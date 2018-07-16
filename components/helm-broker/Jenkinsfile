@@ -62,9 +62,9 @@ podTemplate(label: label) {
                                 sh "cp ./indexbuilder deploy/tools/indexbuilder"
                                 sh "cp ./targz deploy/tools/targz"
 
-                                sh "docker build -t helm-broker:latest deploy/broker"
-                                sh "docker build -t helm-broker-reposerver:latest deploy/reposerver"
-                                sh "docker build -t helm-broker-tools:latest deploy/tools"
+                                sh "docker build -t helm-broker:latest deploy/broker --label version=${params.APP_VERSION} --label component=${application}"
+                                sh "docker build -t helm-broker-reposerver:latest deploy/reposerver --label version=${params.APP_VERSION} --label component=${application}"
+                                sh "docker build -t helm-broker-tools:latest deploy/tools --label version=${params.APP_VERSION} --label component=${application}"
                             }
                         }
 

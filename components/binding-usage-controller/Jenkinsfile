@@ -58,7 +58,7 @@ podTemplate(label: label) {
                         stage("build image $application") {
                             dir(env.APP_FOLDER){
                                 sh "cp $application deploy/controller/$application"
-                                sh "docker build -t $application:latest deploy/controller"
+                                sh "docker build -t $application:latest deploy/controller --label version=${params.APP_VERSION} --label component=${application}"
                             }
                         }
 

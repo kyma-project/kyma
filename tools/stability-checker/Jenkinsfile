@@ -58,7 +58,7 @@ podTemplate(label: label) {
                             dir(env.APP_FOLDER){
                                 sh "cp $application deploy/stability-checker/$application"
                                 sh "cp logs-printer deploy/stability-checker/logs-printer"
-                                sh "docker build -t $application:latest deploy/stability-checker"
+                                sh "docker build -t $application:latest deploy/stability-checker --label version=${params.APP_VERSION} --label component=${application}"
                             }
                         }
 
