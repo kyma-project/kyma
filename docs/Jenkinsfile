@@ -56,43 +56,43 @@ podTemplate(label: label) {
 
                         stage("docs build image") {
                             dir("$docs_image_suffix/$kyma") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $kyma-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $kyma-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$service_catalog") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $service_catalog-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $service_catalog-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$service_brokers") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $service_brokers-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $service_brokers-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$application_connector") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $application_connector-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $application_connector-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$event_bus") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $event_bus-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $event_bus-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$service_mesh") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $service_mesh-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $service_mesh-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$serverless") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $serverless-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $serverless-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$monitoring") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $monitoring-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $monitoring-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$tracing") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $tracing-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $tracing-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$azure_classes_docs_dir/$azure_mysql") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $azure_mysql-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $azure_mysql-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$azure_classes_docs_dir/$azure_sql") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $azure_sql-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $azure_sql-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$azure_classes_docs_dir/$azure_redis_cache") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $azure_redis_cache-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $azure_redis_cache-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$api_gateway") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $api_gateway-$docs_image_suffix --label version=${params.APP_VERSION} --label component=${docs_image_suffix}"
+                                sh "curl $docs_baseimage | docker build -f - . -t $api_gateway-$docs_image_suffix --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$authorization_and_authentication") {
                                 sh "curl $docs_baseimage | docker build -f - . -t $authorization_and_authentication-$docs_image_suffix"

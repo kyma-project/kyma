@@ -63,13 +63,13 @@ podTemplate(label: label) {
 
                         stage("build image $application") {
                             dir(env.APP_FOLDER){
-                            sh "docker build -t $application:latest . --label version=${params.APP_VERSION} --label component=${application}"
+                            sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
                             }
                         }
 
 
                         stage("push image $application") {
-                            sh "docker tag ${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
+                            sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
                             if (isMaster) {
                                 sh "docker push ${dockerPushRoot}${application}:latest"

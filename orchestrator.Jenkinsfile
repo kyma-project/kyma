@@ -1,4 +1,5 @@
 #!/usr/bin/env groovy
+import groovy.json.JsonSlurperClassic
 /*
 
 Monorepo root orchestrator: This Jenkinsfile runs the Jenkinsfiles of all subprojects based on the changes made and triggers kyma integration.
@@ -119,6 +120,30 @@ stage('build projects') {
     parallel jobs
 }
 
+stage('collect versions') {
+    // gather all versions
+    versions = [:]
+    // projects with changes
+    builtProjects = jobs.keySet()
+    for (int i = 0; i < builtProjects.size(); i++) {
+        versions["${builtProjects[i]}"] = env.BRANCH_NAME == "master" ? appVersion : env.BRANCH_NAME
+    }
+
+    // projects without changes
+    unbuiltProjects = projects - builtProjects
+    for (int i = 0; i < unbuiltProjects.size(); i++) {
+        versions["${unbuiltProjects[i]}"] = projectVersion("${unbuiltProjects[i]}")
+    }
+
+    echo """
+    Component versions:
+    ${versions}
+    """
+}
+
+
+// TODO pass versions to Kyma integration
+
 // trigger Kyma integration when changes are made to installation charts/code or resources
 if (runIntegration) {
     stage('launch Kyma integration') {
@@ -204,4 +229,26 @@ String changeset() {
 def commitHashForBuild(build) {
   def scmAction = build?.actions.find { action -> action instanceof jenkins.scm.api.SCMRevisionAction }
   return scmAction?.revision?.hash
+}
+
+/**
+ * Fetches the newest released version of the given project from its manifest in the registry or empty string if there is none.
+ * This function relies on the latest tag on docker images.
+ * More info: https://docs.docker.com/registry/spec/manifest-v2-1/
+ */
+String projectVersion(project) {
+    try {
+        def index = project.lastIndexOf('/')
+        project = project.substring(index+1)
+        def json = "https://eu.gcr.io/v2/kyma-project/${project}/manifests/latest".toURL().getText(requestProperties: [Accept: 'application/vnd.docker.distribution.manifest.v1+prettyjws'])
+        def slurper = new JsonSlurperClassic()
+        def doc = slurper.parseText(json)
+        doc = slurper.parseText(doc.history[0].v1Compatibility)
+
+        return doc.config.Labels.version
+
+    } catch(e) {
+        echo "Got exception getting latest version for project ${project}: ${e}"
+    }
+    return ""
 }

@@ -58,12 +58,12 @@ podTemplate(label: label) {
                             dir(env.APP_FOLDER){
                                 sh "cp $application deploy/stability-checker/$application"
                                 sh "cp logs-printer deploy/stability-checker/logs-printer"
-                                sh "docker build -t $application:latest deploy/stability-checker --label version=${params.APP_VERSION} --label component=${application}"
+                                sh "docker build -t ${dockerPushRoot}${application}:latest deploy/stability-checker --label version=${dockerImageTag} --label component=${application}"
                             }
                         }
 
                         stage("push image $application") {
-                            sh "docker tag ${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
+                            sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
                             if (isMaster) {
                                 sh "docker push ${dockerPushRoot}${application}:latest"
