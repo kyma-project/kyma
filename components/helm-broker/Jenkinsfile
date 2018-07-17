@@ -78,6 +78,12 @@ podTemplate(label: label) {
                             sh "docker tag helm-broker-tools:latest ${dockerPushRoot}helm-broker-tools:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}helm-broker-tools:${dockerImageTag}"
 
+                            if (isMaster) {
+                                sh "docker push ${dockerPushRoot}helm-broker:latest"
+                                sh "docker push ${dockerPushRoot}helm-broker-reposerver:latest"
+                                sh "docker push ${dockerPushRoot}helm-broker-tools:latest"
+                            }
+
                         }
                     }
                 }

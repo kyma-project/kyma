@@ -76,6 +76,9 @@ podTemplate(label: label) {
                         stage("push image") {
                             sh "docker tag ${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
+                            if (isMaster) {
+                                sh "docker push ${dockerPushRoot}${application}:latest"
+                            }
                         }
                     }
                 }
