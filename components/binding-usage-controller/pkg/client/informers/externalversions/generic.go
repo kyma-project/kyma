@@ -39,6 +39,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 	// Group=servicecatalog.kyma.cx, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("servicebindingusages"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("usagekinds"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Servicecatalog().V1alpha1().UsageKinds().Informer()}, nil
 
 	}
 

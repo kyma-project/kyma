@@ -3,3 +3,5 @@
 package v1alpha1
 
 type ServiceBindingUsageExpansion interface{}
+
+type UsageKindExpansion interface{}

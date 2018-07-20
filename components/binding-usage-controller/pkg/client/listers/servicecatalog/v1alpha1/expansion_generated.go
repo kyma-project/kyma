@@ -9,3 +9,7 @@ type ServiceBindingUsageListerExpansion interface{}
 // ServiceBindingUsageNamespaceListerExpansion allows custom methods to be added to
 // ServiceBindingUsageNamespaceLister.
 type ServiceBindingUsageNamespaceListerExpansion interface{}
+
+// UsageKindListerExpansion allows custom methods to be added to
+// UsageKindLister.
+type UsageKindListerExpansion interface{}

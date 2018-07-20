@@ -33,6 +33,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		&ServiceBindingUsage{},
 		&ServiceBindingUsageList{},
+		&UsageKind{},
+		&UsageKindList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
