@@ -18,7 +18,9 @@ func TestUsageAnnotationTracerInjectedLabels(t *testing.T) {
 	tracer := controller.NewUsageAnnotationTracer()
 	testedObjMeta := metaV1.ObjectMeta{}
 
-	fixLabels := make(map[string]string)
+	fixLabels := map[string]string{
+		"k": "v",
+	}
 
 	// when
 	tracer.SetAnnotationAboutBindingUsage(&testedObjMeta, fixUsageName, fixLabels)
@@ -26,12 +28,7 @@ func TestUsageAnnotationTracerInjectedLabels(t *testing.T) {
 	// then
 	got, err := tracer.GetInjectedLabels(testedObjMeta, fixUsageName)
 	require.NoError(t, err)
-	assert.Len(t, got, len(fixLabels))
-	for k, v := range fixLabels {
-		gotValue, found := got[k]
-		assert.True(t, found)
-		assert.Equal(t, v, gotValue)
-	}
+	assertEqualMaps(t, fixLabels, got)
 
 	// when
 	tracer.DeleteAnnotationAboutBindingUsage(&testedObjMeta, fixUsageName)

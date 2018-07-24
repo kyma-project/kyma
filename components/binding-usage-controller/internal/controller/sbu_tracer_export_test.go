@@ -7,3 +7,7 @@ const (
 func NewUsageAnnotationTracer() *usageAnnotationTracer {
 	return &usageAnnotationTracer{}
 }
+
+func NewGenericUsageAnnotationTracer() *genericUsageAnnotationTracer {
+	return &genericUsageAnnotationTracer{}
+}
