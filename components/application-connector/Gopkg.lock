@@ -110,7 +110,7 @@
     "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
     "components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
   ]
-  revision = "98ffd39a35793983f4d291b743e192daa0701d3b"
+  revision = "c4e06fbb6c180bffec61adf3c296d826c1465cd9"
 
 [[projects]]
   name = "github.com/minio/minio-go"
