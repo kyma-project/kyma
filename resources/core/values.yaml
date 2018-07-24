@@ -1,0 +1,43 @@
+dex:      
+  tls:
+    createSecret: false
+
+service-catalog:
+  etcd:
+    replicaCount: 1
+
+minio:  
+  service:
+    type: NodePort
+
+helm-broker:
+  etcd:
+    replicaCount: 1
+
+azure-broker:
+  enabled: false
+
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+    imageTag: 0.1.0
+  istio:
+    tls:
+      secretName: istio-ingress-certs
+
+test:
+  auth:
+    username: admin@kyma.cx
+    password: nimda123
+  acceptance:
+    core:
+      imageTag: "0.2.101"
+      # environments used in remote-environment acceptance test
+      remoteEnvironment: 
+        disabled: "false"
+        linkingTimeout: 4m
+        unlinkingTimeout: 4m
+    ui:
+      imageTag: "0.1.31"
+
+

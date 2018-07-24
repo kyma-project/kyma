@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-{{ template "fullname" . }}-acceptance
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+    "helm-chart-test": "true"
+spec:
+  serviceAccountName:  test-{{ template "fullname" . }}-acceptance
+  containers:
+    - name: test-{{ template "fullname" . }}-acceptance
+      image: {{ .Values.global.containerRegistry.path }}/acceptance-tests:{{ .Values.test.acceptance.core.imageTag }}
+      env:
+      - name: HELM_BROKER_URL
+        value: http://{{.Release.Name }}-helm-broker.{{ .Release.Namespace }}.svc.cluster.local
+      - name: REMOTE_ENVIRONMENT_BROKER_URL
+        value: http://{{.Release.Name }}-remote-environment-broker.{{ .Release.Namespace }}.svc.cluster.local
+      - name: KYMA_DOMAIN
+        value: {{ .Values.global.domainName }}
+      - name: IS_LOCAL_ENV
+        value: {{ .Values.global.isLocalEnv | toString | quote }}
+      - name: STUBS_DOCKER_IMAGE
+        value: {{ .Values.global.containerRegistry.path }}/acceptance-tests:{{ .Values.test.acceptance.core.imageTag }}
+      - name: REMOTE_ENVIRONMENT_UNLINKING_TIMEOUT
+        value: {{ .Values.test.acceptance.core.remoteEnvironment.unlinkingTimeout | quote }}
+      - name: REMOTE_ENVIRONMENT_LINKING_TIMEOUT
+        value: {{ .Values.test.acceptance.core.remoteEnvironment.linkingTimeout | quote }}
+      - name: REMOTE_ENVIRONMENT_KEEP_RESOURCES
+        value: "false"
+      - name: REMOTE_ENVIRONMENT_DISABLED
+        value: {{ .Values.test.acceptance.core.remoteEnvironment.disabled | quote }}
+  restartPolicy: Never

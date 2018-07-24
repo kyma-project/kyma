@@ -1,0 +1,20 @@
+test:
+  image:
+    name: kubeless-test-client
+    tag: 0.2.37
+
+controller:
+  deployment:
+    replicaCount: 1
+    image: bitnami/kubeless-controller-manager:v1.0.0-alpha.5
+    pullPolicy: IfNotPresent
+
+config:
+  builder:
+    enabled: "false"
+    image: kubeless/function-image-builder:v1.0.0-alpha.5
+    secret: ""
+    verifyTls: "true"
+  provision:
+    image: kubeless/unzip@sha256:f162c062973cca05459834de6ed14c039d45df8cdb76097f50b028a1621b3697
+    secret: ""

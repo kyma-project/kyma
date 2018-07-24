@@ -1,0 +1,521 @@
+package servicecatalog_test
+
+import (
+	"fmt"
+	"net/http"
+	"testing"
+	"time"
+
+	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	scClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+
+	bucTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	bucClient "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
+	bucInterface "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
+
+	reTypes "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	reClient "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
+	reInterface "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
+
+	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog/wait"
+	"github.com/stretchr/testify/require"
+	"github.com/vrischmann/envconfig"
+	appsTypes "k8s.io/api/apps/v1beta1"
+	k8sCoreTypes "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/apimachinery/pkg/util/rand"
+	"k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
+)
+
+const (
+	timeoutPerStep = 30 * time.Second
+	baseEnvName    = "GATEWAY_URL"
+)
+
+// Config contains all configurations for Service Binding Usage Acceptance tests
+type Config struct {
+	StubsDockerImage string `envconfig:"STUBS_DOCKER_IMAGE"`
+}
+
+func TestServiceBindingUsagePrefixing(t *testing.T) {
+	// given
+	ts := NewTestSuite(t)
+
+	ts.createTestNamespace()
+	defer ts.deleteTestNamespace()
+
+	ts.createRemoteEnvironment()
+	defer ts.deleteRemoteEnvironment()
+
+	ts.waitForREServiceClasses(timeoutPerStep)
+
+	ts.enableRemoteEnvironmentInTestNamespace()
+
+	ts.createAndWaitForServiceInstanceA(timeoutPerStep)
+	ts.createAndWaitForServiceInstanceB(timeoutPerStep)
+
+	ts.createAndWaitForServiceBindingA(timeoutPerStep)
+	ts.createAndWaitForServiceBindingB(timeoutPerStep)
+
+	ts.createTesterDeploymentAndService()
+
+	// when
+	ts.createBindingUsageForInstanceAWithoutPrefix()
+	ts.createBindingUsageForInstanceBWithPrefix()
+
+	// then
+	ts.assertInjectedEnvVariable(baseEnvName, ts.gatewayUrl, timeoutPerStep)
+	ts.assertInjectedEnvVariable(ts.envPrefix+baseEnvName, ts.gatewayUrl, timeoutPerStep)
+}
+
+func NewTestSuite(t *testing.T) *TestSuite {
+	var cfg Config
+	err := envconfig.Init(&cfg)
+	require.NoError(t, err)
+
+	k8sCfg, err := restclient.InClusterConfig()
+	require.NoError(t, err)
+
+	randID := rand.String(5)
+
+	return &TestSuite{
+		t: t,
+
+		k8sClientCfg:     k8sCfg,
+		stubsDockerImage: cfg.StubsDockerImage,
+
+		namespace:             fmt.Sprintf("svc-test-ns-%s", randID),
+		testerDeploymentName:  fmt.Sprintf("acc-test-env-tester-%s", randID),
+		remoteEnvironmentName: fmt.Sprintf("acc-test-re-env-%s", randID),
+		gatewayUrl:            fmt.Sprintf("http://some-gateway-%s.url", randID),
+		envPrefix:             "SOME_DUMMY_PREFIX_",
+
+		serviceInstanceNameA: fmt.Sprintf("acc-test-instance-a-%s", randID),
+		bindingNameA:         fmt.Sprintf("acc-test-credential-a-%s", randID),
+		reSvcNameA:           fmt.Sprintf("acc-test-svc-id-a-%s", randID),
+
+		serviceInstanceNameB: fmt.Sprintf("acc-test-instance-b-%s", randID),
+		bindingNameB:         fmt.Sprintf("acc-test-credential-b-%s", randID),
+		reSvcNameB:           fmt.Sprintf("acc-test-svc-id-b-%s", randID),
+	}
+}
+
+type TestSuite struct {
+	t *testing.T
+
+	k8sClientCfg *restclient.Config
+
+	namespace             string
+	remoteEnvironmentName string
+	testerDeploymentName  string
+	gatewayUrl            string
+	envPrefix             string
+
+	serviceInstanceNameA string
+	classExternalNameA   string
+	reSvcNameA           string
+	bindingNameA         string
+
+	serviceInstanceNameB string
+	classExternalNameB   string
+	reSvcNameB           string
+	bindingNameB         string
+
+	stubsDockerImage string
+}
+
+// Remote Environment helpers
+func (ts *TestSuite) createRemoteEnvironment() {
+	reCli := ts.remoteEnvironmentClient()
+
+	_, err := reCli.Create(ts.fixRemoteEnvironment())
+	require.NoError(ts.t, err)
+}
+
+func (ts *TestSuite) deleteRemoteEnvironment() {
+	reCli := ts.remoteEnvironmentClient()
+
+	err := reCli.Delete(ts.remoteEnvironmentName, &metav1.DeleteOptions{})
+	require.NoError(ts.t, err)
+}
+
+func (ts *TestSuite) enableRemoteEnvironmentInTestNamespace() {
+	reCli, err := reClient.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+
+	emCli := reCli.RemoteenvironmentV1alpha1().EnvironmentMappings(ts.namespace)
+	_, err = emCli.Create(ts.fixEnvironmentMapping())
+	require.NoError(ts.t, err)
+}
+
+func (ts *TestSuite) remoteEnvironmentClient() reInterface.RemoteEnvironmentInterface {
+	client, err := reClient.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+
+	return client.RemoteenvironmentV1alpha1().RemoteEnvironments(ts.namespace)
+}
+
+func (ts *TestSuite) fixEnvironmentMapping() *reTypes.EnvironmentMapping {
+	return &reTypes.EnvironmentMapping{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "EnvironmentMapping",
+			APIVersion: "remoteenvironment.kyma.cx/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: ts.remoteEnvironmentName,
+		},
+	}
+}
+
+func (ts *TestSuite) fixRemoteEnvironment() *reTypes.RemoteEnvironment {
+	return &reTypes.RemoteEnvironment{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "RemoteEnvironment",
+			APIVersion: "remoteenvironment.kyma.cx/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: ts.remoteEnvironmentName,
+		},
+		Spec: reTypes.RemoteEnvironmentSpec{
+			Source: reTypes.Source{
+				Namespace:   "local.kyma.commerce",
+				Type:        "commerce",
+				Environment: "production",
+			},
+			AccessLabel: "re-access-label",
+			Description: "Remote Environment used by acceptance test",
+			Services: []reTypes.Service{
+				{
+					ID:                  ts.reSvcNameA,
+					ProviderDisplayName: "SAP Hybris",
+					DisplayName:         "Some testable RE service",
+					LongDescription:     "Remote Environment Service Class used by remote-environment acceptance test",
+					Tags:                []string{},
+					Entries: []reTypes.Entry{
+						{
+							Type:        "API",
+							AccessLabel: "some-access-label-A",
+							GatewayUrl:  ts.gatewayUrl,
+						},
+					},
+				},
+				{
+					ID:                  ts.reSvcNameB,
+					ProviderDisplayName: "SAP Hybris",
+					DisplayName:         "Some testable RE service",
+					LongDescription:     "Remote Environment Service Class used by remote-environment acceptance test",
+					Tags:                []string{},
+					Entries: []reTypes.Entry{
+						{
+							Type:        "API",
+							AccessLabel: "some-access-label-B",
+							GatewayUrl:  ts.gatewayUrl,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+// K8s namespace helpers
+func (ts *TestSuite) createTestNamespace() {
+	k8sCli, err := kubernetes.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+
+	nsClient := k8sCli.CoreV1().Namespaces()
+	_, err = nsClient.Create(&k8sCoreTypes.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: ts.namespace,
+			Labels: map[string]string{
+				"env": "true",
+			},
+		},
+	})
+	require.NoError(ts.t, err)
+}
+
+func (ts *TestSuite) deleteTestNamespace() {
+	k8sCli, err := kubernetes.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+
+	nsClient := k8sCli.CoreV1().Namespaces()
+	err = nsClient.Delete(ts.namespace, &metav1.DeleteOptions{})
+	require.NoError(ts.t, err)
+}
+
+// Binding helpers
+func (ts *TestSuite) createAndWaitForServiceBindingA(timeout time.Duration) {
+	ts.createAndWaitForServiceBinding(ts.bindingNameA, ts.serviceInstanceNameA, timeout)
+}
+
+func (ts *TestSuite) createAndWaitForServiceBindingB(timeout time.Duration) {
+	ts.createAndWaitForServiceBinding(ts.bindingNameB, ts.serviceInstanceNameB, timeout)
+}
+
+func (ts *TestSuite) createAndWaitForServiceBinding(bindingName, instanceName string, timeout time.Duration) {
+	scCli, err := scClient.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+
+	bindingClient := scCli.ServicecatalogV1beta1().ServiceBindings(ts.namespace)
+	_, err = bindingClient.Create(&scTypes.ServiceBinding{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      bindingName,
+			Namespace: ts.namespace,
+		},
+		Spec: scTypes.ServiceBindingSpec{
+			ServiceInstanceRef: scTypes.LocalObjectReference{
+				Name: instanceName,
+			},
+		},
+	})
+	require.NoError(ts.t, err)
+
+	wait.AtMost(ts.t, func() error {
+		b, err := bindingClient.Get(bindingName, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+
+		isNotReady := func(instance *scTypes.ServiceBinding) bool {
+			for _, cond := range instance.Status.Conditions {
+				if cond.Type == scTypes.ServiceBindingConditionReady {
+					return cond.Status != scTypes.ConditionTrue
+				}
+			}
+			return true
+		}
+
+		if isNotReady(b) {
+			return fmt.Errorf("ServiceBinding %s/%s is not in ready state. Status: %+v", b.Namespace, b.Name, b.Status)
+		}
+
+		return nil
+	}, timeout)
+}
+
+// BindingUsage helpers
+func (ts *TestSuite) createBindingUsageForInstanceAWithoutPrefix() {
+	ts.bindingUsage(ts.bindingNameA, "binding-usage-tester", "")
+}
+
+func (ts *TestSuite) createBindingUsageForInstanceBWithPrefix() {
+	ts.bindingUsage(ts.bindingNameB, "binding-usage-tester-with-prefix", ts.envPrefix)
+}
+
+func (ts *TestSuite) bindingUsage(bindingName, sbuName, envPrefix string) {
+	usageCli := ts.bindingUsageClient()
+	sbu := &bucTypes.ServiceBindingUsage{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ServiceBindingUsage",
+			APIVersion: "servicecatalog.kyma.cx/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: sbuName,
+		},
+		Spec: bucTypes.ServiceBindingUsageSpec{
+			ServiceBindingRef: bucTypes.LocalReferenceByName{
+				Name: bindingName,
+			},
+			UsedBy: bucTypes.LocalReferenceByKindAndName{
+				Kind: "Deployment",
+				Name: ts.testerDeploymentName,
+			},
+		},
+	}
+
+	if envPrefix != "" {
+		sbu.Spec.Parameters = &bucTypes.Parameters{
+			EnvPrefix: &bucTypes.EnvPrefix{
+				Name: envPrefix,
+			},
+		}
+	}
+
+	_, err := usageCli.Create(sbu)
+	require.NoError(ts.t, err)
+}
+
+func (ts *TestSuite) bindingUsageClient() bucInterface.ServiceBindingUsageInterface {
+	client, err := bucClient.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+	return client.ServicecatalogV1alpha1().ServiceBindingUsages(ts.namespace)
+}
+
+// ServiceInstance helpers
+func (ts *TestSuite) createAndWaitForServiceInstanceA(timeout time.Duration) {
+	ts.createAndWaitForServiceInstance(ts.serviceInstanceNameA, ts.classExternalNameA, timeout)
+}
+
+func (ts *TestSuite) createAndWaitForServiceInstanceB(timeout time.Duration) {
+	ts.createAndWaitForServiceInstance(ts.serviceInstanceNameB, ts.classExternalNameB, timeout)
+}
+
+func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternalName string, timeout time.Duration) {
+	clientSet, err := scClient.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+	siClient := clientSet.ServicecatalogV1beta1().ServiceInstances(ts.namespace)
+
+	_, err = siClient.Create(&scTypes.ServiceInstance{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: instanceName,
+		},
+		Spec: scTypes.ServiceInstanceSpec{
+			PlanReference: scTypes.PlanReference{
+				ClusterServiceClassExternalName: classExternalName,
+				ClusterServicePlanExternalName:  "default",
+			},
+		},
+	})
+	require.NoError(ts.t, err)
+
+	wait.AtMost(ts.t, func() error {
+		si, err := siClient.Get(instanceName, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+
+		isNotReady := func(instance *scTypes.ServiceInstance) bool {
+			for _, cond := range instance.Status.Conditions {
+				if cond.Type == scTypes.ServiceInstanceConditionReady {
+					return cond.Status != scTypes.ConditionTrue
+				}
+			}
+			return true
+		}
+
+		if isNotReady(si) {
+			return fmt.Errorf("ServiceInstance %s/%s is not in ready state. Status: %+v", si.Namespace, si.Name, si.Status)
+		}
+
+		return nil
+	}, timeout)
+}
+
+// ServiceClass helpers
+func (ts *TestSuite) waitForREServiceClasses(timeout time.Duration) {
+	wait.AtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
+	wait.AtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
+}
+
+func (ts *TestSuite) serviceClassIsAvailableA() func() error {
+	clientSet, err := scClient.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+
+	return func() error {
+		class, err := clientSet.ServicecatalogV1beta1().ClusterServiceClasses().Get(ts.reSvcNameA, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		ts.classExternalNameA = class.Spec.ExternalName
+		return nil
+	}
+}
+
+func (ts *TestSuite) serviceClassIsAvailableB() func() error {
+	clientSet, err := scClient.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+
+	return func() error {
+		class, err := clientSet.ServicecatalogV1beta1().ClusterServiceClasses().Get(ts.reSvcNameB, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		ts.classExternalNameB = class.Spec.ExternalName
+		return nil
+	}
+}
+
+// Deployment helpers
+func (ts *TestSuite) createTesterDeploymentAndService() {
+	clientset, err := kubernetes.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+
+	labels := map[string]string{
+		"app": "acc-test-env-tester",
+	}
+	deploy := ts.envTesterDeployment(labels)
+	svc := ts.envTesterService(labels)
+
+	deploymentClient := clientset.AppsV1beta1().Deployments(ts.namespace)
+	_, err = deploymentClient.Create(deploy)
+	require.NoError(ts.t, err)
+
+	serviceClient := clientset.CoreV1().Services(ts.namespace)
+	_, err = serviceClient.Create(svc)
+	require.NoError(ts.t, err)
+}
+
+func (*TestSuite) envTesterService(labels map[string]string) *k8sCoreTypes.Service {
+	return &k8sCoreTypes.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "acc-test-env-tester",
+		},
+		Spec: k8sCoreTypes.ServiceSpec{
+			Selector: labels,
+			Ports: []k8sCoreTypes.ServicePort{
+				{
+					Name:       "http",
+					Protocol:   "TCP",
+					Port:       80,
+					TargetPort: intstr.IntOrString{Type: intstr.Int, IntVal: 8080},
+				},
+			},
+			Type: k8sCoreTypes.ServiceTypeNodePort,
+		},
+	}
+}
+
+func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.Deployment {
+	var replicas int32 = 1
+	return &appsTypes.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: ts.testerDeploymentName,
+		},
+		Spec: appsTypes.DeploymentSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: labels,
+			},
+			Replicas: &replicas,
+			Template: k8sCoreTypes.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: labels,
+				},
+				Spec: k8sCoreTypes.PodSpec{
+					Containers: []k8sCoreTypes.Container{
+						{
+							Name:  "app",
+							Image: ts.stubsDockerImage,
+							Ports: []k8sCoreTypes.ContainerPort{
+								{
+									Name:          "http",
+									Protocol:      k8sCoreTypes.ProtocolTCP,
+									ContainerPort: 8080,
+								},
+							},
+							Command: []string{"/go/bin/env-tester.bin"},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, timeout time.Duration) {
+	req := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs?name=%s&value=%s", ts.namespace, envName, envValue)
+
+	wait.AtMost(ts.t, func() error {
+		resp, err := http.Get(req)
+		if err != nil {
+			return err
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			return fmt.Errorf("while checking if proper env is injected, received unexpected status code [got: %d, expected: %d]", resp.StatusCode, http.StatusOK)
+		}
+		return nil
+	}, timeout)
+}

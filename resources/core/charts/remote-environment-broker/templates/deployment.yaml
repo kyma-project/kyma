@@ -1,0 +1,71 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+    spec:
+      serviceAccountName: {{ template "fullname" . }}
+
+      containers:
+      - name: reb
+        image: "{{ .Values.global.containerRegistry.path }}/remote-environment-broker:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: APP_PORT
+            value: "{{ .Values.service.internalPort }}"
+          - name: APP_CONFIG_FILE_NAME
+            value: /etc/config/re-broker/config.yaml
+          - name: APP_BROKER_NAME
+            value: {{ template "fullname" . }}
+          - name: APP_BROKER_RELIST_DURATION_WINDOW
+            value: {{ .Values.brokerRelistDurationWindow }}
+        volumeMounts:
+        - mountPath: /etc/config/re-broker
+          name: config-volume
+
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+        # Temporary solution for readiness probe
+        # Ref: https://github.com/istio/istio/issues/2628
+        readinessProbe:
+          exec:
+            command:
+              - curl
+              - localhost:{{ .Values.service.internalPort }}/statusz
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 2
+        livenessProbe:
+          exec:
+            command:
+              - curl
+              - localhost:{{ .Values.service.internalPort }}/statusz
+          periodSeconds: 10
+          timeoutSeconds: 2
+          successThreshold: 1
+      volumes:
+      - name: config-volume
+        configMap:
+          name: re-broker-config-map

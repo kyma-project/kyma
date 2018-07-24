@@ -1,0 +1,29 @@
+# Default values for console.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+image:
+  tag: 0.1.70
+  pullPolicy: IfNotPresent
+service:
+  name: nginx
+  externalPort: 80
+  internalPort: 80
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+cluster:  
+  consoleClientId: console
+  scope: audience:server:client_id:kyma-client audience:server:client_id:console openid profile email groups
+  # Organization data for which the Kyma cluster is installed
+  orgId: 'my-org-123'
+  orgName: 'My Organization'

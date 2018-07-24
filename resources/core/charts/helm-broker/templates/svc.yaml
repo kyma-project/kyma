@@ -1,0 +1,47 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ template "fullname" . }}
+  annotations:
+    "auth.istio.io/{{.Values.service.externalPort}}": NONE
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: {{ template "fullname" . }}
+    release: {{ .Release.Name }}
+  ports:
+  - protocol: TCP
+    name: http-hb-port
+    port: {{ .Values.service.externalPort }}
+    targetPort: {{ .Values.service.internalPort }}
+
+---
+{{ if .Values.embeddedRepository.provision }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ template "reposerver-fullname" . }}
+  annotations:
+    "auth.istio.io/{{.Values.embeddedRepository.service.externalPort}}": NONE
+  labels:
+    app: {{ template "reposerver-name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  type: {{ .Values.embeddedRepository.service.type }}
+  selector:
+    app: {{ template "reposerver-name" . }}
+    release: {{ .Release.Name }}
+  ports:
+  - protocol: TCP
+    name: http-hb-reposerver-port
+    port: {{ .Values.embeddedRepository.service.externalPort }}
+    targetPort: {{ .Values.embeddedRepository.service.internalPort }}
+
+{{ end }}

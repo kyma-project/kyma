@@ -1,0 +1,27 @@
+# Default values for stability-checker.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+containerRegistry:
+  path: eu.gcr.io/kyma-project
+
+image:
+  tag: 0.2.37
+  # valid values are "IfNotPresent", "Never", and "Always"
+  pullPolicy: "IfNotPresent"
+
+
+storage:
+  claimName: "stability-test-scripts-pvc"
+
+pathToTestingScript: "/data/input/testing.sh"
+slackClientWebhookUrl: "need-to-be-provided"
+slackClientChannelId: "need-to-be-provided"
+slackClientToken: "123-need-to-be-provided"
+testThrottle: "5m"
+testResultWindowTime: "6h"
+
+service:
+  type: NodePort
+  externalPort: 80
+  internalPort: 8080

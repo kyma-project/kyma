@@ -1,0 +1,121 @@
+nodeSelector: {}
+
+## Tolerations for use with node taints
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+##
+tolerations: {}
+  #  - key: "key"
+  #    operator: "Equal"
+  #    value: "value"
+  #    effect: "NoSchedule"
+
+annotations:
+  sidecar.istio.io/inject: '"true"'
+
+## If true, create a serviceMonitor for grafana
+##
+selfServiceMonitor: true
+
+## Pass extra environment variables to the Grafana container.
+##
+# extraVars:
+# - name: EXTRA_VAR_1
+#   value: extra-var-value-1
+# - name: EXTRA_VAR_2
+#   value: extra-var-value-2
+extraVars:
+
+## Change to true override Grafana's default config.
+## Make sure grafana.ini is present on /etc/grafana
+mountGrafanaConfig: false
+
+service:
+
+  ## Annotations to be added to the Service
+  ##
+  annotations:
+    auth.istio.io/80: NONE
+
+  ## Cluster-internal IP address for Alertmanager Service
+  ##
+  clusterIP: ""
+
+  ## List of external IP addresses at which the Alertmanager Service will be available
+  ##
+  externalIPs: []
+
+  ## External IP address to assign to Alertmanager Service
+  ## Only used if service.type is 'LoadBalancer' and supported by cloud provider
+  ##
+  loadBalancerIP: ""
+
+  ## List of client IPs allowed to access Alertmanager Service
+  ## Only used if service.type is 'LoadBalancer' and supported by cloud provider
+  ##
+  loadBalancerSourceRanges: []
+
+  ## Port to expose on each node
+  ## Only used if service.type is 'NodePort'
+  ##
+  nodePort: 30902
+
+  ## Service type
+  ##
+  type: ClusterIP
+
+## Grafana Docker image
+##
+image:
+  repository: grafana/grafana
+  tag: 5.1.0
+
+containersEnv:
+  gfAuthGenericOauthClientId: grafana
+  gfAuthGenericOauthClientSecret: apie4eeX6hiC9ainieli
+  gfAuthGenericOauthTokenUrlValue: http://dex-service:5556/token
+
+persistence:
+
+  ## minio data Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # storageClass: "-"
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+resources:
+  requests:
+    memory: 200Mi
+
+ingress:
+  ## If true, Grafana Ingress will be created
+  ##
+  enabled: true
+
+  ## Annotations for Alertmanager Ingress
+  ##
+  annotations:
+    kubernetes.io/ingress.class: istio
+
+# Set datasource in beginning
+dataSource: {}
+
+serverDashboardFiles: {}
+
+## Keep the Dashboards that are defined in this HELM chart
+keepOriginalDashboards: true
+
+## Keep the Datasources that are defined in this HELM chart
+keepOriginalDatasources: true
+
+auth:
+  anonymous:
+    enabled: "false"
+
+##Custom Labels to be added to Grafana ServiceMonitors
+##
+additionalServiceMonitorLabels: {}

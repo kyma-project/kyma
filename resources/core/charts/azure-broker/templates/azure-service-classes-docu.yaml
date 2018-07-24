@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "fullname" . }}-docs
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  activeDeadlineSeconds: 180
+  template:
+    metadata:
+      name: {{ template "fullname" . }}-docs
+      labels:
+        inject: docs-upload-config
+    spec:
+      restartPolicy: Never
+      containers:
+      - name:  azure-redis-cache-docs
+        image: {{ .Values.global.containerRegistry.path }}/azure-redis-cache-docs:0.0.8
+      - name:  azure-mysql-docs
+        image: {{ .Values.global.containerRegistry.path }}/azure-mysql-docs:0.0.8
+      - name:  azure-sql-docs
+        image: {{ .Values.global.containerRegistry.path }}/azure-sql-docs:0.0.8

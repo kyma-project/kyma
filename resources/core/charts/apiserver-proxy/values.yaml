@@ -1,0 +1,6 @@
+tls:
+  secretName: "istio-ingress-certs"
+
+nginx:
+  configmapName: nginx-proxy-conf
+containerPort: 80  

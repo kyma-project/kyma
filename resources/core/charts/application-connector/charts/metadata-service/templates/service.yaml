@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    "auth.istio.io/{{ .Values.service.externalapi.port }}": NONE
+  name: {{ .Chart.Name }}-external-api
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.service.externalapi.port }}
+      protocol: TCP
+      name: ext-api-port
+  selector:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}

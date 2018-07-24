@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-gateway
+  labels:
+    app: {{ .Release.Name }}-gateway
+    release: {{ .Release.Name }}-gateway
+    heritage: {{ .Release.Service }}-gateway
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ .Release.Name }}-gateway
+        release: {{ .Release.Name }}-gateway
+    spec:
+      containers:
+      - name: {{ .Release.Name }}-gateway
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag }}"
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        args:
+          - "/gateway"
+          - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
+          - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
+          - "--eventsTargetURL={{ .Values.deployment.args.eventsTargetURL }}"
+          - "--remoteEnvironment={{ .Release.Name }}"
+          - "--namespace={{ .Release.Namespace }}"
+          - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
+          - "--skipVerify={{ .Values.deployment.args.skipVerify }}"
+          - "--proxyTimeout={{ .Values.deployment.args.proxyTimeout }}"
+          - "--proxyCacheTTL={{ .Values.deployment.args.proxyCacheTTL }}"
+          - "--sourceNamespace={{ .Values.deployment.args.sourceNamespace }}"
+          - "--sourceType={{ .Values.deployment.args.sourceType }}"
+          - "--sourceEnvironment={{ .Values.deployment.args.sourceEnvironment }}"
+          - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
+        readinessProbe:
+          httpGet:
+            path: /v1/health
+            port: {{ .Values.deployment.args.externalAPIPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        ports:
+          - containerPort: {{ .Values.deployment.args.proxyPort }}
+            name: proxy-port
+          - containerPort: {{ .Values.deployment.args.externalAPIPort }}
+            name: ext-api-port

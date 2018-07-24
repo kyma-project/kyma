@@ -1,0 +1,13 @@
+{{ define "unhealthy-pods-rules.yaml.tpl" }}
+groups:
+- name: pod-not-running-rule
+  rules:
+  - alert: PodNotRunning
+    expr: (kube_pod_container_status_running { pod="sample-metrics",namespace="default" } == 0)
+    for: 15s
+    labels:
+      severity: critical
+    annotations:
+      description: "{{`{{$labels.namespace}}`}}/{{`{{$labels.pod}}`}} is not running"
+      summary: "{{`{{$labels.pod}}`}} is not running"
+{{ end }}

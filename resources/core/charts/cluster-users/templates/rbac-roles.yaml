@@ -1,0 +1,112 @@
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: kube-system-view
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    "helm.sh/hook-weight": "0"
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: view
+
+# Cluster viewer role
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: kyma-view
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    "helm.sh/hook-weight": "0"
+rules:
+- apiGroups: ["", "api.kyma.cx", "apps", "extensions", "gateway.kyma.cx", "kubeless.io", "rbac.authorization.k8s.io", "remoteenvironment.kyma.cx", "servicecatalog.k8s.io", "servicecatalog.kyma.cx", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma.cx", "ui.kyma.cx"]
+  resources: ["*"]
+  verbs: ["get, list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: kyma-view-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    "helm.sh/hook-weight": "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-view
+subjects:
+- kind: User
+  name: user1@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+- kind: User
+  name: user2@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+{{- range .Values.bindings.kymaView.groups }}
+- kind: Group
+  name: {{ .  }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
+
+# Cluster admin role
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: kyma-admin
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    "helm.sh/hook-weight": "0"
+rules:
+- apiGroups: ["", "api.kyma.cx", "apps", "extensions", "gateway.kyma.cx", "kubeless.io", "rbac.authorization.k8s.io", "remoteenvironment.kyma.cx", "servicecatalog.k8s.io", "servicecatalog.kyma.cx", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma.cx", "ui.kyma.cx"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: kyma-admin-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    "helm.sh/hook-weight": "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-admin
+subjects:
+- kind: User
+  name: admin@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+{{ if .Values.users.adminGroup }}
+- kind: Group
+  name: {{ .Values.users.adminGroup }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
+{{- range .Values.bindings.kymaAdmin.groups }}
+- kind: Group
+  name: {{ . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

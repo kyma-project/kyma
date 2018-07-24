@@ -1,0 +1,7 @@
+name: quote
+version: 1.0.1
+id: 0df8ec66-6d6b-41fa-a99d-babbdb09fa61
+description: Quote service
+
+displayName: Quote
+longDescription: Quote service returns random quotes

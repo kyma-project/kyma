@@ -1,0 +1,12 @@
+# Visual Studio Code
+/.vscode/
+*.code-workspace
+# Mac OS
+.DS_Store
+
+/.idea/
+*.iml
+
+bin/
+docker/
+vendor/

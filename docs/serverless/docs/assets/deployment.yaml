@@ -1,0 +1,18 @@
+---
+apiVersion: kubeless.io/v1beta1
+kind: Function
+metadata:
+  name: hello
+  labels:
+    example: serverless-lambda
+spec:
+  deps: ""
+  function: |-
+    module.exports = {
+        main: function (event, context) {
+            return 'hello world';
+        }
+    }
+  runtime: nodejs8
+  type: HTTP
+  handler: handler.main

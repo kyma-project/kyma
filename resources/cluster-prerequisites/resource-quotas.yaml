@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: kyma-default
+  namespace: kyma-system
+spec:
+  hard:
+    # The sum of all pod memory requests must not exceed this value.
+    requests.memory: 7Gi
+
+    # The sum of all pod memory limit must not exceed this value.
+    limits.memory: 10Gi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: kyma-default
+  namespace: kyma-integration
+spec:
+  hard:
+    # The sum of all pod memory requests must not exceed this value.
+    requests.memory: 3Gi
+
+    # The sum of all pod memory limit must not exceed this value.
+    limits.memory: 3Gi
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: kyma-default
+  namespace: istio-system
+spec:
+  hard:
+    # The sum of all pod memory requests must not exceed this value.
+    requests.memory: 2Gi
+
+    # The sum of all pod memory limit must not exceed this value.
+    limits.memory: 3Gi

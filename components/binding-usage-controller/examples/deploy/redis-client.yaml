@@ -1,0 +1,17 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: redis-client
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis-client
+    spec:
+      containers:
+        - name: redis-client
+          image: "appregistry/redis:3.2.9-r2"
+          env:
+          - name: ALLOW_EMPTY_PASSWORD
+            value: "yes"

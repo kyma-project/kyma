@@ -1,0 +1,17 @@
+---
+apiVersion: gateway.kyma.cx/v1alpha2
+kind: Api
+metadata:
+  labels:
+    example: http-db-service
+  name: http-db-service
+spec:
+  authentication:
+  - type: JWT
+    jwt:
+      jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+      issuer: https://dex.kyma.local
+  hostname: http-db-service.kyma.local
+  service:
+    name: http-db-service
+    port: 8017

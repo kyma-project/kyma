@@ -1,0 +1,10 @@
+apiVersion: servicecatalog.kyma.cx/v1alpha1
+kind: ServiceBindingUsage
+metadata:
+ name: deploy-redis-client
+spec:
+ serviceBindingRef:
+   name: redis-instance-credential
+ usedBy:
+   kind: Deployment
+   name: redis-client

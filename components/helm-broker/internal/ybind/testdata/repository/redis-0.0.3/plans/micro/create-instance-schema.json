@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "redisPassword": {
+      "type": "string",
+      "description": "Redis password.",
+      "default": "Defaults to a random 10-character alphanumeric string"
+    },
+    "imagePullPolicy": {
+      "type": "string",
+      "enum": ["Always", "IfNotPresent", "Never"],
+      "default": "IfNotPresent"
+    }
+  }
+}

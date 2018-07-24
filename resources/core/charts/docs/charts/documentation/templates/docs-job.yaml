@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "fullname" . }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  activeDeadlineSeconds: 180
+  template:
+    metadata:
+      name: {{ template "fullname" . }}-docs
+      labels:
+        inject: docs-upload-config
+    spec:
+      restartPolicy: Never
+      containers:
+      - name:  kyma
+        image: {{ .Values.global.containerRegistry.path }}/kyma-docs:{{ .Chart.AppVersion }}
+      - name:  service-catalog
+        image: {{ .Values.global.containerRegistry.path }}/service-catalog-docs:{{ .Chart.AppVersion }}
+      - name:  service-brokers
+        image: {{ .Values.global.containerRegistry.path }}/service-brokers-docs:{{ .Chart.AppVersion }}
+      - name:  application-connector
+        image: {{ .Values.global.containerRegistry.path }}/application-connector-docs:{{ .Chart.AppVersion }}
+      - name:  event-bus
+        image: {{ .Values.global.containerRegistry.path }}/event-bus-docs:{{ .Chart.AppVersion }}
+      - name:  service-mesh
+        image: {{ .Values.global.containerRegistry.path }}/service-mesh-docs:{{ .Chart.AppVersion }}
+      - name:  serverless
+        image: {{ .Values.global.containerRegistry.path }}/serverless-docs:{{ .Chart.AppVersion }}
+      - name:  monitoring
+        image: {{ .Values.global.containerRegistry.path }}/monitoring-docs:{{ .Chart.AppVersion }}
+      - name:  tracing
+        image: {{ .Values.global.containerRegistry.path }}/tracing-docs:{{ .Chart.AppVersion }}
+      - name:  api-gateway
+        image: {{ .Values.global.containerRegistry.path }}/api-gateway-docs:{{ .Chart.AppVersion }}
+      - name:  authorization-and-authentication
+        image: {{ .Values.global.containerRegistry.path }}/authorization-and-authentication-docs:{{ .Chart.AppVersion }}

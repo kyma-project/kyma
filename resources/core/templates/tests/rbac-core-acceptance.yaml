@@ -1,0 +1,63 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: test-{{ template "fullname" . }}-acceptance
+  labels:
+    app: {{ template "name" . }}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: test-{{ template "fullname" . }}-acceptance
+  labels:
+    app: {{ template "name" . }}
+rules:
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["clusterserviceclasses"]
+    verbs: ["list", "delete", "get"]
+    nonResourceURLs: []
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["clusterserviceplans"]
+    verbs: ["list", "delete"]
+    nonResourceURLs: []
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["serviceinstances", "servicebindings"]
+    verbs: ["get", "delete", "create", "list"]
+    nonResourceURLs: []
+  - apiGroups: ["servicecatalog.kyma.cx"]
+    resources: ["servicebindingusages"]
+    verbs: ["get", "delete", "create", "list"]
+    nonResourceURLs: []
+  - apiGroups: ["remoteenvironment.kyma.cx"]
+    resources: ["remoteenvironments", "environmentmappings"]
+    verbs: ["create", "delete"]
+    nonResourceURLs: []
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["create", "delete", "get", "list"]
+    nonResourceURLs: []
+  - apiGroups: [""]
+    resources: ["services", "namespaces", "pods", "pods/log", "events", "configmaps", "serviceaccounts"]
+    verbs: ["create", "delete", "get", "list", "update"]
+    nonResourceURLs: []
+  - apiGroups: ["config.istio.io"]
+    resources: ["rules", "checknothings", "deniers"]
+    verbs: ["create", "delete", "get", "list"]
+    nonResourceURLs: []
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["roles", "rolebindings"]
+    verbs: ["create"]
+    nonResourceURLs: []
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: test-{{ template "fullname" . }}-acceptance
+subjects:
+  - kind: ServiceAccount
+    name: test-{{ template "fullname" . }}-acceptance
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: test-{{ template "fullname" . }}-acceptance

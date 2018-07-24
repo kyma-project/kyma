@@ -1,0 +1,32 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-gateway-role
+  labels:
+    app: {{ .Release.Name }}-gateway
+    release: {{ .Release.Name }}-gateway
+    heritage: {{ .Release.Service }}-gateway
+rules:
+- apiGroups: ["remoteenvironment.kyma.cx"]
+  resources: ["remoteenvironments"]
+  verbs: ["get", "list"]
+- apiGroups: ["*"]
+  resources: ["secrets"]
+  verbs: ["get"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-gateway-rolebinding
+  labels:
+    app: {{ .Release.Name }}-gateway
+    release: {{ .Release.Name }}-gateway
+    heritage: {{ .Release.Service }}-gateway
+subjects:
+- kind: User
+  name: system:serviceaccount:{{ .Release.Namespace }}:default
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: {{ .Release.Name }}-gateway-role
+  apiGroup: rbac.authorization.k8s.io

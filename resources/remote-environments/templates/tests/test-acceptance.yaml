@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-{{.Release.Name }}-acceptance
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+    "helm-chart-test": "true"
+spec:
+  containers:
+    - name: test-{{.Release.Name }}-acceptance
+      image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.acceptanceTest.image.name }}:{{ .Values.acceptanceTest.image.tag }}"
+      imagePullPolicy: {{ .Values.acceptanceTest.image.pullPolicy }}
+      resources:
+        limits:
+          memory: 900Mi
+        requests:
+          memory: 900Mi
+      env:
+      - name: GATEWAY_URL
+        value: http://{{.Release.Name }}-gateway-external-api.{{ .Release.Namespace }}.svc.cluster.local:8081
+      - name: NAMESPACE
+        value: {{ .Release.Namespace }}
+      - name: REMOTE_ENVIRONMENT
+        value: {{ .Release.Name }}
+  restartPolicy: Never

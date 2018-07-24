@@ -1,0 +1,13 @@
+apiVersion: servicecatalog.kyma.cx/v1alpha1
+kind: ServiceBindingUsage
+metadata:
+ name: fn-redis-client
+spec:
+ serviceBindingRef:
+   name: redis-instance-credential
+ usedBy:
+   kind: Function
+   name: redis-client
+ parameters:
+   envPrefix:
+     name: "APP_"

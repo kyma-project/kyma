@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ template "fullname" . }}-redis
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+stringData:
+  encryption-key: {{ randAlphaNum 32 }}
+  redis-password: {{ .Values.redis.redisPassword | quote }}

@@ -1,0 +1,8 @@
+replicaCount: 1
+image:
+  tag: 0.2.79
+  pullPolicy: IfNotPresent
+service:
+  type: NodePort
+  externalPort: 80
+  internalPort: 8080

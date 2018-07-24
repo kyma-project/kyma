@@ -1,0 +1,91 @@
+
+# Gopkg.toml example
+#
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#  name = "github.com/x/y"
+#  version = "2.4.0"
+
+required= [
+    "google.golang.org/grpc",
+    "github.com/ugorji/go/codec",
+    "github.com/golang/lint/golint",
+    "golang.org/x/tools/cmd/goimports"
+    ]
+
+[prune]
+  unused-packages = true
+  go-tests = true
+
+[[constraint]]
+  name = "github.com/ugorji/go"
+  revision = "bdcc60b419d136a85cdf2e7cbcac34b3f1cd6e57"
+
+[[constraint]]
+  name = "google.golang.org/grpc"
+  branch = "v1.7.x"
+
+[[constraint]]
+  name = "github.com/coreos/etcd"
+  branch = "release-3.3"
+
+[[constraint]]
+  name = "github.com/Masterminds/semver"
+  version = "1.4.0"
+
+[[constraint]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.10.1"
+
+[[constraint]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.10.1"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.10.1"
+
+[[constraint]]
+  # latests release was 0.2.0 and we are depending on functionality added later
+  name = "github.com/urfave/negroni"
+  branch = "master"
+
+[[constraint]]
+  name = "k8s.io/helm"
+  version = "2.8.2"
+
+# etcd(release-3.3) has dependency to bbolt in this version:
+# see https://github.com/coreos/etcd/blob/release-3.3/glide.yaml
+[[override]]
+  name = "github.com/coreos/bbolt"
+  version = "v1.3.1-coreos.6"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.10.1"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.10.1"
+
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.10.1"
+
+[[override]]
+  name = "k8s.io/code-generator"
+  version = "kubernetes-1.10.1"

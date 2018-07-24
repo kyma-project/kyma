@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: kyma-default
+  namespace: kyma-installer
+spec:
+  hard:
+    # The sum of all pod memory requests must not exceed this value.
+    requests.memory: 384Mi
+
+    # The sum of all pod memory limit must not exceed this value.
+    limits.memory: 512Gi

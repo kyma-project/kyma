@@ -1,0 +1,43 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: dex
+  namespace:  {{ .Release.Namespace }}
+  labels:
+    app: dex
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+    # temp disabled, looks like dex with sidecar have some problems affecting apiserver->dex communication used to verify id_tokens
+      # annotations:
+      #   sidecar.istio.io/inject: "true"
+      labels:
+        app: dex
+        chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/dex-config-map.yaml") . | sha256sum }}
+    spec:
+      serviceAccount: dex-account
+      containers:
+      - image: {{ .Values.imageRegistry }}/dex:{{ .Chart.AppVersion }}
+        name: dex
+        command: ["/usr/local/bin/dex", "serve", "/etc/dex/cfg/config.yaml"]
+
+        ports:
+        - name: http
+          containerPort: {{ .Values.containerPort }}
+
+        volumeMounts:
+        - name: config
+          mountPath: /etc/dex/cfg
+        
+      volumes:
+      - name: config
+        configMap:
+          name: dex-config
+          items:
+          - key: config.yaml
+            path: config.yaml

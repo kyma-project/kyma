@@ -1,0 +1,33 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+rules:
+- apiGroups: ["settings.k8s.io"]
+  resources: ["podpresets"]
+  verbs: ["*"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch", "patch"]
+- apiGroups: ["kubeless.io"]
+  resources: ["functions"]
+  verbs: ["get","list","watch", "update"]
+- apiGroups: ["servicecatalog.kyma.cx"]
+  resources: ["servicebindingusages"]
+  verbs: ["*"]
+- apiGroups: ["servicecatalog.k8s.io"]
+  resources: ["servicebindings","serviceinstances","clusterserviceclasses"]
+  verbs:     ["get","list","watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["patch", "create"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["*"]
+  resourceNames:
+    - "{{ .Chart.Name }}-process-sbu-spec"

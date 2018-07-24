@@ -1,0 +1,53 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ .Chart.Name }}
+        release: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag }}"
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        args:
+          - "/connectorservice"
+          - '--appName={{ .Chart.Name }}'
+          - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
+          - "--internalAPIPort={{ .Values.deployment.args.internalAPIPort }}"
+          - "--namespace={{ .Values.global.namespace }}"
+          - "--tokenLength={{ .Values.deployment.args.tokenLength }}"
+          - "--tokenExpirationMinutes={{ .Values.deployment.args.tokenExpirationMinutes }}"
+          - "--domainName={{ .Values.global.domainName }}"
+          - "--connectorServiceHost=connector-service.{{ .Values.global.domainName }}"
+        env:
+          - name: COUNTRY
+            value: "{{ .Values.deployment.envvars.country }}"
+          - name: ORGANIZATION
+            value: "{{ .Values.deployment.envvars.organization }}"
+          - name: ORGANIZATIONALUNIT
+            value: "{{ .Values.deployment.envvars.organizationalunit }}"
+          - name: LOCALITY
+            value: "{{ .Values.deployment.envvars.locality }}"
+          - name: PROVINCE
+            value: "{{ .Values.deployment.envvars.province }}"
+        ports:
+          - containerPort: {{ .Values.deployment.args.internalAPIPort }}
+            name: int-api-port
+          - containerPort: {{ .Values.deployment.args.externalAPIPort }}
+            name: ext-api-port

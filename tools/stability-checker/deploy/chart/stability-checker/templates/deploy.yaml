@@ -1,0 +1,83 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "stability-checker.fullname" . }}
+  labels:
+    app: {{ template "stability-checker.name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "stability-checker.fullname" . }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ template "stability-checker.fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+    spec:
+      serviceAccountName: {{ template "stability-checker.fullname" . }}
+
+      volumes:
+        - name: testing-script-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.storage.claimName }}
+
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.containerRegistry.path }}/stability-checker:{{ .Values.image.tag }}"
+
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+
+        env:
+          - name: APP_PORT
+            value: "{{ .Values.service.internalPort }}"
+          - name: APP_WORKING_NAMESPACE
+            value: "{{ .Release.Namespace }}"
+          - name: APP_TEST_CONFIG_MAP_NAME
+            value: "{{ .Chart.Name }}-test-results"
+          - name: APP_PATH_TO_TESTING_SCRIPT
+            value: "{{ .Values.pathToTestingScript }}"
+          - name: APP_SLACK_CLIENT_CHANNEL_ID
+            value: "{{ .Values.slackClientChannelId }}"
+          - name: APP_SLACK_CLIENT_WEBHOOK_URL
+            value: "{{ .Values.slackClientWebhookUrl }}"
+          - name: APP_SLACK_CLIENT_TOKEN
+            value: "{{ .Values.slackClientToken }}"
+          - name: APP_TEST_THROTTLE
+            value: "{{ .Values.testThrottle }}"
+          - name: APP_TEST_RESULT_WINDOW_TIME
+            value: "{{ .Values.testResultWindowTime }}"
+
+
+        volumeMounts:
+          - name: testing-script-volume
+            mountPath: /data
+
+        readinessProbe:
+          httpGet:
+            path: /statusz
+            port: {{ .Values.service.internalPort }}
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 2
+
+        livenessProbe:
+          httpGet:
+            path: /statusz
+            port: {{ .Values.service.internalPort }}
+
+          periodSeconds: 10
+          timeoutSeconds: 2
+          successThreshold: 1

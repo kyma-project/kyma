@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    "auth.istio.io/{{.Values.containerPort}}": NONE  
+  name: dex-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: dex
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: {{.Values.containerPort}}
+  selector:
+    app: dex

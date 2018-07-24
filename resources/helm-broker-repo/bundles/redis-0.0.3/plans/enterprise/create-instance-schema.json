@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "redisPassword": {
+      "type": "string",
+      "format": "password",
+      "description": "Defaults to a random 10-character alphanumeric string",
+      "default": "",
+      "title": "Password"
+    },
+    "imagePullPolicy": {
+      "type": "string",
+      "enum": ["Always", "IfNotPresent", "Never"],
+      "default": "IfNotPresent",
+      "title": "Image pull policy"
+    }
+  }
+}

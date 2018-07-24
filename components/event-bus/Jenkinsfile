@@ -1,0 +1,136 @@
+#!/usr/bin/env groovy
+def label = "kyma-${UUID.randomUUID().toString()}"
+def application = "event-bus"
+def isMaster = params.GIT_BRANCH == 'master'
+
+def dockerPushRoot = isMaster
+    ? "${env.DOCKER_REGISTRY}"
+    : "${env.DOCKER_REGISTRY}snapshot/"
+
+def dockerImageTag = isMaster
+    ? params.APP_VERSION
+    : params.GIT_BRANCH
+
+def imageNamePush = 'event-bus-push'
+def imageNamePublish = 'event-bus-publish'
+def imageNameSubValidator = 'event-bus-sub-validator'
+
+echo """
+********************************
+Job started with the following parameters:
+DOCKER_REGISTRY=${env.DOCKER_REGISTRY}
+DOCKER_CREDENTIALS=${env.DOCKER_CREDENTIALS}
+GIT_REVISION=${params.GIT_REVISION}
+GIT_BRANCH=${params.GIT_BRANCH}
+APP_VERSION=${params.APP_VERSION}
+APP_FOLDER=${env.APP_FOLDER}
+dockerPushRoot=${dockerPushRoot}
+dockerImageTag=${dockerImageTag}
+********************************
+"""
+
+podTemplate(label: label) {
+    node(label) {
+        try {
+            timestamps {
+                timeout(time:20, unit:"MINUTES") {
+                    ansiColor('xterm') {
+                        stage("setup") {
+                            checkout scm
+
+                            if(dockerImageTag == "") {
+                                error("No version for docker tag defined, please set APP_VERSION parameter for master branch or GIT_BRANCH parameter for any branch")
+                            }
+
+                            withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS, passwordVariable: 'pwd', usernameVariable: 'uname')]) {
+                                sh "docker login -u $uname -p '$pwd' $env.DOCKER_REGISTRY"
+                            }
+                        }
+
+                        stage("install dependencies $application") {
+                            execute("/", "make resolve")
+                        }
+
+                        stage("code quality") {
+                            execute("/", "gometalinter --skip=generated --vendor --deadline=2m --disable-all "
+                            + "--enable=vet "
+                            + "./...")
+                        }
+
+                        stage("build and test - event-bus-publish") {
+                            execute("/cmd/event-bus-publish", "make clean build")
+                        }
+
+                        stage("build image - event-bus-publish") {
+                            dir(env.APP_FOLDER + '/cmd/event-bus-publish') {
+                                sh "./dockerBuild.sh event-bus-publish latest"
+                            }
+                        }
+
+                        stage("build and test - event-bus-push") {
+                            execute("/cmd/event-bus-push", "make clean build")
+                        }
+
+                        stage("build image - event-bus-push") {
+                            dir(env.APP_FOLDER + '/cmd/event-bus-push') {
+                                sh "./dockerBuild.sh event-bus-push latest"
+                            }
+                        }
+
+                        stage("build and test - event-bus-sub-validator") {
+                            execute("/cmd/event-bus-sv", "make clean build")
+                        }
+
+                        stage("build image - event-bus-sub-validator") {
+                            dir(env.APP_FOLDER + '/cmd/event-bus-sv') {
+                                sh "./dockerBuild.sh event-bus-sub-validator latest"
+                            }
+                        }
+
+                        if (isMaster) {
+                            stage("IP scan $application (Sourceclear)"){
+                                withCredentials([string(credentialsId: 'SRCCLR_API_TOKEN', variable: 'SRCCLR_API_TOKEN')]) {
+                                    execute("/", "make scan", "SRCCLR_API_TOKEN=$SRCCLR_API_TOKEN")
+                                }
+                            }
+                        }
+
+                        stage("push image - event-bus-publish") {
+                            def imageName = "${dockerPushRoot}${imageNamePublish}:${dockerImageTag}"
+                            sh "docker tag event-bus-publish:latest ${imageName}"
+                            sh "docker push ${imageName}"
+                            echo "pushed image event-bus-publish: ${imageName}"
+                        }
+
+                        stage("push image - event-bus-push") {
+                            def imageName = "${dockerPushRoot}${imageNamePush}:${dockerImageTag}"
+                            sh "docker tag event-bus-push:latest ${imageName}"
+                            sh "docker push ${imageName}"
+                            echo "pushed image event-bus-push: ${imageName}"
+                        }
+
+                        stage("push image - event-bus-sub-validator") {
+                            def imageName = "${dockerPushRoot}${imageNameSubValidator}:${dockerImageTag}"
+                            sh "docker tag event-bus-sub-validator:latest ${imageName}"
+                            sh "docker push ${imageName}"
+                            echo "pushed image event-bus-sub-validator: ${imageName}"
+                        }
+                    }
+                }
+            }
+        } catch (ex) {
+            echo "Got exception: ${ex}"
+            currentBuild.result = "FAILURE"
+            def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${params.GIT_BRANCH}. See details: ${env.BUILD_URL}"
+            emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+        }
+    }
+}
+
+def execute(workPath, command, envs = '') {
+    def buildpack = 'golang-buildpack:0.0.8'
+    def repositoryName = 'kyma'
+    def envText = envs=='' ? '' : "--env $envs"
+    workDir = pwd()
+    sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/$repositoryName/ -w /go/src/github.com/kyma-project/$repositoryName/$env.APP_FOLDER$workPath $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
+}

@@ -1,0 +1,24 @@
+deployment:
+  image:
+    name: application-connector
+    tag: 0.2.56
+    pullPolicy: IfNotPresent
+  args:
+    proxyPort: &proxyPort 8080
+    externalAPIPort: &externalAPIPort 8081
+    minioURL: core-minio.kyma-system.svc.cluster.local:9000
+    requestTimeout: 10
+    requestLogging: false
+
+service:
+  externalapi:
+    port: *externalAPIPort
+    nodePort: 32020
+
+minioUserSecretName: remoteenvironments-minio-user
+
+tests:
+  image:
+    name: application-connector-tests
+    tag: 0.2.56
+    pullPolicy: IfNotPresent

@@ -1,0 +1,15 @@
+apiVersion: remoteenvironment.kyma.cx/v1alpha1
+kind: RemoteEnvironment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}-gateway
+    release: {{ .Release.Name }}-gateway
+    heritage: {{ .Release.Service }}-gateway
+spec:
+  source:
+    environment: {{ .Values.deployment.args.sourceEnvironment }} 
+    type: {{ .Values.deployment.args.sourceType }} 
+    namespace: {{ .Values.deployment.args.sourceNamespace }} 
+  description: "This Remote Environment corresponds to the connected remote solution."
+  accessLabel: "echo-access-label"

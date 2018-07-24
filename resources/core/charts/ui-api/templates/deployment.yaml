@@ -1,0 +1,94 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ template "name" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+    spec:
+      serviceAccountName: {{ template "fullname" . }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: APP_PORT
+            value: "{{ .Values.service.internalPort }}"
+          - name: APP_HOST
+            value: "0.0.0.0"
+          - name: APP_ALLOWED_ORIGINS
+            {{- if .Values.global.isLocalEnv }}
+            value: "https://*.{{ .Values.global.domainName }},*.svc.cluster.local:44134,http://console-dev.{{ .Values.global.domainName }}:4200"
+            {{- else }}
+            value: "https://*.{{ .Values.global.domainName }},*.svc.cluster.local:44134"
+            {{- end }}
+          - name: APP_VERBOSE
+            value: "true"
+          - name: APP_CONTENT_ADDRESS
+            valueFrom:
+              configMapKeyRef:
+                name: core-minio-docs-upload
+                key: APP_UPLOAD_ENDPOINT
+          - name: APP_CONTENT_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: core-minio-docs-upload
+                key: APP_UPLOAD_PORT
+          - name: APP_CONTENT_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: core-minio
+                key: accesskey
+          - name: APP_CONTENT_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: core-minio
+                key: secretkey
+          - name: APP_CONTENT_SECURE
+            valueFrom:
+              configMapKeyRef:
+                name: core-minio-docs-upload
+                key: APP_UPLOAD_SECURE
+          - name: APP_CONTENT_BUCKET
+            valueFrom:
+              configMapKeyRef:
+                name: core-minio-docs-upload
+                key: APP_BUCKET_NAME
+          - name: APP_CONTENT_EXTERNAL_ADDRESS
+            valueFrom:
+              configMapKeyRef:
+                name: core-minio-docs-upload
+                key: APP_EXTERNAL_ENDPOINT
+          - name: APP_CONTENT_ASSETS_FOLDER
+            valueFrom:
+              configMapKeyRef:
+                name: core-minio-docs-upload
+                key: APP_ASSETS_FOLDER
+          - name: APP_REMOTE_ENVIRONMENT_GATEWAY_INTEGRATION_NAMESPACE
+            value: "kyma-integration"
+          - name: APP_REMOTE_ENVIRONMENT_GATEWAY_STATUS_REFRESH_PERIOD
+            value: "15s"
+          - name: APP_REMOTE_ENVIRONMENT_CONNECTOR_URL
+            value: "http://connector-service-internal-api.kyma-integration.svc.cluster.local:8080"
+        ports:
+          - containerPort: {{ .Values.service.internalPort }}

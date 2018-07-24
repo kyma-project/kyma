@@ -1,0 +1,14 @@
+# Default values for lambdas-ui.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+image:
+  name: lambda
+  tag: 0.1.69
+  pullPolicy: IfNotPresent
+service:
+  name: nginx
+  type: ClusterIP
+  externalPort: 80
+  internalPort: 80
+resources: {}

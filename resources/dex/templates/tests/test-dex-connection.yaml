@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "test-{{ template "fullname" . }}-connection-dex"
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+      "helm-chart-test": "true"
+spec:
+  containers:
+  - name: "test-{{ template "fullname" . }}-connection-dex"
+    image: tutum/curl:alpine
+    command: ["/usr/bin/curl"]
+    args: [
+      "--fail",
+      "--max-time", "10",
+      "--retry", "60",
+      "--retry-delay", "3",
+      "http://dex-service.{{ .Release.Namespace }}.svc.cluster.local:5556/.well-known/openid-configuration"
+    ]
+  restartPolicy: Never
+---

@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "name" . }}-service-account
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ .Values.global.containerRegistry.path }}/environments:0.1.2
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          env:
+            - name: APP_NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: APP_LIMIT_RANGE_MEMORY_DEFAULT_REQUEST
+              value: "{{ .Values.limitRanges.defaultRequest }}"
+            - name: APP_LIMIT_RANGE_MEMORY_DEFAULT
+              value: "{{ .Values.limitRanges.default }}"
+            - name: APP_LIMIT_RANGE_MEMORY_MAX
+              value: "{{ .Values.limitRanges.max }}"
+            - name: APP_RESOURCE_QUOTA_LIMITS_MEMORY
+              value: "{{ .Values.resourceQuota.limitsMemory}}"
+            - name: APP_RESOURCE_QUOTA_REQUESTS_MEMORY
+              value: "{{ .Values.resourceQuota.requestsMemory}}"

@@ -1,0 +1,51 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "publish.fullname" . }}
+  labels:
+{{ include "publish.labels.standard" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ template "publish.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.global.containerRegistry.path }}/event-bus-publish:{{ .Values.global.eventBusVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --client_id=$(POD_NAME)
+            - --max_requests={{ .Values.global.publish.maxRequests }}
+            - --nats_streaming_cluster_id={{ .Values.global.natsStreaming.clusterID }}
+            - --nats_url=nats://{{ printf "$(%s_NATS_STREAMING_SERVICE_HOST):%s" (upper .Release.Name| replace "-" "_") (toString .Values.global.natsStreaming.ports.client)}}
+            - --port={{ .Values.port }}
+            - --trace_api_url={{ .Values.global.trace.apiURL }}
+            - --trace_service_name={{ .Values.trace.serviceName }}
+            - --trace_operation_name={{ .Values.trace.operationName }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.port }}
+          livenessProbe:
+            exec:
+              command:
+              - curl
+              - -f
+              - http://localhost:{{ .Values.port }}/v1/status/ready
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
+          env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          resources:
+{{ toYaml .Values.global.publish.resources | indent 12 }}

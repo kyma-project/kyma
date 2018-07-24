@@ -1,0 +1,17 @@
+storage:
+  - driver: memory
+    provide:
+      bundle: ~
+      chart: ~
+    memory:
+      max-keys: 4096
+  - driver: etcd
+    provide:
+      instance:
+        prefix: instance
+      instanceOperation:
+        prefix: instanceOperation
+    etcd:
+      endpoints:
+        - hostA
+        - hostB

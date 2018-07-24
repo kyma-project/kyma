@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+description: A Helm chart for Open Service Broker For Azure
+name: azure-broker
+home: https://github.com/azure/open-service-broker-azure
+keywords:
+  - azure
+  - services
+  - service broker
+sources:
+  - https://github.com/azure/open-service-broker-azure
+  - https://hub.docker.com/r/microsoft/azure-service-broker/
+tillerVersion: '>=2.7.0-rc1'
+appVersion: v0.6.0-alpha
+version: 0.4.1

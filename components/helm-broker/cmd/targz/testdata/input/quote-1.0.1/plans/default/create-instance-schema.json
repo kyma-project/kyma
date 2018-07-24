@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "replicaCount": {
+      "type": "number",
+      "description": "Specifies the number of desired Pods",
+      "default": "1"
+    }
+  }
+}

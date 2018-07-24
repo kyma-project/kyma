@@ -1,0 +1,156 @@
+#!/usr/bin/env groovy
+def docs_image_suffix = "docs"
+def kyma = "kyma"
+def service_catalog = "service-catalog"
+def service_brokers = "service-brokers"
+def application_connector = "application-connector"
+def event_bus = "event-bus"
+def service_mesh = "service-mesh"
+def serverless = "serverless"
+def monitoring = "monitoring"
+def tracing = "tracing"
+def azure_mysql = "azure-mysql"
+def azure_redis_cache = "azure-redis-cache"
+def azure_sql = "azure-sql"
+def azure_classes_docs_dir = "$service_brokers/azure-broker-service-classes"
+def api_gateway = "api-gateway"
+def authorization_and_authentication = "authorization-and-authentication"
+def docs_baseimage = "https://github.wdf.sap.corp/raw/kyma/content-upload-base-image/master/Dockerfile"
+def label = "kyma-${UUID.randomUUID().toString()}"
+
+def isMaster = params.GIT_BRANCH == 'master'
+
+def dockerPushRoot = isMaster
+    ? "${env.DOCKER_REGISTRY}"
+    : "${env.DOCKER_REGISTRY}snapshot/"
+
+def dockerImageTag = isMaster
+    ? params.APP_VERSION
+    : params.GIT_BRANCH
+
+echo """
+********************************
+Job started with the following parameters:
+DOCKER_REGISTRY=${env.DOCKER_REGISTRY}
+DOCKER_CREDENTIALS=${env.DOCKER_CREDENTIALS}
+GIT_REVISION=${params.GIT_REVISION}
+GIT_BRANCH=${params.GIT_BRANCH}
+APP_VERSION=${params.APP_VERSION}
+APP_FOLDER=${env.APP_FOLDER}
+********************************
+"""
+
+podTemplate(label: label) {
+    node(label) {
+        try {
+            timestamps {
+                timeout(time:20, unit:"MINUTES") {
+                    ansiColor('xterm') {
+                        stage("setup") {
+                            checkout scm
+
+                            withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS, passwordVariable: 'pwd', usernameVariable: 'uname')]) {
+                                sh "docker login -u $uname -p '$pwd' $env.DOCKER_REGISTRY"
+                            }
+                        }
+
+                        stage("docs build image") {
+                            dir("$docs_image_suffix/$kyma") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $kyma-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$service_catalog") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $service_catalog-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$service_brokers") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $service_brokers-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$application_connector") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $application_connector-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$event_bus") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $event_bus-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$service_mesh") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $service_mesh-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$serverless") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $serverless-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$monitoring") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $monitoring-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$tracing") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $tracing-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$azure_classes_docs_dir/$azure_mysql") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $azure_mysql-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$azure_classes_docs_dir/$azure_sql") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $azure_sql-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$azure_classes_docs_dir/$azure_redis_cache") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $azure_redis_cache-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$api_gateway") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $api_gateway-$docs_image_suffix"
+                            }
+                            dir("$docs_image_suffix/$authorization_and_authentication") {
+                                sh "curl $docs_baseimage | docker build -f - . -t $authorization_and_authentication-$docs_image_suffix"
+                            }
+
+                        }
+
+                        stage("docs push image") {
+                            sh "docker tag $kyma-$docs_image_suffix ${dockerPushRoot}$kyma-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$kyma-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $service_catalog-$docs_image_suffix ${dockerPushRoot}$service_catalog-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$service_catalog-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $service_brokers-$docs_image_suffix ${dockerPushRoot}$service_brokers-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$service_brokers-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $application_connector-$docs_image_suffix ${dockerPushRoot}$application_connector-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$application_connector-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $event_bus-$docs_image_suffix ${dockerPushRoot}$event_bus-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$event_bus-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $service_mesh-$docs_image_suffix ${dockerPushRoot}$service_mesh-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$service_mesh-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $serverless-$docs_image_suffix ${dockerPushRoot}$serverless-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$serverless-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $monitoring-$docs_image_suffix ${dockerPushRoot}$monitoring-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$monitoring-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $tracing-$docs_image_suffix ${dockerPushRoot}$tracing-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$tracing-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $azure_mysql-$docs_image_suffix ${dockerPushRoot}$azure_mysql-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$azure_mysql-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $azure_sql-$docs_image_suffix ${dockerPushRoot}$azure_sql-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$azure_sql-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $azure_redis_cache-$docs_image_suffix ${dockerPushRoot}$azure_redis_cache-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$azure_redis_cache-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $api_gateway-$docs_image_suffix ${dockerPushRoot}$api_gateway-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$api_gateway-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag $authorization_and_authentication-$docs_image_suffix ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:$dockerImageTag"
+                        }
+                    }
+                }
+            }
+        } catch (ex) {
+            echo "Got exception: ${ex}"
+            currentBuild.result = "FAILURE"
+            def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${params.GIT_BRANCH}. See details: ${env.BUILD_URL}"
+            emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+        }
+    }
+}

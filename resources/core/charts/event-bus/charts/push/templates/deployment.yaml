@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name:  {{ .Release.Name }}-push-sa
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-subscriptions-controller
+rules:
+- apiGroups: ["eventing.kyma.cx"]
+  resources: ["subscriptions"]
+  verbs: ["get", "watch", "list"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-subscriptions-controller
+subjects:
+- kind: ServiceAccount
+  name:  {{ .Release.Name}}-push-sa
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Release.Name }}-subscriptions-controller
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "push.fullname" . }}
+  labels:
+{{ include "push.labels.standard" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ template "push.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.global.containerRegistry.path }}/event-bus-push:{{ .Values.global.eventBusVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --client_id=$(POD_NAME)
+            - --nats_url=nats://{{ printf "$(%s_NATS_STREAMING_SERVICE_HOST):%s" (upper .Release.Name| replace "-" "_") (toString .Values.global.natsStreaming.ports.client)}}
+            - --cluster_id={{ .Values.global.natsStreaming.clusterID }}
+            - --tls_skip_verify={{ .Values.http.tlsSkipVerify }}
+            - --subscription_name_header={{ .Values.global.push.http.subscriptionNameHeader }}
+            - --topic_header={{ .Values.global.push.http.topicHeader }}
+            - --trace_api_url={{ .Values.global.trace.apiURL }}
+            - --trace_service_name={{ .Values.trace.serviceName }}
+            - --trace_operation_name={{ .Values.trace.operationName }}
+            - --check_events_activation={{ .Values.check.eventsActivation }}
+          ports:
+            - name: http 
+              containerPort: {{ .Values.port }}
+          livenessProbe:
+            httpGet:
+              path: /v1/status/ready
+              port: http
+            initialDelaySeconds: 60
+          env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          resources:
+{{ toYaml .Values.global.push.resources | indent 12 }}
+      serviceAccount:  {{ .Release.Name }}-push-sa

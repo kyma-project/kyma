@@ -1,0 +1,30 @@
+apiVersion: v1
+entries:
+  redis:
+    - name: redis
+      description: Redis service
+      version: 0.0.3
+  quote:
+    - name: quote
+      description: Quote service
+      version: 1.0.1
+  remote-envs-apiserver:
+    - name: remote-envs-apiserver
+      description: Remote environment api server
+      version: 0.1.0
+  fission:
+    - name: fission
+      description: Fission
+      version: 0.1.0
+  nats-streaming:
+    - name: nats-streaming
+      version: 0.1.1
+      description: NATS Streaming is a high-performance messaging streaming system.
+  minio:
+    - name: minio
+      description: Minio is an open source object storage server compatible with Amazon S3 APIs
+      version: 0.3.1
+  ec-demo:
+    - name: ec-demo
+      description: Demo of EC connected to lounge site
+      version: 0.0.1

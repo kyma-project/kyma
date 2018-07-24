@@ -1,0 +1,29 @@
+# Default values for jaeger.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: jaegertracing/all-in-one
+  tag: 1.2.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  uiPort: 80
+
+zipkin:
+  httpPort: 9411
+  thriftCompactPort: 5775
+
+jaeger:
+  uiPort: 16686
+  thriftCompactPort: 6831
+  thriftBinaryPort: 6832
+  configPort: 5778
+  tChannelPort: 14267
+  collectorHTTPPort: 14268
+resources:
+  limits:
+    memory: "256M"

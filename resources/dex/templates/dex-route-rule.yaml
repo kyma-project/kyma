@@ -1,0 +1,11 @@
+
+apiVersion: config.istio.io/v1alpha2
+kind: RouteRule
+metadata:
+  name: dex-cors-route-rule
+spec:
+  destination:
+    name: dex-service
+  corsPolicy:
+    allowOrigin:
+      - "*"      

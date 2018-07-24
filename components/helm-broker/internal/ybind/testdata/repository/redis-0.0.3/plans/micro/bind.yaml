@@ -1,0 +1,15 @@
+credential:
+  - name: HOST
+    value: {{ template "redis.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  - name: PORT
+    valueFrom:
+      serviceRef:
+        name: {{ template "redis.fullname" . }}
+        jsonpath: '{ .spec.ports[?(@.name=="redis")].port }'
+{{- if .Values.usePassword }}
+  - name: REDIS_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: {{ template "redis.fullname" . }}
+        key: redis-password
+{{- end }}

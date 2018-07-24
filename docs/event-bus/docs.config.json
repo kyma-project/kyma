@@ -1,0 +1,8 @@
+{
+  "spec":{
+    "id":"event-bus",
+    "displayName":"Event Bus",
+    "description":"Overal documentation for Event Bus",
+    "type":"Components"
+  }
+}

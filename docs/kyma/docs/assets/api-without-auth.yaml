@@ -1,0 +1,13 @@
+---
+apiVersion: gateway.kyma.cx/v1alpha2
+kind: Api
+metadata:
+  labels:
+    example: http-db-service
+  name: http-db-service
+spec:
+  authentication: []
+  hostname: http-db-service.kyma.local
+  service:
+    name: http-db-service
+    port: 8017

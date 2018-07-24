@@ -1,0 +1,51 @@
+apiVersion: kubeless.io/v1beta1
+kind: Function
+metadata:
+  name: redis-client
+  labels:
+    example: service-binding
+spec:
+  handler: app.handler
+  runtime: nodejs8
+  type: HTTP
+  deps: |
+    {
+      "name": "app",
+      "version": "0.0.1",
+      "dependencies": {
+        "async-redis":  "1.1.4"
+      }
+    }
+  function: |
+      const asyncRedis = require("async-redis");
+      
+      module.exports = {
+        handler: async (event, context) => {
+          try {
+          const client = asyncRedis.createClient({
+            host: process.env.APP_HOST,
+            port: process.env.APP_PORT,
+            password: process.env.APP_REDIS_PASSWORD,
+            retry_strategy: function (options) {
+              if (options.error && options.error.code === 'ECONNREFUSED') {
+                  return new Error('The server refused the connection');
+              }
+              if (options.total_retry_time > 1000*60*60) {
+                  return new Error('Retry time exhausted');
+              }
+              if (options.attempt > 10) {
+                  return undefined;
+              }
+              // reconnect after
+              return Math.min(options.attempt * 100, 3000);
+          }});
+
+          const value = await client.info();
+          
+          return value;
+          } catch (err) {
+            console.log(err);
+            return "Cannot connect to redis server, please see function logs for more details.";
+          }
+        },
+      };

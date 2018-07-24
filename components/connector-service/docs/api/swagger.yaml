@@ -1,0 +1,182 @@
+openapi: '3.0.0'
+info:
+  version: '1.0.0'
+  title: 'Kyma Certificate Service Metadata API'
+paths:
+  /v1/remoteenvironments/{remoteEnvName}/tokens:
+    post:
+      parameters:
+        - in: path
+          name: remoteEnvName
+          description: 'Name of remote environment.'
+          required: true
+          schema:
+            type: string
+      tags:
+        - internal API
+      summary: 'Creates a token used for certificate signing flow.'
+      responses:
+        '201':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tokenResponse'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/remoteenvironments/{remoteEnvName}/info:
+    get:
+      parameters:
+        - in: path
+          name: remoteEnvName
+          description: 'Name of remote environment.'
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: token
+          description: 'Access Token fetched from /tokens endpoint.'
+          required: true
+          schema:
+            type: string
+      tags:
+        - external API
+      summary: 'Allows for fetching proper information for future CSR.'
+      responses:
+        '200':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/infoResponse'
+        '403':
+          description: 'Invalid token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/remoteenvironments/{remoteEnvName}/client-certs:
+    post:
+      parameters:
+        - in: path
+          name: remoteEnvName
+          description: 'Name of remote environment.'
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: token
+          description: 'Access Token fetched from /tokens endpoint.'
+          required: true
+          schema:
+            type: string
+      tags:
+        - external API
+      summary: 'Signs CSR.'
+      requestBody:
+        description: 'The CSR to be signed'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/csrRequest'
+      responses:
+        '201':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/csrResponse'
+        '403':
+          description: 'Invalid token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '404':
+          description: 'Not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+components:
+  schemas:
+    tokenResponse:
+      type: 'object'
+      properties:
+        url:
+          type: 'string'
+          example: 'https://cert-service.kyma.cluster.cx/v1/remoteenvironments/ec-default/info?token=1edfc34g'
+        token:
+          type: 'string'
+          example: '1edfc34g'
+    cert:
+      type: 'object'
+      properties:
+        subject:
+          type: 'string'
+          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN=ec-default'
+        extensions:
+          type: 'string'
+        key-algorithm:
+          type: 'string'
+          example: 'rsa2048'
+    apiURLs:
+      type: 'object'
+      properties:
+        metadataUrl:
+          type: 'string'
+          example: 'gateway.wormhole.kyma.cluster.cx/ec-default/v1/metadata/services'
+        eventsUrl:
+          type: 'string'
+          example: 'gateway.wormhole.kyma.cluster.cx/ec-default/v1/events'
+        certificatesUrl:
+          type: 'string'
+          example: 'certificate-service.kyma.cluster.cx/v1/remoteenvironments/ec-default'
+    infoResponse:
+      type: 'object'
+      properties:
+        url:
+          type: 'string'
+          example: 'https://cert-service.kyma.cluster.cx/v1/remoteenvironments/ec-default/client-certs?token=1edfc34g'
+        api:
+          $ref: '#/components/schemas/apiURLs'
+        certificate:
+          $ref: '#/components/schemas/cert'
+    appError:
+      type: 'object'
+      properties:
+        code:
+          type: 'integer'
+        error:
+          type: 'string'
+    csrRequest:
+      type: 'object'
+      properties:
+        csr:
+          type: 'string'
+          description: 'Base64 encoded certificate signing request file.'
+          example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tDQpBTllfQ0VSVElGSUNBVEVfRklMRV9USElTX0lTX0pVU1RfQU5fRVhBTVBMRQ0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ0K'
+    csrResponse:
+      type: 'object'
+      properties:
+        crt:
+          type: 'string'
+          description: 'Base64 encoded certificate file.'
+          example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tDQpBTllfQ0VSVElGSUNBVEVfRklMRV9USElTX0lTX0pVU1RfQU5fRVhBTVBMRQ0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ0K'

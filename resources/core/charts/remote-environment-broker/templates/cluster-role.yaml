@@ -1,0 +1,26 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+rules:
+- apiGroups: ["remoteenvironment.kyma.cx"]
+  resources: ["remoteenvironments","environmentmappings"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["remoteenvironment.kyma.cx"]
+  resources: ["eventactivations"]
+  verbs: ["create", "delete"]
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["patch", "list", "watch"]
+- apiGroups: ["servicecatalog.k8s.io"]
+  resources: ["clusterserviceclasses","serviceinstances"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["servicecatalog.k8s.io"]
+  resources: ["clusterservicebrokers"]
+  verbs: ["get", "update"]
+

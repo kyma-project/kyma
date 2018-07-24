@@ -1,0 +1,4 @@
+name: documentation
+description:  Documentation for Kyma that is displayed in Kyma Console
+version: 0.0.10
+appVersion: 0.0.10

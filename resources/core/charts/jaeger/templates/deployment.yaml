@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "jaeger.fullname" . }}
+  labels:
+    app: {{ template "jaeger.name" . }}
+    chart: {{ template "jaeger.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}  
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "jaeger.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "jaeger.name" . }}
+        release: {{ .Release.Name }}
+        jaeger-infra: jaeger-pod
+    spec:
+      containers:
+      -   env:
+          - name: COLLECTOR_ZIPKIN_HTTP_PORT
+            value: "{{ .Values.zipkin.httpPort }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          name: {{ .Chart.Name }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.zipkin.thriftCompactPort }}
+              protocol: UDP
+            - containerPort: {{ .Values.jaeger.thriftCompactPort }}
+              protocol: UDP
+            - containerPort: {{ .Values.jaeger.thriftBinaryPort }}
+              protocol: UDP
+            - containerPort: {{ .Values.jaeger.uiPort }}
+              protocol: TCP
+            - containerPort: {{ .Values.zipkin.httpPort }}
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: "/"
+              port: {{ .Values.jaeger.uiPort }}
+            initialDelaySeconds: 5
+          resources:
+{{ toYaml .Values.resources | indent 12 }}

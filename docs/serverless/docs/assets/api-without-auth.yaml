@@ -1,0 +1,13 @@
+---
+apiVersion: gateway.kyma.cx/v1alpha2
+kind: Api
+metadata:
+  labels:
+    function: hello
+    example: serverless-lambda
+  name: hello
+spec:
+  hostname: hello.kyma.local
+  service:
+    name: hello
+    port: 8080

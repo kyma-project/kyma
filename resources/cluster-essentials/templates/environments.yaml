@@ -1,0 +1,26 @@
+# production env
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    env: "true"
+  name: production
+---
+
+# stage env
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    env: "true"
+  name: stage
+---
+
+# qa env
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    env: "true"
+  name: qa
+---

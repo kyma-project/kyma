@@ -1,0 +1,23 @@
+{{ if not .Values.global.isLocalEnv }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Chart.Name }}-tests
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+    "helm-chart-test": "true"
+spec:
+  containers:
+    - name: {{ .Chart.Name }}-tests
+      image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.tests.image.name }}:{{ .Values.tests.image.tag }}"
+      imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
+      env:
+      - name: INTERNAL_API_URL
+        value: http://{{ .Chart.Name }}-internal-api.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.service.internalapi.port }}
+      - name: EXTERNAL_API_URL
+        value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.service.externalapi.port }}
+      - name: GATEWAY_URL
+        value: https://gateway.{{ .Values.global.domainName }}
+  restartPolicy: Never
+{{ end }}

@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.nginx.configmapName }}
+  namespace: {{.Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "0"
+data:
+  nginx.conf: |
+    load_module /usr/lib/nginx/modules/ndk_http_module.so;
+
+    worker_processes 1;
+    events {
+      worker_connections 1024;
+    }
+
+    http {
+      server {
+        listen       80;
+        server_name  apiserver.{{ .Values.global.domainName }};
+
+        location ~ ^/ {
+          proxy_set_header "Host" $host;
+          proxy_pass https://kubernetes.default;
+        }
+
+        location ~ ^/.+ {
+          proxy_set_header "Host" $host;
+          proxy_pass https://kubernetes.default;
+        }
+      }
+    }

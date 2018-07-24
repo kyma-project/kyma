@@ -1,0 +1,4 @@
+dependencies:
+  - name: nats-streaming
+  - name: publish
+  - name: push

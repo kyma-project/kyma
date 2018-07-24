@@ -1,0 +1,8 @@
+{
+  "spec":{
+    "id":"monitoring",
+    "displayName":"Monitoring",
+    "description":"Overal documentation for Monitoring",
+    "type":"Components"
+  }
+}

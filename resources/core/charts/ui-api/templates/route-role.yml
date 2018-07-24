@@ -1,0 +1,8 @@
+apiVersion: config.istio.io/v1alpha2
+kind: RouteRule
+metadata:
+  name: {{ template "fullname" . }}
+spec:
+  websocketUpgrade: True
+  destination:
+    name: {{ template "fullname" . }}

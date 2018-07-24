@@ -1,0 +1,4 @@
+kubeConfig:
+  clusterName: minikube
+  url:
+  ca:

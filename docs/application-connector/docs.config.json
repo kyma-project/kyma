@@ -1,0 +1,8 @@
+{
+  "spec":{
+    "id":"application-connector",
+    "displayName":"Application Connector",
+    "description":"Overal documentation for Application Connector",
+    "type":"Components"
+  }
+}

@@ -1,0 +1,21 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: api-controller
+  namespace:  {{ .Release.Namespace }}
+  labels:
+    app: api-controller    
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: api-controller
+    spec:
+      serviceAccount: api-controller-account
+      containers:
+      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+        name: api-controller        
+        # ports:
+        #   - containerPort: 80

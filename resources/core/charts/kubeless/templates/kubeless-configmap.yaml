@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}-config
+  labels:
+{{ include "labels.standard" . | indent 4 }}
+data:
+  ingress-enabled: "false"
+  service-type: ClusterIP
+  builder-image: {{ .Values.config.builder.image }}
+  builder-secret: {{ .Values.config.builder.secret }}
+  provision-image: {{ .Values.config.provision.image }}
+  provision-secret: {{ .Values.config.provision.secret }}
+  deployment: |-
+    {
+      "spec": {
+        "template": {
+          "metadata": {
+            "annotations": {
+              "sidecar.istio.io/inject": "true"
+            }
+          },
+          "spec": {
+            "securityContext": {}
+          }
+        }
+      }
+    }
+  enable-build-step: "{{ .Values.config.builder.enabled }}"
+  function-registry-tls-verify: "{{ .Values.config.builder.verifyTls }}"
+  runtime-images: |-
+    [
+      {
+        "ID": "nodejs",
+        "compiled": false,
+        "versions": [
+          {
+            "name": "node6",
+            "version": "6",
+            "runtimeImage": "kubeless/nodejs@sha256:0a8a72af4cc3bfbfd4fe9bd309cbf486e7493d0dc32a691673b3f0d3fae07487",
+            "initImage": "node:6.10",
+          },
+          {
+            "name": "node8",
+            "version": "8",
+            "runtimeImage": "kubeless/nodejs@sha256:76ee28dc7e3613845fface2d1c56afc2e6e2c6d6392c724795a7ccc2f5e60582",
+            "initImage": "node:8",
+          }
+        ],
+        "livenessProbeInfo": {
+          "exec": {
+            "command": [
+              "curl",
+              "-f",
+              "http://localhost:8080/healthz"
+            ]
+          },
+          "initialDelaySeconds": 5,
+          "periodSeconds": 5,
+          "failureThreshold": 3,
+          "timeoutSeconds": 30
+        },
+        "depName": "package.json",
+        "fileNameSuffix": ".js"
+      }
+    ]

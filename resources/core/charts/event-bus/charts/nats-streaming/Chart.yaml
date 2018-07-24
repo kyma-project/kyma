@@ -1,0 +1,4 @@
+apiVersion: v1
+description: NATS Streaming Helm chart
+name: nats-streaming
+version: 0.1.0

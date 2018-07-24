@@ -1,0 +1,41 @@
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+    imageTag: 0.1.0
+
+deployment:
+  image:
+    name: gateway
+    tag: 0.2.56
+    pullPolicy: IfNotPresent
+  args:
+    proxyPort: &proxyPort 8080
+    externalAPIPort: &externalAPIPort 8081
+    eventsTargetURL: http://core-publish.kyma-system.svc.cluster.local:8080/v1/events
+    requestTimeout: 10
+    skipVerify: false
+    proxyTimeout: 10
+    proxyCacheTTL: 120
+    sourceNamespace: com.org
+    sourceType: commerce
+    sourceEnvironment: stage
+    requestLogging: false
+
+service:
+  externalapi:
+    port: *externalAPIPort
+    nodePort: 32000
+  echo:
+    serviceType: ClusterIP
+    port: *proxyPort
+
+ingress:
+  enabled: true
+  authSecret: kyma-integration/nginx-auth-ca
+  tlsSecret: nginx-ingress-cert
+
+acceptanceTest:
+  image:
+    name: gateway-acceptance-tests
+    tag: 0.2.56
+    pullPolicy: IfNotPresent

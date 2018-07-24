@@ -1,0 +1,31 @@
+dependencies:
+  - name: dex
+    condition: dex.enabled
+  - name: apiserver-proxy
+    condition: apiserver-proxy.enabled
+  - name: monitoring
+    condition: monitoring.enabled
+  - name: service-catalog
+    condition: service-catalog.enabled
+  - name: console
+    condition: console.enabled
+  - name: helm-broker
+    condition: helm-broker.enabled
+  - name: remote-environment-broker
+    condition: remote-environment-broker.enabled
+  - name: azure-broker
+    condition: azure-broker.enabled
+  - name: environments
+    condition: environments.enabled
+  - name: cluster-users
+    condition: cluster-users.enabled
+  - name: event-bus
+    condition: event-bus.enabled
+  - name: kubeless
+    condition: kubeless.enabled
+  - name: jaeger
+    condition: jaeger.enabled
+  - name: ui-api
+    condition: ui-api.enabled
+  - name: docs
+    condition: docs.enabled

@@ -1,0 +1,10 @@
+imageRegistry: "quay.io/coreos"
+
+containerPort: 5556
+
+oidc:
+  kymaClient: "kyma-client"
+  consoleClientId: console
+  consoleClientName: 'Console'
+  grafanaClientId: grafana
+  grafanaClientName: 'Grafana UI'

@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: {{ template "grafana.fullname" . }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    heritage: "{{ .Release.Service }}"
+    release: "{{ .Release.Name }}"
+  name: {{ template "grafana.server.fullname" . }}
+spec:
+  serviceName: {{ template "grafana.server.fullname" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "grafana.fullname" . }}
+      release: "{{ .Release.Name }}"
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+  template:
+    metadata:
+      annotations:
+      {{- range $key, $value := .Values.annotations }}
+        {{ $key }}: {{ $value }}
+      {{- end }}
+      labels:
+        app: {{ template "grafana.fullname" . }}
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: grafana
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        env:
+        - name: GF_PATHS_PROVISIONING
+          value: /etc/grafana/provisioning
+        - name: GF_USERS_AUTO_ASSIGN_ORG
+          value: "true"
+        - name: GF_USERS_AUTO_ASSIGN_ORG_ROLE
+          value: Editor
+        - name: GF_AUTH_BASIC_ENABLED
+          value: "false"
+        - name: GF_AUTH_DISABLE_LOGIN_FORM
+          value: "true"
+        - name: GF_AUTH_GENERIC_OAUTH_AUTH_URL
+          value: 'https://dex.{{ .Values.global.domainName }}/auth'
+        - name: GF_AUTH_GENERIC_OAUTH_CLIENT_ID
+          value: {{ .Values.containersEnv.gfAuthGenericOauthClientId }}
+        - name: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+          value: {{ .Values.containersEnv.gfAuthGenericOauthClientSecret }}
+        - name: GF_AUTH_GENERIC_OAUTH_ENABLED
+          value: "true"
+        - name: GF_AUTH_GENERIC_OAUTH_SCOPES
+          value: openid profile email groups
+        - name: GF_AUTH_GENERIC_OAUTH_TOKEN_URL
+          value: {{ .Values.containersEnv.gfAuthGenericOauthTokenUrlValue }}
+        - name: GF_AUTH_ANONYMOUS_ENABLED
+          value: "{{ .Values.auth.anonymous.enabled }}"
+        - name: GF_SERVER_ROOT_URL
+          value: 'https://grafana.{{ .Values.global.domainName }}/'
+{{- if .Values.extraVars }}
+{{ toYaml .Values.extraVars | indent 8 }}
+{{- end }}
+        volumeMounts:
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        - name: dashboard-provisioner
+          mountPath: /etc/grafana/provisioning/dashboards
+        - name: datasource-provisioner
+          mountPath: /etc/grafana/provisioning/datasources
+        - name: grafana-dashboards
+          mountPath: /var/lib/grafana/grafana-dashboards
+      {{- if .Values.mountGrafanaConfig }}
+        - name: grafana-config
+          mountPath: /etc/grafana
+      {{- end }}
+        ports:
+        - name: web
+          containerPort: 3000
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          periodSeconds: 1
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 10
+        resources:
+          requests:
+            memory: 100Mi
+          limits:
+            memory: 200Mi  
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+    {{ toYaml .Values.nodeSelector | indent 4 }}
+    {{- end }}
+    {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+    {{- end }}
+      securityContext:
+        fsGroup: 472
+      volumes:
+        - name: grafana-storage
+          {{- if .Values.persistence }}
+          persistentVolumeClaim:
+            claimName: {{ template "grafana.server.fullname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: grafana-dashboards
+          configMap:
+            name: {{ template "grafana.server.fullname" . }}
+        - name: dashboard-provisioner
+          configMap:
+            name: {{ template "grafana.configmap.dashboard" . }}
+        - name: datasource-provisioner
+          configMap:
+            name: {{ template "grafana.configmap.datasource" . }}
+      {{- if .Values.mountGrafanaConfig }}
+        - name: grafana-config
+          hostPath:
+            path: /etc/grafana
+            type: directory
+      {{- end }}

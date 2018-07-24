@@ -1,0 +1,477 @@
+# Scalars
+
+scalar JSON
+
+scalar Timestamp
+
+# Content
+
+
+type Title {
+    name: String!
+    anchor: String!
+    titles: [Title!]
+}
+
+type Section {
+    titles: [Title!]!
+    topicType: String!
+}
+
+type TopicEntry {
+    contentType: String!
+    id: String!
+    sections: [Section!]!
+}
+
+# Service Catalog
+
+type ServiceInstance {
+    name: String!
+    environment: String!
+    serviceClassName: String
+    ServiceClassDisplayName: String!
+    servicePlanName: String
+    servicePlanDisplayName: String!
+    creationTimestamp: Timestamp!
+    labels: [String]!
+    status: ServiceInstanceStatus
+    servicePlan: ServicePlan
+    serviceClass: ServiceClass
+    bindable: Boolean!
+    serviceBindings: [ServiceBinding]!
+    serviceBindingUsages: [ServiceBindingUsage]!
+}
+
+type ServiceInstanceStatus {
+    type: InstanceStatusType!
+    reason: String!
+    message: String!
+}
+
+enum InstanceStatusType {
+    RUNNING
+    PROVISIONING
+    DEPROVISIONING
+    PENDING
+    FAILED
+}
+
+type ServiceInstanceEvent {
+    type: ServiceInstanceEventType!
+    instance: ServiceInstance
+}
+
+enum ServiceInstanceEventType {
+    ADD
+    UPDATE
+    DELETE
+}
+
+input ServiceInstanceCreateInput {
+    name: String!
+    environment: String!
+    externalServiceClassName: String!
+    externalPlanName: String!
+    labels: [String]!
+    parameterSchema: JSON
+}
+
+type ServiceClass {
+    name: String!
+    externalName: String!
+    displayName: String
+    creationTimestamp: Timestamp!
+    description: String!
+    imageUrl: String
+    documentationUrl: String
+    providerDisplayName: String
+    tags: [String]!
+    plans: [ServicePlan]!
+    activated: Boolean!
+    apiSpec: JSON
+    asyncApiSpec: JSON
+    content: JSON
+}
+
+type ServicePlan {
+    name: String!
+    displayName: String
+    externalName: String!
+    description: String!
+    relatedServiceClassName: String!
+    instanceCreateParameterSchema: JSON
+}
+
+type ServiceBroker {
+    name: String!
+    status: ServiceBrokerStatus!
+    creationTimestamp: Timestamp!
+    url: String!
+    labels: JSON!
+}
+
+type ServiceBrokerStatus {
+    ready: Boolean!
+    reason: String!
+    message: String!
+}
+
+type ServiceBinding {
+    name: String!
+    serviceInstanceName: String!
+    environment: String!
+    secret: Secret
+    status: ServiceBindingStatus!
+}
+
+type ServiceBindingStatus {
+    type: ServiceBindingStatusType!
+    reason: String!
+    message: String!
+}
+
+enum ServiceBindingStatusType {
+    READY
+    PENDING
+    FAILED
+    UNKNOWN
+}
+
+# We cannot use ServiceBinding as a result of create action
+# because secret at the moment of mutation execution is not available.
+type CreateServiceBindingOutput {
+    name: String!
+    serviceInstanceName: String!
+    environment: String!
+}
+
+type Secret {
+    name: String!
+    environment: String!
+    data: JSON!
+}
+
+type DeleteServiceBindingOutput {
+    name: String!
+    environment: String!
+}
+
+type DeleteServiceBindingUsageOutput {
+    name: String!
+    environment: String!
+}
+
+type ServiceBindingUsage {
+    name: String!
+    environment: String!
+    serviceBinding: ServiceBinding
+    usedBy: LocalObjectReference!
+    parameters: ServiceBindingUsageParameters
+    status: ServiceBindingUsageStatus!
+}
+
+type ServiceBindingUsageStatus {
+    type: ServiceBindingUsageStatusType!
+    reason: String!
+    message: String!
+}
+
+enum ServiceBindingUsageStatusType {
+    READY
+    PENDING
+    FAILED
+    UNKNOWN
+}
+
+type LocalObjectReference {
+    kind: BindingUsageReferenceType!
+    name: String!
+}
+
+type ServiceBindingUsageParameters {
+    envPrefix: EnvPrefix
+}
+
+type EnvPrefix {
+    name: String!
+}
+
+type LimitRange {
+    name: String!
+    limits: [LimitRangeItem]!
+}
+
+type LimitRangeItem {
+    limitType: LimitType!
+    max: ResourceType!
+    default: ResourceType!
+    defaultRequest: ResourceType!
+}
+
+enum LimitType {
+    Container
+    Pod
+}
+
+type ResourceType {
+    memory: String
+    cpu: String
+}
+
+input CreateServiceBindingUsageInput {
+    name: String!
+    environment: String!
+    serviceBindingRef: ServiceBindingRefInput!
+    usedBy: LocalObjectReferenceInput!
+    parameters: ServiceBindingUsageParametersInput
+}
+
+input ServiceBindingRefInput {
+    name: String!
+}
+
+input LocalObjectReferenceInput {
+    kind: BindingUsageReferenceType!
+    name: String!
+}
+
+enum BindingUsageReferenceType {
+    DEPLOYMENT
+    FUNCTION
+}
+
+input ServiceBindingUsageParametersInput {
+    envPrefix: EnvPrefixInput
+}
+
+input EnvPrefixInput {
+    name: String!
+}
+
+type Container {
+    name: String!
+    image: String!
+}
+
+type DeploymentStatus {
+    replicas: Int!
+    updatedReplicas: Int!
+    readyReplicas: Int!
+    availableReplicas: Int!
+    conditions: DeploymentCondition!
+}
+
+type DeploymentCondition {
+    status: String!
+    type: String!
+    lastTransitionTimestamp: Timestamp!
+    lastUpdateTimestamp: Timestamp!
+    message: String!
+    reason: String!
+}
+
+type Deployment {
+    name: String!
+    environment: String!
+    creationTimestamp: Timestamp!
+    status: DeploymentStatus!
+    labels: JSON!
+    containers: [Container]!
+    boundServiceInstanceNames: [String]!
+}
+
+type ResourceQuota {
+    name: String!
+    pods: String
+    limits: ResourceValues!
+    requests: ResourceValues!
+}
+
+type ResourceValues {
+    memory: String
+    cpu: String
+}
+
+# Remote Environments
+
+type Environment {
+    name: String!
+    remoteEnvironments: [String]!
+}
+
+type RemoteEnvironment {
+    name: String!
+    description: String!
+    source: RemoteEnvironmentSource!
+    services: [RemoteEnvironmentService]!
+    enabledInEnvironments: [String]!
+    status: RemoteEnvironmentStatus!
+}
+
+type ConnectorService {
+    url: String!
+}
+
+type EnvironmentMapping {
+    environment: String!
+    remoteEnvironment: String!
+}
+
+type RemoteEnvironmentSource {
+    environment: String!
+    type: String!
+    namespace: String!
+}
+
+type RemoteEnvironmentService {
+    id: String!
+    displayName: String!
+    longDescription: String!
+    providerDisplayName: String!
+    tags: [String]!
+    entries: [RemoteEnvironmentEntry]!
+}
+
+type RemoteEnvironmentEntry {
+    type: String!
+    gatewayUrl: String
+    accessLabel: String
+}
+
+enum RemoteEnvironmentStatus {
+    SERVING
+    NOT_SERVING
+    GATEWAY_NOT_CONFIGURED
+}
+
+type EventActivationSource {
+    environment: String!
+    type: String!
+    namespace: String!
+}
+
+type EventActivationEvent {
+    eventType: String!
+    version: String!
+    description: String!
+}
+
+type EventActivation {
+    name: String!
+    displayName: String!
+    source: EventActivationSource!
+    events: [EventActivationEvent]!
+}
+
+# IDP PRESETS
+
+type IDPPreset {
+    name: String!
+    issuer: String!
+    jwksUri: String!
+}
+
+# Kubeless
+
+type Function {
+    name: String!
+    trigger: String!
+    creationTimestamp: Timestamp!
+    labels: JSON!
+    environment: String!
+}
+
+input InputTopic {
+    id: String!
+    type: String!
+}
+
+# API controller
+
+type Service {
+    name: String!
+    port: Int!
+}
+
+enum AuthenticationPolicyType {
+    JWT
+}
+
+type AuthenticationPolicy  {
+    type: AuthenticationPolicyType!
+    issuer: String!
+    jwksURI: String!
+}
+
+type API {
+    name: String!
+    hostname: String!
+    service: Service!
+    authenticationPolicies: [AuthenticationPolicy]!
+}
+
+# Queries
+
+type Query {
+    serviceInstance(name: String!, environment: String!): ServiceInstance
+    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance]!
+    serviceClasses(first: Int, offset: Int): [ServiceClass]!
+    serviceClass(name: String!): ServiceClass
+    serviceBrokers(first: Int, offset: Int): [ServiceBroker]!
+    serviceBroker(name: String!): ServiceBroker
+    serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
+    serviceBinding(name: String!, environment: String!): ServiceBinding
+
+    apis(environment: String!, serviceName: String, hostname: String): [API!]!
+
+    remoteEnvironment(name: String!): RemoteEnvironment
+    remoteEnvironments(environment: String, first: Int, offset: Int): [RemoteEnvironment]!
+    connectorService(remoteEnvironment: String!): ConnectorService!
+
+    environments(remoteEnvironment: String): [Environment]!
+    deployments(environment: String!, excludeFunctions: Boolean): [Deployment]!
+    resourceQuotas(environment: String!): [ResourceQuota]!
+
+    functions(environment: String!, first: Int, offset: Int): [Function]!
+
+    #TODO: it is not possible to define 'type' as argument name
+    content(contentType: String!, id: String!): JSON
+    topics(input: [InputTopic]!, internal: Boolean): [TopicEntry]
+    eventActivations(environment: String!): [EventActivation]!
+
+    limitRanges(environment: String!): [LimitRange!]!
+
+    IDPPreset(name: String!): IDPPreset
+    IDPPresets(first: Int, offset: Int): [IDPPreset!]!
+}
+
+# Mutations
+
+type Mutation {
+    createServiceInstance(params: ServiceInstanceCreateInput!): ServiceInstance
+    deleteServiceInstance(name: String!, environment: String!): ServiceInstance
+    createServiceBinding(serviceBindingName: String!, serviceInstanceName: String!, environment: String!): CreateServiceBindingOutput
+    deleteServiceBinding(serviceBindingName: String!, environment: String!): DeleteServiceBindingOutput
+    createServiceBindingUsage(createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage
+    deleteServiceBindingUsage(serviceBindingUsageName: String!, environment: String!): DeleteServiceBindingUsageOutput
+
+    enableRemoteEnvironment(remoteEnvironment: String!, environment: String!): EnvironmentMapping
+    disableRemoteEnvironment(remoteEnvironment: String!, environment: String!): EnvironmentMapping
+
+    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
+    deleteIDPPreset(name: String!): IDPPreset
+}
+
+# Subscriptions
+
+type Subscription {
+    serviceInstanceEvent(environment: String!): ServiceInstanceEvent!
+}
+
+# Schema
+
+schema {
+    query: Query
+    mutation: Mutation
+}

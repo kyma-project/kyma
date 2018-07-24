@@ -1,0 +1,26 @@
+replicaCount: 1
+
+image:
+  tag: 0.2.37
+  pullPolicy: IfNotPresent
+
+# The REB informs the Service Catalog that its available services changed and should be relisted.
+# Due to performance reason, many actions (like adding, updating, or deleting RemoteEnvironment)
+# which happen during the period defined in `brokerRelistDurationWindow`
+# result in a single Service Catalog relist trigger.
+#
+# Note: We have hardcoded resynchronization period for RemoteEnvironments informers to 30minutes.
+# Because of that every 30minutes update action for all defined RemoteEnvironments is triggered,
+# which means that the Service Catalog is triggered to perform relist action.
+brokerRelistDurationWindow: 10s
+
+service:
+  type: NodePort
+  externalPort: 80
+  internalPort: 8080
+
+config:
+  storage:
+    - driver: memory
+      provide:
+        all: ~

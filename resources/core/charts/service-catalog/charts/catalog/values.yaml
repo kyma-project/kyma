@@ -1,0 +1,111 @@
+# Default values for Service Catalog
+# service-catalog image to use
+image: quay.io/kubernetes-service-catalog/service-catalog:v0.1.11
+# imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
+# "Never", and "Always"
+imagePullPolicy: Always
+# determines whether the API server should be registered with the kube-aggregator
+useAggregator: true
+## If true, create & use RBAC resources
+##
+rbacEnable: true
+apiserver:
+  # PodPreset is an optional feature and can be enabled by uncommenting the line below
+  # featureGates: "PodPreset=true"
+  aggregator:
+    # priority is the priority of the APIService. Please see
+    # https://github.com/kubernetes/kubernetes/blob/v1.7.0/staging/src/k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1/types.go#L56-L61
+    # for more information on proper values of this field.
+    #
+    # This field is only applicable on clusters that expose APIService as a v1alpha1 field,
+    # which is generally 1.6.x clusters
+    priority: 100
+    # groupPriorityMinimum is the minimum priority the group should have. Please see
+    # https://github.com/kubernetes/kubernetes/blob/v1.7.0/staging/src/k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1/types.go#L56-L61
+    # for more information on proper values of this field.
+    groupPriorityMinimum: 10000
+    # versionPriority is the ordering of this API inside of the group. Please see
+    # https://github.com/kubernetes/kubernetes/blob/v1.7.0/staging/src/k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1/types.go#L56-L61
+    # for more information on proper values of this field
+    versionPriority: 20
+  tls:
+    # Base64-encoded CA used to validate request-header authentication, when
+    # receiving delegated authentication from an aggregator. If not set, the
+    # service catalog API server will inherit this CA from the
+    # extension-apiserver-authentication ConfigMap if available.
+    requestHeaderCA:
+    # Base64-encoded x509 certificate
+    # Attributes of the apiserver's service resource
+    crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURWRENDQWp5Z0F3SUJBZ0lVSEUwRnhscmFRcHdITXg2dFcxN0g0dnR4TzdFd0RRWUpLb1pJaHZjTkFRRUwKQlFBd0RURUxNQWtHQTFVRUF3d0NZMkV3SGhjTk1UZ3dOVEUxTURZeU9UQXdXaGNOTWpNd05URTBNRFl5T1RBdwpXakFoTVI4d0hRWURWUVFERXhaamIzSmxMV05oZEdGc2IyY3RZWEJwYzJWeWRtVnlNSUlCSWpBTkJna3Foa2lHCjl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF2OFFhWDJOWURtNjdGZStqQ2pVWG5yRUlUZXlObnNjakpJbEkKblNtS0loTTk1cTBUaEhWUHRGL1gyQmF5d0RXa0gzZlpNQzVPWHVoek95QjYzSGtGTzEvN2ZLLzVpLzRBU3I4Sgp2YzJNWkg0Q1pRamlnbUdTK2xpR3lBL09mdGxyZlV1ZUxKMFRNQ3Q4VVg0L0pRZ1RHK05MOTJnVVFURG5PNmZQCmNxcTlOZEw1cy83WFZ0M1ZHMzRPMWVCR2dyM1dlZWdSSmVNRERaOTlNV3VWdTQyTGV1OU1yZ2tLUDVOMUlyZDIKY2xlWStIWWZaaFM4RG05b2paVXNJeHNZUzRNSXlpQlZ6L0JXZHl4MjFTbGVmQjBJSStVRFpQcG42Z1NMQURDdwpXYXY3NExRTmsxVHB5QmhSQmtMbFRMUk45amM0UnNlWWJjSWZOemlweDFsbTJXbTZUd0lEQVFBQm80R1hNSUdVCk1BNEdBMVVkRHdFQi93UUVBd0lGb0RBTUJnTlZIUk1CQWY4RUFqQUFNQjBHQTFVZERnUVdCQlR0bCs2NGZnZEIKZy8rNytabGtjUitDeEpLNjBEQlZCZ05WSFJFRVRqQk1naUpqYjNKbExXTmhkR0ZzYjJjdFlYQnBjMlZ5ZG1WeQpMbXQ1YldFdGMzbHpkR1Z0Z2laamIzSmxMV05oZEdGc2IyY3RZWEJwYzJWeWRtVnlMbXQ1YldFdGMzbHpkR1Z0CkxuTjJZekFOQmdrcWhraUc5dzBCQVFzRkFBT0NBUUVBSnk0TlZINTV5WkhjcWpYYjVFLzB4c1BDdHlTRGJGc24KNWwyVGF6S0JwaXlKMStzN0crK1pWUURCTXk1c09GVXRLVVRpYVczNHRFTTJqMnN2b0xOYXB2TDhBNjR6a0hVOApmUUNOSlViQ3pxUGNoeFhKQkhrM1VWOTZDaGpZSXZLc29DSnk5aG8yMzdzMzIrdVk1ZVRpZjZPclYxYmRZTFc2Ck93N2Z3MFlKdkZsdXUvZitCVFpPUEVLSjhHY3hlc0dtVW5CQ0xLSyt6RG1wdlFiWVd5TkhXa2hkeDE4cjhhUjkKZjhkMHdiZENXWWRMQm04NWFZNnZrN20xWmxlcWNxU3hzYWpoLzZlWmhQTnZmYk1KcHRDZGEzcTE2OGx3S3EwNQpLSmp0UG4zd3VoV2Y3NXRMQzEwV292UjdKYkFVS0VUcVkrcTBrdWZDWXh0SThReHJydlh4N3c9PQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+    key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb3dJQkFBS0NBUUVBdjhRYVgyTllEbTY3RmUrakNqVVhuckVJVGV5Tm5zY2pKSWxJblNtS0loTTk1cTBUCmhIVlB0Ri9YMkJheXdEV2tIM2ZaTUM1T1h1aHpPeUI2M0hrRk8xLzdmSy81aS80QVNyOEp2YzJNWkg0Q1pRamkKZ21HUytsaUd5QS9PZnRscmZVdWVMSjBUTUN0OFVYNC9KUWdURytOTDkyZ1VRVERuTzZmUGNxcTlOZEw1cy83WApWdDNWRzM0TzFlQkdncjNXZWVnUkplTUREWjk5TVd1VnU0MkxldTlNcmdrS1A1TjFJcmQyY2xlWStIWWZaaFM4CkRtOW9qWlVzSXhzWVM0TUl5aUJWei9CV2R5eDIxU2xlZkIwSUkrVURaUHBuNmdTTEFEQ3dXYXY3NExRTmsxVHAKeUJoUkJrTGxUTFJOOWpjNFJzZVliY0lmTnppcHgxbG0yV202VHdJREFRQUJBb0lCQVFDdmsza2lCTzlHcDVPYgpqZ0VWQTI5UTJIM2wrc1Bmc0N3NDg0a01mRkFBeXVWT0l3RlBzYWo4V1JSaXdNV0F2cHc2UTUwVFJCSjFTeGJWCjkvTUZrYmg4bUhERnhNa1NwOGpVcHZ6Z1R5WlBqQi9kS2JsWjdzU0hlaTVOVmt1V1VMTGQwVEpOWHJPRzB3bk0KQTI4RkZOT0tJUjRZczY1MzBiS2xLQXdEek5mWVFtenVYNzJ3ODJWakdvVksvS0NRSUx6QzFDQmJrN2thVXovQwoxYzVqUk1VNFVPd3l4S25BaEl2RFdxd1Zvczlab0Y3dm1IL0lzbk82QWhGZ0o2NzlhdjZKd3JxSHhWYzM4SkF4Cko1OTI3L1NMdnppRVdwbUFDbEdiWlIzNGVmd08zamJtOGhsNEdmK0pjeWRJV0VMenM4K1BoU3JvSk1KUjBRY0MKSWR1Zm1tN2hBb0dCQVAyL3NNSGQrSDRUWEJEbVVtYjlDNklESzJ1Q3NKUktlM01PU2VaZk0xSmRPZ1dxZldCSwpMeHE1Y0JwMjFXUndpWWZlT3lEbVdBaHVXK1dFcmFaZHFvRzVPRWJER09NajZKd21SVGU3NlFwQ2J4Q0tEMFZyClZkWkY2dU9BRnhIMXBaQnpLRk9RNVR2YkpEZFBNYUZLT2pGQk9KVlVUN3NoZCs5ajcwS3daeENOQW9HQkFNRjMKbzNJRUFtamZKRXRKa1JENWxTTjM2UitPRFc2RHZhZVRMVnBFZHR0ak5QV2hNWGhwakJqN2dMeHJIelF3RW5EYwpQZEZJaWxnWlpaQkRvbWNzVUhKL3RTSk9kWWhsVGVOaEZ4czgyaWsyRzFSZWtOVkhkWXZtU2tQNlF5cm1iQkdPCmcvNmhWUlFwOXdpR2FYMGducGNHQkN4MTdTWmRjcXExYlllaEFhVkxBb0dBYWhxWndyY2FqVDF6SmUzcFR2OUkKdWZveFVjZFlKdW51TFBJd25JLzZXZHA1eEp6QnlGMjh6S1AxNkZzQVovdFd4dVY2UEF1VmpCRDVoRU95aVBwcApyY3pSWjJWMUpxV0JRcW9PRDN3WHVoNkZhcGtRUWFyY1Bia0d1eEo0a3gzd21USk9Eb05zRjFkUEVZR2Y4eDJpCnI2M2lCeTgyRjcycTlRTUlyUTR1U3BFQ2dZQXl2VkhjZ1Rpd2tIVlFXWWIyVUw3UWdvNWRmRUFCa0FPWmczd04KaEk4M2twazlJbjE2K3hPSEtjN2xtNktmYVV3czFWWlJJUmxIYWNHOVNEKzdsMSt4NTlSMW51WXNVNFZOOFJUQwpTLzliZDVsTFUxSGczZER5VS85K1BKQ0pHODJUL1RDWkEyN3d6dUMvRjZGcTg3Y2tIS3ZUalVvWkdjRU5ESEFoCmRoU2NhUUtCZ0hURkJXWjhXY2M1R3RtNzhKWUd1VXJxbnhJaEk2SGtidEtGdmZXaGQrRDY3Nld3UjZjNXJ3SDgKRnUzN29XNi85Wk5lUUJSVndZQ3RjQ0VsdWg1WVIyN3pXYWE2WHg5Y0FPcFRoejNTbWVSdnRVSWZHS1M0VXJvegptQzNBandFU3RSanpPdDNFckpUUE1jZllGdVppNG5XWFc3N3Y0RlJraGhMZUMxMnd3REVBCi0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
+    # Base64-encoded certificate authority for the APIService object to register
+    # the Service Catalog API with the apiregistration
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUNsakNDQVg0Q0NRQytGUno0a1J2UDVqQU5CZ2txaGtpRzl3MEJBUXNGQURBTk1Rc3dDUVlEVlFRRERBSmoKWVRBZUZ3MHhPREExTVRVd05qSTRNakJhRncweU1UQXlNRGd3TmpJNE1qQmFNQTB4Q3pBSkJnTlZCQU1NQW1OaApNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQWxXWDdUQUdBY2UvTXV3TXU5Uy9oCkJMNzRRRGNuY1JIZGNHMUk1anlhbXhBaXpmTjhLUGRncGJpR3VldmliRzUzNzhLU2N0UWhpNkQ0dkZOK2EzVE8Kakw2NXJ2ZE54RnBPTDNCZlpkTlhXekhpQlNqdnRNNmhlV2xON3AxZjE1amJSZ0VOVjVSZzBkTEk3NVhSRVZXUwpKQ2Z4S2k3SCsrS3pnbWVZWU1sc3RYZDJUSERkZmpjL2ZJZ1RXbWNVNFp3VndobFNHWXNCenBtcCtPSUJUYzd0ClZLUklxdGJERElxdEtWRm9sTHl1RHUvTS9lTzNqc3FUVHpJOG5jTVBXS2RGclcxL2xqdnFhUm1kWHNKdUZNSEoKRlRsY21tT2Q0NWsrenl0L0tpWVJzd21mbGFPTHdjMUhyZUphQTVnNHhEc0oxNFE2bGtxVnRNbzJrY2NENm0vaAp2d0lEQVFBQk1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQmJtd28vK1Y1MHhzaENJeEtld3JobTlhaHBobHFjCldyY0lvQWRwaVNTM2xjV01EdDRsT2V1UDg5R1lGbnVuMFFIYW05bXF3dGpycWlUbnFYQ2FabTR6K1U1R2F0cUQKVmdKaDRzQ0RlQ2xZbFk4NDRQaExaQ1gxcXcxckJXVUc4UFZ1eHNieWJoWVM2L05XU0xzNmhIanIvOEpVakszTwpoUHlyWnNBUWhQRUl3NTFWRmZOVE16a3NHeU4zN1k2NmkvZnA2K2cvU010Wm1pWElIUkJpL1JSZ1U4UExtamcrCnprdGQxLzhobVBVcXpsdnBYUjdvdGVqMmxHZUJqelVRcmZ5bk5MNlFyQjdYS2t3MEk4NWRhYnZyZGx2dFRQcEgKSktySm13Si9MNnhScGY0cit1OEwwNFJTNmNycjBjdDc3NFNTZ2lzeDVtdGZjbTIyV0dpeGtEYnoKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+
+  service:
+    # Type of service; valid values are "LoadBalancer" and "NodePort"
+    # NodePort is useful if deploying on bare metal or hacking locally on
+    # minikube. If Values.global.isLocalEnv is set to true then default type
+    # "LoadBalancer" will be used.
+    type: NodePort
+    # Further configuration for services of type NodePort
+    nodePort:
+      # Available port in allowable range (e.g. 30000 - 32767 on minikube)
+      # The TLS-enabled endpoint will be exposed here
+      securePort: 30443
+  storage:
+    # The storage backend to use; the only valid value is "etcd"
+    # (left for "crd" support in future)
+    type: etcd
+    # Further configuration for the etcd-based backend
+    etcd:
+      # Whether to embed an etcd container in the apiserver pod
+      # THIS IS INADEQUATE FOR PRODUCTION USE!
+      useEmbedded: false
+      # etcd URL(s); override this if NOT using embedded etcd
+      servers: http://core-etcd.kyma-system.svc.cluster.local:2379
+  # Log level; valid values are in the range 0 - 10
+  verbosity: 1
+  auth:
+    # Enable or disable authentication and authorization. Disabling
+    # authentication and authorization can be useful for outlying scenarios
+    # but is not suitable for production.
+    enabled: true
+  audit:
+    # If true, enables the use of audit features via this chart.
+    activated: false
+    # If specified, audit log goes to specified path.
+    logPath: "/tmp/service-catalog-apiserver-audit.log"
+  serviceAccount: service-catalog-apiserver
+  # if true, makes the API server serve the OpenAPI schema (which is problematic with older versions of kubectl)
+  serveOpenAPISpec: false
+controllerManager:
+  # Log level; valid values are in the range 0 - 10
+  verbosity: 1
+  # Resync interval; format is a duration (`20m`, `1h`, etc)
+  resyncInterval: 5m
+  # Broker relist interval; format is a duration (`20m`, `1h`, etc)
+  brokerRelistInterval: 24h
+  # Whether or not the controller supports a --broker-relist-interval flag. If this is 
+  # set to true, brokerRelistInterval will be used as the value for that flag
+  brokerRelistIntervalActivated: true
+  # enables profiling via web interface host:port/debug/pprof/
+  profiling:
+    # Disable profiling via web interface host:port/debug/pprof/
+    disabled: false
+    # Enables lock contention profiling, if profiling is enabled.
+    contentionProfiling: false
+  leaderElection:
+    # Whether the controller has leader election enabled.
+    activated: false
+  serviceAccount: service-catalog-controller-manager
+  # Controls whether the API server's TLS verification should be skipped.
+  apiserverSkipVerify: true
+  # Whether the controller will expose metrics on /metrics
+  enablePrometheusScrape: false
+  # Whether the OriginatingIdentity alpha feature should be enabled
+originatingIdentityEnabled: false
+# Whether the AsyncBindingOperations alpha feature should be enabled
+asyncBindingOperationsEnabled: false
+# Whether the NamespacedServiceBroker alpha feature should be enabled
+namespacedServiceBrokerEnabled: false

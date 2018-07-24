@@ -1,0 +1,45 @@
+required = ["k8s.io/code-generator/cmd/client-gen"]
+
+[[constraint]]
+  name = "github.com/nats-io/go-nats"
+  version = "1.5.0"
+
+[[constraint]]
+  name = "github.com/nats-io/go-nats-streaming"
+  version = "0.3.4"
+
+[[constraint]]
+  name = "github.com/nats-io/nats-streaming-server"
+  version = "0.7.2"
+
+[[constraint]]
+  name = "github.com/opentracing/opentracing-go"
+  version = "1.0.2"
+
+[[constraint]]
+  name = "github.com/openzipkin/zipkin-go-opentracing"
+  version = "0.3.4"
+
+[[constraint]]
+  name = "github.com/satori/go.uuid"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "github.com/stretchr/testify"
+  version = "1.2.1"
+
+[[constraint]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.10.1"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.10.1"
+
+[[constraint]]
+  name = "k8s.io/code-generator"
+  version = "kubernetes-1.10.1"
+
+[[override]]
+  branch = "master"
+  name = "github.com/apache/thrift"

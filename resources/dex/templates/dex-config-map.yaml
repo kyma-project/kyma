@@ -1,0 +1,64 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dex-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: dex
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  config.yaml: |
+    issuer: https://dex.{{ .Values.global.domainName }}
+    storage:
+      type: kubernetes
+      config:
+        inCluster: true
+    logger:
+      level: "debug"
+      format: "text"
+    web:
+      http: 0.0.0.0:{{ .Values.containerPort }}
+
+    oauth2:
+      skipApprovalScreen: true
+      responseTypes: ["code", "token", "id_token"]
+
+    staticClients:
+    - id: {{ .Values.oidc.kymaClient }}
+      name: 'Kyma Client'
+      redirectURIs:
+      - 'http://127.0.0.1:5555/callback'
+      secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+      trustedPeers:
+      - kubecontroller
+      - {{ .Values.oidc.consoleClientId }}
+    - id: {{ .Values.oidc.consoleClientId }}
+      name: {{ .Values.oidc.consoleClientName }}
+      redirectURIs:
+      - 'http://console-dev.{{ .Values.global.domainName }}:4200'
+      - 'https://console.{{ .Values.global.domainName }}'
+      secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+    - id: {{ .Values.oidc.grafanaClientId }}
+      name: {{ .Values.oidc.grafanaClientName }}
+      redirectURIs:
+      - 'https://grafana.{{ .Values.global.domainName }}/login/generic_oauth'
+      secret: apie4eeX6hiC9ainieli
+
+    enablePasswordDB: true
+    staticPasswords:
+    - email: "admin@kyma.cx"
+      # bcrypt hash of the string \"nimda123\"
+      hash: "$2a$10$j7pKw2qQUVuYXAVoLCel6eS8RLcpG8G3NduYRINMuRc8ox8iKZowS"
+      username: "admin"
+      userID: "18a8684b-db88-4b73-90a9-3cd1661f5463"
+    - email: "user1@kyma.cx"
+      # bcrypt hash of the string "nimda1"
+      hash: "$2a$10$Rr0PzZ9XOxu6lITrQx2PXuenz8Ww1Dzwwr9HIeivkQIGCrVIYIc7e"
+      username: "user1"
+      userID: "08a8684b-db88-4b73-90a9-1"
+    - email: "user2@kyma.cx"
+      # bcrypt hash of the string "nimda2"
+      hash: "$2a$10$LM4c6EkoOj6cvRrM8W3DkuE6S6bQvF6hQjLUl/9HUlUrPS88ZAWzq"
+      username: "user2"
+      userID: "08a8684b-db88-4b73-90a9-2"

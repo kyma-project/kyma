@@ -1,0 +1,13 @@
+name: instances
+replicaCount: 1
+image:
+  pullPolicy: IfNotPresent
+service:
+  internalPort: 80
+  externalPort: 80
+  protocol: TCP
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: istio
+resources: {}

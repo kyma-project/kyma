@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "vpcId": {
+      "description": "VPC ID in which security group with inboundAllowedIp will be created.",
+      "type": "string"
+    },
+    "inboundAllowedIp": {
+      "description": "IP from which you will be able to reach RDS Instance.",
+      "type": "string"
+    },
+    "engine": {
+      "description": "The name of the database engine to be used for this instance.",
+      "type": "string",
+      "default": "postgres",
+      "enum": [
+        "aurora",
+        "mysql"
+      ]
+    }
+  },
+  "required": ["vpcId", "inboundAllowedIp"]
+}

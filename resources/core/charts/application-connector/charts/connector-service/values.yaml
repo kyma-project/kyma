@@ -1,0 +1,30 @@
+deployment:
+  image:
+    name: connector-service
+    tag: 0.2.63
+    pullPolicy: IfNotPresent
+  args:
+    internalAPIPort: &internalAPIPort 8080
+    externalAPIPort: &externalAPIPort 8081
+    tokenLength: 64
+    tokenExpirationMinutes: 60
+  envvars:
+    country: DE
+    organization: Organization
+    organizationalunit: OrgUnit
+    locality: Waldorf
+    province: Waldorf
+
+service:
+  externalapi:
+    port: *externalAPIPort
+    nodePort: 32010
+  internalapi:
+    serviceType: ClusterIP
+    port: *internalAPIPort
+
+tests:
+  image:
+    name: connector-service-tests
+    tag: 0.2.134
+    pullPolicy: IfNotPresent

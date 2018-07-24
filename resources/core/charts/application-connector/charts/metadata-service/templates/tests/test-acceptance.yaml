@@ -1,0 +1,54 @@
+{{ if not .Values.global.isLocalEnv }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Chart.Name }}-tests
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+    "helm-chart-test": "true"
+spec:
+  containers:
+    - name: {{ .Chart.Name }}-tests
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.tests.image.name }}:{{ .Values.tests.image.tag }}
+      imagePullPolicy: IfNotPresent
+      env:
+      - name: METADATA_URL
+        value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local:8081
+      - name: NAMESPACE
+        value: {{ .Values.global.namespace }}
+  restartPolicy: Never
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Chart.Name }}-tests-role
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+    release: {{ .Chart.Name }}-tests
+    heritage: {{ .Release.Service }}
+rules:
+- apiGroups: ["remoteenvironment.kyma.cx"]
+  resources: ["remoteenvironments"]
+  verbs: ["get", "update", "create", "delete", "list"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-tests-rolebinding
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Chart.Name }}-tests
+    release: {{ .Chart.Name }}-tests
+    heritage: {{ .Release.Service }}
+subjects:
+- kind: User
+  name: system:serviceaccount:{{ .Values.global.namespace }}:default
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: {{ .Chart.Name }}-tests-role
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}

@@ -1,0 +1,18 @@
+---
+apiVersion: gateway.kyma.cx/v1alpha2
+kind: Api
+metadata:
+  labels:
+    function: hello
+    example: serverless-lambda
+  name: hello
+spec:
+  authentication:
+  - type: JWT
+    jwt:
+      jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+      issuer: https://dex.kyma.local
+  hostname: hello.kyma.local
+  service:
+    name: hello
+    port: 8080

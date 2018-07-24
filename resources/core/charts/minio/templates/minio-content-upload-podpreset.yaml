@@ -1,0 +1,27 @@
+#
+# This is a temporary hack because there is no separate chart with documentation in Kyma.
+# TODO: Move file to separate chart 
+#
+
+apiVersion: settings.k8s.io/v1alpha1
+kind: PodPreset
+metadata:
+  name: {{ template "minio.fullname" . }}-docs-upload
+spec:
+  selector:
+    matchLabels:
+      inject: docs-upload-config
+  env:
+    - name: APP_UPLOAD_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: {{ template "minio.fullname" . }}
+          key: accesskey
+    - name: APP_UPLOAD_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: {{ template "minio.fullname" . }}
+          key: secretkey
+  envFrom:
+    - configMapRef:
+        name: {{ template "minio.fullname" . }}-docs-upload

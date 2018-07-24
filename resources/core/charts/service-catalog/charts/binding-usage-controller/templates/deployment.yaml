@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "fullname" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.global.containerRegistry.path }}/binding-usage-controller:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: APP_LOGGER_LEVEL
+              value: "debug"
+            - name: APP_APPLIED_SBU_CONFIG_MAP_NAME
+              value: "{{ .Chart.Name }}-process-sbu-spec"
+            - name: APP_APPLIED_SBU_CONFIG_MAP_NAMESPACE
+              value: "{{ .Release.Namespace }}"
+
+          ports:
+            - containerPort: {{ .Values.service.internalPort }}
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - localhost:{{ .Values.service.internalPort }}/statusz
+            periodSeconds: 10
+            timeoutSeconds: 2
+            successThreshold: 1

@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    nginx.ingress.kubernetes.io/ingress-class: "nginx"
+    nginx.ingress.kubernetes.io/allow-http: "false"
+    nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "false"
+    nginx.ingress.kubernetes.io/auth-tls-secret: {{ .Values.ingress.authSecret }}
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+    nginx.ingress.kubernetes.io/auth-tls-verify-depth: "3"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      if ($ssl_client_s_dn !~ (.*(CN={{ .Release.Name }}(,|]|$)).*)) {
+          return 403;
+      }
+spec:
+  rules:
+  - host: gateway.{{ .Values.global.domainName }}
+    http:
+      paths:
+      - path: /{{ .Release.Name }}/v1/events
+        backend:
+          serviceName: {{ .Release.Name }}-gateway-external-api
+          servicePort: 8081
+      - path: /{{ .Release.Name }}/v1/metadata
+        backend:
+          serviceName: metadata-service-external-api
+          servicePort: 8081
+
+  tls:
+  - hosts:
+    - gateway.{{ .Values.global.domainName }}
+    secretName: {{ .Values.ingress.tlsSecret }}

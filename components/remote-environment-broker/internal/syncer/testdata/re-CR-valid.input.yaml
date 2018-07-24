@@ -1,0 +1,37 @@
+apiVersion: remoteenvironment.kyma.cx/v1alpha1
+kind: RemoteEnvironment
+metadata:
+  name: ec-prod
+spec:
+  source:
+    environment: "production"
+    type: "commerce"
+    namespace: "com.hakuna.matata"
+
+  description: "EC description"
+
+  services:
+    - id: "ac031e8c-9aa4-4cb7-8999-0d358726ffaa"
+
+      displayName: "Promotions"
+      longDescription: "Promotions APIs"
+      providerDisplayName: "HakunaMatata"
+
+      tags:
+      - occ
+      - promotions
+
+      entries:
+      - type: API
+        gatewayUrl: "http://promotions-gateway.production.svc.cluster.local/"
+        accessLabel: "access-label-1"
+      - type: Events
+
+    - id: "48ab05bf-9aa4-4cb7-8999-0d3587265ac3"
+      displayName: "Orders"
+      longDescription: "Orders API"
+      providerDisplayName: "HakunaMatata"
+      entries:
+      - type: API
+        gatewayUrl: "http://orders-gateway.production.svc.cluster.local/"
+        accessLabel: "access-label-2"

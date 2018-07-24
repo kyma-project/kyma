@@ -1,0 +1,28 @@
+---
+metadata:
+  name: kyma-docs
+spec:
+  root:
+    displayName: Kyma
+    id: kyma
+  components:
+    - displayName: Service Catalog
+      id: service-catalog
+    - displayName: Service Brokers
+      id: service-brokers
+    - displayName: Application Connector
+      id: application-connector
+    - displayName: Event Bus
+      id: event-bus
+    - displayName: Service Mesh
+      id: service-mesh
+    - displayName: Serverless
+      id: serverless
+    - displayName: Monitoring
+      id: monitoring
+    - displayName: Tracing
+      id: tracing
+    - displayName: API Gateway
+      id: api-gateway
+    - displayName: Authorization and Authentication
+      id: authorization-and-authentication

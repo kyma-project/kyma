@@ -1,0 +1,81 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: remoteenv-test
+  namespace: kyma-system
+  labels:
+    app: remoteenv-test
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: remoteenv-test
+  labels:
+    app: remoteenv-test
+rules:
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["clusterserviceclasses"]
+    verbs: ["list", "delete", "get"]
+    nonResourceURLs: []
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["clusterserviceplans"]
+    verbs: ["list", "delete"]
+    nonResourceURLs: []
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["serviceinstances", "servicebindings"]
+    verbs: ["get", "delete", "create", "list"]
+    nonResourceURLs: []
+  - apiGroups: ["servicecatalog.kyma.cx"]
+    resources: ["servicebindingusages"]
+    verbs: ["get", "delete", "create", "list"]
+    nonResourceURLs: []
+  - apiGroups: ["remoteenvironment.kyma.cx"]
+    resources: ["remoteenvironments", "environmentmappings"]
+    verbs: ["create", "delete"]
+    nonResourceURLs: []
+  - apiGroups: ["apps"]
+    resources: ["ingresses", "deployments"]
+    verbs: ["create", "delete", "get", "list"]
+    nonResourceURLs: []
+  - apiGroups: [""]
+    resources: ["services", "namespaces", "pods", "events", "configmaps", "serviceaccounts"]
+    verbs: ["create", "delete", "get", "list", "update"]
+    nonResourceURLs: []
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get", "list"]
+    nonResourceURLs: []
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["roles", "rolebindings"]
+    verbs: ["create"]
+    nonResourceURLs: []
+  - apiGroups: ["config.istio.io"]
+    resources: ["rules", "checknothings", "deniers"]
+    verbs: ["create", "delete", "get", "list"]
+    nonResourceURLs: []
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: remoteenv-test
+subjects:
+  - kind: ServiceAccount
+    name: remoteenv-test
+    namespace: kyma-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: remoteenv-test
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: remoteenv-test-acceptance-test
+subjects:
+  - kind: ServiceAccount
+    name: remoteenv-test
+    namespace: acceptance-test
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: remoteenv-test

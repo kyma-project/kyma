@@ -1,0 +1,7 @@
+apiVersion: v1
+description: A Helm chart for quote service
+name: quote
+version: 0.1.0
+
+sources:
+- https://github.com

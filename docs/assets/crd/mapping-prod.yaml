@@ -1,0 +1,6 @@
+apiVersion: remoteenvironment.kyma.cx/v1alpha1
+kind: EnvironmentMapping
+metadata:
+  # Remote Environment "ec-prod" is enabled in "production" environment
+  name: ec-prod
+  namespace: production

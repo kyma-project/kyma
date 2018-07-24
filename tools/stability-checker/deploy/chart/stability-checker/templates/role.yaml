@@ -1,0 +1,22 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ template "stability-checker.name" . }}
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["*"]
+  resourceNames:
+    - "{{ .Chart.Name }}-test-results"
+
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["list","get","delete"]
+
+- apiGroups: [""]
+  resources: ["pods/portforward"]
+  verbs: ["create"]
+
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get"]
