@@ -135,7 +135,7 @@ bash ${ROOT_PATH}/create-generic-secret.sh "${ROOT_PATH}/../resources/cluster-ce
   "TLS_CERT" "${TLS_CERT}" \
   "TLS_KEY" "${TLS_KEY}"
 
-echo -e "\nApplying asecret for Cluster certificate"
+echo -e "\nApplying secret for Cluster certificate"
 kubectl create -f "${ROOT_PATH}/../resources/cluster-certificate-secret.yaml"
 
 ##########
@@ -145,7 +145,7 @@ bash ${ROOT_PATH}/create-generic-secret.sh "${ROOT_PATH}/../resources/remote-env
   "REMOTE_ENV_CA" "${REMOTE_ENV_CA}" \
   "REMOTE_ENV_CA_KEY" "${REMOTE_ENV_CA_KEY}"
 
-echo -e "\nApplying asecret for C Remote Env certificate"
+echo -e "\nApplying secret for C Remote Env certificate"
 kubectl create -f "${ROOT_PATH}/../resources/remote-env-certificate-secret.yaml"
 
 ##########
@@ -155,20 +155,22 @@ bash ${ROOT_PATH}/create-generic-secret.sh "${ROOT_PATH}/../resources/ui-test-se
   "UI_TEST_USER" "${UI_TEST_USER}" \
   "UI_TEST_PASSWORD" "${UI_TEST_PASSWORD}"
 
-echo -e "\nApplying asecret for UI Test"
+echo -e "\nApplying secret for UI Test"
 kubectl create -f "${ROOT_PATH}/../resources/ui-test-secret.yaml"
 
 ##########
 
-echo -e "\nGenerating secret for Azure Broker"
-bash ${ROOT_PATH}/create-generic-secret.sh "${ROOT_PATH}/../resources/azure-broker-secret.yaml" \
-  "AZURE_BROKER_SUBSCRIPTION_ID" "${AZURE_BROKER_SUBSCRIPTION_ID}" \
-  "AZURE_BROKER_TENANT_ID" "${AZURE_BROKER_TENANT_ID}" \
-  "AZURE_BROKER_CLIENT_ID" "${AZURE_BROKER_CLIENT_ID}" \
-  "AZURE_BROKER_CLIENT_SECRET" "${AZURE_BROKER_CLIENT_SECRET}"
+if [ -n "${AZURE_BROKER_SUBSCRIPTION_ID}" ]; then
+  echo -e "\nGenerating secret for Azure Broker"
+  bash ${ROOT_PATH}/create-generic-secret.sh "${ROOT_PATH}/../resources/azure-broker-secret.yaml" \
+    "AZURE_BROKER_SUBSCRIPTION_ID" "${AZURE_BROKER_SUBSCRIPTION_ID}" \
+    "AZURE_BROKER_TENANT_ID" "${AZURE_BROKER_TENANT_ID}" \
+    "AZURE_BROKER_CLIENT_ID" "${AZURE_BROKER_CLIENT_ID}" \
+    "AZURE_BROKER_CLIENT_SECRET" "${AZURE_BROKER_CLIENT_SECRET}"
 
-echo -e "\nApplying asecret for Azure Broker"
-kubectl create -f "${ROOT_PATH}/../resources/azure-broker-secret.yaml"
+  echo -e "\nApplying secret for Azure Broker"
+  kubectl create -f "${ROOT_PATH}/../resources/azure-broker-secret.yaml"
+fi
 
 ##########
 
