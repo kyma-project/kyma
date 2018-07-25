@@ -10,6 +10,7 @@ import (
 	bindingUsageClientset "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
 	bindingUsageInformers "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions"
 	"github.com/pkg/errors"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 )
 
@@ -33,6 +34,7 @@ type Resolver struct {
 	*brokerResolver
 	*serviceBindingResolver
 	*serviceBindingUsageResolver
+	*usageKindResolver
 
 	informerFactory             catalogInformers.SharedInformerFactory
 	bindingUsageInformerFactory bindingUsageInformers.SharedInformerFactory
@@ -56,7 +58,9 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, asyncApiSp
 		return nil, errors.Wrap(err, "while initializing Binding Usage Clientset")
 	}
 
+	dynamicClient := dynamic.NewDynamicClientPool(restConfig)
 	bindingUsageInformerFactory := bindingUsageInformers.NewSharedInformerFactory(bindingUsageClient, informerResyncPeriod)
+	usageKindService := newUsageKindService(bindingUsageClient.ServicecatalogV1alpha1(), dynamicClient, bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer())
 	bindingUsageService := newServiceBindingUsageService(bindingUsageClient.ServicecatalogV1alpha1(), bindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer(), bindingService)
 
 	return &Container{
@@ -68,6 +72,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, asyncApiSp
 			classResolver:               newClassResolver(classService, planService, instanceService, asyncApiSpecGetter, apiSpecGetter, contentGetter),
 			serviceBindingResolver:      newServiceBindingResolver(bindingService),
 			serviceBindingUsageResolver: newServiceBindingUsageResolver(bindingUsageService),
+			usageKindResolver:           newUsageKindResolver(usageKindService),
 		},
 		ServiceBindingUsageLister: bindingUsageService,
 		ServiceBindingGetter:      bindingService,

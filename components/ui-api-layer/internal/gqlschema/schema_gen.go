@@ -40,6 +40,8 @@ type Resolvers interface {
 	Query_serviceBroker(ctx context.Context, name string) (*ServiceBroker, error)
 	Query_serviceBindingUsage(ctx context.Context, name string, environment string) (*ServiceBindingUsage, error)
 	Query_serviceBinding(ctx context.Context, name string, environment string) (*ServiceBinding, error)
+	Query_usageKinds(ctx context.Context, first *int, offset *int) ([]UsageKind, error)
+	Query_usageKindResources(ctx context.Context, usageKind string, environment string) ([]UsageKindResource, error)
 	Query_apis(ctx context.Context, environment string, serviceName *string, hostname *string) ([]API, error)
 	Query_remoteEnvironment(ctx context.Context, name string) (*RemoteEnvironment, error)
 	Query_remoteEnvironments(ctx context.Context, environment *string, first *int, offset *int) ([]RemoteEnvironment, error)
@@ -2084,6 +2086,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 			out.Values[i] = ec._Query_serviceBindingUsage(ctx, field)
 		case "serviceBinding":
 			out.Values[i] = ec._Query_serviceBinding(ctx, field)
+		case "usageKinds":
+			out.Values[i] = ec._Query_usageKinds(ctx, field)
+		case "usageKindResources":
+			out.Values[i] = ec._Query_usageKindResources(ctx, field)
 		case "apis":
 			out.Values[i] = ec._Query_apis(ctx, field)
 		case "remoteEnvironment":
@@ -2606,6 +2612,136 @@ func (ec *executionContext) _Query_serviceBinding(ctx context.Context, field gra
 			return graphql.Null
 		}
 		return ec._ServiceBinding(ctx, field.Selections, res)
+	})
+}
+
+func (ec *executionContext) _Query_usageKinds(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := field.Args["first"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	}
+	args["first"] = arg0
+	var arg1 *int
+	if tmp, ok := field.Args["offset"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	}
+	args["offset"] = arg1
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_usageKinds(ctx, args["first"].(*int), args["offset"].(*int))
+		})
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]UsageKind)
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler {
+				rctx := graphql.GetResolverContext(ctx)
+				rctx.PushIndex(idx1)
+				defer rctx.Pop()
+				return ec._UsageKind(ctx, field.Selections, &res[idx1])
+			}())
+		}
+		return arr1
+	})
+}
+
+func (ec *executionContext) _Query_usageKindResources(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := field.Args["usageKind"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	}
+	args["usageKind"] = arg0
+	var arg1 string
+	if tmp, ok := field.Args["environment"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	}
+	args["environment"] = arg1
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_usageKindResources(ctx, args["usageKind"].(string), args["environment"].(string))
+		})
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]UsageKindResource)
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler {
+				rctx := graphql.GetResolverContext(ctx)
+				rctx.PushIndex(idx1)
+				defer rctx.Pop()
+				return ec._UsageKindResource(ctx, field.Selections, &res[idx1])
+			}())
+		}
+		return arr1
 	})
 }
 
@@ -5840,6 +5976,139 @@ func (ec *executionContext) _TopicEntry_sections(ctx context.Context, field grap
 	return arr1
 }
 
+var usageKindImplementors = []string{"UsageKind"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _UsageKind(ctx context.Context, sel []query.Selection, obj *UsageKind) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.Doc, sel, usageKindImplementors, ec.Variables)
+
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UsageKind")
+		case "name":
+			out.Values[i] = ec._UsageKind_name(ctx, field, obj)
+		case "group":
+			out.Values[i] = ec._UsageKind_group(ctx, field, obj)
+		case "kind":
+			out.Values[i] = ec._UsageKind_kind(ctx, field, obj)
+		case "version":
+			out.Values[i] = ec._UsageKind_version(ctx, field, obj)
+		case "displayName":
+			out.Values[i] = ec._UsageKind_displayName(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _UsageKind_name(ctx context.Context, field graphql.CollectedField, obj *UsageKind) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "UsageKind"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Name
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _UsageKind_group(ctx context.Context, field graphql.CollectedField, obj *UsageKind) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "UsageKind"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Group
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _UsageKind_kind(ctx context.Context, field graphql.CollectedField, obj *UsageKind) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "UsageKind"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Kind
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _UsageKind_version(ctx context.Context, field graphql.CollectedField, obj *UsageKind) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "UsageKind"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Version
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _UsageKind_displayName(ctx context.Context, field graphql.CollectedField, obj *UsageKind) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "UsageKind"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.DisplayName
+	return graphql.MarshalString(res)
+}
+
+var usageKindResourceImplementors = []string{"UsageKindResource"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _UsageKindResource(ctx context.Context, sel []query.Selection, obj *UsageKindResource) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.Doc, sel, usageKindResourceImplementors, ec.Variables)
+
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UsageKindResource")
+		case "name":
+			out.Values[i] = ec._UsageKindResource_name(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._UsageKindResource_namespace(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _UsageKindResource_name(ctx context.Context, field graphql.CollectedField, obj *UsageKindResource) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "UsageKindResource"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Name
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _UsageKindResource_namespace(ctx context.Context, field graphql.CollectedField, obj *UsageKindResource) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "UsageKindResource"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Namespace
+	return graphql.MarshalString(res)
+}
+
 var __DirectiveImplementors = []string{"__Directive"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -7158,6 +7427,19 @@ type EventActivation {
     events: [EventActivationEvent]!
 }
 
+type UsageKind {
+    name: String!
+    group: String!
+    kind: String!
+    version: String!
+    displayName: String!
+}
+
+type UsageKindResource {
+    name: String!
+    namespace: String!
+}
+
 # IDP PRESETS
 
 type IDPPreset {
@@ -7216,6 +7498,8 @@ type Query {
     serviceBroker(name: String!): ServiceBroker
     serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
     serviceBinding(name: String!, environment: String!): ServiceBinding
+    usageKinds(first: Int, offset: Int): [UsageKind!]!
+    usageKindResources(usageKind: String!, environment: String!): [UsageKindResource!]!
 
     apis(environment: String!, serviceName: String, hostname: String): [API!]!
 

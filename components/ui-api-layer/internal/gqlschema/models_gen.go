@@ -159,6 +159,17 @@ type ServicePlan struct {
 	RelatedServiceClassName       string  `json:"relatedServiceClassName"`
 	InstanceCreateParameterSchema *JSON   `json:"instanceCreateParameterSchema"`
 }
+type UsageKind struct {
+	Name        string `json:"name"`
+	Group       string `json:"group"`
+	Kind        string `json:"kind"`
+	Version     string `json:"version"`
+	DisplayName string `json:"displayName"`
+}
+type UsageKindResource struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
 
 type AuthenticationPolicyType string
 
