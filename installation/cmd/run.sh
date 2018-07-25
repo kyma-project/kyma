@@ -33,6 +33,8 @@ if [[ ! ${SKIP_MINIKUBE_START} ]]; then
     bash $CURRENT_DIR/../scripts/minikube.sh --domain ${DOMAIN}
 fi
 
+bash $CURRENT_DIR/../scripts/generate-local-config.sh
+
 if [ -z "$CR_PATH" ]; then
 
     TMPDIR=`mktemp -d "$CURRENT_DIR/../../temp-XXXXXXXXXX"`

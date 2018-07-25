@@ -21,6 +21,8 @@ if ($SKIP_MINIKUBE_START -eq $false) {
     }
 }
 
+Invoke-Expression -Command "$SCRIPTS_DIR\generate-local-config.ps1"
+
 if ($LOCAL -eq $true) {
     $CR_PATH = (New-TemporaryFile).FullName
 
