@@ -2,23 +2,23 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: configurations-generator
+  name: {{ template "name" . }}
   labels:
-    app: configurations-generator
+    app: {{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: configurations-generator
+        app: {{ template "name" . }}
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Chart.Name }}:{{ .Chart.Version }}
-        name: configurations-generator
+        name: {{ template "name" . }}
         command: [
           "/app",
           "-kube-config-custer-name={{ .Values.kubeConfig.clusterName }}",

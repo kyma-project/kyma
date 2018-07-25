@@ -20,4 +20,4 @@ Currently, Kyma Dex uses a static user database and authenticates static users b
 
 For the list of static Dex users and clients, as well as the information about the connectors that delegate authentication to external identity providers, see the [dex-config-map.yaml](templates/dex-config-map.yaml) file.
 
-Kyma Dex is exposed using Ingress and can be accessed https://dex.kyma.local.
+Kyma Dex is exposed using the [Istio VirtualService](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#VirtualService) feature. Access Dex at  `https://dex.kyma.local`.

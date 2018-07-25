@@ -30,8 +30,8 @@ spec:
 {{- end }}
 {{- if .Values.externalUrl }}
   externalUrl: "{{ .Values.externalUrl }}"
-{{- else if .Values.ingress.fqdn }}
-  externalUrl: http://{{ .Values.ingress.fqdn }}{{ .Values.routePrefix }}
+{{- else if .Values.virtualservice.fqdn }}
+  externalUrl: http://{{ .Values.virtualservice.fqdn }}{{ .Values.routePrefix }}
 {{- else }}
   externalUrl: http://{{ template "prometheus.fullname" . }}.{{ .Release.Namespace }}:9090
 {{- end }}

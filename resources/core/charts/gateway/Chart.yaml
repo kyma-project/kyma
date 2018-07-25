@@ -1,0 +1,5 @@
+name: Kyma gateway
+version: 0.0.1
+description: Gateway for  Kyma 
+keywords:
+  - gateway

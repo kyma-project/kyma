@@ -8,3 +8,7 @@ oidc:
   consoleClientName: 'Console'
   grafanaClientId: grafana
   grafanaClientName: 'Grafana UI'
+
+global:
+  gateway:
+    name: kyma-gateway

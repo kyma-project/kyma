@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  "tls.crt": {{ .Values.global.tlsCrt}}
+  "tls.key": {{ .Values.global.tlsKey }}
+kind: Secret
+metadata:
+  name: istio-ingressgateway-certs
+  namespace: istio-system
+type: kubernetes.io/tls

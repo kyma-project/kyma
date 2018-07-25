@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "name" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+  - "apiserver.{{ .Values.global.domainName }}"
+  gateways:
+  - {{ .Values.global.istio.gateway.name }}
+  http:
+  - match:
+    - uri:
+        regex: /.*
+    route:
+    - destination:
+        port:
+          number: {{.Values.containerPort}}
+        host: {{ template "name" . }}
+    corsPolicy:
+      allowOrigin:
+      - "*"
+      allowHeaders:
+      - "*"
+      allowMethods:
+      - '*'

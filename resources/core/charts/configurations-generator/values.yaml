@@ -2,3 +2,6 @@ kubeConfig:
   clusterName: minikube
   url:
   ca:
+service:
+  port: 8000
+  name: configurations-generator
