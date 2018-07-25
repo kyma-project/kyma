@@ -9,7 +9,7 @@ metadata:
 rules:
 - apiGroups: ["remoteenvironment.kyma.cx"]
   resources: ["remoteenvironments"]
-  verbs: ["get", "list", "update"]
+  verbs: ["get", "list", "update","create", "delete"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -21,7 +21,7 @@ metadata:
     heritage: {{ .Release.Service }}
 subjects:
 - kind: User
-  name: system:serviceaccount:{{ .Release.Namespace }}:default
+  name: system:serviceaccount:{{ .Values.global.Namespace }}:default
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   apiGroup: rbac.authorization.k8s.io
