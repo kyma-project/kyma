@@ -152,6 +152,9 @@
 # Application Connector Component
 /components/application-connector/ @lszymik @akgalwas @janmedrek
 
+# Gateway Component
+/components/gateway/ @lszymik @akgalwas @janmedrek
+
 # Event Bus Component
 /components/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 

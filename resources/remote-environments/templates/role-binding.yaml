@@ -7,9 +7,6 @@ metadata:
     release: {{ .Release.Name }}-gateway
     heritage: {{ .Release.Service }}-gateway
 rules:
-- apiGroups: ["remoteenvironment.kyma.cx"]
-  resources: ["remoteenvironments"]
-  verbs: ["get", "list"]
 - apiGroups: ["*"]
   resources: ["secrets"]
   verbs: ["get"]

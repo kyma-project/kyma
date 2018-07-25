@@ -8,9 +8,6 @@ metadata:
     release: {{ .Chart.Name }}
     heritage: {{ .Release.Service }}
 rules:
-- apiGroups: ["remoteenvironment.kyma.cx"]
-  resources: ["remoteenvironments"]
-  verbs: ["get", "update", "list"]
 - apiGroups: ["*"]
   resources: ["services"]
   verbs: ["create", "get", "delete"]

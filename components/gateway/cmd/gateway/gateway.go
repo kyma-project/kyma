@@ -106,7 +106,7 @@ func newServiceDefinitionService(namespace string, remoteEnvironment string) (me
 		return nil, apperrors.Internal("failed to create k8s core client, %s", err)
 	}
 
-	remoteEnvironmentServiceRepository, apperror := newRemoteEnvironmentRepository(k8sConfig, namespace, remoteEnvironment)
+	remoteEnvironmentServiceRepository, apperror := newRemoteEnvironmentRepository(k8sConfig, remoteEnvironment)
 	if apperror != nil {
 		return nil, apperror
 	}
@@ -118,13 +118,13 @@ func newServiceDefinitionService(namespace string, remoteEnvironment string) (me
 	return metadata.NewServiceDefinitionService(serviceAPIService, remoteEnvironmentServiceRepository), nil
 }
 
-func newRemoteEnvironmentRepository(config *restclient.Config, namespace string, name string) (remoteenv.ServiceRepository, apperrors.AppError) {
+func newRemoteEnvironmentRepository(config *restclient.Config, name string) (remoteenv.ServiceRepository, apperrors.AppError) {
 	remoteEnvironmentClientset, err := versioned.NewForConfig(config)
 	if err != nil {
 		return nil, apperrors.Internal("failed to create k8s remote environment client, %s", err)
 	}
 
-	rei := remoteEnvironmentClientset.RemoteenvironmentV1alpha1().RemoteEnvironments(namespace)
+	rei := remoteEnvironmentClientset.RemoteenvironmentV1alpha1().RemoteEnvironments()
 
 	return remoteenv.NewServiceRepository(name, rei), nil
 }
