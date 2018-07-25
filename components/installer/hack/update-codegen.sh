@@ -14,5 +14,4 @@ CODEGEN_PKG=${CODEGEN_PKG:-$(cd ${SCRIPT_ROOT}; ls -d -1 ./vendor/k8s.io/code-ge
 ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
   github.com/kyma-project/kyma/components/installer/pkg/client github.com/kyma-project/kyma/components/installer/pkg/apis \
   "installer:v1alpha1 release:v1alpha1" \
-  --output-base "$(dirname ${BASH_SOURCE})/../../../.." \
   --go-header-file ${SCRIPT_ROOT}/hack/custom-boilerplate.go.txt
