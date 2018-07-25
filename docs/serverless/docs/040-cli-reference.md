@@ -9,7 +9,7 @@ This section provides you with useful command line examples used in Kyma.
 
 ## Prerequisites
 
-* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.9.0
+* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.10.0
 
 To develop, deploy, or run functions directly download these tools additionally:
 

@@ -13,7 +13,7 @@ This guide uses a standalone sample service written in the [Go](http://golang.or
 
 To use the Kyma cluster and install the example, download these tools:
 
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.9.0
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.10.0
 - [curl](https://github.com/curl/curl)
 
 ## Steps

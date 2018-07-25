@@ -5,7 +5,7 @@ set -o errexit
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 MINIKUBE_DOMAIN=""
-MINIKUBE_VERSION=0.28.0
+MINIKUBE_VERSION=0.28.2
 KUBERNETES_VERSION=1.10.0
 VM_DRIVER="hyperkit"
 
