@@ -76,8 +76,6 @@ func TestUpdateVirtualService(t *testing.T) {
 		}
 	})
 
-	// TODO: hostname has changed so ...
-
 	t.Run("nothing has changed so virtualService should not be updated", func(t *testing.T) {
 		newApi := oldApi
 

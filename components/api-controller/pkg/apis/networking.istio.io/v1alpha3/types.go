@@ -32,7 +32,7 @@ func (s *VirtualServiceSpec) String() string {
 	return fmt.Sprintf("{Hosts: %v, Gateways: %v, Http: %v}", s.Hosts, s.Gateways, s.Http)
 }
 
-type HTTPRoute struct { // TODO: probably there should be also other fields of specification https://github.com/istio/istio/blob/master/vendor/istio.io/api/networking/v1alpha3/virtual_service.pb.go#L358
+type HTTPRoute struct {
 	Match []*HTTPMatchRequest  `json:"match"`
 	Route []*DestinationWeight `json:"route"`
 }
