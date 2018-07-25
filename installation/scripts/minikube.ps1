@@ -104,7 +104,11 @@ function WaitForMinikubeToBeUp() {
 }
 
 function AddDevDomainsToEtcHosts([string[]]$hostnamesPrefixes) {
-    $hostnames = $hostnamesPrefixes | % {"$_.${DOMAIN}"}
+    $n = 6 # 7 hostnames in one line, others in next line. Windows can't read more than 9 hostnames in the same line.
+    $hostnames = $hostnamesPrefixes | ForEach-Object {"$_.${DOMAIN}"} # for minikube ssh
+    $hostnames1 = $hostnamesPrefixes[0..$n] | ForEach-Object {"$_.${DOMAIN}"}
+    $hostnames2 = $hostnamesPrefixes[ - $n..-1] | ForEach-Object {"$_.${DOMAIN}"} 
+    
     $cmd = "minikube ip"
     $minikubeIp = (Invoke-Expression -Command $cmd | Out-String).Trim()
 
@@ -114,9 +118,11 @@ function AddDevDomainsToEtcHosts([string[]]$hostnamesPrefixes) {
     Invoke-Expression -Command $cmd
 
     $winHostsPath = "C:\Windows\system32\drivers\etc\hosts"
+
     Get-Content -Path $winHostsPath | Select-String -Pattern $DOMAIN -NotMatch | Out-File -FilePath $winHostsPath
 
-    "${minikubeIp} ${hostnames}" | Out-File $winHostsPath -Append
+    "${minikubeIp} ${hostnames1}" | Out-File $winHostsPath -Append
+    "${minikubeIp} ${hostnames2}" | Out-File $winHostsPath -Append
 }
 
 CheckIfMinikubeIsInitialized
@@ -124,4 +130,4 @@ InitializeMinikubeConfig
 UploadDexTlsCertForApiserver
 StartMinikube
 WaitForMinikubeToBeUp
-AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "dex", "docs", "lambdas-ui", "ui-api" "minio", "jaeger", "grafana", "configurations-generator"
+AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "dex", "docs", "lambdas-ui", "ui-api", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service"
