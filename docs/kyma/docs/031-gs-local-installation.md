@@ -29,7 +29,7 @@ Follow these steps to "always trust" the Kyma certificate on macOS:
 1. Open the Keychain Access application. Select **System** from the **Keychains** menu.
 2. Go to **File**, then select **Import items...** and import the Kyma [certificate](../../../installation/certs/workspace/raw/server.crt).
 3. Go to the **Certificates** view and find the `*.kyma.local` certificate you imported.
-4. Righ-click on the certificate and select **Get Info**.
+4. Right-click on the certificate and select **Get Info**.
 5. Expand the **Trust** list and set **When using this certificate** to **Always trust**.
 6. Close the certificate information window and enter your system password to confirm the changes.
 
