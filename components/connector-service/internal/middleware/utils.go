@@ -18,7 +18,7 @@ func SetupMonitoring() ([]Middleware, apperrors.AppError) {
 
 	codeMiddleware, err := NewCodeMiddleware("connector-service-endpoints-responses", "kyma-integration")
 	if err != nil {
-		return nil, apperrors.Internal("Failed to setup duration middleware: %s", err.Error())
+		return nil, apperrors.Internal("Failed to setup response codes middleware: %s", err.Error())
 	}
 
 	return []Middleware{durationMiddleware, codeMiddleware}, nil

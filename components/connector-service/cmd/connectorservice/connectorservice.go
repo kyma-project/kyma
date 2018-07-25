@@ -40,7 +40,7 @@ func main() {
 
 	middlewares, appErr := middleware.SetupMonitoring()
 	if appErr != nil {
-		panic(appErr)
+		log.Errorf("Error while setting up monitoring: %s", appErr)
 	}
 
 	externalHandler := newExternalHandler(tokenCache, certUtil, tokenGenerator, options, env, middlewares)
