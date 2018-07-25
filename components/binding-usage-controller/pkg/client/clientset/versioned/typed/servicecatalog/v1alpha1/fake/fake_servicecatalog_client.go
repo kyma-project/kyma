@@ -16,6 +16,10 @@ func (c *FakeServicecatalogV1alpha1) ServiceBindingUsages(namespace string) v1al
 	return &FakeServiceBindingUsages{c, namespace}
 }
 
+func (c *FakeServicecatalogV1alpha1) UsageKinds() v1alpha1.UsageKindInterface {
+	return &FakeUsageKinds{c}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeServicecatalogV1alpha1) RESTClient() rest.Interface {

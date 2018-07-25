@@ -79,8 +79,6 @@ Use the `create-cr.sh` script to generate the Custom Resource file. The script a
 - `--version` - the Kyma version
 - `--ipaddr` - the load balancer IP
 - `--domain` - the instance domain
-- `--sci-ui-user` - SCI credentials for the UI API
-- `--sci-ui-password` - SCI credentials for the UI API
 
 For example:
 ```

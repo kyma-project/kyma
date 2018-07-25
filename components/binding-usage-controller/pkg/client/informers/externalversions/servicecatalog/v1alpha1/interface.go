@@ -10,6 +10,8 @@ import (
 type Interface interface {
 	// ServiceBindingUsages returns a ServiceBindingUsageInformer.
 	ServiceBindingUsages() ServiceBindingUsageInformer
+	// UsageKinds returns a UsageKindInformer.
+	UsageKinds() UsageKindInformer
 }
 
 type version struct {
@@ -26,4 +28,9 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 // ServiceBindingUsages returns a ServiceBindingUsageInformer.
 func (v *version) ServiceBindingUsages() ServiceBindingUsageInformer {
 	return &serviceBindingUsageInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// UsageKinds returns a UsageKindInformer.
+func (v *version) UsageKinds() UsageKindInformer {
+	return &usageKindInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
