@@ -21,5 +21,4 @@ When it comes to technology stacks, Kyma is all about the latest, most modern, a
 The communication between services is handled by the [Istio](https://istio.io/) service mesh component, which enables security, monitoring, and tracing without the need to change the application code.
 Build your applications using services provisioned by one of the many Service Brokers compatible with the [Open Service Broker API](https://www.openservicebrokerapi.org/), and monitor the speed and efficiency of your solutions using [Prometheus](https://prometheus.io/), which gives you the most accurate and up-to-date tracing and telemetry data.
 
-<p class="internal">
-Using [Minikube](https://github.com/kubernetes/minikube), you can run Kyma locally, develop, and test your solutions on a small scale before you push them to a cluster. Follow the Getting Started guides to [install Kyma locally](031-gs-local-installation.md) and [deploy a sample service](032-gs-sample-service-deployment-to-local.md).</p>
+Using [Minikube](https://github.com/kubernetes/minikube), you can run Kyma locally, develop, and test your solutions on a small scale before you push them to a cluster. Follow the Getting Started guides to [install Kyma locally](031-gs-local-installation.md) and [deploy a sample service](032-gs-sample-service-deployment-to-local.md).
