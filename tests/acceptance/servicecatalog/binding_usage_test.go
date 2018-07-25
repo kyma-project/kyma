@@ -154,7 +154,7 @@ func (ts *TestSuite) remoteEnvironmentClient() reInterface.RemoteEnvironmentInte
 	client, err := reClient.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
 
-	return client.RemoteenvironmentV1alpha1().RemoteEnvironments(ts.namespace)
+	return client.RemoteenvironmentV1alpha1().RemoteEnvironments()
 }
 
 func (ts *TestSuite) fixEnvironmentMapping() *reTypes.EnvironmentMapping {

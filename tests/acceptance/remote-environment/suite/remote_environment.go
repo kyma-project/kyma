@@ -15,7 +15,7 @@ func (ts *TestSuite) createRemoteEnvironmentResources() {
 	require.NoError(ts.t, err)
 
 	displayName := fmt.Sprintf("acc-test-re-name-%s", ts.TestID)
-	rei := client.RemoteenvironmentV1alpha1().RemoteEnvironments(ts.namespace)
+	rei := client.RemoteenvironmentV1alpha1().RemoteEnvironments()
 	_, err = rei.Create(fixRemoteEnvironment(ts.remoteEnvironmentName, ts.accessLabel, ts.osbServiceId, ts.gatewayUrl, displayName))
 	require.NoError(ts.t, err)
 
@@ -28,7 +28,7 @@ func (ts *TestSuite) deleteRemoteEnvironment() {
 	client, err := versioned.NewForConfig(ts.config)
 	require.NoError(ts.t, err)
 
-	rei := client.RemoteenvironmentV1alpha1().RemoteEnvironments(ts.namespace)
+	rei := client.RemoteenvironmentV1alpha1().RemoteEnvironments()
 	err = rei.Delete(ts.remoteEnvironmentName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 }

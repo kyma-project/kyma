@@ -71,7 +71,7 @@ func remoteEnvironmentsClient(t *testing.T) reclient.RemoteEnvironmentInterface 
 	reClient, err := versioned.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 
-	rei := reClient.RemoteenvironmentV1alpha1().RemoteEnvironments("default")
+	rei := reClient.RemoteenvironmentV1alpha1().RemoteEnvironments()
 	return rei
 }
 

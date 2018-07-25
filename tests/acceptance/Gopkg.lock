@@ -99,7 +99,6 @@
   version = "v0.1.11"
 
 [[projects]]
-  branch = "master"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
@@ -111,7 +110,7 @@
     "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
     "components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
   ]
-  revision = "c4e06fbb6c180bffec61adf3c296d826c1465cd9"
+  revision = "5d75b1cfda3dfc393351e71d89ea1c7a750ec89c"
 
 [[projects]]
   name = "github.com/pborman/uuid"
@@ -387,6 +386,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "43f2aa0793e1e42894425006386aba0f9e562852a26e1864ce76cdd1cb00cb29"
+  inputs-digest = "8793a8ae502926b19ce1aab49f8f73222924a57fa20e56485ace158bbfb1305e"
   solver-name = "gps-cdcl"
   solver-version = 1
