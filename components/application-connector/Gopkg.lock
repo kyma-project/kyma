@@ -105,6 +105,38 @@
   branch = "master"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "components/application-connector/internal/apperrors",
+    "components/application-connector/internal/externalapi",
+    "components/application-connector/internal/httpconsts",
+    "components/application-connector/internal/httperrors",
+    "components/application-connector/internal/httptools",
+    "components/application-connector/internal/k8sconsts",
+    "components/application-connector/internal/k8sconsts/mocks",
+    "components/application-connector/internal/metadata",
+    "components/application-connector/internal/metadata/accessservice",
+    "components/application-connector/internal/metadata/accessservice/mocks",
+    "components/application-connector/internal/metadata/istio",
+    "components/application-connector/internal/metadata/istio/mocks",
+    "components/application-connector/internal/metadata/minio",
+    "components/application-connector/internal/metadata/minio/mocks",
+    "components/application-connector/internal/metadata/mocks",
+    "components/application-connector/internal/metadata/remoteenv",
+    "components/application-connector/internal/metadata/remoteenv/mocks",
+    "components/application-connector/internal/metadata/secrets",
+    "components/application-connector/internal/metadata/secrets/mocks",
+    "components/application-connector/internal/metadata/serviceapi",
+    "components/application-connector/internal/metadata/serviceapi/mocks",
+    "components/application-connector/internal/metadata/uuid",
+    "components/application-connector/internal/metadata/uuid/mocks",
+    "components/application-connector/pkg/apis/istio/v1alpha2",
+    "components/application-connector/pkg/client/clientset/versioned",
+    "components/application-connector/pkg/client/clientset/versioned/scheme",
+    "components/application-connector/pkg/client/clientset/versioned/typed/istio/v1alpha2",
+    "components/application-connector/pkg/client/clientset/versioned/typed/istio/v1alpha2/fake",
+    "components/application-connector/pkg/client/informers/externalversions/internalinterfaces",
+    "components/application-connector/pkg/client/informers/externalversions/istio",
+    "components/application-connector/pkg/client/informers/externalversions/istio/v1alpha2",
+    "components/application-connector/pkg/client/listers/istio/v1alpha2",
     "components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1",
     "components/remote-environment-broker/pkg/client/clientset/versioned",
     "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
@@ -447,6 +479,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "aaf725a6da61303bc63d2e62b6f67816e8d2b75e3413e5eb479527917f6a26f9"
+  inputs-digest = "72c5148d3871559b305d51c21324cdb447e613509004a5ef4014262c2dbc949f"
   solver-name = "gps-cdcl"
   solver-version = 1

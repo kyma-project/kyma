@@ -107,7 +107,7 @@ func newServiceDefinitionService(minioURL, namespace, appName string, proxyPort 
 
 	minioService := minio.NewService(minioRepository)
 
-	remoteEnvironmentServiceRepository, apperror := newRemoteEnvironmentRepository(k8sConfig, namespace)
+	remoteEnvironmentServiceRepository, apperror := newRemoteEnvironmentRepository(k8sConfig)
 	if apperror != nil {
 		return nil, apperror
 	}
@@ -129,13 +129,13 @@ func newServiceDefinitionService(minioURL, namespace, appName string, proxyPort 
 	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, remoteEnvironmentServiceRepository, minioService), nil
 }
 
-func newRemoteEnvironmentRepository(config *restclient.Config, namespace string) (remoteenv.ServiceRepository, apperrors.AppError) {
+func newRemoteEnvironmentRepository(config *restclient.Config) (remoteenv.ServiceRepository, apperrors.AppError) {
 	remoteEnvironmentClientset, err := versioned.NewForConfig(config)
 	if err != nil {
 		return nil, apperrors.Internal("failed to create k8s remote environment client, %s", err)
 	}
 
-	rei := remoteEnvironmentClientset.RemoteenvironmentV1alpha1().RemoteEnvironments(namespace)
+	rei := remoteEnvironmentClientset.RemoteenvironmentV1alpha1().RemoteEnvironments()
 
 	return remoteenv.NewServiceRepository(rei), nil
 }
