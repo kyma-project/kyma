@@ -12,6 +12,7 @@ The `docs` folder contains end-to-end documentation on Kyma and the following co
 * [Service Catalog](service-catalog/docs/)
 * [Service Mesh](service-mesh/docs/)
 * [Tracing](tracing/docs/)
+* [Authorization and Authentication](authorization-and-authentication/docs/)
 
 Read it directly in GitHub or inside the Kyma Console if you have access to the Kyma cluster.
 
