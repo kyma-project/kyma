@@ -36,7 +36,7 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  branch = "master"
+  revision = "5d75b1cfda3dfc393351e71d89ea1c7a750ec89c"
 
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
