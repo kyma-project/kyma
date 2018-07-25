@@ -36,6 +36,12 @@ test:
   auth:
     username: ""
     password: ""
+etcd-operator:
+  backupOperator:
+    enabled: ""
+    abs:
+      storage-account: ""
+      storage-key: ""
 `
 			installationData := NewInstallationDataCreator().WithDomain("kyma.local").WithRemoteEnvIP("1.1.1.1").WithAdminGroup("testgroup").
 				GetData()
@@ -64,11 +70,54 @@ test:
   auth:
     username: "user1"
     password: "p@ssw0rd"
+etcd-operator:
+  backupOperator:
+    enabled: ""
+    abs:
+      storage-account: ""
+      storage-key: ""
 `
 			installationData := NewInstallationDataCreator().
 				WithDomain("kyma.local").
 				WithRemoteEnvIP("1.1.1.1").
 				WithUITestCredentials("user1", "p@ssw0rd").
+				GetData()
+
+			overrides, err := GetCoreOverrides(&installationData)
+
+			So(err, ShouldBeNil)
+			So(overrides, ShouldEqual, dummyOverridesForCore)
+		})
+
+		Convey("when etcd-operator properties are provided then enabled, abs.storage-account and abs.storage-key should exist", func() {
+			const dummyOverridesForCore = `
+nginx-ingress:
+  controller:
+    service:
+      loadBalancerIP: 1.1.1.1
+configurations-generator:
+  kubeConfig:
+    clusterName: kyma.local
+    url: 
+    ca: 
+cluster-users:
+  users:
+    adminGroup: 
+test:
+  auth:
+    username: ""
+    password: ""
+etcd-operator:
+  backupOperator:
+    enabled: "true"
+    abs:
+      storage-account: "pico-bello"
+      storage-key: "123-456-3245-a23b"
+`
+			installationData := NewInstallationDataCreator().
+				WithDomain("kyma.local").
+				WithRemoteEnvIP("1.1.1.1").
+				WithEtcdOperator("true", "pico-bello", "123-456-3245-a23b").
 				GetData()
 
 			overrides, err := GetCoreOverrides(&installationData)

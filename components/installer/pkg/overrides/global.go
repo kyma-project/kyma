@@ -18,6 +18,8 @@ global:
   istio:
     tls:
       secretName: "istio-ingress-certs"
+  ectdBackupABS:
+    containerName: "{{.EctdBackupABSContainerName}}"
 `
 
 // GetGlobalOverrides .
