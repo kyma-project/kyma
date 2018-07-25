@@ -24,6 +24,8 @@ global:
   istio:
     tls:
       secretName: istio-ingress-certs
+  ectdBackupABS:
+    secretName: etcd-backup-abs-credentials
 
 test:
   auth:

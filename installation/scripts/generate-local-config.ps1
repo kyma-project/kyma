@@ -99,7 +99,7 @@ Write-Output "Generating config map for installation ..."
 
 $CONFIG_PATH = (New-TemporaryFile).FullName
 
-$cmd = "${SCRIPTS_DIR}\create-config-map.ps1 -output ${CONFIG_PATH} -ip_address `"`" -domain `"kyma.local`" -remote_env_ip `"`" -k8s_apiserver_url `"${MINIKUBE_IP}`" -k8s_apiserver_ca `"${MINIKUBE_CA}`" -admin_group `"`""
+$cmd = "${SCRIPTS_DIR}\create-config-map.ps1 -output ${CONFIG_PATH} -ip_address `"`" -domain `"kyma.local`" -remote_env_ip `"`" -k8s_apiserver_url `"${MINIKUBE_IP}`" -k8s_apiserver_ca `"${MINIKUBE_CA}`" -admin_group `"`" -enable_etcd_backup_operator `"false`" -ectd_backup_abs_container_name `"`" "
 Invoke-Expression -Command $cmd
 
 $cmd = "kubectl apply -f ${CONFIG_PATH}"
