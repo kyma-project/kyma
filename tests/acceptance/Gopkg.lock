@@ -108,9 +108,7 @@
     "components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1",
     "components/remote-environment-broker/pkg/client/clientset/versioned",
     "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1",
-    "tests/acceptance/remote-environment/suite",
-    "tests/acceptance/servicecatalog/wait"
+    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
   ]
   revision = "5d75b1cfda3dfc393351e71d89ea1c7a750ec89c"
 
@@ -388,6 +386,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bc683c0423d27472d27b76abf08755418526b74282cc363aacf149c985b9e479"
+  inputs-digest = "8793a8ae502926b19ce1aab49f8f73222924a57fa20e56485ace158bbfb1305e"
   solver-name = "gps-cdcl"
   solver-version = 1
