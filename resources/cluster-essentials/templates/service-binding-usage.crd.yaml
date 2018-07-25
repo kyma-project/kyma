@@ -33,7 +33,6 @@ spec:
               properties:
                 kind:
                   type: string
-                  enum: ["Deployment", "Function"]
                 name:
                   type: string
             parameters:

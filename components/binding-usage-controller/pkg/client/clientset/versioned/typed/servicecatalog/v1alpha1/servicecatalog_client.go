@@ -12,6 +12,7 @@ import (
 type ServicecatalogV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	ServiceBindingUsagesGetter
+	UsageKindsGetter
 }
 
 // ServicecatalogV1alpha1Client is used to interact with features provided by the servicecatalog.kyma.cx group.
@@ -21,6 +22,10 @@ type ServicecatalogV1alpha1Client struct {
 
 func (c *ServicecatalogV1alpha1Client) ServiceBindingUsages(namespace string) ServiceBindingUsageInterface {
 	return newServiceBindingUsages(c, namespace)
+}
+
+func (c *ServicecatalogV1alpha1Client) UsageKinds() UsageKindInterface {
+	return newUsageKinds(c)
 }
 
 // NewForConfig creates a new ServicecatalogV1alpha1Client for the given config.
