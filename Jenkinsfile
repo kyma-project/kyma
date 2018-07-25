@@ -77,6 +77,7 @@ if(isMaster && currentBuild.currentResult == "SUCCESS") {
     stage("trigger remote cluster"){
         build job: 'azure/master', parameters: [
             string(name:'REVISION', value: "${commit_id}")],
+            string(name:'APP_VERSION', value: "${params.APP_VERSION}")],
             wait: false
     }
 }
