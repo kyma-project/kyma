@@ -5,14 +5,19 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
+	"github.com/kyma-project/kyma/components/connector-service/internal/middleware"
 )
 
 type TokenHandler interface {
 	CreateToken(w http.ResponseWriter, r *http.Request)
 }
 
-func NewHandler(handler TokenHandler) http.Handler {
+func NewHandler(handler TokenHandler, middlewares []middleware.Middleware) http.Handler {
 	router := mux.NewRouter()
+
+	for _, middleware := range middlewares {
+		router.Use(middleware.Handle)
+	}
 
 	tokenRouter := router.PathPrefix("/v1/remoteenvironments").Subrouter()
 

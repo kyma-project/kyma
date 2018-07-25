@@ -11,6 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
 	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/connector-service/internal/internalapi"
+	"github.com/kyma-project/kyma/components/connector-service/internal/middleware"
 	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
@@ -37,8 +38,13 @@ func main() {
 	certUtil := certificates.NewCertificateUtility()
 	tokenGenerator := tokens.NewTokenGenerator(options.tokenLength, tokenCache)
 
-	externalHandler := newExternalHandler(tokenCache, certUtil, tokenGenerator, options, env)
-	internalHandler := newInternalHandler(tokenCache, tokenGenerator, options.connectorServiceHost)
+	middlewares, appErr := middleware.SetupMonitoring()
+	if appErr != nil {
+		panic(appErr)
+	}
+
+	externalHandler := newExternalHandler(tokenCache, certUtil, tokenGenerator, options, env, middlewares)
+	internalHandler := newInternalHandler(tokenCache, tokenGenerator, options.connectorServiceHost, middlewares)
 
 	externalSrv := &http.Server{
 		Addr:    ":" + strconv.Itoa(options.externalAPIPort),
@@ -64,7 +70,7 @@ func main() {
 	wg.Wait()
 }
 
-func newExternalHandler(cache tokencache.TokenCache, utility certificates.CertificateUtility, tokenGenerator tokens.TokenGenerator, opts *options, env *environment) http.Handler {
+func newExternalHandler(cache tokencache.TokenCache, utility certificates.CertificateUtility, tokenGenerator tokens.TokenGenerator, opts *options, env *environment, middlewares []middleware.Middleware) http.Handler {
 	secretsRepository, appErr := newSecretsRepository(opts.namespace)
 	if appErr != nil {
 		log.Infof("Failed to create secrets repository. %s", appErr.Error())
@@ -80,12 +86,12 @@ func newExternalHandler(cache tokencache.TokenCache, utility certificates.Certif
 	}
 	rh := externalapi.NewSignatureHandler(cache, utility, secretsRepository, opts.connectorServiceHost, opts.domainName, subjectValues)
 	ih := externalapi.NewInfoHandler(cache, tokenGenerator, opts.connectorServiceHost, opts.domainName, subjectValues)
-	return externalapi.NewHandler(rh, ih)
+	return externalapi.NewHandler(rh, ih, middlewares)
 }
 
-func newInternalHandler(cache tokencache.TokenCache, tokenGenerator tokens.TokenGenerator, host string) http.Handler {
+func newInternalHandler(cache tokencache.TokenCache, tokenGenerator tokens.TokenGenerator, host string, middlewares []middleware.Middleware) http.Handler {
 	th := internalapi.NewTokenHandler(tokenGenerator, host)
-	return internalapi.NewHandler(th)
+	return internalapi.NewHandler(th, middlewares)
 }
 
 func newSecretsRepository(namespace string) (secrets.Repository, apperrors.AppError) {
