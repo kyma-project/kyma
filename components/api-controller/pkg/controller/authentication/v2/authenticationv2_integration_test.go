@@ -107,5 +107,10 @@ func authenticationFromDefaultConfig() (Interface, error) {
 
 	clientset := istioAuth.NewForConfigOrDie(kubeConfig)
 
-	return New(clientset), nil
+	sampleJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+
+	return New(clientset, sampleJwtDefaultConfig), nil
 }

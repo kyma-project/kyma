@@ -21,5 +21,9 @@ required = ["k8s.io/code-generator/cmd/client-gen"]
   version = "kubernetes-1.10.1"
 
 [[constraint]]
+  name = "k8s.io/apiextensions-apiserver"
+  version = "kubernetes-1.10.1"
+
+[[constraint]]
   name = "github.com/satori/go.uuid"
   version = "1.2.0"

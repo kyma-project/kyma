@@ -16,8 +16,8 @@ import (
 	"reflect"
 
 	authentication "github.com/kyma-project/kyma/components/api-controller/pkg/controller/authentication/v2"
-	ingress "github.com/kyma-project/kyma/components/api-controller/pkg/controller/ingress/v1"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/controller/meta"
+	networking "github.com/kyma-project/kyma/components/api-controller/pkg/controller/networking/v1"
 	service "github.com/kyma-project/kyma/components/api-controller/pkg/controller/service/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/runtime"
@@ -33,14 +33,14 @@ type Controller struct {
 	apisSynced     cache.InformerSynced
 	queue          workqueue.RateLimitingInterface
 	recorder       record.EventRecorder
-	ingCtrl        ingress.Interface
+	networkingCtrl networking.Interface
 	services       service.Interface
 	authentication authentication.Interface
 }
 
 func NewController(
 	kymaInterface kyma.Interface,
-	ingresses ingress.Interface,
+	networking networking.Interface,
 	services service.Interface,
 	authentication authentication.Interface,
 	internalInformerFactory kymaInformers.SharedInformerFactory) *Controller {
@@ -50,7 +50,7 @@ func NewController(
 	c := &Controller{
 
 		kymaInterface:  kymaInterface,
-		ingCtrl:        ingresses,
+		networkingCtrl: networking,
 		services:       services,
 		authentication: authentication,
 		apisLister:     apisInformer.Lister(),
@@ -206,24 +206,24 @@ func (c *Controller) onCreate(apiObj *kymaApi.Api) error {
 
 	metaDto := toMetaDto(api)
 
-	createIngressStatus := c.createIngress(metaDto, api, apiStatusHelper)
+	createNetworkingStatus := c.createNetworking(metaDto, api, apiStatusHelper)
 	createAuthenticationStatus := c.createAuthentication(metaDto, api, apiStatusHelper)
 
-	if createIngressStatus.IsError() || createAuthenticationStatus.IsError() {
+	if createNetworkingStatus.IsError() || createAuthenticationStatus.IsError() {
 		return fmt.Errorf("error while processing create: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
 	}
 	return nil
 }
 
-func (c *Controller) createIngress(metaDto meta.Dto, api *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
+func (c *Controller) createNetworking(metaDto meta.Dto, api *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
 
-	ingressCreatorAdapter := func(api *kymaApi.Api) (*kymaMeta.GatewayResource, error) {
-		return c.ingCtrl.Create(toIngressDto(metaDto, api))
+	networkingCreatorAdapter := func(api *kymaApi.Api) (*kymaMeta.GatewayResource, error) {
+		return c.networkingCtrl.Create(toNetworkingDto(metaDto, api))
 	}
 
-	return c.tmplCreateResource(api, &api.Status.IngressStatus, "ingress", ingressCreatorAdapter,
+	return c.tmplCreateResource(api, &api.Status.NetworkingStatus, "Networking", networkingCreatorAdapter,
 		func(status *kymaMeta.GatewayResourceStatus) {
-			apiStatusHelper.SetIngressStatus(status)
+			apiStatusHelper.SetNetworkingStatus(status)
 		})
 }
 
@@ -253,7 +253,7 @@ func (c *Controller) tmplCreateResource(
 
 	log.Debugf("Creating %s for: %s/%s ver: %s", resourceName, api.Namespace, api.Name, api.ResourceVersion)
 
-	// Error occurred when creating ingress - save error in API CR status
+	// Error occurred when creating resource - save error in API CR status
 	createdResource, createErr := resourceCreator(api)
 
 	if createErr != nil {
@@ -268,7 +268,7 @@ func (c *Controller) tmplCreateResource(
 		return kymaMeta.Error
 	}
 
-	log.Infof("%s created for: %s/%s ver: %s", resourceName, api.Namespace, api.Name, api.ResourceVersion)
+	log.Infof("%s creation finished for: %s/%s ver: %s", resourceName, api.Namespace, api.Name, api.ResourceVersion)
 
 	status := &kymaMeta.GatewayResourceStatus{
 		Code: kymaMeta.Done,
@@ -302,26 +302,26 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 	oldMetaDto := toMetaDto(oldApi)
 	newMetaDto := toMetaDto(newApi)
 
-	updateIngressStatus := c.updateIngress(oldApi, oldMetaDto, newApi, newMetaDto, apiStatusHelper)
+	updateNetworkingStatus := c.updateNetworking(oldApi, oldMetaDto, newApi, newMetaDto, apiStatusHelper)
 	updateAuthenticationStatus := c.updateAuthentication(oldApi, oldMetaDto, newApi, newMetaDto, apiStatusHelper)
 
-	if updateIngressStatus.IsError() || updateAuthenticationStatus.IsError() {
+	if updateNetworkingStatus.IsError() || updateAuthenticationStatus.IsError() {
 		return fmt.Errorf("error while processing update: %s/%s ver: %s", newApi.Namespace, newApi.Name, newApi.ResourceVersion)
 	}
 	return nil
 }
 
-func (c *Controller) updateIngress(oldApi *kymaApi.Api, oldMetaDto meta.Dto, newApi *kymaApi.Api, newMetaDto meta.Dto, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
+func (c *Controller) updateNetworking(oldApi *kymaApi.Api, oldMetaDto meta.Dto, newApi *kymaApi.Api, newMetaDto meta.Dto, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
 
 	updaterAdapter := func(oldApi, newApi *kymaApi.Api) (*kymaMeta.GatewayResource, error) {
-		oldDto := toIngressDto(oldMetaDto, oldApi)
-		newDto := toIngressDto(newMetaDto, newApi)
-		return c.ingCtrl.Update(oldDto, newDto)
+		oldDto := toNetworkingDto(oldMetaDto, oldApi)
+		newDto := toNetworkingDto(newMetaDto, newApi)
+		return c.networkingCtrl.Update(oldDto, newDto)
 	}
 
-	return c.tmplUpdateResource(oldApi, newApi, &newApi.Status.IngressStatus, "Ingress", updaterAdapter,
+	return c.tmplUpdateResource(oldApi, newApi, &newApi.Status.NetworkingStatus, "Networking", updaterAdapter,
 		func(status *kymaMeta.GatewayResourceStatus) {
-			apiStatusHelper.SetIngressStatus(status)
+			apiStatusHelper.SetNetworkingStatus(status)
 		})
 }
 
@@ -392,10 +392,10 @@ func (c *Controller) onDelete(api *kymaApi.Api) error {
 		log.Errorf("Error while deleting authentication for: %s/%s ver: %s. Root cause: %s", api.Namespace, api.Name, api.ResourceVersion, err)
 	}
 
-	log.Debugf("Deleting ingress for: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
-	if err := c.ingCtrl.Delete(toIngressDto(metaDto, api)); err != nil {
+	log.Debugf("Deleting networking for: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
+	if err := c.networkingCtrl.Delete(toNetworkingDto(metaDto, api)); err != nil {
 		deleteResourceFailed = true
-		log.Errorf("Error while deleting ingress for: %s/%s ver: %s. Root cause: %s", api.Namespace, api.Name, api.ResourceVersion, err)
+		log.Errorf("Error while deleting networking for: %s/%s ver: %s. Root cause: %s", api.Namespace, api.Name, api.ResourceVersion, err)
 	}
 
 	if deleteResourceFailed {
@@ -427,18 +427,25 @@ func (c *Controller) apiStatusHelperFor(api *kymaApi.Api) *ApiStatusHelper {
 	return NewApiStatusHelper(c.kymaInterface, api)
 }
 
-func toIngressDto(metaDto meta.Dto, api *kymaApi.Api) *ingress.Dto {
-	return &ingress.Dto{
+func toNetworkingDto(metaDto meta.Dto, api *kymaApi.Api) *networking.Dto {
+	return &networking.Dto{
 		MetaDto:     metaDto,
 		Hostname:    api.Spec.Hostname,
 		ServiceName: api.Spec.Service.Name,
 		ServicePort: api.Spec.Service.Port,
+		Status:      api.Status.NetworkingStatus,
 	}
 }
 
 func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto {
 
-	if len(api.Spec.Authentication) == 0 {
+	// authentication disabled explicitly with authenticationEnabled
+	if api.Spec.AuthenticationEnabled != nil && !*api.Spec.AuthenticationEnabled {
+		return nil
+	}
+
+	// authentication disabled because authenticationEnabled flag is not provided and authentication rules are empty
+	if api.Spec.AuthenticationEnabled == nil && len(api.Spec.Authentication) == 0 {
 		return nil
 	}
 
@@ -449,6 +456,7 @@ func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto
 	}
 
 	dtoRules := make(authentication.Rules, len(api.Spec.Authentication))
+
 	for _, authRule := range api.Spec.Authentication {
 
 		if authRule.Type == kymaApi.JwtType {

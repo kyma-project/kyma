@@ -26,8 +26,8 @@ func (su *ApiStatusHelper) SetAuthenticationStatus(authStatus *kymaMeta.GatewayR
 	su.hasChanged = true
 }
 
-func (su *ApiStatusHelper) SetIngressStatus(ingressStatus *kymaMeta.GatewayResourceStatus) {
-	su.apiCopy.Status.IngressStatus = *ingressStatus
+func (su *ApiStatusHelper) SetNetworkingStatus(networkingStatus *kymaMeta.GatewayResourceStatus) {
+	su.apiCopy.Status.NetworkingStatus = *networkingStatus
 	su.hasChanged = true
 }
 

@@ -8,7 +8,7 @@ import (
 	time "time"
 
 	versioned "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned"
-	gateway_kyma_cx "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx/informers/externalversions/gateway.kyma.cx"
+	gatewaykymacx "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx/informers/externalversions/gateway.kyma.cx"
 	internalinterfaces "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx/informers/externalversions/internalinterfaces"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
@@ -107,9 +107,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Gateway() gateway_kyma_cx.Interface
+	Gateway() gatewaykymacx.Interface
 }
 
-func (f *sharedInformerFactory) Gateway() gateway_kyma_cx.Interface {
-	return gateway_kyma_cx.New(f, f.namespace, f.tweakListOptions)
+func (f *sharedInformerFactory) Gateway() gatewaykymacx.Interface {
+	return gatewaykymacx.New(f, f.namespace, f.tweakListOptions)
 }

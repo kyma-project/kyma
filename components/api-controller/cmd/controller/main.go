@@ -8,9 +8,10 @@ import (
 	istioAuthenticationClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/authentication.istio.io/clientset/versioned"
 	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned"
 	kymaInformers "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx/informers/externalversions"
+	istioNetworkingClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io/clientset/versioned"
 	authenticationV2 "github.com/kyma-project/kyma/components/api-controller/pkg/controller/authentication/v2"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/controller/crd"
-	ingressV1 "github.com/kyma-project/kyma/components/api-controller/pkg/controller/ingress/v1"
+	istioNetworkingV1 "github.com/kyma-project/kyma/components/api-controller/pkg/controller/networking/v1"
 	serviceV1 "github.com/kyma-project/kyma/components/api-controller/pkg/controller/service/v1"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/controller/v1alpha2"
 	log "github.com/sirupsen/logrus"
@@ -28,6 +29,10 @@ func main() {
 
 	stop := make(chan struct{})
 
+	jwtDefaultConfig := initJwtDefaultConfig()
+
+	istioGateway := getIstioGateway()
+
 	kubeConfig := initKubeConfig()
 
 	apiExtensionsClientSet := apiExtensionsClient.NewForConfigOrDie(kubeConfig)
@@ -35,20 +40,21 @@ func main() {
 	registerer := crd.NewRegistrar(apiExtensionsClientSet)
 	registerer.Register(v1alpha2.Crd())
 
-	k8sClientSet := k8sClient.NewForConfigOrDie(kubeConfig)
+	istioNetworkingClientSet := istioNetworkingClient.NewForConfigOrDie(kubeConfig)
+	istioNetworkingV1Interface := istioNetworkingV1.New(istioNetworkingClientSet, istioGateway)
 
-	ingressV1Interface := ingressV1.New(k8sClientSet)
+	k8sClientSet := k8sClient.NewForConfigOrDie(kubeConfig)
 	serviceV1Interface := serviceV1.New(k8sClientSet)
 
 	istioAuthenticationClientSet := istioAuthenticationClient.NewForConfigOrDie(kubeConfig)
-	authenticationV2Interface := authenticationV2.New(istioAuthenticationClientSet)
+	authenticationV2Interface := authenticationV2.New(istioAuthenticationClientSet, jwtDefaultConfig)
 
 	kymaClientSet := kyma.NewForConfigOrDie(kubeConfig)
 
 	internalInformerFactory := kymaInformers.NewSharedInformerFactory(kymaClientSet, time.Second*30)
 	go internalInformerFactory.Start(stop)
 
-	v1alpha2Controller := v1alpha2.NewController(kymaClientSet, ingressV1Interface, serviceV1Interface, authenticationV2Interface, internalInformerFactory)
+	v1alpha2Controller := v1alpha2.NewController(kymaClientSet, istioNetworkingV1Interface, serviceV1Interface, authenticationV2Interface, internalInformerFactory)
 	v1alpha2Controller.Run(2, stop)
 }
 
@@ -77,4 +83,26 @@ func getLoggerLevel() log.Level {
 		}
 	}
 	return log.InfoLevel
+}
+
+func getIstioGateway() string {
+	gateway := os.Getenv("GATEWAY_FQDN")
+
+	if gateway == "" {
+		log.Fatal("gateway not provided. Please provide env variables GATEWAY_FQDN")
+	}
+	return gateway
+}
+
+func initJwtDefaultConfig() authenticationV2.JwtDefaultConfig {
+	issuer := os.Getenv("DEFAULT_ISSUER")
+	jwksURI := os.Getenv("DEFAULT_JWKS_URI")
+
+	if issuer == "" || jwksURI == "" {
+		log.Fatal("default issuer or jwksURI not provided. Please provide env variables DEFAULT_ISSUER and DEFAULT_JWKS_URI")
+	}
+	return authenticationV2.JwtDefaultConfig{
+		Issuer:  issuer,
+		JwksUri: jwksURI,
+	}
 }

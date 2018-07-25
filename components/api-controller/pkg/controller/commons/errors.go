@@ -1,10 +1,9 @@
 package commons
 
 import (
-	"fmt"
-
-	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
+	"fmt"
+	"github.com/satori/go.uuid"
 )
 
 // Logs root cause and returns new error to hide implementation details

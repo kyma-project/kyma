@@ -1,0 +1,12 @@
+---
+apiVersion: gateway.kyma.cx/v1alpha2
+kind: Api
+metadata:
+    name: sample-api
+spec:
+    service:
+      name: kubernetes
+      port: 443
+    hostname: kubernetes.kyma.local
+    authenticationEnabled: false # optional (forces auth to be disabled no matter what is inside authentication spec)
+    authentication: []

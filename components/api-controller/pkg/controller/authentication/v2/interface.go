@@ -13,6 +13,8 @@ type Interface interface {
 	Delete(dto *Dto) error
 }
 
+type JwtDefaultConfig Jwt
+
 type Dto struct {
 	MetaDto     meta.Dto
 	ServiceName string

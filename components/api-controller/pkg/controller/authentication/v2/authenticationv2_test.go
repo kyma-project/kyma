@@ -14,7 +14,11 @@ func TestCreateAuthentication_ShouldCreateNewPolicy(t *testing.T) {
 
 	// given
 	fakeIstioAuth := istioFakes.NewSimpleClientset()
-	authentication := New(fakeIstioAuth)
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+	authentication := New(fakeIstioAuth, fakeJwtDefaultConfig)
 
 	dto := &Dto{
 		MetaDto: meta.Dto{
@@ -53,13 +57,23 @@ func TestCreateAuthentication_ShouldCreateNewPolicy(t *testing.T) {
 	}
 }
 
-func TestCreateAuthentication_ShouldNotCreatePolicyIfDisabled(t *testing.T) {
+func TestCreateAuthentication_ShouldCreateNewPolicyWithDefaultJwtConfigIfRulesAreEmpty(t *testing.T) {
 
 	// given
-	fakeIstioConfig := istioFakes.NewSimpleClientset()
-	authentication := New(fakeIstioConfig)
+	fakeIstioAuth := istioFakes.NewSimpleClientset()
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+	authentication := New(fakeIstioAuth, fakeJwtDefaultConfig)
 
-	var dto *Dto = nil
+	dto := &Dto{
+		MetaDto: meta.Dto{
+			Name:      "test-api",
+			Namespace: "test-namespace",
+		},
+		ServiceName: "dummy-service",
+	}
 
 	// when
 	gatewayResource, err := authentication.Create(dto)
@@ -70,25 +84,28 @@ func TestCreateAuthentication_ShouldNotCreatePolicyIfDisabled(t *testing.T) {
 		return
 	}
 
-	if gatewayResource != nil {
-		t.Error("Gateway resource should be nil.")
+	if gatewayResource == nil {
+		t.Error("Gateway resource should not be nil.")
+		return
+	}
+
+	if gatewayResource.Name != "test-api" {
+		t.Error("Gateway resource name should be the same as api name.")
 		return
 	}
 }
 
-func TestCreateAuthRule_ShouldNotCreatePolicyIfRulesEmpty(t *testing.T) {
+func TestCreateAuthentication_ShouldNotCreatePolicyIfDisabled(t *testing.T) {
 
 	// given
 	fakeIstioConfig := istioFakes.NewSimpleClientset()
-	authentication := New(fakeIstioConfig)
-
-	dto := &Dto{
-		MetaDto: meta.Dto{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		ServiceName: "dummy-service",
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
 	}
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
+
+	var dto *Dto = nil
 
 	// when
 	gatewayResource, err := authentication.Create(dto)
@@ -109,7 +126,11 @@ func TestUpdateAuthentication_ShouldCreateNewPolicy(t *testing.T) {
 
 	// given
 	fakeIstioConfig := istioFakes.NewSimpleClientset()
-	authentication := New(fakeIstioConfig)
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
 
 	oldDto := &Dto{}
 
@@ -150,6 +171,46 @@ func TestUpdateAuthentication_ShouldCreateNewPolicy(t *testing.T) {
 	}
 }
 
+func TestUpdateAuthentication_ShouldCreateNewPolicyWithDefaultJwtConfigIfRulesAreEmpty(t *testing.T) {
+
+	// given
+	fakeIstioConfig := istioFakes.NewSimpleClientset()
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
+
+	oldDto := &Dto{}
+
+	newDto := &Dto{
+		MetaDto: meta.Dto{
+			Name:      "test-api",
+			Namespace: "test-namespace",
+		},
+		ServiceName: "dummy-service",
+	}
+
+	// when
+	gatewayResource, err := authentication.Update(oldDto, newDto)
+
+	// then
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	if gatewayResource == nil {
+		t.Error("Gateway resource should not be nil.")
+		return
+	}
+
+	if gatewayResource.Name != "test-api" {
+		t.Error("Gateway resource name should be the same as api name.")
+		return
+	}
+}
+
 func TestUpdateAuthentication_ShouldDeleteOldPolicyIfAuthenticationDisabled(t *testing.T) {
 
 	// given
@@ -161,7 +222,11 @@ func TestUpdateAuthentication_ShouldDeleteOldPolicyIfAuthenticationDisabled(t *t
 		Spec: &istioAuthApi.PolicySpec{},
 	}
 	fakeIstioConfig := istioFakes.NewSimpleClientset(testAuthentication)
-	authentication := New(fakeIstioConfig)
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
 
 	oldDto := &Dto{
 		MetaDto: meta.Dto{
@@ -192,59 +257,15 @@ func TestUpdateAuthentication_ShouldDeleteOldPolicyIfAuthenticationDisabled(t *t
 	}
 }
 
-func TestUpdateAuthentication_ShouldDeleteOldPolicyIfRulesEmpty(t *testing.T) {
-
-	// given
-	testAuthentication := &istioAuthApi.Policy{
-		ObjectMeta: k8sMeta.ObjectMeta{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		Spec: &istioAuthApi.PolicySpec{},
-	}
-	fakeIstioConfig := istioFakes.NewSimpleClientset(testAuthentication)
-	authentication := New(fakeIstioConfig)
-
-	oldDto := &Dto{
-		MetaDto: meta.Dto{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		Status: kymaMeta.GatewayResourceStatus{
-			Resource: kymaMeta.GatewayResource{
-				Name: "test-api",
-			},
-		},
-	}
-
-	newDto := &Dto{
-		MetaDto: meta.Dto{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		ServiceName: "dummy-service",
-	}
-
-	// when
-	gatewayResource, err := authentication.Update(oldDto, newDto)
-
-	// then
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-
-	if gatewayResource != nil {
-		t.Error("Gateway resource should be nil (should only delete old resource).")
-		return
-	}
-}
-
 func TestUpdateAuthentication_ShouldDoNothingIfSRulesHasNotChanged(t *testing.T) {
 
 	// given
 	fakeIstioConfig := istioFakes.NewSimpleClientset()
-	authentication := New(fakeIstioConfig)
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
 
 	oldApi := &Dto{
 		MetaDto: meta.Dto{
@@ -311,7 +332,11 @@ func TestDeleteAuthentication(t *testing.T) {
 		Spec: &istioAuthApi.PolicySpec{},
 	}
 	fakeIstioConfig := istioFakes.NewSimpleClientset(testAuthentication)
-	authentication := New(fakeIstioConfig)
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
 
 	dto := &Dto{
 		MetaDto: meta.Dto{
@@ -340,7 +365,11 @@ func TestDeleteAuthentication_ShouldNotFailIfNil(t *testing.T) {
 
 	// given
 	fakeIstioConfig := istioFakes.NewSimpleClientset()
-	authentication := New(fakeIstioConfig)
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
 
 	var dto *Dto = nil
 
@@ -358,7 +387,11 @@ func TestDeleteAuthentication_ShouldNotFailIfOldNameEmpty(t *testing.T) {
 
 	// given
 	fakeIstioConfig := istioFakes.NewSimpleClientset()
-	authRules := New(fakeIstioConfig)
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+	authRules := New(fakeIstioConfig, fakeJwtDefaultConfig)
 
 	dto := &Dto{
 		MetaDto: meta.Dto{

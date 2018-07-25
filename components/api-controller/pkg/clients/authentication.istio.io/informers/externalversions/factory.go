@@ -8,7 +8,7 @@ import (
 	time "time"
 
 	versioned "github.com/kyma-project/kyma/components/api-controller/pkg/clients/authentication.istio.io/clientset/versioned"
-	authentication_istio_io "github.com/kyma-project/kyma/components/api-controller/pkg/clients/authentication.istio.io/informers/externalversions/authentication.istio.io"
+	authenticationistioio "github.com/kyma-project/kyma/components/api-controller/pkg/clients/authentication.istio.io/informers/externalversions/authentication.istio.io"
 	internalinterfaces "github.com/kyma-project/kyma/components/api-controller/pkg/clients/authentication.istio.io/informers/externalversions/internalinterfaces"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
@@ -107,9 +107,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Authentication() authentication_istio_io.Interface
+	Authentication() authenticationistioio.Interface
 }
 
-func (f *sharedInformerFactory) Authentication() authentication_istio_io.Interface {
-	return authentication_istio_io.New(f, f.namespace, f.tweakListOptions)
+func (f *sharedInformerFactory) Authentication() authenticationistioio.Interface {
+	return authenticationistioio.New(f, f.namespace, f.tweakListOptions)
 }
