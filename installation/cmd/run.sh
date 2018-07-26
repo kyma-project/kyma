@@ -29,19 +29,24 @@ do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
+VM_DRIVER="virtualbox"
+if [ `uname -s` = "Darwin" ]; then
+    VM_DRIVER="hyperkit"
+fi
+
 if [[ ! ${SKIP_MINIKUBE_START} ]]; then
-    bash $CURRENT_DIR/../scripts/minikube.sh --domain ${DOMAIN}
+    bash ${CURRENT_DIR}/../scripts/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}"
 fi
 
 if [ -z "$CR_PATH" ]; then
 
-    TMPDIR=`mktemp -d "$CURRENT_DIR/../../temp-XXXXXXXXXX"`
-    CR_PATH="$TMPDIR/installer-cr-local.yaml"
+    TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
+    CR_PATH="${TMPDIR}/installer-cr-local.yaml"
 
-    bash $CURRENT_DIR/../scripts/create-cr.sh --output ${CR_PATH} --domain ${DOMAIN}
-    bash $CURRENT_DIR/../scripts/installer.sh --local --cr "$CR_PATH"
+    bash ${CURRENT_DIR}/../scripts/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}"
+    bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}"
 
     rm -rf $TMPDIR
 else
-    bash $CURRENT_DIR/../scripts/installer.sh --cr "$CR_PATH"
+    bash ${CURRENT_DIR}/../scripts/installer.sh --cr "${CR_PATH}"
 fi
