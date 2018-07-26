@@ -1,7 +1,7 @@
 deployment:
   image:
     name: application-connector
-    tag: 0.2.56
+    tag: 0.2.19
     pullPolicy: IfNotPresent
   args:
     proxyPort: &proxyPort 8080
@@ -20,5 +20,5 @@ minioUserSecretName: remoteenvironments-minio-user
 tests:
   image:
     name: application-connector-tests
-    tag: 0.2.19
+    tag: 0.2.56
     pullPolicy: IfNotPresent
