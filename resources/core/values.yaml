@@ -17,6 +17,10 @@ helm-broker:
 azure-broker:
   enabled: false
 
+etcd-operator:
+  backupOperator:
+    enabled: false
+
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project

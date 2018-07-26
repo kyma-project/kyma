@@ -1,0 +1,36 @@
+etcdOperator:
+  image:
+    repository: quay.io/coreos/etcd-operator
+    tag: v0.9.2
+    # valid values are "IfNotPresent", "Never", and "Always"
+    pullPolicy: "IfNotPresent"
+  resources:
+    cpu: 100m
+    memory: 128Mi
+  readinessProbe:
+    enabled: false
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 3
+  livenessProbe:
+    enabled: false
+    initialDelaySeconds: 0
+    periodSeconds: 10
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 3
+backupOperator:
+  image:
+    repository: quay.io/coreos/etcd-operator
+    tag: v0.9.2
+    # valid values are "IfNotPresent", "Never", and "Always"
+    pullPolicy: "IfNotPresent"
+  resources:
+    cpu: 100m
+    memory: 128Mi
+  storageType: ABS
+  abs:
+    storageAccount: ""
+    storageKey: ""
