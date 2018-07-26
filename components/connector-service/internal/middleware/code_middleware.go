@@ -23,28 +23,28 @@ func (lrw *responseWriterWrapper) WriteHeader(code int) {
 }
 
 type codeMiddleware struct {
-	summaryVec *prometheus.SummaryVec
+	histogramVec *prometheus.HistogramVec
 }
 
-func NewCodeMiddleware(name, namespace string) (*codeMiddleware, apperrors.AppError) {
-	summaryVec := newCodeSummaryVec(name, namespace)
+func NewCodeMiddleware(name string) (*codeMiddleware, apperrors.AppError) {
+	histogramVec := newCodeHistogram(name)
 
-	err := prometheus.Register(summaryVec)
+	err := prometheus.Register(histogramVec)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to create middleware %s: %s", name, err.Error())
 	}
 
-	return &codeMiddleware{summaryVec: summaryVec}, nil
+	return &codeMiddleware{histogramVec: histogramVec}, nil
 }
 
-func newCodeSummaryVec(name, namespace string) *prometheus.SummaryVec {
-	return prometheus.NewSummaryVec(
-		prometheus.SummaryOpts{
-			Namespace: namespace,
-			Name:      name,
-			Help:	   "Status codes returned by each endpoint",
+func newCodeHistogram(name string) *prometheus.HistogramVec {
+	return prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    name,
+			Help:    "Status codes returned by each endpoint",
+			Buckets: []float64{200, 201, 400, 403, 404, 409, 500, 503},
 		},
-		[]string{"endpoint", "code"},
+		[]string{"endpoint", "method"},
 	)
 }
 
@@ -64,7 +64,7 @@ func (dm *codeMiddleware) Handle(next http.Handler) http.Handler {
 		if err != nil {
 			logrus.Errorf("Failed to get path template: %s", err.Error())
 		} else {
-			dm.summaryVec.WithLabelValues(template, r.Method).Observe(float64(writerWrapper.statusCode))
+			dm.histogramVec.WithLabelValues(template, r.Method).Observe(float64(writerWrapper.statusCode))
 		}
 	})
 }

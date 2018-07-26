@@ -13,8 +13,8 @@ type durationMiddleware struct {
 	summaryVec *prometheus.SummaryVec
 }
 
-func NewDurationMiddleware(name, namespace string) (*durationMiddleware, apperrors.AppError) {
-	summaryVec := newDurationSummaryVec(name, namespace)
+func NewDurationMiddleware(name string) (*durationMiddleware, apperrors.AppError) {
+	summaryVec := newDurationSummaryVec(name)
 
 	err := prometheus.Register(summaryVec)
 	if err != nil {
@@ -24,13 +24,12 @@ func NewDurationMiddleware(name, namespace string) (*durationMiddleware, apperro
 	return &durationMiddleware{summaryVec: summaryVec}, nil
 }
 
-func newDurationSummaryVec(name, namespace string) *prometheus.SummaryVec {
+func newDurationSummaryVec(name string) *prometheus.SummaryVec {
 	return prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
-			Namespace:  namespace,
 			Name:       name,
-			Help: 		"Response time for each endpoint",
-			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+			Help:       "Response time for each endpoint",
+			Objectives: map[float64]float64{0.5: 0.05},
 		},
 		[]string{"endpoint", "method"},
 	)

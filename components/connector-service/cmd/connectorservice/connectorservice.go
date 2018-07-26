@@ -15,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -65,6 +66,12 @@ func main() {
 
 	go func() {
 		log.Info(internalSrv.ListenAndServe())
+	}()
+
+	http.Handle("/metrics", promhttp.Handler())
+
+	go func() {
+		log.Fatal(http.ListenAndServe(":9090", nil))
 	}()
 
 	wg.Wait()
