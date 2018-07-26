@@ -16,7 +16,7 @@ To run Kyma locally, download these tools:
 - [Minikube](https://github.com/kubernetes/minikube) 0.28.0
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.9.0
 - [Helm](https://github.com/kubernetes/helm) 2.8.2
-- [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver)
+- [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) (not needed for Linux users)
 
 Read the [prerequisite reasoning](019-prereq-reasoning.md) document to learn why Kyma uses these tools.
 
@@ -36,6 +36,7 @@ Follow these steps to "always trust" the Kyma certificate on macOS:
 >**NOTE:**
 - The process is complete when you close the certificate information window and enter your password. You don't get the expected results if you try to use the certificate before completing this step.
 - "Always trusting" the certificate does not work with Mozilla Firefox.
+- Linux users do not have to import the certificate to the system as mentioned above.
 
 ## Install Kyma on Minikube
 
@@ -46,9 +47,16 @@ Follow these steps to "always trust" the Kyma certificate on macOS:
   cd installation
   ```
 
-2. Run the `run.sh` script:
+2. (For macOS users) Run the `run.sh` script:
   ```
   cmd/run.sh
+  ```
+
+ (For Linux users) First start a minikube cluster, and run the `run.sh` script, because the hyperkit driver is not available on Linux:
+
+  ```
+  minikube start
+  cmd/run.sh --skip-minikube-start
   ```
 
 The `run.sh` script does not show the progress of the Kyma installation, which allows you to perform other tasks in the terminal window. However, to see the status of the Kyma installation, run this script after you set up the cluster and the installer:
