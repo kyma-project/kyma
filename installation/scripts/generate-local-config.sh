@@ -18,6 +18,8 @@ UI_TEST_PASSWORD=nimda123
 
 ##########
 
+kubectl create namespace "kyma-installer"
+
 echo -e "\nGenerating secret for UI Test"
 bash ${ROOT_PATH}/create-generic-secret.sh "${ROOT_PATH}/../resources/ui-test-secret.yaml" \
   "UI_TEST_USER" "${UI_TEST_USER}" \

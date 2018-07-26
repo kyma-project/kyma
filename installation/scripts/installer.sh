@@ -33,7 +33,6 @@ echo "
 ################################################################################
 "
 
-kubectl create namespace "kyma-installer"
 kubectl apply -f $CURRENT_DIR/../../resources/cluster-prerequisites/limit-range.yaml -n "kyma-installer"
 kubectl apply -f $CURRENT_DIR/../../resources/cluster-prerequisites/resource-quotas-installer.yaml
 kubectl apply -f $CURRENT_DIR/../resources/installer-types.yaml
@@ -46,10 +45,7 @@ kubectl apply -f $CURRENT_DIR/../resources/installer.yaml -n "kyma-installer"
 $CURRENT_DIR/is-ready.sh kube-system k8s-app kube-dns
 
 if [ $LOCAL ]; then
-    bash $CURRENT_DIR/generate-local-config.sh
     bash $CURRENT_DIR/copy-resources.sh
-else
-    bash $CURRENT_DIR/generate-cluster-config.sh
 fi
 
 if [ $CR_PATH ]; then
