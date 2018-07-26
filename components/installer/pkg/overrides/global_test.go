@@ -21,6 +21,8 @@ global:
   istio:
     tls:
       secretName: "istio-ingress-certs"
+  ectdBackupABS:
+    containerName: ""
 `
 
 			installData := NewInstallationDataCreator().WithDomain("kyma.local").WithEmptyIP().GetData()
@@ -43,6 +45,8 @@ global:
   istio:
     tls:
       secretName: "istio-ingress-certs"
+  ectdBackupABS:
+    containerName: ""
 `
 			installData := NewInstallationDataCreator().WithDomain("kyma.local").WithIP("100.100.100.100").GetData()
 
@@ -64,6 +68,8 @@ global:
   istio:
     tls:
       secretName: "istio-ingress-certs"
+  ectdBackupABS:
+    containerName: ""
 `
 			installData := NewInstallationDataCreator().WithDomain("kyma.local").WithIP("100.100.100.100").WithCert("abc", "def").GetData()
 
@@ -85,8 +91,37 @@ global:
   istio:
     tls:
       secretName: "istio-ingress-certs"
+  ectdBackupABS:
+    containerName: ""
 `
 			installData := NewInstallationDataCreator().WithDomain("kyma.local").WithIP("100.100.100.100").WithRemoteEnvCa("xyz").WithRemoteEnvCaKey("abc").GetData()
+
+			overrides, err := GetGlobalOverrides(&installData)
+
+			So(err, ShouldBeNil)
+			So(overrides, ShouldEqual, dummyOverridesForGlobal)
+		})
+
+		Convey("when EctdBackupABSContainerName property is provided then ectdBackupABS.containerName should exist", func() {
+			const dummyOverridesForGlobal = `
+global:
+  tlsCrt: ""
+  tlsKey: ""
+  isLocalEnv: false
+  domainName: "kyma.local"
+  remoteEnvCa: ""
+  remoteEnvCaKey: ""
+  istio:
+    tls:
+      secretName: "istio-ingress-certs"
+  ectdBackupABS:
+    containerName: "abs/container/name"
+`
+			installData := NewInstallationDataCreator().
+				WithDomain("kyma.local").
+				WithIP("100.100.100.100").
+				WithEctdBackupABSContainerName("abs/container/name").
+				GetData()
 
 			overrides, err := GetGlobalOverrides(&installData)
 

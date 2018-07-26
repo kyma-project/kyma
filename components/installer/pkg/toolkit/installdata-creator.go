@@ -109,6 +109,22 @@ func (sc *InstallationDataCreator) WithAdminGroup(adminGroupName string) *Instal
 	return sc
 }
 
+// WithEtcdOperator sets value for EtcdOperator property
+func (sc *InstallationDataCreator) WithEtcdOperator(enabled, storageAccount, storageKey string) *InstallationDataCreator {
+	sc.installationData.EnableEtcdBackupOperator = enabled
+	sc.installationData.EtcdBackupABSAccount = storageAccount
+	sc.installationData.EtcdBackupABSKey = storageKey
+
+	return sc
+}
+
+// WithEctdBackupABSContainerName sets value for EctdBackupABSContainerName property
+func (sc *InstallationDataCreator) WithEctdBackupABSContainerName(path string) *InstallationDataCreator {
+	sc.installationData.EctdBackupABSContainerName = path
+
+	return sc
+}
+
 ////////////////////////////////////////
 // GetData returns InstallationData created by InstallationDataCreator
 func (sc *InstallationDataCreator) GetData() config.InstallationData {

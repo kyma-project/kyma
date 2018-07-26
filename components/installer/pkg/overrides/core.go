@@ -24,6 +24,12 @@ test:
   auth:
     username: "{{.UITestUser}}"
     password: "{{.UITestPassword}}"
+etcd-operator:
+  backupOperator:
+    enabled: "{{.EnableEtcdBackupOperator}}"
+    abs:
+      storage-account: "{{.EtcdBackupABSAccount}}"
+      storage-key: "{{.EtcdBackupABSKey}}"
 `
 
 // GetCoreOverrides - returns values overrides for core installation basing on domain
