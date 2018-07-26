@@ -6,7 +6,7 @@ global:
 deployment:
   image:
     name: gateway
-    tag: 0.2.56
+    tag: 0.2.19
     pullPolicy: IfNotPresent
   args:
     proxyPort: &proxyPort 8080
