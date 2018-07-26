@@ -25,18 +25,18 @@ func TestEventDetails_Encode(t *testing.T) {
 					sourceType:        "ec",
 				},
 			},
-			want: `prod.com\.sap\.hybris.ec.order\.created.v1`},
+			want: `prod.local\.kyma\.commerce.ec.order\.created.v1`},
 		{name: "event2",
 			fields: fields{
 				eventType:        "order.created",
 				eventTypeVersion: "v1",
 				source: &source{
 					sourceEnvironment: "prod.com",
-					sourceNamespace:   "sap.hybris",
+					sourceNamespace:   "local.kyma",
 					sourceType:        "ec",
 				},
 			},
-			want: `prod\.com.sap\.hybris.ec.order\.created.v1`},
+			want: `prod\.com.local\.kyma.ec.order\.created.v1`},
 		{name: "event3",
 			fields: fields{
 				eventType:        "order.created.v1",
@@ -47,7 +47,7 @@ func TestEventDetails_Encode(t *testing.T) {
 					sourceType:        "ec",
 				},
 			},
-			want: `com\.sap\.hybris\.prod.com\.sap\.hybris.ec.order\.created\.v1.`},
+			want: `local\.kyma\.commerce\.prod.local\.kyma\.commerce.ec.order\.created\.v1.`},
 		{name: "event4",
 			fields: fields{
 				eventType:        `order\.created`,
