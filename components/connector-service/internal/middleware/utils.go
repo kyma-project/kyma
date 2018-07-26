@@ -11,12 +11,12 @@ type Middleware interface {
 
 func SetupMonitoring() ([]Middleware, apperrors.AppError) {
 
-	durationMiddleware, err := NewDurationMiddleware("connector-service-endpoints-duration", "kyma-integration")
+	durationMiddleware, err := NewDurationMiddleware("connector_service_endpoints_duration", "integration")
 	if err != nil {
 		return nil, apperrors.Internal("Failed to setup duration middleware: %s", err.Error())
 	}
 
-	codeMiddleware, err := NewCodeMiddleware("connector-service-endpoints-responses", "kyma-integration")
+	codeMiddleware, err := NewCodeMiddleware("connector_service_endpoints_responses", "integration")
 	if err != nil {
 		return nil, apperrors.Internal("Failed to setup response codes middleware: %s", err.Error())
 	}
