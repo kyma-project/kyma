@@ -79,6 +79,18 @@ spec:
                 name: ui-test
                 key: password
                 optional: true
+          - name: ETCD_BACKUP_ABS_ACCOUNT
+            valueFrom:
+              secretKeyRef:
+                name: etcd-backup-abs-credentials
+                key: storage-account
+                optional: true
+          - name: ETCD_BACKUP_ABS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: etcd-backup-abs-credentials
+                key: storage-key
+                optional: true
           - name: EXTERNAL_IP_ADDRESS
             valueFrom:
               configMapKeyRef:
@@ -109,6 +121,18 @@ spec:
               configMapKeyRef:
                 name: installation-config
                 key: admin_group
+                optional: true
+          - name: ENABLE_ETCD_BACKUP_OPERATOR
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: enable_etcd_backup_operator
+                optional: true
+          - name: ECTD_BACKUP_ABS_CONTAINER_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: ectd_backup_abs_container_name
                 optional: true
 ---
 kind: ClusterRole

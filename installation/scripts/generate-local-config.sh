@@ -69,6 +69,8 @@ bash ${ROOT_PATH}/create-config-map.sh \
 --k8s-apiserver-url "${MINIKUBE_IP}" \
 --k8s-apiserver-ca "${MINIKUBE_CA}" \
 --admin-group "" \
+--enable-etcd-backup-operator "false" \
+--ectd-backup-abs-container-name "" \
 --output ${OUTPUT}
 
 kubectl create -f ${OUTPUT}

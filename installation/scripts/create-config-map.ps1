@@ -5,6 +5,8 @@ param (
     [string]$K8S_APISERVER_URL = "",
     [string]$K8S_APISERVER_CA = "",
     [string]$ADMIN_GROUP = "",
+    [string]$ENABLE_ETCD_BACKUP_OPERATOR = "",
+    [string]$ECTD_BACKUP_ABS_CONTAINER_NAME = "",
     [string]$OUTPUT = ""
 )
 
@@ -19,3 +21,5 @@ Copy-Item -Path $TPL_PATH -Destination $OUTPUT
 (Get-Content $OUTPUT).replace("__K8S_APISERVER_URL__", $K8S_APISERVER_URL) | Set-Content $OUTPUT
 (Get-Content $OUTPUT).replace("__K8S_APISERVER_CA__", $K8S_APISERVER_CA) | Set-Content $OUTPUT
 (Get-Content $OUTPUT).replace("__ADMIN_GROUP__", $ADMIN_GROUP) | Set-Content $OUTPUT
+(Get-Content $OUTPUT).replace("__ENABLE_ETCD_BACKUP_OPERATOR__", $ENABLE_ETCD_BACKUP_OPERATOR) | Set-Content $OUTPUT
+(Get-Content $OUTPUT).replace("__ECTD_BACKUP_ABS_CONTAINER_NAME__", $ECTD_BACKUP_ABS_CONTAINER_NAME) | Set-Content $OUTPUT
