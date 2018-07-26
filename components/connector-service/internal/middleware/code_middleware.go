@@ -42,6 +42,7 @@ func newCodeSummaryVec(name, namespace string) *prometheus.SummaryVec {
 		prometheus.SummaryOpts{
 			Namespace: namespace,
 			Name:      name,
+			Help:	   "Status codes returned by each endpoint",
 		},
 		[]string{"endpoint", "code"},
 	)
