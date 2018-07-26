@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "test-{{ template "fullname" . }}-ui-acceptance"
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+    "helm-chart-test": "true"
+spec:
+  hostNetwork: true
+  containers:
+    - name: "test-{{ template "fullname" . }}-ui-acceptance"
+      # image: {{ .Values.global.containerRegistry.path }}/ui-tests:{{ .Values.test.acceptance.ui.imageTag }}
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.test.acceptance.ui.image.name }}:{{ .Values.test.acceptance.ui.image.tag }}
+      imagePullPolicy: Always
+      resources:
+         requests:
+           memory: {{ .Values.test.acceptance.ui.requests.memory }}
+           cpu: {{ .Values.test.acceptance.ui.requests.cpu }}
+         limits:
+           memory: {{ .Values.test.acceptance.ui.limits.memory }}
+           cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
+      env:
+        - name: DOMAIN
+          value: {{ .Values.global.domainName }}
+        - name: LOGIN
+          value: {{ .Values.test.auth.username }}
+        - name: PASSWORD
+          value: {{ .Values.test.auth.password }}
+  restartPolicy: Never  
