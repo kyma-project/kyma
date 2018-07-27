@@ -50,4 +50,4 @@ spec:
           - containerPort: {{ .Values.deployment.args.internalAPIPort }}
             name: int-api-port
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
-            name: ext-api-port
+            name: http-api-port

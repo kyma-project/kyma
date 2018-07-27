@@ -14,7 +14,7 @@ spec:
   ports:
     - port: {{ .Values.service.externalapi.port }}
       protocol: TCP
-      name: ext-api-port
+      name: http-api-port
   selector:
     app: {{ .Release.Name }}-gateway
     release: {{ .Release.Name }}-gateway
