@@ -34,14 +34,14 @@ func (a *istioImpl) Create(dto *Dto) (*kymaMeta.GatewayResource, error) {
 
 	istioAuthPolicy := toIstioAuthPolicy(dto, a.jwtDefaultConfig)
 
-	log.Debugf("Creating authentication policy: %v", istioAuthPolicy)
+	log.Infof("Creating authentication policy: %+v", istioAuthPolicy)
 
 	created, err := a.istioAuthPolicyInterface(dto.MetaDto).Create(istioAuthPolicy)
 	if err != nil {
 		return nil, commons.HandleError(err, "error while creating authentication policy")
 	}
 
-	log.Debugf("Authentication policy created: %v", istioAuthPolicy)
+	log.Infof("Authentication policy %s/%s ver: %s created.", istioAuthPolicy.Namespace, istioAuthPolicy.Name, istioAuthPolicy.ResourceVersion)
 	return gatewayResourceFrom(created), nil
 }
 
@@ -49,7 +49,7 @@ func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, erro
 
 	if isAuthenticationDisabled(newDto) {
 
-		log.Debugf("Authentication disabled. Trying to delete the old authentication policy...")
+		log.Infof("Authentication disabled. Trying to delete the old authentication policy...")
 		// no new new policy; we only have to delete the old one, if it exists
 		if err := a.Delete(oldDto); err != nil {
 			return nil, err
@@ -60,12 +60,12 @@ func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, erro
 	// there is an authentication policy to update / create
 	newIstioAuthPolicy := toIstioAuthPolicy(newDto, a.jwtDefaultConfig)
 
-	log.Debugf("Authentication enabled. Trying to create or update authentication policy: %v", newIstioAuthPolicy)
+	log.Infof("Authentication enabled. Trying to create or update authentication policy with: %v", newIstioAuthPolicy)
 
-	// checking if authentication policy has to be created
-	if oldDto == nil || oldDto.Status.Resource.Name == "" {
+	// checking if authentication policy has to be created (was disabled before)
+	if isAuthenticationDisabled(oldDto) || oldDto.Status.Resource.Name == "" {
 
-		log.Debug("Authentication policy does not exist. Creating...")
+		log.Infof("Authentication policy does not exist. Creating...")
 
 		// create new authentication policy
 		createdResource, err := a.Create(newDto)
@@ -74,7 +74,7 @@ func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, erro
 			return nil, commons.HandleError(err, "error while creating authentication policy (can not create a new one)")
 		}
 
-		log.Debugf("Authentication policy created: %v", createdResource)
+		log.Infof("Authentication policy created: %v", createdResource)
 		return createdResource, nil
 	}
 
@@ -82,28 +82,28 @@ func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, erro
 
 	if a.isEqual(oldIstioAuthPolicy, newIstioAuthPolicy) {
 
-		log.Debugf("Update skipped: authentication policy has not changed.")
-		return nil, nil
+		log.Infof("Update skipped: authentication policy has not changed.")
+		return gatewayResourceFrom(oldIstioAuthPolicy), nil
 	}
 
 	newIstioAuthPolicy.ObjectMeta.ResourceVersion = oldDto.Status.Resource.Version
 
 	// new authentication policy should be updated (it was created earlier and it differs from the old one)
-	log.Debugf("Updating authentication policy: %v", newIstioAuthPolicy)
+	log.Infof("Updating authentication policy: %v", newIstioAuthPolicy)
 
 	updated, err := a.istioAuthPolicyInterface(newDto.MetaDto).Update(newIstioAuthPolicy)
 	if err != nil {
 		return nil, commons.HandleError(err, "error while updating authentication policy")
 	}
 
-	log.Debugf("Authentication policy updated: %v", updated)
+	log.Infof("Authentication policy updated: %v", updated)
 	return gatewayResourceFrom(updated), nil
 }
 
 func (a *istioImpl) Delete(dto *Dto) error {
 
-	if dto == nil {
-		log.Debug("Delete skipped: no authentication policy to delete.")
+	if isAuthenticationDisabled(dto) {
+		log.Infof("Delete skipped: no authentication policy to delete.")
 		return nil
 	}
 	return a.deleteByName(dto.MetaDto)
@@ -113,10 +113,10 @@ func (a *istioImpl) deleteByName(meta meta.Dto) error {
 
 	// if there is no authentication policy to delete, just skip it
 	if meta.Name == "" {
-		log.Debug("Delete skipped: no authentication policy to delete.")
+		log.Infof("Delete skipped: no authentication policy to delete.")
 		return nil
 	}
-	log.Debugf("Deleting authentication policy: %s", meta.Name)
+	log.Infof("Deleting authentication policy: %s", meta.Name)
 
 	err := a.istioAuthPolicyInterface(meta).Delete(meta.Name, &k8sMeta.DeleteOptions{})
 	if err != nil {
@@ -126,7 +126,7 @@ func (a *istioImpl) deleteByName(meta meta.Dto) error {
 		return commons.HandleError(err, "error while deleting authentication policy")
 	}
 
-	log.Debugf("Authentication policy deleted: %+v", meta.Name)
+	log.Infof("Authentication policy deleted: %+v", meta.Name)
 	return nil
 }
 
@@ -141,9 +141,11 @@ func (a *istioImpl) isEqual(oldRule *istioAuthApi.Policy, newRule *istioAuthApi.
 func toIstioAuthPolicy(dto *Dto, defaultConfig JwtDefaultConfig) *istioAuthApi.Policy {
 
 	objectMetadata := k8sMeta.ObjectMeta{
-		Name:      dto.MetaDto.Name,
-		Namespace: dto.MetaDto.Namespace,
-		Labels:    dto.MetaDto.Labels,
+		Name:            dto.MetaDto.Name,
+		Namespace:       dto.MetaDto.Namespace,
+		Labels:          dto.MetaDto.Labels,
+		UID:             dto.Status.Resource.Uid,
+		ResourceVersion: dto.Status.Resource.Version,
 	}
 
 	spec := &istioAuthApi.PolicySpec{
@@ -166,7 +168,7 @@ func toIstioAuthPolicy(dto *Dto, defaultConfig JwtDefaultConfig) *istioAuthApi.P
 				})
 			}
 		}
-	} else {
+	} else if dto.AuthenticationEnabled {
 		origins = append(origins, &istioAuthApi.Origin{
 			Jwt: &istioAuthApi.Jwt{
 				Issuer:  defaultConfig.Issuer,
@@ -186,7 +188,7 @@ func toIstioAuthPolicy(dto *Dto, defaultConfig JwtDefaultConfig) *istioAuthApi.P
 }
 
 func isAuthenticationDisabled(dto *Dto) bool {
-	return dto == nil
+	return !dto.AuthenticationEnabled
 }
 
 func gatewayResourceFrom(policy *istioAuthApi.Policy) *kymaMeta.GatewayResource {

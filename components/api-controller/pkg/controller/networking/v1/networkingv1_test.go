@@ -30,7 +30,7 @@ func TestCreateVirtualService(t *testing.T) {
 func TestCreateVirtualServiceForExistingVirtualService(t *testing.T) {
 
 	dto := fakeDto()
-	virtualService := toIstioVirtualService(dto, testingGateway)
+	virtualService := toVirtualService(dto, testingGateway)
 	fakeClientset := fake.NewSimpleClientset(virtualService)
 
 	virtualServiceCtrl := New(fakeClientset, testingGateway)
@@ -43,7 +43,7 @@ func TestCreateVirtualServiceForExistingVirtualService(t *testing.T) {
 func TestUpdateVirtualService(t *testing.T) {
 
 	oldApi := fakeDto()
-	virtualService := toIstioVirtualService(oldApi, testingGateway)
+	virtualService := toVirtualService(oldApi, testingGateway)
 
 	t.Run("service assigned to virtualService has changed so virtualService will be updated", func(t *testing.T) {
 
@@ -87,7 +87,7 @@ func TestUpdateVirtualService(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error while updating VirtualService. Details : %s", err.Error())
 		}
-		if updatedResource != nil {
+		if updatedResource.Version != oldApi.Status.Resource.Version {
 			t.Error("Error while updating VirtualService. Should not update virtualService because nothing has changed.")
 		}
 	})
@@ -96,7 +96,7 @@ func TestUpdateVirtualService(t *testing.T) {
 func TestDeleteVirtualService(t *testing.T) {
 
 	dto := fakeDto()
-	virtualService := toIstioVirtualService(dto, testingGateway)
+	virtualService := toVirtualService(dto, testingGateway)
 
 	t.Run("Should delete virtual service if exists and dto not empty", func(t *testing.T) {
 		fakeClientset := fake.NewSimpleClientset(virtualService)

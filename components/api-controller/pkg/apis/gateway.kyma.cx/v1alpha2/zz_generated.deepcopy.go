@@ -100,7 +100,7 @@ func (in *ApiSpec) DeepCopy() *ApiSpec {
 func (in *ApiStatus) DeepCopyInto(out *ApiStatus) {
 	*out = *in
 	out.AuthenticationStatus = in.AuthenticationStatus
-	out.NetworkingStatus = in.NetworkingStatus
+	out.VirtualServiceStatus = in.VirtualServiceStatus
 	return
 }
 

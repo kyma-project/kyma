@@ -44,6 +44,7 @@ func TestIntegrationCreateUpdateAndDeleteAuthentication(t *testing.T) {
 		},
 		ServiceName: "sample-app-kfvcdftg-0",
 		Rules:       rules,
+		AuthenticationEnabled: true,
 	}
 
 	// when
@@ -87,6 +88,7 @@ func TestIntegrationCreateUpdateAndDeleteAuthentication(t *testing.T) {
 		Status: kymaMeta.GatewayResourceStatus{
 			Resource: *createdResource,
 		},
+		AuthenticationEnabled: true,
 	}
 
 	_, err3 := authentication.Update(oldApiDto, authDto)

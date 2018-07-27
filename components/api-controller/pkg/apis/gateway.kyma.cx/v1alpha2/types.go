@@ -46,30 +46,30 @@ type JwtAuthentication struct {
 
 type ApiStatus struct {
 	AuthenticationStatus kymaMeta.GatewayResourceStatus `json:"authenticationStatus,omitempty"`
-	NetworkingStatus     kymaMeta.GatewayResourceStatus `json:"networkingStatus,omitempty"`
+	VirtualServiceStatus kymaMeta.GatewayResourceStatus `json:"virtualServiceStatus,omitempty"`
 }
 
 func (s *ApiStatus) IsEmpty() bool {
-	return s.NetworkingStatus.IsEmpty() && s.AuthenticationStatus.IsEmpty()
+	return s.VirtualServiceStatus.IsEmpty() && s.AuthenticationStatus.IsEmpty()
 }
 
 func (s *ApiStatus) IsDone() bool {
-	return s.NetworkingStatus.IsDone() && s.AuthenticationStatus.IsDone()
+	return s.VirtualServiceStatus.IsDone() && s.AuthenticationStatus.IsDone()
 }
 
 func (s *ApiStatus) IsInProgress() bool {
-	return s.NetworkingStatus.IsInProgress() || s.AuthenticationStatus.IsInProgress()
+	return s.VirtualServiceStatus.IsInProgress() || s.AuthenticationStatus.IsInProgress()
 }
 
 func (s *ApiStatus) IsError() bool {
-	return s.NetworkingStatus.IsError() || s.AuthenticationStatus.IsError()
+	return s.VirtualServiceStatus.IsError() || s.AuthenticationStatus.IsError()
 }
 
 func (s *ApiStatus) SetInProgress() {
 	s.AuthenticationStatus = kymaMeta.GatewayResourceStatus{
 		Code: kymaMeta.InProgress,
 	}
-	s.NetworkingStatus = kymaMeta.GatewayResourceStatus{
+	s.VirtualServiceStatus = kymaMeta.GatewayResourceStatus{
 		Code: kymaMeta.InProgress,
 	}
 }
