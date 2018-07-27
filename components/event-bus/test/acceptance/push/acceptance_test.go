@@ -76,6 +76,7 @@ func TestMain(m *testing.M) {
 	subscriptionsSupervisor1 := pushApplication.SubscriptionsSupervisor
 	subscriptionsSupervisor1.StartSubscriptionReq(
 		util.NewSubscription(
+			"test-sub",
 			metav1.NamespaceDefault,
 			subscriberServerV1.URL+util.SubServer1EventsPath,
 			eventType,
@@ -87,6 +88,7 @@ func TestMain(m *testing.M) {
 	subscriptionsSupervisor2 := pushApplication.SubscriptionsSupervisor
 	subscriptionsSupervisor2.StartSubscriptionReq(
 		util.NewSubscription(
+			"test-sub",
 			metav1.NamespaceDefault,
 			subscriberServerV2.URL+util.SubServer2EventsPath,
 			eventType,
@@ -221,6 +223,7 @@ func Test_Publish_Push_Request(t *testing.T) {
 
 func newFakeInformer() cache.SharedIndexInformer {
 	sub := util.NewSubscription(
+		"test-sub",
 		metav1.NamespaceDefault,
 		subscriberServerV1.URL+util.SubServer1EventsPath,
 		eventType,
