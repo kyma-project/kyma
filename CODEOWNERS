@@ -185,6 +185,9 @@
 # Stability Checker Component
 /tools/stability-checker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
+# Etcd backup Component
+/tools/etcd-backup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
+
 # The alpine-net directory
 /tools/alpine-net/ @suleymanakbas91 @ahmedami @clebs @a-thaler @lilitgh
 

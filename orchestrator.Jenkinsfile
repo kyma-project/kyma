@@ -36,6 +36,7 @@ projects = [
     "tools/alpine-net",
     "tools/watch-pods",
     "tools/stability-checker",
+    "tools/etcd-backup",
     "tests/test-logging-monitoring",
     "tests/acceptance",
     "tests/ui-api-layer-acceptance-tests",
