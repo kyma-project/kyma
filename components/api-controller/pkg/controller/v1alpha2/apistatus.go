@@ -26,8 +26,8 @@ func (su *ApiStatusHelper) SetAuthenticationStatus(authStatus *kymaMeta.GatewayR
 	su.hasChanged = true
 }
 
-func (su *ApiStatusHelper) SetIngressStatus(ingressStatus *kymaMeta.GatewayResourceStatus) {
-	su.apiCopy.Status.IngressStatus = *ingressStatus
+func (su *ApiStatusHelper) SetVirtualServiceStatus(virtualServiceStatus *kymaMeta.GatewayResourceStatus) {
+	su.apiCopy.Status.VirtualServiceStatus = *virtualServiceStatus
 	su.hasChanged = true
 }
 
@@ -35,7 +35,8 @@ func (su *ApiStatusHelper) Update() {
 
 	if su.hasChanged {
 
-		log.Infof("Saving status for: %+v", su.apiCopy)
+		log.Infof("Saving status for: %s/%s ver: %s", su.apiCopy.Namespace, su.apiCopy.Name, su.apiCopy.ResourceVersion)
+		log.Debugf("Status of %s/%s ver %s: %+v", su.apiCopy.Namespace, su.apiCopy.Name, su.apiCopy.ResourceVersion, su.apiCopy)
 
 		if _, err2 := su.kymaInterface.GatewayV1alpha2().Apis(su.apiCopy.Namespace).Update(su.apiCopy); err2 != nil {
 			log.Errorf("Error while saving API status. Root cause: %s", err2)

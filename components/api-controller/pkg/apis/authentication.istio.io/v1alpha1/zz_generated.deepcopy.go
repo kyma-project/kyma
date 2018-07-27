@@ -29,12 +29,8 @@ func (in *Origin) DeepCopyInto(out *Origin) {
 	*out = *in
 	if in.Jwt != nil {
 		in, out := &in.Jwt, &out.Jwt
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(Jwt)
-			**out = **in
-		}
+		*out = new(Jwt)
+		**out = **in
 	}
 	return
 }
@@ -55,11 +51,10 @@ func (in Origins) DeepCopyInto(out *Origins) {
 		in := &in
 		*out = make(Origins, len(*in))
 		for i := range *in {
-			if (*in)[i] == nil {
-				(*out)[i] = nil
-			} else {
-				(*out)[i] = new(Origin)
-				(*in)[i].DeepCopyInto((*out)[i])
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Origin)
+				(*in).DeepCopyInto(*out)
 			}
 		}
 		return
@@ -83,12 +78,8 @@ func (in *Policy) DeepCopyInto(out *Policy) {
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
 	if in.Spec != nil {
 		in, out := &in.Spec, &out.Spec
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(PolicySpec)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(PolicySpec)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }
@@ -151,11 +142,10 @@ func (in *PolicySpec) DeepCopyInto(out *PolicySpec) {
 		in, out := &in.Targets, &out.Targets
 		*out = make(Targets, len(*in))
 		for i := range *in {
-			if (*in)[i] == nil {
-				(*out)[i] = nil
-			} else {
-				(*out)[i] = new(Target)
-				(*in)[i].DeepCopyInto((*out)[i])
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Target)
+				**out = **in
 			}
 		}
 	}
@@ -163,11 +153,10 @@ func (in *PolicySpec) DeepCopyInto(out *PolicySpec) {
 		in, out := &in.Origins, &out.Origins
 		*out = make(Origins, len(*in))
 		for i := range *in {
-			if (*in)[i] == nil {
-				(*out)[i] = nil
-			} else {
-				(*out)[i] = new(Origin)
-				(*in)[i].DeepCopyInto((*out)[i])
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Origin)
+				(*in).DeepCopyInto(*out)
 			}
 		}
 	}
@@ -206,11 +195,10 @@ func (in Targets) DeepCopyInto(out *Targets) {
 		in := &in
 		*out = make(Targets, len(*in))
 		for i := range *in {
-			if (*in)[i] == nil {
-				(*out)[i] = nil
-			} else {
-				(*out)[i] = new(Target)
-				(*in)[i].DeepCopyInto((*out)[i])
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Target)
+				**out = **in
 			}
 		}
 		return

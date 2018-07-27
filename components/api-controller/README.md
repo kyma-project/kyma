@@ -9,7 +9,7 @@
 
 ## Overview
 
-The Kyma API Controller is a core component that manages Istio authentication policies and Ingresses, and allows to expose services using the Kyma Console. It is implemented according to the [Kubernetes Operator](https://coreos.com/blog/introducing-operators.html) principles and operates on `api.gateway.kyma.cx` Custom Resource Definition (CRD) resources.
+The Kyma API Controller is a core component that manages Istio authentication policies and VirtualServices, and allows to expose services using the Kyma Console or API resources. It is implemented according to the [Kubernetes Operator](https://coreos.com/blog/introducing-operators.html) principles and operates on `api.gateway.kyma.cx` Custom Resource Definition (CRD) resources.
 
 This [Helm chart](/resources/core/charts/api-controller/Chart.yaml) defines the component's installation.
 
@@ -40,6 +40,9 @@ Use these environment variables to configure the application:
 | Name | Required | Default | Description |
 |-----|---------|--------|------------|
 | API_CONTROLLER_LOG_LEVEL | No | `info` | Show detailed logs in the application.
+| DEFAULT_ISSUER | Yes | - | Used to set default issuer in NetworkPolicy
+| DEFAULT_JWKS_URI | Yes | - | Used to set default jwksUri in NetworkPolicy
+| GATEWAY_FQDN | Yes | - | Used to set gateway in VirtualServices spec
 
 
 ### Test

@@ -13,11 +13,14 @@ type Interface interface {
 	Delete(dto *Dto) error
 }
 
+type JwtDefaultConfig Jwt
+
 type Dto struct {
-	MetaDto     meta.Dto
-	ServiceName string
-	Rules       Rules
-	Status      kymaMeta.GatewayResourceStatus
+	MetaDto               meta.Dto
+	ServiceName           string
+	AuthenticationEnabled bool
+	Rules                 Rules
+	Status                kymaMeta.GatewayResourceStatus
 }
 
 type Rules []Rule

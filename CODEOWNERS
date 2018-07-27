@@ -8,28 +8,28 @@
 * @derberg @pbochynski @PK85 @a-thaler
 
 # The `installation` directory and subdirectories
-/installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @damianpacierpnikatsap @piotrmscsap @pssap @mwieczorek
+/installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @damianpacierpnikatsap @piotrmsc @pssap @mwieczorek
 
 # The `cluster-prerequisites` subdirectory
-/resources/cluster-prerequisites @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @damianpacierpnikatsap @piotrmscsap @pssap
+/resources/cluster-prerequisites @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @damianpacierpnikatsap @piotrmsc @pssap
 
 # The `cluster-essentials` subchart
 /resources/cluster-essentials/ @damianpacierpnikatsap @damjatsap @PK85
 
 # The `api-controller` subchart
-/resources/core/charts/api-controller/ @damianpacierpnikatsap @piotrmscsap @pssap
+/resources/core/charts/api-controller/ @damianpacierpnikatsap @piotrmsc @pssap
 
 # The `apiserver-proxy` subchart
-/resources/core/charts/apiserver-proxy/ @damianpacierpnikatsap @piotrmscsap @pssap
+/resources/core/charts/apiserver-proxy/ @damianpacierpnikatsap @piotrmsc @pssap
 
 # The `azure-broker` subchart
 /resources/core/charts/azure-broker/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
 
 # The `cluster-users` subchart
-/resources/core/charts/cluster-users/ @damianpacierpnikatsap @piotrmscsap @pssap
+/resources/core/charts/cluster-users/ @damianpacierpnikatsap @piotrmsc @pssap
 
 # The `configurations-generator` subchart
-/resources/core/charts/configurations-generator @damianpacierpnikatsap @piotrmscsap @pssap
+/resources/core/charts/configurations-generator @damianpacierpnikatsap @piotrmsc @pssap
 
 # The `application-connector` subchart
 /resources/core/charts/application-connector/ @lszymik @akgalwas @janmedrek
@@ -38,7 +38,7 @@
 /resources/core/charts/console/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @katadus @antiheld
 
 # The `dex` subchart
-/resources/core/charts/dex/ @damianpacierpnikatsap @piotrmscsap @pssap
+/resources/core/charts/dex/ @damianpacierpnikatsap @piotrmsc @pssap
 
 # The `environments` subchart
 /resources/core/charts/environments/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
@@ -104,7 +104,7 @@
 /resources/helm-broker-repo/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
 # The `istio` subdirectory
-/resources/istio/ @damianpacierpnikatsap @piotrmscsap @pssap
+/resources/istio/ @damianpacierpnikatsap @piotrmsc @pssap
 
 # The `jaeger` charts
 /resources/core/charts/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
@@ -117,7 +117,7 @@
 
 # Components
 # Api controller Component
-/components/api-controller/ @damianpacierpnikatsap @piotrmscsap @pssap
+/components/api-controller/ @damianpacierpnikatsap @piotrmsc @pssap
 
 # Binding usage controller Component
 /components/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
@@ -126,13 +126,13 @@
 /components/installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
 
 # Configurations Generator Component
-/components/configurations-generator/ @damianpacierpnikatsap @piotrmscsap @pssap
+/components/configurations-generator/ @damianpacierpnikatsap @piotrmsc @pssap
 
 # Environments controller Component
 /components/environments/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
 
 # Istio Extensions Component
-/components/istio-webhook/ @damianpacierpnikatsap @piotrmscsap @pssap
+/components/istio-webhook/ @damianpacierpnikatsap @piotrmsc @pssap
 
 # Remote environment controller Component
 /components/remote-environment-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
@@ -161,7 +161,7 @@
 # Tests
 # acceptance tests
 /tests/acceptance/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85
-/tests/acceptance/dex @pssap @piotrmscsap
+/tests/acceptance/dex @pssap @piotrmsc
 
 # test-environments
 /tests/test-environemnts/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
@@ -170,7 +170,7 @@
 /tests/test-logging-monitoring/ @rakesh-garimella @joek @sayanh @venturasr @gchbg
 
 # api-controller acceptance tests
-/tests/api-controller-acceptance-tests/ @damianpacierpnikatsap @piotrmscsap @pssap
+/tests/api-controller-acceptance-tests/ @damianpacierpnikatsap @piotrmsc @pssap
 
 # UI API Layer acceptance tests
 /tests/ui-api-layer-acceptance-tests/ @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel

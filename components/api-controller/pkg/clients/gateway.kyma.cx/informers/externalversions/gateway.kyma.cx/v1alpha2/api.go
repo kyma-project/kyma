@@ -5,7 +5,7 @@ package v1alpha2
 import (
 	time "time"
 
-	gateway_kyma_cx_v1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma.cx/v1alpha2"
+	gatewaykymacxv1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma.cx/v1alpha2"
 	versioned "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned"
 	internalinterfaces "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx/informers/externalversions/internalinterfaces"
 	v1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx/listers/gateway.kyma.cx/v1alpha2"
@@ -54,7 +54,7 @@ func NewFilteredApiInformer(client versioned.Interface, namespace string, resync
 				return client.GatewayV1alpha2().Apis(namespace).Watch(options)
 			},
 		},
-		&gateway_kyma_cx_v1alpha2.Api{},
+		&gatewaykymacxv1alpha2.Api{},
 		resyncPeriod,
 		indexers,
 	)
@@ -65,7 +65,7 @@ func (f *apiInformer) defaultInformer(client versioned.Interface, resyncPeriod t
 }
 
 func (f *apiInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&gateway_kyma_cx_v1alpha2.Api{}, f.defaultInformer)
+	return f.factory.InformerFor(&gatewaykymacxv1alpha2.Api{}, f.defaultInformer)
 }
 
 func (f *apiInformer) Lister() v1alpha2.ApiLister {

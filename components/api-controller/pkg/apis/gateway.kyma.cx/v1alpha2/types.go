@@ -17,17 +17,16 @@ type Api struct {
 }
 
 type ApiSpec struct {
-	Service        Service        `json:"service"`
-	Hostname       string         `json:"hostname"`
-	Authentication Authentication `json:"authentication"`
+	Service               Service              `json:"service"`
+	Hostname              string               `json:"hostname"`
+	AuthenticationEnabled *bool                `json:"authenticationEnabled,omitempty"`
+	Authentication        []AuthenticationRule `json:"authentication"`
 }
 
 type Service struct {
 	Name string `json:"name"`
 	Port int    `json:"port"`
 }
-
-type Authentication []AuthenticationRule
 
 type AuthenticationRule struct {
 	Type AuthenticationType `json:"type"`
@@ -47,30 +46,30 @@ type JwtAuthentication struct {
 
 type ApiStatus struct {
 	AuthenticationStatus kymaMeta.GatewayResourceStatus `json:"authenticationStatus,omitempty"`
-	IngressStatus        kymaMeta.GatewayResourceStatus `json:"ingressStatus,omitempty"`
+	VirtualServiceStatus kymaMeta.GatewayResourceStatus `json:"virtualServiceStatus,omitempty"`
 }
 
 func (s *ApiStatus) IsEmpty() bool {
-	return s.IngressStatus.IsEmpty() && s.AuthenticationStatus.IsEmpty()
+	return s.VirtualServiceStatus.IsEmpty() && s.AuthenticationStatus.IsEmpty()
 }
 
 func (s *ApiStatus) IsDone() bool {
-	return s.IngressStatus.IsDone() && s.AuthenticationStatus.IsDone()
+	return s.VirtualServiceStatus.IsDone() && s.AuthenticationStatus.IsDone()
 }
 
 func (s *ApiStatus) IsInProgress() bool {
-	return s.IngressStatus.IsInProgress() || s.AuthenticationStatus.IsInProgress()
+	return s.VirtualServiceStatus.IsInProgress() || s.AuthenticationStatus.IsInProgress()
 }
 
 func (s *ApiStatus) IsError() bool {
-	return s.IngressStatus.IsError() || s.AuthenticationStatus.IsError()
+	return s.VirtualServiceStatus.IsError() || s.AuthenticationStatus.IsError()
 }
 
 func (s *ApiStatus) SetInProgress() {
 	s.AuthenticationStatus = kymaMeta.GatewayResourceStatus{
 		Code: kymaMeta.InProgress,
 	}
-	s.IngressStatus = kymaMeta.GatewayResourceStatus{
+	s.VirtualServiceStatus = kymaMeta.GatewayResourceStatus{
 		Code: kymaMeta.InProgress,
 	}
 }

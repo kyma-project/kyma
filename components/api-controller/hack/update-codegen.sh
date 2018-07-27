@@ -19,11 +19,17 @@ echo $CODEGEN_PKG
 ${CODEGEN_PKG}/generate-groups.sh  "deepcopy,client,informer,lister" \
   github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx github.com/kyma-project/kyma/components/api-controller/pkg/apis \
   gateway.kyma.cx:v1alpha2 \
-  --output-base "$(dirname ${BASH_SOURCE})/../../../.." \
+  --output-base "$(dirname ${BASH_SOURCE})/../../../../../.." \
   --go-header-file ${SCRIPT_ROOT}/hack/custom-boilerplate.go.txt
 
 ${CODEGEN_PKG}/generate-groups.sh  "deepcopy,client,informer,lister" \
   github.com/kyma-project/kyma/components/api-controller/pkg/clients/authentication.istio.io github.com/kyma-project/kyma/components/api-controller/pkg/apis \
   authentication.istio.io:v1alpha1 \
-  --output-base "$(dirname ${BASH_SOURCE})/../../../.." \
+  --output-base "$(dirname ${BASH_SOURCE})/../../../../../.." \
+  --go-header-file ${SCRIPT_ROOT}/hack/custom-boilerplate.go.txt
+
+${CODEGEN_PKG}/generate-groups.sh  "deepcopy,client,informer,lister" \
+  github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io github.com/kyma-project/kyma/components/api-controller/pkg/apis \
+  networking.istio.io:v1alpha3 \
+  --output-base "$(dirname ${BASH_SOURCE})/../../../../../.." \
   --go-header-file ${SCRIPT_ROOT}/hack/custom-boilerplate.go.txt

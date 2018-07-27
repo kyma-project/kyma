@@ -44,6 +44,7 @@ func TestIntegrationCreateUpdateAndDeleteAuthentication(t *testing.T) {
 		},
 		ServiceName: "sample-app-kfvcdftg-0",
 		Rules:       rules,
+		AuthenticationEnabled: true,
 	}
 
 	// when
@@ -87,6 +88,7 @@ func TestIntegrationCreateUpdateAndDeleteAuthentication(t *testing.T) {
 		Status: kymaMeta.GatewayResourceStatus{
 			Resource: *createdResource,
 		},
+		AuthenticationEnabled: true,
 	}
 
 	_, err3 := authentication.Update(oldApiDto, authDto)
@@ -107,5 +109,10 @@ func authenticationFromDefaultConfig() (Interface, error) {
 
 	clientset := istioAuth.NewForConfigOrDie(kubeConfig)
 
-	return New(clientset), nil
+	sampleJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+
+	return New(clientset, sampleJwtDefaultConfig), nil
 }

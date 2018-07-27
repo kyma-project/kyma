@@ -10,299 +10,221 @@ import (
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestCreateAuthentication_ShouldCreateNewPolicy(t *testing.T) {
+func TestCreateAuthentication(t *testing.T) {
 
-	// given
 	fakeIstioAuth := istioFakes.NewSimpleClientset()
-	authentication := New(fakeIstioAuth)
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+	authentication := New(fakeIstioAuth, fakeJwtDefaultConfig)
 
-	dto := &Dto{
-		MetaDto: meta.Dto{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		ServiceName: "dummy-service",
-		Rules: Rules{
-			{
-				Type: JwtType,
-				Jwt: Jwt{
-					Issuer:  "https://accounts.google.com",
-					JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	t.Run("Should create policy with custom auth configuration", func(t *testing.T) {
+
+		dto := &Dto{
+			MetaDto: meta.Dto{
+				Name:      "test-api",
+				Namespace: "test-namespace",
+			},
+			ServiceName: "dummy-service",
+			Rules: Rules{
+				{
+					Type: JwtType,
+					Jwt: Jwt{
+						Issuer:  "https://accounts.google.com",
+						JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+					},
 				},
 			},
-		},
-	}
+			AuthenticationEnabled: true,
+		}
 
-	// when
-	gatewayResource, err := authentication.Create(dto)
+		gatewayResource, err := authentication.Create(dto)
 
-	// then
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+		}
 
-	if gatewayResource == nil {
-		t.Error("Gateway resource should not be nil.")
-		return
-	}
+		if gatewayResource == nil {
+			t.Error("Gateway resource should not be nil.")
+		}
 
-	if gatewayResource.Name != "test-api" {
-		t.Error("Gateway resource name should be the same as api name.")
-		return
-	}
-}
+		if gatewayResource.Name != "test-api" {
+			t.Error("Gateway resource name should be the same as api name.")
+		}
+	})
 
-func TestCreateAuthentication_ShouldNotCreatePolicyIfDisabled(t *testing.T) {
-
-	// given
-	fakeIstioConfig := istioFakes.NewSimpleClientset()
-	authentication := New(fakeIstioConfig)
-
-	var dto *Dto = nil
-
-	// when
-	gatewayResource, err := authentication.Create(dto)
-
-	// then
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-
-	if gatewayResource != nil {
-		t.Error("Gateway resource should be nil.")
-		return
-	}
-}
-
-func TestCreateAuthRule_ShouldNotCreatePolicyIfRulesEmpty(t *testing.T) {
-
-	// given
-	fakeIstioConfig := istioFakes.NewSimpleClientset()
-	authentication := New(fakeIstioConfig)
-
-	dto := &Dto{
-		MetaDto: meta.Dto{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		ServiceName: "dummy-service",
-	}
-
-	// when
-	gatewayResource, err := authentication.Create(dto)
-
-	// then
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-
-	if gatewayResource != nil {
-		t.Error("Gateway resource should be nil.")
-		return
-	}
-}
-
-func TestUpdateAuthentication_ShouldCreateNewPolicy(t *testing.T) {
-
-	// given
-	fakeIstioConfig := istioFakes.NewSimpleClientset()
-	authentication := New(fakeIstioConfig)
-
-	oldDto := &Dto{}
-
-	newDto := &Dto{
-		MetaDto: meta.Dto{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		ServiceName: "dummy-service",
-		Rules: Rules{
-			{
-				Type: JwtType,
-				Jwt: Jwt{
-					Issuer:  "https://accounts.google.com",
-					JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
-				},
+	t.Run("Should create new policy with default jwt config if authentication enabled and rules not provided", func(t *testing.T) {
+		dto := &Dto{
+			MetaDto: meta.Dto{
+				Name:      "test-api2",
+				Namespace: "test-namespace",
 			},
-		},
-	}
+			ServiceName:           "dummy-service",
+			AuthenticationEnabled: true,
+		}
 
-	// when
-	gatewayResource, err := authentication.Update(oldDto, newDto)
+		gatewayResource, err := authentication.Create(dto)
 
-	// then
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+		}
 
-	if gatewayResource == nil {
-		t.Error("Gateway resource should not be nil.")
-		return
-	}
+		if gatewayResource == nil {
+			t.Error("Gateway resource should not be nil.")
+		} else if gatewayResource.Name != "test-api2" {
+			t.Error("Gateway resource name should be the same as api name.")
+		}
+	})
 
-	if gatewayResource.Name != "test-api" {
-		t.Error("Gateway resource name should be the same as api name.")
-		return
-	}
+	t.Run("Should not create policy if authentication disabled", func(t *testing.T) {
+		var dto *Dto = &Dto{
+			AuthenticationEnabled: false,
+		}
+
+		gatewayResource, err := authentication.Create(dto)
+
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+		}
+
+		if gatewayResource != nil {
+			t.Error("Gateway resource should be nil.")
+		}
+	})
 }
 
-func TestUpdateAuthentication_ShouldDeleteOldPolicyIfAuthenticationDisabled(t *testing.T) {
+func TestUpdateAuthentication(t *testing.T) {
 
-	// given
-	testAuthentication := &istioAuthApi.Policy{
-		ObjectMeta: k8sMeta.ObjectMeta{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		Spec: &istioAuthApi.PolicySpec{},
+	fakeIstioConfig := istioFakes.NewSimpleClientset()
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
 	}
-	fakeIstioConfig := istioFakes.NewSimpleClientset(testAuthentication)
-	authentication := New(fakeIstioConfig)
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
 
 	oldDto := &Dto{
-		MetaDto: meta.Dto{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		Status: kymaMeta.GatewayResourceStatus{
-			Resource: kymaMeta.GatewayResource{
-				Name: "test-api",
+		AuthenticationEnabled: false,
+	}
+
+	customIssuer := "https://test.issuer.com"
+
+	t.Run("Should create new policy if authentication was disabled and now is enabled", func(t *testing.T) {
+		newDto := &Dto{
+			MetaDto: meta.Dto{
+				Name:      "test-api",
+				Namespace: "test-namespace",
 			},
-		},
-	}
-
-	var newDto *Dto = nil
-
-	// when
-	gatewayResource, err := authentication.Update(oldDto, newDto)
-
-	// then
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-
-	if gatewayResource != nil {
-		t.Error("Gateway resource should be nil (should only delete old resource).")
-		return
-	}
-}
-
-func TestUpdateAuthentication_ShouldDeleteOldPolicyIfRulesEmpty(t *testing.T) {
-
-	// given
-	testAuthentication := &istioAuthApi.Policy{
-		ObjectMeta: k8sMeta.ObjectMeta{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		Spec: &istioAuthApi.PolicySpec{},
-	}
-	fakeIstioConfig := istioFakes.NewSimpleClientset(testAuthentication)
-	authentication := New(fakeIstioConfig)
-
-	oldDto := &Dto{
-		MetaDto: meta.Dto{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		Status: kymaMeta.GatewayResourceStatus{
-			Resource: kymaMeta.GatewayResource{
-				Name: "test-api",
-			},
-		},
-	}
-
-	newDto := &Dto{
-		MetaDto: meta.Dto{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		ServiceName: "dummy-service",
-	}
-
-	// when
-	gatewayResource, err := authentication.Update(oldDto, newDto)
-
-	// then
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-
-	if gatewayResource != nil {
-		t.Error("Gateway resource should be nil (should only delete old resource).")
-		return
-	}
-}
-
-func TestUpdateAuthentication_ShouldDoNothingIfSRulesHasNotChanged(t *testing.T) {
-
-	// given
-	fakeIstioConfig := istioFakes.NewSimpleClientset()
-	authentication := New(fakeIstioConfig)
-
-	oldApi := &Dto{
-		MetaDto: meta.Dto{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		ServiceName: "dummy-service",
-		Rules: Rules{
-			{
-				Type: JwtType,
-				Jwt: Jwt{
-					Issuer:  "https://accounts.google.com",
-					JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+			ServiceName: "dummy-service",
+			Rules: Rules{
+				{
+					Type: JwtType,
+					Jwt: Jwt{
+						Issuer:  customIssuer,
+						JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+					},
 				},
 			},
-		},
-		Status: kymaMeta.GatewayResourceStatus{
-			Resource: kymaMeta.GatewayResource{
-				Name: "test-api",
-			},
-		},
-	}
+			AuthenticationEnabled: true,
+		}
 
-	newDto := &Dto{
-		MetaDto: meta.Dto{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		ServiceName: "dummy-service",
-		Rules: Rules{
-			{
-				Type: JwtType,
-				Jwt: Jwt{
-					Issuer:  "https://accounts.google.com",
-					JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+		gatewayResource, err := authentication.Update(oldDto, newDto)
+
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+		}
+
+		if gatewayResource == nil {
+			t.Error("Gateway resource should not be nil.")
+		} else if gatewayResource.Name != "test-api" {
+			t.Error("Gateway resource name should be the same as api name.")
+		}
+
+		oldDto = newDto // set oldDto for next test
+		oldDto.Status.Resource = *gatewayResource
+	})
+
+	t.Run("Should do nothing if nothing has changed", func(t *testing.T) {
+		newDto := &Dto{
+			MetaDto: meta.Dto{
+				Name:      "test-api",
+				Namespace: "test-namespace",
+			},
+			ServiceName: "dummy-service",
+			Rules: Rules{
+				{
+					Type: JwtType,
+					Jwt: Jwt{
+						Issuer:  customIssuer,
+						JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+					},
 				},
 			},
-		},
-	}
+			AuthenticationEnabled: true,
+		}
 
-	// when
-	gatewayResource, err := authentication.Update(oldApi, newDto)
+		gatewayResource, err := authentication.Update(oldDto, newDto)
 
-	// then
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+		}
 
-	if gatewayResource != nil {
-		t.Error("Gateway resource should be nil (should do nothing).")
-		return
-	}
+		if gatewayResource.Version != oldDto.Status.Resource.Version {
+			t.Error("Gateway resource should be nil (should do nothing).")
+		}
+	})
+
+	t.Run("Should update policy with default jwt config if rules was custom and now rules are empty and authentication is enabled", func(t *testing.T) {
+		newDto := &Dto{
+			MetaDto: meta.Dto{
+				Name:      "test-api",
+				Namespace: "test-namespace",
+			},
+			ServiceName:           "dummy-service",
+			AuthenticationEnabled: true,
+			Rules: Rules{},
+		}
+
+		gatewayResource, err := authentication.Update(oldDto, newDto)
+
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+		}
+
+		if gatewayResource == nil {
+			t.Error("Gateway resource should not be nil.")
+		} else if gatewayResource.Name != "test-api" {
+			t.Error("Gateway resource name should be the same as api name.")
+		}
+
+		oldDto = newDto // set oldDto for next test
+		oldDto.Status.Resource = *gatewayResource
+	})
+
+	t.Run("Should delete old policy if authentication disabled", func(t *testing.T) {
+		var newDto *Dto = &Dto{
+			MetaDto: meta.Dto{
+				Name:      "test-api",
+				Namespace: "test-namespace",
+			},
+			ServiceName:           "dummy-service",
+			AuthenticationEnabled: false,
+		}
+
+		gatewayResource, err := authentication.Update(oldDto, newDto)
+
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+		}
+
+		if gatewayResource != nil {
+			t.Error("Gateway resource should be nil (should only delete old resource).")
+		}
+	})
 }
 
 func TestDeleteAuthentication(t *testing.T) {
 
-	// given
 	testAuthentication := &istioAuthApi.Policy{
 		ObjectMeta: k8sMeta.ObjectMeta{
 			Name:      "test-api",
@@ -311,67 +233,58 @@ func TestDeleteAuthentication(t *testing.T) {
 		Spec: &istioAuthApi.PolicySpec{},
 	}
 	fakeIstioConfig := istioFakes.NewSimpleClientset(testAuthentication)
-	authentication := New(fakeIstioConfig)
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
 
-	dto := &Dto{
-		MetaDto: meta.Dto{
-			Name:      "test-api",
-			Namespace: "test-namespace",
-		},
-		Status: kymaMeta.GatewayResourceStatus{
-			Resource: kymaMeta.GatewayResource{
-				Name:    "test-api",
-				Version: "1",
+	t.Run("Should delete Policy if exists", func(t *testing.T) {
+		dto := &Dto{
+			MetaDto: meta.Dto{
+				Name:      "test-api",
+				Namespace: "test-namespace",
 			},
-		},
-	}
+			Status: kymaMeta.GatewayResourceStatus{
+				Resource: kymaMeta.GatewayResource{
+					Name:    "test-api",
+					Version: "1",
+				},
+			},
+			AuthenticationEnabled: false,
+		}
 
-	// when
-	err := authentication.Delete(dto)
+		err := authentication.Delete(dto)
 
-	// then
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-}
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+		}
+	})
 
-func TestDeleteAuthentication_ShouldNotFailIfNil(t *testing.T) {
+	t.Run("Should not fail if Policy doesn't exists", func(t *testing.T) {
+		var dto *Dto = &Dto{
+			AuthenticationEnabled: false,
+		}
 
-	// given
-	fakeIstioConfig := istioFakes.NewSimpleClientset()
-	authentication := New(fakeIstioConfig)
+		err := authentication.Delete(dto)
 
-	var dto *Dto = nil
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+		}
+	})
 
-	// when
-	err := authentication.Delete(dto)
+	t.Run("Should not fail if old Policy name is empty", func(t *testing.T) {
+		dto := &Dto{
+			MetaDto: meta.Dto{
+				Namespace: "test-namepsace",
+			},
+			AuthenticationEnabled: false,
+		}
 
-	// then
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
-}
+		err := authentication.Delete(dto)
 
-func TestDeleteAuthentication_ShouldNotFailIfOldNameEmpty(t *testing.T) {
-
-	// given
-	fakeIstioConfig := istioFakes.NewSimpleClientset()
-	authRules := New(fakeIstioConfig)
-
-	dto := &Dto{
-		MetaDto: meta.Dto{
-			Namespace: "test-namepsace",
-		},
-	}
-
-	// when
-	err := authRules.Delete(dto)
-
-	// then
-	if err != nil {
-		t.Errorf("Unexpected error: %s", err)
-		return
-	}
+		if err != nil {
+			t.Errorf("Unexpected error: %s", err)
+		}
+	})
 }

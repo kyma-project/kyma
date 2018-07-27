@@ -16,8 +16,8 @@ import (
 	"reflect"
 
 	authentication "github.com/kyma-project/kyma/components/api-controller/pkg/controller/authentication/v2"
-	ingress "github.com/kyma-project/kyma/components/api-controller/pkg/controller/ingress/v1"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/controller/meta"
+	networking "github.com/kyma-project/kyma/components/api-controller/pkg/controller/networking/v1"
 	service "github.com/kyma-project/kyma/components/api-controller/pkg/controller/service/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/runtime"
@@ -28,19 +28,19 @@ import (
 )
 
 type Controller struct {
-	kymaInterface  kyma.Interface
-	apisLister     kymaListers.ApiLister
-	apisSynced     cache.InformerSynced
-	queue          workqueue.RateLimitingInterface
-	recorder       record.EventRecorder
-	ingCtrl        ingress.Interface
-	services       service.Interface
-	authentication authentication.Interface
+	kymaInterface      kyma.Interface
+	apisLister         kymaListers.ApiLister
+	apisSynced         cache.InformerSynced
+	queue              workqueue.RateLimitingInterface
+	recorder           record.EventRecorder
+	virtualServiceCtrl networking.Interface
+	services           service.Interface
+	authentication     authentication.Interface
 }
 
 func NewController(
 	kymaInterface kyma.Interface,
-	ingresses ingress.Interface,
+	virtualServiceCtrl networking.Interface,
 	services service.Interface,
 	authentication authentication.Interface,
 	internalInformerFactory kymaInformers.SharedInformerFactory) *Controller {
@@ -49,13 +49,13 @@ func NewController(
 
 	c := &Controller{
 
-		kymaInterface:  kymaInterface,
-		ingCtrl:        ingresses,
-		services:       services,
-		authentication: authentication,
-		apisLister:     apisInformer.Lister(),
-		apisSynced:     apisInformer.Informer().HasSynced,
-		queue:          workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "apis"),
+		kymaInterface:      kymaInterface,
+		virtualServiceCtrl: virtualServiceCtrl,
+		services:           services,
+		authentication:     authentication,
+		apisLister:         apisInformer.Lister(),
+		apisSynced:         apisInformer.Informer().HasSynced,
+		queue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "apis"),
 	}
 
 	apisInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -182,7 +182,7 @@ func (c *Controller) syncHandler(event BackendEvent) error {
 
 func (c *Controller) onCreate(apiObj *kymaApi.Api) error {
 
-	log.Infof("CREATING: %+v", apiObj)
+	log.Infof("Creating: %s/%s", apiObj.Namespace, apiObj.Name)
 
 	namespace := apiObj.Namespace
 	name := apiObj.Name
@@ -206,24 +206,24 @@ func (c *Controller) onCreate(apiObj *kymaApi.Api) error {
 
 	metaDto := toMetaDto(api)
 
-	createIngressStatus := c.createIngress(metaDto, api, apiStatusHelper)
+	createVirtualServiceStatus := c.createVirtualService(metaDto, api, apiStatusHelper)
 	createAuthenticationStatus := c.createAuthentication(metaDto, api, apiStatusHelper)
 
-	if createIngressStatus.IsError() || createAuthenticationStatus.IsError() {
+	if createVirtualServiceStatus.IsError() || createAuthenticationStatus.IsError() {
 		return fmt.Errorf("error while processing create: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
 	}
 	return nil
 }
 
-func (c *Controller) createIngress(metaDto meta.Dto, api *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
+func (c *Controller) createVirtualService(metaDto meta.Dto, api *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
 
-	ingressCreatorAdapter := func(api *kymaApi.Api) (*kymaMeta.GatewayResource, error) {
-		return c.ingCtrl.Create(toIngressDto(metaDto, api))
+	virtualServiceCreatorAdapter := func(api *kymaApi.Api) (*kymaMeta.GatewayResource, error) {
+		return c.virtualServiceCtrl.Create(toVirtualServiceDto(metaDto, api))
 	}
 
-	return c.tmplCreateResource(api, &api.Status.IngressStatus, "ingress", ingressCreatorAdapter,
+	return c.tmplCreateResource(api, &api.Status.VirtualServiceStatus, "VirtualService", virtualServiceCreatorAdapter,
 		func(status *kymaMeta.GatewayResourceStatus) {
-			apiStatusHelper.SetIngressStatus(status)
+			apiStatusHelper.SetVirtualServiceStatus(status)
 		})
 }
 
@@ -253,7 +253,7 @@ func (c *Controller) tmplCreateResource(
 
 	log.Debugf("Creating %s for: %s/%s ver: %s", resourceName, api.Namespace, api.Name, api.ResourceVersion)
 
-	// Error occurred when creating ingress - save error in API CR status
+	// Error occurred when creating resource - save error in API CR status
 	createdResource, createErr := resourceCreator(api)
 
 	if createErr != nil {
@@ -268,7 +268,7 @@ func (c *Controller) tmplCreateResource(
 		return kymaMeta.Error
 	}
 
-	log.Infof("%s created for: %s/%s ver: %s", resourceName, api.Namespace, api.Name, api.ResourceVersion)
+	log.Infof("%s creation finished for: %s/%s ver: %s", resourceName, api.Namespace, api.Name, api.ResourceVersion)
 
 	status := &kymaMeta.GatewayResourceStatus{
 		Code: kymaMeta.Done,
@@ -285,11 +285,11 @@ func (c *Controller) tmplCreateResource(
 
 func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 
-	log.Infof("UPDATING: OLD: %+v; NEW: %+v", oldApi, newApi)
+	log.Infof("Updating: %s/%s ver: %s", oldApi.Namespace, oldApi.Name, oldApi.ResourceVersion)
 
 	// if update is done (so it is not in progress; it is not a retry)
 	if newApi.ResourceVersion == oldApi.ResourceVersion || reflect.DeepEqual(newApi.Spec, oldApi.Spec) {
-		log.Info("SKIPPED: all changes has been already applied to the API (both specs are equal).")
+		log.Info("Skipped: all changes has been already applied to the API (both specs are equal).")
 		return nil
 	}
 
@@ -302,26 +302,26 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 	oldMetaDto := toMetaDto(oldApi)
 	newMetaDto := toMetaDto(newApi)
 
-	updateIngressStatus := c.updateIngress(oldApi, oldMetaDto, newApi, newMetaDto, apiStatusHelper)
+	updateVirtualServiceStatus := c.updateVirtualService(oldApi, oldMetaDto, newApi, newMetaDto, apiStatusHelper)
 	updateAuthenticationStatus := c.updateAuthentication(oldApi, oldMetaDto, newApi, newMetaDto, apiStatusHelper)
 
-	if updateIngressStatus.IsError() || updateAuthenticationStatus.IsError() {
+	if updateVirtualServiceStatus.IsError() || updateAuthenticationStatus.IsError() {
 		return fmt.Errorf("error while processing update: %s/%s ver: %s", newApi.Namespace, newApi.Name, newApi.ResourceVersion)
 	}
 	return nil
 }
 
-func (c *Controller) updateIngress(oldApi *kymaApi.Api, oldMetaDto meta.Dto, newApi *kymaApi.Api, newMetaDto meta.Dto, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
+func (c *Controller) updateVirtualService(oldApi *kymaApi.Api, oldMetaDto meta.Dto, newApi *kymaApi.Api, newMetaDto meta.Dto, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
 
 	updaterAdapter := func(oldApi, newApi *kymaApi.Api) (*kymaMeta.GatewayResource, error) {
-		oldDto := toIngressDto(oldMetaDto, oldApi)
-		newDto := toIngressDto(newMetaDto, newApi)
-		return c.ingCtrl.Update(oldDto, newDto)
+		oldDto := toVirtualServiceDto(oldMetaDto, oldApi)
+		newDto := toVirtualServiceDto(newMetaDto, newApi)
+		return c.virtualServiceCtrl.Update(oldDto, newDto)
 	}
 
-	return c.tmplUpdateResource(oldApi, newApi, &newApi.Status.IngressStatus, "Ingress", updaterAdapter,
+	return c.tmplUpdateResource(oldApi, newApi, &newApi.Status.VirtualServiceStatus, "VirtualService", updaterAdapter,
 		func(status *kymaMeta.GatewayResourceStatus) {
-			apiStatusHelper.SetIngressStatus(status)
+			apiStatusHelper.SetVirtualServiceStatus(status)
 		})
 }
 
@@ -380,7 +380,7 @@ func (c *Controller) tmplUpdateResource(oldApi *kymaApi.Api, newApi *kymaApi.Api
 
 func (c *Controller) onDelete(api *kymaApi.Api) error {
 
-	log.Infof("DELETING: %+v", api)
+	log.Infof("Deleting: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
 
 	deleteResourceFailed := false
 
@@ -392,10 +392,10 @@ func (c *Controller) onDelete(api *kymaApi.Api) error {
 		log.Errorf("Error while deleting authentication for: %s/%s ver: %s. Root cause: %s", api.Namespace, api.Name, api.ResourceVersion, err)
 	}
 
-	log.Debugf("Deleting ingress for: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
-	if err := c.ingCtrl.Delete(toIngressDto(metaDto, api)); err != nil {
+	log.Debugf("Deleting virtualService for: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
+	if err := c.virtualServiceCtrl.Delete(toVirtualServiceDto(metaDto, api)); err != nil {
 		deleteResourceFailed = true
-		log.Errorf("Error while deleting ingress for: %s/%s ver: %s. Root cause: %s", api.Namespace, api.Name, api.ResourceVersion, err)
+		log.Errorf("Error while deleting virtualService for: %s/%s ver: %s. Root cause: %s", api.Namespace, api.Name, api.ResourceVersion, err)
 	}
 
 	if deleteResourceFailed {
@@ -427,28 +427,42 @@ func (c *Controller) apiStatusHelperFor(api *kymaApi.Api) *ApiStatusHelper {
 	return NewApiStatusHelper(c.kymaInterface, api)
 }
 
-func toIngressDto(metaDto meta.Dto, api *kymaApi.Api) *ingress.Dto {
-	return &ingress.Dto{
+func toVirtualServiceDto(metaDto meta.Dto, api *kymaApi.Api) *networking.Dto {
+	return &networking.Dto{
 		MetaDto:     metaDto,
 		Hostname:    api.Spec.Hostname,
 		ServiceName: api.Spec.Service.Name,
 		ServicePort: api.Spec.Service.Port,
+		Status:      api.Status.VirtualServiceStatus,
 	}
 }
 
 func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto {
 
-	if len(api.Spec.Authentication) == 0 {
-		return nil
+	// authentication disabled explicitly with authenticationEnabled
+	if api.Spec.AuthenticationEnabled != nil && !*api.Spec.AuthenticationEnabled {
+		return &authentication.Dto{
+			AuthenticationEnabled: false,
+		}
 	}
 
+	// authentication disabled because authenticationEnabled flag is not provided and authentication rules are empty
+	if api.Spec.AuthenticationEnabled == nil && len(api.Spec.Authentication) == 0 {
+		return &authentication.Dto{
+			AuthenticationEnabled: false,
+		}
+	}
+
+	// authentication enabled
 	dto := &authentication.Dto{
-		MetaDto:     metaDto,
-		ServiceName: api.Spec.Service.Name,
-		Status:      api.Status.AuthenticationStatus,
+		MetaDto:               metaDto,
+		ServiceName:           api.Spec.Service.Name,
+		Status:                api.Status.AuthenticationStatus,
+		AuthenticationEnabled: true,
 	}
 
 	dtoRules := make(authentication.Rules, len(api.Spec.Authentication))
+
 	for _, authRule := range api.Spec.Authentication {
 
 		if authRule.Type == kymaApi.JwtType {
