@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
+	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 )
 
@@ -15,14 +16,13 @@ func (steps *InstallationSteps) InstallClusterEssentials(installationData *confi
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
-	releaseName := "cluster-essentials"
-	chartDir := path.Join(steps.chartDir, releaseName)
+	chartDir := path.Join(steps.chartDir, consts.ClusterEssentialsComponent)
 	clusterEssentialsOverrides := steps.getClusterEssentialsOverrides(installationData, chartDir)
 
 	installResp, installErr := steps.helmClient.InstallRelease(
 		chartDir,
 		"kyma-system",
-		releaseName,
+		consts.ClusterEssentialsComponent,
 		clusterEssentialsOverrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
@@ -42,13 +42,12 @@ func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
-	releaseName := "cluster-essentials"
-	chartDir := path.Join(steps.chartDir, releaseName)
+	chartDir := path.Join(steps.chartDir, consts.ClusterEssentialsComponent)
 	clusterEssentailsOverrides := steps.getClusterEssentialsOverrides(installationData, chartDir)
 
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
-		releaseName,
+		consts.ClusterEssentialsComponent,
 		clusterEssentailsOverrides)
 
 	if steps.errorHandlers.CheckError("Upgrade Error: ", upgradeErr) {

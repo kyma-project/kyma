@@ -1,6 +1,8 @@
 package config
 
 import (
+	"strings"
+
 	"github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
 )
 
@@ -35,6 +37,7 @@ type InstallationData struct {
 	EnableEtcdBackupOperator   string
 	EtcdBackupABSAccount       string
 	EtcdBackupABSKey           string
+	Components                 map[string]struct{}
 	IsLocalInstallation        func() bool
 }
 
@@ -74,7 +77,25 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		EnableEtcdBackupOperator:   installationConfig.EnableEtcdBackupOperator,
 		EtcdBackupABSAccount:       installationConfig.EtcdBackupABSAccount,
 		EtcdBackupABSKey:           installationConfig.EtcdBackupABSKey,
+		Components:                 convertToMap(installationConfig.ComponentsList),
 		IsLocalInstallation:        isLocalInstallationFunc,
 	}
 	return res, nil
+}
+
+// ShouldInstallComponent returns true if the provided component is on the list of desired components
+func (installationData *InstallationData) ShouldInstallComponent(componentName string) bool {
+	_, found := installationData.Components[componentName]
+	return found
+}
+
+func convertToMap(cList string) map[string]struct{} {
+	split := strings.Split(strings.Replace(cList, " ", "", -1), ",")
+	output := make(map[string]struct{}, len(split))
+	for _, c := range split {
+		if c != "" {
+			output[c] = struct{}{}
+		}
+	}
+	return output
 }

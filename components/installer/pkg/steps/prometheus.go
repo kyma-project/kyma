@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
+	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 )
 
 //InstallPrometheus .
@@ -13,8 +14,7 @@ func (steps *InstallationSteps) InstallPrometheus(installationData *config.Insta
 	const stepName string = "Installing Prometheus operator"
 	const namespace = "kyma-system"
 
-	releaseName := "prometheus-operator"
-	chartDir := path.Join(steps.chartDir, releaseName)
+	chartDir := path.Join(steps.chartDir, consts.PrometheusComponent)
 	overrides := steps.getPrometheusOverrides(installationData, chartDir)
 
 	steps.PrintInstallationStep(stepName)
@@ -23,7 +23,7 @@ func (steps *InstallationSteps) InstallPrometheus(installationData *config.Insta
 	installResp, installErr := steps.helmClient.InstallRelease(
 		chartDir,
 		namespace,
-		releaseName,
+		consts.PrometheusComponent,
 		overrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
@@ -42,8 +42,7 @@ func (steps *InstallationSteps) UpdatePrometheus(installationData *config.Instal
 	const stepName string = "Updating Prometheus operator"
 	const namespace = "kyma-system"
 
-	releaseName := "prometheus-operator"
-	chartDir := path.Join(steps.chartDir, releaseName)
+	chartDir := path.Join(steps.chartDir, consts.PrometheusComponent)
 	overrides := steps.getPrometheusOverrides(installationData, chartDir)
 
 	steps.PrintInstallationStep(stepName)
@@ -51,7 +50,7 @@ func (steps *InstallationSteps) UpdatePrometheus(installationData *config.Instal
 
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
-		releaseName,
+		consts.PrometheusComponent,
 		overrides)
 
 	if steps.errorHandlers.CheckError("Upgrade Error: ", upgradeErr) {

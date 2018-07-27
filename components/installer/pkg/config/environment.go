@@ -26,6 +26,7 @@ type installationConfig struct {
 	EnableEtcdBackupOperator   string
 	EtcdBackupABSAccount       string
 	EtcdBackupABSKey           string
+	ComponentsList             string
 }
 
 // GetInstallationConfig returns all non-secret installation parameters from the Installer environment variables
@@ -51,5 +52,6 @@ func GetInstallationConfig() *installationConfig {
 		EtcdBackupABSContainerName: os.Getenv("ETCD_BACKUP_ABS_CONTAINER_NAME"),
 		EtcdBackupABSAccount:       os.Getenv("ETCD_BACKUP_ABS_ACCOUNT"),
 		EtcdBackupABSKey:           os.Getenv("ETCD_BACKUP_ABS_KEY"),
+		ComponentsList:             os.Getenv("COMPONENT_LIST"),
 	}
 }
