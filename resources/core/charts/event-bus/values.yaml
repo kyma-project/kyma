@@ -33,7 +33,7 @@ global:
         memory: "32M"
   trace:
     apiURL: http://zipkin.kyma-system:9411/api/v1/spans
-  eventBusVersion: "0.2.20"
+  eventBusVersion: "0.2.34"
 e2eTests:
   nameTester: "test-core-event-bus-tester"
   nameSubscriber: "test-core-event-bus-subscriber"    
