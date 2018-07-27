@@ -1,7 +1,7 @@
 deployment:
   image:
     name: application-connector
-    tag: 0.2.19
+    tag: 0.2.30
     pullPolicy: IfNotPresent
   args:
     proxyPort: &proxyPort 8080
