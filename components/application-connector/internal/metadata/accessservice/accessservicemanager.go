@@ -1,6 +1,7 @@
 package accessservice
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/components/application-connector/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-connector/internal/k8sconsts"
 	corev1 "k8s.io/api/core/v1"
@@ -8,6 +9,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
+
+const appNameLabelFormat = "%s-gateway"
 
 // ServiceInterface has methods to work with Service resources.
 type ServiceInterface interface {
@@ -22,7 +25,6 @@ type AccessServiceManager interface {
 }
 
 type AccessServiceManagerConfig struct {
-	AppName    string
 	TargetPort int32
 }
 
@@ -68,6 +70,8 @@ func (m *accessServiceManager) Delete(serviceName string) apperrors.AppError {
 }
 
 func (m *accessServiceManager) create(remoteEnvironment, serviceId, serviceName string) (*corev1.Service, error) {
+	appName := fmt.Sprintf(appNameLabelFormat, remoteEnvironment)
+
 	service := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: serviceName,
@@ -77,7 +81,7 @@ func (m *accessServiceManager) create(remoteEnvironment, serviceId, serviceName 
 			},
 		},
 		Spec: corev1.ServiceSpec{
-			Selector: map[string]string{k8sconsts.LabelApp: m.config.AppName},
+			Selector: map[string]string{k8sconsts.LabelApp: appName},
 			Ports: []corev1.ServicePort{
 				{
 					Name:       "http",
