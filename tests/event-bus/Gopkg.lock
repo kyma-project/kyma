@@ -73,7 +73,7 @@
     "components/event-bus/internal/ea/apis/remoteenvironment.kyma.cx/v1alpha1",
     "components/event-bus/test/util"
   ]
-  revision = "c4e06fbb6c180bffec61adf3c296d826c1465cd9"
+  revision = "846df1b0a0234d22509d135d995b3dce8d1ef5de"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"

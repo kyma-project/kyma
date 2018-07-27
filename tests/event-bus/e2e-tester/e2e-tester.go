@@ -29,9 +29,13 @@ const (
 	testerName          = "test-core-event-bus-tester"
 	subscriptionName    = "test-sub"
 	eventActivationName = "test-ea"
-	SUCCESS             = 0
-	FAIL                = 1
-	RETRIES             = 20
+	srcNamespace        = "local.kyma.commerce"
+	srcType             = "commerce"
+	srcEnv              = "test"
+
+	SUCCESS = 0
+	FAIL    = 1
+	RETRIES = 20
 )
 
 var (
@@ -101,13 +105,14 @@ func main() {
 		shutdown(FAIL)
 	}
 	if _, err = subClient.EventingV1alpha1().Subscriptions(*namespace).Create(util.NewSubscription(
+		subscriptionName,
 		*namespace,
 		*subscriberEventEndpointURL,
 		eventType,
 		"v1",
-		"test",
-		"local.kyma.commerce",
-		"ec")); err != nil {
+		srcEnv,
+		srcNamespace,
+		srcType)); err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
 			log.Printf("Error in creating subscription: %v\n", err)
 			shutdown(FAIL)
@@ -210,9 +215,9 @@ func shutdown(code int) {
 
 func publishTestEvent(publishEventURL string) (*api.PublishResponse, error) {
 	payload := fmt.Sprintf(
-		`{"source": {"source-namespace": "local.kyma.commerce","source-type": "commerce","source-environment": "test"},
+		`{"source": {"source-namespace": "%s","source-type": "%s","source-environment": "%s"},
 	"event-type": "%s","event-type-version": "v1","event-time": "2018-11-02T22:08:41+00:00","data": "test-event-1"}`,
-		eventType)
+		srcNamespace, srcType, srcEnv, eventType)
 	log.Printf("event to be published: %v\n", payload)
 	res, err := http.Post(publishEventURL, "application/json", strings.NewReader(payload))
 	if err != nil {
@@ -354,7 +359,12 @@ func createEventActivation(namespace *string, noOfRetries int) bool {
 	var eventActivationOK bool
 	var err error
 	for i := 0; i < noOfRetries; i++ {
-		if _, err = eaClient.RemoteenvironmentV1alpha1().EventActivations(*namespace).Create(util.NewEventActivation(*namespace)); err == nil {
+		if _, err = eaClient.RemoteenvironmentV1alpha1().EventActivations(*namespace).Create(util.NewEventActivation(
+			eventActivationName,
+			*namespace,
+			srcEnv,
+			srcNamespace,
+			srcType)); err == nil {
 			eventActivationOK = true
 			break
 		}
