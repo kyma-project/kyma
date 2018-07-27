@@ -9,7 +9,8 @@ import (
 )
 
 // NewSubscription creates a new subscription
-func NewSubscription(namespace string,
+func NewSubscription(name string,
+	namespace string,
 	subscriberEventEndpointURL string,
 	eventType string,
 	eventTypeVersion string,
@@ -20,7 +21,7 @@ func NewSubscription(namespace string,
 	return &apiv1.Subscription{
 		TypeMeta: metav1.TypeMeta{APIVersion: apiv1.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-sub",
+			Name:      name,
 			Namespace: namespace,
 			UID:       types.UID(uid),
 		},
@@ -39,16 +40,22 @@ func NewSubscription(namespace string,
 }
 
 // NewEventActivation creates a new event activation
-func NewEventActivation(namespace string) *eaApis.EventActivation {
+func NewEventActivation(name string,
+	namespace string,
+	sourceEnvironment string,
+	sourceNamespace string,
+	sourceType string) *eaApis.EventActivation {
 	return &eaApis.EventActivation{
 		TypeMeta: metav1.TypeMeta{APIVersion: apiv1.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-ea",
+			Name:      name,
 			Namespace: namespace,
 		},
 		EventActivationSpec: eaApis.EventActivationSpec{
-			DisplayName: "e2e-test-event-activation",
-			Source:      eaApis.Source{Environment: "test", Namespace: "local.kyma.commerce", Type: "commerce"},
+			DisplayName: name,
+			Source: eaApis.Source{Environment: sourceEnvironment,
+				Namespace: sourceNamespace,
+				Type:      sourceType},
 		},
 	}
 }
