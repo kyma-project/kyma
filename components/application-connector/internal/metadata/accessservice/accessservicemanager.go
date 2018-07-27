@@ -1,16 +1,16 @@
 package accessservice
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/components/application-connector/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-connector/internal/k8sconsts"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"fmt"
 )
 
-const appNameLabelFormat  = "%s-gateway"
+const appNameLabelFormat = "%s-gateway"
 
 // ServiceInterface has methods to work with Service resources.
 type ServiceInterface interface {
@@ -25,7 +25,6 @@ type AccessServiceManager interface {
 }
 
 type AccessServiceManagerConfig struct {
-	AppName    string
 	TargetPort int32
 }
 

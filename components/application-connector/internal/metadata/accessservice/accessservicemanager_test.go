@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"fmt"
 	"github.com/kyma-project/kyma/components/application-connector/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-connector/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/application-connector/internal/metadata/accessservice/mocks"
@@ -16,7 +17,6 @@ import (
 )
 
 var config = AccessServiceManagerConfig{
-	AppName:    "metadata",
 	TargetPort: 8081,
 }
 
@@ -24,7 +24,7 @@ func TestAccessServiceManager_Create(t *testing.T) {
 
 	t.Run("should create new access service", func(t *testing.T) {
 		// given
-		expectedService := mockService("metadata", "ec-default", "uuid-1", "service-uuid1", 8081)
+		expectedService := mockService("ec-default", "uuid-1", "service-uuid1", 8081)
 		serviceInterface := new(mocks.ServiceInterface)
 		serviceInterface.On("Create", expectedService).Return(expectedService, nil)
 
@@ -40,7 +40,7 @@ func TestAccessServiceManager_Create(t *testing.T) {
 
 	t.Run("should handle errors", func(t *testing.T) {
 		// given
-		expectedService := mockService("metadata", "ec-default", "uuid-1", "service-uuid1", 8081)
+		expectedService := mockService("ec-default", "uuid-1", "service-uuid1", 8081)
 		serviceInterface := new(mocks.ServiceInterface)
 		serviceInterface.On("Create", expectedService).Return(nil, errors.New("some error"))
 
@@ -62,7 +62,7 @@ func TestAccessServiceManager_Upsert(t *testing.T) {
 
 	t.Run("should create access service if not exists", func(t *testing.T) {
 		// given
-		expectedService := mockService("metadata", "ec-default", "uuid-1", "service-uuid1", 8081)
+		expectedService := mockService("ec-default", "uuid-1", "service-uuid1", 8081)
 		serviceInterface := new(mocks.ServiceInterface)
 		serviceInterface.On("Create", expectedService).Return(expectedService, nil)
 
@@ -78,7 +78,7 @@ func TestAccessServiceManager_Upsert(t *testing.T) {
 
 	t.Run("should not fail if access service exists", func(t *testing.T) {
 		// given
-		expectedService := mockService("metadata", "ec-default", "uuid-1", "service-uuid1", 8081)
+		expectedService := mockService("ec-default", "uuid-1", "service-uuid1", 8081)
 		serviceInterface := new(mocks.ServiceInterface)
 		serviceInterface.On("Create", expectedService).Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, ""))
 
@@ -94,7 +94,7 @@ func TestAccessServiceManager_Upsert(t *testing.T) {
 
 	t.Run("should handle errors", func(t *testing.T) {
 		// given
-		expectedService := mockService("metadata", "ec-default", "uuid-1", "service-uuid1", 8081)
+		expectedService := mockService("ec-default", "uuid-1", "service-uuid1", 8081)
 		serviceInterface := new(mocks.ServiceInterface)
 		serviceInterface.On("Create", expectedService).Return(nil, errors.New("some error"))
 
@@ -165,7 +165,9 @@ func TestAccessServiceManager_Delete(t *testing.T) {
 	})
 }
 
-func mockService(appName, remoteEnvironment, serviceId, serviceName string, targetPort int32) *corev1.Service {
+func mockService(remoteEnvironment, serviceId, serviceName string, targetPort int32) *corev1.Service {
+	appName := fmt.Sprintf(appNameLabelFormat, remoteEnvironment)
+
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: serviceName,

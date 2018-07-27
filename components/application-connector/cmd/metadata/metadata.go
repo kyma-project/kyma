@@ -47,7 +47,6 @@ func main() {
 	serviceDefinitionService, err := newServiceDefinitionService(
 		options.minioURL,
 		options.namespace,
-		options.appName,
 		options.proxyPort,
 		nameResolver,
 	)
@@ -84,7 +83,7 @@ func newExternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 	return externalapi.NewHandler(metadataHandler)
 }
 
-func newServiceDefinitionService(minioURL, namespace, appName string, proxyPort int, nameResolver k8sconsts.NameResolver) (metadata.ServiceDefinitionService, apperrors.AppError) {
+func newServiceDefinitionService(minioURL, namespace string, proxyPort int, nameResolver k8sconsts.NameResolver) (metadata.ServiceDefinitionService, apperrors.AppError) {
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
 		return nil, apperrors.Internal("failed to read k8s in-cluster configuration, %s", err)
@@ -117,7 +116,7 @@ func newServiceDefinitionService(minioURL, namespace, appName string, proxyPort 
 		return nil, apperror
 	}
 
-	accessServiceManager := newAccessServiceManager(coreClientset, namespace, appName, proxyPort)
+	accessServiceManager := newAccessServiceManager(coreClientset, namespace, proxyPort)
 	secretsRepository := newSecretsRepository(coreClientset, namespace)
 
 	uuidGenerator := metauuid.GeneratorFunc(func() string {
@@ -140,11 +139,10 @@ func newRemoteEnvironmentRepository(config *restclient.Config) (remoteenv.Servic
 	return remoteenv.NewServiceRepository(rei), nil
 }
 
-func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace, appName string, proxyPort int) accessservice.AccessServiceManager {
+func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace string, proxyPort int) accessservice.AccessServiceManager {
 	si := coreClientset.CoreV1().Services(namespace)
 
 	config := accessservice.AccessServiceManagerConfig{
-		AppName:    appName,
 		TargetPort: int32(proxyPort),
 	}
 
