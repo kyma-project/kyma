@@ -6,6 +6,11 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 DOMAIN="kyma.local"
 
+VM_DRIVER="virtualbox"
+if [ `uname -s` = "Darwin" ]; then
+    VM_DRIVER="hyperkit"
+fi
+
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -21,6 +26,10 @@ do
             shift # past argument
             shift # past value
         ;;
+        --vm-driver)
+            VM_DRIVER="$2"
+            shift
+            shift
         *)    # unknown option
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
@@ -28,11 +37,6 @@ do
     esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
-
-VM_DRIVER="virtualbox"
-if [ `uname -s` = "Darwin" ]; then
-    VM_DRIVER="hyperkit"
-fi
 
 if [[ ! ${SKIP_MINIKUBE_START} ]]; then
     bash ${CURRENT_DIR}/../scripts/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}"
