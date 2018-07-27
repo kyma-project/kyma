@@ -27,7 +27,6 @@ spec:
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/metadata"
-          - '--appName={{ .Chart.Name }}'
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--minioURL={{ .Values.deployment.args.minioURL }}"
