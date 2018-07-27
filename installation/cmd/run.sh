@@ -30,6 +30,7 @@ do
             VM_DRIVER="$2"
             shift
             shift
+        ;;
         *)    # unknown option
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
