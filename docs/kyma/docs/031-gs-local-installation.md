@@ -6,7 +6,7 @@ internal: true
 
 ## Overview
 
-This Getting Started guide instructs developers to quickly deploy Kyma locally on a Mac, Linux or Windows. Kyma installs locally using a proprietary installer based on a Kubernetes operator.
+This Getting Started guide instructs developers to quickly deploy Kyma locally on a Mac, Linux, or Windows. Kyma installs locally using a proprietary installer based on a Kubernetes operator.
 The document provides the prerequisites, the instructions on how to install Kyma locally and verify the deployment, and the troubleshooting tips.
 
 ## Prerequisites
@@ -17,7 +17,7 @@ To run Kyma locally, download these tools:
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.9.0
 - [Helm](https://github.com/kubernetes/helm) 2.8.2
 - [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - Mac only
-- [Virtualbox](https://www.virtualbox.org/) - Linux / Windows
+- [Virtualbox](https://www.virtualbox.org/) - Linux or Windows
 - Hyper-V - Windows
 
 Read the [prerequisite reasoning](019-prereq-reasoning.md) document to learn why Kyma uses these tools.
@@ -48,7 +48,7 @@ Follow these steps to "always trust" the Kyma certificate on macOS:
   cd installation
   ```
 
-2. Run the `run.sh` (Mac / Linux) or `run.ps1` (Windows) script:
+2. Depending on your operating system, run `run.sh` for Mac and Linux or `run.ps1` for Windows
   ```
   cmd/run.sh
   ```
