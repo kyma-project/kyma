@@ -27,9 +27,8 @@ func NewDurationMiddleware(name string) (*durationMiddleware, apperrors.AppError
 func newDurationSummaryVec(name string) *prometheus.SummaryVec {
 	return prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
-			Name:       name,
-			Help:       "Response time for each endpoint",
-			Objectives: map[float64]float64{0.5: 0.05},
+			Name: name,
+			Help: "Response time for each endpoint",
 		},
 		[]string{"endpoint", "method"},
 	)

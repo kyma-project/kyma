@@ -23,26 +23,25 @@ func (lrw *responseWriterWrapper) WriteHeader(code int) {
 }
 
 type codeMiddleware struct {
-	histogramVec *prometheus.HistogramVec
+	summaryVec *prometheus.SummaryVec
 }
 
 func NewCodeMiddleware(name string) (*codeMiddleware, apperrors.AppError) {
-	histogramVec := newCodeHistogram(name)
+	summaryVec := newSummaryVec(name)
 
-	err := prometheus.Register(histogramVec)
+	err := prometheus.Register(summaryVec)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to create middleware %s: %s", name, err.Error())
 	}
 
-	return &codeMiddleware{histogramVec: histogramVec}, nil
+	return &codeMiddleware{summaryVec: summaryVec}, nil
 }
 
-func newCodeHistogram(name string) *prometheus.HistogramVec {
-	return prometheus.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    name,
-			Help:    "Status codes returned by each endpoint",
-			Buckets: []float64{200, 201, 400, 403, 404, 409, 500, 503},
+func newSummaryVec(name string) *prometheus.SummaryVec {
+	return prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Name: name,
+			Help: "Status codes returned by each endpoint",
 		},
 		[]string{"endpoint", "method"},
 	)
@@ -64,7 +63,7 @@ func (dm *codeMiddleware) Handle(next http.Handler) http.Handler {
 		if err != nil {
 			logrus.Errorf("Failed to get path template: %s", err.Error())
 		} else {
-			dm.histogramVec.WithLabelValues(template, r.Method).Observe(float64(writerWrapper.statusCode))
+			dm.summaryVec.WithLabelValues(template, r.Method).Observe(float64(writerWrapper.statusCode))
 		}
 	})
 }
