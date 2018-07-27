@@ -13,8 +13,8 @@
     "proto",
     "sortkeys"
   ]
-  revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
-  version = "v1.0.0"
+  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
@@ -90,7 +90,7 @@
     "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned/scheme",
     "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned/typed/gateway.kyma.cx/v1alpha2"
   ]
-  revision = "c4e06fbb6c180bffec61adf3c296d826c1465cd9"
+  revision = "e22316a37f7ed482fedcd934ee55d6cd3131e814"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -107,8 +107,8 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
-  version = "v1.0.5"
+  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
+  version = "v1.0.6"
 
 [[projects]]
   name = "github.com/smartystreets/assertions"
@@ -140,7 +140,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
+  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
 
 [[projects]]
   branch = "master"
@@ -152,7 +152,7 @@
     "http2/hpack",
     "idna"
   ]
-  revision = "6f138e0f60713a248abf7046f1014a3ba90f5341"
+  revision = "3673e40ba22529d22c3fd7c93e97b0ce50fa7bdd"
 
 [[projects]]
   branch = "master"
@@ -161,7 +161,7 @@
     "unix",
     "windows"
   ]
-  revision = "1b2967e3c290b7c545b3db0deeda16e9be4f98a2"
+  revision = "e072cadbbdc8dd3d3ffa82b8b4b9304c261d9311"
 
 [[projects]]
   name = "golang.org/x/text"
