@@ -7,10 +7,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	recordedBackupCfgMapName = "recorded-etcd-backup-data"
-	absBackupCfgMapKeyName   = "abs-backup-file-path-from-last-success"
-)
+const absBackupCfgMapKeyName = "abs-backup-file-path-from-last-success"
 
 //go:generate mockery -name=configMapClient -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=singleBackupExecutor -output=automock -outpkg=automock -case=underscore
@@ -31,13 +28,15 @@ type (
 type RecordedExecutor struct {
 	underlying singleBackupExecutor
 	cfgMapCli  configMapClient
+	cfgMapName string
 }
 
 // NewRecordedExecutor returns new instance of RecordedExecutor
-func NewRecordedExecutor(underlying singleBackupExecutor, cfgMapCli configMapClient) *RecordedExecutor {
+func NewRecordedExecutor(underlying singleBackupExecutor, cfgMapName string, cfgMapCli configMapClient) *RecordedExecutor {
 	return &RecordedExecutor{
 		underlying: underlying,
 		cfgMapCli:  cfgMapCli,
+		cfgMapName: cfgMapName,
 	}
 }
 
@@ -64,7 +63,7 @@ func (r *RecordedExecutor) upsertABSBackupPathToCfgMap(path string) error {
 	case apiErrors.IsAlreadyExists(err):
 		r.updateCfgMapWithABSBackupPath(path)
 	default:
-		return errors.Wrapf(err, "while creating %s config map", recordedBackupCfgMapName)
+		return errors.Wrapf(err, "while creating %s config map", r.cfgMapName)
 	}
 
 	return nil
@@ -73,7 +72,7 @@ func (r *RecordedExecutor) upsertABSBackupPathToCfgMap(path string) error {
 func (r *RecordedExecutor) createCfgMapWithABSBackupPath(path string) error {
 	_, err := r.cfgMapCli.Create(&coreTypes.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: recordedBackupCfgMapName,
+			Name: r.cfgMapName,
 		},
 		Data: map[string]string{
 			absBackupCfgMapKeyName: path,
@@ -84,9 +83,9 @@ func (r *RecordedExecutor) createCfgMapWithABSBackupPath(path string) error {
 }
 
 func (r *RecordedExecutor) updateCfgMapWithABSBackupPath(path string) error {
-	oldCfg, err := r.cfgMapCli.Get(recordedBackupCfgMapName, metav1.GetOptions{})
+	oldCfg, err := r.cfgMapCli.Get(r.cfgMapName, metav1.GetOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "while getting %s config map", recordedBackupCfgMapName)
+		return errors.Wrapf(err, "while getting %s config map", r.cfgMapName)
 	}
 
 	cfgCopy := oldCfg.DeepCopy()
@@ -94,7 +93,7 @@ func (r *RecordedExecutor) updateCfgMapWithABSBackupPath(path string) error {
 	cfgCopy.Data[absBackupCfgMapKeyName] = path
 
 	if _, err := r.cfgMapCli.Update(cfgCopy); err != nil {
-		return errors.Wrapf(err, "while updating %s config map", recordedBackupCfgMapName)
+		return errors.Wrapf(err, "while updating %s config map", r.cfgMapName)
 	}
 
 	return nil

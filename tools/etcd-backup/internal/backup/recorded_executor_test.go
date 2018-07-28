@@ -16,6 +16,7 @@ import (
 
 func TestRecordedExecutorSingleBackupSuccess(t *testing.T) {
 	// given
+	fixCfgMapName := "recorded-etcd-backup-data"
 	fixBlobPrefix := "blob-prefix"
 	fixBackupOut := &backup.SingleBackupOutput{
 		ABSBackupPath: "abs/backup/path",
@@ -32,14 +33,14 @@ func TestRecordedExecutorSingleBackupSuccess(t *testing.T) {
 	defer cfgMapCliMock.AssertExpectations(t)
 	cfgMapCliMock.ExpectOnCreate(&coreTypes.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "recorded-etcd-backup-data",
+			Name: fixCfgMapName,
 		},
 		Data: map[string]string{
 			"abs-backup-file-path-from-last-success": fixBackupOut.ABSBackupPath,
 		},
 	})
 
-	sut := backup.NewRecordedExecutor(backupExecutorMock, cfgMapCliMock)
+	sut := backup.NewRecordedExecutor(backupExecutorMock, fixCfgMapName, cfgMapCliMock)
 
 	// when
 	out, err := sut.SingleBackup(ctx.Done(), fixBlobPrefix)
@@ -70,7 +71,7 @@ func TestRecordedExecutorSingleBackupFailure(t *testing.T) {
 		defer backupExecutorMock.AssertExpectations(t)
 		backupExecutorMock.ExpectErrorOnSingleBackup(fixBOut, fixErr)
 
-		sut := backup.NewRecordedExecutor(backupExecutorMock, nil)
+		sut := backup.NewRecordedExecutor(backupExecutorMock, "", nil)
 
 		// when
 		out, err := sut.SingleBackup(ctx.Done(), fixBlobPrefix)
@@ -93,7 +94,7 @@ func TestRecordedExecutorSingleBackupFailure(t *testing.T) {
 		defer cfgMapCliMock.AssertExpectations(t)
 		cfgMapCliMock.ExpectErrorOnCreate(fixErr)
 
-		sut := backup.NewRecordedExecutor(backupExecutorMock, cfgMapCliMock)
+		sut := backup.NewRecordedExecutor(backupExecutorMock, "fix-cfg-map-name", cfgMapCliMock)
 
 		// when
 		out, err := sut.SingleBackup(ctx.Done(), fixBlobPrefix)

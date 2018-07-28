@@ -69,7 +69,7 @@ func main() {
 
 	// STEP 1: backup service
 	backupExecutor := backup.NewExecutor(cfg.Backup, cfg.ABS.SecretName, cfg.ABS.ContainerName, etcdOpNsScopedCli, etcdOpNsScopedLister, log)
-	recBackupExecutor := backup.NewRecordedExecutor(backupExecutor, cfgMapNsScopedCli)
+	recBackupExecutor := backup.NewRecordedExecutor(backupExecutor, cfg.Backup.ConfigMapNameForTracing, cfgMapNsScopedCli)
 
 	_, err = recBackupExecutor.SingleBackup(stopCh, cfg.BlobPrefix)
 	fatalOnError(err, "while executing single etcd cluster backup")

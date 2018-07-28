@@ -29,6 +29,7 @@ export APP_ABS_CONTAINER_NAME=<container_name>
 export APP_ABS_SECRET_NAME=<secret_name>
 export APP_BLOB_PREFIX=<prefix_name>
 
+export APP_BACKUP_CONFIG_MAP_NAME_FOR_TRACING="sc-recorded-etcd-backup-data"
 export APP_BACKUP_ETCD_ENDPOINTS="<endpoints>"
 
 go run main.go
@@ -47,7 +48,9 @@ Use the following environment variables to configure the application:
 | **APP_ABS_CONTAINER_NAME** | Yes |  | The Azure Blob Storage container name where the backup should be saved. |
 | **APP_ABS_SECRET_NAME** | Yes |  | The name of the secret object that stores the Azure storage credential. |
 | **APP_BLOB_PREFIX** | Yes |  | The name of the blob prefix which should be used for saved backup. Basically it should be the name of application for which backup is performed e.g. **service-catalog** |
-| **APP_BACKUP_ETCD_ENDPOINTS** | Yes |  | EtcdEndpoints specifies the endpoints of an etcd cluster. When multiple endpoints are given, the backup operator retrieves the backup from the endpoint that has the most up-to-date state. The given endpoints must belong to the same etcd cluster. |
+| **APP_BACKUP_ETCD_ENDPOINTS** | Yes |  | The endpoints of an etcd cluster. When multiple endpoints are given, the backup operator retrieves the backup from the endpoint that has the most up-to-date state. The given endpoints must belong to the same etcd cluster. |
+| **APP_BACKUP_CONFIG_MAP_NAME_FOR_TRACING** | Yes |  | The name of the ConfigMap where the path to the ABS backup is saved (only from the last success). |
+
 
 ## Development
 

@@ -80,5 +80,5 @@ def execute(command, envs = '') {
     def buildpack = 'golang-buildpack:0.0.8'
     def envText = envs=='' ? '' : "--env $envs"
     workDir = pwd()
-    sh "docker run --rm -v $workDir:/go/src/github.wdf.sap.corp/kyma/kyma-new/ -w /go/src/github.wdf.sap.corp/kyma/kyma-new/$env.APP_FOLDER $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
+    sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/kyma/ -w /go/src/github.com/kyma-project/kyma/$env.APP_FOLDER $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
 }
