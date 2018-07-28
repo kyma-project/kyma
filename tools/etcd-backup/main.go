@@ -32,7 +32,7 @@ type Config struct {
 	}
 	BlobPrefix string
 
-	Backup  backup.Config
+	Backup backup.Config
 }
 
 func main() {

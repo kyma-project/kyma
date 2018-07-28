@@ -31,17 +31,15 @@ type Executor struct {
 
 // NewExecutor returns new instance of Executor
 func NewExecutor(cfg Config, absSecretName, absContainerName string, etcdBackupCli etcdOpClient.EtcdBackupInterface, nsScopedLister etcdOpLister.EtcdBackupNamespaceLister, log logrus.FieldLogger) *Executor {
-	e := &Executor{
+	return &Executor{
 		log:              log,
 		etcdBackupCli:    etcdBackupCli,
 		etcdBackupLister: nsScopedLister,
 		absSecretName:    absSecretName,
 		etcdEndpoints:    cfg.EtcdEndpoints,
 		idProvider:       idprovider.New(),
+		absContainerName: removeSlashSuffixIfNeeded(absContainerName),
 	}
-	e.absContainerName = e.removeSlashSuffixIfNeeded(absContainerName)
-
-	return e
 }
 
 // SingleBackupOutput contains all information which will be returned from SingleBackup function
@@ -86,7 +84,7 @@ func (e *Executor) etcdBackup(blobPrefix string) (*etcdTypes.EtcdBackup, error) 
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating ID")
 	}
-	blobPrefix = e.removeSlashSuffixIfNeeded(blobPrefix)
+	blobPrefix = removeSlashSuffixIfNeeded(blobPrefix)
 
 	return &etcdTypes.EtcdBackup{
 		ObjectMeta: metav1.ObjectMeta{
@@ -131,7 +129,7 @@ func (e *Executor) waitForEctdBackupStatus(name string, stopCh <-chan struct{}) 
 }
 
 // removeSlashSuffixIfNeeded ensures that path does not contain the slash suffix
-func (e *Executor) removeSlashSuffixIfNeeded(path string) string {
+func removeSlashSuffixIfNeeded(path string) string {
 	if strings.HasSuffix(path, "/") {
 		return path[:len(path)-1]
 	}

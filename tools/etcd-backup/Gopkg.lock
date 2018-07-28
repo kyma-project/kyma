@@ -2,18 +2,6 @@
 
 
 [[projects]]
-  name = "github.com/Azure/azure-pipeline-go"
-  packages = ["pipeline"]
-  revision = "7571e8eb0876932ab505918ff7ed5107773e5ee2"
-  version = "0.1.7"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/Azure/azure-storage-blob-go"
-  packages = ["2018-03-28/azblob"]
-  revision = "eaae161d9d5e07363f04ddb19d84d57efc66d1a1"
-
-[[projects]]
   name = "github.com/coreos/etcd-operator"
   packages = [
     "pkg/apis/etcd/v1beta2",
@@ -414,6 +402,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "98b594a23835abd4b3cfcd3a9e077ea3c41deda65df7fddddcdbd4e5dfc7e1e3"
+  inputs-digest = "73e9246622b858fb79523f044ed63a102782998e3cf566e676a9f8e59e28323d"
   solver-name = "gps-cdcl"
   solver-version = 1
