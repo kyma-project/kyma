@@ -22,7 +22,7 @@ type installationConfig struct {
 	RemoteEnvCaKey             string
 	UITestUser                 string
 	UITestPassword             string
-	EctdBackupABSContainerName string
+	EtcdBackupABSContainerName string
 	EnableEtcdBackupOperator   string
 	EtcdBackupABSAccount       string
 	EtcdBackupABSKey           string
@@ -48,7 +48,7 @@ func GetInstallationConfig() *installationConfig {
 		UITestUser:                 os.Getenv("UI_TEST_USER"),
 		UITestPassword:             os.Getenv("UI_TEST_PASSWORD"),
 		EnableEtcdBackupOperator:   os.Getenv("ENABLE_ETCD_BACKUP_OPERATOR"),
-		EctdBackupABSContainerName: os.Getenv("ECTD_BACKUP_ABS_CONTAINER_NAME"),
+		EtcdBackupABSContainerName: os.Getenv("ETCD_BACKUP_ABS_CONTAINER_NAME"),
 		EtcdBackupABSAccount:       os.Getenv("ETCD_BACKUP_ABS_ACCOUNT"),
 		EtcdBackupABSKey:           os.Getenv("ETCD_BACKUP_ABS_KEY"),
 	}

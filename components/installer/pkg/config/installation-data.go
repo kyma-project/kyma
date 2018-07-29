@@ -31,7 +31,7 @@ type InstallationData struct {
 	UITestUser                 string
 	UITestPassword             string
 	AdminGroup                 string
-	EctdBackupABSContainerName string
+	EtcdBackupABSContainerName string
 	EnableEtcdBackupOperator   string
 	EtcdBackupABSAccount       string
 	EtcdBackupABSKey           string
@@ -70,7 +70,7 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		UITestUser:                 installationConfig.UITestUser,
 		UITestPassword:             installationConfig.UITestPassword,
 		AdminGroup:                 installationConfig.AdminGroup,
-		EctdBackupABSContainerName: installationConfig.EctdBackupABSContainerName,
+		EtcdBackupABSContainerName: installationConfig.EtcdBackupABSContainerName,
 		EnableEtcdBackupOperator:   installationConfig.EnableEtcdBackupOperator,
 		EtcdBackupABSAccount:       installationConfig.EtcdBackupABSAccount,
 		EtcdBackupABSKey:           installationConfig.EtcdBackupABSKey,
