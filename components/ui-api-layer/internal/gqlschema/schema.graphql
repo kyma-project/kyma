@@ -364,6 +364,19 @@ type EventActivation {
     events: [EventActivationEvent]!
 }
 
+type UsageKind {
+    name: String!
+    group: String!
+    kind: String!
+    version: String!
+    displayName: String!
+}
+
+type UsageKindResource {
+    name: String!
+    namespace: String!
+}
+
 # IDP PRESETS
 
 type IDPPreset {
@@ -422,6 +435,8 @@ type Query {
     serviceBroker(name: String!): ServiceBroker
     serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
     serviceBinding(name: String!, environment: String!): ServiceBinding
+    usageKinds(first: Int, offset: Int): [UsageKind!]!
+    usageKindResources(usageKind: String!, environment: String!): [UsageKindResource!]!
 
     apis(environment: String!, serviceName: String, hostname: String): [API!]!
 

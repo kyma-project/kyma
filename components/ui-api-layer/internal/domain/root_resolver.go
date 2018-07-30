@@ -146,6 +146,14 @@ func (r *RootResolver) Query_serviceBroker(ctx context.Context, name string) (*g
 	return r.sc.ServiceBrokerQuery(ctx, name)
 }
 
+func (r *RootResolver) Query_usageKinds(ctx context.Context, first *int, offset *int) ([]gqlschema.UsageKind, error) {
+	return r.sc.ListUsageKinds(ctx, first, offset)
+}
+
+func (r *RootResolver) Query_usageKindResources(ctx context.Context, usageKind string, environment string) ([]gqlschema.UsageKindResource, error) {
+	return r.sc.ListServiceUsageKindResources(ctx, usageKind, environment)
+}
+
 func (r *RootResolver) ServiceClass_activated(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error) {
 	return r.sc.ServiceClassActivatedField(ctx, obj)
 }

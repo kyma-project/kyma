@@ -205,7 +205,13 @@
     "components/remote-environment-broker/pkg/client/informers/externalversions/remoteenvironment/v1alpha1",
     "components/remote-environment-broker/pkg/client/listers/remoteenvironment/v1alpha1"
   ]
-  revision = "c4e06fbb6c180bffec61adf3c296d826c1465cd9"
+  revision = "55714d3c4840a7ed71ffbef2a62541254ec86502"
+
+[[projects]]
+  name = "github.com/magiconair/properties"
+  packages = ["assert"]
+  revision = "c2353362d570a7bfa228149c62842019201cfb71"
+  version = "v1.8.0"
 
 [[projects]]
   name = "github.com/minio/minio-go"
@@ -421,7 +427,6 @@
     "storage/v1beta1"
   ]
   revision = "73d903622b7391f3312dcbac6483fed484e185f8"
-  version = "kubernetes-1.10.1"
 
 [[projects]]
   name = "k8s.io/apimachinery"
@@ -472,6 +477,8 @@
   packages = [
     "discovery",
     "discovery/fake",
+    "dynamic",
+    "dynamic/fake",
     "informers",
     "informers/admissionregistration",
     "informers/admissionregistration/v1alpha1",
@@ -625,6 +632,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a4f01f10991a3ea7164d4613c0c5f5eaebb206c83b1bf91d24c945e6d222a844"
+  inputs-digest = "9cca6476df0f56c7f54ad1db853b9b9b2178015cfd81f28bf9e81064a806288d"
   solver-name = "gps-cdcl"
   solver-version = 1
