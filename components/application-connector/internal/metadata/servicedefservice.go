@@ -12,6 +12,8 @@ import (
 	"encoding/json"
 )
 
+const targetSwaggerVersion = "2.0"
+
 // ServiceDefinitionService is a service that manages ServiceDefinition objects.
 type ServiceDefinitionService interface {
 	// Create adds new ServiceDefinition.
@@ -274,11 +276,15 @@ func (sds *serviceDefinitionService) insertSpecs(id string, docs []byte, api *se
 }
 
 func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte,apperrors.AppError) {
-	apiSpec := spec.Swagger{}
+	var apiSpec spec.Swagger
 
 	err := json.Unmarshal(rawApiSpec, &apiSpec)
 	if err != nil {
 		return []byte{}, apperrors.Internal("failed to unmarshal api spec, %s", err)
+	}
+
+	if apiSpec.Swagger != targetSwaggerVersion {
+		return rawApiSpec, nil
 	}
 
 	fullUrl, err := url.Parse(gatewayUrl)
