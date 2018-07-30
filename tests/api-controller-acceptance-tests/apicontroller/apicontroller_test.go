@@ -87,35 +87,18 @@ func TestSpec(t *testing.T) {
 
 			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled)
 
-			createdApi, err := kymaInterface.GatewayV1alpha2().Apis(namespace).Create(api)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Create(api)
 
 			So(err, ShouldBeNil)
-			So(createdApi, ShouldNotBeNil)
-
-			lastApi = createdApi
-
+			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-		})
 
-		Convey("validate created API", func() {
-
-			t.Log("Validate created...")
-
-			checkPreconditions(lastApi, t)
 			validateApiNotSecured(httpClient, lastApi)
-		})
 
-		Convey("get API", func() {
-
-			t.Log("Get...")
-
-			gotApi, err := kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
-			So(gotApi, ShouldNotBeNil)
-
-			lastApi = gotApi
-
+			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 		})
 
@@ -126,35 +109,18 @@ func TestSpec(t *testing.T) {
 			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityEnabled)
 			api.ResourceVersion = lastApi.ResourceVersion
 
-			updatedApi, err := kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
 
 			So(err, ShouldBeNil)
-			So(updatedApi, ShouldNotBeNil)
-
-			lastApi = updatedApi
-
+			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-		})
 
-		Convey("validate updated API with default jwt configuration", func() {
-
-			t.Log("Validate updated...")
-
-			checkPreconditions(lastApi, t)
 			validateApiSecured(httpClient, lastApi)
-		})
 
-		Convey("get updated API with default jwt configuration", func() {
-
-			t.Log("Get...")
-
-			gotApi, err := kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
-			So(gotApi, ShouldNotBeNil)
-
-			lastApi = gotApi
-
+			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 		})
 
@@ -165,35 +131,18 @@ func TestSpec(t *testing.T) {
 			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled)
 			api.ResourceVersion = lastApi.ResourceVersion
 
-			updatedApi, err := kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
 
 			So(err, ShouldBeNil)
-			So(updatedApi, ShouldNotBeNil)
-
-			lastApi = updatedApi
-
+			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-		})
 
-		Convey("validate updated API with disabled authentication", func() {
-
-			t.Log("Validate updated...")
-
-			checkPreconditions(lastApi, t)
 			validateApiNotSecured(httpClient, lastApi)
-		})
 
-		Convey("get updated API with disabled authentication", func() {
-
-			t.Log("Get...")
-
-			gotApi, err := kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
-			So(gotApi, ShouldNotBeNil)
-
-			lastApi = gotApi
-
+			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 		})
 
@@ -206,22 +155,19 @@ func TestSpec(t *testing.T) {
 
 			setCustomJwtAuthenticationConfig(api)
 
-			updatedApi, err := kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
 
 			So(err, ShouldBeNil)
-			So(updatedApi, ShouldNotBeNil)
-
-			lastApi = updatedApi
-
+			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-		})
 
-		Convey("validate updated API with custom jwt configuration", func() {
-
-			t.Log("Validate updated...")
-
-			checkPreconditions(lastApi, t)
 			validateApiSecured(httpClient, lastApi)
+
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+
+			So(err, ShouldBeNil)
+			So(lastApi, ShouldNotBeNil)
+			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 		})
 
 		Convey("delete API", func() {
@@ -233,18 +179,11 @@ func TestSpec(t *testing.T) {
 			err := kymaInterface.GatewayV1alpha2().Apis(namespace).Delete(lastApi.Name, &metav1.DeleteOptions{})
 
 			So(err, ShouldBeNil)
-		})
 
-		Convey("validate if API is deleted properly", func() {
-
-			t.Log("Validate deleted...")
-
-			checkPreconditions(lastApi, t)
-			_, err := kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+			_, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
 
 			So(err, ShouldNotBeNil)
 		})
-
 	})
 }
 
