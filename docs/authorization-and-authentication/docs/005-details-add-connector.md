@@ -5,13 +5,14 @@ type: Details
 
 Add external, OpenID Connect compliant authentication providers to Kyma using [Dex connectors](https://github.com/coreos/dex#connectors). Follow the instructions below to add a GitHub connector and use it to authenticate users in Kyma.
 
+>**NOTE:** Groups in the Github are represented as teams. See [this](https://help.github.com/articles/organizing-members-into-teams/) document to learn how to manage teams in Github.
+
 ## Prerequisites
 
 To add a GitHub connector to Dex, [register](https://github.com/settings/applications/new) a new OAuth application in GitHub. Set the authorization callback URL to `https://dex.kyma.local/callback`.
 After you complete the registration, [request](https://help.github.com/articles/requesting-organization-approval-for-oauth-apps/) for an organization approval.
 
 >**NOTE:** To authenticate in Kyma using GitHub, the user must be a member of a GitHub [organization](https://help.github.com/articles/creating-a-new-organization-from-scratch/) that has at least one [team](https://help.github.com/articles/creating-a-team/).
-
 
 ## Configure Dex
 
@@ -40,7 +41,7 @@ This table explains the placeholders used in the template:
 
 ## Configure authorization rules
 
-To bind two default roles added to every Kyma Environment, add the **bindings** section to [this](../../../resources/core/charts/cluster-users/values.yaml) file. Follow this template:
+To bind Github groups to the default roles added to every Kyma Environment, add the **bindings** section to [this](../../../resources/core/charts/cluster-users/values.yaml) file. Follow this template:
 
 ```
 bindings:
@@ -59,3 +60,4 @@ This table explains the placeholders used in the template:
 | GITHUB_ORGANIZATION | Specifies the name of the GitHub organization. |
 | GITHUB_TEAM_A | Specifies the name of GitHub team to bind to the `kyma-admin-role` role. |
 | GITHUB_TEAM_B | Specifies the name of GitHub team to bind to the `kyma-reader-role` role. |
+
