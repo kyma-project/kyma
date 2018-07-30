@@ -3,6 +3,8 @@
 </p>
 
 ## Overview
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fkyma-project%2Fkyma.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fkyma-project%2Fkyma?ref=badge_shield)
+
 
 Kyma is a cloud-native application development framework.
 
@@ -41,3 +43,7 @@ Learn how to use Kyma and test the available examples.
 ### Examples
 
 Kyma comes with the ready-to-use code snippets that you can use to test the extensions and the core functionality. See the list of existing examples in the [`examples`](https://github.com/kyma-project/examples) repository.
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fkyma-project%2Fkyma.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fkyma-project%2Fkyma?ref=badge_large)
