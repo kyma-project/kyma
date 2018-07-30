@@ -26,14 +26,15 @@ import (
 )
 
 const (
-	namespace                               = "kyma-system"
-	ingressControllerServiceURL             = "istio-ingress.istio-system.svc.cluster.local"
-	testIdLength                            = 8
-	maxRetries                              = 100
-	retrySleep                              = 3 * time.Second
-	domainNameEnv                           = "DOMAIN_NAME"
-	apiSecurityEnabled          ApiSecurity = true
-	apiSecurityDisabled         ApiSecurity = false
+	namespace                                      = "kyma-system"
+	ingressGatewayControllerServiceURL             = "istio-ingressgateway.istio-system.svc.cluster.local"
+	testIdLength                                   = 8
+	maxRetries                                     = 1000
+	minimalNumberOfCorrectResults                  = 5
+	retrySleep                                     = 2 * time.Second
+	domainNameEnv                                  = "DOMAIN_NAME"
+	apiSecurityEnabled                 ApiSecurity = true
+	apiSecurityDisabled                ApiSecurity = false
 )
 
 type ApiSecurity bool
@@ -86,61 +87,87 @@ func TestSpec(t *testing.T) {
 
 			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled)
 
-			createdApi, err := kymaInterface.GatewayV1alpha2().Apis(namespace).Create(api)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Create(api)
 
 			So(err, ShouldBeNil)
-			So(createdApi, ShouldNotBeNil)
-
-			lastApi = createdApi
-
+			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-		})
 
-		Convey("validate created API", func() {
-
-			t.Log("Validate created...")
-
-			checkPreconditions(lastApi, t)
 			validateApiNotSecured(httpClient, lastApi)
-		})
 
-		Convey("get API", func() {
-
-			t.Log("Get...")
-
-			gotApi, err := kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
 
 			So(err, ShouldBeNil)
-			So(gotApi, ShouldNotBeNil)
-
-			lastApi = gotApi
-
+			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 		})
 
-		Convey("update API to enable authentication", func() {
+		Convey("update API with default jwt configuration to enable authentication", func() {
 
 			t.Log("Update...")
 
 			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityEnabled)
 			api.ResourceVersion = lastApi.ResourceVersion
 
-			updatedApi, err := kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
 
 			So(err, ShouldBeNil)
-			So(updatedApi, ShouldNotBeNil)
+			So(lastApi, ShouldNotBeNil)
+			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			lastApi = updatedApi
+			validateApiSecured(httpClient, lastApi)
 
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+
+			So(err, ShouldBeNil)
+			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 		})
 
-		Convey("validate updated API", func() {
+		Convey("update API to disable authentication", func() {
 
-			t.Log("Validate updated...")
+			t.Log("Update...")
 
-			checkPreconditions(lastApi, t)
+			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled)
+			api.ResourceVersion = lastApi.ResourceVersion
+
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+
+			So(err, ShouldBeNil)
+			So(lastApi, ShouldNotBeNil)
+			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+
+			validateApiNotSecured(httpClient, lastApi)
+
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+
+			So(err, ShouldBeNil)
+			So(lastApi, ShouldNotBeNil)
+			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+		})
+
+		Convey("update API with custom jwt configuration", func() {
+
+			t.Log("Update...")
+
+			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityEnabled)
+			api.ResourceVersion = lastApi.ResourceVersion
+
+			setCustomJwtAuthenticationConfig(api)
+
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+
+			So(err, ShouldBeNil)
+			So(lastApi, ShouldNotBeNil)
+			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+
 			validateApiSecured(httpClient, lastApi)
+
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+
+			So(err, ShouldBeNil)
+			So(lastApi, ShouldNotBeNil)
+			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 		})
 
 		Convey("delete API", func() {
@@ -152,39 +179,15 @@ func TestSpec(t *testing.T) {
 			err := kymaInterface.GatewayV1alpha2().Apis(namespace).Delete(lastApi.Name, &metav1.DeleteOptions{})
 
 			So(err, ShouldBeNil)
-		})
 
-		Convey("validate if API is deleted properly", func() {
-
-			t.Log("Validate deleted...")
-
-			checkPreconditions(lastApi, t)
-			_, err := kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+			_, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
 
 			So(err, ShouldNotBeNil)
 		})
-
 	})
 }
 
 func apiFor(testId, domainName string, svc *apiv1.Service, secured ApiSecurity) *kymaApi.Api {
-
-	auth := kymaApi.Authentication{}
-	if secured {
-
-		issuer := "https://accounts.google.com"
-		jwksUri := "https://www.googleapis.com/oauth2/v3/certs"
-
-		auth = kymaApi.Authentication{
-			kymaApi.AuthenticationRule{
-				Type: kymaApi.JwtType,
-				Jwt: kymaApi.JwtAuthentication{
-					Issuer:  issuer,
-					JwksUri: jwksUri,
-				},
-			},
-		}
-	}
 
 	return &kymaApi.Api{
 		ObjectMeta: metav1.ObjectMeta{
@@ -197,9 +200,35 @@ func apiFor(testId, domainName string, svc *apiv1.Service, secured ApiSecurity) 
 				Name: svc.Name,
 				Port: int(svc.Spec.Ports[0].Port),
 			},
-			Authentication: auth,
+			AuthenticationEnabled: (*bool)(&secured),
+			Authentication:        []kymaApi.AuthenticationRule{},
 		},
 	}
+}
+
+func setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
+	// OTHER EXAMPLE OF POSSSIBLE VALUES:
+	//issuer := "https://accounts.google.com"
+	//jwksUri := "https://www.googleapis.com/oauth2/v3/certs"
+
+	issuer := "https://accounts.google.com"
+	jwksUri := "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
+
+	rules := []kymaApi.AuthenticationRule{
+		{
+			Type: kymaApi.JwtType,
+			Jwt: kymaApi.JwtAuthentication{
+				Issuer:  issuer,
+				JwksUri: jwksUri,
+			},
+		},
+	}
+
+	secured := true
+	if !(*api.Spec.AuthenticationEnabled) { // optional property, but if set earlier to false it will force auth disabled
+		api.Spec.AuthenticationEnabled = &secured
+	}
+	api.Spec.Authentication = rules
 }
 
 func checkPreconditions(lastApi *kymaApi.Api, t *testing.T) {
@@ -214,8 +243,8 @@ func hostnameFor(testId, domainName string) string {
 
 func validateApiSecured(httpClient *http.Client, api *kymaApi.Api) {
 
-	response, err := withRetries(maxRetries, func() (*http.Response, error) {
-		return httpClient.Get(fmt.Sprintf("https://%s/api.yaml", api.Spec.Hostname))
+	response, err := withRetries(maxRetries, minimalNumberOfCorrectResults, func() (*http.Response, error) {
+		return httpClient.Get(fmt.Sprintf("https://%s", api.Spec.Hostname))
 	}, httpUnauthorizedPredicate)
 
 	So(err, ShouldBeNil)
@@ -224,19 +253,20 @@ func validateApiSecured(httpClient *http.Client, api *kymaApi.Api) {
 
 func validateApiNotSecured(httpClient *http.Client, api *kymaApi.Api) {
 
-	response, err := withRetries(maxRetries, func() (*http.Response, error) {
-		return httpClient.Get(fmt.Sprintf("https://%s/api.yaml", api.Spec.Hostname))
+	response, err := withRetries(maxRetries, minimalNumberOfCorrectResults, func() (*http.Response, error) {
+		return httpClient.Get(fmt.Sprintf("https://%s", api.Spec.Hostname))
 	}, httpOkPredicate)
 
 	So(err, ShouldBeNil)
 	So(response.StatusCode, ShouldEqual, http.StatusOK)
 }
 
-func withRetries(maxRetries int, httpCall func() (*http.Response, error), shouldRetryPredicate func(*http.Response) bool) (*http.Response, error) {
+func withRetries(maxRetries, minCorrect int, httpCall func() (*http.Response, error), shouldRetryPredicate func(*http.Response) bool) (*http.Response, error) {
 
 	var response *http.Response
 	var err error
 
+	count := 0
 	retry := true
 	for retryNo := 0; retry; retryNo++ {
 
@@ -245,11 +275,16 @@ func withRetries(maxRetries int, httpCall func() (*http.Response, error), should
 
 		if err != nil {
 			log.Errorf("[%d / %d] Got error: %s", retryNo, maxRetries, err)
+			count = 0
 		} else if shouldRetryPredicate(response) {
 			log.Errorf("[%d / %d] Got response: %s", retryNo, maxRetries, response.Status)
+			count = 0
 		} else {
-			log.Infof("Got expected response - do not need retry anymore.")
-			retry = false
+			log.Infof("Got expected response %d in a row.", count+1)
+			if count++; count == minCorrect {
+				log.Infof("Reached minimal number of expected responses in a row. Do not need to retry anymore.")
+				retry = false
+			}
 		}
 
 		if retry {
@@ -317,24 +352,24 @@ func newHttpClient(testId, domainName string) (*http.Client, error) {
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	ingressControllerAddr, err := net.LookupHost(ingressControllerServiceURL)
+	ingressGatewayControllerAddr, err := net.LookupHost(ingressGatewayControllerServiceURL)
 	if err != nil {
-		log.Warnf("Unable to resolve host '%s' (if you are running this test from outside of Kyma ignore this log). Root cause: %v", ingressControllerServiceURL, err)
+		log.Warnf("Unable to resolve host '%s' (if you are running this test from outside of Kyma ignore this log). Root cause: %v", ingressGatewayControllerServiceURL, err)
 		minikubeIp := tryToGetMinikubeIp()
 		if minikubeIp == "" {
 			return nil, err
 		}
-		ingressControllerAddr = []string{minikubeIp}
+		ingressGatewayControllerAddr = []string{minikubeIp}
 	}
-	log.Infof("Ingress controller address: '%s'", ingressControllerAddr)
+	log.Infof("Ingress controller address: '%s'", ingressGatewayControllerAddr)
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-			// Changes request destination address to ingress internal cluster address for requests to sample app service.
+			// Changes request destination address to ingressGateway internal cluster address for requests to sample app service.
 			hostname := hostnameFor(testId, domainName)
 			if strings.HasPrefix(addr, hostname) {
-				addr = strings.Replace(addr, hostname, ingressControllerAddr[0], 1)
+				addr = strings.Replace(addr, hostname, ingressGatewayControllerAddr[0], 1)
 			}
 			dialer := net.Dialer{}
 			return dialer.DialContext(ctx, network, addr)
