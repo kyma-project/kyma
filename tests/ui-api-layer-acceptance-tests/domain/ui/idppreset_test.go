@@ -7,13 +7,9 @@ import (
 	"testing"
 	"time"
 
-	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -31,12 +27,20 @@ type idpPresetCreateMutationResponse struct {
 	CreateIDPPreset IDPPreset
 }
 
+type idpPresetQueryResponse struct {
+	IDPPreset IDPPreset
+}
+
+type idpPresetsQueryResponse struct {
+	IDPPresets []IDPPreset
+}
+
 func TestIDPPresetQueriesAndMutations(t *testing.T) {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
-	client, _, err := k8s.NewIDPPresetClientWithConfig()
-	require.NoError(t, err)
+	// client, _, err := k8s.NewIDPPresetClientWithConfig()
+	// require.NoError(t, err)
 
 	expectedResource := idpPreset("test-name7", "test-issuer", "https://test-jwksUri")
 	resourceDetailsQuery := idpPresetDetailsFields()
@@ -47,9 +51,17 @@ func TestIDPPresetQueriesAndMutations(t *testing.T) {
 	require.NoError(t, err)
 	checkIDPPreset(t, expectedResource, createRes.CreateIDPPreset)
 
-	t.Log("Wait For IDPPreset Ready")
-	err = waitForIDPPresetReady(expectedResource.Name, expectedResource.Issuer, expectedResource.JwksUri, client)
+	t.Log("Query Single Resource")
+	res, err := querySingleIDPPreset(c, resourceDetailsQuery, expectedResource)
+
 	assert.NoError(t, err)
+	checkIDPPreset(t, expectedResource, res.IDPPreset)
+
+	t.Log("Query Multiple Resources")
+	multipleRes, err := queryMultipleIDPPresets(c, resourceDetailsQuery, expectedResource)
+
+	assert.NoError(t, err)
+	assertIDPPresetExistsAndEqual(t, expectedResource, multipleRes.IDPPresets)
 
 }
 
@@ -92,24 +104,67 @@ func createIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedRes
 	return res, err
 }
 
+func querySingleIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (idpPresetQueryResponse, error) {
+	req := singleResourceQueryRequest(resourceDetailsQuery, expectedResource)
+
+	var res idpPresetQueryResponse
+	err := c.Do(req, &res)
+
+	return res, err
+}
+
+func singleResourceQueryRequest(resourceDetailsQuery string, expectedResource IDPPreset) *graphql.Request {
+	query := fmt.Sprintf(`
+			query ($name: String!) {
+				IDPPreset(name: $name) {
+					%s
+				}
+			}
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("name", expectedResource.Name)
+
+	return req
+}
+
+func queryMultipleIDPPresets(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (idpPresetsQueryResponse, error) {
+	req := multipleResourcesQueryRequest(resourceDetailsQuery, expectedResource)
+
+	var res idpPresetsQueryResponse
+	err := c.Do(req, &res)
+
+	return res, err
+}
+
+func multipleResourcesQueryRequest(resourceDetailsQuery string, expectedResource IDPPreset) *graphql.Request {
+	query := fmt.Sprintf(`
+			query () {
+				IDPPresets() {
+					%s
+				}
+			}
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+
+	return req
+}
+
+func assertIDPPresetExistsAndEqual(t *testing.T, expectedElement IDPPreset, arr []IDPPreset) {
+
+	assert.Condition(t, func() (success bool) {
+		for _, v := range arr {
+			if v.Name == expectedElement.Name {
+				checkIDPPreset(t, expectedElement, v)
+				return true
+			}
+		}
+
+		return false
+	}, "Resource does not exist")
+}
+
 func checkIDPPreset(t *testing.T, expected, actual IDPPreset) {
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Equal(t, expected.Issuer, actual.Issuer)
 	assert.Equal(t, expected.JwksUri, actual.JwksUri)
-}
-
-func waitForIDPPresetReady(name string, issuer string, jwksUri string, client *idpClientset.Clientset) error {
-	return waiter.WaitAtMost(func() (bool, error) {
-		idp, err := client.UiV1alpha1().IDPPresets().Get(name, metav1.GetOptions{})
-		if err != nil || idp == nil {
-			return false, err
-		}
-
-		arr := idp.Spec.Issuer
-		if arr == issuer {
-			return true, nil
-		}
-
-		return false, nil
-	}, IDPPresetReadyTimeout)
 }
