@@ -40,8 +40,8 @@ etcd-operator:
   backupOperator:
     enabled: ""
     abs:
-      storage-account: ""
-      storage-key: ""
+      storageAccount: ""
+      storageKey: ""
 `
 			installationData := NewInstallationDataCreator().WithDomain("kyma.local").WithRemoteEnvIP("1.1.1.1").WithAdminGroup("testgroup").
 				GetData()
@@ -74,8 +74,8 @@ etcd-operator:
   backupOperator:
     enabled: ""
     abs:
-      storage-account: ""
-      storage-key: ""
+      storageAccount: ""
+      storageKey: ""
 `
 			installationData := NewInstallationDataCreator().
 				WithDomain("kyma.local").
@@ -89,7 +89,7 @@ etcd-operator:
 			So(overrides, ShouldEqual, dummyOverridesForCore)
 		})
 
-		Convey("when etcd-operator properties are provided then enabled, abs.storage-account and abs.storage-key should exist", func() {
+		Convey("when etcd-operator properties are provided then enabled, abs.storageAccount and abs.storageKey should exist", func() {
 			const dummyOverridesForCore = `
 nginx-ingress:
   controller:
@@ -111,8 +111,8 @@ etcd-operator:
   backupOperator:
     enabled: "true"
     abs:
-      storage-account: "pico-bello"
-      storage-key: "123-456-3245-a23b"
+      storageAccount: "pico-bello"
+      storageKey: "123-456-3245-a23b"
 `
 			installationData := NewInstallationDataCreator().
 				WithDomain("kyma.local").

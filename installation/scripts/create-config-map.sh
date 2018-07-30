@@ -12,7 +12,7 @@ K8S_APISERVER_URL=""
 K8S_APISERVER_CA=""
 ADMIN_GROUP=""
 ENABLE_ETCD_BACKUP_OPERATOR=""
-ECTD_BACKUP_ABS_CONTAINER_NAME=""
+ETCD_BACKUP_ABS_CONTAINER_NAME=""
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -55,8 +55,8 @@ do
             shift # past argument
             shift # past value
             ;;
-        --ectd-backup-abs-container-name)
-            ECTD_BACKUP_ABS_CONTAINER_NAME="$2"
+        --etcd-backup-abs-container-name)
+            ETCD_BACKUP_ABS_CONTAINER_NAME="$2"
             shift # past argument
             shift # past value
             ;;
@@ -84,7 +84,7 @@ case `uname -s` in
         sed -i "" "s;__K8S_APISERVER_CA__;${K8S_APISERVER_CA};" "$OUTPUT"
         sed -i "" "s;__ADMIN_GROUP__;${ADMIN_GROUP};" "$OUTPUT"
         sed -i "" "s;__ENABLE_ETCD_BACKUP_OPERATOR__;${ENABLE_ETCD_BACKUP_OPERATOR};" "$OUTPUT"
-        sed -i "" "s;__ECTD_BACKUP_ABS_CONTAINER_NAME__;${ECTD_BACKUP_ABS_CONTAINER_NAME};" "$OUTPUT"
+        sed -i "" "s;__ETCD_BACKUP_ABS_CONTAINER_NAME__;${ETCD_BACKUP_ABS_CONTAINER_NAME};" "$OUTPUT"
         ;;
     *)
         sed -i "s;__EXTERNAL_IP_ADDRESS__;${EXTERNAL_IP_ADDRESS};g" "$OUTPUT"
@@ -94,6 +94,6 @@ case `uname -s` in
         sed -i "s;__K8S_APISERVER_CA__;${K8S_APISERVER_CA};g" "$OUTPUT"
         sed -i "s;__ADMIN_GROUP__;${ADMIN_GROUP};g" "$OUTPUT"
         sed -i "s;__ENABLE_ETCD_BACKUP_OPERATOR__;${ENABLE_ETCD_BACKUP_OPERATOR};g" "$OUTPUT"
-        sed -i "s;__ECTD_BACKUP_ABS_CONTAINER_NAME__;${ECTD_BACKUP_ABS_CONTAINER_NAME};g" "$OUTPUT"
+        sed -i "s;__ETCD_BACKUP_ABS_CONTAINER_NAME__;${ETCD_BACKUP_ABS_CONTAINER_NAME};g" "$OUTPUT"
         ;;
 esac

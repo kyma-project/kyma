@@ -28,8 +28,8 @@ etcd-operator:
   backupOperator:
     enabled: "{{.EnableEtcdBackupOperator}}"
     abs:
-      storage-account: "{{.EtcdBackupABSAccount}}"
-      storage-key: "{{.EtcdBackupABSKey}}"
+      storageAccount: "{{.EtcdBackupABSAccount}}"
+      storageKey: "{{.EtcdBackupABSKey}}"
 `
 
 // GetCoreOverrides - returns values overrides for core installation basing on domain

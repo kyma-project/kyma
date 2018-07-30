@@ -118,9 +118,9 @@ func (sc *InstallationDataCreator) WithEtcdOperator(enabled, storageAccount, sto
 	return sc
 }
 
-// WithEctdBackupABSContainerName sets value for EctdBackupABSContainerName property
-func (sc *InstallationDataCreator) WithEctdBackupABSContainerName(path string) *InstallationDataCreator {
-	sc.installationData.EctdBackupABSContainerName = path
+// WithEtcdBackupABSContainerName sets value for EtcdBackupABSContainerName property
+func (sc *InstallationDataCreator) WithEtcdBackupABSContainerName(path string) *InstallationDataCreator {
+	sc.installationData.EtcdBackupABSContainerName = path
 
 	return sc
 }

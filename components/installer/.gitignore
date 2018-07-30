@@ -19,3 +19,6 @@
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
+
+# Binary created by ./before-commit.sh script
+/installer
