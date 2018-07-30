@@ -7,9 +7,14 @@ import (
 	"testing"
 	"time"
 
+	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -34,13 +39,16 @@ type idpPresetQueryResponse struct {
 type idpPresetsQueryResponse struct {
 	IDPPresets []IDPPreset
 }
+type idpPresetDeleteMutationResponse struct {
+	DeleteIDPPreset IDPPreset
+}
 
 func TestIDPPresetQueriesAndMutations(t *testing.T) {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
-	// client, _, err := k8s.NewIDPPresetClientWithConfig()
-	// require.NoError(t, err)
+	client, _, err := k8s.NewIDPPresetClientWithConfig()
+	require.NoError(t, err)
 
 	expectedResource := idpPreset("test-name7", "test-issuer", "https://test-jwksUri")
 	resourceDetailsQuery := idpPresetDetailsFields()
@@ -63,6 +71,15 @@ func TestIDPPresetQueriesAndMutations(t *testing.T) {
 	assert.NoError(t, err)
 	assertIDPPresetExistsAndEqual(t, expectedResource, multipleRes.IDPPresets)
 
+	t.Log("Delete IDP Preset")
+	deleteRes, err := deleteIDPPreset(c, resourceDetailsQuery, expectedResource)
+
+	assert.NoError(t, err)
+	checkIDPPreset(t, expectedResource, deleteRes.DeleteIDPPreset)
+
+	t.Log("Wait For IDP Preset Deletion")
+	err = waitForIDPPresetDeletion(expectedResource.Name, client)
+	assert.NoError(t, err)
 }
 
 func idpPreset(name string, issuer string, jwksUri string) IDPPreset {
@@ -147,6 +164,38 @@ func multipleResourcesQueryRequest(resourceDetailsQuery string, expectedResource
 	req := graphql.NewRequest(query)
 
 	return req
+}
+
+func deleteIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (idpPresetDeleteMutationResponse, error) {
+	query := fmt.Sprintf(`
+			mutation ($name: String!) {
+				deleteIDPPreset(name: $name) {
+					%s
+				}
+			}
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("name", expectedResource.Name)
+
+	var res idpPresetDeleteMutationResponse
+	err := c.Do(req, &res)
+
+	return res, err
+}
+
+func waitForIDPPresetDeletion(name string, client *idpClientset.Clientset) error {
+	return waiter.WaitAtMost(func() (bool, error) {
+		_, err := client.UiV1alpha1().IDPPresets().Get(name, metav1.GetOptions{})
+
+		if errors.IsNotFound(err) {
+			return true, nil
+		}
+		if err != nil {
+			return false, err
+		}
+
+		return false, nil
+	}, IDPPresetDeletionTimeout)
 }
 
 func assertIDPPresetExistsAndEqual(t *testing.T, expectedElement IDPPreset, arr []IDPPreset) {
