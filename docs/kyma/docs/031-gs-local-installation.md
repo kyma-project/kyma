@@ -11,7 +11,7 @@ The document provides the prerequisites, the instructions on how to install Kyma
 
 ## Prerequisites
 
-To run Kyma locally, download these tools:
+To run Kyma locally, first clone this Git repository to your local machine and then download these tools:
 
 - [Minikube](https://github.com/kubernetes/minikube) 0.28.0
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.9.0
