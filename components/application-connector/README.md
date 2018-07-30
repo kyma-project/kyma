@@ -107,7 +107,7 @@ telepresence --namespace kyma-system --swap-deployment metadata:metadata --run-s
  ```bash
 sudo ln -s $TELEPRESENCE_ROOT/var/run/secrets /var/run/secrets
 ```
-5. Run `make build`, then `./metadata` to give all  Kubernetes services that call the Metadata Service to access this process. The process runs locally on your machine. Use the same command to run different Application Connector services like Proxy or Events.
+5. Run `CGO_ENABLED=0 go build ./cmd/metadata` to build the Metadata Service and give all  Kubernetes services that call the Metadata Service access to this process. The process runs locally on your machine. Use the same command to run different Application Connector services like Proxy or Events.
 
 You can also run another shell to make calls to this service. To run this shell, swap the Remote Environment Broker Deployment, because Istio sidecar is already injected into this Deployment:
 ```bash
