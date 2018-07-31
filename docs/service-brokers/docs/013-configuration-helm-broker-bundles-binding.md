@@ -1,7 +1,6 @@
 ---
 title: Binding yBundles
 type: Configuration
-internal: true
 ---
 
 

@@ -1,7 +1,6 @@
 ---
 title: Testing Kyma
 type: Details
-internal: true
 ---
 
 For testing, the Kyma components use the Helm test concept. Place your test under the `templates` directory as a Pod definition that specifies a container with a given command to run.

@@ -1,7 +1,6 @@
 ---
 title: Configure Helm Broker
 type: Configuration
-internal: true
 ---
 
 The Helm Broker fetches bundle definitions from an HTTP server defined in the `values.yaml` file. The **config.repository.baseURL** attribute defines the HTTP server URL. By default, the Helm Broker contains an embedded HTTP server which serves bundles from the Kyma `bundles` directory.
