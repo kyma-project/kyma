@@ -49,4 +49,4 @@ spec:
           - containerPort: {{ .Values.deployment.args.proxyPort }}
             name: proxy-port
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
-            name: ext-api-port
+            name: http-api-port

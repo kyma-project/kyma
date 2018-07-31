@@ -156,7 +156,7 @@ The UI API Facade must check the status of the Gateway instance that represents 
 In the current solution, the UI API Facade iterates through services to find those which match the criteria, and then uses the health endpoint to determine the status.
 The UI API Facade has the following obligatory requirements:
 - The Kubernetes Gateway service uses the `remoteEnvironment` key, with the value as the name of the remote environment.
-- The Kubernetes Gateway service contains one port with the `ext-api-port` name. The system uses this port for the status check.
+- The Kubernetes Gateway service contains one port with the `http-api-port` name. The system uses this port for the status check.
 - Find the Kubernetes Gateway service in the `kyma-integration` Namespace. You can change its location in the `ui-api-layer` chart configuration.
 - The `/v1/health` endpoint returns a status of `HTTP 200`. Any other status code indicates the service is not healthy.
 
