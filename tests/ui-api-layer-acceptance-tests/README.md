@@ -22,15 +22,30 @@ dep ensure -vendor-only
 
 ### Run tests outside the cluster
 
-To run acceptance tests outside the cluster and against the local UI API Layer, use this command to enable port forwarding for the Helm client:
+To run acceptance tests outside the cluster, use this command to enable port forwarding for the Helm client:
 ```bash
 kubectl port-forward $(kubectl get po -n kube-system | grep tiller |  awk '{print $1}') 44134:44134 -n kube-system
 ```
 
 Run acceptance tests using the following command:
-```bash
-KUBE_CONFIG=/Users/{your_username}/.kube/config go test ./... -tags=acceptance
-```
+
+- against the UI API Layer deployed on the local cluster:
+  
+  ```bash
+  KUBE_CONFIG=/Users/${USER}/.kube/config go test ./... -tags=acceptance
+  ```
+
+- against standalone UI API Layer deployed on the local host:
+  
+  ```bash
+  KUBE_CONFIG=/Users/${USER}/.kube/config IS_LOCAL_CLUSTER=false GRAPHQL_ENDPOINT=http://localhost:3000/graphql go test ./... -tags=acceptance
+  ```
+
+- against the UI API Layer deployed on the cluster with custom domain:
+  
+  ```bash
+  KUBE_CONFIG=/Users/${USER}/.kube/config IS_LOCAL_CLUSTER=false DOMAIN=nightly.kyma.cx go test ./... -tags=acceptance
+  ```
 
 ### Verify the code
 
