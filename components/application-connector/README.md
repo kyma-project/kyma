@@ -133,7 +133,7 @@ This section outlines the testing details.
 To run the unit tests, use the following command:
 
 ```
-make test-unit
+go test ./...
 ```
 
 ### Generate Kubernetes clients for custom resources
