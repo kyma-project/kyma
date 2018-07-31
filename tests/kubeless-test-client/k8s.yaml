@@ -1,0 +1,56 @@
+apiVersion: gateway.kyma.cx/v1alpha2
+kind: Api
+metadata:
+  namespace: kubeless-test
+  name: test-hello
+  labels:
+    function: test-hello
+spec:
+  authentication: []
+  hostname: test-hello.kyma.local
+  service:
+    name: test-hello
+    port: 8080
+---
+apiVersion: gateway.kyma.cx/v1alpha2
+kind: Api
+metadata:
+  namespace: kubeless-test
+  name: test-event
+  labels:
+    function: test-event
+spec:
+  authentication: []
+  hostname: test-event.kyma.local
+  service:
+    name: test-event
+    port: 8080
+---
+apiVersion: remoteenvironment.kyma.cx/v1alpha1
+kind: EventActivation
+metadata:
+  namespace: kubeless-test
+  name: test-event
+spec:
+  source:
+    namespace: test
+    type: test
+    environment: test
+---
+apiVersion: eventing.kyma.cx/v1alpha1
+kind: Subscription
+metadata:
+  namespace: kubeless-test
+  name: test-event
+spec:
+  endpoint: http://test-event.kubeless-test:8080/
+  push_request_timeout_ms: 2000
+  max_inflight: 400
+  include_subscription_name_header: true
+  include_topic_header: true
+  event_type: test
+  event_type_version: v1
+  source:
+    source_namespace: test
+    source_type: test
+    source_environment: test

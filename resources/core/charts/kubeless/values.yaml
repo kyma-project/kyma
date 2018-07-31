@@ -1,18 +1,18 @@
 test:
   image:
-    name: kubeless-test-client
-    tag: 0.2.37
+    name: snapshot/kubeless-test-client
+    tag: PR-24
 
 controller:
   deployment:
     replicaCount: 1
-    image: bitnami/kubeless-controller-manager:v1.0.0-alpha.5
+    image: bitnami/kubeless-controller-manager:v1.0.0-alpha.7
     pullPolicy: IfNotPresent
 
 config:
   builder:
     enabled: "false"
-    image: kubeless/function-image-builder:v1.0.0-alpha.5
+    image: kubeless/function-image-builder:v1.0.0-alpha.7
     secret: ""
     verifyTls: "true"
   provision:

@@ -1,0 +1,83 @@
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  namespace: kubeless-test
+  name: redis
+spec:
+  clusterServiceClassExternalName: redis
+  clusterServicePlanExternalName: micro
+  parameters:
+    redisPassword: VXU3ZVRkY2tVdlFVMkNHYlYwM2gK
+    resources:
+      requests:
+        memory: 96Mi
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceBinding
+metadata:
+  namespace: kubeless-test
+  name: redis-binding
+spec:
+  instanceRef:
+    name: redis
+---
+apiVersion: gateway.kyma.cx/v1alpha2
+kind: Api
+metadata:
+  namespace: kubeless-test
+  name: test-svcbind
+  labels:
+    function: test-svcbind
+spec:
+  authentication: []
+  hostname: test-svcbind.kyma.local
+  service:
+    name: test-svcbind
+    port: 8080
+---
+apiVersion: kubeless.io/v1beta1
+kind: Function
+metadata:
+  namespace: kubeless-test
+  name: test-svcbind
+spec:
+  handler: svcbind.handler
+  runtime: nodejs8
+  type: HTTP
+  deps: |
+    {
+      "name": "svcbind",
+      "version": "1.0.0",
+      "dependencies": {
+        "redis":  "2.8.0",
+        "double-ended-queue": "2.1.0-0",
+        "redis-commands": "1.3.1",
+        "redis-parser": "2.6.0"
+      }
+    }
+  function: |
+      const redis = require('redis');
+      module.exports = {
+          handler: (event, context) => {
+              const client = redis.createClient({host: process.env.HOST, port: process.env.PORT, password: process.env.REDIS_PASSWORD});
+              client.info(function (err, reply) {
+                  if (err) {
+                      return `Error occurred while connecting to redis: ${err}\n`;
+                  }
+                  console.log(`OK ${event.data}`)
+              });
+              return "OK";
+          },
+      };
+---
+apiVersion: servicecatalog.kyma.cx/v1alpha1
+kind: ServiceBindingUsage
+metadata:
+  namespace: kubeless-test
+  name: test-svcbind
+spec:
+ serviceBindingRef:
+   name: redis-binding
+ usedBy:
+   kind: Function
+   name: test-svcbind

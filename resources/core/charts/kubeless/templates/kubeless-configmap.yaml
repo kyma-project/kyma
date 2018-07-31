@@ -37,13 +37,13 @@ data:
           {
             "name": "node6",
             "version": "6",
-            "runtimeImage": "kubeless/nodejs@sha256:0a8a72af4cc3bfbfd4fe9bd309cbf486e7493d0dc32a691673b3f0d3fae07487",
+            "runtimeImage": "kubeless/nodejs@sha256:f2a338c62d010687137c0880d1b68bea926f71a7111251a4622db8ae8c036898",
             "initImage": "node:6.10",
           },
           {
             "name": "node8",
             "version": "8",
-            "runtimeImage": "kubeless/nodejs@sha256:76ee28dc7e3613845fface2d1c56afc2e6e2c6d6392c724795a7ccc2f5e60582",
+            "runtimeImage": "kubeless/nodejs@sha256:3b5180a9e0bdce043f0f455758561cf4ad62406fcc80140c2393a2c3a1ff88ac",
             "initImage": "node:8",
           }
         ],

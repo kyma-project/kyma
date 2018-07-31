@@ -13,8 +13,8 @@ The document provides the prerequisites, the instructions on how to install Kyma
 
 To run Kyma locally, download these tools:
 
-- [Minikube](https://github.com/kubernetes/minikube) 0.28.0
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.9.0
+- [Minikube](https://github.com/kubernetes/minikube) 0.28.2
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.10.0
 - [Helm](https://github.com/kubernetes/helm) 2.8.2
 - [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - Mac only
 - [Virtualbox](https://www.virtualbox.org/) - Linux or Windows

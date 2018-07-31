@@ -1,6 +1,6 @@
 {
-  "name": "hello",
-  "version": "0.0.2",
+  "name": "test",
+  "version": "0.0.1",
   "dependencies": {
     "lodash": "3.10.1",
     "express": "~3.4.7",
