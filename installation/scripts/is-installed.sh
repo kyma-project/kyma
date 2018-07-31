@@ -35,7 +35,7 @@ do
   then
     echo "kyma installation error... ${DESC}"
     echo "----------"
-    echo "$(kubectl logs $(kubectl get pods --all-namespaces | grep kyma-installer | awk '{print $2}') -n kyma-installer)"
+    echo "$(kubectl logs -n kyma-installer $(kubectl get pods --all-namespaces -l name=kyma-installer --no-headers -o jsonpath='{.items[*].metadata.name}'))"
     echo "----------"
     exit 1
   else 
