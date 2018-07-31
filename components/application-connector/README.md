@@ -12,7 +12,7 @@ To install the Application Connector components, follow these steps:
 
 1. `git clone git@github.com/kyma-project/kyma/components/application-connector`
 2. `cd application-connector`
-3. `make build`
+3. `CGO_ENABLED=0 go build ./cmd/metadata`
 
 ## Usage
 

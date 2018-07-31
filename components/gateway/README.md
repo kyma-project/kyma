@@ -14,7 +14,7 @@ To install the Gateway, follow these steps:
 
 1. `git clone git@github.com:kyma-project/kyma.git`
 1. `cd kyma/components/gateway`
-1. `make build`
+1. `CGO_ENABLED=0 go build ./cmd/gateway`
 
 ## Usage
 
