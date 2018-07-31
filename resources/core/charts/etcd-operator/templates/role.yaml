@@ -33,7 +33,6 @@ rules:
   - deployments
   verbs:
   - "*"
-# The following permissions can be removed if not using S3 backup and TLS
 - apiGroups:
   - ""
   resources: 

@@ -1,0 +1,7 @@
+version: 3.2.14
+
+resources:
+  limits:
+    memory: 256Mi
+  requests:
+    memory: 32Mi
