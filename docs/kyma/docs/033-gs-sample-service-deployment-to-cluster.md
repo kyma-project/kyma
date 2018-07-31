@@ -77,7 +77,6 @@ Run the following command:
    ```bash
    curl -k https://minio.$yourClusterDomain/content/root/kyma/assets/api-with-auth.yaml |  sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -n stage -f -
    ```
+After you apply this update, you must include a valid bearer ID token in the Authorization header to access the service.
 
 >**NOTE:** The update might take some time.
-
-Since now, to access the service, valid bearer ID token has to be used in the Authorization header.

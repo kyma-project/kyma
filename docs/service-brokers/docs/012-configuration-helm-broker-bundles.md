@@ -1,7 +1,6 @@
 ---
 title: How to create a yBundle
 type: Configuration
-internal: true
 ---
 
 [bind]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.12/spec.md#binding  "OSB Spec Binding"

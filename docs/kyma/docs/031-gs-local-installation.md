@@ -1,7 +1,6 @@
 ---
 title: Local Kyma installation
 type: Getting Started
-internal: true
 ---
 
 ## Overview
