@@ -8,7 +8,7 @@ type Config struct {
 	// The given endpoints must belong to the same etcd cluster.
 	EtcdEndpoints []string
 
-	// ConfigMapNameForTracing is the name of the k8s ConfigMap where the
-	// path to the ABS backup is saved (only from the last success).
+	// ConfigMapNameForTracing is the name of the ConfigMap where
+	// the path to the last successful ABS backup is saved.
 	ConfigMapNameForTracing string
 }

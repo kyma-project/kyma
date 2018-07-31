@@ -14,7 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const etcdBackupName = "automated-etcd-backup-job-"
+const etcdBackupGenerateName = "automated-etcd-backup-job-"
 
 // Executor executes the backup process of etcd database
 type Executor struct {
@@ -88,7 +88,7 @@ func (e *Executor) etcdBackup(blobPrefix string) (*etcdTypes.EtcdBackup, error) 
 
 	return &etcdTypes.EtcdBackup{
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: etcdBackupName, // used to generate a unique name
+			GenerateName: etcdBackupGenerateName, // used to generate a unique name
 		},
 		Spec: etcdTypes.BackupSpec{
 			EtcdEndpoints: e.etcdEndpoints,
