@@ -3,6 +3,8 @@ package metadata
 import (
 	"testing"
 
+	"bytes"
+	"encoding/json"
 	"github.com/kyma-project/kyma/components/application-connector/internal/apperrors"
 	miniomocks "github.com/kyma-project/kyma/components/application-connector/internal/metadata/minio/mocks"
 	"github.com/kyma-project/kyma/components/application-connector/internal/metadata/remoteenv"
@@ -13,8 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"bytes"
-	"encoding/json"
 )
 
 var (
