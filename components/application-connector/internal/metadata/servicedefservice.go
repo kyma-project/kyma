@@ -2,14 +2,14 @@
 package metadata
 
 import (
+	"encoding/json"
+	"github.com/go-openapi/spec"
 	"github.com/kyma-project/kyma/components/application-connector/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-connector/internal/metadata/minio"
 	"github.com/kyma-project/kyma/components/application-connector/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/application-connector/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/application-connector/internal/metadata/uuid"
-	"github.com/go-openapi/spec"
 	"net/url"
-	"encoding/json"
 )
 
 const targetSwaggerVersion = "2.0"
@@ -275,7 +275,7 @@ func (sds *serviceDefinitionService) insertSpecs(id string, docs []byte, api *se
 	return sds.minioService.Put(id, documentation, apiSpec, eventsSpec)
 }
 
-func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte,apperrors.AppError) {
+func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppError) {
 	var apiSpec spec.Swagger
 
 	err := json.Unmarshal(rawApiSpec, &apiSpec)
