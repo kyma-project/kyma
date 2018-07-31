@@ -3,13 +3,22 @@ info:
   version: '1.0.0'
   title: 'Kyma Metadata API'
 tags:
-- name: 'service metadata'
-  description: 'Service registering API.'
+- name: 'Metadata Service'
+  description: 'API for registering services in Kyma.'
 paths:
+  /v1/health:
+    get:
+      summary: 'Returns health of a service'
+      operationId: 'getHealth'
+      tags:
+        - 'health'
+      responses:
+        '200':
+          description: 'The service is in a good health'
   /v1/metadata/services:
     post:
       tags:
-      - 'service metadata'
+      - 'services'
       summary: 'Registers a new service'
       operationId: 'registerService'
       requestBody:
@@ -40,7 +49,7 @@ paths:
                 $ref: '#/components/schemas/MetadataErrorResponse'
     get:
       tags:
-      - 'service metadata'
+      - 'services'
       summary: 'Gets all registered services'
       operationId: 'getServices'
       responses:
@@ -61,7 +70,7 @@ paths:
   /v1/metadata/services/{serviceId}:
     get:
       tags:
-      - 'service metadata'
+      - 'services'
       summary: 'Gets a service by service ID'
       operationId: 'getServiceByServiceId'
       parameters:
@@ -93,7 +102,7 @@ paths:
                 $ref: '#/components/schemas/MetadataErrorResponse'
     put:
       tags:
-      - 'service metadata'
+      - 'services'
       summary: 'Updates a service by service ID'
       operationId: 'updateService'
       requestBody:
@@ -128,7 +137,7 @@ paths:
                 $ref: '#/components/schemas/MetadataErrorResponse'
     delete:
       tags:
-      - 'service metadata'
+      - 'services'
       summary: 'Deletes a service by service ID'
       operationId: 'deleteServiceByServiceId'
       parameters:
@@ -154,15 +163,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MetadataErrorResponse'
-  /v1/health:
-    get:
-      summary: 'Returns health of a service'
-      operationId: 'getHealth'
-      tags:
-        - 'health'
-      responses:
-        '200':
-          description: 'The service is in a good health'
 components:
   schemas:
     ServiceId:
@@ -182,6 +182,8 @@ components:
           type: 'string'
         api:
           $ref: '#/components/schemas/Api'
+        events:
+          $ref: '#/components/schemas/Events'
         documentation:
           $ref: '#/components/schemas/Documentation'
       required:
@@ -213,6 +215,12 @@ components:
           description: 'OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json'
       required:
         - targetUrl
+    Events:
+      type: 'object'
+      properties:
+        spec:
+          description: 'AsynApi file v1: https://github.com/asyncapi/asyncapi/blob/develop/schema/asyncapi.json'
+          type: 'object'
     Documentation:
       type: 'object'
       properties:
@@ -275,65 +283,3 @@ components:
           type: 'integer'
         error:
           type: 'string'
-    AnyValue:
-      nullable: false
-      description: Can be any value but null.
-    APIError:
-      type: object
-      description: API Error response body
-      properties:
-        status:
-          type: integer
-          description: >-
-            original HTTP error code, should be consistent with the response HTTP code
-          minimum: 100
-          maximum: 599
-        type:
-          type: string
-          description: >-
-            classification of the error type, lower case with underscore eg
-            validation_failure
-          pattern: '[a-z]+[a-z_]*[a-z]+'
-        message:
-          type: string
-          description: descriptive error message for debugging
-        moreInfo:
-          type: string
-          format: uri
-          description: link to documentation to investigate further and finding support
-        details:
-          type: array
-          description: list of error causes
-          items:
-            $ref: '#/components/schemas/APIErrorDetail'
-      required:
-        - status
-        - type
-    APIErrorDetail:
-      description: schema for specific error detail
-      type: object
-      properties:
-        field:
-          type: string
-          description: >-
-            a bean notation expression specifying the element in request
-            data causing the error, eg product.variants[3].name, this can
-            be empty if violation was not field specific
-        type:
-          type: string
-          description: >-
-            classification of the error detail type, lower case with
-            underscore eg missing_value, this value must be always
-            interpreted in context of the general error type.
-          pattern: '[a-z]+[a-z_]*[a-z]+'
-        message:
-          type: string
-          description: descriptive error detail message for debugging
-        moreInfo:
-          type: string
-          format: uri
-          description: >-
-            link to documentation to investigate further and finding
-            support for error detail
-      required:
-        - type
