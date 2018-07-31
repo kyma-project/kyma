@@ -65,7 +65,7 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 		}
 		service.API = serviceAPI
 
-		serviceDef.Api.Spec, err = modifyAPISpec(serviceDef.Api.Spec, serviceAPI.GatewayURL)
+		serviceDef.Api.Spec, err = tryToModifyAPISpec(serviceDef.Api.Spec, serviceAPI.GatewayURL)
 		if err != nil {
 			return "", apperrors.Internal("failed to modify API spec, %s", err)
 		}
@@ -136,7 +136,7 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 			return apperrors.Internal("failed to update API, %s", err)
 		}
 
-		serviceDef.Api.Spec, err = modifyAPISpec(serviceDef.Api.Spec, service.API.GatewayURL)
+		serviceDef.Api.Spec, err = tryToModifyAPISpec(serviceDef.Api.Spec, service.API.GatewayURL)
 		if err != nil {
 			return apperrors.Internal("failed to modify API spec, %s", err)
 		}
@@ -275,7 +275,11 @@ func (sds *serviceDefinitionService) insertSpecs(id string, docs []byte, api *se
 	return sds.minioService.Put(id, documentation, apiSpec, eventsSpec)
 }
 
-func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppError) {
+func tryToModifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppError) {
+	if rawApiSpec == nil {
+		return rawApiSpec, nil
+	}
+
 	var apiSpec spec.Swagger
 
 	err := json.Unmarshal(rawApiSpec, &apiSpec)
@@ -287,6 +291,10 @@ func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppE
 		return rawApiSpec, nil
 	}
 
+	return modifyAPISpec(apiSpec, gatewayUrl)
+}
+
+func modifyAPISpec(apiSpec spec.Swagger, gatewayUrl string) ([]byte, apperrors.AppError) {
 	fullUrl, err := url.Parse(gatewayUrl)
 	if err != nil {
 		return []byte{}, apperrors.Internal("failed to parse gateway url, %s", err)
