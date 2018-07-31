@@ -17,7 +17,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const IDPPresetMutationTimeout = time.Second * 15
+const idpPresetMutationTimeout = time.Second * 15
 
 type IDPPreset struct {
 	Name    string
@@ -25,18 +25,18 @@ type IDPPreset struct {
 	JwksUri string
 }
 
-type IDPPresetCreateMutationResponse struct {
+type idpPresetCreateMutationResponse struct {
 	CreateIDPPreset IDPPreset
 }
 
-type IDPPresetQueryResponse struct {
+type idpPresetQueryResponse struct {
 	IDPPreset IDPPreset
 }
 
-type IDPPresetsQueryResponse struct {
+type idpPresetsQueryResponse struct {
 	IDPPresets []IDPPreset
 }
-type IDPPresetDeleteMutationResponse struct {
+type idpPresetDeleteMutationResponse struct {
 	DeleteIDPPreset IDPPreset
 }
 
@@ -70,7 +70,7 @@ func TestIDPPresetQueriesAndMutations(t *testing.T) {
 	multipleRes, err := queryMultipleIDPPresets(c, resourceDetailsQuery, expectedResource)
 
 	assert.NoError(t, err)
-	assertIDPPresetExistsAndEqual(t, expectedResource, multipleRes.IDPPresets)
+	checkIDPPresets(t, expectedResource, multipleRes.IDPPresets)
 
 	t.Log("Delete IDP Preset")
 	deleteRes, err := deleteIDPPreset(c, resourceDetailsQuery, expectedResource)
@@ -99,7 +99,7 @@ func idpPresetDetailsFields() string {
 	`
 }
 
-func createIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (IDPPresetCreateMutationResponse, error) {
+func createIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (idpPresetCreateMutationResponse, error) {
 	query := fmt.Sprintf(`
 		mutation ($name: String!, $issuer: String!, $jwksUri: String!) {
 			createIDPPreset(
@@ -116,7 +116,7 @@ func createIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedRes
 	req.SetVar("issuer", expectedResource.Issuer)
 	req.SetVar("jwksUri", expectedResource.JwksUri)
 
-	var res IDPPresetCreateMutationResponse
+	var res idpPresetCreateMutationResponse
 	err := c.Do(req, &res)
 
 	return res, err
@@ -131,13 +131,13 @@ func waitForIDPPresetCreation(name string, client *idpClientset.Clientset) error
 		}
 
 		return true, nil
-	}, IDPPresetMutationTimeout)
+	}, idpPresetMutationTimeout)
 }
 
-func querySingleIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (IDPPresetQueryResponse, error) {
+func querySingleIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (idpPresetQueryResponse, error) {
 	req := singleResourceQueryRequest(resourceDetailsQuery, expectedResource)
 
-	var res IDPPresetQueryResponse
+	var res idpPresetQueryResponse
 	err := c.Do(req, &res)
 
 	return res, err
@@ -157,10 +157,10 @@ func singleResourceQueryRequest(resourceDetailsQuery string, expectedResource ID
 	return req
 }
 
-func queryMultipleIDPPresets(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (IDPPresetsQueryResponse, error) {
+func queryMultipleIDPPresets(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (idpPresetsQueryResponse, error) {
 	req := multipleResourcesQueryRequest(resourceDetailsQuery, expectedResource)
 
-	var res IDPPresetsQueryResponse
+	var res idpPresetsQueryResponse
 	err := c.Do(req, &res)
 
 	return res, err
@@ -179,7 +179,7 @@ func multipleResourcesQueryRequest(resourceDetailsQuery string, expectedResource
 	return req
 }
 
-func deleteIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (IDPPresetDeleteMutationResponse, error) {
+func deleteIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (idpPresetDeleteMutationResponse, error) {
 	query := fmt.Sprintf(`
 			mutation ($name: String!) {
 				deleteIDPPreset(name: $name) {
@@ -190,7 +190,7 @@ func deleteIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedRes
 	req := graphql.NewRequest(query)
 	req.SetVar("name", expectedResource.Name)
 
-	var res IDPPresetDeleteMutationResponse
+	var res idpPresetDeleteMutationResponse
 	err := c.Do(req, &res)
 
 	return res, err
@@ -208,10 +208,10 @@ func waitForIDPPresetDeletion(name string, client *idpClientset.Clientset) error
 		}
 
 		return false, nil
-	}, IDPPresetMutationTimeout)
+	}, idpPresetMutationTimeout)
 }
 
-func assertIDPPresetExistsAndEqual(t *testing.T, expectedElement IDPPreset, arr []IDPPreset) {
+func checkIDPPresets(t *testing.T, expectedElement IDPPreset, arr []IDPPreset) {
 
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
