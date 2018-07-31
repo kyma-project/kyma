@@ -198,6 +198,10 @@ func (c *Controller) onCreate(apiObj *kymaApi.Api) error {
 		return err
 	}
 
+	if api.Spec.Authentication == nil {
+		api.Spec.Authentication = []kymaApi.AuthenticationRule{}
+	}
+
 	apiStatusHelper := c.apiStatusHelperFor(api)
 	if api.Status.IsEmpty() {
 		api.Status.SetInProgress()
@@ -291,6 +295,10 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 	if newApi.ResourceVersion == oldApi.ResourceVersion || reflect.DeepEqual(newApi.Spec, oldApi.Spec) {
 		log.Info("Skipped: all changes has been already applied to the API (both specs are equal).")
 		return nil
+	}
+
+	if newApi.Spec.Authentication == nil {
+		newApi.Spec.Authentication = []kymaApi.AuthenticationRule{}
 	}
 
 	apiStatusHelper := c.apiStatusHelperFor(newApi)
