@@ -34,7 +34,7 @@ func NewKymaStatusManager(installationClient installationClientset.Interface, in
 
 //InProgress .
 func (sm *statusManager) InProgress(description string) error {
-	instObj, getErr := sm.lister.Installations(consts.INST_NAMESPACE).Get(consts.INST_RESOURCE)
+	instObj, getErr := sm.lister.Installations(consts.InstNamespace).Get(consts.InstResource)
 	if getErr != nil {
 		return getErr
 	}
@@ -71,7 +71,7 @@ func (sm *statusManager) Error(description string) error {
 
 func (sm *statusManager) update(installationStatus *installationv1alpha1.InstallationStatus) error {
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		instObj, getErr := sm.lister.Installations(consts.INST_NAMESPACE).Get(consts.INST_RESOURCE)
+		instObj, getErr := sm.lister.Installations(consts.InstNamespace).Get(consts.InstResource)
 		if getErr != nil {
 			return getErr
 		}
@@ -81,7 +81,7 @@ func (sm *statusManager) update(installationStatus *installationv1alpha1.Install
 
 		installationCopy.Status.Conditions = instObj.Status.Conditions
 
-		_, updateErr := sm.client.InstallerV1alpha1().Installations(consts.INST_NAMESPACE).Update(installationCopy)
+		_, updateErr := sm.client.InstallerV1alpha1().Installations(consts.InstNamespace).Update(installationCopy)
 		return updateErr
 	})
 

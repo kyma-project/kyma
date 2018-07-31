@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
+	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 )
 
@@ -18,14 +19,13 @@ func (steps InstallationSteps) InstallCore(installationData *config.Installation
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
-	releaseName := "core"
-	chartDir := path.Join(steps.chartDir, releaseName)
+	chartDir := path.Join(steps.chartDir, consts.CoreComponent)
 	coreOverrides := steps.getCoreOverrides(installationData, chartDir)
 
 	installResp, installErr := steps.helmClient.InstallRelease(
 		chartDir,
 		"kyma-system",
-		releaseName,
+		consts.CoreComponent,
 		coreOverrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
@@ -46,13 +46,12 @@ func (steps InstallationSteps) UpgradeCore(installationData *config.Installation
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
-	releaseName := "core"
-	chartDir := path.Join(steps.chartDir, releaseName)
+	chartDir := path.Join(steps.chartDir, consts.CoreComponent)
 	coreOverrides := steps.getCoreOverrides(installationData, chartDir)
 
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
-		releaseName,
+		consts.CoreComponent,
 		coreOverrides)
 
 	if steps.errorHandlers.CheckError("Upgrade Error: ", upgradeErr) {
