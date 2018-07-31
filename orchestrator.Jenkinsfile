@@ -1,5 +1,6 @@
 #!/usr/bin/env groovy
 import groovy.json.JsonSlurperClassic
+import groovy.json.JsonOutput
 /*
 
 Monorepo root orchestrator: This Jenkinsfile runs the Jenkinsfiles of all subprojects based on the changes made and triggers kyma integration.
@@ -135,14 +136,13 @@ stage('collect versions') {
         versions["${unbuiltProjects[i]}"] = projectVersion("${unbuiltProjects[i]}")
     }
 
+    // convert versions to JSON string to pass to on
+    versions = JsonOutput.toJson(versions)
     echo """
-    Component versions:
-    ${versions}
+    Component versions:\n
+    ${JsonOutput.prettyPrint(versions)}
     """
 }
-
-
-// TODO pass versions to Kyma integration
 
 // trigger Kyma integration when changes are made to installation charts/code or resources
 if (runIntegration) {
@@ -152,7 +152,8 @@ if (runIntegration) {
             parameters: [
                 string(name:'GIT_REVISION', value: "$commitID"),
                 string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
-                string(name:'APP_VERSION', value: "$appVersion")
+                string(name:'APP_VERSION', value: "$appVersion"),
+                string(name:'COMP_VERSIONS', value: "$versions") // parse with groovy.json.JsonSlurperClassic
             ]
     }
 }

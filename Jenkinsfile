@@ -1,4 +1,7 @@
 #!/usr/bin/env groovy
+import groovy.json.JsonSlurperClassic
+import groovy.json.JsonOutput
+
 def label = "kyma-${UUID.randomUUID().toString()}"
 def commit_id=''
 def isMaster = params.GIT_BRANCH == 'master'
@@ -11,6 +14,7 @@ DOCKER_CREDENTIALS=${env.DOCKER_CREDENTIALS}
 GIT_REVISION=${params.GIT_REVISION}
 GIT_BRANCH=${params.GIT_BRANCH}
 APP_VERSION=${params.APP_VERSION}
+COMP_VERSIONS=${${JsonOutput.prettyPrint(params.COMP_VERSIONS)}
 ********************************
 """
 
