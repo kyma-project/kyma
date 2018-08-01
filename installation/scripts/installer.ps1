@@ -11,6 +11,15 @@ Invoke-Expression -Command $cmd
 $cmd = "kubectl apply -f $CURRENT_DIR/../../resources/cluster-prerequisites/resource-quotas-installer.yaml"
 Invoke-Expression -Command $cmd
 
+<<<<<<< HEAD
+=======
+$cmd = "kubectl apply -f $CURRENT_DIR\..\resources\installer-types.yaml"
+Invoke-Expression -Command $cmd
+
+$cmd = "${CURRENT_DIR}\install-tiller.ps1"
+Invoke-Expression -Command $cmd
+
+>>>>>>> Moving tiller installation from installer component to bash scripts
 $cmd = "kubectl.exe apply -f ${CURRENT_DIR}\..\resources\installer.yaml -n kyma-installer"
 Invoke-Expression -Command $cmd
 
