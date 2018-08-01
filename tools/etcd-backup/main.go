@@ -3,7 +3,9 @@ package main
 import (
 	"time"
 
+	"github.com/kyma-project/kyma/tools/etcd-backup/internal/azure"
 	"github.com/kyma-project/kyma/tools/etcd-backup/internal/backup"
+	"github.com/kyma-project/kyma/tools/etcd-backup/internal/cleaner"
 	"github.com/kyma-project/kyma/tools/etcd-backup/internal/platform/logger"
 	"github.com/kyma-project/kyma/tools/etcd-backup/internal/platform/signal"
 
@@ -32,7 +34,8 @@ type Config struct {
 	}
 	BlobPrefix string
 
-	Backup backup.Config
+	Backup  backup.Config
+	Cleaner cleaner.Config
 }
 
 func main() {
@@ -49,7 +52,10 @@ func main() {
 	// k8s client
 	k8sCli, err := kubernetes.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating k8s client")
-	cfgMapNsScopedCli := k8sCli.CoreV1().ConfigMaps(cfg.WorkingNamespace)
+	var (
+		cfgMapNsScopedCli = k8sCli.CoreV1().ConfigMaps(cfg.WorkingNamespace)
+		secretNsScopedCli = k8sCli.CoreV1().Secrets(cfg.WorkingNamespace)
+	)
 
 	// etcd-operator informers
 	etcdOperatorCli, err := etcdOperatorClientset.NewForConfig(k8sConfig)
@@ -74,7 +80,16 @@ func main() {
 	_, err = recBackupExecutor.SingleBackup(stopCh, cfg.BlobPrefix)
 	fatalOnError(err, "while executing single etcd cluster backup")
 
-	// TODO(STEP 2): rotate backup service
+	// STEP 2: rotate backup service
+	azureCreds, err := azure.ExtractCredsFromSecret(cfg.ABS.SecretName, secretNsScopedCli)
+	fatalOnError(err, "while extracting ABS credentials from secret")
+
+	azBlobCli, err := azure.NewBlobContainerClient(azureCreds.AccountName, azureCreds.AccountKey, cfg.ABS.ContainerName)
+	fatalOnError(err, "while creating Azure Blob client")
+
+	backupCleaner := cleaner.NewAzure(cfg.Cleaner, azBlobCli, log)
+	err = backupCleaner.Clean(stopCh, cfg.BlobPrefix)
+	fatalOnError(err, "while removing old backups from ABS")
 }
 
 func newRestClientConfig(kubeConfigPath string) (*restclient.Config, error) {

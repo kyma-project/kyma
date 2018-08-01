@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Etcd Backup triggers a backup process of the `etcd` cluster using the etcd-backup-operator.
+The Etcd Backup triggers a backup process of the `etcd` cluster using the etcd-backup-operator. This application also removes the old backup files from the Azure Blob Storage (ABS). For more information, see the [Use environment variables](#use-environment-variables) section.
 
 ## Prerequisites
 
@@ -32,6 +32,9 @@ export APP_BLOB_PREFIX={prefix_name}
 export APP_BACKUP_CONFIG_MAP_NAME_FOR_TRACING="sc-recorded-etcd-backup-data"
 export APP_BACKUP_ETCD_ENDPOINTS="{endpoints}"
 
+export APP_CLEANER_LEAVE_MIN_NEWEST_BACKUP_BLOBS="3"
+export APP_CLEANER_EXPIRATION_BLOB_TIME="24h"
+
 go run main.go
 ```
 
@@ -50,7 +53,8 @@ Use the following environment variables to configure the application:
 | **APP_BLOB_PREFIX** | Yes |  | The name of the blob prefix to use to save the backup. Basically, it should be the name of the application for which the system performs the backup e.g. **service-catalog** |
 | **APP_BACKUP_ETCD_ENDPOINTS** | Yes |  | The endpoints of the `etcd` cluster. When there are multiple endpoints, the backup operator retrieves the backup from the endpoint that has the most up-to-date state. The given endpoints must belong to the same etcd cluster. Multiple endpoints should be separated by comma. |
 | **APP_BACKUP_CONFIG_MAP_NAME_FOR_TRACING** | Yes |  | The name of the ConfigMap where the path to the last successful ABS backup is saved. |
-
+| **APP_CLEANER_LEAVE_MIN_NEWEST_BACKUP_BLOBS** | Yes |  | The number of blobs which should not be deleted even if they are treated as expired. |
+| **APP_CLEANER_EXPIRATION_BLOB_TIME** | Yes |  | The duration used to check if a given blob should be deleted. If the **blob.LastModified** is earlier than the current time reduced by the **APP_CLEANER_EXPIRATION_BLOB_TIME** then the blob is removed. |
 
 ## Development
 
