@@ -136,7 +136,7 @@ stage('collect versions') {
         versions["${unbuiltProjects[i]}"] = projectVersion("${unbuiltProjects[i]}")
     }
 
-    // convert versions to JSON string to pass to on
+    // convert versions to JSON string to pass on
     versions = JsonOutput.toJson(versions)
     echo """
     Component versions:\n
