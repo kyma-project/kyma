@@ -8,12 +8,12 @@ import (
 )
 
 const istioTplStr = `
-ingress:
+ingressgateway:
   service:
     externalPublicIp: {{.ExternalIPAddress}}
 `
 
-// GetIstioOverrides returns values overrides for istio ingress
+// GetIstioOverrides returns values overrides for istio ingressgateway
 func GetIstioOverrides(installationData *config.InstallationData) (string, error) {
 	if hasIPAddress(installationData) == false {
 		return "", nil
