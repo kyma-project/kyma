@@ -8,6 +8,7 @@ The project is based on the Kubernetes operator pattern. It tracks changes of th
 - Minikube 0.26.1
 - kubectl 1.9.0
 - Docker
+- jq
 
 ## Development
 
