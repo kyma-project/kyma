@@ -1539,7 +1539,7 @@ func (ec *executionContext) _LocalObjectReference_kind(ctx context.Context, fiel
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.Kind
-	return res
+	return graphql.MarshalString(res)
 }
 
 func (ec *executionContext) _LocalObjectReference_name(ctx context.Context, field graphql.CollectedField, obj *LocalObjectReference) graphql.Marshaler {
@@ -6932,7 +6932,7 @@ func UnmarshalLocalObjectReferenceInput(v interface{}) (LocalObjectReferenceInpu
 		switch k {
 		case "kind":
 			var err error
-			err = (&it.Kind).UnmarshalGQL(v)
+			it.Kind, err = graphql.UnmarshalString(v)
 			if err != nil {
 				return it, err
 			}
@@ -7248,7 +7248,7 @@ enum ServiceBindingUsageStatusType {
 }
 
 type LocalObjectReference {
-    kind: BindingUsageReferenceType!
+    kind: String!
     name: String!
 }
 
@@ -7295,13 +7295,8 @@ input ServiceBindingRefInput {
 }
 
 input LocalObjectReferenceInput {
-    kind: BindingUsageReferenceType!
+    kind: String!
     name: String!
-}
-
-enum BindingUsageReferenceType {
-    DEPLOYMENT
-    FUNCTION
 }
 
 input ServiceBindingUsageParametersInput {
