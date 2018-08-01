@@ -122,7 +122,6 @@ Helm installation.
 By default, this tool installs a predefined component package. If necessary, you can specify which components to install by customizing the component list located in the [installation-config.yaml.tpl](../../installation/resources/installation-config.yaml.tpl) file. Available components:
 
 - cluster-prerequisites
-- tiller
 - cluster-essentials
 - istio
 - prometheus-operator

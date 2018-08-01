@@ -38,6 +38,7 @@ kubectl apply -f ${CURRENT_DIR}/../../resources/cluster-prerequisites/limit-rang
 kubectl apply -f ${CURRENT_DIR}/../../resources/cluster-prerequisites/resource-quotas-installer.yaml
 kubectl apply -f ${CURRENT_DIR}/../resources/installer-types.yaml
 
+kubectl apply -f ${CURRENT_DIR}/../resources/admin-cluster-role-binding.yaml
 bash ${CURRENT_DIR}/install-tiller.sh
 
 kubectl apply -f ${CURRENT_DIR}/../resources/installer.yaml -n "kyma-installer"

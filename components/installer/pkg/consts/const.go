@@ -7,7 +7,6 @@ const (
 	RelFinalizer  = "finalizer.release.kyma.cx"
 
 	ClusterPrerequisitesComponent = "cluster-prerequisites"
-	TillerComponent               = "tiller"
 	ClusterEssentialsComponent    = "cluster-essentials"
 	IstioComponent                = "istio"
 	PrometheusComponent           = "prometheus-operator"
