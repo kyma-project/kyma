@@ -8,7 +8,7 @@ $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 $cmd = "kubectl.exe create ns kyma-installer"
 Invoke-Expression -Command $cmd
 
-$cmd = "kubectl apply -f $CURRENT_DIR/../../resources/default-sa-rbac-role.yaml"
+$cmd = "kubectl apply -f $CURRENT_DIR/../../resources/cluster-prerequisites/default-sa-rbac-role.yaml"
 Invoke-Expression -Command $cmd
 
 $cmd = "kubectl apply -f $CURRENT_DIR/../../resources/cluster-prerequisites/limit-range.yaml -n kyma-installer"
