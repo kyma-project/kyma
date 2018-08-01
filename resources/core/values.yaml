@@ -30,7 +30,7 @@ global:
       secretName: istio-ingress-certs  
     gateway: 
       name: kyma-gateway      
-  ectdBackupABS:
+  etcdBackupABS:
     secretName: etcd-backup-abs-credentials
 
 

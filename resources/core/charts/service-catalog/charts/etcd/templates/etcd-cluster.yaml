@@ -1,0 +1,14 @@
+apiVersion: "etcd.database.coreos.com/v1beta2"
+kind: "EtcdCluster"
+metadata:
+  name: {{ template "etcd-fullname" . }}
+  namespace: "{{ .Release.Namespace }}"
+spec:
+  size: {{ .Values.replicaCount }}
+  version: {{ .Values.cluster.version }}
+  pod:
+    resources:
+      limits:
+        memory: "{{ .Values.cluster.resources.limits.memory }}"
+      requests:
+        memory: "{{ .Values.cluster.resources.requests.memory }}"
