@@ -20,7 +20,7 @@ func TestGetIstioOverrides(t *testing.T) {
 
 		Convey("when IP address is specified should contain yaml", func() {
 			const dummyOverridesForIstio = `
-ingress:
+ingressgateway:
   service:
     externalPublicIp: 100.100.100.100
 `
