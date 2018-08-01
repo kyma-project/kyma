@@ -1,12 +1,4 @@
-# Version from not yet merged PR: https://github.com/kubernetes/charts/pull/4678
 name: etcd
-home: https://github.com/coreos/etcd
-version: 0.4.0
-appVersion: 3.2.14
-description: Distributed reliable key-value store for the most critical data of a distributed system.
-icon: https://raw.githubusercontent.com/coreos/etcd/master/logos/etcd-horizontal-color.png
-sources:
-- https://github.com/coreos/etcd
-maintainers:
-- name: Lachlan Evenson
-  email: lachlan@deis.com
+description: etcd datastore for service-catalog
+version: 0.0.1
+

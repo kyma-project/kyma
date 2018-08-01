@@ -1,0 +1,13 @@
+apiVersion: "etcd.database.coreos.com/v1beta2"
+kind: "EtcdCluster"
+metadata:
+  name: "core-etcd"
+spec:
+  size: {{ .Values.replicaCount }}
+  version: {{ .Values.version }}
+  pod:
+    resources:
+      limits:
+        memory: {{ .Values.resources.limits.memory }}
+      requests:
+        memory: {{ .Values.resources.requests.memory }}
