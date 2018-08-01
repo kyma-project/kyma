@@ -28,9 +28,14 @@ spec:
           image: "{{ .Values.global.hub }}/proxyv2:{{ .Values.global.tag }}"
           imagePullPolicy: {{ .Values.global.imagePullPolicy }}
           ports:
-            {{- range $key, $val := .Values.deployment.ports }}
-            - containerPort: {{ $val.containerPort }}
-            {{- end }}
+          - containerPort: 80
+        {{- if .Values.global.isLocalEnv }}
+            hostPort: 80
+        {{- end }}
+          - containerPort: 443
+        {{- if .Values.global.isLocalEnv }}
+            hostPort: 443
+        {{- end }}
           args:
           - proxy
           - router

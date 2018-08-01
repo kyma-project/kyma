@@ -91,15 +91,14 @@ resources:
   requests:
     memory: 200Mi
 
-ingress:
-  ## If true, Grafana Ingress will be created
+virtualservice:
+  ## If true, Grafana VirtualService will be created
   ##
   enabled: true
 
-  ## Annotations for Alertmanager Ingress
+  ## Annotations for Alertmanager VirtualService
   ##
-  annotations:
-    kubernetes.io/ingress.class: istio
+  annotations: {}
 
 # Set datasource in beginning
 dataSource: {}

@@ -6,8 +6,7 @@ service:
   internalPort: 80
   externalPort: 80
   protocol: TCP
-ingress:
+virtualservice:
   enabled: true
-  annotations:
-    kubernetes.io/ingress.class: istio
+  annotations: {}
 resources: {}

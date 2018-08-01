@@ -23,9 +23,12 @@ global:
     imageTag: 0.1.0
   istio:
     tls:
-      secretName: istio-ingress-certs
-  etcdBackupABS:
+      secretName: istio-ingress-certs  
+    gateway: 
+      name: kyma-gateway      
+  ectdBackupABS:
     secretName: etcd-backup-abs-credentials
+
 
 test:
   auth:
