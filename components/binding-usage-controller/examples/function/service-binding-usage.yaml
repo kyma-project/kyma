@@ -6,7 +6,7 @@ spec:
  serviceBindingRef:
    name: redis-instance-credential
  usedBy:
-   kind: Function
+   kind: function
    name: redis-client
  parameters:
    envPrefix:

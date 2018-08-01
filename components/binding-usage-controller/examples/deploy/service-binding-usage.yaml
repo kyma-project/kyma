@@ -6,5 +6,5 @@ spec:
  serviceBindingRef:
    name: redis-instance-credential
  usedBy:
-   kind: Deployment
+   kind: deployment
    name: redis-client
