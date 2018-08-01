@@ -36,10 +36,7 @@ echo "
 kubectl apply -f $CURRENT_DIR/../../resources/cluster-prerequisites/limit-range.yaml -n "kyma-installer"
 kubectl apply -f $CURRENT_DIR/../../resources/cluster-prerequisites/resource-quotas-installer.yaml
 kubectl apply -f $CURRENT_DIR/../resources/installer-types.yaml
-if [ ! $LOCAL ]; then
-    #release-adder is only available in cluster setup
-    kubectl apply -f $CURRENT_DIR/../resources/release-adder.yaml -n "kyma-installer"
-fi
+
 kubectl apply -f $CURRENT_DIR/../resources/installer.yaml -n "kyma-installer"
 
 $CURRENT_DIR/is-ready.sh kube-system k8s-app kube-dns
