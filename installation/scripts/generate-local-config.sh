@@ -86,6 +86,7 @@ if [ -n "${AZURE_BROKER_SUBSCRIPTION_ID}" ]; then
 
   AZURE_BROKER_TPL_PATH="${ROOT_PATH}/../resources/azure-broker-secret.yaml.tpl"
   AZURE_BROKER_OUTPUT_PATH=$(mktemp)
+  cp $AZURE_BROKER_TPL_PATH $AZURE_BROKER_OUTPUT_PATH
 
   bash ${ROOT_PATH}/replace-placeholder.sh --path ${AZURE_BROKER_OUTPUT_PATH} --placeholder "__AZURE_BROKER_SUBSCRIPTION_ID__" --value "${AZURE_BROKER_SUBSCRIPTION_ID}"
   bash ${ROOT_PATH}/replace-placeholder.sh --path ${AZURE_BROKER_OUTPUT_PATH} --placeholder "__AZURE_BROKER_TENANT_ID__" --value "${AZURE_BROKER_TENANT_ID}"
