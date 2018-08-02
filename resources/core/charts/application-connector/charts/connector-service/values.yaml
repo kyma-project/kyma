@@ -1,7 +1,7 @@
 deployment:
   image:
     name: snapshot/connector-service
-    tag: PR-21
+    tag: 0.2.63
     pullPolicy: IfNotPresent
   args:
     internalAPIPort: &internalAPIPort 8080

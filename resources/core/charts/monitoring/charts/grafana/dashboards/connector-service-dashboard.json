@@ -449,7 +449,7 @@
       "targets": [
         {
           "$$hashKey": "object:6024",
-          "expr": "connector_service_endpoints_duration{exported_endpoint=\"/v1/remoteenvironments/{reName}/tokens\"})",
+          "expr": "avg(connector_service_endpoints_duration{exported_endpoint=\"/v1/remoteenvironments/{reName}/tokens\"})",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,
@@ -458,7 +458,7 @@
         },
         {
           "$$hashKey": "object:6025",
-          "expr": "connector_service_endpoints_duration{exported_endpoint=\"/v1/remoteenvironments/{reName}/client-certs\"})",
+          "expr": "avg(connector_service_endpoints_duration{exported_endpoint=\"/v1/remoteenvironments/{reName}/client-certs\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "AVG /v1/remoteenvironments/{reName}/client-certs",
@@ -466,7 +466,7 @@
         },
         {
           "$$hashKey": "object:6026",
-          "expr": "connector_service_endpoints_duration{exported_endpoint=\"/v1/remoteenvironments/{reName}/info\"})",
+          "expr": "avg(connector_service_endpoints_duration{exported_endpoint=\"/v1/remoteenvironments/{reName}/info\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "AVG /v1/remoteenvironments/{reName}/info",
