@@ -2,10 +2,9 @@ package middleware
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"github.com/kyma-project/kyma/components/connector-service/internal/middleware/metrics"
 )
 
 type responseWriterWrapper struct {
@@ -23,28 +22,11 @@ func (lrw *responseWriterWrapper) WriteHeader(code int) {
 }
 
 type codeMiddleware struct {
-	summaryVec *prometheus.SummaryVec
+	metricsService metrics.Collector
 }
 
-func NewCodeMiddleware(name string) (*codeMiddleware, apperrors.AppError) {
-	summaryVec := newSummaryVec(name)
-
-	err := prometheus.Register(summaryVec)
-	if err != nil {
-		return nil, apperrors.Internal("Failed to create middleware %s: %s", name, err.Error())
-	}
-
-	return &codeMiddleware{summaryVec: summaryVec}, nil
-}
-
-func newSummaryVec(name string) *prometheus.SummaryVec {
-	return prometheus.NewSummaryVec(
-		prometheus.SummaryOpts{
-			Name: name,
-			Help: "Status codes returned by each endpoint",
-		},
-		[]string{"endpoint", "method"},
-	)
+func NewCodeMiddleware(metricsService metrics.Collector) (*codeMiddleware) {
+	return &codeMiddleware{metricsService: metricsService}
 }
 
 func (dm *codeMiddleware) Handle(next http.Handler) http.Handler {
@@ -63,7 +45,7 @@ func (dm *codeMiddleware) Handle(next http.Handler) http.Handler {
 		if err != nil {
 			logrus.Errorf("Failed to get path template: %s", err.Error())
 		} else {
-			dm.summaryVec.WithLabelValues(template, r.Method).Observe(float64(writerWrapper.statusCode))
+			dm.metricsService.AddObservation(template, r.Method, float64(writerWrapper.statusCode))
 		}
 	})
 }
