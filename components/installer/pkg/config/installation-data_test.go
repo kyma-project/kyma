@@ -32,10 +32,10 @@ func TestConvertTopMap(t *testing.T) {
 
 		Convey("Length of the output map should always reflect the number of valid elements", func() {
 
-			fakeComponentList = "tiller,istio,dex,core"
+			fakeComponentList = "istio,dex,core"
 			testMap := convertToMap(fakeComponentList)
 
-			So(len(testMap), ShouldEqual, 4)
+			So(len(testMap), ShouldEqual, 3)
 		})
 
 		Convey("In case of a trailing comma, the map should not create additional key", func() {

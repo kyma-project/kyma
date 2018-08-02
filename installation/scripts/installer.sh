@@ -33,15 +33,18 @@ echo "
 ################################################################################
 "
 
-kubectl apply -f $CURRENT_DIR/../../resources/cluster-prerequisites/limit-range.yaml -n "kyma-installer"
-kubectl apply -f $CURRENT_DIR/../../resources/cluster-prerequisites/resource-quotas-installer.yaml
+kubectl apply -f ${CURRENT_DIR}/../../resources/cluster-prerequisites/default-sa-rbac-role.yaml"
+kubectl apply -f ${CURRENT_DIR}/../../resources/cluster-prerequisites/limit-range.yaml -n "kyma-installer"
+kubectl apply -f ${CURRENT_DIR}/../../resources/cluster-prerequisites/resource-quotas-installer.yaml
 
-kubectl apply -f $CURRENT_DIR/../resources/installer.yaml -n "kyma-installer"
+bash ${CURRENT_DIR}/install-tiller.sh
 
-$CURRENT_DIR/is-ready.sh kube-system k8s-app kube-dns
+kubectl apply -f ${CURRENT_DIR}/../resources/installer.yaml -n "kyma-installer"
+
+${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
 
 if [ $LOCAL ]; then
-    bash $CURRENT_DIR/copy-resources.sh
+    bash ${CURRENT_DIR}/copy-resources.sh
 fi
 
 if [ $CR_PATH ]; then

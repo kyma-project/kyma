@@ -32,4 +32,4 @@ data:
   admin_group: "__ADMIN_GROUP__"
   enable_etcd_backup_operator: "__ENABLE_ETCD_BACKUP_OPERATOR__"
   etcd_backup_abs_container_name: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
-  components: "cluster-prerequisites,tiller,cluster-essentials,istio,prometheus-operator,provision-bundles,dex,core,remote-environments" 
+  components: "cluster-prerequisites,cluster-essentials,istio,prometheus-operator,provision-bundles,dex,core,remote-environments" 
