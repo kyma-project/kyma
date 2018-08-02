@@ -13,8 +13,8 @@ cp $CONFIG_TPL_PATH $CONFIG_OUTPUT_PATH
 echo -e "\nGenerating secret for Cluster certificate"
 
 TLS_FILE=${ROOT_PATH}/../resources/local-tls-certs.yaml
-TLS_CERT=$(cat ${TLS_FILE} | grep 'tls.crt' | sed 's/^.*: //' | base64)
-TLS_KEY=$(cat ${TLS_FILE} | grep 'tls.key' | sed 's/^.*: //' | base64)
+TLS_CERT=$(cat ${TLS_FILE} | grep 'tls.crt' | sed 's/^.*: //' | base64 | tr -d '\n')
+TLS_KEY=$(cat ${TLS_FILE} | grep 'tls.key' | sed 's/^.*: //' | base64 | tr -d '\n')
 
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__TLS_CERT__" --value "${TLS_CERT}"
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__TLS_KEY__" --value "${TLS_KEY}"
