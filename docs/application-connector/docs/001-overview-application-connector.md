@@ -9,8 +9,8 @@ components that ensure the security of the connection, and the access to all of 
 These are the components of the Application Connector:
 
 - The **Connector Service** generates the required certificates and ensures a secure and trusted connection between Kyma and an external solution.
-- The **Metadata Service** allows you to register all of the external solution's APIs and Event catalogs which Kyma consumes.
-- The **Gateway Service** proxies the API calls sent from Kyma to the connected external solution.
-- The **Event Service** proxies and routes the Events sent from a connected external solution to Kyma.
+- The **Metadata Service** allows you to register all of the external solution's APIs and Event catalogs which Kyma consumes. You can register the APIs along with additional documentation and Swagger files.
+- The **Gateway Service** proxies the API calls sent from Kyma to the connected external solution and handles OAuth2 tokens. 
+- The **Event Service** delivers the Events sent from a connected external solution to Kyma.
 
 To ensure maximum security and separation, a single instance of the Gateway Service allows you to connect only to a single external solution. This connection is represented in Kyma by a [Remote Environment](./014-details-remote-environment.md).
