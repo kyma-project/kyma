@@ -47,10 +47,10 @@
 /resources/core/charts/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
 # The `monitoring` subchart
-/resources/core/charts/monitoring/ @gchbg @joek @rakesh-garimella @sayanh @venturasr
+/resources/core/charts/monitoring/ @gchbg @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
 # The `kubeless` subchart
-/resources/core/charts/kubeless/ @gchbg @joek @rakesh-garimella @sayanh @venturasr
+/resources/core/charts/kubeless/ @gchbg @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
 # The `minio` subchart
 /resources/core/charts/minio/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
@@ -110,7 +110,7 @@
 /resources/core/charts/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
 # The `prometheus-operator` chart
-/resources/prometheus-operator/ @gchbg @joek @rakesh-garimella @sayanh @venturasr
+/resources/prometheus-operator/ @gchbg @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
 # The `remote environment` chart
 /resources/remote-environments/ @lszymik @akgalwas @janmedrek
@@ -167,7 +167,7 @@
 /tests/test-environemnts/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
 
 # test-logging-monitoring tests
-/tests/test-logging-monitoring/ @rakesh-garimella @joek @sayanh @venturasr @gchbg
+/tests/test-logging-monitoring/ @rakesh-garimella @joek @sayanh @venturasr @gchbg @lilitgh
 
 # api-controller acceptance tests
 /tests/api-controller-acceptance-tests/ @damianpacierpnikatsap @piotrmsc @pssap
@@ -195,7 +195,7 @@
 /tools/watch-pods/ @suleymanakbas91 @ahmedami @clebs @a-thaler @lilitgh
 
 # kubeless-test-client tests
-/tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @gchbg
+/tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @gchbg @lilitgh
 
 # Event Bus Tests
 /tests/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
