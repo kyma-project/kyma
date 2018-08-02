@@ -62,21 +62,27 @@ podTemplate(label: label) {
                                 sh "cp ./indexbuilder deploy/tools/indexbuilder"
                                 sh "cp ./targz deploy/tools/targz"
 
-                                sh "docker build -t helm-broker:latest deploy/broker"
-                                sh "docker build -t helm-broker-reposerver:latest deploy/reposerver"
-                                sh "docker build -t helm-broker-tools:latest deploy/tools"
+                                sh "docker build -t ${dockerPushRoot}helm-broker:latest deploy/broker --label version=${dockerImageTag} --label component=${application}"
+                                sh "docker build -t ${dockerPushRoot}helm-broker-reposerver:latest deploy/reposerver --label version=${dockerImageTag} --label component=${application}"
+                                sh "docker build -t ${dockerPushRoot}helm-broker-tools:latest deploy/tools --label version=${dockerImageTag} --label component=${application}"
                             }
                         }
 
                         stage("push image $application") {
-                            sh "docker tag helm-broker:latest ${dockerPushRoot}helm-broker:${dockerImageTag}"
+                            sh "docker tag ${dockerPushRoot}helm-broker:latest ${dockerPushRoot}helm-broker:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}helm-broker:${dockerImageTag}"
 
-                            sh "docker tag helm-broker-reposerver:latest ${dockerPushRoot}helm-broker-reposerver:${dockerImageTag}"
+                            sh "docker tag ${dockerPushRoot}helm-broker-reposerver:latest ${dockerPushRoot}helm-broker-reposerver:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}helm-broker-reposerver:${dockerImageTag}"
 
-                            sh "docker tag helm-broker-tools:latest ${dockerPushRoot}helm-broker-tools:${dockerImageTag}"
+                            sh "docker tag ${dockerPushRoot}helm-broker-tools:latest ${dockerPushRoot}helm-broker-tools:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}helm-broker-tools:${dockerImageTag}"
+
+                            if (isMaster) {
+                                sh "docker push ${dockerPushRoot}helm-broker:latest"
+                                sh "docker push ${dockerPushRoot}helm-broker-reposerver:latest"
+                                sh "docker push ${dockerPushRoot}helm-broker-tools:latest"
+                            }
 
                         }
                     }
