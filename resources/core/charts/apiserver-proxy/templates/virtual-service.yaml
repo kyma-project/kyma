@@ -21,6 +21,10 @@ spec:
       allowOrigin:
       - "*"
       allowHeaders:
-      - "*"
+      - "Authorization"
+      - "Content-Type"
       allowMethods:
-      - '*'
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
