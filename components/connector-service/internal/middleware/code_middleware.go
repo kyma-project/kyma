@@ -2,31 +2,17 @@ package middleware
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/connector-service/internal/middleware/metrics"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"github.com/kyma-project/kyma/components/connector-service/internal/middleware/metrics"
 )
 
-type responseWriterWrapper struct {
-	http.ResponseWriter
-	statusCode int
-}
-
-func newResponseWriterWrapper(w http.ResponseWriter) *responseWriterWrapper {
-	return &responseWriterWrapper{w, 0}
-}
-
-func (lrw *responseWriterWrapper) WriteHeader(code int) {
-	lrw.statusCode = code
-	lrw.ResponseWriter.WriteHeader(code)
-}
-
 type codeMiddleware struct {
-	metricsService metrics.Collector
+	metricsCollector metrics.Collector
 }
 
-func NewCodeMiddleware(metricsService metrics.Collector) (*codeMiddleware) {
-	return &codeMiddleware{metricsService: metricsService}
+func NewCodeMiddleware(metricsCollector metrics.Collector) *codeMiddleware {
+	return &codeMiddleware{metricsCollector: metricsCollector}
 }
 
 func (dm *codeMiddleware) Handle(next http.Handler) http.Handler {
@@ -45,7 +31,7 @@ func (dm *codeMiddleware) Handle(next http.Handler) http.Handler {
 		if err != nil {
 			logrus.Errorf("Failed to get path template: %s", err.Error())
 		} else {
-			dm.metricsService.AddObservation(template, r.Method, float64(writerWrapper.statusCode))
+			dm.metricsCollector.AddObservation(template, r.Method, float64(writerWrapper.statusCode))
 		}
 	})
 }

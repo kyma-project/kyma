@@ -1,8 +1,8 @@
 package metrics
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type Collector interface {
@@ -18,7 +18,7 @@ func NewMetricsService(name string, help string, labels []string) (Collector, ap
 
 	err := prometheus.Register(vector)
 	if err != nil {
-		return nil, apperrors.Internal("Failed to create metrics service %s: %s", name, err.Error())
+		return nil, apperrors.Internal("Failed to create metrics collector %s: %s", name, err.Error())
 	}
 
 	return &collector{vector: vector}, nil

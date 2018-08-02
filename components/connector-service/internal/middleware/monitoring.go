@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"net/http"
 	"github.com/kyma-project/kyma/components/connector-service/internal/middleware/metrics"
+	"net/http"
 )
 
 type Middleware interface {
@@ -12,7 +12,7 @@ type Middleware interface {
 
 func SetupMonitoring() ([]Middleware, apperrors.AppError) {
 
-	durationMiddleware, err := NewDurationMiddleware("connector_service_endpoints_duration")
+	durationMiddleware, err := newDurationMiddleware("connector_service_endpoints_duration")
 	if err != nil {
 		return nil, apperrors.Internal("Failed to setup duration middleware: %s", err.Error())
 	}
@@ -28,7 +28,16 @@ func SetupMonitoring() ([]Middleware, apperrors.AppError) {
 func newCodeMiddleware(name string) (*codeMiddleware, apperrors.AppError) {
 	metricsService, err := metrics.NewMetricsService(name, "Status codes returned by each endpoint", []string{"endpoint", "method"})
 	if err != nil {
-		return nil, apperrors.Internal("Failed to setup response codes metrics service: %s", err.Error())
+		return nil, apperrors.Internal("Failed to setup response codes metrics collector: %s", err.Error())
+	}
+
+	return NewCodeMiddleware(metricsService), nil
+}
+
+func newDurationMiddleware(name string) (*codeMiddleware, apperrors.AppError) {
+	metricsService, err := metrics.NewMetricsService(name, "Response time for each endpoint", []string{"endpoint", "method"})
+	if err != nil {
+		return nil, apperrors.Internal("Failed to setup duration metrics collector: %s", err.Error())
 	}
 
 	return NewCodeMiddleware(metricsService), nil
