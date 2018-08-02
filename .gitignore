@@ -57,3 +57,7 @@ local/tmp/
 /temp-*
 
 !templates
+
+# Files generated after installation
+/installation/resources/cluster-certificate-secret.yaml
+/installation/resources/ui-test-secret.yaml
