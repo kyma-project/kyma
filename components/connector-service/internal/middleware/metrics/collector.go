@@ -13,7 +13,7 @@ type collector struct {
 	vector *prometheus.SummaryVec
 }
 
-func NewMetricsService(name string, help string, labels []string) (Collector, apperrors.AppError) {
+func NewMetricsCollector(name string, help string, labels []string) (Collector, apperrors.AppError) {
 	vector := newSummaryVec(name, help, labels)
 
 	err := prometheus.Register(vector)

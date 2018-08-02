@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/middleware/metrics"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -13,8 +12,8 @@ type durationMiddleware struct {
 	metricsCollector metrics.Collector
 }
 
-func NewDurationMiddleware(metricsCollector metrics.Collector) (*durationMiddleware, apperrors.AppError) {
-	return &durationMiddleware{metricsCollector: metricsCollector}, nil
+func NewDurationMiddleware(metricsCollector metrics.Collector) *durationMiddleware {
+	return &durationMiddleware{metricsCollector: metricsCollector}
 }
 
 func (dm *durationMiddleware) Handle(next http.Handler) http.Handler {

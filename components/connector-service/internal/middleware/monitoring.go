@@ -26,19 +26,19 @@ func SetupMonitoring() ([]Middleware, apperrors.AppError) {
 }
 
 func newCodeMiddleware(name string) (*codeMiddleware, apperrors.AppError) {
-	metricsService, err := metrics.NewMetricsService(name, "Status codes returned by each endpoint", []string{"endpoint", "method"})
+	metricsCollector, err := metrics.NewMetricsCollector(name, "Status codes returned by each endpoint", []string{"endpoint", "method"})
 	if err != nil {
 		return nil, apperrors.Internal("Failed to setup response codes metrics collector: %s", err.Error())
 	}
 
-	return NewCodeMiddleware(metricsService), nil
+	return NewCodeMiddleware(metricsCollector), nil
 }
 
-func newDurationMiddleware(name string) (*codeMiddleware, apperrors.AppError) {
-	metricsService, err := metrics.NewMetricsService(name, "Response time for each endpoint", []string{"endpoint", "method"})
+func newDurationMiddleware(name string) (*durationMiddleware, apperrors.AppError) {
+	metricsCollector, err := metrics.NewMetricsCollector(name, "Response time for each endpoint", []string{"endpoint", "method"})
 	if err != nil {
 		return nil, apperrors.Internal("Failed to setup duration metrics collector: %s", err.Error())
 	}
 
-	return NewCodeMiddleware(metricsService), nil
+	return NewDurationMiddleware(metricsCollector), nil
 }
