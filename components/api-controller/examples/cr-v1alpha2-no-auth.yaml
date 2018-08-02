@@ -8,5 +8,5 @@ spec:
       name: kubernetes
       port: 443
     hostname: kubernetes.kyma.local
-    authenticationEnabled: false # optional (forces auth to be disabled no matter what is inside authentication spec)
-    authentication: []
+    authenticationEnabled: false # optional here (forces auth to be disabled no matter what is inside authentication spec)
+    authentication: [] # optional here
