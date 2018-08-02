@@ -1,6 +1,6 @@
 deployment:
   image:
-    name: snapshot/connector-service
+    name: connector-service
     tag: 0.2.63
     pullPolicy: IfNotPresent
   args:
