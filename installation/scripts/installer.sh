@@ -36,7 +36,6 @@ echo "
 kubectl apply -f ${CURRENT_DIR}/../../resources/cluster-prerequisites/default-sa-rbac-role.yaml"
 kubectl apply -f ${CURRENT_DIR}/../../resources/cluster-prerequisites/limit-range.yaml -n "kyma-installer"
 kubectl apply -f ${CURRENT_DIR}/../../resources/cluster-prerequisites/resource-quotas-installer.yaml
-kubectl apply -f ${CURRENT_DIR}/../resources/installer-types.yaml
 
 bash ${CURRENT_DIR}/install-tiller.sh
 
