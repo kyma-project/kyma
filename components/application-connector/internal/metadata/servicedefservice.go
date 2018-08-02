@@ -65,7 +65,7 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 		}
 		service.API = serviceAPI
 
-		serviceDef.Api.Spec, err = tryToModifyAPISpec(serviceDef.Api.Spec, serviceAPI.GatewayURL)
+		serviceDef.Api.Spec, err = modifyAPISpec(serviceDef.Api.Spec, serviceAPI.GatewayURL)
 		if err != nil {
 			return "", apperrors.Internal("failed to modify API spec, %s", err)
 		}
@@ -136,7 +136,7 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 			return apperrors.Internal("failed to update API, %s", err)
 		}
 
-		serviceDef.Api.Spec, err = tryToModifyAPISpec(serviceDef.Api.Spec, service.API.GatewayURL)
+		serviceDef.Api.Spec, err = modifyAPISpec(serviceDef.Api.Spec, service.API.GatewayURL)
 		if err != nil {
 			return apperrors.Internal("failed to modify API spec, %s", err)
 		}
@@ -275,13 +275,12 @@ func (sds *serviceDefinitionService) insertSpecs(id string, docs []byte, api *se
 	return sds.minioService.Put(id, documentation, apiSpec, eventsSpec)
 }
 
-func tryToModifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppError) {
+func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppError) {
 	if rawApiSpec == nil {
 		return rawApiSpec, nil
 	}
 
 	var apiSpec spec.Swagger
-
 	err := json.Unmarshal(rawApiSpec, &apiSpec)
 	if err != nil {
 		return []byte{}, apperrors.Internal("failed to unmarshal api spec, %s", err)
@@ -291,20 +290,28 @@ func tryToModifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors
 		return rawApiSpec, nil
 	}
 
-	return modifyAPISpec(apiSpec, gatewayUrl)
+	newSpec, err := updateBaseUrl(apiSpec, gatewayUrl)
+	if err != nil {
+		return rawApiSpec, apperrors.Internal("failed to update base url, %s", err)
+	}
+
+	modifiedSpec, err := json.Marshal(newSpec)
+	if err != nil {
+		return rawApiSpec, apperrors.Internal("failed to marshal updated spec, %s", err)
+	}
+
+	return modifiedSpec, nil
 }
 
-func modifyAPISpec(apiSpec spec.Swagger, gatewayUrl string) ([]byte, apperrors.AppError) {
+func updateBaseUrl(apiSpec spec.Swagger, gatewayUrl string) (spec.Swagger, apperrors.AppError) {
 	fullUrl, err := url.Parse(gatewayUrl)
 	if err != nil {
-		return []byte{}, apperrors.Internal("failed to parse gateway url, %s", err)
+		return spec.Swagger{}, apperrors.Internal("failed to parse gateway url, %s", err)
 	}
 
 	apiSpec.Host = fullUrl.Hostname()
 	apiSpec.BasePath = ""
 	apiSpec.Schemes = []string{"http"}
 
-	modifiedSpec, err := json.Marshal(apiSpec)
-
-	return modifiedSpec, nil
+	return apiSpec, nil
 }
