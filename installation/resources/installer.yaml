@@ -1,3 +1,31 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+    name: installations.installer.kyma.cx
+spec:
+  group: installer.kyma.cx
+  version: v1alpha1
+  scope: Namespaced
+  names:
+    kind: Installation
+    singular: installation
+    plural: installations
+    shortNames: ['installation']
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+    name: releases.release.kyma.cx
+spec:
+  group: release.kyma.cx
+  version: v1alpha1
+  scope: Namespaced
+  names:
+    kind: Release
+    singular: release
+    plural: releases
+    shortNames: ['release']
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -16,7 +44,7 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/installer:0.1.4
+        image: eu.gcr.io/kyma-project/installer:0.3.66
         imagePullPolicy: IfNotPresent
         env:
           - name: AZURE_BROKER_SUBSCRIPTION_ID
@@ -134,6 +162,12 @@ spec:
                 name: installation-config
                 key: etcd_backup_abs_container_name
                 optional: true
+          - name: COMPONENT_LIST
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: components
+                optional: false
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -156,18 +190,3 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: kyma-installer-reader
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: default-sa-cluster-admin
-  labels:
-    app: kyma
-subjects:
-- kind: ServiceAccount
-  name: default
-  namespace: kube-system
-roleRef:
-  kind: ClusterRole
-  apiGroup: rbac.authorization.k8s.io
-  name: cluster-admin

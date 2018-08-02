@@ -1,10 +1,13 @@
-FROM debian:stable-slim
+FROM alpine:latest
 
 LABEL source="git@github.com:kyma-project/kyma.git"
 
-RUN apt-get update && apt-get install -y curl unzip && rm -r /var/lib/apt/lists/*
+RUN apk add --no-cache curl
 
-RUN curl -Lo /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.10.0/bin/linux/amd64/kubectl && chmod +x /usr/local/bin/kubectl
+RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.10.0/bin/linux/amd64/kubectl && chmod +x /usr/bin/kubectl
+
+# To automatically get the latest version:
+#RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v/bin/linux/amd64/kubectl && chmod +x /usr/bin/kubectl
 
 RUN mkdir -p /root/.kube && touch /root/.kube/config
 COPY bin/app /test-logging-monitoring

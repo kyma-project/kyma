@@ -63,7 +63,7 @@ apiserver:
       # THIS IS INADEQUATE FOR PRODUCTION USE!
       useEmbedded: false
       # etcd URL(s); override this if NOT using embedded etcd
-      servers: http://core-etcd.kyma-system.svc.cluster.local:2379
+      servers: http://core-etcd-client.kyma-system.svc.cluster.local:2379
   # Log level; valid values are in the range 0 - 10
   verbosity: 1
   auth:

@@ -23,6 +23,9 @@ rules:
   - apiGroups: [""]
     resources: ["limitranges", "resourcequotas"]
     verbs: ["create", "get"]
+  - apiGroups: ["ui.kyma.cx"]
+    resources: ["idppresets"]
+    verbs: ["get"]
 
 ---
 kind: ClusterRoleBinding

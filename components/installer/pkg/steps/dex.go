@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
+	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 )
 
@@ -15,8 +16,7 @@ func (steps *InstallationSteps) InstallDex(installationData *config.Installation
 	const stepName string = "Installing Dex"
 	const namespace string = "kyma-system"
 
-	releaseName := "dex"
-	chartDir := path.Join(steps.chartDir, releaseName)
+	chartDir := path.Join(steps.chartDir, consts.DexComponent)
 	overrides := steps.getDexOverrides(installationData, chartDir)
 
 	steps.PrintInstallationStep(stepName)
@@ -25,7 +25,7 @@ func (steps *InstallationSteps) InstallDex(installationData *config.Installation
 	installResp, installErr := steps.helmClient.InstallRelease(
 		chartDir,
 		namespace,
-		releaseName,
+		consts.DexComponent,
 		overrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
@@ -45,8 +45,7 @@ func (steps *InstallationSteps) UpdateDex(installationData *config.InstallationD
 	const stepName string = "Updating Dex"
 	const namespace string = "kyma-system"
 
-	releaseName := "dex"
-	chartDir := path.Join(steps.chartDir, releaseName)
+	chartDir := path.Join(steps.chartDir, consts.DexComponent)
 	overrides := steps.getDexOverrides(installationData, chartDir)
 
 	steps.PrintInstallationStep(stepName)
@@ -54,7 +53,7 @@ func (steps *InstallationSteps) UpdateDex(installationData *config.InstallationD
 
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
-		releaseName,
+		consts.DexComponent,
 		overrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", upgradeErr) {

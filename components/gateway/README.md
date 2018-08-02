@@ -14,7 +14,7 @@ To install the Gateway, follow these steps:
 
 1. `git clone git@github.com:kyma-project/kyma.git`
 1. `cd kyma/components/gateway`
-1. `make build`
+1. `CGO_ENABLED=0 go build ./cmd/gateway`
 
 ## Usage
 
@@ -94,49 +94,8 @@ This section outlines the testing details.
 To run the unit tests, use the following command:
 
 ```
-make test-unit
+go test `go list ./internal/... ./cmd/...`
 ```
-
-#### Acceptance tests
-
-To run the acceptance tests, start the Gateway and the Echo service.
-
-##### Start echo-service
-
-To start the Echo service, use this command:
-```
-make start-echo-service
-```
-
-The `start-echo-service` command has one parameter, **echo-port**. This parameter is the server's HTTP port, and the default port is `9000`.
-
-```
-make start-echo-service echo-port=9001
-```
-
-##### Run the acceptance tests
-
-To run the acceptance tests, use the following command:
-```
-make test-acc
-```
-
-The `test-acc` command has the following parameters:
-- **gateExternalAddr** - The Gateway's external API address. The default external API address is `127.0.0.1:8081`.
-- **gateProxyAddr** - The Gateway's proxy API address. The default proxy API address is `127.0.0.1:8080`.
-
-```
-make test-acc -gateExternalAddr 127.0.0.1:7080 -gateProxyAddr 127.0.0.1:7081
-```
-
-When the script runs, it informs you of a success or any errors.
-
-In this test configuration, the Events API implementation enhances the events with the Gateway data and sends them through the tunnel to the Echo service endpoint.
-To test it, use this command:
-```
-curl -v -X POST "localhost:8081/v1/events" -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"event-type\":\"order.created\",\"event-type-version\":\"v1\",\"event-id\":\"31109198-4d69-4ae0-972d-76117f3748c8\",\"event-time\":\"2012-11-01T22:08:41+00:00\", \"data\":\"my order created\" }"
-```
-
 ### Generate Kubernetes clients for custom resources
 
 1. Create a directory structure for each client, similar to the one in `pkg/apis`. For example, when generating a client for EgressRule in Istio, the directory structure looks like this: `pkg/apis/istio/v1alpha2`.

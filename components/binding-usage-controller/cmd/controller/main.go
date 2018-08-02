@@ -11,6 +11,7 @@ import (
 	serviceCatalogClientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	serviceCatalogInformers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
+	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/usagekind"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/platform/logger"
 	bindingUsageClientset "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
 	bindingUsageInformers "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions"
@@ -18,6 +19,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/informers"
 	k8sClientset "k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -35,6 +37,10 @@ type Config struct {
 	KubeconfigPath               string `envconfig:"optional"`
 	AppliedSBUConfigMapName      string `envconfig:"default=applied-sbu-spec"`
 	AppliedSBUConfigMapNamespace string `envconfig:"default=kyma-system"`
+
+	// PluggableSBU is a feature flag, which enables dynamic configuration, which uses UsageKind resources
+	// todo (pluggable SBU cleanup): remove the FF
+	PluggableSBU bool `envconfig:"default=false"`
 }
 
 func main() {
@@ -64,19 +70,31 @@ func main() {
 	fatalOnError(err)
 	serviceCatalogInformerFactory := serviceCatalogInformers.NewSharedInformerFactory(serviceCatalogCli, informerResyncPeriod)
 
-	// Kubeless informers
-	kubelessCli, err := kubelessClientset.NewForConfig(k8sConfig)
-	fatalOnError(err)
-	kubelessInformerFactory := kubelessInformers.NewSharedInformerFactory(kubelessCli, informerResyncPeriod)
-
 	podPresetModifier := controller.NewPodPresetModifier(k8sCli.SettingsV1alpha1())
 
-	dSupervisor := controller.NewDeploymentSupervisor(k8sInformersFactory.Apps().V1beta2().Deployments(), k8sCli.AppsV1beta2(), log)
-	fnSupervisor := controller.NewKubelessFunctionSupervisor(kubelessInformerFactory.Kubeless().V1beta1().Functions(), kubelessCli.KubelessV1beta1(), log)
-
 	aggregator := controller.NewResourceSupervisorAggregator()
-	aggregator.Register(controller.KindDeployment, dSupervisor)
-	aggregator.Register(controller.KindKubelessFunction, fnSupervisor)
+	var kindController *usagekind.Controller
+	if cfg.PluggableSBU {
+		log.Info("Pluggable SBU enabled")
+		cp := dynamic.NewDynamicClientPool(k8sConfig)
+
+		kindController = usagekind.NewKindController(
+			bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds(),
+			aggregator,
+			cp,
+			log)
+
+	} else {
+		// Kubeless informers
+		kubelessCli, err := kubelessClientset.NewForConfig(k8sConfig)
+		fatalOnError(err)
+		kubelessInformerFactory := kubelessInformers.NewSharedInformerFactory(kubelessCli, informerResyncPeriod)
+		dSupervisor := controller.NewDeploymentSupervisor(k8sInformersFactory.Apps().V1beta2().Deployments(), k8sCli.AppsV1beta2(), log)
+		fnSupervisor := controller.NewKubelessFunctionSupervisor(kubelessInformerFactory.Kubeless().V1beta1().Functions(), kubelessCli.KubelessV1beta1(), log)
+		aggregator.Register(controller.KindDeployment, dSupervisor)
+		aggregator.Register(controller.KindKubelessFunction, fnSupervisor)
+		kubelessInformerFactory.Start(stopCh)
+	}
 
 	labelsFetcher := controller.NewBindingLabelsFetcher(serviceCatalogInformerFactory.Servicecatalog().V1beta1().ServiceInstances().Lister(), serviceCatalogInformerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Lister())
 
@@ -97,12 +115,14 @@ func main() {
 	// TODO consider to extract here the cache sync logic from controller
 	// and use WaitForCacheSync() method defined on factories
 	k8sInformersFactory.Start(stopCh)
-	kubelessInformerFactory.Start(stopCh)
 	bindingUsageInformerFactory.Start(stopCh)
 	serviceCatalogInformerFactory.Start(stopCh)
 
 	go runStatuszHTTPServer(stopCh, fmt.Sprintf(":%d", cfg.Port), log)
 
+	if cfg.PluggableSBU {
+		go kindController.Run(stopCh)
+	}
 	ctr.Run(stopCh)
 }
 

@@ -1,7 +1,6 @@
 ---
 title: Enable the Azure Broker for local deployment
 type: Configuration
-internal: true
 ---
 >**NOTE:** To enable the Azure Broker, you need a [Microsoft Azure](https://azure.microsoft.com/en-us) subscription.
 

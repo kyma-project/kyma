@@ -1,7 +1,6 @@
 ---
 title: Publish a service Docker image and deploy it to Kyma
 type: Getting Started
-internal: true
 ---
 
 ## Overview

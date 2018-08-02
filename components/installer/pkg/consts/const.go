@@ -1,8 +1,17 @@
 package consts
 
 const (
-	INST_NAMESPACE = "default"
-	INST_RESOURCE  = "kyma-installation"
-	INST_FINALIZER = "finalizer.installer.kyma.cx"
-	REL_FINALIZER  = "finalizer.release.kyma.cx"
+	InstNamespace = "default"
+	InstResource  = "kyma-installation"
+	InstFinalizer = "finalizer.installer.kyma.cx"
+	RelFinalizer  = "finalizer.release.kyma.cx"
+
+	ClusterPrerequisitesComponent = "cluster-prerequisites"
+	ClusterEssentialsComponent    = "cluster-essentials"
+	IstioComponent                = "istio"
+	PrometheusComponent           = "prometheus-operator"
+	ProvisionBundlesComponent     = "provision-bundles"
+	DexComponent                  = "dex"
+	CoreComponent                 = "core"
+	RemoteEnvironments            = "remote-environments"
 )

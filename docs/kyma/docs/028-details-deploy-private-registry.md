@@ -1,7 +1,6 @@
 ---
 title: How to deploy a Docker image from a private registry
 type: Details
-internal: true
 ---
 
 ## Overview

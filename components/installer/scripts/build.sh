@@ -22,7 +22,7 @@ else
     echo "Building installer version: ${IMAGE_VERSION}"
 fi
 
-IMAGE_NAME=eu.gcr.io/kyma-project/snapshot/installer:${IMAGE_VERSION}
+IMAGE_NAME=eu.gcr.io/kyma-project/installer:${IMAGE_VERSION}
 
 pushd ${ROOT_DIR}
 

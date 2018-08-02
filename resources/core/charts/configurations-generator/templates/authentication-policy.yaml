@@ -1,0 +1,14 @@
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:    
+  name: {{ template "name" . }}
+  namespace: {{.Release.Namespace}}  
+spec:
+  origins:
+  - jwt:
+      issuer: https://dex.{{ .Values.global.domainName }}
+      jwksUri: http://dex-service.{{.Release.Namespace}}.svc.cluster.local:5556/keys
+  principalBinding: USE_ORIGIN
+  targets:
+  - name: {{ template "name" . }}
+  

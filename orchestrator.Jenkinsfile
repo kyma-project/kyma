@@ -12,7 +12,7 @@ Monorepo root orchestrator: This Jenkinsfile runs the Jenkinsfiles of all subpro
 
 */
 def label = "kyma-${UUID.randomUUID().toString()}"
-appVersion = "0.2." + env.BUILD_NUMBER
+appVersion = "0.3." + env.BUILD_NUMBER
 
 /*
     Projects that are built when changed.

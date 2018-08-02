@@ -115,3 +115,19 @@ To perform a clean-up, remove the Namespace:
 ```bash
 kubectl delete ns $namespace
 ```
+
+## Pluggable SBU
+
+The feature flag **APP_PLUGGABLE_SBU=true** changes Binding Usage Controller logic. The following scenario shows how to test it:
+
+1. Start the application:
+```bash
+APP_APPLIED_SBU_CONFIG_MAP_NAME=binding-usage-controller-process-sbu-spec APP_LOGGER_LEVEL=debug APP_PLUGGABLE_SBU=true APP_KUBECONFIG_PATH=~/.kube/config go run cmd/controller/main.go
+```
+
+2. Register **UsageKind** resources:
+```bash
+kubectl apply -f usage-kind/deployment.yaml
+```
+
+3. Follow the steps under the steps **Use the bindings on a Deployment** or **Use the bindings on a Function**

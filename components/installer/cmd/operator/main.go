@@ -69,8 +69,8 @@ func main() {
 	kymaActionManager := actionmanager.NewKymaActionManager(internalClient, installationLister)
 	conditionManager := conditionmanager.New(internalClient, installationLister)
 
-	installationFinalizerManager := finalizer.NewManager(consts.INST_FINALIZER)
-	releaseFinalizerManager := finalizer.NewManager(consts.REL_FINALIZER)
+	installationFinalizerManager := finalizer.NewManager(consts.InstFinalizer)
+	releaseFinalizerManager := finalizer.NewManager(consts.RelFinalizer)
 
 	kymaCommandExecutor := &toolkit.KymaCommandExecutor{}
 	installationSteps := steps.New(helmClient, kubeClient, serviceCatalogClient, *kymaDir, kymaStatusManager, kymaActionManager, kymaCommandExecutor, kymaPackageClient)

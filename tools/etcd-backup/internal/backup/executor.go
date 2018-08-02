@@ -70,7 +70,7 @@ func (e *Executor) SingleBackup(stopCh <-chan struct{}, blobPrefix string) (*Sin
 	}()
 
 	e.log.Debugf("EtcdBackup CR %q created, waiting for status", etcdBackupCR.Name)
-	if err := e.waitForEctdBackupStatus(etcdBackupCR.Name, stopCh); err != nil {
+	if err := e.waitForEtcdBackupStatus(etcdBackupCR.Name, stopCh); err != nil {
 		return nil, errors.Wrap(err, "while getting EtcdBackup status")
 	}
 
@@ -104,7 +104,7 @@ func (e *Executor) etcdBackup(blobPrefix string) (*etcdTypes.EtcdBackup, error) 
 	}, nil
 }
 
-func (e *Executor) waitForEctdBackupStatus(name string, stopCh <-chan struct{}) error {
+func (e *Executor) waitForEtcdBackupStatus(name string, stopCh <-chan struct{}) error {
 	for {
 		if e.shouldExit(stopCh) {
 			return errors.New("stop channel was called when waiting for EtcdBackup status")

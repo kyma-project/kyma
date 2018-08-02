@@ -1,7 +1,6 @@
 ---
 title: Charts
 type: Details
-internal: true
 ---
 
 Kyma uses Helm charts to deliver single components and extensions, as well as the core components. This document contains information about the chart-related technical concepts, dependency management to use with Helm charts, and chart examples.

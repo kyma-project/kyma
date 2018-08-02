@@ -6,6 +6,7 @@ import (
 
 	actionmanager "github.com/kyma-project/kyma/components/installer/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
+	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 	internalerrors "github.com/kyma-project/kyma/components/installer/pkg/errors"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
@@ -49,68 +50,68 @@ func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientse
 
 //InstallKyma .
 func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData) error {
+
 	downloadKymaErr := steps.DownloadKyma(installationData)
 	if downloadKymaErr != nil {
 		return downloadKymaErr
 	}
 
-	instErr := steps.InstallClusterPrerequisites(installationData)
-	if instErr != nil {
-		return instErr
+	if installationData.ShouldInstallComponent(consts.ClusterPrerequisitesComponent) {
+		if instErr := steps.InstallClusterPrerequisites(installationData); instErr != nil {
+			return instErr
+		}
 	}
 
-	instErr = steps.InstallTiller(installationData)
-	if instErr != nil {
-		return instErr
+	if installationData.ShouldInstallComponent(consts.ClusterEssentialsComponent) {
+		if instErr := steps.InstallClusterEssentials(installationData); instErr != nil {
+			return instErr
+		}
 	}
 
-	instErr = steps.InstallClusterEssentials(installationData)
-	if instErr != nil {
-		return instErr
+	if installationData.ShouldInstallComponent(consts.IstioComponent) {
+		if instErr := steps.InstallIstio(installationData); instErr != nil {
+			return instErr
+		}
+	}
+	if installationData.ShouldInstallComponent(consts.PrometheusComponent) {
+		if instErr := steps.InstallPrometheus(installationData); instErr != nil {
+			return instErr
+		}
 	}
 
-	instErr = steps.InstallIstio(installationData)
-	if instErr != nil {
-		return instErr
+	if installationData.ShouldInstallComponent(consts.ProvisionBundlesComponent) {
+		if bundlesErr := steps.ProvisionBundles(installationData); bundlesErr != nil {
+			return bundlesErr
+		}
 	}
 
-	instErr = steps.InstallPrometheus(installationData)
-	if instErr != nil {
-		return instErr
+	if installationData.ShouldInstallComponent(consts.DexComponent) {
+		if dexErr := steps.InstallDex(installationData); dexErr != nil {
+			return dexErr
+		}
 	}
 
-	bundlesErr := steps.ProvisionBundles(installationData)
-	if bundlesErr != nil {
-		return bundlesErr
+	if installationData.ShouldInstallComponent(consts.CoreComponent) {
+		if instErr := steps.InstallCore(installationData); instErr != nil {
+			return instErr
+		}
+
+		if upgradeErr := steps.UpgradeCore(installationData); upgradeErr != nil {
+			return upgradeErr
+		}
 	}
 
-	dexErr := steps.InstallDex(installationData)
-	if dexErr != nil {
-		return dexErr
+	if installationData.ShouldInstallComponent(consts.RemoteEnvironments) {
+		if instErr := steps.InstallHmcDefaultRemoteEnvironments(installationData); instErr != nil {
+			return instErr
+		}
+
+		if instErr := steps.InstallEcDefaultRemoteEnvironments(installationData); instErr != nil {
+			return instErr
+		}
 	}
 
-	instErr = steps.InstallCore(installationData)
-	if instErr != nil {
-		return instErr
-	}
-
-	upgradeErr := steps.UpgradeCore(installationData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
-
-	instErr = steps.InstallHmcDefaultRemoteEnvironments(installationData)
-	if instErr != nil {
-		return instErr
-	}
-
-	instErr = steps.InstallEcDefaultRemoteEnvironments(installationData)
-	if instErr != nil {
-		return instErr
-	}
-
-	instErr = steps.RemoveKymaSources(installationData)
-	if instErr != nil {
+	if instErr := steps.RemoveKymaSources(installationData); instErr != nil {
 		return instErr
 	}
 
@@ -135,11 +136,6 @@ func (steps *InstallationSteps) UpdateKyma(installationData *config.Installation
 	}
 
 	upgradeErr := steps.UpdateClusterPrerequisites(installationData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
-
-	upgradeErr = steps.UpdateTiller(installationData)
 	if upgradeErr != nil {
 		return upgradeErr
 	}

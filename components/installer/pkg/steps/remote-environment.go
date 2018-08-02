@@ -6,7 +6,13 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
+	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
+)
+
+const (
+	ecRemoteEnvironmentComponent  = "ec-default"
+	hmcRemoteEnvironmentComponent = "hmc-default"
 )
 
 //InstallHmcDefaultRemoteEnvironments function will install Hmc Remote Environments
@@ -15,11 +21,10 @@ func (steps *InstallationSteps) InstallHmcDefaultRemoteEnvironments(installation
 	steps.PrintInstallationStep(stepName)
 
 	steps.statusManager.InProgress(stepName)
-	releaseName := "hmc-default"
-	chartDir := path.Join(steps.chartDir, "remote-environments")
+	chartDir := path.Join(steps.chartDir, consts.RemoteEnvironments)
 	hmcOverrides := steps.getHmcOverrides(installationData, chartDir)
 
-	installErr := steps.installRemoteEnvironment(releaseName, chartDir, hmcOverrides)
+	installErr := steps.installRemoteEnvironment(hmcRemoteEnvironmentComponent, chartDir, hmcOverrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
 		steps.statusManager.Error(stepName)
@@ -38,11 +43,10 @@ func (steps *InstallationSteps) UpdateHmcDefaultRemoteEnvironments(installationD
 
 	steps.statusManager.InProgress(stepName)
 
-	releaseName := "hmc-default"
-	chartDir := path.Join(steps.chartDir, "remote-environments")
+	chartDir := path.Join(steps.chartDir, consts.RemoteEnvironments)
 	hmcOverrides := steps.getHmcOverrides(installationData, chartDir)
 
-	upgradeErr := steps.updateRemoteEnvironment(releaseName, chartDir, hmcOverrides)
+	upgradeErr := steps.updateRemoteEnvironment(hmcRemoteEnvironmentComponent, chartDir, hmcOverrides)
 
 	if steps.errorHandlers.CheckError("Update Error: ", upgradeErr) {
 		steps.statusManager.Error(stepName)
@@ -60,11 +64,10 @@ func (steps *InstallationSteps) InstallEcDefaultRemoteEnvironments(installationD
 	steps.PrintInstallationStep(stepName)
 
 	steps.statusManager.InProgress(stepName)
-	releaseName := "ec-default"
-	chartDir := path.Join(steps.chartDir, "remote-environments")
+	chartDir := path.Join(steps.chartDir, consts.RemoteEnvironments)
 	ecOverrides := steps.getEcOverrides(installationData, chartDir)
 
-	installErr := steps.installRemoteEnvironment(releaseName, chartDir, ecOverrides)
+	installErr := steps.installRemoteEnvironment(ecRemoteEnvironmentComponent, chartDir, ecOverrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
 		steps.statusManager.Error(stepName)
@@ -82,11 +85,10 @@ func (steps *InstallationSteps) UpdateEcDefaultRemoteEnvironments(installationDa
 	steps.PrintInstallationStep(stepName)
 
 	steps.statusManager.InProgress(stepName)
-	releaseName := "ec-default"
-	chartDir := path.Join(steps.chartDir, "remote-environments")
+	chartDir := path.Join(steps.chartDir, consts.RemoteEnvironments)
 	ecOverrides := steps.getEcOverrides(installationData, chartDir)
 
-	upgradeErr := steps.updateRemoteEnvironment(releaseName, chartDir, ecOverrides)
+	upgradeErr := steps.updateRemoteEnvironment(ecRemoteEnvironmentComponent, chartDir, ecOverrides)
 
 	if steps.errorHandlers.CheckError("Update Error: ", upgradeErr) {
 		steps.statusManager.Error(stepName)

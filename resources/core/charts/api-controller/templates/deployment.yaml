@@ -16,6 +16,11 @@ spec:
       serviceAccount: api-controller-account
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
-        name: api-controller        
-        # ports:
-        #   - containerPort: 80
+        name: api-controller
+        env:
+        - name: DEFAULT_ISSUER
+          value: https://dex.{{ .Values.global.domainName }}
+        - name: DEFAULT_JWKS_URI
+          value: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+        - name: GATEWAY_FQDN
+          value: {{ .Values.global.istio.gateway.name }}.{{ .Release.Namespace }}.svc.cluster.local
