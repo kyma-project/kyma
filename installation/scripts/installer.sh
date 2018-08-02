@@ -33,7 +33,7 @@ echo "
 ################################################################################
 "
 
-kubectl apply -f ${CURRENT_DIR}/../../resources/cluster-prerequisites/default-sa-rbac-role.yaml"
+kubectl apply -f ${CURRENT_DIR}/../../resources/cluster-prerequisites/default-sa-rbac-role.yaml
 kubectl apply -f ${CURRENT_DIR}/../../resources/cluster-prerequisites/limit-range.yaml -n "kyma-installer"
 kubectl apply -f ${CURRENT_DIR}/../../resources/cluster-prerequisites/resource-quotas-installer.yaml
 
