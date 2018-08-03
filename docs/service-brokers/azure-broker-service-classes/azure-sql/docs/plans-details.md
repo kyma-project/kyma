@@ -9,18 +9,11 @@ The `azure-sql` service provides the following plan names and descriptions:
 
 | Plan Name | Description |
 |-----------|-------------|
-| `basic` | "Basic Tier, 5 DTUs, 2GB, 7 days point-in-time restore |
-| `standard-s0` | Standard Tier, 10 DTUs, 250GB, 35 days point-in-time restore |
-| `standard-s1` | StandardS1 Tier, 20 DTUs, 250GB, 35 days point-in-time restore |
-| `standard-s2` | StandardS2 Tier, 50 DTUs, 250GB, 35 days point-in-time restore |
-| `standard-s3` | StandardS3 Tier, 100 DTUs, 250GB, 35 days point-in-time restore |
-| `premium-p1` | PremiumP1 Tier, 125 DTUs, 500GB, 35 days point-in-time restore |
-| `premium-p2` | PremiumP2 Tier, 250 DTUs, 500GB, 35 days point-in-time restore |
-| `premium-p4` | PremiumP4 Tier, 500 DTUs, 500GB, 35 days point-in-time restore |
-| `premium-p6` | PremiumP6 Tier, 1000 DTUs, 500GB, 35 days point-in-time restore |
-| `premium-p11` | PremiumP11 Tier, 1750 DTUs, 1024GB, 35 days point-in-time restore |
-| `data-warehouse-100` | DataWarehouse100 Tier, 100 DWUs, 1024GB |
-| `data-warehouse-1200` | DataWarehouse1200 Tier, 1200 DWUs, 1024GB |
+| `Basic Tier` | Basic Tier, 5 DTUs, 2GB, 7 days point-in-time restore |
+| `Standard Tier` | Standard Tier, up to 3000 DTUs, with 250GB storage, 35 days point-in-time restore |
+| `General Purpouse (preview)` | General Purpose Tier, up to 80 vCores, up to 440 GB Memory, up to 1 TB storage, 7 days point-in-time restore |
+| `Business Critical (preview)` | Business Critical Tier, up to 80 vCores, up to 440 GB Memory, up to 1 TB storage, Local SSD, 7 days point-in-time restore. Offers highest resilience to failures using several isolated replicas |
+| `Premium Tier` | Premium Tier, up to 4000 DTUs, with 500GB storage, 35 days point-in-time restore |
 
 ## Provision
 
@@ -34,9 +27,7 @@ These are the provisioning parameters:
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
 | `Location` | `string` | The Azure region in which to provision applicable resources. | Y | None. |
-| `Resource group"` | `string` | The new or existing resource group with which to associate new resources. | Y | Creates a new resource group with a UUID as its name. |
-| `Firewall start IP address` | `string` | Specifies the start of the IP range that this firewall rule allows. | Y | `0.0.0.0` |
-| `Firewall end IP address` | `string` | Specifies the end of the IP range that this firewall rule allows. | Y | `255.255.255.255` |
+| `Resource group` | `string` | The new or existing resource group with which to associate new resources. | Y | Creates a new resource group with a UUID as its name. |
 
 ### Credentials
 

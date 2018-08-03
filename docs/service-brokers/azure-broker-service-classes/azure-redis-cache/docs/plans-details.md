@@ -24,7 +24,6 @@ These are the provisioning parameters:
 |----------------|------|-------------|----------|---------------|
 | `Location` | `string` | The Azure region in which to provision applicable resources. | Y | None. |
 | `Resource group` | `string` | The new or existing resource group with which to associate new resources. | Y | Creates a new resource group with a UUID as its name. |
-| `Server name` | `string` | The name of the Azure Redis Cache to create. | N |  |
 
 ### Credentials
 
