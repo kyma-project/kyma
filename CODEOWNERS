@@ -62,31 +62,22 @@
 /resources/core/charts/remote-environment-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
 # The `service-catalog` subchart
-/resources/core/charts/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @derberg
+/resources/core/charts/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
 # The `binding-usage-controller` subchart
 /resources/core/charts/service-catalog/charts/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
-# The `catalog-service-api` subchart
-/resources/core/charts/service-catalog/charts/catalog-service-api/ @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu
-
-# The `catalog-service-ui` subchart
-/resources/core/charts/service-catalog/charts/catalog-service-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu
-
 # The `catalog-ui` subchart
-/resources/core/charts/service-catalog/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu
+/resources/core/charts/service-catalog/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
 
 # The `instances-ui` subchart
-/resources/core/charts/service-catalog/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu
-
-# The `service-instances-ui` subchart
-/resources/core/charts/service-catalog/charts/service-instances-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu
+/resources/core/charts/service-catalog/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
 
 # The `docs` subchart
-/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu
+/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
 
 # The `ui-api` subchart
-/resources/core/charts/ui-api/ @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
+/resources/core/charts/ui-api/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
 # The `templates` chart
 /resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
@@ -141,7 +132,7 @@
 /components/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
 # UI API Layer Component
-/components/ui-api-layer/ @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
+/components/ui-api-layer/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
 # IDPPreset Component
 /components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
@@ -173,7 +164,7 @@
 /tests/api-controller-acceptance-tests/ @damianpacierpnikatsap @piotrmsc @pssap
 
 # UI API Layer acceptance tests
-/tests/ui-api-layer-acceptance-tests/ @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
+/tests/ui-api-layer-acceptance-tests/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
 # Connector Service Tests
 /tests/connector-service-tests/ @lszymik @akgalwas @janmedrek
@@ -210,4 +201,4 @@
 orchestrator.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh
 
 # Governance file
-governance.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu
+governance.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
