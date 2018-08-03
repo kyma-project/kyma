@@ -14,6 +14,8 @@ spec:
       env:
         - name: TILLER_HOST
           value: "tiller-deploy.kube-system.svc.cluster.local:44134"
-        - name: ENDPOINT
-          value: "http://core-ui-api.{{ .Release.Namespace }}.svc.cluster.local:3000/graphql"
-  restartPolicy: Never 
+        - name: IS_LOCAL_CLUSTER
+          value: "{{ .Values.global.isLocalEnv }}"
+        - name: DOMAIN
+          value: "{{ .Values.global.domainName }}"
+  restartPolicy: Never
