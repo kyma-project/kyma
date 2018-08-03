@@ -13,49 +13,51 @@ import (
 )
 
 func TestConvertService(t *testing.T) {
-	for tn, tc := range map[string]struct {
-		givenSource  internal.Source
-		givenService func() *internal.Service
+	const fixReName = "fix-re-name"
 
-		expectedService func() *osb.Service
+	for tn, tc := range map[string]struct {
+		givenSource  func() internal.Source
+		givenService func() internal.Service
+
+		expectedService func() osb.Service
 	}{
 		"simpleAPIBasedService": {
-			givenSource: *fixSource(),
-			givenService: func() *internal.Service {
+			givenSource: fixSource,
+			givenService: func() internal.Service {
 				svc := fixAPIBasedService()
 				svc.DisplayName = "*Service Name\ną-'#$\tÜ"
 				return svc
 			},
-			expectedService: func() *osb.Service {
-				svc := fixOsbService()
+			expectedService: func() osb.Service {
+				svc := fixOsbService(fixReName)
 				svc.Name = "service-name-c7fe3"
 				svc.Metadata["displayName"] = "*Service Name\ną-'#$\tÜ"
 				return svc
 			},
 		},
 		"emptyDisplayName": {
-			givenSource: *fixSource(),
-			givenService: func() *internal.Service {
+			givenSource: fixSource,
+			givenService: func() internal.Service {
 				svc := fixAPIBasedService()
 				svc.DisplayName = ""
 				return svc
 			},
-			expectedService: func() *osb.Service {
-				svc := fixOsbService()
+			expectedService: func() osb.Service {
+				svc := fixOsbService(fixReName)
 				svc.Name = "c7fe3"
 				svc.Metadata["displayName"] = ""
 				return svc
 			},
 		},
 		"longDisplayName": {
-			givenSource: *fixSource(),
-			givenService: func() *internal.Service {
+			givenSource: fixSource,
+			givenService: func() internal.Service {
 				svc := fixAPIBasedService()
 				svc.DisplayName = "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
 				return svc
 			},
-			expectedService: func() *osb.Service {
-				svc := fixOsbService()
+			expectedService: func() osb.Service {
+				svc := fixOsbService(fixReName)
 				svc.Name = "123456789012345678901234567890123456789012345678901234567-c7fe3"
 				svc.Metadata["displayName"] = "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
 				return svc
@@ -67,11 +69,11 @@ func TestConvertService(t *testing.T) {
 			converter := broker.NewConverter()
 
 			// when
-			result, err := converter.Convert(&tc.givenSource, tc.givenService())
+			result, err := converter.Convert(fixReName, tc.givenSource(), tc.givenService())
 			require.NoError(t, err)
 
 			// then
-			assert.Equal(t, *tc.expectedService(), result)
+			assert.Equal(t, tc.expectedService(), result)
 			assert.True(t, len(tc.expectedService().Name) < 64)
 		})
 	}
@@ -83,12 +85,12 @@ func TestFailConvertServiceWhenAccessLabelNotProvided(t *testing.T) {
 	converter := broker.NewConverter()
 
 	// when
-	_, err := converter.Convert(fixSource(), &internal.Service{
+	_, err := converter.Convert("fix-re-name", fixSource(), internal.Service{
 		APIEntry: &internal.APIEntry{},
 	})
 
 	// then
-	assert.EqualError(t, err, "cannot create binding labels: accessLabel field is required to build bindingLabels")
+	assert.EqualError(t, err, "while creating the metadata object: cannot create binding labels: accessLabel field is required to build bindingLabels")
 
 }
 
@@ -97,26 +99,27 @@ func TestIsBindableFalseForEventsBasedService(t *testing.T) {
 	converter := broker.NewConverter()
 
 	// when
-	a, err := converter.Convert(fixSource(), fixEventsBasedService())
+	a, err := converter.Convert("fix-re-name", fixSource(), fixEventsBasedService())
 
 	// then
 	assert.NoError(t, err)
 	assert.Equal(t, a.Bindable, false)
 }
+
 func TestIsBindableTrueForAPIBasedService(t *testing.T) {
 	// given
 	converter := broker.NewConverter()
 
 	// when
-	a, err := converter.Convert(fixSource(), fixAPIBasedService())
+	a, err := converter.Convert("fix-re-name", fixSource(), fixAPIBasedService())
 
 	// then
 	assert.NoError(t, err)
 	assert.Equal(t, a.Bindable, true)
 }
 
-func fixAPIBasedService() *internal.Service {
-	return &internal.Service{
+func fixAPIBasedService() internal.Service {
+	return internal.Service{
 		ID:                  internal.RemoteServiceID("0023-abcd-2098"),
 		LongDescription:     "long description",
 		DisplayName:         "service name",
@@ -129,24 +132,24 @@ func fixAPIBasedService() *internal.Service {
 	}
 }
 
-func fixEventsBasedService() *internal.Service {
-	return &internal.Service{}
+func fixEventsBasedService() internal.Service {
+	return internal.Service{}
 }
 
-func fixSource() *internal.Source {
-	return &internal.Source{
+func fixSource() internal.Source {
+	return internal.Source{
 		Environment: "prod",
 		Type:        "commerce",
 		Namespace:   "com.hakuna.matata",
 	}
 }
 
-func fixOsbService() *osb.Service {
-	return &osb.Service{
+func fixOsbService(reName string) osb.Service {
+	return osb.Service{
 		ID:          "0023-abcd-2098",
 		Description: "long description",
 		Bindable:    true,
-		Name:        "service-name",
+		Name:        "serviceName",
 		Plans: []osb.Plan{{
 			Name:        "default",
 			Description: "Default plan",
@@ -157,7 +160,7 @@ func fixOsbService() *osb.Service {
 		}},
 		Tags: []string{"tag1", "tag2"},
 		Metadata: map[string]interface{}{
-			"providerDisplayName":        "HakunaMatata",
+			"providerDisplayName":        "HakunaMatata" + " - " + reName,
 			"displayName":                "service-name",
 			"longDescription":            "long description",
 			"remoteEnvironmentServiceId": "0023-abcd-2098",

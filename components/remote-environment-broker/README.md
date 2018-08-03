@@ -18,6 +18,23 @@ You need the following tools to set up the project:
 * The latest version of [Docker](https://www.docker.com/)
 * The latest version of [Dep](https://github.com/golang/dep)
 
+## Details
+
+The Remote Environment Broker converts the RemoteEnvironment Custom Resource to the Open Service Broker API [Service Object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#service-objects).
+All fields are mapped one-to-one except from the **name** and **metadata.providerDisplayName** properties.  
+
+The pattern for the **metadata.providerDisplayName** property is as follows:
+```
+{RemoteEnvironment.Service.ProviderDisplayName} - {RemoteEnvironment.Name}
+```
+It enables you to easily distinguish different remote environments from the same provider. 
+
+The pattern for the **name** property is as follows:
+```
+{NORMALIZED_DISPLAY_NAME}-{FIST_FIVE_CHARARACTERS_OF_SHA_FROM_SERVICE_ID}
+```
+After normalization, the **displayName** contains only lowercase characters, numbers and hyphens.
+
 ## Development
 
 Before each commit, use the `before-commit.sh` script, which tests your changes.
