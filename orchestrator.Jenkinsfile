@@ -148,7 +148,7 @@ stage('collect versions') {
 if (runIntegration) {
     stage('launch Kyma integration') {
         build job: 'kyma/integration',
-            wait: false,
+            wait: true,
             parameters: [
                 string(name:'GIT_REVISION', value: "$commitID"),
                 string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
