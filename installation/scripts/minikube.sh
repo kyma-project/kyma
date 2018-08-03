@@ -5,7 +5,7 @@ set -o errexit
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 MINIKUBE_DOMAIN=""
-MINIKUBE_VERSION=0.28.2
+MINIKUBE_VERSION=0.28.0
 KUBERNETES_VERSION=1.10.0
 VM_DRIVER="hyperkit"
 
@@ -181,7 +181,7 @@ function start() {
     --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList=".*" \
     --extra-config=controller-manager.ClusterSigningCertFile="/var/lib/localkube/certs/ca.crt" \
 	--extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
-    --extra-config=apiserver.Admission.PluginNames="Initializers,NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota,PodPreset,PersistentVolumeLabel" \
+    --extra-config=apiserver.Admission.PluginNames="Initializers,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota,PodPreset,PersistentVolumeLabel" \
     --kubernetes-version=v$KUBERNETES_VERSION \
     --vm-driver=$VM_DRIVER \
     --feature-gates="MountPropagation=false" \
