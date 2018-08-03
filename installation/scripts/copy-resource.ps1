@@ -4,13 +4,13 @@ $INSTALLER_NS = "kyma-installer"
 $INSTALLER_POD = "kyma-installer"
 $REMOTE_DIR = "/kyma"
 
-$cmd = "kubectl.exe -n ${INSTALLER_NS} get pods -o jsonpath='{.items[*].metadata.name}'"
+$cmd = "${CURRENT_DIR}\is-ready.ps1 -ns ${INSTALLER_NS} name ${INSTALLER_POD}"
+Invoke-Expression -Command $cmd
+
+$cmd = "kubectl.exe -n ${INSTALLER_NS} get pods -l name=${INSTALLER_POD} -o jsonpath='{.items[*].metadata.name}'"
 $POD_NAME = (Invoke-Expression -Command $cmd | Out-String).ToString().Trim()
 
 Write-Output "Copying kyma sources from ${LOCAL_DIR} into ${POD_NAME}:${REMOTE_DIR} ..."
-
-$cmd = "${CURRENT_DIR}\is-ready.ps1 -ns ${INSTALLER_NS} name ${INSTALLER_POD}"
-Invoke-Expression -Command $cmd
 
 $cmd = "kubectl.exe exec -n ${INSTALLER_NS} ${POD_NAME} -- /bin/rm -rf ${REMOTE_DIR}"
 Invoke-Expression -Command $cmd
