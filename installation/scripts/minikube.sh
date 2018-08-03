@@ -120,7 +120,7 @@ function checkIfMinikubeIsInitialized() {
 function checkMinikubeVersion() {
     local version=$(minikube version | awk '{print  $3}')
 
-    if [[ "${version}" != *"${MINIKUBE_VERSION}"* ]]; then
+    if [[ "${version}" < *"${MINIKUBE_VERSION}"* ]]; then
         echo "Your minikube is in v${version}. v${MINIKUBE_VERSION} is supported version of minikube. Install supported version!"
         exit -1
     fi
