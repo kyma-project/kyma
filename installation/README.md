@@ -77,7 +77,29 @@ When you fill in all required placeholder values, run the following command to p
 kubectl apply -f installer-config.yaml
 ```
 
-3. Deploy the `Installer` component.
+3. Bind the default RBAC role.
+
+Kyma inallation requires increased permissions granted by the **cluster-admin** role. To bind the role with the default **ServiceAccount**, run the following command: 
+
+```
+kubectl apply -f resources/cluster-prerequisites/default-sa-rbac-role.yaml
+```
+
+4. Deploy `tiller`.
+
+To deploy the `tiller` component on your cluster, run the following command:
+
+```
+kubectl apply -f installation/resources/tiller.yaml
+```
+
+Wait for the `tiller` Pod to be ready. To make sure it is running, execute the following command:
+
+```
+kubectl get pods -n kube-system | grep tiller
+```  
+
+5. Deploy the `Installer` component.
 
 To deploy the `Installer` component on your cluster, run the following command:
 
@@ -85,7 +107,7 @@ To deploy the `Installer` component on your cluster, run the following command:
 kubectl apply -f installation/resources/installer.yaml -n kyma-installer
 ```
 
-4. Trigger the installation.
+6. Trigger the installation.
 
 To trigger the installation of Kyma, you need a Custom Resource file. Copy the `installer-cr.yaml.tpl` file, rename it to `installer-cr.yaml`, and fill in these placeholder values:
 
