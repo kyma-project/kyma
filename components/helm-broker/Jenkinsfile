@@ -43,8 +43,12 @@ podTemplate(label: label) {
                             }
                         }
 
-                        stage("build and test $application") {
-                            execute "./before-commit.sh ci"
+                        cache(maxCacheSize: 256, caches: [
+                            [$class: 'ArbitraryFileCache', excludes: '', includes: '**/*', path: "${pwd()}/${env.APP_FOLDER}/vendor"]
+                        ]) {
+                            stage("build and test $application") {
+                                execute "./before-commit.sh ci"
+                            }
                         }
 
                         if (isMaster) {
