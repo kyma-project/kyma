@@ -7,5 +7,5 @@ metadata:
   finalizers:
     - finalizer.installer.kyma.cx
 spec:
-  version: __VERSION__
-  url: __URL__
+  version: "__VERSION__"
+  url: "__URL__"

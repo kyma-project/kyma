@@ -1,6 +1,44 @@
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 
-Write-Output "Applying configurations ..."
+$CONFIG_TPL_PATH = "${CURRENT_DIR}\..\resources\installer-config.yaml.tpl"
+$CONFIG_OUTPUT_PATH = (New-TemporaryFile).FullName
+
+Copy-Item -Path $CONFIG_TPL_PATH -Destination $CONFIG_OUTPUT_PATH
+
+##########
+
+Write-Output "Generating secret for cluster certificate ..."
+
+$TLS_FILE="${CURRENT_DIR}\..\resources\local-tls-certs.yaml"
+$TLS_CRT = Get-Content -Path "${TLS_FILE}" | Select-String -Pattern 'tls.crt: .*'
+$TLS_CRT = $TLS_CRT.ToString().Replace("tls.crt:", "").Trim()
+$TLS_CRT = [System.Convert]::ToBase64String(
+    [System.Text.Encoding]::UTF8.GetBytes($TLS_CRT))
+
+$TLS_KEY = Get-Content -Path "${TLS_FILE}" | Select-String -Pattern 'tls.key: .*'
+$TLS_KEY = $TLS_KEY.ToString().Replace("tls.key:", "").Trim()
+$TLS_KEY = [System.Convert]::ToBase64String(
+    [System.Text.Encoding]::UTF8.GetBytes($TLS_KEY))
+
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__TLS_CERT__`" -value `"${TLS_CRT}`""
+Invoke-Expression -Command $cmd
+
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__TLS_KEY__`" -value `"${TLS_KEY}`""
+Invoke-Expression -Command $cmd
+
+##########
+
+Write-Output "Generating secret for Remote Environemnts"
+
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_CA__`" -value `"`""
+Invoke-Expression -Command $cmd
+
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_CA_KEY__`" -value `"`""
+Invoke-Expression -Command $cmd
+
+##########
+
+Write-Output "Generating config map for installation ..."
 
 $cmd = "minikube.exe ip"
 $MINIKUBE_IP = (Invoke-Expression -Command $cmd | Out-String).ToString().Trim()
@@ -9,14 +47,49 @@ $MINIKUBE_CA_CRT = Get-Content -Path "${HOME}\.minikube\ca.crt"
 $MINIKUBE_CA = [System.Convert]::ToBase64String(
     [System.Text.Encoding]::UTF8.GetBytes($MINIKUBE_CA_CRT))
 
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__DOMAIN__`" -value `"kyma.local`""
+Invoke-Expression -Command $cmd
+
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__EXTERNAL_IP_ADDRESS__`" -value `"`""
+Invoke-Expression -Command $cmd
+
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_IP__`" -value `"`""
+Invoke-Expression -Command $cmd
+
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__K8S_APISERVER_URL__`" -value `"${MINIKUBE_IP}`""
+Invoke-Expression -Command $cmd
+
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__K8S_APISERVER_CA__`" -value `"${MINIKUBE_CA}`""
+Invoke-Expression -Command $cmd
+
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ADMIN_GROUP__`" -value `"`""
+Invoke-Expression -Command $cmd
+
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ENABLE_ETCD_BACKUP_OPERATOR__`" -value `"false`""
+Invoke-Expression -Command $cmd
+
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ETCD_BACKUP_ABS_CONTAINER_NAME__`" -value `"`""
+Invoke-Expression -Command $cmd
+
+##########
+
+Write-Output "Applying configuration"
+
+$cmd = "kubectl.exe create ns kyma-installer"
+Invoke-Expression -Command $cmd
+
+$cmd = "kubectl apply -f ${CONFIG_OUTPUT_PATH}"
+Invoke-Expression -Command $cmd
+
+##########
+
+Write-Output "Generating secret for UI Test ..."
+
 $UI_TEST_USER = [System.Convert]::ToBase64String(
     [System.Text.Encoding]::UTF8.GetBytes("admin@kyma.cx"))
 $UI_TEST_PASSWORD = [System.Convert]::ToBase64String(
     [System.Text.Encoding]::UTF8.GetBytes("nimda123"))
 
-##########
-
-Write-Output "Generating secret for UI Test ..."
 $UI_TEST_SECRET_TPL_PATH = "${CURRENT_DIR}\..\resources\ui-test-secret.yaml.tpl"
 $UI_TEST_SECRET_PATH = (New-TemporaryFile).FullName
 
@@ -63,44 +136,3 @@ if (Test-Path env.AZURE_BROKER_SUBSCRIPTION_ID) {
     $cmd = "kubectl apply -f ${AB_SECRET_PATH}"
     Invoke-Expression -Command $cmd
 }
-
-##########
-
-Write-Output "Generating secret for cluster certificate ..."
-
-$TLS_FILE="${CURRENT_DIR}\..\resources\local-tls-certs.yaml"
-$TLS_CRT = Get-Content -Path "${TLS_FILE}" | Select-String -Pattern 'tls.crt: .*'
-$TLS_CRT = $TLS_CRT.ToString().Replace("tls.crt:", "").Trim()
-$TLS_CRT = [System.Convert]::ToBase64String(
-    [System.Text.Encoding]::UTF8.GetBytes($TLS_CRT))
-
-$TLS_KEY = Get-Content -Path "${TLS_FILE}" | Select-String -Pattern 'tls.key: .*'
-$TLS_KEY = $TLS_KEY.ToString().Replace("tls.key:", "").Trim()
-$TLS_KEY = [System.Convert]::ToBase64String(
-    [System.Text.Encoding]::UTF8.GetBytes($TLS_KEY))
-
-$CLUSTER_CERT_TPL_PATH = "${CURRENT_DIR}\..\resources\cluster-certificate-secret.yaml.tpl"
-$CLUSTER_CERT_PATH = (New-TemporaryFile).FullName
-
-Copy-Item -Path $CLUSTER_CERT_TPL_PATH -Destination $CLUSTER_CERT_PATH
-
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CLUSTER_CERT_PATH} -placeholder `"__TLS_CERT__`" -value `"${TLS_CRT}`""
-Invoke-Expression -Command $cmd
-
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CLUSTER_CERT_PATH} -placeholder `"__TLS_KEY__`" -value `"${TLS_KEY}`""
-Invoke-Expression -Command $cmd
-
-$cmd = "kubectl apply -f ${CLUSTER_CERT_PATH}"
-Invoke-Expression -Command $cmd
-
-##########
-
-Write-Output "Generating config map for installation ..."
-
-$CONFIG_PATH = (New-TemporaryFile).FullName
-
-$cmd = "${SCRIPTS_DIR}\create-config-map.ps1 -output ${CONFIG_PATH} -ip_address `"`" -domain `"kyma.local`" -remote_env_ip `"`" -k8s_apiserver_url `"${MINIKUBE_IP}`" -k8s_apiserver_ca `"${MINIKUBE_CA}`" -admin_group `"`" -enable_etcd_backup_operator `"false`" -etcd_backup_abs_container_name `"`" "
-Invoke-Expression -Command $cmd
-
-$cmd = "kubectl apply -f ${CONFIG_PATH}"
-Invoke-Expression -Command $cmd

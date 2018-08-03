@@ -1,7 +1,6 @@
 ---
 title: Develop a service locally without using Docker
 type: Getting Started
-internal: true
 ---
 
 ## Overview

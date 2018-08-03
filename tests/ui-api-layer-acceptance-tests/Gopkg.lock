@@ -118,6 +118,17 @@
   version = "v0.1.20"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/kyma-project/kyma"
+  packages = [
+    "components/idppreset/pkg/apis/ui/v1alpha1",
+    "components/idppreset/pkg/client/clientset/versioned",
+    "components/idppreset/pkg/client/clientset/versioned/scheme",
+    "components/idppreset/pkg/client/clientset/versioned/typed/ui/v1alpha1"
+  ]
+  revision = "25fae354c9c7196da5b192f61595fc4cb2ea9844"
+
+[[projects]]
   name = "github.com/machinebox/graphql"
   packages = ["."]
   revision = "05b17f3157491bbfa5d6fc2006443a272d960d15"
@@ -402,6 +413,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "07174ce5e88f75c20953f4352c17345ffec37b92f1db197c23bcfb199189e089"
+  inputs-digest = "7bb042f75f8cb819a41da53db8ce28150c2f32f603f7e0b317c8dc95fcf1b7b3"
   solver-name = "gps-cdcl"
   solver-version = 1

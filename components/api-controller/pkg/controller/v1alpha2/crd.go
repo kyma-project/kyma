@@ -36,7 +36,7 @@ func Crd() *k8sApiExtensions.CustomResourceDefinition {
 				OpenAPIV3Schema: &k8sApiExtensions.JSONSchemaProps{
 					Properties: map[string]k8sApiExtensions.JSONSchemaProps{
 						"spec": {
-							Required: []string{"service", "hostname", "authentication"},
+							Required: []string{"service", "hostname"},
 							Properties: map[string]k8sApiExtensions.JSONSchemaProps{
 								"service": {
 									Type:     "object",

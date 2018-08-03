@@ -29,7 +29,8 @@ spec:
               value: "{{ .Chart.Name }}-process-sbu-spec"
             - name: APP_APPLIED_SBU_CONFIG_MAP_NAMESPACE
               value: "{{ .Release.Namespace }}"
-
+            - name: APP_PLUGGABLE_SBU
+              value: "false"
           ports:
             - containerPort: {{ .Values.service.internalPort }}
           livenessProbe:

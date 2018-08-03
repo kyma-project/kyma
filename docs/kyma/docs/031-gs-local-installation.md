@@ -1,7 +1,6 @@
 ---
 title: Local Kyma installation
 type: Getting Started
-internal: true
 ---
 
 ## Overview
@@ -11,11 +10,12 @@ The document provides the prerequisites, the instructions on how to install Kyma
 
 ## Prerequisites
 
-To run Kyma locally, download these tools:
+To run Kyma locally, clone this Git repository to your local machine and download these tools:
 
 - [Minikube](https://github.com/kubernetes/minikube) 0.28.2
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.10.0
 - [Helm](https://github.com/kubernetes/helm) 2.8.2
+- [jq](https://stedolan.github.io/jq/)
 - [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - Mac only
 - [Virtualbox](https://www.virtualbox.org/) - Linux or Windows
 - Hyper-V - Windows
@@ -106,7 +106,7 @@ The command retrieves all Pods from all Namespaces, the status of the Pods, and 
 
 Access your local Kyma instance through [this](https://console.kyma.local/) link.
 
-* Click **Login with Email** and sign in with the `admin@kyma.cx` email address and the generic password from the [Dex ConfigMap](../../../resources/dex/templates/dex-config-map.yaml) file.
+* Click **Login with Email** and sign in with the `admin@kyma.cx` email address and the generic password from the [Dex ConfigMap](../../../resources/dex/templates/dex-config-map.yaml#L51) file.
 
 * Click the **Environments** section and select an Environment from the drop-down menu to explore Kyma further.
 

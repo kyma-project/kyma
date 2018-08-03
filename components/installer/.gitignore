@@ -22,3 +22,7 @@
 
 # Binary created by ./before-commit.sh script
 /installer
+/main
+
+# "Local" kyma sources
+/kyma

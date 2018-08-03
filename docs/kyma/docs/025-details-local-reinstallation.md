@@ -1,7 +1,6 @@
 ---
 title: Reinstall Kyma
 type: Details
-internal: true
 ---
 The custom scripts allow you to remove Kyma from a Minikube cluster, and reinstall Kyma without removing the cluster.
 

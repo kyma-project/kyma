@@ -3,4 +3,4 @@
 test:
   image:
     name: test-logging-monitoring
-    tag: 0.2.37
+    tag: 0.2.51

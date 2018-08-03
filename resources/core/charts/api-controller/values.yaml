@@ -1,9 +1,9 @@
 image:
   name: "api-controller"
-  tag: "4.1.0"
+  tag: "0.3.76"
   
 tests:
   enabled: true
   image:
     name: "api-controller-acceptance-tests"
-    tag: "4.1.0"
+    tag: "4.2.0"

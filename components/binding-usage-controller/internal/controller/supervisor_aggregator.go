@@ -1,6 +1,9 @@
 package controller
 
-import "fmt"
+import (
+	"strings"
+	"sync"
+)
 
 //go:generate mockery -name=KubernetesResourceSupervisor -output=automock -outpkg=automock -case=underscore
 
@@ -16,6 +19,11 @@ type KubernetesResourceSupervisor interface {
 // Kind represents Kubernetes Kind name
 type Kind string
 
+// TODO (pluggable SBU cleanup): consider removing normalized method
+func (k Kind) normalized() string {
+	return strings.ToLower(string(k))
+}
+
 const (
 	// KindDeployment represents Deployment resource
 	KindDeployment Kind = "Deployment"
@@ -25,23 +33,30 @@ const (
 
 // ResourceSupervisorAggregator aggregates all defined resources supervisors
 type ResourceSupervisorAggregator struct {
-	registered map[Kind]KubernetesResourceSupervisor
+	registered map[string]KubernetesResourceSupervisor
+	mu         sync.RWMutex
 }
 
 // NewResourceSupervisorAggregator returns new instance of ResourceSupervisorAggregator
 func NewResourceSupervisorAggregator() *ResourceSupervisorAggregator {
 	return &ResourceSupervisorAggregator{
-		registered: make(map[Kind]KubernetesResourceSupervisor),
+		registered: make(map[string]KubernetesResourceSupervisor),
 	}
 }
 
 // Register adds new resource supervisor
 func (f *ResourceSupervisorAggregator) Register(k Kind, supervisor KubernetesResourceSupervisor) error {
-	if _, exists := f.registered[k]; exists {
-		return fmt.Errorf("supervisor for kind %q is already registered", k)
-	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.registered[k.normalized()] = supervisor
+	return nil
+}
 
-	f.registered[k] = supervisor
+// Unregister removes resource supervisor
+func (f *ResourceSupervisorAggregator) Unregister(k Kind) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	delete(f.registered, k.normalized())
 	return nil
 }
 
@@ -58,7 +73,9 @@ func (f *ResourceSupervisorAggregator) HasSynced() bool {
 
 // Get returns supervisor for given kind
 func (f *ResourceSupervisorAggregator) Get(k Kind) (KubernetesResourceSupervisor, error) {
-	concreteSupervisor, exists := f.registered[k]
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+	concreteSupervisor, exists := f.registered[k.normalized()]
 	if !exists {
 		return nil, NewNotFoundError("supervisor for kind %s was not found", k)
 	}

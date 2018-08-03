@@ -2,9 +2,11 @@
 
 NAMESPACE=kyma-system
 
-PROVISIONING_DIR="$(dirname $0)/../provisioning"
+readonly CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+readonly PROVISIONING_DIR="${CURRENT_DIR}/../provisioning"
+readonly BUNDLES_DIR="${CURRENT_DIR}/../bundles"
 
-bash ${PROVISIONING_DIR}/provision-bundles.sh bundles
+bash ${PROVISIONING_DIR}/provision-bundles.sh ${BUNDLES_DIR}
 
 HELM_BROKER_POD_NAME=$(kubectl get po -n ${NAMESPACE} -l app=core-helm-broker -o jsonpath="{.items[0].metadata.name}")
 

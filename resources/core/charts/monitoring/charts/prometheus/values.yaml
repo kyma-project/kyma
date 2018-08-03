@@ -48,30 +48,20 @@ image:
 ##
 labels: {}
 
-ingress:
-  ## If true, Prometheus Ingress will be created
+virtualservice:
+  ## If true, Prometheus VirtualService will be created
   ##
   enabled: false
 
-  ## Annotations for Prometheus Ingress
+  ## Annotations for Prometheus VirtualService
   ##
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
 
-  ## Labels to be added to the Ingress
+  ## Labels to be added to the VirtualService
   ##
   labels: {}
 
   fqdn: ""
-
-  ## TLS configuration for Prometheus Ingress
-  ## Secret must be manually created in the namespace
-  ##
-  tls: []
-    # - secretName: prometheus-k8s-tls
-    #   hosts:
-    #     - prometheus.example.com
 
 ## Node labels for Prometheus pod assignment
 ## Ref: https://kubernetes.io/docs/user-guide/node-selection/

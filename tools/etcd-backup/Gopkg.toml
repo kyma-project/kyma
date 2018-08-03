@@ -1,0 +1,32 @@
+required = [
+  "github.com/golang/lint/golint",
+  "golang.org/x/tools/cmd/goimports",
+]
+
+
+[[constraint]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.10.1"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.10.1"
+
+[[constraint]]
+  name = "github.com/coreos/etcd-operator"
+  version = "v0.9.2"
+
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.10.1"
+
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.10.1"
+
+
+[prune]
+  go-tests = true
+  unused-packages = true
+  non-go = true

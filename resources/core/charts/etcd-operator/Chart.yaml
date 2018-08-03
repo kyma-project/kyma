@@ -1,0 +1,4 @@
+name: etcd-operator
+description: Etcd-operator and etcd-backup-operator deployment chart.
+appVersion: 0.9.2
+version: 0.0.1

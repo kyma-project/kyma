@@ -37,6 +37,6 @@ podTemplate(label: label) {
 
 def validateLinks(command) {
     workDir = pwd()
-    whiteList = "github.com,localhost,alert.victorops.com,hooks.slack.com,named-lynx-etcd,gateway.CLUSTER,connector-service.CLUSTER,svc.cluster.local,10.0.0.54,10.0.0.55,192.168.64.44,minio,dex-web,dex-service,http-db-service,custom.bundles-repository,grafana,testjs.default,abc.com,sampleapis.com,regularsampleapis.com,httpbin.org,console.kyma.local,kyma.cx,ec.com,github.io,dummy.url,kyma.local,jaegertracing.io"
+    whiteList = "orders.com,github.com,localhost,alert.victorops.com,hooks.slack.com,named-lynx-etcd,gateway.CLUSTER,connector-service.CLUSTER,svc.cluster.local,10.0.0.54,10.0.0.55,192.168.64.44,minio,dex-web,dex-service,http-db-service,custom.bundles-repository,grafana,testjs.default,abc.com,sampleapis.com,regularsampleapis.com,httpbin.org,console.kyma.local,kyma.cx,ec.com,github.io,dummy.url,kyma.local,jaegertracing.io,semver.org,example.com"
     sh "docker run --rm -v $workDir:/mnt:ro dkhamsing/awesome_bot --allow-dupe --allow-redirect --skip-save-results --allow-ssl --white-list $whiteList `$command`"
 }

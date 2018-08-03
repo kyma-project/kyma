@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
+	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 )
 
@@ -15,15 +16,14 @@ func (steps *InstallationSteps) InstallIstio(installationData *config.Installati
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
-	releaseName := "istio"
-	chartDir := path.Join(steps.chartDir, releaseName, "istio")
+	chartDir := path.Join(steps.chartDir, consts.IstioComponent, "istio")
 	overrides := steps.getIstioOverrides(installationData, chartDir)
 
 	//helm install
 	installResp, installErr := steps.helmClient.InstallReleaseWithoutWait(
 		chartDir,
 		"istio-system",
-		releaseName,
+		consts.IstioComponent,
 		overrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
@@ -43,13 +43,12 @@ func (steps *InstallationSteps) UpdateIstio(installationData *config.Installatio
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
-	releaseName := "istio"
-	chartDir := path.Join(steps.chartDir, releaseName, "istio")
+	chartDir := path.Join(steps.chartDir, consts.IstioComponent, "istio")
 	overrides := steps.getIstioOverrides(installationData, chartDir)
 
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
-		releaseName,
+		consts.IstioComponent,
 		overrides)
 
 	if steps.errorHandlers.CheckError("Upgrade Error: ", upgradeErr) {

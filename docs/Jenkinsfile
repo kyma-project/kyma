@@ -56,92 +56,109 @@ podTemplate(label: label) {
 
                         stage("docs build image") {
                             dir("$docs_image_suffix/$kyma") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $kyma-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$kyma-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$service_catalog") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $service_catalog-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$service_catalog-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$service_brokers") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $service_brokers-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$service_brokers-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$application_connector") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $application_connector-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$application_connector-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$event_bus") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $event_bus-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$event_bus-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$service_mesh") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $service_mesh-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$service_mesh-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$serverless") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $serverless-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$serverless-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$monitoring") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $monitoring-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$monitoring-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$tracing") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $tracing-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$tracing-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$azure_classes_docs_dir/$azure_mysql") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $azure_mysql-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$azure_mysql-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$azure_classes_docs_dir/$azure_sql") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $azure_sql-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$azure_sql-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$azure_classes_docs_dir/$azure_redis_cache") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $azure_redis_cache-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$azure_redis_cache-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$api_gateway") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $api_gateway-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$api_gateway-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$authorization_and_authentication") {
-                                sh "curl $docs_baseimage | docker build -f - . -t $authorization_and_authentication-$docs_image_suffix"
+                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:latest"
                             }
 
                         }
 
                         stage("docs push image") {
-                            sh "docker tag $kyma-$docs_image_suffix ${dockerPushRoot}$kyma-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$kyma-$docs_image_suffix:latest ${dockerPushRoot}$kyma-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$kyma-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $service_catalog-$docs_image_suffix ${dockerPushRoot}$service_catalog-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$service_catalog-$docs_image_suffix:latest ${dockerPushRoot}$service_catalog-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$service_catalog-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $service_brokers-$docs_image_suffix ${dockerPushRoot}$service_brokers-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$service_brokers-$docs_image_suffix:latest ${dockerPushRoot}$service_brokers-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$service_brokers-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $application_connector-$docs_image_suffix ${dockerPushRoot}$application_connector-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$application_connector-$docs_image_suffix:latest ${dockerPushRoot}$application_connector-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$application_connector-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $event_bus-$docs_image_suffix ${dockerPushRoot}$event_bus-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$event_bus-$docs_image_suffix:latest ${dockerPushRoot}$event_bus-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$event_bus-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $service_mesh-$docs_image_suffix ${dockerPushRoot}$service_mesh-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$service_mesh-$docs_image_suffix:latest ${dockerPushRoot}$service_mesh-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$service_mesh-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $serverless-$docs_image_suffix ${dockerPushRoot}$serverless-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$serverless-$docs_image_suffix:latest ${dockerPushRoot}$serverless-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$serverless-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $monitoring-$docs_image_suffix ${dockerPushRoot}$monitoring-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$monitoring-$docs_image_suffix:latest ${dockerPushRoot}$monitoring-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$monitoring-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $tracing-$docs_image_suffix ${dockerPushRoot}$tracing-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$tracing-$docs_image_suffix:latest ${dockerPushRoot}$tracing-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$tracing-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $azure_mysql-$docs_image_suffix ${dockerPushRoot}$azure_mysql-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$azure_mysql-$docs_image_suffix:latest ${dockerPushRoot}$azure_mysql-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$azure_mysql-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $azure_sql-$docs_image_suffix ${dockerPushRoot}$azure_sql-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$azure_sql-$docs_image_suffix:latest ${dockerPushRoot}$azure_sql-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$azure_sql-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $azure_redis_cache-$docs_image_suffix ${dockerPushRoot}$azure_redis_cache-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$azure_redis_cache-$docs_image_suffix:latest ${dockerPushRoot}$azure_redis_cache-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$azure_redis_cache-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $api_gateway-$docs_image_suffix ${dockerPushRoot}$api_gateway-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$api_gateway-$docs_image_suffix:latest ${dockerPushRoot}$api_gateway-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$api_gateway-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag $authorization_and_authentication-$docs_image_suffix ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:latest ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:$dockerImageTag"
+
+                            if (isMaster) {
+                                sh "docker push ${dockerPushRoot}$kyma-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$service_catalog-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$service_brokers-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$application_connector-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$event_bus-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$service_mesh-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$serverless-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$monitoring-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$tracing-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$azure_mysql-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$azure_sql-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$azure_redis_cache-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$api_gateway-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:latest"
+                            }
                         }
                     }
                 }

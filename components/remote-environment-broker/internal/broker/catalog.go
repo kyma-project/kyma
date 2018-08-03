@@ -17,7 +17,7 @@ import (
 
 //go:generate mockery -name=converter -output=automock -outpkg=automock -case=underscore
 type converter interface {
-	Convert(source *internal.Source, service *internal.Service) (osb.Service, error)
+	Convert(name internal.RemoteEnvironmentName, source internal.Source, svc internal.Service) (osb.Service, error)
 }
 
 type catalogService struct {
@@ -35,9 +35,8 @@ func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*
 	resp := osb.CatalogResponse{}
 	resp.Services = make([]osb.Service, 0)
 	for _, re := range reList {
-
-		for _, service := range re.Services {
-			s, err := svc.conv.Convert(&re.Source, &service)
+		for _, reSvc := range re.Services {
+			s, err := svc.conv.Convert(re.Name, re.Source, reSvc)
 			if err != nil {
 				return nil, errors.Wrap(err, "while converting bundle to service")
 			}
@@ -48,8 +47,6 @@ func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*
 	return &resp, nil
 }
 
-type reToServiceConverter struct{}
-
 const (
 	defaultPlanName        = "default"
 	defaultDisplayPlanName = "Default"
@@ -58,22 +55,33 @@ const (
 
 var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
 
-func (f *reToServiceConverter) Convert(source *internal.Source, service *internal.Service) (osb.Service, error) {
-	bindable := true
+type reToServiceConverter struct{}
 
-	plan := osb.Plan{
-		ID:          fmt.Sprintf("%s-plan", service.ID),
-		Name:        defaultPlanName,
-		Description: defaultPlanDescription,
-		Metadata: map[string]interface{}{
-			"displayName": defaultDisplayPlanName,
-		},
+func (c *reToServiceConverter) Convert(name internal.RemoteEnvironmentName, source internal.Source, svc internal.Service) (osb.Service, error) {
+	metadata, err := c.osbMetadata(name, source, svc)
+	if err != nil {
+		return osb.Service{}, errors.Wrap(err, "while creating the metadata object")
 	}
+
+	osbService := osb.Service{
+		Name:        c.createOsbServiceName(svc.DisplayName, svc.ID),
+		ID:          string(svc.ID),
+		Description: svc.LongDescription,
+		Bindable:    c.isSvcBindable(svc),
+		Metadata:    metadata,
+		Plans:       c.osbPlans(svc.ID),
+		Tags:        svc.Tags,
+	}
+
+	return osbService, nil
+}
+
+func (c *reToServiceConverter) osbMetadata(name internal.RemoteEnvironmentName, source internal.Source, svc internal.Service) (map[string]interface{}, error) {
 	metadata := map[string]interface{}{
-		"displayName":                service.DisplayName,
-		"providerDisplayName":        service.ProviderDisplayName,
-		"longDescription":            service.LongDescription,
-		"remoteEnvironmentServiceId": string(service.ID),
+		"displayName":                svc.DisplayName,
+		"providerDisplayName":        c.osbProviderDisplayName(name, svc),
+		"longDescription":            svc.LongDescription,
+		"remoteEnvironmentServiceId": string(svc.ID),
 		"source": map[string]interface{}{
 			"environment": source.Environment,
 			"type":        source.Type,
@@ -81,34 +89,43 @@ func (f *reToServiceConverter) Convert(source *internal.Source, service *interna
 		},
 	}
 
-	//TODO(entry-simplification): this is an accepted simplification until
+	// TODO(entry-simplification): this is an accepted simplification until
 	// explicit support of many APIEntry and EventEntry
-	if service.APIEntry != nil {
+	if svc.APIEntry != nil {
 		// future: comma separated labels, must be supported on Service API
-		bindingLabels, err := f.buildBindingLabels(service.APIEntry.AccessLabel)
+		bindingLabels, err := c.buildBindingLabels(svc.APIEntry.AccessLabel)
 		if err != nil {
-			return osb.Service{}, errors.Wrap(err, "cannot create binding labels")
+			return nil, errors.Wrap(err, "cannot create binding labels")
 		}
 		metadata["bindingLabels"] = bindingLabels
-	} else {
-		// service provides only events so it is not bindable
-		bindable = false
 	}
 
-	osbService := osb.Service{
-		ID: string(service.ID),
-		// Name is converted to clusterServiceClassExternalName, so it need to be normalized.
-		// MUST only contain lowercase characters, numbers and hyphens (no spaces).
-		// MUST be unique across all service objects returned in this response. MUST be a non-empty string.
-		Name:        normalizeDisplayName(service.DisplayName, string(service.ID)),
-		Description: service.LongDescription,
-		Bindable:    bindable,
-		Metadata:    metadata,
-		Plans:       []osb.Plan{plan},
-		Tags:        service.Tags,
+	return metadata, nil
+}
+
+// osbProviderDisplayName returns the ProviderDisplayName in a such way that we are able to easily distinguish the remote environment from the same provider
+// e.g. instead of having always `3rd Party Provider`, we will have `3rd Party Provider - stage`, `3rd Party Provider - prod-us`
+func (*reToServiceConverter) osbProviderDisplayName(name internal.RemoteEnvironmentName, svc internal.Service) string {
+	return fmt.Sprintf("%s - %s", svc.ProviderDisplayName, name)
+}
+
+// isSvcBindable checks if service is bindable. If APIEntry is not set then service provides only events,
+// so it is not bindable and false is returned
+func (*reToServiceConverter) isSvcBindable(svc internal.Service) bool {
+	return svc.APIEntry != nil
+}
+
+func (*reToServiceConverter) osbPlans(svcID internal.RemoteServiceID) []osb.Plan {
+	plan := osb.Plan{
+		ID:          fmt.Sprintf("%s-plan", svcID),
+		Name:        defaultPlanName,
+		Description: defaultPlanDescription,
+		Metadata: map[string]interface{}{
+			"displayName": defaultDisplayPlanName,
+		},
 	}
 
-	return osbService, nil
+	return []osb.Plan{plan}
 }
 
 func (*reToServiceConverter) buildBindingLabels(accLabel string) (map[string]string, error) {
@@ -123,7 +140,13 @@ func (*reToServiceConverter) buildBindingLabels(accLabel string) (map[string]str
 	return bindingLabels, nil
 }
 
-func normalizeDisplayName(name, id string) string {
+// createOsbServiceName creates the OSB Service Name for given RemoteEnvironment Service.
+// The OSB Service Name is used in the Service Catalog as the clusterServiceClassExternalName, so it need to be normalized.
+//
+// Normalization rules:
+// - MUST only contain lowercase characters, numbers and hyphens (no spaces).
+// - MUST be unique across all service objects returned in this response. MUST be a non-empty string.
+func (*reToServiceConverter) createOsbServiceName(name string, id internal.RemoteServiceID) string {
 	// generate 5 characters suffix from the id
 	sha := sha1.New()
 	sha.Write([]byte(id))

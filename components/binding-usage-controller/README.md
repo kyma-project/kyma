@@ -32,6 +32,7 @@ Use the following environment variables to configure the application:
 | **APP_PORT** | No | `3000` | The port on which the HTTP server listens. |
 | **APP_LOGGER_LEVEL** | No | `info` | Show detailed logs in the application. |
 | **APP_KUBECONFIG_PATH** | No |  | The path to the `kubeconfig` file that you need to run an application outside of the cluster. |
+| **APP_PLUGGABLE_SBU** | No | false | The feature flag that enables pluggable binding usage by **UsageKind** resources. 
 
 ## Development
 

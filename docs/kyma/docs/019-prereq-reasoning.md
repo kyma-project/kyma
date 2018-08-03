@@ -1,7 +1,6 @@
 ---
 title: Prerequisites reasoning
 type: Details
-internal: true
 ---
 
 ## Hyperkit Driver

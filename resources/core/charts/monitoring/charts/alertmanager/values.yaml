@@ -80,30 +80,20 @@ image:
 ##
 labels: {}
 
-ingress:
-  ## If true, Alertmanager Ingress will be created
+virtualservice:
+  ## If true, Alertmanager VirtualService will be created
   ##
   enabled: false
 
-  ## Annotations for Alertmanager Ingress
+  ## Annotations for Alertmanager VirtualService
   ##
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
 
-  ## Labels to be added to the Ingress
+  ## Labels to be added to the VirtualService
   ##
   labels: {}
 
   fqdn: ""
-
-  ## TLS configuration for Alertmanager Ingress
-  ## Secret must be manually created in the namespace
-  ##
-  tls: []
-    # - secretName: alertmanager-general-tls
-    #   hosts:
-    #     - alertmanager.example.com
 
 ## Node labels for Alertmanager pod assignment
 ## Ref: https://kubernetes.io/docs/user-guide/node-selection/

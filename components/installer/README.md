@@ -8,6 +8,7 @@ The project is based on the Kubernetes operator pattern. It tracks changes of th
 - Minikube 0.26.1
 - kubectl 1.9.0
 - Docker
+- jq
 
 ## Development
 
@@ -115,3 +116,16 @@ To run the installer with the Azure Broker enabled, specify the Azure credential
 
 You can define cluster-specific overrides for each root chart. In the cluster deployment scenario, the installer reads the `cluster.yaml` file in each root chart and appends its content to the overrides applied during the 
 Helm installation.
+
+## Install selected components only
+
+By default, this tool installs a predefined component package. If necessary, you can specify which components to install by customizing the component list located in the [installation-config.yaml.tpl](../../installation/resources/installation-config.yaml.tpl) file. Available components:
+
+- cluster-prerequisites
+- cluster-essentials
+- istio
+- prometheus-operator
+- provision-bundles
+- dex
+- core
+- remote-environments

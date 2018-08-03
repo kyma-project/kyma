@@ -1,9 +1,6 @@
 # Application Connector
 
-## Overview
-
-This is the repository for the Application Connector. It contains the following services:
-- Metadata
+This is the repository for the Application Connector. See [this](../../docs/application-connector/docs/) directory for more documentation for this component.
 
 ## Prerequisites
 
@@ -14,33 +11,34 @@ The Application Connector requires Go 1.8 or higher.
 To install the Application Connector components, follow these steps:
 
 1. `git clone git@github.com/kyma-project/kyma/components/application-connector`
-1. `cd application-connector`
-1. `make build`
+2. `cd application-connector`
+3. `CGO_ENABLED=0 go build ./cmd/metadata`
 
 ## Usage
 
 This section explains how to use the Application Connector.
 
-### Start the Metadata
-To start the Metadata, run this command:
+### Start the Metadata service
+
+To start the Metadata Service, run this command:
 
 ```
 ./metadata
 ```
 
-The Metadata has the following parameters:
+The Metadata Service has the following parameters:
 - **proxyPort** - This port acts as a proxy for the calls from services and lambdas to an external solution. The default port is `8080`.
 - **externalAPIPort** - This port exposes the Metadata API to an external solution. The default port is `8081`.
-- **eventsTargetURL** - A URL to which you proxy the incoming events. The default URL is http://localhost:9000.
-- **appName** - The name of the metadata instance. The default appName is `metadata`.
-- **namespace** - Namespace where Metadata is deployed. The default namespace is `kyma-system`.
-- **requestTimeout** - A time-out for requests sent through the Metadata. It is provided in seconds. The default time-out is `1`.
+- **eventsTargetURL** - A URL to which you proxy the incoming events. The default URL is `http://localhost:9000`.
+- **appName** - The name of the Metadata Service instance. The default is `metadata`.
+- **namespace** - Namespace where Metadata Service is deployed. The default Namespace is `kyma-system`.
+- **requestTimeout** - A time-out for requests sent through the Metadata Service. It is provided in seconds. The default time-out is `1`.
 - **skipVerify** - A flag for skipping the verification of certificates for the proxy targets. The default value is `false`.
 - **requestLogging** - A flag for logging incoming requests. The default value is `false`.
 
-### Sample call
+### Sample calls
 
-- Creating a new service
+- Create a new service
 
 ```sh
 curl -X POST http://localhost:32000/ec-default/v1/metadata/services \
@@ -81,9 +79,9 @@ curl -X POST http://localhost:32000/ec-default/v1/metadata/services \
 }'
 ```
 
-- Fetching all services
+- Fetch all services
 
-```console
+```
 curl http://localhost:32000/ec-default/v1/metadata/services
 ```
 
@@ -93,9 +91,9 @@ This section explains the development process.
 
 ### Rapid development with Telepresence
 
-Application Connector stores its state in the Kubernetes Custom Resource, therefore it's dependent on Kubernetes. You cannot mock the dependency. You cannot develop locally. Manual deployment on every change is a mundane task.
+The Application Connector stores its state in the Kubernetes Custom Resource, therefore it's dependent on Kubernetes. You cannot mock the dependency. You cannot develop locally. Manual deployment on every change is a mundane task.
 
-You can, however, leverage [Telepresence](https://www.telepresence.io/). This works by replacing a container in a specified pod, opening up a new local shell or a pre-configured bash, and proxying the network traffic from the local shell through the pod.
+You can, however, leverage [Telepresence](https://www.telepresence.io/). This works by replacing a container in a specified Pod, opening up a new local shell or a pre-configured bash, and proxying the network traffic from the local shell through the Pod.
 
 Although you are on your local machine, you can make calls such as `curl http://....svc.cluster.local:8081/v1/metadata/services`. When you run a server in this shell, other Kubernetes services can access it.
 
@@ -105,11 +103,11 @@ Although you are on your local machine, you can make calls such as `curl http://
 ```bash
 telepresence --namespace kyma-system --swap-deployment metadata:metadata --run-shell
 ```
-4. Every Kubernetes pod has `/var/run/secrets` mounted. The Kubernetes client uses it in the Application Connector services. It is hardcoded. By default, telepresence copies this directory. It stores the directory path in `$TELEPRESENCE_ROOT`, under telepresence shell. It unwinds to `/tmp/tmp...`. You need to move it to `/var/run/secrets`, where the service expects it. Create a symlink:
+4. Every Kubernetes Pod has `/var/run/secrets` mounted. The Kubernetes client uses it in the Application Connector services. It is hardcoded. By default, telepresence copies this directory. It stores the directory path in `$TELEPRESENCE_ROOT`, under telepresence shell. It unwinds to `/tmp/tmp...`. You need to move it to `/var/run/secrets`, where the service expects it. Create a symlink:
  ```bash
 sudo ln -s $TELEPRESENCE_ROOT/var/run/secrets /var/run/secrets
 ```
-5. Use the `make build` and then the `./metadata` commands, and now all the Kubernetes services that call metadata access this process. The process runs locally on your machine. Use the same command to run different Application Connector services like Proxy or Events.
+5. Run `CGO_ENABLED=0 go build ./cmd/metadata` to build the Metadata Service and give all  Kubernetes services that call the Metadata Service access to this process. The process runs locally on your machine. Use the same command to run different Application Connector services like Proxy or Events.
 
 You can also run another shell to make calls to this service. To run this shell, swap the Remote Environment Broker Deployment, because Istio sidecar is already injected into this Deployment:
 ```bash
@@ -135,7 +133,7 @@ This section outlines the testing details.
 To run the unit tests, use the following command:
 
 ```
-make test-unit
+go test ./...
 ```
 
 ### Generate Kubernetes clients for custom resources
@@ -153,10 +151,10 @@ See an example in `pkg/apis/istio/v1alpha2`.
 
 ### Contract between the Application Connector and the UI API Facade
 
-The UI API Facade must check the status of the Application Connector services instances that represents the Remote Environment.
+The UI API Facade must check the status of the Application Connector services instances that represent the Remote Environment.
 In the current solution, the UI API Facade iterates through services to find those which match the criteria, and then uses the health endpoint to determine the status.
 The UI API Facade has the following obligatory requirements:
-- The Kubernetes service for each Application Connector service uses the `remoteEnvironment` key, with the value as the name of the remote environment.
+- The Kubernetes service for each Application Connector service uses the `remoteEnvironment` key, with the value as the name of the Remote Environment.
 - The Kubernetes service for each Application Connector service contains one port with the `ext-api-port` name. The system uses this port for the status check.
 - Find the Kubernetes Application Connector service service in the `kyma-integration` Namespace. You can change its location in the `ui-api-layer` chart configuration.
 - The `/v1/health` endpoint returns a status of `HTTP 200`. Any other status code indicates the service is not healthy.

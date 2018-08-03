@@ -1,7 +1,7 @@
 test:
   image:
-    name: snapshot/kubeless-test-client
-    tag: PR-24
+    name: kubeless-test-client
+    tag: 0.2.51
 
 controller:
   deployment:

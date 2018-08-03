@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: nginx-proxy
+  name: {{ template "name" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
@@ -10,7 +10,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
-        app: apiserver-proxy
+        app: {{ template "name" . }}
     spec:
       containers:
       - image: elvido/alpine-nginx-lua:3.6
@@ -18,20 +18,9 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: {{ .Values.containerPort}}
-        volumeMounts:          
+        volumeMounts:
           - name: {{ .Values.nginx.configmapName}}
-            mountPath: /var/nginx/config          
-
-      - name: dnsmasq
-        image: "janeczku/go-dnsmasq:release-1.0.5"
-        args:
-          - --listen
-          - "127.0.0.1:53"
-          - --default-resolver
-          - --append-search-domains
-          - --hostsfile=/etc/hosts
-          - --verbose
-
+            mountPath: /var/nginx/config
       volumes:
         - name: {{ .Values.nginx.configmapName}}
           configMap:

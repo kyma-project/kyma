@@ -5,7 +5,6 @@ type: Details
 
 By default, Kyma comes with two Application Connectors preconfigured. Those Application Connectors are installed in the `kyma-integration` Namespace.
 
-<p class="internal">
 
 ### Install a Application Connector locally
 
@@ -21,7 +20,6 @@ You can override the following parameters:
 - **sourceType** - the Event source type.
 - **sourceNamespace** - the organization that publishes the Event.
 
-</p>
 
 ### Install an Application Connector on the cluster
 
