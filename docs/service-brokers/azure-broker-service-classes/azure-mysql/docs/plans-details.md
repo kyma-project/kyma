@@ -8,9 +8,9 @@ This service is named `azure-mysqldb` with the following plan names and descript
 
 | Plan Name | Description |
 |-----------|-------------|
-| `Basic Tier` | Basic Tier, Up to 2 vCores, Variable I/O performance |
-| `General Purpose Tier` | General Purporse Tier, Up to 32 vCores, Predictable I/O Performance, Local or Geo-Redundant Backups |
-| `Memory Optimized Tier` | Memory Optimized Tier, Up to 16 memory optimized vCores, Predictable I/O Performance, Local or Geo-Redundant Backups |
+| `Basic Tier` | Basic Tier, up to 2 vCores, variable I/O performance |
+| `General Purpose Tier` | General Purpose Tier, up to 32 vCores, predictable I/O Performance, local or geo-redundant backups |
+| `Memory Optimized Tier` | Memory Optimized Tier, up to 16 memory optimized vCores, predictable I/O Performance, local or geo-redundant backups |
 
 ## Provision
 
@@ -24,10 +24,10 @@ These are the provisioning parameters:
 |----------------|------|-------------|----------|---------------|
 | `Backup redundancy` | `string` | Specifies the backup redundancy, either `local` or `geo` | N | `local` |
 | `Backup retention` | `integer` | Specifies the number of days to retain backups. Ranges from 7 to 35 | N | 7 |
-| `Cores` | `integer` | Specifies vCores, which represent the logical CPU. Valid values are 2, 4, 8, 16 or 32 | N | 2 |
+| `Cores` | `integer` | Specifies vCores, which represent the logical CPU. Valid values are 2, 4, 8, 16, or 32. | N | 2 |
 | `Location` | `string` | The Azure region in which to provision applicable resources. | Y | None. |
 | `Resource group` | `string` | The (new or existing) resource group with which to associate new resources. | Y | Creates a new resource group with a UUID as its name. |
-| `SSL Eeforcement` | `string` | Specifies whether the server requires the use of TLS when connecting. Valid valued are `""` (unspecified), `enabled`, or `disabled`. | N | `""`. Left unspecified, SSL _will_ be enforced. |
+| `SSL SSL Enforcement` | `string` | Specifies whether the server requires the use of TLS when connecting. Valid valued are `""` (unspecified), `enabled`, or `disabled`. | N | The value is unspecified (`""`). It requires the enforcement of SSL. |
 | `Storage` | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 1048 | N | 10 |
 
 ### Credentials
