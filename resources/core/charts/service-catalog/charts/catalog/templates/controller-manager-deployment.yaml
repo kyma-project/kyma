@@ -20,6 +20,9 @@ spec:
     metadata:
       annotations:
         prometheus.io/scrape: "{{ .Values.controllerManager.enablePrometheusScrape }}"
+      {{ if .Values.controllerManager.annotations }}
+{{ toYaml .Values.controllerManager.annotations | indent 8 }}
+      {{- end }}
       labels:
         app: {{ template "fullname" . }}-controller-manager
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -32,8 +35,7 @@ spec:
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
-          requests:
-            memory: 20Mi
+{{ toYaml .Values.controllerManager.resources | indent 10 }}
         env:
         - name: K8S_NAMESPACE
           valueFrom:
@@ -43,6 +45,7 @@ spec:
         - controller-manager
         - --secure-port
         - "8444"
+        - "--cluster-id-configmap-namespace={{ .Release.Namespace }}"
         {{ if .Values.controllerManager.leaderElection.activated -}}
         - "--leader-election-namespace={{ .Release.Namespace }}"
         - "--leader-elect-resource-lock=configmaps"
@@ -78,9 +81,13 @@ spec:
         - --feature-gates
         - AsyncBindingOperations=true
         {{- end }}
-        {{- if .Values.namespacedServiceBrokerEnabled }}
+        {{- if .Values.catalogRestrictionsEnabled }}
         - --feature-gates
-        - NamespacedServiceBroker=true
+        - CatalogRestrictions=true
+        {{- end }}
+        {{- if .Values.namespacedServiceBrokerDisabled }}
+        - --feature-gates
+        - NamespacedServiceBroker=false
         {{- end }}
         ports:
         - containerPort: 8444
@@ -88,6 +95,7 @@ spec:
         - name: service-catalog-cert
           mountPath: /var/run/kubernetes-service-catalog
           readOnly: true
+        {{- if .Values.controllerManager.healthcheck.enabled }}
         readinessProbe:
           httpGet:
             port: 8444
@@ -108,6 +116,11 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 2
+        {{- end }}
+      {{ if .Values.controllerManager.nodeSelector }}
+      nodeSelector:
+         {{ .Values.controllerManager.nodeSelector }}
+      {{ end }}
       volumes:
       - name: service-catalog-cert
         secret:
