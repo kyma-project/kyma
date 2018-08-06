@@ -20,9 +20,9 @@ podTemplate(label: label) {
                             checkout scm
                         }
 
-                        stage("validate external links") {
-                            validateLinks('find . -name "*.md" | grep -v "vendor"')
-                        }
+                        // stage("validate external links") {
+                        //     validateLinks('find . -name "*.md" | grep -v "vendor"')
+                        // }
                     }
                 }
             }
