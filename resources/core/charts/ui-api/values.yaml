@@ -13,6 +13,5 @@ virtualservice:
   enabled: true
   host: ui-api
   annotations: {}
-auth:
-  jwt:
-    name: graphql-api-jwt-rule
+istio:
+  namespace: istio-system

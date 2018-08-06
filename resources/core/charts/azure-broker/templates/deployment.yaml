@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: open-service-broker-azure
-          image: {{ .Values.global.containerRegistry.path }}/azure-broker:0.0.22
+          image: microsoft/azure-service-broker:v1.1.0
           imagePullPolicy: IfNotPresent
           resources:
             limits:
@@ -31,10 +31,7 @@ spec:
               memory: 256Mi
           env:
           - name: ENVIRONMENT
-            valueFrom:
-              secretKeyRef:
-                name: {{ template "fullname" . }}-credentials
-                key: environment
+            value: AzurePublicCloud
           - name: AZURE_SUBSCRIPTION_ID
             valueFrom:
               secretKeyRef:

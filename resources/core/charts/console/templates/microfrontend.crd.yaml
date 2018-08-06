@@ -31,7 +31,7 @@ spec:
               pattern: "[a-zA-Z0-9]+"
             location: 
               type: string
-              pattern: '^(https?)://.+$'
+              pattern: '^https://.+$'
               maxLength: 512
             navigation:
               type: object
