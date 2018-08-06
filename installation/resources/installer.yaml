@@ -44,7 +44,7 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/installer:0.3.103
+        image: eu.gcr.io/kyma-project/snapshot/installer:ip-address-optional
         imagePullPolicy: IfNotPresent
         env:
           - name: AZURE_BROKER_SUBSCRIPTION_ID
@@ -119,21 +119,26 @@ spec:
                 name: etcd-backup-abs-credentials
                 key: storage-key
                 optional: true
-          - name: EXTERNAL_IP_ADDRESS
+          - name: IS_LOCAL_INSTALLATION
             valueFrom:
               configMapKeyRef:
                 name: installation-config
-                key: external_ip_address
+                key: is_local_installation
+#          - name: EXTERNAL_PUBLIC_IP
+#            valueFrom:
+#              configMapKeyRef:
+#                name: installation-config
+#                key: external_public_ip
           - name: DOMAIN
             valueFrom:
               configMapKeyRef:
                 name: installation-config
                 key: domain
-          - name: REMOTE_ENV_IP
-            valueFrom:
-              configMapKeyRef:
-                name: installation-config
-                key: remote_env_ip
+#          - name: REMOTE_ENV_IP
+#            valueFrom:
+#              configMapKeyRef:
+#                name: installation-config
+#                key: remote_env_ip
           - name: K8S_APISERVER_URL
             valueFrom:
               configMapKeyRef:

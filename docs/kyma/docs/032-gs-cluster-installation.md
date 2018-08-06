@@ -17,15 +17,21 @@ The cluster on which you install Kyma must run Kubernetes version `1.10` or high
 
 To install Kyma, you need the following data:
 
-- The IP address for Kyma Ingress
-- The IP address for Remote Environments Ingress.
 - The domain name such as `kyma.example.com`
-  - `gateway.kyma.example.com` points to Remote Environments Ingress IP address
-  - `*.kyma.example.com` points to Kyma Ingress IP address
 - The wildcard TLS certificate for your cluster domain that you can generate with **Let's Encrypt**
 - The certificate for Remote Environments.
 
 >**NOTE:** See the Application Connector documentation for more details on Remote Environments.
+
+
+Optionally, you can prepare the following:
+
+-  Static IP address for Kyma Ingress (public external IP)
+  - Create a DNS entry `*.kyma.example.com` that points to Kyma Ingress IP address
+- Static IP address for Remote Environments Ingress.
+  - Create a DNS entry `gateway.kyma.example.com` that points to Remote Environments Ingress IP address
+
+If you can't manually pre-allocate these IP addresses within your cloud platform, the cluster will request them during installation by platform-specific means. In that case don't forget to perform [Post-Installation steps](#Post-Installation-steps).
 
 Configure the Kubernetes API Server following this template:
 
@@ -79,9 +85,10 @@ The Kyma installation process requires installation data specified in the `insta
 - `__TLS_KEY__` for the TLS certificate key
 - `__REMOTE_ENV_CA__` for the Remote Environments CA
 - `__REMOTE_ENV_CA_KEY__` for the Remote Environments CA key
-- `__EXTERNAL_IP_ADDRESS__` for the IP address for Kyma Ingress
+- `__IS_LOCAL_INSTALLATION__` for controlling installation procedure. Set to `true` for local installation, otherwise cluster installation is assumed.
 - `__DOMAIN__` for the domain name such as `kyma.example.com`
-- `__REMOTE_ENV_IP__` for the IP address for Remote Environments Ingress
+- `__EXTERNAL_PUBLIC_IP__` for the IP address of Kyma Ingress (optional)
+- `__REMOTE_ENV_IP__` for the IP address for Remote Environments Ingress (optional)
 - `__K8S_APISERVER_URL__` for the API server's URL
 - `__K8S_APISERVER_CA__` for your API Server CA
 - `__ADMIN_GROUP__` for the additional admin group. This value is optional.
@@ -116,7 +123,7 @@ Wait until the `tiller` Pod is ready. Execute the following command to check tha
 
 ```
 kubectl get pods -n kube-system | grep tiller
-```  
+```
 
 6. Deploy the `Installer` component.
 
@@ -149,6 +156,20 @@ kubectl get installation kyma-installation -o yaml
 ```
 
 A successful installation ends by setting `status.state` to `Installed` and `status.description` to `Kyma installed`.
+
+8. Post installation steps
+
+If you haven't provided IP addresses for "Kyma Ingress" and "Remote Environments Ingress" before installation, cluster will request those from underlying cloud provider infrastructure. You can now read it out and set up DNS entries correctly.
+
+List all Services and look for "LoadBalancer":
+```
+kubectl get services --all-namespaces | grep LoadBalancer
+```
+
+- entry named `istio-ingressgateway` in namespace `istio-system` specifies IP address for Kyma Ingress. Create a DNS entry `*.kyma.example.com` that points to this address.
+
+- entry named `core-nginx-ingress-controller` in namespace `kyma-system` specifies IP address for Remote Environments Ingress. Create a DNS entry `gateway.kyma.example.com` that points to this address.
+
 
 ## Troubleshooting
 
