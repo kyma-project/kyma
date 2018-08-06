@@ -32,4 +32,15 @@ spec:
         port:
           number: {{ $servicePort }}
         host: {{ $serviceName }}
+    corsPolicy:
+      allowOrigin:
+      - "*"
+      allowHeaders:
+      - "Authorization"
+      - "Content-Type"
+      allowMethods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
 {{- end }}
