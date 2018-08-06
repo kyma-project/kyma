@@ -3,7 +3,7 @@ title: Overview
 type: Overview
 ---
 
-Kyma is the easiest and fastest way to integrate and extend products in a cloud-native way. Kyma is designed as a centerpiece that brings together different external products and increases their agility and customizability.
+Kyma is the easiest and fastest way to connect and extend products in a cloud-native way. Kyma is designed as a centerpiece that brings together different external products and increases their agility and customizability.
 
 Kyma allows you to extend and customize the functionality of your products in a quick and modern way, using serverless computing and microservice architecture. The extensions and customizations you create are decoupled from the core applications, which means that deployments are quick, scaling is independent from the core applications, and the changes you make can be easily reverted without causing downtime of the production system.
 
@@ -21,4 +21,4 @@ When it comes to technology stacks, Kyma is all about the latest, most modern, a
 The communication between services is handled by the [Istio](https://istio.io/) service mesh component, which enables security, monitoring, and tracing without the need to change the application code.
 Build your applications using services provisioned by one of the many Service Brokers compatible with the [Open Service Broker API](https://www.openservicebrokerapi.org/), and monitor the speed and efficiency of your solutions using [Prometheus](https://prometheus.io/), which gives you the most accurate and up-to-date tracing and telemetry data.
 
-Using [Minikube](https://github.com/kubernetes/minikube), you can run Kyma locally, develop, and test your solutions on a small scale before you push them to a cluster. Follow the Getting Started guides to [install Kyma locally](031-gs-local-installation.md) and [deploy a sample service](032-gs-sample-service-deployment-to-local.md).
+Using [Minikube](https://github.com/kubernetes/minikube), you can run Kyma locally, develop, and test your solutions on a small scale before you push them to a cluster. Follow the Getting Started guides to [install Kyma locally](031-gs-local-installation.md) and [deploy a sample service](033-gs-sample-service-deployment-to-local.md).
