@@ -25,7 +25,7 @@ global:
     containerName: ""
 `
 
-			installData := NewInstallationDataCreator().WithDomain("kyma.local").WithEmptyIP().GetData()
+			installData := NewInstallationDataCreator().WithDomain("kyma.local").WithLocalInstallation().GetData()
 
 			overrides, err := GetGlobalOverrides(&installData)
 

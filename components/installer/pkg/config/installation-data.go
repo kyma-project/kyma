@@ -15,7 +15,7 @@ type InstallationContext struct {
 // InstallationData describes all installation attributes
 type InstallationData struct {
 	Context                    InstallationContext
-	ExternalIPAddress          string
+	ExternalPublicIP           string
 	Domain                     string
 	KymaVersion                string
 	URL                        string
@@ -38,15 +38,11 @@ type InstallationData struct {
 	EtcdBackupABSAccount       string
 	EtcdBackupABSKey           string
 	Components                 map[string]struct{}
-	IsLocalInstallation        func() bool
+	IsLocalInstallation        bool
 }
 
 // NewInstallationData .
 func NewInstallationData(installation *v1alpha1.Installation, installationConfig *installationConfig) (*InstallationData, error) {
-
-	isLocalInstallationFunc := func() bool {
-		return installationConfig.ExternalIPAddress == ""
-	}
 
 	ctx := InstallationContext{
 		Name:      installation.Name,
@@ -55,7 +51,7 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 
 	res := &InstallationData{
 		Context:                    ctx,
-		ExternalIPAddress:          installationConfig.ExternalIPAddress,
+		ExternalPublicIP:           installationConfig.ExternalPublicIP,
 		Domain:                     installationConfig.Domain,
 		KymaVersion:                installation.Spec.KymaVersion,
 		URL:                        installation.Spec.URL,
@@ -78,7 +74,7 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		EtcdBackupABSAccount:       installationConfig.EtcdBackupABSAccount,
 		EtcdBackupABSKey:           installationConfig.EtcdBackupABSKey,
 		Components:                 convertToMap(installationConfig.ComponentsList),
-		IsLocalInstallation:        isLocalInstallationFunc,
+		IsLocalInstallation:        installationConfig.IsLocalInstallation,
 	}
 	return res, nil
 }
