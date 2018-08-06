@@ -47,6 +47,14 @@ test:
         linkingTimeout: 4m
         unlinkingTimeout: 4m
     ui:
-      imageTag: "0.1.31"
+      image:
+        name: "snapshot/ui-tests"
+        tag: "PR-5"
+      requests:
+        memory: "1Gi"
+        cpu: "300m"
+      limits:
+        memory: "1Gi"
+        cpu: "300m"
 
 
