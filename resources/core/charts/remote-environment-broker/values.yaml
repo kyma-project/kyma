@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  tag: 0.2.37
+  tag: 0.3.102
   pullPolicy: IfNotPresent
 
 # The REB informs the Service Catalog that its available services changed and should be relisted.
