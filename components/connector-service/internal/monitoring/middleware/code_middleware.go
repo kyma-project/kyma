@@ -2,20 +2,20 @@ package middleware
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/connector-service/internal/middleware/metrics"
+	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring/collector"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
-type codeMiddleware struct {
-	metricsCollector metrics.Collector
+type CodeMiddleware struct {
+	metricsCollector collector.Collector
 }
 
-func NewCodeMiddleware(metricsCollector metrics.Collector) *codeMiddleware {
-	return &codeMiddleware{metricsCollector: metricsCollector}
+func NewCodeMiddleware(metricsCollector collector.Collector) *CodeMiddleware {
+	return &CodeMiddleware{metricsCollector: metricsCollector}
 }
 
-func (dm *codeMiddleware) Handle(next http.Handler) http.Handler {
+func (dm *CodeMiddleware) Handle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		writerWrapper := newResponseWriterWrapper(w)
 

@@ -2,21 +2,21 @@ package middleware
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/connector-service/internal/middleware/metrics"
+	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring/collector"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 )
 
-type durationMiddleware struct {
-	metricsCollector metrics.Collector
+type DurationMiddleware struct {
+	metricsCollector collector.Collector
 }
 
-func NewDurationMiddleware(metricsCollector metrics.Collector) *durationMiddleware {
-	return &durationMiddleware{metricsCollector: metricsCollector}
+func NewDurationMiddleware(metricsCollector collector.Collector) *DurationMiddleware {
+	return &DurationMiddleware{metricsCollector: metricsCollector}
 }
 
-func (dm *durationMiddleware) Handle(next http.Handler) http.Handler {
+func (dm *DurationMiddleware) Handle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		startedAt := time.Now()
 

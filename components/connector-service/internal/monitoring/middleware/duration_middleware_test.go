@@ -3,7 +3,7 @@ package middleware
 import (
 	"bytes"
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/connector-service/internal/middleware/metrics/mocks"
+	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring/collector/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
