@@ -11,7 +11,6 @@ spec:
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
       image: {{ .Values.global.containerRegistry.path }}/ui-tests:0.1.72
-      # image: {{ .Values.global.containerRegistry.path }}/snapshot/ui-tests:PR-21
       resources:
          requests:
            memory: {{ .Values.test.acceptance.ui.requests.memory }}
