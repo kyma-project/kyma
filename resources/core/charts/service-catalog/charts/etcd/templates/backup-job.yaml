@@ -36,7 +36,7 @@ spec:
             - name: APP_BACKUP_CONFIG_MAP_NAME_FOR_TRACING
               value: "sc-recorded-etcd-backup-data"
             - name: APP_BACKUP_ETCD_ENDPOINTS
-              value: http://service-catalog-core-etcd-client.kyma-system.svc.cluster.local:2379
+              value: http://core-service-catalog-etcd-client.kyma-system.svc.cluster.local:2379
             - name: APP_CLEANER_LEAVE_MIN_NEWEST_BACKUP_BLOBS
               value: "{{ .Values.backupApp.cleaner.leaveMinNewestBackupBlobs }}"
             - name: APP_CLEANER_EXPIRATION_BLOB_TIME
