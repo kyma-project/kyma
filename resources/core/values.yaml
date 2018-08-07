@@ -10,10 +10,6 @@ minio:
   service:
     type: NodePort
 
-helm-broker:
-  etcd:
-    replicaCount: 1
-
 azure-broker:
   enabled: false
 
