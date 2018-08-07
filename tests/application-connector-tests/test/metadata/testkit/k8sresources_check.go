@@ -3,7 +3,7 @@ package testkit
 import (
 	"testing"
 
-	istio "github.com/kyma-project/kyma/components/gateway/pkg/apis/istio/v1alpha2"
+	istio "github.com/kyma-project/kyma/components/application-connector/pkg/apis/istio/v1alpha2"
 	remoteenv "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
 	"github.com/stretchr/testify/require"
 	v1core "k8s.io/api/core/v1"
