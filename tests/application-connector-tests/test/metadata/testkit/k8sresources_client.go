@@ -85,7 +85,7 @@ func (c *k8sResourcesClient) GetChecknothing(name string, options v1.GetOptions)
 }
 
 func (c *k8sResourcesClient) GetRemoteEnvironmentServices(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error) {
-	return c.remoteEnvironmentClient.RemoteenvironmentV1alpha1().RemoteEnvironments(c.namespace).Get(name, options)
+	return c.remoteEnvironmentClient.RemoteenvironmentV1alpha1().RemoteEnvironments().Get(name, options)
 }
 
 func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error) {
@@ -98,9 +98,9 @@ func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, options v
 		},
 	}
 
-	return c.remoteEnvironmentClient.RemoteenvironmentV1alpha1().RemoteEnvironments(c.namespace).Create(dummyRe)
+	return c.remoteEnvironmentClient.RemoteenvironmentV1alpha1().RemoteEnvironments().Create(dummyRe)
 }
 
 func (c *k8sResourcesClient) DeleteRemoteEnvironment(name string, options *v1.DeleteOptions) error {
-	return c.remoteEnvironmentClient.RemoteenvironmentV1alpha1().RemoteEnvironments(c.namespace).Delete(name, options)
+	return c.remoteEnvironmentClient.RemoteenvironmentV1alpha1().RemoteEnvironments().Delete(name, options)
 }
