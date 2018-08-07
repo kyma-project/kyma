@@ -14,9 +14,10 @@ spec:
  # serviceBindingRef is the reference to the ServiceBinding and it needs to be in the same Namespace where the ServiceBindingUsage is created.
  serviceBindingRef:
    name: redis-instance-binding
- # usedBy is the reference to the application to which the Binding Usage Controller injects environment variables included in the ServiceBinding pointed by the serviceBindingRef. The pointed resource should be available in the same Namespace as the ServiceBindingUsage. The supported kinds in the usedBy section are `Development` and `Function`.
+ # usedBy is the reference to the application to which the Binding Usage Controller injects environment variables included in the ServiceBinding pointed by the serviceBindingRef. The pointed resource should be available in the same Namespace as the ServiceBindingUsage. The supported kinds in the usedBy section are defined by UsageKind resources.
  usedBy:
-   kind: Deployment
+   # kind matches name of the corresponding UsageKind instance.
+   kind: deployment
    name: redis-client
  # parameters is a set of the parameters passed to the controller
  parameters:
@@ -36,6 +37,26 @@ status:
       status: "True"
       # type defines if the condition is `ready`.
       type: Ready
+```
+
+The corresponding UsageKind looks as follows:
+
+```yaml
+apiVersion: servicecatalog.kyma.cx/v1alpha1
+kind: UsageKind
+metadata:
+  name: deployment
+spec:
+  # displayName is a human-readable name of the UsageKind.
+  displayName: Deployment
+
+  # the type of the target resource labelled by the controller is specified by its resource group, kind, and version. All of these fields are required.
+  resource:
+    group: apps
+    kind: deployment
+    version: v1beta1
+  # labelsPath specifies a resource field which contains labels.
+  labelsPath: spec.template.metadata.labels
 ```
 
 **Conditions** can also have their **status** parameter set to `false`, in which case the **message** and **reason** fields appear. See the following example:
