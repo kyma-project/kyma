@@ -32,52 +32,52 @@ podTemplate(label: label) {
                         stage("skipped") {
                             echo "Incorrect dependencies in Dep manifest"
                         }
-                        // stage("setup") {
-                        //     checkout scm
+                        stage("setup") {
+                            checkout scm
 
-                        //     if(dockerImageTag == ""){
-                        //        error("No version for docker tag defined, please set APP_VERSION parameter for master branch or GIT_BRANCH parameter for any branch")
-                        //    }
+                            if(dockerImageTag == ""){
+                               error("No version for docker tag defined, please set APP_VERSION parameter for master branch or GIT_BRANCH parameter for any branch")
+                           }
 
-                        //     withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS, passwordVariable: 'pwd', usernameVariable: 'uname')]) {
-                        //         sh "docker login -u $uname -p '$pwd' $env.DOCKER_REGISTRY"
-                        //     }
-                        // }
+                            withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS, passwordVariable: 'pwd', usernameVariable: 'uname')]) {
+                                sh "docker login -u $uname -p '$pwd' $env.DOCKER_REGISTRY"
+                            }
+                        }
 
-                        // stage("install dependencies $application") {
-                        //     execute("dep ensure -v")
-                        // }
+                        stage("install dependencies $application") {
+                            execute("dep ensure -v")
+                        }
 
-                        // stage("code quality") {
-                        //     execute("gometalinter --vendor --deadline=2m --disable-all --enable=vet --exclude=vendor ./...")
-                        // }
+                        stage("code quality") {
+                            execute("gometalinter --vendor --deadline=2m --disable-all --enable=vet --exclude=vendor ./...")
+                        }
 
-                        // stage("compile tests") {
-                        //     execute("go test -c ./test/metadata/apitests")
-                        //     execute("go test -c ./test/metadata/k8stests")
-                        // }
+                        stage("compile tests") {
+                            execute("go test -c ./test/metadata/apitests")
+                            execute("go test -c ./test/metadata/k8stests")
+                        }
 
-                        // if (isMaster) {
-                        //     stage("IP scan $application (Sourceclear)"){
-                        //         withCredentials([string(credentialsId: 'SRCCLR_API_TOKEN', variable: 'SRCCLR_API_TOKEN')]) {
-                        //             execute("make scan","SRCCLR_API_TOKEN=$SRCCLR_API_TOKEN")
-                        //         }
-                        //     }
-                        // }
+                        if (isMaster) {
+                            stage("IP scan $application (Sourceclear)"){
+                                withCredentials([string(credentialsId: 'SRCCLR_API_TOKEN', variable: 'SRCCLR_API_TOKEN')]) {
+                                    execute("make scan","SRCCLR_API_TOKEN=$SRCCLR_API_TOKEN")
+                                }
+                            }
+                        }
 
-                        // stage("build image $application") {
-                        //     dir(env.APP_FOLDER){
-                        //     sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
-                        //     }
-                        // }
+                        stage("build image $application") {
+                            dir(env.APP_FOLDER){
+                            sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
+                            }
+                        }
 
-                        // stage("push image $application") {
-                        //     sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
-                        //     sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
-                        //     if (isMaster) {
-                        //         sh "docker push ${dockerPushRoot}${application}:latest"
-                        //     }
-                        // }
+                        stage("push image $application") {
+                            sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
+                            sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
+                            if (isMaster) {
+                                sh "docker push ${dockerPushRoot}${application}:latest"
+                            }
+                        }
                     }
                 }
             }
