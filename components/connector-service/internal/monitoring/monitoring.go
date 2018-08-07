@@ -36,8 +36,6 @@ func newCodeMiddleware(name string) (*middleware.CodeMiddleware, apperrors.AppEr
 	opts := prometheus.CounterOpts{
 		Name: name,
 		Help: "help",
-
-		//Objectives: map[float64]float64{calculatedPercentile/100:percentileAccuracy},
 	}
 
 	metricsCollector, err := collector.NewCounterCollector(opts, []string{"endpoint", "status", "method"})
