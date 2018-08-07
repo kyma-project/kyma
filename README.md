@@ -9,7 +9,7 @@ Kyma is a cloud-native application development framework.
 It provides the last mile capabilities that a developer needs to build a cloud-native application using several open-source projects under the Cloud Native Computing Foundation (CNCF), such as Kubernetes, Istio, NATS, Kubeless, and Prometheus, to name a few.
 It is designed natively on Kubernetes and, therefore, it is portable to all major cloud providers.
 
-Kyma allows you to integrate and extend products in a quick and modern way, using serverless computing and microservice architecture.
+Kyma allows you to connect and extend products in a quick and modern way, using serverless computing and microservice architecture.
 
 The extensions and customizations you create are decoupled from the core applications, which means that:
 * deployments are quick
@@ -20,7 +20,7 @@ Living outside of the core product, Kyma allows you to be completely language-ag
 
 [Read more](docs/kyma/docs/001-overview.md) about the product and its technology stack.
 
-Follow the sections for an overview of the `kyma` repository documentation, Kyma local deployment, and the available examples that you can test to learn how to use the product.
+Follow the sections for an overview of the `kyma` repository documentation, Kyma local and cluster deployment, and the available examples that you can test to learn how to use the product.
 
 ### Documentation
 
@@ -28,11 +28,15 @@ See the [`docs`](docs/README.md) folder to learn about [Kyma](docs/kyma/docs/) a
 
 ## Installation
 
-This section provides a reference to the local deployment of Kyma.
+This section provides a reference to the local and cluster deployment of Kyma.
 
 ### Local deployment
 
 To learn how to deploy Kyma locally, see the corresponding [Getting Started](docs/kyma/docs/031-gs-local-installation.md) guide.
+
+### Cluster deployment
+
+[This](docs/kyma/docs/032-gs-cluster-installation.md) Getting Started guide provides details required to install Kyma on a cluster.
 
 ## Usage
 

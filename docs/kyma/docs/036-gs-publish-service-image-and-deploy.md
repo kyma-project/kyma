@@ -5,7 +5,7 @@ type: Getting Started
 
 ## Overview
 
-In the [Getting Started](034-gs-local-develop-no-docker.md) guide for local development of a service, you can learn how to develop a service locally. You can immediately see all the changes made in the local Kyma installation based on Minikube, without building a Docker image and publishing it to a Docker registry, such as the Docker Hub.
+In the [Getting Started](035-gs-local-develop-no-docker.md) guide for local development of a service, you can learn how to develop a service locally. You can immediately see all the changes made in the local Kyma installation based on Minikube, without building a Docker image and publishing it to a Docker registry, such as the Docker Hub.
 
 Using the same example service, this guide explains how to build a Docker image for your service, publish it to the Docker registry, and deploy it to the local Kyma installation. The instructions base on Minikube, but you can also use the image that you create, and the Kubernetes resource definitions that you use on the Kyma cluster.
 
@@ -17,7 +17,7 @@ Using the same example service, this guide explains how to build a Docker image 
 
 The `http-db-service` example used in this guide provides you with the `Dockerfile` necessary for building Docker images. Examine the `Dockerfile` to learn how it looks and how it uses the Docker Multistaging feature, but do not use it one-to-one for production. There might be custom `LABEL` attributes with values to override.
 
-1. In your terminal, go to the `examples/http-db-service` directory. If you did not follow the [local service development](034-gs-local-develop-no-docker.md) guide and you do not have this directory locally, get the `http-db-service` example from the [examples](https://github.com/kyma-project/examples) repository.
+1. In your terminal, go to the `examples/http-db-service` directory. If you did not follow the [local service development](035-gs-local-develop-no-docker.md) guide and you do not have this directory locally, get the `http-db-service` example from the [examples](https://github.com/kyma-project/examples) repository.
 2. Run the build with `./build.sh`.
 
 >**NOTE:** Ensure that the new image builds and is available in your local Docker registry by calling `docker images`. Find an image called `example-http-db-service` and tagged as `latest`.

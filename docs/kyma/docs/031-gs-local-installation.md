@@ -5,8 +5,7 @@ type: Getting Started
 
 ## Overview
 
-This Getting Started guide instructs developers to quickly deploy Kyma locally on a Mac, Linux, or Windows. Kyma installs locally using a proprietary installer based on a Kubernetes operator.
-The document provides the prerequisites, the instructions on how to install Kyma locally and verify the deployment, and the troubleshooting tips.
+This Getting Started guide shows developers how to to quickly deploy Kyma locally on a Mac, Linux, or Windows. Kyma installs locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma locally and verify the deployment, as well as the troubleshooting tips.
 
 ## Prerequisites
 
@@ -118,7 +117,7 @@ Additionally, confirm that you can access your Kubernetes Dashboard. Run the fol
 minikube ip
 ```
 
-The URL of your Kubernetes Dashboard looks similar to this:
+The address of your Kubernetes Dashboard looks similar to this:
 ```
 http://{ip-address}:30000
 ```
