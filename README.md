@@ -36,7 +36,7 @@ To learn how to deploy Kyma locally, see the corresponding [Getting Started](doc
 
 ### Cluster deployment
 
-[This](docs/kyma/docs/032-gs-cluster-installation.md) Getting Started guide provides details steps required to install Kyma on a cluster.
+[This](docs/kyma/docs/032-gs-cluster-installation.md) Getting Started guide provides details required to install Kyma on a cluster.
 
 ## Usage
 
