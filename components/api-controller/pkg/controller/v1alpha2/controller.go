@@ -24,6 +24,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
+	"strings"
 )
 
 type Controller struct {
@@ -35,6 +36,7 @@ type Controller struct {
 	virtualServiceCtrl networking.Interface
 	services           service.Interface
 	authentication     authentication.Interface
+	domainName		   string
 }
 
 func NewController(
@@ -42,7 +44,8 @@ func NewController(
 	virtualServiceCtrl networking.Interface,
 	services service.Interface,
 	authentication authentication.Interface,
-	internalInformerFactory kymaInformers.SharedInformerFactory) *Controller {
+	internalInformerFactory kymaInformers.SharedInformerFactory,
+	domainName string) *Controller {
 
 	apisInformer := internalInformerFactory.Gateway().V1alpha2().Apis()
 
@@ -55,6 +58,7 @@ func NewController(
 		apisLister:         apisInformer.Lister(),
 		apisSynced:         apisInformer.Informer().HasSynced,
 		queue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "apis"),
+		domainName:			domainName,
 	}
 
 	apisInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -187,6 +191,8 @@ func (c *Controller) onCreate(api *kymaApi.Api) error {
 		api.Spec.Authentication = []kymaApi.AuthenticationRule{}
 	}
 
+	api.Spec.Hostname = fixHostname(c.domainName, api.Spec.Hostname)
+
 	apiStatusHelper := c.apiStatusHelperFor(api)
 	if api.Status.IsEmpty() {
 		api.Status.SetInProgress()
@@ -281,6 +287,8 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 		log.Info("Skipped: all changes has been already applied to the API (both specs are equal).")
 		return nil
 	}
+
+	newApi.Spec.Hostname = fixHostname(c.domainName, newApi.Spec.Hostname)
 
 	if newApi.Spec.Authentication == nil {
 		newApi.Spec.Authentication = []kymaApi.AuthenticationRule{}
@@ -420,7 +428,15 @@ func (c *Controller) apiStatusHelperFor(api *kymaApi.Api) *ApiStatusHelper {
 	return NewApiStatusHelper(c.kymaInterface, api)
 }
 
+func fixHostname(domainName, hostname string) string {
+	if !strings.HasSuffix(hostname, "." + domainName) {
+		return fmt.Sprintf("%s.%s", hostname, domainName)
+	}
+	return hostname
+}
+
 func toVirtualServiceDto(metaDto meta.Dto, api *kymaApi.Api) *networking.Dto {
+
 	return &networking.Dto{
 		MetaDto:     metaDto,
 		Hostname:    api.Spec.Hostname,

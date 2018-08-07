@@ -56,7 +56,7 @@ func main() {
 	internalInformerFactory := kymaInformers.NewSharedInformerFactory(kymaClientSet, time.Second*30)
 	go internalInformerFactory.Start(stop)
 
-	v1alpha2Controller := v1alpha2.NewController(kymaClientSet, istioNetworkingV1Interface, serviceV1Interface, authenticationV2Interface, internalInformerFactory)
+	v1alpha2Controller := v1alpha2.NewController(kymaClientSet, istioNetworkingV1Interface, serviceV1Interface, authenticationV2Interface, internalInformerFactory, domainName)
 	v1alpha2Controller.Run(2, stop)
 }
 
