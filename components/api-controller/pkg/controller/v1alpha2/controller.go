@@ -19,7 +19,6 @@ import (
 	"github.com/kyma-project/kyma/components/api-controller/pkg/controller/meta"
 	networking "github.com/kyma-project/kyma/components/api-controller/pkg/controller/networking/v1"
 	service "github.com/kyma-project/kyma/components/api-controller/pkg/controller/service/v1"
-	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
@@ -180,23 +179,9 @@ func (c *Controller) syncHandler(event BackendEvent) error {
 	return nil
 }
 
-func (c *Controller) onCreate(apiObj *kymaApi.Api) error {
+func (c *Controller) onCreate(api *kymaApi.Api) error {
 
-	log.Infof("Creating: %s/%s", apiObj.Namespace, apiObj.Name)
-
-	namespace := apiObj.Namespace
-	name := apiObj.Name
-
-	api, err := c.apisLister.Apis(namespace).Get(name)
-
-	if err != nil {
-
-		if apiErrors.IsNotFound(err) {
-			runtime.HandleError(fmt.Errorf("API '%+v' in work queue no longer exists", api))
-			return nil
-		}
-		return err
-	}
+	log.Infof("Creating: %s/%s", api.Namespace, api.Name)
 
 	if api.Spec.Authentication == nil {
 		api.Spec.Authentication = []kymaApi.AuthenticationRule{}
