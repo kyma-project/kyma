@@ -9,7 +9,7 @@ import (
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Crd() *k8sApiExtensions.CustomResourceDefinition {
+func Crd(domainName string) *k8sApiExtensions.CustomResourceDefinition {
 
 	kind := kymaApi.KindName
 	listKind := kymaApi.ListKindName
@@ -52,7 +52,7 @@ func Crd() *k8sApiExtensions.CustomResourceDefinition {
 								},
 								"hostname": {
 									Type:      "string",
-									Pattern:   hostnamePattern,
+									Pattern:   hostnamePattern(domainName),
 									MinLength: itoi64(3),
 									MaxLength: itoi64(256),
 								},
@@ -100,9 +100,13 @@ func Crd() *k8sApiExtensions.CustomResourceDefinition {
 }
 
 const (
-	hostnamePattern = `^([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`
+	hostnamePatternFormat = `^([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])(.%s)*$`
 	urlPattern      = `^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`
 )
+
+func hostnamePattern(domainName string) string {
+	return fmt.Sprintf(hostnamePatternFormat, domainName)
+}
 
 func itoi64(i int) *int64 {
 

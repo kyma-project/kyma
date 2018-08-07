@@ -35,10 +35,12 @@ func main() {
 
 	kubeConfig := initKubeConfig()
 
+	domainName := initDomainName()
+
 	apiExtensionsClientSet := apiExtensionsClient.NewForConfigOrDie(kubeConfig)
 
 	registerer := crd.NewRegistrar(apiExtensionsClientSet)
-	registerer.Register(v1alpha2.Crd())
+	registerer.Register(v1alpha2.Crd(domainName))
 
 	istioNetworkingClientSet := istioNetworkingClient.NewForConfigOrDie(kubeConfig)
 	istioNetworkingV1Interface := istioNetworkingV1.New(istioNetworkingClientSet, istioGateway)
@@ -105,4 +107,14 @@ func initJwtDefaultConfig() authenticationV2.JwtDefaultConfig {
 		Issuer:  issuer,
 		JwksUri: jwksURI,
 	}
+}
+
+func initDomainName() string {
+	domainName := os.Getenv("DOMAIN_NAME")
+
+	if domainName == "" {
+		log.Fatal("domain name not provided. Please provide env variable DOMAIN_NAME")
+	}
+
+	return domainName
 }
