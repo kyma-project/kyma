@@ -4,11 +4,11 @@
 replicaCount: 1
 image:
   tag: 0.1.89
-  pullPolicy: IfNotPresent
+  pullPolicy: Never
 service:
   name: nginx
   externalPort: 80
-  internalPort: 80
+  internalPort: 8080
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
