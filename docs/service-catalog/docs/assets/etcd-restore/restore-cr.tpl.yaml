@@ -2,12 +2,12 @@ apiVersion: "etcd.database.coreos.com/v1beta2"
 kind: "EtcdRestore"
 metadata:
   # The restore CR name must be the same as spec.etcdCluster.name
-  name: service-catalog-core-etcd
+  name: core-service-catalog-etcd
   namespace: kyma-system
 spec:
   etcdCluster:
     # The namespace is the same as this EtcdRestore CR
-    name: service-catalog-core-etcd
+    name: core-service-catalog-etcd
   backupStorageType: ABS
   abs:
     path: <full-abs-path>

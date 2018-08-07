@@ -71,7 +71,7 @@ Now the etcd-restore-operator restores a new cluster from the backup.
 
 6. See the status of the Pods and wait until all of them are ready. Check the [number][sc-etcd-cluster-no] of the Pods which should be in the`RUNNING` state before going to the next step:
 ```bash
-watch -n 1 kubectl get pod -n kyma-system -l app=etcd,etcd_cluster=service-catalog-core-etcd
+watch -n 1 kubectl get pod -n kyma-system -l app=etcd,etcd_cluster=core-service-catalog-etcd
 ```
 
 7. Restart the Service Catalog `apiserver` Pod:
