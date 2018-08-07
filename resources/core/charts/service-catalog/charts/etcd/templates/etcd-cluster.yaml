@@ -4,7 +4,7 @@ metadata:
   name: {{ template "etcd-fullname" . }}
   namespace: "{{ .Release.Namespace }}"
 spec:
-  size: {{ .Values.replicaCount }}
+  size: {{ .Values.cluster.replicaCount }}
   version: {{ .Values.cluster.version }}
   pod:
     resources:

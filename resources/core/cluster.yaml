@@ -1,8 +1,7 @@
 service-catalog:
   etcd:
-    replicaCount: 3
-    persistentVolume:
-      storageClass: "managed-standard"
+    cluster:
+      replicaCount: 3
 
 helm-broker:
   etcd:

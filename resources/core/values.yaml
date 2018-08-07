@@ -4,7 +4,8 @@ dex:
 
 service-catalog:
   etcd:
-    replicaCount: 1
+    cluster:
+      replicaCount: 1
 
 minio:  
   service:
