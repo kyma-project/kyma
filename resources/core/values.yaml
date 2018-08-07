@@ -4,7 +4,8 @@ dex:
 
 service-catalog:
   etcd:
-    replicaCount: 1
+    cluster:
+      replicaCount: 1
 
 minio:  
   service:
@@ -26,7 +27,7 @@ global:
       secretName: istio-ingress-certs  
     gateway: 
       name: kyma-gateway      
-  ectdBackupABS:
+  etcdBackupABS:
     secretName: etcd-backup-abs-credentials
 
 
