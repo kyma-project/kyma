@@ -1,13 +1,7 @@
 service-catalog:
   etcd:
-    replicaCount: 3
-    persistentVolume:
-      storageClass: "managed-standard"
-
-helm-broker:
-  etcd:
-    persistentVolume:
-      storageClass: "managed-standard"
+    cluster:
+      replicaCount: 3
 
 sidecar-injector:
   includeIPRanges: "10.244.0.0/16,10.240.0.0/16"

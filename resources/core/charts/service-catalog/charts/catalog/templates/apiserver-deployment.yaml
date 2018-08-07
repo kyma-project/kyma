@@ -22,9 +22,12 @@ spec:
         app: {{ template "fullname" . }}-apiserver
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
+        releaseRevision: "{{ .Release.Revision }}"
         heritage: "{{ .Release.Service }}"
+      {{ if .Values.apiserver.annotations }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/apiserver-secret.yaml") . | sha256sum }}
+{{ toYaml .Values.apiserver.annotations | indent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: "{{ .Values.apiserver.serviceAccount }}"
       containers:
@@ -32,15 +35,14 @@ spec:
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
-          requests:
-            memory: 20Mi
+{{ toYaml .Values.apiserver.resources | indent 10 }}
         args:
         - apiserver
         {{ if .Values.apiserver.audit.activated -}}
         - --audit-log-path
         - {{ .Values.apiserver.audit.logPath }}
         {{- end}}
-        - --admission-control
+        - --enable-admission-plugins
         - "KubernetesNamespaceLifecycle,DefaultServicePlan,ServiceBindingsLifecycle,ServicePlanChangeValidator,BrokerAuthSarCheck"
         - --secure-port
         - "8443"
@@ -62,9 +64,9 @@ spec:
         - --feature-gates
         - OriginatingIdentity=true
         {{- end }}
-        {{- if .Values.namespacedServiceBrokerEnabled }}
+        {{- if .Values.namespacedServiceBrokerDisabled }}
         - --feature-gates
-        - NamespacedServiceBroker=true
+        - NamespacedServiceBroker=false
         {{- end }}
         {{- if .Values.apiserver.serveOpenAPISpec }}
         - --serve-openapi-spec
@@ -75,6 +77,7 @@ spec:
         - name: apiserver-cert
           mountPath: /var/run/kubernetes-service-catalog
           readOnly: true
+        {{- if .Values.apiserver.healthcheck.enabled }}
         readinessProbe:
           httpGet:
             port: 8443
@@ -95,13 +98,13 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 2
+        {{- end }}
       {{- if and (eq .Values.apiserver.storage.type "etcd") .Values.apiserver.storage.etcd.useEmbedded }}
       - name: etcd
-        image: quay.io/coreos/etcd:v3.2.13
+        image: quay.io/coreos/etcd:latest
         imagePullPolicy: Always
         resources:
-          requests:
-            memory: 30Mi
+{{ toYaml .Values.apiserver.storage.etcd.resources | indent 10 }}
         env:
         - name: ETCD_DATA_DIR
           value: /etcd-data-dir
@@ -135,6 +138,10 @@ spec:
           successThreshold: 1
           timeoutSeconds: 2
       {{- end }}
+      {{ if .Values.apiserver.nodeSelector }}
+      nodeSelector:
+         {{ .Values.apiserver.nodeSelector }}
+      {{ end }}
       volumes:
       - name: apiserver-cert
         secret:

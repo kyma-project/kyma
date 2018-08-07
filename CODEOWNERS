@@ -46,6 +46,9 @@
 # The `environments` subchart
 /resources/core/charts/environments/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
 
+# The `etcd-operator` subchart
+/resources/core/charts/etcd-operator/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek
+
 # The `helm-broker` subchart
 /resources/core/charts/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
@@ -183,10 +186,10 @@
 /tools/etcd-backup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
 # The alpine-net directory
-/tools/alpine-net/ @suleymanakbas91 @ahmedami @clebs @a-thaler @lilitgh
+/tools/alpine-net/ @suleymanakbas91 @clebs @a-thaler @lilitgh
 
 # The watch-pods directory
-/tools/watch-pods/ @suleymanakbas91 @ahmedami @clebs @a-thaler @lilitgh
+/tools/watch-pods/ @suleymanakbas91 @clebs @a-thaler @lilitgh
 
 # kubeless-test-client tests
 /tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh

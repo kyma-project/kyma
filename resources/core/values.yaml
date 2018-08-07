@@ -4,15 +4,12 @@ dex:
 
 service-catalog:
   etcd:
-    replicaCount: 1
+    cluster:
+      replicaCount: 1
 
 minio:  
   service:
     type: NodePort
-
-helm-broker:
-  etcd:
-    replicaCount: 1
 
 azure-broker:
   enabled: false
@@ -30,7 +27,7 @@ global:
       secretName: istio-ingress-certs  
     gateway: 
       name: kyma-gateway      
-  ectdBackupABS:
+  etcdBackupABS:
     secretName: etcd-backup-abs-credentials
 
 
@@ -47,6 +44,11 @@ test:
         linkingTimeout: 4m
         unlinkingTimeout: 4m
     ui:
-      imageTag: "0.1.31"
+      requests:
+        memory: "1Gi"
+        cpu: "300m"
+      limits:
+        memory: "1Gi"
+        cpu: "300m"
 
 

@@ -17,6 +17,12 @@ items:
   - apiGroups: [""]
     resources: ["namespaces"]
     verbs:     ["get", "list", "watch"]
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["validatingwebhookconfigurations"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["mutatingwebhookconfigurations"]
+    verbs: ["get", "list", "watch"]
 # API-server service-account gets its own role
 - apiVersion: {{template "rbacApiVersion" . }}
   kind: ClusterRoleBinding
@@ -100,6 +106,20 @@ items:
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["clusterservicebrokers/status","clusterserviceclasses/status","clusterserviceplans/status","serviceinstances/status","serviceinstances/reference","servicebindings/status"]
     verbs:     ["update"]
+  {{- if not .Values.namespacedServiceBrokerDisabled }}
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["serviceclasses"]
+    verbs:     ["get","list","watch","create","patch","update","delete"]
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["serviceplans"]
+    verbs:     ["get","list","watch","create","patch","update","delete"]
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["servicebrokers"]
+    verbs:     ["get","list","watch"]
+  - apiGroups: ["servicecatalog.k8s.io"]
+    resources: ["servicebrokers/status","serviceclasses/status","serviceplans/status"]
+    verbs:     ["update"]
+  {{- end }}
 # give the controller-manager service account access to whats defined in its role.
 - apiVersion: {{template "rbacApiVersion" . }}
   kind: ClusterRoleBinding
@@ -109,6 +129,32 @@ items:
     apiGroup: rbac.authorization.k8s.io
     kind: ClusterRole
     name: "servicecatalog.k8s.io:controller-manager"
+  subjects:
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: "{{ .Values.controllerManager.serviceAccount }}"
+    namespace: "{{ .Release.Namespace }}"
+
+# This gives create/update access to configmaps
+- apiVersion: {{template "rbacApiVersion" . }}
+  kind: Role
+  metadata:
+    name: "servicecatalog.k8s.io:cluster-info-configmap"
+    namespace: "{{ .Release.Namespace }}"
+  rules:
+  - apiGroups:     [""]
+    resources:     ["configmaps"]
+    resourceNames: ["cluster-info"]
+    verbs:         ["get","create","list","watch","update"]
+- apiVersion: {{template "rbacApiVersion" . }}
+  kind: RoleBinding
+  metadata:
+    name: service-catalog-controller-manager-cluster-info
+    namespace: "{{ .Release.Namespace }}"
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: "servicecatalog.k8s.io:cluster-info-configmap"
   subjects:
   - apiGroup: ""
     kind: ServiceAccount
@@ -132,7 +178,7 @@ items:
 - apiVersion: {{template "rbacApiVersion" . }}
   kind: RoleBinding
   metadata:
-    name: service-catalog-controller-manager
+    name: service-catalog-controller-manager-leader-election
     namespace: "{{ .Release.Namespace }}"
   roleRef:
     apiGroup: rbac.authorization.k8s.io
