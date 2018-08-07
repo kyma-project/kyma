@@ -6,7 +6,7 @@ import (
 )
 
 type Collector interface {
-	AddObservation(pathTemplate string, requestMethod string, message float64)
+	AddObservation(message float64, labelValues ...string)
 }
 
 type summaryCollector struct {
@@ -18,12 +18,12 @@ func NewSummaryCollector(opts prometheus.SummaryOpts, labels []string) (Collecto
 
 	err := prometheus.Register(vector)
 	if err != nil {
-		return nil, apperrors.Internal("Failed to create metrics histogramCollector %s: %s", opts.Name, err.Error())
+		return nil, apperrors.Internal("Failed to create summaryCollector %s: %s", opts.Name, err.Error())
 	}
 
 	return &summaryCollector{vector: vector}, nil
 }
 
-func (ms *summaryCollector) AddObservation(pathTemplate string, requestMethod string, message float64) {
-	ms.vector.WithLabelValues(pathTemplate, requestMethod).Observe(float64(message))
+func (ms *summaryCollector) AddObservation(message float64, labelValues ...string) {
+	ms.vector.WithLabelValues(labelValues...).Observe(float64(message))
 }

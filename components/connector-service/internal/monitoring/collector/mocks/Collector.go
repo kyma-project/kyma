@@ -8,7 +8,14 @@ type Collector struct {
 	mock.Mock
 }
 
-// AddObservation provides a mock function with given fields: pathTemplate, requestMethod, message
-func (_m *Collector) AddObservation(pathTemplate string, requestMethod string, message float64) {
-	_m.Called(pathTemplate, requestMethod, message)
+// AddObservation provides a mock function with given fields: message, labelValues
+func (_m *Collector) AddObservation(message float64, labelValues ...string) {
+	_va := make([]interface{}, len(labelValues))
+	for _i := range labelValues {
+		_va[_i] = labelValues[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, message)
+	_ca = append(_ca, _va...)
+	_m.Called(_ca...)
 }

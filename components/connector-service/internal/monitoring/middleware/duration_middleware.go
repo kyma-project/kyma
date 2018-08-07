@@ -32,7 +32,7 @@ func (dm *DurationMiddleware) Handle(next http.Handler) http.Handler {
 		if err != nil {
 			logrus.Errorf("Failed to get path template: %s", err.Error())
 		} else {
-			dm.metricsCollector.AddObservation(template, r.Method, time.Since(startedAt).Seconds())
+			dm.metricsCollector.AddObservation(time.Since(startedAt).Seconds(), template, r.Method)
 		}
 	})
 }

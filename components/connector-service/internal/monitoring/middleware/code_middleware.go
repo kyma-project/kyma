@@ -5,6 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring/collector"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"strconv"
 )
 
 type CodeMiddleware struct {
@@ -31,7 +32,8 @@ func (dm *CodeMiddleware) Handle(next http.Handler) http.Handler {
 		if err != nil {
 			logrus.Errorf("Failed to get path template: %s", err.Error())
 		} else {
-			dm.metricsCollector.AddObservation(template, r.Method, float64(writerWrapper.statusCode))
+			statusLabel := strconv.FormatInt(int64(writerWrapper.statusCode), 10)
+			dm.metricsCollector.AddObservation(1, template, statusLabel, r.Method)
 		}
 	})
 }

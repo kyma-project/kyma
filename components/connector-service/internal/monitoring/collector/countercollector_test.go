@@ -7,17 +7,17 @@ import (
 	"testing"
 )
 
-func TestNewSummaryCollector(t *testing.T) {
+func TestNewCounterCollector(t *testing.T) {
 
-	t.Run("should create and register summary collector", func(t *testing.T) {
+	t.Run("should create and register counter collector", func(t *testing.T) {
 		// given
-		opts := prometheus.SummaryOpts{
-			Name: "summary",
+		opts := prometheus.CounterOpts{
+			Name: "counter",
 			Help: "help",
 		}
 
 		// when
-		collector, err := NewSummaryCollector(opts, []string{"label"})
+		collector, err := NewCounterCollector(opts, []string{"label"})
 
 		//then
 		require.NoError(t, err)
@@ -26,12 +26,12 @@ func TestNewSummaryCollector(t *testing.T) {
 
 	t.Run("should return error if name not specified", func(t *testing.T) {
 		// given
-		opts := prometheus.SummaryOpts{
+		opts := prometheus.CounterOpts{
 			Help: "help",
 		}
 
 		// when
-		collector, err := NewSummaryCollector(opts, []string{"label"})
+		collector, err := NewCounterCollector(opts, []string{"label"})
 
 		//then
 		require.Error(t, err)
@@ -40,12 +40,12 @@ func TestNewSummaryCollector(t *testing.T) {
 
 	t.Run("should return error if help not specified", func(t *testing.T) {
 		// given
-		opts := prometheus.SummaryOpts{
+		opts := prometheus.CounterOpts{
 			Name: "name",
 		}
 
 		// when
-		collector, err := NewSummaryCollector(opts, []string{"label"})
+		collector, err := NewCounterCollector(opts, []string{"label"})
 
 		//then
 		require.Error(t, err)

@@ -28,7 +28,7 @@ func TestCodeMiddleware_Handle(t *testing.T) {
 		path := "/v1/remoteenvironments/ec-default/tokens"
 
 		collector := &mocks.Collector{}
-		collector.On("AddObservation", path, http.MethodPost, float64(testHandlerStatus)).Return()
+		collector.On("AddObservation", float64(1), path, "200", http.MethodPost).Return()
 
 		codeMiddleware := NewCodeMiddleware(collector)
 
@@ -48,7 +48,7 @@ func TestCodeMiddleware_Handle(t *testing.T) {
 		require.NoError(t, apperr)
 
 		// then
-		collector.AssertCalled(t, "AddObservation", path, http.MethodPost, float64(testHandlerStatus))
+		collector.AssertCalled(t, "AddObservation", float64(1), path, "200", http.MethodPost)
 		assert.Equal(t, testHandlerStatus, response.StatusCode)
 	})
 
