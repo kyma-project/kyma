@@ -18,6 +18,8 @@ spec:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
         name: api-controller
         env:
+        - name: DOMAIN_NAME
+          value: {{ .Values.global.domainName }}
         - name: DEFAULT_ISSUER
           value: https://dex.{{ .Values.global.domainName }}
         - name: DEFAULT_JWKS_URI
