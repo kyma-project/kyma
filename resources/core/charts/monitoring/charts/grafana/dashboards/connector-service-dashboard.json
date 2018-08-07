@@ -1,11 +1,21 @@
 {
   "annotations": {
-    "list": []
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
   },
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 14,
+  "iteration": 1533632584748,
   "links": [],
   "panels": [
     {
@@ -83,7 +93,6 @@
       "tableColumn": "",
       "targets": [
         {
-          "$$hashKey": "object:6646",
           "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"kyma-integration\",pod_name=~\"connector-service.*\"}[3m]))",
           "format": "time_series",
           "intervalFactor": 2,
@@ -316,7 +325,6 @@
       "steppedLine": false,
       "targets": [
         {
-          "$$hashKey": "object:5835",
           "expr": "max(kube_deployment_status_replicas{deployment=\"connector-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
@@ -325,7 +333,6 @@
           "step": 30
         },
         {
-          "$$hashKey": "object:5836",
           "expr": "min(kube_deployment_status_replicas_available{deployment=\"connector-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
@@ -334,7 +341,6 @@
           "step": 30
         },
         {
-          "$$hashKey": "object:5837",
           "expr": "max(kube_deployment_status_replicas_unavailable{deployment=\"connector-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
@@ -343,7 +349,6 @@
           "step": 30
         },
         {
-          "$$hashKey": "object:5838",
           "expr": "min(kube_deployment_status_replicas_updated{deployment=\"connector-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
@@ -352,7 +357,6 @@
           "step": 30
         },
         {
-          "$$hashKey": "object:5839",
           "expr": "max(kube_deployment_spec_replicas{deployment=\"connector-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
@@ -408,7 +412,7 @@
       },
       "id": 12,
       "panels": [],
-      "title": "Endpoints Duration",
+      "title": "Request Duration",
       "type": "row"
     },
     {
@@ -419,7 +423,7 @@
       "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
-        "h": 7,
+        "h": 9,
         "w": 24,
         "x": 0,
         "y": 16
@@ -442,41 +446,27 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
+      "repeat": null,
+      "repeatDirection": "h",
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "$$hashKey": "object:6024",
-          "expr": "avg(connector_service_endpoints_duration{exported_endpoint=\"/v1/remoteenvironments/{reName}/tokens\"})",
+          "expr": "connector_service_endpoints_duration{exported_endpoint=~\"$endpoint\", quantile=\"0.995\"}",
           "format": "time_series",
+          "hide": false,
           "instant": false,
           "intervalFactor": 1,
-          "legendFormat": "AVG /v1/remoteenvironments/{reName}/tokens",
+          "legendFormat": "{{ exported_endpoint }}",
           "refId": "A"
-        },
-        {
-          "$$hashKey": "object:6025",
-          "expr": "avg(connector_service_endpoints_duration{exported_endpoint=\"/v1/remoteenvironments/{reName}/client-certs\"})",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "AVG /v1/remoteenvironments/{reName}/client-certs",
-          "refId": "B"
-        },
-        {
-          "$$hashKey": "object:6026",
-          "expr": "avg(connector_service_endpoints_duration{exported_endpoint=\"/v1/remoteenvironments/{reName}/info\"})",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "AVG /v1/remoteenvironments/{reName}/info",
-          "refId": "C"
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
+      "timeFrom": "5h",
       "timeShift": null,
-      "title": "Average Endpoint Duration",
+      "title": "99.5%ile of request durration",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -487,12 +477,11 @@
         "buckets": null,
         "mode": "time",
         "name": null,
-        "show": false,
+        "show": true,
         "values": []
       },
       "yaxes": [
         {
-          "$$hashKey": "object:6096",
           "format": "s",
           "label": null,
           "logBase": 1,
@@ -501,7 +490,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:6097",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -521,11 +509,11 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 25
       },
       "id": 6,
       "panels": [],
-      "title": "Endpoint Codes",
+      "title": "Response Codes",
       "type": "row"
     },
     {
@@ -536,11 +524,12 @@
       "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
-        "h": 11,
-        "w": 8,
+        "h": 10,
+        "w": 24,
         "x": 0,
-        "y": 24
+        "y": 26
       },
+      "hideTimeOverride": false,
       "id": 8,
       "legend": {
         "alignAsTable": false,
@@ -569,17 +558,17 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "connector_service_endpoints_responses{exported_endpoint=\"/v1/remoteenvironments/{reName}/tokens\"}",
+          "expr": "connector_service_endpoints_responses{exported_endpoint=~\"$endpoint\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{ code }}",
+          "legendFormat": "{{exported_endpoint}} {{ status }}",
           "refId": "A"
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
+      "timeFrom": "5h",
       "timeShift": null,
-      "title": "Codes: /v1/remoteenvironments/{reName}/tokens",
+      "title": "Codes: $endpoint",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -615,182 +604,6 @@
         "align": false,
         "alignLevel": null
       }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 8,
-        "y": 24
-      },
-      "id": 4,
-      "legend": {
-        "alignAsTable": false,
-        "avg": false,
-        "current": false,
-        "hideEmpty": false,
-        "hideZero": false,
-        "max": false,
-        "min": false,
-        "rightSide": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "connector_service_endpoints_responses{exported_endpoint=\"/v1/remoteenvironments/{reName}/info\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{ code }}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Codes: /v1/remoteenvironments/{reName}/info",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "locale",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 11,
-        "w": 8,
-        "x": 16,
-        "y": 24
-      },
-      "id": 10,
-      "legend": {
-        "alignAsTable": false,
-        "avg": false,
-        "current": false,
-        "hideEmpty": false,
-        "hideZero": false,
-        "max": false,
-        "min": false,
-        "rightSide": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "connector_service_endpoints_responses{exported_endpoint=\"/v1/remoteenvironments/{reName}/client-certs\"}",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "legendFormat": "{{ code }}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Codes: /v1/remoteenvironments/{reName}/client-certs",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "locale",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
     }
   ],
   "refresh": "10s",
@@ -798,7 +611,35 @@
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "tags": [],
+          "text": "/v1/remoteenvironments/{reName}/info + /v1/remoteenvironments/{reName}/tokens",
+          "value": [
+            "/v1/remoteenvironments/{reName}/info",
+            "/v1/remoteenvironments/{reName}/tokens"
+          ]
+        },
+        "datasource": "Prometheus",
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": true,
+        "name": "endpoint",
+        "options": [],
+        "query": "label_values(connector_service_endpoints_duration ,exported_endpoint)",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
     "from": "now-15m",
@@ -832,5 +673,5 @@
   "timezone": "",
   "title": "Connector-Service",
   "uid": "ut2aRhFmz",
-  "version": 10
+  "version": 1
 }
