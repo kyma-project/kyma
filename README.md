@@ -18,30 +18,12 @@ The extensions and customizations you create are decoupled from the core applica
 
 Living outside of the core product, Kyma allows you to be completely language-agnostic and customize your solution using the technology stack you want to use, not the one the core product dictates. Additionally, Kyma follows the "batteries included" principle and comes with all of the "plumbing code" ready to use, allowing you to focus entirely on writing the domain code and business logic.
 
-[Read more](docs/kyma/docs/001-overview.md) about the product and its technology stack.
-
-Follow the sections for an overview of the `kyma` repository documentation, Kyma local and cluster deployment, and the available examples that you can test to learn how to use the product.
-
-### Documentation
-
-See the [`docs`](docs/README.md) folder to learn about [Kyma](docs/kyma/docs/) and its components.
+Read the [documentation](docs/README.md) to learn about the product, its technology stack, and components.
 
 ## Installation
 
-This section provides a reference to the local and cluster deployment of Kyma.
-
-### Local deployment
-
-To learn how to deploy Kyma locally, see the corresponding [Getting Started](docs/kyma/docs/031-gs-local-installation.md) guide.
-
-### Cluster deployment
-
-[This](docs/kyma/docs/032-gs-cluster-installation.md) Getting Started guide provides details required to install Kyma on a cluster.
+Install Kyma [locally](docs/kyma/docs/031-gs-local-installation.md) and on a [cluster](docs/kyma/docs/032-gs-cluster-installation.md).
 
 ## Usage
-
-Learn how to use Kyma and test the available examples.
-
-### Examples
 
 Kyma comes with the ready-to-use code snippets that you can use to test the extensions and the core functionality. See the list of existing examples in the [`examples`](https://github.com/kyma-project/examples) repository.
