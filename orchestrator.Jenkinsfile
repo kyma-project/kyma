@@ -195,8 +195,8 @@ String[] changedProjects() {
                 res.add(allProjects[i])
                 break // already found a change in the current project, no need to continue iterating the changeset
             }
-            if (projectPaths[i] == "governance" && allChanges[j].endsWith(".md") && !res.contains(projectPaths[i])) {
-                res.add(projectPaths[i])
+            if (allProjects[i] == "governance" && allChanges[j].endsWith(".md") && !res.contains(allProjects[i])) {
+                res.add(allProjects[i])
                 break // already found a change in one of the .md files, no need to continue iterating the changeset
             }
         }
