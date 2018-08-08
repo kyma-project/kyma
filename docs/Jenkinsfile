@@ -15,7 +15,6 @@ def azure_sql = "azure-sql"
 def azure_classes_docs_dir = "$service_brokers/azure-broker-service-classes"
 def api_gateway = "api-gateway"
 def authorization_and_authentication = "authorization-and-authentication"
-def docs_baseimage = "https://github.wdf.sap.corp/raw/kyma/content-upload-base-image/master/Dockerfile"
 def label = "kyma-${UUID.randomUUID().toString()}"
 
 def isMaster = params.GIT_BRANCH == 'master'
@@ -56,46 +55,46 @@ podTemplate(label: label) {
 
                         stage("docs build image") {
                             dir("$docs_image_suffix/$kyma") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$kyma-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$kyma-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$service_catalog") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$service_catalog-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$service_catalog-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$service_brokers") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$service_brokers-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$service_brokers-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$application_connector") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$application_connector-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$application_connector-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$event_bus") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$event_bus-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$event_bus-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$service_mesh") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$service_mesh-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$service_mesh-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$serverless") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$serverless-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$serverless-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$monitoring") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$monitoring-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$monitoring-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$tracing") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$tracing-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$tracing-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$azure_classes_docs_dir/$azure_mysql") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$azure_mysql-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$azure_mysql-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$azure_classes_docs_dir/$azure_sql") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$azure_sql-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$azure_sql-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$azure_classes_docs_dir/$azure_redis_cache") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$azure_redis_cache-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$azure_redis_cache-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$api_gateway") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$api_gateway-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$api_gateway-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
                             dir("$docs_image_suffix/$authorization_and_authentication") {
-                                sh "curl $docs_baseimage | docker build -f - . -t ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:latest"
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:latest"
                             }
 
                         }
