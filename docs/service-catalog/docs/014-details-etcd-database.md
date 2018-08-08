@@ -32,6 +32,7 @@ To execute the backup process, you must set the following values in the [core][c
 ### Restore
 
 Follow this instruction to restore an `etcd` cluster from the existing backup.
+Execute all restore commands in the `docs/service-catalog/docs` directory.
 
 > **NOTE:** You must have the backup files created by the CronJob backup application from the previous section.
 
@@ -57,7 +58,7 @@ export ABS_PATH=$(kubectl get cm -n kyma-system sc-recorded-etcd-backup-data -o=
 export SECRET_NAME=etcd-backup-abs-credentials
 ```
 
-> **NOTE:** The Secret name is defined [here](../../../resources/core/values.yaml) under the **global.etcdBackupABS.secretName** property.
+> **NOTE:** The Secret name is defined [here][core-chart-values] under the **global.etcdBackupABS.secretName** property.
 
 5. Create the EtcdRestore Custom Resource which triggers a restore process:
 ```bash
@@ -69,9 +70,15 @@ sed -e "s|<full-abs-path>|$ABS_PATH|g" \
 
 Now the etcd-restore-operator restores a new cluster from the backup.
 
-6. See the status of the Pods and wait until all of them are ready. Check the [number][sc-etcd-cluster-no] of the Pods which should be in the`RUNNING` state before going to the next step:
+6. See the status of the Pods and wait until all of them are ready:
 ```bash
 watch -n 1 kubectl get pod -n kyma-system -l app=etcd,etcd_cluster=core-service-catalog-etcd
+```
+
+Before going to the next step, check the number of the Pods which should be in the`RUNNING` state.
+Run this command:
+```bash
+kubectl get EtcdCluster core-service-catalog-etcd -n kyma-system  -o jsonpath='{.spec.size}'
 ```
 
 7. Restart the Service Catalog `apiserver` Pod:
@@ -95,14 +102,14 @@ kubectl delete -f assets/etcd-restore/operator-deploy.yaml
 [etcd-backups]:https://github.com/coreos/etcd-operator/blob/master/doc/user/walkthrough/backup-operator.md
 [etcd-restores]:https://github.com/coreos/etcd-operator/blob/master/doc/user/walkthrough/restore-operator.md
 
-[sc-etcd-sub-chart]:../../../resources/core/charts/service-catalog/charts/etcd/templates/etcd-cluster-cr.yaml
-[sc-etcd-cluster-no]:../../../resources/core/charts/service-catalog/charts/etcd/templates/etcd-cluster-cr.yaml#L6
-[sc-backup-sub-chart]:../../../resources/core/charts/service-catalog/charts/etcd/templates/backup-job.yaml
-[etcd-operator-chart]:../../../resources/core/charts/service-catalog/charts/etcd
-[etcd-backup-operator-chart]:../../../resources/core/charts/etcd-operator/templates/backup-deployment.yaml
-[core-chart-values]:../../../resources/core/values.yaml
+<!-- These absolute paths should be replaced with the relative links after adding this functionality to Kyma -->
+[sc-etcd-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd/templates/etcd-cluster.yaml
+[sc-backup-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd/templates/backup-job.yaml
+[etcd-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd
+[etcd-backup-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator/templates/backup-deployment.yaml
+[core-chart-values]:https://github.com/kyma-project/kyma/blob/master/resources/core/values.yaml
 
-[etcd-backup-app-readme]:../../../tools/etcd-backup/README.md
-[etcd-backup-app]:../../../tools/etcd-backup
+[etcd-backup-app-readme]:https://github.com/kyma-project/kyma/blob/master/tools/etcd-backup/README.md
+[etcd-backup-app]:https://github.com/kyma-project/kyma/blob/master/tools/etcd-backup
 
-[abs-creds]:../../../resources/core/charts/etcd-operator/templates/etcd-backup-abs-storage-secret.yaml
+[abs-creds]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator/templates/etcd-backup-abs-storage-secret.yaml
