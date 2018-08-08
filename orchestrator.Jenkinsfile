@@ -11,7 +11,6 @@ Monorepo root orchestrator: This Jenkinsfile runs the Jenkinsfiles of all subpro
         - revision
         - branch
         - current app version
-        - all component versions
 
 */
 def label = "kyma-${UUID.randomUUID().toString()}"
@@ -32,7 +31,7 @@ projects = [
     "components/istio-webhook": "istio-webhook",
     "components/helm-broker": "helm-broker",
     "components/remote-environment-broker": "remote-environment-broker",
-    "components/application-connector": "application-connector",
+    "components/metadata-service": "metadata-service",
     "components/gateway": "gateway",
     "components/installer": "installer",
     "components/connector-service": "connector-service",
@@ -50,6 +49,7 @@ projects = [
     "tests/kubeless-test-client": "kubeless-test-client",
     "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
     "tests/connector-service-tests": "connector-service-tests",
+    "tests/metadata-service-tests": "metadata-service-tests",
     "tests/event-bus": "event-bus-e2e-tester",
     "governance": null
 ]
@@ -92,7 +92,7 @@ podTemplate(label: label) {
                     }
 
                     stage('collect projects') {
-                        buildableProjects = changes.intersect(projects.keySet()) // only projects that have build jobs
+                        buildableProjects = changes.intersect(projects) // only projects that have build jobs
                         echo "Collected the following projects with changes: $buildableProjects..."
                         for (int i=0; i < buildableProjects.size(); i++) {
                             def index = i
@@ -118,24 +118,24 @@ podTemplate(label: label) {
     }
 }
 
-// gather all component versions
+// trigger jobs for projects that have changes, in parallel
+stage('build projects') {
+    parallel jobs
+}
+
 stage('collect versions') {
+    // gather all versions
     versions = [:]
-    
-    changedProjects = jobs.keySet()
-    for (int i = 0; i < changedProjects.size(); i++) {
-        // only projects that have an associated docker image have a version to deploy
-        if (projects["${changedProjects[i]}"] != null) {
-            versions["${changedProjects[i]}"] = env.BRANCH_NAME == "master" ? appVersion : env.BRANCH_NAME
-        }
+    // projects with changes
+    builtProjects = jobs.keySet()
+    for (int i = 0; i < builtProjects.size(); i++) {
+        versions["${builtProjects[i]}"] = env.BRANCH_NAME == "master" ? appVersion : env.BRANCH_NAME
     }
 
-    unchangedProjects = projects.keySet() - changedProjects
-    for (int i = 0; i < unchangedProjects.size(); i++) {
-        // only projects that have an associated docker image have a version to deploy
-        if (projects["${unchangedProjects[i]}"] != null) {
-            versions["${unchangedProjects[i]}"] = projectVersion("${unchangedProjects[i]}")
-        }
+    // projects without changes
+    unbuiltProjects = projects - builtProjects
+    for (int i = 0; i < unbuiltProjects.size(); i++) {
+        versions["${unbuiltProjects[i]}"] = projectVersion("${unbuiltProjects[i]}")
     }
 
     // convert versions to JSON string to pass on
@@ -144,11 +144,6 @@ stage('collect versions') {
     Component versions:\n
     ${JsonOutput.prettyPrint(versions)}
     """
-}
-
-// trigger jobs for projects that have changes, in parallel
-stage('build projects') {
-    parallel jobs
 }
 
 // trigger Kyma integration when changes are made to installation charts/code or resources
@@ -174,9 +169,8 @@ if (runIntegration) {
  * If no changes found, all projects will be returned.
  */
 String[] changedProjects() {
-    def res = []
-    def projectPaths = projects.keySet()
-    def allProjects = projectPaths + additionalProjects
+    res = []
+    def allProjects = projects + additionalProjects
     echo "Looking for changes in the following projects: $allProjects."
 
     // get all changes
@@ -195,8 +189,8 @@ String[] changedProjects() {
                 res.add(allProjects[i])
                 break // already found a change in the current project, no need to continue iterating the changeset
             }
-            if (allProjects[i] == "governance" && allChanges[j].endsWith(".md") && !res.contains(allProjects[i])) {
-                res.add(allProjects[i])
+            if (projects[i] == "governance" && allChanges[j].endsWith(".md") && !res.contains(projects[i])) {
+                res.add(projects[i])
                 break // already found a change in one of the .md files, no need to continue iterating the changeset
             }
         }
@@ -241,14 +235,15 @@ def commitHashForBuild(build) {
 }
 
 /**
- * Fetches the newest released version of the given project from its manifest in the registry or an error if the version could not be fetched.
+ * Fetches the newest released version of the given project from its manifest in the registry or empty string if there is none.
  * This function relies on the latest tag on docker images.
  * More info: https://docs.docker.com/registry/spec/manifest-v2-1/
  */
 String projectVersion(project) {
     try {
-        def img = projects[project]
-        def json = "https://eu.gcr.io/v2/kyma-project/${img}/manifests/latest".toURL().getText(requestProperties: [Accept: 'application/vnd.docker.distribution.manifest.v1+prettyjws'])
+        def index = project.lastIndexOf('/')
+        project = project.substring(index+1)
+        def json = "https://eu.gcr.io/v2/kyma-project/${project}/manifests/latest".toURL().getText(requestProperties: [Accept: 'application/vnd.docker.distribution.manifest.v1+prettyjws'])
         def slurper = new JsonSlurperClassic()
         def doc = slurper.parseText(json)
         doc = slurper.parseText(doc.history[0].v1Compatibility)
@@ -256,6 +251,7 @@ String projectVersion(project) {
         return doc.config.Labels.version
 
     } catch(e) {
-        error("Error fetching latest version for ${project}: ${e}. Please check that ${project} has a docker image tagged ${img}:latest in the docker registry.\nLatest images are pushed to the registry on master branch builds.")
+        echo "Got exception getting latest version for project ${project}: ${e}"
     }
+    return ""
 }
