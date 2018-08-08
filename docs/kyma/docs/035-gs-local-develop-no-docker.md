@@ -32,7 +32,7 @@ CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
 ### Mount the example directory into Minikube
 
-For this step, you need a running local Kyma instance. Read the [Local Kyma installation](031-gs-local-installation.md) Getting Started guide to learn how to install Kyma locally.
+For this step, you need a running local Kyma instance. Read the **Local Kyma installation** Getting Started guide to learn how to install Kyma locally.
 
 1. Open the terminal window. Do not close it until the development finishes.
 2. Mount your local drive into Minikube:

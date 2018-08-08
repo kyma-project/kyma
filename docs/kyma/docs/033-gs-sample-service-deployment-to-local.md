@@ -45,7 +45,7 @@ Follow these steps:
    curl -ik https://http-db-service.kyma.local/orders
    ```
 
-    The system returns a response similar to the following:
+   The system returns a response similar to the following:
    ```
    HTTP/2 200
    content-type: application/json;charset=UTF-8

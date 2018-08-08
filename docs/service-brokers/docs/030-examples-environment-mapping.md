@@ -3,7 +3,7 @@ title: EnvironmentMapping tutorial
 type: Examples
 ---
 
-This tutorial shows how to perform operations on remote environments in the command line. For the custom resource definition, see the [environment-mapping.crd.yaml](../../../resources/cluster-essentials/templates/environment-mapping.crd.yaml) file.
+This tutorial shows how to perform operations on remote environments in the command line. For the custom resource definition, see the `environment-mapping.crd.yaml` file under the `/resources/cluster-essentials/templates/` directory.
 
 An instance of the EnvironmentMapping enables the RemoteEnvironment with the same name in a given Namespace. In this example, the EnvironmentMapping enables the `ec-prod` remote environment in the `production` Namespace:
 
@@ -17,12 +17,12 @@ metadata:
 
 ## Prerequisites
 
-To follow this tutorial, run Kyma locally. For information on how to deploy Kyma locally, see the [local installation](../../kyma/docs/031-gs-local-installation.md) getting started guide.
+To follow this tutorial, run Kyma locally. For information on how to deploy Kyma locally, see the **Local Kyma installation** Getting Started guide.
 
 ## Details
 
 Follow these steps to complete the tutorial:
-1. List all RemoteEnvironments enabled in the `production` environment:
+1. List all RemoteEnvironments enabled in the `production` Environment:
     ```bash
     > kubectl get em -n production
     No resources found.
@@ -32,12 +32,12 @@ Follow these steps to complete the tutorial:
     > kubectl apply -f docs/assets/crd/remote-environment-prod.yaml
     remoteenvironment "ec-prod" created
     ```
-3. Enable this RemoteEnvironment in the `production` environment:
+3. Enable this RemoteEnvironment in the `production` Environment:
     ```bash
     > kubectl apply -f docs/assets/crd/mapping-prod.yaml
     environmentmapping "ec-prod" created
     ```  
-4. List all RemoteEnvironments enabled in the `production` environment again:
+4. List all RemoteEnvironments enabled in the `production` Environment again:
     ```bash
     > kubectl get em -n production
     NAME      AGE
@@ -48,7 +48,7 @@ Follow these steps to complete the tutorial:
     > kubectl get em --all-namespaces -o jsonpath='{range .items[?(@.metadata.name=="ec-prod")]}{@.metadata.namespace}{"\n"}{end}'
     production
     ```
-6. Disable `ec-prod` in the `production` environment:
+6. Disable `ec-prod` in the `production` Environment:
     ```bash
     > kubectl delete -f docs/assets/crd/mapping-prod.yaml
     environmentmapping "ec-prod" deleted

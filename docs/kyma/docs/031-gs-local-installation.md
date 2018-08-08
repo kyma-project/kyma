@@ -16,19 +16,17 @@ To run Kyma locally, clone this Git repository to your local machine and downloa
 - [Helm](https://github.com/kubernetes/helm) 2.8.2
 - [jq](https://stedolan.github.io/jq/)
 - [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - Mac only
-- [Virtualbox](https://www.virtualbox.org/) - Linux or Windows
+- [VirtualBox](https://www.virtualbox.org/) - Linux or Windows
 - Hyper-V - Windows
 
-Read the [prerequisite reasoning](019-prereq-reasoning.md) document to learn why Kyma uses these tools.
+## Set up certificates
 
-## Setup certificates
-
-Kyma comes with a local wildcard self-signed [certificate](../../../installation/certs/workspace/raw/server.crt). Trust it on the OS level for convenience. Alternatively, accept exceptions for each subdomain in your browser as you use Kyma.
+Kyma comes with a local wildcard self-signed `server.crt` certificate that you can find under the `/installation/certs/workspace/raw/` directory of the `kyma` repository. Trust it on the OS level for convenience. Alternatively, accept exceptions for each subdomain in your browser as you use Kyma.
 
 Follow these steps to "always trust" the Kyma certificate on macOS:
 
 1. Open the Keychain Access application. Select **System** from the **Keychains** menu.
-2. Go to **File**, select **Import items...**, and import the Kyma [certificate](../../../installation/certs/workspace/raw/server.crt).
+2. Go to **File**, select **Import items...**, and import the Kyma `server.crt` certificate.
 3. Go to the **Certificates** view and find the `*.kyma.local` certificate you imported.
 4. Right-click the certificate and select **Get Info**.
 5. Expand the **Trust** list and set **When using this certificate** to **Always trust**.
@@ -58,13 +56,13 @@ The `run.sh` script does not show the progress of the Kyma installation, which a
 scripts/is-installed.sh
 ```
 
-Read the [Reinstall Kyma](025-details-local-reinstallation.md) document to learn how to reinstall Kyma without deleting the cluster from Minikube.
-To learn how to test Kyma, see the [Testing Kyma](026-details-testing.md) document.
+Read the **Reinstall Kyma** document to learn how to reinstall Kyma without deleting the cluster from Minikube.
+To learn how to test Kyma, see the **Testing Kyma** document.
 
 ### Custom Resource file
 
-The Custom Resource file contains controls the Kyma installer, which is a proprietary solution based on the [Kubernetes operator](https://coreos.com/operators/). The file contains the basic information that defines Kyma installation.
-Find the custom resource template [here](../../../installation/resources/installer-cr.yaml.tpl).
+The Custom Resource file contains controls the Kyma installer, which is a proprietary solution based on the Kubernetes operator. The file contains the basic information that defines Kyma installation.
+For the `installer-cr.yaml.tpl` custom resource template, go to the `/installation/resources/` directory in the `kyma` repository.
 
 ### Control the installation process
 
@@ -105,7 +103,7 @@ The command retrieves all Pods from all Namespaces, the status of the Pods, and 
 
 Access your local Kyma instance through [this](https://console.kyma.local/) link.
 
-* Click **Login with Email** and sign in with the `admin@kyma.cx` email address and the generic password from the [Dex ConfigMap](../../../resources/dex/templates/dex-config-map.yaml#L51) file.
+* Click **Login with Email** and sign in with the `admin@kyma.cx` email address and the generic password from the `dex-config-map.yaml` file in the `/resources/dex/templates/` directory.
 
 * Click the **Environments** section and select an Environment from the drop-down menu to explore Kyma further.
 
