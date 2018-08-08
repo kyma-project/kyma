@@ -85,13 +85,14 @@ func (ts *TestSuite) WaitForServiceClassWithTimeout(timeout time.Duration) {
 	done := time.After(timeout)
 	require.NoError(ts.t, err)
 	for {
+		// if error occurs, try again
 		ts.serviceClass, err = clientSet.ServicecatalogV1beta1().ClusterServiceClasses().Get(ts.osbServiceId, metav1.GetOptions{})
 		if err == nil {
 			return
 		}
 
 		if !apierrors.IsNotFound(err) {
-			require.Fail(ts.t, err.Error())
+			ts.t.Logf("error while getting service class: %s", err.Error())
 		}
 
 		select {

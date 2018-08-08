@@ -61,7 +61,7 @@ func TestServiceCatalogContainsRemoteEnvironmentBrokerServiceClass(t *testing.T)
 	// then
 	assert.NotEmpty(t, brokerServices)
 	// timeout must be greater than the broker relistDuration
-	awaitCatalogContainsServiceClasses(t, 12*time.Second, brokerServices)
+	awaitCatalogContainsServiceClasses(t, 30*time.Second, brokerServices)
 }
 
 func remoteEnvironmentsClient(t *testing.T) reclient.RemoteEnvironmentInterface {
