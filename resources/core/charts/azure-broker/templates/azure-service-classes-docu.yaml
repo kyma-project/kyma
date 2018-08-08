@@ -17,8 +17,8 @@ spec:
       restartPolicy: Never
       containers:
       - name:  azure-redis-cache-docs
-        image: {{ .Values.global.containerRegistry.path }}/azure-redis-cache-docs:0.0.8
+        image: {{ .Values.global.containerRegistry.path }}/azure-redis-cache-docs:0.3.130
       - name:  azure-mysql-docs
-        image: {{ .Values.global.containerRegistry.path }}/azure-mysql-docs:0.0.8
+        image: {{ .Values.global.containerRegistry.path }}/azure-mysql-docs:0.3.130
       - name:  azure-sql-docs
-        image: {{ .Values.global.containerRegistry.path }}/azure-sql-docs:0.0.8
+        image: {{ .Values.global.containerRegistry.path }}/azure-sql-docs:0.3.130
