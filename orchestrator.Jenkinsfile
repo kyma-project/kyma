@@ -45,7 +45,6 @@ projects = [
     "tests/test-logging-monitoring": "test-logging-monitoring",
     "tests/acceptance": "acceptance-tests",
     "tests/ui-api-layer-acceptance-tests": "ui-api-layer-acceptance-tests",
-    "tests/application-connector-tests": "application-connector-tests",
     "tests/gateway-tests": "gateway-acceptance-tests",
     "tests/test-environments": "test-environments",
     "tests/kubeless-test-client": "kubeless-test-client",
