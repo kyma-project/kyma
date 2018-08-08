@@ -1,6 +1,6 @@
 # Metadata Service
 
-This is the repository for the Metadata Service, which is a part of Application Connector. See [this](../../docs/application-connector/docs/) directory for more documentation for this component.
+This is the repository for the Metadata Service, which is a part of the Application Connector. See [this](../../docs/application-connector/docs/) directory for more documentation for this component.
 
 ## Prerequisites
 
