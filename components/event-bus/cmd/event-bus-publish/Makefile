@@ -1,5 +1,6 @@
 NAME = kyma-project/event-bus-publish
 VERSION = 0.1.0
+COMPONENT = event-bus
 REGISTRY = eu.gcr.io
 
 .PHONY: all clean build tag push
@@ -19,7 +20,7 @@ test:
 	go test github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish -v
 
 docker-build:
-	./dockerBuild.sh  $(NAME) $(VERSION)
+	./dockerBuild.sh  $(NAME) $(VERSION) $(COMPONENT)
 
 tag:
 	docker tag $(NAME):$(VERSION) $(REGISTRY)/$(NAME):$(VERSION)

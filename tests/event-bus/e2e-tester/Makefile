@@ -1,5 +1,6 @@
 NAME = kyma-project/event-bus-e2e-tester
 VERSION = 0.1.0
+COMPONENT = event-bus
 REGISTRY = eu.gcr.io
 
 .PHONY: all build docker-build tag push
@@ -16,7 +17,7 @@ compile:
 	go build -o bin/e2e-tester
 
 docker-build:
-	./dockerBuild.sh  $(NAME) $(VERSION)
+	./dockerBuild.sh  $(NAME) $(VERSION) $(COMPONENT)
 	
 tag:
 	docker tag $(NAME):$(VERSION) $(REGISTRY)/$(NAME):$(VERSION)
