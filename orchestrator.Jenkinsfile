@@ -24,7 +24,7 @@ appVersion = "0.3." + env.BUILD_NUMBER
     IMPORTANT NOTE: Projects trigger jobs and therefore are expected to have a job defined with the same name.
 */
 projects = [
-    "docs": "docs",
+    "docs": "kyma-docs",
     "components/api-controller": "api-controller",
     "components/binding-usage-controller": "binding-usage-controller",
     "components/configurations-generator": "configurations-generator",
