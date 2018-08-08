@@ -191,8 +191,6 @@ func (c *Controller) onCreate(api *kymaApi.Api) error {
 		api.Spec.Authentication = []kymaApi.AuthenticationRule{}
 	}
 
-	api.Spec.Hostname = fixHostname(c.domainName, api.Spec.Hostname)
-
 	apiStatusHelper := c.apiStatusHelperFor(api)
 	if api.Status.IsEmpty() {
 		api.Status.SetInProgress()
@@ -213,7 +211,7 @@ func (c *Controller) onCreate(api *kymaApi.Api) error {
 func (c *Controller) createVirtualService(metaDto meta.Dto, api *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
 
 	virtualServiceCreatorAdapter := func(api *kymaApi.Api) (*kymaMeta.GatewayResource, error) {
-		return c.virtualServiceCtrl.Create(toVirtualServiceDto(metaDto, api))
+		return c.virtualServiceCtrl.Create(toVirtualServiceDto(c.domainName, metaDto, api))
 	}
 
 	return c.tmplCreateResource(api, &api.Status.VirtualServiceStatus, "VirtualService", virtualServiceCreatorAdapter,
@@ -288,8 +286,6 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 		return nil
 	}
 
-	newApi.Spec.Hostname = fixHostname(c.domainName, newApi.Spec.Hostname)
-
 	if newApi.Spec.Authentication == nil {
 		newApi.Spec.Authentication = []kymaApi.AuthenticationRule{}
 	}
@@ -315,8 +311,8 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 func (c *Controller) updateVirtualService(oldApi *kymaApi.Api, oldMetaDto meta.Dto, newApi *kymaApi.Api, newMetaDto meta.Dto, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
 
 	updaterAdapter := func(oldApi, newApi *kymaApi.Api) (*kymaMeta.GatewayResource, error) {
-		oldDto := toVirtualServiceDto(oldMetaDto, oldApi)
-		newDto := toVirtualServiceDto(newMetaDto, newApi)
+		oldDto := toVirtualServiceDto(c.domainName, oldMetaDto, oldApi)
+		newDto := toVirtualServiceDto(c.domainName, newMetaDto, newApi)
 		return c.virtualServiceCtrl.Update(oldDto, newDto)
 	}
 
@@ -394,7 +390,7 @@ func (c *Controller) onDelete(api *kymaApi.Api) error {
 	}
 
 	log.Debugf("Deleting virtualService for: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
-	if err := c.virtualServiceCtrl.Delete(toVirtualServiceDto(metaDto, api)); err != nil {
+	if err := c.virtualServiceCtrl.Delete(toVirtualServiceDto(c.domainName, metaDto, api)); err != nil {
 		deleteResourceFailed = true
 		log.Errorf("Error while deleting virtualService for: %s/%s ver: %s. Root cause: %s", api.Namespace, api.Name, api.ResourceVersion, err)
 	}
@@ -435,11 +431,11 @@ func fixHostname(domainName, hostname string) string {
 	return hostname
 }
 
-func toVirtualServiceDto(metaDto meta.Dto, api *kymaApi.Api) *networking.Dto {
+func toVirtualServiceDto(domainName string, metaDto meta.Dto, api *kymaApi.Api) *networking.Dto {
 
 	return &networking.Dto{
 		MetaDto:     metaDto,
-		Hostname:    api.Spec.Hostname,
+		Hostname:    fixHostname(domainName, api.Spec.Hostname),
 		ServiceName: api.Spec.Service.Name,
 		ServicePort: api.Spec.Service.Port,
 		Status:      api.Status.VirtualServiceStatus,
