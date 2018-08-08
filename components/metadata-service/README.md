@@ -29,11 +29,9 @@ To start the Metadata Service, run this command:
 The Metadata Service has the following parameters:
 - **proxyPort** - This port acts as a proxy for the calls from services and lambdas to an external solution. The default port is `8080`.
 - **externalAPIPort** - This port exposes the Metadata API to an external solution. The default port is `8081`.
-- **eventsTargetURL** - A URL to which you proxy the incoming events. The default URL is `http://localhost:9000`.
-- **appName** - The name of the Metadata Service instance. The default is `metadata`.
+- **minioURL** - The URL of a Minio service which stores specifications and documentation.
 - **namespace** - Namespace where Metadata Service is deployed. The default Namespace is `kyma-system`.
 - **requestTimeout** - A time-out for requests sent through the Metadata Service. It is provided in seconds. The default time-out is `1`.
-- **skipVerify** - A flag for skipping the verification of certificates for the proxy targets. The default value is `false`.
 - **requestLogging** - A flag for logging incoming requests. The default value is `false`.
 
 ### Sample calls
