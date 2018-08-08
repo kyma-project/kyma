@@ -15,35 +15,21 @@ To run Kyma locally, clone this Git repository to your local machine and downloa
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.10.0
 - [Helm](https://github.com/kubernetes/helm) 2.8.2
 - [jq](https://stedolan.github.io/jq/)
-<<<<<<< HEAD
-- [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - Mac only
-- [VirtualBox](https://www.virtualbox.org/) - Linux or Windows
-- Hyper-V - Windows
-
-## Set up certificates
-=======
 
 Vitrualization:
 
-- [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - Mac
-- [Virtualbox](https://www.virtualbox.org/) - Linux, Windows, Mac
-- Hyper-V - Windows
+- [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - Mac only
+- [VirtualBox](https://www.virtualbox.org/) - Linux or Windows
+- [Hyper-V](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v) - Windows
 
-> **NOTE:** To work with Kyma, use only the provided installation and deinstallation scripts. Kyma does not work on a basic Minikube cluster that you can start using the `minikube start` command or stop with the `minikube stop` command. If you do not need Kyma on Minikube anymore, remove the cluster with the `minikube delete` command.
->>>>>>> Local installation docu update
+> **NOTE:** To work with Kyma, use only the provided installation and deinstallation scripts. Kyma does not work on a basic Minikube cluster that you can start using the `minikube start` command or stop with the `minikube stop` command. If you don't need Kyma on Minikube anymore, remove the cluster with the `minikube delete` command.
+
+## Set up certificates
 
 Kyma comes with a local wildcard self-signed `server.crt` certificate that you can find under the `/installation/certs/workspace/raw/` directory of the `kyma` repository. Trust it on the OS level for convenience. Alternatively, accept exceptions for each subdomain in your browser as you use Kyma.
 
 Follow these steps to "always trust" the Kyma certificate on macOS:
 
-<<<<<<< HEAD
-1. Open the Keychain Access application. Select **System** from the **Keychains** menu.
-2. Go to **File**, select **Import items...**, and import the Kyma `server.crt` certificate.
-3. Go to the **Certificates** view and find the `*.kyma.local` certificate you imported.
-4. Right-click the certificate and select **Get Info**.
-5. Expand the **Trust** list and set **When using this certificate** to **Always trust**.
-6. Close the certificate information window and enter your system password to confirm the changes.
-=======
 1. Change the working directory to `installation`:
   ```
   cd installation
@@ -52,13 +38,13 @@ Follow these steps to "always trust" the Kyma certificate on macOS:
   ```
   sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain certs/workspace/raw/server.crt
   ```
->>>>>>> Local installation docu update
 
 >**NOTE:** "Always trusting" the certificate does not work with Mozilla Firefox.
 
 ## Install Kyma on Minikube
 
-> **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube.
+
+> **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube. Read the **Installation** CRD specification document to learn how to control the Kyma installation by customizing the installer Custom Resource file.
 
 1. Change the working directory to `installation`:
   ```
@@ -78,35 +64,6 @@ scripts/is-installed.sh
 
 Read the **Reinstall Kyma** document to learn how to reinstall Kyma without deleting the cluster from Minikube.
 To learn how to test Kyma, see the **Testing Kyma** document.
-
-### Customize the Kyma installation
-
-<<<<<<< HEAD
-The Custom Resource file contains controls the Kyma installer, which is a proprietary solution based on the Kubernetes operator. The file contains the basic information that defines Kyma installation.
-For the `installer-cr.yaml.tpl` custom resource template, go to the `/installation/resources/` directory in the `kyma` repository.
-
-### Control the installation process
-
-To trigger the installation process, set the **action** label to `install` in the metadata of the Custom Resource with the installer configuration.
-To trigger the deinstallation process, set the **action** label to `uninstall` in the metadata of the Custom Resource with the installer configuration.
-
-### Generate a new Custom Resource file
-
-Use the `create-cr.sh` script to generate the Custom Resource file. The script accepts these arguments:
-
-- `--output` - mandatory. The location of the Custom Resource output file
-- `--url` - the URL of the Kyma package to install
-- `--version` - the Kyma version
-- `--ipaddr` - the load balancer IP
-- `--domain` - the instance domain
-
-For example:
-```
-$ ./installation/scripts/create-cr.sh --output kyma-cr.yaml --url {Kyma_TAR.GZ_URL} --version 0.0.1 --domain kyma.local
-```
-=======
-Read the [Installer Custom Resource](./037-CRD.md) document to learn how to customize the Kyma installation by customizing the installer Custom Resource file.
->>>>>>> Local installation docu update
 
 ## Verify the deployment
 
