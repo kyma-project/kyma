@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   tag: PR-32
-  pullPolicy: Never
+  pullPolicy: IfNotPresent
 service:
   name: nginx
   externalPort: 80
