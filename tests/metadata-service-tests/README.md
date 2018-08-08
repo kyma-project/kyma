@@ -11,4 +11,4 @@ This section provides information on building and versioning of the Docker image
 
 ### Configuring the Kyma
 
-After building and pushing the Docker image, set the proper tag in the `resources/core/charts/application-connector/metadata/values.yaml` file, in the`tests.image.tag` property.
+After building and pushing the Docker image, set the proper tag in the `resources/core/charts/application-connector/metadata-service/values.yaml` file, in the`tests.image.tag` property.
