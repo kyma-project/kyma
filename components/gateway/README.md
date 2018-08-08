@@ -136,6 +136,17 @@ curl https://gateway.kyma.local:{NODE_PORT}/ec-default/v1/metadata/services --ce
 ```
 
 
+### Contract between the Application Connector and the UI API Facade
+
+The UI API Facade must check the status of the Application Connector services instances that represent the Remote Environment.
+In the current solution, the UI API Facade iterates through services to find those which match the criteria, and then uses the health endpoint to determine the status.
+The UI API Facade has the following obligatory requirements:
+- The Kubernetes service for each Application Connector service uses the `remoteEnvironment` key, with the value as the name of the Remote Environment.
+- The Kubernetes service for each Application Connector service contains one port with the `ext-api-port` name. The system uses this port for the status check.
+- Find the Kubernetes Application Connector service service in the `kyma-integration` Namespace. You can change its location in the `ui-api-layer` chart configuration.
+- The `/v1/health` endpoint returns a status of `HTTP 200`. Any other status code indicates the service is not healthy.
+
+
 ### Contribution
 
 To learn how you can contribute to this project, see the [Contributing](/CONTRIBUTING.md) document.
