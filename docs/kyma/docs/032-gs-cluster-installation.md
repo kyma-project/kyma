@@ -117,6 +117,8 @@ To trigger the installation of Kyma, you need a Custom Resource file. Duplicate 
 - `__VERSION__` for the version number of Kyma to install. When manually installing Kyma on a cluster, specify any valid [SemVer](https://semver.org/) notation string. For example, `0.0.1`.
 - `__URL__` for the URL to the Kyma `tar.gz` package to install. For example, for the `master` branch of Kyma, the address is `https://github.com/kyma-project/kyma/archive/master.tar.gz`.
 
+>**NOTE:** Read the **Installation** document to learn more about the Custom Resource that controls the Kyma installer. 
+
 Once the file is ready, run this command to trigger the installation:
 
 ```

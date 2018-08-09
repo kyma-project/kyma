@@ -1,6 +1,6 @@
 ---
 title: Api
-type: CRD
+type: Custom Resource
 ---
 
 The `api.gateway.kyma.cx` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format the API Controller listens for. To get the up-to-date CRD and show

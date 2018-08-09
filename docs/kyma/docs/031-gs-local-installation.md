@@ -44,7 +44,7 @@ Follow these steps to "always trust" the Kyma certificate on macOS:
 ## Install Kyma on Minikube
 
 
-> **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube. Read the **Installation** CRD specification document to learn how to control the Kyma installation by customizing the installer Custom Resource file.
+> **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube.
 
 1. Change the working directory to `installation`:
   ```
