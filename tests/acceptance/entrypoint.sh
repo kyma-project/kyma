@@ -2,10 +2,9 @@
 
 res=0
 
-### Temporarily disabled
-#echo "Run dex tests"
-#./dex.test
-#res=$((res+$?))
+echo "Run dex tests"
+./dex.test
+res=$((res+$?))
 
 echo "Run servicecatalog tests"
 ./servicecatalog.test
