@@ -32,7 +32,7 @@ projects = [
     "components/istio-webhook": "istio-webhook",
     "components/helm-broker": "helm-broker",
     "components/remote-environment-broker": "remote-environment-broker",
-    "components/application-connector": "application-connector",
+    "components/metadata-service": "metadata-service",
     "components/gateway": "gateway",
     "components/installer": "installer",
     "components/connector-service": "connector-service",
@@ -50,6 +50,7 @@ projects = [
     "tests/kubeless-test-client": "kubeless-test-client",
     "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
     "tests/connector-service-tests": "connector-service-tests",
+    "tests/metadata-service-tests": "metadata-service-tests",
     "tests/event-bus": "event-bus-e2e-tester",
     "governance": null
 ]

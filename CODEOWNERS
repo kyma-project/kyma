@@ -147,7 +147,7 @@
 /components/connector-service/ @lszymik @akgalwas @janmedrek
 
 # Application Connector Component
-/components/application-connector/ @lszymik @akgalwas @janmedrek
+/components/metadata-service/ @lszymik @akgalwas @janmedrek
 
 # Gateway Component
 /components/gateway/ @lszymik @akgalwas @janmedrek
@@ -176,7 +176,7 @@
 /tests/connector-service-tests/ @lszymik @akgalwas @janmedrek
 
 # Application Connector Tests
-/tests/application-connector-tests/ @lszymik @akgalwas @janmedrekk
+/tests/metadata-service-tests/ @lszymik @akgalwas @janmedrekk
 
 # Tools
 # Stability Checker Component
