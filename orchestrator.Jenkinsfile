@@ -18,7 +18,7 @@ def label = "kyma-${UUID.randomUUID().toString()}"
 appVersion = "0.3." + env.BUILD_NUMBER
 
 /*
-    Projects that are built when changed, consisting of pairs [project path, produced docker image].
+    Projects that are built when changed, consisting of pairs [project path, produced docker image]. Projects producing multiple Docker images only need to provide one of them.
     Projects that do NOT produce docker images need to have a null value and will not be passed to the integration job, as there is nothing to deploy.
 
     IMPORTANT NOTE: Projects trigger jobs and therefore are expected to have a job defined with the same name.
@@ -256,6 +256,6 @@ String projectVersion(project) {
         return doc.config.Labels.version
 
     } catch(e) {
-        error("Error fetching latest version for ${project}: ${e}")
+        error("Error fetching latest version for ${project}: ${e}. Please check that ${project} has a docker image tagged ${img}:latest in the docker registry.\nLatest images are pushed to the registry on master branch builds.")
     }
 }
