@@ -56,7 +56,7 @@ Kyma binding operation consists of two phases:
 
 ### Bind with other resources
 
-By default, you can bind your ServiceInstance to a Deployment or Function. The UsageKind is a cluster-wide custom resource which allows you to bind a ServiceInstance to any other custom resource. It describes the way in which such ServiceBinding is conducted. The ServiceBindingUsage uses this information to inject Secrets to the Application. 
+The UsageKind is a cluster-wide custom resource which allows you to bind a ServiceInstance to any custom resource. By default, there are two UsageKinds which enable binding either to a Deployment or Function. You can add more UsageKinds if you want to bind your ServiceInstance to the other custom resource. The UsageKind contains information of the way in which binding to this custom resource is conducted. Then, the ServiceBindingUsage uses this information to inject Secrets to the Application.
 
 ![Kyma UsageKind](assets/usagekind.png)
 
