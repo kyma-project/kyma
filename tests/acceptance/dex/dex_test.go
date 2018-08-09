@@ -20,15 +20,20 @@ import (
 )
 
 const (
-	ingressGatewayControllerServiceURL = "istio-ingressgateway.istio-system.svc.cluster.local"
-	domainEnvName                      = "KYMA_DOMAIN"
-	isLocalEnvEnvName                  = "IS_LOCAL_ENV"
-	clientId                           = "kyma-client"
-	username                           = "admin@kyma.cx"
-	password                           = "nimda123"
+	ingressGatewayControllerServiceURLEnv = "INGRESSGATEWAY_FQDN"
+	domainEnvName                         = "KYMA_DOMAIN"
+	isLocalEnvEnvName                     = "IS_LOCAL_ENV"
+	clientId                              = "kyma-client"
+	username                              = "admin@kyma.cx"
+	password                              = "nimda123"
 )
 
 func TestSpec(t *testing.T) {
+
+	ingressGatewayControllerServiceURL, envFound := os.LookupEnv(ingressGatewayControllerServiceURLEnv)
+	if !envFound {
+		t.Fatal(ingressGatewayControllerServiceURLEnv + " env variable not set")
+	}
 
 	isLocalEnv, envFound := os.LookupEnv(isLocalEnvEnvName)
 	if !envFound {
