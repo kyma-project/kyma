@@ -41,8 +41,12 @@ podTemplate(label: label) {
                             }
                         }
 
-                        stage("install dependencies $application") {
-                            execute("dep ensure -v")
+                        cache(maxCacheSize: 256, caches: [
+                            [$class: 'ArbitraryFileCache', excludes: '', includes: '**/*', path: "${pwd()}/${env.APP_FOLDER}/vendor"]
+                        ]) {
+                            stage("install dependencies $application") {
+                                execute("make resolve")
+                            }
                         }
 
                         stage("build $application") {
