@@ -1,8 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"context"
+	"crypto/tls"
+	"io/ioutil"
 	"log"
 	"math/rand"
+	"net"
+	"net/http"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -129,23 +135,66 @@ func deleteFun(namespace, name string) {
 	}
 }
 
-func ensureOutputIsCorrect(url, host, expectedOutput, testID string) {
+func tryToGetMinikubeIP() string {
+	mipCmd := exec.Command("minikube", "ip")
+	if mipOut, err := mipCmd.Output(); err != nil {
+		log.Fatalf("Error while getting minikube IP. Root cause: %s", err)
+		return ""
+	} else {
+		return strings.Trim(string(mipOut), "\n")
+	}
+}
+
+func ensureOutputIsCorrect(host, expectedOutput, testID string) {
 	timeout := time.After(2 * time.Minute)
 	tick := time.Tick(1 * time.Second)
-	for {
-		select {
-		case <-timeout:
-			cmd := exec.Command("curl", "-s", url, "-H", "Host: "+host)
-			stdoutStderr, _ := cmd.CombinedOutput()
-			log.Fatal("Timed out getting the correct output from ", url, " host ", host, ":\n", string(stdoutStderr))
-		case <-tick:
-			cmd := exec.Command("curl", "-ks", url, "-H", "Host: "+host, "-d", testID)
-			stdoutStderr, err := cmd.CombinedOutput()
-			if err != nil {
-				log.Fatal("Unable to call ", url, " host ", host, ":\n", string(stdoutStderr))
-			}
-			if string(stdoutStderr) == expectedOutput {
-				return
+
+	dialer := &net.Dialer{
+		Timeout: 30 * time.Second,
+	}
+	ingressGatewayControllerServiceURL := "istio-ingressgateway.istio-system.svc.cluster.local"
+
+	ingressGatewayControllerAddr, err := net.LookupHost(ingressGatewayControllerServiceURL)
+	if err != nil {
+		log.Fatalf("Unable to resolve host '%s'. Root cause: %v", ingressGatewayControllerServiceURL, err)
+		if minikubeIP := tryToGetMinikubeIP(); minikubeIP != "" {
+			ingressGatewayControllerAddr = []string{minikubeIP}
+		}
+	}
+	if len(ingressGatewayControllerAddr) > 0 {
+		log.Printf("Ingress controller address: '%s'", ingressGatewayControllerAddr[0])
+
+		http.DefaultTransport.(*http.Transport).DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			addr = ingressGatewayControllerAddr[0] + ":443"
+			return dialer.DialContext(ctx, network, addr)
+		}
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+		for {
+			select {
+			case <-timeout:
+				resp, err := http.Get(host)
+				if err != nil {
+					log.Fatal("Timed out getting the correct output from host ", host, ":\n", err)
+				}
+				log.Fatal("Timed out getting the correct output from response is host ", host, ":\n", resp)
+
+			case <-tick:
+				resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
+				if err != nil {
+					log.Fatal("Unable to call host ", host, ":\n", err)
+				}
+				if resp.StatusCode == http.StatusOK {
+					bodyBytes, err := ioutil.ReadAll(resp.Body)
+					if err != nil {
+						log.Fatalf("Unable to get response: %v", err)
+					}
+					if string(bodyBytes) == expectedOutput {
+						log.Printf("Response is equal to expected output: %v == %v", string(bodyBytes), expectedOutput)
+						return
+					}
+					log.Fatalf("Response is not equal to expected output: %v != %v", string(bodyBytes), expectedOutput)
+				}
 			}
 		}
 	}
@@ -169,21 +218,39 @@ func publishEvent(testID string) {
 	}
 }
 
-func ensureCorrectLog(namespace, funName string, pattern *regexp.Regexp, match string) {
+func ensureCorrectLog(namespace, funName string, pattern *regexp.Regexp, match string, serviceBinding bool) {
 	timeout := time.After(2 * time.Minute)
 	tick := time.Tick(1 * time.Second)
+	sbuID := ""
+	if serviceBinding {
+		sbuID = getSBUID(namespace, funName)
+	}
 	for {
+		var cmd *exec.Cmd
+		if sbuID == "" {
+			cmd = exec.Command("kubectl", "-n", namespace, "get", "pods", "-l", "function="+funName, "--field-selector=status.phase==Running", "--output=jsonpath={.items[0].metadata.name}")
+		} else {
+			cmd = exec.Command("kubectl", "-n", namespace, "get", "pods", "-l", "use-"+sbuID+","+"function="+funName, "--field-selector=status.phase==Running", "--output=jsonpath={.items[0].metadata.name}")
+		}
+
+		stdoutStderr, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Fatalf("Unable to get running pod for function: %v due to following reason: %v", funName, err)
+		}
+		pod := string(stdoutStderr)
+		log.Printf("Checking logs for pods: %v", pod)
 		select {
 		case <-timeout:
-			cmd := exec.Command("kubectl", "-n", namespace, "log", "-l", "function="+funName, "-c", funName)
+			cmd := exec.Command("kubectl", "-n", namespace, "logs", pod)
 			stdoutStderr, _ := cmd.CombinedOutput()
 			log.Fatal("Timed out getting the correct log for ", funName, ":\n", string(stdoutStderr))
 		case <-tick:
-			cmd := exec.Command("kubectl", "-n", namespace, "log", "-l", "function="+funName, "-c", funName)
+			cmd := exec.Command("kubectl", "-n", namespace, "logs", pod, "-c", funName)
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Fatal("Unable to obtain function log for ", funName, ":\n", string(stdoutStderr))
 			}
+
 			submatches := pattern.FindStringSubmatch(string(stdoutStderr))
 			if submatches != nil && submatches[1] == match {
 				return
@@ -236,7 +303,7 @@ func main() {
 		log.Println("Deploying test-hello function")
 		deployFun("kubeless-test", "test-hello", "nodejs6", "dependencies.json", "hello.js", "hello.handler")
 		log.Println("Verifying correct function output for test-hello")
-		ensureOutputIsCorrect("https://istio-ingress.istio-system", "test-hello.kyma.local", "hello world", testID)
+		ensureOutputIsCorrect("https://test-hello.kyma.local", "hello world", testID)
 		log.Println("Function test-hello works correctly")
 		defer wg.Done()
 	}()
@@ -247,7 +314,7 @@ func main() {
 		log.Println("Publishing event to function test-event")
 		publishEvent(testID)
 		log.Println("Verifying correct event processing for test-event")
-		ensureCorrectLog("kubeless-test", "test-event", testDataRegex, testID)
+		ensureCorrectLog("kubeless-test", "test-event", testDataRegex, testID, false)
 		log.Println("Function test-event works correctly")
 		defer wg.Done()
 	}()
@@ -257,9 +324,9 @@ func main() {
 		deployK8s("svcbind.yaml")
 		ensureFunctionIsRunning("kubeless-test", "test-svcbind", true)
 		log.Println("Verifying correct function output for test-svcbind")
-		ensureOutputIsCorrect("https://istio-ingress.istio-system", "test-svcbind.kyma.local", "OK", testID)
+		ensureOutputIsCorrect("https://test-svcbind.kyma.local", "OK", testID)
 		log.Println("Verifying service connection for test-svcbind")
-		ensureCorrectLog("kubeless-test", "test-svcbind", testDataRegex, testID)
+		ensureCorrectLog("kubeless-test", "test-svcbind", testDataRegex, testID, true)
 		log.Println("Function test-svcbind works correctly")
 		defer wg.Done()
 	}()
