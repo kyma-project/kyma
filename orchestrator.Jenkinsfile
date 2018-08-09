@@ -24,35 +24,35 @@ appVersion = "0.3." + env.BUILD_NUMBER
     IMPORTANT NOTE: Projects trigger jobs and therefore are expected to have a job defined with the same name.
 */
 projects = [
-        "docs": "kyma-docs",
-        "components/api-controller": "api-controller",
-        "components/binding-usage-controller": "binding-usage-controller",
-        "components/configurations-generator": "configurations-generator",
-        "components/environments": "environments",
-        "components/istio-webhook": "istio-webhook",
-        "components/helm-broker": "helm-broker",
-        "components/remote-environment-broker": "remote-environment-broker",
-        "components/metadata-service": "metadata-service",
-        "components/gateway": "gateway",
-        "components/installer": "installer",
-        "components/connector-service": "connector-service",
-        "components/ui-api-layer": "ui-api-layer",
-        "components/event-bus": "event-bus-publish",
-        "tools/alpine-net": "alpine-net",
-        "tools/watch-pods": "watch-pods",
-        "tools/stability-checker": "stability-checker",
-        "tools/etcd-backup": "etcd-backup",
-        "tests/test-logging-monitoring": "test-logging-monitoring",
-        "tests/acceptance": "acceptance-tests",
-        "tests/ui-api-layer-acceptance-tests": "ui-api-layer-acceptance-tests",
-        "tests/gateway-tests": "gateway-acceptance-tests",
-        "tests/test-environments": "test-environments",
-        "tests/kubeless-test-client": "kubeless-test-client",
-        "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
-        "tests/connector-service-tests": "connector-service-tests",
-        "tests/metadata-service-tests": "metadata-service-tests",
-        "tests/event-bus": "event-bus-e2e-tester",
-        "governance": null
+    "docs": "kyma-docs",
+    "components/api-controller": "api-controller",
+    "components/binding-usage-controller": "binding-usage-controller",
+    "components/configurations-generator": "configurations-generator",
+    "components/environments": "environments",
+    "components/istio-webhook": "istio-webhook",
+    "components/helm-broker": "helm-broker",
+    "components/remote-environment-broker": "remote-environment-broker",
+    "components/metadata-service": "metadata-service",
+    "components/gateway": "gateway",
+    "components/installer": "installer",
+    "components/connector-service": "connector-service",
+    "components/ui-api-layer": "ui-api-layer",
+    "components/event-bus": "event-bus-publish",
+    "tools/alpine-net": "alpine-net",
+    "tools/watch-pods": "watch-pods",
+    "tools/stability-checker": "stability-checker",
+    "tools/etcd-backup": "etcd-backup",
+    "tests/test-logging-monitoring": "test-logging-monitoring",
+    "tests/acceptance": "acceptance-tests",
+    "tests/ui-api-layer-acceptance-tests": "ui-api-layer-acceptance-tests",
+    "tests/gateway-tests": "gateway-acceptance-tests",
+    "tests/test-environments": "test-environments",
+    "tests/kubeless-test-client": "kubeless-test-client",
+    "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
+    "tests/connector-service-tests": "connector-service-tests",
+    "tests/metadata-service-tests": "metadata-service-tests",
+    "tests/event-bus": "event-bus-e2e-tester",
+    "governance": null
 ]
 
 /*
@@ -72,8 +72,8 @@ jobs = [:]
 runIntegration = false
 
 properties([
-        buildDiscarder(logRotator(numToKeepStr: '10')),
-        disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '10')),
+    disableConcurrentBuilds()
 ])
 
 podTemplate(label: label) {
@@ -98,13 +98,13 @@ podTemplate(label: label) {
                         for (int i=0; i < buildableProjects.size(); i++) {
                             def index = i
                             jobs["${buildableProjects[index]}"] = { ->
-                                build job: "kyma/"+buildableProjects[index],
-                                        wait: true,
-                                        parameters: [
+                                    build job: "kyma/"+buildableProjects[index],
+                                            wait: true,
+                                            parameters: [
                                                 string(name:'GIT_REVISION', value: "$commitID"),
                                                 string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
                                                 string(name:'APP_VERSION', value: "$appVersion")
-                                        ]
+                                            ]
                             }
                         }
                     }
@@ -122,7 +122,7 @@ podTemplate(label: label) {
 // gather all component versions
 stage('collect versions') {
     versions = [:]
-
+    
     changedProjects = jobs.keySet()
     for (int i = 0; i < changedProjects.size(); i++) {
         // only projects that have an associated docker image have a version to deploy
@@ -156,13 +156,13 @@ stage('build projects') {
 if (runIntegration) {
     stage('launch Kyma integration') {
         build job: 'kyma/integration',
-                wait: true,
-                parameters: [
-                        string(name:'GIT_REVISION', value: "$commitID"),
-                        string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
-                        string(name:'APP_VERSION', value: "$appVersion"),
-                        string(name:'COMP_VERSIONS', value: "$versions") // parse with groovy.json.JsonSlurperClassic
-                ]
+            wait: true,
+            parameters: [
+                string(name:'GIT_REVISION', value: "$commitID"),
+                string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
+                string(name:'APP_VERSION', value: "$appVersion"),
+                string(name:'COMP_VERSIONS', value: "$versions") // parse with groovy.json.JsonSlurperClassic
+            ]
     }
 }
 
@@ -237,8 +237,8 @@ String changeset() {
  */
 @NonCPS
 def commitHashForBuild(build) {
-    def scmAction = build?.actions.find { action -> action instanceof jenkins.scm.api.SCMRevisionAction }
-    return scmAction?.revision?.hash
+  def scmAction = build?.actions.find { action -> action instanceof jenkins.scm.api.SCMRevisionAction }
+  return scmAction?.revision?.hash
 }
 
 /**
