@@ -20,6 +20,20 @@ Living outside of the core product, Kyma allows you to be completely language-ag
 
 Read the [documentation](docs/README.md) to learn about the product, its technology stack, and components.
 
+### Project structure
+
+The repository has the following structure:
+
+```
+  ├── .github                     # Pull request and issue templates             
+  ├── components                  # Source code of all Kyma components                                                   
+  ├── docs                        # Documentation source files
+  ├── installation                # Installation scripts     
+  ├── resources                   # Helm charts and Kubernetes resources for the Kyma installation
+  ├── tests                       # Acceptance tests
+  └── tools                       # Source code of utilities used, for example, for the installation and testing
+  ```
+
 ## Installation
 
 Install Kyma [locally](docs/kyma/docs/031-gs-local-installation.md) and on a [cluster](docs/kyma/docs/032-gs-cluster-installation.md).
@@ -27,3 +41,48 @@ Install Kyma [locally](docs/kyma/docs/031-gs-local-installation.md) and on a [cl
 ## Usage
 
 Kyma comes with the ready-to-use code snippets that you can use to test the extensions and the core functionality. See the list of existing examples in the [`examples`](https://github.com/kyma-project/examples) repository.
+
+## Development
+
+Develop on your remote repository forked from the original repository in Go.
+See the example that uses the [`ui-api-layer`](components/ui-api-layer) project located in the `components` directory in the `kyma` repository but applies to any Go project. This set of instructions uses the recommended [`git workflow`](https://github.com/kyma-project/community/blob/master/git-workflow.md) and the Kyma [contribution flow](https://github.com/kyma-project/community/blob/master/CONTRIBUTING.md#contribute-code-or-content).
+
+Follow these steps:
+
+> **NOTE:** The example assumes you have the `$GOPATH` already set.
+
+1. Fork the repository in GitHub.
+
+2. Clone the fork to your `$GOPATH` workspace. Use this command to create the folder structure and clone the repository under the correct location:
+
+```
+git clone git@github.com:{GitHubUsername}/kyma.git $GOPATH/src/github.com/kyma-project/kyma
+```
+
+Follow the steps described in the [`git-workflow.md`](https://github.com/kyma-project/community/blob/master/git-workflow.md#steps) document to configure your fork.
+
+3. Install dependencies.
+
+Go to the main directory of the project in your workspace location and install the required dependencies:
+
+```
+$ cd components/ui-api-layer
+$ dep ensure -vendor-only
+```
+
+4. Build the project.
+
+Every project runs differently. Follow instructions in the main `README.md` document of the given project to build it.
+
+5. Create a branch and start to develop.
+
+6. Test your changes.
+
+When you finish, run unit and acceptance tests to verify your changes. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. To run the acceptance tests, go to the `tests` directory for details.
+
+7. Update the relevant documentation.
+
+> **NOTE:** Successful unit and acceptance tests, and the documentation update are required to open a pull request.
+
+7. Submit a pull request with your changes in code and wait for the owners' review and approval.
+8. When you receive the required approvals, create another pull request to update the image version and any configuration changes in relevant Kyma charts.
