@@ -63,7 +63,7 @@ podTemplate(label: label) {
 
                         stage("build image - event-bus-publish") {
                             dir(env.APP_FOLDER + '/cmd/event-bus-publish') {
-                                sh "./dockerBuild.sh event-bus-publish latest"
+                                sh "./dockerBuild.sh event-bus-publish ${dockerImageTag} ${application}"
                             }
                         }
 
@@ -73,7 +73,7 @@ podTemplate(label: label) {
 
                         stage("build image - event-bus-push") {
                             dir(env.APP_FOLDER + '/cmd/event-bus-push') {
-                                sh "./dockerBuild.sh event-bus-push latest"
+                                sh "./dockerBuild.sh event-bus-push ${dockerImageTag} ${application}"
                             }
                         }
 
@@ -83,7 +83,7 @@ podTemplate(label: label) {
 
                         stage("build image - event-bus-sub-validator") {
                             dir(env.APP_FOLDER + '/cmd/event-bus-sv') {
-                                sh "./dockerBuild.sh event-bus-sub-validator latest"
+                                sh "./dockerBuild.sh event-bus-sub-validator ${dockerImageTag} ${application}"
                             }
                         }
 
@@ -97,23 +97,41 @@ podTemplate(label: label) {
 
                         stage("push image - event-bus-publish") {
                             def imageName = "${dockerPushRoot}${imageNamePublish}:${dockerImageTag}"
-                            sh "docker tag event-bus-publish:latest ${imageName}"
+                            sh "docker tag event-bus-publish:${dockerImageTag} ${imageName}"
                             sh "docker push ${imageName}"
                             echo "pushed image event-bus-publish: ${imageName}"
+
+                            if (isMaster) {
+                                def latestImageName = "${dockerPushRoot}${imageNamePublish}:latest"
+                                sh "docker tag event-bus-publish:${dockerImageTag} ${latestImageName}"
+                                sh "docker push ${latestImageName}"
+                            }
                         }
 
                         stage("push image - event-bus-push") {
                             def imageName = "${dockerPushRoot}${imageNamePush}:${dockerImageTag}"
-                            sh "docker tag event-bus-push:latest ${imageName}"
+                            sh "docker tag event-bus-push:${dockerImageTag} ${imageName}"
                             sh "docker push ${imageName}"
                             echo "pushed image event-bus-push: ${imageName}"
+
+                            if (isMaster) {
+                                def latestImageName = "${dockerPushRoot}${imageNamePush}:latest"
+                                sh "docker tag event-bus-push:${dockerImageTag} ${latestImageName}"
+                                sh "docker push ${latestImageName}"
+                            }
                         }
 
                         stage("push image - event-bus-sub-validator") {
                             def imageName = "${dockerPushRoot}${imageNameSubValidator}:${dockerImageTag}"
-                            sh "docker tag event-bus-sub-validator:latest ${imageName}"
+                            sh "docker tag event-bus-sub-validator:${dockerImageTag} ${imageName}"
                             sh "docker push ${imageName}"
                             echo "pushed image event-bus-sub-validator: ${imageName}"
+
+                            if (isMaster) {
+                                def latestImageName = "${dockerPushRoot}${imageNameSubValidator}:latest"
+                                sh "docker tag event-bus-sub-validator:${dockerImageTag} ${latestImageName}"
+                                sh "docker push ${latestImageName}"
+                            }
                         }
                     }
                 }
