@@ -20,3 +20,5 @@ This document includes an overview of resources that the Kyma Service Catalog pr
 * **ServiceBindingUsage** is a Kyma custom resource that allows a ServiceBindingUsage controller to inject Secrets into a given application.
 
 * **ServiceInstance** is a provisioned instance of a ClusterServiceClass to use in one or more cluster applications.
+
+* **UsageKind** is a Kyma custom resource that allows you to bind a ServiceInstance to any resource.
