@@ -11,6 +11,7 @@ Monorepo root orchestrator: This Jenkinsfile runs the Jenkinsfiles of all subpro
         - revision
         - branch
         - current app version
+        - all component versions
 
 */
 def label = "kyma-${UUID.randomUUID().toString()}"
@@ -23,35 +24,35 @@ appVersion = "0.3." + env.BUILD_NUMBER
     IMPORTANT NOTE: Projects trigger jobs and therefore are expected to have a job defined with the same name.
 */
 projects = [
-    "docs": "kyma-docs",
-    "components/api-controller": "api-controller",
-    "components/binding-usage-controller": "binding-usage-controller",
-    "components/configurations-generator": "configurations-generator",
-    "components/environments": "environments",
-    "components/istio-webhook": "istio-webhook",
-    "components/helm-broker": "helm-broker",
-    "components/remote-environment-broker": "remote-environment-broker",
-    "components/metadata-service": "metadata-service",
-    "components/gateway": "gateway",
-    "components/installer": "installer",
-    "components/connector-service": "connector-service",
-    "components/ui-api-layer": "ui-api-layer",
-    "components/event-bus": "event-bus-publish",
-    "tools/alpine-net": "alpine-net",
-    "tools/watch-pods": "watch-pods",
-    "tools/stability-checker": "stability-checker",
-    "tools/etcd-backup": "etcd-backup",
-    "tests/test-logging-monitoring": "test-logging-monitoring",
-    "tests/acceptance": "acceptance-tests",
-    "tests/ui-api-layer-acceptance-tests": "ui-api-layer-acceptance-tests",
-    "tests/gateway-tests": "gateway-acceptance-tests",
-    "tests/test-environments": "test-environments",
-    "tests/kubeless-test-client": "kubeless-test-client",
-    "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
-    "tests/connector-service-tests": "connector-service-tests",
-    "tests/metadata-service-tests": "metadata-service-tests",
-    "tests/event-bus": "event-bus-e2e-tester",
-    "governance": null
+        "docs": "kyma-docs",
+        "components/api-controller": "api-controller",
+        "components/binding-usage-controller": "binding-usage-controller",
+        "components/configurations-generator": "configurations-generator",
+        "components/environments": "environments",
+        "components/istio-webhook": "istio-webhook",
+        "components/helm-broker": "helm-broker",
+        "components/remote-environment-broker": "remote-environment-broker",
+        "components/metadata-service": "metadata-service",
+        "components/gateway": "gateway",
+        "components/installer": "installer",
+        "components/connector-service": "connector-service",
+        "components/ui-api-layer": "ui-api-layer",
+        "components/event-bus": "event-bus-publish",
+        "tools/alpine-net": "alpine-net",
+        "tools/watch-pods": "watch-pods",
+        "tools/stability-checker": "stability-checker",
+        "tools/etcd-backup": "etcd-backup",
+        "tests/test-logging-monitoring": "test-logging-monitoring",
+        "tests/acceptance": "acceptance-tests",
+        "tests/ui-api-layer-acceptance-tests": "ui-api-layer-acceptance-tests",
+        "tests/gateway-tests": "gateway-acceptance-tests",
+        "tests/test-environments": "test-environments",
+        "tests/kubeless-test-client": "kubeless-test-client",
+        "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
+        "tests/connector-service-tests": "connector-service-tests",
+        "tests/metadata-service-tests": "metadata-service-tests",
+        "tests/event-bus": "event-bus-e2e-tester",
+        "governance": null
 ]
 
 /*
@@ -71,8 +72,8 @@ jobs = [:]
 runIntegration = false
 
 properties([
-    buildDiscarder(logRotator(numToKeepStr: '10')),
-    disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10')),
+        disableConcurrentBuilds()
 ])
 
 podTemplate(label: label) {
@@ -92,18 +93,18 @@ podTemplate(label: label) {
                     }
 
                     stage('collect projects') {
-                        buildableProjects = changes.intersect(projects) // only projects that have build jobs
+                        buildableProjects = changes.intersect(projects.keySet()) // only projects that have build jobs
                         echo "Collected the following projects with changes: $buildableProjects..."
                         for (int i=0; i < buildableProjects.size(); i++) {
                             def index = i
                             jobs["${buildableProjects[index]}"] = { ->
-                                    build job: "kyma/"+buildableProjects[index],
-                                            wait: true,
-                                            parameters: [
+                                build job: "kyma/"+buildableProjects[index],
+                                        wait: true,
+                                        parameters: [
                                                 string(name:'GIT_REVISION', value: "$commitID"),
                                                 string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
                                                 string(name:'APP_VERSION', value: "$appVersion")
-                                            ]
+                                        ]
                             }
                         }
                     }
@@ -118,24 +119,24 @@ podTemplate(label: label) {
     }
 }
 
-// trigger jobs for projects that have changes, in parallel
-stage('build projects') {
-    parallel jobs
-}
-
+// gather all component versions
 stage('collect versions') {
-    // gather all versions
     versions = [:]
-    // projects with changes
-    builtProjects = jobs.keySet()
-    for (int i = 0; i < builtProjects.size(); i++) {
-        versions["${builtProjects[i]}"] = env.BRANCH_NAME == "master" ? appVersion : env.BRANCH_NAME
+
+    changedProjects = jobs.keySet()
+    for (int i = 0; i < changedProjects.size(); i++) {
+        // only projects that have an associated docker image have a version to deploy
+        if (projects["${changedProjects[i]}"] != null) {
+            versions["${changedProjects[i]}"] = env.BRANCH_NAME == "master" ? appVersion : env.BRANCH_NAME
+        }
     }
 
-    // projects without changes
-    unbuiltProjects = projects - builtProjects
-    for (int i = 0; i < unbuiltProjects.size(); i++) {
-        versions["${unbuiltProjects[i]}"] = projectVersion("${unbuiltProjects[i]}")
+    unchangedProjects = projects.keySet() - changedProjects
+    for (int i = 0; i < unchangedProjects.size(); i++) {
+        // only projects that have an associated docker image have a version to deploy
+        if (projects["${unchangedProjects[i]}"] != null) {
+            versions["${unchangedProjects[i]}"] = projectVersion("${unchangedProjects[i]}")
+        }
     }
 
     // convert versions to JSON string to pass on
@@ -146,17 +147,22 @@ stage('collect versions') {
     """
 }
 
+// trigger jobs for projects that have changes, in parallel
+stage('build projects') {
+    parallel jobs
+}
+
 // trigger Kyma integration when changes are made to installation charts/code or resources
 if (runIntegration) {
     stage('launch Kyma integration') {
         build job: 'kyma/integration',
-            wait: true,
-            parameters: [
-                string(name:'GIT_REVISION', value: "$commitID"),
-                string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
-                string(name:'APP_VERSION', value: "$appVersion"),
-                string(name:'COMP_VERSIONS', value: "$versions") // parse with groovy.json.JsonSlurperClassic
-            ]
+                wait: true,
+                parameters: [
+                        string(name:'GIT_REVISION', value: "$commitID"),
+                        string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
+                        string(name:'APP_VERSION', value: "$appVersion"),
+                        string(name:'COMP_VERSIONS', value: "$versions") // parse with groovy.json.JsonSlurperClassic
+                ]
     }
 }
 
@@ -169,8 +175,9 @@ if (runIntegration) {
  * If no changes found, all projects will be returned.
  */
 String[] changedProjects() {
-    res = []
-    def allProjects = projects + additionalProjects
+    def res = []
+    def projectPaths = projects.keySet()
+    def allProjects = projectPaths + additionalProjects
     echo "Looking for changes in the following projects: $allProjects."
 
     // get all changes
@@ -189,8 +196,8 @@ String[] changedProjects() {
                 res.add(allProjects[i])
                 break // already found a change in the current project, no need to continue iterating the changeset
             }
-            if (projects[i] == "governance" && allChanges[j].endsWith(".md") && !res.contains(projects[i])) {
-                res.add(projects[i])
+            if (allProjects[i] == "governance" && allChanges[j].endsWith(".md") && !res.contains(allProjects[i])) {
+                res.add(allProjects[i])
                 break // already found a change in one of the .md files, no need to continue iterating the changeset
             }
         }
@@ -230,20 +237,19 @@ String changeset() {
  */
 @NonCPS
 def commitHashForBuild(build) {
-  def scmAction = build?.actions.find { action -> action instanceof jenkins.scm.api.SCMRevisionAction }
-  return scmAction?.revision?.hash
+    def scmAction = build?.actions.find { action -> action instanceof jenkins.scm.api.SCMRevisionAction }
+    return scmAction?.revision?.hash
 }
 
 /**
- * Fetches the newest released version of the given project from its manifest in the registry or empty string if there is none.
+ * Fetches the newest released version of the given project from its manifest in the registry or an error if the version could not be fetched.
  * This function relies on the latest tag on docker images.
  * More info: https://docs.docker.com/registry/spec/manifest-v2-1/
  */
 String projectVersion(project) {
     try {
-        def index = project.lastIndexOf('/')
-        project = project.substring(index+1)
-        def json = "https://eu.gcr.io/v2/kyma-project/${project}/manifests/latest".toURL().getText(requestProperties: [Accept: 'application/vnd.docker.distribution.manifest.v1+prettyjws'])
+        def img = projects[project]
+        def json = "https://eu.gcr.io/v2/kyma-project/${img}/manifests/latest".toURL().getText(requestProperties: [Accept: 'application/vnd.docker.distribution.manifest.v1+prettyjws'])
         def slurper = new JsonSlurperClassic()
         def doc = slurper.parseText(json)
         doc = slurper.parseText(doc.history[0].v1Compatibility)
@@ -251,7 +257,6 @@ String projectVersion(project) {
         return doc.config.Labels.version
 
     } catch(e) {
-        echo "Got exception getting latest version for project ${project}: ${e}"
+        error("Error fetching latest version for ${project}: ${e}. Please check that ${project} has a docker image tagged ${img}:latest in the docker registry.\nLatest images are pushed to the registry on master branch builds.")
     }
-    return ""
 }
