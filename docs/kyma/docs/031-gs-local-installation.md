@@ -16,7 +16,7 @@ To run Kyma locally, clone this Git repository to your local machine and downloa
 - [Helm](https://github.com/kubernetes/helm) 2.8.2
 - [jq](https://stedolan.github.io/jq/)
 
-Vitrualization:
+Virtualization:
 
 - [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - Mac only
 - [VirtualBox](https://www.virtualbox.org/) - Linux or Windows
