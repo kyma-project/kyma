@@ -32,7 +32,7 @@ func TestSpec(t *testing.T) {
 
 	ingressGatewayControllerServiceURL, envFound := os.LookupEnv(ingressGatewayControllerServiceURLEnv)
 	if !envFound {
-		t.Fatal(ingressGatewayControllerServiceURLEnv + " env variable not set")
+		t.Fatalf("%s env variable not set", ingressGatewayControllerServiceURLEnv)
 	}
 
 	isLocalEnv, envFound := os.LookupEnv(isLocalEnvEnvName)
@@ -47,16 +47,18 @@ func TestSpec(t *testing.T) {
 		t.Skip()
 	}
 
-	ingressGatewayControllerAddr, err := net.LookupHost(ingressGatewayControllerServiceURL)
+	var ingressGatewayControllerAddr string
+	hostLookupResponse, err := net.LookupHost(ingressGatewayControllerServiceURL)
 	if err != nil {
-
 		glog.Warningf("Unable to resolve host '%s' (if you are running this test from outside of Kyma ignore this log). Root cause: %v", ingressGatewayControllerServiceURL, err)
 
-		if minikubeIp := tryToGetMinikubeIp(); minikubeIp != "" {
-			ingressGatewayControllerAddr = []string{minikubeIp}
-		} else {
+		minikubeIp := tryToGetMinikubeIp()
+		if minikubeIp == "" {
 			t.Fatal(err)
 		}
+		ingressGatewayControllerAddr = minikubeIp
+	} else {
+		ingressGatewayControllerAddr = hostLookupResponse[0]
 	}
 
 	domain, envFound := os.LookupEnv(domainEnvName)
@@ -72,7 +74,7 @@ func TestSpec(t *testing.T) {
 		tr.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 			// Changes request destination address to ingress gateway internal cluster address for requests to dex.
 			if strings.HasPrefix(addr, "dex") {
-				addr = ingressGatewayControllerAddr[0] + ":443"
+				addr = fmt.Sprintf("%s:443", ingressGatewayControllerAddr)
 			}
 			dialer := net.Dialer{}
 			return dialer.DialContext(ctx, network, addr)
@@ -125,6 +127,7 @@ func TestSpec(t *testing.T) {
 		tokenPayload := make(map[string]interface{})
 		err = json.Unmarshal(tokenPayloadDecoded, &tokenPayload)
 
+		So(err, ShouldBeNil)
 		So(tokenPayload["iss"].(string), ShouldEqual, idProviderConfig.dexConfig.baseUrl)
 		So(tokenPayload["aud"].(string), ShouldEqual, idProviderConfig.clientConfig.id)
 		So(tokenPayload["email"].(string), ShouldEqual, idProviderConfig.userCredentials.username)

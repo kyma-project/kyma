@@ -8,8 +8,6 @@ import (
 	"strings"
 
 	"log"
-
-	"github.com/pkg/errors"
 )
 
 type idTokenProvider interface {
@@ -36,58 +34,58 @@ func (p *dexIdTokenProvider) fetchIdToken() (string, error) {
 
 func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 
-	authorizeResp, err1 := p.httpClient.PostForm(p.config.dexConfig.authorizeEndpoint, url.Values{
+	authorizeResp, err := p.httpClient.PostForm(p.config.dexConfig.authorizeEndpoint, url.Values{
 		"response_type": {"id_token token"},
 		"client_id":     {p.config.clientConfig.id},
 		"redirect_uri":  {p.config.clientConfig.redirectUri},
 		"scope":         {"openid profile email groups"},
 		"nonce":         {"vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM"},
 	})
-	if err1 != nil {
-		return nil, err1
+	if err != nil {
+		return nil, err
 	}
 	if authorizeResp.StatusCode < 300 || authorizeResp.StatusCode > 399 {
-		return nil, errors.New(fmt.Sprintf("Authorize - response error: '%s' - %s", authorizeResp.Status, readRespBody(authorizeResp)))
+		return nil, fmt.Errorf("Authorize - response error: '%s' - %s", authorizeResp.Status, readRespBody(authorizeResp))
 	}
 
 	// /auth/local?req=qruhpy2cqjvv4hcrbuu44mf4v
 	loginEndpoint := authorizeResp.Header.Get("location")
 	if strings.Contains(loginEndpoint, "#.*error") {
-		return nil, errors.New(fmt.Sprintf("Login - Redirected with error: '%s'", loginEndpoint))
+		return nil, fmt.Errorf("Login - Redirected with error: '%s'", loginEndpoint)
 	}
 
-	_, err2 := p.httpClient.Get(p.config.dexConfig.baseUrl + loginEndpoint)
-	if err2 != nil {
-		return nil, err2
+	_, err = p.httpClient.Get(p.config.dexConfig.baseUrl + loginEndpoint)
+	if err != nil {
+		return nil, err
 	}
 
-	loginResp, err3 := p.httpClient.PostForm(p.config.dexConfig.baseUrl+loginEndpoint, url.Values{
+	loginResp, err := p.httpClient.PostForm(p.config.dexConfig.baseUrl+loginEndpoint, url.Values{
 		"login":    {p.config.userCredentials.username},
 		"password": {p.config.userCredentials.password},
 	})
-	if err3 != nil {
-		return nil, err3
+	if err != nil {
+		return nil, err
 	}
 	if loginResp.StatusCode < 300 || loginResp.StatusCode > 399 {
-		return nil, errors.New(fmt.Sprintf("Login - response error: '%s' - %s", loginResp.Status, readRespBody(loginResp)))
+		return nil, fmt.Errorf("Login - response error: '%s' - %s", loginResp.Status, readRespBody(loginResp))
 	}
 
 	// /approval?req=qruhpy2cqjvv4hcrbuu44mf4v
 	approvalEndpoint := loginResp.Header.Get("location")
 	if strings.Contains(approvalEndpoint, "#.*error") {
-		return nil, errors.New(fmt.Sprintf("Approval - Redirected with error: '%s'", approvalEndpoint))
+		return nil, fmt.Errorf("Approval - Redirected with error: '%s'", approvalEndpoint)
 	}
-	approvalResp, err4 := p.httpClient.Get(p.config.dexConfig.baseUrl + approvalEndpoint)
-	if err4 != nil {
-		return nil, err4
+	approvalResp, err := p.httpClient.Get(p.config.dexConfig.baseUrl + approvalEndpoint)
+	if err != nil {
+		return nil, err
 	}
 	if approvalResp.StatusCode < 300 || approvalResp.StatusCode > 399 {
-		return nil, errors.New(fmt.Sprintf("Approval - response error: '%s' - %s", approvalResp.Status, readRespBody(approvalResp)))
+		return nil, fmt.Errorf("Approval - response error: '%s' - %s", approvalResp.Status, readRespBody(approvalResp))
 	}
 
 	clientEndpoint := approvalResp.Header.Get("location")
 	if strings.Contains(clientEndpoint, "#.*error") {
-		return nil, errors.New(fmt.Sprintf("Client - Redirected with error: '%s'", clientEndpoint))
+		return nil, fmt.Errorf("Client - Redirected with error: '%s'", clientEndpoint)
 	}
 
 	parsedUrl, parseErr := url.Parse(clientEndpoint)
@@ -95,7 +93,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 		return nil, parseErr
 	}
 
-	var result map[string]string = make(map[string]string)
+	result := make(map[string]string)
 	fragmentParams := strings.Split(parsedUrl.Fragment, "&")
 	for _, param := range fragmentParams {
 		keyAndValue := strings.Split(param, "=")
