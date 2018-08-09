@@ -9,7 +9,7 @@ This Getting Started guide shows developers how to to quickly deploy Kyma on a c
 
 ## Prerequisites
 
-**NOTE:** The public IPs and DNS records for Istio Ingress and the Remote Environments gateway must exist prior to the Kyma installation. The Kyma installer does not support clusters on AWS as the provider does not support static IP assignment during ELB creation.
+>**NOTE:** The public IPs and DNS records for Istio Ingress and the Remote Environments gateway must exist prior to the Kyma installation. The Kyma installer does not support clusters on AWS as the provider does not support static IP assignment during ELB creation.
 
 The cluster on which you install Kyma must run Kubernetes version `1.10` or higher.
 
@@ -23,7 +23,7 @@ To install Kyma, you need the following data:
 - The wildcard TLS certificate for your cluster domain that you can generate with **Let's Encrypt**
 - The certificate for Remote Environments.
 
-**NOTE:** See the Application Connector documentation for more details.
+>**NOTE:** See the Application Connector documentation for more details on Remote Environments.
 
 Configure the Kubernetes API Server following this template:
 
@@ -72,7 +72,7 @@ The Kyma installation process requires installation data specified in the `insta
 - `__ENABLE_ETCD_BACKUP_OPERATOR__` to enable or disable the `etcd` backup operator. Enter `true` or `false`.
 - `__ETCD_BACKUP_ABS_CONTAINER_NAME__` for the Azure Blob Storage name of `etcd` backups. You can leave the value blank when the backup operator is disabled.
 
-**NOTE:** As the `etcd` backup feature is in development, set `__ENABLE_ETCD_BACKUP_OPERATOR__` to `false` and leave `__ETCD_BACKUP_ABS_CONTAINER_NAME__` blank.
+>**NOTE:** As the `etcd` backup feature is in development, set `__ENABLE_ETCD_BACKUP_OPERATOR__` to `false` and leave `__ETCD_BACKUP_ABS_CONTAINER_NAME__` blank.
 
 When you fill in all required placeholder values, run the following command to provide the cluster with the installation data:
 
@@ -117,7 +117,7 @@ To trigger the installation of Kyma, you need a Custom Resource file. Duplicate 
 - `__VERSION__` for the version number of Kyma to install. When manually installing Kyma on a cluster, specify any valid [SemVer](https://semver.org/) notation string. For example, `0.0.1`.
 - `__URL__` for the URL to the Kyma `tar.gz` package to install. For example, for the `master` branch of Kyma, the address is `https://github.com/kyma-project/kyma/archive/master.tar.gz`.
 
->**NOTE:** Read the **Installation** document to learn more about the Custom Resource that controls the Kyma installer. 
+>**NOTE:** Read the **Installation** document to learn more about the Custom Resource that controls the Kyma installer.
 
 Once the file is ready, run this command to trigger the installation:
 
