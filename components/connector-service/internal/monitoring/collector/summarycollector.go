@@ -6,7 +6,7 @@ import (
 )
 
 type Collector interface {
-	AddObservation(message float64, labelValues ...string)
+	AddObservation(observation float64, labelValues ...string)
 }
 
 type summaryCollector struct {
@@ -24,6 +24,6 @@ func NewSummaryCollector(opts prometheus.SummaryOpts, labels []string) (Collecto
 	return &summaryCollector{vector: vector}, nil
 }
 
-func (ms *summaryCollector) AddObservation(message float64, labelValues ...string) {
-	ms.vector.WithLabelValues(labelValues...).Observe(float64(message))
+func (ms *summaryCollector) AddObservation(observation float64, labelValues ...string) {
+	ms.vector.WithLabelValues(labelValues...).Observe(float64(observation))
 }

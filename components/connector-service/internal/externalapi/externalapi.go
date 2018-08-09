@@ -5,7 +5,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
-	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring"
 )
 
 type SignatureHandler interface {
@@ -16,11 +15,11 @@ type InfoHandler interface {
 	GetInfo(w http.ResponseWriter, r *http.Request)
 }
 
-func NewHandler(sHandler SignatureHandler, iHandler InfoHandler, middlewares []monitoring.Middleware) http.Handler {
+func NewHandler(sHandler SignatureHandler, iHandler InfoHandler, middlewares []mux.MiddlewareFunc) http.Handler {
 	router := mux.NewRouter()
 
 	for _, middleware := range middlewares {
-		router.Use(middleware.Handle)
+		router.Use(middleware)
 	}
 
 	registrationRouter := router.PathPrefix("/v1/remoteenvironments").Subrouter()

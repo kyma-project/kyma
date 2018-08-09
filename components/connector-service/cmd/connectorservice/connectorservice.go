@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
@@ -39,7 +40,7 @@ func main() {
 	certUtil := certificates.NewCertificateUtility()
 	tokenGenerator := tokens.NewTokenGenerator(options.tokenLength, tokenCache)
 
-	middlewares, appErr := monitoring.SetupMonitoring()
+	middlewares, appErr := monitoring.SetupMonitoringMiddleware()
 	if appErr != nil {
 		log.Errorf("Error while setting up monitoring: %s", appErr)
 	}
@@ -71,13 +72,13 @@ func main() {
 	http.Handle("/metrics", promhttp.Handler())
 
 	go func() {
-		log.Fatal(http.ListenAndServe(":9090", nil))
+		log.Info(http.ListenAndServe(":9090", nil))
 	}()
 
 	wg.Wait()
 }
 
-func newExternalHandler(cache tokencache.TokenCache, utility certificates.CertificateUtility, tokenGenerator tokens.TokenGenerator, opts *options, env *environment, middlewares []monitoring.Middleware) http.Handler {
+func newExternalHandler(cache tokencache.TokenCache, utility certificates.CertificateUtility, tokenGenerator tokens.TokenGenerator, opts *options, env *environment, middlewares []mux.MiddlewareFunc) http.Handler {
 	secretsRepository, appErr := newSecretsRepository(opts.namespace)
 	if appErr != nil {
 		log.Infof("Failed to create secrets repository. %s", appErr.Error())
@@ -96,7 +97,7 @@ func newExternalHandler(cache tokencache.TokenCache, utility certificates.Certif
 	return externalapi.NewHandler(rh, ih, middlewares)
 }
 
-func newInternalHandler(cache tokencache.TokenCache, tokenGenerator tokens.TokenGenerator, host string, middlewares []monitoring.Middleware) http.Handler {
+func newInternalHandler(cache tokencache.TokenCache, tokenGenerator tokens.TokenGenerator, host string, middlewares []mux.MiddlewareFunc) http.Handler {
 	th := internalapi.NewTokenHandler(tokenGenerator, host)
 	return internalapi.NewHandler(th, middlewares)
 }

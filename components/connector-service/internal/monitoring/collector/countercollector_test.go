@@ -9,7 +9,7 @@ import (
 
 func TestNewCounterCollector(t *testing.T) {
 
-	t.Run("should create and register counter collector", func(t *testing.T) {
+	t.Run("should create counter collector", func(t *testing.T) {
 		// given
 		opts := prometheus.CounterOpts{
 			Name: "counter",

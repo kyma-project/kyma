@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"bytes"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring/collector/mocks"
 	"github.com/stretchr/testify/assert"
@@ -30,12 +30,10 @@ func TestDurationMiddleware_Handle(t *testing.T) {
 		testServer := httptest.NewServer(router)
 		defer testServer.Close()
 
-		var fullUrl bytes.Buffer
-		fullUrl.WriteString(string(testServer.URL))
-		fullUrl.WriteString(path)
+		fullUrl := fmt.Sprintf("%s%s", testServer.URL, path)
 
 		// when
-		response, apperr := http.Post(fullUrl.String(), "application/json", nil)
+		response, apperr := http.Post(fullUrl, "application/json", nil)
 		require.NoError(t, apperr)
 
 		// then

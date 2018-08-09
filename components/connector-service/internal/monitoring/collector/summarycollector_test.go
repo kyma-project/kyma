@@ -9,7 +9,7 @@ import (
 
 func TestNewSummaryCollector(t *testing.T) {
 
-	t.Run("should create and register summary collector", func(t *testing.T) {
+	t.Run("should create summary collector", func(t *testing.T) {
 		// given
 		opts := prometheus.SummaryOpts{
 			Name: "summary",

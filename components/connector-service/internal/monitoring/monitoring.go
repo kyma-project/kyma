@@ -1,11 +1,11 @@
 package monitoring
 
 import (
+	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring/collector"
 	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring/middleware"
 	"github.com/prometheus/client_golang/prometheus"
-	"net/http"
 )
 
 const (
@@ -13,11 +13,7 @@ const (
 	percentileAccuracy   = 0.05
 )
 
-type Middleware interface {
-	Handle(next http.Handler) http.Handler
-}
-
-func SetupMonitoring() ([]Middleware, apperrors.AppError) {
+func SetupMonitoringMiddleware() ([]mux.MiddlewareFunc, apperrors.AppError) {
 
 	durationMiddleware, err := newDurationMiddleware("connector_service_endpoints_duration")
 	if err != nil {
@@ -29,7 +25,7 @@ func SetupMonitoring() ([]Middleware, apperrors.AppError) {
 		return nil, apperrors.Internal("Failed to setup response codes middleware: %s", err.Error())
 	}
 
-	return []Middleware{durationMiddleware, codeMiddleware}, nil
+	return []mux.MiddlewareFunc{durationMiddleware.Handle, codeMiddleware.Handle}, nil
 }
 
 func newCodeMiddleware(name string) (*middleware.CodeMiddleware, apperrors.AppError) {

@@ -20,6 +20,6 @@ func NewCounterCollector(opts prometheus.CounterOpts, labels []string) (Collecto
 	return &counterCollector{vector: vector}, nil
 }
 
-func (ms *counterCollector) AddObservation(message float64, labelValues ...string) {
-	ms.vector.WithLabelValues(labelValues...).Add(float64(message))
+func (ms *counterCollector) AddObservation(observation float64, labelValues ...string) {
+	ms.vector.WithLabelValues(labelValues...).Add(float64(observation))
 }

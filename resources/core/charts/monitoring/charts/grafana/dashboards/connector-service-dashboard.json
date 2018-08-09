@@ -2,6 +2,7 @@
   "annotations": {
     "list": [
       {
+        "$$hashKey": "object:67",
         "builtIn": 1,
         "datasource": "-- Grafana --",
         "enable": true,
@@ -15,7 +16,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1533632584748,
+  "iteration": 1533822819914,
   "links": [],
   "panels": [
     {
@@ -454,6 +455,7 @@
       "steppedLine": false,
       "targets": [
         {
+          "$$hashKey": "object:132",
           "expr": "connector_service_endpoints_duration{exported_endpoint=~\"$endpoint\", quantile=\"0.995\"}",
           "format": "time_series",
           "hide": false,
@@ -466,7 +468,7 @@
       "thresholds": [],
       "timeFrom": "5h",
       "timeShift": null,
-      "title": "99.5%ile of request durration",
+      "title": "99.5%ile of request duration",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -558,7 +560,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "connector_service_endpoints_responses{exported_endpoint=~\"$endpoint\"}",
+          "$$hashKey": "object:287",
+          "expr": "increase(connector_service_endpoints_responses{exported_endpoint=~\"$endpoint\"}[10m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{exported_endpoint}} {{ status }}",
@@ -615,7 +618,6 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "/v1/remoteenvironments/{reName}/info + /v1/remoteenvironments/{reName}/tokens",
           "value": [
             "/v1/remoteenvironments/{reName}/info",
