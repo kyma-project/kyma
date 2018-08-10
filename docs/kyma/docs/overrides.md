@@ -6,22 +6,24 @@ This document describes how to configure Installer with override values for Helm
 ## Overview
 
 The Installer is a Kubernetes Operator that uses Helm golang client to install Kyma components.
+
 Some components must be configured to align with installation environment (e.g. Domain name, TLS Certificates, Api Server CA etc.)
 You might also want to customize the installation - for example: Provide different memory setting for particular component or change some database properties.
+
 To address these needs, the Installer provides a generic way to configure overrides for your Helm charts.
 
 There are two sources of overrides for Installer:
 - Default overrides: Defined in `overrides.yaml`, a file in the root of installation package, that specifies versions of all kyma-specific components and other static overrides.
 - User-provided overrides: Optionally defined by the User. User-provided overrides have precedence over default ones.
 
-***Note*** Overrides described here are using Helm mechanisms without any changes or customizations, please consult Helm documentation in case of any doubts. What's described here is the way to pass overrides to Kyma Installer in order to use them during Helm install/upgrade operations.
+**Note**: *Overrides described here are using Helm mechanisms without any changes or customizations, please consult Helm documentation in case of any doubts. What's described here is the way to pass overrides to Kyma Installer in order to use them during Helm install/upgrade operations.*
 
 
 ## User-provided overrides
 
 Installer finds user-provided overrides by reading ConfigMaps and Secrets deployed in `kyma-installer` namespace and marked with `installer:overrides` label.
 Installer constructs the override by inspecting the ConfigMap/Secret entry key name. The key name should be a dot-separated sequence of strings, corresponding to the template values used in the chart template. See examples below.
-***Note***: Regardless of how many user-provided override objects (ConfigMaps/Secrets) exist, Installer merges them all into one single override structure and is using that to install all components.
+**Note**: *Regardless of how many user-provided override objects (ConfigMaps/Secrets) exist, Installer merges them all into one single override structure and is using that to install all components.*
 
 #### Top-level charts overrides
 
