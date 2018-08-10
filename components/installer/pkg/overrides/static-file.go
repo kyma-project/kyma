@@ -10,7 +10,7 @@ import (
 // StaticFile interface defines contract for overrides file representation
 type StaticFile interface {
 	HasOverrides() bool
-	GetOverrides() (*string, error)
+	GetOverrides() (OverridesMap, error)
 }
 
 // LocalStaticFile struct defines static file overrides for local
@@ -27,8 +27,8 @@ func (localStaticFile *LocalStaticFile) HasOverrides() bool {
 }
 
 // GetOverrides .
-func (localStaticFile *LocalStaticFile) GetOverrides() (*string, error) {
-	return nil, nil
+func (localStaticFile *LocalStaticFile) GetOverrides() (OverridesMap, error) {
+	return OverridesMap{}, nil
 }
 
 // ClusterStaticFile struct defines static file overrides for cluster
@@ -57,7 +57,7 @@ func (clusterStaticFile *ClusterStaticFile) HasOverrides() bool {
 }
 
 // GetOverrides function reads cluster overrides file and returns its content
-func (clusterStaticFile *ClusterStaticFile) GetOverrides() (*string, error) {
+func (clusterStaticFile *ClusterStaticFile) GetOverrides() (OverridesMap, error) {
 	fileBytes, err := ioutil.ReadFile(clusterStaticFile.getFilePath())
 
 	if err != nil {
@@ -68,9 +68,7 @@ func (clusterStaticFile *ClusterStaticFile) GetOverrides() (*string, error) {
 		return nil, err
 	}
 
-	overridesStr := string(fileBytes)
-
-	return &overridesStr, nil
+	return ToMap(string(fileBytes))
 }
 
 func (clusterStaticFile *ClusterStaticFile) getFilePath() string {

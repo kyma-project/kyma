@@ -3,7 +3,6 @@ package steps
 import (
 	"log"
 	"path"
-	"strings"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
 	"github.com/kyma-project/kyma/components/installer/pkg/consts"
@@ -17,7 +16,12 @@ func (steps *InstallationSteps) InstallIstio(installationData *config.Installati
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.chartDir, consts.IstioComponent, "istio")
-	overrides := steps.getIstioOverrides(installationData, chartDir)
+	overrides, err := steps.getIstioOverrides(installationData, chartDir)
+
+	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
 
 	//helm install
 	installResp, installErr := steps.helmClient.InstallReleaseWithoutWait(
@@ -44,7 +48,12 @@ func (steps *InstallationSteps) UpdateIstio(installationData *config.Installatio
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.chartDir, consts.IstioComponent, "istio")
-	overrides := steps.getIstioOverrides(installationData, chartDir)
+	overrides, err := steps.getIstioOverrides(installationData, chartDir)
+
+	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
+		steps.statusManager.Error("Updating istio")
+		return err
+	}
 
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
@@ -62,23 +71,23 @@ func (steps *InstallationSteps) UpdateIstio(installationData *config.Installatio
 	return nil
 }
 
-func (steps *InstallationSteps) getIstioOverrides(installationData *config.InstallationData, chartDir string) string {
-	var allOverrides []string
+func (steps *InstallationSteps) getIstioOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
+	allOverrides := overrides.OverridesMap{}
 
 	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
 	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)
-	allOverrides = append(allOverrides, globalOverrides)
+	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	istioOverrides, err := overrides.GetIstioOverrides(installationData)
 	steps.errorHandlers.LogError("Couldn't get Istio overrides: ", err)
-	allOverrides = append(allOverrides, istioOverrides)
+	overrides.MergeMaps(allOverrides, istioOverrides)
 
-	fileOverrides := steps.getStaticFileOverrides(installationData, chartDir)
-	if fileOverrides.HasOverrides() == true {
-		fileOverridesStr, err := fileOverrides.GetOverrides()
+	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
+	if staticOverrides.HasOverrides() == true {
+		fileOverrides, err := staticOverrides.GetOverrides()
 		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
-		allOverrides = append(allOverrides, *fileOverridesStr)
+		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
-	return strings.Join(allOverrides, "\n")
+	return overrides.ToYaml(allOverrides)
 }

@@ -3,7 +3,6 @@ package steps
 import (
 	"log"
 	"path"
-	"strings"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
 	"github.com/kyma-project/kyma/components/installer/pkg/consts"
@@ -17,7 +16,12 @@ func (steps *InstallationSteps) InstallClusterEssentials(installationData *confi
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.chartDir, consts.ClusterEssentialsComponent)
-	clusterEssentialsOverrides := steps.getClusterEssentialsOverrides(installationData, chartDir)
+	clusterEssentialsOverrides, err := steps.getClusterEssentialsOverrides(installationData, chartDir)
+
+	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
 
 	installResp, installErr := steps.helmClient.InstallRelease(
 		chartDir,
@@ -43,7 +47,12 @@ func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.chartDir, consts.ClusterEssentialsComponent)
-	clusterEssentailsOverrides := steps.getClusterEssentialsOverrides(installationData, chartDir)
+	clusterEssentailsOverrides, err := steps.getClusterEssentialsOverrides(installationData, chartDir)
+
+	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
 
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
@@ -61,19 +70,19 @@ func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config
 	return nil
 }
 
-func (steps *InstallationSteps) getClusterEssentialsOverrides(installationData *config.InstallationData, chartDir string) string {
-	var allOverrides []string
+func (steps *InstallationSteps) getClusterEssentialsOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
+	allOverrides := overrides.OverridesMap{}
 
 	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
 	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)
-	allOverrides = append(allOverrides, globalOverrides)
+	overrides.MergeMaps(allOverrides, globalOverrides)
 
-	fileOverrides := steps.getStaticFileOverrides(installationData, chartDir)
-	if fileOverrides.HasOverrides() == true {
-		fileOverridesStr, err := fileOverrides.GetOverrides()
+	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
+	if staticOverrides.HasOverrides() == true {
+		fileOverrides, err := staticOverrides.GetOverrides()
 		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
-		allOverrides = append(allOverrides, *fileOverridesStr)
+		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
-	return strings.Join(allOverrides, "\n")
+	return overrides.ToYaml(allOverrides)
 }

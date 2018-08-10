@@ -4,7 +4,6 @@ import (
 	"log"
 	"os/exec"
 	"path"
-	"strings"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
 	"github.com/kyma-project/kyma/components/installer/pkg/consts"
@@ -20,7 +19,14 @@ func (steps InstallationSteps) InstallCore(installationData *config.Installation
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.chartDir, consts.CoreComponent)
-	coreOverrides := steps.getCoreOverrides(installationData, chartDir)
+	coreOverrides, err := steps.getCoreOverrides(installationData, chartDir)
+
+	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		logCore(steps)
+		return err
+	}
+
 	installResp, installErr := steps.helmClient.InstallRelease(
 		chartDir,
 		"kyma-system",
@@ -46,7 +52,13 @@ func (steps InstallationSteps) UpgradeCore(installationData *config.Installation
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.chartDir, consts.CoreComponent)
-	coreOverrides := steps.getCoreOverrides(installationData, chartDir)
+	coreOverrides, err := steps.getCoreOverrides(installationData, chartDir)
+
+	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		logCore(steps)
+		return err
+	}
 
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
@@ -91,28 +103,28 @@ func logFailedResources(ns string) {
 	log.Println(string(msg[:]))
 }
 
-func (steps *InstallationSteps) getCoreOverrides(installationData *config.InstallationData, chartDir string) string {
-	var allOverrides []string
+func (steps *InstallationSteps) getCoreOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
+	allOverrides := overrides.OverridesMap{}
 
 	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
 	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)
-	allOverrides = append(allOverrides, globalOverrides)
+	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	azureBrokerOverrides, err := overrides.EnableAzureBroker(installationData)
 	steps.errorHandlers.LogError("Enable azure-broker Error: ", err)
-	allOverrides = append(allOverrides, azureBrokerOverrides)
+	overrides.MergeMaps(allOverrides, azureBrokerOverrides)
 
 	coreOverrides, err := overrides.GetCoreOverrides(installationData)
 	steps.errorHandlers.LogError("Couldn't get Kyma core overrides: ", err)
 
-	allOverrides = append(allOverrides, coreOverrides)
+	overrides.MergeMaps(allOverrides, coreOverrides)
 
-	fileOverrides := steps.getStaticFileOverrides(installationData, chartDir)
-	if fileOverrides.HasOverrides() == true {
-		fileOverridesStr, err := fileOverrides.GetOverrides()
+	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
+	if staticOverrides.HasOverrides() == true {
+		fileOverrides, err := staticOverrides.GetOverrides()
 		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
-		allOverrides = append(allOverrides, *fileOverridesStr)
+		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
-	return strings.Join(allOverrides, "\n")
+	return overrides.ToYaml(allOverrides)
 }

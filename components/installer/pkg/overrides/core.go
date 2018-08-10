@@ -33,23 +33,23 @@ etcd-operator:
 `
 
 // GetCoreOverrides - returns values overrides for core installation basing on domain
-func GetCoreOverrides(installationData *config.InstallationData) (string, error) {
+func GetCoreOverrides(installationData *config.InstallationData) (OverridesMap, error) {
 	if hasValidDomain(installationData) == false {
-		return "", nil
+		return OverridesMap{}, nil
 	}
 
 	tmpl, err := template.New("").Parse(coreTplStr)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, installationData)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return buf.String(), nil
+	return ToMap(buf.String())
 }
 
 func hasValidDomain(installationData *config.InstallationData) bool {

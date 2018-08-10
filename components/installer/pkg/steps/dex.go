@@ -3,7 +3,6 @@ package steps
 import (
 	"log"
 	"path"
-	"strings"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
 	"github.com/kyma-project/kyma/components/installer/pkg/consts"
@@ -17,7 +16,12 @@ func (steps *InstallationSteps) InstallDex(installationData *config.Installation
 	const namespace string = "kyma-system"
 
 	chartDir := path.Join(steps.chartDir, consts.DexComponent)
-	overrides := steps.getDexOverrides(installationData, chartDir)
+	overrides, err := steps.getDexOverrides(installationData, chartDir)
+
+	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
 
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -46,7 +50,12 @@ func (steps *InstallationSteps) UpdateDex(installationData *config.InstallationD
 	const namespace string = "kyma-system"
 
 	chartDir := path.Join(steps.chartDir, consts.DexComponent)
-	overrides := steps.getDexOverrides(installationData, chartDir)
+	overrides, err := steps.getDexOverrides(installationData, chartDir)
+
+	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
 
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -67,20 +76,20 @@ func (steps *InstallationSteps) UpdateDex(installationData *config.InstallationD
 	return nil
 }
 
-func (steps *InstallationSteps) getDexOverrides(installationData *config.InstallationData, chartDir string) string {
+func (steps *InstallationSteps) getDexOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
 
-	var allOverrides []string
+	allOverrides := overrides.OverridesMap{}
 
 	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
 	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)
-	allOverrides = append(allOverrides, globalOverrides)
+	overrides.MergeMaps(allOverrides, globalOverrides)
 
-	fileOverrides := steps.getStaticFileOverrides(installationData, chartDir)
-	if fileOverrides.HasOverrides() == true {
-		fileOverridesStr, err := fileOverrides.GetOverrides()
+	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
+	if staticOverrides.HasOverrides() == true {
+		fileOverrides, err := staticOverrides.GetOverrides()
 		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
-		allOverrides = append(allOverrides, *fileOverridesStr)
+		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
-	return strings.Join(allOverrides, "\n")
+	return overrides.ToYaml(allOverrides)
 }
