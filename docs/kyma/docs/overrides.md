@@ -58,8 +58,10 @@ For values that should be kept in Secrets, just define a Secret object instead o
 #### Sub-chart overrides
 
 Overrides for sub charts follow the same convention as top-level charts, but require additional information about sub-chart location.
-When a sub-chart contains `values.yaml` file, all values in this file are resolved against the chart itself, so information about chart location is not necessary there.
-But when the Installer installs a chart with it's sub-charts, all template values for a sub-chart must be prefixed with a sub-chart "path" (relative to top-level "parent" chart). This in not Installer-specific requirement, the same considerations apply when you provide overrides manually via Helm CLI.
+When a sub-chart contains `values.yaml` file, all values from this file are resolved against the chart itself, so information about chart location is not necessary there (chart and it's `values.yaml` file are on the same level).
+The situation is different when the Installer installs a chart with sub-charts.
+All template values for a sub-chart must be prefixed with a sub-chart "path" (relative to top-level "parent" chart).
+This in not Installer-specific requirement, the same considerations apply when you provide overrides manually via Helm command-line tool.
 
 Example:
 
