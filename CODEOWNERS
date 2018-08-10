@@ -203,6 +203,9 @@
 # All files and subdirectories in /docs
 /docs/ @kazydek @klaudiagrz @tomekpapiernik @dpolitesap
 
+# Config file for MILV - milv.config.yaml
+milv.config.yaml @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
+
 # Orchestrator file
 orchestrator.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh
 
