@@ -15,7 +15,7 @@ spec:
     - k8s-app
   endpoints:
   - port: metrics-port
-    interval: 10s
+    interval: 30s
   namespaceSelector:
     matchNames:
       - {{ .Values.global.namespace }}
