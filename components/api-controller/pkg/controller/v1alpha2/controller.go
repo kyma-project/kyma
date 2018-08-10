@@ -79,8 +79,8 @@ func NewController(
 			}
 
 			event := UpdateEvent{
-				newApi: newApiDef,
-				oldApi: oldApiDef,
+				newApi: newApiDef.DeepCopy(),
+				oldApi: oldApiDef.DeepCopy(),
 			}
 			c.queue.AddRateLimited(event)
 		},
