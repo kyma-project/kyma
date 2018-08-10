@@ -69,6 +69,10 @@ type (
 	prefixGetter interface {
 		GetPrefix(bUsage *sbuTypes.ServiceBindingUsage) string
 	}
+
+	onDeleteListener interface {
+		OnDeleteSBU(event *SBUDeletedEvent)
+	}
 )
 
 // ServiceBindingUsageController watches ServiceBindingUsage and injects data to given Deployment/Function
@@ -89,6 +93,8 @@ type ServiceBindingUsageController struct {
 
 	// testHookAsyncOpDone used only in unit tests
 	testHookAsyncOpDone func()
+
+	onDeleteListeners []onDeleteListener
 }
 
 // NewServiceBindingUsage creates a new ServiceBindingUsageController.
@@ -534,6 +540,12 @@ func (c *ServiceBindingUsageController) reconcileServiceBindingUsageDelete(usage
 		)
 	}
 
+	c.informListeners(&SBUDeletedEvent{
+		Name:       usageName,
+		Namespace:  usageNamespace,
+		UsedByKind: storedSpec.UsedBy.Kind,
+	})
+
 	return nil
 }
 
@@ -541,6 +553,18 @@ func (c *ServiceBindingUsageController) podPresetNameFromBindingUsageName(bindin
 	h := sha1.New()
 	h.Write([]byte(bindingUsageName))
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+func (c *ServiceBindingUsageController) informListeners(event *SBUDeletedEvent) {
+	for _, listener := range c.onDeleteListeners {
+		listener.OnDeleteSBU(event)
+	}
+}
+
+// AddOnDeleteListener adds OnDeleteListener
+// The method is not thread safe
+func (c *ServiceBindingUsageController) AddOnDeleteListener(listener onDeleteListener) {
+	c.onDeleteListeners = append(c.onDeleteListeners, listener)
 }
 
 // isServiceBindingReady returns whether the given service binding has a ready condition
