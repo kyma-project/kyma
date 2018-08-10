@@ -157,7 +157,7 @@ a:
 			Convey("Should not fail for empty map", func() {
 
 				inputMap := map[string]string{}
-				res, err := ToYaml(UnflattenMap(inputMap))
+				res, err := ToYaml(UnflattenToMap(inputMap))
 				So(err, ShouldBeNil)
 				So(res, ShouldBeBlank)
 			})
@@ -175,7 +175,7 @@ a:
 				inputMap["a.b.c"] = "100"
 				inputMap["a.b.d"] = "200"
 				inputMap["a.b.e"] = "300"
-				res, err := ToYaml(UnflattenMap(inputMap))
+				res, err := ToYaml(UnflattenToMap(inputMap))
 				So(err, ShouldBeNil)
 				So(res, ShouldEqual, nlnl(expected))
 			})
@@ -197,7 +197,7 @@ a:
 				inputMap["a.b.d"] = "200"
 				inputMap["a.b.e"] = "300\n400\n500\n"
 
-				res, err := ToYaml(UnflattenMap(inputMap))
+				res, err := ToYaml(UnflattenToMap(inputMap))
 				So(err, ShouldBeNil)
 				So(res, ShouldEqual, nlnl(expected))
 			})
@@ -223,7 +223,7 @@ h:
 				inputMap["global.foo"] = "bar"
 				inputMap["h.o.o"] = "xyz"
 
-				res, err := ToYaml(UnflattenMap(inputMap))
+				res, err := ToYaml(UnflattenToMap(inputMap))
 				So(err, ShouldBeNil)
 				So(res, ShouldEqual, nlnl(expected))
 			})

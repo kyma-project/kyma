@@ -45,8 +45,8 @@ func FlattenMap(oMap Map) map[string]string {
 	return res
 }
 
-//UnflattenMap converts external "flat" overrides into Map. Opposite of FlattenMap function.
-func UnflattenMap(sourceMap map[string]string) Map {
+//UnflattenToMap converts external "flat" overrides into Map. Opposite of FlattenMap function.
+func UnflattenToMap(sourceMap map[string]string) Map {
 	mergedMap := Map{}
 	if len(sourceMap) == 0 {
 		return mergedMap
@@ -64,6 +64,10 @@ func UnflattenMap(sourceMap map[string]string) Map {
 //baseMap WILL be modified during merge.
 //overridesMap won't be modified by future merges, since a deep-copy of it's nested maps are used for merging such nested maps.
 func MergeMaps(baseMap, overridesMap Map) {
+
+	if (overridesMap) == nil {
+		return
+	}
 
 	//Helper function to deep-copy nested maps
 	putValueToMap := func(baseMap map[string]interface{}, key string, overrideVal interface{}) {
@@ -90,7 +94,6 @@ func MergeMaps(baseMap, overridesMap Map) {
 			putValueToMap(baseMap, key, overrideVal)
 		}
 	}
-
 }
 
 //Recursively copies the map. Used to ensure immutability of input maps when merging.
