@@ -77,7 +77,7 @@ spec:
 	  - "--tokenExpirationMinutes={{ .Values.deployment.args.tokenExpirationMinutes }}"
 ```
 
-The following fragment of `values.yaml` file in `connector-service` chart defines value for _tokenExpirationMinutes_:
+The following fragment of `values.yaml` file in `connector-service` chart defines value for `tokenExpirationMinutes`:
 ```
 deployment:
   args:
