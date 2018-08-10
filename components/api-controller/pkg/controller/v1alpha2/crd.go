@@ -100,12 +100,13 @@ func Crd(domainName string) *k8sApiExtensions.CustomResourceDefinition {
 }
 
 const (
-	hostnamePatternFormat = `^([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])(.%s)*$`
+	hostnamePatternFormat = `^([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])(\.%s)?$`
 	urlPattern      = `^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`
 )
 
 func hostnamePattern(domainName string) string {
-	return fmt.Sprintf(hostnamePatternFormat, domainName)
+	escapedDomainName := strings.Replace(domainName, ".", "\\.", -1)
+	return fmt.Sprintf(hostnamePatternFormat, escapedDomainName)
 }
 
 func itoi64(i int) *int64 {

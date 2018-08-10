@@ -44,3 +44,19 @@ func TestMatchNotCompleteHostnameWithDifferentDomain(t *testing.T) {
 		t.Error("Hostname shouldn't match:", hostname)
 	}
 }
+
+func TestMatchNotCompleteHostnameWithDomainMultiplied(t *testing.T) {
+	re := regexp.MustCompile(hostnamePattern("kyma.local"))
+	hostname := "my-service.kyma.local.kyma.local"
+	if re.MatchString(hostname) {
+		t.Error("Hostname shouldn't match:", hostname)
+	}
+}
+
+func TestMatchExactDomainName(t *testing.T) {
+	re := regexp.MustCompile(hostnamePattern("kyma.local"))
+	hostname := "my-service.kyma-local"
+	if re.MatchString(hostname) {
+		t.Error("Hostname shouldn't match:", hostname)
+	}
+}
