@@ -26,9 +26,9 @@ Virtualization:
 
 ## Set up certificates
 
-Kyma comes with a local wildcard self-signed `server.crt` certificate that you can find under the `/installation/certs/workspace/raw/` directory of the `kyma` repository. Trust it on the OS level for convenience. Alternatively, accept exceptions for each subdomain in your browser as you use Kyma.
+Kyma comes with a local wildcard self-signed `server.crt` certificate that you can find under the `/installation/certs/workspace/raw/` directory of the `kyma` repository. Trust it on the OS level for convenience.
 
-Follow these steps to "always trust" the Kyma certificate on macOS:
+Follow these steps to "always trust" the Kyma certificate on Mac:
 
 1. Change the working directory to `installation`:
   ```
