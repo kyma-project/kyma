@@ -1,6 +1,5 @@
 #!/usr/bin/env groovy
 import groovy.json.JsonSlurperClassic
-import groovy.json.JsonOutput
 /*
 
 Monorepo root orchestrator: This Jenkinsfile runs the Jenkinsfiles of all subprojects based on the changes made and triggers kyma integration.
@@ -140,11 +139,11 @@ stage('collect versions') {
     }
 
     // convert versions to JSON string to pass on
-    versions = JsonOutput.toJson(versions)
+    versions = versionsYaml(versions)
     echo """
-    Component versions:\n
-    ${JsonOutput.prettyPrint(versions)}
-    """
+Component versions:
+$versions
+"""
 }
 
 // trigger jobs for projects that have changes, in parallel
@@ -161,7 +160,7 @@ if (runIntegration) {
                 string(name:'GIT_REVISION', value: "$commitID"),
                 string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
                 string(name:'APP_VERSION', value: "$appVersion"),
-                string(name:'COMP_VERSIONS', value: "$versions") // parse with groovy.json.JsonSlurperClassic
+                string(name:'COMP_VERSIONS', value: "$versions") // YAML string
             ]
     }
 }
@@ -259,4 +258,47 @@ String projectVersion(project) {
     } catch(e) {
         error("Error fetching latest version for ${project}: ${e}. Please check that ${project} has a docker image tagged ${img}:latest in the docker registry.\nLatest images are pushed to the registry on master branch builds.")
     }
+}
+
+/**
+ * Provides the component versions as YAML; To be passed to the kyma installer in various jobs.
+ */
+@NonCPS
+def versionsYaml(versions) {
+    def overrides = 
+"""global:
+  kyma:
+    versions:
+      - docs: ${versions['docs']}
+      - api-controller: ${versions['components/api-controller']}
+      - binding-usage-controller: ${versions['components/binding-usage-controller']}
+      - configurations-generator: ${versions['components/configurations-generator']}
+      - environments: ${versions['components/environments']}
+      - istio-webhook: ${versions['components/istio-webhook']}
+      - helm-broker: ${versions['components/helm-broker']}
+      - remote-environment-broker: ${versions['components/remote-environment-broker']}
+      - metadata-service: ${versions['components/metadata-service']}
+      - gateway: ${versions['components/gateway']}
+      - installer: ${versions['components/installer']}
+      - connector-service: ${versions['components/connector-service']}
+      - ui-api-layer: ${versions['components/ui-api-layer']}
+      - event-bus: ${versions['components/event-bus']}
+      - alpine-net: ${versions['tools/alpine-net']}
+      - watch-pods: ${versions['tools/watch-pods']}
+      - stability-checker: ${versions['tools/stability-checker']}
+      - etcd-backup: ${versions['tools/etcd-backup']}
+      - test-logging-monitoring: ${versions['tests/test-logging-monitoring']}
+      - acceptance-tests: ${versions['tests/acceptance']}
+      - ui-api-layer-acceptance-tests: ${versions['tests/ui-api-layer-acceptance-tests']}
+      - gateway-tests: ${versions['tests/gateway-tests']}
+      - test-environments: ${versions['tests/test-environments']}
+      - kubeless-test-client: ${versions['tests/kubeless-test-client']}
+      - api-controller-acceptance-tests: ${versions['tests/api-controller-acceptance-tests']}
+      - connector-service-tests: ${versions['tests/connector-service-tests']}
+      - metadata-service-tests: ${versions['tests/metadata-service-tests']}
+      - event-bus-tests: ${versions['tests/event-bus']}
+
+"""
+
+    return "$overrides"
 }
