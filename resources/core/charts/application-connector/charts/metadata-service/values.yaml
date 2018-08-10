@@ -1,7 +1,7 @@
 deployment:
   image:
-    name: application-connector
-    tag: 0.3.72
+    name: metadata-service
+    tag: 0.3.139
     pullPolicy: IfNotPresent
   args:
     proxyPort: &proxyPort 8080
@@ -13,12 +13,11 @@ deployment:
 service:
   externalapi:
     port: *externalAPIPort
-    nodePort: 32020
 
 minioUserSecretName: remoteenvironments-minio-user
 
 tests:
   image:
-    name: application-connector-tests
-    tag: 0.2.56
+    name: metadata-service-tests
+    tag: 0.3.139
     pullPolicy: IfNotPresent

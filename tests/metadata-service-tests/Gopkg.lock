@@ -88,16 +88,16 @@
   branch = "master"
   name = "github.com/kyma-project/kyma"
   packages = [
-    "components/application-connector/pkg/apis/istio/v1alpha2",
-    "components/application-connector/pkg/client/clientset/versioned",
-    "components/application-connector/pkg/client/clientset/versioned/scheme",
-    "components/application-connector/pkg/client/clientset/versioned/typed/istio/v1alpha2",
+    "components/metadata-service/pkg/apis/istio/v1alpha2",
+    "components/metadata-service/pkg/client/clientset/versioned",
+    "components/metadata-service/pkg/client/clientset/versioned/scheme",
+    "components/metadata-service/pkg/client/clientset/versioned/typed/istio/v1alpha2",
     "components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1",
     "components/remote-environment-broker/pkg/client/clientset/versioned",
     "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
     "components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
   ]
-  revision = "c4e06fbb6c180bffec61adf3c296d826c1465cd9"
+  revision = "f200bbd3f0538faa5e59331a670c5562ddc824fa"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
