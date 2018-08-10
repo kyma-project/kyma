@@ -74,7 +74,7 @@ spec:
 	  - "/connectorservice"
 	  - '--appName={{ .Chart.Name }}'
 	  - "--domainName={{ .Values.global.domainName }}"
-	  - "--tokenExpirationMinutes={{ .Values.deployment.args.tokenExpirationMinutes
+	  - "--tokenExpirationMinutes={{ .Values.deployment.args.tokenExpirationMinutes }}"
 ```
 
 The following fragment of `values.yaml` file in `connector-service` chart defines value for _tokenExpirationMinutes_:
@@ -89,8 +89,8 @@ If you want to override this value, for example to "90", do as follows:
 - Add an entry `application-connector.connector-service.deployment.args.tokenExpirationMinutes: 90` to the map.
 
 Notice that the user-provided override key is now composed from two parts:
-  - Chart "path" inside top-level `core` chart: _application-connector.connector-service_
-  - Original template value reference from the chart (without .Values. prefix): _deployment.args.tokenExpirationMinutes_
+  - Chart "path" inside top-level `core` chart: **application-connector.connector-service**
+  - Original template value reference from the chart (without .Values. prefix): **deployment.args.tokenExpirationMinutes**
 Once the installation starts, Installer generates overrides based on the map entries and value of "90" will be used instead of default "60" from the chart `values.yaml` file.
 
 
