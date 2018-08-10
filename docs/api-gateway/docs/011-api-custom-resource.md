@@ -1,6 +1,6 @@
 ---
 title: Api
-type: CRD
+type: Custom Resource
 ---
 
 The `api.gateway.kyma.cx` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format the API Controller listens for. To get the up-to-date CRD and show
@@ -35,8 +35,8 @@ This table analyses the elements of the sample CR and the information it contain
 
 | Field   |      Mandatory?      |  Description |
 |:----------:|:-------------:|:------|
-| **apiVersion** |  **YES** | Defined basing on the `group` and `version` fields of the CRD `spec` section. |
-| **kind** |    **YES**   |  Defined basing on the `names: kind` field of the CRD `spec` section. |
+| **apiVersion** |  **YES** | Defined basing on the **group** and **version** fields of the CRD **spec** section. |
+| **kind** |    **YES**   | Defined basing on the **names: kind** field of the CRD **spec** section. |
 | **metadata.name** |    **YES**   | Specifies the name of the exposed API |
 | **service.name**, **service.port** | **YES** | Specifies the name and the communication port of the exposed service. |
 | **hostname** | **YES** | Specifies the service's external inbound communication address. |
