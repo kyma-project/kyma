@@ -2,11 +2,12 @@
 
 ## Overview
 
-In order to provide a starting point for adding alert rules, Kyma includes a helm chart where new rules can be created.
+Kyma uses Prometheus alert rules for monitoring the health of its resources. And this chart it is a starting point for configuring alert rules to used by Prometheus.
 
-In this chart it is possible to define Prometheus alert rules.
 
 ### Creating Alert Rules in Kyma
+
+First it is needed a quick understanding of how rules are recognised by Prometheus.
 
 Prometheus uses the a label selector **spec.ruleSelector** to identify those ConfigMap that holding Prometheus rule files.
 
@@ -22,9 +23,7 @@ Prometheus uses the a label selector **spec.ruleSelector** to identify those Con
 {{- end }}
 ```
 
-So, to define a new alert rule in Kyma, you need to specify a new ConfigMap.
-
-Best practice is to label the ConfigMaps containing rule files with ```role: alert-rules``` as well as the name of the Prometheus object, ```prometheus: {{ .Release.Name }}```.
+So, to define a **new alert rule in Kyma**, it is needed first to create a ConfigMap. And as best practice, is labeling  ConfigMaps with ```role: alert-rules``` as well as the name of the Prometheus object, ```prometheus: {{ .Release.Name }}```.
 
 Kyma provides the file [unhealthy-pods-configmap.yaml](templates/unhealthy-pods-configmap.yaml) which serves as a reference to define Rules as configmaps.
 
@@ -55,13 +54,12 @@ data:
 Under ```data:``` ``` alert.rules:``` is configured the file, [unhealthy-pods-rules.yaml](templates/unhealthy-pods-rules.yaml), where is created a rule for alerting if a pod is not running. 
 
 ```yaml
-# Modify the file according to your requirements
 {{ define "unhealthy-pods-rules.yaml.tpl" }}
 groups:
 - name: pod-not-running-rule
   rules:
   - alert: PodNotRunning
-    expr: (kube_pod_container_status_running { pod="sample-metrics",namespace="default" } == 0)
+    expr: absent(kube_pod_container_status_running{namespace="default",pod="sample-metrics"})
     for: 15s
     labels:
       severity: critical
