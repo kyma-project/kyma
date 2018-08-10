@@ -23,6 +23,7 @@ There are two sources of overrides for Installer:
 
 Installer finds user-provided overrides by reading ConfigMaps and Secrets deployed in `kyma-installer` namespace and marked with `installer:overrides` label.
 Installer constructs the override by inspecting the ConfigMap/Secret entry key name. The key name should be a dot-separated sequence of strings, corresponding to the template values used in the chart template. See examples below.
+
 **Note**: *Regardless of how many user-provided override objects (ConfigMaps/Secrets) exist, Installer merges them all into one single override structure and is using that to install all components.*
 
 #### Top-level charts overrides
