@@ -1,2 +1,6 @@
 white-list-external: ["localhost", "console.kyma.local"]
 black-list: ["/vendor/"]
+files:
+  - path: "./kyma/docs/tracing/docs/001-overview-tracing.md"
+    config:
+      white-list-external: ["jaegertracing.io"]
