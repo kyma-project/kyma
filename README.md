@@ -79,10 +79,3 @@ Every project runs differently. Follow instructions in the main `README.md` docu
 6. Test your changes.
 
 When you finish, run unit and acceptance tests to verify your changes. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. To run the acceptance tests, go to the `tests` directory for details.
-
-7. Update the relevant documentation.
-
-> **NOTE:** Successful unit and acceptance tests, and the documentation update are required to open a pull request.
-
-7. Submit a pull request with your changes in code and wait for the owners' review and approval.
-8. When you receive the required approvals, create another pull request to update the image version and any configuration changes in relevant Kyma charts.
