@@ -1,7 +1,7 @@
 test:
   image:
     name: kubeless-test-client
-    tag: 0.2.51
+    tag: 0.2.52
 
 controller:
   deployment:

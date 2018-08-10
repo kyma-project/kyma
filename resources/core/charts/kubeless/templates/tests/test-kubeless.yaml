@@ -66,7 +66,7 @@ kind: Pod
 metadata:
   name: test-{{ template "fullname" . }}
   labels:
-    helm-chart-test: "false"
+    helm-chart-test: "true"
   annotations:
     helm.sh/hook: test-success
 spec:
