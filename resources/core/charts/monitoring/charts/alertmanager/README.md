@@ -35,7 +35,7 @@ The next section explains how to configure Alertmanager for enabling alerting no
 #### Alertmanager configuration - alertmanager.yaml
 
 The template
-[kyma/resources/core/charts/monitoring/charts/alertmanager/templates/alertmanager.config.yaml](alertmanager.yaml.tpl) is used to create the ```alertmanager.yaml```.
+[kyma/resources/core/charts/monitoring/charts/alertmanager/templates/alertmanager.config.yaml](templates/secret.yaml) pre-configure two simple receiver to handle alert in **VictorOps and Slack**.
 
 This yaml file pre-configure two simple receivers to handle alert in **VictorOps and Slack**.
 
@@ -49,7 +49,7 @@ route:
   receiver: 'null'
   group_wait: 30s
   group_interval: 5m
-  repeat_interval: 1h # change to 10m to test
+  repeat_interval: 5m
   group_by: ['cluster','pod','job','alertname']
   # All alerts that do not match the following child routes
   # will remain at the root node and be dispatched to 'default-receiver'
@@ -59,12 +59,12 @@ route:
       alertname: DeadMansSwitch
   - receiver: "victorOps"
     continue: true # If continue: is set to false it will stop after the first matching.
-    match:
-      alertname: kyma.pods.not.running.rules
+    match_re:
+      severity: critical
   - receiver: "slack"
     continue: true # If continue: is set to false it will stop after the first matching.
-    match:
-      alertname: kyma.pods.not.running.rules
+    match_re:
+      severity: warning|critical
 receivers:
 - name: 'null'
 - name: "victorOps"
@@ -73,7 +73,7 @@ receivers:
     send_resolved: true
     api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
     routing_key: {{ .Values.global.alertTools.credentials.victorOps.routingkey | quote }}
-    state_message: 'Alert: {{`{{ .CommonLabels.alertname }}`}}. Summary:{{`{{ .CommonAnnotations.summary }}`}}. RawData: {{ .CommonLabels }}'
+    state_message: 'Alert: {{`{{ .CommonLabels.alertname }}`}}. Summary:{{`{{ .CommonAnnotations.summary }}`}}. RawData: {{`{{ .CommonLabels }}`}}'
 - name: "slack"
   slack_configs:
   - channel: {{ .Values.global.alertTools.credentials.slack.channel | quote }}
@@ -94,13 +94,13 @@ What this configuration provides is to enable the ```receivers:```, "victorOps" 
 
 In order to enable alert notifications for the receivers above, four parameters need to be configured.
 
-* ```api_key:``` defines the team Api key in VistorOps
-* ```routing_key:``` defines the team routing key in VistorOps
+* ```api_key:``` defines the team Api key in VictorOps
+* ```routing_key:``` defines the team routing key in VictorOps
 * ```channel:```  the Slack channel to receive the alerts notifications
 * ```api_url:``` The url endpoint containing to send the alerts.
 
 As it was mentioned at first only part of the configuration is located in this chart, that is why all of four parameters values are got it from the template, ```{{ .Values.global.alertTools.credentials... }}```, and these values are configured in
-[kyma/resources/core/values.yaml](kyma/resources/core/values.yaml). There we have:
+[kyma/resources/core/values.yaml](../../../../values.yaml). There we have:
 
 
 ```yaml

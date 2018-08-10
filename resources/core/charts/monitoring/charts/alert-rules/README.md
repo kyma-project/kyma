@@ -2,7 +2,7 @@
 
 ## Overview
 
-Kyma uses Prometheus alert rules for monitoring the health of its resources. And this chart it is a starting point for configuring alert rules to used by Prometheus.
+Kyma uses Prometheus alert rules for monitoring the health of its resources. And this chart is the starting point for configuring alert rules.
 
 
 ### Creating Alert Rules in Kyma
@@ -23,7 +23,7 @@ Prometheus uses the a label selector **spec.ruleSelector** to identify those Con
 {{- end }}
 ```
 
-So, to define a **new alert rule in Kyma**, it is needed first to create a ConfigMap. And as best practice, is labeling  ConfigMaps with ```role: alert-rules``` as well as the name of the Prometheus object, ```prometheus: {{ .Release.Name }}```.
+So, to define a **new alert rule in Kyma**, it is needed to create a ConfigMap. And as best practice, ConfigMaps are labelled with ```role: alert-rules``` as well as the name of the Prometheus object, ```prometheus: {{ .Release.Name }}```.
 
 Kyma provides the file [unhealthy-pods-configmap.yaml](templates/unhealthy-pods-configmap.yaml) which serves as a reference to define Rules as configmaps.
 
@@ -51,7 +51,7 @@ data:
     {{- include "unhealthy-pods-rules.yaml.tpl" . | indent 4}}
 {{ end }}
 ```
-Under ```data:``` ``` alert.rules:``` is configured the file, [unhealthy-pods-rules.yaml](templates/unhealthy-pods-rules.yaml), where is created a rule for alerting if a pod is not running. 
+Under ```data:``` ``` alert.rules:``` is configured the file, [unhealthy-pods-rules.yaml](templates/unhealthy-pods-rules.yaml), where is created a rule for alerting if a pod is not running.
 
 ```yaml
 {{ define "unhealthy-pods-rules.yaml.tpl" }}

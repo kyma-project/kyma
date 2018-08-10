@@ -30,6 +30,10 @@ type installationConfig struct {
 	EtcdBackupABSKey           string
 	ComponentsList             string
 	IsLocalInstallation        bool
+	VictorOpsApiKey            string
+	VictorOpsRoutingKey        string
+	SlackChannel               string
+	SlackApiUrl                string
 }
 
 // GetInstallationConfig returns all non-secret installation parameters from the Installer environment variables
@@ -58,6 +62,10 @@ func GetInstallationConfig() *installationConfig {
 		EtcdBackupABSKey:           os.Getenv("ETCD_BACKUP_ABS_KEY"),
 		ComponentsList:             os.Getenv("COMPONENT_LIST"),
 		IsLocalInstallation:        isLocalInstallation(os.Getenv("IS_LOCAL_INSTALLATION")),
+		VictorOpsApiKey:            os.Getenv("VICTOR_OPS_API_KEY_VALUE"),
+		VictorOpsRoutingKey:        os.Getenv("VICTOR_OPS_ROUTING_KEY_VALUE"),
+		SlackChannel:               os.Getenv("SLACK_CHANNEL_VALUE"),
+		SlackApiUrl:                os.Getenv("SLACK_API_URL_VALUE"),
 	}
 }
 
