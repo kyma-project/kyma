@@ -14,8 +14,12 @@ type MetadataHandler interface {
 	DeleteService(w http.ResponseWriter, r *http.Request)
 }
 
-func NewHandler(handler MetadataHandler) http.Handler {
+func NewHandler(handler MetadataHandler, middlewares []mux.MiddlewareFunc) http.Handler {
 	router := mux.NewRouter()
+
+	for _, middleware := range middlewares {
+		router.Use(middleware)
+	}
 
 	router.Path("/v1/health").Handler(NewHealthCheckHandler()).Methods(http.MethodGet)
 

@@ -1,0 +1,25 @@
+package collector
+
+import (
+	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
+	"github.com/prometheus/client_golang/prometheus"
+)
+
+type summaryCollector struct {
+	vector *prometheus.SummaryVec
+}
+
+func NewSummaryCollector(opts prometheus.SummaryOpts, labels []string) (Collector, apperrors.AppError) {
+	vector := prometheus.NewSummaryVec(opts, labels)
+
+	err := prometheus.Register(vector)
+	if err != nil {
+		return nil, apperrors.Internal("Failed to register a summary collector: %s: %s", opts.Name, err.Error())
+	}
+
+	return &summaryCollector{vector: vector}, nil
+}
+
+func (sc *summaryCollector) AddObservation(observation float64, labelValues ...string) {
+	sc.vector.WithLabelValues(labelValues...).Observe(observation)
+}
