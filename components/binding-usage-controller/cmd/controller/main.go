@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	kubelessClientset "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
-	kubelessInformers "github.com/kubeless/kubeless/pkg/client/informers/externalversions"
 	serviceCatalogClientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	serviceCatalogInformers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
@@ -37,10 +35,6 @@ type Config struct {
 	KubeconfigPath               string `envconfig:"optional"`
 	AppliedSBUConfigMapName      string `envconfig:"default=applied-sbu-spec"`
 	AppliedSBUConfigMapNamespace string `envconfig:"default=kyma-system"`
-
-	// PluggableSBU is a feature flag, which enables dynamic configuration, which uses UsageKind resources
-	// todo (pluggable SBU cleanup): remove the FF
-	PluggableSBU bool `envconfig:"default=false"`
 }
 
 func main() {
@@ -73,38 +67,20 @@ func main() {
 	podPresetModifier := controller.NewPodPresetModifier(k8sCli.SettingsV1alpha1())
 
 	aggregator := controller.NewResourceSupervisorAggregator()
-	var (
-		kindController         *usagekind.Controller
-		ukProtectionController *usagekind.ProtectionController
-	)
 	sbuInformer := bindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages()
-	if cfg.PluggableSBU {
-		log.Info("Pluggable SBU enabled")
-		cp := dynamic.NewDynamicClientPool(k8sConfig)
 
-		kindController = usagekind.NewKindController(
-			bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds(),
-			aggregator,
-			cp,
-			log)
-		ukProtectionController = usagekind.NewProtectionController(
-			bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds(),
-			sbuInformer,
-			bindingUsageCli.ServicecatalogV1alpha1(),
-			log,
-		)
-
-	} else {
-		// Kubeless informers
-		kubelessCli, err := kubelessClientset.NewForConfig(k8sConfig)
-		fatalOnError(err)
-		kubelessInformerFactory := kubelessInformers.NewSharedInformerFactory(kubelessCli, informerResyncPeriod)
-		dSupervisor := controller.NewDeploymentSupervisor(k8sInformersFactory.Apps().V1beta2().Deployments(), k8sCli.AppsV1beta2(), log)
-		fnSupervisor := controller.NewKubelessFunctionSupervisor(kubelessInformerFactory.Kubeless().V1beta1().Functions(), kubelessCli.KubelessV1beta1(), log)
-		aggregator.Register(controller.KindDeployment, dSupervisor)
-		aggregator.Register(controller.KindKubelessFunction, fnSupervisor)
-		kubelessInformerFactory.Start(stopCh)
-	}
+	cp := dynamic.NewDynamicClientPool(k8sConfig)
+	kindController := usagekind.NewKindController(
+		bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds(),
+		aggregator,
+		cp,
+		log)
+	ukProtectionController := usagekind.NewProtectionController(
+		bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds(),
+		sbuInformer,
+		bindingUsageCli.ServicecatalogV1alpha1(),
+		log,
+	)
 
 	labelsFetcher := controller.NewBindingLabelsFetcher(serviceCatalogInformerFactory.Servicecatalog().V1beta1().ServiceInstances().Lister(), serviceCatalogInformerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Lister())
 
@@ -121,6 +97,7 @@ func main() {
 		labelsFetcher,
 		log,
 	)
+	ctr.AddOnDeleteListener(ukProtectionController)
 
 	// TODO consider to extract here the cache sync logic from controller
 	// and use WaitForCacheSync() method defined on factories
@@ -129,12 +106,9 @@ func main() {
 	serviceCatalogInformerFactory.Start(stopCh)
 
 	go runStatuszHTTPServer(stopCh, fmt.Sprintf(":%d", cfg.Port), log)
+	go kindController.Run(stopCh)
+	go ukProtectionController.Run(stopCh)
 
-	if cfg.PluggableSBU {
-		ctr.AddOnDeleteListener(ukProtectionController)
-		go kindController.Run(stopCh)
-		go ukProtectionController.Run(stopCh)
-	}
 	ctr.Run(stopCh)
 }
 

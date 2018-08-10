@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	kubelessTypes "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/platform/logger/spy"
 	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/sirupsen/logrus"
@@ -41,12 +40,6 @@ func patchDeploymentAction(oldDeploy, newDeploy *appsV1beta2.Deployment) k8sTest
 	}
 
 	return k8sTesting.NewPatchAction(deploymentsResource, oldDeploy.Namespace, oldDeploy.Name, patchBytes)
-}
-
-var functionsResource = schema.GroupVersionResource{Group: "kubeless.io", Version: "v1beta1", Resource: "functions"}
-
-func updateFunctionAction(fn *kubelessTypes.Function) k8sTesting.UpdateAction {
-	return k8sTesting.NewUpdateAction(functionsResource, fn.Namespace, fn)
 }
 
 var podpresetsResource = schema.GroupVersionResource{Group: "settings.k8s.io", Version: "v1alpha1", Resource: "podpresets"}

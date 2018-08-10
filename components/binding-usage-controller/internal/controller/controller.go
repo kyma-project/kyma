@@ -40,8 +40,6 @@ const (
 
 //go:generate mockery -name=podPresetModifier -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=kindsSupervisors -output=automock -outpkg=automock -case=underscore
-//go:generate mockery -name=deploymentFinder -output=automock -outpkg=automock -case=underscore
-//go:generate mockery -name=kubelessFunctionFinder -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=bindingLabelsFetcher -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=appliedSpecStorage -output=automock -outpkg=automock -case=underscore
 
@@ -53,7 +51,6 @@ type (
 
 	kindsSupervisors interface {
 		Get(kind Kind) (KubernetesResourceSupervisor, error)
-		HasSynced() bool
 	}
 
 	bindingLabelsFetcher interface {
@@ -186,7 +183,7 @@ func (c *ServiceBindingUsageController) Run(stopCh <-chan struct{}) {
 	defer c.log.Infof("Shutting down service binding usage controller")
 
 	if !cache.WaitForCacheSync(stopCh, c.bindingUsageListerSynced,
-		c.bindingListerSynced, c.kindsSupervisors.HasSynced) {
+		c.bindingListerSynced) {
 		c.log.Error("Timeout occurred on waiting for caches to sync. Shutdown the controller.")
 		return
 	}

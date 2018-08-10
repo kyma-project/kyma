@@ -12,16 +12,8 @@ func (_m *KubernetesResourceSupervisor) ExpectOnEnsureLabelsCreated(ns string, r
 	return _m.On("EnsureLabelsCreated", ns, resourceName, usageName, labels).Return(nil)
 }
 
-func (_m *KubernetesResourceSupervisor) ExpectOnHasSynced(synced bool) *mock.Call {
-	return _m.On("HasSynced").Return(synced)
-}
-
 func (_m *KindsSupervisors) ExpectOnGet(k controller.Kind, supervisor controller.KubernetesResourceSupervisor) *mock.Call {
 	return _m.On("Get", k).Return(supervisor, nil)
-}
-
-func (_m *KindsSupervisors) ExpectOnHasSynced(synced bool) *mock.Call {
-	return _m.On("HasSynced").Return(synced)
 }
 
 func (_m *PodPresetModifier) ExpectOnUpsertPodPreset(newPodPreset *settingsV1alpha1.PodPreset) *mock.Call {
