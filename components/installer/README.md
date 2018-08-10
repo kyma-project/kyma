@@ -119,7 +119,7 @@ Helm installation.
 
 ## Install selected components only
 
-By default, this tool installs a predefined component package. If necessary, you can specify which components to install by customizing the component list located in the [installation-config.yaml.tpl](../../installation/resources/installation-config.yaml.tpl) file. Available components:
+By default, this tool installs a predefined component package. If necessary, you can specify which components to install by customizing the component list located in the [installer-config.yaml.tpl](../../installation/resources/installer-config.yaml.tpl) file. Available components:
 
 - cluster-prerequisites
 - cluster-essentials
