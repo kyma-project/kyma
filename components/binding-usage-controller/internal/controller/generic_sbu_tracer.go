@@ -13,6 +13,7 @@ const (
 	tracingAnnotationKey = "servicebindingusages.servicecatalog.kyma.cx/tracing-information"
 )
 
+//go:generate mockery -name=genericUsageBindingAnnotationTracer -output=automock -outpkg=automock -case=underscore
 type genericUsageBindingAnnotationTracer interface {
 	GetInjectedLabels(res *unstructured.Unstructured, usageName string) (map[string]string, error)
 	DeleteAnnotationAboutBindingUsage(res *unstructured.Unstructured, usageName string) error

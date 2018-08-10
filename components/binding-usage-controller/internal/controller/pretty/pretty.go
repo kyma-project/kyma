@@ -7,6 +7,7 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/pretty"
 	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	settingsV1alpha1 "k8s.io/api/settings/v1alpha1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 // ClusterServiceClassName returns string with type and name of ClusterServiceClass
@@ -32,4 +33,9 @@ func ServiceBindingUsageName(obj *sbuTypes.ServiceBindingUsage) string {
 // PodPresetName returns string with the type, namespace and name of PodPreset.
 func PodPresetName(obj *settingsV1alpha1.PodPreset) string {
 	return fmt.Sprintf(`PodPreset "%s/%s"`, obj.Namespace, obj.Name)
+}
+
+// UnstructuredName returns string with the type, namespace and name of Unstructured object.
+func UnstructuredName(obj *unstructured.Unstructured) string {
+	return fmt.Sprintf(`Unstructured object "%s/%s"`, obj.GetName(), obj.GetNamespace())
 }

@@ -69,7 +69,11 @@ func main() {
 	aggregator := controller.NewResourceSupervisorAggregator()
 	sbuInformer := bindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages()
 
-	cp := dynamic.NewDynamicClientPool(k8sConfig)
+	cp, err := dynamic.NewForConfig(k8sConfig)
+	if err != nil {
+		fatalOnError(err)
+	}
+
 	kindController := usagekind.NewKindController(
 		bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds(),
 		aggregator,

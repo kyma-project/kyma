@@ -6,6 +6,8 @@ import (
 
 	"time"
 
+	"strings"
+
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/pkg/errors"
@@ -35,7 +37,7 @@ type Controller struct {
 	listerSynced  cache.InformerSynced
 	maxRetries    int
 	kindContainer SupervisorRegistry
-	clientPool    dynamic.ClientPool
+	dynamicClient dynamic.Interface
 
 	log logrus.FieldLogger
 
@@ -47,7 +49,7 @@ type Controller struct {
 func NewKindController(
 	kindInformer ukInformer.UsageKindInformer,
 	kindContainer SupervisorRegistry,
-	dynamicClientPool dynamic.ClientPool,
+	dynamicClient dynamic.Interface,
 	log logrus.FieldLogger) *Controller {
 
 	c := &Controller{
@@ -55,7 +57,7 @@ func NewKindController(
 		listerSynced:  kindInformer.Informer().HasSynced,
 		maxRetries:    defaultMaxRetries,
 		kindContainer: kindContainer,
-		clientPool:    dynamicClientPool,
+		dynamicClient: dynamicClient,
 		log:           log.WithField("service", "controller:usage-kind"),
 		queue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "UsageKind"),
 	}
@@ -181,16 +183,16 @@ func (c *Controller) reconcileDelete(name string) error {
 
 func (c *Controller) reconcileAddUpdate(kind *api.UsageKind) error {
 	c.log.Debugf("Registering supervisor for usage kind %s", kind.Name)
-	rip, err := newResourceInterfaceProvider(c.clientPool, schema.GroupVersionKind{
-		Version: kind.Spec.Resource.Version,
-		Group:   kind.Spec.Resource.Group,
-		Kind:    kind.Spec.Resource.Kind,
+	rip, err := newResourceInterfaceProvider(c.dynamicClient, schema.GroupVersionResource{
+		Resource: strings.ToLower(kind.Spec.Resource.Kind) + "s",
+		Version:  kind.Spec.Resource.Version,
+		Group:    kind.Spec.Resource.Group,
 	})
 	if err != nil {
 		return errors.Wrapf(err, "while creating resource interface provider")
 	}
 
-	supervisor := controller.NewGenericSupervisor(rip,
+	supervisor := controller.NewGenericSupervisor(rip.resourceInterface,
 		newLabelManipulator(kind.Spec.LabelsPath),
 		c.log.WithField("service", "generic-supervisor").WithField("kind", kind.Name))
 
