@@ -11,7 +11,7 @@ func TestGetIstioOverrides(t *testing.T) {
 	Convey("GetIstioOverrides", t, func() {
 		Convey("when IP address is not specified overrides should be empty", func() {
 
-			installationData := NewInstallationDataCreator().WithEmptyIP().GetData()
+			installationData := NewInstallationDataCreator().GetData()
 			overrides, err := GetIstioOverrides(&installationData)
 
 			So(err, ShouldBeNil)
