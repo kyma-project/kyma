@@ -27,11 +27,11 @@ To install Kyma, you need the following data:
 Optionally, you can prepare the following:
 
 -  Static IP address for Kyma Ingress (public external IP)
-  - Create a DNS entry `*.kyma.example.com` that points to Kyma Ingress IP address
+  - Create a DNS entry `*.kyma.example.com` that points to Kyma Ingress IP Address
 - Static IP address for Remote Environments Ingress.
-  - Create a DNS entry `gateway.kyma.example.com` that points to Remote Environments Ingress IP address
+  - Create a DNS entry `gateway.kyma.example.com` that points to Remote Environments Ingress IP Address
 
-If you can't manually pre-allocate these IP addresses within your cloud platform, the cluster will request them during installation by platform-specific means. In that case don't forget to perform [Post-Installation steps](#Post-Installation-steps).
+If you can't manually pre-allocate these IP addresses within your cloud platform, the cluster will request them during installation by platform-specific means. In that case don't forget to perform [Post-Installation steps](#Post-installation-steps).
 
 Configure the Kubernetes API Server following this template:
 
