@@ -42,6 +42,7 @@ projects = [
     "tools/watch-pods": "watch-pods",
     "tools/stability-checker": "stability-checker",
     "tools/etcd-backup": "etcd-backup",
+    "tools/etcd-tls-setup": "etcd-tls-setup",
     "tests/test-logging-monitoring": "test-logging-monitoring",
     "tests/acceptance": "acceptance-tests",
     "tests/ui-api-layer-acceptance-tests": "ui-api-layer-acceptance-tests",

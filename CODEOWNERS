@@ -191,6 +191,9 @@
 # The watch-pods directory
 /tools/watch-pods/ @suleymanakbas91 @clebs @a-thaler @lilitgh
 
+# The etcd-tls-setup directory
+/tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek
+
 # kubeless-test-client tests
 /tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
