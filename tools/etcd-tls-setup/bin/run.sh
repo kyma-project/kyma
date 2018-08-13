@@ -7,6 +7,11 @@ NAMESPACE=${NAMESPACE:-"kyma-system"}
 
 # ETCD_CLUSTER_NAME - should be set as value of EtcdCluster CR's name
 
+function generateCertificate {
+    certProfile=$1
+    cfssl gencert -ca=${tempPath}/ca.pem -ca-key=${tempPath}/ca-key.pem -config=${configPath}/ca-config.json -profile=${certProfile} ${configPath}/${certProfile}.json | cfssljson -bare ${tempPath}/${certProfile}
+}
+
 caSecretName="${ETCD_CLUSTER_NAME}-etcd-ca-tls"
 serverSecretName="${ETCD_CLUSTER_NAME}-etcd-server-tls"
 peerSecretName="${ETCD_CLUSTER_NAME}-etcd-peer-tls"
@@ -35,13 +40,13 @@ fi
 
 
 echo "generating etcd peer certs ==="
-cfssl gencert -ca=${tempPath}/ca.pem -ca-key=${tempPath}/ca-key.pem -config=${configPath}/ca-config.json -profile=peer ${configPath}/peer.json | cfssljson -bare ${tempPath}/peer
+generateCertificate peer
 
 echo "generating etcd server certs ==="
-cfssl gencert -ca=${tempPath}/ca.pem -ca-key=${tempPath}/ca-key.pem -config=${configPath}/ca-config.json -profile=server ${configPath}/server.json | cfssljson -bare ${tempPath}/server
+generateCertificate server
 
 echo "generating etcd client certs ==="
-cfssl gencert -ca=${tempPath}/ca.pem -ca-key=${tempPath}/ca-key.pem -config=${configPath}/ca-config.json -profile=client ${configPath}/client.json | cfssljson -bare ${tempPath}/client
+generateCertificate client
 
 mv ${tempPath}/client.pem ${tempPath}/etcd-client.crt
 mv ${tempPath}/client-key.pem ${tempPath}/etcd-client.key
