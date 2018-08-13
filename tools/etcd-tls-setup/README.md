@@ -1,22 +1,22 @@
-# etcd-tls
+# etcd-tls-setup
 
 ## Overview
 
-This image provide tools and scripts to generate TLS certificates for communication between service catalog and etcd.
+This image provides tools and scripts to generate TLS certificates for communication between the Service Catalog and etcd.
 
-The etcd-tls image has following binaries installed:
+The etcd-tls-setup image has the following binaries installed:
 
 * curl
 * kubectl
 * cfssl
 * cfssljson
 
-For more details see the [Dockerfile](Dockerfile)
+For more details, see this [Dockerfile](Dockerfile).
 
 ## Usage
 
-To build and run etcd-tls locally, call:
+To build and run the etcd-tls-setup locally, run this command:
 
 ```bash
-docker build -t etcd-tls:latest . && docker run -it etcd-tls:latest
+docker build -t etcd-tls-setup:latest . && docker run -it etcd-tls-setup:latest
 ```
