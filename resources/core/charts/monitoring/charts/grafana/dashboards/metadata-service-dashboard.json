@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1534159979286,
+  "iteration": 1534166765512,
   "links": [],
   "panels": [
     {
@@ -612,11 +612,9 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
-          "text": "/v1/remoteenvironments/{reName}/client-certs",
-          "value": [
-            "/v1/remoteenvironments/{reName}/client-certs"
-          ]
+          "selected": false,
+          "text": "/{remoteEnvironment}/v1/metadata/services",
+          "value": "/{remoteEnvironment}/v1/metadata/services"
         },
         "datasource": "Prometheus",
         "hide": 0,
@@ -638,8 +636,8 @@
     ]
   },
   "time": {
-    "from": "now-15m",
-    "to": "now"
+    "from": "2018-08-13T12:44:08.416Z",
+    "to": "2018-08-13T12:50:37.716Z"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -669,5 +667,5 @@
   "timezone": "",
   "title": "Metadata-Service",
   "uid": "fax-V95mz",
-  "version": 2
+  "version": 1
 }
