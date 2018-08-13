@@ -11,8 +11,12 @@ type TokenHandler interface {
 	CreateToken(w http.ResponseWriter, r *http.Request)
 }
 
-func NewHandler(handler TokenHandler) http.Handler {
+func NewHandler(handler TokenHandler, middlewares []mux.MiddlewareFunc) http.Handler {
 	router := mux.NewRouter()
+
+	for _, middleware := range middlewares {
+		router.Use(middleware)
+	}
 
 	tokenRouter := router.PathPrefix("/v1/remoteenvironments").Subrouter()
 

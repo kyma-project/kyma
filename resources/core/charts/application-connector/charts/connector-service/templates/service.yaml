@@ -35,3 +35,18 @@ spec:
   selector:
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Chart.Name}}-metrics
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    k8s-app: metrics
+spec:
+  selector:
+    app: {{ .Chart.Name }}
+  ports:
+  - name: metrics-port
+    port: 9090
+    protocol: TCP
