@@ -11,11 +11,13 @@ var hostnameCases = []struct {
 }{
 	{"my-service", true},
 	{"my-service.kyma.local", true},
-	{"my-service.kyma-local", false},
-	{"my-service.my-division", false},
-	{"my-service.my-division.kyma.local", false},
-	{"my-service.kima.locl", false},
-	{"my-service.kyma.local.kyma.local", false},
+	{"dot-is-escaped.kyma-local", false},
+	{"with-subdomain.my-division", false},
+	{"with-subdomain.my-division.kyma.local", false},
+	{"wrong-domain.kima.locl", false},
+	{"duplicated-domain.kyma.local.kyma.local", false},
+	{"my-special-very-too-long-hostname-that-is-not-compliant-with-relevant-rfc", false},
+	{"my-special-very-too-long-hostname-that-is-not-compliant-with-relevant-rfc.kyma.local", false},
 }
 
 func TestMatchHostname(t *testing.T) {
