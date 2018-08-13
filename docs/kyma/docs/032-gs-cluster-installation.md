@@ -85,7 +85,7 @@ The Kyma installation process requires installation data specified in the `insta
 - `__REMOTE_ENV_CA_KEY__` for the Remote Environments CA key
 - `__IS_LOCAL_INSTALLATION__` for controlling installation procedure. Set to `true` for local installation, otherwise cluster installation is assumed.
 - `__DOMAIN__` for the domain name such as `kyma.example.com`
-- `__EXTERNAL_PUBLIC_IP__` for the IP address of Kyma Ingress (optional)
+- `__EXTERNAL_PUBLIC_IP__` for the IP address of Kyma Istio Ingress (optional)
 - `__REMOTE_ENV_IP__` for the IP address for Remote Environments Ingress (optional)
 - `__K8S_APISERVER_URL__` for the API server's URL
 - `__K8S_APISERVER_CA__` for your API Server CA
