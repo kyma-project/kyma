@@ -1,62 +1,30 @@
 package v1alpha2
 
 import (
-	"testing"
 	"regexp"
+	"testing"
 )
 
-func TestMatchSimpleHostname(t *testing.T) {
-	re := regexp.MustCompile(hostnamePattern("kyma.local"))
-	hostname := "my-service"
-	if !re.MatchString(hostname) {
-		t.Error("Hostname should match:", hostname)
-	}
+var hostnameCases = []struct {
+	hostname string
+	valid    bool
+}{
+	{"my-service", true},
+	{"my-service.kyma.local", true},
+	{"my-service.kyma-local", false},
+	{"my-service.my-division", false},
+	{"my-service.my-division.kyma.local", false},
+	{"my-service.kima.locl", false},
+	{"my-service.kyma.local.kyma.local", false},
 }
 
-func TestMatchCompleteHostname(t *testing.T) {
+func TestMatchHostname(t *testing.T) {
 	re := regexp.MustCompile(hostnamePattern("kyma.local"))
-	hostname := "my-service.kyma.local"
-	if !re.MatchString(hostname) {
-		t.Error("Hostname should match:", hostname)
-	}
-}
-
-func TestMatchNotSimpleHostnameWithSubdomain(t *testing.T) {
-	re := regexp.MustCompile(hostnamePattern("kyma.local"))
-	hostname := "my-service.my-division"
-	if re.MatchString(hostname) {
-		t.Error("Hostname shouldn't match:", hostname)
-	}
-}
-
-func TestMatchNotCompleteHostnameWithSubdomain(t *testing.T) {
-	re := regexp.MustCompile(hostnamePattern("kyma.local"))
-	hostname := "my-service.my-division.kyma.local"
-	if re.MatchString(hostname) {
-		t.Error("Hostname shouldn't match:", hostname)
-	}
-}
-
-func TestMatchNotCompleteHostnameWithDifferentDomain(t *testing.T) {
-	re := regexp.MustCompile(hostnamePattern("kyma.local"))
-	hostname := "my-service.my-division.kima.locl"
-	if re.MatchString(hostname) {
-		t.Error("Hostname shouldn't match:", hostname)
-	}
-}
-
-func TestMatchNotCompleteHostnameWithDomainMultiplied(t *testing.T) {
-	re := regexp.MustCompile(hostnamePattern("kyma.local"))
-	hostname := "my-service.kyma.local.kyma.local"
-	if re.MatchString(hostname) {
-		t.Error("Hostname shouldn't match:", hostname)
-	}
-}
-
-func TestMatchExactDomainName(t *testing.T) {
-	re := regexp.MustCompile(hostnamePattern("kyma.local"))
-	hostname := "my-service.kyma-local"
-	if re.MatchString(hostname) {
-		t.Error("Hostname shouldn't match:", hostname)
+	for _, tc := range hostnameCases {
+		t.Run(tc.hostname, func(t *testing.T) {
+			if re.MatchString(tc.hostname) != tc.valid {
+				t.Errorf("Hostname '%s' should match: %v", tc.hostname, tc.valid)
+			}
+		})
 	}
 }
