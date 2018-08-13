@@ -34,16 +34,6 @@ func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testin
 		assert.Equal(t, fixServiceBindingUsage(), result)
 	})
 
-	t.Run("Wrong kind", func(t *testing.T) {
-		resolver := servicecatalog.NewServiceBindingUsageResolver(nil)
-
-		input := fixCreateServiceBindingUsageInput()
-		input.UsedBy.Kind = "nope"
-		_, err := resolver.CreateServiceBindingUsageMutation(nil, input)
-
-		require.Error(t, err)
-	})
-
 	t.Run("Already exists", func(t *testing.T) {
 		svc := automock.NewServiceBindingUsageOperations()
 		svc.On("Create", mock.Anything, mock.Anything).Return(nil, apiErrors.NewAlreadyExists(schema.GroupResource{}, "test")).Once()
@@ -195,7 +185,7 @@ func fixServiceBindingUsage() *gqlschema.ServiceBindingUsage {
 		Name:        "bu-name",
 		Environment: "test-ns",
 		UsedBy: gqlschema.LocalObjectReference{
-			Kind: gqlschema.BindingUsageReferenceTypeDeployment,
+			Kind: "Deployment",
 			Name: "sample-deployment",
 		},
 		ServiceBindingName: "binding-name",
@@ -213,7 +203,7 @@ func fixCreateServiceBindingUsageInput() *gqlschema.CreateServiceBindingUsageInp
 			Name: "binding-name",
 		},
 		UsedBy: gqlschema.LocalObjectReferenceInput{
-			Kind: gqlschema.BindingUsageReferenceTypeDeployment,
+			Kind: "Deployment",
 			Name: "sample-deployment",
 		},
 	}

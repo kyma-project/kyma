@@ -40,7 +40,7 @@ func TestBindingUsageConversionToGQLCornerCases(t *testing.T) {
 		}
 		expGQLSBU := &gqlschema.ServiceBindingUsage{
 			UsedBy: gqlschema.LocalObjectReference{
-				Kind: gqlschema.BindingUsageReferenceTypeFunction,
+				Kind: "Function",
 			},
 		}
 
@@ -72,7 +72,7 @@ func TestBindingUsageConversionToGQL(t *testing.T) {
 				Name: "usage",
 				UsedBy: gqlschema.LocalObjectReference{
 					Name: "app",
-					Kind: gqlschema.BindingUsageReferenceTypeDeployment,
+					Kind: "Deployment",
 				},
 				ServiceBindingName: "redis-binding",
 				Environment:        "production",
@@ -90,7 +90,7 @@ func TestBindingUsageConversionToGQL(t *testing.T) {
 				Name: "usage",
 				UsedBy: gqlschema.LocalObjectReference{
 					Name: "app",
-					Kind: gqlschema.BindingUsageReferenceTypeDeployment,
+					Kind: "Deployment",
 				},
 				ServiceBindingName: "redis-binding",
 				Environment:        "production",
@@ -160,7 +160,7 @@ func TestBindingUsageConversionInput(t *testing.T) {
 		"only kind is provided": {
 			givenSBUInput: &gqlschema.CreateServiceBindingUsageInput{
 				UsedBy: gqlschema.LocalObjectReferenceInput{
-					Kind: gqlschema.BindingUsageReferenceTypeFunction,
+					Kind: "Function",
 				},
 			},
 			expK8sSBU: &api.ServiceBindingUsage{
@@ -188,7 +188,7 @@ func TestBindingUsageConversionInput(t *testing.T) {
 				},
 				UsedBy: gqlschema.LocalObjectReferenceInput{
 					Name: "app",
-					Kind: gqlschema.BindingUsageReferenceTypeDeployment,
+					Kind: "Deployment",
 				},
 				Parameters: &gqlschema.ServiceBindingUsageParametersInput{
 					EnvPrefix: &gqlschema.EnvPrefixInput{Name: "ENV_PREFIX"},
@@ -225,7 +225,7 @@ func TestBindingUsageConversionInput(t *testing.T) {
 				},
 				UsedBy: gqlschema.LocalObjectReferenceInput{
 					Name: "app",
-					Kind: gqlschema.BindingUsageReferenceTypeDeployment,
+					Kind: "Deployment",
 				},
 			},
 			expK8sSBU: &api.ServiceBindingUsage{

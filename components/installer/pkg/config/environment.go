@@ -2,11 +2,12 @@ package config
 
 import (
 	"os"
+	"strings"
 )
 
 // Configuration of non-secret values in installer
 type installationConfig struct {
-	ExternalIPAddress          string
+	ExternalPublicIP           string
 	Domain                     string
 	RemoteEnvIP                string
 	K8sApiserverUrl            string
@@ -27,12 +28,13 @@ type installationConfig struct {
 	EtcdBackupABSAccount       string
 	EtcdBackupABSKey           string
 	ComponentsList             string
+	IsLocalInstallation        bool
 }
 
 // GetInstallationConfig returns all non-secret installation parameters from the Installer environment variables
 func GetInstallationConfig() *installationConfig {
 	return &installationConfig{
-		ExternalIPAddress:          os.Getenv("EXTERNAL_IP_ADDRESS"),
+		ExternalPublicIP:           os.Getenv("EXTERNAL_PUBLIC_IP"),
 		Domain:                     os.Getenv("DOMAIN"),
 		RemoteEnvIP:                os.Getenv("REMOTE_ENV_IP"),
 		K8sApiserverUrl:            os.Getenv("K8S_APISERVER_URL"),
@@ -53,5 +55,10 @@ func GetInstallationConfig() *installationConfig {
 		EtcdBackupABSAccount:       os.Getenv("ETCD_BACKUP_ABS_ACCOUNT"),
 		EtcdBackupABSKey:           os.Getenv("ETCD_BACKUP_ABS_KEY"),
 		ComponentsList:             os.Getenv("COMPONENT_LIST"),
+		IsLocalInstallation:        isLocalInstallation(os.Getenv("IS_LOCAL_INSTALLATION")),
 	}
+}
+
+func isLocalInstallation(value string) bool {
+	return strings.ToLower(value) == "true"
 }

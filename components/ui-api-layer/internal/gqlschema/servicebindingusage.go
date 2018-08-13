@@ -10,7 +10,7 @@ type ServiceBindingUsage struct {
 }
 
 type LocalObjectReference struct {
-	Kind BindingUsageReferenceType
+	Kind string
 	Name string
 }
 

@@ -9,6 +9,11 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+const (
+	tracingAnnotationKey = "servicebindingusages.servicecatalog.kyma.cx/tracing-information"
+)
+
+//go:generate mockery -name=genericUsageBindingAnnotationTracer -output=automock -outpkg=automock -case=underscore
 type genericUsageBindingAnnotationTracer interface {
 	GetInjectedLabels(res *unstructured.Unstructured, usageName string) (map[string]string, error)
 	DeleteAnnotationAboutBindingUsage(res *unstructured.Unstructured, usageName string) error
@@ -69,6 +74,11 @@ func (c *genericUsageAnnotationTracer) SetAnnotationAboutBindingUsage(res *unstr
 		return errors.Wrap(err, "while saving annotation tracing data")
 	}
 	return nil
+}
+
+// sbuTracingInfo represents stored (in annotation) data about applied service binding usage
+type sbuTracingInfo struct {
+	InjectedLabelKeys map[string]string `json:"injectedLabels"`
 }
 
 func (c *genericUsageAnnotationTracer) readAnnotationData(res *unstructured.Unstructured) (map[string]sbuTracingInfo, bool, error) {

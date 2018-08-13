@@ -225,7 +225,7 @@ func (steps *InstallationSteps) PrintInstallationStep(stepName string) {
 }
 
 func (steps *InstallationSteps) getStaticFileOverrides(installationData *config.InstallationData, chartDir string) overrides.StaticFile {
-	if installationData.IsLocalInstallation() == true {
+	if installationData.IsLocalInstallation {
 		return overrides.NewLocalStaticFile()
 	}
 

@@ -185,7 +185,7 @@ enum ServiceBindingUsageStatusType {
 }
 
 type LocalObjectReference {
-    kind: BindingUsageReferenceType!
+    kind: String!
     name: String!
 }
 
@@ -232,13 +232,8 @@ input ServiceBindingRefInput {
 }
 
 input LocalObjectReferenceInput {
-    kind: BindingUsageReferenceType!
+    kind: String!
     name: String!
-}
-
-enum BindingUsageReferenceType {
-    DEPLOYMENT
-    FUNCTION
 }
 
 input ServiceBindingUsageParametersInput {

@@ -59,16 +59,16 @@ func (sc *InstallationDataCreator) WithDomain(domain string) *InstallationDataCr
 	return sc
 }
 
-// WithEmptyIP sets IP address property in InstallationData to empty value
-func (sc *InstallationDataCreator) WithEmptyIP() *InstallationDataCreator {
-	sc.installationData.ExternalIPAddress = ""
+// WithLocalInstallation sets IsLocalInstallation poperty in InstallationData to true
+func (sc *InstallationDataCreator) WithLocalInstallation() *InstallationDataCreator {
+	sc.installationData.IsLocalInstallation = true
 
 	return sc
 }
 
 // WithIP sets IP address in InstallationData
 func (sc *InstallationDataCreator) WithIP(ipAddr string) *InstallationDataCreator {
-	sc.installationData.ExternalIPAddress = ipAddr
+	sc.installationData.ExternalPublicIP = ipAddr
 
 	return sc
 }
@@ -128,6 +128,5 @@ func (sc *InstallationDataCreator) WithEtcdBackupABSContainerName(path string) *
 ////////////////////////////////////////
 // GetData returns InstallationData created by InstallationDataCreator
 func (sc *InstallationDataCreator) GetData() config.InstallationData {
-	sc.installationData.IsLocalInstallation = func() bool { return sc.installationData.ExternalIPAddress == "" }
 	return sc.installationData
 }

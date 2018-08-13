@@ -10,7 +10,7 @@ import (
 const istioTplStr = `
 ingressgateway:
   service:
-    externalPublicIp: {{.ExternalIPAddress}}
+    externalPublicIp: {{.ExternalPublicIP}}
 `
 
 // GetIstioOverrides returns values overrides for istio ingressgateway
@@ -34,5 +34,5 @@ func GetIstioOverrides(installationData *config.InstallationData) (string, error
 }
 
 func hasIPAddress(installationData *config.InstallationData) bool {
-	return installationData.ExternalIPAddress != ""
+	return installationData.ExternalPublicIP != ""
 }

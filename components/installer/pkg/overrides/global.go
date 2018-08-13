@@ -11,7 +11,7 @@ const globalsTplStr = `
 global:
   tlsCrt: "{{.ClusterTLSCert}}"
   tlsKey: "{{.ClusterTLSKey}}"
-  isLocalEnv: {{isLocal}}
+  isLocalEnv: {{.IsLocalInstallation}}
   domainName: "{{.Domain}}"
   remoteEnvCa: "{{.RemoteEnvCa}}"
   remoteEnvCaKey: "{{.RemoteEnvCaKey}}"
@@ -25,11 +25,7 @@ global:
 // GetGlobalOverrides .
 func GetGlobalOverrides(installationData *config.InstallationData) (string, error) {
 
-	fmap := template.FuncMap{
-		"isLocal": installationData.IsLocalInstallation,
-	}
-
-	tmpl, err := template.New("").Funcs(fmap).Parse(globalsTplStr)
+	tmpl, err := template.New("").Parse(globalsTplStr)
 	if err != nil {
 		return "", err
 	}

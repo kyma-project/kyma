@@ -57,9 +57,7 @@ func TestControllerRunAddSuccess(t *testing.T) {
 		}).
 		Once()
 
-	tc.kindsSupervisorsMock.ExpectOnHasSynced(true).
-		Once()
-	tc.kindsSupervisorsMock.ExpectOnGet(controller.KindDeployment, tc.deploySupervisorMock).
+	tc.kindsSupervisorsMock.ExpectOnGet("deployment", tc.deploySupervisorMock).
 		Once()
 
 	tc.podPresetModifierMock.ExpectOnUpsertPodPreset(fixPP).
@@ -144,7 +142,6 @@ func TestControllerRunAddFailOnFetchingLabels(t *testing.T) {
 	usageInformersFactory := bindingUsageInformers.NewSharedInformerFactory(usageCli, 0)
 	scInformerFactory := scInformers.NewSharedInformerFactory(scCli, 0)
 
-	tc.kindsSupervisorsMock.ExpectOnHasSynced(true)
 	tc.podPresetModifierMock.ExpectOnUpsertPodPreset(fixPP)
 	tc.labelsFetcherMock.ExpectErrorOnFetch(fixErr)
 
@@ -225,7 +222,7 @@ func (c *ctrlTestCase) fixDeploymentServiceBindingUsage() *sbuTypes.ServiceBindi
 		Spec: sbuTypes.ServiceBindingUsageSpec{
 			UsedBy: sbuTypes.LocalReferenceByKindAndName{
 				Name: "redis-client",
-				Kind: "Deployment",
+				Kind: "deployment",
 			},
 			ServiceBindingRef: sbuTypes.LocalReferenceByName{
 				Name: "redis-client",
