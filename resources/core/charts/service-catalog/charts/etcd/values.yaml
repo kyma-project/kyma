@@ -6,12 +6,14 @@ cluster:
       memory: 256Mi
     requests:
       memory: 32Mi
+  TLS:
+    enabled: true
 
 nameOverride: service-catalog-etcd
 
 backupApp:
   image:
-    tag: 0.3.70
+    tag: 0.3.187
     pullPolicy: IfNotPresent
   cronJobSchedule: "*/30 * * * *"
   cleaner:

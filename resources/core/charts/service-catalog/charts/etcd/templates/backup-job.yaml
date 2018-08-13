@@ -35,8 +35,19 @@ spec:
               value: "service-catalog"
             - name: APP_BACKUP_CONFIG_MAP_NAME_FOR_TRACING
               value: "sc-recorded-etcd-backup-data"
+            {{- if .Values.cluster.TLS.enabled }}
+            - name: APP_BACKUP_CLIENT_TLS_SECRET
+              value: "{{ template "etcd-fullname" . }}-etcd-client-tls"
+            {{ end }}
             - name: APP_BACKUP_ETCD_ENDPOINTS
+            # After helm v2.9 we can replace it with sprig ternary function:
+            # http://masterminds.github.io/sprig/defaults.html#ternary
+            # value: \{\{ ternary "https" "http" .Values.cluster.TLS.enabled }}://core-service-catalog-etcd-client.kyma-system.svc.cluster.local:2379
+            {{- if .Values.cluster.TLS.enabled }}
+              value: https://core-service-catalog-etcd-client.kyma-system.svc.cluster.local:2379
+            {{ else }}
               value: http://core-service-catalog-etcd-client.kyma-system.svc.cluster.local:2379
+            {{ end }}
             - name: APP_CLEANER_LEAVE_MIN_NEWEST_BACKUP_BLOBS
               value: "{{ .Values.backupApp.cleaner.leaveMinNewestBackupBlobs }}"
             - name: APP_CLEANER_EXPIRATION_BLOB_TIME
