@@ -26,7 +26,7 @@ spec:
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag }}"
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
-          - "/metadata"
+          - "/metadataservice"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--minioURL={{ .Values.deployment.args.minioURL }}"
