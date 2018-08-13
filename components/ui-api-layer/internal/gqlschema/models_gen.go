@@ -87,8 +87,8 @@ type InputTopic struct {
 	Type string `json:"type"`
 }
 type LocalObjectReferenceInput struct {
-	Kind BindingUsageReferenceType `json:"kind"`
-	Name string                    `json:"name"`
+	Kind string `json:"kind"`
+	Name string `json:"name"`
 }
 type RemoteEnvironmentEntry struct {
 	Type        string  `json:"type"`
@@ -203,42 +203,6 @@ func (e *AuthenticationPolicyType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AuthenticationPolicyType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type BindingUsageReferenceType string
-
-const (
-	BindingUsageReferenceTypeDeployment BindingUsageReferenceType = "DEPLOYMENT"
-	BindingUsageReferenceTypeFunction   BindingUsageReferenceType = "FUNCTION"
-)
-
-func (e BindingUsageReferenceType) IsValid() bool {
-	switch e {
-	case BindingUsageReferenceTypeDeployment, BindingUsageReferenceTypeFunction:
-		return true
-	}
-	return false
-}
-
-func (e BindingUsageReferenceType) String() string {
-	return string(e)
-}
-
-func (e *BindingUsageReferenceType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = BindingUsageReferenceType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid BindingUsageReferenceType", str)
-	}
-	return nil
-}
-
-func (e BindingUsageReferenceType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

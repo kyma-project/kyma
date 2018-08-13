@@ -1,8 +1,6 @@
 package servicecatalog
 
 import (
-	"fmt"
-
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -31,17 +29,12 @@ func (c *bindingUsageConverter) ToGQL(in *api.ServiceBindingUsage) (*gqlschema.S
 		return nil, nil
 	}
 
-	kind, err := c.refTypeToQL(in.Spec.UsedBy.Kind)
-	if err != nil {
-		return nil, err
-	}
-
 	gqlSBU := gqlschema.ServiceBindingUsage{
 		Name:        in.Name,
 		Environment: in.Namespace,
 		UsedBy: gqlschema.LocalObjectReference{
 			Name: in.Spec.UsedBy.Name,
-			Kind: kind,
+			Kind: in.Spec.UsedBy.Kind,
 		},
 		ServiceBindingName: in.Spec.ServiceBindingRef.Name,
 		Status:             c.extractor.Status(in.Status.Conditions),
@@ -78,11 +71,6 @@ func (c *bindingUsageConverter) InputToK8s(in *gqlschema.CreateServiceBindingUsa
 		return nil, nil
 	}
 
-	kind, err := c.referenceTypeToStr(in.UsedBy.Kind)
-	if err != nil {
-		return nil, err
-	}
-
 	k8sSBU := api.ServiceBindingUsage{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceBindingUsage",
@@ -96,7 +84,7 @@ func (c *bindingUsageConverter) InputToK8s(in *gqlschema.CreateServiceBindingUsa
 				Name: in.ServiceBindingRef.Name,
 			},
 			UsedBy: api.LocalReferenceByKindAndName{
-				Kind: kind,
+				Kind: in.UsedBy.Kind,
 				Name: in.UsedBy.Name,
 			},
 		},
@@ -111,27 +99,4 @@ func (c *bindingUsageConverter) InputToK8s(in *gqlschema.CreateServiceBindingUsa
 	}
 
 	return &k8sSBU, nil
-}
-
-func (*bindingUsageConverter) referenceTypeToStr(referenceType gqlschema.BindingUsageReferenceType) (string, error) {
-	switch referenceType {
-	case gqlschema.BindingUsageReferenceTypeDeployment:
-		return "Deployment", nil
-	case gqlschema.BindingUsageReferenceTypeFunction:
-		return "Function", nil
-	default:
-		return "", fmt.Errorf("unknown reference kind %s", referenceType)
-	}
-}
-
-// refTypeToQL converts string to reference type, if the kind is unknown, returns exactly the same string.
-func (*bindingUsageConverter) refTypeToQL(kind string) (gqlschema.BindingUsageReferenceType, error) {
-	switch kind {
-	case "Deployment":
-		return gqlschema.BindingUsageReferenceTypeDeployment, nil
-	case "Function":
-		return gqlschema.BindingUsageReferenceTypeFunction, nil
-	default:
-		return "", fmt.Errorf("unknown kind %s", kind)
-	}
 }
