@@ -9,11 +9,10 @@ data:
   remote_env_ca_key: "__REMOTE_ENV_CA_KEY__"
 ---
 apiVersion: v1
-kind: Secret
+kind: ConfigMap
 metadata:
   name: cluster-certificate
   namespace: kyma-installer
-type: Opaque
 data:
   tls_cert: "__TLS_CERT__"
   tls_key: "__TLS_KEY__"
