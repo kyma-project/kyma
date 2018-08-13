@@ -10,7 +10,6 @@ import (
 // KubernetesResourceSupervisor validates if given Kubernetes resource can be modified by ServiceBindingUsage. If yes
 // it can ensure that labels are present or deleted on previous validated resource.
 type KubernetesResourceSupervisor interface {
-	HasSynced() bool
 	EnsureLabelsCreated(resourceNs, resourceName, usageName string, labels map[string]string) error
 	EnsureLabelsDeleted(resourceNs, resourceName, usageName string) error
 	GetInjectedLabels(resourceNs, resourceName, usageName string) (map[string]string, error)
@@ -23,13 +22,6 @@ type Kind string
 func (k Kind) normalized() string {
 	return strings.ToLower(string(k))
 }
-
-const (
-	// KindDeployment represents Deployment resource
-	KindDeployment Kind = "Deployment"
-	// KindKubelessFunction represents Kubeless Function resource
-	KindKubelessFunction Kind = "Function"
-)
 
 // ResourceSupervisorAggregator aggregates all defined resources supervisors
 type ResourceSupervisorAggregator struct {
@@ -58,17 +50,6 @@ func (f *ResourceSupervisorAggregator) Unregister(k Kind) error {
 	defer f.mu.Unlock()
 	delete(f.registered, k.normalized())
 	return nil
-}
-
-// HasSynced returns true if all registered supervisors are synced
-func (f *ResourceSupervisorAggregator) HasSynced() bool {
-	for _, supervisor := range f.registered {
-		if !supervisor.HasSynced() {
-			return false
-		}
-	}
-
-	return true
 }
 
 // Get returns supervisor for given kind

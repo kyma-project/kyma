@@ -61,8 +61,13 @@ func TestProtectionControllerProtectsUsageKindUsedBySBU(t *testing.T) {
 	tc.WaitForProcessDeletionDone(t, 3*time.Second)
 
 	// THEN
-	uk = tc.GetUsageKind(t, fixUsageKind().Name)
-	assert.NotContains(t, uk.Finalizers, usagekind.FinalizerName)
+
+	// Caches may be not up to date and update of UsageKind triggers another processing, so just after removal the UsageKind could contain the finalizer.
+	// After a short period of time the uk.Finalizers must be empty
+	tc.WaitForTrue(t, 100*time.Millisecond, func() bool {
+		uk := tc.GetUsageKind(t, fixUsageKind().Name)
+		return len(uk.Finalizers) == 0
+	}, "expected empty finalizer list")
 }
 
 func fixSBU(kind string) *v1alpha1.ServiceBindingUsage {

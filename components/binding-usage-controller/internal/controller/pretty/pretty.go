@@ -3,11 +3,9 @@ package pretty
 import (
 	"fmt"
 
-	kubelessTypes "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/pretty"
 	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	appsV1beta2 "k8s.io/api/apps/v1beta2"
 	settingsV1alpha1 "k8s.io/api/settings/v1alpha1"
 )
 
@@ -34,14 +32,4 @@ func ServiceBindingUsageName(obj *sbuTypes.ServiceBindingUsage) string {
 // PodPresetName returns string with the type, namespace and name of PodPreset.
 func PodPresetName(obj *settingsV1alpha1.PodPreset) string {
 	return fmt.Sprintf(`PodPreset "%s/%s"`, obj.Namespace, obj.Name)
-}
-
-// DeploymentName returns string with the type, namespace and name of Deployment.
-func DeploymentName(obj *appsV1beta2.Deployment) string {
-	return fmt.Sprintf(`Deployment "%s/%s"`, obj.Namespace, obj.Name)
-}
-
-// FunctionName returns string with the type, namespace and name of Function.
-func FunctionName(obj *kubelessTypes.Function) string {
-	return fmt.Sprintf(`Deployment "%s/%s"`, obj.Namespace, obj.Name)
 }

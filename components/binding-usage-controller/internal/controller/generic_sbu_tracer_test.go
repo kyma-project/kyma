@@ -9,6 +9,10 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+const (
+	fixUsageName = "test-usage"
+)
+
 func TestGenericUsageAnnotationTracerInjectedLabels(t *testing.T) {
 	// given
 	tracer := controller.NewGenericUsageAnnotationTracer()

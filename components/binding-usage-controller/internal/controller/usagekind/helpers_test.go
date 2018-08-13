@@ -76,3 +76,20 @@ func (tc *testCase) WaitForChan(t *testing.T, ch chan struct{}, timeout time.Dur
 		t.Fatalf("timeout occured when waiting for channel")
 	}
 }
+
+func (tc *testCase) WaitForTrue(t *testing.T, timeout time.Duration, testingFn func() bool, message string) {
+	timeoutCh := time.After(timeout)
+	for {
+		select {
+		case <-timeoutCh:
+			t.Fatalf("Timeout exceeded for: %s", message)
+		default:
+		}
+
+		if testingFn() {
+			break
+		}
+
+		time.Sleep(1 * time.Millisecond)
+	}
+}
