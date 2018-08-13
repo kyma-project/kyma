@@ -80,7 +80,7 @@ func newControllerTestCase(registry *automock.SupervisorRegistry) *controllerTes
 	cs := fake.NewSimpleClientset()
 	informersFactory := informers.NewSharedInformerFactory(cs, 0)
 	kindInformer := informersFactory.Servicecatalog().V1alpha1().UsageKinds()
-	cp := &dynamicFake.FakeClientPool{}
+	cp := &dynamicFake.FakeDynamicClient{}
 
 	ctr := usagekind.NewKindController(kindInformer, registry, cp, spy.NewLogSink().Logger).WithTestHookOnAsyncOpDone(hookAsyncOp)
 

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"errors"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -18,39 +20,48 @@ func newLabelManipulator(path string) *labelManipulator {
 }
 
 func (lm *labelManipulator) EnsureLabelsAreApplied(res *unstructured.Unstructured, labelsToApply map[string]string) error {
-	val, err := lm.findOrCreateLabelsField(res)
+	labels, err := lm.findOrCreateLabelsField(res)
 	if err != nil {
 		return err
 	}
-
-	if labelMap, ok := val.(map[string]interface{}); ok {
-		for k, v := range labelsToApply {
-			labelMap[k] = v
-		}
-	} else {
-		return fmt.Errorf("expected type of field is map[string]string, but was %T", val)
+	for k, v := range labelsToApply {
+		labels[k] = v
 	}
-
 	return nil
 }
 
 func (lm *labelManipulator) EnsureLabelsAreDeleted(res *unstructured.Unstructured, labelsToDelete map[string]string) error {
-	val, err := lm.findOrCreateLabelsField(res)
+	labels, err := lm.findOrCreateLabelsField(res)
 	if err != nil {
 		return err
 	}
 
-	if labelMap, ok := val.(map[string]interface{}); ok {
-		for k := range labelsToDelete {
-			delete(labelMap, k)
-		}
-	} else {
-		return fmt.Errorf("expected type of field is map[string]string, but was %T", val)
+	for k := range labelsToDelete {
+		delete(labels, k)
 	}
+
 	return nil
 }
 
-func (lm *labelManipulator) findOrCreateLabelsField(res *unstructured.Unstructured) (interface{}, error) {
+func (lm *labelManipulator) DetectLabelsConflicts(res *unstructured.Unstructured, labelsToCheck map[string]string) ([]string, error) {
+	labels, err := lm.findOrCreateLabelsField(res)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]string, 0)
+	for k := range labelsToCheck {
+		if _, exist := labels[k]; exist {
+			result = append(result, k)
+		}
+	}
+	if len(result) != 0 {
+		return result, errors.New("labels conflicts detected")
+	}
+	return nil, nil
+}
+
+func (lm *labelManipulator) findOrCreateLabelsField(res *unstructured.Unstructured) (map[string]interface{}, error) {
 	var val interface{} = res.Object
 
 	for i, field := range lm.fields {
@@ -65,5 +76,9 @@ func (lm *labelManipulator) findOrCreateLabelsField(res *unstructured.Unstructur
 		}
 	}
 
-	return val, nil
+	result, ok := val.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected type of field is map[string]string, but was %T", val)
+	}
+	return result, nil
 }
