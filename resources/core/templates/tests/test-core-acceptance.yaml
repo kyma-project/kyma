@@ -20,6 +20,8 @@ spec:
         value: {{ .Values.global.domainName }}
       - name: IS_LOCAL_ENV
         value: {{ .Values.global.isLocalEnv | toString | quote }}
+      - name: INGRESSGATEWAY_FQDN
+        value: istio-ingressgateway.istio-system.svc.cluster.local
       - name: STUBS_DOCKER_IMAGE
         value: {{ .Values.global.containerRegistry.path }}/acceptance-tests:{{ .Values.test.acceptance.core.imageTag }}
       - name: REMOTE_ENVIRONMENT_UNLINKING_TIMEOUT

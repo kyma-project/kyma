@@ -30,7 +30,7 @@ Follow these steps to download **kubeconfig** and configure kubectl to access th
 
 The commands throughout this guide use URLs that require you to provide the domain of the cluster which you are using. To complete this configuration, set the variable `yourClusterDomain` to the domain of your cluster.
 
-For example if your cluster's domain is 'demo.cluster.kyma.cx' then run the following command:
+For example, if your cluster's domain is `demo.cluster.kyma.cx`, run the following command:
 
    ```bash
    export yourClusterDomain='demo.cluster.kyma.cx'

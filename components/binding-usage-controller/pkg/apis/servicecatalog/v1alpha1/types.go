@@ -124,7 +124,7 @@ type UsageKind struct {
 	Spec UsageKindSpec `json:"spec"`
 }
 
-// ServiceBindingTargetSpec represents a description of the ServiceBindingTarget
+// UsageKindSpec represents a description of the ServiceBindingTarget
 type UsageKindSpec struct {
 	DisplayName string             `json:"displayName"`
 	Resource    *ResourceReference `json:"resource"`

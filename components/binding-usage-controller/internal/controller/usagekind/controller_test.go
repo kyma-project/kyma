@@ -13,7 +13,6 @@ import (
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
 	informers "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions"
 	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	dynamicFake "k8s.io/client-go/dynamic/fake"
 )
@@ -21,7 +20,7 @@ import (
 func TestControllerRunAddAndDelete(t *testing.T) {
 	// GIVEN
 	registry := &automock.SupervisorRegistry{}
-	tc := newTestCase(registry)
+	tc := newControllerTestCase(registry)
 	defer tc.TearDown()
 
 	// the goal of controller work is to register/unregister supervisor
@@ -64,15 +63,13 @@ func fixUsageKind() *v1alpha1.UsageKind {
 	}
 }
 
-type testCase struct {
-	kindController *usagekind.Controller
-	cancel         context.CancelFunc
-	timeoutContext context.Context
-	asyncOpDone    chan struct{}
-	clientSet      *fake.Clientset
+type controllerTestCase struct {
+	*testCase
+
+	asyncOpDone chan struct{}
 }
 
-func newTestCase(registry *automock.SupervisorRegistry) *testCase {
+func newControllerTestCase(registry *automock.SupervisorRegistry) *controllerTestCase {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 	asyncOpDone := make(chan struct{})
@@ -88,45 +85,24 @@ func newTestCase(registry *automock.SupervisorRegistry) *testCase {
 	ctr := usagekind.NewKindController(kindInformer, registry, cp, spy.NewLogSink().Logger).WithTestHookOnAsyncOpDone(hookAsyncOp)
 
 	informersFactory.Start(ctx.Done())
-
-	return &testCase{
-		kindController: ctr,
-		cancel:         cancel,
-		timeoutContext: ctx,
-		asyncOpDone:    asyncOpDone,
-		clientSet:      cs,
+	return &controllerTestCase{
+		testCase: &testCase{
+			ctrl:           ctr,
+			cancel:         cancel,
+			timeoutContext: ctx,
+			clientSet:      cs,
+		},
+		asyncOpDone: asyncOpDone,
 	}
 }
 
-func (tc *testCase) SupervisorMatcher() interface{} {
+func (tc *controllerTestCase) SupervisorMatcher() interface{} {
 	return func(s *controller.GenericSupervisor) bool {
 		// todo (pluggable SBU cleanup): check generic supervisor
 		return true
 	}
 }
 
-func (tc *testCase) RunController() {
-	go tc.kindController.Run(tc.timeoutContext.Done())
-}
-
-func (tc *testCase) TearDown() {
-	defer tc.cancel()
-}
-
-func (tc *testCase) WaitForItemProcessed(t *testing.T, timeout time.Duration) {
-	select {
-	case <-tc.asyncOpDone:
-	case <-time.After(timeout):
-		t.Fatalf("timeout occured when waiting for channel")
-	}
-}
-
-func (tc *testCase) RemoveUsageKind(t *testing.T, name string) {
-	err := tc.clientSet.Servicecatalog().UsageKinds().Delete(name, &v1.DeleteOptions{})
-	require.NoError(t, err)
-}
-
-func (tc *testCase) AddUsageKind(t *testing.T, uk *v1alpha1.UsageKind) {
-	_, err := tc.clientSet.Servicecatalog().UsageKinds().Create(uk)
-	require.NoError(t, err)
+func (tc *controllerTestCase) WaitForItemProcessed(t *testing.T, timeout time.Duration) {
+	tc.WaitForChan(t, tc.asyncOpDone, timeout)
 }

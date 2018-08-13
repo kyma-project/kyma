@@ -7,7 +7,7 @@ Kyma uses Helm charts to deliver single components and extensions, as well as th
 
 ## Manage dependencies with Init Containers
 
-The [ARD#004](https://github.com/kyma-project/community-new/blob/master/architecture-decision-records/adr-004-InitContainers_for_dependency_management.md) architecture decision record declares the use of Init Containers as the primary dependency mechanism.
+The **ADR 003: Init Containers for dependency management** document declares the use of Init Containers as the primary dependency mechanism.
 
 [Init Containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) present a set of distinctive behaviors:
 

@@ -28,7 +28,7 @@ import (
 
 // informerResyncPeriod defines how often informer will execute relist action. Setting to zero disable resync.
 // BEWARE: too short period time will increase the CPU load.
-const informerResyncPeriod = time.Minute
+const informerResyncPeriod = 30 * time.Minute
 
 // Config holds application configuration
 type Config struct {
@@ -73,7 +73,11 @@ func main() {
 	podPresetModifier := controller.NewPodPresetModifier(k8sCli.SettingsV1alpha1())
 
 	aggregator := controller.NewResourceSupervisorAggregator()
-	var kindController *usagekind.Controller
+	var (
+		kindController         *usagekind.Controller
+		ukProtectionController *usagekind.ProtectionController
+	)
+	sbuInformer := bindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages()
 	if cfg.PluggableSBU {
 		log.Info("Pluggable SBU enabled")
 		cp := dynamic.NewDynamicClientPool(k8sConfig)
@@ -83,6 +87,12 @@ func main() {
 			aggregator,
 			cp,
 			log)
+		ukProtectionController = usagekind.NewProtectionController(
+			bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds(),
+			sbuInformer,
+			bindingUsageCli.ServicecatalogV1alpha1(),
+			log,
+		)
 
 	} else {
 		// Kubeless informers
@@ -104,7 +114,7 @@ func main() {
 	ctr := controller.NewServiceBindingUsage(
 		usageSpecStorage,
 		bindingUsageCli.ServicecatalogV1alpha1(),
-		bindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages(),
+		sbuInformer,
 		serviceCatalogInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
 		aggregator,
 		podPresetModifier,
@@ -121,7 +131,9 @@ func main() {
 	go runStatuszHTTPServer(stopCh, fmt.Sprintf(":%d", cfg.Port), log)
 
 	if cfg.PluggableSBU {
+		ctr.AddOnDeleteListener(ukProtectionController)
 		go kindController.Run(stopCh)
+		go ukProtectionController.Run(stopCh)
 	}
 	ctr.Run(stopCh)
 }

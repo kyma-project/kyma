@@ -77,7 +77,7 @@ The `meta.yaml` file contains information about a yBundle plan. Set the followin
 
 The `bind.yaml` file contains the information required for the [binding action][bind] in a specific plan.
 If you defined in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file.
-For more information about the content of the `bind.yaml` file, see the [Binding yBundles](013-configuration-helm-broker-bundles-binding.md) documentation.
+For more information about the content of the `bind.yaml` file, see the **Binding yBundles** document.
 
 #### The values.yaml file
 

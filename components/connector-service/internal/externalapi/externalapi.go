@@ -15,8 +15,12 @@ type InfoHandler interface {
 	GetInfo(w http.ResponseWriter, r *http.Request)
 }
 
-func NewHandler(sHandler SignatureHandler, iHandler InfoHandler) http.Handler {
+func NewHandler(sHandler SignatureHandler, iHandler InfoHandler, middlewares []mux.MiddlewareFunc) http.Handler {
 	router := mux.NewRouter()
+
+	for _, middleware := range middlewares {
+		router.Use(middleware)
+	}
 
 	registrationRouter := router.PathPrefix("/v1/remoteenvironments").Subrouter()
 

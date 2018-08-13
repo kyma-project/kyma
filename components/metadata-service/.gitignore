@@ -1,0 +1,8 @@
+/.idea
+*.iml
+
+/metadataservice
+
+*.log
+
+vendor
