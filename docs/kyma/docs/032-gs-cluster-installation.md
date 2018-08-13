@@ -11,8 +11,6 @@ This Getting Started guide shows developers how to to quickly deploy Kyma on a c
 
 ## Prerequisites
 
->**NOTE:** The public IPs and DNS records for Istio Ingress and the Remote Environments gateway must exist prior to the Kyma installation. The Kyma installer does not support clusters on AWS as the provider does not support static IP assignment during ELB creation.
-
 The cluster on which you install Kyma must run Kubernetes version `1.10` or higher.
 
 To install Kyma, you need the following data:
@@ -26,12 +24,12 @@ To install Kyma, you need the following data:
 
 Optionally, you can prepare the following:
 
--  Static IP address for Kyma Ingress (public external IP)
-  - Create a DNS entry `*.kyma.example.com` that points to Kyma Ingress IP Address
+-  Static IP address for Kyma Istio Ingress (public external IP)
+  - Create a DNS record `*.kyma.example.com` that points to Kyma Istio Ingress IP Address
 - Static IP address for Remote Environments Ingress.
-  - Create a DNS entry `gateway.kyma.example.com` that points to Remote Environments Ingress IP Address
+  - Create a DNS record `gateway.kyma.example.com` that points to Remote Environments Ingress IP Address
 
-If you can't manually pre-allocate these IP addresses within your cloud platform, the cluster will request them during installation by platform-specific means. In that case don't forget to perform [Post-Installation steps](#Post-installation-steps).
+If you can't pre-allocate IP addresses (as is the case in AWS, where the provider does not support static IP assignment during ELB creation), the cluster will request them during installation by platform-specific means. In that case don't forget to perform [Post-Installation steps](#Post-installation-steps).
 
 Configure the Kubernetes API Server following this template:
 
