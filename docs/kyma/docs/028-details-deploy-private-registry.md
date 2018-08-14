@@ -1,5 +1,5 @@
 ---
-title: Deploying from a private Docker registry
+title: Deploy with a private Docker registry
 type: Details
 ---
 
