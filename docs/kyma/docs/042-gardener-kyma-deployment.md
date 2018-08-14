@@ -30,7 +30,7 @@ Shoot Clusters require a TLS certificate to run Kyma properly. To generate a cer
 
 2. Configure the Shoot Cluster.
 
-The deployment of a Gardener cluster requires data specified in the `shoot.yaml` file. Copy the [shoot.yaml.tpl](../../../installation/resources/gardener/shoot.yaml.tpl) template, rename it to `shoot.yaml`, and fill in the placeholder values:
+The deployment of a Gardener cluster requires data specified in the `shoot.yaml` file. Copy the `shoot.yaml.tpl` template located in the `installation/resources/gardener` directory, rename it to `shoot.yaml`, and fill in the placeholder values:
 
 - `__CLUSTER_NAME__` for the desired name of your cluster
 - `__PROJECT_NAME__` for the name of your project
@@ -75,3 +75,7 @@ kubectl apply -f installation/resources/gardener/managed-standard.yaml
 ## Install Kyma
 
 To install Kyma on the Shoot Cluster, follow the instructions from the **Kyma Cluster installation** document.
+
+## Test Kyma
+
+To test Kyma on the Shoot Cluster, wait until the installation is complete and run the `testing.sh` script located in the `installation/scripts` directory.
