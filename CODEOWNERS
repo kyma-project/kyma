@@ -32,7 +32,10 @@
 /resources/core/charts/configurations-generator @piotrmsc
 
 # The `application-connector` subchart
-/resources/core/charts/application-connector/ @lszymik @akgalwas @janmedrek
+/resources/core/charts/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib
+
+# The `nginx-ingress` subchart
+/resources/core/charts/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # The `console` subchart
 /resources/core/charts/console/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
@@ -110,7 +113,7 @@
 /resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
 # The `remote environment` chart
-/resources/remote-environments/ @lszymik @akgalwas @janmedrek
+/resources/remote-environments/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # Components
 # Api controller Component
@@ -144,13 +147,13 @@
 /components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
 
 # Connector Service Component
-/components/connector-service/ @lszymik @akgalwas @janmedrek
+/components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # Application Connector Component
-/components/metadata-service/ @lszymik @akgalwas @janmedrek
+/components/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # Gateway Component
-/components/gateway/ @lszymik @akgalwas @janmedrek
+/components/gateway/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # Event Bus Component
 /components/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
@@ -173,10 +176,10 @@
 /tests/ui-api-layer-acceptance-tests/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
 # Connector Service Tests
-/tests/connector-service-tests/ @lszymik @akgalwas @janmedrek
+/tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # Application Connector Tests
-/tests/metadata-service-tests/ @lszymik @akgalwas @janmedrekk
+/tests/metadata-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # Tools
 # Stability Checker Component
