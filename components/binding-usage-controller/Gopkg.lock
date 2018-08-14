@@ -165,10 +165,11 @@
     "pkg/client/informers_generated/externalversions/settings/v1alpha1",
     "pkg/client/listers_generated/servicecatalog/v1beta1",
     "pkg/client/listers_generated/settings/v1alpha1",
+    "pkg/filter",
     "pkg/pretty"
   ]
-  revision = "98af5889bb75a9472313e288ed5c06c591a19a19"
-  version = "v0.1.11"
+  revision = "0aaf02aba556b945a357fce4e82f62122d158f2a"
+  version = "v0.1.28"
 
 [[projects]]
   branch = "master"
@@ -191,12 +192,6 @@
   packages = ["."]
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
-
-[[projects]]
-  name = "github.com/pborman/uuid"
-  packages = ["."]
-  revision = "e790cca94e6cc75c7064b1332e63811d4aae1a53"
-  version = "v1.1"
 
 [[projects]]
   branch = "master"
@@ -414,7 +409,6 @@
     "pkg/util/runtime",
     "pkg/util/sets",
     "pkg/util/strategicpatch",
-    "pkg/util/uuid",
     "pkg/util/validation",
     "pkg/util/validation/field",
     "pkg/util/wait",
@@ -649,6 +643,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4abb6fb18876c893d7c67169b081cb34d41334042d75f39800178c1247053de0"
+  inputs-digest = "2a0fd8cf43baccd060abf832eeb20d0ba5dc5753e7dc8702f2737eb621d65c66"
   solver-name = "gps-cdcl"
   solver-version = 1

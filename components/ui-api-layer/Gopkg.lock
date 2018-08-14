@@ -152,8 +152,8 @@
     "pkg/client/listers_generated/settings/v1alpha1",
     "pkg/filter"
   ]
-  revision = "87a5db0e1e0359ce372037a235ce4448944c8611"
-  version = "v0.1.23"
+  revision = "0aaf02aba556b945a357fce4e82f62122d158f2a"
+  version = "v0.1.28"
 
 [[projects]]
   branch = "master"
@@ -427,6 +427,7 @@
     "storage/v1beta1"
   ]
   revision = "73d903622b7391f3312dcbac6483fed484e185f8"
+  version = "kubernetes-1.10.1"
 
 [[projects]]
   name = "k8s.io/apimachinery"
@@ -471,6 +472,7 @@
     "third_party/forked/golang/reflect"
   ]
   revision = "302974c03f7e50f16561ba237db776ab93594ef6"
+  version = "kubernetes-1.10.1"
 
 [[projects]]
   name = "k8s.io/client-go"
@@ -632,6 +634,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9cca6476df0f56c7f54ad1db853b9b9b2178015cfd81f28bf9e81064a806288d"
+  inputs-digest = "37849b38ee6afabd09ab86392065f3e439d0d18c9c3725645f7a7db1d9456d33"
   solver-name = "gps-cdcl"
   solver-version = 1
