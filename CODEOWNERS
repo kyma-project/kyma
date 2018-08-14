@@ -35,7 +35,7 @@
 /resources/core/charts/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # The `nginx-ingress` subchart
-/resources/core/charts/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib
+/resources/core/charts/nginx-ingress/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # The `console` subchart
 /resources/core/charts/console/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
