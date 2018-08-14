@@ -19,5 +19,5 @@ minioUserSecretName: remoteenvironments-minio-user
 tests:
   image:
     name: metadata-service-tests
-    tag: 0.3.139
+    tag: 0.3.158
     pullPolicy: IfNotPresent
