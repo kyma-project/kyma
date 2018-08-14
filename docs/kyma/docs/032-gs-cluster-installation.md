@@ -7,6 +7,8 @@ type: Getting Started
 
 This Getting Started guide shows developers how to to quickly deploy Kyma on a cluster. Kyma installs on a cluster using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma on a cluster and verify the deployment, as well as the troubleshooting tips.
 
+>**NOTE:** To learn how to install Kyma on a [Gardener](https://github.com/gardener/gardener) cluster, see the **Install Kyma on Gardener** document.
+
 ## Prerequisites
 
 >**NOTE:** The public IPs and DNS records for Istio Ingress and the Remote Environments gateway must exist prior to the Kyma installation. The Kyma installer does not support clusters on AWS as the provider does not support static IP assignment during ELB creation.
@@ -55,7 +57,21 @@ Run the following command:
 kubectl create ns kyma-installer
 ```
 
-2. Fill in the `installer-config.yaml.tpl` template.
+2. Enable Azure Broker (optional)
+
+>**NOTE:** This instruction is applicable only when you install Kyma on a Gardener Cluster.. 
+
+To enable the communication between the Shoot Cluster and the Azure Broker, you must pass Azure credentials to the cluster.
+
+- Copy the `azure-broker-secret.yaml.tpl` template located in the `installation/resources` directory.
+- Rename the file to `azure-broker-secret.yaml`. 
+- Replace the placeholder values with your Azure credentials.
+- Run this command to pass the secret to the Shoot Cluster:
+```
+kubectl apply -f installation/resources/azure-broker-secret.yaml
+```
+
+3. Fill in the `installer-config.yaml.tpl` template.
 
 The Kyma installation process requires installation data specified in the `installer-config.yaml` file. Copy the `installer-config.yaml.tpl` template, rename it to `installer-config.yaml`, and fill in these placeholder values:
 
@@ -80,7 +96,7 @@ When you fill in all required placeholder values, run the following command to p
 kubectl apply -f installer-config.yaml
 ```
 
-3. Bind the default RBAC role.
+4. Bind the default RBAC role.
 
 Kyma installation requires increased permissions granted by the **cluster-admin** role. To bind the role to the default **ServiceAccount**, run the following command:
 
@@ -88,7 +104,7 @@ Kyma installation requires increased permissions granted by the **cluster-admin*
 kubectl apply -f resources/cluster-prerequisites/default-sa-rbac-role.yaml
 ```
 
-4. Deploy `tiller`.
+5. Deploy `tiller`.
 
 To deploy the `tiller` component on your cluster, run the following command:
 
@@ -102,7 +118,7 @@ Wait until the `tiller` Pod is ready. Execute the following command to check tha
 kubectl get pods -n kube-system | grep tiller
 ```  
 
-5. Deploy the `Installer` component.
+6. Deploy the `Installer` component.
 
 To deploy the `Installer` component on your cluster, run this command:
 
@@ -110,7 +126,7 @@ To deploy the `Installer` component on your cluster, run this command:
 kubectl apply -f installation/resources/installer.yaml -n kyma-installer
 ```
 
-6. Trigger the installation.
+7. Trigger the installation.
 
 To trigger the installation of Kyma, you need a Custom Resource file. Duplicate the `installer-cr.yaml.tpl` file, rename it to `installer-cr.yaml`, and fill in these placeholder values:
 
@@ -124,7 +140,7 @@ Once the file is ready, run this command to trigger the installation:
 ```
 kubectl apply -f installer-cr.yaml
 ```
-7. Verify the installation.
+8. Verify the installation.
 
 To check the progress of the installation process, verify the Custom Resource:
 
