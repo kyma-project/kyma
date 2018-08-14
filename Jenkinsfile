@@ -1,6 +1,4 @@
 #!/usr/bin/env groovy
-import groovy.json.JsonSlurperClassic
-import groovy.json.JsonOutput
 
 def label = "kyma-${UUID.randomUUID().toString()}"
 def commit_id=''
@@ -14,7 +12,7 @@ DOCKER_CREDENTIALS=${env.DOCKER_CREDENTIALS}
 GIT_REVISION=${params.GIT_REVISION}
 GIT_BRANCH=${params.GIT_BRANCH}
 APP_VERSION=${params.APP_VERSION}
-COMP_VERSIONS=${JsonOutput.prettyPrint(params.COMP_VERSIONS)}
+COMP_VERSIONS=\n${params.COMP_VERSIONS}
 ********************************
 """
 
@@ -31,6 +29,7 @@ podTemplate(label: label) {
                             stage("checkout kyma") {
                                 dir("kyma") {
                                     checkout scm
+                                    writeFile file: "installation/overrides.yaml", text: "${params.COMP_VERSIONS}"
                                 }
                             }
 
