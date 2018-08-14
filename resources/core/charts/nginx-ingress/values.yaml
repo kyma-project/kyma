@@ -5,7 +5,7 @@ controller:
   name: controller
   image:
     repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
-    tag: "0.17.1"
+    tag: "0.18.0"
     pullPolicy: IfNotPresent
 
   config: {}
@@ -135,13 +135,11 @@ controller:
 
   minAvailable: 1
 
-  resources: {}
-  #  limits:
-  #    cpu: 100m
-  #    memory: 64Mi
-  #  requests:
-  #    cpu: 100m
-  #    memory: 64Mi
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      memory: 128Mi
 
   autoscaling:
     enabled: false
