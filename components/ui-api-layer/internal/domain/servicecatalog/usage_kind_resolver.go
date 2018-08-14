@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+//go:generate mockery -name=usageKindServices -output=automock -outpkg=automock -case=underscore
 type usageKindServices interface {
 	List(params pager.PagingParams) ([]*v1alpha1.UsageKind, error)
 	ListUsageKindResources(usageKind string, environment string) ([]gqlschema.UsageKindResource, error)

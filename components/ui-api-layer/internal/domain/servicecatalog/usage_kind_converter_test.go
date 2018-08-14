@@ -18,7 +18,7 @@ func TestUsageKindConverter_ToGQL(t *testing.T) {
 	result := conv.ToGQL(fixUsageKind(name))
 
 	// THEN
-	assert.Equal(t, result, fixGQLBindingTarget(name))
+	assert.Equal(t, result, fixUsageKindGQL(name))
 }
 
 func fixUsageKind(name string) *v1alpha1.UsageKind {
@@ -29,36 +29,41 @@ func fixUsageKind(name string) *v1alpha1.UsageKind {
 		Spec: v1alpha1.UsageKindSpec{
 			DisplayName: fixUsageKindDisplayName(),
 			Resource: &v1alpha1.ResourceReference{
-				Group:   fixUsageKindGroup(),
-				Kind:    fixUsageKindKind(),
-				Version: fixUsageKindVersion(),
+				Group:   fixResource().Group,
+				Kind:    fixResource().Kind,
+				Version: fixResource().Version,
 			},
+			LabelsPath: fixUsageKindLabelsPath(),
 		},
 	}
 }
 
-func fixGQLBindingTarget(name string) *gqlschema.UsageKind {
+func fixUsageKindGQL(name string) *gqlschema.UsageKind {
 	return &gqlschema.UsageKind{
 		Name:        name,
-		Group:       fixUsageKindGroup(),
-		Kind:        fixUsageKindKind(),
-		Version:     fixUsageKindVersion(),
+		Group:       fixResource().Group,
+		Kind:        fixResource().Kind,
+		Version:     fixResource().Version,
 		DisplayName: fixUsageKindDisplayName(),
 	}
 }
 
-func fixUsageKindGroup() string {
-	return "kubeless.io"
-}
-
-func fixUsageKindKind() string {
-	return "function"
-}
-
-func fixUsageKindVersion() string {
-	return "v1beta1"
-}
-
 func fixUsageKindDisplayName() string {
 	return "target"
+}
+
+func fixUsageKindLabelsPath() string {
+	return "meta.data"
+}
+
+func fixResource() *v1alpha1.ResourceReference {
+	return &v1alpha1.ResourceReference{
+		Group:   "kubeless.io",
+		Kind:    "function",
+		Version: "v1beta1",
+	}
+}
+
+func fixUsageKindResourceNamespace() string {
+	return "space"
 }

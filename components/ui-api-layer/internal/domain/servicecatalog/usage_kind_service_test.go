@@ -30,7 +30,7 @@ func TestUsageKindService_List_Success(t *testing.T) {
 	require.NoError(t, err)
 
 	// THEN
-	assert.Len(t, result, 2)
+	assert.Equal(t, result, fixUsageKindsList())
 
 }
 
@@ -48,20 +48,20 @@ func TestUsageKindService_List_Empty(t *testing.T) {
 	require.NoError(t, err)
 
 	// THEN
-	assert.Len(t, result, 0)
+	assert.Empty(t, result)
 }
 
-func TestUsageKindService_ListBindingResources_Success(t *testing.T) {
+func TestUsageKindService_ListBindingResources_Empty(t *testing.T) {
 	// GIVEN
 	usageKind := fixUsageKind("fix-A")
 
-	dynamicOperations := &fakeDynamic.FakeClientPool{}
+	dynamicOp := &fakeDynamic.FakeClientPool{}
 
 	client := fake.NewSimpleClientset(usageKind)
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 	informer := informerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer()
 
-	svc := newUsageKindService(client.ServicecatalogV1alpha1(), dynamicOperations, informer)
+	svc := newUsageKindService(client.ServicecatalogV1alpha1(), dynamicOp, informer)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 	// WHEN
@@ -69,9 +69,5 @@ func TestUsageKindService_ListBindingResources_Success(t *testing.T) {
 	require.NoError(t, err)
 
 	// THEN
-	assert.Len(t, result, 0)
-}
-
-func fixUsageKindResourceNamespace() string {
-	return "space"
+	assert.Empty(t, result)
 }
