@@ -19,12 +19,12 @@ import (
 	"github.com/kyma-project/kyma/components/api-controller/pkg/controller/meta"
 	networking "github.com/kyma-project/kyma/components/api-controller/pkg/controller/networking/v1"
 	service "github.com/kyma-project/kyma/components/api-controller/pkg/controller/service/v1"
-	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
+	"strings"
 )
 
 type Controller struct {
@@ -36,6 +36,7 @@ type Controller struct {
 	virtualServiceCtrl networking.Interface
 	services           service.Interface
 	authentication     authentication.Interface
+	domainName		   string
 }
 
 func NewController(
@@ -43,7 +44,8 @@ func NewController(
 	virtualServiceCtrl networking.Interface,
 	services service.Interface,
 	authentication authentication.Interface,
-	internalInformerFactory kymaInformers.SharedInformerFactory) *Controller {
+	internalInformerFactory kymaInformers.SharedInformerFactory,
+	domainName string) *Controller {
 
 	apisInformer := internalInformerFactory.Gateway().V1alpha2().Apis()
 
@@ -56,6 +58,7 @@ func NewController(
 		apisLister:         apisInformer.Lister(),
 		apisSynced:         apisInformer.Informer().HasSynced,
 		queue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "apis"),
+		domainName:			domainName,
 	}
 
 	apisInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -76,8 +79,8 @@ func NewController(
 			}
 
 			event := UpdateEvent{
-				newApi: newApiDef,
-				oldApi: oldApiDef,
+				newApi: newApiDef.DeepCopy(),
+				oldApi: oldApiDef.DeepCopy(),
 			}
 			c.queue.AddRateLimited(event)
 		},
@@ -180,23 +183,9 @@ func (c *Controller) syncHandler(event BackendEvent) error {
 	return nil
 }
 
-func (c *Controller) onCreate(apiObj *kymaApi.Api) error {
+func (c *Controller) onCreate(api *kymaApi.Api) error {
 
-	log.Infof("Creating: %s/%s", apiObj.Namespace, apiObj.Name)
-
-	namespace := apiObj.Namespace
-	name := apiObj.Name
-
-	api, err := c.apisLister.Apis(namespace).Get(name)
-
-	if err != nil {
-
-		if apiErrors.IsNotFound(err) {
-			runtime.HandleError(fmt.Errorf("API '%+v' in work queue no longer exists", api))
-			return nil
-		}
-		return err
-	}
+	log.Infof("Creating: %s/%s", api.Namespace, api.Name)
 
 	if api.Spec.Authentication == nil {
 		api.Spec.Authentication = []kymaApi.AuthenticationRule{}
@@ -222,7 +211,7 @@ func (c *Controller) onCreate(apiObj *kymaApi.Api) error {
 func (c *Controller) createVirtualService(metaDto meta.Dto, api *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
 
 	virtualServiceCreatorAdapter := func(api *kymaApi.Api) (*kymaMeta.GatewayResource, error) {
-		return c.virtualServiceCtrl.Create(toVirtualServiceDto(metaDto, api))
+		return c.virtualServiceCtrl.Create(toVirtualServiceDto(c.domainName, metaDto, api))
 	}
 
 	return c.tmplCreateResource(api, &api.Status.VirtualServiceStatus, "VirtualService", virtualServiceCreatorAdapter,
@@ -322,8 +311,8 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 func (c *Controller) updateVirtualService(oldApi *kymaApi.Api, oldMetaDto meta.Dto, newApi *kymaApi.Api, newMetaDto meta.Dto, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
 
 	updaterAdapter := func(oldApi, newApi *kymaApi.Api) (*kymaMeta.GatewayResource, error) {
-		oldDto := toVirtualServiceDto(oldMetaDto, oldApi)
-		newDto := toVirtualServiceDto(newMetaDto, newApi)
+		oldDto := toVirtualServiceDto(c.domainName, oldMetaDto, oldApi)
+		newDto := toVirtualServiceDto(c.domainName, newMetaDto, newApi)
 		return c.virtualServiceCtrl.Update(oldDto, newDto)
 	}
 
@@ -401,7 +390,7 @@ func (c *Controller) onDelete(api *kymaApi.Api) error {
 	}
 
 	log.Debugf("Deleting virtualService for: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
-	if err := c.virtualServiceCtrl.Delete(toVirtualServiceDto(metaDto, api)); err != nil {
+	if err := c.virtualServiceCtrl.Delete(toVirtualServiceDto(c.domainName, metaDto, api)); err != nil {
 		deleteResourceFailed = true
 		log.Errorf("Error while deleting virtualService for: %s/%s ver: %s. Root cause: %s", api.Namespace, api.Name, api.ResourceVersion, err)
 	}
@@ -435,10 +424,18 @@ func (c *Controller) apiStatusHelperFor(api *kymaApi.Api) *ApiStatusHelper {
 	return NewApiStatusHelper(c.kymaInterface, api)
 }
 
-func toVirtualServiceDto(metaDto meta.Dto, api *kymaApi.Api) *networking.Dto {
+func fixHostname(domainName, hostname string) string {
+	if !strings.HasSuffix(hostname, "." + domainName) {
+		return fmt.Sprintf("%s.%s", hostname, domainName)
+	}
+	return hostname
+}
+
+func toVirtualServiceDto(domainName string, metaDto meta.Dto, api *kymaApi.Api) *networking.Dto {
+
 	return &networking.Dto{
 		MetaDto:     metaDto,
-		Hostname:    api.Spec.Hostname,
+		Hostname:    fixHostname(domainName, api.Spec.Hostname),
 		ServiceName: api.Spec.Service.Name,
 		ServicePort: api.Spec.Service.Port,
 		Status:      api.Status.VirtualServiceStatus,

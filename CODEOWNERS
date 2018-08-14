@@ -17,7 +17,7 @@
 /resources/cluster-essentials/ @damianpacierpnikatsap @damjatsap @PK85
 
 # The `api-controller` subchart
-/resources/core/charts/api-controller/ @piotrmsc
+/resources/core/charts/api-controller/ @piotrmsc @kubadz
 
 # The `apiserver-proxy` subchart
 /resources/core/charts/apiserver-proxy/ @piotrmsc
@@ -114,7 +114,7 @@
 
 # Components
 # Api controller Component
-/components/api-controller/ @piotrmsc
+/components/api-controller/ @piotrmsc @kubadz
 
 # Binding usage controller Component
 /components/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel

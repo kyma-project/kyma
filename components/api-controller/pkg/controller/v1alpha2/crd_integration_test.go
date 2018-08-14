@@ -24,7 +24,7 @@ func TestCrd_ShouldCreateCrd(t *testing.T) {
 		return
 	}
 
-	registrar.Register(Crd())
+	registrar.Register(Crd("kyma.local"))
 }
 
 func registrarFromDefaultConfig() (*crd.Registrar, error) {

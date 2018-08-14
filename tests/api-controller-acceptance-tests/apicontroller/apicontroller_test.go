@@ -85,7 +85,7 @@ func TestSpec(t *testing.T) {
 
 			t.Log("Create...")
 
-			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled)
+			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled, true)
 
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Create(api)
 
@@ -93,7 +93,7 @@ func TestSpec(t *testing.T) {
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			validateApiNotSecured(httpClient, lastApi)
+			validateApiNotSecured(httpClient, lastApi.Spec.Hostname)
 
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
 
@@ -102,11 +102,45 @@ func TestSpec(t *testing.T) {
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 		})
 
+		Convey("update API with hostname without domain", func() {
+
+			t.Log("Update...")
+
+			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled, false)
+			api.ResourceVersion = lastApi.ResourceVersion
+
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+
+			So(err, ShouldBeNil)
+			So(lastApi, ShouldNotBeNil)
+			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+
+			validateApiNotSecured(httpClient, hostnameFor(lastApi.Spec.Hostname, domainName, true))
+
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+
+			So(err, ShouldBeNil)
+			So(lastApi, ShouldNotBeNil)
+			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+		})
+
+		Convey("do not update API with wrong domain", func() {
+
+			t.Log("Update...")
+
+			api := apiFor(testId, domainName + ".com", fixture.SampleAppService, apiSecurityDisabled, true)
+			api.ResourceVersion = lastApi.ResourceVersion
+
+			_, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+
+			So(err, ShouldNotBeNil)
+		})
+
 		Convey("update API with default jwt configuration to enable authentication", func() {
 
 			t.Log("Update...")
 
-			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityEnabled)
+			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityEnabled, true)
 			api.ResourceVersion = lastApi.ResourceVersion
 
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
@@ -128,7 +162,7 @@ func TestSpec(t *testing.T) {
 
 			t.Log("Update...")
 
-			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled)
+			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled, true)
 			api.ResourceVersion = lastApi.ResourceVersion
 
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
@@ -137,7 +171,7 @@ func TestSpec(t *testing.T) {
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			validateApiNotSecured(httpClient, lastApi)
+			validateApiNotSecured(httpClient, lastApi.Spec.Hostname)
 
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
 
@@ -150,7 +184,7 @@ func TestSpec(t *testing.T) {
 
 			t.Log("Update...")
 
-			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityEnabled)
+			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityEnabled, true)
 			api.ResourceVersion = lastApi.ResourceVersion
 
 			setCustomJwtAuthenticationConfig(api)
@@ -187,7 +221,7 @@ func TestSpec(t *testing.T) {
 	})
 }
 
-func apiFor(testId, domainName string, svc *apiv1.Service, secured ApiSecurity) *kymaApi.Api {
+func apiFor(testId, domainName string, svc *apiv1.Service, secured ApiSecurity, hostWithDomain bool) *kymaApi.Api {
 
 	return &kymaApi.Api{
 		ObjectMeta: metav1.ObjectMeta{
@@ -195,7 +229,7 @@ func apiFor(testId, domainName string, svc *apiv1.Service, secured ApiSecurity) 
 			Name:      fmt.Sprintf("sample-app-api-%s", testId),
 		},
 		Spec: kymaApi.ApiSpec{
-			Hostname: hostnameFor(testId, domainName),
+			Hostname: hostnameFor(testId, domainName, hostWithDomain),
 			Service: kymaApi.Service{
 				Name: svc.Name,
 				Port: int(svc.Spec.Ports[0].Port),
@@ -237,8 +271,11 @@ func checkPreconditions(lastApi *kymaApi.Api, t *testing.T) {
 	}
 }
 
-func hostnameFor(testId, domainName string) string {
-	return fmt.Sprintf("%s.%s", testId, domainName)
+func hostnameFor(testId, domainName string, hostWithDomain bool) string {
+	if hostWithDomain {
+		return fmt.Sprintf("%s.%s", testId, domainName)
+	}
+	return testId
 }
 
 func validateApiSecured(httpClient *http.Client, api *kymaApi.Api) {
@@ -251,10 +288,10 @@ func validateApiSecured(httpClient *http.Client, api *kymaApi.Api) {
 	So(response.StatusCode, ShouldEqual, http.StatusUnauthorized)
 }
 
-func validateApiNotSecured(httpClient *http.Client, api *kymaApi.Api) {
+func validateApiNotSecured(httpClient *http.Client, hostname string) {
 
 	response, err := withRetries(maxRetries, minimalNumberOfCorrectResults, func() (*http.Response, error) {
-		return httpClient.Get(fmt.Sprintf("https://%s", api.Spec.Hostname))
+		return httpClient.Get(fmt.Sprintf("https://%s", hostname))
 	}, httpOkPredicate)
 
 	So(err, ShouldBeNil)
@@ -367,7 +404,7 @@ func newHttpClient(testId, domainName string) (*http.Client, error) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			// Changes request destination address to ingressGateway internal cluster address for requests to sample app service.
-			hostname := hostnameFor(testId, domainName)
+			hostname := hostnameFor(testId, domainName, true)
 			if strings.HasPrefix(addr, hostname) {
 				addr = strings.Replace(addr, hostname, ingressGatewayControllerAddr[0], 1)
 			}
