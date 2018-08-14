@@ -145,7 +145,7 @@ func tryToGetMinikubeIP() string {
 	}
 }
 
-func ensureOutputIsCorrect(host, expectedOutput, testID string) {
+func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName string) {
 	timeout := time.After(2 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 
@@ -173,11 +173,20 @@ func ensureOutputIsCorrect(host, expectedOutput, testID string) {
 		for {
 			select {
 			case <-timeout:
-				resp, err := http.Get(host)
+				log.Println("Timeout: Check if virtual service has been created")
+				cmd := exec.Command("kubectl", "-n", namespace, "get", "virtualservices.networking.istio.io")
+				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
-					log.Fatal("Timed out getting the correct output from host ", host, ":\n", err)
+					log.Fatal("Unable to fetch virtual Service for", testName, ":\n", err)
 				}
-				log.Fatal("Timed out getting the correct output from response is host ", host, ":\n", resp)
+				log.Fatal("Timeout: Virtual Service is:\n", string(stdoutStderr))
+
+				log.Println("Timeout: Check http Get one last time")
+				resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
+				if err != nil {
+					log.Fatal("Timeout: Unable to call host ", host, ":\n", err)
+				}
+				log.Fatalf("Timeout: Response is: %v", resp)
 
 			case <-tick:
 				resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
@@ -259,6 +268,30 @@ func ensureCorrectLog(namespace, funName string, pattern *regexp.Regexp, match s
 	}
 }
 
+func ensureSvcInstanceIsDeployed(namespace, svcInstance string) {
+	timeout := time.After(5 * time.Minute)
+	tick := time.Tick(1 * time.Second)
+
+	select {
+	case <-timeout:
+		cmd := exec.Command("kubectl", "-n", namespace, "get", "serviceinstance", svcInstance, "--output=jsonpath={.items[0].metadata.name}")
+		stdoutStderr, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Fatalf("Unable to fetch service instance %v: %v", svcInstance, err)
+		}
+		log.Fatalf("Timeout waiting to get service instance %v: %v", svcInstance, string(stdoutStderr))
+	case <-tick:
+		cmd := exec.Command("kubectl", "-n", namespace, "get", "serviceinstance", svcInstance, "--output=jsonpath={.items[0].metadata.name}")
+		stdoutStderr, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Fatalf("Error fetching service instance %v: %v", svcInstance, err)
+		}
+		if string(stdoutStderr) == "redis" {
+			return
+		}
+	}
+}
+
 func cleanup() {
 	log.Println("Cleaning up")
 	var wg sync.WaitGroup
@@ -276,7 +309,8 @@ func cleanup() {
 		defer wg.Done()
 	}()
 	go func() {
-		deleteK8s("svcbind.yaml")
+		deleteK8s("svcbind-lambda.yaml")
+		deleteK8s("svc-instance.yaml")
 		defer wg.Done()
 	}()
 	go func() {
@@ -303,7 +337,7 @@ func main() {
 		log.Println("Deploying test-hello function")
 		deployFun("kubeless-test", "test-hello", "nodejs6", "dependencies.json", "hello.js", "hello.handler")
 		log.Println("Verifying correct function output for test-hello")
-		ensureOutputIsCorrect("https://test-hello.kyma.local", "hello world", testID)
+		ensureOutputIsCorrect("https://test-hello.kyma.local", "hello world", testID, "kubeless-test", "test-hello")
 		log.Println("Function test-hello works correctly")
 		defer wg.Done()
 	}()
@@ -320,11 +354,14 @@ func main() {
 	}()
 
 	go func() {
-		log.Println("Deploying test-svcbind function")
-		deployK8s("svcbind.yaml")
+		log.Println("Deploying svc-instance")
+		deployK8s("svc-instance.yaml")
+		ensureSvcInstanceIsDeployed("kubeless-test", "redis")
+		log.Println("Deploying svcbind-lambda")
+		deployK8s("svcbind-lambda.yaml")
 		ensureFunctionIsRunning("kubeless-test", "test-svcbind", true)
 		log.Println("Verifying correct function output for test-svcbind")
-		ensureOutputIsCorrect("https://test-svcbind.kyma.local", "OK", testID)
+		ensureOutputIsCorrect("https://test-svcbind.kyma.local", "OK", testID, "kubeless-test", "test-svcbind")
 		log.Println("Verifying service connection for test-svcbind")
 		ensureCorrectLog("kubeless-test", "test-svcbind", testDataRegex, testID, true)
 		log.Println("Function test-svcbind works correctly")
