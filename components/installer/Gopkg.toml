@@ -10,7 +10,7 @@ required = ["k8s.io/code-generator/cmd/client-gen"]
 
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
-  version = "v0.1.11"
+  version = "=v0.1.28"
 
 [[constraint]]
   name = "k8s.io/apimachinery"

@@ -47,10 +47,14 @@ $MINIKUBE_CA_CRT = Get-Content -Path "${HOME}\.minikube\ca.crt"
 $MINIKUBE_CA = [System.Convert]::ToBase64String(
     [System.Text.Encoding]::UTF8.GetBytes($MINIKUBE_CA_CRT))
 
+
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__IS_LOCAL_INSTALLATION__`" -value `"true`""
+Invoke-Expression -Command $cmd
+
 $cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__DOMAIN__`" -value `"kyma.local`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__EXTERNAL_IP_ADDRESS__`" -value `"`""
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__EXTERNAL_PUBLIC_IP__`" -value `"`""
 Invoke-Expression -Command $cmd
 
 $cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_IP__`" -value `"`""

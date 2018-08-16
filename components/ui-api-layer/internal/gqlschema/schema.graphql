@@ -431,6 +431,8 @@ type Query {
     serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
     serviceBinding(name: String!, environment: String!): ServiceBinding
     usageKinds(first: Int, offset: Int): [UsageKind!]!
+
+    # The query returns all instances of the resources specified by the usageKind parameter in the given environment. The result contains the resources which do not have the metadata.ownerReference.
     usageKindResources(usageKind: String!, environment: String!): [UsageKindResource!]!
 
     apis(environment: String!, serviceName: String, hostname: String): [API!]!

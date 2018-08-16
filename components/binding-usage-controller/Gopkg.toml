@@ -48,7 +48,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
-  version = "=v0.1.11"
+  version = "=v0.1.28"
 
 [[constraint]]
   name = "github.com/kubeless/kubeless"

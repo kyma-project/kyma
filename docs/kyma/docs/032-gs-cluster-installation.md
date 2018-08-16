@@ -5,23 +5,23 @@ type: Getting Started
 
 ## Overview
 
-This Getting Started guide shows developers how to to quickly deploy Kyma on a cluster. Kyma installs on a cluster using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma on a cluster and verify the deployment, as well as the troubleshooting tips.
+This Getting Started guide shows developers how to quickly deploy Kyma on a cluster. Kyma installs on a cluster using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma on a cluster and verify the deployment, as well as the troubleshooting tips.
+
+>**NOTE:** To learn how to install Kyma on a [Gardener](https://github.com/gardener/gardener) cluster, see the **Install Kyma on Gardener** document.
 
 ## Prerequisites
 
->**NOTE:** The public IPs and DNS records for Istio Ingress and the Remote Environments gateway must exist prior to the Kyma installation. The Kyma installer does not support clusters on AWS as the provider does not support static IP assignment during ELB creation.
-
 The cluster on which you install Kyma must run Kubernetes version `1.10` or higher.
 
-To install Kyma, you need the following data:
+Prepare these items: 
 
-- The IP address for Kyma Ingress
-- The IP address for Remote Environments Ingress.
-- The domain name such as `kyma.example.com`
-  - `gateway.kyma.example.com` points to Remote Environments Ingress IP address
-  - `*.kyma.example.com` points to Kyma Ingress IP address
-- The wildcard TLS certificate for your cluster domain that you can generate with **Let's Encrypt**
+- A domain name such as `kyma.example.com`.
+- A wildcard TLS certificate for your cluster domain. Generate it with [**Let's Encrypt**](https://letsencrypt.org/).
 - The certificate for Remote Environments.
+- A static IP address for the Kyma Istio Ingress (public external IP). Create a DNS record `*.kyma.example.com` that points to Kyma Istio Ingress IP Address.
+- A Static IP address for Remote Environments Ingress. Create a DNS record `gateway.kyma.example.com` that points to Remote Environments Ingress IP Address.
+
+Some providers doen't allow to pre-allocate IP addresses, such as is the case with AWS which does not support static IP assignment during ELB creation. For such providers, you must complete the configuration after you install Kyma. See the **DNS configuration** section for more details. 
 
 >**NOTE:** See the Application Connector documentation for more details on Remote Environments.
 
@@ -55,7 +55,21 @@ Run the following command:
 kubectl create ns kyma-installer
 ```
 
-2. Fill in the `installer-config.yaml.tpl` template.
+2. Enable Azure Broker (optional)
+
+>**NOTE:** This instruction is applicable only when you install Kyma on a Gardener Cluster..
+
+To enable the communication between the Shoot Cluster and the Azure Broker, you must pass Azure credentials to the cluster.
+
+- Copy the `azure-broker-secret.yaml.tpl` template located in the `installation/resources` directory.
+- Rename the file to `azure-broker-secret.yaml`.
+- Replace the placeholder values with your Azure credentials.
+- Run this command to pass the secret to the Shoot Cluster:
+```
+kubectl apply -f installation/resources/azure-broker-secret.yaml
+```
+
+3. Fill in the `installer-config.yaml.tpl` template.
 
 The Kyma installation process requires installation data specified in the `installer-config.yaml` file. Copy the `installer-config.yaml.tpl` template, rename it to `installer-config.yaml`, and fill in these placeholder values:
 
@@ -63,9 +77,10 @@ The Kyma installation process requires installation data specified in the `insta
 - `__TLS_KEY__` for the TLS certificate key
 - `__REMOTE_ENV_CA__` for the Remote Environments CA
 - `__REMOTE_ENV_CA_KEY__` for the Remote Environments CA key
-- `__EXTERNAL_IP_ADDRESS__` for the IP address for Kyma Ingress
+- `__IS_LOCAL_INSTALLATION__` for controlling installation procedure. Set to `true` for local installation, otherwise cluster installation is assumed.
 - `__DOMAIN__` for the domain name such as `kyma.example.com`
-- `__REMOTE_ENV_IP__` for the IP address for Remote Environments Ingress
+- `__EXTERNAL_PUBLIC_IP__` for the IP address of Kyma Istio Ingress (optional)
+- `__REMOTE_ENV_IP__` for the IP address for Remote Environments Ingress (optional)
 - `__K8S_APISERVER_URL__` for the API server's URL
 - `__K8S_APISERVER_CA__` for your API Server CA
 - `__ADMIN_GROUP__` for the additional admin group. This value is optional.
@@ -80,7 +95,7 @@ When you fill in all required placeholder values, run the following command to p
 kubectl apply -f installer-config.yaml
 ```
 
-3. Bind the default RBAC role.
+4. Bind the default RBAC role.
 
 Kyma installation requires increased permissions granted by the **cluster-admin** role. To bind the role to the default **ServiceAccount**, run the following command:
 
@@ -88,7 +103,7 @@ Kyma installation requires increased permissions granted by the **cluster-admin*
 kubectl apply -f resources/cluster-prerequisites/default-sa-rbac-role.yaml
 ```
 
-4. Deploy `tiller`.
+5. Deploy `tiller`.
 
 To deploy the `tiller` component on your cluster, run the following command:
 
@@ -100,9 +115,9 @@ Wait until the `tiller` Pod is ready. Execute the following command to check tha
 
 ```
 kubectl get pods -n kube-system | grep tiller
-```  
+```
 
-5. Deploy the `Installer` component.
+6. Deploy the `Installer` component.
 
 To deploy the `Installer` component on your cluster, run this command:
 
@@ -110,7 +125,7 @@ To deploy the `Installer` component on your cluster, run this command:
 kubectl apply -f installation/resources/installer.yaml -n kyma-installer
 ```
 
-6. Trigger the installation.
+7. Trigger the installation.
 
 To trigger the installation of Kyma, you need a Custom Resource file. Duplicate the `installer-cr.yaml.tpl` file, rename it to `installer-cr.yaml`, and fill in these placeholder values:
 
@@ -124,7 +139,7 @@ Once the file is ready, run this command to trigger the installation:
 ```
 kubectl apply -f installer-cr.yaml
 ```
-7. Verify the installation.
+8. Verify the installation.
 
 To check the progress of the installation process, verify the Custom Resource:
 
@@ -133,6 +148,20 @@ kubectl get installation kyma-installation -o yaml
 ```
 
 A successful installation ends by setting `status.state` to `Installed` and `status.description` to `Kyma installed`.
+
+## DNS configuration
+
+If the cluster provider doesn't allow to pre-allocate IP addresses, the cluster gets the required details from the underlying cloud provider infrastructure. Get the allocated IP addresses and set up the DNS entries required for Kyma.
+
+- List all Services and look for "LoadBalancer":
+  ```
+  kubectl get services --all-namespaces | grep LoadBalancer
+  ```
+
+- Find `istio-ingressgateway` in the `istio-system` Namespace. This entry specifies the IP address for the Kyma Ingress. Create a DNS entry `*.kyma.example.com` that points to this IP address.
+
+- Find `core-nginx-ingress-controller` in the `kyma-system` Namespace. This entry specifies the IP address for the Remote Environments Ingress. Create a DNS entry `gateway.kyma.example.com` that points to this address.
+
 
 ## Troubleshooting
 

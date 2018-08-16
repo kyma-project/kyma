@@ -84,7 +84,6 @@ func (svc *usageKindService) ListUsageKindResources(usageKind string, environmen
 
 	results := make([]gqlschema.UsageKindResource, 0)
 	for _, item := range list.Items {
-		// TODO: Write test case for logic bellow
 		if len(item.GetOwnerReferences()) > 0 {
 			continue
 		}

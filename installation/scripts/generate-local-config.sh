@@ -33,8 +33,9 @@ echo -e "\nGenerating config map for installation"
 MINIKUBE_IP=$(minikube ip)
 MINIKUBE_CA=$(cat ${HOME}/.minikube/ca.crt | base64 | tr -d '\n')
 
+bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__IS_LOCAL_INSTALLATION__" --value "true"
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__DOMAIN__" --value "kyma.local"
-bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__EXTERNAL_IP_ADDRESS__" --value ""
+bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__EXTERNAL_PUBLIC_IP__" --value ""
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__REMOTE_ENV_IP__" --value ""
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__K8S_APISERVER_URL__" --value "${MINIKUBE_IP}"
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__K8S_APISERVER_CA__" --value "${MINIKUBE_CA}"
@@ -95,6 +96,6 @@ if [ -n "${AZURE_BROKER_SUBSCRIPTION_ID}" ]; then
 
   echo -e "\nApplying asecret for Azure Broker"
   kubectl apply -f "${AZURE_BROKER_OUTPUT_PATH}"
-  
+
   rm ${AZURE_BROKER_OUTPUT_PATH}
 fi

@@ -8,9 +8,11 @@ The Binding Usage Controller workflow steps are as follows:
 
 3. The Binding Usage Controller creates a PodPreset which is applied to all Pods with the **use-{serviceBindingUsageUID}** label set to `{serviceBindingUsage resource version}`. The name of the PodPreset is the SHA1-encoded name of the ServiceBindingUsage. The PodPreset injects a Secret with the same name as specified in the  **serviceBindingRef.name** field into those Pods. By default, the prefixing of the injected environment variables is disabled. Set the **envPrefix.name** to enable the prefix. **envPrefix.name** is used to prefix the name of the environment variable.
 
-4. The Binding Usage Controller labels the resource specified in the **usedBy** property. The labels mentioned in step 2 and 3 are used for labelling.
+4. The Binding Usage Controller finds the corresponding UsageKind specified by the **usedBy.Kind** field. The UsageKind defines the resource to be labelled and the field which contains labels.
 
-5. The Binding Usage Controller adds an annotation with data of the applied ServiceBindingUsage. Annotations are used for the tracing and debugging purposes. With annotations, you can trace the labels that have been attached to a given Deployment. The patter of such annotation is as follows:
+5. The Binding Usage Controller labels the resource specified in the **usedBy** property. The labels mentioned in step 2 and 3 are used for labelling.
+
+6. The Binding Usage Controller adds an annotation with data on the applied ServiceBindingUsage. Annotations are used for the tracing and debugging purposes. With annotations, you can trace the labels attached to a given Deployment. The patter of such annotation is as follows:
 
  ```
  servicebindingusages.servicecatalog.kyma.cx/tracing-information: '{

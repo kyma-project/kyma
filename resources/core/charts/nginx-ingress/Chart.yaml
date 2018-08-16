@@ -1,17 +1,19 @@
-appVersion: 0.12.0
-description: An Ingress Chart for Kyma
-engine: gotpl
-keywords:
-- ingress
-- nginx
-maintainers:
-- email: jack.zampolin@gmail.com
-  name: jackzampolin
-- email: mgoodness@gmail.com
-  name: mgoodness
-- email: chance.zibolski@coreos.com
-  name: chancez
 name: nginx-ingress
+version: 0.24.0
+appVersion: 0.17.1
+home: https://github.com/kubernetes/ingress-nginx
+description: An nginx Ingress controller that uses ConfigMap to store the nginx configuration.
+icon: https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Nginx_logo.svg/500px-Nginx_logo.svg.png
+keywords:
+  - ingress
+  - nginx
 sources:
-- https://github.com/kubernetes/ingress-nginx
-version: 0.12.2
+  - https://github.com/kubernetes/ingress-nginx
+maintainers:
+  - name: jackzampolin
+    email: jack.zampolin@gmail.com
+  - name: mgoodness
+    email: mgoodness@gmail.com
+  - name: chancez
+    email: chance.zibolski@coreos.com
+engine: gotpl
