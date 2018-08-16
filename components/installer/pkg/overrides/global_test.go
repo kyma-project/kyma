@@ -177,6 +177,7 @@ global:
 		Convey("when slack and victorops credentials are provided then alertTools.credentials.victorOps and alertTools.credentials.slack should exist", func() {
 			const dummyOverridesForGlobal = `
 global:
+  tlsPEMCrt: ""
   tlsCrt: ""
   tlsKey: ""
   isLocalEnv: false
