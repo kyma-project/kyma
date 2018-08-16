@@ -364,6 +364,13 @@ mixer:
     hub: docker.io/prom
     tag: v0.6.0
 
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      memory: 128Mi
+
 #
 # pilot configuration
 #
