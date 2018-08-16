@@ -129,7 +129,7 @@ func (s *bindingUsageTestSuite) fixServiceBindingUsage(name, serviceBindingName,
 		},
 		UsedBy: LocalObjectReference{
 			Name: deploymentName,
-			Kind: "DEPLOYMENT",
+			Kind: "deployment",
 		},
 	}
 }
