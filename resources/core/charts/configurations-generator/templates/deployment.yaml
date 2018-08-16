@@ -19,6 +19,9 @@ spec:
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Chart.Name }}:{{ .Chart.Version }}
         name: {{ template "name" . }}
+        resources:
+          limit:
+            memory: 256Mi
         command: [
           "/app",
           "-kube-config-custer-name={{ .Values.kubeConfig.clusterName }}",
