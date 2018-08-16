@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"strings"
 	"sync"
 )
 
@@ -18,21 +17,16 @@ type KubernetesResourceSupervisor interface {
 // Kind represents Kubernetes Kind name
 type Kind string
 
-// TODO (pluggable SBU cleanup): consider removing normalized method
-func (k Kind) normalized() string {
-	return strings.ToLower(string(k))
-}
-
 // ResourceSupervisorAggregator aggregates all defined resources supervisors
 type ResourceSupervisorAggregator struct {
-	registered map[string]KubernetesResourceSupervisor
+	registered map[Kind]KubernetesResourceSupervisor
 	mu         sync.RWMutex
 }
 
 // NewResourceSupervisorAggregator returns new instance of ResourceSupervisorAggregator
 func NewResourceSupervisorAggregator() *ResourceSupervisorAggregator {
 	return &ResourceSupervisorAggregator{
-		registered: make(map[string]KubernetesResourceSupervisor),
+		registered: make(map[Kind]KubernetesResourceSupervisor),
 	}
 }
 
@@ -40,7 +34,7 @@ func NewResourceSupervisorAggregator() *ResourceSupervisorAggregator {
 func (f *ResourceSupervisorAggregator) Register(k Kind, supervisor KubernetesResourceSupervisor) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	f.registered[k.normalized()] = supervisor
+	f.registered[k] = supervisor
 	return nil
 }
 
@@ -48,7 +42,7 @@ func (f *ResourceSupervisorAggregator) Register(k Kind, supervisor KubernetesRes
 func (f *ResourceSupervisorAggregator) Unregister(k Kind) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	delete(f.registered, k.normalized())
+	delete(f.registered, k)
 	return nil
 }
 
@@ -56,7 +50,7 @@ func (f *ResourceSupervisorAggregator) Unregister(k Kind) error {
 func (f *ResourceSupervisorAggregator) Get(k Kind) (KubernetesResourceSupervisor, error) {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
-	concreteSupervisor, exists := f.registered[k.normalized()]
+	concreteSupervisor, exists := f.registered[k]
 	if !exists {
 		return nil, NewNotFoundError("supervisor for kind %s was not found", k)
 	}
