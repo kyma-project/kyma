@@ -8,7 +8,7 @@ route:
   repeat_interval: 5m
   group_by: ['cluster','pod','job','alertname']
   # All alerts that do not match the following child routes
-  # will remain at the root node and be dispatched to 'default-receiver'
+  # remain at the root node and are dispatched to 'default-receiver'
   routes:
   - receiver: 'null'
     match:
@@ -16,7 +16,7 @@ route:
   {{- if and .Values.global.alertTools.credentials.victorOps }}
   {{- if and (not (eq "" .Values.global.alertTools.credentials.victorOps.apikey)) (not (eq "" .Values.global.alertTools.credentials.victorOps.routingkey))}}
   - receiver: "victorOps"
-    continue: true # If continue: is set to false it will stop after the first matching.
+    continue: true # If set to `false`, it stops after the first matching.
     match_re:
       severity: critical
   {{- end }}
@@ -24,7 +24,7 @@ route:
   {{- if and .Values.global.alertTools.credentials.slack }}
   {{- if and (not (eq "" .Values.global.alertTools.credentials.slack.channel)) (not (eq "" .Values.global.alertTools.credentials.slack.apiurl))}}
   - receiver: "slack"
-    continue: true # If continue: is set to false it will stop after the first matching.
+    continue: true # If set to `false`, it stops after the first matching.
     match_re:
       severity: critical
   {{- end }}

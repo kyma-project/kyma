@@ -1,6 +1,6 @@
 ### Alertmanager
 
-In Kyma part of the configuration related to the Alertmanager is in this chart.
+This chart contains a part of the configuration related to the Alertmanager.
 
 #### Secret configuration
 
@@ -27,17 +27,16 @@ data:
 {{- end }}
 ```
 
-Secret `data:` is an encoded ```alertmanager.yaml``` file which contains all the configuration for alerting notifications.
+The **data** Secret is an encoded `alertmanager.yaml` file which contains all the configuration for alerting notifications.
 
-The next section explains how to configure Alertmanager for enabling alerting notifications.
+This section explains how to configure Alertmanager to enable alerting notifications.
 
 
 #### Alertmanager configuration - alertmanager.yaml
 
-The template
-[kyma/resources/core/charts/monitoring/charts/alertmanager/templates/alertmanager.config.yaml](templates/secret.yaml) pre-configure two simple receiver to handle alert in **VictorOps and Slack**.
+[This](templates/alertmanager.config.yaml) template pre-configures two simple receivers to handle alerts in **VictorOps and Slack**.
 
-This yaml file pre-configure two simple receivers to handle alert in **VictorOps and Slack**.
+This yaml file pre-configures two simple receivers to handle alerts in **VictorOps and Slack**.
 
 To avoid confusion, use optional configuration parameters for ```route:``` and then group the receivers under the label ```routes:```
 
@@ -90,23 +89,20 @@ receivers:
 * ```receiver:``` Receiver is a named configuration of one or more notification integrations.
 * ```receiver:``` A list of configured notification receivers.
 
-What this configuration provides is to enable the ```receivers:```, "victorOps" and "slack" for receiving alerts fired by Prometheus rules.
+This configuration enables the **receivers**, VictorOps, and Slack to receive alerts fired by Prometheus rules.
 
-In order to enable alert notifications for the receivers above, four parameters need to be configured.
+In order to enable alert notifications for the receivers, configure these four parameters:
 
-* ```api_key:``` defines the team Api key in VictorOps
-* ```routing_key:``` defines the team routing key in VictorOps
-* ```channel:```  the Slack channel to receive the alerts notifications
-* ```api_url:``` The url endpoint containing to send the alerts.
+**api_key** defines the team Api key in VictorOps.
+**routing_key** defines the team routing key in VictorOps.
+**channel** refers to the Slack channel which receives the alerts notifications.
+**api_url** is the URL endpoint which sends the alerts.
 
-As it was mentioned at first only part of the configuration is located in this chart, that is why all of four parameters values are got it from the template, ```{{ .Values.global.alertTools.credentials... }}```, and these values are configured in
-[kyma/resources/core/values.yaml](../../../../values.yaml). There we have:
-
+Only a part of the configuration is located in this chart. All of the four parameters' values are taken from the `{{ .Values.global.alertTools.credentials... }}` template. These values are configured in [this](../../../../values.yaml) file. For example:
 
 ```yaml
 global:
-  #... some other configuration here
-  #Alerting tools credentials
+  #Alerting tools credentials are as follows:
   alertTools:
     credentials:
       victorOps:
@@ -117,7 +113,7 @@ global:
         apiurl: ""
 ```
 
-The main reason for keeping this configuration as a ```global:``` is because these parameters might be replaced with values configured during a cluster build and taken from the final enviromente variables during the Kyma installation.
+The main reason to keep this configuration as **global** is that these parameters might be replaced with values configured during the cluster build and taken from the final environment variables during the Kyma installation.
 
 **References**
 - [VictorOps-Prometheus Integration Guide](https://help.victorops.com/knowledge-base/victorops-prometheus-integration/)
