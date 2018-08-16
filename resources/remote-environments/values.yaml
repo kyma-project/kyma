@@ -24,7 +24,6 @@ deployment:
 service:
   externalapi:
     port: *externalAPIPort
-    nodePort: 32000
   echo:
     serviceType: ClusterIP
     port: *proxyPort
