@@ -5,7 +5,7 @@ type: Getting Started
 
 ## Overview
 
-This Getting Started guide shows developers how to to quickly deploy Kyma on a cluster. Kyma installs on a cluster using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma on a cluster and verify the deployment, as well as the troubleshooting tips.
+This Getting Started guide shows developers how to quickly deploy Kyma on a cluster. Kyma installs on a cluster using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma on a cluster and verify the deployment, as well as the troubleshooting tips.
 
 >**NOTE:** To learn how to install Kyma on a [Gardener](https://github.com/gardener/gardener) cluster, see the **Install Kyma on Gardener** document.
 
@@ -13,23 +13,17 @@ This Getting Started guide shows developers how to to quickly deploy Kyma on a c
 
 The cluster on which you install Kyma must run Kubernetes version `1.10` or higher.
 
-To install Kyma, you need the following data:
+Prepare these items: 
 
-- The domain name such as `kyma.example.com`
-- The wildcard TLS certificate for your cluster domain that you can generate with **Let's Encrypt**
+- A domain name such as `kyma.example.com`.
+- A wildcard TLS certificate for your cluster domain. Generate it with [**Let's Encrypt**](https://letsencrypt.org/).
 - The certificate for Remote Environments.
+- A static IP address for the Kyma Istio Ingress (public external IP). Create a DNS record `*.kyma.example.com` that points to Kyma Istio Ingress IP Address.
+- A Static IP address for Remote Environments Ingress. Create a DNS record `gateway.kyma.example.com` that points to Remote Environments Ingress IP Address.
+
+Some providers doen't allow to pre-allocate IP addresses, such as is the case with AWS which does not support static IP assignment during ELB creation. For such providers, you must complete the configuration during the Kyma installation when asked by platform-specific means, or after you install Kyma. See the **DNS configuration** section for more details. 
 
 >**NOTE:** See the Application Connector documentation for more details on Remote Environments.
-
-
-Optionally, you can prepare the following:
-
--  Static IP address for Kyma Istio Ingress (public external IP)
-  - Create a DNS record `*.kyma.example.com` that points to Kyma Istio Ingress IP Address
-- Static IP address for Remote Environments Ingress.
-  - Create a DNS record `gateway.kyma.example.com` that points to Remote Environments Ingress IP Address
-
-If you can't pre-allocate IP addresses (as is the case in AWS, where the provider does not support static IP assignment during ELB creation), the cluster will request them during installation by platform-specific means. In that case don't forget to perform Post-Installation steps.
 
 Configure the Kubernetes API Server following this template:
 
@@ -155,18 +149,18 @@ kubectl get installation kyma-installation -o yaml
 
 A successful installation ends by setting `status.state` to `Installed` and `status.description` to `Kyma installed`.
 
-8. Post installation steps
+## DNS configuration
 
-If you haven't provided IP addresses for "Kyma Ingress" and "Remote Environments Ingress" before installation, cluster will request those from underlying cloud provider infrastructure. You can now read it out and set up DNS entries correctly.
+If the cluster provider doesn't allow to pre-allocate IP addresses, the cluster gets the required details from the underlying cloud provider infrastructure. Get the allocated IP addresses and set up the DNS entries required for Kyma.
 
-List all Services and look for "LoadBalancer":
-```
-kubectl get services --all-namespaces | grep LoadBalancer
-```
+- List all Services and look for "LoadBalancer":
+  ```
+  kubectl get services --all-namespaces | grep LoadBalancer
+  ```
 
-- entry named `istio-ingressgateway` in namespace `istio-system` specifies IP address for Kyma Ingress. Create a DNS entry `*.kyma.example.com` that points to this address.
+- Find `istio-ingressgateway` in the `istio-system` Namespace. This entry specifies the IP address for the Kyma Ingress. Create a DNS entry `*.kyma.example.com` that points to this IP address.
 
-- entry named `core-nginx-ingress-controller` in namespace `kyma-system` specifies IP address for Remote Environments Ingress. Create a DNS entry `gateway.kyma.example.com` that points to this address.
+- Find `core-nginx-ingress-controller` in the `kyma-system` Namespace. This entry specifies the IP address for the Remote Environments Ingress. Create a DNS entry `gateway.kyma.example.com` that points to this address.
 
 
 ## Troubleshooting
