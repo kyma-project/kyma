@@ -24,7 +24,7 @@ func (ts *TestSuite) CreateTesterBindingUsage() {
 				Name: ts.bindingName,
 			},
 			UsedBy: v1alpha1.LocalReferenceByKindAndName{
-				Kind: "Deployment",
+				Kind: "deployment",
 				Name: ts.gwClientSvcDeploymentName,
 			},
 		},
