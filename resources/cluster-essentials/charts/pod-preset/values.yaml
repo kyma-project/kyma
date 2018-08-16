@@ -1,0 +1,19 @@
+webhook:
+  replicaCount: 1
+  image:
+    repository: mszostok/service-catalog-admission-webhook
+    tag: 0.0.1
+    pullPolicy: IfNotPresent
+  verbosity: 6
+  service:
+    type: NodePort
+    port: 443
+
+controller:
+  enabled: false
+  image:
+    repository: mszostok/service-catalog-podpreset-controller
+    tag: 0.0.1
+    pullPolicy: IfNotPresent
+
+

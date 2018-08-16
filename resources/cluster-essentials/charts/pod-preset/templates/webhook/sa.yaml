@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "pod-preset.fullname" . }}-webhook
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    app: {{ template "pod-preset.name" . }}-webhook
+    chart: {{ template "pod-preset.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
