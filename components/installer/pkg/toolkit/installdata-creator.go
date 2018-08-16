@@ -49,6 +49,7 @@ func (sc *InstallationDataCreator) WithEmptyDomain() *InstallationDataCreator {
 func (sc *InstallationDataCreator) WithCert(cert, certKey string) *InstallationDataCreator {
 	sc.installationData.ClusterTLSCert = cert
 	sc.installationData.ClusterTLSKey = certKey
+	sc.installationData.ClusterTLSPEMCert = cert
 	return sc
 }
 

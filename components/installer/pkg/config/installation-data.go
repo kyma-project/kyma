@@ -25,6 +25,7 @@ type InstallationData struct {
 	AzureBrokerClientSecret    string
 	ClusterTLSKey              string
 	ClusterTLSCert             string
+	ClusterTLSPEMCert          string
 	RemoteEnvCa                string
 	RemoteEnvCaKey             string
 	RemoteEnvIP                string
@@ -61,6 +62,7 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		AzureBrokerClientSecret:    installationConfig.AzureBrokerClientSecret,
 		ClusterTLSKey:              installationConfig.ClusterTLSKey,
 		ClusterTLSCert:             installationConfig.ClusterTLSCert,
+		ClusterTLSPEMCert:          installationConfig.ClusterTLSPEMCert,
 		RemoteEnvCa:                installationConfig.RemoteEnvCa,
 		RemoteEnvCaKey:             installationConfig.RemoteEnvCaKey,
 		RemoteEnvIP:                installationConfig.RemoteEnvIP,
