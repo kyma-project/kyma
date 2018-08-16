@@ -29,7 +29,7 @@ Optionally, you can prepare the following:
 - Static IP address for Remote Environments Ingress.
   - Create a DNS record `gateway.kyma.example.com` that points to Remote Environments Ingress IP Address
 
-If you can't pre-allocate IP addresses (as is the case in AWS, where the provider does not support static IP assignment during ELB creation), the cluster will request them during installation by platform-specific means. In that case don't forget to perform [Post-Installation steps](#Post-installation-steps).
+If you can't pre-allocate IP addresses (as is the case in AWS, where the provider does not support static IP assignment during ELB creation), the cluster will request them during installation by platform-specific means. In that case don't forget to perform Post-Installation steps.
 
 Configure the Kubernetes API Server following this template:
 
@@ -63,12 +63,12 @@ kubectl create ns kyma-installer
 
 2. Enable Azure Broker (optional)
 
->**NOTE:** This instruction is applicable only when you install Kyma on a Gardener Cluster.. 
+>**NOTE:** This instruction is applicable only when you install Kyma on a Gardener Cluster..
 
 To enable the communication between the Shoot Cluster and the Azure Broker, you must pass Azure credentials to the cluster.
 
 - Copy the `azure-broker-secret.yaml.tpl` template located in the `installation/resources` directory.
-- Rename the file to `azure-broker-secret.yaml`. 
+- Rename the file to `azure-broker-secret.yaml`.
 - Replace the placeholder values with your Azure credentials.
 - Run this command to pass the secret to the Shoot Cluster:
 ```
