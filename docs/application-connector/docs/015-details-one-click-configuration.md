@@ -92,11 +92,13 @@ Alternatively, get the configuration URL with a valid token using `kubectl port-
   After the CSR is ready, make the following call:
 
     - Request:
+
     ```
     curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' https://connector-service.CLUSTER_NAME.kyma.cluster.cx/v1/remoteenvironments/{remote-environment-name}/client-certs?token=example-token-456
     ```
 
     - Response:
+    
     ```json
     {
         "crt":"BASE64_ENCODED_CRT"
