@@ -12,6 +12,7 @@ func TestGetGlobalOverrides(t *testing.T) {
 		Convey("when IP address is not specified IsLocalEnv should be true", func() {
 			const dummyOverridesForGlobal = `
 global:
+  tlsPEMCrt: ""
   tlsCrt: ""
   tlsKey: ""
   isLocalEnv: true
@@ -36,6 +37,7 @@ global:
 		Convey("when IP address is specified IsLocalEnv should be false", func() {
 			const dummyOverridesForGlobal = `
 global:
+  tlsPEMCrt: ""
   tlsCrt: ""
   tlsKey: ""
   isLocalEnv: false
@@ -59,6 +61,7 @@ global:
 		Convey("when cert properties are provided tlsCrt and tlsKey should exist", func() {
 			const dummyOverridesForGlobal = `
 global:
+  tlsPEMCrt: "abc"
   tlsCrt: "abc"
   tlsKey: "def"
   isLocalEnv: false
@@ -82,6 +85,7 @@ global:
 		Convey("when remote env CA property is provided remoteEnvCa should exist", func() {
 			const dummyOverridesForGlobal = `
 global:
+  tlsPEMCrt: ""
   tlsCrt: ""
   tlsKey: ""
   isLocalEnv: false
@@ -105,6 +109,7 @@ global:
 		Convey("when EtcdBackupABSContainerName property is provided then etcdBackupABS.containerName should exist", func() {
 			const dummyOverridesForGlobal = `
 global:
+  tlsPEMCrt: ""
   tlsCrt: ""
   tlsKey: ""
   isLocalEnv: false

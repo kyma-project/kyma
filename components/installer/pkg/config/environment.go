@@ -19,6 +19,7 @@ type installationConfig struct {
 	AzureBrokerClientSecret    string
 	ClusterTLSKey              string
 	ClusterTLSCert             string
+	ClusterTLSPEMCert          string
 	RemoteEnvCa                string
 	RemoteEnvCaKey             string
 	UITestUser                 string
@@ -46,6 +47,7 @@ func GetInstallationConfig() *installationConfig {
 		AzureBrokerClientSecret:    os.Getenv("AZURE_BROKER_CLIENT_SECRET"),
 		ClusterTLSKey:              os.Getenv("TLS_KEY"),
 		ClusterTLSCert:             os.Getenv("TLS_CERT"),
+		ClusterTLSPEMCert:          os.Getenv("TLS_PEM_CERT"),
 		RemoteEnvCa:                os.Getenv("REMOTE_ENV_CA"),
 		RemoteEnvCaKey:             os.Getenv("REMOTE_ENV_CA_KEY"),
 		UITestUser:                 os.Getenv("UI_TEST_USER"),
