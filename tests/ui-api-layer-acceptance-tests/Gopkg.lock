@@ -121,6 +121,10 @@
   branch = "master"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
+    "components/binding-usage-controller/pkg/client/clientset/versioned",
+    "components/binding-usage-controller/pkg/client/clientset/versioned/scheme",
+    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "components/idppreset/pkg/apis/ui/v1alpha1",
     "components/idppreset/pkg/client/clientset/versioned",
     "components/idppreset/pkg/client/clientset/versioned/scheme",
@@ -371,6 +375,7 @@
   packages = [
     "discovery",
     "kubernetes/scheme",
+    "kubernetes/typed/apps/v1beta1",
     "kubernetes/typed/core/v1",
     "pkg/apis/clientauthentication",
     "pkg/apis/clientauthentication/v1alpha1",
@@ -413,6 +418,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "640f3b3ce16ca50bd9020c82cfe1789f6ab0faa7a2a18c2d910a642020dc0302"
+  inputs-digest = "a677945e25d2ade2da6345fdd2a270d471ae7d537099e4f811c48721173c7dcd"
   solver-name = "gps-cdcl"
   solver-version = 1

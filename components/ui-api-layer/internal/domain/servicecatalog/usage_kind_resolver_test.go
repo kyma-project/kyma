@@ -5,13 +5,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	fakeDynamic "k8s.io/client-go/dynamic/fake"
 )
 
 func TestUsageKindResolver_ListUsageKinds(t *testing.T) {
@@ -19,57 +21,59 @@ func TestUsageKindResolver_ListUsageKinds(t *testing.T) {
 	usageKindA := fixUsageKind("fix-A")
 	usageKindB := fixUsageKind("fix-B")
 
+	svc := automock.NewUsageKindServices()
+	svc.On("List", pager.PagingParams{}).
+		Return(fixUsageKindsList(), nil).
+		Once()
+	defer svc.AssertExpectations(t)
+
 	client := fake.NewSimpleClientset(usageKindA, usageKindB)
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 
 	informer := informerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer()
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
-	svc := newUsageKindService(client.ServicecatalogV1alpha1(), nil, informer)
 	resolver := newUsageKindResolver(svc)
+
 	// WHEN
 	resp, err := resolver.ListUsageKinds(context.Background(), nil, nil)
-	require.NoError(t, err)
 
 	// THEN
-	assert.Equal(t, resp, fixUsageKindsGQL())
+	require.NoError(t, err)
+	assert.Equal(t, fixUsageKindsListGQL(), resp)
 }
 
 func TestUsageKindResolver_ListUsageKindResources_Empty(t *testing.T) {
 	// GIVEN
-	usageKindA := fixUsageKind("fix-A")
+	svc := automock.NewUsageKindServices()
+	svc.On("ListUsageKindResources", "fix-A", fixUsageKindResourceNamespace()).
+		Return([]gqlschema.UsageKindResource{}, nil).
+		Once()
+	defer svc.AssertExpectations(t)
 
-	dynamicClient := &fakeDynamic.FakeClientPool{}
-
-	client := fake.NewSimpleClientset(usageKindA)
+	client := fake.NewSimpleClientset()
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 
 	informer := informerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer()
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
-	svc := newUsageKindService(client.ServicecatalogV1alpha1(), dynamicClient, informer)
 	resolver := newUsageKindResolver(svc)
+
 	// WHEN
-	resp, err := resolver.ListServiceUsageKindResources(context.Background(), "fix-A", "default")
-	require.NoError(t, err)
+	_, err := resolver.ListServiceUsageKindResources(context.Background(), "fix-A", fixUsageKindResourceNamespace())
 
 	// THEN
-	assert.Equal(t, []gqlschema.UsageKindResource{}, resp)
+	require.NoError(t, err)
 }
 
-func fixUsageKindsGQL() []gqlschema.UsageKind {
+func fixUsageKindsList() []*v1alpha1.UsageKind {
+	return []*v1alpha1.UsageKind{
+		fixUsageKind("fix-A"),
+		fixUsageKind("fix-B"),
+	}
+}
+
+func fixUsageKindsListGQL() []gqlschema.UsageKind {
 	return []gqlschema.UsageKind{
-		{
-			Name:        "fix-A",
-			DisplayName: fixUsageKindDisplayName(),
-			Group:       fixUsageKindGroup(),
-			Kind:        fixUsageKindKind(),
-			Version:     fixUsageKindVersion(),
-		},
-		{
-			Name:        "fix-B",
-			DisplayName: fixUsageKindDisplayName(),
-			Group:       fixUsageKindGroup(),
-			Kind:        fixUsageKindKind(),
-			Version:     fixUsageKindVersion(),
-		},
+		*fixUsageKindGQL("fix-A"),
+		*fixUsageKindGQL("fix-B"),
 	}
 }
