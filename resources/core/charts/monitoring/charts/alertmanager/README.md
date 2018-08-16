@@ -4,7 +4,7 @@ This chart contains a part of the configuration related to the Alertmanager.
 
 #### Secret configuration
 
-Alertmanager instances require a secret resource to be named with the following format alertmanager-{ALERTMANAGER_NAME}.
+Alertmanager instances require a Secret resource named with the `alertmanager-{ALERTMANAGER_NAME}` format.
 
 In Kyma, the name of the Alertmanager is defined by ```name: {{ .Release.Name }}```. The secret is ```name: alertmanager-{{ .Release.Name }}```. The name of the config file is alertmanager.yaml.
 
@@ -29,14 +29,13 @@ data:
 
 The **data** Secret is an encoded `alertmanager.yaml` file which contains all the configuration for alerting notifications.
 
-This section explains how to configure Alertmanager to enable alerting notifications.
 
 
 #### Alertmanager configuration - alertmanager.yaml
 
-[This](templates/alertmanager.config.yaml) template pre-configures two simple receivers to handle alerts in **VictorOps and Slack**.
+This section explains how to configure Alertmanager to enable alerting notifications. [This](templates/alertmanager.config.yaml) template pre-configures two simple receivers to handle alerts in VictorOps and Slack.
 
-This yaml file pre-configures two simple receivers to handle alerts in **VictorOps and Slack**.
+This yaml file pre-configures two simple receivers to handle alerts in VictorOps and Slack.
 
 To avoid confusion, use optional configuration parameters for ```route:``` and then group the receivers under the label ```routes:```
 
@@ -51,17 +50,17 @@ route:
   repeat_interval: 5m
   group_by: ['cluster','pod','job','alertname']
   # All alerts that do not match the following child routes
-  # will remain at the root node and be dispatched to 'default-receiver'
+  # remain at the root Node and are dispatched to the `default-receiver`.
   routes:
   - receiver: 'null'
     match:
       alertname: DeadMansSwitch
   - receiver: "victorOps"
-    continue: true # If continue: is set to false it will stop after the first matching.
+    continue: true # If set to `false`, it stops after the first matching.
     match_re:
       severity: critical
   - receiver: "slack"
-    continue: true # If continue: is set to false it will stop after the first matching.
+    continue: true # If set to `false`, it stops after the first matching.
     match_re:
       severity: warning|critical
 receivers:
