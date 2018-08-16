@@ -38,7 +38,7 @@ Using the UI:
  - Click **Connect Remote Environment**.
  - Copy the token by clicking **Copy to clipboard**.
 
-Alternatively, get the configuration address URL with a valid token using `kubectl port-forward` or `kubectl proxy`.
+Alternatively, get the configuration URL with a valid token using `kubectl port-forward` or `kubectl proxy`.
 
   - Request:
 
@@ -46,7 +46,7 @@ Alternatively, get the configuration address URL with a valid token using `kubec
     ```
     kubectl -n=kyma-integration port-forward svc/connector-service-internal-api 8080:8080
     ```
-    And send the request in the second one.
+    Send the request:
     ```
     curl -X POST http://localhost:8080/v1/remoteenvironments/{remote-environment-name}/tokens
     ```
@@ -59,10 +59,13 @@ Alternatively, get the configuration address URL with a valid token using `kubec
     ```
 
 2. Use the provided link to fetch information about the Kyma's URLs and CSR configuration.
+
     - Request:
     ```
     curl {CONFIGURATION_URL_WITH_TOKEN}
     ```
+    >**NOTE:** The URL you call in this step contains a token that is valid for a single call. If you need to get the configuration details once again, generate a new configuration URL with a valid token and call it again. You get a code `403` error if you call the same configuration URL more than once.
+
     - Response:
     ```json
     {
