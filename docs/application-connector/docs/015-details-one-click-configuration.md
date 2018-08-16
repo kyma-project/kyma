@@ -14,7 +14,7 @@ Automatic configuration flow is presented in following diagram:
 
 This example assumes that the new Remote Environment already exists and it is in the `disconnected` state, which means that there are no solutions connected to it.
 
-On the diagram, the admin on the Kyma side and on the external system side is the same person.
+On the diagram, the administrator on the Kyma side and on the external system side is the same person.
 
 1. The admin requests for a token using the CLI or the UI and receives a link with the token, which is valid for a limited period of time.
 2. The admin passes the token to the external system, which requests for information regarding the Kyma installation. In the response, it receives the following information:
@@ -83,21 +83,24 @@ Alternatively, get the configuration URL with a valid token using `kubectl port-
     }
     ```
 
-3. Use values received in the `certificate.subject` field to create a CSR. After the CSR is ready, make the following call:
+3. Use values received in the `certificate.subject` field to create a CSR.
+
+    ```
+    openssl req -new -out test.csr -key ec-default.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN=ec-default"
+    ```
+
+  After the CSR is ready, make the following call:
+
     - Request:
     ```
     curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' https://connector-service.CLUSTER_NAME.kyma.cluster.cx/v1/remoteenvironments/{remote-environment-name}/client-certs?token=example-token-456
     ```
+
     - Response:
     ```json
     {
         "crt":"BASE64_ENCODED_CRT"
     }
-    ```
-
-    Use the following command to generate the example CSR:
-    ```
-    openssl req -new -out test.csr -key hmc-default.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN=ec-default"
     ```
 
 4. The `crt` field contains a valid base64-encoded PEM block of a certificate signed by the Kyma's CA.
