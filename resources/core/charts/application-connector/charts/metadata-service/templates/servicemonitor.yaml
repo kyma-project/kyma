@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: metadata-service-metrics
+  namespace: kyma-system
+  labels:
+    prometheus: core
+    example: monitoring-custom-metrics
+spec:
+  selector:
+    matchLabels:
+      k8s-app: metrics
+  targetLabels:
+    - k8s-app
+  endpoints:
+  - port: metrics-port
+    interval: 30s
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.global.namespace }}

@@ -32,6 +32,10 @@ required = [
   name = "k8s.io/code-generator"
   branch = "release-1.10"
 
+[[constraint]]
+  name = "github.com/prometheus/client_golang"
+  version = "0.8.0"
+
 [[override]]
   name = "k8s.io/api"
   version = "kubernetes-1.10.1"

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/httptools"
@@ -18,12 +19,15 @@ import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/secrets"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
 	metauuid "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/monitoring"
 	istioclient "github.com/kyma-project/kyma/components/metadata-service/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
+	"sync"
 )
 
 const (
@@ -55,11 +59,19 @@ func main() {
 		log.Errorf("Unable to initialize: '%s'", err.Error())
 	}
 
-	externalHandler := newExternalHandler(serviceDefinitionService)
+	middlewares, err := monitoring.SetupMonitoringMiddleware()
+	if err != nil {
+		log.Errorf("Error while setting up monitoring: %s", err.Error())
+	}
+
+	externalHandler := newExternalHandler(serviceDefinitionService, middlewares)
 
 	if options.requestLogging {
 		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
 	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
 
 	externalSrv := &http.Server{
 		Addr:         ":" + strconv.Itoa(options.externalAPIPort),
@@ -68,10 +80,20 @@ func main() {
 		WriteTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
 
-	log.Info(externalSrv.ListenAndServe())
+	go func() {
+		log.Info(externalSrv.ListenAndServe())
+	}()
+
+	http.Handle("/metrics", promhttp.Handler())
+
+	go func() {
+		log.Info(http.ListenAndServe(":9090", nil))
+	}()
+
+	wg.Wait()
 }
 
-func newExternalHandler(serviceDefinitionService metadata.ServiceDefinitionService) http.Handler {
+func newExternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, middlewares []mux.MiddlewareFunc) http.Handler {
 	var metadataHandler externalapi.MetadataHandler
 
 	if serviceDefinitionService != nil {
@@ -80,7 +102,7 @@ func newExternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 		metadataHandler = externalapi.NewInvalidStateMetadataHandler("Service is not initialized properly.")
 	}
 
-	return externalapi.NewHandler(metadataHandler)
+	return externalapi.NewHandler(metadataHandler, middlewares)
 }
 
 func newServiceDefinitionService(minioURL, namespace string, proxyPort int, nameResolver k8sconsts.NameResolver) (metadata.ServiceDefinitionService, apperrors.AppError) {
