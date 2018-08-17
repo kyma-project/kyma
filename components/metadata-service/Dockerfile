@@ -5,7 +5,6 @@ ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/metadata-servic
 RUN mkdir -p $DOCK_PKG_DIR
 
 COPY ./ $DOCK_PKG_DIR
-COPY ./metadataapi.yaml $DOCK_PKG_DIR/api.yaml
 WORKDIR $DOCK_PKG_DIR
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o metadataservice ./cmd/metadataservice
@@ -16,5 +15,6 @@ LABEL source=git@github.com:kyma-project/kyma.git
 RUN apk update && apk add curl ngrep
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/metadata-service/metadataservice .
+COPY ./metadataapi.yaml .
 
 CMD ["/metadataservice"]

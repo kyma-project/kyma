@@ -33,6 +33,10 @@ spec:
         backend:
           serviceName: metadata-service-external-api
           servicePort: 8081
+      - path: /metadataapi.yaml
+              backend:
+                serviceName: metadata-service-external-api
+                servicePort: 8081
 
   tls:
   - hosts:

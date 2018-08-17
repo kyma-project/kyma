@@ -30,7 +30,7 @@ func TestApiSpec(t *testing.T) {
 
 		t.Run("should return api spec", func(t *testing.T) {
 			// given
-			url := config.MetadataServiceUrl + "/api.yaml"
+			url := config.MetadataServiceUrl + "/metadataapi.yaml"
 
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
