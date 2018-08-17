@@ -13,6 +13,9 @@
 # IntelliJ
 /out/
 
+# vscode
+.vscode/
+
 # vendor
 vendor/
 
