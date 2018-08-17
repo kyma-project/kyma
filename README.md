@@ -20,20 +20,6 @@ Living outside of the core product, Kyma allows you to be completely language-ag
 
 Read the [documentation](docs/README.md) to learn about the product, its technology stack, and components.
 
-### Project structure
-
-The repository has the following structure:
-
-```
-  ├── .github                     # Pull request and issue templates             
-  ├── components                  # Source code of all Kyma components                                                   
-  ├── docs                        # Documentation source files
-  ├── installation                # Installation scripts     
-  ├── resources                   # Helm charts and Kubernetes resources for the Kyma installation
-  ├── tests                       # Acceptance tests
-  └── tools                       # Source code of utilities used, for example, for the installation and testing
-  ```
-
 ## Installation
 
 Install Kyma [locally](docs/kyma/docs/031-gs-local-installation.md) and on a [cluster](docs/kyma/docs/032-gs-cluster-installation.md).
@@ -78,4 +64,18 @@ Every project runs differently. Follow instructions in the main `README.md` docu
 
 6. Test your changes.
 
-When you finish, run unit and acceptance tests to verify your changes. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. To run the acceptance tests, go to the `tests` directory for details.
+When you finish, run unit and acceptance tests to verify your changes. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. To run the acceptance tests, go to the corresponding directory `tests` directory for details.
+
+### Project structure
+
+The repository has the following structure:
+
+```
+  ├── .github                     # Pull request and issue templates             
+  ├── components                  # Source code of all Kyma components                                                
+  ├── docs                        # Documentation source files
+  ├── installation                # Installation scripts     
+  ├── resources                   # Helm charts and Kubernetes resources for the Kyma installation
+  ├── tests                       # Acceptance tests
+  └── tools                       # Source code of utilities used, for example, for the installation and testing
+  ```

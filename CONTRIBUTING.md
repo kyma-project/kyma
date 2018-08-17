@@ -19,4 +19,4 @@ Apart from the general rules described in the `community` repository, every `kym
 * Do not copy charts from the Internet. Customize the Helm charts and simplify them to pertain only to the specific use case. Apply this rule to all documents associated with the charts, such as `README.md` and `NOTES.txt` documents.
 * Follow the `IfNotPresent` pulling policy. Do not use the `latest` tag for all `Deployments` definitions for the local installation.
 * Adjust any data copied from the Internet to the product needs.
-* When you receive the required approvals for your pull request, create another one to update the image version and any configuration changes in relevant Kyma charts.
+* When you receive the required approvals for your pull request and it is merged, create another one to update the image version and any configuration changes in relevant Kyma charts.
