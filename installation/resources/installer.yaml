@@ -44,7 +44,7 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/installer:0.3.165
+        image: eu.gcr.io/kyma-project/installer:0.3.178
         imagePullPolicy: IfNotPresent
         env:
           - name: AZURE_BROKER_SUBSCRIPTION_ID
