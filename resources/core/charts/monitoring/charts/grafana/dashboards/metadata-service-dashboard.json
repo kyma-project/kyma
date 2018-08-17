@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1534496644326,
+  "iteration": 1534500781495,
   "links": [],
   "panels": [
     {
@@ -436,6 +436,7 @@
           "expr": "metadata_service_endpoints_duration{exported_endpoint=~\"$endpoint\", quantile=\"0.995\"}",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "{{ exported_endpoint }}",
           "refId": "A"
         }
       ],
@@ -585,9 +586,10 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
-          "text": "",
-          "value": []
+          "isNone": true,
+          "selected": false,
+          "text": "None",
+          "value": ""
         },
         "datasource": "Prometheus",
         "hide": 0,
