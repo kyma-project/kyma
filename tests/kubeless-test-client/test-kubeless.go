@@ -135,7 +135,7 @@ func deleteFun(namespace, name string) {
 	}
 }
 
-func tryToGetMinikubeIP() string {
+func getMinikubeIP() string {
 	mipCmd := exec.Command("minikube", "ip")
 	if mipOut, err := mipCmd.Output(); err != nil {
 		log.Fatalf("Error while getting minikube IP. Root cause: %s", err)
@@ -156,8 +156,8 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 
 	ingressGatewayControllerAddr, err := net.LookupHost(ingressGatewayControllerServiceURL)
 	if err != nil {
-		log.Fatalf("Unable to resolve host '%s'. Root cause: %v", ingressGatewayControllerServiceURL, err)
-		if minikubeIP := tryToGetMinikubeIP(); minikubeIP != "" {
+		log.Printf("Unable to resolve host '%s'. Root cause: %v", ingressGatewayControllerServiceURL, err)
+		if minikubeIP := getMinikubeIP(); minikubeIP != "" {
 			ingressGatewayControllerAddr = []string{minikubeIP}
 		}
 	}
@@ -179,7 +179,7 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 				if err != nil {
 					log.Fatal("Unable to fetch virtual Service for", testName, ":\n", err)
 				}
-				log.Fatal("Timeout: Virtual Service is:\n", string(stdoutStderr))
+				log.Printf("Timeout: Virtual Service is: %v", string(stdoutStderr))
 
 				log.Println("Timeout: Check http Get one last time")
 				resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
@@ -272,22 +272,24 @@ func ensureSvcInstanceIsDeployed(namespace, svcInstance string) {
 	timeout := time.After(5 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 
-	select {
-	case <-timeout:
-		cmd := exec.Command("kubectl", "-n", namespace, "get", "serviceinstance", svcInstance, "--output=jsonpath={.items[0].metadata.name}")
-		stdoutStderr, err := cmd.CombinedOutput()
-		if err != nil {
-			log.Fatalf("Unable to fetch service instance %v: %v", svcInstance, err)
-		}
-		log.Fatalf("Timeout waiting to get service instance %v: %v", svcInstance, string(stdoutStderr))
-	case <-tick:
-		cmd := exec.Command("kubectl", "-n", namespace, "get", "serviceinstance", svcInstance, "--output=jsonpath={.items[0].metadata.name}")
-		stdoutStderr, err := cmd.CombinedOutput()
-		if err != nil {
-			log.Fatalf("Error fetching service instance %v: %v", svcInstance, err)
-		}
-		if string(stdoutStderr) == "redis" {
-			return
+	for {
+		select {
+		case <-timeout:
+			cmd := exec.Command("kubectl", "-n", namespace, "get", "serviceinstance", svcInstance, "--output=jsonpath={.items[0].metadata.name}")
+			stdoutStderr, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Fatalf("Unable to fetch service instance %v: %v", svcInstance, err)
+			}
+			log.Fatalf("Timeout waiting to get service instance %v: %v", svcInstance, string(stdoutStderr))
+		case <-tick:
+			cmd := exec.Command("kubectl", "-n", namespace, "get", "serviceinstance", svcInstance, "-o=jsonpath={.items[*]}{.status.conditions[*].reason}")
+			stdoutStderr, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Fatalf("Error fetching service instance %v: %v", svcInstance, err)
+			}
+			if string(stdoutStderr) == "ProvisionedSuccessfully" {
+				return
+			}
 		}
 	}
 }

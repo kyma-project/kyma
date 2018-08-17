@@ -56,5 +56,5 @@ spec:
  serviceBindingRef:
    name: redis-binding
  usedBy:
-   kind: Function
+   kind: function
    name: test-svcbind
