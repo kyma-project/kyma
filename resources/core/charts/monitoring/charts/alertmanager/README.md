@@ -1,10 +1,10 @@
 ### Alertmanager
 
-In Kyma all the configuration related to the Alertmanager is in this chart.
+This chart contains a part of the configuration related to the Alertmanager.
 
 #### Secret configuration
 
-Alertmanager instances require the secret resource naming to follow the format alertmanager-{ALERTMANAGER_NAME}.
+Alertmanager instances require a Secret resource named with the `alertmanager-{ALERTMANAGER_NAME}` format.
 
 In Kyma, the name of the Alertmanager is defined by ```name: {{ .Release.Name }}```. The secret is ```name: alertmanager-{{ .Release.Name }}```. The name of the config file is alertmanager.yaml.
 
@@ -20,67 +20,99 @@ metadata:
     release: {{ .Release.Name }}
   name: alertmanager-{{ .Release.Name }}
 data:
-  alertmanager.yaml: {{ toYaml .Values.config | b64enc | quote }}
+  alertmanager.yaml: |-
+    {{ include "alertmanager.yaml.tpl" . | b64enc }}
 {{- range $key, $val := .Values.templateFiles }}
   {{ $key }}: {{ $val | b64enc | quote }}
 {{- end }}
 ```
 
-The next section explains the Alertmanager configuration.
+The **data** Secret is an encoded `alertmanager.yaml` file which contains all the configuration for alerting notifications.
+
+
 
 #### Alertmanager configuration - alertmanager.yaml
 
-[kyma/resources/core/charts/monitoring/charts/alertmanager/values.yaml](values.yaml) pre-configure two simple receiver to handle alert in **VictorOps and Slack**.
+This section explains how to configure Alertmanager to enable alerting notifications. [This](templates/alertmanager.config.yaml) template pre-configures two simple receivers to handle alerts in VictorOps and Slack.
+
+This yaml file pre-configures two simple receivers to handle alerts in VictorOps and Slack.
 
 To avoid confusion, use optional configuration parameters for ```route:``` and then group the receivers under the label ```routes:```
 
 ```yaml
-config:
-  global:
-    resolve_timeout: 5m
-  route:
-    receiver: 'null'
-    group_wait: 30s
-    group_interval: 5m
-    repeat_interval: 1h # change to 10m to test
-    group_by: ['cluster','pod','job','alertname']
-    # All alerts that do not match the following child routes
-    # will remain at the root node and be dispatched to 'default-receiver'
-    routes:
-    - receiver: 'null'
-      match:
-        alertname: DeadMansSwitch
-    # - receiver: 'team-YOUR-TEAM-victorOps'
-    #   continue: true # If continue: is set to false it will stop after the first matching.
-    #   match:
-    #     alertname: PodNotRunning
-    # - receiver: 'team-YOUR-TEAM-slack'
-    #   continue: true # If continue: is set to false it will stop after the first matching.
-    #   match:
-    #     alertname: PodNotRunning
-  receivers:
-  - name: 'null'
-  # - name: 'team-YOUR-TEAM-victorOps'
-  #   victorops_configs:
-  #     - api_key: API_VICTOROPS_TOKEN
-  #       send_resolved: true
-  #       api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
-  #       routing_key: YOUR-TEAM-ROUTING-KEY
-  #       state_message: 'Alert: {{ .CommonLabels.alertname }}. Summary:{{ .CommonAnnotations.summary }}. RawData: {{ .CommonLabels }}'
-  # - name: 'team-YOUR-TEAM-slack'
-  #   slack_configs:
-  #   - channel: '#YOU_CHANNEL'
-  #     send_resolved: true
-  #     api_url: https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXX #Your slack Webhook URL
-  #     icon_emoji: ":ghost:"
-  #     title: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] Monitoring Event Notification'
-  #     text: "<!channel> \nsummary: {{ .CommonAnnotations.summary }}\ndescription: {{ .CommonAnnotations.description }}"
+{{ define "alertmanager.yaml.tpl" }}
+global:
+  resolve_timeout: 5m
+route:
+  receiver: 'null'
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 5m
+  group_by: ['cluster','pod','job','alertname']
+  # All alerts that do not match the following child routes
+  # remain at the root Node and are dispatched to the `default-receiver`.
+  routes:
+  - receiver: 'null'
+    match:
+      alertname: DeadMansSwitch
+  - receiver: "victorOps"
+    continue: true # If set to `false`, it stops after the first matching.
+    match_re:
+      severity: critical
+  - receiver: "slack"
+    continue: true # If set to `false`, it stops after the first matching.
+    match_re:
+      severity: warning|critical
+receivers:
+- name: 'null'
+- name: "victorOps"
+  victorops_configs:
+  - api_key: {{ .Values.global.alertTools.credentials.victorOps.apikey | quote }}
+    send_resolved: true
+    api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
+    routing_key: {{ .Values.global.alertTools.credentials.victorOps.routingkey | quote }}
+    state_message: 'Alert: {{`{{ .CommonLabels.alertname }}`}}. Summary:{{`{{ .CommonAnnotations.summary }}`}}. RawData: {{`{{ .CommonLabels }}`}}'
+- name: "slack"
+  slack_configs:
+  - channel: {{ .Values.global.alertTools.credentials.slack.channel | quote }}
+    send_resolved: true
+    api_url: {{ .Values.global.alertTools.credentials.slack.apiurl | quote }}
+    icon_emoji: ":ghost:"
+    title: '[{{`{{ .Status | toUpper }}`}}{{`{{ if eq .Status "firing" }}`}}:{{`{{ .Alerts.Firing | len }}`}}{{`{{ end }}`}}] Monitoring Event Notification'
+    text: "<!channel> \nsummary: {{`{{ .CommonAnnotations.summary }}`}}\ndescription: {{`{{ .CommonAnnotations.description }}`}}"
+{{ end }}
 ```
 **A Quick explanation**
 * ```route:``` A route block defines a node in a routing tree and its children. Its optional configuration parameters are inherited from its parent node if not set.
 * ```routes:``` Child routes.
 * ```receiver:``` Receiver is a named configuration of one or more notification integrations.
 * ```receiver:``` A list of configured notification receivers.
+
+This configuration enables the **receivers**, VictorOps, and Slack to receive alerts fired by Prometheus rules.
+
+In order to enable alert notifications for the receivers, configure these four parameters:
+
+**api_key** defines the team Api key in VictorOps.
+**routing_key** defines the team routing key in VictorOps.
+**channel** refers to the Slack channel which receives the alerts notifications.
+**api_url** is the URL endpoint which sends the alerts.
+
+Only a part of the configuration is located in this chart. All of the four parameters' values are taken from the `{{ .Values.global.alertTools.credentials... }}` template. These values are configured in [this](../../../../values.yaml) file. For example:
+
+```yaml
+global:
+  #Alerting tools credentials are as follows:
+  alertTools:
+    credentials:
+      victorOps:
+        routingkey: ""
+        apikey: ""
+      slack:
+        channel: ""
+        apiurl: ""
+```
+
+The main reason to keep this configuration as **global** is that these parameters might be replaced with values configured during the cluster build and taken from the final environment variables during the Kyma installation.
 
 **References**
 - [VictorOps-Prometheus Integration Guide](https://help.victorops.com/knowledge-base/victorops-prometheus-integration/)

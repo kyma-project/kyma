@@ -21,7 +21,6 @@ func (steps InstallationSteps) InstallCore(installationData *config.Installation
 
 	chartDir := path.Join(steps.chartDir, consts.CoreComponent)
 	coreOverrides := steps.getCoreOverrides(installationData, chartDir)
-
 	installResp, installErr := steps.helmClient.InstallRelease(
 		chartDir,
 		"kyma-system",

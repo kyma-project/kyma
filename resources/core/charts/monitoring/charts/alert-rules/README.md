@@ -2,9 +2,8 @@
 
 ## Overview
 
-In order to provide a starting point for adding alert rules, Kyma includes a helm chart where new rules can be created.
+Kyma uses Prometheus alert rules for monitoring the health of its resources. This chart is the starting point for configuring alert rules.
 
-In this chart it is possible to define Prometheus alert rules.
 
 ### Creating Alert Rules in Kyma
 
@@ -22,9 +21,7 @@ Prometheus uses the a label selector **spec.ruleSelector** to identify those Con
 {{- end }}
 ```
 
-So, to define a new alert rule in Kyma, you need to specify a new ConfigMap.
-
-Best practice is to label the ConfigMaps containing rule files with ```role: alert-rules``` as well as the name of the Prometheus object, ```prometheus: {{ .Release.Name }}```.
+To define a new alert rule in Kyma, create a ConfigMap labelled with `role: alert-rules` as well as the name of the Prometheus object as `prometheus: {{ .Release.Name }}`.
 
 Kyma provides the file [unhealthy-pods-configmap.yaml](templates/unhealthy-pods-configmap.yaml) which serves as a reference to define Rules as configmaps.
 
@@ -52,16 +49,15 @@ data:
     {{- include "unhealthy-pods-rules.yaml.tpl" . | indent 4}}
 {{ end }}
 ```
-Under ```data:``` ``` alert.rules:``` is configured the file, [unhealthy-pods-rules.yaml](templates/unhealthy-pods-rules.yaml), where is created a rule for alerting if a pod is not running. 
+Under the **data. alert.rules** parameter, there is a configuration of the [unhealthy-pods-rules.yaml](templates/unhealthy-pods-rules.yaml) file, which creates a rule for alerting when a Pod is not running.
 
 ```yaml
-# Modify the file according to your requirements
 {{ define "unhealthy-pods-rules.yaml.tpl" }}
 groups:
 - name: pod-not-running-rule
   rules:
   - alert: PodNotRunning
-    expr: (kube_pod_container_status_running { pod="sample-metrics",namespace="default" } == 0)
+    expr: absent(kube_pod_container_status_running{namespace="default",pod="sample-metrics"})
     for: 15s
     labels:
       severity: critical

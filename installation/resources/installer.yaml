@@ -163,11 +163,35 @@ spec:
                 name: installation-config
                 key: enable_etcd_backup_operator
                 optional: true
-          - name: ETCD_BACKUP_ABS_CONTAINER_NAME
+          - name: ECTD_BACKUP_ABS_CONTAINER_NAME
             valueFrom:
               configMapKeyRef:
                 name: installation-config
-                key: etcd_backup_abs_container_name
+                key: ectd_backup_abs_container_name
+                optional: true
+          - name: VICTOR_OPS_API_KEY_VALUE
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: victor_ops_api_key
+                optional: true
+          - name: VICTOR_OPS_ROUTING_KEY_VALUE
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: victor_ops_routing_key
+                optional: true
+          - name: SLACK_CHANNEL_VALUE
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: slack_channel
+                optional: true
+          - name: SLACK_API_URL_VALUE
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: slack_api_url
                 optional: true
           - name: COMPONENT_LIST
             valueFrom:
