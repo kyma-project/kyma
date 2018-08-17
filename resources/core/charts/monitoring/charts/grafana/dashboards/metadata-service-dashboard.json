@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1534166765512,
+  "iteration": 1534496644326,
   "links": [],
   "panels": [
     {
@@ -26,7 +26,7 @@
         "x": 0,
         "y": 0
       },
-      "id": 14,
+      "id": 18,
       "panels": [],
       "title": "Resources and Replicas",
       "type": "row"
@@ -36,12 +36,11 @@
       "colorBackground": false,
       "colorValue": false,
       "colors": [
-        "rgba(245, 54, 54, 0.9)",
+        "#299c46",
         "rgba(237, 129, 40, 0.89)",
-        "rgba(50, 172, 45, 0.97)"
+        "#d44a3a"
       ],
       "datasource": "Prometheus",
-      "editable": true,
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -51,12 +50,12 @@
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 5,
+        "h": 9,
         "w": 8,
         "x": 0,
         "y": 1
       },
-      "id": 16,
+      "id": 20,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -73,7 +72,7 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "postfix": "cores",
+      "postfix": " cores",
       "postfixFontSize": "50%",
       "prefix": "",
       "prefixFontSize": "50%",
@@ -96,14 +95,13 @@
           "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"kyma-integration\",pod_name=~\"metadata-service.*\"}[3m]))",
           "format": "time_series",
           "intervalFactor": 2,
-          "refId": "A",
-          "step": 600
+          "refId": "A"
         }
       ],
       "thresholds": "",
       "title": "CPU",
       "type": "singlestat",
-      "valueFontSize": "110%",
+      "valueFontSize": "80%",
       "valueMaps": [
         {
           "op": "=",
@@ -118,12 +116,11 @@
       "colorBackground": false,
       "colorValue": false,
       "colors": [
-        "rgba(245, 54, 54, 0.9)",
+        "#299c46",
         "rgba(237, 129, 40, 0.89)",
-        "rgba(50, 172, 45, 0.97)"
+        "#d44a3a"
       ],
       "datasource": "Prometheus",
-      "editable": true,
       "format": "none",
       "gauge": {
         "maxValue": 100,
@@ -133,12 +130,12 @@
         "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 5,
+        "h": 9,
         "w": 8,
         "x": 8,
         "y": 1
       },
-      "id": 18,
+      "id": 22,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -155,10 +152,10 @@
       "maxDataPoints": 100,
       "nullPointMode": "connected",
       "nullText": null,
-      "postfix": "GB",
+      "postfix": " GB",
       "postfixFontSize": "50%",
       "prefix": "",
-      "prefixFontSize": "80%",
+      "prefixFontSize": "50%",
       "rangeMaps": [
         {
           "from": "null",
@@ -177,15 +174,14 @@
         {
           "expr": "sum(container_memory_usage_bytes{namespace=\"kyma-integration\",pod_name=~\"metadata-service.*\"}) / 1024^3",
           "format": "time_series",
-          "intervalFactor": 2,
-          "refId": "A",
-          "step": 600
+          "intervalFactor": 1,
+          "refId": "A"
         }
       ],
       "thresholds": "",
       "title": "Memory",
       "type": "singlestat",
-      "valueFontSize": "110%",
+      "valueFontSize": "80%",
       "valueMaps": [
         {
           "op": "=",
@@ -200,27 +196,26 @@
       "colorBackground": false,
       "colorValue": false,
       "colors": [
-        "rgba(245, 54, 54, 0.9)",
+        "#299c46",
         "rgba(237, 129, 40, 0.89)",
-        "rgba(50, 172, 45, 0.97)"
+        "#d44a3a"
       ],
       "datasource": "Prometheus",
-      "editable": true,
       "format": "Bps",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
         "show": false,
         "thresholdLabels": false,
-        "thresholdMarkers": false
+        "thresholdMarkers": true
       },
       "gridPos": {
-        "h": 5,
+        "h": 9,
         "w": 8,
         "x": 16,
         "y": 1
       },
-      "id": 20,
+      "id": 24,
       "interval": null,
       "links": [],
       "mappingType": 1,
@@ -260,8 +255,7 @@
           "expr": "sum(rate(container_network_transmit_bytes_total{namespace=\"kyma-integration\",pod_name=~\"metadata-service.*\"}[3m])) + sum(rate(container_network_receive_bytes_total{namespace=\"kyma-integration\",pod_name=~\"metadata-service.*\"}[3m]))",
           "format": "time_series",
           "intervalFactor": 2,
-          "refId": "A",
-          "step": 600
+          "refId": "A"
         }
       ],
       "thresholds": "",
@@ -283,38 +277,27 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Prometheus",
-      "editable": true,
-      "error": false,
       "fill": 1,
-      "grid": {
-        "threshold1Color": "rgba(216, 200, 27, 0.27)",
-        "threshold2Color": "rgba(234, 112, 112, 0.22)"
-      },
       "gridPos": {
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 6
+        "y": 10
       },
-      "id": 22,
-      "isNew": true,
+      "id": 8,
       "legend": {
-        "alignAsTable": false,
         "avg": false,
         "current": false,
-        "hideEmpty": false,
-        "hideZero": false,
         "max": false,
         "min": false,
-        "rightSide": false,
         "show": true,
         "total": false,
         "values": false
       },
       "lines": true,
-      "linewidth": 2,
+      "linewidth": 1,
       "links": [],
-      "nullPointMode": "connected",
+      "nullPointMode": "null",
       "percentage": false,
       "pointradius": 5,
       "points": false,
@@ -329,40 +312,35 @@
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "current replicas",
-          "refId": "A",
-          "step": 30
+          "refId": "A"
         },
         {
           "expr": "min(kube_deployment_status_replicas_available{deployment=\"metadata-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "available",
-          "refId": "B",
-          "step": 30
+          "refId": "B"
         },
         {
           "expr": "max(kube_deployment_status_replicas_unavailable{deployment=\"metadata-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "unavailable",
-          "refId": "C",
-          "step": 30
+          "refId": "C"
         },
         {
           "expr": "min(kube_deployment_status_replicas_updated{deployment=\"metadata-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "updated",
-          "refId": "D",
-          "step": 30
+          "refId": "D"
         },
         {
           "expr": "max(kube_deployment_spec_replicas{deployment=\"metadata-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "desired",
-          "refId": "E",
-          "step": 30
+          "refId": "E"
         }
       ],
       "thresholds": [],
@@ -370,10 +348,9 @@
       "timeShift": null,
       "title": "Replicas",
       "tooltip": {
-        "msResolution": true,
         "shared": true,
         "sort": 0,
-        "value_type": "cumulative"
+        "value_type": "individual"
       },
       "type": "graph",
       "xaxis": {
@@ -385,15 +362,19 @@
       },
       "yaxes": [
         {
-          "format": "none",
-          "label": "",
+          "format": "short",
+          "label": null,
           "logBase": 1,
+          "max": null,
+          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": "",
+          "label": null,
           "logBase": 1,
+          "max": null,
+          "min": null,
           "show": false
         }
       ],
@@ -408,9 +389,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 19
       },
-      "id": 12,
+      "id": 16,
       "panels": [],
       "title": "Request Duration",
       "type": "row"
@@ -426,9 +407,9 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 20
       },
-      "id": 2,
+      "id": 10,
       "legend": {
         "avg": false,
         "current": false,
@@ -441,13 +422,11 @@
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null as zero",
+      "nullPointMode": "null",
       "percentage": false,
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "repeat": null,
-      "repeatDirection": "h",
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
@@ -457,7 +436,7 @@
           "expr": "metadata_service_endpoints_duration{exported_endpoint=~\"$endpoint\", quantile=\"0.995\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "refId": "B"
+          "refId": "A"
         }
       ],
       "thresholds": [],
@@ -506,9 +485,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 25
+        "y": 29
       },
-      "id": 6,
+      "id": 14,
       "panels": [],
       "title": "Response Codes",
       "type": "row"
@@ -521,22 +500,17 @@
       "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
-        "h": 10,
+        "h": 9,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 30
       },
-      "hideTimeOverride": false,
-      "id": 8,
+      "id": 12,
       "legend": {
-        "alignAsTable": false,
         "avg": false,
         "current": false,
-        "hideEmpty": false,
-        "hideZero": false,
         "max": false,
         "min": false,
-        "rightSide": false,
         "show": true,
         "total": false,
         "values": false
@@ -603,7 +577,6 @@
       }
     }
   ],
-  "refresh": "10s",
   "schemaVersion": 16,
   "style": "dark",
   "tags": [],
@@ -612,9 +585,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "/{remoteEnvironment}/v1/metadata/services",
-          "value": "/{remoteEnvironment}/v1/metadata/services"
+          "tags": [],
+          "text": "",
+          "value": []
         },
         "datasource": "Prometheus",
         "hide": 0,
@@ -636,8 +609,8 @@
     ]
   },
   "time": {
-    "from": "2018-08-13T12:44:08.416Z",
-    "to": "2018-08-13T12:50:37.716Z"
+    "from": "now-6h",
+    "to": "now"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -666,6 +639,6 @@
   },
   "timezone": "",
   "title": "Metadata-Service",
-  "uid": "fax-V95mz",
+  "uid": "24yXN4tmk",
   "version": 1
 }

@@ -10,7 +10,7 @@ import (
 
 const (
 	calculatedPercentile = 99.5
-	percentileAccurace   = 0.05
+	percentileAccuracy   = 0.05
 )
 
 func SetupMonitoringMiddleware() ([]mux.MiddlewareFunc, apperrors.AppError) {
@@ -46,7 +46,7 @@ func newDurationMiddleware(name string) (middleware.Middleware, apperrors.AppErr
 	opts := prometheus.SummaryOpts{
 		Name:       name,
 		Help:       "help",
-		Objectives: map[float64]float64{calculatedPercentile / 100: percentileAccurace},
+		Objectives: map[float64]float64{calculatedPercentile / 100: percentileAccuracy},
 	}
 
 	metricsCollector, err := collector.NewSummaryCollector(opts, []string{"endpoint", "method"})

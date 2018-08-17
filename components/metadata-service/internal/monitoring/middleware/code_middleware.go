@@ -8,6 +8,10 @@ import (
 	"strconv"
 )
 
+type Middleware interface {
+	Handle(next http.Handler) http.Handler
+}
+
 type codeMiddleware struct {
 	metricsCollector collector.Collector
 }

@@ -15,7 +15,3 @@ func (rww *responseWriterWrapper) WriteHeader(code int) {
 	rww.statusCode = code
 	rww.ResponseWriter.WriteHeader(code)
 }
-
-type Middleware interface {
-	Handle(next http.Handler) http.Handler
-}
