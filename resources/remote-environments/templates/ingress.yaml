@@ -33,7 +33,7 @@ spec:
         backend:
           serviceName: metadata-service-external-api
           servicePort: 8081
-      - path: /metadataapi.yaml
+      - path: /{{ .Release.Name }}/v1/metadataapi.yaml
               backend:
                 serviceName: metadata-service-external-api
                 servicePort: 8081

@@ -13,15 +13,17 @@ type MetadataHandler interface {
 	UpdateService(w http.ResponseWriter, r *http.Request)
 	DeleteService(w http.ResponseWriter, r *http.Request)
 }
+
 const apiSpecPath = "/go/src/github.com/kyma-project/kyma/components/metadata-service/metadataapi.yaml"
 
 func NewHandler(handler MetadataHandler) http.Handler {
 	router := mux.NewRouter()
-	
-	router.Path("/").Handler(http.RedirectHandler("/metadataapi.yaml",http.StatusMovedPermanently)).Methods(http.MethodGet)
-	router.Path("/metadataapi.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
 
 	router.Path("/v1/health").Handler(NewHealthCheckHandler()).Methods(http.MethodGet)
+
+	router.Path("/{remoteEnvironment}/v1/").Handler(http.RedirectHandler("/{remoteEnvironment}/v1/metadataapi.yaml", http.StatusMovedPermanently)).Methods(http.MethodGet)
+
+	router.Path("/{remoteEnvironment}/v1/metadataapi.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
 
 	metadataRouter := router.PathPrefix("/{remoteEnvironment}/v1/metadata").Subrouter()
 	metadataRouter.HandleFunc("/services", handler.CreateService).Methods(http.MethodPost)
@@ -35,4 +37,3 @@ func NewHandler(handler MetadataHandler) http.Handler {
 
 	return router
 }
-
