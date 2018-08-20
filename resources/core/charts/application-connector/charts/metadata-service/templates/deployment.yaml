@@ -17,6 +17,8 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
+        traffic.sidecar.istio.io/includeInboundPorts: "{{ .Values.deployment.args.proxyPort }}"
+        traffic.sidecar.istio.io/includeInboundPorts: "{{ .Values.deployment.args.externalAPIPort }}"
       labels:
         app: {{ .Chart.Name }}
         release: {{ .Chart.Name }}
@@ -49,3 +51,5 @@ spec:
             name: proxy-port
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: ext-api-port
+          - containerPort: 9090
+            name: metrics-port

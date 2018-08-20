@@ -320,7 +320,7 @@ func (ts *TestSuite) bindingUsage(bindingName, sbuName, envPrefix string) {
 				Name: bindingName,
 			},
 			UsedBy: bucTypes.LocalReferenceByKindAndName{
-				Kind: "Deployment",
+				Kind: "deployment",
 				Name: ts.testerDeploymentName,
 			},
 		},

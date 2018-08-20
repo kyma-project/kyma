@@ -126,6 +126,20 @@ func (sc *InstallationDataCreator) WithEtcdBackupABSContainerName(path string) *
 	return sc
 }
 
+// WithVictorOpsCredentials sets value for VictorOpsApiKey and VictorOpsRoutingKey properties
+func (sc *InstallationDataCreator) WithVictorOpsCredentials(routingkey, apikey string) *InstallationDataCreator {
+	sc.installationData.VictorOpsApiKey = apikey
+	sc.installationData.VictorOpsRoutingKey = routingkey
+	return sc
+}
+
+// WithSlackCredentials sets value for SlackChannel and SlackApiUrl properties
+func (sc *InstallationDataCreator) WithSlackCredentials(channel, apiurl string) *InstallationDataCreator {
+	sc.installationData.SlackChannel = channel
+	sc.installationData.SlackApiUrl = apiurl
+	return sc
+}
+
 ////////////////////////////////////////
 // GetData returns InstallationData created by InstallationDataCreator
 func (sc *InstallationDataCreator) GetData() config.InstallationData {

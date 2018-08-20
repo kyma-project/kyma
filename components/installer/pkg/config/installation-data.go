@@ -40,6 +40,10 @@ type InstallationData struct {
 	EtcdBackupABSKey           string
 	Components                 map[string]struct{}
 	IsLocalInstallation        bool
+	VictorOpsApiKey            string
+	VictorOpsRoutingKey        string
+	SlackChannel               string
+	SlackApiUrl                string
 }
 
 // NewInstallationData .
@@ -77,6 +81,10 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		EtcdBackupABSKey:           installationConfig.EtcdBackupABSKey,
 		Components:                 convertToMap(installationConfig.ComponentsList),
 		IsLocalInstallation:        installationConfig.IsLocalInstallation,
+		VictorOpsApiKey:            installationConfig.VictorOpsApiKey,
+		VictorOpsRoutingKey:        installationConfig.VictorOpsRoutingKey,
+		SlackChannel:               installationConfig.SlackChannel,
+		SlackApiUrl:                installationConfig.SlackApiUrl,
 	}
 	return res, nil
 }

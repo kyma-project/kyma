@@ -20,4 +20,3 @@
 .idea/
 *.tmproj
 charts/kubeless/templates/tests/
-templates/tests/test-ui-acceptance.yaml

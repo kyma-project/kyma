@@ -16,8 +16,12 @@ type MetadataHandler interface {
 
 const apiSpecPath = "/go/src/github.com/kyma-project/kyma/components/metadata-service/metadataapi.yaml"
 
-func NewHandler(handler MetadataHandler) http.Handler {
+func NewHandler(handler MetadataHandler, middlewares []mux.MiddlewareFunc) http.Handler {
 	router := mux.NewRouter()
+
+	for _, middleware := range middlewares {
+		router.Use(middleware)
+	}
 
 	router.Path("/v1/health").Handler(NewHealthCheckHandler()).Methods(http.MethodGet)
 

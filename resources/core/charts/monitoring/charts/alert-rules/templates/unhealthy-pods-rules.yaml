@@ -2,12 +2,12 @@
 groups:
 - name: pod-not-running-rule
   rules:
-  - alert: PodNotRunning
-    expr: (kube_pod_container_status_running { pod="sample-metrics",namespace="default" } == 0)
+  - alert: kubeless-controller-is-not-running
+    expr: absent(kube_pod_container_status_running{namespace="kyma-system",pod=~"^core-kubeless-controller-manager(.*)"})
     for: 15s
     labels:
       severity: critical
     annotations:
-      description: "{{`{{$labels.namespace}}`}}/{{`{{$labels.pod}}`}} is not running"
-      summary: "{{`{{$labels.pod}}`}} is not running"
+      description: "kubeless-controller pod is not running"
+      summary: "kubeless-controller pod is not running"
 {{ end }}

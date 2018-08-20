@@ -29,15 +29,22 @@ global:
       name: kyma-gateway      
   etcdBackupABS:
     secretName: etcd-backup-abs-credentials
-
-
+  #Alerting tools credentials
+  alertTools:
+    credentials: {}
+      # victorOps:
+      #   routingkey: "sample_routing_key"
+      #   apikey: "sample_api_key"
+      # slack:
+      #   channel: "#samplechannel"
+      #   apiurl: "sample_api_url"
 test:
   auth:
     username: admin@kyma.cx
     password: nimda123
   acceptance:
     core:
-      imageTag: "0.3.131"
+      imageTag: "0.3.175"
       # environments used in remote-environment acceptance test
       remoteEnvironment: 
         disabled: "false"
@@ -50,5 +57,3 @@ test:
       limits:
         memory: "1Gi"
         cpu: "300m"
-
-

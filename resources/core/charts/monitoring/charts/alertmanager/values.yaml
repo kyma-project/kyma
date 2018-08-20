@@ -1,46 +1,5 @@
 ## Alertmanager configuration directives
 ## Ref: https://prometheus.io/docs/alerting/configuration/
-##
-config:
-  global:
-    resolve_timeout: 5m
-  route:
-    receiver: 'null'
-    group_wait: 30s
-    group_interval: 5m
-    repeat_interval: 1h # change to 10m to test
-    group_by: ['cluster','pod','job','alertname']
-    # All alerts that do not match the following child routes
-    # will remain at the root node and be dispatched to 'default-receiver'
-    routes:
-    - receiver: 'null'
-      match:
-        alertname: DeadMansSwitch
-    # - receiver: 'team-YOUR-TEAM-victorOps'
-    #   continue: true # If continue: is set to false it will stop after the first matching.
-    #   match:
-    #     alertname: PodNotRunning
-    # - receiver: 'team-YOUR-TEAM-slack'
-    #   continue: true # If continue: is set to false it will stop after the first matching.
-    #   match:
-    #     alertname: PodNotRunning
-  receivers:
-  - name: 'null'
-  # - name: 'team-YOUR-TEAM-victorOps'
-  #   victorops_configs:
-  #     - api_key: API_VICTOROPS_TOKEN
-  #       send_resolved: true
-  #       api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
-  #       routing_key: YOUR-TEAM-ROUTING-KEY
-  #       state_message: 'Alert: {{ .CommonLabels.alertname }}. Summary:{{ .CommonAnnotations.summary }}. RawData: {{ .CommonLabels }}'
-  # - name: 'team-YOUR-TEAM-slack'
-  #   slack_configs:
-  #   - channel: '#YOU_CHANNEL'
-  #     send_resolved: true
-  #     api_url: https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXX #Your slack Webhook URL
-  #     icon_emoji: ":ghost:"
-  #     title: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] Monitoring Event Notification'
-  #     text: "<!channel> \nsummary: {{ .CommonAnnotations.summary }}\ndescription: {{ .CommonAnnotations.description }}"
 
 ## Alertmanager template files to include
 #
