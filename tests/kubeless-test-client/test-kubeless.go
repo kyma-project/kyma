@@ -250,7 +250,7 @@ func ensureCorrectLog(namespace, funName string, pattern *regexp.Regexp, match s
 		log.Printf("Checking logs for pods: %v", pod)
 		select {
 		case <-timeout:
-			cmd := exec.Command("kubectl", "-n", namespace, "logs", pod)
+			cmd := exec.Command("kubectl", "-n", namespace, "logs", pod, "-c", funName)
 			stdoutStderr, _ := cmd.CombinedOutput()
 			log.Fatal("Timed out getting the correct log for ", funName, ":\n", string(stdoutStderr))
 		case <-tick:
