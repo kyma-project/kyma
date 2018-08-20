@@ -11,4 +11,9 @@ type Config struct {
 	// ConfigMapNameForTracing is the name of the ConfigMap where
 	// the path to the last successful ABS backup is saved.
 	ConfigMapNameForTracing string
+
+	// ClientTLSSecret is the name of the secret where
+	// client tls certificates are stored required for communication
+	// with etcd cluster to make a backup.
+	ClientTLSSecret string `envconfig:"optional"`
 }
