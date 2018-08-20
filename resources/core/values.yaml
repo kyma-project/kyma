@@ -29,15 +29,7 @@ global:
       name: kyma-gateway      
   etcdBackupABS:
     secretName: etcd-backup-abs-credentials
-  #Alerting tools credentials
-  alertTools:
-    credentials: {}
-      # victorOps:
-      #   routingkey: "sample_routing_key"
-      #   apikey: "sample_api_key"
-      # slack:
-      #   channel: "#samplechannel"
-      #   apiurl: "sample_api_url"
+
 test:
   auth:
     username: admin@kyma.cx
