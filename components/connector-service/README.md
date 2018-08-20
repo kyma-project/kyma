@@ -37,8 +37,8 @@ Connector Service also uses following environmental variables for CSR - related 
 - **PROVINCE**
 
 
-## Building image
-To build the Connector Service Docker image use the script `build.sh` located in the `scripts` directory.
+## Build the image
+To build the Connector Service Docker image, use the `build.sh` script located in the `scripts` directory.
 
 ```
 ./scripts/build.sh -t={IMAGE}:{TAG}
