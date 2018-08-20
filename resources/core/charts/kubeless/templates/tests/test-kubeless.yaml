@@ -37,9 +37,7 @@ rules:
 - apiGroups: ["remoteenvironment.kyma.cx"]
   resources: ["eventactivations"]
   verbs: ["create", "delete", "get", "list"]
-- apiGroups: ["networking.istio.io"]
-  resources: ["virtualservices"]
-  verbs: ["get"]
+
 
 ---
 apiVersion: v1
@@ -69,7 +67,7 @@ kind: Pod
 metadata:
   name: test-{{ template "fullname" . }}
   labels:
-    helm-chart-test: "true"
+    helm-chart-test: "false"
   annotations:
     helm.sh/hook: test-success
 spec:
