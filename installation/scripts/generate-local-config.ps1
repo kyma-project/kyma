@@ -7,7 +7,7 @@ Copy-Item -Path $CONFIG_TPL_PATH -Destination $CONFIG_OUTPUT_PATH
 
 ##########
 
-Write-Output "Generating secret for cluster certificate ..."
+Write-Output "Generating configmap for cluster certificate ..."
 
 $TLS_FILE="${CURRENT_DIR}\..\resources\local-tls-certs.yaml"
 $TLS_CRT = Get-Content -Path "${TLS_FILE}" | Select-String -Pattern 'tls.crt: .*'

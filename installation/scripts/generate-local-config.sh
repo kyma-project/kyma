@@ -10,7 +10,7 @@ cp $CONFIG_TPL_PATH $CONFIG_OUTPUT_PATH
 
 ##########
 
-echo -e "\nGenerating secret for Cluster certificate"
+echo -e "\nGenerating configmap for Cluster certificate"
 
 TLS_FILE=${ROOT_PATH}/../resources/local-tls-certs.yaml
 TLS_CERT=$(cat ${TLS_FILE} | grep 'tls.crt' | sed 's/^.*: //' | tr -d '\n')
