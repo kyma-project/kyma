@@ -62,9 +62,12 @@ Every project runs differently. Follow instructions in the main `README.md` docu
 
 5. Create a branch and start to develop.
 
-6. Test your changes.
+Do not forget about creating unit and acceptance tests if needed. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. For the details concerning the acceptance tests, go to the corresponding directory inside the `tests` directory.
+Find the information on how to run changes on the cluster without a Docker image in the [Develop a service locally without using Docker](docs/kyma/docs/035-gs-local-develop-no-docker.md) document.
 
-When you finish, run unit and acceptance tests to verify your changes. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. To run the acceptance tests, go to the corresponding directory `tests` directory for details.
+>**NOTE:** For more details about testing, go to the [Testing Kyma](docs/kyma/docs/026-details-testing.md) document.
+
+6. Test your changes.
 
 ### Project structure
 
