@@ -11,10 +11,7 @@ Find the Application Connector API documentation in the included Swagger files.
 
 For convenient viewing, open these files using [this](https://editor.swagger.io/) Swagger editor.
 
-You can also acquire the API specification for a given version directly from the service:
-
-- Connector Service: 
-    ```
-    curl https://connector-service.{CLUSTER_NAME}.kyma.cx/v1/api.yaml
-    ```
-    
+You can acquire the API specification for a given version directly from the Connector Service:
+```
+curl https://connector-service.{CLUSTER_NAME}.kyma.cx/v1/api.yaml
+```
