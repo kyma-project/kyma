@@ -1,6 +1,6 @@
 ---
 title: Examples
-type: Examples
+type: Getting Started
 ---
 
 This is a tutorial on how to get a new Application Connector running on Minikube.

@@ -1,6 +1,6 @@
 ---
 title: EnvironmentMapping tutorial
-type: Examples
+type: Getting Started
 ---
 
 This tutorial shows how to perform operations on remote environments in the command line. For the custom resource definition, see the `environment-mapping.crd.yaml` file under the `/resources/cluster-essentials/templates/` directory.
