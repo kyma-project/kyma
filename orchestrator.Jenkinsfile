@@ -271,34 +271,34 @@ def versionsYaml(versions) {
 """global:
   kyma:
     versions:
-      - docs: ${versions['docs']}
-      - api-controller: ${versions['components/api-controller']}
-      - binding-usage-controller: ${versions['components/binding-usage-controller']}
-      - configurations-generator: ${versions['components/configurations-generator']}
-      - environments: ${versions['components/environments']}
-      - istio-webhook: ${versions['components/istio-webhook']}
-      - helm-broker: ${versions['components/helm-broker']}
-      - remote-environment-broker: ${versions['components/remote-environment-broker']}
-      - metadata-service: ${versions['components/metadata-service']}
-      - gateway: ${versions['components/gateway']}
-      - installer: ${versions['components/installer']}
-      - connector-service: ${versions['components/connector-service']}
-      - ui-api-layer: ${versions['components/ui-api-layer']}
-      - event-bus: ${versions['components/event-bus']}
-      - alpine-net: ${versions['tools/alpine-net']}
-      - watch-pods: ${versions['tools/watch-pods']}
-      - stability-checker: ${versions['tools/stability-checker']}
-      - etcd-backup: ${versions['tools/etcd-backup']}
-      - test-logging-monitoring: ${versions['tests/test-logging-monitoring']}
-      - acceptance-tests: ${versions['tests/acceptance']}
-      - ui-api-layer-acceptance-tests: ${versions['tests/ui-api-layer-acceptance-tests']}
-      - gateway-tests: ${versions['tests/gateway-tests']}
-      - test-environments: ${versions['tests/test-environments']}
-      - kubeless-test-client: ${versions['tests/kubeless-test-client']}
-      - api-controller-acceptance-tests: ${versions['tests/api-controller-acceptance-tests']}
-      - connector-service-tests: ${versions['tests/connector-service-tests']}
-      - metadata-service-tests: ${versions['tests/metadata-service-tests']}
-      - event-bus-tests: ${versions['tests/event-bus']}
+      docs: ${versions['docs']}
+      api-controller: ${versions['components/api-controller']}
+      binding-usage-controller: ${versions['components/binding-usage-controller']}
+      configurations-generator: ${versions['components/configurations-generator']}
+      environments: ${versions['components/environments']}
+      istio-webhook: ${versions['components/istio-webhook']}
+      helm-broker: ${versions['components/helm-broker']}
+      remote-environment-broker: ${versions['components/remote-environment-broker']}
+      metadata-service: ${versions['components/metadata-service']}
+      gateway: ${versions['components/gateway']}
+      installer: ${versions['components/installer']}
+      connector-service: ${versions['components/connector-service']}
+      ui-api-layer: ${versions['components/ui-api-layer']}
+      event-bus: ${versions['components/event-bus']}
+      alpine-net: ${versions['tools/alpine-net']}
+      watch-pods: ${versions['tools/watch-pods']}
+      stability-checker: ${versions['tools/stability-checker']}
+      etcd-backup: ${versions['tools/etcd-backup']}
+      test-logging-monitoring: ${versions['tests/test-logging-monitoring']}
+      acceptance-tests: ${versions['tests/acceptance']}
+      ui-api-layer-acceptance-tests: ${versions['tests/ui-api-layer-acceptance-tests']}
+      gateway-tests: ${versions['tests/gateway-tests']}
+      test-environments: ${versions['tests/test-environments']}
+      kubeless-test-client: ${versions['tests/kubeless-test-client']}
+      api-controller-acceptance-tests: ${versions['tests/api-controller-acceptance-tests']}
+      connector-service-tests: ${versions['tests/connector-service-tests']}
+      metadata-service-tests: ${versions['tests/metadata-service-tests']}
+      event-bus-tests: ${versions['tests/event-bus']}
 
 """
 
