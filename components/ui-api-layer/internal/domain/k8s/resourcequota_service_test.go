@@ -23,11 +23,11 @@ func TestResourceQuotaResolver_ListSuccess(t *testing.T) {
 	rqQa := fixResourceQuota("rq", "qa")
 	informer := fixResourceQuotaInformer(rq1, rq2, rqQa)
 
-	svc := k8s.NewResourceQuotaService(informer)
+	svc := k8s.NewResourceQuotaService(informer, nil, nil, nil)
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 	// WHEN
-	result, err := svc.List("prod")
+	result, err := svc.ListResourceQuotas("prod")
 
 	// THEN
 	require.NoError(t, err)
