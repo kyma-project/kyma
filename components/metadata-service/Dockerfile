@@ -15,6 +15,6 @@ LABEL source=git@github.com:kyma-project/kyma.git
 RUN apk update && apk add curl ngrep
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/metadata-service/metadataservice .
-COPY ./metadataapi.yaml .
+COPY ./docs/api/api.yaml .
 
 CMD ["/metadataservice"]
