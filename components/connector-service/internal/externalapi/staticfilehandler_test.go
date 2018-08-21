@@ -1,12 +1,12 @@
 package externalapi
 
 import (
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"io/ioutil"
+	"net/http"
 	"net/http/httptest"
 	"testing"
-	"net/http"
-	"github.com/stretchr/testify/assert"
-	"io/ioutil"
 )
 
 func TestApiSpecHandler_HandleRequest(t *testing.T) {
@@ -15,7 +15,7 @@ func TestApiSpecHandler_HandleRequest(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/api.yaml", nil)
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
-		
+
 		handler := NewStaticFileHandler("testdata/apispec.yaml")
 
 		// when

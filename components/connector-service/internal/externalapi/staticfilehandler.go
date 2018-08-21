@@ -10,4 +10,3 @@ func NewStaticFileHandler(path string) http.Handler {
 		http.ServeFile(w, r, path)
 	})
 }
-
