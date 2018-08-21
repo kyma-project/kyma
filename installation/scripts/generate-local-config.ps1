@@ -12,13 +12,10 @@ Write-Output "Generating secret for cluster certificate ..."
 $TLS_FILE="${CURRENT_DIR}\..\resources\local-tls-certs.yaml"
 $TLS_CRT = Get-Content -Path "${TLS_FILE}" | Select-String -Pattern 'tls.crt: .*'
 $TLS_CRT = $TLS_CRT.ToString().Replace("tls.crt:", "").Trim()
-$TLS_CRT = [System.Convert]::ToBase64String(
-    [System.Text.Encoding]::UTF8.GetBytes($TLS_CRT))
 
 $TLS_KEY = Get-Content -Path "${TLS_FILE}" | Select-String -Pattern 'tls.key: .*'
 $TLS_KEY = $TLS_KEY.ToString().Replace("tls.key:", "").Trim()
-$TLS_KEY = [System.Convert]::ToBase64String(
-    [System.Text.Encoding]::UTF8.GetBytes($TLS_KEY))
+
 
 $cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__TLS_CERT__`" -value `"${TLS_CRT}`""
 Invoke-Expression -Command $cmd

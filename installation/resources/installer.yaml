@@ -76,13 +76,11 @@ spec:
               configMapKeyRef:
                 name: cluster-certificate
                 key: tls_cert
-                optional: true
           - name: TLS_KEY
             valueFrom:
               configMapKeyRef:
                 name: cluster-certificate
                 key: tls_key
-                optional: true
           - name: REMOTE_ENV_CA
             valueFrom:
               secretKeyRef:
