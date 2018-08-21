@@ -23,7 +23,7 @@ import (
 func TestApiSpecHandler_HandleRequest(t *testing.T) {
 	t.Run("should serve specified file", func(t *testing.T) {
 		// given
-		req, err := http.NewRequest(http.MethodGet, "/metadataapi.yaml", nil)
+		req, err := http.NewRequest(http.MethodGet, "/api.yaml", nil)
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 		
@@ -54,6 +54,6 @@ func TestApiSpecHandler_HandleRequest(t *testing.T) {
 		handler.ServeHTTP(rr, req)
 
 		// then
-		assert.Equal(t, http.NotFound, rr.Code)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
 }

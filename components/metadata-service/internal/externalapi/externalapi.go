@@ -14,7 +14,7 @@ type MetadataHandler interface {
 	DeleteService(w http.ResponseWriter, r *http.Request)
 }
 
-const apiSpecPath = "/go/src/github.com/kyma-project/kyma/components/metadata-service/metadataapi.yaml"
+const apiSpecPath = "./docs/api/api.yaml"
 
 func NewHandler(handler MetadataHandler, middlewares []mux.MiddlewareFunc) http.Handler {
 	router := mux.NewRouter()

@@ -1,0 +1,285 @@
+openapi: '3.0.0'
+info:
+  version: '1.0.0'
+  title: 'Kyma Metadata API'
+tags:
+- name: 'Metadata Service'
+  description: 'API for registering services in Kyma.'
+paths:
+  /v1/health:
+    get:
+      summary: 'Returns health of a service'
+      operationId: 'getHealth'
+      tags:
+        - 'health'
+      responses:
+        '200':
+          description: 'The service is in a good health'
+  /v1/metadata/services:
+    post:
+      tags:
+      - 'services'
+      summary: 'Registers a new service'
+      operationId: 'registerService'
+      requestBody:
+        description: 'Service object to be registered'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceDetails'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceId'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataErrorResponse'
+        '500':
+          description: 'Internal server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataErrorResponse'
+    get:
+      tags:
+      - 'services'
+      summary: 'Gets all registered services'
+      operationId: 'getServices'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                type: 'array'
+                items:
+                  $ref: '#/components/schemas/Service'
+        '500':
+          description: 'Internal server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataErrorResponse'
+  /v1/metadata/services/{serviceId}:
+    get:
+      tags:
+      - 'services'
+      summary: 'Gets a service by service ID'
+      operationId: 'getServiceByServiceId'
+      parameters:
+      - in: 'path'
+        name: 'serviceId'
+        description: 'ID of a service'
+        required: true
+        schema:
+          type: 'string'
+          format: 'uuid'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceDetails'
+        '404':
+          description: 'Service not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataErrorResponse'
+        '500':
+          description: 'Internal server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataErrorResponse'
+    put:
+      tags:
+      - 'services'
+      summary: 'Updates a service by service ID'
+      operationId: 'updateService'
+      requestBody:
+        description: 'Service object to be stored'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceDetails'
+      parameters:
+      - in: 'path'
+        name: 'serviceId'
+        description: 'ID of a service'
+        required: true
+        schema:
+          type: 'string'
+          format: 'uuid'
+      responses:
+        '200':
+          description: 'Successful operation'
+        '404':
+          description: 'Service not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataErrorResponse'
+        '500':
+          description: 'Internal server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataErrorResponse'
+    delete:
+      tags:
+      - 'services'
+      summary: 'Deletes a service by service ID'
+      operationId: 'deleteServiceByServiceId'
+      parameters:
+      - in: 'path'
+        name: 'serviceId'
+        description: 'ID of a service'
+        required: true
+        schema:
+          type: 'string'
+          format: 'uuid'
+      responses:
+        '204':
+          description: 'Successful operation'
+        '404':
+          description: 'Service not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataErrorResponse'
+        '500':
+          description: 'Internal server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataErrorResponse'
+components:
+  schemas:
+    ServiceId:
+      type: 'object'
+      properties:
+        id:
+          type: 'string'
+          format: 'uuid'
+    ServiceDetails:
+      type: 'object'
+      properties:
+        provider:
+          type: 'string'
+        name:
+          type: 'string'
+        description:
+          type: 'string'
+        api:
+          $ref: '#/components/schemas/Api'
+        events:
+          $ref: '#/components/schemas/Events'
+        documentation:
+          $ref: '#/components/schemas/Documentation'
+      required:
+        - provider
+        - name
+        - description
+    Service:
+      type: 'object'
+      properties:
+        id:
+          type: 'string'
+          format: 'uuid'
+        provider:
+          type: 'string'
+        name:
+          type: 'string'
+        description:
+          type: 'string'
+    Api:
+      type: 'object'
+      properties:
+        targetUrl:
+          type: 'string'
+          format: 'uri'
+        credentials:
+          $ref: '#/components/schemas/ApiCredentials'
+        spec:
+          type: 'object'
+          description: 'OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json'
+      required:
+        - targetUrl
+    Events:
+      type: 'object'
+      properties:
+        spec:
+          description: 'AsynApi file v1: https://github.com/asyncapi/asyncapi/blob/develop/schema/asyncapi.json'
+          type: 'object'
+    Documentation:
+      type: 'object'
+      properties:
+        displayName: 
+          type: 'string'
+        description: 
+          type: 'string'
+        type:
+          type: 'string'
+        tags:
+          type: 'array'
+          items: 
+            type: 'string'
+        docs:
+          type: 'array'
+          items:
+            $ref: '#/components/schemas/Document'
+      required:
+        - displayName
+        - description
+        - type
+    Document:
+      type: 'object'
+      properties:
+        title:
+          type: 'string'
+        type:
+          type: 'string'
+        source:
+          type: 'string'
+      required:
+        - title
+        - type
+        - source
+    ApiCredentials:
+      type: 'object'
+      properties:
+        oauth:
+          $ref: '#/components/schemas/OAuth'
+      required:
+        - oauth
+    OAuth:
+      type: 'object'
+      properties:
+        url:
+          type: 'string'
+          format: 'uri'
+        clientId:
+          type: 'string'
+        clientSecret:
+          type: 'string'
+      required:
+        - url
+        - clientId
+        - clientSecret
+    MetadataErrorResponse:
+      type: 'object'
+      properties:
+        code:
+          type: 'integer'
+        error:
+          type: 'string'
