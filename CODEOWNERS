@@ -13,8 +13,11 @@
 # The `cluster-prerequisites` subdirectory
 /resources/cluster-prerequisites @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc
 
-# The `cluster-essentials` subchart
+# The `cluster-essentials` chart
 /resources/cluster-essentials/ @damianpacierpnikatsap @damjatsap @PK85
+
+# The `pod-preset` subchart
+/resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz
