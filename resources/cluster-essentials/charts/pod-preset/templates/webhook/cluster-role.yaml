@@ -9,7 +9,7 @@ metadata:
     heritage: {{ .Release.Service }}
 rules:
 - apiGroups:
-  - settings.servicecatalog.k8s.io
+  - settings.svcat.k8s.io
   resources:
   - podpresets
   verbs:

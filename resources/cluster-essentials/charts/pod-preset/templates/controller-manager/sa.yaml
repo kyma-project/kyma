@@ -2,10 +2,10 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "pod-preset.fullname" . }}-manager
+  name: {{ template "pod-preset.fullname" . }}-controller
   namespace: "{{ .Release.Namespace }}"
   labels:
-    app: {{ template "pod-preset.name" . }}-manager
+    app: {{ template "pod-preset.name" . }}-controller
     chart: {{ template "pod-preset.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}

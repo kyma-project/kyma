@@ -16,7 +16,7 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: /mutating-pods
   failurePolicy: Ignore
-  name: podpresets.settings.servicecatalog.k8s.io
+  name: podpresets.settings.svcat.k8s.io
   rules:
   - apiGroups:
     - ""

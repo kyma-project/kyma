@@ -2,7 +2,7 @@ webhook:
   replicaCount: 1
   image:
     repository: mszostok/service-catalog-admission-webhook
-    tag: 0.0.1
+    tag: 0.0.2
     pullPolicy: IfNotPresent
   verbosity: 6
   service:
@@ -13,7 +13,7 @@ controller:
   enabled: false
   image:
     repository: mszostok/service-catalog-podpreset-controller
-    tag: 0.0.1
+    tag: 0.0.2
     pullPolicy: IfNotPresent
 
 
