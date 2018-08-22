@@ -29,7 +29,7 @@ Configure the Kubernetes API Server following this template:
 
 ```
 "apiServerConfig": {
-    "--enable-admission-plugins": "Initializers,NamespaceLifecycle,LimitRanger,ServiceAccount,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,DefaultStorageClass,ResourceQuota,PodPreset",
+    "--enable-admission-plugins": "Initializers,NamespaceLifecycle,LimitRanger,ServiceAccount,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,DefaultStorageClass,ResourceQuota",
     "--runtime-config": "batch/v2alpha1=true,settings.k8s.io/v1alpha1=true,admissionregistration.k8s.io/v1alpha1=true",
     "--cors-allowed-origins": ".*",
     "--feature-gates": "ReadOnlyAPIDataVolumes=false",
