@@ -38,6 +38,7 @@ rules:
   resources: ["eventactivations"]
   verbs: ["create", "delete", "get", "list"]
 
+
 ---
 apiVersion: v1
 kind: ServiceAccount
