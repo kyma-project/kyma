@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: kyma-default
-  namespace: kyma-integration
+  namespace: {{ .Values.global.namespace }}
 spec:
   hard:
     # The sum of all pod memory requests must not exceed this value.
