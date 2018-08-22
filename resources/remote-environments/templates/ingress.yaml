@@ -29,11 +29,11 @@ spec:
         backend:
           serviceName: {{ .Release.Name }}-gateway-external-api
           servicePort: 8081
-      - path: /{{ .Release.Name }}/v1/metadata
+      - path: /{{ .Release.Name }}/v1/metadataapi.yaml
         backend:
           serviceName: metadata-service-external-api
           servicePort: 8081
-      - path: /v1/metadataapi.yaml
+      - path: /{{ .Release.Name }}/v1/metadata
         backend:
           serviceName: metadata-service-external-api
           servicePort: 8081

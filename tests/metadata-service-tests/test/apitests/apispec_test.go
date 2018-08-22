@@ -19,18 +19,25 @@ import (
 	"gopkg.in/yaml.v2"
 	"github.com/go-openapi/spec"
 	"io/ioutil"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestApiSpec(t *testing.T) {
-
 	config, err := testkit.ReadConfig()
 	require.NoError(t, err)
+
+	k8sResourcesClient, err := testkit.NewK8sInClusterResourcesClient(config.Namespace)
+	require.NoError(t, err)
+
+	dummyRE, err := k8sResourcesClient.CreateDummyRemoteEnvironment("dummy-re", v1.GetOptions{})
+	require.NoError(t, err)
+
 
 	t.Run("Application Connector Metadata", func(t *testing.T) {
 
 		t.Run("should return api spec", func(t *testing.T) {
 			// given
-			url := config.MetadataServiceUrl + "/metadataapi.yaml"
+			url := config.MetadataServiceUrl + dummyRE.Name  + "/" + "/metadataapi.yaml"
 
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)

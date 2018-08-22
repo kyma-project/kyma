@@ -25,9 +25,9 @@ func NewHandler(handler MetadataHandler, middlewares []mux.MiddlewareFunc) http.
 
 	router.Path("/v1/health").Handler(NewHealthCheckHandler()).Methods(http.MethodGet)
 
-	router.Path("/v1").Handler(http.RedirectHandler("/v1/metadataapi.yaml", http.StatusMovedPermanently)).Methods(http.MethodGet)
+	router.Path("/{remoteEnvironment}/v1").Handler(http.RedirectHandler("/v1/metadataapi.yaml", http.StatusMovedPermanently)).Methods(http.MethodGet)
 
-	router.Path("/v1/metadataapi.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
+	router.Path("/{remoteEnvironment}/v1/metadataapi.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
 
 	metadataRouter := router.PathPrefix("/{remoteEnvironment}/v1/metadata").Subrouter()
 	metadataRouter.HandleFunc("/services", handler.CreateService).Methods(http.MethodPost)
