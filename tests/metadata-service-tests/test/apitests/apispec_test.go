@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/kyma/tests/metadata-service-tests/test/testkit"
 	"net/http"
 	"gopkg.in/yaml.v2"
-	"github.com/go-openapi/spec"
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -41,7 +40,7 @@ func TestApiSpec(t *testing.T) {
 			rawApiSpec, err := ioutil.ReadAll(response.Body)
 			require.NoError(t, err)
 
-			var apiSpec spec.Swagger
+			var apiSpec struct{}
 			err = yaml.Unmarshal(rawApiSpec, &apiSpec)
 			require.NoError(t, err)
 		})
