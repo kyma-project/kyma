@@ -9,9 +9,9 @@ import (
 
 func TestConvertTopMap(t *testing.T) {
 
-	Convey("The function consumes a string of comma-separated values and converts it to a string-struct map", t, func() {
+	Convey("The function consumes a list of KymaComponent structs and converts it to a string-struct map", t, func() {
 
-		Convey("Should the string be empty, the map must not contain any keys", func() {
+		Convey("Should the list be empty, the map must not contain any keys", func() {
 
 			fakeComponentList := []v1alpha1.KymaComponent{}
 			testMap := convertToMap(fakeComponentList)
@@ -19,7 +19,7 @@ func TestConvertTopMap(t *testing.T) {
 			So(len(testMap), ShouldEqual, 0)
 		})
 
-		Convey("Should the string contain just one element, the map must be of length 1 as well", func() {
+		Convey("Should the list contain just one element, the map must be of length 1 as well", func() {
 
 			fakeComponentList := []v1alpha1.KymaComponent{
 				v1alpha1.KymaComponent{Name: "core"},
