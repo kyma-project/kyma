@@ -1,10 +1,9 @@
 ---
-title: EnvironmentMapping tutorial
+title: Activate a RemoteEnvironment using EnvironmentMapping
 type: Getting Started
 ---
 
-This tutorial shows how to perform operations on remote environments in the command line. For the custom resource definition, see the `environment-mapping.crd.yaml` file under the `/resources/cluster-essentials/templates/` directory.
-
+This Getting Started guide shows you how to perform operations on remote environments in the command line. For the Custom Resource Definition, see the `environment-mapping.crd.yaml` file under the `/resources/cluster-essentials/templates/` directory.
 An instance of the EnvironmentMapping enables the RemoteEnvironment with the same name in a given Namespace. In this example, the EnvironmentMapping enables the `ec-prod` remote environment in the `production` Namespace:
 
 ```yaml
@@ -17,11 +16,11 @@ metadata:
 
 ## Prerequisites
 
-To follow this tutorial, run Kyma locally. For information on how to deploy Kyma locally, see the **Local Kyma installation** Getting Started guide.
+To follow this guide, run Kyma locally. For information on how to deploy Kyma locally, see the **Local Kyma installation** Getting Started guide.
 
 ## Details
 
-Follow these steps to complete the tutorial:
+Follow these steps to complete the Getting Started guide:
 1. List all RemoteEnvironments enabled in the `production` Environment:
     ```bash
     > kubectl get em -n production

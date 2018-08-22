@@ -1,9 +1,9 @@
 ---
-title: Examples
+title: Run Application Connector on Minikube
 type: Getting Started
 ---
 
-This is a tutorial on how to get a new Application Connector running on Minikube.
+This Getting Started guide shows you how to run a new Application Connector on Minikube.
 
 To integrate a new Remote Environment marked as `Production`, you can use the following values:
 * **sourceEnvironment** = `production`
