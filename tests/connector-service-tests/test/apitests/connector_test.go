@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
-	"github.com/go-openapi/spec"
 )
 
 func TestConnector(t *testing.T) {
@@ -203,7 +202,7 @@ func TestApiSpec(t *testing.T) {
 		// then
 		require.NoError(t, err)
 
-		var apiSpec spec.Swagger
+		var apiSpec struct{}
 		err = yaml.Unmarshal(body, &apiSpec)
 		require.NoError(t, err)
 	})

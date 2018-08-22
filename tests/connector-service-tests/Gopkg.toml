@@ -23,11 +23,6 @@
 #   non-go = false
 #   go-tests = true
 #   unused-packages = true
-
-
-[[constraint]]
-  name = "github.com/go-openapi/spec"
-  version = "0.16.0"
   
 [prune]
   go-tests = true
