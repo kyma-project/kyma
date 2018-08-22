@@ -9,7 +9,6 @@ import (
 
 const globalsTplStr = `
 global:
-  tlsPEMCrt: "{{.ClusterTLSPEMCert}}"
   tlsCrt: "{{.ClusterTLSCert}}"
   tlsKey: "{{.ClusterTLSKey}}"
   isLocalEnv: {{.IsLocalInstallation}}
