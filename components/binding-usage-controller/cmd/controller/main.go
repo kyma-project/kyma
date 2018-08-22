@@ -65,7 +65,8 @@ func main() {
 	serviceCatalogInformerFactory := serviceCatalogInformers.NewSharedInformerFactory(serviceCatalogCli, informerResyncPeriod)
 
 	// Service Catalog PodPreset client
-	// As a temporary solution is generated in this repository under /pkg/client
+	// As a temporary solution, client is generated in this repository under /pkg/client.
+	// This SHOULD be changed when PodPreset from Service Catalog become production ready.
 	svcatPodPresetCli := bindingUsageCli.SettingsV1alpha1()
 	podPresetModifier := controller.NewPodPresetModifier(svcatPodPresetCli)
 
