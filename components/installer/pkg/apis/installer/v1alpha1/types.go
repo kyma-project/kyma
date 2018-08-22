@@ -87,8 +87,14 @@ func (i *Installation) IsBeingDeleted() bool {
 
 // InstallationSpec .
 type InstallationSpec struct {
-	KymaVersion string `json:"version"`
-	URL         string `json:"url"`
+	KymaVersion string          `json:"version"`
+	URL         string          `json:"url"`
+	Components  []KymaComponent `json:"components"`
+}
+
+// KymaComponent represents single kyma component to be handled by the installer
+type KymaComponent struct {
+	Name string `json:"name"`
 }
 
 // StateEnum describes installation state
