@@ -4,4 +4,5 @@ The `kubeless-test-client` contains the following:
 * The [ns.yaml](ns.yaml) file, which specifies the `kubeless-test` namespace
 * The [k8s.yaml](k8s.yaml) file, which contains necessary resources for `test-event` and `test-hello`
 * The JavaScript files of `test-event` and `test-hello`
-* The [svcbind.yaml](svcbind.yaml) file, which specifies `test-svcbind` and its supporting Kubernetes resources, including a Redis service which the functions binds to.
+* The [svc-instance.yaml](svc-instance.yaml) file deploys the Redis service instance and service binding.
+* The [svcbind-lambda.yaml](svcbind-lambda.yaml) file, which specifies `test-svcbind` the lambda which would be used to test the service binding. This file also deploys the Service binding usage.
