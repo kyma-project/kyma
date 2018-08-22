@@ -8,13 +8,13 @@ $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 $cmd = "kubectl.exe create ns kyma-installer"
 Invoke-Expression -Command $cmd
 
-$cmd = "kubectl apply -f $CURRENT_DIR/../../resources/cluster-prerequisites/default-sa-rbac-role.yaml"
+$cmd = "kubectl apply -f ${CURRENT_DIR}\..\resources\default-sa-rbac-role.yaml"
 Invoke-Expression -Command $cmd
 
-$cmd = "kubectl apply -f $CURRENT_DIR/../../resources/cluster-prerequisites/limit-range.yaml -n kyma-installer"
+$cmd = "kubectl apply -f ${CURRENT_DIR}\..\resources\limit-range-installer.yaml
 Invoke-Expression -Command $cmd
 
-$cmd = "kubectl apply -f $CURRENT_DIR/../../resources/cluster-prerequisites/resource-quotas-installer.yaml"
+$cmd = "kubectl apply -f ${CURRENT_DIR}\..\resources\resource-quotas-installer.yaml"
 Invoke-Expression -Command $cmd
 
 $cmd = "${CURRENT_DIR}\install-tiller.ps1"
