@@ -44,7 +44,7 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/snapshot/installer:PR-233
+        image: eu.gcr.io/kyma-project/installer:0.3.178
         imagePullPolicy: IfNotPresent
         env:
           - name: AZURE_BROKER_SUBSCRIPTION_ID
@@ -193,6 +193,12 @@ spec:
                 name: installation-config
                 key: slack_api_url
                 optional: true
+          - name: COMPONENT_LIST
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: components
+                optional: false
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
