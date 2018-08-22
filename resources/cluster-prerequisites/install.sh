@@ -14,6 +14,7 @@ prepareSystemNs "kyma-system"
 prepareSystemNs "kyma-integration"
 
 kubectl label namespace kyma-system "istio-injection=enabled"
+
 kubectl label namespace kyma-integration "istio-injection=enabled"
 
 kubectl apply -f /kyma/resources/cluster-prerequisites/remote-environments-minio-secret.yaml -n "kyma-integration"

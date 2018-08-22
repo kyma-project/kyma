@@ -46,31 +46,6 @@ function initializeMinikubeConfig() {
     minikube config unset ingress
 }
 
-function uploadDexTlsCertForApiserver() {
-	local TLS_FILE="$CURRENT_DIR/../resources/local-tls-certs.yaml"
-
-	local TLS_CERT=$(cat $TLS_FILE | grep 'tls.crt' | sed 's/^.*: //')
-
-	log "Parsing DEX TLS certificate secret..." green
-
-    local crt=$(echo $TLS_CERT | base64 --decode)
-
-    # cert saved for localkube... for kubeadm (--bootstrapper=kubeadm) location will be different
-    local crtDir="$HOME/.minikube/files"
-
-    if [ ! -d "$crtDir" ]; then
-        mkdir -p "${crtDir}"
-    fi
-
-    local crtFile="$crtDir/dex-ca.crt"
-
-    log "Saving DEX TLS certificate in the container file: ${crtFile}..." green
-
-    echo -e "${crt}" > "${crtFile}"
-
-    log "DEX TLS certificate saved in the container: ${crtFile}" green
-}
-
 #TODO refactor to use minikube status!
 function waitForMinikubeToBeUp() {
     set +o errexit
@@ -163,8 +138,6 @@ function start() {
 
     initializeMinikubeConfig
 
-    uploadDexTlsCertForApiserver
-
     if [[ "$VM_DRIVER" = "none" ]]; then
         fixDindMinikubeIssue
     fi
@@ -173,11 +146,6 @@ function start() {
     --memory 8192 \
     --cpus 4 \
     --extra-config=apiserver.Authorization.Mode=RBAC \
-    --extra-config=apiserver.Authentication.OIDC.IssuerURL="https://dex.${MINIKUBE_DOMAIN}" \
-    --extra-config=apiserver.Authentication.OIDC.CAFile=/dex-ca.crt \
-    --extra-config=apiserver.Authentication.OIDC.ClientID=kyma-client \
-    --extra-config=apiserver.Authentication.OIDC.UsernameClaim=email \
-    --extra-config=apiserver.Authentication.OIDC.GroupsClaim=groups \
     --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList=".*" \
     --extra-config=controller-manager.ClusterSigningCertFile="/var/lib/localkube/certs/ca.crt" \
 	--extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
