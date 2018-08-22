@@ -5,6 +5,7 @@ package versioned
 import (
 	glog "github.com/golang/glog"
 	servicecatalogv1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
+	settingsv1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
@@ -15,6 +16,9 @@ type Interface interface {
 	ServicecatalogV1alpha1() servicecatalogv1alpha1.ServicecatalogV1alpha1Interface
 	// Deprecated: please explicitly pick a version if possible.
 	Servicecatalog() servicecatalogv1alpha1.ServicecatalogV1alpha1Interface
+	SettingsV1alpha1() settingsv1alpha1.SettingsV1alpha1Interface
+	// Deprecated: please explicitly pick a version if possible.
+	Settings() settingsv1alpha1.SettingsV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -22,6 +26,7 @@ type Interface interface {
 type Clientset struct {
 	*discovery.DiscoveryClient
 	servicecatalogV1alpha1 *servicecatalogv1alpha1.ServicecatalogV1alpha1Client
+	settingsV1alpha1       *settingsv1alpha1.SettingsV1alpha1Client
 }
 
 // ServicecatalogV1alpha1 retrieves the ServicecatalogV1alpha1Client
@@ -33,6 +38,17 @@ func (c *Clientset) ServicecatalogV1alpha1() servicecatalogv1alpha1.Servicecatal
 // Please explicitly pick a version.
 func (c *Clientset) Servicecatalog() servicecatalogv1alpha1.ServicecatalogV1alpha1Interface {
 	return c.servicecatalogV1alpha1
+}
+
+// SettingsV1alpha1 retrieves the SettingsV1alpha1Client
+func (c *Clientset) SettingsV1alpha1() settingsv1alpha1.SettingsV1alpha1Interface {
+	return c.settingsV1alpha1
+}
+
+// Deprecated: Settings retrieves the default version of SettingsClient.
+// Please explicitly pick a version.
+func (c *Clientset) Settings() settingsv1alpha1.SettingsV1alpha1Interface {
+	return c.settingsV1alpha1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -55,6 +71,10 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	if err != nil {
 		return nil, err
 	}
+	cs.settingsV1alpha1, err = settingsv1alpha1.NewForConfig(&configShallowCopy)
+	if err != nil {
+		return nil, err
+	}
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
@@ -69,6 +89,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
 	cs.servicecatalogV1alpha1 = servicecatalogv1alpha1.NewForConfigOrDie(c)
+	cs.settingsV1alpha1 = settingsv1alpha1.NewForConfigOrDie(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(c)
 	return &cs
@@ -78,6 +99,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
 	cs.servicecatalogV1alpha1 = servicecatalogv1alpha1.New(c)
+	cs.settingsV1alpha1 = settingsv1alpha1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

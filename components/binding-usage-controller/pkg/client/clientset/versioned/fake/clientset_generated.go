@@ -6,6 +6,8 @@ import (
 	clientset "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
 	servicecatalogv1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 	fakeservicecatalogv1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1/fake"
+	settingsv1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1"
+	fakesettingsv1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -62,4 +64,14 @@ func (c *Clientset) ServicecatalogV1alpha1() servicecatalogv1alpha1.Servicecatal
 // Servicecatalog retrieves the ServicecatalogV1alpha1Client
 func (c *Clientset) Servicecatalog() servicecatalogv1alpha1.ServicecatalogV1alpha1Interface {
 	return &fakeservicecatalogv1alpha1.FakeServicecatalogV1alpha1{Fake: &c.Fake}
+}
+
+// SettingsV1alpha1 retrieves the SettingsV1alpha1Client
+func (c *Clientset) SettingsV1alpha1() settingsv1alpha1.SettingsV1alpha1Interface {
+	return &fakesettingsv1alpha1.FakeSettingsV1alpha1{Fake: &c.Fake}
+}
+
+// Settings retrieves the SettingsV1alpha1Client
+func (c *Clientset) Settings() settingsv1alpha1.SettingsV1alpha1Interface {
+	return &fakesettingsv1alpha1.FakeSettingsV1alpha1{Fake: &c.Fake}
 }

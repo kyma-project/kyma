@@ -14,6 +14,7 @@ import (
 	sbuStatus "github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/status"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/platform/logger/spy"
 	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	svcatSettings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
 	sbuFake "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
 	bindingUsageInformers "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions"
 	"github.com/pkg/errors"
@@ -22,7 +23,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/context"
 	coreV1 "k8s.io/api/core/v1"
-	settingsV1alpha1 "k8s.io/api/settings/v1alpha1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -249,8 +249,8 @@ func (c *ctrlTestCase) fixReadyServiceBinding(usage *sbuTypes.ServiceBindingUsag
 	}
 }
 
-func (c *ctrlTestCase) fixPodPreset(usage *sbuTypes.ServiceBindingUsage) *settingsV1alpha1.PodPreset {
-	return &settingsV1alpha1.PodPreset{
+func (c *ctrlTestCase) fixPodPreset(usage *sbuTypes.ServiceBindingUsage) *svcatSettings.PodPreset {
+	return &svcatSettings.PodPreset{
 		ObjectMeta: metaV1.ObjectMeta{
 			Name:      "9e8947c3a22caf7875e80141e91eaf66e07f1bee", // sha1(binding usage name)
 			Namespace: usage.Namespace,
@@ -258,7 +258,7 @@ func (c *ctrlTestCase) fixPodPreset(usage *sbuTypes.ServiceBindingUsage) *settin
 				"servicebindingusages.servicecatalog.kyma.cx/owner-name": usage.Name,
 			},
 		},
-		Spec: settingsV1alpha1.PodPresetSpec{
+		Spec: svcatSettings.PodPresetSpec{
 			Selector: metaV1.LabelSelector{
 				MatchLabels: map[string]string{
 					fmt.Sprintf("use-%s", usage.UID): usage.ResourceVersion,

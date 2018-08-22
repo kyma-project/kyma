@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	v1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	settings_v1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -41,6 +42,10 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("usagekinds"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Servicecatalog().V1alpha1().UsageKinds().Informer()}, nil
+
+		// Group=settings.svcat.k8s.io, Version=v1alpha1
+	case settings_v1alpha1.SchemeGroupVersion.WithResource("podpresets"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Settings().V1alpha1().PodPresets().Informer()}, nil
 
 	}
 

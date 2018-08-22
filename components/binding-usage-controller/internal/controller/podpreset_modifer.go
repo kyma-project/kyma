@@ -2,27 +2,27 @@ package controller
 
 import (
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/pretty"
+	svcatSettings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
+	settingsv1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1"
 	"github.com/pkg/errors"
-	k8sSettings "k8s.io/api/settings/v1alpha1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	clientSettingsV1alpha1 "k8s.io/client-go/kubernetes/typed/settings/v1alpha1"
 )
 
 // PodPresetModifier provides functionality needed to create and delete PodPreset
 type PodPresetModifier struct {
-	settingsClient clientSettingsV1alpha1.SettingsV1alpha1Interface
+	settingsClient settingsv1alpha1.SettingsV1alpha1Interface
 }
 
 // NewPodPresetModifier creates a new PodPresetModifier
-func NewPodPresetModifier(settingsClient clientSettingsV1alpha1.SettingsV1alpha1Interface) *PodPresetModifier {
+func NewPodPresetModifier(settingsClient settingsv1alpha1.SettingsV1alpha1Interface) *PodPresetModifier {
 	return &PodPresetModifier{
 		settingsClient: settingsClient,
 	}
 }
 
 // UpsertPodPreset creates a new PodPreset or update it if needed
-func (m *PodPresetModifier) UpsertPodPreset(podPreset *k8sSettings.PodPreset) error {
+func (m *PodPresetModifier) UpsertPodPreset(podPreset *svcatSettings.PodPreset) error {
 	// TODO consider to add support for `ownerReferences` and then use v1.IsControlledBy method
 	_, err := m.settingsClient.PodPresets(podPreset.Namespace).Create(podPreset)
 	switch {

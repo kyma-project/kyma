@@ -64,7 +64,10 @@ func main() {
 	fatalOnError(err)
 	serviceCatalogInformerFactory := serviceCatalogInformers.NewSharedInformerFactory(serviceCatalogCli, informerResyncPeriod)
 
-	podPresetModifier := controller.NewPodPresetModifier(k8sCli.SettingsV1alpha1())
+	// Service Catalog PodPreset client
+	// As a temporary solution is generated in this repository under /pkg/client
+	svcatPodPresetCli := bindingUsageCli.SettingsV1alpha1()
+	podPresetModifier := controller.NewPodPresetModifier(svcatPodPresetCli)
 
 	aggregator := controller.NewResourceSupervisorAggregator()
 	sbuInformer := bindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages()
