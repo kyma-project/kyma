@@ -52,9 +52,6 @@ func (hc *Client) ReleaseStatus(rname string) (string, error) {
 
 // InstallReleaseFromChart .
 func (hc *Client) InstallReleaseFromChart(chartdir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error) {
-	fmt.Println("########## InstallReleaseFromChart() overrides: ############")
-	fmt.Println(overrides)
-	fmt.Println("############################################################")
 	chart, err := chartutil.Load(chartdir)
 
 	if err != nil {
@@ -73,9 +70,6 @@ func (hc *Client) InstallReleaseFromChart(chartdir, ns, releaseName, overrides s
 
 // InstallRelease .
 func (hc *Client) InstallRelease(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error) {
-	fmt.Println("########## InstallRelease() overrides: #####################")
-	fmt.Println(overrides)
-	fmt.Println("############################################################")
 	return hc.helm.InstallRelease(
 		chartdir,
 		ns,
@@ -88,9 +82,6 @@ func (hc *Client) InstallRelease(chartdir, ns, releasename, overrides string) (*
 
 // InstallReleaseWithoutWait .
 func (hc *Client) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error) {
-	fmt.Println("########## InstallReleaseWithoutWait() overrides: ##########")
-	fmt.Println(overrides)
-	fmt.Println("############################################################")
 	return hc.helm.InstallRelease(
 		chartdir,
 		ns,
@@ -103,9 +94,6 @@ func (hc *Client) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides
 
 // UpgradeRelease .
 func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error) {
-	fmt.Println("########## UpgradeRelease() overrides: #####################")
-	fmt.Println(overrides)
-	fmt.Println("############################################################")
 	return hc.helm.UpdateRelease(
 		releaseName,
 		chartDir,

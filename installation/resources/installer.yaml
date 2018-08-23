@@ -44,7 +44,7 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/snapshot/installer:PR-240
+        image: eu.gcr.io/kyma-project/installer:0.3.195
         imagePullPolicy: IfNotPresent
         env:
           - name: AZURE_BROKER_SUBSCRIPTION_ID
@@ -71,7 +71,7 @@ spec:
                 name: azure-broker
                 key: azure_broker_client_secret
                 optional: true
-          - name: TLS_CERT
+          - name: TLS_CERT          
             valueFrom:
               configMapKeyRef:
                 name: cluster-certificate
