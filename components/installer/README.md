@@ -95,6 +95,7 @@ The required properties iclude:
 
 - `url` which is the URL address to a Kyma charts package. Only `tar.gz` is supported and it is required for non-local installations only.
 - `version` which is the version of Kyma.
+- `components` which is the list of Kyma components.
 
 
 ### Generate the Custom Resource file for installer
@@ -119,7 +120,7 @@ Helm installation.
 
 ## Install selected components only
 
-By default, this tool installs a predefined component package. If necessary, you can specify which components to install by customizing the component list located in the [installer-config.yaml.tpl](../../installation/resources/installer-config.yaml.tpl) file. Available components:
+By default, this tool installs a predefined component package. If necessary, you can specify which components to install by customizing the component list located in the [installer-cr.yaml.tpl](../../installation/resources/installer-cr.yaml.tpl) file. Available components:
 
 - cluster-prerequisites
 - cluster-essentials
