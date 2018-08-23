@@ -3,7 +3,7 @@
 # TODO: Move file to separate chart 
 #
 
-apiVersion: settings.k8s.io/v1alpha1
+apiVersion: settings.svcat.k8s.io/v1alpha1
 kind: PodPreset
 metadata:
   name: {{ template "minio.fullname" . }}-docs-upload

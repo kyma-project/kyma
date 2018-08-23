@@ -8,7 +8,7 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 rules:
-- apiGroups: ["settings.k8s.io"]
+- apiGroups: ["settings.svcat.k8s.io"]
   resources: ["podpresets"]
   verbs: ["create", "delete"]
 - apiGroups: ["apps"]
