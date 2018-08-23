@@ -21,7 +21,7 @@ while($true) {
     } elseif ($status -eq "Error") {
         Write-Output "kyma installation error... ${desc}"
         Write-Output "----------"
-        $cmd = "kubectl.exe -n ${INSTALLER_NS} get pods -o jsonpath='{.items[*].metadata.name}'"
+        $cmd = "kubectl.exe get pods -n kyma-installer -o jsonpath='{.items[*].metadata.name}'"
         $podName = (Invoke-Expression -Command $cmd | Out-String).ToString().Trim()
         
         $cmd = "kubectl.exe logs ${podName} -n kyma-installer"
