@@ -100,7 +100,7 @@ kubectl apply -f installer-config.yaml
 Kyma installation requires increased permissions granted by the **cluster-admin** role. To bind the role to the default **ServiceAccount**, run the following command:
 
 ```
-kubectl apply -f resources/cluster-prerequisites/default-sa-rbac-role.yaml
+kubectl apply -f installation/resources/default-sa-rbac-role.yaml
 ```
 
 5. Deploy `tiller`.

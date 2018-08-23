@@ -10,11 +10,8 @@
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek
 
-# The `cluster-prerequisites` subdirectory
-/resources/cluster-prerequisites @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc
-
 # The `cluster-essentials` chart
-/resources/cluster-essentials/ @damianpacierpnikatsap @damjatsap @PK85
+/resources/cluster-essentials/ @piotrmsc @damjatsap @PK85
 
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel
