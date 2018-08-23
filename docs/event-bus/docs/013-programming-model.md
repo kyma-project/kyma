@@ -6,7 +6,7 @@ type: Details
 
 ## Details
 
-The kyma system will forward the published cloud event to your service in terms of an HTTP request, you can use the request body to get the event payload and the HTTP headers to extract the cloud event and optional tracing information.
+To write an HTTP service in Kyma to handle the event bus published events, The Kyma system will forward the published cloud event to your service in terms of an HTTP request, you can use the request body to get the event payload and the HTTP headers to extract the cloud event and optional tracing information.
 
 ### The Cloud Event Object
 
