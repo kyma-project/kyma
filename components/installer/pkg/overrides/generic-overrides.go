@@ -6,12 +6,12 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-//OverridesMap is a map of overrides. Values in the map can be nested maps (of the same type) or strings
-type OverridesMap map[string]interface{}
+//Map is a map of overrides. Values in the map can be nested maps (of the same type) or strings
+type Map map[string]interface{}
 
-//ToMap converts yaml to OverridesMap. Supports only map-like yamls (no lists!)
-func ToMap(value string) (OverridesMap, error) {
-	target := OverridesMap{}
+//ToMap converts yaml to Map. Supports only map-like yamls (no lists!)
+func ToMap(value string) (Map, error) {
+	target := Map{}
 
 	if value == "" {
 		//Otherwise, nil Map is returned by yaml.Unmarshal
@@ -25,8 +25,8 @@ func ToMap(value string) (OverridesMap, error) {
 	return target, nil
 }
 
-//ToYaml converts OverridesMap to YAML
-func ToYaml(oMap OverridesMap) (string, error) {
+//ToYaml converts Map to YAML
+func ToYaml(oMap Map) (string, error) {
 	if len(oMap) == 0 {
 		return "", nil
 	}
@@ -38,16 +38,16 @@ func ToYaml(oMap OverridesMap) (string, error) {
 	return string(res), nil
 }
 
-//Flattens an OverridesMap into a map of aggregated keys and value (to entries like, for example: "istio.ingress.service.gateway: xyz")
-func FlattenMap(oMap OverridesMap) map[string]string {
+//FlattenMap flattens an Map into a map of aggregated keys and value (to entries like, for example: "istio.ingress.service.gateway: xyz")
+func FlattenMap(oMap Map) map[string]string {
 	res := map[string]string{}
 	flattenMap(oMap, "", res)
 	return res
 }
 
-//UnflattenMap converts external "flat" overrides into OverridesMap. Opposite of FlattenMap function.
-func UnflattenMap(sourceMap map[string]string) OverridesMap {
-	mergedMap := OverridesMap{}
+//UnflattenMap converts external "flat" overrides into Map. Opposite of FlattenMap function.
+func UnflattenMap(sourceMap map[string]string) Map {
+	mergedMap := Map{}
 	if len(sourceMap) == 0 {
 		return mergedMap
 	}
@@ -63,7 +63,7 @@ func UnflattenMap(sourceMap map[string]string) OverridesMap {
 //MergeMaps merges all values from overridesMap map into baseMap, adding and/or overwriting final keys (string values) if both maps contain such entries.
 //baseMap WILL be modified during merge.
 //overridesMap won't be modified by future merges, since a deep-copy of it's nested maps are used for merging such nested maps.
-func MergeMaps(baseMap, overridesMap OverridesMap) {
+func MergeMaps(baseMap, overridesMap Map) {
 
 	//Helper function to deep-copy nested maps
 	putValueToMap := func(baseMap map[string]interface{}, key string, overrideVal interface{}) {
@@ -119,8 +119,8 @@ func deepCopyMap(src map[string]interface{}) map[string]interface{} {
 	return dst
 }
 
-// Flattens given OverridesMap. The keys in result map will contain all intermediate keys joined with dots, e.g.: "istio.ingress.service.gateway: xyz"
-func flattenMap(oMap OverridesMap, keys string, result map[string]string) {
+// Flattens given Map. The keys in result map will contain all intermediate keys joined with dots, e.g.: "istio.ingress.service.gateway: xyz"
+func flattenMap(oMap Map, keys string, result map[string]string) {
 
 	var prefix string
 
@@ -144,7 +144,7 @@ func flattenMap(oMap OverridesMap, keys string, result map[string]string) {
 }
 
 //Merges value into given map, introducing intermediate "nested" maps for every intermediate key.
-func mergeIntoMap(keys []string, value string, dstMap OverridesMap) {
+func mergeIntoMap(keys []string, value string, dstMap Map) {
 	currentKey := keys[0]
 	//Last key points directly to string value
 	if len(keys) == 1 {
@@ -153,10 +153,10 @@ func mergeIntoMap(keys []string, value string, dstMap OverridesMap) {
 	}
 
 	//All keys but the last one should point to a nested map
-	nestedMap, isMap := dstMap[currentKey].(OverridesMap)
+	nestedMap, isMap := dstMap[currentKey].(Map)
 
 	if !isMap {
-		nestedMap = OverridesMap{}
+		nestedMap = Map{}
 		dstMap[currentKey] = nestedMap
 	}
 

@@ -72,7 +72,7 @@ func (steps *InstallationSteps) UpdateIstio(installationData *config.Installatio
 }
 
 func (steps *InstallationSteps) getIstioOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
-	allOverrides := overrides.OverridesMap{}
+	allOverrides := overrides.Map{}
 
 	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
 	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)

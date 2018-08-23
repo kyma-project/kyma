@@ -104,7 +104,7 @@ func logFailedResources(ns string) {
 }
 
 func (steps *InstallationSteps) getCoreOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
-	allOverrides := overrides.OverridesMap{}
+	allOverrides := overrides.Map{}
 
 	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
 	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)

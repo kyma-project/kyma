@@ -31,7 +31,7 @@ global:
 `
 
 // GetGlobalOverrides .
-func GetGlobalOverrides(installationData *config.InstallationData) (OverridesMap, error) {
+func GetGlobalOverrides(installationData *config.InstallationData) (Map, error) {
 
 	tmpl, err := template.New("").Parse(globalsTplStr)
 	if err != nil {

@@ -24,10 +24,10 @@ type azureParams struct {
 }
 
 // EnableAzureBroker provides Azure parameters from Vault
-func EnableAzureBroker(installationData *config.InstallationData) (OverridesMap, error) {
+func EnableAzureBroker(installationData *config.InstallationData) (Map, error) {
 
 	if !hasAzureParams(installationData) {
-		return OverridesMap{}, nil
+		return Map{}, nil
 	}
 
 	azureParams, err := getAzureParams(installationData)

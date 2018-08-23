@@ -71,7 +71,7 @@ func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config
 }
 
 func (steps *InstallationSteps) getClusterEssentialsOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
-	allOverrides := overrides.OverridesMap{}
+	allOverrides := overrides.Map{}
 
 	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
 	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)

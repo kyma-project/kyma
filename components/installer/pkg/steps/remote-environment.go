@@ -119,7 +119,7 @@ func (steps *InstallationSteps) UpdateEcDefaultRemoteEnvironments(installationDa
 }
 
 func (steps *InstallationSteps) getHmcOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
-	allOverrides := overrides.OverridesMap{}
+	allOverrides := overrides.Map{}
 
 	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
 	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)
@@ -141,7 +141,7 @@ func (steps *InstallationSteps) getHmcOverrides(installationData *config.Install
 }
 
 func (steps *InstallationSteps) getEcOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
-	allOverrides := overrides.OverridesMap{}
+	allOverrides := overrides.Map{}
 
 	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
 	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)

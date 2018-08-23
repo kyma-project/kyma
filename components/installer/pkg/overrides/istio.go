@@ -14,9 +14,9 @@ ingressgateway:
 `
 
 // GetIstioOverrides returns values overrides for istio ingressgateway
-func GetIstioOverrides(installationData *config.InstallationData) (OverridesMap, error) {
+func GetIstioOverrides(installationData *config.InstallationData) (Map, error) {
 	if hasIPAddress(installationData) == false {
-		return OverridesMap{}, nil
+		return Map{}, nil
 	}
 
 	tmpl, err := template.New("").Parse(istioTplStr)
