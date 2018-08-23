@@ -5,7 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/stretchr/testify/mock"
-	settingsV1alpha1 "k8s.io/api/settings/v1alpha1"
+	svcatSettings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
 )
 
 func (_m *KubernetesResourceSupervisor) ExpectOnEnsureLabelsCreated(ns string, resourceName string, usageName string, labels map[string]string) *mock.Call {
@@ -16,7 +16,7 @@ func (_m *KindsSupervisors) ExpectOnGet(k controller.Kind, supervisor controller
 	return _m.On("Get", k).Return(supervisor, nil)
 }
 
-func (_m *PodPresetModifier) ExpectOnUpsertPodPreset(newPodPreset *settingsV1alpha1.PodPreset) *mock.Call {
+func (_m *PodPresetModifier) ExpectOnUpsertPodPreset(newPodPreset *svcatSettings.PodPreset) *mock.Call {
 	return _m.On("UpsertPodPreset", newPodPreset).Return(nil)
 }
 

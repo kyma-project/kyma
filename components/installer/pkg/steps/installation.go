@@ -56,12 +56,6 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 		return downloadKymaErr
 	}
 
-	if installationData.ShouldInstallComponent(consts.ClusterPrerequisitesComponent) {
-		if instErr := steps.InstallClusterPrerequisites(installationData); instErr != nil {
-			return instErr
-		}
-	}
-
 	if installationData.ShouldInstallComponent(consts.ClusterEssentialsComponent) {
 		if instErr := steps.InstallClusterEssentials(installationData); instErr != nil {
 			return instErr
@@ -135,12 +129,7 @@ func (steps *InstallationSteps) UpdateKyma(installationData *config.Installation
 		return downloadKymaErr
 	}
 
-	upgradeErr := steps.UpdateClusterPrerequisites(installationData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
-
-	upgradeErr = steps.UpdateClusterEssentials(installationData)
+	upgradeErr := steps.UpdateClusterEssentials(installationData)
 	if upgradeErr != nil {
 		return upgradeErr
 	}

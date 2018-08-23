@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "name" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ template "name" . }}
+    spec:
+      serviceAccountName: kube-rbac-proxy
+      {{ if .Values.global.isLocalEnv }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{ end }}
+      containers:
+      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+        name: kube-rbac-proxy
+        imagePullPolicy: IfNotPresent
+        args:
+        - "--insecure-listen-address=0.0.0.0:{{ .Values.containerPort}}"
+        - "--upstream=https://kubernetes.default"
+        - "--logtostderr=true"
+        - "--v=10"
+        - "--oidc-issuer=https://dex.{{ .Values.global.domainName }}"
+        - "--oidc-clientID=kyma-client"
+        - "--oidc-ca-file=/etc/{{ .Values.configmapName}}/ca.crt"
+        ports:
+        - containerPort: {{ .Values.containerPort}}
+        volumeMounts:
+          - name: {{ .Values.configmapName}}
+            mountPath: /etc/{{ .Values.configmapName}}/
+      volumes:
+        - name: {{ .Values.configmapName}}
+          configMap:
+            name: {{ .Values.configmapName}}
+            

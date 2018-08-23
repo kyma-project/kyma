@@ -19,7 +19,7 @@ This section explains how to use the Binding Usage Controller.
 To run the application without building the binary file, run this command:
 
 ```bash
-APP_KUBECONFIG_PATH=/Users/{User}/.kube/config APP_LOGGER_LEVEL=debug go run cmd/controller/main.go
+APP_KUBECONFIG_PATH=/Users/$User/.kube/config APP_LOGGER_LEVEL=debug go run cmd/controller/main.go
 ```
 
 For the description of the available environment variables, see the **Use environment variables** section.

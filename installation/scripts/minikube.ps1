@@ -35,36 +35,11 @@ function InitializeMinikubeConfig () {
     Invoke-Expression -Command $cmd
 }
 
-function UploadDexTlsCertForApiserver() {
-    Write-Output "Parsing DEX TLS certificate"
-
-    $yaml = Get-Content -Path "${CURRENT_DIR}\..\resources\local-tls-certs.yaml" | Select-String -Pattern 'tls.crt: .*'
-    $yaml = $yaml.ToString().Replace("tls.crt:", "").Trim()
-    $yaml = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($yaml))
-    $cert = $yaml.ToString()
-    
-    Write-Output "Saving DEX TLS certificate in the container file."
-
-    $crtDir = "${HOME}\.minikube\files\dex"
-    $crtFile = "${crtDir}\dex-ca.crt"
-    
-    if (!(Test-Path -Path $crtDir)) {
-        New-Item -ItemType Directory -Path $crtDir | Out-Null
-    }
-
-    $cert | Set-Content $crtFile
-}
-
 function StartMinikube() {
     $cmd = "minikube start"`
         + " --memory 8192"`
         + " --cpus 4"`
         + " --extra-config=apiserver.Authorization.Mode=RBAC"`
-        + " --extra-config=apiserver.Authentication.OIDC.IssuerURL='https://dex.${DOMAIN}'"`
-        + " --extra-config=apiserver.Authentication.OIDC.CAFile=/home/docker/dex/dex-ca.crt"`
-        + " --extra-config=apiserver.Authentication.OIDC.ClientID=kyma-client"`
-        + " --extra-config=apiserver.Authentication.OIDC.UsernameClaim=email"`
-        + " --extra-config=apiserver.Authentication.OIDC.GroupsClaim=groups"`
         + " --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList='.*'"`
         + " --extra-config=controller-manager.ClusterSigningCertFile='/var/lib/localkube/certs/ca.crt'"`
         + " --extra-config=controller-manager.ClusterSigningKeyFile='/var/lib/localkube/certs/ca.key'"`
@@ -127,7 +102,6 @@ function AddDevDomainsToEtcHosts([string[]]$hostnamesPrefixes) {
 
 CheckIfMinikubeIsInitialized
 InitializeMinikubeConfig
-UploadDexTlsCertForApiserver
 StartMinikube
 WaitForMinikubeToBeUp
 AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "dex", "docs", "lambdas-ui", "ui-api", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service"

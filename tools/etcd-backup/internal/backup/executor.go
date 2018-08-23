@@ -22,9 +22,10 @@ type Executor struct {
 	etcdBackupCli    etcdOpClient.EtcdBackupInterface
 	etcdBackupLister etcdOpLister.EtcdBackupNamespaceLister
 
-	absContainerName string
-	etcdEndpoints    []string
-	absSecretName    string
+	absContainerName    string
+	etcdEndpoints       []string
+	etcdClientTLSSecret string
+	absSecretName       string
 
 	idProvider idprovider.Fn
 }
@@ -32,13 +33,14 @@ type Executor struct {
 // NewExecutor returns new instance of Executor
 func NewExecutor(cfg Config, absSecretName, absContainerName string, etcdBackupCli etcdOpClient.EtcdBackupInterface, nsScopedLister etcdOpLister.EtcdBackupNamespaceLister, log logrus.FieldLogger) *Executor {
 	return &Executor{
-		log:              log,
-		etcdBackupCli:    etcdBackupCli,
-		etcdBackupLister: nsScopedLister,
-		absSecretName:    absSecretName,
-		etcdEndpoints:    cfg.EtcdEndpoints,
-		idProvider:       idprovider.New(),
-		absContainerName: removeSlashSuffixIfNeeded(absContainerName),
+		log:                 log,
+		etcdBackupCli:       etcdBackupCli,
+		etcdBackupLister:    nsScopedLister,
+		absSecretName:       absSecretName,
+		etcdEndpoints:       cfg.EtcdEndpoints,
+		etcdClientTLSSecret: cfg.ClientTLSSecret,
+		idProvider:          idprovider.New(),
+		absContainerName:    removeSlashSuffixIfNeeded(absContainerName),
 	}
 }
 
@@ -91,7 +93,8 @@ func (e *Executor) etcdBackup(blobPrefix string) (*etcdTypes.EtcdBackup, error) 
 			GenerateName: etcdBackupGenerateName, // used to generate a unique name
 		},
 		Spec: etcdTypes.BackupSpec{
-			EtcdEndpoints: e.etcdEndpoints,
+			EtcdEndpoints:   e.etcdEndpoints,
+			ClientTLSSecret: e.etcdClientTLSSecret,
 
 			StorageType: etcdTypes.BackupStorageTypeABS,
 			BackupSource: etcdTypes.BackupSource{

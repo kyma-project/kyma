@@ -10,5 +10,5 @@ REB_ROOT_PKG="github.com/kyma-project/kyma/components/binding-usage-controller/p
 
 ./hack/generate-groups.sh all \
   ${REB_ROOT_PKG}/client ${REB_ROOT_PKG}/apis \
-  servicecatalog:v1alpha1 \
+  "settings:v1alpha1 servicecatalog:v1alpha1" \
   --go-header-file ${SCRIPT_ROOT}/hack/boilerplate.go.txt

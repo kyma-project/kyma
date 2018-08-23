@@ -4,19 +4,19 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
+	svcatSettings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
+	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	k8sSettings "k8s.io/api/settings/v1alpha1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes/fake"
 	k8sTesting "k8s.io/client-go/testing"
 )
 
 func TestPodPresetModifierUpsertPodPreset(t *testing.T) {
 	tests := map[string]struct {
 		objAlreadyInK8s []runtime.Object
-		ppToCreate      *k8sSettings.PodPreset
+		ppToCreate      *svcatSettings.PodPreset
 		expActions      []k8sTesting.Action
 	}{
 		"create existing PodPreset": {
@@ -64,7 +64,7 @@ func TestPodPresetModifierUpsertPodPreset(t *testing.T) {
 func TestPodPresetModifierEnsurePodPresetDeleted(t *testing.T) {
 	tests := map[string]struct {
 		objAlreadyInK8s []runtime.Object
-		ppToDelete      *k8sSettings.PodPreset
+		ppToDelete      *svcatSettings.PodPreset
 	}{
 		"delete existing PodPreset": {
 			objAlreadyInK8s: []runtime.Object{
@@ -95,13 +95,13 @@ func TestPodPresetModifierEnsurePodPresetDeleted(t *testing.T) {
 	}
 }
 
-func fixPodPreset() *k8sSettings.PodPreset {
-	return &k8sSettings.PodPreset{
+func fixPodPreset() *svcatSettings.PodPreset {
+	return &svcatSettings.PodPreset{
 		ObjectMeta: metaV1.ObjectMeta{
 			Name:      "pp-test",
 			Namespace: "ns-test",
 		},
-		Spec: k8sSettings.PodPresetSpec{
+		Spec: svcatSettings.PodPresetSpec{
 			Selector: metaV1.LabelSelector{
 				MatchLabels: map[string]string{
 					"test-key": "test-value",

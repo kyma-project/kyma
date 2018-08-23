@@ -15,6 +15,8 @@ type InfoHandler interface {
 	GetInfo(w http.ResponseWriter, r *http.Request)
 }
 
+const apiSpecPath = "connectorapi.yaml"
+
 func NewHandler(sHandler SignatureHandler, iHandler InfoHandler, middlewares []mux.MiddlewareFunc) http.Handler {
 	router := mux.NewRouter()
 
@@ -22,8 +24,10 @@ func NewHandler(sHandler SignatureHandler, iHandler InfoHandler, middlewares []m
 		router.Use(middleware)
 	}
 
-	registrationRouter := router.PathPrefix("/v1/remoteenvironments").Subrouter()
+	router.Path("/v1").Handler(http.RedirectHandler("/v1/api.yaml", http.StatusMovedPermanently)).Methods(http.MethodGet)
+	router.Path("/v1/api.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
 
+	registrationRouter := router.PathPrefix("/v1/remoteenvironments").Subrouter()
 	registrationRouter.HandleFunc("/{reName}/client-certs", sHandler.SignCSR).Methods(http.MethodPost)
 	registrationRouter.HandleFunc("/{reName}/info", iHandler.GetInfo).Methods(http.MethodGet)
 

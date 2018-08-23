@@ -4,6 +4,7 @@ package scheme
 
 import (
 	servicecatalogv1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	settingsv1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -35,4 +36,5 @@ func init() {
 // correctly.
 func AddToScheme(scheme *runtime.Scheme) {
 	servicecatalogv1alpha1.AddToScheme(scheme)
+	settingsv1alpha1.AddToScheme(scheme)
 }

@@ -44,7 +44,7 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/installer:0.3.165
+        image: eu.gcr.io/kyma-project/installer:0.3.205
         imagePullPolicy: IfNotPresent
         env:
           - name: AZURE_BROKER_SUBSCRIPTION_ID
@@ -71,18 +71,16 @@ spec:
                 name: azure-broker
                 key: azure_broker_client_secret
                 optional: true
-          - name: TLS_CERT
+          - name: TLS_CERT          
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: cluster-certificate
                 key: tls_cert
-                optional: true
           - name: TLS_KEY
             valueFrom:
-              secretKeyRef:
+              configMapKeyRef:
                 name: cluster-certificate
                 key: tls_key
-                optional: true
           - name: REMOTE_ENV_CA
             valueFrom:
               secretKeyRef:
@@ -163,11 +161,11 @@ spec:
                 name: installation-config
                 key: enable_etcd_backup_operator
                 optional: true
-          - name: ECTD_BACKUP_ABS_CONTAINER_NAME
+          - name: ETCD_BACKUP_ABS_CONTAINER_NAME
             valueFrom:
               configMapKeyRef:
                 name: installation-config
-                key: ectd_backup_abs_container_name
+                key: etcd_backup_abs_container_name
                 optional: true
           - name: VICTOR_OPS_API_KEY_VALUE
             valueFrom:
@@ -193,12 +191,6 @@ spec:
                 name: installation-config
                 key: slack_api_url
                 optional: true
-          - name: COMPONENT_LIST
-            valueFrom:
-              configMapKeyRef:
-                name: installation-config
-                key: components
-                optional: false
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1

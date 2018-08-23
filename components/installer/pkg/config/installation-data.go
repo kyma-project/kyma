@@ -1,8 +1,6 @@
 package config
 
 import (
-	"strings"
-
 	"github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
 )
 
@@ -25,7 +23,6 @@ type InstallationData struct {
 	AzureBrokerClientSecret    string
 	ClusterTLSKey              string
 	ClusterTLSCert             string
-	ClusterTLSPEMCert          string
 	RemoteEnvCa                string
 	RemoteEnvCaKey             string
 	RemoteEnvIP                string
@@ -38,7 +35,7 @@ type InstallationData struct {
 	EnableEtcdBackupOperator   string
 	EtcdBackupABSAccount       string
 	EtcdBackupABSKey           string
-	Components                 map[string]struct{}
+	Components                 map[string]v1alpha1.KymaComponent
 	IsLocalInstallation        bool
 	VictorOpsApiKey            string
 	VictorOpsRoutingKey        string
@@ -66,7 +63,6 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		AzureBrokerClientSecret:    installationConfig.AzureBrokerClientSecret,
 		ClusterTLSKey:              installationConfig.ClusterTLSKey,
 		ClusterTLSCert:             installationConfig.ClusterTLSCert,
-		ClusterTLSPEMCert:          installationConfig.ClusterTLSPEMCert,
 		RemoteEnvCa:                installationConfig.RemoteEnvCa,
 		RemoteEnvCaKey:             installationConfig.RemoteEnvCaKey,
 		RemoteEnvIP:                installationConfig.RemoteEnvIP,
@@ -79,7 +75,7 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		EnableEtcdBackupOperator:   installationConfig.EnableEtcdBackupOperator,
 		EtcdBackupABSAccount:       installationConfig.EtcdBackupABSAccount,
 		EtcdBackupABSKey:           installationConfig.EtcdBackupABSKey,
-		Components:                 convertToMap(installationConfig.ComponentsList),
+		Components:                 convertToMap(installation.Spec.Components),
 		IsLocalInstallation:        installationConfig.IsLocalInstallation,
 		VictorOpsApiKey:            installationConfig.VictorOpsApiKey,
 		VictorOpsRoutingKey:        installationConfig.VictorOpsRoutingKey,
@@ -95,12 +91,11 @@ func (installationData *InstallationData) ShouldInstallComponent(componentName s
 	return found
 }
 
-func convertToMap(cList string) map[string]struct{} {
-	split := strings.Split(strings.Replace(cList, " ", "", -1), ",")
-	output := make(map[string]struct{}, len(split))
-	for _, c := range split {
-		if c != "" {
-			output[c] = struct{}{}
+func convertToMap(cList []v1alpha1.KymaComponent) map[string]v1alpha1.KymaComponent {
+	output := make(map[string]v1alpha1.KymaComponent, len(cList))
+	for _, c := range cList {
+		if c.Name != "" {
+			output[c.Name] = c
 		}
 	}
 	return output

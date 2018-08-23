@@ -71,12 +71,22 @@ spec:
         {{- if .Values.apiserver.serveOpenAPISpec }}
         - --serve-openapi-spec
         {{- end }}
+        {{- if .Values.apiserver.storage.etcd.tls.enabled }}
+        - --etcd-cafile=/var/run/etcd-client/etcd-client-ca.crt
+        - --etcd-certfile=/var/run/etcd-client/etcd-client.crt
+        - --etcd-keyfile=/var/run/etcd-client/etcd-client.key
+        {{- end }}
         ports:
         - containerPort: 8443
         volumeMounts:
         - name: apiserver-cert
           mountPath: /var/run/kubernetes-service-catalog
           readOnly: true
+        {{- if .Values.apiserver.storage.etcd.tls.enabled }}
+        - name: etcd-client-cert
+          mountPath: /var/run/etcd-client
+          readOnly: true
+        {{- end }}
         {{- if .Values.apiserver.healthcheck.enabled }}
         readinessProbe:
           httpGet:
@@ -163,4 +173,9 @@ spec:
       {{- else }}
         emptyDir: {}
       {{- end }}
+      {{- end }}
+      {{- if .Values.apiserver.storage.etcd.tls.enabled }}
+      - name: etcd-client-cert
+        secret:
+          secretName: {{ .Values.apiserver.storage.etcd.tls.clientCertSecretName }}
       {{- end }}

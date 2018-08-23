@@ -1,6 +1,9 @@
 tls:
   secretName: "istio-ingress-certs"
 
-nginx:
-  configmapName: nginx-proxy-conf
-containerPort: 80  
+configmapName: oidc-ca
+containerPort: 8444  
+
+image: 
+  name: kube-rbac-proxy
+  tag: 0.3.1

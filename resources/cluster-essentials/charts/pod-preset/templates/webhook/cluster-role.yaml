@@ -1,0 +1,18 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "pod-preset.fullname" . }}-webhook
+  labels:
+    app: {{ template "pod-preset.name" . }}-webhook
+    chart: {{ template "pod-preset.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+rules:
+- apiGroups:
+  - settings.svcat.k8s.io
+  resources:
+  - podpresets
+  verbs:
+  - get
+  - list
+  - watch

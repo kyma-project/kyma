@@ -31,6 +31,7 @@ export APP_BLOB_PREFIX={prefix_name}
 
 export APP_BACKUP_CONFIG_MAP_NAME_FOR_TRACING="sc-recorded-etcd-backup-data"
 export APP_BACKUP_ETCD_ENDPOINTS="{endpoints}"
+export APP_BACKUP_CLIENT_TLS_SECRET="core-service-catalog-etcd-etcd-client-tls" # If the TLS for the etcd is enabled.
 
 export APP_CLEANER_LEAVE_MIN_NEWEST_BACKUP_BLOBS="3"
 export APP_CLEANER_EXPIRATION_BLOB_TIME="24h"

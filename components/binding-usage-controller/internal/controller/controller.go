@@ -13,13 +13,13 @@ import (
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/pretty"
 	sbuStatus "github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/status"
 	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	svcatSettings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
 	sbuClient "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 	sbuInformer "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions/servicecatalog/v1alpha1"
 	sbuLister "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	coreV1 "k8s.io/api/core/v1"
-	settingsV1alpha1 "k8s.io/api/settings/v1alpha1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -45,7 +45,7 @@ const (
 
 type (
 	podPresetModifier interface {
-		UpsertPodPreset(newPodPreset *settingsV1alpha1.PodPreset) error
+		UpsertPodPreset(newPodPreset *svcatSettings.PodPreset) error
 		EnsurePodPresetDeleted(name, namespace string) error
 	}
 
@@ -475,8 +475,8 @@ func (c *ServiceBindingUsageController) isUpdateNeeded(specA *sbuTypes.ServiceBi
 	return !reflect.DeepEqual(specA.Spec, specB.Spec)
 }
 
-func (c *ServiceBindingUsageController) createPodPresetForBindingUsage(bUsage *sbuTypes.ServiceBindingUsage) *settingsV1alpha1.PodPreset {
-	return &settingsV1alpha1.PodPreset{
+func (c *ServiceBindingUsageController) createPodPresetForBindingUsage(bUsage *sbuTypes.ServiceBindingUsage) *svcatSettings.PodPreset {
+	return &svcatSettings.PodPreset{
 		ObjectMeta: metaV1.ObjectMeta{
 			Namespace: bUsage.Namespace,
 			Name:      c.podPresetNameFromBindingUsageName(bUsage.Name),
@@ -484,7 +484,7 @@ func (c *ServiceBindingUsageController) createPodPresetForBindingUsage(bUsage *s
 				podPresetOwnerAnnotationKey: bUsage.Name,
 			},
 		},
-		Spec: settingsV1alpha1.PodPresetSpec{
+		Spec: svcatSettings.PodPresetSpec{
 			Selector: metaV1.LabelSelector{
 				MatchLabels: c.podPresetMatchLabels(bUsage),
 			},

@@ -11,7 +11,7 @@ kubectl get crd apis.gateway.kyma.cx -o yaml
 
 ## Sample Custom Resource
 
-This is a sample CR that the API-Controller listens for to expose a service. This example has the **authentication** section specified which makes the API-Controller create an Istio Authentication Policy for this service.
+This is a sample CR that the API-Controller listens for to expose a service. This example has the **authentication** section specified which makes the API Controller create an Istio Authentication Policy for this service.
 
 ```
 apiVersion: gateway.kyma.cx/v1alpha2

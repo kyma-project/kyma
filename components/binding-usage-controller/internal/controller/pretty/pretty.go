@@ -6,7 +6,7 @@ import (
 	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/pretty"
 	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	settingsV1alpha1 "k8s.io/api/settings/v1alpha1"
+	svcatSettings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -31,7 +31,7 @@ func ServiceBindingUsageName(obj *sbuTypes.ServiceBindingUsage) string {
 }
 
 // PodPresetName returns string with the type, namespace and name of PodPreset.
-func PodPresetName(obj *settingsV1alpha1.PodPreset) string {
+func PodPresetName(obj *svcatSettings.PodPreset) string {
 	return fmt.Sprintf(`PodPreset "%s/%s"`, obj.Namespace, obj.Name)
 }
 

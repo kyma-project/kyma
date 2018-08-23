@@ -9,11 +9,10 @@ data:
   remote_env_ca_key: "__REMOTE_ENV_CA_KEY__"
 ---
 apiVersion: v1
-kind: Secret
+kind: ConfigMap
 metadata:
   name: cluster-certificate
   namespace: kyma-installer
-type: Opaque
 data:
   tls_cert: "__TLS_CERT__"
   tls_key: "__TLS_KEY__"
@@ -33,7 +32,6 @@ data:
   admin_group: "__ADMIN_GROUP__"
   enable_etcd_backup_operator: "__ENABLE_ETCD_BACKUP_OPERATOR__"
   etcd_backup_abs_container_name: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
-  components: "cluster-prerequisites,cluster-essentials,istio,prometheus-operator,provision-bundles,dex,core,remote-environments" 
   slack_api_url: "__SLACK_API_URL_VALUE__"
   slack_channel: "__SLACK_CHANNEL_VALUE__"
   victor_ops_routing_key: "__VICTOR_OPS_ROUTING_KEY_VALUE__"

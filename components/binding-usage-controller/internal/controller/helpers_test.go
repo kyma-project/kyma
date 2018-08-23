@@ -9,11 +9,11 @@ import (
 
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/platform/logger/spy"
 	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	svcatSettings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	appsV1beta2 "k8s.io/api/apps/v1beta2"
 	coreV1 "k8s.io/api/core/v1"
-	k8sSettings "k8s.io/api/settings/v1alpha1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -44,15 +44,15 @@ func patchDeploymentAction(oldDeploy, newDeploy *appsV1beta2.Deployment) k8sTest
 
 var podpresetsResource = schema.GroupVersionResource{Group: "settings.k8s.io", Version: "v1alpha1", Resource: "podpresets"}
 
-func createPodPresetAction(pp *k8sSettings.PodPreset) k8sTesting.Action {
+func createPodPresetAction(pp *svcatSettings.PodPreset) k8sTesting.Action {
 	return k8sTesting.NewCreateAction(podpresetsResource, pp.Namespace, pp)
 }
 
-func updatePodPresetAction(pp *k8sSettings.PodPreset) k8sTesting.Action {
+func updatePodPresetAction(pp *svcatSettings.PodPreset) k8sTesting.Action {
 	return k8sTesting.NewUpdateAction(podpresetsResource, pp.Namespace, pp)
 }
 
-func deletePodPresetAction(pp *k8sSettings.PodPreset) k8sTesting.Action {
+func deletePodPresetAction(pp *svcatSettings.PodPreset) k8sTesting.Action {
 	return k8sTesting.NewDeleteAction(podpresetsResource, pp.Namespace, pp.Name)
 }
 
