@@ -1,5 +1,5 @@
 ---
-title: The Application Connector
+title: Overview
 type: Overview
 ---
 
