@@ -168,8 +168,8 @@ func (r *instanceResolver) ServiceInstanceServicePlanField(ctx context.Context, 
 		glog.Error(errors.New("ServiceInstance cannot be empty in order to resolve ServicePlan for instance"))
 		return nil, errors.New(errMessage)
 	}
-
 	if obj.ServicePlanName == nil {
+		glog.Warning(errors.New("ServicePlanName is empty during resolving ServicePlan for instance"))
 		return nil, nil
 	}
 
@@ -196,16 +196,20 @@ func (r *instanceResolver) ServiceInstanceServicePlanField(ctx context.Context, 
 func (r *instanceResolver) ServiceInstanceServiceClassField(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ServiceClass, error) {
 	errMessage := "Cannot query ServiceClass for instance"
 
-	if obj == nil || obj.ServiceClassName == nil {
-		glog.Error(errors.New("ServiceClassName cannot be empty in order to resolve ServiceClass for instance"))
+	if obj == nil {
+		glog.Error(errors.New("ServiceInstance cannot be empty in order to resolve ServiceClass for instance"))
 		return nil, errors.New(errMessage)
+	}
+	if obj.ServiceClassName == nil {
+		glog.Warning(errors.New("ServiceClassName is empty during resolving ServiceClass for instance"))
+		return nil, nil
 	}
 
 	externalErr := fmt.Errorf("%s `%s` in environment `%s`", errMessage, obj.Name, obj.Environment)
 
 	serviceClass, err := r.classGetter.Find(*obj.ServiceClassName)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting ServiceClass for  instance %s in environment `%s`", obj.Name, obj.Environment))
+		glog.Error(errors.Wrapf(err, "while getting ServiceClass for instance %s in environment `%s`", obj.Name, obj.Environment))
 		return nil, externalErr
 	}
 	if serviceClass == nil {
@@ -224,10 +228,17 @@ func (r *instanceResolver) ServiceInstanceServiceClassField(ctx context.Context,
 func (r *instanceResolver) ServiceInstanceBindableField(ctx context.Context, obj *gqlschema.ServiceInstance) (bool, error) {
 	errMessage := "Cannot query `bindable` field for instance"
 
-	// FIXME: It returns error for Create mutation, because ServiceClassName and ServicePlanName are empty
-	if obj == nil || obj.ServiceClassName == nil || obj.ServicePlanName == nil {
-		glog.Error(errors.New("ServiceClass or ServiceClassName or ServicePlanName cannot be empty in order to resolve ServiceClass for instance"))
+	if obj == nil {
+		glog.Error(errors.New("ServiceInstance cannot be empty in order to resolve `bindable` field for instance"))
 		return false, errors.New(errMessage)
+	}
+	if obj.ServiceClassName == nil {
+		glog.Warning(errors.New("ServiceClassName is empty during resolving `bindable` field for instance"))
+		return false, nil
+	}
+	if obj.ServicePlanName == nil {
+		glog.Warning(errors.New("ServicePlanName is empty during resolving `bindable` field for instance"))
+		return false, nil
 	}
 
 	externalErr := fmt.Errorf("%s `%s` in environment `%s`", errMessage, obj.Name, obj.Environment)

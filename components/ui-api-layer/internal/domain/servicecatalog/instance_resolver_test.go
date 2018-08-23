@@ -365,14 +365,28 @@ func TestInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) {
 		resourceGetter.On("Find", name).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		parentObj := &gqlschema.ServiceInstance{
+		parentObj := gqlschema.ServiceInstance{
 			Name:             "test",
 			ServiceClassName: &name,
 		}
 
 		resolver := servicecatalog.NewInstanceResolver(nil, nil, resourceGetter)
 
-		result, err := resolver.ServiceInstanceServiceClassField(nil, parentObj)
+		result, err := resolver.ServiceInstanceServiceClassField(nil, &parentObj)
+
+		require.NoError(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("ServiceClassName not provided", func(t *testing.T) {
+		parentObj := gqlschema.ServiceInstance{
+			Name:             "test",
+			ServiceClassName: nil,
+		}
+
+		resolver := servicecatalog.NewInstanceResolver(nil, nil, nil)
+
+		result, err := resolver.ServiceInstanceServiceClassField(nil, &parentObj)
 
 		require.NoError(t, err)
 		assert.Nil(t, result)
@@ -401,9 +415,13 @@ func TestInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) {
 
 func TestInstanceResolver_ServiceInstanceBindableField(t *testing.T) {
 	testErr := errors.New("Test")
+	className := "className"
+	planName := "planName"
 
 	for _, tc := range []struct {
 		// Input
+		className        *string
+		planName         *string
 		planErr          error
 		classErr         error
 		instanceBindable bool
@@ -412,13 +430,13 @@ func TestInstanceResolver_ServiceInstanceBindableField(t *testing.T) {
 		expectedResult    bool
 		shouldReturnError bool
 	}{
-		{planErr: nil, classErr: nil, instanceBindable: true, expectedResult: true, shouldReturnError: false},
-		{planErr: nil, classErr: nil, instanceBindable: false, expectedResult: false, shouldReturnError: false},
-		{planErr: testErr, classErr: nil, instanceBindable: false, expectedResult: false, shouldReturnError: true},
-		{planErr: nil, classErr: testErr, instanceBindable: false, expectedResult: false, shouldReturnError: true},
+		{className: &className, planName: &planName, planErr: nil, classErr: nil, instanceBindable: true, expectedResult: true, shouldReturnError: false},
+		{className: &className, planName: &planName, planErr: nil, classErr: nil, instanceBindable: false, expectedResult: false, shouldReturnError: false},
+		{className: &className, planName: &planName, planErr: testErr, classErr: nil, instanceBindable: false, expectedResult: false, shouldReturnError: true},
+		{className: &className, planName: &planName, planErr: nil, classErr: testErr, instanceBindable: false, expectedResult: false, shouldReturnError: true},
+		{className: &className, planName: nil, planErr: nil, classErr: nil, instanceBindable: false, expectedResult: false, shouldReturnError: false},
+		{className: nil, planName: &planName, planErr: nil, classErr: nil, instanceBindable: false, expectedResult: false, shouldReturnError: false},
 	} {
-		className := "className"
-		planName := "planName"
 		class := &v1beta1.ClusterServiceClass{}
 		plan := &v1beta1.ClusterServicePlan{}
 
@@ -433,8 +451,8 @@ func TestInstanceResolver_ServiceInstanceBindableField(t *testing.T) {
 
 		parentObj := &gqlschema.ServiceInstance{
 			Name:             "test",
-			ServiceClassName: &className,
-			ServicePlanName:  &planName,
+			ServiceClassName: tc.className,
+			ServicePlanName:  tc.planName,
 		}
 
 		result, err := resolver.ServiceInstanceBindableField(nil, parentObj)
@@ -446,7 +464,6 @@ func TestInstanceResolver_ServiceInstanceBindableField(t *testing.T) {
 		}
 		assert.Equal(t, tc.expectedResult, result)
 	}
-
 }
 
 func TestInstanceResolver_ServiceInstanceEventSubscription(t *testing.T) {
