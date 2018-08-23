@@ -19,11 +19,11 @@ service:
 `
 
 // GetHmcDefaultOverrides returns values overrides for hmc default remote environment
-func GetHmcDefaultOverrides() string {
-	return hmcDefault
+func GetHmcDefaultOverrides() (Map, error) {
+	return ToMap(hmcDefault)
 }
 
 // GetEcDefaultOverrides returns values overrides for ec default remote environment
-func GetEcDefaultOverrides() string {
-	return ecDefault
+func GetEcDefaultOverrides() (Map, error) {
+	return ToMap(ecDefault)
 }

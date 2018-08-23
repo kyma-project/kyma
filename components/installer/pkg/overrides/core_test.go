@@ -12,70 +12,72 @@ func TestGetCoreOverrides(t *testing.T) {
 		Convey("when InstallationData does not contain domain name overrides should be empty", func() {
 
 			installationData := NewInstallationDataCreator().WithEmptyDomain().GetData()
-			overrides, err := GetCoreOverrides(&installationData)
+			overridesMap, err := GetCoreOverrides(&installationData)
+			So(err, ShouldBeNil)
 
+			overrides, err := ToYaml(overridesMap)
 			So(err, ShouldBeNil)
 			So(overrides, ShouldBeBlank)
 		})
 
 		Convey("when InstallationData contains domain name overrides should contain yaml", func() {
-			const dummyOverridesForCore = `
+			const dummyOverridesForCore = `cluster-users:
+  users:
+    adminGroup: testgroup
+configurations-generator:
+  kubeConfig:
+    ca: null
+    clusterName: kyma.local
+    url: null
+etcd-operator:
+  backupOperator:
+    abs:
+      storageAccount: ""
+      storageKey: ""
+    enabled: ""
 nginx-ingress:
   controller:
     service:
       loadBalancerIP: 1.1.1.1
-configurations-generator:
-  kubeConfig:
-    clusterName: kyma.local
-    url: 
-    ca: 
-cluster-users:
-  users:
-    adminGroup: testgroup
 test:
   auth:
-    username: ""
     password: ""
-etcd-operator:
-  backupOperator:
-    enabled: ""
-    abs:
-      storageAccount: ""
-      storageKey: ""
+    username: ""
 `
 			installationData := NewInstallationDataCreator().WithDomain("kyma.local").WithRemoteEnvIP("1.1.1.1").WithAdminGroup("testgroup").
 				GetData()
 
-			overrides, err := GetCoreOverrides(&installationData)
+			overridesMap, err := GetCoreOverrides(&installationData)
+			So(err, ShouldBeNil)
 
+			overrides, err := ToYaml(overridesMap)
 			So(err, ShouldBeNil)
 			So(overrides, ShouldEqual, dummyOverridesForCore)
 		})
 
 		Convey("when test properties are provided, auth.username and auth.password should exist", func() {
-			const dummyOverridesForCore = `
+			const dummyOverridesForCore = `cluster-users:
+  users:
+    adminGroup: null
+configurations-generator:
+  kubeConfig:
+    ca: null
+    clusterName: kyma.local
+    url: null
+etcd-operator:
+  backupOperator:
+    abs:
+      storageAccount: ""
+      storageKey: ""
+    enabled: ""
 nginx-ingress:
   controller:
     service:
       loadBalancerIP: 1.1.1.1
-configurations-generator:
-  kubeConfig:
-    clusterName: kyma.local
-    url: 
-    ca: 
-cluster-users:
-  users:
-    adminGroup: 
 test:
   auth:
-    username: "user1"
-    password: "p@ssw0rd"
-etcd-operator:
-  backupOperator:
-    enabled: ""
-    abs:
-      storageAccount: ""
-      storageKey: ""
+    password: p@ssw0rd
+    username: user1
 `
 			installationData := NewInstallationDataCreator().
 				WithDomain("kyma.local").
@@ -83,36 +85,37 @@ etcd-operator:
 				WithUITestCredentials("user1", "p@ssw0rd").
 				GetData()
 
-			overrides, err := GetCoreOverrides(&installationData)
+			overridesMap, err := GetCoreOverrides(&installationData)
+			So(err, ShouldBeNil)
 
+			overrides, err := ToYaml(overridesMap)
 			So(err, ShouldBeNil)
 			So(overrides, ShouldEqual, dummyOverridesForCore)
 		})
 
 		Convey("when etcd-operator properties are provided then enabled, abs.storageAccount and abs.storageKey should exist", func() {
-			const dummyOverridesForCore = `
+			const dummyOverridesForCore = `cluster-users:
+  users:
+    adminGroup: null
+configurations-generator:
+  kubeConfig:
+    ca: null
+    clusterName: kyma.local
+    url: null
+etcd-operator:
+  backupOperator:
+    abs:
+      storageAccount: pico-bello
+      storageKey: 123-456-3245-a23b
+    enabled: "true"
 nginx-ingress:
   controller:
     service:
       loadBalancerIP: 1.1.1.1
-configurations-generator:
-  kubeConfig:
-    clusterName: kyma.local
-    url: 
-    ca: 
-cluster-users:
-  users:
-    adminGroup: 
 test:
   auth:
-    username: ""
     password: ""
-etcd-operator:
-  backupOperator:
-    enabled: "true"
-    abs:
-      storageAccount: "pico-bello"
-      storageKey: "123-456-3245-a23b"
+    username: ""
 `
 			installationData := NewInstallationDataCreator().
 				WithDomain("kyma.local").
@@ -120,8 +123,10 @@ etcd-operator:
 				WithEtcdOperator("true", "pico-bello", "123-456-3245-a23b").
 				GetData()
 
-			overrides, err := GetCoreOverrides(&installationData)
+			overridesMap, err := GetCoreOverrides(&installationData)
+			So(err, ShouldBeNil)
 
+			overrides, err := ToYaml(overridesMap)
 			So(err, ShouldBeNil)
 			So(overrides, ShouldEqual, dummyOverridesForCore)
 		})

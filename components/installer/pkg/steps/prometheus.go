@@ -3,10 +3,10 @@ package steps
 import (
 	"log"
 	"path"
-	"strings"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
 	"github.com/kyma-project/kyma/components/installer/pkg/consts"
+	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 )
 
 //InstallPrometheus .
@@ -15,7 +15,12 @@ func (steps *InstallationSteps) InstallPrometheus(installationData *config.Insta
 	const namespace = "kyma-system"
 
 	chartDir := path.Join(steps.chartDir, consts.PrometheusComponent)
-	overrides := steps.getPrometheusOverrides(installationData, chartDir)
+	overrides, err := steps.getPrometheusOverrides(installationData, chartDir)
+
+	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
 
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -43,7 +48,12 @@ func (steps *InstallationSteps) UpdatePrometheus(installationData *config.Instal
 	const namespace = "kyma-system"
 
 	chartDir := path.Join(steps.chartDir, consts.PrometheusComponent)
-	overrides := steps.getPrometheusOverrides(installationData, chartDir)
+	overrides, err := steps.getPrometheusOverrides(installationData, chartDir)
+
+	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
 
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -63,15 +73,16 @@ func (steps *InstallationSteps) UpdatePrometheus(installationData *config.Instal
 
 	return nil
 }
-func (steps *InstallationSteps) getPrometheusOverrides(installationData *config.InstallationData, chartDir string) string {
-	var allOverrides []string
+func (steps *InstallationSteps) getPrometheusOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
+	//TODO: this does not get globalOverrides... Is that a problem if global will carry all external ones (overrides.yaml + from configMaps/secrets?)
+	allOverrides := overrides.Map{}
 
-	fileOverrides := steps.getStaticFileOverrides(installationData, chartDir)
-	if fileOverrides.HasOverrides() == true {
-		fileOverridesStr, err := fileOverrides.GetOverrides()
+	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
+	if staticOverrides.HasOverrides() == true {
+		fileOverrides, err := staticOverrides.GetOverrides()
 		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
-		allOverrides = append(allOverrides, *fileOverridesStr)
+		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
-	return strings.Join(allOverrides, "\n")
+	return overrides.ToYaml(allOverrides)
 }

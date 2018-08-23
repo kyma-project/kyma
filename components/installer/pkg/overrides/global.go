@@ -31,18 +31,18 @@ global:
 `
 
 // GetGlobalOverrides .
-func GetGlobalOverrides(installationData *config.InstallationData) (string, error) {
+func GetGlobalOverrides(installationData *config.InstallationData) (Map, error) {
 
 	tmpl, err := template.New("").Parse(globalsTplStr)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	buf := new(bytes.Buffer)
 	err = tmpl.Execute(buf, installationData)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return buf.String(), nil
+	return ToMap(buf.String())
 }
