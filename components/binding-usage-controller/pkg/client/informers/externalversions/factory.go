@@ -10,6 +10,7 @@ import (
 	versioned "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions/internalinterfaces"
 	servicecatalog "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions/servicecatalog"
+	settings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions/settings"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -108,8 +109,13 @@ type SharedInformerFactory interface {
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
 	Servicecatalog() servicecatalog.Interface
+	Settings() settings.Interface
 }
 
 func (f *sharedInformerFactory) Servicecatalog() servicecatalog.Interface {
 	return servicecatalog.New(f, f.namespace, f.tweakListOptions)
+}
+
+func (f *sharedInformerFactory) Settings() settings.Interface {
+	return settings.New(f, f.namespace, f.tweakListOptions)
 }
