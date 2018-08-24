@@ -9,6 +9,18 @@ data:
   remote_env_ca_key: "__REMOTE_ENV_CA_KEY__"
 ---
 apiVersion: v1
+kind: Secret
+metadata:
+  name: remote-env-certificate-verrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+type: Opaque
+data:
+  global.remoteEnvCa: "__REMOTE_ENV_CA__"
+  global.remoteEnvCaKey: "__REMOTE_ENV_CA_KEY__"
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cluster-certificate
@@ -16,6 +28,17 @@ metadata:
 data:
   tls_cert: "__TLS_CERT__"
   tls_key: "__TLS_KEY__"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-certificate-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+data:
+  global.tlsCrt: "__TLS_CERT__"
+  global.tlsKey: "__TLS_KEY__"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -36,3 +59,25 @@ data:
   slack_channel: "__SLACK_CHANNEL_VALUE__"
   victor_ops_routing_key: "__VICTOR_OPS_ROUTING_KEY_VALUE__"
   victor_ops_api_key: "__VICTOR_OPS_API_KEY_VALUE__"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: installation-config-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+data:
+  global.isLocalEnv: "__IS_LOCAL_INSTALLATION__"
+  ingressgateway.service.externalPublicIp: "__EXTERNAL_PUBLIC_IP__"
+  global.domainName: "__DOMAIN__"
+  nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
+  configurations-generator.kubeConfig.url: "__K8S_APISERVER_URL__"
+  configurations-generator.kubeConfig.ca: "__K8S_APISERVER_CA__"
+  cluster-users.users.adminGroup: "__ADMIN_GROUP__"
+  etcd-operator.backupOperator.enabled: "__ENABLE_ETCD_BACKUP_OPERATOR__"
+  global.etcdBackupABS.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
+  global.alertTools.credentials.slack.apiurl: "__SLACK_API_URL_VALUE__"
+  global.alertTools.credentials.slack.channel: "__SLACK_CHANNEL_VALUE__"
+  global.alertTools.credentials.victorOps.routingkey: "__VICTOR_OPS_ROUTING_KEY_VALUE__"
+  global.alertTools.credentials.victorOps.apikey: "__VICTOR_OPS_API_KEY_VALUE__"
