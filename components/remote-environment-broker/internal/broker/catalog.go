@@ -26,7 +26,6 @@ type catalogService struct {
 }
 
 func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*osb.CatalogResponse, error) {
-
 	reList, err := svc.finder.FindAll()
 	if err != nil {
 		return nil, errors.Wrap(err, "while finding Remote Environments")

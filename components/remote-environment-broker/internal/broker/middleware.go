@@ -4,16 +4,48 @@ import (
 	"net/http"
 
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	"github.com/sirupsen/logrus"
 )
 
 // OSBContextMiddleware implements Handler interface
-type OSBContextMiddleware struct{}
+type OSBContextMiddleware struct {
+	brokerFlavor brokerFlavorProvider
+	log          *logrus.Entry
+}
+
+//go:generate mockery -name=brokerFlavorProvider -output=automock -outpkg=automock -case=underscore
+type brokerFlavorProvider interface {
+	IsClusterScoped() bool
+	GetNsFromBrokerURL(url string) (string, error)
+}
+
+// NewOsbContextMiddleware created OsbContext middleware
+func NewOsbContextMiddleware(brokerFlavorProvider brokerFlavorProvider, log *logrus.Entry) *OSBContextMiddleware {
+	return &OSBContextMiddleware{
+		brokerFlavor: brokerFlavorProvider,
+		log:          log.WithField("service", "OSBContextMiddleware"),
+	}
+}
 
 // ServeHTTP adds content of Open Service Broker Api headers to the requests
-func (OSBContextMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func (m *OSBContextMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	brokerNamespace := ""
+	if m.brokerFlavor.IsClusterScoped() == false {
+		var err error
+		brokerNamespace, err = m.brokerFlavor.GetNsFromBrokerURL(r.Host)
+		if err != nil {
+			errMsg := "misconfiguration, broker is running as a namespace-scoped, but cannot extract namespace from request host"
+			m.log.Error(errMsg, err)
+			writeErrorResponse(rw, http.StatusInternalServerError, errMsg, "")
+			return
+		}
+	}
+
 	osbCtx := osbContext{
 		APIVersion:          r.Header.Get(osb.APIVersionHeader),
 		OriginatingIdentity: r.Header.Get(osb.OriginatingIdentityHeader),
+		BrokerNamespace:     brokerNamespace,
+		ClusterScopedBroker: m.brokerFlavor.IsClusterScoped(),
 	}
 
 	r = r.WithContext(contextWithOSB(r.Context(), osbCtx))

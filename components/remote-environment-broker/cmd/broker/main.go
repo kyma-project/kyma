@@ -63,7 +63,7 @@ func main() {
 	scInformersGroup := scInformerFactory.Servicecatalog().V1beta1()
 
 	// instance populator
-	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), cfg.BrokerName)
+	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), cfg.ClusterScopedBrokerName)
 	popCtx, popCancelFunc := context.WithTimeout(context.Background(), time.Minute)
 	defer popCancelFunc()
 	log.Info("Instance storage population...")
@@ -78,7 +78,7 @@ func main() {
 	reInformersGroup := reInformerFactory.Remoteenvironment().V1alpha1()
 
 	// internal services
-	relistRequester := syncer.NewRelistRequester(scSDK, cfg.BrokerName, cfg.BrokerRelistDurationWindow, log)
+	relistRequester := syncer.NewRelistRequester(scSDK, cfg.ClusterScopedBrokerName, cfg.BrokerRelistDurationWindow, log)
 	siFacade := broker.NewServiceInstanceFacade(scInformersGroup.ServiceInstances().Informer())
 	accessChecker := access.New(sFact.RemoteEnvironment(), reClient.RemoteenvironmentV1alpha1(), sFact.Instance())
 
@@ -87,7 +87,7 @@ func main() {
 
 	// create broker
 	srv := broker.New(sFact.RemoteEnvironment(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
-		reClient.RemoteenvironmentV1alpha1(), siFacade, log)
+		reClient.RemoteenvironmentV1alpha1(), siFacade, config.NewBrokerFlavorFromConfig(cfg), log)
 
 	// setup graceful shutdown signals
 	ctx, cancelFunc := context.WithCancel(context.Background())
