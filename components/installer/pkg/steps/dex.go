@@ -15,7 +15,7 @@ func (steps *InstallationSteps) InstallDex(installationData *config.Installation
 	const stepName string = "Installing Dex"
 	const namespace string = "kyma-system"
 
-	chartDir := path.Join(steps.chartDir, consts.DexComponent)
+	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.DexComponent)
 	overrides, err := steps.getDexOverrides(installationData, chartDir)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
@@ -49,7 +49,7 @@ func (steps *InstallationSteps) UpdateDex(installationData *config.InstallationD
 	const stepName string = "Updating Dex"
 	const namespace string = "kyma-system"
 
-	chartDir := path.Join(steps.chartDir, consts.DexComponent)
+	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.DexComponent)
 	overrides, err := steps.getDexOverrides(installationData, chartDir)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {

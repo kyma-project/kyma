@@ -18,7 +18,7 @@ func (steps InstallationSteps) InstallCore(installationData *config.Installation
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
-	chartDir := path.Join(steps.chartDir, consts.CoreComponent)
+	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.CoreComponent)
 	coreOverrides, err := steps.getCoreOverrides(installationData, chartDir)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
@@ -51,7 +51,7 @@ func (steps InstallationSteps) UpgradeCore(installationData *config.Installation
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
-	chartDir := path.Join(steps.chartDir, consts.CoreComponent)
+	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.CoreComponent)
 	coreOverrides, err := steps.getCoreOverrides(installationData, chartDir)
 
 	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {

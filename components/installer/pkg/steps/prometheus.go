@@ -14,7 +14,7 @@ func (steps *InstallationSteps) InstallPrometheus(installationData *config.Insta
 	const stepName string = "Installing Prometheus operator"
 	const namespace = "kyma-system"
 
-	chartDir := path.Join(steps.chartDir, consts.PrometheusComponent)
+	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.PrometheusComponent)
 	overrides, err := steps.getPrometheusOverrides(installationData, chartDir)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
@@ -47,7 +47,7 @@ func (steps *InstallationSteps) UpdatePrometheus(installationData *config.Instal
 	const stepName string = "Updating Prometheus operator"
 	const namespace = "kyma-system"
 
-	chartDir := path.Join(steps.chartDir, consts.PrometheusComponent)
+	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.PrometheusComponent)
 	overrides, err := steps.getPrometheusOverrides(installationData, chartDir)
 
 	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {

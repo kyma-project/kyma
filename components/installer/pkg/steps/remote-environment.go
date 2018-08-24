@@ -20,7 +20,7 @@ func (steps *InstallationSteps) InstallHmcDefaultRemoteEnvironments(installation
 	steps.PrintInstallationStep(stepName)
 
 	steps.statusManager.InProgress(stepName)
-	chartDir := path.Join(steps.chartDir, consts.RemoteEnvironments)
+	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.RemoteEnvironments)
 	hmcOverrides, err := steps.getHmcOverrides(installationData, chartDir)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
@@ -47,7 +47,7 @@ func (steps *InstallationSteps) UpdateHmcDefaultRemoteEnvironments(installationD
 
 	steps.statusManager.InProgress(stepName)
 
-	chartDir := path.Join(steps.chartDir, consts.RemoteEnvironments)
+	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.RemoteEnvironments)
 	hmcOverrides, err := steps.getHmcOverrides(installationData, chartDir)
 	if steps.errorHandlers.CheckError("Update Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -72,7 +72,7 @@ func (steps *InstallationSteps) InstallEcDefaultRemoteEnvironments(installationD
 	steps.PrintInstallationStep(stepName)
 
 	steps.statusManager.InProgress(stepName)
-	chartDir := path.Join(steps.chartDir, consts.RemoteEnvironments)
+	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.RemoteEnvironments)
 	ecOverrides, err := steps.getEcOverrides(installationData, chartDir)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
@@ -98,7 +98,7 @@ func (steps *InstallationSteps) UpdateEcDefaultRemoteEnvironments(installationDa
 	steps.PrintInstallationStep(stepName)
 
 	steps.statusManager.InProgress(stepName)
-	chartDir := path.Join(steps.chartDir, consts.RemoteEnvironments)
+	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.RemoteEnvironments)
 	ecOverrides, err := steps.getEcOverrides(installationData, chartDir)
 
 	if steps.errorHandlers.CheckError("Update Error: ", err) {

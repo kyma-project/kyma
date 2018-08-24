@@ -14,7 +14,7 @@ func (steps InstallationSteps) ProvisionBundles(installationData *config.Install
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
-	helmBrokerScriptPath := path.Join(steps.chartDir, "helm-broker-repo/install.sh")
+	helmBrokerScriptPath := path.Join(steps.currentPackage.GetChartsDirPath(), "helm-broker-repo/install.sh")
 
 	err := steps.kymaCommandExecutor.RunCommand("/bin/bash", helmBrokerScriptPath)
 
@@ -34,7 +34,7 @@ func (steps InstallationSteps) UpdateBundles(installationData *config.Installati
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
-	helmBrokerScriptPath := path.Join(steps.chartDir, "helm-broker-repo/update.sh")
+	helmBrokerScriptPath := path.Join(steps.currentPackage.GetChartsDirPath(), "helm-broker-repo/update.sh")
 
 	err := steps.kymaCommandExecutor.RunBashCommand(helmBrokerScriptPath, toolkit.EmptyArgs)
 
