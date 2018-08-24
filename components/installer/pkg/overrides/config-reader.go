@@ -15,7 +15,8 @@ var listOpts = metav1.ListOptions{LabelSelector: labelSelector}
 
 // ReaderInterface exposes functions
 type ReaderInterface interface {
-	GetFullConfigMap() (map[string]string, error)
+	GetCommonConfig() (map[string]string, error)
+	GetComponentConfig(componentName string) (map[string]string, error)
 }
 
 type reader struct {
@@ -30,7 +31,11 @@ func NewReader(client *kubernetes.Clientset) (ReaderInterface, error) {
 	return r, nil
 }
 
-func (r reader) GetFullConfigMap() (map[string]string, error) {
+func (r reader) GetComponentConfig(componentName string) (map[string]string, error) {
+	return nil, nil
+}
+
+func (r reader) GetCommonConfig() (map[string]string, error) {
 
 	var combined = make(map[string]string)
 
