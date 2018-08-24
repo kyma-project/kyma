@@ -5,7 +5,7 @@ kind: ClusterRole
 metadata:
   name: test-{{ template "fullname" . }}
   labels:
-    helm-chart-test: "false"
+    helm-chart-test: "true"
 rules:
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
@@ -37,6 +37,9 @@ rules:
 - apiGroups: ["remoteenvironment.kyma.cx"]
   resources: ["eventactivations"]
   verbs: ["create", "delete", "get", "list"]
+- apiGroups: ["networking.istio.io"]
+  resources: ["virtualservices"]
+  verbs: ["get"]
 
 
 ---
@@ -67,7 +70,7 @@ kind: Pod
 metadata:
   name: test-{{ template "fullname" . }}
   labels:
-    helm-chart-test: "false"
+    helm-chart-test: "true"
   annotations:
     helm.sh/hook: test-success
 spec:
