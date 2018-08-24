@@ -103,6 +103,7 @@ type fsWrapperForCreatingDir struct {
 	FilesystemWrapperMock
 }
 
+func (fsWrapperForCreatingDir) Exists(path string) bool               { return false }
 func (fsWrapperForCreatingDir) CreateDir(packageDirPath string) error { return nil }
 
 type mockCommandExecutor struct {

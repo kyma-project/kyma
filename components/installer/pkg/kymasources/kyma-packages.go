@@ -75,7 +75,12 @@ func (kps *kymaPackages) FetchPackage(url, version string) error {
 	outputFilePath := path.Join(kps.rootDir, version+".tar.gz")
 	packageDirPath := kps.getPackageDirPath(version)
 
-	err := kps.downloadPackage(url, outputFilePath)
+	err := kps.prepareRootDir()
+	if err != nil {
+		return err
+	}
+
+	err = kps.downloadPackage(url, outputFilePath)
 	if err != nil {
 		return err
 	}
@@ -88,6 +93,14 @@ func (kps *kymaPackages) FetchPackage(url, version string) error {
 	err = kps.extractPackage(outputFilePath, packageDirPath)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (kps *kymaPackages) prepareRootDir() error {
+	if kps.fsWrapper.Exists(kps.rootDir) == false {
+		return kps.fsWrapper.CreateDir(kps.rootDir)
 	}
 
 	return nil
