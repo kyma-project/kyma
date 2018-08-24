@@ -75,14 +75,20 @@ func (kps *kymaPackages) FetchPackage(url, version string) error {
 	outputFilePath := path.Join(kps.rootDir, version+".tar.gz")
 	packageDirPath := kps.getPackageDirPath(version)
 
-	kps.downloadPackage(url, outputFilePath)
-
-	err := kps.fsWrapper.CreateDir(packageDirPath)
+	err := kps.downloadPackage(url, outputFilePath)
 	if err != nil {
 		return err
 	}
 
-	kps.extractPackage(outputFilePath, packageDirPath)
+	err = kps.fsWrapper.CreateDir(packageDirPath)
+	if err != nil {
+		return err
+	}
+
+	err = kps.extractPackage(outputFilePath, packageDirPath)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -97,12 +103,12 @@ func (kps *kymaPackages) getPackageDirPath(version string) string {
 	return packageDirPath
 }
 
-func (kps *kymaPackages) extractPackage(packageFilePath, packageDirPath string) {
-	kps.cmdExecutor.RunCommand("tar", "xz", "-C", packageDirPath, "--strip-components=1", "-f", packageFilePath)
+func (kps *kymaPackages) extractPackage(packageFilePath, packageDirPath string) error {
+	return kps.cmdExecutor.RunCommand("tar", "xz", "-C", packageDirPath, "--strip-components=1", "-f", packageFilePath)
 }
 
-func (kps *kymaPackages) downloadPackage(url, outputFilePath string) {
-	kps.cmdExecutor.RunCommand("curl", "-Lks", url, "-o", outputFilePath)
+func (kps *kymaPackages) downloadPackage(url, outputFilePath string) error {
+	return kps.cmdExecutor.RunCommand("curl", "-Lks", url, "-o", outputFilePath)
 }
 
 // NewKymaPackages returns instance of `KymaPackages` type
