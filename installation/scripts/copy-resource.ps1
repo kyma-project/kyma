@@ -2,7 +2,7 @@ $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 $LOCAL_DIR = "${CURRENT_DIR}\..\..".Substring(2)
 $INSTALLER_NS = "kyma-installer"
 $INSTALLER_POD = "kyma-installer"
-$REMOTE_DIR = "/kyma"
+$REMOTE_DIR = "/kyma/injected"
 
 $cmd = "${CURRENT_DIR}\is-ready.ps1 -ns ${INSTALLER_NS} name ${INSTALLER_POD}"
 Invoke-Expression -Command $cmd
@@ -15,7 +15,7 @@ Write-Output "Copying kyma sources from ${LOCAL_DIR} into ${POD_NAME}:${REMOTE_D
 $cmd = "kubectl.exe exec -n ${INSTALLER_NS} ${POD_NAME} -- /bin/rm -rf ${REMOTE_DIR}"
 Invoke-Expression -Command $cmd
 
-$cmd = "kubectl.exe exec -n ${INSTALLER_NS} ${POD_NAME} -- /bin/mkdir ${REMOTE_DIR}"
+$cmd = "kubectl.exe exec -n ${INSTALLER_NS} ${POD_NAME} -- /bin/mkdir -p ${REMOTE_DIR}"
 Invoke-Expression -Command $cmd
 
 $cmd = "kubectl.exe cp ${LOCAL_DIR}\resources ${INSTALLER_NS}/${POD_NAME}:${REMOTE_DIR}/resources"
