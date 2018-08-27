@@ -6,6 +6,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymasources"
+	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/installer/pkg/statusmanager"
@@ -192,4 +193,28 @@ func getCommonTestSetup(mockHelmClient kymahelm.ClientInterface, mockCommandExec
 	installationData := toolkit.NewInstallationDataCreator().GetData()
 
 	return &installationData, kymaTestSteps
+}
+
+type MockOverrideData struct {
+	common       overrides.Map
+	forComponent map[string](overrides.Map)
+}
+
+func (mod MockOverrideData) Common() overrides.Map {
+	if mod.common == nil {
+		return overrides.Map{}
+	}
+	return mod.common
+}
+
+func (mod MockOverrideData) ForComponent(componentName string) overrides.Map {
+
+	if mod.forComponent == nil {
+		return overrides.Map{}
+	}
+	res := mod.forComponent[componentName]
+	if res == nil {
+		return overrides.Map{}
+	}
+	return res
 }

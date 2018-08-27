@@ -16,7 +16,7 @@ func TestInstallPrometheus(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once and call InstallRelease returning no error", func() {
 
-				err := kymaTestSteps.InstallPrometheus(installationData)
+				err := kymaTestSteps.InstallPrometheus(installationData, MockOverrideData{})
 
 				So(mockHelmClient.InstallReleaseCalled, ShouldBeTrue)
 				So(err, ShouldBeNil)
@@ -29,7 +29,7 @@ func TestInstallPrometheus(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once, call InstallRelease, call UpdateInstallationStatus again and return the error", func() {
 
-				err := kymaTestSteps.InstallPrometheus(installationData)
+				err := kymaTestSteps.InstallPrometheus(installationData, MockOverrideData{})
 
 				So(mockErrorHelmClient.InstallReleaseCalled, ShouldBeTrue)
 				So(err, ShouldNotBeNil)

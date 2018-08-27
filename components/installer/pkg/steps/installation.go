@@ -31,6 +31,11 @@ type InstallationSteps struct {
 	installedPackage kymasources.KymaPackage
 }
 
+type OverrideData interface {
+	Common() overrides.Map
+	ForComponent(componentName string) overrides.Map
+}
+
 // New .
 func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientset,
 	serviceCatalog serviceCatalog.ClientInterface, statusManager statusmanager.StatusManager,

@@ -13,7 +13,7 @@ import (
 const kymaPath = "/kyma"
 
 //InstallCore .
-func (steps InstallationSteps) InstallCore(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
+func (steps InstallationSteps) InstallCore(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Installing core"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -58,7 +58,7 @@ func (steps InstallationSteps) InstallCore(installationData *config.Installation
 }
 
 //UpgradeCore .
-func (steps InstallationSteps) UpgradeCore(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
+func (steps InstallationSteps) UpgradeCore(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Upgrading core"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)

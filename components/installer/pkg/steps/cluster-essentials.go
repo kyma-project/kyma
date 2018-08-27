@@ -10,7 +10,7 @@ import (
 )
 
 // InstallClusterEssentials .
-func (steps *InstallationSteps) InstallClusterEssentials(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
+func (steps *InstallationSteps) InstallClusterEssentials(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Installing cluster-essentials"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -52,7 +52,7 @@ func (steps *InstallationSteps) InstallClusterEssentials(installationData *confi
 }
 
 // UpdateClusterEssentials .
-func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
+func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Updating cluster-essentials"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)

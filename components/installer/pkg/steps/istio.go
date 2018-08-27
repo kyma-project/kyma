@@ -10,7 +10,7 @@ import (
 )
 
 // InstallIstio .
-func (steps *InstallationSteps) InstallIstio(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
+func (steps *InstallationSteps) InstallIstio(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Installing istio"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -53,7 +53,7 @@ func (steps *InstallationSteps) InstallIstio(installationData *config.Installati
 }
 
 // UpdateIstio .
-func (steps *InstallationSteps) UpdateIstio(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
+func (steps *InstallationSteps) UpdateIstio(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Updating istio"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)

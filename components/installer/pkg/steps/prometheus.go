@@ -10,7 +10,7 @@ import (
 )
 
 //InstallPrometheus .
-func (steps *InstallationSteps) InstallPrometheus(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
+func (steps *InstallationSteps) InstallPrometheus(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Installing Prometheus operator"
 	const namespace = "kyma-system"
 
@@ -54,7 +54,7 @@ func (steps *InstallationSteps) InstallPrometheus(installationData *config.Insta
 }
 
 //UpdatePrometheus .
-func (steps *InstallationSteps) UpdatePrometheus(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
+func (steps *InstallationSteps) UpdatePrometheus(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Updating Prometheus operator"
 	const namespace = "kyma-system"
 
