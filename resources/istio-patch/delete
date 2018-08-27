@@ -1,0 +1,16 @@
+deployment service-graph
+deployment prometheus
+deployment istio-tracing
+deployment servicegraph
+deployment grafana
+job istio-grafana-post-install
+service grafana
+service jaeger-agent
+service jaeger-collector
+service jaeger-query
+service prometheus
+service servicegraph
+service tracing
+service zipkin
+serviceaccount istio-grafana-post-install-account
+serviceaccount prometheus 

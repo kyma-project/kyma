@@ -1,0 +1,7 @@
+[
+  {
+    "op": "add",
+    "path": "/spec/template/spec/containers/0/args",
+    "value": ["discovery", "--webhookEndpoint", "http://istio-webhook:5000"]
+  }
+]

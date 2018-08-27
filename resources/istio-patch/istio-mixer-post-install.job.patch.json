@@ -1,0 +1,8 @@
+[
+  {
+    "op": "replace",
+    "path": "/metadata/annotations/helm.sh~1hook-delete-policy",
+    "value": "hook-succeeded"
+  }
+]
+
