@@ -2,13 +2,13 @@ package steps
 
 import (
 	"log"
-	"path"
 
 	actionmanager "github.com/kyma-project/kyma/components/installer/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
 	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 	internalerrors "github.com/kyma-project/kyma/components/installer/pkg/errors"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
+	"github.com/kyma-project/kyma/components/installer/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 	serviceCatalog "github.com/kyma-project/kyma/components/installer/pkg/servicecatalog"
 	statusmanager "github.com/kyma-project/kyma/components/installer/pkg/statusmanager"
@@ -22,27 +22,29 @@ type InstallationSteps struct {
 	kubeClientset       *kubernetes.Clientset
 	serviceCatalog      serviceCatalog.ClientInterface
 	errorHandlers       internalerrors.ErrorHandlersInterface
-	chartDir            string
 	statusManager       statusmanager.StatusManager
 	actionManager       actionmanager.ActionManager
 	kymaCommandExecutor toolkit.CommandExecutor
-	kymaPath            string
-	kymaPackageClient   KymaPackageInterface
+	kymaPackages        kymasources.KymaPackages
+
+	currentPackage   kymasources.KymaPackage
+	installedPackage kymasources.KymaPackage
 }
 
 // New .
-func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientset, serviceCatalog serviceCatalog.ClientInterface, kymaDir string, statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager, kymaCommandExecutor toolkit.CommandExecutor, kymaPackageClient KymaPackageInterface) *InstallationSteps {
+func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientset,
+	serviceCatalog serviceCatalog.ClientInterface, statusManager statusmanager.StatusManager,
+	actionManager actionmanager.ActionManager, kymaCommandExecutor toolkit.CommandExecutor,
+	kymaPackages kymasources.KymaPackages) *InstallationSteps {
 	steps := &InstallationSteps{
 		helmClient:          helmClient,
 		kubeClientset:       kubeClientset,
 		serviceCatalog:      serviceCatalog,
 		errorHandlers:       &internalerrors.ErrorHandlers{},
-		chartDir:            path.Join(kymaDir, "resources"),
 		statusManager:       statusManager,
 		actionManager:       actionManager,
 		kymaCommandExecutor: kymaCommandExecutor,
-		kymaPath:            kymaDir,
-		kymaPackageClient:   kymaPackageClient,
+		kymaPackages:        kymaPackages,
 	}
 
 	return steps
@@ -51,10 +53,12 @@ func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientse
 //InstallKyma .
 func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData) error {
 
-	downloadKymaErr := steps.DownloadKyma(installationData)
+	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
 	if downloadKymaErr != nil {
 		return downloadKymaErr
 	}
+
+	steps.currentPackage = currentPackage
 
 	if installationData.ShouldInstallComponent(consts.ClusterEssentialsComponent) {
 		if instErr := steps.InstallClusterEssentials(installationData); instErr != nil {
@@ -105,10 +109,6 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 		}
 	}
 
-	if instErr := steps.RemoveKymaSources(installationData); instErr != nil {
-		return instErr
-	}
-
 	err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
 	if steps.errorHandlers.CheckError("Error on removing label: ", err) {
 		return err
@@ -124,10 +124,12 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 
 //UpdateKyma .
 func (steps *InstallationSteps) UpdateKyma(installationData *config.InstallationData) error {
-	downloadKymaErr := steps.DownloadKyma(installationData)
+	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
 	if downloadKymaErr != nil {
 		return downloadKymaErr
 	}
+
+	steps.currentPackage = currentPackage
 
 	upgradeErr := steps.UpdateClusterEssentials(installationData)
 	if upgradeErr != nil {
@@ -165,11 +167,6 @@ func (steps *InstallationSteps) UpdateKyma(installationData *config.Installation
 	}
 
 	upgradeErr = steps.UpdateEcDefaultRemoteEnvironments(installationData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
-
-	upgradeErr = steps.RemoveKymaSources(installationData)
 	if upgradeErr != nil {
 		return upgradeErr
 	}

@@ -15,7 +15,7 @@ func (steps *InstallationSteps) InstallIstio(installationData *config.Installati
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
-	chartDir := path.Join(steps.chartDir, consts.IstioComponent, "istio")
+	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.IstioComponent, "istio")
 	overrides, err := steps.getIstioOverrides(installationData, chartDir)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
@@ -47,7 +47,7 @@ func (steps *InstallationSteps) UpdateIstio(installationData *config.Installatio
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
-	chartDir := path.Join(steps.chartDir, consts.IstioComponent, "istio")
+	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.IstioComponent, "istio")
 	overrides, err := steps.getIstioOverrides(installationData, chartDir)
 
 	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {

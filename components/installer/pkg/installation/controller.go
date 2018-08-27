@@ -58,7 +58,8 @@ type Controller struct {
 
 // NewController .
 func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kubeinformers.SharedInformerFactory,
-	internalInformerFactory informers.SharedInformerFactory, kymaDir string, installationSteps *steps.InstallationSteps, conditionManager conditionmanager.Interface, finalizerManager *finalizer.Manager, internalClientset *internalClientset.Clientset) *Controller {
+	internalInformerFactory informers.SharedInformerFactory, installationSteps *steps.InstallationSteps,
+	conditionManager conditionmanager.Interface, finalizerManager *finalizer.Manager, internalClientset *internalClientset.Clientset) *Controller {
 
 	installationInformer := internalInformerFactory.Installer().V1alpha1().Installations()
 
