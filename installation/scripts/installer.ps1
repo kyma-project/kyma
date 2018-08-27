@@ -11,7 +11,7 @@ Invoke-Expression -Command $cmd
 $cmd = "kubectl apply -f ${CURRENT_DIR}\..\resources\default-sa-rbac-role.yaml"
 Invoke-Expression -Command $cmd
 
-$cmd = "kubectl apply -f ${CURRENT_DIR}\..\resources\limit-range-installer.yaml
+$cmd = "kubectl apply -f ${CURRENT_DIR}\..\resources\limit-range-installer.yaml"
 Invoke-Expression -Command $cmd
 
 $cmd = "kubectl apply -f ${CURRENT_DIR}\..\resources\resource-quotas-installer.yaml"
