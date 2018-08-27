@@ -25,7 +25,5 @@ func (eh *ErrorHandlers) CheckError(msg string, err error) bool {
 
 // LogError .
 func (eh *ErrorHandlers) LogError(msg string, err error) {
-	if err != nil {
-		log.Printf("%s Details: %s", msg, err.Error())
-	}
+	eh.CheckError(msg, err)
 }

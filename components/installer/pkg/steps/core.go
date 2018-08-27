@@ -13,7 +13,7 @@ import (
 const kymaPath = "/kyma"
 
 //InstallCore .
-func (steps InstallationSteps) InstallCore(installationData *config.InstallationData) error {
+func (steps InstallationSteps) InstallCore(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
 	const stepName string = "Installing core"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -27,11 +27,23 @@ func (steps InstallationSteps) InstallCore(installationData *config.Installation
 		return err
 	}
 
+	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, coreOverrides) //TODO: Remove after migration to generic overrides is completed
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.CoreComponent))
+
+	overridesStr, err := overrides.ToYaml(allOverrides)
+
+	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
+
 	installResp, installErr := steps.helmClient.InstallRelease(
 		chartDir,
 		"kyma-system",
 		consts.CoreComponent,
-		coreOverrides)
+		overridesStr)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
 		steps.statusManager.Error(stepName)
@@ -46,7 +58,7 @@ func (steps InstallationSteps) InstallCore(installationData *config.Installation
 }
 
 //UpgradeCore .
-func (steps InstallationSteps) UpgradeCore(installationData *config.InstallationData) error {
+func (steps InstallationSteps) UpgradeCore(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
 	const stepName string = "Upgrading core"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -60,10 +72,22 @@ func (steps InstallationSteps) UpgradeCore(installationData *config.Installation
 		return err
 	}
 
+	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, coreOverrides) //TODO: Remove after migration to generic overrides is completed
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.CoreComponent))
+
+	overridesStr, err := overrides.ToYaml(allOverrides)
+
+	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
+
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
 		consts.CoreComponent,
-		coreOverrides)
+		overridesStr)
 
 	if steps.errorHandlers.CheckError("Upgrade Error: ", upgradeErr) {
 		steps.statusManager.Error(stepName)
@@ -103,28 +127,35 @@ func logFailedResources(ns string) {
 	log.Println(string(msg[:]))
 }
 
-func (steps *InstallationSteps) getCoreOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
+func (steps *InstallationSteps) getCoreOverrides(installationData *config.InstallationData, chartDir string) (overrides.Map, error) {
 	allOverrides := overrides.Map{}
 
 	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
-	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)
+	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
+		return nil, err
+	}
 	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	azureBrokerOverrides, err := overrides.EnableAzureBroker(installationData)
-	steps.errorHandlers.LogError("Enable azure-broker Error: ", err)
+	if steps.errorHandlers.CheckError("Enable azure-broker Error: ", err) {
+		return nil, err
+	}
 	overrides.MergeMaps(allOverrides, azureBrokerOverrides)
 
 	coreOverrides, err := overrides.GetCoreOverrides(installationData)
-	steps.errorHandlers.LogError("Couldn't get Kyma core overrides: ", err)
-
+	if steps.errorHandlers.CheckError("Couldn't get Kyma core overrides: ", err) {
+		return nil, err
+	}
 	overrides.MergeMaps(allOverrides, coreOverrides)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
-		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
+		if steps.errorHandlers.CheckError("Couldn't get additional overrides: ", err) {
+			return nil, err
+		}
 		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
-	return overrides.ToYaml(allOverrides)
+	return allOverrides, nil
 }

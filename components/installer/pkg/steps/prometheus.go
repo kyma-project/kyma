@@ -10,12 +10,23 @@ import (
 )
 
 //InstallPrometheus .
-func (steps *InstallationSteps) InstallPrometheus(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) InstallPrometheus(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
 	const stepName string = "Installing Prometheus operator"
 	const namespace = "kyma-system"
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.PrometheusComponent)
-	overrides, err := steps.getPrometheusOverrides(installationData, chartDir)
+	prometheusOverrides, err := steps.getPrometheusOverrides(installationData, chartDir)
+
+	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
+
+	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, prometheusOverrides) //TODO: Remove after migration to generic overrides is completed
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.PrometheusComponent))
+	overridesStr, err := overrides.ToYaml(allOverrides)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -29,7 +40,7 @@ func (steps *InstallationSteps) InstallPrometheus(installationData *config.Insta
 		chartDir,
 		namespace,
 		consts.PrometheusComponent,
-		overrides)
+		overridesStr)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
 		steps.statusManager.Error(stepName)
@@ -43,12 +54,23 @@ func (steps *InstallationSteps) InstallPrometheus(installationData *config.Insta
 }
 
 //UpdatePrometheus .
-func (steps *InstallationSteps) UpdatePrometheus(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) UpdatePrometheus(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
 	const stepName string = "Updating Prometheus operator"
 	const namespace = "kyma-system"
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.PrometheusComponent)
-	overrides, err := steps.getPrometheusOverrides(installationData, chartDir)
+	prometheusOverrides, err := steps.getPrometheusOverrides(installationData, chartDir)
+
+	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
+
+	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, prometheusOverrides) //TODO: Remove after migration to generic overrides is completed
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.PrometheusComponent))
+	overridesStr, err := overrides.ToYaml(allOverrides)
 
 	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -61,7 +83,7 @@ func (steps *InstallationSteps) UpdatePrometheus(installationData *config.Instal
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
 		consts.PrometheusComponent,
-		overrides)
+		overridesStr)
 
 	if steps.errorHandlers.CheckError("Upgrade Error: ", upgradeErr) {
 		steps.statusManager.Error(stepName)
@@ -73,16 +95,18 @@ func (steps *InstallationSteps) UpdatePrometheus(installationData *config.Instal
 
 	return nil
 }
-func (steps *InstallationSteps) getPrometheusOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
-	//TODO: this does not get globalOverrides... Is that a problem if global will carry all external ones (overrides.yaml + from configMaps/secrets?)
+
+func (steps *InstallationSteps) getPrometheusOverrides(installationData *config.InstallationData, chartDir string) (overrides.Map, error) {
 	allOverrides := overrides.Map{}
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
-		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
+		if steps.errorHandlers.CheckError("Couldn't get additional overrides: ", err) {
+			return nil, err
+		}
 		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
-	return overrides.ToYaml(allOverrides)
+	return allOverrides, nil
 }

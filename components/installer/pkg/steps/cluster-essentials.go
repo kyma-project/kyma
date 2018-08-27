@@ -10,7 +10,7 @@ import (
 )
 
 // InstallClusterEssentials .
-func (steps *InstallationSteps) InstallClusterEssentials(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) InstallClusterEssentials(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
 	const stepName string = "Installing cluster-essentials"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -23,11 +23,22 @@ func (steps *InstallationSteps) InstallClusterEssentials(installationData *confi
 		return err
 	}
 
+	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, clusterEssentialsOverrides) //TODO: Remove after migration to generic overrides is completed
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.ClusterEssentialsComponent))
+	overridesStr, err := overrides.ToYaml(allOverrides)
+
+	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
+
 	installResp, installErr := steps.helmClient.InstallRelease(
 		chartDir,
 		"kyma-system",
 		consts.ClusterEssentialsComponent,
-		clusterEssentialsOverrides)
+		overridesStr)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
 		steps.statusManager.Error(stepName)
@@ -41,7 +52,7 @@ func (steps *InstallationSteps) InstallClusterEssentials(installationData *confi
 }
 
 // UpdateClusterEssentials .
-func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config.InstallationData, overrideData *overrides.Overrides) error {
 	const stepName string = "Updating cluster-essentials"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -54,10 +65,22 @@ func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config
 		return err
 	}
 
+	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, clusterEssentialsOverrides) //TODO: Remove after migration to generic overrides is completed
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.ClusterEssentialsComponent))
+
+	overridesStr, err := overrides.ToYaml(allOverrides)
+
+	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
+		steps.statusManager.Error(stepName)
+		return err
+	}
+
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
 		consts.ClusterEssentialsComponent,
-		clusterEssentailsOverrides)
+		overridesStr)
 
 	if steps.errorHandlers.CheckError("Upgrade Error: ", upgradeErr) {
 		steps.statusManager.Error(stepName)
@@ -70,19 +93,24 @@ func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config
 	return nil
 }
 
-func (steps *InstallationSteps) getClusterEssentialsOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
+func (steps *InstallationSteps) getClusterEssentialsOverrides(installationData *config.InstallationData, chartDir string) (overrides.Map, error) {
 	allOverrides := overrides.Map{}
 
 	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
-	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)
+	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
+		return nil, err
+	}
+
 	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
-		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
+		if steps.errorHandlers.CheckError("Couldn't get additional overrides: ", err) {
+			return nil, err
+		}
 		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
-	return overrides.ToYaml(allOverrides)
+	return allOverrides, nil
 }

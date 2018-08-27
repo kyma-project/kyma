@@ -53,6 +53,11 @@ func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientse
 //InstallKyma .
 func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData) error {
 
+	overrides, overridesErr := overrides.New(steps.kubeClientset)
+	if err != nil {
+		return overridesErr
+	}
+
 	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
 	if downloadKymaErr != nil {
 		return downloadKymaErr
@@ -61,18 +66,18 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 	steps.currentPackage = currentPackage
 
 	if installationData.ShouldInstallComponent(consts.ClusterEssentialsComponent) {
-		if instErr := steps.InstallClusterEssentials(installationData); instErr != nil {
+		if instErr := steps.InstallClusterEssentials(installationData, overrides); instErr != nil {
 			return instErr
 		}
 	}
 
 	if installationData.ShouldInstallComponent(consts.IstioComponent) {
-		if instErr := steps.InstallIstio(installationData); instErr != nil {
+		if instErr := steps.InstallIstio(installationData, overrides); instErr != nil {
 			return instErr
 		}
 	}
 	if installationData.ShouldInstallComponent(consts.PrometheusComponent) {
-		if instErr := steps.InstallPrometheus(installationData); instErr != nil {
+		if instErr := steps.InstallPrometheus(installationData, overrides); instErr != nil {
 			return instErr
 		}
 	}
@@ -84,32 +89,33 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 	}
 
 	if installationData.ShouldInstallComponent(consts.DexComponent) {
-		if dexErr := steps.InstallDex(installationData); dexErr != nil {
+		if dexErr := steps.InstallDex(installationData, overrides); dexErr != nil {
 			return dexErr
 		}
 	}
 
 	if installationData.ShouldInstallComponent(consts.CoreComponent) {
-		if instErr := steps.InstallCore(installationData); instErr != nil {
+		if instErr := steps.InstallCore(installationData, overrides); instErr != nil {
 			return instErr
 		}
 
-		if upgradeErr := steps.UpgradeCore(installationData); upgradeErr != nil {
+		if upgradeErr := steps.UpgradeCore(installationData, overrides); upgradeErr != nil {
 			return upgradeErr
 		}
 	}
 
 	if installationData.ShouldInstallComponent(consts.RemoteEnvironments) {
-		if instErr := steps.InstallHmcDefaultRemoteEnvironments(installationData); instErr != nil {
+		if instErr := steps.InstallHmcDefaultRemoteEnvironments(installationData, overrides); instErr != nil {
 			return instErr
 		}
 
-		if instErr := steps.InstallEcDefaultRemoteEnvironments(installationData); instErr != nil {
+		if instErr := steps.InstallEcDefaultRemoteEnvironments(installationData, overrides); instErr != nil {
 			return instErr
 		}
 	}
 
 	err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
+
 	if steps.errorHandlers.CheckError("Error on removing label: ", err) {
 		return err
 	}
@@ -124,24 +130,31 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 
 //UpdateKyma .
 func (steps *InstallationSteps) UpdateKyma(installationData *config.InstallationData) error {
+	overrides, overridesErr := overrides.New(steps.kubeClientset)
+	if overridesErr != nil {
+		return overridesErr
+	}
+
 	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
+
 	if downloadKymaErr != nil {
 		return downloadKymaErr
 	}
 
 	steps.currentPackage = currentPackage
 
-	upgradeErr := steps.UpdateClusterEssentials(installationData)
+	upgradeErr := steps.UpdateClusterEssentials(installationData, overrides)
+
 	if upgradeErr != nil {
 		return upgradeErr
 	}
 
-	upgradeErr = steps.UpdateIstio(installationData)
+	upgradeErr = steps.UpdateIstio(installationData, overrides)
 	if upgradeErr != nil {
 		return upgradeErr
 	}
 
-	upgradeErr = steps.UpdatePrometheus(installationData)
+	upgradeErr = steps.UpdatePrometheus(installationData, overrides)
 	if upgradeErr != nil {
 		return upgradeErr
 	}
@@ -151,27 +164,28 @@ func (steps *InstallationSteps) UpdateKyma(installationData *config.Installation
 		return bundlesErr
 	}
 
-	dexErr := steps.UpdateDex(installationData)
+	dexErr := steps.UpdateDex(installationData, overrides)
 	if dexErr != nil {
 		return dexErr
 	}
 
-	upgradeErr = steps.UpgradeCore(installationData)
+	upgradeErr = steps.UpgradeCore(installationData, overrides)
 	if upgradeErr != nil {
 		return upgradeErr
 	}
 
-	upgradeErr = steps.UpdateHmcDefaultRemoteEnvironments(installationData)
+	upgradeErr = steps.UpdateHmcDefaultRemoteEnvironments(installationData, overrides)
 	if upgradeErr != nil {
 		return upgradeErr
 	}
 
-	upgradeErr = steps.UpdateEcDefaultRemoteEnvironments(installationData)
+	upgradeErr = steps.UpdateEcDefaultRemoteEnvironments(installationData, overrides)
 	if upgradeErr != nil {
 		return upgradeErr
 	}
 
 	err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
+
 	if steps.errorHandlers.CheckError("Error on removing label: ", err) {
 		return err
 	}

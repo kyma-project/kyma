@@ -42,27 +42,29 @@ func New(client *kubernetes.Clientset) (*Overrides, error) {
 }
 
 //Common returns overrides common for all components
-func (o *Overrides) Common(componentName string) (Map, error) {
+func (o *Overrides) Common() Map {
+	res := o.common
+
+	if res == nil {
+		return Map{}
+	}
+
+	return res
+}
+
+//ForComponent returns overrides defined only for specified component
+func (o *Overrides) ForComponent(componentName string) Map {
+
 	res := o.components[componentName]
 
 	if res == nil {
-		return Map{}, nil
+		return Map{}
 	}
 
-	return res, nil
+	return res
 }
 
-//OverridesFor returns overrides defined only for specified component
-func (o *Overrides) OnlyFor(componentName string) (Map, error) {
-
-	specific := o.components[componentName]
-	if specific == nil {
-		return Map{}, nil
-	}
-
-	return specific, nil
-}
-
+//componentVersions reads overrides for component versions (versions.yaml)
 func componentVersions(r *reader) (Map, error) {
 
 	versionsFileData, err := loadComponentsVersions()
@@ -77,6 +79,7 @@ func componentVersions(r *reader) (Map, error) {
 	return ToMap(versionsFileData.String())
 }
 
+//commonOverrides reads overrides common to all components
 func commonOverrides(r *reader) (Map, error) {
 	common, err := r.getCommonConfig()
 	if err != nil {
@@ -90,6 +93,8 @@ func commonOverrides(r *reader) (Map, error) {
 	return UnflattenToMap(common), nil
 }
 
+//componentOverrides reads overrides specific for components.
+//Returns a map where a key is component name and value is a Map of overrides for the component.
 func componentOverrides(r *reader) (map[string]Map, error) {
 
 	components, err := r.getComponents()
