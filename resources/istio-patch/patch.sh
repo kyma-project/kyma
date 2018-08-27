@@ -6,39 +6,39 @@ function run_patch() {
   local type=$1
   local name=$2
   local result=$?
-  local patch=$(cat $DIR/$name.$type.patch.json)
-  if [ $result != 0 ]; then
-    echo $patch
-    return $result
+  local patch=$(cat ${DIR}/${name}.${type}.patch.json)
+  if [ ${result} != 0 ]; then
+    echo ${patch}
+    return ${result}
   fi
-  kubectl patch $type -n istio-system $name --patch "$patch" --type json
+  kubectl patch ${type} -n istio-system ${name} --patch "$patch" --type json
 }
 
 function run_all_patches() {
-  for f in $(find $DIR -name '*\.patch\.json' | xargs basename); do
-    local type=$(cut -d. -f2 <<< $f)
-    local name=$(cut -d. -f1 <<< $f)
-    run_patch $type $name
+  for f in $(find ${DIR} -name '*\.patch\.json' | xargs basename); do
+    local type=$(cut -d. -f2 <<< ${f})
+    local name=$(cut -d. -f1 <<< ${f})
+    run_patch ${type} ${name}
   done
 }
 
 function remove_not_used() {
   while read line; do
-    local type=$(cut -d' ' -f1 <<< $line)
-    local name=$(cut -d' ' -f2 <<< $line)
-    kubectl delete $type $name -n istio-system
-  done <$DIR/delete
+    local type=$(cut -d' ' -f1 <<< ${line})
+    local name=$(cut -d' ' -f2 <<< ${line})
+    kubectl delete ${type} ${name} -n istio-system
+  done <${DIR}/delete
 }
 
-function configure_sidcar_injector() {
+function configure_sidecar_injector() {
   local configmap=$(kubectl -n istio-system get configmap istio-sidecar-injector -o jsonpath='{.data.config}')
-  # Disable autoinjecting
+  # Disable automatic injecting
   configmap=$(sed 's/policy: enabled/policy: disabled/' <<< "$configmap")
   
-  # Set limits for sidecar. Our namespaces have resourcequota set thus every container needs to have limits defined. 
+  # Set limits for sidecar. Our namespaces have resource quota set thus every container needs to have limits defined.
   # Add limits to already existing resources sections
   configmap=$(sed 's|    resources:|    resources:\'$'\n      limits: { memory: 50Mi }|' <<< "$configmap")
-  # In case there is no limits section add one at the begining of container definition/ It serves as default. 
+  # In case there is no limits section add one at the beginning of container definition/ It serves as default.
   configmap=$(sed 's|  - name: istio-\(.*\)|  - name: istio-\1\'$'\n    resources: { limits: { memory: 50Mi } }|' <<< "$configmap")
 
   # Escape new lines and double quotes for kubectl
@@ -49,13 +49,13 @@ function configure_sidcar_injector() {
 }
 
 function apply_all() {
-  for f in $(find $DIR -name '*\.yaml' | xargs basename); do
-    kubectl apply -f $DIR/$f
+  for f in $(find ${DIR} -name '*\.yaml' | xargs basename); do
+    kubectl apply -f ${DIR}/${f}
   done
 }
 
 function open_ingress_ports() {
-  if [[ $IS_LOCAL_INSTALLATION == "true" ]]; then
+  if [[ ${IS_LOCAL_INSTALLATION} == "true" ]]; then
     kubectl patch -n istio-system deployment istio-ingressgateway --type json -p '
       [
         {
@@ -73,13 +73,13 @@ function open_ingress_ports() {
 }
 
 function set_external_load_balancer() {
-  if [[ -n $EXTERNAL_PUBLIC_IP ]]; then
+  if [[ -n ${EXTERNAL_PUBLIC_IP} ]]; then
     kubectl patch -n istio-system service istio-ingressgateway --type json -p '
       [
         {
           "op": "replace",
           "path": "/spec/loadBalancerIP",
-          "value": "'$EXTERNAL_PUBLIC_IP'"
+          "value": "'${EXTERNAL_PUBLIC_IP}'"
         }
       ]
     '
@@ -89,6 +89,6 @@ function set_external_load_balancer() {
 run_all_patches
 remove_not_used
 apply_all
-configure_sidcar_injector
+configure_sidecar_injector
 open_ingress_ports
 set_external_load_balancer
