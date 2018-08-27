@@ -14,7 +14,7 @@ func New(client *kubernetes.Clientset) (*Data, error) {
 		client: client,
 	}
 
-	versionsMap, err := componentVersions(r)
+	versionsMap, err := componentVersions()
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (o *Data) ForComponent(componentName string) Map {
 }
 
 //componentVersions reads overrides for component versions (versions.yaml)
-func componentVersions(r *reader) (Map, error) {
+func componentVersions() (Map, error) {
 
 	versionsFileData, err := loadComponentsVersions()
 	if err != nil {
