@@ -52,7 +52,7 @@ func (r reader) getComponents() ([]component, error) {
 	for _, sec := range secrets {
 		comp := component{
 			name:      sec.Labels["component"],
-			overrides: sec.StringData,
+			overrides: toStringStringMap(sec.Data),
 		}
 		components = append(components, comp)
 	}
@@ -109,4 +109,13 @@ func (r reader) getLabeledSecrets(opts metav1.ListOptions) ([]core.Secret, error
 
 func concatLabels(labels ...string) string {
 	return strings.Join(labels, ", ")
+}
+
+func toStringStringMap(input map[string][]byte) map[string]string {
+	var output = make(map[string]string)
+	for key, value := range input {
+		output[key] = string(value)
+	}
+
+	return output
 }
