@@ -15,6 +15,11 @@ func ClusterServiceClassName(obj *scTypes.ClusterServiceClass) string {
 	return fmt.Sprintf("%s %s", pretty.ClusterServiceClass, obj.Name)
 }
 
+// ServiceClassName returns string with type and name of ServiceClass
+func ServiceClassName(obj *scTypes.ServiceClass) string {
+	return fmt.Sprintf("%s %s/%s", pretty.ServiceClass, obj.Namespace, obj.Name)
+}
+
 // ServiceInstanceName returns string with type, namespace and name of ServiceInstance
 func ServiceInstanceName(obj *scTypes.ServiceInstance) string {
 	return fmt.Sprintf("%s %s/%s", pretty.ServiceInstance, obj.Namespace, obj.Name)

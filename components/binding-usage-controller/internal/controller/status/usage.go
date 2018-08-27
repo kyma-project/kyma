@@ -16,7 +16,7 @@ const (
 	ServiceBindingNotReadyReason = "ServiceBindingNotReadyError"
 	// PodPresetUpsertErrorReason is added in an usage when we cannot create a new PodPreset
 	PodPresetUpsertErrorReason = "PodPresetUpsertError"
-	// FetchBindingLabelsErrorReason is added in an usage when we cannot fetch labels from given ClusterServiceClass
+	// FetchBindingLabelsErrorReason is added in an usage when we cannot fetch labels from given ClusterServiceClass or ServiceClass
 	FetchBindingLabelsErrorReason = "ServiceClassGetBindingLabelsError"
 	// ApplyLabelsConflictErrorReason is added in a usage when we cannot add labels to the given resource because they already exists
 	ApplyLabelsConflictErrorReason = "ApplyLabelsConflictError"
