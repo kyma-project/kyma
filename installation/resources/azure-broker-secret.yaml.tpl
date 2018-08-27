@@ -19,7 +19,6 @@ metadata:
     installer: overrides
 type: Opaque
 data:
-  azure-broker.enabled: true
   azure_broker.subscription_id: "__AZURE_BROKER_SUBSCRIPTION_ID__"
   azure_broker.tenant_id: "__AZURE_BROKER_TENANT_ID__"
   azure_broker.client_id: "__AZURE_BROKER_CLIENT_ID__"
