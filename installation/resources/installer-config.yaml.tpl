@@ -81,3 +81,27 @@ data:
   global.alertTools.credentials.slack.channel: "__SLACK_CHANNEL_VALUE__"
   global.alertTools.credentials.victorOps.routingkey: "__VICTOR_OPS_ROUTING_KEY_VALUE__"
   global.alertTools.credentials.victorOps.apikey: "__VICTOR_OPS_API_KEY_VALUE__"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ec-default-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: ec-default
+data:
+  deployment.args.sourceType: marketing
+  service.externalapi.nodePort: "32001"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hmc-default-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: hmc-default
+data:
+  deployment.args.sourceType: commerce
+  service.externalapi.nodePort: "32000"
