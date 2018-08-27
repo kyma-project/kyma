@@ -22,6 +22,7 @@ etcdOperator:
     successThreshold: 1
     failureThreshold: 3
 backupOperator:
+  enabled: "false"
   image:
     repository: quay.io/coreos/etcd-operator
     tag: v0.9.2

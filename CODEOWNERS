@@ -50,7 +50,7 @@
 /resources/core/charts/environments/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
 
 # The `etcd-operator` subchart
-/resources/core/charts/etcd-operator/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek
+/resources/etcd-operator/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek
 
 # The `helm-broker` subchart
 /resources/core/charts/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel

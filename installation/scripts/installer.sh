@@ -39,6 +39,8 @@ kubectl apply -f ${CURRENT_DIR}/../resources/resource-quotas-installer.yaml
 
 bash ${CURRENT_DIR}/install-tiller.sh
 
+helm install ${CURRENT_DIR}/../../resources/etcd-operator --name etcd-operator --namespace "kyma-system"
+
 kubectl apply -f ${CURRENT_DIR}/../resources/installer.yaml -n "kyma-installer"
 
 ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
