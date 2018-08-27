@@ -7,7 +7,7 @@ cluster:
     requests:
       memory: 32Mi
   TLS:
-    enabled: true
+    enabled: false
 
 nameOverride: service-catalog-etcd
 
