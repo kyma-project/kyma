@@ -10,7 +10,7 @@ import (
 )
 
 // InstallIstio .
-func (steps *InstallationSteps) InstallIstio(installationData *config.InstallationData, overrideData OverrideData) error {
+func (steps *InstallationSteps) InstallIstio(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 	const stepName string = "Installing istio"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -42,7 +42,7 @@ func (steps *InstallationSteps) InstallIstio(installationData *config.Installati
 }
 
 // UpdateIstio .
-func (steps *InstallationSteps) UpdateIstio(installationData *config.InstallationData, overrideData OverrideData) error {
+func (steps *InstallationSteps) UpdateIstio(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 	const stepName string = "Updating istio"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -71,7 +71,7 @@ func (steps *InstallationSteps) UpdateIstio(installationData *config.Installatio
 	return nil
 }
 
-func (steps *InstallationSteps) getIstioOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
+func (steps *InstallationSteps) getIstioOverrides(installationData *config.InstallationData, chartDir string, overrideData overrides.OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
 	overrides.MergeMaps(allOverrides, overrideData.Common())
 	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.IstioComponent))

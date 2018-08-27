@@ -13,7 +13,7 @@ import (
 const kymaPath = "/kyma"
 
 //InstallCore .
-func (steps InstallationSteps) InstallCore(installationData *config.InstallationData, overrideData OverrideData) error {
+func (steps InstallationSteps) InstallCore(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 	const stepName string = "Installing core"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -46,7 +46,7 @@ func (steps InstallationSteps) InstallCore(installationData *config.Installation
 }
 
 //UpgradeCore .
-func (steps InstallationSteps) UpgradeCore(installationData *config.InstallationData, overrideData OverrideData) error {
+func (steps InstallationSteps) UpgradeCore(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 	const stepName string = "Upgrading core"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -103,7 +103,7 @@ func logFailedResources(ns string) {
 	log.Println(string(msg[:]))
 }
 
-func (steps *InstallationSteps) getCoreOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
+func (steps *InstallationSteps) getCoreOverrides(installationData *config.InstallationData, chartDir string, overrideData overrides.OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
 	overrides.MergeMaps(allOverrides, overrideData.Common())
 	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.CoreComponent))

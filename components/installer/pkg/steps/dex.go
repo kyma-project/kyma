@@ -10,7 +10,7 @@ import (
 )
 
 //InstallDex installs Dex component
-func (steps *InstallationSteps) InstallDex(installationData *config.InstallationData, overrideData OverrideData) error {
+func (steps *InstallationSteps) InstallDex(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 
 	const stepName string = "Installing Dex"
 	const namespace string = "kyma-system"
@@ -44,7 +44,7 @@ func (steps *InstallationSteps) InstallDex(installationData *config.Installation
 }
 
 // UpdateDex updates Dex component
-func (steps *InstallationSteps) UpdateDex(installationData *config.InstallationData, overrideData OverrideData) error {
+func (steps *InstallationSteps) UpdateDex(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 
 	const stepName string = "Updating Dex"
 	const namespace string = "kyma-system"
@@ -76,7 +76,7 @@ func (steps *InstallationSteps) UpdateDex(installationData *config.InstallationD
 	return nil
 }
 
-func (steps *InstallationSteps) getDexOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
+func (steps *InstallationSteps) getDexOverrides(installationData *config.InstallationData, chartDir string, overrideData overrides.OverrideData) (string, error) {
 
 	allOverrides := overrides.Map{}
 	overrides.MergeMaps(allOverrides, overrideData.Common())

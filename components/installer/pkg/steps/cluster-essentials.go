@@ -10,7 +10,7 @@ import (
 )
 
 // InstallClusterEssentials .
-func (steps *InstallationSteps) InstallClusterEssentials(installationData *config.InstallationData, overrideData OverrideData) error {
+func (steps *InstallationSteps) InstallClusterEssentials(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 	const stepName string = "Installing cluster-essentials"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -41,7 +41,7 @@ func (steps *InstallationSteps) InstallClusterEssentials(installationData *confi
 }
 
 // UpdateClusterEssentials .
-func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config.InstallationData, overrideData OverrideData) error {
+func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 	const stepName string = "Updating cluster-essentials"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
@@ -70,7 +70,7 @@ func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config
 	return nil
 }
 
-func (steps *InstallationSteps) getClusterEssentialsOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
+func (steps *InstallationSteps) getClusterEssentialsOverrides(installationData *config.InstallationData, chartDir string, overrideData overrides.OverrideData) (string, error) {
 
 	allOverrides := overrides.Map{}
 	overrides.MergeMaps(allOverrides, overrideData.Common())

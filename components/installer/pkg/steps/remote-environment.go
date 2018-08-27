@@ -15,7 +15,7 @@ const (
 )
 
 //InstallHmcDefaultRemoteEnvironments function will install Hmc Remote Environments
-func (steps *InstallationSteps) InstallHmcDefaultRemoteEnvironments(installationData *config.InstallationData, overrideData OverrideData) error {
+func (steps *InstallationSteps) InstallHmcDefaultRemoteEnvironments(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 	const stepName string = "Installing Hmc Remote Environment"
 	steps.PrintInstallationStep(stepName)
 
@@ -41,7 +41,7 @@ func (steps *InstallationSteps) InstallHmcDefaultRemoteEnvironments(installation
 }
 
 //UpdateHmcDefaultRemoteEnvironments function will install Hmc Remote Environments
-func (steps *InstallationSteps) UpdateHmcDefaultRemoteEnvironments(installationData *config.InstallationData, overrideData OverrideData) error {
+func (steps *InstallationSteps) UpdateHmcDefaultRemoteEnvironments(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 	const stepName string = "Updating Hmc Remote Environment"
 	steps.PrintInstallationStep(stepName)
 
@@ -67,7 +67,7 @@ func (steps *InstallationSteps) UpdateHmcDefaultRemoteEnvironments(installationD
 }
 
 //InstallEcDefaultRemoteEnvironments function will install EC Remote Environments
-func (steps *InstallationSteps) InstallEcDefaultRemoteEnvironments(installationData *config.InstallationData, overrideData OverrideData) error {
+func (steps *InstallationSteps) InstallEcDefaultRemoteEnvironments(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 	const stepName string = "Installing Ec Remote Environment"
 	steps.PrintInstallationStep(stepName)
 
@@ -93,7 +93,7 @@ func (steps *InstallationSteps) InstallEcDefaultRemoteEnvironments(installationD
 }
 
 //UpdateEcDefaultRemoteEnvironments function will install EC Remote Environments
-func (steps *InstallationSteps) UpdateEcDefaultRemoteEnvironments(installationData *config.InstallationData, overrideData OverrideData) error {
+func (steps *InstallationSteps) UpdateEcDefaultRemoteEnvironments(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 	const stepName string = "Updating Ec Remote Environment"
 	steps.PrintInstallationStep(stepName)
 
@@ -118,7 +118,7 @@ func (steps *InstallationSteps) UpdateEcDefaultRemoteEnvironments(installationDa
 	return nil
 }
 
-func (steps *InstallationSteps) getHmcOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
+func (steps *InstallationSteps) getHmcOverrides(installationData *config.InstallationData, chartDir string, overrideData overrides.OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
 	overrides.MergeMaps(allOverrides, overrideData.Common())
 	overrides.MergeMaps(allOverrides, overrideData.ForComponent(hmcRemoteEnvironmentComponent))
@@ -141,7 +141,7 @@ func (steps *InstallationSteps) getHmcOverrides(installationData *config.Install
 	return overrides.ToYaml(allOverrides)
 }
 
-func (steps *InstallationSteps) getEcOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
+func (steps *InstallationSteps) getEcOverrides(installationData *config.InstallationData, chartDir string, overrideData overrides.OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
 	overrides.MergeMaps(allOverrides, overrideData.Common())
 	overrides.MergeMaps(allOverrides, overrideData.ForComponent(ecRemoteEnvironmentComponent))

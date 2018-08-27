@@ -25,7 +25,7 @@ type InstallationData struct {
 	RemoteEnvCa                string
 	RemoteEnvCaKey             string
 	EtcdBackupABSContainerName string
-	Components                 map[string]v1alpha1.KymaComponent
+	Components                 []v1alpha1.KymaComponent
 	IsLocalInstallation        bool
 	VictorOpsApiKey            string
 	VictorOpsRoutingKey        string
@@ -55,7 +55,7 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		RemoteEnvCa:                installationConfig.RemoteEnvCa,
 		RemoteEnvCaKey:             installationConfig.RemoteEnvCaKey,
 		EtcdBackupABSContainerName: installationConfig.EtcdBackupABSContainerName,
-		Components:                 convertToMap(installation.Spec.Components),
+		Components:                 installation.Spec.Components,
 		IsLocalInstallation:        installationConfig.IsLocalInstallation,
 		VictorOpsApiKey:            installationConfig.VictorOpsApiKey,
 		VictorOpsRoutingKey:        installationConfig.VictorOpsRoutingKey,
@@ -63,20 +63,4 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		SlackApiUrl:                installationConfig.SlackApiUrl,
 	}
 	return res, nil
-}
-
-// ShouldInstallComponent returns true if the provided component is on the list of desired components
-func (installationData *InstallationData) ShouldInstallComponent(componentName string) bool {
-	_, found := installationData.Components[componentName]
-	return found
-}
-
-func convertToMap(cList []v1alpha1.KymaComponent) map[string]v1alpha1.KymaComponent {
-	output := make(map[string]v1alpha1.KymaComponent, len(cList))
-	for _, c := range cList {
-		if c.Name != "" {
-			output[c.Name] = c
-		}
-	}
-	return output
 }
