@@ -59,7 +59,7 @@ func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientse
 func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData) error {
 
 	overrides, overridesErr := overrides.New(steps.kubeClientset)
-	if err != nil {
+	if overridesErr != nil {
 		return overridesErr
 	}
 

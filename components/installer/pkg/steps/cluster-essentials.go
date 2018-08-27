@@ -58,7 +58,7 @@ func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.ClusterEssentialsComponent)
-	clusterEssentailsOverrides, err := steps.getClusterEssentialsOverrides(installationData, chartDir)
+	clusterEssentialsOverrides, err := steps.getClusterEssentialsOverrides(installationData, chartDir)
 
 	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
