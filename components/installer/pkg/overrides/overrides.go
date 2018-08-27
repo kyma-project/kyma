@@ -108,8 +108,7 @@ func componentOverrides(r *reader) (map[string]Map, error) {
 	}
 
 	for _, c := range components {
-		unflattened := UnflattenToMap(c.overrides)
-		res[c.name] = unflattened
+		res[c.name] = UnflattenToMap(c.overrides)
 	}
 
 	return res, nil
