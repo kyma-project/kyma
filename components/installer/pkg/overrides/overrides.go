@@ -7,14 +7,14 @@ type Data struct {
 	components map[string]Map
 }
 
-//New returns new Overrides instance.
+//New returns new Data instance.
 func New(client *kubernetes.Clientset) (*Data, error) {
 
 	r := &reader{
 		client: client,
 	}
 
-	versionsMap, err := componentVersions()
+	versionsMap, err := versionOverrides()
 	if err != nil {
 		return nil, err
 	}
@@ -64,8 +64,8 @@ func (o *Data) ForComponent(componentName string) Map {
 	return res
 }
 
-//componentVersions reads overrides for component versions (versions.yaml)
-func componentVersions() (Map, error) {
+//versionOverrides reads overrides for component versions (versions.yaml)
+func versionOverrides() (Map, error) {
 
 	versionsFileData, err := loadComponentsVersions()
 	if err != nil {
