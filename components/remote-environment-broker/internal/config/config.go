@@ -30,6 +30,8 @@ type Config struct {
 	Storage                    []storage.Config `valid:"required"`
 	BrokerName                 string           `valid:"required"`
 	BrokerRelistDurationWindow time.Duration    `valid:"required"`
+	// Before adjusting ui-api-layer and tests, this flag by default should be set to true.
+	ClusterScopedBroker bool `default:"true"`
 }
 
 // Load method has following strategy:
