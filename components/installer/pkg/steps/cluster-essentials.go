@@ -54,11 +54,6 @@ func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config
 		return err
 	}
 
-	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
-		steps.statusManager.Error(stepName)
-		return err
-	}
-
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
 		consts.ClusterEssentialsComponent,

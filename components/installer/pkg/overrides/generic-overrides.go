@@ -1,7 +1,6 @@
 package overrides
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ghodss/yaml"
@@ -66,7 +65,6 @@ func UnflattenToMap(sourceMap map[string]string) Map {
 //overridesMap won't be modified by future merges, since a deep-copy of it's nested maps are used for merging such nested maps.
 func MergeMaps(baseMap, overridesMap Map) {
 
-	fmt.Println("\n### MERGE ENTRY! ###")
 	if (overridesMap) == nil {
 		return
 	}
@@ -84,20 +82,13 @@ func MergeMaps(baseMap, overridesMap Map) {
 	for key, overrideVal := range overridesMap {
 		//Can be nil
 		baseVal := baseMap[key]
-		fmt.Printf("\nKEY :%#v\n", key)
-		fmt.Printf("\nBASE:%#v\n", baseVal)
-		fmt.Printf("\nOVER:%#v\n", overrideVal)
 		baseMapVal, baseIsMap := baseVal.(map[string]interface{})
 		ovrrMapVal, newIsMap := overrideVal.(map[string]interface{})
 
 		if baseIsMap && newIsMap {
 			//Two maps case! Reccursion happens here!
-			fmt.Println("Both maps: " + key)
 			MergeMaps(baseMapVal, ovrrMapVal)
 		} else {
-			fmt.Println("Not both maps: " + key)
-			fmt.Printf("%v - %#v\n", baseIsMap, baseMapVal)
-			fmt.Printf("%v - %#v\n", newIsMap, ovrrMapVal)
 			//All other cases, even "pathological" one, when baseMap[key] is a map and overrideVal is a string.
 			putValueToMap(baseMap, key, overrideVal)
 		}

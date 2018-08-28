@@ -32,9 +32,6 @@ global:
 // GetGlobalOverrides .
 func GetGlobalOverrides(installationData *config.InstallationData, overrides Map) (Map, error) {
 
-	allOverrides := Map{}
-	MergeMaps(allOverrides, overrides)
-
 	tmpl, err := template.New("").Parse(globalsTplStr)
 	if err != nil {
 		return nil, err
@@ -51,6 +48,9 @@ func GetGlobalOverrides(installationData *config.InstallationData, overrides Map
 		return nil, err
 	}
 
+	allOverrides := Map{}
+	MergeMaps(allOverrides, overrides)
 	MergeMaps(allOverrides, globalOverrides)
+
 	return allOverrides, nil
 }

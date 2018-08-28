@@ -339,8 +339,9 @@ a:
 			})
 		})
 
-		Convey("findOverrideValue function", func() {
-			Convey("Should find override value in a map", func() {
+		Convey("FindOverrideValue function", func() {
+
+			Convey("Should find non-empty value in a map", func() {
 				flatmap := map[string]string{}
 				flatmap["a.b.c.d"] = "testval"
 
@@ -349,6 +350,17 @@ a:
 				val, exists := FindOverrideValue(oMap, "a.b.c.d")
 				So(exists, ShouldBeTrue)
 				So(val, ShouldEqual, "testval")
+			})
+
+			Convey("Should find empty string in a map", func() {
+				flatmap := map[string]string{}
+				flatmap["a.b.c.d"] = ""
+
+				oMap := UnflattenToMap(flatmap)
+
+				val, exists := FindOverrideValue(oMap, "a.b.c.d")
+				So(exists, ShouldBeTrue)
+				So(val, ShouldBeBlank)
 			})
 
 			Convey("Should not find override value in a map when it's not a final entry", func() {

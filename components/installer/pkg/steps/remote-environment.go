@@ -121,7 +121,7 @@ func (steps *InstallationSteps) UpdateEcDefaultRemoteEnvironments(installationDa
 func (steps *InstallationSteps) getHmcOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
 	overrides.MergeMaps(allOverrides, overrideData.Common())
-	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.RemoteEnvironments))
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(hmcRemoteEnvironmentComponent))
 
 	allOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
 	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
@@ -150,7 +150,7 @@ func (steps *InstallationSteps) getHmcOverrides(installationData *config.Install
 func (steps *InstallationSteps) getEcOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
 	overrides.MergeMaps(allOverrides, overrideData.Common())
-	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.RemoteEnvironments))
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(ecRemoteEnvironmentComponent))
 
 	allOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
 	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
