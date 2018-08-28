@@ -17,7 +17,7 @@ func TestBrokerFlavorGetNsFromBrokerURL(t *testing.T) {
 		assert.Equal(t, "stage", actNs)
 	})
 
-	t.Run("misconfiguration", func(t *testing.T) {
+	t.Run("URL does not match ns-pattern", func(t *testing.T) {
 		_, err := sut.GetNsFromBrokerURL("https://core-reb.kyma-system.svc.cluster.local/v2/catalog")
 		assert.EqualError(t, err, "url:https://core-reb.kyma-system.svc.cluster.local/v2/catalog does not match pattern reb-ns-for-([a-z][a-z0-9-]*)\\.")
 	})
