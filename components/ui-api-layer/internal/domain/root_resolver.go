@@ -106,6 +106,10 @@ func (r *RootResolver) Query_resourceQuotas(ctx context.Context, environment str
 	return r.k8s.ResourceQuotasQuery(ctx, environment)
 }
 
+func (r *RootResolver) Query_resourceQuotaStatus(ctx context.Context, environment string) (gqlschema.ResourceQuotaStatus, error) {
+	return r.k8s.ResourceQuotaStatus(ctx, environment)
+}
+
 // Kubeless
 
 func (r *RootResolver) Query_functions(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.Function, error) {

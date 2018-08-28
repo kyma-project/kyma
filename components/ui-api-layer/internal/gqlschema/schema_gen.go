@@ -49,6 +49,7 @@ type Resolvers interface {
 	Query_environments(ctx context.Context, remoteEnvironment *string) ([]Environment, error)
 	Query_deployments(ctx context.Context, environment string, excludeFunctions *bool) ([]Deployment, error)
 	Query_resourceQuotas(ctx context.Context, environment string) ([]ResourceQuota, error)
+	Query_resourceQuotaStatus(ctx context.Context, environment string) (ResourceQuotaStatus, error)
 	Query_functions(ctx context.Context, environment string, first *int, offset *int) ([]Function, error)
 	Query_content(ctx context.Context, contentType string, id string) (*JSON, error)
 	Query_topics(ctx context.Context, input []InputTopic, internal *bool) ([]TopicEntry, error)
@@ -2104,6 +2105,8 @@ func (ec *executionContext) _Query(ctx context.Context, sel []query.Selection) g
 			out.Values[i] = ec._Query_deployments(ctx, field)
 		case "resourceQuotas":
 			out.Values[i] = ec._Query_resourceQuotas(ctx, field)
+		case "resourceQuotaStatus":
+			out.Values[i] = ec._Query_resourceQuotaStatus(ctx, field)
 		case "functions":
 			out.Values[i] = ec._Query_functions(ctx, field)
 		case "content":
@@ -3165,6 +3168,47 @@ func (ec *executionContext) _Query_resourceQuotas(ctx context.Context, field gra
 	})
 }
 
+func (ec *executionContext) _Query_resourceQuotaStatus(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := field.Args["environment"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	}
+	args["environment"] = arg0
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.Query_resourceQuotaStatus(ctx, args["environment"].(string))
+		})
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.(ResourceQuotaStatus)
+		return ec._ResourceQuotaStatus(ctx, field.Selections, &res)
+	})
+}
+
 func (ec *executionContext) _Query_functions(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -4096,6 +4140,53 @@ func (ec *executionContext) _ResourceQuota_requests(ctx context.Context, field g
 	defer rctx.Pop()
 	res := obj.Requests
 	return ec._ResourceValues(ctx, field.Selections, &res)
+}
+
+var resourceQuotaStatusImplementors = []string{"ResourceQuotaStatus"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ResourceQuotaStatus(ctx context.Context, sel []query.Selection, obj *ResourceQuotaStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.Doc, sel, resourceQuotaStatusImplementors, ec.Variables)
+
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ResourceQuotaStatus")
+		case "exceeded":
+			out.Values[i] = ec._ResourceQuotaStatus_exceeded(ctx, field, obj)
+		case "message":
+			out.Values[i] = ec._ResourceQuotaStatus_message(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _ResourceQuotaStatus_exceeded(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotaStatus) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "ResourceQuotaStatus"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Exceeded
+	return graphql.MarshalBoolean(res)
+}
+
+func (ec *executionContext) _ResourceQuotaStatus_message(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotaStatus) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "ResourceQuotaStatus"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Message
+	return graphql.MarshalString(res)
 }
 
 var resourceTypeImplementors = []string{"ResourceType"}
@@ -7339,6 +7430,11 @@ type Deployment {
     boundServiceInstanceNames: [String]!
 }
 
+type ResourceValues {
+    memory: String
+    cpu: String
+}
+
 type ResourceQuota {
     name: String!
     pods: String
@@ -7346,9 +7442,9 @@ type ResourceQuota {
     requests: ResourceValues!
 }
 
-type ResourceValues {
-    memory: String
-    cpu: String
+type ResourceQuotaStatus {
+    exceeded: Boolean!
+    message: String!
 }
 
 # Remote Environments
@@ -7494,6 +7590,8 @@ type Query {
     serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
     serviceBinding(name: String!, environment: String!): ServiceBinding
     usageKinds(first: Int, offset: Int): [UsageKind!]!
+
+    # The query returns all instances of the resources specified by the usageKind parameter in the given environment. The result contains the resources which do not have the metadata.ownerReference.
     usageKindResources(usageKind: String!, environment: String!): [UsageKindResource!]!
 
     apis(environment: String!, serviceName: String, hostname: String): [API!]!
@@ -7505,6 +7603,7 @@ type Query {
     environments(remoteEnvironment: String): [Environment]!
     deployments(environment: String!, excludeFunctions: Boolean): [Deployment]!
     resourceQuotas(environment: String!): [ResourceQuota]!
+    resourceQuotaStatus(environment: String!): ResourceQuotaStatus!
 
     functions(environment: String!, first: Int, offset: Int): [Function]!
 

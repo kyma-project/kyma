@@ -100,6 +100,10 @@ type RemoteEnvironmentSource struct {
 	Type        string `json:"type"`
 	Namespace   string `json:"namespace"`
 }
+type ResourceQuotaStatus struct {
+	Exceeded bool   `json:"exceeded"`
+	Message  string `json:"message"`
+}
 type ResourceType struct {
 	Memory *string `json:"memory"`
 	Cpu    *string `json:"cpu"`
