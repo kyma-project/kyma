@@ -103,7 +103,7 @@ apiserver:
       memory: 20Mi
     limits:
       cpu: 100m
-      memory: 30Mi
+      memory: 96Mi
 controllerManager:
   # annotations is a collection of annotations to add to the controllerManager pod.
   annotations: {}
