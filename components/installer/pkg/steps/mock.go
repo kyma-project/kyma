@@ -167,7 +167,7 @@ func getTestSetup() (*InstallationSteps, *config.InstallationData, *MockHelmClie
 
 	mockCommandExecutor := &MockCommandExecutor{}
 	mockHelmClient := &MockHelmClient{}
-	installationData, kymaTestSteps := getCommonTestSetup(mockHelmClient, mockCommandExecutor)
+	installationData, _, kymaTestSteps := getCommonTestSetup(mockHelmClient, mockCommandExecutor)
 
 	return kymaTestSteps, installationData, mockHelmClient, mockCommandExecutor
 }
@@ -176,12 +176,12 @@ func getFailingTestSetup() (*InstallationSteps, *config.InstallationData, *MockE
 
 	mockFailingCommandExecutor := &MockFailingCommandExecutor{}
 	mockErrorHelmClient := &MockErrorHelmClient{}
-	installationData, kymaTestSteps := getCommonTestSetup(mockErrorHelmClient, mockFailingCommandExecutor)
+	installationData, _, kymaTestSteps := getCommonTestSetup(mockErrorHelmClient, mockFailingCommandExecutor)
 
 	return kymaTestSteps, installationData, mockErrorHelmClient, mockFailingCommandExecutor
 }
 
-func getCommonTestSetup(mockHelmClient kymahelm.ClientInterface, mockCommandExecutor toolkit.CommandExecutor) (*config.InstallationData, *InstallationSteps) {
+func getCommonTestSetup(mockHelmClient kymahelm.ClientInterface, mockCommandExecutor toolkit.CommandExecutor) (*config.InstallationData, map[string]string, *InstallationSteps) {
 
 	fakeClient := fake.NewSimpleClientset()
 	informers := installationInformers.NewSharedInformerFactory(fakeClient, time.Second*0)
@@ -190,9 +190,9 @@ func getCommonTestSetup(mockHelmClient kymahelm.ClientInterface, mockCommandExec
 	kymaTestSteps := New(mockHelmClient, nil, nil, mockStatusManager, nil, mockCommandExecutor, nil)
 	kymaTestSteps.currentPackage = KymaPackageMock{}
 
-	installationData := toolkit.NewInstallationDataCreator().GetData()
+	installationData, overrides := toolkit.NewInstallationDataCreator().GetData()
 
-	return &installationData, kymaTestSteps
+	return &installationData, overrides, kymaTestSteps
 }
 
 type MockOverrideData struct {

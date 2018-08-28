@@ -16,18 +16,7 @@ func (steps *InstallationSteps) InstallIstio(installationData *config.Installati
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.IstioComponent, "istio")
-	istioOverrides, err := steps.getIstioOverrides(installationData, chartDir)
-
-	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
-		steps.statusManager.Error(stepName)
-		return err
-	}
-
-	allOverrides := overrides.Map{}
-	overrides.MergeMaps(allOverrides, overrideData.Common())
-	overrides.MergeMaps(allOverrides, istioOverrides) //TODO: Remove after migration to generic overrides is completed
-	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.IstioComponent))
-	overridesStr, err := overrides.ToYaml(allOverrides)
+	istioOverrides, err := steps.getIstioOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -39,7 +28,7 @@ func (steps *InstallationSteps) InstallIstio(installationData *config.Installati
 		chartDir,
 		"istio-system",
 		consts.IstioComponent,
-		overridesStr)
+		istioOverrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
 		steps.statusManager.Error(stepName)
@@ -59,28 +48,17 @@ func (steps *InstallationSteps) UpdateIstio(installationData *config.Installatio
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.IstioComponent, "istio")
-	istioOverrides, err := steps.getIstioOverrides(installationData, chartDir)
+	istioOverrides, err := steps.getIstioOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
 		steps.statusManager.Error("Updating istio")
 		return err
 	}
 
-	allOverrides := overrides.Map{}
-	overrides.MergeMaps(allOverrides, overrideData.Common())
-	overrides.MergeMaps(allOverrides, istioOverrides) //TODO: Remove after migration to generic overrides is completed
-	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.IstioComponent))
-	overridesStr, err := overrides.ToYaml(allOverrides)
-
-	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
-		steps.statusManager.Error(stepName)
-		return err
-	}
-
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
 		consts.IstioComponent,
-		overridesStr)
+		istioOverrides)
 
 	if steps.errorHandlers.CheckError("Upgrade Error: ", upgradeErr) {
 		steps.statusManager.Error("Updating istio")
@@ -93,31 +71,30 @@ func (steps *InstallationSteps) UpdateIstio(installationData *config.Installatio
 	return nil
 }
 
-func (steps *InstallationSteps) getIstioOverrides(installationData *config.InstallationData, chartDir string) (overrides.Map, error) {
+func (steps *InstallationSteps) getIstioOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.IstioComponent))
 
-	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
+	allOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
 
 	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
-		return nil, err
+		return "", err
 	}
 
-	overrides.MergeMaps(allOverrides, globalOverrides)
-
-	istioOverrides, err := overrides.GetIstioOverrides(installationData)
+	allOverrides, err = overrides.GetIstioOverrides(installationData, allOverrides)
 	if steps.errorHandlers.CheckError("Couldn't get Istio overrides: ", err) {
-		return nil, err
+		return "", err
 	}
-	overrides.MergeMaps(allOverrides, istioOverrides)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
 		if steps.errorHandlers.CheckError("Couldn't get additional overrides: ", err) {
-			return nil, err
+			return "", err
 		}
 		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
-	return allOverrides, nil
+	return overrides.ToYaml(allOverrides)
 }

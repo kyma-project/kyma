@@ -21,26 +21,14 @@ func (steps *InstallationSteps) InstallHmcDefaultRemoteEnvironments(installation
 
 	steps.statusManager.InProgress(stepName)
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.RemoteEnvironments)
-	hmcOverrides, err := steps.getHmcOverrides(installationData, chartDir)
+	hmcOverrides, err := steps.getHmcOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
 		return err
 	}
 
-	allOverrides := overrides.Map{}
-	overrides.MergeMaps(allOverrides, overrideData.Common())
-	overrides.MergeMaps(allOverrides, hmcOverrides)                                         //TODO: Remove after migration to generic overrides is completed
-	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.RemoteEnvironments)) //TODO: We need two different components for Hmc and Ec!
-
-	overridesStr, err := overrides.ToYaml(allOverrides)
-
-	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
-		steps.statusManager.Error(stepName)
-		return err
-	}
-
-	installErr := steps.installRemoteEnvironment(hmcRemoteEnvironmentComponent, chartDir, overridesStr)
+	installErr := steps.installRemoteEnvironment(hmcRemoteEnvironmentComponent, chartDir, hmcOverrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
 		steps.statusManager.Error(stepName)
@@ -60,25 +48,13 @@ func (steps *InstallationSteps) UpdateHmcDefaultRemoteEnvironments(installationD
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.RemoteEnvironments)
-	hmcOverrides, err := steps.getHmcOverrides(installationData, chartDir)
+	hmcOverrides, err := steps.getHmcOverrides(installationData, chartDir, overrideData)
 	if steps.errorHandlers.CheckError("Update Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
 		return err
 	}
 
-	allOverrides := overrides.Map{}
-	overrides.MergeMaps(allOverrides, overrideData.Common())
-	overrides.MergeMaps(allOverrides, hmcOverrides)                                         //TODO: Remove after migration to generic overrides is completed
-	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.RemoteEnvironments)) //TODO: We need two different components for Hmc and Ec!
-
-	overridesStr, err := overrides.ToYaml(allOverrides)
-
-	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
-		steps.statusManager.Error(stepName)
-		return err
-	}
-
-	upgradeErr := steps.updateRemoteEnvironment(hmcRemoteEnvironmentComponent, chartDir, overridesStr)
+	upgradeErr := steps.updateRemoteEnvironment(hmcRemoteEnvironmentComponent, chartDir, hmcOverrides)
 
 	if steps.errorHandlers.CheckError("Update Error: ", upgradeErr) {
 		steps.statusManager.Error(stepName)
@@ -97,26 +73,14 @@ func (steps *InstallationSteps) InstallEcDefaultRemoteEnvironments(installationD
 
 	steps.statusManager.InProgress(stepName)
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.RemoteEnvironments)
-	ecOverrides, err := steps.getEcOverrides(installationData, chartDir)
+	ecOverrides, err := steps.getEcOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
 		return err
 	}
 
-	allOverrides := overrides.Map{}
-	overrides.MergeMaps(allOverrides, overrideData.Common())
-	overrides.MergeMaps(allOverrides, ecOverrides)                                          //TODO: Remove after migration to generic overrides is completed
-	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.RemoteEnvironments)) //TODO: We need two different components for Hmc and Ec!
-
-	overridesStr, err := overrides.ToYaml(allOverrides)
-
-	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
-		steps.statusManager.Error(stepName)
-		return err
-	}
-
-	installErr := steps.installRemoteEnvironment(ecRemoteEnvironmentComponent, chartDir, overridesStr)
+	installErr := steps.installRemoteEnvironment(ecRemoteEnvironmentComponent, chartDir, ecOverrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
 		steps.statusManager.Error(stepName)
@@ -135,26 +99,14 @@ func (steps *InstallationSteps) UpdateEcDefaultRemoteEnvironments(installationDa
 
 	steps.statusManager.InProgress(stepName)
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.RemoteEnvironments)
-	ecOverrides, err := steps.getEcOverrides(installationData, chartDir)
+	ecOverrides, err := steps.getEcOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Update Error: ", err) {
 		steps.statusManager.Error(stepName)
 		return err
 	}
 
-	allOverrides := overrides.Map{}
-	overrides.MergeMaps(allOverrides, overrideData.Common())
-	overrides.MergeMaps(allOverrides, ecOverrides)                                          //TODO: Remove after migration to generic overrides is completed
-	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.RemoteEnvironments)) //TODO: We need two different components for Hmc and Ec!
-
-	overridesStr, err := overrides.ToYaml(allOverrides)
-
-	if steps.errorHandlers.CheckError("Install Upgrade Error: ", err) {
-		steps.statusManager.Error(stepName)
-		return err
-	}
-
-	upgradeErr := steps.updateRemoteEnvironment(ecRemoteEnvironmentComponent, chartDir, overridesStr)
+	upgradeErr := steps.updateRemoteEnvironment(ecRemoteEnvironmentComponent, chartDir, ecOverrides)
 
 	if steps.errorHandlers.CheckError("Update Error: ", upgradeErr) {
 		steps.statusManager.Error(stepName)
@@ -166,19 +118,20 @@ func (steps *InstallationSteps) UpdateEcDefaultRemoteEnvironments(installationDa
 	return nil
 }
 
-func (steps *InstallationSteps) getHmcOverrides(installationData *config.InstallationData, chartDir string) (overrides.Map, error) {
+func (steps *InstallationSteps) getHmcOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.RemoteEnvironments))
 
-	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
+	allOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
 	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
-		return nil, err
+		return "", err
 	}
-	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	hmcDefaultOverride, err := overrides.GetHmcDefaultOverrides()
 
 	if steps.errorHandlers.CheckError("Couldn't get Hmc default overrides: ", err) {
-		return nil, err
+		return "", err
 	}
 	overrides.MergeMaps(allOverrides, hmcDefaultOverride)
 
@@ -186,26 +139,27 @@ func (steps *InstallationSteps) getHmcOverrides(installationData *config.Install
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
 		if steps.errorHandlers.CheckError("Couldn't get additional overrides: ", err) {
-			return nil, err
+			return "", err
 		}
 		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
-	return allOverrides, nil
+	return overrides.ToYaml(allOverrides)
 }
 
-func (steps *InstallationSteps) getEcOverrides(installationData *config.InstallationData, chartDir string) (overrides.Map, error) {
+func (steps *InstallationSteps) getEcOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.RemoteEnvironments))
 
-	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
+	allOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
 	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
-		return nil, err
+		return "", err
 	}
-	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	ecDefaultOverride, err := overrides.GetEcDefaultOverrides()
 	if steps.errorHandlers.CheckError("Couldn't get Ec default overrides: ", err) {
-		return nil, err
+		return "", err
 	}
 	overrides.MergeMaps(allOverrides, ecDefaultOverride)
 
@@ -213,12 +167,12 @@ func (steps *InstallationSteps) getEcOverrides(installationData *config.Installa
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
 		if steps.errorHandlers.CheckError("Couldn't get additional overrides: ", err) {
-			return nil, err
+			return "", err
 		}
 		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
-	return allOverrides, nil
+	return overrides.ToYaml(allOverrides)
 }
 
 func (steps *InstallationSteps) installRemoteEnvironment(installationName, chartDir, overrides string) error {

@@ -11,8 +11,8 @@ func TestGetIstioOverrides(t *testing.T) {
 	Convey("GetIstioOverrides", t, func() {
 		Convey("when IP address is not specified overrides should be empty", func() {
 
-			installationData := NewInstallationDataCreator().GetData()
-			overrides, err := GetIstioOverrides(&installationData)
+			installationData, testOverrides := NewInstallationDataCreator().GetData()
+			overrides, err := GetIstioOverrides(&installationData, UnflattenToMap(testOverrides))
 
 			So(err, ShouldBeNil)
 			So(overrides, ShouldBeEmpty)
@@ -23,12 +23,13 @@ func TestGetIstioOverrides(t *testing.T) {
   service:
     externalPublicIp: 100.100.100.100
 `
-			installationData := NewInstallationDataCreator().WithIP("100.100.100.100").GetData()
-			overridesMap, err := GetIstioOverrides(&installationData)
+			installationData, testOverrides := NewInstallationDataCreator().WithIP("100.100.100.100").GetData()
+			overridesMap, err := GetIstioOverrides(&installationData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
-			overrides, err := ToYaml(overridesMap)
+
+			overridesYaml, err := ToYaml(overridesMap)
 			So(err, ShouldBeNil)
-			So(overrides, ShouldEqual, dummyOverridesForIstio)
+			So(overridesYaml, ShouldEqual, dummyOverridesForIstio)
 		})
 	})
 }

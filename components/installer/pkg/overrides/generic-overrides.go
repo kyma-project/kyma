@@ -1,6 +1,7 @@
 package overrides
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/ghodss/yaml"
@@ -11,7 +12,7 @@ type Map map[string]interface{}
 
 //ToMap converts yaml to Map. Supports only map-like yamls (no lists!)
 func ToMap(value string) (Map, error) {
-	target := Map{}
+	target := map[string]interface{}{}
 
 	if value == "" {
 		//Otherwise, nil Map is returned by yaml.Unmarshal
@@ -47,7 +48,7 @@ func FlattenMap(oMap Map) map[string]string {
 
 //UnflattenToMap converts external "flat" overrides into Map. Opposite of FlattenMap function.
 func UnflattenToMap(sourceMap map[string]string) Map {
-	mergedMap := Map{}
+	mergedMap := map[string]interface{}{}
 	if len(sourceMap) == 0 {
 		return mergedMap
 	}
@@ -65,6 +66,7 @@ func UnflattenToMap(sourceMap map[string]string) Map {
 //overridesMap won't be modified by future merges, since a deep-copy of it's nested maps are used for merging such nested maps.
 func MergeMaps(baseMap, overridesMap Map) {
 
+	fmt.Println("\n### MERGE ENTRY! ###")
 	if (overridesMap) == nil {
 		return
 	}
@@ -82,18 +84,49 @@ func MergeMaps(baseMap, overridesMap Map) {
 	for key, overrideVal := range overridesMap {
 		//Can be nil
 		baseVal := baseMap[key]
-
+		fmt.Printf("\nKEY :%#v\n", key)
+		fmt.Printf("\nBASE:%#v\n", baseVal)
+		fmt.Printf("\nOVER:%#v\n", overrideVal)
 		baseMapVal, baseIsMap := baseVal.(map[string]interface{})
 		ovrrMapVal, newIsMap := overrideVal.(map[string]interface{})
 
 		if baseIsMap && newIsMap {
 			//Two maps case! Reccursion happens here!
+			fmt.Println("Both maps: " + key)
 			MergeMaps(baseMapVal, ovrrMapVal)
 		} else {
+			fmt.Println("Not both maps: " + key)
+			fmt.Printf("%v - %#v\n", baseIsMap, baseMapVal)
+			fmt.Printf("%v - %#v\n", newIsMap, ovrrMapVal)
 			//All other cases, even "pathological" one, when baseMap[key] is a map and overrideVal is a string.
 			putValueToMap(baseMap, key, overrideVal)
 		}
 	}
+}
+
+func FindOverrideValue(overrides Map, flatName string) (string, bool) {
+
+	var findOverride func(m map[string]interface{}, keys []string) (string, bool)
+
+	findOverride = func(m map[string]interface{}, keys []string) (string, bool) {
+		if len(keys) == 1 {
+			res, isString := (m[keys[0]]).(string)
+			if !isString {
+				return "", false
+			}
+			return res, true
+		}
+
+		nestedMap, isMap := m[keys[0]].(map[string]interface{})
+		if !isMap {
+			return "", false
+		}
+
+		return findOverride(nestedMap, keys[1:])
+	}
+
+	keys := strings.Split(flatName, ".")
+	return findOverride(overrides, keys)
 }
 
 //Recursively copies the map. Used to ensure immutability of input maps when merging.
@@ -147,7 +180,7 @@ func flattenMap(oMap Map, keys string, result map[string]string) {
 }
 
 //Merges value into given map, introducing intermediate "nested" maps for every intermediate key.
-func mergeIntoMap(keys []string, value string, dstMap Map) {
+func mergeIntoMap(keys []string, value string, dstMap map[string]interface{}) {
 	currentKey := keys[0]
 	//Last key points directly to string value
 	if len(keys) == 1 {
@@ -156,10 +189,10 @@ func mergeIntoMap(keys []string, value string, dstMap Map) {
 	}
 
 	//All keys but the last one should point to a nested map
-	nestedMap, isMap := dstMap[currentKey].(Map)
+	nestedMap, isMap := dstMap[currentKey].(map[string]interface{})
 
 	if !isMap {
-		nestedMap = Map{}
+		nestedMap = map[string]interface{}{}
 		dstMap[currentKey] = nestedMap
 	}
 

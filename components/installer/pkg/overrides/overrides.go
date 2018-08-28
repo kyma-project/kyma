@@ -2,13 +2,36 @@ package overrides
 
 import "k8s.io/client-go/kubernetes"
 
-type Data struct {
+type Provider struct {
 	common     Map
 	components map[string]Map
 }
 
+//Common returns overrides common for all components
+func (o *Provider) Common() Map {
+	res := o.common
+
+	if res == nil {
+		return Map{}
+	}
+
+	return res
+}
+
+//ForComponent returns overrides defined only for specified component
+func (o *Provider) ForComponent(componentName string) Map {
+
+	res := o.components[componentName]
+
+	if res == nil {
+		return Map{}
+	}
+
+	return res
+}
+
 //New returns new Data instance.
-func New(client *kubernetes.Clientset) (*Data, error) {
+func New(client *kubernetes.Clientset) (*Provider, error) {
 
 	r := &reader{
 		client: client,
@@ -33,35 +56,12 @@ func New(client *kubernetes.Clientset) (*Data, error) {
 		return nil, err
 	}
 
-	res := Data{
+	res := Provider{
 		common:     commonOverridesMap,
 		components: componentsMap,
 	}
 
 	return &res, nil
-}
-
-//Common returns overrides common for all components
-func (o *Data) Common() Map {
-	res := o.common
-
-	if res == nil {
-		return Map{}
-	}
-
-	return res
-}
-
-//ForComponent returns overrides defined only for specified component
-func (o *Data) ForComponent(componentName string) Map {
-
-	res := o.components[componentName]
-
-	if res == nil {
-		return Map{}
-	}
-
-	return res
 }
 
 //versionOverrides reads overrides for component versions (versions.yaml)

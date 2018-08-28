@@ -56,12 +56,7 @@ func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientse
 }
 
 //InstallKyma .
-func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData) error {
-
-	overrides, overridesErr := overrides.New(steps.kubeClientset)
-	if overridesErr != nil {
-		return overridesErr
-	}
+func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData OverrideData) error {
 
 	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
 	if downloadKymaErr != nil {
@@ -71,18 +66,18 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 	steps.currentPackage = currentPackage
 
 	if installationData.ShouldInstallComponent(consts.ClusterEssentialsComponent) {
-		if instErr := steps.InstallClusterEssentials(installationData, overrides); instErr != nil {
+		if instErr := steps.InstallClusterEssentials(installationData, overrideData); instErr != nil {
 			return instErr
 		}
 	}
 
 	if installationData.ShouldInstallComponent(consts.IstioComponent) {
-		if instErr := steps.InstallIstio(installationData, overrides); instErr != nil {
+		if instErr := steps.InstallIstio(installationData, overrideData); instErr != nil {
 			return instErr
 		}
 	}
 	if installationData.ShouldInstallComponent(consts.PrometheusComponent) {
-		if instErr := steps.InstallPrometheus(installationData, overrides); instErr != nil {
+		if instErr := steps.InstallPrometheus(installationData, overrideData); instErr != nil {
 			return instErr
 		}
 	}
@@ -94,27 +89,27 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 	}
 
 	if installationData.ShouldInstallComponent(consts.DexComponent) {
-		if dexErr := steps.InstallDex(installationData, overrides); dexErr != nil {
+		if dexErr := steps.InstallDex(installationData, overrideData); dexErr != nil {
 			return dexErr
 		}
 	}
 
 	if installationData.ShouldInstallComponent(consts.CoreComponent) {
-		if instErr := steps.InstallCore(installationData, overrides); instErr != nil {
+		if instErr := steps.InstallCore(installationData, overrideData); instErr != nil {
 			return instErr
 		}
 
-		if upgradeErr := steps.UpgradeCore(installationData, overrides); upgradeErr != nil {
+		if upgradeErr := steps.UpgradeCore(installationData, overrideData); upgradeErr != nil {
 			return upgradeErr
 		}
 	}
 
 	if installationData.ShouldInstallComponent(consts.RemoteEnvironments) {
-		if instErr := steps.InstallHmcDefaultRemoteEnvironments(installationData, overrides); instErr != nil {
+		if instErr := steps.InstallHmcDefaultRemoteEnvironments(installationData, overrideData); instErr != nil {
 			return instErr
 		}
 
-		if instErr := steps.InstallEcDefaultRemoteEnvironments(installationData, overrides); instErr != nil {
+		if instErr := steps.InstallEcDefaultRemoteEnvironments(installationData, overrideData); instErr != nil {
 			return instErr
 		}
 	}
@@ -134,11 +129,7 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 }
 
 //UpdateKyma .
-func (steps *InstallationSteps) UpdateKyma(installationData *config.InstallationData) error {
-	overrides, overridesErr := overrides.New(steps.kubeClientset)
-	if overridesErr != nil {
-		return overridesErr
-	}
+func (steps *InstallationSteps) UpdateKyma(installationData *config.InstallationData, overrideData OverrideData) error {
 
 	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
 
@@ -148,18 +139,18 @@ func (steps *InstallationSteps) UpdateKyma(installationData *config.Installation
 
 	steps.currentPackage = currentPackage
 
-	upgradeErr := steps.UpdateClusterEssentials(installationData, overrides)
+	upgradeErr := steps.UpdateClusterEssentials(installationData, overrideData)
 
 	if upgradeErr != nil {
 		return upgradeErr
 	}
 
-	upgradeErr = steps.UpdateIstio(installationData, overrides)
+	upgradeErr = steps.UpdateIstio(installationData, overrideData)
 	if upgradeErr != nil {
 		return upgradeErr
 	}
 
-	upgradeErr = steps.UpdatePrometheus(installationData, overrides)
+	upgradeErr = steps.UpdatePrometheus(installationData, overrideData)
 	if upgradeErr != nil {
 		return upgradeErr
 	}
@@ -169,22 +160,22 @@ func (steps *InstallationSteps) UpdateKyma(installationData *config.Installation
 		return bundlesErr
 	}
 
-	dexErr := steps.UpdateDex(installationData, overrides)
+	dexErr := steps.UpdateDex(installationData, overrideData)
 	if dexErr != nil {
 		return dexErr
 	}
 
-	upgradeErr = steps.UpgradeCore(installationData, overrides)
+	upgradeErr = steps.UpgradeCore(installationData, overrideData)
 	if upgradeErr != nil {
 		return upgradeErr
 	}
 
-	upgradeErr = steps.UpdateHmcDefaultRemoteEnvironments(installationData, overrides)
+	upgradeErr = steps.UpdateHmcDefaultRemoteEnvironments(installationData, overrideData)
 	if upgradeErr != nil {
 		return upgradeErr
 	}
 
-	upgradeErr = steps.UpdateEcDefaultRemoteEnvironments(installationData, overrides)
+	upgradeErr = steps.UpdateEcDefaultRemoteEnvironments(installationData, overrideData)
 	if upgradeErr != nil {
 		return upgradeErr
 	}

@@ -14,7 +14,6 @@ nginx-ingress:
       loadBalancerIP: {{.RemoteEnvIP}}
 configurations-generator:
   kubeConfig:
-    clusterName: {{.Domain}}
     url: {{.K8sApiserverURL}}
     ca: {{.K8sApiserverCa}}
 cluster-users:
@@ -33,10 +32,7 @@ etcd-operator:
 `
 
 // GetCoreOverrides - returns values overrides for core installation basing on domain
-func GetCoreOverrides(installationData *config.InstallationData) (Map, error) {
-	if hasValidDomain(installationData) == false {
-		return Map{}, nil
-	}
+func GetCoreOverrides(installationData *config.InstallationData, overrides Map) (Map, error) {
 
 	tmpl, err := template.New("").Parse(coreTplStr)
 	if err != nil {
@@ -49,9 +45,29 @@ func GetCoreOverrides(installationData *config.InstallationData) (Map, error) {
 		return nil, err
 	}
 
-	return ToMap(buf.String())
+	coreOverrides, err := ToMap(buf.String())
+	if err != nil {
+		return nil, err
+	}
+
+	allOverrides := Map{}
+	MergeMaps(allOverrides, overrides)
+	MergeMaps(allOverrides, coreOverrides)
+
+	if hasValidDomain(allOverrides) == false {
+		return Map{}, nil
+	}
+
+	return allOverrides, nil
 }
 
-func hasValidDomain(installationData *config.InstallationData) bool {
-	return installationData.Domain != ""
+func hasValidDomain(m Map) bool {
+
+	res, found := FindOverrideValue(m, "configurations-generator.kubeConfig.clusterName")
+
+	if !found {
+		return false
+	}
+
+	return res != ""
 }

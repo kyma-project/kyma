@@ -16,18 +16,7 @@ func (steps *InstallationSteps) InstallClusterEssentials(installationData *confi
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.ClusterEssentialsComponent)
-	clusterEssentialsOverrides, err := steps.getClusterEssentialsOverrides(installationData, chartDir)
-
-	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
-		steps.statusManager.Error(stepName)
-		return err
-	}
-
-	allOverrides := overrides.Map{}
-	overrides.MergeMaps(allOverrides, overrideData.Common())
-	overrides.MergeMaps(allOverrides, clusterEssentialsOverrides) //TODO: Remove after migration to generic overrides is completed
-	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.ClusterEssentialsComponent))
-	overridesStr, err := overrides.ToYaml(allOverrides)
+	clusterEssentialsOverrides, err := steps.getClusterEssentialsOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -38,7 +27,7 @@ func (steps *InstallationSteps) InstallClusterEssentials(installationData *confi
 		chartDir,
 		"kyma-system",
 		consts.ClusterEssentialsComponent,
-		overridesStr)
+		clusterEssentialsOverrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
 		steps.statusManager.Error(stepName)
@@ -58,19 +47,12 @@ func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.ClusterEssentialsComponent)
-	clusterEssentialsOverrides, err := steps.getClusterEssentialsOverrides(installationData, chartDir)
+	clusterEssentialsOverrides, err := steps.getClusterEssentialsOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
 		return err
 	}
-
-	allOverrides := overrides.Map{}
-	overrides.MergeMaps(allOverrides, overrideData.Common())
-	overrides.MergeMaps(allOverrides, clusterEssentialsOverrides) //TODO: Remove after migration to generic overrides is completed
-	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.ClusterEssentialsComponent))
-
-	overridesStr, err := overrides.ToYaml(allOverrides)
 
 	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -80,7 +62,7 @@ func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
 		consts.ClusterEssentialsComponent,
-		overridesStr)
+		clusterEssentialsOverrides)
 
 	if steps.errorHandlers.CheckError("Upgrade Error: ", upgradeErr) {
 		steps.statusManager.Error(stepName)
@@ -93,24 +75,25 @@ func (steps *InstallationSteps) UpdateClusterEssentials(installationData *config
 	return nil
 }
 
-func (steps *InstallationSteps) getClusterEssentialsOverrides(installationData *config.InstallationData, chartDir string) (overrides.Map, error) {
+func (steps *InstallationSteps) getClusterEssentialsOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
+
 	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.ClusterEssentialsComponent))
 
-	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
+	allOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
 	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
-		return nil, err
+		return "", err
 	}
-
-	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
 		if steps.errorHandlers.CheckError("Couldn't get additional overrides: ", err) {
-			return nil, err
+			return "", err
 		}
 		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
-	return allOverrides, nil
+	return overrides.ToYaml(allOverrides)
 }

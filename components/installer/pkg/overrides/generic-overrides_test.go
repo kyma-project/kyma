@@ -89,8 +89,10 @@ a:
 				overrideMap, err := ToMap(override)
 				So(err, ShouldBeNil)
 
-				MergeMaps(baseMap, overrideMap)
-				res, err := ToYaml(baseMap)
+				testMap := Map{}
+				MergeMaps(testMap, baseMap)
+				MergeMaps(testMap, overrideMap)
+				res, err := ToYaml(testMap)
 				So(err, ShouldBeNil)
 				So(res, ShouldEqual, nlnl(expected))
 			})
@@ -334,6 +336,39 @@ a:
 				copyD, _ = copyB["d"].(map[string]interface{})
 				So(srcD["e"], ShouldEqual, "200")
 				So(copyD["e"], ShouldEqual, 500)
+			})
+		})
+
+		Convey("findOverrideValue function", func() {
+			Convey("Should find override value in a map", func() {
+				flatmap := map[string]string{}
+				flatmap["a.b.c.d"] = "testval"
+
+				oMap := UnflattenToMap(flatmap)
+
+				val, exists := FindOverrideValue(oMap, "a.b.c.d")
+				So(exists, ShouldBeTrue)
+				So(val, ShouldEqual, "testval")
+			})
+
+			Convey("Should not find override value in a map when it's not a final entry", func() {
+				flatmap := map[string]string{}
+				flatmap["a.b.c.d"] = "testval"
+
+				oMap := UnflattenToMap(flatmap)
+
+				_, exists := FindOverrideValue(oMap, "a.b.c")
+				So(exists, ShouldBeFalse)
+			})
+
+			Convey("Should not find override value in a map when it does not exist", func() {
+				flatmap := map[string]string{}
+				flatmap["a.b.c.d"] = "testval"
+
+				oMap := UnflattenToMap(flatmap)
+
+				_, exists := FindOverrideValue(oMap, "a.b.f")
+				So(exists, ShouldBeFalse)
 			})
 		})
 	})
