@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-kubeless-config
+  namespace: kyma-system
+  labels:
+    helm-chart-test: "true"
+data:
+  k8sYaml: |-
+    {{- include "k8s.yaml.tpl" . | indent 4}}

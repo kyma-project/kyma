@@ -78,9 +78,22 @@ spec:
   containers:
   - name: test-{{ template "fullname" . }}
     image: {{ .Values.global.containerRegistry.path }}/{{ .Values.test.image.name }}:{{ .Values.test.image.tag }}
+    volumeMounts:
+    - name: k8syaml
+      mountPath: /k8syaml
     env:
     - name: KUBELESS_NAMESPACE
       value: kyma-system
     - name: KUBELESS_CONFIG
       value: {{ template "fullname" . }}-config
+    - name: DOMAIN_NAME
+      value: {{ .Values.global.domainName }}
+  volumes:
+    - name: k8syaml
+      configMap: 
+        name: test-kubeless-config
+        items:
+          - key: k8sYaml
+            path: k8s.yaml
+
   restartPolicy: Never
