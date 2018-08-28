@@ -40,7 +40,7 @@ spec:
           - name: APP_BROKER_RELIST_DURATION_WINDOW
             value: {{ .Values.brokerRelistDurationWindow }}
           - name: APP_CLUSTER_SCOPED_BROKER
-            value: {{ .Values.clusterScopedBroker }}
+            value: "{{ .Values.clusterScopedBroker }}"
         volumeMounts:
         - mountPath: /etc/config/re-broker
           name: config-volume
