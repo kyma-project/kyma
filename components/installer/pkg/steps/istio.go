@@ -76,16 +76,17 @@ func (steps *InstallationSteps) getIstioOverrides(installationData *config.Insta
 	overrides.MergeMaps(allOverrides, overrideData.Common())
 	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.IstioComponent))
 
-	allOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
-
+	globalOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
 	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
 		return "", err
 	}
+	overrides.MergeMaps(allOverrides, globalOverrides)
 
-	allOverrides, err = overrides.GetIstioOverrides(installationData, allOverrides)
+	istioOverrides, err := overrides.GetIstioOverrides(installationData, allOverrides)
 	if steps.errorHandlers.CheckError("Couldn't get Istio overrides: ", err) {
 		return "", err
 	}
+	overrides.MergeMaps(allOverrides, istioOverrides)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {

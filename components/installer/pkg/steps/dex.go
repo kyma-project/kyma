@@ -82,10 +82,11 @@ func (steps *InstallationSteps) getDexOverrides(installationData *config.Install
 	overrides.MergeMaps(allOverrides, overrideData.Common())
 	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.DexComponent))
 
-	allOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
+	globalOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
 	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
 		return "", err
 	}
+	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {

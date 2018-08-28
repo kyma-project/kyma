@@ -74,6 +74,7 @@ data:
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   configurations-generator.kubeConfig.url: "__K8S_APISERVER_URL__"
   configurations-generator.kubeConfig.ca: "__K8S_APISERVER_CA__"
+  configurations-generator.kubeConfig.clusterName: "__DOMAIN__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
   etcd-operator.backupOperator.enabled: "__ENABLE_ETCD_BACKUP_OPERATOR__"
   global.etcdBackupABS.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"

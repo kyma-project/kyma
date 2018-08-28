@@ -76,10 +76,11 @@ func (steps *InstallationSteps) getClusterEssentialsOverrides(installationData *
 	overrides.MergeMaps(allOverrides, overrideData.Common())
 	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.ClusterEssentialsComponent))
 
-	allOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
+	globalOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
 	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
 		return "", err
 	}
+	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {

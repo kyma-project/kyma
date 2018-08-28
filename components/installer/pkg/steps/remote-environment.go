@@ -123,10 +123,11 @@ func (steps *InstallationSteps) getHmcOverrides(installationData *config.Install
 	overrides.MergeMaps(allOverrides, overrideData.Common())
 	overrides.MergeMaps(allOverrides, overrideData.ForComponent(hmcRemoteEnvironmentComponent))
 
-	allOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
+	globalOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
 	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
 		return "", err
 	}
+	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	hmcDefaultOverride, err := overrides.GetHmcDefaultOverrides()
 
@@ -152,10 +153,11 @@ func (steps *InstallationSteps) getEcOverrides(installationData *config.Installa
 	overrides.MergeMaps(allOverrides, overrideData.Common())
 	overrides.MergeMaps(allOverrides, overrideData.ForComponent(ecRemoteEnvironmentComponent))
 
-	allOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
+	globalOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
 	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
 		return "", err
 	}
+	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	ecDefaultOverride, err := overrides.GetEcDefaultOverrides()
 	if steps.errorHandlers.CheckError("Couldn't get Ec default overrides: ", err) {
