@@ -38,7 +38,7 @@ spec:
             value: "0.0.0.0"
           - name: APP_ALLOWED_ORIGINS
             {{- if .Values.global.isLocalEnv }}
-            value: "https://*.{{ .Values.global.domainName }},*.svc.cluster.local:44134,http://console-dev.{{ .Values.global.domainName }}:4200"
+            value: "https://*.{{ .Values.global.domainName }},*.svc.cluster.local:44134,http://console-dev.{{ .Values.global.domainName }}:*"
             {{- else }}
             value: "https://*.{{ .Values.global.domainName }},*.svc.cluster.local:44134"
             {{- end }}
