@@ -3,12 +3,12 @@ package k8s
 import (
 	"fmt"
 
+	"strings"
+
 	"github.com/pkg/errors"
 	apps "k8s.io/api/apps/v1"
 	"k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 	coreV1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
 )
@@ -17,10 +17,10 @@ type resourceQuotaService struct {
 	rqInformer cache.SharedIndexInformer
 	rsInformer cache.SharedIndexInformer
 	ssInformer cache.SharedIndexInformer
-	podClient  *coreV1.CoreV1Client
+	podClient  coreV1.CoreV1Interface
 }
 
-func newResourceQuotaService(rqInformer cache.SharedIndexInformer, rsInformer cache.SharedIndexInformer, ssInformer cache.SharedIndexInformer, podClient *coreV1.CoreV1Client) *resourceQuotaService {
+func newResourceQuotaService(rqInformer cache.SharedIndexInformer, rsInformer cache.SharedIndexInformer, ssInformer cache.SharedIndexInformer, podClient coreV1.CoreV1Interface) *resourceQuotaService {
 	return &resourceQuotaService{
 		rqInformer: rqInformer,
 		rsInformer: rsInformer,
@@ -84,20 +84,18 @@ func (svc *resourceQuotaService) ListStatefulSets(environment string) ([]*apps.S
 }
 
 func (svc *resourceQuotaService) ListPods(environment string, labelSelector map[string]string) ([]v1.Pod, error) {
-	selector := labels.NewSelector()
+	selectors := make([]string, 0)
 	for key, value := range labelSelector {
-		req, err := labels.NewRequirement(key, selection.In, []string{value})
-		if err != nil {
-			return nil, errors.Wrapf(err, "while creating new requirement with key: %s, value: %s", key, value)
-		}
-		selector.Add(*req)
+		selectors = append(selectors, fmt.Sprintf("%s=%s", key, value))
 	}
 
+	selector := strings.Join(selectors, ",")
+
 	pods, err := svc.podClient.Pods(environment).List(metaV1.ListOptions{
-		LabelSelector: selector.String(),
+		LabelSelector: selector,
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "while listing Pods in environment: %s, with labelSelector: %s", environment, labelSelector)
+		return nil, errors.Wrapf(err, "while listing Pods in environment: %selector, with labelSelector: %selector", environment, labelSelector)
 	}
 
 	return pods.Items, err

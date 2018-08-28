@@ -21,3 +21,8 @@ type ServiceBindingUsageLister interface {
 type ServiceBindingGetter interface {
 	Find(env string, name string) (*bindingApi.ServiceBinding, error)
 }
+
+//go:generate mockery -name=deploymentGetter -output=automock -outpkg=automock -case=underscore
+type deploymentGetter interface {
+	Find(name string, environment string) (*api.Deployment, error)
+}
