@@ -42,6 +42,7 @@ bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placehol
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__ADMIN_GROUP__" --value ""
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__ENABLE_ETCD_BACKUP__" --value "false"
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__ETCD_BACKUP_ABS_CONTAINER_NAME__" --value ""
+bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__INGRESSGATEWAY_SERVICE_TYPE__" --value "NodePort"
 ##########
 
 echo -e "\nApplying configuration"
