@@ -29,9 +29,6 @@ spec:
       serviceAccountName: {{ template "fullname" . }}
       containers:
       - name: {{ .Chart.Name }}
-        resources:
-          limit:
-            memory: 256Mi
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
