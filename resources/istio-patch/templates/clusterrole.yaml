@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: istio-kyma-patch
+rules:
+- apiGroups: [""]
+  resources: ["services", "serviceaccounts", "secrets", "configmaps", "pods"]
+  verbs: ["*"]
+- apiGroups: ["extensions"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["*"]
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["*"]

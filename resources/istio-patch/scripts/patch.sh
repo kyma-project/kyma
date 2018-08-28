@@ -15,15 +15,19 @@ function run_patch() {
 }
 
 function run_all_patches() {
-  for f in $(find ${DIR} -name '*\.patch\.json' | xargs basename); do
+  echo "--> Patch resources"
+  for f in $(find ${DIR} -name '*\.patch\.json' | xargs -I '{}' basename '{}'); do
     local type=$(cut -d. -f2 <<< ${f})
     local name=$(cut -d. -f1 <<< ${f})
+    echo "    Patch $type $name"
     run_patch ${type} ${name}
   done
 }
 
 function remove_not_used() {
+  echo "--> Delete resources"
   while read line; do
+    echo "    Delete $line"
     local type=$(cut -d' ' -f1 <<< ${line})
     local name=$(cut -d' ' -f2 <<< ${line})
     kubectl delete ${type} ${name} -n istio-system
@@ -31,6 +35,7 @@ function remove_not_used() {
 }
 
 function configure_sidecar_injector() {
+  echo "--> Configure sidecar injector"
   local configmap=$(kubectl -n istio-system get configmap istio-sidecar-injector -o jsonpath='{.data.config}')
   # Disable automatic injecting
   configmap=$(sed 's/policy: enabled/policy: disabled/' <<< "$configmap")
@@ -38,7 +43,7 @@ function configure_sidecar_injector() {
   # Set limits for sidecar. Our namespaces have resource quota set thus every container needs to have limits defined.
   # Add limits to already existing resources sections
   configmap=$(sed 's|    resources:|    resources:\'$'\n      limits: { memory: 50Mi }|' <<< "$configmap")
-  # In case there is no limits section add one at the beginning of container definition/ It serves as default.
+  # In case there is no limits section add one at the beginning of container definition. It serves as default.
   configmap=$(sed 's|  - name: istio-\(.*\)|  - name: istio-\1\'$'\n    resources: { limits: { memory: 50Mi } }|' <<< "$configmap")
 
   # Escape new lines and double quotes for kubectl
@@ -49,13 +54,16 @@ function configure_sidecar_injector() {
 }
 
 function apply_all() {
-  for f in $(find ${DIR} -name '*\.yaml' | xargs basename); do
+  echo "--> Apply resources"
+  for f in $(find ${DIR} -name '*\.yaml' | xargs -I '{}' basename '{}'); do
+    echo "    Apply $f"
     kubectl apply -f ${DIR}/${f}
   done
 }
 
 function open_ingress_ports() {
   if [[ ${IS_LOCAL_INSTALLATION} == "true" ]]; then
+    echo "--> Open ingress gateway ports"
     kubectl patch -n istio-system deployment istio-ingressgateway --type json -p '
       [
         {
@@ -74,6 +82,7 @@ function open_ingress_ports() {
 
 function set_external_load_balancer() {
   if [[ -n ${EXTERNAL_PUBLIC_IP} ]]; then
+    echo "--> Set external public IP: $EXTERNAL_PUBLIC_IP"
     kubectl patch -n istio-system service istio-ingressgateway --type json -p '
       [
         {

@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: istio-kyma-patch
+spec:
+  template:
+    metadata:
+      name: istio-kyma-patch
+    spec:
+      serviceAccountName: istio-kyma-patch
+      restartPolicy: OnFailure
+      containers:
+      - name: istio-kyma-patch
+        imagePullPolicy: Never
+        image: local/istio-patch:latest
+        env:
+        - name: IS_LOCAL_INSTALLATION
+          value: "true"
