@@ -16,6 +16,7 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/config"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/labeler"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mode"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage/populator"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/syncer"
@@ -63,7 +64,7 @@ func main() {
 	scInformersGroup := scInformerFactory.Servicecatalog().V1beta1()
 
 	// instance populator
-	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), cfg.BrokerName)
+	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), cfg.ClusterScopedBrokerName)
 	popCtx, popCancelFunc := context.WithTimeout(context.Background(), time.Minute)
 	defer popCancelFunc()
 	log.Info("Instance storage population...")
@@ -78,16 +79,18 @@ func main() {
 	reInformersGroup := reInformerFactory.Remoteenvironment().V1alpha1()
 
 	// internal services
-	relistRequester := syncer.NewRelistRequester(scSDK, cfg.BrokerName, cfg.BrokerRelistDurationWindow, log)
+	relistRequester := syncer.NewRelistRequester(scSDK, cfg.ClusterScopedBrokerName, cfg.BrokerRelistDurationWindow, log)
 	siFacade := broker.NewServiceInstanceFacade(scInformersGroup.ServiceInstances().Informer())
 	accessChecker := access.New(sFact.RemoteEnvironment(), reClient.RemoteenvironmentV1alpha1(), sFact.Instance())
 
 	reSyncCtrl := syncer.New(reInformersGroup.RemoteEnvironments(), sFact.RemoteEnvironment(), sFact.RemoteEnvironment(), relistRequester, log)
 	labelerCtrl := labeler.New(reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), log)
 
+	brokerMode, err := mode.NewBrokerService(cfg)
+	fatalOnError(err)
 	// create broker
 	srv := broker.New(sFact.RemoteEnvironment(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
-		reClient.RemoteenvironmentV1alpha1(), siFacade, log)
+		reClient.RemoteenvironmentV1alpha1(), siFacade, brokerMode, log)
 
 	// setup graceful shutdown signals
 	ctx, cancelFunc := context.WithCancel(context.Background())

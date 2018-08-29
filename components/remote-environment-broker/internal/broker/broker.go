@@ -4,6 +4,7 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/access"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mode"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/platform/idprovider"
 	"github.com/sirupsen/logrus"
@@ -95,7 +96,7 @@ type (
 )
 
 // New creates instance of broker server.
-func New(remoteEnvironmentFinder reFinder, instStorage instanceStorage, opStorage operationStorage, accessChecker access.ProvisionChecker, reClient v1alpha1.RemoteenvironmentV1alpha1Interface, serviceInstanceGetter serviceInstanceGetter, log *logrus.Entry) *Server {
+func New(remoteEnvironmentFinder reFinder, instStorage instanceStorage, opStorage operationStorage, accessChecker access.ProvisionChecker, reClient v1alpha1.RemoteenvironmentV1alpha1Interface, serviceInstanceGetter serviceInstanceGetter, brokerMode *mode.BrokerService, log *logrus.Entry) *Server {
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {
 		idRaw, err := idpRaw()
@@ -119,6 +120,7 @@ func New(remoteEnvironmentFinder reFinder, instStorage instanceStorage, opStorag
 		lastOpGetter: &getLastOperationService{
 			getter: opStorage,
 		},
-		logger: log.WithField("service", "broker:server"),
+		brokerMode: brokerMode,
+		logger:     log.WithField("service", "broker:server"),
 	}
 }
