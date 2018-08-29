@@ -5,6 +5,8 @@ metadata:
   namespace: kyma-system
   labels:
     helm-chart-test: "true"
+  annotations:
+    helm.sh/hook: test-success
 data:
   k8sYaml: |-
     {{- include "k8s.yaml.tpl" . | indent 4}}

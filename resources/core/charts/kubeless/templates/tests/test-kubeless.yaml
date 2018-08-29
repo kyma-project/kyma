@@ -77,7 +77,7 @@ spec:
   serviceAccount: "test-{{ template "fullname" . }}"
   containers:
   - name: test-{{ template "fullname" . }}
-    image: eu.gcr.io/kyma-project/snapshot/kubeless-test-client:PR-306
+    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.test.image.name }}:{{ .Values.test.image.tag }}
     volumeMounts:
     - name: k8syaml
       mountPath: /k8syaml
