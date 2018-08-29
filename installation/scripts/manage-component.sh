@@ -8,7 +8,7 @@ COMPONENT_NAME="$1"
 ENABLED="$2"
 STATUS="disabled"
 FILE_NAME="components.yaml"
-FILE_PATH=$ROOT_PATH/../${FILE_NAME}
+FILE_PATH=${ROOT_PATH}/../${FILE_NAME}
 
 # Check if the provided value is a valid boolean
 if [[ ! ("${ENABLED}" == "true" || "${ENABLED}" == "false") ]]; then
@@ -29,7 +29,14 @@ fi
 
 # Remove previous entry in case the provided key exists
 if grep -Fq ${COMPONENT_NAME} ${FILE_PATH}; then
-    sed -i '' '/'"${COMPONENT_NAME}"'/d' ${FILE_PATH}
+    case `uname -s` in
+        Darwin)
+            sed -i '' '/'"${COMPONENT_NAME}"'/d' ${FILE_PATH}
+            ;;
+        *)
+            sed -i '/'"${COMPONENT_NAME}"'/d' ${FILE_PATH}
+            ;;
+    esac
 fi
 
 # Append the provided key and value to the file
