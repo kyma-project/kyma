@@ -10,13 +10,13 @@ import (
 )
 
 //InstallDex installs Dex component
-func (steps *InstallationSteps) InstallDex(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) InstallDex(installationData *config.InstallationData, overrideData OverrideData) error {
 
 	const stepName string = "Installing Dex"
 	const namespace string = "kyma-system"
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.DexComponent)
-	overrides, err := steps.getDexOverrides(installationData, chartDir)
+	dexOverrides, err := steps.getDexOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -30,7 +30,7 @@ func (steps *InstallationSteps) InstallDex(installationData *config.Installation
 		chartDir,
 		namespace,
 		consts.DexComponent,
-		overrides)
+		dexOverrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
 		steps.statusManager.Error(stepName)
@@ -44,15 +44,15 @@ func (steps *InstallationSteps) InstallDex(installationData *config.Installation
 }
 
 // UpdateDex updates Dex component
-func (steps *InstallationSteps) UpdateDex(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) UpdateDex(installationData *config.InstallationData, overrideData OverrideData) error {
 
 	const stepName string = "Updating Dex"
 	const namespace string = "kyma-system"
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.DexComponent)
-	overrides, err := steps.getDexOverrides(installationData, chartDir)
+	dexOverrides, err := steps.getDexOverrides(installationData, chartDir, overrideData)
 
-	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
+	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
 		return err
 	}
@@ -63,9 +63,9 @@ func (steps *InstallationSteps) UpdateDex(installationData *config.InstallationD
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
 		consts.DexComponent,
-		overrides)
+		dexOverrides)
 
-	if steps.errorHandlers.CheckError("Install Error: ", upgradeErr) {
+	if steps.errorHandlers.CheckError("Upgrade Error: ", upgradeErr) {
 		steps.statusManager.Error(stepName)
 		return upgradeErr
 	}
@@ -76,18 +76,24 @@ func (steps *InstallationSteps) UpdateDex(installationData *config.InstallationD
 	return nil
 }
 
-func (steps *InstallationSteps) getDexOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
+func (steps *InstallationSteps) getDexOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
 
 	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.DexComponent))
 
-	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
-	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)
+	globalOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
+	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
+		return "", err
+	}
 	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
-		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
+		if steps.errorHandlers.CheckError("Couldn't get additional overrides: ", err) {
+			return "", err
+		}
 		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 

@@ -16,7 +16,7 @@ func TestInstallIstio(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once, call RunCommand once, call InstallReleaseWithoutWait, call RunCommand again and return no error", func() {
 
-				err := kymaTestSteps.InstallIstio(installationData)
+				err := kymaTestSteps.InstallIstio(installationData, MockOverrideData{})
 
 				So(mockHelmClient.InstallReleaseWithoutWaitCalled, ShouldBeTrue)
 				// We no longer execute shell commands during istio installation
@@ -33,7 +33,7 @@ func TestInstallIstio(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once, call RunCommand once, call InstallReleaseWithoutWait, call UpdateInstallationStatus again and return the error", func() {
 
-				err := kymaTestSteps.InstallIstio(installationData)
+				err := kymaTestSteps.InstallIstio(installationData, MockOverrideData{})
 
 				// We no longer execute shell commands during istio installation
 				So(mockCommandExecutor.TimesMockCommandExecutorCalled, ShouldEqual, 0)

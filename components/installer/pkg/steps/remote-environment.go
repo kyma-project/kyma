@@ -15,13 +15,13 @@ const (
 )
 
 //InstallHmcDefaultRemoteEnvironments function will install Hmc Remote Environments
-func (steps *InstallationSteps) InstallHmcDefaultRemoteEnvironments(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) InstallHmcDefaultRemoteEnvironments(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Installing Hmc Remote Environment"
 	steps.PrintInstallationStep(stepName)
 
 	steps.statusManager.InProgress(stepName)
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.RemoteEnvironments)
-	hmcOverrides, err := steps.getHmcOverrides(installationData, chartDir)
+	hmcOverrides, err := steps.getHmcOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -41,14 +41,14 @@ func (steps *InstallationSteps) InstallHmcDefaultRemoteEnvironments(installation
 }
 
 //UpdateHmcDefaultRemoteEnvironments function will install Hmc Remote Environments
-func (steps *InstallationSteps) UpdateHmcDefaultRemoteEnvironments(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) UpdateHmcDefaultRemoteEnvironments(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Updating Hmc Remote Environment"
 	steps.PrintInstallationStep(stepName)
 
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.RemoteEnvironments)
-	hmcOverrides, err := steps.getHmcOverrides(installationData, chartDir)
+	hmcOverrides, err := steps.getHmcOverrides(installationData, chartDir, overrideData)
 	if steps.errorHandlers.CheckError("Update Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
 		return err
@@ -67,13 +67,13 @@ func (steps *InstallationSteps) UpdateHmcDefaultRemoteEnvironments(installationD
 }
 
 //InstallEcDefaultRemoteEnvironments function will install EC Remote Environments
-func (steps *InstallationSteps) InstallEcDefaultRemoteEnvironments(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) InstallEcDefaultRemoteEnvironments(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Installing Ec Remote Environment"
 	steps.PrintInstallationStep(stepName)
 
 	steps.statusManager.InProgress(stepName)
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.RemoteEnvironments)
-	ecOverrides, err := steps.getEcOverrides(installationData, chartDir)
+	ecOverrides, err := steps.getEcOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -93,13 +93,13 @@ func (steps *InstallationSteps) InstallEcDefaultRemoteEnvironments(installationD
 }
 
 //UpdateEcDefaultRemoteEnvironments function will install EC Remote Environments
-func (steps *InstallationSteps) UpdateEcDefaultRemoteEnvironments(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) UpdateEcDefaultRemoteEnvironments(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Updating Ec Remote Environment"
 	steps.PrintInstallationStep(stepName)
 
 	steps.statusManager.InProgress(stepName)
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.RemoteEnvironments)
-	ecOverrides, err := steps.getEcOverrides(installationData, chartDir)
+	ecOverrides, err := steps.getEcOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Update Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -118,43 +118,59 @@ func (steps *InstallationSteps) UpdateEcDefaultRemoteEnvironments(installationDa
 	return nil
 }
 
-func (steps *InstallationSteps) getHmcOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
+func (steps *InstallationSteps) getHmcOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(hmcRemoteEnvironmentComponent))
 
-	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
-	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)
+	globalOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
+	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
+		return "", err
+	}
 	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	hmcDefaultOverride, err := overrides.GetHmcDefaultOverrides()
 
-	steps.errorHandlers.LogError("Couldn't get Hmc default overrides: ", err)
+	if steps.errorHandlers.CheckError("Couldn't get Hmc default overrides: ", err) {
+		return "", err
+	}
 	overrides.MergeMaps(allOverrides, hmcDefaultOverride)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
-		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
+		if steps.errorHandlers.CheckError("Couldn't get additional overrides: ", err) {
+			return "", err
+		}
 		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
 	return overrides.ToYaml(allOverrides)
 }
 
-func (steps *InstallationSteps) getEcOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
+func (steps *InstallationSteps) getEcOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(ecRemoteEnvironmentComponent))
 
-	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
-	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)
+	globalOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
+	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
+		return "", err
+	}
 	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	ecDefaultOverride, err := overrides.GetEcDefaultOverrides()
-	steps.errorHandlers.LogError("Couldn't get Ec default overrides: ", err)
+	if steps.errorHandlers.CheckError("Couldn't get Ec default overrides: ", err) {
+		return "", err
+	}
 	overrides.MergeMaps(allOverrides, ecDefaultOverride)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
-		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
+		if steps.errorHandlers.CheckError("Couldn't get additional overrides: ", err) {
+			return "", err
+		}
 		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 

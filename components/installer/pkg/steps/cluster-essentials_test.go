@@ -16,7 +16,7 @@ func TestInstallClusterEssentials(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once and call InstallRelease returning no error", func() {
 
-				err := kymaTestSteps.InstallClusterEssentials(testInst)
+				err := kymaTestSteps.InstallClusterEssentials(testInst, MockOverrideData{})
 
 				So(mockHelmClient.InstallReleaseCalled, ShouldBeTrue)
 				So(err, ShouldBeNil)
@@ -29,7 +29,7 @@ func TestInstallClusterEssentials(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once, call InstallRelease, call UpdateInstallationStatus again and return the error", func() {
 
-				err := kymaTestSteps.InstallClusterEssentials(testInst)
+				err := kymaTestSteps.InstallClusterEssentials(testInst, MockOverrideData{})
 
 				So(mockErrorHelmClient.InstallReleaseCalled, ShouldBeTrue)
 				So(err, ShouldNotBeNil)

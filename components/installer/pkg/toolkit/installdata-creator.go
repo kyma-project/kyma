@@ -7,12 +7,14 @@ import (
 // InstallationDataCreator .
 type InstallationDataCreator struct {
 	installationData config.InstallationData
+	genericOverrides map[string]string
 }
 
 // NewInstallationDataCreator return new instance of InstallationDataCreator
 func NewInstallationDataCreator() *InstallationDataCreator {
 	res := &InstallationDataCreator{
 		installationData: config.InstallationData{},
+		genericOverrides: map[string]string{},
 	}
 
 	return res
@@ -38,13 +40,6 @@ func (sc *InstallationDataCreator) WithDummyAzureCredentials() *InstallationData
 	return sc
 }
 
-// WithEmptyDomain sets Domain property in InstallationData to empty value
-func (sc *InstallationDataCreator) WithEmptyDomain() *InstallationDataCreator {
-	sc.installationData.Domain = ""
-
-	return sc
-}
-
 // WithCert sets Cert and CertKey properties
 func (sc *InstallationDataCreator) WithCert(cert, certKey string) *InstallationDataCreator {
 	sc.installationData.ClusterTLSCert = cert
@@ -53,9 +48,8 @@ func (sc *InstallationDataCreator) WithCert(cert, certKey string) *InstallationD
 }
 
 // WithDomain sets Domain property in InstallationData
-func (sc *InstallationDataCreator) WithDomain(domain string) *InstallationDataCreator {
-	sc.installationData.Domain = domain
-
+func (sc *InstallationDataCreator) WithDomain(key, value string) *InstallationDataCreator {
+	sc.genericOverrides[key] = value
 	return sc
 }
 
@@ -141,6 +135,8 @@ func (sc *InstallationDataCreator) WithSlackCredentials(channel, apiurl string) 
 
 ////////////////////////////////////////
 // GetData returns InstallationData created by InstallationDataCreator
-func (sc *InstallationDataCreator) GetData() config.InstallationData {
-	return sc.installationData
+func (sc *InstallationDataCreator) GetData() (config.InstallationData, map[string]string) {
+
+	//We can't use types from overrides package here because of cyclic imports, we must use general types.
+	return sc.installationData, sc.genericOverrides
 }

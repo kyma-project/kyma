@@ -8,7 +8,6 @@ import (
 // Configuration of non-secret values in installer
 type installationConfig struct {
 	ExternalPublicIP           string
-	Domain                     string
 	RemoteEnvIP                string
 	K8sApiserverUrl            string
 	K8sApiserverCa             string
@@ -39,7 +38,6 @@ type installationConfig struct {
 func GetInstallationConfig() *installationConfig {
 	return &installationConfig{
 		ExternalPublicIP:           os.Getenv("EXTERNAL_PUBLIC_IP"),
-		Domain:                     os.Getenv("DOMAIN"),
 		RemoteEnvIP:                os.Getenv("REMOTE_ENV_IP"),
 		K8sApiserverUrl:            os.Getenv("K8S_APISERVER_URL"),
 		K8sApiserverCa:             os.Getenv("K8S_APISERVER_CA"),

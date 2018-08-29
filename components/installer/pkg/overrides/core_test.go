@@ -11,13 +11,13 @@ func TestGetCoreOverrides(t *testing.T) {
 	Convey("GetCoreOverrides", t, func() {
 		Convey("when InstallationData does not contain domain name overrides should be empty", func() {
 
-			installationData := NewInstallationDataCreator().WithEmptyDomain().GetData()
-			overridesMap, err := GetCoreOverrides(&installationData)
+			installationData, _ := NewInstallationDataCreator().GetData()
+			overridesMap, err := GetCoreOverrides(&installationData, Map{})
 			So(err, ShouldBeNil)
 
-			overrides, err := ToYaml(overridesMap)
+			overridesYaml, err := ToYaml(overridesMap)
 			So(err, ShouldBeNil)
-			So(overrides, ShouldBeBlank)
+			So(overridesYaml, ShouldBeBlank)
 		})
 
 		Convey("when InstallationData contains domain name overrides should contain yaml", func() {
@@ -44,15 +44,15 @@ test:
     password: ""
     username: ""
 `
-			installationData := NewInstallationDataCreator().WithDomain("kyma.local").WithRemoteEnvIP("1.1.1.1").WithAdminGroup("testgroup").
+			installationData, testOverrides := NewInstallationDataCreator().WithDomain("configurations-generator.kubeConfig.clusterName", "kyma.local").WithRemoteEnvIP("1.1.1.1").WithAdminGroup("testgroup").
 				GetData()
 
-			overridesMap, err := GetCoreOverrides(&installationData)
+			overridesMap, err := GetCoreOverrides(&installationData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
 
-			overrides, err := ToYaml(overridesMap)
+			overridesYaml, err := ToYaml(overridesMap)
 			So(err, ShouldBeNil)
-			So(overrides, ShouldEqual, dummyOverridesForCore)
+			So(overridesYaml, ShouldEqual, dummyOverridesForCore)
 		})
 
 		Convey("when test properties are provided, auth.username and auth.password should exist", func() {
@@ -79,18 +79,18 @@ test:
     password: p@ssw0rd
     username: user1
 `
-			installationData := NewInstallationDataCreator().
-				WithDomain("kyma.local").
+			installationData, testOverrides := NewInstallationDataCreator().
+				WithDomain("configurations-generator.kubeConfig.clusterName", "kyma.local").
 				WithRemoteEnvIP("1.1.1.1").
 				WithUITestCredentials("user1", "p@ssw0rd").
 				GetData()
 
-			overridesMap, err := GetCoreOverrides(&installationData)
+			overridesMap, err := GetCoreOverrides(&installationData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
 
-			overrides, err := ToYaml(overridesMap)
+			overridesYaml, err := ToYaml(overridesMap)
 			So(err, ShouldBeNil)
-			So(overrides, ShouldEqual, dummyOverridesForCore)
+			So(overridesYaml, ShouldEqual, dummyOverridesForCore)
 		})
 
 		Convey("when etcd-operator properties are provided then enabled, abs.storageAccount and abs.storageKey should exist", func() {
@@ -117,18 +117,18 @@ test:
     password: ""
     username: ""
 `
-			installationData := NewInstallationDataCreator().
-				WithDomain("kyma.local").
+			installationData, testOverrides := NewInstallationDataCreator().
+				WithDomain("configurations-generator.kubeConfig.clusterName", "kyma.local").
 				WithRemoteEnvIP("1.1.1.1").
 				WithEtcdOperator("true", "pico-bello", "123-456-3245-a23b").
 				GetData()
 
-			overridesMap, err := GetCoreOverrides(&installationData)
+			overridesMap, err := GetCoreOverrides(&installationData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
 
-			overrides, err := ToYaml(overridesMap)
+			overridesYaml, err := ToYaml(overridesMap)
 			So(err, ShouldBeNil)
-			So(overrides, ShouldEqual, dummyOverridesForCore)
+			So(overridesYaml, ShouldEqual, dummyOverridesForCore)
 		})
 	})
 }

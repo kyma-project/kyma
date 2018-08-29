@@ -6,6 +6,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymasources"
+	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/installer/pkg/statusmanager"
@@ -166,7 +167,7 @@ func getTestSetup() (*InstallationSteps, *config.InstallationData, *MockHelmClie
 
 	mockCommandExecutor := &MockCommandExecutor{}
 	mockHelmClient := &MockHelmClient{}
-	installationData, kymaTestSteps := getCommonTestSetup(mockHelmClient, mockCommandExecutor)
+	installationData, _, kymaTestSteps := getCommonTestSetup(mockHelmClient, mockCommandExecutor)
 
 	return kymaTestSteps, installationData, mockHelmClient, mockCommandExecutor
 }
@@ -175,12 +176,12 @@ func getFailingTestSetup() (*InstallationSteps, *config.InstallationData, *MockE
 
 	mockFailingCommandExecutor := &MockFailingCommandExecutor{}
 	mockErrorHelmClient := &MockErrorHelmClient{}
-	installationData, kymaTestSteps := getCommonTestSetup(mockErrorHelmClient, mockFailingCommandExecutor)
+	installationData, _, kymaTestSteps := getCommonTestSetup(mockErrorHelmClient, mockFailingCommandExecutor)
 
 	return kymaTestSteps, installationData, mockErrorHelmClient, mockFailingCommandExecutor
 }
 
-func getCommonTestSetup(mockHelmClient kymahelm.ClientInterface, mockCommandExecutor toolkit.CommandExecutor) (*config.InstallationData, *InstallationSteps) {
+func getCommonTestSetup(mockHelmClient kymahelm.ClientInterface, mockCommandExecutor toolkit.CommandExecutor) (*config.InstallationData, map[string]string, *InstallationSteps) {
 
 	fakeClient := fake.NewSimpleClientset()
 	informers := installationInformers.NewSharedInformerFactory(fakeClient, time.Second*0)
@@ -189,7 +190,31 @@ func getCommonTestSetup(mockHelmClient kymahelm.ClientInterface, mockCommandExec
 	kymaTestSteps := New(mockHelmClient, nil, nil, mockStatusManager, nil, mockCommandExecutor, nil)
 	kymaTestSteps.currentPackage = KymaPackageMock{}
 
-	installationData := toolkit.NewInstallationDataCreator().GetData()
+	installationData, overrides := toolkit.NewInstallationDataCreator().GetData()
 
-	return &installationData, kymaTestSteps
+	return &installationData, overrides, kymaTestSteps
+}
+
+type MockOverrideData struct {
+	common       overrides.Map
+	forComponent map[string](overrides.Map)
+}
+
+func (mod MockOverrideData) Common() overrides.Map {
+	if mod.common == nil {
+		return overrides.Map{}
+	}
+	return mod.common
+}
+
+func (mod MockOverrideData) ForComponent(componentName string) overrides.Map {
+
+	if mod.forComponent == nil {
+		return overrides.Map{}
+	}
+	res := mod.forComponent[componentName]
+	if res == nil {
+		return overrides.Map{}
+	}
+	return res
 }

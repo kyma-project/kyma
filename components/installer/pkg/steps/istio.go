@@ -10,13 +10,13 @@ import (
 )
 
 // InstallIstio .
-func (steps *InstallationSteps) InstallIstio(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) InstallIstio(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Installing istio"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.IstioComponent, "istio")
-	overrides, err := steps.getIstioOverrides(installationData, chartDir)
+	istioOverrides, err := steps.getIstioOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -28,7 +28,7 @@ func (steps *InstallationSteps) InstallIstio(installationData *config.Installati
 		chartDir,
 		"istio-system",
 		consts.IstioComponent,
-		overrides)
+		istioOverrides)
 
 	if steps.errorHandlers.CheckError("Install Error: ", installErr) {
 		steps.statusManager.Error(stepName)
@@ -42,13 +42,13 @@ func (steps *InstallationSteps) InstallIstio(installationData *config.Installati
 }
 
 // UpdateIstio .
-func (steps *InstallationSteps) UpdateIstio(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) UpdateIstio(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Updating istio"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.IstioComponent, "istio")
-	overrides, err := steps.getIstioOverrides(installationData, chartDir)
+	istioOverrides, err := steps.getIstioOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
 		steps.statusManager.Error("Updating istio")
@@ -58,7 +58,7 @@ func (steps *InstallationSteps) UpdateIstio(installationData *config.Installatio
 	upgradeResp, upgradeErr := steps.helmClient.UpgradeRelease(
 		chartDir,
 		consts.IstioComponent,
-		overrides)
+		istioOverrides)
 
 	if steps.errorHandlers.CheckError("Upgrade Error: ", upgradeErr) {
 		steps.statusManager.Error("Updating istio")
@@ -71,21 +71,29 @@ func (steps *InstallationSteps) UpdateIstio(installationData *config.Installatio
 	return nil
 }
 
-func (steps *InstallationSteps) getIstioOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
+func (steps *InstallationSteps) getIstioOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.IstioComponent))
 
-	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
-	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)
+	globalOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
+	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
+		return "", err
+	}
 	overrides.MergeMaps(allOverrides, globalOverrides)
 
-	istioOverrides, err := overrides.GetIstioOverrides(installationData)
-	steps.errorHandlers.LogError("Couldn't get Istio overrides: ", err)
+	istioOverrides, err := overrides.GetIstioOverrides(installationData, allOverrides)
+	if steps.errorHandlers.CheckError("Couldn't get Istio overrides: ", err) {
+		return "", err
+	}
 	overrides.MergeMaps(allOverrides, istioOverrides)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
-		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
+		if steps.errorHandlers.CheckError("Couldn't get additional overrides: ", err) {
+			return "", err
+		}
 		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 

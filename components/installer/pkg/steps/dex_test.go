@@ -16,7 +16,7 @@ func TestInstallDex(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once and call InstallRelease, returning no error", func() {
 
-				err := kymaTestSteps.InstallDex(installationData)
+				err := kymaTestSteps.InstallDex(installationData, MockOverrideData{})
 
 				So(mockHelmClient.InstallReleaseCalled, ShouldBeTrue)
 				So(err, ShouldBeNil)
@@ -29,7 +29,7 @@ func TestInstallDex(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once, call InstallRelease, call UpdateInstallationStatus again and return the error", func() {
 
-				err := kymaTestSteps.InstallDex(installationData)
+				err := kymaTestSteps.InstallDex(installationData, MockOverrideData{})
 
 				So(mockErrorHelmClient.InstallReleaseCalled, ShouldBeTrue)
 				So(err, ShouldNotBeNil)
@@ -48,7 +48,7 @@ func TestUpdateDex(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once and call UpdateRelease, returning no error", func() {
 
-				err := kymaTestSteps.UpdateDex(installationData)
+				err := kymaTestSteps.UpdateDex(installationData, MockOverrideData{})
 
 				So(mockHelmClient.UpgradeReleaseCalled, ShouldBeTrue)
 				So(err, ShouldBeNil)
@@ -61,7 +61,7 @@ func TestUpdateDex(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once, call UpdateRelease, call UpdateInstallationStatus again and return the error", func() {
 
-				err := kymaTestSteps.UpdateDex(installationData)
+				err := kymaTestSteps.UpdateDex(installationData, MockOverrideData{})
 
 				So(mockErrorHelmClient.UpgradeReleaseCalled, ShouldBeTrue)
 				So(err, ShouldNotBeNil)

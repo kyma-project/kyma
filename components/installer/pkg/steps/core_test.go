@@ -16,7 +16,7 @@ func TestInstallCore(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once and call InstalRelease, returning no error", func() {
 
-				err := kymaTestSteps.InstallCore(installationData)
+				err := kymaTestSteps.InstallCore(installationData, MockOverrideData{})
 
 				So(mockHelmClient.InstallReleaseCalled, ShouldBeTrue)
 				So(err, ShouldBeNil)
@@ -29,7 +29,7 @@ func TestInstallCore(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once, call InstallRelease, call UpdateInstallationStatus, call ReleaseStatus again and return the error", func() {
 
-				err := kymaTestSteps.InstallCore(installationData)
+				err := kymaTestSteps.InstallCore(installationData, MockOverrideData{})
 
 				So(mockErrorHelmClient.InstallReleaseCalled, ShouldBeTrue)
 				So(mockErrorHelmClient.ReleaseStatusCalled, ShouldBeTrue)
@@ -49,7 +49,7 @@ func TestUpgradeCore(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once and call UpdateRelease, returning no error", func() {
 
-				err := kymaTestSteps.UpgradeCore(installationData)
+				err := kymaTestSteps.UpgradeCore(installationData, MockOverrideData{})
 
 				So(mockHelmClient.UpgradeReleaseCalled, ShouldBeTrue)
 				So(err, ShouldBeNil)
@@ -62,7 +62,7 @@ func TestUpgradeCore(t *testing.T) {
 
 			Convey("call UpdateInstallationStatus once, call UpdateRelease, call UpdateInstallationStatus, call ReleaseStatus again and return the error", func() {
 
-				err := kymaTestSteps.UpgradeCore(installationData)
+				err := kymaTestSteps.UpgradeCore(installationData, MockOverrideData{})
 
 				So(mockErrorHelmClient.UpgradeReleaseCalled, ShouldBeTrue)
 				So(mockErrorHelmClient.ReleaseStatusCalled, ShouldBeTrue)

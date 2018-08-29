@@ -13,13 +13,13 @@ import (
 const kymaPath = "/kyma"
 
 //InstallCore .
-func (steps InstallationSteps) InstallCore(installationData *config.InstallationData) error {
+func (steps InstallationSteps) InstallCore(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Installing core"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.CoreComponent)
-	coreOverrides, err := steps.getCoreOverrides(installationData, chartDir)
+	coreOverrides, err := steps.getCoreOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Install Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -46,13 +46,13 @@ func (steps InstallationSteps) InstallCore(installationData *config.Installation
 }
 
 //UpgradeCore .
-func (steps InstallationSteps) UpgradeCore(installationData *config.InstallationData) error {
+func (steps InstallationSteps) UpgradeCore(installationData *config.InstallationData, overrideData OverrideData) error {
 	const stepName string = "Upgrading core"
 	steps.PrintInstallationStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
 	chartDir := path.Join(steps.currentPackage.GetChartsDirPath(), consts.CoreComponent)
-	coreOverrides, err := steps.getCoreOverrides(installationData, chartDir)
+	coreOverrides, err := steps.getCoreOverrides(installationData, chartDir, overrideData)
 
 	if steps.errorHandlers.CheckError("Upgrade Overrides Error: ", err) {
 		steps.statusManager.Error(stepName)
@@ -103,26 +103,35 @@ func logFailedResources(ns string) {
 	log.Println(string(msg[:]))
 }
 
-func (steps *InstallationSteps) getCoreOverrides(installationData *config.InstallationData, chartDir string) (string, error) {
+func (steps *InstallationSteps) getCoreOverrides(installationData *config.InstallationData, chartDir string, overrideData OverrideData) (string, error) {
 	allOverrides := overrides.Map{}
+	overrides.MergeMaps(allOverrides, overrideData.Common())
+	overrides.MergeMaps(allOverrides, overrideData.ForComponent(consts.CoreComponent))
 
-	globalOverrides, err := overrides.GetGlobalOverrides(installationData)
-	steps.errorHandlers.LogError("Couldn't get global overrides: ", err)
+	globalOverrides, err := overrides.GetGlobalOverrides(installationData, allOverrides)
+	if steps.errorHandlers.CheckError("Couldn't get global overrides: ", err) {
+		return "", err
+	}
 	overrides.MergeMaps(allOverrides, globalOverrides)
 
 	azureBrokerOverrides, err := overrides.EnableAzureBroker(installationData)
-	steps.errorHandlers.LogError("Enable azure-broker Error: ", err)
+	if steps.errorHandlers.CheckError("Enable azure-broker Error: ", err) {
+		return "", err
+	}
 	overrides.MergeMaps(allOverrides, azureBrokerOverrides)
 
-	coreOverrides, err := overrides.GetCoreOverrides(installationData)
-	steps.errorHandlers.LogError("Couldn't get Kyma core overrides: ", err)
-
+	coreOverrides, err := overrides.GetCoreOverrides(installationData, allOverrides)
+	if steps.errorHandlers.CheckError("Couldn't get Kyma core overrides: ", err) {
+		return "", err
+	}
 	overrides.MergeMaps(allOverrides, coreOverrides)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
-		steps.errorHandlers.LogError("Couldn't get additional overrides: ", err)
+		if steps.errorHandlers.CheckError("Couldn't get additional overrides: ", err) {
+			return "", err
+		}
 		overrides.MergeMaps(allOverrides, fileOverrides)
 	}
 
