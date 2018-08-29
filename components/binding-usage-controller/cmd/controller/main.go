@@ -63,6 +63,7 @@ func main() {
 	serviceCatalogCli, err := serviceCatalogClientset.NewForConfig(k8sConfig)
 	fatalOnError(err)
 	serviceCatalogInformerFactory := serviceCatalogInformers.NewSharedInformerFactory(serviceCatalogCli, informerResyncPeriod)
+	scInformersGroup := serviceCatalogInformerFactory.Servicecatalog().V1beta1()
 
 	// Service Catalog PodPreset client
 	// As a temporary solution, client is generated in this repository under /pkg/client.
@@ -90,7 +91,9 @@ func main() {
 		log,
 	)
 
-	labelsFetcher := controller.NewBindingLabelsFetcher(serviceCatalogInformerFactory.Servicecatalog().V1beta1().ServiceInstances().Lister(), serviceCatalogInformerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Lister())
+	labelsFetcher := controller.NewBindingLabelsFetcher(scInformersGroup.ServiceInstances().Lister(),
+		scInformersGroup.ClusterServiceClasses().Lister(),
+		scInformersGroup.ServiceClasses().Lister())
 
 	cfgMapClient := k8sCli.CoreV1().ConfigMaps(cfg.AppliedSBUConfigMapNamespace)
 	usageSpecStorage := controller.NewBindingUsageSpecStorage(cfgMapClient, cfg.AppliedSBUConfigMapName)
@@ -99,7 +102,7 @@ func main() {
 		usageSpecStorage,
 		bindingUsageCli.ServicecatalogV1alpha1(),
 		sbuInformer,
-		serviceCatalogInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
+		scInformersGroup.ServiceBindings(),
 		aggregator,
 		podPresetModifier,
 		labelsFetcher,
