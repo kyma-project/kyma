@@ -313,7 +313,7 @@ func cleanup() {
 		defer wg.Done()
 	}()
 	go func() {
-		deleteK8s("svcbind-lambda.yaml")
+		deleteK8s("k8syaml/svcbind-lambda.yaml")
 		deleteK8s("svc-instance.yaml")
 		defer wg.Done()
 	}()
@@ -364,7 +364,7 @@ func main() {
 		deployK8s("svc-instance.yaml")
 		ensureSvcInstanceIsDeployed("kubeless-test", "redis")
 		log.Println("Deploying svcbind-lambda")
-		deployK8s("svcbind-lambda.yaml")
+		deployK8s("k8syaml/svcbind-lambda.yaml")
 		ensureFunctionIsRunning("kubeless-test", "test-svcbind", true)
 		log.Println("Verifying correct function output for test-svcbind")
 		host := fmt.Sprintf("https://test-svcbind.%s", os.Getenv("DOMAIN_NAME"))

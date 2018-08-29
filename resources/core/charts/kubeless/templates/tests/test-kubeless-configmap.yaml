@@ -8,3 +8,5 @@ metadata:
 data:
   k8sYaml: |-
     {{- include "k8s.yaml.tpl" . | indent 4}}
+  svcBindLambdaYaml: |-
+    {{- include "svcbind-lambda.yaml.tpl" . | indent 4}}
