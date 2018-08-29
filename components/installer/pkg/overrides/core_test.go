@@ -46,7 +46,7 @@ test:
     password: ""
     username: ""
 `
-			installationData, testOverrides := NewInstallationDataCreator().WithAny("global.domainName", "kyma.local").WithAny("configurations-generator.kubeConfig.clusterName", "kyma.local").WithRemoteEnvIP("1.1.1.1").WithAdminGroup("testgroup").
+			installationData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithGeneric("configurations-generator.kubeConfig.clusterName", "kyma.local").WithRemoteEnvIP("1.1.1.1").WithAdminGroup("testgroup").
 				GetData()
 
 			overridesMap, err := GetCoreOverrides(&installationData, UnflattenToMap(testOverrides))
@@ -84,8 +84,8 @@ test:
     username: user1
 `
 			installationData, testOverrides := NewInstallationDataCreator().
-				WithAny("global.domainName", "kyma.local").
-				WithAny("configurations-generator.kubeConfig.clusterName", "kyma.local").
+				WithGeneric("global.domainName", "kyma.local").
+				WithGeneric("configurations-generator.kubeConfig.clusterName", "kyma.local").
 				WithRemoteEnvIP("1.1.1.1").
 				WithUITestCredentials("user1", "p@ssw0rd").
 				GetData()
@@ -125,8 +125,8 @@ test:
     username: ""
 `
 			installationData, testOverrides := NewInstallationDataCreator().
-				WithAny("global.domainName", "kyma.local").
-				WithAny("configurations-generator.kubeConfig.clusterName", "kyma.local").
+				WithGeneric("global.domainName", "kyma.local").
+				WithGeneric("configurations-generator.kubeConfig.clusterName", "kyma.local").
 				WithRemoteEnvIP("1.1.1.1").
 				WithEtcdOperator("true", "pico-bello", "123-456-3245-a23b").
 				GetData()
