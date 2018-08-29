@@ -34,6 +34,8 @@ rules:
 - apiGroups: ["", "api.kyma.cx", "apps", "extensions", "gateway.kyma.cx", "kubeless.io", "rbac.authorization.k8s.io", "remoteenvironment.kyma.cx", "servicecatalog.k8s.io", "servicecatalog.kyma.cx", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma.cx", "ui.kyma.cx"]
   resources: ["*"]
   verbs: ["get, list"]
+- nonResourceURLs: [ "/version", "/api", "/api/*", "/apis", "/apis/*"] #required permissions for kubectl when using KUBECONFIG generated from config-generator
+  verbs: ["get", "list"]   
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
