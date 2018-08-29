@@ -16,6 +16,7 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/config"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/labeler"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mode"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage/populator"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/syncer"
@@ -86,8 +87,10 @@ func main() {
 	labelerCtrl := labeler.New(reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), log)
 
 	// create broker
+	brokerMode, err := mode.NewBroker(cfg)
+	fatalOnError(err)
 	srv := broker.New(sFact.RemoteEnvironment(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
-		reClient.RemoteenvironmentV1alpha1(), siFacade, config.NewBrokerFlavorFromConfig(cfg), log)
+		reClient.RemoteenvironmentV1alpha1(), siFacade, brokerMode, log)
 
 	// setup graceful shutdown signals
 	ctx, cancelFunc := context.WithCancel(context.Background())

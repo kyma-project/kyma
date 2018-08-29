@@ -15,11 +15,11 @@ import (
 
 func TestOSBContextForClusterScopedBroker(t *testing.T) {
 	// GIVEN
-	mockBrokerFlavor := &automock.BrokerFlavorProvider{}
-	defer mockBrokerFlavor.AssertExpectations(t)
+	mockBrokerModeService := &automock.BrokerModeService{}
+	defer mockBrokerModeService.AssertExpectations(t)
 
-	mockBrokerFlavor.On("IsClusterScoped").Return(true)
-	sut := NewOsbContextMiddleware(mockBrokerFlavor, spy.NewLogDummy())
+	mockBrokerModeService.On("IsClusterScoped").Return(true)
+	sut := NewOsbContextMiddleware(mockBrokerModeService, spy.NewLogDummy())
 
 	req := httptest.NewRequest(http.MethodGet, "https://core-reb.kyma-system.svc.cluster.local/v2/catalog", nil)
 	rw := httptest.NewRecorder()
@@ -31,6 +31,7 @@ func TestOSBContextForClusterScopedBroker(t *testing.T) {
 		// THEN
 		assert.True(t, ex)
 		assert.True(t, osbCtx.ClusterScopedBroker)
+		assert.Empty(t, osbCtx.BrokerNamespace)
 	})
 	// THEN
 	assert.True(t, nextCalled)
@@ -38,15 +39,15 @@ func TestOSBContextForClusterScopedBroker(t *testing.T) {
 
 func TestOSBContextForNsScopedBroker(t *testing.T) {
 	// GIVEN
-	mockBrokerFlavor := &automock.BrokerFlavorProvider{}
-	defer mockBrokerFlavor.AssertExpectations(t)
+	mockBrokerService := &automock.BrokerModeService{}
+	defer mockBrokerService.AssertExpectations(t)
 	url := "http://reb-ns-for-stage.kyma-system.svc.cluster.local/v2/catalog"
 
-	mockBrokerFlavor.On("IsClusterScoped").Return(false)
+	mockBrokerService.On("IsClusterScoped").Return(false)
 
-	mockBrokerFlavor.On("GetNsFromBrokerURL", "reb-ns-for-stage.kyma-system.svc.cluster.local").Return("stage", nil)
+	mockBrokerService.On("GetNsFromBrokerURL", "reb-ns-for-stage.kyma-system.svc.cluster.local").Return("stage", nil)
 
-	sut := NewOsbContextMiddleware(mockBrokerFlavor, spy.NewLogDummy())
+	sut := NewOsbContextMiddleware(mockBrokerService, spy.NewLogDummy())
 	req := httptest.NewRequest(http.MethodGet, url, nil)
 	rw := httptest.NewRecorder()
 	nextCalled := false
@@ -67,22 +68,23 @@ func TestOSBContextForNsScopedBroker(t *testing.T) {
 
 func TestOsbContextReturnsErrorWhenCannotExtractNamespace(t *testing.T) {
 	// GIVEN
-	mockBrokerFlavor := &automock.BrokerFlavorProvider{}
-	defer mockBrokerFlavor.AssertExpectations(t)
+	mockBrokerService := &automock.BrokerModeService{}
+	defer mockBrokerService.AssertExpectations(t)
 
-	mockBrokerFlavor.On("IsClusterScoped").Return(false)
-	mockBrokerFlavor.On("GetNsFromBrokerURL", mock.Anything).Return("", errors.New("some error"))
+	mockBrokerService.On("IsClusterScoped").Return(false)
+	mockBrokerService.On("GetNsFromBrokerURL", mock.Anything).Return("", errors.New("some error"))
 	logSink := spy.NewLogSink()
-	sut := NewOsbContextMiddleware(mockBrokerFlavor, logSink.Logger)
-	// WHEN
+	sut := NewOsbContextMiddleware(mockBrokerService, logSink.Logger)
 	req := httptest.NewRequest(http.MethodGet, "https://core-reb.kyma-system.svc.cluster.local/v2/catalog", nil)
 	rw := httptest.NewRecorder()
-	// THEN
 	nextCalled := false
+	// WHEN
 	sut.ServeHTTP(rw, req, func(nextRw http.ResponseWriter, nextReq *http.Request) {
+		// THEN
 		nextCalled = true
 	})
+	// THEN
 	assert.False(t, nextCalled)
 	assert.Equal(t, http.StatusInternalServerError, rw.Result().StatusCode)
-	logSink.AssertLogged(t, logrus.ErrorLevel, "misconfiguration, broker is running as a namespace-scoped, but cannot extract namespace from request host")
+	logSink.AssertLogged(t, logrus.ErrorLevel, "misconfiguration, broker is running as a namespace-scoped, but cannot extract namespace from request")
 }

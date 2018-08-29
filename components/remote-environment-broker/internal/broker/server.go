@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/config"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mode"
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -52,7 +52,7 @@ type Server struct {
 	lastOpGetter  lastOpGetter
 	logger        *logrus.Entry
 	addr          string
-	brokerFlavor  *config.BrokerFlavor
+	brokerMode    *mode.BrokerService
 }
 
 // Addr returns address server is listening on.
@@ -148,7 +148,7 @@ func (srv *Server) createHandler() http.Handler {
 	}
 
 	n := negroni.New(negroni.NewRecovery(), logMiddleware)
-	osbContextMiddleware := NewOsbContextMiddleware(srv.brokerFlavor, srv.logger)
+	osbContextMiddleware := NewOsbContextMiddleware(srv.brokerMode, srv.logger)
 	n.Use(osbContextMiddleware)
 	n.UseHandler(rtr)
 	return n
@@ -426,7 +426,7 @@ func (srv *Server) writeErrorResponse(w http.ResponseWriter, code int, errorMsg,
 func writeErrorResponse(w http.ResponseWriter, code int, errorMsg, desc string) {
 	dto := struct {
 		// Error is a machine readable info on an error.
-		// As of 2.13 Open Broker API spec it's NOT passed to entity querying the catalog.
+		// As of 2.13 Open BrokerService API spec it's NOT passed to entity querying the catalog.
 		Error string `json:"error,optional"`
 
 		// Desc is a meaningful error message explaining why the request failed.

@@ -31,7 +31,7 @@ type Config struct {
 	BrokerRelistDurationWindow time.Duration    `valid:"required"`
 	ClusterScopedBrokerName    string           `valid:"required"`
 	// Before adjusting ui-api-layer and tests, this flag by default should be set to true.
-	ClusterScopedBroker bool ` valid:"required"`
+	ClusterScopedBrokerEnabled bool ` valid:"required"`
 }
 
 // Load method has following strategy:

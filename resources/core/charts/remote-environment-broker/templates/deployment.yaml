@@ -37,8 +37,8 @@ spec:
             value: /etc/config/re-broker/config.yaml
           - name: APP_BROKER_RELIST_DURATION_WINDOW
             value: {{ .Values.brokerRelistDurationWindow }}
-          - name: APP_CLUSTER_SCOPED_BROKER
-            value: "{{ .Values.clusterScopedBroker }}"
+          - name: APP_CLUSTER_SCOPED_BROKER_ENABLED
+            value: "{{ .Values.clusterScopedBrokerEnabled }}"
           - name: APP_CLUSTER_SCOPED_BROKER_NAME
             value: {{ template "fullname" . }}
         volumeMounts:

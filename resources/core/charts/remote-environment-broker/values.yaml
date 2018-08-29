@@ -13,7 +13,7 @@ image:
 # Because of that every 30minutes update action for all defined RemoteEnvironments is triggered,
 # which means that the Service Catalog is triggered to perform relist action.
 brokerRelistDurationWindow: 10s
-clusterScopedBroker: true
+clusterScopedBrokerEnabled: true
 
 service:
   type: NodePort
