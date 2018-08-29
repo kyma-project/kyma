@@ -426,7 +426,7 @@ func (srv *Server) writeErrorResponse(w http.ResponseWriter, code int, errorMsg,
 func writeErrorResponse(w http.ResponseWriter, code int, errorMsg, desc string) {
 	dto := struct {
 		// Error is a machine readable info on an error.
-		// As of 2.13 Open BrokerService API spec it's NOT passed to entity querying the catalog.
+		// As of 2.13 Open Broker API spec it's NOT passed to entity querying the catalog.
 		Error string `json:"error,optional"`
 
 		// Desc is a meaningful error message explaining why the request failed.

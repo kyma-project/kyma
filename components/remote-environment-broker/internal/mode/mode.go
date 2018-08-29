@@ -15,8 +15,8 @@ type BrokerService struct {
 	nsBrokerURLPattern *regexp.Regexp
 }
 
-// NewBroker creates BrokerService from configuration
-func NewBroker(cfg *config.Config) (*BrokerService, error) {
+// NewBrokerService creates BrokerService from configuration
+func NewBrokerService(cfg *config.Config) (*BrokerService, error) {
 	r, err := regexp.Compile("reb-ns-for-([a-z][a-z0-9-]*)\\.")
 	if err != nil {
 		return nil, errors.Wrap(err, "while compiling regexp for URL of namespaced brokers")

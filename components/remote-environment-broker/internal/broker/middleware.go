@@ -56,7 +56,7 @@ func (m *OSBContextMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request
 // RequireAsyncMiddleware asserts if request allows for asynchronous response
 type RequireAsyncMiddleware struct{}
 
-// ServeHTTP handling asynchronous HTTP requests in Open Service BrokerService Api
+// ServeHTTP handling asynchronous HTTP requests in Open Service Broker Api
 func (RequireAsyncMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	if r.URL.Query().Get("accepts_incomplete") != "true" {
 		// message and desc as defined in https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#response-2

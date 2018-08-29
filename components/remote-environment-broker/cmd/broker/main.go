@@ -86,9 +86,9 @@ func main() {
 	reSyncCtrl := syncer.New(reInformersGroup.RemoteEnvironments(), sFact.RemoteEnvironment(), sFact.RemoteEnvironment(), relistRequester, log)
 	labelerCtrl := labeler.New(reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), log)
 
-	// create broker
-	brokerMode, err := mode.NewBroker(cfg)
+	brokerMode, err := mode.NewBrokerService(cfg)
 	fatalOnError(err)
+	// create broker
 	srv := broker.New(sFact.RemoteEnvironment(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		reClient.RemoteenvironmentV1alpha1(), siFacade, brokerMode, log)
 
