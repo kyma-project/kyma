@@ -1,3 +1,5 @@
+{{ define "k8s.yaml.tpl" }}
+
 apiVersion: gateway.kyma.cx/v1alpha2
 kind: Api
 metadata:
@@ -7,7 +9,7 @@ metadata:
     function: test-hello
 spec:
   authentication: []
-  hostname: test-hello.kyma.local
+  hostname: test-hello.{{ .Values.global.domainName }}
   service:
     name: test-hello
     port: 8080
@@ -21,7 +23,7 @@ metadata:
     function: test-event
 spec:
   authentication: []
-  hostname: test-event.kyma.local
+  hostname: test-event.{{ .Values.global.domainName }}
   service:
     name: test-event
     port: 8080
@@ -54,3 +56,4 @@ spec:
     source_namespace: test
     source_type: test
     source_environment: test
+{{ end }}

@@ -1,3 +1,5 @@
+{{ define "svcbind-lambda.yaml.tpl" }}
+
 apiVersion: gateway.kyma.cx/v1alpha2
 kind: Api
 metadata:
@@ -7,7 +9,7 @@ metadata:
     function: test-svcbind
 spec:
   authentication: []
-  hostname: test-svcbind.kyma.local
+  hostname: test-svcbind.{{ .Values.global.domainName }}
   service:
     name: test-svcbind
     port: 8080
@@ -58,3 +60,4 @@ spec:
  usedBy:
    kind: function
    name: test-svcbind
+{{ end }}
