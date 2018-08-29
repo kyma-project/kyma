@@ -33,7 +33,7 @@ func TestGetGlobalOverrides(t *testing.T) {
   tlsKey: ""
 `
 
-			installData, testOverrides := NewInstallationDataCreator().WithDomain("global.domainName", "kyma.local").WithLocalInstallation().GetData()
+			installData, testOverrides := NewInstallationDataCreator().WithAny("global.domainName", "kyma.local").WithLocalInstallation().GetData()
 
 			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
@@ -66,7 +66,7 @@ func TestGetGlobalOverrides(t *testing.T) {
   tlsCrt: ""
   tlsKey: ""
 `
-			installData, testOverrides := NewInstallationDataCreator().WithDomain("global.domainName", "kyma.local").WithIP("100.100.100.100").GetData()
+			installData, testOverrides := NewInstallationDataCreator().WithAny("global.domainName", "kyma.local").WithIP("100.100.100.100").GetData()
 
 			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
@@ -99,7 +99,7 @@ func TestGetGlobalOverrides(t *testing.T) {
   tlsCrt: abc
   tlsKey: def
 `
-			installData, testOverrides := NewInstallationDataCreator().WithDomain("global.domainName", "kyma.local").WithIP("100.100.100.100").WithCert("abc", "def").GetData()
+			installData, testOverrides := NewInstallationDataCreator().WithAny("global.domainName", "kyma.local").WithIP("100.100.100.100").WithCert("abc", "def").GetData()
 
 			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
@@ -132,7 +132,7 @@ func TestGetGlobalOverrides(t *testing.T) {
   tlsCrt: ""
   tlsKey: ""
 `
-			installData, testOverrides := NewInstallationDataCreator().WithDomain("global.domainName", "kyma.local").WithIP("100.100.100.100").WithRemoteEnvCa("xyz").WithRemoteEnvCaKey("abc").GetData()
+			installData, testOverrides := NewInstallationDataCreator().WithAny("global.domainName", "kyma.local").WithIP("100.100.100.100").WithRemoteEnvCa("xyz").WithRemoteEnvCaKey("abc").GetData()
 
 			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
@@ -166,7 +166,7 @@ func TestGetGlobalOverrides(t *testing.T) {
   tlsKey: ""
 `
 			installData, testOverrides := NewInstallationDataCreator().
-				WithDomain("global.domainName", "kyma.local").
+				WithAny("global.domainName", "kyma.local").
 				WithIP("100.100.100.100").
 				WithEtcdBackupABSContainerName("abs/container/name").
 				GetData()
@@ -202,7 +202,7 @@ func TestGetGlobalOverrides(t *testing.T) {
   tlsKey: ""
 `
 			installData, testOverrides := NewInstallationDataCreator().
-				WithDomain("global.domainName", "kyma.local").
+				WithAny("global.domainName", "kyma.local").
 				WithIP("100.100.100.100").
 				WithVictorOpsCredentials("victorops_routing_key", "victorops_api_key").
 				WithSlackCredentials("slack_channel", "slack_apiurl").

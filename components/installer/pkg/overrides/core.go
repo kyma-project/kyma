@@ -63,7 +63,7 @@ func GetCoreOverrides(installationData *config.InstallationData, overrides Map) 
 
 func hasValidDomain(m Map) bool {
 
-	res, found := FindOverrideValue(m, "configurations-generator.kubeConfig.clusterName")
+	res, found := FindOverrideValue(m, "global.domainName")
 
 	if !found {
 		return false

@@ -47,8 +47,8 @@ func (sc *InstallationDataCreator) WithCert(cert, certKey string) *InstallationD
 	return sc
 }
 
-// WithDomain sets Domain property in InstallationData
-func (sc *InstallationDataCreator) WithDomain(key, value string) *InstallationDataCreator {
+// WithAny sets any property in InstallationData
+func (sc *InstallationDataCreator) WithAny(key, value string) *InstallationDataCreator {
 	sc.genericOverrides[key] = value
 	return sc
 }
