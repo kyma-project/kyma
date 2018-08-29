@@ -91,7 +91,7 @@ spec:
   volumes:
     - name: k8syaml
       configMap: 
-        name: test-kubeless-config
+        name: "test-{{ template "fullname" . }}-config"
         items:
           - key: k8sYaml
             path: k8s.yaml

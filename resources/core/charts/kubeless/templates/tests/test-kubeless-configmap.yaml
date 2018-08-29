@@ -1,12 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: test-kubeless-config
-  namespace: kyma-system
+  name: "test-{{ template "fullname" . }}-config"
   labels:
     helm-chart-test: "true"
-  annotations:
-    helm.sh/hook: test-success
 data:
   k8sYaml: |-
     {{- include "k8s.yaml.tpl" . | indent 4}}
