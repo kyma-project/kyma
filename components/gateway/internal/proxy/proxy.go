@@ -59,21 +59,18 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	kymaAuthorization := r.Header.Get(httpconsts.HeaderAccessToken)
-	if kymaAuthorization != "" {
-		r.Header.Del(httpconsts.HeaderAccessToken)
-		r.Header.Set(httpconsts.HeaderAuthorization, kymaAuthorization)
-	} else if cacheObj.OauthUrl != "" {
-		err = p.addCredentials(r, cacheObj.OauthUrl, cacheObj.ClientId, cacheObj.ClientSecret)
-		if err != nil {
-			handleErrors(w, err)
-			return
-		}
+	request, err := p.handleHeaders(r, cacheObj)
+	if err != nil {
+		handleErrors(w, err)
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(p.proxyTimeout)*time.Second)
 	defer cancel()
-	requestWithContext := r.WithContext(ctx)
+	requestWithContext := request.WithContext(ctx)
+
+	rr := newRequestRetrier(id, p, r)
+	cacheObj.Proxy.ModifyResponse = rr.CheckResponse
 
 	cacheObj.Proxy.ServeHTTP(w, requestWithContext)
 }
@@ -105,6 +102,21 @@ func (p *proxy) createAndCacheProxy(id string) (*proxycache.Proxy, apperrors.App
 	), nil
 }
 
+func (p *proxy) handleHeaders(r *http.Request, cacheObj *proxycache.Proxy) (*http.Request, apperrors.AppError) {
+	kymaAuthorization := r.Header.Get(httpconsts.HeaderAccessToken)
+	if kymaAuthorization != "" {
+		r.Header.Del(httpconsts.HeaderAccessToken)
+		r.Header.Set(httpconsts.HeaderAuthorization, kymaAuthorization)
+	} else if cacheObj.OauthUrl != "" {
+		err := p.addCredentials(r, cacheObj.OauthUrl, cacheObj.ClientId, cacheObj.ClientSecret)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return r, nil
+}
+
 func (p *proxy) addCredentials(r *http.Request, oauthUrl, clientId, clientSecret string) apperrors.AppError {
 	token, err := p.oauthClient.GetToken(clientId, clientSecret, oauthUrl)
 	if err != nil {
@@ -113,7 +125,7 @@ func (p *proxy) addCredentials(r *http.Request, oauthUrl, clientId, clientSecret
 	}
 
 	r.Header.Set(httpconsts.HeaderAuthorization, token)
-	log.Infof("OAuth token fecthed. Adding Authorization header: %s", r.Header.Get("Authorization"))
+	log.Infof("OAuth token fetched. Adding Authorization header: %s", r.Header.Get("Authorization"))
 
 	return nil
 }

@@ -12,6 +12,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/gateway/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/gateway/internal/proxy/tokencache"
 )
 
 type oauthResponse struct {
@@ -23,17 +24,51 @@ type oauthResponse struct {
 
 type OAuthClient interface {
 	GetToken(clientID string, clientSecret string, authURL string) (string, apperrors.AppError)
+	InvalidateAndRetry(clientID string, clientSecret string, authURL string) (string, apperrors.AppError)
 }
 
 type oauthClient struct {
 	timeoutDuration int
+	tokenCache      tokencache.TokenCache
 }
 
-func NewOauthClient(timeoutDuration int) OAuthClient {
-	return &oauthClient{timeoutDuration: timeoutDuration}
+func NewOauthClient(timeoutDuration int, tokenCache tokencache.TokenCache) OAuthClient {
+	return &oauthClient{
+		timeoutDuration: timeoutDuration,
+		tokenCache:      tokenCache,
+	}
 }
 
 func (oc *oauthClient) GetToken(clientID string, clientSecret string, authURL string) (string, apperrors.AppError) {
+	token, found := oc.tokenCache.Get(clientID)
+	if found {
+		return "Bearer " + token, nil
+	}
+
+	tokenResponse, err := oc.makeTokenRequest(clientID, clientSecret, authURL)
+	if err != nil {
+		return "", err
+	}
+
+	oc.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
+
+	return "Bearer " + tokenResponse.AccessToken, nil
+}
+
+func (oc *oauthClient) InvalidateAndRetry(clientID string, clientSecret string, authURL string) (string, apperrors.AppError) {
+	oc.tokenCache.Remove(clientID)
+
+	tokenResponse, err := oc.makeTokenRequest(clientID, clientSecret, authURL)
+	if err != nil {
+		return "", err
+	}
+
+	oc.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
+
+	return "Bearer " + tokenResponse.AccessToken, nil
+}
+
+func (oc *oauthClient) makeTokenRequest(clientID string, clientSecret string, authURL string) (*oauthResponse, apperrors.AppError) {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -46,7 +81,7 @@ func (oc *oauthClient) GetToken(clientID string, clientSecret string, authURL st
 
 	req, err := http.NewRequest(http.MethodPost, authURL, strings.NewReader(form.Encode()))
 	if err != nil {
-		return "", apperrors.Internal("failed to create token request: %s", err.Error())
+		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
 	}
 
 	req.Header.Add(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationURLEncoded)
@@ -57,25 +92,25 @@ func (oc *oauthClient) GetToken(clientID string, clientSecret string, authURL st
 
 	response, err := client.Do(requestWithContext)
 	if err != nil {
-		return "", apperrors.UpstreamServerCallFailed("failed to make a request to '%s': %s", authURL, err.Error())
+		return nil, apperrors.UpstreamServerCallFailed("failed to make a request to '%s': %s", authURL, err.Error())
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return "", apperrors.UpstreamServerCallFailed("incorrect response code '%s' while getting token from %s", response.StatusCode, authURL)
+		return nil, apperrors.UpstreamServerCallFailed("incorrect response code '%s' while getting token from %s", response.StatusCode, authURL)
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
 	defer response.Body.Close()
 	if err != nil {
-		return "", apperrors.UpstreamServerCallFailed("failed to read token response body from '%s': %s", authURL, err.Error())
+		return nil, apperrors.UpstreamServerCallFailed("failed to read token response body from '%s': %s", authURL, err.Error())
 	}
 
-	tokenResponse := oauthResponse{}
+	tokenResponse := &oauthResponse{}
 
-	err = json.Unmarshal(body, &tokenResponse)
+	err = json.Unmarshal(body, tokenResponse)
 	if err != nil {
-		return "", apperrors.UpstreamServerCallFailed("failed to unmarshal token response body: %s", err.Error())
+		return nil, apperrors.UpstreamServerCallFailed("failed to unmarshal token response body: %s", err.Error())
 	}
 
-	return "Bearer " + tokenResponse.AccessToken, nil
+	return tokenResponse, nil
 }

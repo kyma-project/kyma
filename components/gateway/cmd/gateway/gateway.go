@@ -17,6 +17,7 @@ import (
 	"github.com/kyma-project/kyma/components/gateway/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/gateway/internal/proxy"
 	"github.com/kyma-project/kyma/components/gateway/internal/proxy/proxycache"
+	"github.com/kyma-project/kyma/components/gateway/internal/proxy/tokencache"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
@@ -37,6 +38,7 @@ func main() {
 	bus.Init(&options.sourceNamespace, &options.sourceType, &options.sourceEnvironment, &options.eventsTargetURL)
 
 	proxyCache := proxycache.NewProxyCache(options.skipVerify, options.proxyCacheTTL)
+	tokenCache := tokencache.NewTokenCache()
 
 	nameResolver := k8sconsts.NewNameResolver(options.remoteEnvironment, options.namespace)
 
@@ -49,7 +51,7 @@ func main() {
 		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
 	}
 
-	internalHandler := newInternalHandler(serviceDefinitionService, nameResolver, proxyCache, options.skipVerify, options.proxyTimeout)
+	internalHandler := newInternalHandler(serviceDefinitionService, nameResolver, proxyCache, tokenCache, options.skipVerify, options.proxyTimeout)
 	externalHandler := externalapi.NewHandler()
 
 	if options.requestLogging {
@@ -86,9 +88,9 @@ func main() {
 }
 
 func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, nameResolver k8sconsts.NameResolver,
-	httpProxyCache proxycache.HTTPProxyCache, skipVerify bool, proxyTimeout int) http.Handler {
+	httpProxyCache proxycache.HTTPProxyCache, tokenCache tokencache.TokenCache, skipVerify bool, proxyTimeout int) http.Handler {
 	if serviceDefinitionService != nil {
-		oauthClient := proxy.NewOauthClient(proxyTimeout)
+		oauthClient := proxy.NewOauthClient(proxyTimeout, tokenCache)
 
 		return proxy.New(nameResolver, serviceDefinitionService, oauthClient, httpProxyCache, skipVerify, proxyTimeout)
 	}

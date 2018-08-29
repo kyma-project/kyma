@@ -357,6 +357,56 @@ func TestProxy(t *testing.T) {
 		httpCacheMock.AssertExpectations(t)
 		oauthClientMock.AssertExpectations(t)
 	})
+
+	t.Run("should invalidate proxy and retry when 403 occurred", func(t *testing.T) {
+		// given
+		ts := NewTestServer(func(req *http.Request) {
+			assert.Equal(t, req.Method, http.MethodGet)
+			assert.Equal(t, req.RequestURI, "/orders/123")
+		})
+		defer ts.Close()
+
+		tsf := NewForbiddenTestServer(func(req *http.Request) {
+			assert.Equal(t, req.Method, http.MethodGet)
+			assert.Equal(t, req.RequestURI, "/orders/123")
+		})
+		defer tsf.Close()
+
+		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		req.Host = "uuid-1.cluster.local"
+
+		nameResolver := new(k8smocks.NameResolver)
+		nameResolver.On("ExtractServiceId", "uuid-1.cluster.local").Return("uuid-1")
+
+		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
+			TargetUrl: tsf.URL,
+		}, nil)
+
+		u, _ := url.Parse(ts.URL)
+		httpCacheMock := &cacheMock.HTTPProxyCache{}
+		httpCacheMock.On("Get", "uuid-1").Return(nil, false)
+		httpCacheMock.On("Add", "uuid-1", "", "", "", mock.AnythingOfType("*httputil.ReverseProxy")).Return(
+			&proxycache.Proxy{
+				Proxy:        httputil.NewSingleHostReverseProxy(u),
+				ClientId:     "",
+				OauthUrl:     "",
+				ClientSecret: "",
+			})
+
+		handler := New(nameResolver, serviceDefServiceMock, nil, httpCacheMock, true, proxyTimeout)
+		rr := httptest.NewRecorder()
+
+		// when
+		handler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "test", rr.Body.String())
+
+		serviceDefServiceMock.AssertExpectations(t)
+		httpCacheMock.AssertExpectations(t)
+	})
 }
 
 func TestInvalidStateHandler(t *testing.T) {
@@ -387,6 +437,15 @@ func NewTestServer(check func(req *http.Request)) *httptest.Server {
 		r.ParseForm()
 		check(r)
 		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("test"))
+	}))
+}
+
+func NewForbiddenTestServer(check func(req *http.Request)) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		check(r)
+		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("test"))
 	}))
 }
