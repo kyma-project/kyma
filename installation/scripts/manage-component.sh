@@ -7,7 +7,7 @@ ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 COMPONENT_NAME="$1"
 ENABLED="$2"
 STATUS="disabled"
-FILE_NAME="components.yaml"
+FILE_NAME="components.env"
 FILE_PATH=${ROOT_PATH}/../${FILE_NAME}
 
 # Check if the provided value is a valid boolean
@@ -21,9 +21,9 @@ if [ "${ENABLED}" == "true" ]; then
     STATUS="enabled"
 fi
 
-# Create the components.yaml file if it does not exist
+# Create the file if it does not exist
 if [ ! -f "${FILE_PATH}" ]; then
-    echo "Generating components.yaml file"
+    echo "Generating ${FILE_NAME} file"
     touch "${FILE_PATH}"
 fi
 
@@ -41,7 +41,7 @@ fi
 
 # Append the provided key and value to the file
 cat >> "${FILE_PATH}" <<EOL
-${COMPONENT_NAME}.enabled: "${ENABLED}"
+${COMPONENT_NAME}.enabled=${ENABLED}
 EOL
 
 echo "Component ${COMPONENT_NAME} is now ${STATUS}!"
