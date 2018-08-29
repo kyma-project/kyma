@@ -35,6 +35,8 @@ etcd-operator:
       storageAccount: ""
       storageKey: ""
     enabled: ""
+global:
+  domainName: kyma.local
 nginx-ingress:
   controller:
     service:
@@ -44,7 +46,7 @@ test:
     password: ""
     username: ""
 `
-			installationData, testOverrides := NewInstallationDataCreator().WithAny("configurations-generator.kubeConfig.clusterName", "kyma.local").WithRemoteEnvIP("1.1.1.1").WithAdminGroup("testgroup").
+			installationData, testOverrides := NewInstallationDataCreator().WithAny("global.domainName", "kyma.local").WithAny("configurations-generator.kubeConfig.clusterName", "kyma.local").WithRemoteEnvIP("1.1.1.1").WithAdminGroup("testgroup").
 				GetData()
 
 			overridesMap, err := GetCoreOverrides(&installationData, UnflattenToMap(testOverrides))
@@ -70,6 +72,8 @@ etcd-operator:
       storageAccount: ""
       storageKey: ""
     enabled: ""
+global:
+  domainName: kyma.local
 nginx-ingress:
   controller:
     service:
@@ -80,6 +84,7 @@ test:
     username: user1
 `
 			installationData, testOverrides := NewInstallationDataCreator().
+				WithAny("global.domainName", "kyma.local").
 				WithAny("configurations-generator.kubeConfig.clusterName", "kyma.local").
 				WithRemoteEnvIP("1.1.1.1").
 				WithUITestCredentials("user1", "p@ssw0rd").
@@ -108,6 +113,8 @@ etcd-operator:
       storageAccount: pico-bello
       storageKey: 123-456-3245-a23b
     enabled: "true"
+global:
+  domainName: kyma.local
 nginx-ingress:
   controller:
     service:
@@ -118,6 +125,7 @@ test:
     username: ""
 `
 			installationData, testOverrides := NewInstallationDataCreator().
+				WithAny("global.domainName", "kyma.local").
 				WithAny("configurations-generator.kubeConfig.clusterName", "kyma.local").
 				WithRemoteEnvIP("1.1.1.1").
 				WithEtcdOperator("true", "pico-bello", "123-456-3245-a23b").
