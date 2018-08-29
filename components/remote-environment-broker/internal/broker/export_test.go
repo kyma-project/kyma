@@ -1,8 +1,9 @@
 package broker
 
-func NewOSBContext(originatingIdentity, apiVersion string) *osbContext {
+func NewOSBContext(originatingIdentity, apiVersion, namespace string) *osbContext {
 	return &osbContext{
 		OriginatingIdentity: originatingIdentity,
 		APIVersion:          apiVersion,
+		BrokerNamespace:     namespace,
 	}
 }
