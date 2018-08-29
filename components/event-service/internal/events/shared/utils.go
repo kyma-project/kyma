@@ -3,7 +3,7 @@ package shared
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/event-gateway/internal/events/api"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 )
 
 func ErrorResponseBadRequest(moreInfo string) (response *api.PublishEventResponses) {

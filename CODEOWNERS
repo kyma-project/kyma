@@ -159,7 +159,7 @@
 /components/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
 # Event Gateway Component
-/components/event-gateway/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+/components/event-service/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
 # Tests
 # acceptance tests

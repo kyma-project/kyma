@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 def label = "kyma-${UUID.randomUUID().toString()}"
-def application = 'event-gateway'
+def application = 'event-service'
 def isMaster = params.GIT_BRANCH == 'master'
 
 def dockerPushRoot = isMaster 
@@ -50,7 +50,7 @@ podTemplate(label: label) {
                         }
 
                         stage("build $application") {
-                            execute("CGO_ENABLED=0 go build ./cmd/eventgateway")
+                            execute("CGO_ENABLED=0 go build ./cmd/eventservice")
                         }
 
                         stage("test $application") {

@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/event-gateway/internal/events/api"
-	"github.com/kyma-project/kyma/components/event-gateway/internal/events/bus"
-	"github.com/kyma-project/kyma/components/event-gateway/internal/events/shared"
-	"github.com/kyma-project/kyma/components/event-gateway/internal/httptools"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
+	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
 )
 
 func TestEventOk(t *testing.T) {
@@ -71,7 +71,7 @@ func TestPropagateTraceHeaders(t *testing.T) {
 	sourceNamespace, sourceType, sourceEnvironment, targetUrl := "", "", "", "http://kyma-domain/v1/events"
 	bus.Init(sourceNamespace, sourceType, sourceEnvironment, targetUrl)
 
-	// simulate request from outside of event-gateway
+	// simulate request from outside of event-service
 	event := "{\"event-type\":\"order.created\",\"event-type-version\":\"v1\",\"event-id\":\"31109198-4d69-4ae0-972d-76117f3748c8\",\"event-time\":\"2012-11-01T22:08:41+00:00\",\"data\":\"{'key':'value'}\"}"
 	req, err := http.NewRequest(http.MethodPost, shared.EventsPath, strings.NewReader(event))
 

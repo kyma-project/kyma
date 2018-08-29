@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/event-gateway/internal/httperrors"
+	"github.com/kyma-project/kyma/components/event-service/internal/httperrors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

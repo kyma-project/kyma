@@ -37,7 +37,7 @@ projects = [
     "components/connector-service": "connector-service",
     "components/ui-api-layer": "ui-api-layer",
     "components/event-bus": "event-bus-publish",
-    "components/event-gateway": "event-gateway",
+    "components/event-service": "event-service",
     "tools/alpine-net": "alpine-net",
     "tools/watch-pods": "watch-pods",
     "tools/stability-checker": "stability-checker",

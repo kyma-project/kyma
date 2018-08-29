@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/event-gateway/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/event-gateway/internal/httperrors"
+	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/event-service/internal/httperrors"
 )
 
 type ErrorHandler struct {

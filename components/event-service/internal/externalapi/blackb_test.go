@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/event-gateway/internal/events/api"
-	"github.com/kyma-project/kyma/components/event-gateway/internal/events/shared"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 )
 
 func TestErrorNoContent(t *testing.T) {
