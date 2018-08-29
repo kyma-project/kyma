@@ -11,7 +11,7 @@ global:
   hub: docker.io/istio
 
   # Default tag for Istio images.
-  tag: 1.0.0
+  tag: 1.0.1
 
   # Gateway used for legacy k8s Ingress resources. By default it is
   # using 'istio:ingress', to match 0.8 config. It requires that
@@ -41,6 +41,9 @@ global:
     # Configures the access log for each sidecar. Setting it to an empty string will
     # disable access log for sidecar.
     accessLogFile: "/dev/stdout"
+
+    #If set to true, istio-proxy container will have privileged securityContext
+    privileged: false
 
     # If set, newly injected sidecars will have core dumps enabled.
     enableCoreDump: false
@@ -209,6 +212,8 @@ gateways:
       #requests:
       #  cpu: 1800m
       #  memory: 256Mi
+    cpu:
+      targetAverageUtilization: 80
 
     loadBalancerIP: ""
     serviceAnnotations: {}
@@ -234,8 +239,9 @@ gateways:
     - port: 8060
       targetPort: 8060
       name: tcp-citadel-grpc-tls
-    # Telemetry-related ports are enabled in gateway - but will only redirect if
-    # the gateway configration for the various components are enabled.
+    - port: 853
+      targetPort: 853
+      name: tcp-dns-tls
     - port: 15030
       targetPort: 15030
       name: http2-prometheus
@@ -259,6 +265,8 @@ gateways:
     replicaCount: 1
     autoscaleMin: 1
     autoscaleMax: 5
+    cpu:
+      targetAverageUtilization: 80
     serviceAnnotations: {}
     type: ClusterIP #change to NodePort or LoadBalancer if need be
     ports:
@@ -293,6 +301,8 @@ gateways:
       #limits:
       #  cpu: 1800m
       #  memory: 256Mi
+    cpu:
+      targetAverageUtilization: 80
     loadBalancerIP: ""
     serviceAnnotations:
       cloud.google.com/load-balancer-type: "internal"
@@ -307,8 +317,8 @@ gateways:
     - port: 8060
       targetPort: 8060
       name: tcp-citadel-grpc-tls
-    # Port 5353 is forwarded to kube-dns
-    - port: 5353
+    # Port 853 is reserved for the kube-dns gateway
+    - port: 853
       name: tcp-dns
     secretVolumes:
     - name: ilbgateway-certs
@@ -378,7 +388,7 @@ pilot:
   enabled: true
   replicaCount: 1
   autoscaleMin: 1
-  autoscaleMax: 1
+  autoscaleMax: 5
   image: pilot
   sidecar: true
   traceSampling: 100.0
@@ -389,6 +399,11 @@ pilot:
       memory: 2Gi
     requests:
       memory: 512Mi
+  env:
+    PILOT_PUSH_THROTTLE_COUNT: 100
+    GODEBUG: gctrace=2
+  cpu:
+    targetAverageUtilization: 80
 
 #
 # security configuration
