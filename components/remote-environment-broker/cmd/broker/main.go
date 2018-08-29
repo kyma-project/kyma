@@ -52,7 +52,6 @@ func main() {
 
 	// k8s
 	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
-	k8sClient.CoreV1().Services()
 	fatalOnError(err)
 	nsInformer := v1.NewNamespaceInformer(k8sClient, informerResyncPeriod, cache.Indexers{})
 
@@ -61,8 +60,13 @@ func main() {
 	fatalOnError(err)
 	scSDK := &servicecatalog.SDK{ServiceCatalogClient: scClientSet}
 
+
+
 	scInformerFactory := catalogInformers.NewSharedInformerFactory(scClientSet, informerResyncPeriod)
+	scInformerFactory.Servicecatalog().V1beta1().ServiceBrokers().Lister().List()
 	scInformersGroup := scInformerFactory.Servicecatalog().V1beta1()
+
+
 
 	scClientSet.ServicecatalogV1beta1()
 	// instance populator
