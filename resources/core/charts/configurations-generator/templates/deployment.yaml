@@ -22,8 +22,8 @@ spec:
         command: [
           "/app",
           "-kube-config-custer-name={{ .Values.kubeConfig.clusterName }}",
-          "-kube-config-url={{ .Values.kubeConfig.url }}",
-          "-kube-config-ca={{ .Values.kubeConfig.ca }}"
+          "-kube-config-url=https://apiserver.{{ .Values.global.domainName }}",
+          "-kube-config-ca={{ .Values.global.tlsCrt }}"
         ]
         ports:
           - name: http
