@@ -19,9 +19,10 @@ func TestGetIstioOverrides(t *testing.T) {
 		})
 
 		Convey("when IP address is specified should contain yaml", func() {
-			const dummyOverridesForIstio = `ingressgateway:
-  service:
-    externalPublicIp: 100.100.100.100
+			const dummyOverridesForIstio = `gateways:
+  istio-ingressgateway:
+    service:
+      externalPublicIp: 100.100.100.100
 `
 			installationData, testOverrides := NewInstallationDataCreator().WithIP("100.100.100.100").GetData()
 			overridesMap, err := GetIstioOverrides(&installationData, UnflattenToMap(testOverrides))
