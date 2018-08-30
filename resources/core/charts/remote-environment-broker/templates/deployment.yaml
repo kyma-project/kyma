@@ -28,7 +28,7 @@ spec:
 
       containers:
       - name: reb
-        image: "{{ .Values.global.containerRegistry.path }}/remote-environment-broker:{{ .Values.image.tag }}"
+        image: "eu.gcr.io/kyma-project/snapshot/remote-environment-broker:PR-343"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
           - name: APP_PORT
