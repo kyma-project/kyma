@@ -8,10 +8,6 @@ import (
 )
 
 const coreTplStr = `
-configurations-generator:
-  kubeConfig:
-    url: {{.K8sApiserverURL}}
-    ca: {{.K8sApiserverCa}}
 test:
   auth:
     username: "{{.UITestUser}}"

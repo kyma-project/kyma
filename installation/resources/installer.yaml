@@ -133,16 +133,6 @@ spec:
               configMapKeyRef:
                 name: installation-config
                 key: domain
-          - name: K8S_APISERVER_URL
-            valueFrom:
-              configMapKeyRef:
-                name: installation-config
-                key: k8s_apiserver_url
-          - name: K8S_APISERVER_CA
-            valueFrom:
-              configMapKeyRef:
-                name: installation-config
-                key: k8s_apiserver_ca
           - name: ENABLE_ETCD_BACKUP_OPERATOR
             valueFrom:
               configMapKeyRef:

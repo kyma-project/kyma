@@ -8,8 +8,6 @@ import (
 // Configuration of non-secret values in installer
 type installationConfig struct {
 	ExternalPublicIP           string
-	K8sApiserverUrl            string
-	K8sApiserverCa             string
 	AzureBrokerTenantID        string
 	AzureBrokerClientID        string
 	AzureBrokerSubscriptionID  string
@@ -36,8 +34,6 @@ type installationConfig struct {
 func GetInstallationConfig() *installationConfig {
 	return &installationConfig{
 		ExternalPublicIP:           os.Getenv("EXTERNAL_PUBLIC_IP"),
-		K8sApiserverUrl:            os.Getenv("K8S_APISERVER_URL"),
-		K8sApiserverCa:             os.Getenv("K8S_APISERVER_CA"),
 		AzureBrokerTenantID:        os.Getenv("AZURE_BROKER_TENANT_ID"),
 		AzureBrokerClientID:        os.Getenv("AZURE_BROKER_CLIENT_ID"),
 		AzureBrokerSubscriptionID:  os.Getenv("AZURE_BROKER_SUBSCRIPTION_ID"),
