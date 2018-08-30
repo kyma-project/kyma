@@ -87,12 +87,13 @@ func main() {
 
 	reSyncCtrl := syncer.New(reInformersGroup.RemoteEnvironments(), sFact.RemoteEnvironment(), sFact.RemoteEnvironment(), relistRequester, log)
 
-	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, int32(cfg.Port), log)
+	brokerMode, err := mode.NewBrokerService(cfg)
+	fatalOnError(err)
+
+	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), brokerMode, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, int32(cfg.Port), log)
 
 	mappingCtrl := mapping.New(!cfg.ClusterScopedBrokerEnabled, cfg.Namespace, reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), nsBrokerFacade, log)
 
-	brokerMode, err := mode.NewBrokerService(cfg)
-	fatalOnError(err)
 	// create broker
 	srv := broker.New(sFact.RemoteEnvironment(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		reClient.RemoteenvironmentV1alpha1(), siFacade, reInformersGroup.EnvironmentMappings().Lister(), brokerMode, log)

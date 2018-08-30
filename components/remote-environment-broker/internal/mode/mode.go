@@ -8,6 +8,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const prefix = "reb-ns-for-"
+
 // BrokerService aggregates information about mode REB is running: if it is cluster scoped or namespaced scoped
 type BrokerService struct {
 	clusterScoped      bool
@@ -17,7 +19,7 @@ type BrokerService struct {
 
 // NewBrokerService creates BrokerService from configuration
 func NewBrokerService(cfg *config.Config) (*BrokerService, error) {
-	r, err := regexp.Compile("reb-ns-for-([a-z][a-z0-9-]*)\\.")
+	r, err := regexp.Compile(fmt.Sprintf("%s([a-z][a-z0-9-]*)\\.", prefix))
 	if err != nil {
 		return nil, errors.Wrap(err, "while compiling regexp for URL of namespaced brokers")
 	}
@@ -37,6 +39,11 @@ func (bf *BrokerService) GetNsFromBrokerURL(url string) (string, error) {
 	}
 	// out[0] = matched regexp, out[1] = matched group in bracket
 	return out[1], nil
+}
+
+// GetServiceNameForNsBroker returns service name for namespaced broker
+func (bf *BrokerService) GetServiceNameForNsBroker(ns string) string {
+	return prefix + ns
 }
 
 // IsClusterScoped returns information if broker is configured as a ClusterScoped

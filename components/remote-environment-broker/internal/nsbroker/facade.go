@@ -20,25 +20,32 @@ const (
 	brokerLabelValue = "true"
 )
 
+//go:generate mockery -name=serviceNameProvider -output=automock -outpkg=automock -case=underscore
+type serviceNameProvider interface {
+	GetServiceNameForNsBroker(ns string) string
+}
+
 // Facade is responsible for creation k8s objects for namespaced broker
 type Facade struct {
-	brokerGetter     scbeta.ServiceBrokersGetter
-	servicesGetter   typedCorev1.ServicesGetter
-	rebSelectorKey   string
-	rebSelectorValue string
-	rebTargetPort    int32
-	log              logrus.FieldLogger
+	brokerGetter        scbeta.ServiceBrokersGetter
+	servicesGetter      typedCorev1.ServicesGetter
+	serviceNameProvider serviceNameProvider
+	rebSelectorKey      string
+	rebSelectorValue    string
+	rebTargetPort       int32
+	log                 logrus.FieldLogger
 }
 
 // NewFacade returns facade
-func NewFacade(brokerGetter scbeta.ServiceBrokersGetter, servicesGetter typedCorev1.ServicesGetter, rebSelectorKey string, rebSelectorValue string, rebTargetPort int32, log logrus.FieldLogger) *Facade {
+func NewFacade(brokerGetter scbeta.ServiceBrokersGetter, servicesGetter typedCorev1.ServicesGetter, serviceNameProvider serviceNameProvider, rebSelectorKey string, rebSelectorValue string, rebTargetPort int32, log logrus.FieldLogger) *Facade {
 	return &Facade{
-		brokerGetter:     brokerGetter,
-		servicesGetter:   servicesGetter,
-		rebSelectorKey:   rebSelectorKey,
-		rebSelectorValue: rebSelectorValue,
-		rebTargetPort:    rebTargetPort,
-		log:              log.WithField("service", "nsbroker-facade"),
+		brokerGetter:        brokerGetter,
+		servicesGetter:      servicesGetter,
+		serviceNameProvider: serviceNameProvider,
+		rebSelectorKey:      rebSelectorKey,
+		rebSelectorValue:    rebSelectorValue,
+		rebTargetPort:       rebTargetPort,
+		log:                 log.WithField("service", "nsbroker-facade"),
 	}
 }
 
@@ -48,7 +55,7 @@ func (f *Facade) Create(destinationNs, systemNs string) error {
 
 	if _, err := f.servicesGetter.Services(systemNs).Create(&corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      f.getServiceName(destinationNs),
+			Name:      f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs),
 			Namespace: systemNs,
 		},
 		Spec: corev1.ServiceSpec{
@@ -67,6 +74,7 @@ func (f *Facade) Create(destinationNs, systemNs string) error {
 			},
 		},
 	}); err != nil {
+		f.log.Warnf("Creation of service for namespaced-broker for namespace [%s] results in error: [%s]. AlreadyExist error will be ignored.", destinationNs, err)
 		resultErr = multierror.Append(resultErr, err)
 	}
 
@@ -80,17 +88,15 @@ func (f *Facade) Create(destinationNs, systemNs string) error {
 		},
 		Spec: v1beta1.ServiceBrokerSpec{
 			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
-				URL: fmt.Sprintf("http://%s.%s.svc.cluster.local", f.getServiceName(destinationNs), systemNs),
+				URL: fmt.Sprintf("http://%s.%s.svc.cluster.local", f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs), systemNs),
 			},
 		},
 	}
 	if _, err := f.brokerGetter.ServiceBrokers(destinationNs).Create(broker); err != nil {
 		resultErr = multierror.Append(resultErr, err)
+		f.log.Warnf("Creation of namespaced-broker for namespace [%s] results in error: [%s]. AlreadyExist errors will be ignored.", destinationNs, err)
 	}
 
-	if resultErr != nil {
-		f.log.Warnf("Creation of namespaced-broker [%s] and service for it results in error: [%s]. AlreadyExist errors will be ignored.", destinationNs, resultErr.Error())
-	}
 	resultErr = f.filterOutMultiError(resultErr, f.ignoreAlreadyExist)
 
 	if resultErr == nil {
@@ -103,16 +109,15 @@ func (f *Facade) Create(destinationNs, systemNs string) error {
 func (f *Facade) Delete(destinationNs, systemNs string) error {
 	var resultErr *multierror.Error
 	if err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(brokerName, nil); err != nil {
+		f.log.Warnf("Deletion of namespaced-broker for namespace [%s] results in error: [%s]. NotFound errors will be ignored. ", destinationNs, err)
 		resultErr = multierror.Append(resultErr, err)
 	}
 
-	if err := f.servicesGetter.Services(systemNs).Delete(f.getServiceName(destinationNs), nil); err != nil {
+	if err := f.servicesGetter.Services(systemNs).Delete(f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs), nil); err != nil {
+		f.log.Warnf("Deletion of service for namespaced-broker for namespace [%s] results in error: [%s]. NotFound errors will be ignored. ", destinationNs, err)
 		resultErr = multierror.Append(resultErr, err)
 	}
 
-	if resultErr != nil {
-		f.log.Warnf("Deleteion of namespaced-broker [%s] and service for it reults in error: [%s]. NotFound errors will be ignored. ", destinationNs, resultErr.Error())
-	}
 	resultErr = f.filterOutMultiError(resultErr, f.ignoreIsNotFound)
 	if resultErr == nil {
 		return nil
@@ -132,11 +137,6 @@ func (f *Facade) Exist(destinationNs string) (bool, error) {
 		return true, nil
 	}
 
-}
-
-func (f *Facade) getServiceName(ns string) string {
-	const serviceNamePattern = "reb-ns-for-%s"
-	return fmt.Sprintf(serviceNamePattern, ns)
 }
 
 func (f *Facade) filterOutMultiError(merr *multierror.Error, predicate func(err error) bool) *multierror.Error {
