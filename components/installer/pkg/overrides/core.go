@@ -8,10 +8,6 @@ import (
 )
 
 const coreTplStr = `
-nginx-ingress:
-  controller:
-    service:
-      loadBalancerIP: {{.RemoteEnvIP}}
 configurations-generator:
   kubeConfig:
     url: {{.K8sApiserverURL}}

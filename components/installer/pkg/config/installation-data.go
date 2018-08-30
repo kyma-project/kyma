@@ -24,7 +24,6 @@ type InstallationData struct {
 	ClusterTLSCert             string
 	RemoteEnvCa                string
 	RemoteEnvCaKey             string
-	RemoteEnvIP                string
 	K8sApiserverURL            string
 	K8sApiserverCa             string
 	UITestUser                 string
@@ -63,7 +62,6 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		ClusterTLSCert:             installationConfig.ClusterTLSCert,
 		RemoteEnvCa:                installationConfig.RemoteEnvCa,
 		RemoteEnvCaKey:             installationConfig.RemoteEnvCaKey,
-		RemoteEnvIP:                installationConfig.RemoteEnvIP,
 		K8sApiserverURL:            installationConfig.K8sApiserverUrl,
 		K8sApiserverCa:             installationConfig.K8sApiserverCa,
 		UITestUser:                 installationConfig.UITestUser,

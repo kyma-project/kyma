@@ -81,13 +81,6 @@ func (sc *InstallationDataCreator) WithRemoteEnvCaKey(remoteEnvCaKey string) *In
 	return sc
 }
 
-// WithRemoteEnvIP sets value for RemoteEnvIP property
-func (sc *InstallationDataCreator) WithRemoteEnvIP(ipAddr string) *InstallationDataCreator {
-	sc.installationData.RemoteEnvIP = ipAddr
-
-	return sc
-}
-
 // WithUITestCredentials sets value for UITestUser and UITestPassword properties
 func (sc *InstallationDataCreator) WithUITestCredentials(username, password string) *InstallationDataCreator {
 	sc.installationData.UITestUser = username
