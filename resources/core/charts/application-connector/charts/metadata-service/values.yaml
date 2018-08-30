@@ -14,6 +14,10 @@ service:
   externalapi:
     port: *externalAPIPort
 
+ingress:
+  authSecret: kyma-integration/nginx-auth-ca
+  tlsSecret: nginx-ingress-cert
+
 minioUserSecretName: remoteenvironments-minio-user
 
 tests:
