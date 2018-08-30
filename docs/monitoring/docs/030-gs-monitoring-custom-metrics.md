@@ -16,7 +16,7 @@ This Getting Started guide shows how to expose custom metrics to Prometheus with
 - Kyma as the target deployment environment
 - Istio 0.8
   - sidecar injection enabled
-  - mutual TLS enabled.
+  - mutual TLS enabled
 
 ## Installation
 
@@ -79,7 +79,7 @@ This is a basic example where `Gauge` and `Counter` metrics are exported using t
     ```bash
     kubectl port-forward svc/sample-metrics-8081 8081:8081
     ```
-    Then open a browser and access [`http://localhost:8081/metrics`](http://localhost:8081/metrics)
+    Open a browser and access [`http://localhost:8081/metrics`](http://localhost:8081/metrics)
     
     ![metrics on port 8081](assets/sample-metrics-2.png)
 
@@ -117,7 +117,7 @@ In Kyma, the Prometheus server discovers all ServiceMonitors through the **servi
 
 In this example, the ServiceMonitor selects a **selector** with all services matching the `k8s-app: metrics` label. Find the complete yaml [here](https://github.com/kyma-project/examples/blob/master/monitoring-custom-metrics/deployment/service-monitor.yaml).
 
-In Kyma, there is a [template](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/monitoring/charts/prometheus/templates/servicemonitors.yaml), which serves to discover a list of ServiceMonitors.
+In Kyma, there is a [template](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/monitoring/charts/prometheus/templates/servicemonitors.yaml) which serves to discover a list of ServiceMonitors.
 
 ### Add a Custom Dashboard in Grafana
 
