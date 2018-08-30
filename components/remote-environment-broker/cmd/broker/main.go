@@ -17,6 +17,7 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/config"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mapping"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mode"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/nsbroker"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage/populator"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/syncer"
@@ -60,13 +61,8 @@ func main() {
 	fatalOnError(err)
 	scSDK := &servicecatalog.SDK{ServiceCatalogClient: scClientSet}
 
-
-
 	scInformerFactory := catalogInformers.NewSharedInformerFactory(scClientSet, informerResyncPeriod)
-	scInformerFactory.Servicecatalog().V1beta1().ServiceBrokers().Lister().List()
 	scInformersGroup := scInformerFactory.Servicecatalog().V1beta1()
-
-
 
 	scClientSet.ServicecatalogV1beta1()
 	// instance populator
@@ -90,7 +86,10 @@ func main() {
 	accessChecker := access.New(sFact.RemoteEnvironment(), reClient.RemoteenvironmentV1alpha1(), sFact.Instance())
 
 	reSyncCtrl := syncer.New(reInformersGroup.RemoteEnvironments(), sFact.RemoteEnvironment(), sFact.RemoteEnvironment(), relistRequester, log)
-	mappingCtrl := mapping.New(reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), log)
+
+	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, int32(cfg.Port), log)
+
+	mappingCtrl := mapping.New(!cfg.ClusterScopedBrokerEnabled, cfg.Namespace, reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), nsBrokerFacade, log)
 
 	brokerMode, err := mode.NewBrokerService(cfg)
 	fatalOnError(err)

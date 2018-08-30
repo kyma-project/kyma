@@ -8,6 +8,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
@@ -37,34 +38,38 @@ type nsPatcher interface {
 	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *corev1.Namespace, err error)
 }
 
-//go:generate mockery -name=nsBrokerManager -output=automock -outpkg=automock -case=underscore
-type nsBrokerManager interface {
-	Create(ns string) error
-	Delete(ns string) error
-	Exist(ns string) (bool, error)
+//go:generate mockery -name=nsBrokerFacade -output=automock -outpkg=automock -case=underscore
+type nsBrokerFacade interface {
+	Create(destinationNs, systemNs string) error
+	Delete(destinationNs, systemNs string) error
+	Exist(destinationNs string) (bool, error)
 }
 
 // Controller populates local storage with all EnvironmentMapping custom resources created in k8s cluster.
 type Controller struct {
-	log             logrus.FieldLogger
+	manageNsBrokers bool
+	systemNamesapce string
 	queue           workqueue.RateLimitingInterface
 	emInformer      cache.SharedIndexInformer
 	nsInformer      cache.SharedIndexInformer
 	nsPatcher       nsPatcher
 	reGetter        reGetter
-	manageNsBrokers bool //TODO
-	nsBrokerManager nsBrokerManager
+	nsBrokerFacade  nsBrokerFacade
+	log             logrus.FieldLogger
 }
 
 // New creates new environment mapping controller
-func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, reGetter reGetter, log logrus.FieldLogger) *Controller {
+func New(manageNsBrokers bool, systemNamespace string, emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, reGetter reGetter, nsBrokerFacade nsBrokerFacade, log logrus.FieldLogger) *Controller {
 	c := &Controller{
-		log:        log.WithField("service", "labeler:controller"),
-		emInformer: emInformer,
-		nsInformer: nsInformer,
-		queue:      workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		nsPatcher:  nsPatcher,
-		reGetter:   reGetter,
+		manageNsBrokers: manageNsBrokers,
+		systemNamesapce: systemNamespace,
+		log:             log.WithField("service", "labeler:controller"),
+		emInformer:      emInformer,
+		nsInformer:      nsInformer,
+		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		nsPatcher:       nsPatcher,
+		reGetter:        reGetter,
+		nsBrokerFacade:  nsBrokerFacade,
 	}
 
 	// EventHandler reacts every time when we add, update or delete EnvironmentMapping
@@ -166,7 +171,7 @@ func (c *Controller) processItem(key string) error {
 	// but in k8s they use Lister to check if event should be delete, see:
 	// https://github.com/kubernetes/kubernetes/blob/master/pkg/controller/service/service_controller.go#L725
 	// We need to check the guarantees of such solutions and choose the best one.
-	_, emExist, err := c.emInformer.GetIndexer().GetByKey(key)
+	emObj, emExist, err := c.emInformer.GetIndexer().GetByKey(key)
 	if err != nil {
 		return errors.Wrapf(err, "while getting object with key %q from the store", key)
 	}
@@ -196,7 +201,11 @@ func (c *Controller) processItem(key string) error {
 		return err
 	}
 	if c.manageNsBrokers {
-		if err := c.ensureNsBrokerRegistered(namespace); err != nil {
+		envMapping, ok := emObj.(*v1alpha1.EnvironmentMapping)
+		if !ok {
+			return errors.New("cannot cast received object to v1alpha1.EnvironmentMapping type")
+		}
+		if err := c.ensureNsBrokerRegistered(envMapping); err != nil {
 			return err
 		}
 	}
@@ -221,28 +230,32 @@ func (c *Controller) getNamespace(namespace string) (*corev1.Namespace, error) {
 	return reNs, nil
 }
 
-func (c *Controller) ensureNsBrokerRegistered(namespace string) error {
-	brokerExist, err := c.nsBrokerManager.Exist(namespace)
+func (c *Controller) ensureNsBrokerRegistered(envMapping *v1alpha1.EnvironmentMapping) error {
+	brokerExist, err := c.nsBrokerFacade.Exist(envMapping.Namespace)
 	if err != nil {
-		return errors.Wrapf(err, "while checking if namespaced broker exist in namespace [%s]", namespace)
+		return errors.Wrapf(err, "while checking if namespaced broker exist in namespace [%s]", envMapping.Namespace)
 	}
-	if !brokerExist {
-		if err := c.nsBrokerManager.Create(namespace); err != nil {
-			return errors.Wrapf(err, "while creating namespaced broker in namespace [%s]", namespace)
-		}
+	if brokerExist {
+		return nil
 	}
+	if err := c.nsBrokerFacade.Create(envMapping.Namespace, c.systemNamesapce); err != nil {
+		return errors.Wrapf(err, "while creating namespaced broker in namespace [%s]", envMapping.Namespace)
+	}
+
 	return nil
 }
 
 func (c *Controller) ensureNsBrokerNotRegistered(namespace string) error {
-	brokerExist, err := c.nsBrokerManager.Exist(namespace)
+	brokerExist, err := c.nsBrokerFacade.Exist(namespace)
 	if err != nil {
-		return errors.Wrapf(err,"while checking in namespaced broker exist in namespace [%s]", namespace)
+		return errors.Wrapf(err, "while checking in namespaced broker exist in namespace [%s]", namespace)
 	}
-	if brokerExist {
-		if err := c.nsBrokerManager.Delete(namespace); err != nil {
-			return errors.Wrapf(err,"while removing namespaced broker brom namespace [%s]", namespace)
-		}
+	if !brokerExist {
+		return nil
+	}
+
+	if err := c.nsBrokerFacade.Delete(namespace, c.systemNamesapce); err != nil {
+		return errors.Wrapf(err, "while removing namespaced broker brom namespace [%s]", namespace)
 	}
 	return nil
 }
