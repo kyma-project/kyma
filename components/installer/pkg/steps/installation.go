@@ -68,7 +68,7 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 		steps.PrintInstallationStep(stepName)
 		steps.statusManager.InProgress(stepName)
 
-		if component.Name == "provision-bundles" { // Legacy support for bash bundler provisioner - to be deleted later
+		if component.Name == "provision-bundles" { // Legacy support for bash provision-bundles script - to be deleted later
 			err := steps.ProvisionBundles(installationData)
 			if steps.errorHandlers.CheckError("Step installation error: ", err) {
 				steps.statusManager.Error(stepName)
@@ -117,45 +117,34 @@ func (steps *InstallationSteps) UpdateKyma(installationData *config.Installation
 
 	steps.currentPackage = currentPackage
 
-	upgradeErr := steps.UpdateClusterEssentials(installationData, overrideData)
+	stepsFactory := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrides.NewLegacyProvider(overrideData, installationData, currentPackage, steps.errorHandlers))
 
-	if upgradeErr != nil {
-		return upgradeErr
-	}
+	for _, component := range installationData.Components {
 
-	upgradeErr = steps.UpdateIstio(installationData, overrideData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
+		stepName := "Upgrading " + component.GetReleaseName()
+		steps.PrintInstallationStep(stepName)
+		steps.statusManager.InProgress(stepName)
 
-	upgradeErr = steps.UpdatePrometheus(installationData, overrideData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
+		if component.Name == "provision-bundles" { // Legacy support for bash provision-bundles script - to be deleted later
+			err := steps.UpdateBundles(installationData)
+			if steps.errorHandlers.CheckError("Step installation error: ", err) {
+				steps.statusManager.Error(stepName)
+				//logCore(steps)
+				return err
+			}
+		} else {
+			step := stepsFactory.NewStep(component)
+			steps.PrintInstallationStep(stepName)
 
-	bundlesErr := steps.UpdateBundles(installationData)
-	if bundlesErr != nil {
-		return bundlesErr
-	}
+			installErr := step.Upgrade()
+			if steps.errorHandlers.CheckError("Step installation error: ", installErr) {
+				steps.statusManager.Error(stepName)
+				//logCore(steps)
+				return installErr
+			}
+		}
 
-	dexErr := steps.UpdateDex(installationData, overrideData)
-	if dexErr != nil {
-		return dexErr
-	}
-
-	upgradeErr = steps.UpgradeCore(installationData, overrideData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
-
-	upgradeErr = steps.UpdateHmcDefaultRemoteEnvironments(installationData, overrideData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
-
-	upgradeErr = steps.UpdateEcDefaultRemoteEnvironments(installationData, overrideData)
-	if upgradeErr != nil {
-		return upgradeErr
+		log.Println(stepName + "...DONE")
 	}
 
 	err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")

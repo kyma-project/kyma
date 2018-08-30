@@ -13,6 +13,7 @@ import (
 // Step represents contract for installation step
 type Step interface {
 	Install() error
+	Upgrade() error
 	Status() (string, error)
 	ToString() string
 }
@@ -63,6 +64,30 @@ func (s step) Install() error {
 
 		s.helmClient.PrintRelease(upgradeResp.Release)
 	}
+
+	return nil
+}
+
+// Upgrade method triggers step upgrade via helm
+func (s step) Upgrade() error {
+	chartDir := path.Join(s.kymaPackage.GetChartsDirPath(), s.component.Name)
+
+	overrides, overridesErr := s.legacyOverridesProvider.GetForRelease(s.component)
+
+	if overridesErr != nil {
+		return overridesErr
+	}
+
+	upgradeResp, upgradeErr := s.helmClient.UpgradeRelease(
+		chartDir,
+		s.component.GetReleaseName(),
+		overrides)
+
+	if upgradeErr != nil {
+		return upgradeErr
+	}
+
+	s.helmClient.PrintRelease(upgradeResp.Release)
 
 	return nil
 }
