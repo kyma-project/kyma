@@ -174,18 +174,18 @@ func (c *Controller) syncHandler(key string) error {
 		return err
 	}
 
+	overrideProvider, overridesErr := overrides.New(c.kubeClientset)
+	if overridesErr != nil {
+		return overridesErr
+	}
+
+	domainName, exists := overrides.FindOverrideValue(overrideProvider.Common(), "global.domainName")
+	if !exists || domainName == "" {
+		runtime.HandleError(errors.New("'global.domainName' override not found"))
+		return nil
+	}
+
 	if installation.ShouldInstall() {
-
-		overrideProvider, overridesErr := overrides.New(c.kubeClientset)
-		if overridesErr != nil {
-			return overridesErr
-		}
-
-		domainName, exists := overrides.FindOverrideValue(overrideProvider.Common(), "global.domainName")
-		if !exists || domainName == "" {
-			runtime.HandleError(errors.New("'global.domainName' override not found!"))
-			return nil
-		}
 
 		err = c.conditionManager.InstallStart()
 		if err != nil {
@@ -221,17 +221,6 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 	} else if installation.ShouldUpdate() {
-
-		overrideProvider, overridesErr := overrides.New(c.kubeClientset)
-		if overridesErr != nil {
-			return overridesErr
-		}
-
-		domainName, exists := overrides.FindOverrideValue(overrideProvider.Common(), "global.domainName")
-		if !exists || domainName == "" {
-			runtime.HandleError(errors.New("'global.domainName' override not found!"))
-			return nil
-		}
 
 		err = c.conditionManager.UpdateStart()
 		if err != nil {
