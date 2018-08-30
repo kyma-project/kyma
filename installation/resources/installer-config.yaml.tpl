@@ -47,7 +47,6 @@ metadata:
   namespace: kyma-installer
 data:
   is_local_installation: "__IS_LOCAL_INSTALLATION__"
-  external_public_ip: "__EXTERNAL_PUBLIC_IP__"
   domain: "__DOMAIN__"
   etcd_backup_container_name: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   slack_api_url: "__SLACK_API_URL_VALUE__"

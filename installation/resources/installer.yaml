@@ -98,12 +98,6 @@ spec:
               configMapKeyRef:
                 name: installation-config
                 key: is_local_installation
-          - name: EXTERNAL_PUBLIC_IP
-            valueFrom:
-              configMapKeyRef:
-                name: installation-config
-                key: external_public_ip
-                optional: true
           - name: DOMAIN
             valueFrom:
               configMapKeyRef:

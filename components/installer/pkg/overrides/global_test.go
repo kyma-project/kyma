@@ -66,7 +66,7 @@ func TestGetGlobalOverrides(t *testing.T) {
   tlsCrt: ""
   tlsKey: ""
 `
-			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithIP("100.100.100.100").GetData()
+			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").GetData()
 
 			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
@@ -99,7 +99,7 @@ func TestGetGlobalOverrides(t *testing.T) {
   tlsCrt: abc
   tlsKey: def
 `
-			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithIP("100.100.100.100").WithCert("abc", "def").GetData()
+			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithCert("abc", "def").GetData()
 
 			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
@@ -132,7 +132,7 @@ func TestGetGlobalOverrides(t *testing.T) {
   tlsCrt: ""
   tlsKey: ""
 `
-			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithIP("100.100.100.100").WithRemoteEnvCa("xyz").WithRemoteEnvCaKey("abc").GetData()
+			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithRemoteEnvCa("xyz").WithRemoteEnvCaKey("abc").GetData()
 
 			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
@@ -167,7 +167,6 @@ func TestGetGlobalOverrides(t *testing.T) {
 `
 			installData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").
-				WithIP("100.100.100.100").
 				WithEtcdBackupABSContainerName("abs/container/name").
 				GetData()
 
@@ -203,7 +202,6 @@ func TestGetGlobalOverrides(t *testing.T) {
 `
 			installData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").
-				WithIP("100.100.100.100").
 				WithVictorOpsCredentials("victorops_routing_key", "victorops_api_key").
 				WithSlackCredentials("slack_channel", "slack_apiurl").
 				GetData()
