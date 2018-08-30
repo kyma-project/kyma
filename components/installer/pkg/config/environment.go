@@ -10,7 +10,6 @@ type installationConfig struct {
 	ExternalPublicIP           string
 	K8sApiserverUrl            string
 	K8sApiserverCa             string
-	AdminGroup                 string
 	AzureBrokerTenantID        string
 	AzureBrokerClientID        string
 	AzureBrokerSubscriptionID  string
@@ -39,7 +38,6 @@ func GetInstallationConfig() *installationConfig {
 		ExternalPublicIP:           os.Getenv("EXTERNAL_PUBLIC_IP"),
 		K8sApiserverUrl:            os.Getenv("K8S_APISERVER_URL"),
 		K8sApiserverCa:             os.Getenv("K8S_APISERVER_CA"),
-		AdminGroup:                 os.Getenv("ADMIN_GROUP"),
 		AzureBrokerTenantID:        os.Getenv("AZURE_BROKER_TENANT_ID"),
 		AzureBrokerClientID:        os.Getenv("AZURE_BROKER_CLIENT_ID"),
 		AzureBrokerSubscriptionID:  os.Getenv("AZURE_BROKER_SUBSCRIPTION_ID"),

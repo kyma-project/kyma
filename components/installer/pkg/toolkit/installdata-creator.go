@@ -89,13 +89,6 @@ func (sc *InstallationDataCreator) WithUITestCredentials(username, password stri
 	return sc
 }
 
-// WithAdminGroup sets value for AdminGroup property
-func (sc *InstallationDataCreator) WithAdminGroup(adminGroupName string) *InstallationDataCreator {
-	sc.installationData.AdminGroup = adminGroupName
-
-	return sc
-}
-
 // WithEtcdOperator sets value for EtcdOperator property
 func (sc *InstallationDataCreator) WithEtcdOperator(enabled, storageAccount, storageKey string) *InstallationDataCreator {
 	sc.installationData.EnableEtcdBackupOperator = enabled

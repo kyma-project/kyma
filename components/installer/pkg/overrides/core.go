@@ -12,9 +12,6 @@ configurations-generator:
   kubeConfig:
     url: {{.K8sApiserverURL}}
     ca: {{.K8sApiserverCa}}
-cluster-users:
-  users:
-    adminGroup: {{.AdminGroup}}
 test:
   auth:
     username: "{{.UITestUser}}"

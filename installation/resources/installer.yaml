@@ -143,12 +143,6 @@ spec:
               configMapKeyRef:
                 name: installation-config
                 key: k8s_apiserver_ca
-          - name: ADMIN_GROUP
-            valueFrom:
-              configMapKeyRef:
-                name: installation-config
-                key: admin_group
-                optional: true
           - name: ENABLE_ETCD_BACKUP_OPERATOR
             valueFrom:
               configMapKeyRef:

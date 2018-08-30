@@ -28,7 +28,6 @@ type InstallationData struct {
 	K8sApiserverCa             string
 	UITestUser                 string
 	UITestPassword             string
-	AdminGroup                 string
 	EtcdBackupABSContainerName string
 	EnableEtcdBackupOperator   string
 	EtcdBackupABSAccount       string
@@ -66,7 +65,6 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		K8sApiserverCa:             installationConfig.K8sApiserverCa,
 		UITestUser:                 installationConfig.UITestUser,
 		UITestPassword:             installationConfig.UITestPassword,
-		AdminGroup:                 installationConfig.AdminGroup,
 		EtcdBackupABSContainerName: installationConfig.EtcdBackupABSContainerName,
 		EnableEtcdBackupOperator:   installationConfig.EnableEtcdBackupOperator,
 		EtcdBackupABSAccount:       installationConfig.EtcdBackupABSAccount,

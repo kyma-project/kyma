@@ -22,8 +22,6 @@ func TestGetCoreOverrides(t *testing.T) {
 
 		Convey("when InstallationData contains domain name overrides should contain yaml", func() {
 			const dummyOverridesForCore = `cluster-users:
-  users:
-    adminGroup: testgroup
 configurations-generator:
   kubeConfig:
     ca: null
@@ -42,8 +40,7 @@ test:
     password: ""
     username: ""
 `
-			installationData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithGeneric("configurations-generator.kubeConfig.clusterName", "kyma.local").WithAdminGroup("testgroup").
-				GetData()
+			installationData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithGeneric("configurations-generator.kubeConfig.clusterName", "kyma.local").GetData()
 
 			overridesMap, err := GetCoreOverrides(&installationData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
