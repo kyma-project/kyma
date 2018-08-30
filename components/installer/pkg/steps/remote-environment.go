@@ -129,13 +129,6 @@ func (steps *InstallationSteps) getHmcOverrides(installationData *config.Install
 	}
 	overrides.MergeMaps(allOverrides, globalOverrides)
 
-	hmcDefaultOverride, err := overrides.GetHmcDefaultOverrides()
-
-	if steps.errorHandlers.CheckError("Couldn't get Hmc default overrides: ", err) {
-		return "", err
-	}
-	overrides.MergeMaps(allOverrides, hmcDefaultOverride)
-
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
@@ -158,12 +151,6 @@ func (steps *InstallationSteps) getEcOverrides(installationData *config.Installa
 		return "", err
 	}
 	overrides.MergeMaps(allOverrides, globalOverrides)
-
-	ecDefaultOverride, err := overrides.GetEcDefaultOverrides()
-	if steps.errorHandlers.CheckError("Couldn't get Ec default overrides: ", err) {
-		return "", err
-	}
-	overrides.MergeMaps(allOverrides, ecDefaultOverride)
 
 	staticOverrides := steps.getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
