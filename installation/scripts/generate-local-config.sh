@@ -54,6 +54,12 @@ rm ${CONFIG_OUTPUT_PATH}
 
 ##########
 
+echo -e "\nConfiguring sub-components"
+
+bash ${ROOT_PATH}/configure-components.sh
+
+##########
+
 echo -e "\nGenerating secret for UI Test"
 
 UI_TEST_TPL_PATH="${ROOT_PATH}/../resources/ui-test-secret.yaml.tpl"

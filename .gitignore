@@ -59,4 +59,4 @@ local/tmp/
 !templates
 installation/resources/cluster-certificate-secret.yaml
 installation/resources/ui-test-secret.yaml
-installation/components.yaml
+installation/components.env
