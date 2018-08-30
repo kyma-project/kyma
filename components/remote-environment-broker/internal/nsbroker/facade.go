@@ -44,7 +44,7 @@ func NewFacade(brokerGetter scbeta.ServiceBrokersGetter, servicesGetter typedCor
 
 // Create creates k8s service and ServiceBroker. Errors don't stop execution of method. AlreadyExist errors are ignored.
 func (f *Facade) Create(destinationNs, systemNs string) error {
-	var resultErr error
+	var resultErr *multierror.Error
 
 	if _, err := f.servicesGetter.Services(systemNs).Create(&corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -92,12 +92,16 @@ func (f *Facade) Create(destinationNs, systemNs string) error {
 		f.log.Warnf("Creation of namespaced-broker [%s] and service for it results in error: [%s]. AlreadyExist errors will be ignored.", destinationNs, resultErr.Error())
 	}
 	resultErr = f.filterOutMultiError(resultErr, f.ignoreAlreadyExist)
+
+	if resultErr == nil {
+		return nil
+	}
 	return resultErr
 }
 
 // Delete removes ServiceBroker and Facade. Errors don't stop execution of method. NotFound errors are ignored.
 func (f *Facade) Delete(destinationNs, systemNs string) error {
-	var resultErr error
+	var resultErr *multierror.Error
 	if err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(brokerName, nil); err != nil {
 		resultErr = multierror.Append(resultErr, err)
 	}
@@ -110,6 +114,9 @@ func (f *Facade) Delete(destinationNs, systemNs string) error {
 		f.log.Warnf("Deleteion of namespaced-broker [%s] and service for it reults in error: [%s]. NotFound errors will be ignored. ", destinationNs, resultErr.Error())
 	}
 	resultErr = f.filterOutMultiError(resultErr, f.ignoreIsNotFound)
+	if resultErr == nil {
+		return nil
+	}
 	return resultErr
 }
 
@@ -132,17 +139,17 @@ func (f *Facade) getServiceName(ns string) string {
 	return fmt.Sprintf(serviceNamePattern, ns)
 }
 
-func (f *Facade) filterOutMultiError(maybeMultiError error, predicate func(err error) bool) error {
-	if merr, ok := maybeMultiError.(*multierror.Error); ok {
-		var out *multierror.Error
-		for _, wrapped := range merr.Errors {
-			if predicate(wrapped) {
-				out = multierror.Append(out, wrapped)
-			}
-		}
-		return out
+func (f *Facade) filterOutMultiError(merr *multierror.Error, predicate func(err error) bool) *multierror.Error {
+	if merr == nil {
+		return nil
 	}
-	return maybeMultiError
+	var out *multierror.Error
+	for _, wrapped := range merr.Errors {
+		if predicate(wrapped) {
+			out = multierror.Append(out, wrapped)
+		}
+	}
+	return out
 
 }
 

@@ -211,6 +211,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/kyma-project/kyma"
+  packages = ["components/helm-broker/platform/logger/spy"]
+  revision = "316d1138db90258cd65bc3ff64bba18cb7e0eb31"
+
+[[projects]]
+  branch = "master"
   name = "github.com/mailru/easyjson"
   packages = [
     "buffer",
@@ -701,6 +707,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b2d9cf6b2bef9e1670a216861cb77d6aee87a800c2e80eabe7362dc93c0ad320"
+  inputs-digest = "95af468d31bc5a3a7efef113e213383d050add8faefebe14fce03f687a0721fd"
   solver-name = "gps-cdcl"
   solver-version = 1
