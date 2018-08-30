@@ -19,7 +19,6 @@ func loadComponentsVersions() (*bytes.Buffer, error) {
 	if err != nil {
 
 		if os.IsNotExist(err) {
-			log.Printf("File %v does not exist. Error: %v", fileName, err)
 			return nil, nil
 		}
 
