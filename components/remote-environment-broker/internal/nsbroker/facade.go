@@ -5,16 +5,13 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	//scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	scbeta "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	//"k8s.io/client-go/kubernetes"
 	typedCorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	//"k8s.io/client-go/tools/clientcmd"
 )
 
 const (
@@ -23,43 +20,7 @@ const (
 	brokerLabelValue = "true"
 )
 
-func main() {
-	//cfg, err := clientcmd.BuildConfigFromFlags("", "/Users/i303785/.kube/config")
-	//if err != nil {
-	//	panic(err)
-	//}
-	//cliset, err := kubernetes.NewForConfig(cfg)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//sccliset, err := scCs.NewForConfig(cfg)
-	//if err != nil {
-	//	panic(err)
-	//}
-	////mgr := NewFacade(sccliset.ServicecatalogV1beta1(), cliset.CoreV1(), "app", "core-remote-environment-broker", 8080)
-	//
-	//sysNs := "kyma-system"
-	//testNs := "test"
-	//
-	//err = mgr.Create(testNs, sysNs)
-	//fmt.Println("Create error", err, err == nil)
-	//err = filterOutMultiError(err, IgnoreAlreadyExist)
-	//fmt.Println("Create error without already exist", err)
-	//ex, err := mgr.Exist("test")
-	//fmt.Println("Exist: ", ex)
-	//fmt.Println("Exist err", err)
-	//err = mgr.Delete("test", sysNs)
-	//fmt.Println("Delete err", err)
-	//err = filterOutMultiError(err, IgnoreIsNotFound)
-	//fmt.Println("Delete err without not found", err)
-	//time.Sleep(time.Second*5)
-	//ex, err = mgr.Exist("test")
-	//fmt.Println("Exist", ex)
-	//fmt.Println("Exist err", err)
-
-}
-
+// Facade is responsible for creation k8s objects for namespaced broker
 type Facade struct {
 	brokerGetter     scbeta.ServiceBrokersGetter
 	servicesGetter   typedCorev1.ServicesGetter
@@ -69,6 +30,7 @@ type Facade struct {
 	log              logrus.FieldLogger
 }
 
+// NewFacade returns facade
 func NewFacade(brokerGetter scbeta.ServiceBrokersGetter, servicesGetter typedCorev1.ServicesGetter, rebSelectorKey string, rebSelectorValue string, rebTargetPort int32, log logrus.FieldLogger) *Facade {
 	return &Facade{
 		brokerGetter:     brokerGetter,
@@ -80,6 +42,7 @@ func NewFacade(brokerGetter scbeta.ServiceBrokersGetter, servicesGetter typedCor
 	}
 }
 
+// Create creates k8s service and ServiceBroker. Errors don't stop execution of method. AlreadyExist errors are ignored.
 func (f *Facade) Create(destinationNs, systemNs string) error {
 	var resultErr error
 
@@ -132,6 +95,7 @@ func (f *Facade) Create(destinationNs, systemNs string) error {
 	return resultErr
 }
 
+// Delete removes ServiceBroker and Facade. Errors don't stop execution of method. NotFound errors are ignored.
 func (f *Facade) Delete(destinationNs, systemNs string) error {
 	var resultErr error
 	if err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(brokerName, nil); err != nil {
@@ -149,6 +113,7 @@ func (f *Facade) Delete(destinationNs, systemNs string) error {
 	return resultErr
 }
 
+// Exist check if ServiceBroker exist.
 func (f *Facade) Exist(destinationNs string) (bool, error) {
 	_, err := f.brokerGetter.ServiceBrokers(destinationNs).Get(brokerName, metav1.GetOptions{})
 	switch {

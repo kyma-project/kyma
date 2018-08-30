@@ -62,7 +62,7 @@ func TestControllerRunSuccess(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	svc := mapping.New(emInformer, nsInformer, nsClientMock, reGetterMock, spy.NewLogDummy())
+	svc := mapping.New(false, "ignroed", emInformer, nsInformer, nsClientMock, reGetterMock, nil, spy.NewLogDummy())
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 	awaitInformerStartAtMost(t, time.Second, nsInformer)
@@ -93,7 +93,7 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 		Return(&fixExpectedNS, nil).
 		Once()
 
-	svc := mapping.New(emInformer, nil, nsClientMock, nil, spy.NewLogDummy())
+	svc := mapping.New(false, "ignored", emInformer, nil, nsClientMock, nil, nil, spy.NewLogDummy())
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 
@@ -133,7 +133,7 @@ func TestControllerRunFailure(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	svc := mapping.New(emInformer, nil, nsClientMock, reGetter, spy.NewLogDummy())
+	svc := mapping.New(false, "ignored", emInformer, nil, nsClientMock, reGetter, nil, spy.NewLogDummy())
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 
