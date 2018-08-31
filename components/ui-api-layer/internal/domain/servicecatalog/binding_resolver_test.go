@@ -7,6 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -40,7 +41,7 @@ func TestServiceBindingResolver_CreateServiceBindingMutation(t *testing.T) {
 		_, err := resolver.CreateServiceBindingMutation(nil, "redis-binding", "redis", "production")
 
 		require.Error(t, err)
-		assert.Equal(t, "ServiceBinding redis-binding already exists", err.Error())
+		assert.True(t, gqlerror.IsAlreadyExists(err))
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -52,6 +53,7 @@ func TestServiceBindingResolver_CreateServiceBindingMutation(t *testing.T) {
 		_, err := resolver.CreateServiceBindingMutation(nil, "redis-binding", "redis", "production")
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
@@ -71,7 +73,7 @@ func TestServiceBindingResolver_DeleteServiceBindingMutation(t *testing.T) {
 		}, result)
 	})
 
-	t.Run("Already exists", func(t *testing.T) {
+	t.Run("Not found", func(t *testing.T) {
 		svc := automock.NewServiceBindingOperations()
 		svc.On("Delete", "production", "redis-binding").Return(apiErrors.NewNotFound(schema.GroupResource{}, "test")).Once()
 		defer svc.AssertExpectations(t)
@@ -80,7 +82,7 @@ func TestServiceBindingResolver_DeleteServiceBindingMutation(t *testing.T) {
 		_, err := resolver.DeleteServiceBindingMutation(nil, "redis-binding", "production")
 
 		require.Error(t, err)
-		assert.Equal(t, "ServiceBinding redis-binding not found", err.Error())
+		assert.True(t, gqlerror.IsNotFound(err))
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -92,6 +94,7 @@ func TestServiceBindingResolver_DeleteServiceBindingMutation(t *testing.T) {
 		_, err := resolver.DeleteServiceBindingMutation(nil, "redis-binding", "production")
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
@@ -132,6 +135,7 @@ func TestServiceBindingResolver_ServiceBindingQuery(t *testing.T) {
 		_, err := resolver.ServiceBindingQuery(nil, "redis-binding", "production")
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
@@ -176,6 +180,7 @@ func TestServiceBindingResolver_ServiceBindingsToInstanceQuery(t *testing.T) {
 		_, err := resolver.ServiceBindingsToInstanceQuery(nil, "redis", "production")
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 

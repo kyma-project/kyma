@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
 )
@@ -32,8 +34,8 @@ func (r *resourceQuotaResolver) ResourceQuotasQuery(ctx context.Context, environ
 	items, err := r.rqLister.ListResourceQuotas(environment)
 	if err != nil {
 		glog.Error(
-			errors.Wrapf(err, "while listing resource quotas [environment: %s]", environment))
-		return nil, errors.New("cannot get resource quotas")
+			errors.Wrapf(err, "while listing %s [environment: %s]", pretty.ResourceQuotas, environment))
+		return nil, gqlerror.New(err, pretty.ResourceQuotas, gqlerror.WithEnvironment(environment))
 	}
 
 	return r.converter.ToGQLs(items), nil
@@ -50,8 +52,8 @@ func (r *resourceQuotaResolver) ResourceQuotaStatus(ctx context.Context, environ
 	exceeded, err := r.rqSvc.CheckResourceQuotaStatus(environment, resourcesToCheck)
 	if err != nil {
 		glog.Error(
-			errors.Wrapf(err, "while getting ResourceQuotaStatus [environment: %s]", environment))
-		return gqlschema.ResourceQuotaStatus{}, errors.New("cannot get resource quota status")
+			errors.Wrapf(err, "while getting %s [environment: %s]", pretty.ResourceQuotaStatus, environment))
+		return gqlschema.ResourceQuotaStatus{}, gqlerror.New(err, pretty.ResourceQuotaStatus, gqlerror.WithEnvironment(environment))
 	}
 
 	return exceeded, nil

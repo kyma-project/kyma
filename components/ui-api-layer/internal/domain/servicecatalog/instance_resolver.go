@@ -6,8 +6,10 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 )
 
@@ -32,27 +34,25 @@ func newInstanceResolver(instanceSvc instanceSvc, planGetter planGetter, classGe
 }
 
 func (r *instanceResolver) CreateServiceInstanceMutation(ctx context.Context, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
-	externalErr := fmt.Errorf("Cannot create instance `%s` in environment `%s`", params.Name, params.Environment)
-
 	parameters := r.instanceConverter.GQLCreateInputToInstanceCreateParameters(&params)
 	item, err := r.instanceSvc.Create(*parameters)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while creating ServiceInstance `%s` in environment `%s`", params.Name, params.Environment))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while creating %s `%s` in environment `%s`", pretty.ServiceInstance, params.Name, params.Environment))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(params.Name), gqlerror.WithEnvironment(params.Environment))
 	}
 
 	// ServicePlan and ServiceClass references are empty just after the resource has been created
 	// Adding these references manually, because they are needed to resolve all Service Instance fields
 	serviceClass, err := r.classGetter.FindByExternalName(parameters.ExternalServiceClassName)
 	if err != nil || serviceClass == nil {
-		glog.Error(errors.Wrapf(err, "while getting ServiceClass for externalName `%s`", parameters.ExternalServiceClassName))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while getting %s for externalName `%s`", pretty.ServiceClass, parameters.ExternalServiceClassName))
+		return nil, gqlerror.New(err, pretty.ServiceClass, gqlerror.WithCustomArgument("externalName", parameters.ExternalServiceClassName))
 	}
 
 	servicePlan, err := r.planGetter.FindByExternalNameForClass(parameters.ExternalServicePlanName, serviceClass.Name)
 	if err != nil || servicePlan == nil {
-		glog.Error(errors.Wrapf(err, "while getting ServicePlan for externalName `%s`", parameters.ExternalServicePlanName))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while getting %s for externalName `%s`", pretty.ServicePlan, parameters.ExternalServicePlanName))
+		return nil, gqlerror.New(err, pretty.ServicePlan, gqlerror.WithCustomArgument("externalName", parameters.ExternalServicePlanName))
 	}
 
 	instanceCopy := item.DeepCopy()
@@ -68,23 +68,22 @@ func (r *instanceResolver) CreateServiceInstanceMutation(ctx context.Context, pa
 }
 
 func (r *instanceResolver) DeleteServiceInstanceMutation(ctx context.Context, name, environment string) (*gqlschema.ServiceInstance, error) {
-	externalErr := fmt.Errorf("Cannot delete instance `%s` in environment `%s`", name, environment)
-
 	instance, err := r.instanceSvc.Find(name, environment)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while finding ServiceInstance `%s` in environment `%s`", name, environment))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while finding %s `%s` in environment `%s`", pretty.ServiceInstance, name, environment))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
 	}
 
 	if instance == nil {
-		return nil, fmt.Errorf("Cannot find instance `%s` in environment `%s`", name, environment)
+		glog.Error(fmt.Errorf("cannot find %s `%s` in environment `%s`", pretty.ServiceInstance, name, environment))
+		return nil, gqlerror.NewNotFound(pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
 	}
 
 	instanceCopy := instance.DeepCopy()
 	err = r.instanceSvc.Delete(name, environment)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while deleting ServiceInstance `%s` from environment `%s`", name, environment))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while deleting %s `%s` from environment `%s`", pretty.ServiceInstance, name, environment))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
 	}
 
 	deletedInstance := r.instanceConverter.ToGQL(instanceCopy)
@@ -93,12 +92,10 @@ func (r *instanceResolver) DeleteServiceInstanceMutation(ctx context.Context, na
 }
 
 func (r *instanceResolver) ServiceInstanceQuery(ctx context.Context, name string, environment string) (*gqlschema.ServiceInstance, error) {
-	externalErr := fmt.Errorf("Cannot query instance with name `%s` in environment `%s`", name, environment)
-
 	serviceInstance, err := r.instanceSvc.Find(name, environment)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting ServiceInstance `%s` from environment `%s`", name, environment))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while getting %s `%s` from environment `%s`", pretty.ServiceInstance, name, environment))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
 	}
 	if serviceInstance == nil {
 		return nil, nil
@@ -110,8 +107,6 @@ func (r *instanceResolver) ServiceInstanceQuery(ctx context.Context, name string
 }
 
 func (r *instanceResolver) ServiceInstancesQuery(ctx context.Context, environment string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]gqlschema.ServiceInstance, error) {
-	externalErr := fmt.Errorf("Cannot query instances in environment `%s`", environment)
-
 	var items []*v1beta1.ServiceInstance
 	var err error
 
@@ -129,8 +124,8 @@ func (r *instanceResolver) ServiceInstancesQuery(ctx context.Context, environmen
 	}
 
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing ServiceInstances for environment %s", environment))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while listing %s for environment %s", pretty.ServiceInstances, environment))
+		return nil, gqlerror.New(err, pretty.ServiceInstances, gqlerror.WithEnvironment(environment))
 	}
 
 	serviceInstances := r.instanceConverter.ToGQLs(items)
@@ -162,23 +157,19 @@ func (r *instanceResolver) ServiceInstanceEventSubscription(ctx context.Context,
 }
 
 func (r *instanceResolver) ServiceInstanceServicePlanField(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ServicePlan, error) {
-	errMessage := "Cannot query ServicePlan for instance"
-
 	if obj == nil {
-		glog.Error(errors.New("ServiceInstance cannot be empty in order to resolve ServicePlan for instance"))
-		return nil, errors.New(errMessage)
+		glog.Error(fmt.Errorf("%s cannot be empty in order to resolve %s for instance", pretty.ServiceInstance, pretty.ServicePlan))
+		return nil, gqlerror.NewInternal()
 	}
 	if obj.ServicePlanName == nil {
-		glog.Warning(errors.New("ServicePlanName is empty during resolving ServicePlan for instance"))
+		glog.Warning(fmt.Sprintf("ServicePlanName is empty during resolving %s for %s", pretty.ServicePlan, pretty.ServiceInstance))
 		return nil, nil
 	}
 
-	externalErr := fmt.Errorf("%s `%s` in environment `%s`", errMessage, obj.Name, obj.Environment)
-
 	item, err := r.planGetter.Find(*obj.ServicePlanName)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting ServicePlan for instance `%s` in environment `%s`", obj.Name, obj.Environment))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while getting %s for %s `%s` in environment `%s`", pretty.ServicePlan, pretty.ServiceInstance, obj.Name, obj.Environment))
+		return nil, gqlerror.New(err, pretty.ServicePlan, gqlerror.WithName(*obj.ServicePlanName))
 	}
 	if item == nil {
 		return nil, nil
@@ -186,31 +177,27 @@ func (r *instanceResolver) ServiceInstanceServicePlanField(ctx context.Context, 
 
 	plan, err := r.planConverter.ToGQL(item)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting plan %s to ServicePlan type", plan.Name))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while converting %s %s to %s type", pretty.ServicePlan, plan.Name, pretty.ServicePlan))
+		return nil, gqlerror.New(err, pretty.ServicePlan, gqlerror.WithName(*obj.ServicePlanName))
 	}
 
 	return plan, nil
 }
 
 func (r *instanceResolver) ServiceInstanceServiceClassField(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ServiceClass, error) {
-	errMessage := "Cannot query ServiceClass for instance"
-
 	if obj == nil {
-		glog.Error(errors.New("ServiceInstance cannot be empty in order to resolve ServiceClass for instance"))
-		return nil, errors.New(errMessage)
+		glog.Error(errors.New("%s cannot be empty in order to resolve %s for instance"), pretty.ServiceInstance, pretty.ServiceClass)
+		return nil, gqlerror.NewInternal()
 	}
 	if obj.ServiceClassName == nil {
-		glog.Warning(errors.New("ServiceClassName is empty during resolving ServiceClass for instance"))
+		glog.Warning(fmt.Sprintf("ServiceClassName is empty during resolving %s for instance", pretty.ServiceClass))
 		return nil, nil
 	}
 
-	externalErr := fmt.Errorf("%s `%s` in environment `%s`", errMessage, obj.Name, obj.Environment)
-
 	serviceClass, err := r.classGetter.Find(*obj.ServiceClassName)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting ServiceClass for instance %s in environment `%s`", obj.Name, obj.Environment))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while getting %s for %s %s in environment `%s`", pretty.ServiceClass, pretty.ServiceInstance, obj.Name, obj.Environment))
+		return nil, gqlerror.New(err, pretty.ServiceClass, gqlerror.WithName(*obj.ServiceClassName))
 	}
 	if serviceClass == nil {
 		return nil, nil
@@ -218,19 +205,17 @@ func (r *instanceResolver) ServiceInstanceServiceClassField(ctx context.Context,
 
 	result, err := r.classConverter.ToGQL(serviceClass)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting class %s to ServiceClass type", serviceClass.Name))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while converting %s %s to %s type", pretty.ServiceClass, serviceClass.Name, pretty.ServiceClass))
+		return nil, gqlerror.New(err, pretty.ServiceClass, gqlerror.WithName(*obj.ServiceClassName))
 	}
 
 	return result, nil
 }
 
 func (r *instanceResolver) ServiceInstanceBindableField(ctx context.Context, obj *gqlschema.ServiceInstance) (bool, error) {
-	errMessage := "Cannot query `bindable` field for instance"
-
 	if obj == nil {
 		glog.Error(errors.New("ServiceInstance cannot be empty in order to resolve `bindable` field for instance"))
-		return false, errors.New(errMessage)
+		return false, gqlerror.NewInternal()
 	}
 	if obj.ServiceClassName == nil {
 		glog.Warning(errors.New("ServiceClassName is empty during resolving `bindable` field for instance"))
@@ -241,18 +226,16 @@ func (r *instanceResolver) ServiceInstanceBindableField(ctx context.Context, obj
 		return false, nil
 	}
 
-	externalErr := fmt.Errorf("%s `%s` in environment `%s`", errMessage, obj.Name, obj.Environment)
-
 	serviceClass, err := r.classGetter.Find(*obj.ServiceClassName)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting ServiceClass for instance %s in environment `%s` in order to resolve `bindable` field", obj.Name, obj.Environment))
-		return false, externalErr
+		return false, gqlerror.New(err, pretty.ServiceClass, gqlerror.WithName(*obj.ServiceClassName))
 	}
 
 	servicePlan, err := r.planGetter.Find(*obj.ServicePlanName)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting ServicePlan for instance %s in environment `%s` in order to resolve `bindable` field", obj.Name, obj.Environment))
-		return false, externalErr
+		return false, gqlerror.New(err, pretty.ServicePlan, gqlerror.WithName(*obj.ServicePlanName))
 	}
 
 	return r.instanceSvc.IsBindable(serviceClass, servicePlan), nil

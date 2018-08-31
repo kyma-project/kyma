@@ -5,8 +5,11 @@ import (
 	"fmt"
 
 	"github.com/golang/glog"
+	contentPretty "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/pretty"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 )
 
@@ -35,12 +38,10 @@ func newClassResolver(classLister classListGetter, planLister planLister, instan
 }
 
 func (r *classResolver) ServiceClassQuery(ctx context.Context, name string) (*gqlschema.ServiceClass, error) {
-	externalErr := fmt.Errorf("Cannot query ServiceClass with name `%s`", name)
-
 	serviceClass, err := r.classLister.Find(name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting ServiceClass with name %s", name))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while getting %s with name %s", pretty.ServiceClass, name))
+		return nil, gqlerror.New(err, pretty.ServiceClass, gqlerror.WithName(name))
 	}
 	if serviceClass == nil {
 		return nil, nil
@@ -48,93 +49,79 @@ func (r *classResolver) ServiceClassQuery(ctx context.Context, name string) (*gq
 
 	result, err := r.classConverter.ToGQL(serviceClass)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting to ServiceClass type"))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while converting to %s type"), pretty.ServiceClass)
+		return nil, gqlerror.New(err, pretty.ServiceClass, gqlerror.WithName(name))
 	}
 
 	return result, nil
 }
 
 func (r *classResolver) ServiceClassesQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.ServiceClass, error) {
-	externalErr := fmt.Errorf("Cannot query ServiceClasses")
-
 	items, err := r.classLister.List(pager.PagingParams{
 		First:  first,
 		Offset: offset,
 	})
 
 	if err != nil {
-		glog.Error(errors.Wrap(err, "while listing ServiceClasss"))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while listing %s"), pretty.ServiceClasses)
+		return nil, gqlerror.New(err, pretty.ServiceClasses)
 	}
 
 	serviceClasses, err := r.classConverter.ToGQLs(items)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting ServiceClasses"))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while converting %s"), pretty.ServiceClasses)
+		return nil, gqlerror.New(err, pretty.ServiceClasses)
 	}
 
 	return serviceClasses, nil
 }
 
 func (r *classResolver) ServiceClassPlansField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServicePlan, error) {
-	errMessage := "Cannot query ServicePlans for serviceClass"
-
 	if obj == nil {
-		glog.Error(errors.New("ServiceClass cannot be empty in order to resolve ServicePlans for class"))
-		return nil, errors.New(errMessage)
+		glog.Error(errors.New("%s cannot be empty in order to resolve %s for class"), pretty.ServiceClass, pretty.ServicePlans)
+		return nil, gqlerror.NewInternal()
 	}
-
-	externalErr := fmt.Errorf("%s `%s`", errMessage, obj.Name)
 
 	items, err := r.planLister.ListForClass(obj.Name)
 	if err != nil {
-		glog.Error(errors.Wrap(err, "while getting ServicePlans"))
-		return nil, externalErr
+		glog.Error(errors.Wrap(err, "while getting %s"), pretty.ServicePlans)
+		return nil, gqlerror.New(err, pretty.ServicePlans)
 	}
 
 	convertedPlans, err := r.planConverter.ToGQLs(items)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting ServicePlans"))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while converting %s"), pretty.ServicePlans)
+		return nil, gqlerror.New(err, pretty.ServicePlans)
 	}
 
 	return convertedPlans, nil
 }
 
 func (r *classResolver) ServiceClassActivatedField(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error) {
-	errMessage := "Cannot query activated field for serviceClass"
-
 	if obj == nil {
-		glog.Error(errors.New("ServiceClass cannot be empty in order to resolve activated field"))
-		return false, errors.New(errMessage)
+		glog.Error(fmt.Errorf("%s cannot be empty in order to resolve activated field", pretty.ServiceClass))
+		return false, gqlerror.NewInternal()
 	}
-
-	externalErr := fmt.Errorf("%s `%s`", errMessage, obj.Name)
 
 	items, err := r.instanceLister.ListForClass(obj.Name, obj.ExternalName)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting ServiceInstancesQuery for ServiceClass %s", obj.Name))
-		return false, externalErr
+		glog.Error(errors.Wrapf(err, "while getting %s for %s %s", pretty.ServiceInstances, pretty.ServiceClass, obj.Name))
+		return false, gqlerror.New(err, pretty.ServiceInstances)
 	}
 
 	return len(items) > 0, nil
 }
 
 func (r *classResolver) ServiceClassApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	errMessage := "Cannot query apiSpec field for ServiceClass"
-
 	if obj == nil {
-		glog.Error(errors.New("ServiceClass cannot be empty in order to resolve apiSpec field"))
-		return nil, errors.New(errMessage)
+		glog.Error(errors.New("%s cannot be empty in order to resolve apiSpec field"), pretty.ServiceClass)
+		return nil, gqlerror.NewInternal()
 	}
-
-	externalErr := fmt.Errorf("%s `%s`", errMessage, obj.ExternalName)
 
 	apiSpec, err := r.apiSpecGetter.Find("service-class", obj.Name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while gathering apiSpec for ServiceClass %s", obj.ExternalName))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.ApiSpec, pretty.ServiceClass, obj.ExternalName))
+		return nil, gqlerror.New(err, contentPretty.ApiSpec)
 	}
 
 	if apiSpec == nil {
@@ -144,27 +131,23 @@ func (r *classResolver) ServiceClassApiSpecField(ctx context.Context, obj *gqlsc
 	var result gqlschema.JSON
 	err = result.UnmarshalGQL(apiSpec.Raw)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting apiSpec for ServiceClass %s", obj.ExternalName))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while converting %s for %s %s", contentPretty.ApiSpec, pretty.ServiceClass, obj.ExternalName))
+		return nil, gqlerror.New(err, contentPretty.ApiSpec)
 	}
 
 	return &result, nil
 }
 
 func (r *classResolver) ServiceClassAsyncApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	errMessage := "Cannot query asyncApiSpec field for ServiceClass"
-
 	if obj == nil {
-		glog.Error(errors.New("ServiceClass cannot be empty in order to resolve asyncApiSpec field"))
-		return nil, errors.New(errMessage)
+		glog.Error(errors.New("%s cannot be empty in order to resolve asyncApiSpec field"), pretty.ServiceClass)
+		return nil, gqlerror.NewInternal()
 	}
-
-	externalErr := fmt.Errorf("%s `%s`", errMessage, obj.ExternalName)
 
 	asyncApiSpec, err := r.asyncApiSpecGetter.Find("service-class", obj.Name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while gathering asyncApiSpec for ServiceClass %s", obj.ExternalName))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.AsyncApiSpec, pretty.ServiceClass, obj.ExternalName))
+		return nil, gqlerror.New(err, contentPretty.AsyncApiSpec)
 	}
 
 	if asyncApiSpec == nil {
@@ -174,27 +157,23 @@ func (r *classResolver) ServiceClassAsyncApiSpecField(ctx context.Context, obj *
 	var result gqlschema.JSON
 	err = result.UnmarshalGQL(asyncApiSpec.Raw)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting asyncApiSpec for ServiceClass %s", obj.ExternalName))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while converting %s for %s %s", contentPretty.AsyncApiSpec, pretty.ServiceClass, obj.ExternalName))
+		return nil, gqlerror.New(err, contentPretty.AsyncApiSpec)
 	}
 
 	return &result, nil
 }
 
 func (r *classResolver) ServiceClassContentField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	errMessage := "Cannot query content field for ServiceClass"
-
 	if obj == nil {
-		glog.Error(errors.New("ServiceClass cannot be empty in order to resolve `content` field"))
-		return nil, errors.New(errMessage)
+		glog.Error(errors.New("%s cannot be empty in order to resolve `content` field"), pretty.ServiceClass)
+		return nil, gqlerror.NewInternal()
 	}
-
-	externalErr := fmt.Errorf("%s `%s`", errMessage, obj.ExternalName)
 
 	content, err := r.contentGetter.Find("service-class", obj.Name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while gathering content for ServiceClass %s", obj.ExternalName))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.Content, pretty.ServiceClass, obj.ExternalName))
+		return nil, gqlerror.New(err, contentPretty.Content)
 	}
 
 	if content == nil {
@@ -204,8 +183,8 @@ func (r *classResolver) ServiceClassContentField(ctx context.Context, obj *gqlsc
 	var result gqlschema.JSON
 	err = result.UnmarshalGQL(content.Raw)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting content for ServiceClass %s", obj.ExternalName))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while converting %s for %s %s", contentPretty.Content, pretty.ServiceClass, obj.ExternalName))
+		return nil, gqlerror.New(err, contentPretty.Content)
 	}
 
 	return &result, nil

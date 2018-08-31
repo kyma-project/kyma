@@ -2,14 +2,14 @@ package ui
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/ui/v1alpha1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
-	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 //go:generate mockery -name=idpPresetSvc -output=automock -outpkg=automock -case=underscore
@@ -39,12 +39,9 @@ func newIDPPresetResolver(idpPresetSvc idpPresetSvc) *idpPresetResolver {
 
 func (r *idpPresetResolver) CreateIDPPresetMutation(ctx context.Context, name string, issuer string, jwksUri string) (*gqlschema.IDPPreset, error) {
 	item, err := r.idpPresetSvc.Create(name, issuer, jwksUri)
-	switch {
-	case apiErrors.IsAlreadyExists(err):
-		return nil, fmt.Errorf("IDP Preset with the name `%s` already exists", name)
-	case err != nil:
-		glog.Error(errors.Wrapf(err, "while creating IDP Preset `%s`", name))
-		return nil, fmt.Errorf("Cannot create IDP Preset `%s`", name)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.IDPPreset, name))
+		return nil, gqlerror.New(err, pretty.IDPPreset, gqlerror.WithName(name))
 	}
 
 	idpPreset := r.idpPresetConverter.ToGQL(item)
@@ -55,18 +52,18 @@ func (r *idpPresetResolver) CreateIDPPresetMutation(ctx context.Context, name st
 func (r *idpPresetResolver) DeleteIDPPresetMutation(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
 	idpPreset, err := r.idpPresetSvc.Find(name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while finding IDP Preset `%s`", name))
-		return nil, fmt.Errorf("Cannot delete IDP Preset `%s`", name)
+		glog.Error(errors.Wrapf(err, "while finding %s `%s`", pretty.IDPPreset, name))
+		return nil, gqlerror.New(err, pretty.IDPPreset, gqlerror.WithName(name))
 	}
 	if idpPreset == nil {
-		return nil, fmt.Errorf("Cannot find IDP Preset `%s`", name)
+		return nil, gqlerror.NewNotFound(pretty.IDPPreset, gqlerror.WithName(name))
 	}
 
 	idpPresetCopy := idpPreset.DeepCopy()
 	err = r.idpPresetSvc.Delete(name)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while deleting IDP Preset `%s`", name))
-		return nil, fmt.Errorf("Cannot delete IDP Preset `%s`", name)
+		return nil, gqlerror.New(err, pretty.IDPPreset, gqlerror.WithName(name))
 	}
 
 	deletedIdpPreset := r.idpPresetConverter.ToGQL(idpPresetCopy)
@@ -77,8 +74,8 @@ func (r *idpPresetResolver) DeleteIDPPresetMutation(ctx context.Context, name st
 func (r *idpPresetResolver) IDPPresetQuery(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
 	idpObj, err := r.idpPresetSvc.Find(name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting IDP Preset"))
-		return nil, fmt.Errorf("Cannot query IDP Preset with name `%s`", name)
+		glog.Error(errors.Wrapf(err, "while getting %s `%s`", pretty.IDPPreset, name))
+		return nil, gqlerror.New(err, pretty.IDPPreset, gqlerror.WithName(name))
 	}
 	if idpObj == nil {
 		return nil, nil
@@ -92,8 +89,8 @@ func (r *idpPresetResolver) IDPPresetQuery(ctx context.Context, name string) (*g
 func (r *idpPresetResolver) IDPPresetsQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.IDPPreset, error) {
 	items, err := r.idpPresetSvc.List(pager.PagingParams{First: first, Offset: offset})
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing IDP Presets"))
-		return []gqlschema.IDPPreset{}, fmt.Errorf("Cannot query IDP Presets")
+		glog.Error(errors.Wrapf(err, "while listing %s", pretty.IDPPresets))
+		return []gqlschema.IDPPreset{}, gqlerror.New(err, pretty.IDPPreset)
 	}
 
 	idpPresets := make([]gqlschema.IDPPreset, 0, len(items))

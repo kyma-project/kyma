@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/gateway"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -62,6 +63,7 @@ func TestRemoteEnvironmentStatusFail(t *testing.T) {
 
 	// then
 	require.Error(t, err)
+	assert.True(t, gqlerror.IsInternal(err))
 }
 
 func TestConnectorServiceQuerySuccess(t *testing.T) {
@@ -106,6 +108,6 @@ func TestConnectorServiceQueryFail(t *testing.T) {
 
 	// then
 	require.Error(t, err)
+	assert.True(t, gqlerror.IsInternal(err))
 	assert.Zero(t, gotUrlObj)
-	assert.Equal(t, "while getting Connection Url: something went wrong", err.Error())
 }

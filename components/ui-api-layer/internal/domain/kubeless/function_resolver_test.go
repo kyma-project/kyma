@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/kubeless/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -67,5 +68,6 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 
 		_, err := resolver.FunctionsQuery(nil, environment, nil, nil)
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }

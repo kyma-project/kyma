@@ -9,6 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -67,6 +68,7 @@ func TestClassResolver_ServiceClassQuery(t *testing.T) {
 		result, err := resolver.ServiceClassQuery(nil, name)
 
 		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 		assert.Nil(t, result)
 	})
 }
@@ -135,6 +137,7 @@ func TestClassResolver_ServiceClassesQuery(t *testing.T) {
 		_, err := resolver.ServiceClassesQuery(nil, nil, nil)
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
@@ -199,6 +202,7 @@ func TestClassResolver_ServiceClassActivatedField(t *testing.T) {
 		_, err := resolver.ServiceClassActivatedField(nil, &parentObj)
 
 		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
@@ -270,6 +274,7 @@ func TestClassResolver_ServiceClassPlansField(t *testing.T) {
 		result, err := resolver.ServiceClassPlansField(nil, &parentObj)
 
 		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 		assert.Nil(t, result)
 	})
 }
@@ -336,6 +341,7 @@ func TestClassResolver_ServiceClassContentField(t *testing.T) {
 		result, err := resolver.ServiceClassContentField(nil, &parentObj)
 
 		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 		assert.Nil(t, result)
 	})
 }
@@ -402,6 +408,7 @@ func TestClassResolver_ServiceClassApiSpecField(t *testing.T) {
 		result, err := resolver.ServiceClassApiSpecField(nil, &parentObj)
 
 		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 		assert.Nil(t, result)
 	})
 }
@@ -468,6 +475,7 @@ func TestClassResolver_ServiceClassAsyncApiSpecField(t *testing.T) {
 		result, err := resolver.ServiceClassAsyncApiSpecField(nil, &parentObj)
 
 		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 		assert.Nil(t, result)
 	})
 }
