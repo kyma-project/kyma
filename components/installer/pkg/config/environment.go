@@ -17,7 +17,6 @@ type installationConfig struct {
 	RemoteEnvCa                string
 	RemoteEnvCaKey             string
 	EtcdBackupABSContainerName string
-	EnableEtcdBackupOperator   string
 	EtcdBackupABSAccount       string
 	EtcdBackupABSKey           string
 	ComponentsList             string
@@ -40,7 +39,6 @@ func GetInstallationConfig() *installationConfig {
 		ClusterTLSCert:             os.Getenv("TLS_CERT"),
 		RemoteEnvCa:                os.Getenv("REMOTE_ENV_CA"),
 		RemoteEnvCaKey:             os.Getenv("REMOTE_ENV_CA_KEY"),
-		EnableEtcdBackupOperator:   os.Getenv("ENABLE_ETCD_BACKUP_OPERATOR"),
 		EtcdBackupABSContainerName: os.Getenv("ETCD_BACKUP_ABS_CONTAINER_NAME"),
 		EtcdBackupABSAccount:       os.Getenv("ETCD_BACKUP_ABS_ACCOUNT"),
 		EtcdBackupABSKey:           os.Getenv("ETCD_BACKUP_ABS_KEY"),

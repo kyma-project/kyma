@@ -49,7 +49,6 @@ data:
   is_local_installation: "__IS_LOCAL_INSTALLATION__"
   external_public_ip: "__EXTERNAL_PUBLIC_IP__"
   domain: "__DOMAIN__"
-  enable_etcd_backup_operator: "__ENABLE_ETCD_BACKUP_OPERATOR__"
   etcd_backup_abs_container_name: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   slack_api_url: "__SLACK_API_URL_VALUE__"
   slack_channel: "__SLACK_CHANNEL_VALUE__"

@@ -121,12 +121,6 @@ spec:
               configMapKeyRef:
                 name: installation-config
                 key: domain
-          - name: ENABLE_ETCD_BACKUP_OPERATOR
-            valueFrom:
-              configMapKeyRef:
-                name: installation-config
-                key: enable_etcd_backup_operator
-                optional: true
           - name: ETCD_BACKUP_ABS_CONTAINER_NAME
             valueFrom:
               configMapKeyRef:

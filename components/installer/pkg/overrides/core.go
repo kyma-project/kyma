@@ -10,7 +10,6 @@ import (
 const coreTplStr = `
 etcd-operator:
   backupOperator:
-    enabled: "{{.EnableEtcdBackupOperator}}"
     abs:
       storageAccount: "{{.EtcdBackupABSAccount}}"
       storageKey: "{{.EtcdBackupABSKey}}"

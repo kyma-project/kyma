@@ -81,15 +81,6 @@ func (sc *InstallationDataCreator) WithRemoteEnvCaKey(remoteEnvCaKey string) *In
 	return sc
 }
 
-// WithEtcdOperator sets value for EtcdOperator property
-func (sc *InstallationDataCreator) WithEtcdOperator(enabled, storageAccount, storageKey string) *InstallationDataCreator {
-	sc.installationData.EnableEtcdBackupOperator = enabled
-	sc.installationData.EtcdBackupABSAccount = storageAccount
-	sc.installationData.EtcdBackupABSKey = storageKey
-
-	return sc
-}
-
 // WithEtcdBackupABSContainerName sets value for EtcdBackupABSContainerName property
 func (sc *InstallationDataCreator) WithEtcdBackupABSContainerName(path string) *InstallationDataCreator {
 	sc.installationData.EtcdBackupABSContainerName = path
