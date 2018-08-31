@@ -124,18 +124,26 @@ func (srv *Server) createHandler() http.Handler {
 		fmt.Fprint(w, "OK")
 	}).Methods("GET")
 
+	osbContextMiddleware := NewOsbContextMiddleware(srv.brokerMode, srv.logger)
+	reqAsyncMiddleware := &RequireAsyncMiddleware{}
 	// sync operations
-	rtr.HandleFunc("/v2/catalog", srv.catalogAction).Methods("GET")
-	rtr.HandleFunc("/v2/service_instances/{instance_id}/last_operation", srv.getServiceInstanceLastOperationAction).Methods("GET")
-	rtr.HandleFunc("/v2/service_instances/{instance_id}/service_bindings/{binding_id}", srv.bindAction).Methods("PUT")
-	rtr.HandleFunc("/v2/service_instances/{instance_id}/service_bindings/{binding_id}", srv.unBindAction).Methods("DELETE")
+
+	rtr.Path("/v2/catalog").Methods(http.MethodGet).Handler(
+		negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.catalogAction)))
+
+	rtr.Path("/v2/service_instances/{instance_id}/last_operation").Methods(http.MethodGet).Handler(
+		negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.getServiceInstanceLastOperationAction)))
+
+	rtr.Path("/v2/service_instances/{instance_id}/service_bindings/{binding_id}").Methods(http.MethodPut).Handler(negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.bindAction)))
+
+	rtr.Path("/v2/service_instances/{instance_id}/service_bindings/{binding_id}").Methods(http.MethodDelete).Handler(negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.unBindAction)))
 
 	// async operations
 	rtr.Path("/v2/service_instances/{instance_id}").Methods(http.MethodPut).Handler(
-		negroni.New(&RequireAsyncMiddleware{}, negroni.WrapFunc(srv.provisionAction)),
+		negroni.New(reqAsyncMiddleware, osbContextMiddleware, negroni.WrapFunc(srv.provisionAction)),
 	)
 	rtr.Path("/v2/service_instances/{instance_id}").Methods(http.MethodDelete).Handler(
-		negroni.New(&RequireAsyncMiddleware{}, negroni.WrapFunc(srv.deprovisionAction)),
+		negroni.New(reqAsyncMiddleware, osbContextMiddleware, negroni.WrapFunc(srv.deprovisionAction)),
 	)
 
 	logMiddleware := negronilogrus.NewMiddlewareFromLogger(srv.logger.Logger, "")
@@ -148,8 +156,6 @@ func (srv *Server) createHandler() http.Handler {
 	}
 
 	n := negroni.New(negroni.NewRecovery(), logMiddleware)
-	osbContextMiddleware := NewOsbContextMiddleware(srv.brokerMode, srv.logger)
-	n.Use(osbContextMiddleware)
 	n.UseHandler(rtr)
 	return n
 }

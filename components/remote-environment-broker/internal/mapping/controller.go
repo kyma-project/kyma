@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -153,7 +152,7 @@ func (c *Controller) processNextItem() bool {
 	case err == nil:
 		c.queue.Forget(key)
 
-	case isTemporaryError(err) && c.queue.NumRequeues(key) < maxEnvironmentMappingProcessRetries:
+	case c.queue.NumRequeues(key) < maxEnvironmentMappingProcessRetries:
 		c.log.Errorf("Error processing %q (will retry): %v", key, err)
 		c.queue.AddRateLimited(key)
 
@@ -329,15 +328,9 @@ func (c *Controller) getReAccLabel(reName string) (string, error) {
 	// get RE from storage
 	re, err := c.reGetter.Get(internal.RemoteEnvironmentName(reName))
 	if err != nil {
-		switch {
-		// We consider IsNotFoundError as Temporary error because EM can reference to existing but not already stored RE.
-		// In this case we want from Controller to retry processing this EM.
-		case storage.IsNotFoundError(err):
-			return "", errors.Wrapf(&tmpError{err}, "while getting remote environment with name: %q", reName)
-		default:
-			return "", errors.Wrapf(err, "while getting remote environment with name: %q", reName)
-		}
+		return "", errors.Wrapf(err, "while getting remote environment with name: %q", reName)
 	}
+
 	if re.AccessLabel == "" {
 		return "", fmt.Errorf("RE %q access label is empty", reName)
 	}
@@ -353,26 +346,4 @@ func (c *Controller) closeChanOnCtxCancellation(ctx context.Context, ch chan<- s
 			return
 		}
 	}
-}
-
-// and Temporary() method return true. Otherwise false will be returned.
-func isTemporaryError(err error) bool {
-	type temporary interface {
-		Temporary() bool
-	}
-
-	te, ok := errors.Cause(err).(temporary)
-	return ok && te.Temporary()
-}
-
-type tmpError struct {
-	err error
-}
-
-func (t *tmpError) Error() string {
-	return t.err.Error()
-}
-
-func (t *tmpError) Temporary() bool {
-	return true
 }
