@@ -10,7 +10,6 @@ import (
 const coreTplStr = `
 test:
   auth:
-    username: "{{.UITestUser}}"
     password: "{{.UITestPassword}}"
 etcd-operator:
   backupOperator:

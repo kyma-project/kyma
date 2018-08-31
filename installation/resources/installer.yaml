@@ -93,12 +93,6 @@ spec:
                 name: remote-env-certificate
                 key: remote_env_ca_key
                 optional: true
-          - name: UI_TEST_USER
-            valueFrom:
-              secretKeyRef:
-                name: ui-test
-                key: user
-                optional: true
           - name: UI_TEST_PASSWORD
             valueFrom:
               secretKeyRef:

@@ -21,12 +21,9 @@ func TestGetCoreOverrides(t *testing.T) {
 		})
 
 		Convey("when InstallationData contains domain name overrides should contain yaml", func() {
-			const dummyOverridesForCore = `cluster-users:
-configurations-generator:
+			const dummyOverridesForCore = `configurations-generator:
   kubeConfig:
-    ca: null
     clusterName: kyma.local
-    url: null
 etcd-operator:
   backupOperator:
     abs:
@@ -38,7 +35,6 @@ global:
 test:
   auth:
     password: ""
-    username: ""
 `
 			installationData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithGeneric("configurations-generator.kubeConfig.clusterName", "kyma.local").GetData()
 
@@ -51,14 +47,9 @@ test:
 		})
 
 		Convey("when test properties are provided, auth.username and auth.password should exist", func() {
-			const dummyOverridesForCore = `cluster-users:
-  users:
-    adminGroup: null
-configurations-generator:
+			const dummyOverridesForCore = `configurations-generator:
   kubeConfig:
-    ca: null
     clusterName: kyma.local
-    url: null
 etcd-operator:
   backupOperator:
     abs:
@@ -69,13 +60,11 @@ global:
   domainName: kyma.local
 test:
   auth:
-    password: p@ssw0rd
-    username: user1
+    password: ""
 `
 			installationData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").
 				WithGeneric("configurations-generator.kubeConfig.clusterName", "kyma.local").
-				WithUITestCredentials("user1", "p@ssw0rd").
 				GetData()
 
 			overridesMap, err := GetCoreOverrides(&installationData, UnflattenToMap(testOverrides))
@@ -87,14 +76,9 @@ test:
 		})
 
 		Convey("when etcd-operator properties are provided then enabled, abs.storageAccount and abs.storageKey should exist", func() {
-			const dummyOverridesForCore = `cluster-users:
-  users:
-    adminGroup: null
-configurations-generator:
+			const dummyOverridesForCore = `configurations-generator:
   kubeConfig:
-    ca: null
     clusterName: kyma.local
-    url: null
 etcd-operator:
   backupOperator:
     abs:
@@ -106,7 +90,6 @@ global:
 test:
   auth:
     password: ""
-    username: ""
 `
 			installationData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").

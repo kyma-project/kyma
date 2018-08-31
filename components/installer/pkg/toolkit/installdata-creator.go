@@ -81,14 +81,6 @@ func (sc *InstallationDataCreator) WithRemoteEnvCaKey(remoteEnvCaKey string) *In
 	return sc
 }
 
-// WithUITestCredentials sets value for UITestUser and UITestPassword properties
-func (sc *InstallationDataCreator) WithUITestCredentials(username, password string) *InstallationDataCreator {
-	sc.installationData.UITestUser = username
-	sc.installationData.UITestPassword = password
-
-	return sc
-}
-
 // WithEtcdOperator sets value for EtcdOperator property
 func (sc *InstallationDataCreator) WithEtcdOperator(enabled, storageAccount, storageKey string) *InstallationDataCreator {
 	sc.installationData.EnableEtcdBackupOperator = enabled
