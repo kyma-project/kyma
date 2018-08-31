@@ -27,9 +27,7 @@ func TestGetCoreOverrides(t *testing.T) {
 etcd-operator:
   backupOperator:
     abs:
-      storageAccount: ""
       storageKey: ""
-    enabled: ""
 global:
   domainName: kyma.local
 `
@@ -50,9 +48,7 @@ global:
 etcd-operator:
   backupOperator:
     abs:
-      storageAccount: ""
       storageKey: ""
-    enabled: ""
 global:
   domainName: kyma.local
 `
@@ -76,16 +72,13 @@ global:
 etcd-operator:
   backupOperator:
     abs:
-      storageAccount: pico-bello
-      storageKey: 123-456-3245-a23b
-    enabled: "true"
+      storageKey: ""
 global:
   domainName: kyma.local
 `
 			installationData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").
 				WithGeneric("configurations-generator.kubeConfig.clusterName", "kyma.local").
-				WithEtcdOperator("true", "pico-bello", "123-456-3245-a23b").
 				GetData()
 
 			overridesMap, err := GetCoreOverrides(&installationData, UnflattenToMap(testOverrides))

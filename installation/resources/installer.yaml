@@ -93,12 +93,6 @@ spec:
                 name: remote-env-certificate
                 key: remote_env_ca_key
                 optional: true
-          - name: ETCD_BACKUP_ABS_ACCOUNT
-            valueFrom:
-              secretKeyRef:
-                name: etcd-backup-abs-credentials
-                key: storage-account
-                optional: true
           - name: ETCD_BACKUP_ABS_KEY
             valueFrom:
               secretKeyRef:

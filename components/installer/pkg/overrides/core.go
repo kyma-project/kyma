@@ -11,7 +11,6 @@ const coreTplStr = `
 etcd-operator:
   backupOperator:
     abs:
-      storageAccount: "{{.EtcdBackupABSAccount}}"
       storageKey: "{{.EtcdBackupABSKey}}"
 `
 

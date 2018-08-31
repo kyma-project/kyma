@@ -17,7 +17,6 @@ type installationConfig struct {
 	RemoteEnvCa                string
 	RemoteEnvCaKey             string
 	EtcdBackupABSContainerName string
-	EtcdBackupABSAccount       string
 	EtcdBackupABSKey           string
 	ComponentsList             string
 	IsLocalInstallation        bool
@@ -40,7 +39,6 @@ func GetInstallationConfig() *installationConfig {
 		RemoteEnvCa:                os.Getenv("REMOTE_ENV_CA"),
 		RemoteEnvCaKey:             os.Getenv("REMOTE_ENV_CA_KEY"),
 		EtcdBackupABSContainerName: os.Getenv("ETCD_BACKUP_ABS_CONTAINER_NAME"),
-		EtcdBackupABSAccount:       os.Getenv("ETCD_BACKUP_ABS_ACCOUNT"),
 		EtcdBackupABSKey:           os.Getenv("ETCD_BACKUP_ABS_KEY"),
 		ComponentsList:             os.Getenv("COMPONENT_LIST"),
 		IsLocalInstallation:        isLocalInstallation(os.Getenv("IS_LOCAL_INSTALLATION")),
