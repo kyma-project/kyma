@@ -39,6 +39,8 @@ spec:
             value: {{ .Values.brokerRelistDurationWindow }}
           - name: APP_BROKER_NAME
             value: {{ template "fullname" . }}
+          - name: APP_CLUSTER_SCOPED_BROKER_NAME
+            value: "REB
         volumeMounts:
         - mountPath: /etc/config/re-broker
           name: config-volume
