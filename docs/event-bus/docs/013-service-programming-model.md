@@ -8,17 +8,7 @@ A microservice deployed in Kyma can be configured to receive events from the eve
 
 ## Event Delivery
 
-```ascii
-                                Event
-   +--------------+        +---------------------------+       +--------------+
-   |              |        |     Headers (Metadata)    |       |              |
-   |              +--------+---------------------------+------->              |
-   |  Event Bus   |        |       Body (Payload)      |       | Microservice |
-   |              |        +---------------------------+       |              |
-   |              |                  HTTP/1.1                  |              |
-   |              |                    POST                    |              |
-   +--------------+                                            +--------------+
-```
+![TEST](assets/service-programming-model.png)
 
 The event is delivered as an `HTTP POST` request. Event Metadata is a part of HTTP request Headers. Event Payload is the body of the request.
 
