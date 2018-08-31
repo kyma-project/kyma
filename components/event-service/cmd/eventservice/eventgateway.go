@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kyma-project/kyma/components/event-gateway/internal/events/bus"
-	"github.com/kyma-project/kyma/components/event-gateway/internal/externalapi"
-	"github.com/kyma-project/kyma/components/event-gateway/internal/httptools"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
+	"github.com/kyma-project/kyma/components/event-service/internal/externalapi"
+	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,7 +18,7 @@ func main() {
 	}
 	log.SetFormatter(formatter)
 
-	log.Info("Starting events.")
+	log.Info("Starting event-service")
 
 	options := parseArgs()
 	log.Infof("Options: %s", options)

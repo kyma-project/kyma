@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/kyma-project/kyma/components/event-gateway/internal/events/api"
-	"github.com/kyma-project/kyma/components/event-gateway/internal/events/bus"
-	"github.com/kyma-project/kyma/components/event-gateway/internal/events/shared"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	log "github.com/sirupsen/logrus"
 )
 
