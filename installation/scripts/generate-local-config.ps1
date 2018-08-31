@@ -17,20 +17,20 @@ $TLS_KEY = Get-Content -Path "${TLS_FILE}" | Select-String -Pattern 'tls.key: .*
 $TLS_KEY = $TLS_KEY.ToString().Replace("tls.key:", "").Trim()
 
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__TLS_CERT__`" -value `"${TLS_CRT}`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__TLS_CERT__`" -value `"${TLS_CRT}`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__TLS_KEY__`" -value `"${TLS_KEY}`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__TLS_KEY__`" -value `"${TLS_KEY}`""
 Invoke-Expression -Command $cmd
 
 ##########
 
 Write-Output "Generating secret for Remote Environemnts"
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_CA__`" -value `"`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_CA__`" -value `"`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_CA_KEY__`" -value `"`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_CA_KEY__`" -value `"`""
 Invoke-Expression -Command $cmd
 
 ##########
@@ -45,31 +45,31 @@ $MINIKUBE_CA = [System.Convert]::ToBase64String(
     [System.Text.Encoding]::UTF8.GetBytes($MINIKUBE_CA_CRT))
 
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__IS_LOCAL_INSTALLATION__`" -value `"true`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__IS_LOCAL_INSTALLATION__`" -value `"true`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__DOMAIN__`" -value `"kyma.local`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__DOMAIN__`" -value `"kyma.local`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__EXTERNAL_PUBLIC_IP__`" -value `"`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__EXTERNAL_PUBLIC_IP__`" -value `"`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_IP__`" -value `"`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_IP__`" -value `"`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__K8S_APISERVER_URL__`" -value `"${MINIKUBE_IP}`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__K8S_APISERVER_URL__`" -value `"${MINIKUBE_IP}`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__K8S_APISERVER_CA__`" -value `"${MINIKUBE_CA}`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__K8S_APISERVER_CA__`" -value `"${MINIKUBE_CA}`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ADMIN_GROUP__`" -value `"`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ADMIN_GROUP__`" -value `"`""
 Invoke-Expression -Command $cmd
 
 $cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ENABLE_ETCD_BACKUP__`" -value `"false`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ETCD_BACKUP_ABS_CONTAINER_NAME__`" -value `"`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ETCD_BACKUP_ABS_CONTAINER_NAME__`" -value `"`""
 Invoke-Expression -Command $cmd
 
 ##########
@@ -80,6 +80,13 @@ $cmd = "kubectl.exe create ns kyma-installer"
 Invoke-Expression -Command $cmd
 
 $cmd = "kubectl apply -f ${CONFIG_OUTPUT_PATH}"
+Invoke-Expression -Command $cmd
+
+##########
+
+Write-Output "Configuring sub-components ..."
+
+$cmd = "${CURRENT_DIR}\configure-components.ps1"
 Invoke-Expression -Command $cmd
 
 ##########
@@ -96,10 +103,10 @@ $UI_TEST_SECRET_PATH = (New-TemporaryFile).FullName
 
 Copy-Item -Path $UI_TEST_SECRET_TPL_PATH -Destination $UI_TEST_SECRET_PATH
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${UI_TEST_SECRET_PATH} -placeholder `"__UI_TEST_USER__`" -value `"${UI_TEST_USER}`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${UI_TEST_SECRET_PATH} -placeholder `"__UI_TEST_USER__`" -value `"${UI_TEST_USER}`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${UI_TEST_SECRET_PATH} -placeholder `"__UI_TEST_PASSWORD__`" -value `"${UI_TEST_PASSWORD}`""
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${UI_TEST_SECRET_PATH} -placeholder `"__UI_TEST_PASSWORD__`" -value `"${UI_TEST_PASSWORD}`""
 Invoke-Expression -Command $cmd
 
 $cmd = "kubectl apply -f ${UI_TEST_SECRET_PATH}"
@@ -116,22 +123,22 @@ if (Test-Path env.AZURE_BROKER_SUBSCRIPTION_ID) {
 
     $AB_SUBSCRIPTION_ID = [System.Convert]::ToBase64String(
         [System.Text.Encoding]::UTF8.GetBytes($env.AZURE_BROKER_SUBSCRIPTION_ID))
-    $cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${AB_SECRET_PATH} -placeholder `"__AZURE_BROKER_SUBSCRIPTION_ID__`" -value `"${AB_SUBSCRIPTION_ID}`""
+    $cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${AB_SECRET_PATH} -placeholder `"__AZURE_BROKER_SUBSCRIPTION_ID__`" -value `"${AB_SUBSCRIPTION_ID}`""
     Invoke-Expression -Command $cmd
 
     $AB_TENANT_ID = [System.Convert]::ToBase64String(
         [System.Text.Encoding]::UTF8.GetBytes($env.AZURE_BROKER_TENANT_ID))
-    $cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${AB_SECRET_PATH} -placeholder `"__AZURE_BROKER_TENANT_ID__`" -value `"${AB_TENANT_ID}`""
+    $cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${AB_SECRET_PATH} -placeholder `"__AZURE_BROKER_TENANT_ID__`" -value `"${AB_TENANT_ID}`""
     Invoke-Expression -Command $cmd
 
     $AB_CLIENT_ID = [System.Convert]::ToBase64String(
         [System.Text.Encoding]::UTF8.GetBytes($env.AZURE_BROKER_CLIENT_ID))
-    $cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${AB_SECRET_PATH} -placeholder `"__AZURE_BROKER_CLIENT_ID__`" -value `"${AB_CLIENT_ID}`""
+    $cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${AB_SECRET_PATH} -placeholder `"__AZURE_BROKER_CLIENT_ID__`" -value `"${AB_CLIENT_ID}`""
     Invoke-Expression -Command $cmd
 
     $AB_CLIENT_SECRET = [System.Convert]::ToBase64String(
         [System.Text.Encoding]::UTF8.GetBytes($env.AZURE_BROKER_CLIENT_SECRET))
-    $cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${AB_SECRET_PATH} -placeholder `"__AZURE_BROKER_CLIENT_SECRET__`" -value `"${AB_CLIENT_SECRET}`""
+    $cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${AB_SECRET_PATH} -placeholder `"__AZURE_BROKER_CLIENT_SECRET__`" -value `"${AB_CLIENT_SECRET}`""
     Invoke-Expression -Command $cmd
 
     $cmd = "kubectl apply -f ${AB_SECRET_PATH}"
