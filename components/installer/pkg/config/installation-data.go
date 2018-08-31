@@ -24,7 +24,6 @@ type InstallationData struct {
 	ClusterTLSCert             string
 	RemoteEnvCa                string
 	RemoteEnvCaKey             string
-	UITestPassword             string
 	EtcdBackupABSContainerName string
 	EnableEtcdBackupOperator   string
 	EtcdBackupABSAccount       string
@@ -58,7 +57,6 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		ClusterTLSCert:             installationConfig.ClusterTLSCert,
 		RemoteEnvCa:                installationConfig.RemoteEnvCa,
 		RemoteEnvCaKey:             installationConfig.RemoteEnvCaKey,
-		UITestPassword:             installationConfig.UITestPassword,
 		EtcdBackupABSContainerName: installationConfig.EtcdBackupABSContainerName,
 		EnableEtcdBackupOperator:   installationConfig.EnableEtcdBackupOperator,
 		EtcdBackupABSAccount:       installationConfig.EtcdBackupABSAccount,

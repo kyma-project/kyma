@@ -8,9 +8,6 @@ import (
 )
 
 const coreTplStr = `
-test:
-  auth:
-    password: "{{.UITestPassword}}"
 etcd-operator:
   backupOperator:
     enabled: "{{.EnableEtcdBackupOperator}}"

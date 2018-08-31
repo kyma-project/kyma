@@ -1,15 +1,6 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ui-test
-  namespace: kyma-installer
-type: Opaque
-data:
-  password: "__UI_TEST_PASSWORD__"
----
-apiVersion: v1
-kind: Secret
-metadata:
   name: ui-test-overrides
   namespace: kyma-installer
   labels:

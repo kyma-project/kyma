@@ -32,9 +32,6 @@ etcd-operator:
     enabled: ""
 global:
   domainName: kyma.local
-test:
-  auth:
-    password: ""
 `
 			installationData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithGeneric("configurations-generator.kubeConfig.clusterName", "kyma.local").GetData()
 
@@ -58,9 +55,6 @@ etcd-operator:
     enabled: ""
 global:
   domainName: kyma.local
-test:
-  auth:
-    password: ""
 `
 			installationData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").
@@ -87,9 +81,6 @@ etcd-operator:
     enabled: "true"
 global:
   domainName: kyma.local
-test:
-  auth:
-    password: ""
 `
 			installationData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").
