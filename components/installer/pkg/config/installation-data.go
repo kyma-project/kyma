@@ -25,7 +25,6 @@ type InstallationData struct {
 	RemoteEnvCa                string
 	RemoteEnvCaKey             string
 	EtcdBackupABSContainerName string
-	EtcdBackupABSKey           string
 	Components                 map[string]v1alpha1.KymaComponent
 	IsLocalInstallation        bool
 	VictorOpsApiKey            string
@@ -56,7 +55,6 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		RemoteEnvCa:                installationConfig.RemoteEnvCa,
 		RemoteEnvCaKey:             installationConfig.RemoteEnvCaKey,
 		EtcdBackupABSContainerName: installationConfig.EtcdBackupABSContainerName,
-		EtcdBackupABSKey:           installationConfig.EtcdBackupABSKey,
 		Components:                 convertToMap(installation.Spec.Components),
 		IsLocalInstallation:        installationConfig.IsLocalInstallation,
 		VictorOpsApiKey:            installationConfig.VictorOpsApiKey,

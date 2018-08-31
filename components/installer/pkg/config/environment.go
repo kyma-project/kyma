@@ -17,7 +17,6 @@ type installationConfig struct {
 	RemoteEnvCa                string
 	RemoteEnvCaKey             string
 	EtcdBackupABSContainerName string
-	EtcdBackupABSKey           string
 	ComponentsList             string
 	IsLocalInstallation        bool
 	VictorOpsApiKey            string
@@ -39,7 +38,6 @@ func GetInstallationConfig() *installationConfig {
 		RemoteEnvCa:                os.Getenv("REMOTE_ENV_CA"),
 		RemoteEnvCaKey:             os.Getenv("REMOTE_ENV_CA_KEY"),
 		EtcdBackupABSContainerName: os.Getenv("ETCD_BACKUP_ABS_CONTAINER_NAME"),
-		EtcdBackupABSKey:           os.Getenv("ETCD_BACKUP_ABS_KEY"),
 		ComponentsList:             os.Getenv("COMPONENT_LIST"),
 		IsLocalInstallation:        isLocalInstallation(os.Getenv("IS_LOCAL_INSTALLATION")),
 		VictorOpsApiKey:            os.Getenv("VICTOR_OPS_API_KEY_VALUE"),
