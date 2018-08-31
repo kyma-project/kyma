@@ -5,7 +5,7 @@ metadata:
   annotations:
     "helm.sh/hook": test-success
   labels:
-    "helm-chart-test": "true"
+    "helm-chart-test": "false"
 spec:
   hostNetwork: true
   containers:
