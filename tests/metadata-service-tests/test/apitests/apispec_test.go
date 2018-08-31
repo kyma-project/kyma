@@ -24,7 +24,7 @@ func TestApiSpec(t *testing.T) {
 
 		t.Run("should return api spec", func(t *testing.T) {
 			// given
-			url := config.MetadataServiceUrl +"/" + dummyRE.Name + "/v1/metadataapi.yaml"
+			url := config.MetadataServiceUrl + "/" + dummyRE.Name + "/v1/metadata/api.yaml"
 
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
@@ -48,7 +48,7 @@ func TestApiSpec(t *testing.T) {
 			// given
 			client := &http.Client{
 				CheckRedirect: func(req *http.Request, via []*http.Request) error {
-					require.Equal(t, "/"+dummyRE.Name+"/v1/metadataapi.yaml", req.URL.Path)
+					require.Equal(t, "/"+dummyRE.Name+"/v1/metadata/api.yaml", req.URL.Path)
 					return http.ErrUseLastResponse
 				},
 			}
