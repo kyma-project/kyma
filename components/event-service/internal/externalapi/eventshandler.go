@@ -10,6 +10,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	log "github.com/sirupsen/logrus"
+	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 )
 
 var (
@@ -111,6 +112,7 @@ func checkParameters(parameters *api.PublishEventParameters) (response *api.Publ
 
 func writeJsonResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 	encoder := json.NewEncoder(w)
+	w.Header().Set("Content-Type", httpconsts.ContentTypeApplicationJson)
 	if resp.Error != nil {
 		w.WriteHeader(resp.Error.Status)
 		encoder.Encode(resp.Error)

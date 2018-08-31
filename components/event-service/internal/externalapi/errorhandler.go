@@ -20,7 +20,7 @@ func NewErrorHandler(code int, message string) *ErrorHandler {
 func (eh *ErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	responseBody := httperrors.ErrorResponse{Code: eh.Code, Error: eh.Message}
 
-	w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
+	w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJsonWithCharset)
 	w.WriteHeader(eh.Code)
 	json.NewEncoder(w).Encode(responseBody)
 }
