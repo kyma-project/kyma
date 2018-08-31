@@ -64,7 +64,6 @@ func main() {
 	scInformerFactory := catalogInformers.NewSharedInformerFactory(scClientSet, informerResyncPeriod)
 	scInformersGroup := scInformerFactory.Servicecatalog().V1beta1()
 
-	scClientSet.ServicecatalogV1beta1()
 	// instance populator
 	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), cfg.ClusterScopedBrokerName)
 	popCtx, popCancelFunc := context.WithTimeout(context.Background(), time.Minute)

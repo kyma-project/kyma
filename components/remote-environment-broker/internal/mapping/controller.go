@@ -37,6 +37,7 @@ type nsPatcher interface {
 	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *corev1.Namespace, err error)
 }
 
+// nsBrokerFacade is responsible for managing namespaced ServiceBrokers and creating proper k8s Services for them in the system namespace
 //go:generate mockery -name=nsBrokerFacade -output=automock -outpkg=automock -case=underscore
 type nsBrokerFacade interface {
 	Create(destinationNs, systemNs string) error
@@ -165,7 +166,7 @@ func (c *Controller) processNextItem() bool {
 }
 
 func (c *Controller) processItem(key string) error {
-	// TODO: In prometheus-operator they use emExist to check if we should delete resources, see:
+	// TODO: In prometheus-operator they use exists to check if we should delete resources, see:
 	// https://github.com/coreos/prometheus-operator/blob/master/pkg/alertmanager/operator.go#L364
 	// but in k8s they use Lister to check if event should be delete, see:
 	// https://github.com/kubernetes/kubernetes/blob/master/pkg/controller/service/service_controller.go#L725
@@ -187,7 +188,7 @@ func (c *Controller) processItem(key string) error {
 
 	if !emExist {
 		if err = c.ensureNsNotLabelled(reNs); err != nil {
-			return errors.Wrapf(err, "cannot delete AccessLabel from the namespace: %q", namespace)
+			return err
 		}
 		if c.manageNsBrokers {
 			if err := c.ensureNsBrokerNotRegistered(namespace); err != nil {
