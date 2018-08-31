@@ -32,7 +32,7 @@ func SendEvent(req *api.SendEventParameters, traceHeaders *map[string]string) (*
 	}
 
 	headers := make(http.Header)
-	headers.Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
+	headers.Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJsonWithCharset)
 	httpReq.Header = headers
 
 	reqURL, err := url.ParseRequestURI(eventsTargetURL)

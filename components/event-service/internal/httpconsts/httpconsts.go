@@ -7,5 +7,6 @@ const (
 )
 
 const (
-	ContentTypeApplicationJson = "application/json;charset=UTF-8"
+	ContentTypeApplicationJsonWithCharset = "application/json;charset=UTF-8"
+	ContentTypeApplicationJson            = "application/json"
 )

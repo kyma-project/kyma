@@ -13,6 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
+	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 )
 
 func TestEventOk(t *testing.T) {
@@ -34,6 +35,9 @@ func TestEventOk(t *testing.T) {
 	handler.ServeHTTP(recorder, req)
 	if status := recorder.Code; status != http.StatusOK {
 		t.Errorf("Wrong status code: got %v want %v", status, http.StatusOK)
+	}
+	if contentType := recorder.Result().Header.Get("Content-Type"); contentType != httpconsts.ContentTypeApplicationJson {
+		t.Errorf("Wrong Content-Type: got %v want %v", contentType, httpconsts.ContentTypeApplicationJson)
 	}
 }
 
