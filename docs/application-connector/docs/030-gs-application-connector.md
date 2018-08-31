@@ -1,9 +1,9 @@
 ---
-title: Run Application Connector on Minikube
+title: Set up a Remote Environment on local Kyma installation
 type: Getting Started
 ---
 
-This Getting Started guide shows you how to run a new Application Connector on Minikube.
+This Getting Started guide shows you how to set up a Remote Environment in a local Kyma installation.
 
 To integrate a new Remote Environment marked as `Production`, you can use the following values:
 * **sourceEnvironment** = `production`
@@ -76,7 +76,7 @@ hmc-prod                  	1       	Fri Apr 20 11:25:44 2018	DEPLOYED	gateway-0.
 core                      	2       	Wed Apr 18 07:56:56 2018	DEPLOYED	core-0.0.1                 	  kyma-system
 ```
 
-Use kubectl commands to see the Kubernetes resources associated with your release:
+Use `kubectl` commands to see the Kubernetes resources associated with your release:
 
 ```
 kubectl get pods -n kyma-integration

@@ -3,8 +3,6 @@ title: RemoteEnvironment custom resource
 type: Details
 ---
 
-## Overview
-
 This file contains information about the RemoteEnvironment custom resource.
 The RemoteEnvironment resource registers a remote environment in Kyma. The RemoteEnvironment resource defines APIs that the remote environment offers, such as Orders API in the EC. As a result, the RemoteEnvironment is mapped to service classes in the Service Catalog.
 

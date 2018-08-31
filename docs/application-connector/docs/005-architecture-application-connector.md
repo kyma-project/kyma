@@ -10,6 +10,6 @@ The Application Connector consists of the following components:
 * **Remote Environment CRD instance** responsible for storing a solution's metadata
 * **Minio bucket** responsible for storing API specifications, Event Catalog, and documentation
 
-To connect a new solution, you must deploy a new Application Connector. Every instance of the external solution connected to Kyma has only one instance of the Application Connector dedicated to it. See the **Deploying a new Application Connector** document to learn how to deploy a new Application Connector.
+To connect a new external solution, you must install and set up a new Remote Environment. Every external solution connected to Kyma is a separate Remote Environment with a dedicated Gateway Service and a dedicated Event Service. See the **Set up a Remote Environment on local Kyma installation** getting started guide to learn how to connect an external solution to Kyma.
 
 ![Architecture Diagram](assets/001-application-connector.png)

@@ -3,16 +3,14 @@ title: Automatic connection configuration
 type: Details
 ---
 
-## Overview
-
 Kyma Application Connector allows to authenticate and securely communicate with different systems. Kyma provides an easy way to set up these external solutions with the mechanism for automatic connection configuration.
 
 ## Flow description
 
-Automatic configuration flow is presented in following diagram:
+The automatic configuration flow is presented in this diagram:
 ![Automatic Configuration Flow](./assets/002-automatic-configuration.png)
 
-This example assumes that the new Remote Environment already exists and it is in the `disconnected` state, which means that there are no solutions connected to it.
+This example assumes that a new Remote Environment intended to connect the external solution already exists and is in the `disconnected` state, which means that there are no external solutions connected to it.
 
 On the diagram, the administrator on the Kyma side and on the external system side is the same person.
 
@@ -25,7 +23,7 @@ On the diagram, the administrator on the Kyma side and on the external system si
 
 ## Configuration steps
 
-Follow these steps to configure the automatic connection between the Kyma Application Connector and an external system:
+Follow these steps to configure the automatic connection between the Kyma Application Connector and an external solution:
 
 1. Get the configuration address URL with a valid token.
 
@@ -42,11 +40,11 @@ Alternatively, get the configuration URL with a valid token using `kubectl port-
 
   - Request:
 
-    In the first terminal run:
+    First, run:
     ```
     kubectl -n=kyma-integration port-forward svc/connector-service-internal-api 8080:8080
     ```
-    Send the request:
+    Send the request in a new terminal window:
     ```
     curl -X POST http://localhost:8080/v1/remoteenvironments/{remote-environment-name}/tokens
     ```
@@ -58,7 +56,7 @@ Alternatively, get the configuration URL with a valid token using `kubectl port-
     }
     ```
 
-2. Use the provided link to fetch information about the Kyma's URLs and CSR configuration.
+2. Use the provided link to fetch information about the Kyma URLs and CSR configuration.
 
     - Request:
     ```
@@ -105,6 +103,6 @@ After the CSR is ready, make the following call:
     }
     ```
 
-4. The `crt` field contains a valid base64-encoded PEM block of a certificate signed by the Kyma's CA.
+4. The `crt` field contains a valid base64-encoded PEM block of a certificate signed by the Kyma CA.
 
-5. The external system can now use the created certificate to securely authenticate and communicate with Kyma's Application Connector.
+5. The external solution can now use the created certificate to securely authenticate and communicate with the Application Connector.
