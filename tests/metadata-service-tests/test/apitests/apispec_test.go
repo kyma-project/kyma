@@ -1,13 +1,13 @@
 package apitests
 
 import (
-	"github.com/stretchr/testify/require"
-	"testing"
 	"github.com/kyma-project/kyma/tests/metadata-service-tests/test/testkit"
-	"net/http"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"net/http"
+	"testing"
 )
 
 func TestApiSpec(t *testing.T) {
@@ -20,12 +20,11 @@ func TestApiSpec(t *testing.T) {
 	dummyRE, err := k8sResourcesClient.CreateDummyRemoteEnvironment("dummy-re", v1.GetOptions{})
 	require.NoError(t, err)
 
-
 	t.Run("Application Connector Metadata", func(t *testing.T) {
 
 		t.Run("should return api spec", func(t *testing.T) {
 			// given
-			url := config.MetadataServiceUrl + "/" + dummyRE.Name  + "/v1/metadataapi.yaml"
+			url := config.MetadataServiceUrl + "/v1/metadataapi.yaml"
 
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
@@ -35,7 +34,7 @@ func TestApiSpec(t *testing.T) {
 			require.NoError(t, err)
 
 			// then
-			require.Equal(t, response.StatusCode, http.StatusOK)
+			require.Equal(t, http.StatusOK, response.StatusCode)
 
 			rawApiSpec, err := ioutil.ReadAll(response.Body)
 			require.NoError(t, err)
@@ -44,7 +43,30 @@ func TestApiSpec(t *testing.T) {
 			err = yaml.Unmarshal(rawApiSpec, &apiSpec)
 			require.NoError(t, err)
 		})
+
+		t.Run("should redirect to api spec url", func(t *testing.T) {
+			// given
+			client := &http.Client{
+				CheckRedirect: func(req *http.Request, via []*http.Request) error {
+					require.Equal(t, "/"+dummyRE.Name+"/v1/metadataapi.yaml", req.URL.Path)
+					return http.ErrUseLastResponse
+				},
+			}
+
+			url := config.MetadataServiceUrl + "/" + dummyRE.Name + "/v1/metadata"
+
+			request, err := http.NewRequest(http.MethodGet, url, nil)
+			require.NoError(t, err)
+
+			// when
+			response, err := client.Do(request)
+			require.NoError(t, err)
+
+			// then
+			require.Equal(t, http.StatusMovedPermanently, response.StatusCode)
+		})
 	})
 
+	err = k8sResourcesClient.DeleteRemoteEnvironment(dummyRE.Name, &v1.DeleteOptions{})
+	require.NoError(t, err)
 }
-
