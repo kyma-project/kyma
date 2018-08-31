@@ -34,7 +34,7 @@ You can acquire the API specification for a given version directly from the Conn
 ```
 curl https://connector-service.{CLUSTER_NAME}.kyma.cx/v1/api.yaml
 ```
-Whereas locally:
+You can also access it locally:
 ```
 curl https://connector-service.kyma.local/v1/api.yaml
 ```
