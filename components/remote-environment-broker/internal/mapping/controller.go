@@ -248,14 +248,14 @@ func (c *Controller) ensureNsBrokerRegistered(envMapping *v1alpha1.EnvironmentMa
 func (c *Controller) ensureNsBrokerNotRegistered(namespace string) error {
 	brokerExist, err := c.nsBrokerFacade.Exist(namespace)
 	if err != nil {
-		return errors.Wrapf(err, "while checking in namespaced broker exist in namespace [%s]", namespace)
+		return errors.Wrapf(err, "while checking if namespaced broker exist in namespace [%s]", namespace)
 	}
 	if !brokerExist {
 		return nil
 	}
 
 	if err := c.nsBrokerFacade.Delete(namespace, c.systemNamesapce); err != nil {
-		return errors.Wrapf(err, "while removing namespaced broker brom namespace [%s]", namespace)
+		return errors.Wrapf(err, "while removing namespaced broker from namespace [%s]", namespace)
 	}
 	return nil
 }
