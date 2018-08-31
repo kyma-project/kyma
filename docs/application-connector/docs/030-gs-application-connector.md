@@ -13,7 +13,7 @@ To integrate a new Remote Environment marked as `Production`, you can use the fo
 Start with:
 
 ``` bash
-helm install --name hmc-prod --set deployment.args.sourceType=marketing --set deployment.args.sourceEnvironment=production --set global.isLocalEnv=true --set service.externalapi.nodePort=32002 --namespace kyma-integration ./remote-environments
+helm install --name hmc-prod --set deployment.args.sourceType=marketing --set deployment.args.sourceEnvironment=production --set global.isLocalEnv=true --set service.externalapi.nodePort=32002 --namespace kyma-integration ./resources/remote-environments
 ```
 
 Your output looks like this:
