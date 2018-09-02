@@ -1,4 +1,4 @@
-{{- if ne .Values.global.etcdBackupABS.containerName "" }}
+{{- if .Values.global.etcdBackup.enabled }}
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -28,9 +28,9 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: APP_ABS_CONTAINER_NAME
-              value: "{{ .Values.global.etcdBackupABS.containerName }}"
+              value: "{{ .Values.global.etcdBackup.containerName }}"
             - name: APP_ABS_SECRET_NAME
-              value: "{{ .Values.global.etcdBackupABS.secretName }}"
+              value: "{{ .Values.global.etcdBackup.secretName }}"
             - name: APP_BLOB_PREFIX
               value: "service-catalog"
             - name: APP_BACKUP_CONFIG_MAP_NAME_FOR_TRACING

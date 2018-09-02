@@ -66,7 +66,7 @@ Invoke-Expression -Command $cmd
 $cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ADMIN_GROUP__`" -value `"`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ENABLE_ETCD_BACKUP_OPERATOR__`" -value `"false`""
+$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ENABLE_ETCD_BACKUP__`" -value `"false`""
 Invoke-Expression -Command $cmd
 
 $cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ETCD_BACKUP_ABS_CONTAINER_NAME__`" -value `"`""

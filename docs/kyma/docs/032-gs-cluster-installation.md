@@ -84,10 +84,10 @@ The Kyma installation process requires installation data specified in the `insta
 - `__K8S_APISERVER_URL__` for the API server's URL
 - `__K8S_APISERVER_CA__` for your API Server CA
 - `__ADMIN_GROUP__` for the additional admin group. This value is optional.
-- `__ENABLE_ETCD_BACKUP_OPERATOR__` to enable or disable the `etcd` backup operator. Enter `true` or `false`.
+- `__ENABLE_ETCD_BACKUP__` set to true to install the [etcd-operator][etcd-backup-operator-chart] and CronJob which executes periodically the [Etcd Backup][etcd-backup-app] application.
 - `__ETCD_BACKUP_ABS_CONTAINER_NAME__` for the Azure Blob Storage name of `etcd` backups. You can leave the value blank when the backup operator is disabled.
 
->**NOTE:** As the `etcd` backup feature is in development, set `__ENABLE_ETCD_BACKUP_OPERATOR__` to `false` and leave `__ETCD_BACKUP_ABS_CONTAINER_NAME__` blank.
+>**NOTE:** As the `etcd` backup feature is in development, replace `__ENABLE_ETCD_BACKUP__` to `false`.
 
 When you fill in all required placeholder values, run the following command to provide the cluster with the installation data:
 
@@ -170,3 +170,6 @@ To troubleshoot the installation, start by reviewing logs of the `Installer` com
 ```
 kubectl logs -n kyma-installer $(kubectl get pods --all-namespaces -l name=kyma-installer --no-headers -o jsonpath='{.items[*].metadata.name}')
 ```
+
+[etcd-backup-app]:https://github.com/kyma-project/kyma/blob/master/tools/etcd-backup
+[etcd-backup-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator/templates/backup-deployment.yaml
