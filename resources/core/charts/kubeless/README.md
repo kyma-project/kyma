@@ -24,7 +24,7 @@ The installation of Kubeless in the `kyma-system` namespace enables these compon
 
 ## Prerequisites
 
-The Kubeless CLI is already installed inside the Kubeless CLI container. It is required only outside of the CLI container. For more details on how to install the Kubeless CLI, go to [this](https://github.com/kubeless/kubeless#installation) URL.
+The Kubeless CLI is already installed inside the Kubeless CLI container. It is required only outside of the CLI container. For more details on how to install the Kubeless CLI, go to [this](https://kubeless.io/docs/quick-start/) URL.
 
 ## Details
 
@@ -71,7 +71,7 @@ E.g
 $ kubeless function delete testjs
 ```
 
-For more examples, see [this](https://github.com/kyma-project/examples/tree/master/serverless-lambda) document.
+For more examples, see [this](https://github.com/kyma-project/examples/tree/master/event-subscription/lambda) document.
 
 ## Troubleshooting
 
@@ -89,5 +89,5 @@ $ kubectl logs <kube-controller-pod-name> -n kyma-system
 
 ## References
 
-* [Kubeless Installation](https://github.com/kubeless/kubeless#installation)
+* [Kubeless Installation](https://kubeless.io/docs/quick-start/)
 * [Expose and secure Kubeless functions](https://github.com/kubeless/kubeless/blob/master/docs/http-triggers.md#expose-and-secure-kubeless-functions)

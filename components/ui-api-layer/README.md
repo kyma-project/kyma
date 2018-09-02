@@ -74,7 +74,7 @@ This project uses the [GQLGen](https://github.com/vektah/gqlgen) library, which 
 1.  Find newly generated methods in the `Resolvers` interface located in `./schema_gen.go`.
 1.  Implement resolvers in specific domains according to the project structure and rules in this guide. Use generated models from `./models_gen.go` in your business logic. Move them to a new file in the `gqlschema` package and include in the `./types.json` file, if you want to customize them.
 
-To use advanced features, such as custom scalars, read the [documentation](https://vektah.github.io/gqlgen/) of the used library.
+To use advanced features, such as custom scalars, read the [documentation](https://gqlgen.com/) of the used library.
 
 ### Run tests
 

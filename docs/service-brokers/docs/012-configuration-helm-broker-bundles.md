@@ -3,10 +3,10 @@ title: How to create a yBundle
 type: Configuration
 ---
 
-[bind]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.12/spec.md#binding  "OSB Spec Binding"
-[service-objects]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.12/spec.md#service-objects "OSB Spec Service Objects"
-[service-metadata]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.12/profile.md#service-metadata "OSB Spec Service Metadata"
-[plan-objects]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.12/spec.md#plan-object "OSB Spec Plan Objects"
+[bind]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#binding  "OSB Spec Binding"
+[service-objects]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object "OSB Spec Service Objects"
+[service-metadata]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/profile.md#service-metadata "OSB Spec Service Metadata"
+[plan-objects]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object "OSB Spec Plan Objects"
 
 
 To create your own yBundle, you must create a directory with the following structure:
@@ -89,7 +89,7 @@ For more information about the content of the `values.yaml` file, see the [Value
 
 The `create-instance-schema.json` file contains a schema used to define the parameters. Each input parameter is expressed as a property within a JSON object.
 This file is not required.
-For more information about the content of the `create-instance-schema.json` file, see the [Input parameters](https://github.com/openservicebrokerapi/servicebroker/blob/v2.12/spec.md#input-parameters-object) specification.
+For more information about the content of the `create-instance-schema.json` file, see the [Input parameters](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#input-parameters-schema-object) specification.
 
 ### Troubleshooting
 
