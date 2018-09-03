@@ -8,10 +8,9 @@ import (
 )
 
 const istioTplStr = `
-gateways:
-  istio-ingressgateway:
-    service:
-      externalPublicIp: {{.ExternalPublicIP}}
+ingressgateway:
+  service:
+    externalPublicIp: {{.ExternalPublicIP}}
 `
 
 // GetIstioOverrides returns values overrides for istio ingressgateway
