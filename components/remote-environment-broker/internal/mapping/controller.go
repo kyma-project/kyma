@@ -1,4 +1,4 @@
-package labeler
+package mapping
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
@@ -37,25 +37,37 @@ type nsPatcher interface {
 	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *corev1.Namespace, err error)
 }
 
+// nsBrokerFacade is responsible for managing namespaced ServiceBrokers and creating proper k8s Services for them in the system namespace
+//go:generate mockery -name=nsBrokerFacade -output=automock -outpkg=automock -case=underscore
+type nsBrokerFacade interface {
+	Create(destinationNs string) error
+	Delete(destinationNs string) error
+	Exist(destinationNs string) (bool, error)
+}
+
 // Controller populates local storage with all EnvironmentMapping custom resources created in k8s cluster.
 type Controller struct {
-	log        logrus.FieldLogger
-	queue      workqueue.RateLimitingInterface
-	emInformer cache.SharedIndexInformer
-	nsInformer cache.SharedIndexInformer
-	nsPatcher  nsPatcher
-	reGetter   reGetter
+	manageNsBrokers bool
+	queue           workqueue.RateLimitingInterface
+	emInformer      cache.SharedIndexInformer
+	nsInformer      cache.SharedIndexInformer
+	nsPatcher       nsPatcher
+	reGetter        reGetter
+	nsBrokerFacade  nsBrokerFacade
+	log             logrus.FieldLogger
 }
 
 // New creates new environment mapping controller
-func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, reGetter reGetter, log logrus.FieldLogger) *Controller {
+func New(manageNsBrokers bool, emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, reGetter reGetter, nsBrokerFacade nsBrokerFacade, log logrus.FieldLogger) *Controller {
 	c := &Controller{
-		log:        log.WithField("service", "labeler:controller"),
-		emInformer: emInformer,
-		nsInformer: nsInformer,
-		queue:      workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		nsPatcher:  nsPatcher,
-		reGetter:   reGetter,
+		manageNsBrokers: manageNsBrokers,
+		log:             log.WithField("service", "labeler:controller"),
+		emInformer:      emInformer,
+		nsInformer:      nsInformer,
+		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		nsPatcher:       nsPatcher,
+		reGetter:        reGetter,
+		nsBrokerFacade:  nsBrokerFacade,
 	}
 
 	// EventHandler reacts every time when we add, update or delete EnvironmentMapping
@@ -139,7 +151,7 @@ func (c *Controller) processNextItem() bool {
 	case err == nil:
 		c.queue.Forget(key)
 
-	case isTemporaryError(err) && c.queue.NumRequeues(key) < maxEnvironmentMappingProcessRetries:
+	case c.queue.NumRequeues(key) < maxEnvironmentMappingProcessRetries:
 		c.log.Errorf("Error processing %q (will retry): %v", key, err)
 		c.queue.AddRateLimited(key)
 
@@ -157,47 +169,96 @@ func (c *Controller) processItem(key string) error {
 	// but in k8s they use Lister to check if event should be delete, see:
 	// https://github.com/kubernetes/kubernetes/blob/master/pkg/controller/service/service_controller.go#L725
 	// We need to check the guarantees of such solutions and choose the best one.
-	_, exists, err := c.emInformer.GetIndexer().GetByKey(key)
+	emObj, emExist, err := c.emInformer.GetIndexer().GetByKey(key)
 	if err != nil {
 		return errors.Wrapf(err, "while getting object with key %q from the store", key)
 	}
 
-	var name, namespace string
-	namespace, name, err = cache.SplitMetaNamespaceKey(key)
+	namespace, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return errors.Wrapf(err, "while getting name and namespace from key %q", key)
 	}
 
-	nsObj, nsExist, nsErr := c.nsInformer.GetIndexer().GetByKey(namespace)
-	if nsErr != nil || !nsExist {
-		return errors.Wrapf(err, "cannot get the namespace: %q", namespace)
+	reNs, err := c.getNamespace(namespace)
+	if err != nil {
+		return err
 	}
 
-	reNs, ok := nsObj.(*corev1.Namespace)
-	if !ok {
-		return errors.New("cannot cast received object to corev1.Namespace type")
-	}
-
-	if !exists {
-		if err = c.deleteNsAccLabel(reNs); err != nil {
-			return errors.Wrapf(err, "cannot delete AccessLabel from the namespace: %q", namespace)
+	if !emExist {
+		if err = c.ensureNsNotLabelled(reNs); err != nil {
+			return err
+		}
+		if c.manageNsBrokers {
+			if err := c.ensureNsBrokerNotRegistered(namespace); err != nil {
+				return err
+			}
 		}
 		return nil
 	}
-	var label string
-	label, err = c.getReAccLabel(name)
-	if err != nil {
-		return errors.Wrapf(err, "cannot get AccessLabel from RE: %q", name)
+	if err := c.ensureNsLabelled(name, reNs); err != nil {
+		return err
 	}
-	err = c.applyNsAccLabel(reNs, label)
-	if err != nil {
-		return errors.Wrapf(err, "cannot apply AccessLabel to the namespace: %q", namespace)
+	if c.manageNsBrokers {
+		envMapping, ok := emObj.(*v1alpha1.EnvironmentMapping)
+		if !ok {
+			return fmt.Errorf("cannot cast received object to v1alpha1.EnvironmentMapping type, type was [%T]", emObj)
+		}
+		if err := c.ensureNsBrokerRegistered(envMapping); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (c *Controller) deleteNsAccLabel(ns *corev1.Namespace) error {
+func (c *Controller) getNamespace(namespace string) (*corev1.Namespace, error) {
+	nsObj, nsExist, nsErr := c.nsInformer.GetIndexer().GetByKey(namespace)
+	if nsErr != nil {
+		return nil, errors.Wrapf(nsErr, "cannot get the namespace: %q", namespace)
+	}
+
+	if !nsExist {
+		return nil, fmt.Errorf("namespace [%s] not found", namespace)
+	}
+
+	reNs, ok := nsObj.(*corev1.Namespace)
+	if !ok {
+		return nil, fmt.Errorf("cannot cast received object to corev1.Namespace type, type was [%T]", nsObj)
+	}
+	return reNs, nil
+}
+
+func (c *Controller) ensureNsBrokerRegistered(envMapping *v1alpha1.EnvironmentMapping) error {
+	brokerExist, err := c.nsBrokerFacade.Exist(envMapping.Namespace)
+	if err != nil {
+		return errors.Wrapf(err, "while checking if namespaced broker exist in namespace [%s]", envMapping.Namespace)
+	}
+	if brokerExist {
+		return nil
+	}
+	if err := c.nsBrokerFacade.Create(envMapping.Namespace); err != nil {
+		return errors.Wrapf(err, "while creating namespaced broker in namespace [%s]", envMapping.Namespace)
+	}
+
+	return nil
+}
+
+func (c *Controller) ensureNsBrokerNotRegistered(namespace string) error {
+	brokerExist, err := c.nsBrokerFacade.Exist(namespace)
+	if err != nil {
+		return errors.Wrapf(err, "while checking if namespaced broker exist in namespace [%s]", namespace)
+	}
+	if !brokerExist {
+		return nil
+	}
+
+	if err := c.nsBrokerFacade.Delete(namespace); err != nil {
+		return errors.Wrapf(err, "while removing namespaced broker from namespace [%s]", namespace)
+	}
+	return nil
+}
+
+func (c *Controller) ensureNsNotLabelled(ns *corev1.Namespace) error {
 	nsCopy := ns.DeepCopy()
 	c.log.Infof("Deleting AccessLabel: %q, from the namespace - %q", nsCopy.Labels["accessLabel"], nsCopy.Name)
 
@@ -208,6 +269,19 @@ func (c *Controller) deleteNsAccLabel(ns *corev1.Namespace) error {
 		return fmt.Errorf("failed to delete AccessLabel from the namespace: %q, %v", nsCopy.Name, err)
 	}
 
+	return nil
+}
+
+func (c *Controller) ensureNsLabelled(reName string, reNs *corev1.Namespace) error {
+	var label string
+	label, err := c.getReAccLabel(reName)
+	if err != nil {
+		return errors.Wrapf(err, "cannot get AccessLabel from RE: %q", reName)
+	}
+	err = c.applyNsAccLabel(reNs, label)
+	if err != nil {
+		return errors.Wrapf(err, "cannot apply AccessLabel to the namespace: %q", reNs.Name)
+	}
 	return nil
 }
 
@@ -249,21 +323,15 @@ func (c *Controller) patchNs(nsOrig, nsMod *corev1.Namespace) error {
 	return nil
 }
 
-func (c *Controller) getReAccLabel(name string) (string, error) {
+func (c *Controller) getReAccLabel(reName string) (string, error) {
 	// get RE from storage
-	re, err := c.reGetter.Get(internal.RemoteEnvironmentName(name))
+	re, err := c.reGetter.Get(internal.RemoteEnvironmentName(reName))
 	if err != nil {
-		switch {
-		// We consider IsNotFoundError as Temporary error because EM can reference to existing but not already stored RE.
-		// In this case we want from Controller to retry processing this EM.
-		case storage.IsNotFoundError(err):
-			return "", errors.Wrapf(&tmpError{err}, "while getting remote environment with name: %q", name)
-		default:
-			return "", errors.Wrapf(err, "while getting remote environment with name: %q", name)
-		}
+		return "", errors.Wrapf(err, "while getting remote environment with name: %q", reName)
 	}
+
 	if re.AccessLabel == "" {
-		return "", fmt.Errorf("RE %q access label is empty", name)
+		return "", fmt.Errorf("RE %q access label is empty", reName)
 	}
 
 	return re.AccessLabel, nil
@@ -277,26 +345,4 @@ func (c *Controller) closeChanOnCtxCancellation(ctx context.Context, ch chan<- s
 			return
 		}
 	}
-}
-
-// and Temporary() method return true. Otherwise false will be returned.
-func isTemporaryError(err error) bool {
-	type temporary interface {
-		Temporary() bool
-	}
-
-	te, ok := errors.Cause(err).(temporary)
-	return ok && te.Temporary()
-}
-
-type tmpError struct {
-	err error
-}
-
-func (t *tmpError) Error() string {
-	return t.err.Error()
-}
-
-func (t *tmpError) Temporary() bool {
-	return true
 }

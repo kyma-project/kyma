@@ -31,7 +31,11 @@ type Config struct {
 	BrokerRelistDurationWindow time.Duration    `valid:"required"`
 	ClusterScopedBrokerName    string           `valid:"required"`
 	// Before adjusting ui-api-layer and tests, this flag by default should be set to true.
-	ClusterScopedBrokerEnabled bool ` valid:"required"`
+	ClusterScopedBrokerEnabled bool
+	// UniqueSelectorLabelKey and UniqueSelectorLabelValue allows unambiguously distinguish REB's pods.
+	UniqueSelectorLabelKey   string `valid:"required"`
+	UniqueSelectorLabelValue string `valid:"required"`
+	Namespace                string `valid:"required"`
 }
 
 // Load method has following strategy:

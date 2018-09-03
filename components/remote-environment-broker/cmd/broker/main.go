@@ -15,8 +15,9 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/access"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/config"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/labeler"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mapping"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mode"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/nsbroker"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage/populator"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/syncer"
@@ -84,10 +85,14 @@ func main() {
 	accessChecker := access.New(sFact.RemoteEnvironment(), reClient.RemoteenvironmentV1alpha1(), sFact.Instance())
 
 	reSyncCtrl := syncer.New(reInformersGroup.RemoteEnvironments(), sFact.RemoteEnvironment(), sFact.RemoteEnvironment(), relistRequester, log)
-	labelerCtrl := labeler.New(reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), log)
 
 	brokerMode, err := mode.NewBrokerService(cfg)
 	fatalOnError(err)
+
+	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), brokerMode, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, int32(cfg.Port), log)
+
+	mappingCtrl := mapping.New(!cfg.ClusterScopedBrokerEnabled, reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), nsBrokerFacade, log)
+
 	// create broker
 	srv := broker.New(sFact.RemoteEnvironment(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		reClient.RemoteenvironmentV1alpha1(), siFacade, reInformersGroup.EnvironmentMappings().Lister(), brokerMode, log)
@@ -111,7 +116,7 @@ func main() {
 
 	// start services & ctrl
 	go reSyncCtrl.Run(stopCh)
-	go labelerCtrl.Run(stopCh)
+	go mappingCtrl.Run(stopCh)
 	go relistRequester.Run(stopCh)
 
 	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
