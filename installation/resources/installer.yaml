@@ -109,6 +109,12 @@ spec:
               configMapKeyRef:
                 name: installation-config
                 key: domain
+          - name: ETCD_BACKUP_ABS_CONTAINER_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: etcd_backup_abs_container_name
+                optional: true
           - name: VICTOR_OPS_API_KEY_VALUE
             valueFrom:
               configMapKeyRef:

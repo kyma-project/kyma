@@ -28,21 +28,22 @@ type installationConfig struct {
 // GetInstallationConfig returns all non-secret installation parameters from the Installer environment variables
 func GetInstallationConfig() *installationConfig {
 	return &installationConfig{
-		ExternalPublicIP:          os.Getenv("EXTERNAL_PUBLIC_IP"),
-		AzureBrokerTenantID:       os.Getenv("AZURE_BROKER_TENANT_ID"),
-		AzureBrokerClientID:       os.Getenv("AZURE_BROKER_CLIENT_ID"),
-		AzureBrokerSubscriptionID: os.Getenv("AZURE_BROKER_SUBSCRIPTION_ID"),
-		AzureBrokerClientSecret:   os.Getenv("AZURE_BROKER_CLIENT_SECRET"),
-		ClusterTLSKey:             os.Getenv("TLS_KEY"),
-		ClusterTLSCert:            os.Getenv("TLS_CERT"),
-		RemoteEnvCa:               os.Getenv("REMOTE_ENV_CA"),
-		RemoteEnvCaKey:            os.Getenv("REMOTE_ENV_CA_KEY"),
-		ComponentsList:            os.Getenv("COMPONENT_LIST"),
-		IsLocalInstallation:       isLocalInstallation(os.Getenv("IS_LOCAL_INSTALLATION")),
-		VictorOpsApiKey:           os.Getenv("VICTOR_OPS_API_KEY_VALUE"),
-		VictorOpsRoutingKey:       os.Getenv("VICTOR_OPS_ROUTING_KEY_VALUE"),
-		SlackChannel:              os.Getenv("SLACK_CHANNEL_VALUE"),
-		SlackApiUrl:               os.Getenv("SLACK_API_URL_VALUE"),
+		ExternalPublicIP:           os.Getenv("EXTERNAL_PUBLIC_IP"),
+		AzureBrokerTenantID:        os.Getenv("AZURE_BROKER_TENANT_ID"),
+		AzureBrokerClientID:        os.Getenv("AZURE_BROKER_CLIENT_ID"),
+		AzureBrokerSubscriptionID:  os.Getenv("AZURE_BROKER_SUBSCRIPTION_ID"),
+		AzureBrokerClientSecret:    os.Getenv("AZURE_BROKER_CLIENT_SECRET"),
+		ClusterTLSKey:              os.Getenv("TLS_KEY"),
+		ClusterTLSCert:             os.Getenv("TLS_CERT"),
+		RemoteEnvCa:                os.Getenv("REMOTE_ENV_CA"),
+		RemoteEnvCaKey:             os.Getenv("REMOTE_ENV_CA_KEY"),
+		EtcdBackupABSContainerName: os.Getenv("ETCD_BACKUP_ABS_CONTAINER_NAME"),
+		ComponentsList:             os.Getenv("COMPONENT_LIST"),
+		IsLocalInstallation:        isLocalInstallation(os.Getenv("IS_LOCAL_INSTALLATION")),
+		VictorOpsApiKey:            os.Getenv("VICTOR_OPS_API_KEY_VALUE"),
+		VictorOpsRoutingKey:        os.Getenv("VICTOR_OPS_ROUTING_KEY_VALUE"),
+		SlackChannel:               os.Getenv("SLACK_CHANNEL_VALUE"),
+		SlackApiUrl:                os.Getenv("SLACK_API_URL_VALUE"),
 	}
 }
 
