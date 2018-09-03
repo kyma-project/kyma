@@ -26,7 +26,7 @@ func TestBindServiceBindSuccess(t *testing.T) {
 		Return(&fixRE, nil).
 		Once()
 
-	osbCtx := broker.NewOSBContext("not", "important")
+	osbCtx := broker.NewOSBContext("not", "important", "")
 	svc := broker.NewBindService(reFinder)
 	// when
 	resp, err := svc.Bind(context.Background(), *osbCtx, fixBindRequest())
@@ -62,7 +62,7 @@ func TestBindServiceBindFailure(t *testing.T) {
 		}
 
 		svc := broker.NewBindService(nil)
-		osbCtx := broker.NewOSBContext("not", "important")
+		osbCtx := broker.NewOSBContext("not", "important", "")
 
 		// when
 		resp, err := svc.Bind(context.Background(), *osbCtx, fixReq)
