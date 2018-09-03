@@ -94,7 +94,18 @@ type InstallationSpec struct {
 
 // KymaComponent represents single kyma component to be handled by the installer
 type KymaComponent struct {
-	Name string `json:"name"`
+	Name        string `json:"name"`
+	ReleaseName string `json:"release"`
+	Namespace   string `json:"namespace"`
+}
+
+// GetReleaseName returns release name for component
+func (kc KymaComponent) GetReleaseName() string {
+	if len(kc.ReleaseName) > 0 {
+		return kc.ReleaseName
+	}
+
+	return kc.Name
 }
 
 // StateEnum describes installation state

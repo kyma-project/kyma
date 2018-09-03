@@ -1,6 +1,13 @@
 package overrides
 
-import "k8s.io/client-go/kubernetes"
+import (
+	"k8s.io/client-go/kubernetes"
+)
+
+type OverrideData interface {
+	Common() Map
+	ForComponent(componentName string) Map
+}
 
 type Provider struct {
 	common     Map
@@ -31,7 +38,7 @@ func (o *Provider) ForComponent(componentName string) Map {
 }
 
 //New returns new Data instance.
-func New(client *kubernetes.Clientset) (*Provider, error) {
+func New(client *kubernetes.Clientset) (OverrideData, error) {
 
 	r := &reader{
 		client: client,
