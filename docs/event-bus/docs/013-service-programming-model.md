@@ -4,46 +4,50 @@ type: Details
 ---
 # Service Programming Model
 
-A microservice deployed in Kyma can be configured to receive events from the event bus. This is achieved by creating a [subscription custom resource](https://github.com/kyma-project/kyma/blob/master/resources/cluster-essentials/templates/eventing-subscription.crd.yaml). Refer to [consume events section](https://github.com/kyma-project/kyma/blob/master/docs/event-bus/docs/011-details-event-flow-requirements.md#consume-events) for various configuration options.
+You can configure a microservice deployed in Kyma to receive Events from the Event Bus by creating a [subscription custom resource](https://github.com/kyma-project/kyma/blob/master/resources/cluster-essentials/templates/eventing-subscription.crd.yaml). Find various configuration options in the [Consume Events](https://github.com/kyma-project/kyma/blob/master/docs/event-bus/docs/011-details-event-flow-requirements.md#consume-events) section.
 
 ## Event Delivery
 
+The Event is delivered as an `HTTP POST` request. Event Metadata is a part of an HTTP request Headers. Event Payload is the body of the request.
+
 ![TEST](assets/service-programming-model.png)
 
-The event is delivered as an `HTTP POST` request. Event Metadata is a part of HTTP request Headers. Event Payload is the body of the request.
+1. The Event is published to the Kyma Event Bus from an external system instance e.g. `commerce` in a bound Remote Environment.
+2. The Event Bus checks for the Event subscription and activation, then, it transforms the vent into an `HTTP POST` request.
+3. The Service receives the `HTTP POST` request. The Event Metadata is represented in the request `HTTP Request Headers` and the Event Payload is represented in the `HTTP Request Body`.
 
 ## Event Metadata
 
-Following HTTP headers provide information about the event metadata.
+The Following HTTP Headers provide information about the Event Metadata.
 
-|Header| details|
+|Header| Description|
 |------|--------|
-| kyma-event-id | This is the business event's ID which has been delivered to the micro-service. e.g. `8365633f-53d1-4518-85e7-e5604839bca7` |
-| kyma-event-time | This is the business event's time which has been delivered to the micro-service. e.g. `2018-11-02T22:08:41+00:00` |
-| kyma-event-type | This is the business event's type which has been delivered to the micro-service. e.g. `order.created` |
-| kyma-event-type-version | This is the business event's version which has been delivered to the micro-service. e.g. `v1` |
-| kyma-source-environment | This is the business event's source environment which has been delivered to the micro-service. e.g. `ec-qa` |
-| kyma-source-namespace | This is the business event's source namespace which has been delivered to the micro-service. e.g. `local.kyma.commerce` |
-| kyma-source-type | This is the business event's source type which has been delivered to the micro-service. e.g. `commerce` |
-| kyma-subscription | This is the subscription name which is defined in the subscription contract/CRD and this business event has been published to its subscribers. e.g. `example-subscription` |
-| kyma-topic | This is the topic name used internally by the kyma event bus to deliver the messages to the subscribers via a message bus. e.g. `ec-qa.local\.kyma\.commerce.commerce.test-event-bus.v1` |
-| x-b3-flags | This header is used by the Zipkin tracer in Envoy. The encode one or more options. For example, Debug is encoded as X-B3-Flags: 1. See more on zipkin tracing [here](https://github.com/openzipkin/b3-propagation). e.g. `0` |
-| x-b3-parentspanid | This header is used by the Zipkin tracer in Envoy. The ParentSpanId is 64-bit in length and indicates the position of the parent operation in the trace tree. When the span is the root of the trace tree, the ParentSpanId is absent. See more on zipkin tracing [here](https://github.com/openzipkin/b3-propagation) e.g. `3f52e7d591bf74e8` |
-| x-b3-sampled | This header is used by the Zipkin tracer in Envoy. When the Sampled flag is either not specified or set to 1, the span will be reported to the tracing system. Once Sampled is set to 0 or 1, the same value should be consistently sent downstream. See more on zipkin tracing [here](https://github.com/openzipkin/b3-propagation). e.g. `1` |
-| x-b3-spanid | This header is used by the Zipkin tracer in Envoy. The SpanId is 64-bit in length and indicates the position of the current operation in the trace tree. The value should not be interpreted: it may or may not be derived from the value of the TraceId. See more on zipkin tracing [here](https://github.com/openzipkin/b3-propagation). e.g. `7350c92dc6fa825e` |
-|x-b3-traceid | This header is used by the Zipkin tracer in Envoy. The TraceId is 64-bit in length and indicates the overall ID of the trace. Every span in a trace shares this ID. See more on zipkin tracing [here](https://github.com/openzipkin/b3-propagation). e.g. `02c04beed9aa6c53` |
-| x-request-id | Randomly generated an ID for identifies the HTTP request delivering the business event. e.g. `ec0ffa2a-13b6-9e63-9563-12e5c0e27e38` |
-| x-envoy-decorator-operation | If this header is present on ingress requests, its value will override any locally defined operation (span) name on the server span generated by the tracing mechanism. Similarly, if this header is present on an egress response, its value will override any locally defined operation (span) name on the client span. e.g. `default-route` |
-| x-envoy-expected-rq-timeout-ms | This is the time in milliseconds the router expects the request to be completed. Envoy sets this header so that the upstream host receiving the request can make decisions based on the request timeout, e.g., early exit. This is set on internal requests and is either taken from the `x-envoy-upstream-rq-timeout-ms` header or the route timeout, in that order. e.g. `15000` |
-| x-istio-attributes | istio specific metadata. e.g. `CkMKCnNvdXJjZS51aWQSNRIza3ViZXJuZXRlczovL2NvcmUtcHVzaC01ZDg5OTU1ZjhiLXhjZ3ZyLmt5bWEtc3lzdGVtCh8KCXNvdXJjZS5pcBISMhAAAAAAAAAAAAAA//+sEQAb` |
+| **kyma-event-id** | Business Event's ID delivered to the microservice. e.g. `8365633f-53d1-4518-85e7-e5604839bca7` |
+| **kyma-event-time** | Business Event's time delivered to the microservice. e.g. `2018-11-02T22:08:41+00:00` |
+| **kyma-event-type** | Business Event's type delivered to the microservice. e.g. `order.created` |
+| **kyma-event-type-version** | Business Event's version delivered to the microservice. e.g. `v1` |
+| **kyma-source-environment** | Business Event's source environment delivered to the microservice. e.g. `external-solution-qa` |
+| **kyma-source-namespace** | Business Event's source Namespace delivered to the microservice. e.g. `local.kyma.commerce` |
+| **kyma-source-type** | Business Event's source type delivered to the microservice. e.g. `commerce` |
+| **kyma-subscription** | Subscription name defined in the subscription contract, or in a CRD. This business Event is published to its subscribers. e.g. `example-subscription` |
+| **kyma-topic** | Topic name used internally by the Kyma Event Bus to deliver messages to the subscribers via a Message Bus. e.g. `external-solution-qa.local\.kyma\.commerce.commerce.test-event-bus.v1` |
+| **x-b3-flags** | Header used by the Zipkin tracer in Envoy. It encodes one or more options. See more on Zipkin tracing [here](https://github.com/openzipkin/b3-propagation). e.g. `0` |
+| **x-b3-parentspanid** | Header used by the Zipkin tracer in Envoy. The **ParentSpanId** is 64-bit in length and indicates the position of the parent operation in the trace tree. When the span is the root of the trace tree, the **ParentSpanId** is absent. See more on zipkin tracing [here](https://github.com/openzipkin/b3-propagation) e.g. `3f52e7d591bf74e8` |
+| **x-b3-sampled** | Header used by the Zipkin tracer in Envoy. When the **Sampled** flag is either not specified or set to `1`, the span is reported to the tracing system. Once **Sampled** is set to `0` or `1`, the same value should be consistently sent downstream. See more on zipkin tracing [here](https://github.com/openzipkin/b3-propagation). e.g. `1` |
+| **x-b3-spanid** | Header used by the Zipkin tracer in Envoy. The **SpanId** is 64-bit in length and indicates the position of the current operation in the trace tree. The value should not be interpreted. It may or may not be derived from the value of the **TraceId**. See more on zipkin tracing [here](https://github.com/openzipkin/b3-propagation). e.g. `7350c92dc6fa825e` |
+| **x-b3-traceid** | Header used by the Zipkin tracer in Envoy. The **TraceId** is 64-bit in length and indicates the overall ID of the trace. Every span in a trace shares this ID. See more on zipkin tracing [here](https://github.com/openzipkin/b3-propagation). e.g. `02c04beed9aa6c53` |
+| **x-request-id** | Randomly generated ID which identifies the HTTP request delivering the business Event. e.g. `ec0ffa2a-13b6-9e63-9563-12e5c0e27e38` |
+| **x-envoy-decorator-operation** | If this header is present in Ingress requests, its value overrides any locally defined operation (span) name on the server span generated by the tracing mechanism. If this header is present in an Egress response, its value overrides any locally defined operation (span) name on the client span. e.g. `default-route` |
+| **x-envoy-expected-rq-timeout-ms** | Time in milliseconds in which the router expects the request to be completed. Envoy sets this header so that the upstream host receiving the request can make decisions based on the request timeout. It is set on internal requests and is either taken from the **x-envoy-upstream-rq-timeout-ms** header or from the route timeout. e.g. `15000` |
+| **x-istio-attributes** | Istio specific metadata. e.g. `CkMKCnNvdXJjZS51aWQSNRIza3ViZXJuZXRlczovL2NvcmUtcHVzaC01ZDg5OTU1ZjhiLXhjZ3ZyLmt5bWEtc3lzdGVtCh8KCXNvdXJjZS5pcBISMhAAAAAAAAAAAAAA//+sEQAb` |
 
 ## Event Payload
 
-The event payload is delivered as the body of the HTTP Request in JSON format. The JSON schema is available in the Service Catalog in the registered service for the remote events.
+The Event Payload is delivered as the body of the HTTP Request in JSON format. The JSON schema is available in the Service Catalog in the registered service for the remote Events.
 
 ## Event Payload Example
 
-For example, writing a service interested in an event `order.created` published by `ec` service. the published event is schema is something like:
+In this example, you write a service for an `order.created` Event published by the `external solution` service. The published Event schema looks as follows:
 
 ```json
 {
@@ -61,7 +65,7 @@ For example, writing a service interested in an event `order.created` published 
 }
 ```
 
-So, the HTTP POST request payload would be a JSON object like:
+The HTTP POST request payload would be a JSON object like:
 
 ```json
 {"orderCode": "4caad296-e0c5-491e-98ac-0ed118f9474e"}
@@ -69,8 +73,8 @@ So, the HTTP POST request payload would be a JSON object like:
 
 ## Successful Delivery
 
-The delivered message to a subscriber would be considered as successfully consumed if the service HTTP response status code was `2xx`. However, responding with a status code, not a `2xx` (< 200 or >= 300) means an unsuccessful message consumption and the message delivery will be retried. And this implies **At-least-once** delivery guarantee.
+A message delivered to a subscriber is considered successfully consumed if the service's HTTP response status code is `2xx`. If the status code is not `2xx` (< 200 or >= 300), it means that a message consumption is not successful and that the message delivery is re-tried. This implies **At-least-once** delivery guarantee.
 
 ## Event Subscription Service Example
 
-Refer to his [example](https://github.com/kyma-project/examples/tree/master/event-subscription/service) to find a complete scenario for implementing a subscriber service to a business event.
+Refer to [this](https://github.com/kyma-project/examples/tree/master/event-subscription/service) example to find a complete scenario for implementing a subscriber service to a business Event.
