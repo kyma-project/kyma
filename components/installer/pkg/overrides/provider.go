@@ -1,7 +1,6 @@
 package overrides
 
 import (
-	"log"
 	"path"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
@@ -61,8 +60,6 @@ func (p legacyProvider) GetForRelease(component v1alpha1.KymaComponent) (string,
 		if err != nil {
 			return "", err
 		}
-
-		log.Println(overridesStr)
 
 		return overridesStr, nil
 	}
