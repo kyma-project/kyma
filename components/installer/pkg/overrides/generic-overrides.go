@@ -1,6 +1,7 @@
 package overrides
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/ghodss/yaml"
@@ -175,7 +176,14 @@ func mergeIntoMap(keys []string, value string, dstMap map[string]interface{}) {
 	currentKey := keys[0]
 	//Last key points directly to string value
 	if len(keys) == 1 {
-		dstMap[currentKey] = value
+
+		//Conversion to boolean to satisfy Helm requirements.yaml: "enable:true/false syntax" 
+		var vv interface{} = value
+		if value == "true" || value == "false" {
+			vv, _ = strconv.ParseBool(value) 
+		}
+
+		dstMap[currentKey] = vv
 		return
 	}
 
