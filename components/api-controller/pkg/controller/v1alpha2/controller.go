@@ -15,6 +15,8 @@ import (
 
 	"reflect"
 
+	"strings"
+
 	authentication "github.com/kyma-project/kyma/components/api-controller/pkg/controller/authentication/v2"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/controller/meta"
 	networking "github.com/kyma-project/kyma/components/api-controller/pkg/controller/networking/v1"
@@ -24,7 +26,6 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
-	"strings"
 )
 
 type Controller struct {
@@ -36,7 +37,7 @@ type Controller struct {
 	virtualServiceCtrl networking.Interface
 	services           service.Interface
 	authentication     authentication.Interface
-	domainName		   string
+	domainName         string
 }
 
 func NewController(
@@ -58,7 +59,7 @@ func NewController(
 		apisLister:         apisInformer.Lister(),
 		apisSynced:         apisInformer.Informer().HasSynced,
 		queue:              workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "apis"),
-		domainName:			domainName,
+		domainName:         domainName,
 	}
 
 	apisInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -200,9 +201,14 @@ func (c *Controller) onCreate(api *kymaApi.Api) error {
 	metaDto := toMetaDto(api)
 
 	createVirtualServiceStatus := c.createVirtualService(metaDto, api, apiStatusHelper)
+
+	if createVirtualServiceStatus.IsError() {
+		return fmt.Errorf("error while processing create: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
+	}
+
 	createAuthenticationStatus := c.createAuthentication(metaDto, api, apiStatusHelper)
 
-	if createVirtualServiceStatus.IsError() || createAuthenticationStatus.IsError() {
+	if createAuthenticationStatus.IsError() {
 		return fmt.Errorf("error while processing create: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
 	}
 	return nil
@@ -300,9 +306,14 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 	newMetaDto := toMetaDto(newApi)
 
 	updateVirtualServiceStatus := c.updateVirtualService(oldApi, oldMetaDto, newApi, newMetaDto, apiStatusHelper)
+
+	if updateVirtualServiceStatus.IsError() {
+		return fmt.Errorf("error while processing update: %s/%s ver: %s", newApi.Namespace, newApi.Name, newApi.ResourceVersion)
+	}
+
 	updateAuthenticationStatus := c.updateAuthentication(oldApi, oldMetaDto, newApi, newMetaDto, apiStatusHelper)
 
-	if updateVirtualServiceStatus.IsError() || updateAuthenticationStatus.IsError() {
+	if updateAuthenticationStatus.IsError() {
 		return fmt.Errorf("error while processing update: %s/%s ver: %s", newApi.Namespace, newApi.Name, newApi.ResourceVersion)
 	}
 	return nil
@@ -355,7 +366,19 @@ func (c *Controller) tmplUpdateResource(oldApi *kymaApi.Api, newApi *kymaApi.Api
 
 		log.Errorf("Error while updating %s for: %s/%s ver: %s. Root cause: %s", resourceName, newApi.Namespace, newApi.Name, newApi.ResourceVersion, updateErr)
 
-		// if there was the error: update previous status with the error
+		// if the error was caused by hostname update keep previous resource in status but set LastError
+		_, isHostnameNotAvailableError := updateErr.(networking.HostnameNotAvailableError)
+		if isHostnameNotAvailableError && updatedResource != nil {
+			statusSetter(&kymaMeta.GatewayResourceStatus{
+				Code:      kymaMeta.UpdateFailure,
+				LastError: updateErr.Error(),
+				Resource:  *updatedResource,
+			})
+			// return UpdateFailure - there will be no retries to update again
+			return kymaMeta.UpdateFailure
+		}
+
+		// if there was different error: update previous status with the error
 		statusSetter(&kymaMeta.GatewayResourceStatus{
 			Code:      kymaMeta.Error,
 			LastError: updateErr.Error(),
@@ -425,7 +448,7 @@ func (c *Controller) apiStatusHelperFor(api *kymaApi.Api) *ApiStatusHelper {
 }
 
 func fixHostname(domainName, hostname string) string {
-	if !strings.HasSuffix(hostname, "." + domainName) {
+	if !strings.HasSuffix(hostname, "."+domainName) {
 		return fmt.Sprintf("%s.%s", hostname, domainName)
 	}
 	return hostname

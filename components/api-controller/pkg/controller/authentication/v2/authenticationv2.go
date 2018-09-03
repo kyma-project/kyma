@@ -102,7 +102,7 @@ func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, erro
 
 func (a *istioImpl) Delete(dto *Dto) error {
 
-	if isAuthenticationDisabled(dto) {
+	if isAuthenticationDisabled(dto) || dto.Status.Resource.Name == "" {
 		log.Infof("Delete skipped: no authentication policy to delete.")
 		return nil
 	}

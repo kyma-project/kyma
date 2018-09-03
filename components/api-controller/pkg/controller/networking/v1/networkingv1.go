@@ -8,6 +8,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	types "k8s.io/apimachinery/pkg/types"
+	k8sClient "k8s.io/client-go/kubernetes"
 
 	kymaMeta "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma.cx/meta/v1"
 	istioNetworkingApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/networking.istio.io/v1alpha3"
@@ -18,14 +20,24 @@ import (
 
 type istioImpl struct {
 	istioNetworkingInterface istioNetworking.Interface
+	kubernetesInterface      k8sClient.Interface
 	istioGateway             string
 }
 
-func New(i istioNetworking.Interface, istioGateway string) Interface {
+func New(i istioNetworking.Interface, k k8sClient.Interface, istioGateway string) Interface {
 	return &istioImpl{
 		istioNetworkingInterface: i,
+		kubernetesInterface:      k,
 		istioGateway:             istioGateway,
 	}
+}
+
+type HostnameNotAvailableError struct {
+	errorMsg string
+}
+
+func (e HostnameNotAvailableError) Error() string {
+	return fmt.Sprint(e.errorMsg)
 }
 
 func (a *istioImpl) Create(dto *Dto) (*kymaMeta.GatewayResource, error) {
@@ -34,7 +46,15 @@ func (a *istioImpl) Create(dto *Dto) (*kymaMeta.GatewayResource, error) {
 
 	log.Infof("Creating virtual service: %+v", virtualService)
 
-	created, err := a.istioVirtualServiceInterface(dto.MetaDto).Create(virtualService)
+	isHostnameAvailable, err := a.isHostnameAvailable(dto.MetaDto, dto.Hostname, dto.Status.Resource.Uid)
+	if err != nil {
+		return nil, commons.HandleError(err, "error while creating virtual service")
+
+	} else if !isHostnameAvailable {
+		return nil, HostnameNotAvailableError{fmt.Sprintf("the hostname %s is already in use", dto.Hostname)}
+	}
+
+	created, err := a.istioVirtualServiceInterface(dto.MetaDto.Namespace).Create(virtualService)
 	if err != nil {
 		return nil, commons.HandleError(err, "error while creating virtual service")
 	}
@@ -57,11 +77,23 @@ func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, erro
 		return gatewayResourceFrom(oldVirtualService), nil
 	}
 
+	// if the new hostname is different than the old one
+	if newDto.Hostname != oldDto.Hostname {
+		// check if new hostname is available
+		isHostnameAvailable, err := a.isHostnameAvailable(newDto.MetaDto, newDto.Hostname, oldDto.Status.Resource.Uid)
+		if err != nil {
+			return gatewayResourceFrom(oldVirtualService), commons.HandleError(err, "error while updating virtual service")
+
+		} else if !isHostnameAvailable {
+			return gatewayResourceFrom(oldVirtualService), HostnameNotAvailableError{fmt.Sprintf("the hostname %s is already in use", newDto.Hostname)}
+		}
+	}
+
 	newVirtualService.ObjectMeta.ResourceVersion = oldDto.Status.Resource.Version
 
 	log.Infof("Updating virtual service: %s/%s", newVirtualService.Namespace, newVirtualService.Name)
 
-	updated, err := a.istioVirtualServiceInterface(newDto.MetaDto).Update(newVirtualService)
+	updated, err := a.istioVirtualServiceInterface(newDto.MetaDto.Namespace).Update(newVirtualService)
 	if err != nil {
 		return nil, commons.HandleError(err, "error while updating virtual service")
 	}
@@ -72,7 +104,7 @@ func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, erro
 
 func (a *istioImpl) Delete(dto *Dto) error {
 
-	if dto == nil {
+	if dto == nil || dto.Status.Resource.Name == "" {
 		log.Infof("Delete skipped: no virtual service to delete for: %s/%s.", dto.MetaDto.Namespace, dto.MetaDto.Name)
 		return nil
 	}
@@ -88,10 +120,11 @@ func (a *istioImpl) deleteByName(meta meta.Dto) error {
 	}
 	log.Infof("Deleting virtual service: %s/%s", meta.Namespace, meta.Name)
 
-	err := a.istioVirtualServiceInterface(meta).Delete(meta.Name, &k8sMeta.DeleteOptions{})
+	err := a.istioVirtualServiceInterface(meta.Namespace).Delete(meta.Name, &k8sMeta.DeleteOptions{})
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
-			return commons.HandleError(err, "error while deleting virtual service: virtual service not found")
+			log.Infof("Delete skipped: no virtual service to delete was found.")
+			return nil
 		}
 		return commons.HandleError(err, "error while deleting virtual service")
 	}
@@ -100,8 +133,8 @@ func (a *istioImpl) deleteByName(meta meta.Dto) error {
 	return nil
 }
 
-func (a *istioImpl) istioVirtualServiceInterface(metaDto meta.Dto) istioNetworkingTyped.VirtualServiceInterface {
-	return a.istioNetworkingInterface.NetworkingV1alpha3().VirtualServices(metaDto.Namespace)
+func (a *istioImpl) istioVirtualServiceInterface(namespace string) istioNetworkingTyped.VirtualServiceInterface {
+	return a.istioNetworkingInterface.NetworkingV1alpha3().VirtualServices(namespace)
 }
 
 func (a *istioImpl) isEqual(oldRule, newRule *istioNetworkingApi.VirtualService) bool {
@@ -156,4 +189,36 @@ func gatewayResourceFrom(vscv *istioNetworkingApi.VirtualService) *kymaMeta.Gate
 		Uid:     vscv.UID,
 		Version: vscv.ResourceVersion,
 	}
+}
+
+func (a *istioImpl) isHostnameAvailable(metaDto meta.Dto, hostname string, assignedVirtualServiceUID types.UID) (bool, error) {
+
+	nsList, err := a.kubernetesInterface.CoreV1().Namespaces().List(k8sMeta.ListOptions{})
+
+	if err != nil {
+		return false, err
+	}
+
+	for _, ns := range nsList.Items {
+
+		vsList, err := a.istioVirtualServiceInterface(ns.GetName()).List(k8sMeta.ListOptions{})
+
+		if err != nil {
+			return false, err
+		}
+
+		for _, vs := range vsList.Items {
+			for _, occupiedHostname := range vs.Spec.Hosts {
+				if occupiedHostname == hostname {
+					//if hostname is not used by virtualservice actually assigned to CR
+					if vs.UID != assignedVirtualServiceUID {
+						return false, nil
+					}
+
+				}
+			}
+		}
+	}
+
+	return true, nil
 }

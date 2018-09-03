@@ -37,12 +37,13 @@ $ go run cmd/controller/main.go
 
 Use these environment variables to configure the application:
 
-| Name | Required | Default | Description |
-|-----|---------|--------|------------|
-| API_CONTROLLER_LOG_LEVEL | No | `info` | Show detailed logs in the application.
-| DEFAULT_ISSUER | Yes | - | Used to set default issuer in NetworkPolicy
-| DEFAULT_JWKS_URI | Yes | - | Used to set default jwksUri in NetworkPolicy
-| GATEWAY_FQDN | Yes | - | Used to set gateway in VirtualServices spec
+| Name | Required | Default | Description | Possible Values |
+|------|----------|---------|-------------|-----------------|
+| API_CONTROLLER_LOG_LEVEL | No | `info` | Show detailed logs in the application. | `info`, `debug`
+| DEFAULT_ISSUER | Yes | - | Used to set default issuer in NetworkPolicy | any string |
+| DEFAULT_JWKS_URI | Yes | - | Used to set default jwksUri in NetworkPolicy | any string |
+| GATEWAY_FQDN | Yes | - | Used to set gateway in VirtualServices spec | any string |
+| DOMAIN_NAME | Yes | - | Used to set hostname in VirtualServices spec when short version of hostname is provided | any string |
 
 
 ### Test
