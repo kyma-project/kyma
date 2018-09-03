@@ -83,8 +83,8 @@ Parameter | Description | Default
 `controller.publishService.pathOverride` | override of the default publish-service name | `""`
 `controller.service.clusterIP` | internal controller cluster service IP | `""`
 `controller.service.externalIPs` | controller service external IP addresses. Do not set this when `controller.hostNetwork` is set to `true` and `kube-proxy` is used as there will be a port-conflict for port `80` | `[]`
-`controller.service.externalTrafficPolicy` | If `controller.service.type` is `NodePort` or `LoadBalancer`, set this to `Local` to enable [source IP preservation](https://kubernetes.io/docs/tutorials/services/source-ip/#source-ip-for-services-with-typenodeport) | `"Cluster"`
-`controller.service.healthCheckNodePort` | If `controller.service.type` is `NodePort` or `LoadBalancer` and `controller.service.externalTrafficPolicy` is set to `Local`, set this to [the managed health-check port the kube-proxy will expose](https://kubernetes.io/docs/tutorials/services/source-ip/#source-ip-for-services-with-typenodeport). If blank, a random port in the `NodePort` range will be assigned | `""`
+`controller.service.externalTrafficPolicy` | If `controller.service.type` is `NodePort` or `LoadBalancer`, set this to `Local` to enable [source IP preservation](https://kubernetes.io/docs/tutorials/services/source-ip/#source-ip-for-services-with-type-nodeport) | `"Cluster"`
+`controller.service.healthCheckNodePort` | If `controller.service.type` is `NodePort` or `LoadBalancer` and `controller.service.externalTrafficPolicy` is set to `Local`, set this to [the managed health-check port the kube-proxy will expose](https://kubernetes.io/docs/tutorials/services/source-ip/#source-ip-for-services-with-type-nodeport). If blank, a random port in the `NodePort` range will be assigned | `""`
 `controller.service.loadBalancerIP` | IP address to assign to load balancer (if supported) | `""`
 `controller.service.loadBalancerSourceRanges` | list of IP CIDRs allowed access to load balancer (if supported) | `[]`
 `controller.service.enableHttp` | if port 80 should be opened for service | `true`
@@ -167,7 +167,7 @@ $ helm install stable/nginx-ingress --name my-release -f values.yaml
 ```
 
 A useful trick to debug issues with ingress is to increase the logLevel
-as described [here](https://github.com/kubernetes/ingress-nginx/blob/master/docs/troubleshooting.md#debug)
+as described [here](https://github.com/kubernetes/ingress-nginx/blob/master/docs/troubleshooting.md#debug-logging)
 
 ```console
 $ helm install stable/nginx-ingress --set controller.extraArgs.v=2

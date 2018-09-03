@@ -27,7 +27,7 @@ Pods may contain applications with custom metrics that Prometheus can poll throu
 
 Kyma employs Grafana as a third-party resource in `kube-prometheus` to deliver a feature-rich metrics dashboard and graph editor.
 
-To access the Grafana UI, use the following URL: https://grafana.{DOMAIN}. Replace DOMAIN with the domain of your Kyma cluster.
+To access the Grafana UI, use the following URL: `https://grafana.{DOMAIN}`. Replace DOMAIN with the domain of your Kyma cluster.
 
 ## Alertmanager
 

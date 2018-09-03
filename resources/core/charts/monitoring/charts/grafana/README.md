@@ -42,7 +42,7 @@ To add a dashboard to Kyma:
 6. Install Kyma locally and open it in a browser at https://console.kyma.local.
 7. Access the Grafana console from Kyma by clicking **Administration > Diagnostics > Status & Metrics** in the left navigation.  
 8. Sign in and check if the newly added dashboard is deployed.  
-9. Create a pull request following the [GitHub workflow](https://github.com/kyma-project/community/blob/master/github-flow.md) defined for Kyma.
+9. Create a pull request following the [GitHub workflow](https://github.com/kyma-project/community/blob/master/git-workflow.md) defined for Kyma.
 
 ## Add a Custom Dashboard in Grafana
 

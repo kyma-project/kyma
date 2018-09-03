@@ -50,7 +50,7 @@ podTemplate(label: label) {
 
 def validateLinks(args, repositoryName) {
     workDir = pwd()
-    sh "docker run --rm -v ${workDir}:/${repositoryName}:ro magicmatatjahu/milv:0.0.3 --base-path=/${repositoryName} ${args}"
+    sh "docker run --rm -v ${workDir}:/${repositoryName}:ro magicmatatjahu/milv:0.0.4 --base-path=/${repositoryName} ${args}"
 }
 
 def sendSlackNotification(text) {

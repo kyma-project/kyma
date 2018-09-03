@@ -5,7 +5,7 @@ This repo contains generated client with `clientset`, `informers` and `listers`,
 ## Overview
 
 An identity provider is a trusted provider that lets us use a single sign-on (SSO).
-When exposing an API in the [Console](https://github.com/kyma-project/console-new/core), a user is able to secure it by loading a predefined IDP preset and use the issuer, jwksUri values from the selected preset.
+When exposing an API in the [Console](https://github.com/kyma-project/console/tree/master/core), a user is able to secure it by loading a predefined IDP preset and use the issuer, jwksUri values from the selected preset.
 
 ## Prerequisites
 
@@ -42,7 +42,7 @@ git push --tags
 
 ##### IDPPreset as a ui-api-layer dependency
 
-After releasing a new version in **idppreset** repository, change the version in Gopkg.toml in [ui-api-layer](https://github.com/kyma-project/kyma/components/ui-api-layer) project:
+After releasing a new version in **idppreset** repository, change the version in Gopkg.toml in [ui-api-layer](https://github.com/kyma-project/kyma/tree/master/components/ui-api-layer) project:
 ```
 # Gopkg.toml file in ui-api-layer project
 ...
