@@ -89,16 +89,22 @@ func ensureFunctionIsRunning(namespace, name string, serviceBinding bool) {
 		sbuID = getSBUID(namespace, name)
 	}
 
-	timeout := time.After(6 * time.Minute)
+	timeout := time.After(1 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 	for {
 		select {
 		case <-timeout:
+
 			cmd := exec.Command("kubectl", "-n", namespace, "describe", "pod", "-l", "function="+name)
 			if sbuID != "" {
 				cmd = exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name, "-l", "use-"+sbuID)
+				printDebugLogsSvcBindingUsageFailed(namespace, name)
 			}
-			stdoutStderr, _ := cmd.CombinedOutput()
+			stdoutStderr, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Fatalf("Error while fetching pods for function(with svcbindingusage label): %v\n", err)
+			}
+
 			log.Fatal("Timed out waiting for ", name, " pod to be running:\n", string(stdoutStderr))
 		case <-tick:
 			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name, "-ojsonpath={range .items[*]}{.status.phase}{end}")
@@ -111,6 +117,25 @@ func ensureFunctionIsRunning(namespace, name string, serviceBinding bool) {
 			}
 		}
 	}
+}
+
+func printDebugLogsSvcBindingUsageFailed(namespace, name string) {
+	functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name)
+
+	functionPodsStdOutStdErr, err := functionPodsCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching pods for function: %v\n", err)
+	}
+	log.Printf("Function pods status:\n%s\n", string(functionPodsStdOutStdErr))
+
+	svcBindingUsageControllerLogsCmd := exec.Command("kubectl", "-n", namespace, "log", "$(kubectl -n "+namespace+" get po -lapp=binding-usage-controller --template=\"{{range .items}}{{.metadata.name}}{{end}}\") -c binding-usage-controller)")
+
+	svcBindingUsageControllerLogsCmdOutErr, err := svcBindingUsageControllerLogsCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching logs for bindingusagecontroller: %v\n", err)
+	}
+	log.Printf("Logs from bindingusagecontroller:\n%s\n", string(svcBindingUsageControllerLogsCmdOutErr))
+
 }
 
 func deleteFun(namespace, name string) {
