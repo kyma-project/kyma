@@ -81,37 +81,6 @@ func (sc *InstallationDataCreator) WithRemoteEnvCaKey(remoteEnvCaKey string) *In
 	return sc
 }
 
-// WithRemoteEnvIP sets value for RemoteEnvIP property
-func (sc *InstallationDataCreator) WithRemoteEnvIP(ipAddr string) *InstallationDataCreator {
-	sc.installationData.RemoteEnvIP = ipAddr
-
-	return sc
-}
-
-// WithUITestCredentials sets value for UITestUser and UITestPassword properties
-func (sc *InstallationDataCreator) WithUITestCredentials(username, password string) *InstallationDataCreator {
-	sc.installationData.UITestUser = username
-	sc.installationData.UITestPassword = password
-
-	return sc
-}
-
-// WithAdminGroup sets value for AdminGroup property
-func (sc *InstallationDataCreator) WithAdminGroup(adminGroupName string) *InstallationDataCreator {
-	sc.installationData.AdminGroup = adminGroupName
-
-	return sc
-}
-
-// WithEtcdOperator sets value for EtcdOperator property
-func (sc *InstallationDataCreator) WithEtcdOperator(enabled, storageAccount, storageKey string) *InstallationDataCreator {
-	sc.installationData.EnableEtcdBackupOperator = enabled
-	sc.installationData.EtcdBackupABSAccount = storageAccount
-	sc.installationData.EtcdBackupABSKey = storageKey
-
-	return sc
-}
-
 // WithEtcdBackupABSContainerName sets value for EtcdBackupABSContainerName property
 func (sc *InstallationDataCreator) WithEtcdBackupABSContainerName(path string) *InstallationDataCreator {
 	sc.installationData.EtcdBackupABSContainerName = path

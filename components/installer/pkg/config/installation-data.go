@@ -24,16 +24,7 @@ type InstallationData struct {
 	ClusterTLSCert             string
 	RemoteEnvCa                string
 	RemoteEnvCaKey             string
-	RemoteEnvIP                string
-	K8sApiserverURL            string
-	K8sApiserverCa             string
-	UITestUser                 string
-	UITestPassword             string
-	AdminGroup                 string
 	EtcdBackupABSContainerName string
-	EnableEtcdBackupOperator   string
-	EtcdBackupABSAccount       string
-	EtcdBackupABSKey           string
 	Components                 map[string]v1alpha1.KymaComponent
 	IsLocalInstallation        bool
 	VictorOpsApiKey            string
@@ -63,16 +54,7 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		ClusterTLSCert:             installationConfig.ClusterTLSCert,
 		RemoteEnvCa:                installationConfig.RemoteEnvCa,
 		RemoteEnvCaKey:             installationConfig.RemoteEnvCaKey,
-		RemoteEnvIP:                installationConfig.RemoteEnvIP,
-		K8sApiserverURL:            installationConfig.K8sApiserverUrl,
-		K8sApiserverCa:             installationConfig.K8sApiserverCa,
-		UITestUser:                 installationConfig.UITestUser,
-		UITestPassword:             installationConfig.UITestPassword,
-		AdminGroup:                 installationConfig.AdminGroup,
 		EtcdBackupABSContainerName: installationConfig.EtcdBackupABSContainerName,
-		EnableEtcdBackupOperator:   installationConfig.EnableEtcdBackupOperator,
-		EtcdBackupABSAccount:       installationConfig.EtcdBackupABSAccount,
-		EtcdBackupABSKey:           installationConfig.EtcdBackupABSKey,
 		Components:                 convertToMap(installation.Spec.Components),
 		IsLocalInstallation:        installationConfig.IsLocalInstallation,
 		VictorOpsApiKey:            installationConfig.VictorOpsApiKey,
