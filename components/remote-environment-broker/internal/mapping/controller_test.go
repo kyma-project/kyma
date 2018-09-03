@@ -17,7 +17,6 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/platform/logger/spy"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -45,9 +44,8 @@ func TestControllerRunSuccess(t *testing.T) {
 
 	expectedPatchNS := fmt.Sprintf(`{"metadata":{"labels":{"accessLabel":"%s"}}}`, fixRE.AccessLabel)
 
-	emInformer := newEmInformerFromFakeClientset(t, fixEM)
-
-	nsInformer := newNsInformerFromFakeClientset(t, fixNS)
+	emInformer := newEmInformerFromFakeClientset(fixEM)
+	nsInformer := newNsInformerFromFakeClientset(fixNS)
 
 	nsClientMock := &automock.NsPatcher{}
 	defer nsClientMock.AssertExpectations(t)
@@ -85,7 +83,7 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 	fixNS := fixNamespaceWithAccessLabel(fixNSName)
 	fixExpectedNS := fixNamespace(fixNSName)
 
-	emInformer := newEmInformerFromFakeClientset(t, fixEM)
+	emInformer := newEmInformerFromFakeClientset(fixEM)
 	nsClientMock := &automock.NsPatcher{}
 	defer nsClientMock.AssertExpectations(t)
 
@@ -112,7 +110,7 @@ func TestControllerRunFailure(t *testing.T) {
 	fixErr := errors.New("fix get err")
 	fixPatchErr := errors.New("fix patch err")
 
-	emInformer := newEmInformerFromFakeClientset(t, fixEM)
+	emInformer := newEmInformerFromFakeClientset(fixEM)
 
 	expectations := &sync.WaitGroup{}
 	expectations.Add(2)
@@ -198,8 +196,11 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			fixRE := fixRemoteEnvironment(fixREName)
 			fixNS := fixNamespace(fixNSName)
 
-			emInformer := newEmInformerFromFakeClientset(t, fixEM)
-			nsInformer := newNsInformerFromFakeClientset(t, fixNS)
+			emInformer := newEmInformerFromFakeClientset(fixEM)
+			nsInformer := newNsInformerFromFakeClientset(fixNS)
+
+			awaitInformerStartAtMost(t, time.Second, emInformer)
+			awaitInformerStartAtMost(t, time.Second, nsInformer)
 
 			nsClientMock := &automock.NsPatcher{}
 			defer nsClientMock.AssertExpectations(t)
@@ -272,8 +273,11 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			// GIVEN
 			fixNS := fixNamespace(fixNSName)
 
-			emInformer := newEmInformerFromFakeClientset(t, nil)
-			nsInformer := newNsInformerFromFakeClientset(t, fixNS)
+			emInformer := newEmInformerFromFakeClientset(nil)
+			nsInformer := newNsInformerFromFakeClientset(fixNS)
+
+			awaitInformerStartAtMost(t, time.Second, emInformer)
+			awaitInformerStartAtMost(t, time.Second, nsInformer)
 
 			nsClientMock := &automock.NsPatcher{}
 			defer nsClientMock.AssertExpectations(t)
@@ -375,7 +379,8 @@ func fixNamespaceWithAccessLabel(fixNSName string) *corev1.Namespace {
 		},
 	}
 }
-func newEmInformerFromFakeClientset(t *testing.T, fixEM *v1alpha1.EnvironmentMapping) cache.SharedIndexInformer {
+
+func newEmInformerFromFakeClientset(fixEM *v1alpha1.EnvironmentMapping) cache.SharedIndexInformer {
 	var client *fake.Clientset
 	if fixEM != nil {
 		client = fake.NewSimpleClientset(fixEM)
@@ -385,14 +390,10 @@ func newEmInformerFromFakeClientset(t *testing.T, fixEM *v1alpha1.EnvironmentMap
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 	remoteEnvironmentSharedInformers := informerFactory.Remoteenvironment().V1alpha1()
 	emInformer := remoteEnvironmentSharedInformers.EnvironmentMappings().Informer()
-	if fixEM != nil {
-		err := emInformer.GetIndexer().Add(fixEM)
-		require.NoError(t, err)
-	}
 	return emInformer
 }
 
-func newNsInformerFromFakeClientset(t *testing.T, fixNs *corev1.Namespace) cache.SharedIndexInformer {
+func newNsInformerFromFakeClientset(fixNs *corev1.Namespace) cache.SharedIndexInformer {
 	var client *k8sfake.Clientset
 	if fixNs != nil {
 		client = k8sfake.NewSimpleClientset(fixNs)
@@ -400,9 +401,5 @@ func newNsInformerFromFakeClientset(t *testing.T, fixNs *corev1.Namespace) cache
 		client = k8sfake.NewSimpleClientset()
 	}
 	i := v1.NewNamespaceInformer(client, 0, cache.Indexers{})
-	if fixNs != nil {
-		err := i.GetIndexer().Add(fixNs)
-		require.NoError(t, err)
-	}
 	return i
 }
