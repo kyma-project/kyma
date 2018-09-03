@@ -72,7 +72,6 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 			err := steps.ProvisionBundles(installationData)
 			if steps.errorHandlers.CheckError("Step installation error: ", err) {
 				steps.statusManager.Error(stepName)
-				//logCore(steps)
 				return err
 			}
 		} else {
@@ -82,7 +81,6 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 			installErr := step.Install()
 			if steps.errorHandlers.CheckError("Step installation error: ", installErr) {
 				steps.statusManager.Error(stepName)
-				//logCore(steps)
 				return installErr
 			}
 		}
@@ -129,7 +127,6 @@ func (steps *InstallationSteps) UpdateKyma(installationData *config.Installation
 			err := steps.UpdateBundles(installationData)
 			if steps.errorHandlers.CheckError("Step installation error: ", err) {
 				steps.statusManager.Error(stepName)
-				//logCore(steps)
 				return err
 			}
 		} else {
@@ -139,7 +136,6 @@ func (steps *InstallationSteps) UpdateKyma(installationData *config.Installation
 			installErr := step.Upgrade()
 			if steps.errorHandlers.CheckError("Step installation error: ", installErr) {
 				steps.statusManager.Error(stepName)
-				//logCore(steps)
 				return installErr
 			}
 		}
