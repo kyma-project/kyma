@@ -21,4 +21,4 @@ spec:
       allowOrigin:
       - "*"        
       allowHeaders:
-      - "Authorization"
+      - "authorization"
