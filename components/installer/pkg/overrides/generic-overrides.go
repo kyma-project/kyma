@@ -96,22 +96,27 @@ func MergeMaps(baseMap, overridesMap Map) {
 	}
 }
 
-func FindOverrideValue(overrides Map, flatName string) (string, bool) {
+//FindOverrideStringValue looks for a string value assigned to the provided flat key.
+func FindOverrideStringValue(overrides Map, flatName string) (string, bool) {
 
-	var findOverride func(m map[string]interface{}, keys []string) (string, bool)
+	res, isString := findOverrideValue(overrides, flatName).(string)
+	if !isString {
+		return "", false
+	}
+	return res, true
+}
 
-	findOverride = func(m map[string]interface{}, keys []string) (string, bool) {
+func findOverrideValue(overrides Map, flatName string) (interface{}) {
+	var findOverride func(m map[string]interface{}, keys []string) (interface{})
+
+	findOverride = func(m map[string]interface{}, keys []string) (interface{}) {
 		if len(keys) == 1 {
-			res, isString := (m[keys[0]]).(string)
-			if !isString {
-				return "", false
-			}
-			return res, true
+			return m[keys[0]]
 		}
 
 		nestedMap, isMap := m[keys[0]].(map[string]interface{})
 		if !isMap {
-			return "", false
+			return nil
 		}
 
 		return findOverride(nestedMap, keys[1:])
@@ -119,6 +124,7 @@ func FindOverrideValue(overrides Map, flatName string) (string, bool) {
 
 	keys := strings.Split(flatName, ".")
 	return findOverride(overrides, keys)
+
 }
 
 //Recursively copies the map. Used to ensure immutability of input maps when merging.
@@ -177,10 +183,10 @@ func mergeIntoMap(keys []string, value string, dstMap map[string]interface{}) {
 	//Last key points directly to string value
 	if len(keys) == 1 {
 
-		//Conversion to boolean to satisfy Helm requirements.yaml: "enable:true/false syntax" 
+		//Conversion to boolean to satisfy Helm requirements.yaml: "enable:true/false syntax"
 		var vv interface{} = value
 		if value == "true" || value == "false" {
-			vv, _ = strconv.ParseBool(value) 
+			vv, _ = strconv.ParseBool(value)
 		}
 
 		dstMap[currentKey] = vv

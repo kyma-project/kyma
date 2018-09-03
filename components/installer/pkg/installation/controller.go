@@ -179,7 +179,7 @@ func (c *Controller) syncHandler(key string) error {
 		return overridesErr
 	}
 
-	domainName, exists := overrides.FindOverrideValue(overrideProvider.Common(), "global.domainName")
+	domainName, exists := overrides.FindOverrideStringValue(overrideProvider.Common(), "global.domainName")
 	if !exists || domainName == "" {
 		runtime.HandleError(errors.New("'global.domainName' override not found"))
 		return nil
