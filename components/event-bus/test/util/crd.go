@@ -29,7 +29,6 @@ func NewSubscription(name string,
 		SubscriptionSpec: apiv1.SubscriptionSpec{
 			Endpoint:                      subscriberEventEndpointURL,
 			IncludeSubscriptionNameHeader: false,
-			IncludeTopicHeader:            false,
 			MaxInflight:                   100,
 			PushRequestTimeoutMS:          10,
 			Source:                        apiv1.Source{SourceEnvironment: sourceEnvironment, SourceNamespace: sourceNamespace, SourceType: sourceType},

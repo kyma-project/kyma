@@ -22,7 +22,6 @@ global:
   push:
     http:
       subscriptionNameHeader: "Kyma-Subscription"
-      topicHeader: "Kyma-Topic"
     resources:
       limits:
         memory: "32M"

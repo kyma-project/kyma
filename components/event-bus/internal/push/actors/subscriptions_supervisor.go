@@ -31,7 +31,7 @@ type SubscriptionsSupervisorInterface interface {
 	PoisonPill()
 	IsRunning() bool
 	IsNATSConnected() bool
-	StartSubscriptionReq(sub *v1alpha1.Subscription)
+	StartSubscriptionReq(sub *v1alpha1.Subscription, requestProvider common.RequestProvider)
 	StopSubscriptionReq(sub *v1alpha1.Subscription)
 }
 
@@ -46,14 +46,14 @@ type SubscriptionsSupervisor struct {
 }
 
 // StartSubscriptionsSupervisor starts supervisor actor
-func StartSubscriptionsSupervisor(opts *opts.Options, tracer *trc.Tracer) *SubscriptionsSupervisor {
+func StartSubscriptionsSupervisor(opts *opts.Options, tracer *trc.Tracer, requestProvider common.RequestProvider) *SubscriptionsSupervisor {
 	log.Print("starting subscriptions supervisor actor")
 	ch := make(chan action, actionChannelSize)
 	mhf := handlers.NewMessageHandlerFactory(opts, tracer)
 	s := &SubscriptionsSupervisor{running: true, actionChan: ch, opts: opts, mhf: mhf}
 
 	s.initialize()
-	go s.actorLoop(ch)
+	go s.actorLoop(ch, requestProvider)
 	return s
 }
 
@@ -79,7 +79,7 @@ func pingInterval(i time.Duration) nats.Option {
 	}
 }
 
-func (s *SubscriptionsSupervisor) actorLoop(ch <-chan action) {
+func (s *SubscriptionsSupervisor) actorLoop(ch <-chan action, requestProvider common.RequestProvider) {
 	timer := time.NewTimer(retryConnectionAndSubscriptionsInterval)
 
 	for s.running {
@@ -87,7 +87,7 @@ func (s *SubscriptionsSupervisor) actorLoop(ch <-chan action) {
 		case action := <-ch:
 			action()
 		case <-timer.C:
-			s.retryNATSStreamingSubscriptions()
+			s.retryNATSStreamingSubscriptions(requestProvider)
 			timer = time.NewTimer(retryConnectionAndSubscriptionsInterval) // TODO improve, schedule new retry only if needed
 		}
 	}
@@ -130,12 +130,12 @@ func (s *SubscriptionsSupervisor) ReconnectToNATSStreaming() {
 }
 
 // StartSubscriptionReq message models the request to start handling EventBus subscription
-func (s *SubscriptionsSupervisor) StartSubscriptionReq(sub *v1alpha1.Subscription) {
+func (s *SubscriptionsSupervisor) StartSubscriptionReq(sub *v1alpha1.Subscription, requestProvider common.RequestProvider) {
 	s.actionChan <- func() {
 		log.Print("handling EventBus Subscription start request")
 		if val, present := s.subscriptions[sub.UID]; !present || val == nil {
 			s.subscriptions[sub.UID] = &subscriptionCRWithNATSStreamingSubscription{subscriptionCR: sub}
-			s.retryNATSStreamingSubscriptions()
+			s.retryNATSStreamingSubscriptions(requestProvider)
 		} else { // present && val != nil
 			if val.natsStreamingSubscription != nil {
 				log.Print("subscription is already being handled")
@@ -163,11 +163,11 @@ func (s *SubscriptionsSupervisor) StopSubscriptionReq(sub *v1alpha1.Subscription
 	}
 }
 
-func (s *SubscriptionsSupervisor) retryNATSStreamingSubscriptions() {
+func (s *SubscriptionsSupervisor) retryNATSStreamingSubscriptions(requestProvider common.RequestProvider) {
 	if s.stanConn != nil {
 		for _, subscriptionCRWithNATSStreamingSubscription := range s.subscriptions {
 			if subscriptionCRWithNATSStreamingSubscription.natsStreamingSubscription == nil {
-				s.handleSubscription(subscriptionCRWithNATSStreamingSubscription.subscriptionCR)
+				s.handleSubscription(subscriptionCRWithNATSStreamingSubscription.subscriptionCR, requestProvider)
 			}
 		}
 	}
@@ -182,10 +182,10 @@ func (s *SubscriptionsSupervisor) stopSubscription(sub *v1alpha1.Subscription) {
 	}
 }
 
-func (s *SubscriptionsSupervisor) handleSubscription(sub *v1alpha1.Subscription) {
+func (s *SubscriptionsSupervisor) handleSubscription(sub *v1alpha1.Subscription, requestProvider common.RequestProvider) {
 	log.Printf("attempting establishing NATS Streaming subscription for %s", sub.Name)
 
-	msgHandler := s.mhf.NewMsgHandler(sub, s.opts)
+	msgHandler := s.mhf.NewMsgHandler(sub, s.opts, requestProvider)
 	topic := common.FromSubscriptionSpec(sub.SubscriptionSpec).Encode()
 
 	natsStreamingSub, err := (*s.stanConn).QueueSubscribe(

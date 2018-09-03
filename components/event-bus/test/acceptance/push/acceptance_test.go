@@ -3,6 +3,7 @@ package application_test
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,6 +18,7 @@ import (
 	pushapp "github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-push/application"
 	"github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/event-bus/generated/push/informers/externalversions/eventing.kyma.cx/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/kyma-project/kyma/components/event-bus/internal/publish"
 	"github.com/kyma-project/kyma/components/event-bus/internal/push/opts"
 	"github.com/kyma-project/kyma/components/event-bus/test/util"
@@ -41,6 +43,8 @@ const (
 	eventDataV2         = "test-event-2"
 
 	publishServerStatusPath = "/v1/status/ready"
+
+	headerKymaTopic = "kyma-topic"
 )
 
 var (
@@ -48,6 +52,7 @@ var (
 	pushServer         *httptest.Server
 	subscriberServerV1 *httptest.Server
 	subscriberServerV2 *httptest.Server
+	pushRequest        *http.Request
 )
 
 func startNats() (*server.StanServer, error) {
@@ -70,32 +75,24 @@ func TestMain(m *testing.M) {
 	subscriberServerV1 = util.NewSubscriberServerV1()
 	subscriberServerV2 = util.NewSubscriberServerV2()
 
+	requestProvider := common.RequestProvider(func(method, url string, body io.Reader) (*http.Request, error) {
+		var err error
+		pushRequest, err = http.NewRequest(method, url, body)
+		return pushRequest, err
+	})
+
 	pushOpts := opts.DefaultOptions
 	pushOpts.NatsStreamingClusterID = clusterID
 	pushApplication := pushapp.NewPushApplication(&pushOpts, newFakeInformer())
 	subscriptionsSupervisor1 := pushApplication.SubscriptionsSupervisor
-	subscriptionsSupervisor1.StartSubscriptionReq(
-		util.NewSubscription(
-			"test-sub",
-			metav1.NamespaceDefault,
-			subscriberServerV1.URL+util.SubServer1EventsPath,
-			eventType,
-			eventTypeVersion,
-			sourceEnvironmentV1,
-			sourceNamespaceV1,
-			sourceType))
+	subscription1 := util.NewSubscription("test-sub", metav1.NamespaceDefault, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion,
+		sourceEnvironmentV1, sourceNamespaceV1, sourceType)
+	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, requestProvider)
 
 	subscriptionsSupervisor2 := pushApplication.SubscriptionsSupervisor
-	subscriptionsSupervisor2.StartSubscriptionReq(
-		util.NewSubscription(
-			"test-sub",
-			metav1.NamespaceDefault,
-			subscriberServerV2.URL+util.SubServer2EventsPath,
-			eventType,
-			eventTypeVersion,
-			sourceEnvironmentV2,
-			sourceNamespaceV2,
-			sourceType))
+	subscription2 := util.NewSubscription("test-sub", metav1.NamespaceDefault, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion,
+		sourceEnvironmentV2, sourceNamespaceV2, sourceType)
+	subscriptionsSupervisor2.StartSubscriptionReq(subscription2, common.DefaultRequestProvider)
 
 	pushServer = httptest.NewServer(util.Logger(pushApplication.ServerMux))
 
@@ -246,5 +243,15 @@ func verifyStatusCode(res *http.Response, expectedStatusCode int, t *testing.T) 
 func checkIfError(err error, t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func Test_pushRequestShouldNotIncludeKymaTopicHeader(t *testing.T) {
+	if pushRequest == nil {
+		t.Fatal("push request should not be nil")
+	}
+
+	if header := pushRequest.Header.Get(headerKymaTopic); len(header) > 0 {
+		t.Fatalf("request to endpoint should not include the header %s", headerKymaTopic)
 	}
 }

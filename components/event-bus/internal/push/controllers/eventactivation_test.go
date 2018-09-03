@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/stretchr/testify/mock"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -25,7 +26,7 @@ func (m *MockSupervisior) IsRunning() bool { return true }
 
 func (m *MockSupervisior) IsNATSConnected() bool { return true }
 
-func (m *MockSupervisior) StartSubscriptionReq(sub *v1alpha1.Subscription) {
+func (m *MockSupervisior) StartSubscriptionReq(sub *v1alpha1.Subscription, requestProvider common.RequestProvider) {
 	m.Called(sub)
 }
 

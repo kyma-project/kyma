@@ -52,7 +52,7 @@ func initHTTPTransport(opts *opts.Options) *http.Transport {
 	}
 }
 
-func (mhf *MessageHandlerFactory) NewMsgHandler(sub *v1alpha1.Subscription, opts *opts.Options) func(msg *stan.Msg) {
+func (mhf *MessageHandlerFactory) NewMsgHandler(sub *v1alpha1.Subscription, opts *opts.Options, requestProvider common.RequestProvider) func(msg *stan.Msg) {
 
 	client := &http.Client{
 		Transport: mhf.tr,
@@ -72,7 +72,7 @@ func (mhf *MessageHandlerFactory) NewMsgHandler(sub *v1alpha1.Subscription, opts
 			payload = msg.Data
 		}
 
-		req, err := http.NewRequest(http.MethodPost, sub.Endpoint, bytes.NewBuffer(payload))
+		req, err := requestProvider(http.MethodPost, sub.Endpoint, bytes.NewBuffer(payload))
 		if err != nil {
 			panic(fmt.Sprintf("push HTTP request creation failed: %v", err))
 		}
@@ -80,9 +80,6 @@ func (mhf *MessageHandlerFactory) NewMsgHandler(sub *v1alpha1.Subscription, opts
 
 		subNameSupplier := func() string { return sub.Name }
 		addOptionalHeader(req, sub.IncludeSubscriptionNameHeader, opts.SubscriptionNameHeader, subNameSupplier)
-
-		topicNameSupplier := func() string { return common.FromSubscriptionSpec(sub.SubscriptionSpec).Encode() }
-		addOptionalHeader(req, sub.IncludeTopicHeader, opts.TopicHeader, topicNameSupplier)
 
 		var pushSpan *opentracing.Span
 		if cloudEvent != nil {

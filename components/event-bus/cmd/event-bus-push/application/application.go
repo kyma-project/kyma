@@ -24,7 +24,7 @@ type PushApplication struct {
 func NewPushApplication(pushOpts *pushOpts.Options, informer ...cache.SharedIndexInformer) *PushApplication {
 	log.Println("Push :: Initializing application")
 	tracer := trace.StartNewTracer(&pushOpts.Options)
-	subscriptionsSupervisor := actors.StartSubscriptionsSupervisor(pushOpts, &tracer)
+	subscriptionsSupervisor := actors.StartSubscriptionsSupervisor(pushOpts, &tracer, common.DefaultRequestProvider)
 	var subscriptionsController *controllers.SubscriptionsController
 	if len(informer) > 0 {
 		subscriptionsController = controllers.StartSubscriptionsControllerWithInformer(subscriptionsSupervisor, informer[0], pushOpts)

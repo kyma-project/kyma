@@ -1,8 +1,10 @@
 package controllers
 
-import "log"
 import (
+	"log"
+
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/kyma-project/kyma/components/event-bus/internal/push/actors"
 )
 
@@ -27,7 +29,7 @@ func getUpdateFnWithEventActivationCheck(supervisor actors.SubscriptionsSupervis
 
 		if newSub.HasCondition(subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}) {
 			log.Printf("Start NATS Subscription %+v", newSub)
-			supervisor.StartSubscriptionReq(newSub)
+			supervisor.StartSubscriptionReq(newSub, common.DefaultRequestProvider)
 		}
 	}
 }
@@ -41,7 +43,7 @@ func getAddFnWithEventActivationCheck(supervisor actors.SubscriptionsSupervisorI
 		}
 		if subscription.HasCondition(subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}) {
 			log.Printf("Subscription custom resource created %v", obj)
-			supervisor.StartSubscriptionReq(subscription)
+			supervisor.StartSubscriptionReq(subscription, common.DefaultRequestProvider)
 		}
 	}
 }

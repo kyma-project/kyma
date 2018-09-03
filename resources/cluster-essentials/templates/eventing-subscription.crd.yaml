@@ -23,8 +23,6 @@ spec:
               maxLength: 512
             include_subscription_name_header:
               type: boolean
-            include_topic_header:
-              type: boolean
             max_inflight:
               type: integer
               minimum: 1
