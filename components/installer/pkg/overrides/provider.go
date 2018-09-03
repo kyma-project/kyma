@@ -185,11 +185,6 @@ func (p legacyProvider) getHmcOverrides(installationData *config.InstallationDat
 	p.errorHandlers.LogError("Couldn't get global overrides: ", err)
 	MergeMaps(allOverrides, globalOverrides)
 
-	hmcDefaultOverride, err := GetHmcDefaultOverrides()
-
-	p.errorHandlers.LogError("Couldn't get Hmc default overrides: ", err)
-	MergeMaps(allOverrides, hmcDefaultOverride)
-
 	staticOverrides := getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
@@ -208,10 +203,6 @@ func (p legacyProvider) getEcOverrides(installationData *config.InstallationData
 	globalOverrides, err := GetGlobalOverrides(installationData, allOverrides)
 	p.errorHandlers.LogError("Couldn't get global overrides: ", err)
 	MergeMaps(allOverrides, globalOverrides)
-
-	ecDefaultOverride, err := GetEcDefaultOverrides()
-	p.errorHandlers.LogError("Couldn't get Ec default overrides: ", err)
-	MergeMaps(allOverrides, ecDefaultOverride)
 
 	staticOverrides := getStaticFileOverrides(installationData, chartDir)
 	if staticOverrides.HasOverrides() == true {
