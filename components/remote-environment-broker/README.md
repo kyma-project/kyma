@@ -39,6 +39,22 @@ After normalization, the **displayName** contains only lowercase characters, num
 
 Before each commit, use the `before-commit.sh` script, which tests your changes.
 
+### Use environment variables
+Remote Environment Broker can work in 2 modes: as a cluster-scoped or namespace-scoped broker (see **APP_CLUSTER_SCOPED_BROKER_ENABLED**).
+In the first case, on creation of a Remote Environment, proper Cluster Service Classes will be created automatically and will be available for every namespace.
+In the second case, on creation of a Environment Mapping, namespaced-scoped broker is registered in the specific namespace and  services from this Remote Environment are visible in the namespace.
+
+| Name | Required | Default | Description |
+|-----|---------|--------|------------|
+|**APP_PORT** | false | 8080 | The port on which the HTTP server listen. | 
+|**APP_BROKER_RELIST_DURATION_WINDOW** | true | - | Synchronize REB in Service Catalog (if needed) at most once per this period |
+| **APP_CLUSTER_SCOPED_BROKER_NAME**| true | - | Name of the ClusterServiceBroker (if registered as a cluster-scoped broker) |
+| **APP_CLUSTER_SCOPED_BROKER_ENABLED** | true | - | Flag defines if REB is working as a ClusterServiceBroker or a ServiceBroker | 
+| **APP_UNIQUE_SELECTOR_LABEL_KEY** | true | - |  APP_UNIQUE_SELECTOR_LABEL_KEY and APP_UNIQUE_SELECTOR_LABEL_VALUE define label selector which uniquely identify REB pod's |
+| **APP_UNIQUE_SELECTOR_LABEL_VALUE** | true | - | see above |
+| **NAMESPACE** | true | - | REB working namespace |
+  
+ 
 ## Code generation
 
 Structs related to Custom Resource Definitions are defined in `pkg/apis/remoteenvironment/v1alpha1/types.go` and registered in `pkg/apis/remoteenvironment/v1alpha1/`. After making any changes there, please run:
