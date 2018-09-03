@@ -64,7 +64,7 @@ metadata:
     installer: overrides
 data:
   global.isLocalEnv: "__IS_LOCAL_INSTALLATION__"
-  ingressgateway.service.externalPublicIp: "__EXTERNAL_PUBLIC_IP__"
+  gateways.istio-ingressgateway.service.externalPublicIp: "__EXTERNAL_PUBLIC_IP__"
   global.domainName: "__DOMAIN__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   configurations-generator.kubeConfig.url: "__K8S_APISERVER_URL__"
