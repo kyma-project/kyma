@@ -45,9 +45,9 @@ func TestControllerRunSuccess(t *testing.T) {
 
 	expectedPatchNS := fmt.Sprintf(`{"metadata":{"labels":{"accessLabel":"%s"}}}`, fixRE.AccessLabel)
 
-	emInformer := fakeEMInformer(t, fixEM)
+	emInformer := newEmInformerFromFakeClientset(t, fixEM)
 
-	nsInformer := fakeNSInformer(t, fixNS)
+	nsInformer := newNsInformerFromFakeClientset(t, fixNS)
 
 	nsClientMock := &automock.NsPatcher{}
 	defer nsClientMock.AssertExpectations(t)
@@ -63,7 +63,7 @@ func TestControllerRunSuccess(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	svc := mapping.New(false, "ignored", emInformer, nsInformer, nsClientMock, reGetterMock, nil, spy.NewLogDummy())
+	svc := mapping.New(false, emInformer, nsInformer, nsClientMock, reGetterMock, nil, spy.NewLogDummy())
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 	awaitInformerStartAtMost(t, time.Second, nsInformer)
@@ -85,7 +85,7 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 	fixNS := fixNamespaceWithAccessLabel(fixNSName)
 	fixExpectedNS := fixNamespace(fixNSName)
 
-	emInformer := fakeEMInformer(t, fixEM)
+	emInformer := newEmInformerFromFakeClientset(t, fixEM)
 	nsClientMock := &automock.NsPatcher{}
 	defer nsClientMock.AssertExpectations(t)
 
@@ -94,7 +94,7 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 		Return(fixExpectedNS, nil).
 		Once()
 
-	svc := mapping.New(false, "ignored", emInformer, nil, nsClientMock, nil, nil, spy.NewLogDummy())
+	svc := mapping.New(false, emInformer, nil, nsClientMock, nil, nil, spy.NewLogDummy())
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 
@@ -112,7 +112,7 @@ func TestControllerRunFailure(t *testing.T) {
 	fixErr := errors.New("fix get err")
 	fixPatchErr := errors.New("fix patch err")
 
-	emInformer := fakeEMInformer(t, fixEM)
+	emInformer := newEmInformerFromFakeClientset(t, fixEM)
 
 	expectations := &sync.WaitGroup{}
 	expectations.Add(2)
@@ -134,7 +134,7 @@ func TestControllerRunFailure(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	svc := mapping.New(false, "ignored", emInformer, nil, nsClientMock, reGetter, nil, spy.NewLogDummy())
+	svc := mapping.New(false, emInformer, nil, nsClientMock, reGetter, nil, spy.NewLogDummy())
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 
@@ -161,7 +161,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			prepareMock: func() *automock.NsBrokerFacade {
 				nsBrokerFacade := &automock.NsBrokerFacade{}
 				nsBrokerFacade.On("Exist", fixNSName).Return(false, nil)
-				nsBrokerFacade.On("Create", fixNSName, "kyma-system").Return(nil)
+				nsBrokerFacade.On("Create", fixNSName).Return(nil)
 				return nsBrokerFacade
 			}},
 		{
@@ -178,7 +178,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			prepareMock: func() *automock.NsBrokerFacade {
 				nsBrokerFacade := &automock.NsBrokerFacade{}
 				nsBrokerFacade.On("Exist", fixNSName).Return(false, nil)
-				nsBrokerFacade.On("Create", fixNSName, "kyma-system").Return(errors.New("some error"))
+				nsBrokerFacade.On("Create", fixNSName).Return(errors.New("some error"))
 				return nsBrokerFacade
 			},
 			errorMsg: "while creating namespaced broker in namespace [production]: some error",
@@ -198,8 +198,8 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			fixRE := fixRemoteEnvironment(fixREName)
 			fixNS := fixNamespace(fixNSName)
 
-			emInformer := fakeEMInformer(t, fixEM)
-			nsInformer := fakeNSInformer(t, fixNS)
+			emInformer := newEmInformerFromFakeClientset(t, fixEM)
+			nsInformer := newNsInformerFromFakeClientset(t, fixNS)
 
 			nsClientMock := &automock.NsPatcher{}
 			defer nsClientMock.AssertExpectations(t)
@@ -217,7 +217,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerFacade := tc.prepareMock()
 			defer nsBrokerFacade.AssertExpectations(t)
 
-			svc := mapping.New(true, "kyma-system", emInformer, nsInformer, nsClientMock, reGetterMock, nsBrokerFacade, spy.NewLogDummy())
+			svc := mapping.New(true, emInformer, nsInformer, nsClientMock, reGetterMock, nsBrokerFacade, spy.NewLogDummy())
 
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixREName))
 			if tc.errorMsg == "" {
@@ -236,7 +236,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			prepareMock: func() *automock.NsBrokerFacade {
 				nsBrokerFacade := &automock.NsBrokerFacade{}
 				nsBrokerFacade.On("Exist", fixNSName).Return(true, nil)
-				nsBrokerFacade.On("Delete", fixNSName, "kyma-system").Return(nil)
+				nsBrokerFacade.On("Delete", fixNSName).Return(nil)
 				return nsBrokerFacade
 			},
 		},
@@ -254,7 +254,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			prepareMock: func() *automock.NsBrokerFacade {
 				nsBrokerFacade := &automock.NsBrokerFacade{}
 				nsBrokerFacade.On("Exist", fixNSName).Return(true, nil)
-				nsBrokerFacade.On("Delete", fixNSName, "kyma-system").Return(errors.New("some error"))
+				nsBrokerFacade.On("Delete", fixNSName).Return(errors.New("some error"))
 				return nsBrokerFacade
 			},
 			errorMsg: "while removing namespaced broker from namespace [production]: some error",
@@ -272,8 +272,8 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			// GIVEN
 			fixNS := fixNamespace(fixNSName)
 
-			emInformer := fakeEMInformer(t, nil)
-			nsInformer := fakeNSInformer(t, fixNS)
+			emInformer := newEmInformerFromFakeClientset(t, nil)
+			nsInformer := newNsInformerFromFakeClientset(t, fixNS)
 
 			nsClientMock := &automock.NsPatcher{}
 			defer nsClientMock.AssertExpectations(t)
@@ -285,7 +285,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerFacade := tc.prepareMock()
 			defer nsBrokerFacade.AssertExpectations(t)
 
-			svc := mapping.New(true, "kyma-system", emInformer, nsInformer, nsClientMock, nil, nsBrokerFacade, spy.NewLogDummy())
+			svc := mapping.New(true, emInformer, nsInformer, nsClientMock, nil, nsBrokerFacade, spy.NewLogDummy())
 			// WHEN
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixREName))
 			// THEN
@@ -375,7 +375,7 @@ func fixNamespaceWithAccessLabel(fixNSName string) *corev1.Namespace {
 		},
 	}
 }
-func fakeEMInformer(t *testing.T, fixEM *v1alpha1.EnvironmentMapping) cache.SharedIndexInformer {
+func newEmInformerFromFakeClientset(t *testing.T, fixEM *v1alpha1.EnvironmentMapping) cache.SharedIndexInformer {
 	var client *fake.Clientset
 	if fixEM != nil {
 		client = fake.NewSimpleClientset(fixEM)
@@ -392,7 +392,7 @@ func fakeEMInformer(t *testing.T, fixEM *v1alpha1.EnvironmentMapping) cache.Shar
 	return emInformer
 }
 
-func fakeNSInformer(t *testing.T, fixNs *corev1.Namespace) cache.SharedIndexInformer {
+func newNsInformerFromFakeClientset(t *testing.T, fixNs *corev1.Namespace) cache.SharedIndexInformer {
 	var client *k8sfake.Clientset
 	if fixNs != nil {
 		client = k8sfake.NewSimpleClientset(fixNs)

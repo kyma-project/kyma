@@ -136,7 +136,7 @@ func TestErrorOnDeprovisioningInProgressInstance(t *testing.T) {
 
 func newDeprovisionServiceTestSuite(t *testing.T) *deprovisionServiceTestSuite {
 	return &deprovisionServiceTestSuite{
-		t: t,
+		t:                       t,
 		mockInstanceStateGetter: &automock.InstanceStateGetter{},
 		mockInstanceStorage:     &automock.InstanceStorage{},
 		mockOperationStorage:    &automock.OperationStorage{},

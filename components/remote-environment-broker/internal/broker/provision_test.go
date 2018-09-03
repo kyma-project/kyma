@@ -36,7 +36,7 @@ func TestProvisionAsync(t *testing.T) {
 
 	for _, tc := range []testCase{
 		{
-			name: "success",
+			name:                           "success",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 "provisioning succeeded",
@@ -44,7 +44,7 @@ func TestProvisionAsync(t *testing.T) {
 			expectedInstanceState:          internal.InstanceStateSucceeded,
 		},
 		{
-			name: "cannot provision",
+			name:                           "cannot provision",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: false, Reason: "very important reason"},
 			expectedOpState:                internal.OperationStateFailed,
 			expectedOpDesc:                 "Forbidden provisioning instance [inst-123] for remote environment [id: service-id] in namespace: [example-namesapce]. Reason: [very important reason]",
@@ -52,7 +52,7 @@ func TestProvisionAsync(t *testing.T) {
 			expectedInstanceState:          internal.InstanceStateFailed,
 		},
 		{
-			name: "error on access checking",
+			name:                           "error on access checking",
 			givenCanProvisionError:         errors.New("some error"),
 			expectedOpState:                internal.OperationStateFailed,
 			expectedOpDesc:                 "provisioning failed on error: some error",

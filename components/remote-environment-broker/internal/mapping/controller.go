@@ -40,15 +40,14 @@ type nsPatcher interface {
 // nsBrokerFacade is responsible for managing namespaced ServiceBrokers and creating proper k8s Services for them in the system namespace
 //go:generate mockery -name=nsBrokerFacade -output=automock -outpkg=automock -case=underscore
 type nsBrokerFacade interface {
-	Create(destinationNs, systemNs string) error
-	Delete(destinationNs, systemNs string) error
+	Create(destinationNs string) error
+	Delete(destinationNs string) error
 	Exist(destinationNs string) (bool, error)
 }
 
 // Controller populates local storage with all EnvironmentMapping custom resources created in k8s cluster.
 type Controller struct {
 	manageNsBrokers bool
-	systemNamesapce string
 	queue           workqueue.RateLimitingInterface
 	emInformer      cache.SharedIndexInformer
 	nsInformer      cache.SharedIndexInformer
@@ -59,10 +58,9 @@ type Controller struct {
 }
 
 // New creates new environment mapping controller
-func New(manageNsBrokers bool, systemNamespace string, emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, reGetter reGetter, nsBrokerFacade nsBrokerFacade, log logrus.FieldLogger) *Controller {
+func New(manageNsBrokers bool, emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, reGetter reGetter, nsBrokerFacade nsBrokerFacade, log logrus.FieldLogger) *Controller {
 	c := &Controller{
 		manageNsBrokers: manageNsBrokers,
-		systemNamesapce: systemNamespace,
 		log:             log.WithField("service", "labeler:controller"),
 		emInformer:      emInformer,
 		nsInformer:      nsInformer,
@@ -203,7 +201,7 @@ func (c *Controller) processItem(key string) error {
 	if c.manageNsBrokers {
 		envMapping, ok := emObj.(*v1alpha1.EnvironmentMapping)
 		if !ok {
-			return errors.New("cannot cast received object to v1alpha1.EnvironmentMapping type")
+			return fmt.Errorf("cannot cast received object to v1alpha1.EnvironmentMapping type, type was [%T]", emObj)
 		}
 		if err := c.ensureNsBrokerRegistered(envMapping); err != nil {
 			return err
@@ -225,7 +223,7 @@ func (c *Controller) getNamespace(namespace string) (*corev1.Namespace, error) {
 
 	reNs, ok := nsObj.(*corev1.Namespace)
 	if !ok {
-		return nil, errors.New("cannot cast received object to corev1.Namespace type")
+		return nil, fmt.Errorf("cannot cast received object to corev1.Namespace type, type was [%T]", nsObj)
 	}
 	return reNs, nil
 }
@@ -238,7 +236,7 @@ func (c *Controller) ensureNsBrokerRegistered(envMapping *v1alpha1.EnvironmentMa
 	if brokerExist {
 		return nil
 	}
-	if err := c.nsBrokerFacade.Create(envMapping.Namespace, c.systemNamesapce); err != nil {
+	if err := c.nsBrokerFacade.Create(envMapping.Namespace); err != nil {
 		return errors.Wrapf(err, "while creating namespaced broker in namespace [%s]", envMapping.Namespace)
 	}
 
@@ -254,7 +252,7 @@ func (c *Controller) ensureNsBrokerNotRegistered(namespace string) error {
 		return nil
 	}
 
-	if err := c.nsBrokerFacade.Delete(namespace, c.systemNamesapce); err != nil {
+	if err := c.nsBrokerFacade.Delete(namespace); err != nil {
 		return errors.Wrapf(err, "while removing namespaced broker from namespace [%s]", namespace)
 	}
 	return nil

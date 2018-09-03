@@ -89,9 +89,9 @@ func main() {
 	brokerMode, err := mode.NewBrokerService(cfg)
 	fatalOnError(err)
 
-	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), brokerMode, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, int32(cfg.Port), log)
+	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), brokerMode, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, int32(cfg.Port), log)
 
-	mappingCtrl := mapping.New(!cfg.ClusterScopedBrokerEnabled, cfg.Namespace, reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), nsBrokerFacade, log)
+	mappingCtrl := mapping.New(!cfg.ClusterScopedBrokerEnabled, reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), nsBrokerFacade, log)
 
 	// create broker
 	srv := broker.New(sFact.RemoteEnvironment(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,

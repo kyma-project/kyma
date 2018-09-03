@@ -6,9 +6,10 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scbeta "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	typedCorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -30,6 +31,7 @@ type Facade struct {
 	brokerGetter        scbeta.ServiceBrokersGetter
 	servicesGetter      typedCorev1.ServicesGetter
 	serviceNameProvider serviceNameProvider
+	workingNamespace    string
 	rebSelectorKey      string
 	rebSelectorValue    string
 	rebTargetPort       int32
@@ -37,7 +39,7 @@ type Facade struct {
 }
 
 // NewFacade returns facade
-func NewFacade(brokerGetter scbeta.ServiceBrokersGetter, servicesGetter typedCorev1.ServicesGetter, serviceNameProvider serviceNameProvider, rebSelectorKey string, rebSelectorValue string, rebTargetPort int32, log logrus.FieldLogger) *Facade {
+func NewFacade(brokerGetter scbeta.ServiceBrokersGetter, servicesGetter typedCorev1.ServicesGetter, serviceNameProvider serviceNameProvider, workingNamespace, rebSelectorKey, rebSelectorValue string, rebTargetPort int32, log logrus.FieldLogger) *Facade {
 	return &Facade{
 		brokerGetter:        brokerGetter,
 		servicesGetter:      servicesGetter,
@@ -45,18 +47,19 @@ func NewFacade(brokerGetter scbeta.ServiceBrokersGetter, servicesGetter typedCor
 		rebSelectorKey:      rebSelectorKey,
 		rebSelectorValue:    rebSelectorValue,
 		rebTargetPort:       rebTargetPort,
+		workingNamespace:    workingNamespace,
 		log:                 log.WithField("service", "nsbroker-facade"),
 	}
 }
 
 // Create creates k8s service and ServiceBroker. Errors don't stop execution of method. AlreadyExist errors are ignored.
-func (f *Facade) Create(destinationNs, systemNs string) error {
+func (f *Facade) Create(destinationNs string) error {
 	var resultErr *multierror.Error
 
-	if _, err := f.servicesGetter.Services(systemNs).Create(&corev1.Service{
+	if _, err := f.servicesGetter.Services(f.workingNamespace).Create(&corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs),
-			Namespace: systemNs,
+			Namespace: f.workingNamespace,
 		},
 		Spec: corev1.ServiceSpec{
 			Type: corev1.ServiceTypeNodePort,
@@ -88,7 +91,7 @@ func (f *Facade) Create(destinationNs, systemNs string) error {
 		},
 		Spec: v1beta1.ServiceBrokerSpec{
 			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
-				URL: fmt.Sprintf("http://%s.%s.svc.cluster.local", f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs), systemNs),
+				URL: fmt.Sprintf("http://%s.%s.svc.cluster.local", f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs), f.workingNamespace),
 			},
 		},
 	}
@@ -106,14 +109,14 @@ func (f *Facade) Create(destinationNs, systemNs string) error {
 }
 
 // Delete removes ServiceBroker and Facade. Errors don't stop execution of method. NotFound errors are ignored.
-func (f *Facade) Delete(destinationNs, systemNs string) error {
+func (f *Facade) Delete(destinationNs string) error {
 	var resultErr *multierror.Error
 	if err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(brokerName, nil); err != nil {
 		f.log.Warnf("Deletion of namespaced-broker for namespace [%s] results in error: [%s]. NotFound errors will be ignored. ", destinationNs, err)
 		resultErr = multierror.Append(resultErr, err)
 	}
 
-	if err := f.servicesGetter.Services(systemNs).Delete(f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs), nil); err != nil {
+	if err := f.servicesGetter.Services(f.workingNamespace).Delete(f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs), nil); err != nil {
 		f.log.Warnf("Deletion of service for namespaced-broker for namespace [%s] results in error: [%s]. NotFound errors will be ignored. ", destinationNs, err)
 		resultErr = multierror.Append(resultErr, err)
 	}
@@ -125,18 +128,26 @@ func (f *Facade) Delete(destinationNs, systemNs string) error {
 	return resultErr
 }
 
-// Exist check if ServiceBroker exist.
+// Exist check if ServiceBroker and Service exist.
 func (f *Facade) Exist(destinationNs string) (bool, error) {
 	_, err := f.brokerGetter.ServiceBrokers(destinationNs).Get(brokerName, metav1.GetOptions{})
 	switch {
-	case errors.IsNotFound(err):
+	case k8serrors.IsNotFound(err):
 		return false, nil
 	case err != nil:
-		return false, err
-	default:
-		return true, nil
+		return false, errors.Wrapf(err, "while checking if ServiceBroker [%s] exists in the namespace [%s]", brokerName, destinationNs)
 	}
 
+	svcName := f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs)
+	_, err = f.servicesGetter.Services(f.workingNamespace).Get(svcName, metav1.GetOptions{})
+	switch {
+	case k8serrors.IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, errors.Wrapf(err, "while checking if Service [%s] for ServiceBroker exists in the namespace [%s]", svcName, f.workingNamespace)
+
+	}
+	return true, nil
 }
 
 func (f *Facade) filterOutMultiError(merr *multierror.Error, predicate func(err error) bool) *multierror.Error {
@@ -154,9 +165,9 @@ func (f *Facade) filterOutMultiError(merr *multierror.Error, predicate func(err 
 }
 
 func (f *Facade) ignoreAlreadyExist(err error) bool {
-	return !errors.IsAlreadyExists(err)
+	return !k8serrors.IsAlreadyExists(err)
 }
 
 func (f *Facade) ignoreIsNotFound(err error) bool {
-	return !errors.IsNotFound(err)
+	return !k8serrors.IsNotFound(err)
 }
