@@ -5,7 +5,7 @@ type: Details
 
 By default, Kyma comes with two Remote Environments preinstalled. Those Remote Environments are installed in the `kyma-integration` Namespace.
 
->**NOTE:** A Remote Environment is a representation of a connected external solution.
+>**NOTE:** A Remote Environment represents a single connected external solution.
 
 ## Install a Remote Environment on a local Kyma deployment
 
