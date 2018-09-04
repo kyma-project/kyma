@@ -3,6 +3,10 @@ black-list: ["/vendor/"]
 timeout: 60
 request-repeats: 5
 files:
+  - path: "./kyma/docs/tracing/docs/001-overview-tracing.md"
+    config:
+      #Jaegertracing randomly fail, even with 5 request-repeats...
+      white-list-external: ["jaegertracing.io"]
   - path: "./kyma/tools/stability-checker/README.md"
     config:
       white-list-external: ["https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz"]
