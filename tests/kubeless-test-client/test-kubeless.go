@@ -88,7 +88,6 @@ func ensureFunctionIsRunning(namespace, name string, serviceBinding bool) {
 	if serviceBinding {
 		sbuID = getSBUID(namespace, name)
 	}
-
 	timeout := time.After(6 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 	for {
@@ -97,9 +96,11 @@ func ensureFunctionIsRunning(namespace, name string, serviceBinding bool) {
 			cmd := exec.Command("kubectl", "-n", namespace, "describe", "pod", "-l", "function="+name)
 			if sbuID != "" {
 				cmd = exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name, "-l", "use-"+sbuID)
+				printDebugLogsSvcBindingUsageFailed(namespace, name)
 			}
 			stdoutStderr, _ := cmd.CombinedOutput()
-			log.Fatal("Timed out waiting for ", name, " pod to be running:\n", string(stdoutStderr))
+			printLogsFunctionPodContainers(namespace, name)
+			log.Fatal("Timed out waiting for ", name, " function pod to be running:\n", string(stdoutStderr))
 		case <-tick:
 			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name, "-ojsonpath={range .items[*]}{.status.phase}{end}")
 			if sbuID != "" {
@@ -111,6 +112,59 @@ func ensureFunctionIsRunning(namespace, name string, serviceBinding bool) {
 			}
 		}
 	}
+}
+
+func printLogsFunctionPodContainers(namespace, name string) {
+	functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name, "-ojsonpath={.items[0].metadata.name}")
+	functionPodName, err := functionPodsCmd.CombinedOutput()
+	if err != nil {
+		log.Printf("Error is fetch function pod: %v", string(functionPodName))
+	}
+
+	log.Printf("---------- Logs from all containers for function pod: %s ----------\n", string(functionPodName))
+
+	prepareContainerLogCmd := exec.Command("kubectl", "-n", namespace, "logs", string(functionPodName), "prepare")
+
+	prepareContainerLog, _ := prepareContainerLogCmd.CombinedOutput()
+	log.Printf("Logs from prepare container:\n%s\n", string(prepareContainerLog))
+
+	installContainerLogCmd := exec.Command("kubectl", "-n", namespace, "logs", string(functionPodName), "install")
+
+	installContainerLog, _ := installContainerLogCmd.CombinedOutput()
+	log.Printf("Logs from prepare container:\n%s\n", string(installContainerLog))
+
+	functionContainerLogCmd := exec.Command("kubectl", "-n", namespace, "logs", string(functionPodName), name)
+
+	functionContainerLog, _ := functionContainerLogCmd.CombinedOutput()
+	log.Printf("Logs from %s container in pod %s:\n%s\n", name, string(functionPodName), string(functionContainerLog))
+}
+
+func printDebugLogsSvcBindingUsageFailed(namespace, name string) {
+
+	functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name)
+
+	functionPodsStdOutStdErr, err := functionPodsCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching pods for function: %v\n", err)
+	}
+	log.Printf("Function pods status:\n%s\n", string(functionPodsStdOutStdErr))
+
+	controllerNamespace := os.Getenv("KUBELESS_NAMESPACE")
+	svcBindingUsageControllerPodNameCmd := exec.Command("kubectl", "-n", controllerNamespace, "get", "po", "-l", "app=binding-usage-controller", "-o", "jsonpath={.items[0].metadata.name}")
+
+	svcBindingUsageControllerPodName, err := svcBindingUsageControllerPodNameCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching servicebindingusagercontroller pod: \n%s\n", string(svcBindingUsageControllerPodName))
+	}
+
+	svcBindingUsageControllerLogsCmd := exec.Command("kubectl", "-n", controllerNamespace, "log", string(svcBindingUsageControllerPodName), "-c", "binding-usage-controller")
+
+	svcBindingUsageControllerLogsCmdOutErr, err := svcBindingUsageControllerLogsCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching logs for bindingusagecontroller: %v\n", string(svcBindingUsageControllerLogsCmdOutErr))
+	}
+	log.Printf("Logs from bindingusagecontroller:\n%s\n", string(svcBindingUsageControllerLogsCmdOutErr))
+
 }
 
 func deleteFun(namespace, name string) {
@@ -271,18 +325,18 @@ func ensureCorrectLog(namespace, funName string, pattern *regexp.Regexp, match s
 }
 
 func ensureSvcInstanceIsDeployed(namespace, svcInstance string) {
-	timeout := time.After(5 * time.Minute)
+	timeout := time.After(6 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 
 	for {
 		select {
 		case <-timeout:
-			cmd := exec.Command("kubectl", "-n", namespace, "get", "serviceinstance", svcInstance, "--output=jsonpath={.items[0].metadata.name}")
+			cmd := exec.Command("kubectl", "describe", "-n", namespace, "serviceinstance", svcInstance)
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Fatalf("Unable to fetch service instance %v: %v", svcInstance, err)
+				log.Fatalf("Unable to fetch service instance %v:\n%v", svcInstance, string(stdoutStderr))
 			}
-			log.Fatalf("Timeout waiting to get service instance %v: %v", svcInstance, string(stdoutStderr))
+			log.Fatalf("Timeout waiting to get service instance ProvisionedSuccessfully %v: %v", svcInstance, string(stdoutStderr))
 		case <-tick:
 			cmd := exec.Command("kubectl", "-n", namespace, "get", "serviceinstance", svcInstance, "-o=jsonpath={.items[*]}{.status.conditions[*].reason}")
 			stdoutStderr, err := cmd.CombinedOutput()
