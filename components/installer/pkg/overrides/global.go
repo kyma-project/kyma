@@ -11,7 +11,6 @@ const globalsTplStr = `
 global:
   isLocalEnv: {{.IsLocalInstallation}}
   remoteEnvCa: "{{.RemoteEnvCa}}"
-  remoteEnvCaKey: "{{.RemoteEnvCaKey}}"
   istio:
     tls:
       secretName: "istio-ingress-certs"

@@ -77,12 +77,6 @@ spec:
                 name: remote-env-certificate
                 key: remote_env_ca
                 optional: true
-          - name: REMOTE_ENV_CA_KEY
-            valueFrom:
-              secretKeyRef:
-                name: remote-env-certificate
-                key: remote_env_ca_key
-                optional: true
           - name: IS_LOCAL_INSTALLATION
             valueFrom:
               configMapKeyRef:
