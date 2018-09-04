@@ -100,10 +100,10 @@ func MergeMaps(baseMap, overridesMap Map) {
 func FindOverrideStringValue(overrides Map, flatName string) (string, bool) {
 
 	res, isString := findOverrideValue(overrides, flatName).(string)
-	if !isString {
-		return "", false
+	if isString {
+		return res, true
 	}
-	return res, true
+	return "", false
 }
 
 func findOverrideValue(overrides Map, flatName string) (interface{}) {
@@ -115,11 +115,11 @@ func findOverrideValue(overrides Map, flatName string) (interface{}) {
 		}
 
 		nestedMap, isMap := m[keys[0]].(map[string]interface{})
-		if !isMap {
-			return nil
+		if isMap {
+			return findOverride(nestedMap, keys[1:])
 		}
 
-		return findOverride(nestedMap, keys[1:])
+		return nil		
 	}
 
 	keys := strings.Split(flatName, ".")
