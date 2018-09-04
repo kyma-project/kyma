@@ -118,3 +118,8 @@ auth:
 ##Custom Labels to be added to Grafana ServiceMonitors
 ##
 additionalServiceMonitorLabels: {}
+
+# Possible theme values dark or light
+users:
+  default:
+    theme: "light"
