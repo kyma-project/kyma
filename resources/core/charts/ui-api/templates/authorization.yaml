@@ -19,7 +19,7 @@ spec:
       sub: request.auth.claims["sub"] | ""
   action:
     namespace: destination.namespace | ""
-    service: destination.service | ""
+    service: destination.service.name | ""
     method: request.method | ""
     path: request.path | ""
     properties:
@@ -35,7 +35,7 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
 spec:
-  match: (destination.service == "{{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local") && (request.path == "/graphql" || request.path.startsWith("/graphql?")) && (request.method == "POST")
+  match: (destination.service.name == "{{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local") && (request.path == "/graphql" || request.path.startsWith("/graphql?")) && (request.method == "POST")
   actions:
   # handler and instance names default to the rule's namespace.
   - handler: rbac-handler.rbac

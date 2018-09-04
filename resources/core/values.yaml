@@ -7,16 +7,12 @@ service-catalog:
     cluster:
       replicaCount: 1
 
-minio:  
+minio:
   service:
     type: NodePort
 
 azure-broker:
   enabled: false
-
-etcd-operator:
-  backupOperator:
-    enabled: false
 
 global:
   containerRegistry:
@@ -27,7 +23,8 @@ global:
       secretName: istio-ingress-certs  
     gateway: 
       name: kyma-gateway      
-  etcdBackupABS:
+  etcdBackup:
+    enabled: false
     secretName: etcd-backup-abs-credentials
 
 test:

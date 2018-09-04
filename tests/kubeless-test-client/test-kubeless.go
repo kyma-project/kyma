@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
 	"net/http"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -299,7 +301,7 @@ func cleanup() {
 	var wg sync.WaitGroup
 	wg.Add(5)
 	go func() {
-		deleteK8s("k8s.yaml")
+		deleteK8s("k8syaml/k8s.yaml")
 		defer wg.Done()
 	}()
 	go func() {
@@ -311,7 +313,7 @@ func cleanup() {
 		defer wg.Done()
 	}()
 	go func() {
-		deleteK8s("svcbind-lambda.yaml")
+		deleteK8s("k8syaml/svcbind-lambda.yaml")
 		deleteK8s("svc-instance.yaml")
 		defer wg.Done()
 	}()
@@ -329,9 +331,10 @@ func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	log.Println("Starting test")
+	log.Printf("Domain Name is: %v", os.Getenv("DOMAIN_NAME"))
 	testID := randomString(8)
 	deployK8s("ns.yaml")
-	deployK8s("k8s.yaml")
+	deployK8s("k8syaml/k8s.yaml")
 	var wg sync.WaitGroup
 	wg.Add(3)
 
@@ -339,7 +342,8 @@ func main() {
 		log.Println("Deploying test-hello function")
 		deployFun("kubeless-test", "test-hello", "nodejs6", "dependencies.json", "hello.js", "hello.handler")
 		log.Println("Verifying correct function output for test-hello")
-		ensureOutputIsCorrect("https://test-hello.kyma.local", "hello world", testID, "kubeless-test", "test-hello")
+		host := fmt.Sprintf("https://test-hello.%s", os.Getenv("DOMAIN_NAME"))
+		ensureOutputIsCorrect(host, "hello world", testID, "kubeless-test", "test-hello")
 		log.Println("Function test-hello works correctly")
 		defer wg.Done()
 	}()
@@ -360,10 +364,11 @@ func main() {
 		deployK8s("svc-instance.yaml")
 		ensureSvcInstanceIsDeployed("kubeless-test", "redis")
 		log.Println("Deploying svcbind-lambda")
-		deployK8s("svcbind-lambda.yaml")
+		deployK8s("k8syaml/svcbind-lambda.yaml")
 		ensureFunctionIsRunning("kubeless-test", "test-svcbind", true)
 		log.Println("Verifying correct function output for test-svcbind")
-		ensureOutputIsCorrect("https://test-svcbind.kyma.local", "OK", testID, "kubeless-test", "test-svcbind")
+		host := fmt.Sprintf("https://test-svcbind.%s", os.Getenv("DOMAIN_NAME"))
+		ensureOutputIsCorrect(host, "OK", testID, "kubeless-test", "test-svcbind")
 		log.Println("Verifying service connection for test-svcbind")
 		ensureCorrectLog("kubeless-test", "test-svcbind", testDataRegex, testID, true)
 		log.Println("Function test-svcbind works correctly")

@@ -14,7 +14,7 @@ ingressgateway:
 `
 
 // GetIstioOverrides returns values overrides for istio ingressgateway
-func GetIstioOverrides(installationData *config.InstallationData) (Map, error) {
+func GetIstioOverrides(installationData *config.InstallationData, overrides Map) (Map, error) {
 	if hasIPAddress(installationData) == false {
 		return Map{}, nil
 	}
@@ -30,7 +30,16 @@ func GetIstioOverrides(installationData *config.InstallationData) (Map, error) {
 		return nil, err
 	}
 
-	return ToMap(buf.String())
+	istioOverrides, err := ToMap(buf.String())
+	if err != nil {
+		return nil, err
+	}
+
+	allOverrides := Map{}
+	MergeMaps(allOverrides, overrides)
+	MergeMaps(allOverrides, istioOverrides)
+
+	return allOverrides, nil
 }
 
 func hasIPAddress(installationData *config.InstallationData) bool {

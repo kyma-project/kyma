@@ -22,12 +22,12 @@ To execute the backup process, you must set the following values in the [core][c
 
 | Property name              | Description |
 |---------------------------------------------------|---|
-| **etcd-operator.backupOperator.enabled**            | If set to true, the [etcd-operator][etcd-operator-chart] chart installs the [etcd-backup-operator][etcd-backup-operator-chart]. The etcd-operator also creates the [Secret][abs-creds] with the **storage-account** and **storage-key** keys.  |
+| **global.etcdBackup.enabled**                       | If set to true, the [etcd-operator][etcd-operator-chart] chart and the Service Catalog [sub-chart][sc-backup-sub-chart] installs the CronJob which executes periodically the [Etcd Backup][etcd-backup-app] application. The etcd-operator also creates the [Secret][abs-creds] with the **storage-account** and **storage-key** keys. For more information on how to configure the backup CronJob, see the [Etcd Backup][etcd-backup-app-readme] documentation. |
+| **global.etcdBackup.containerName**                 | The ABS container to store the backup. |
 | **etcd-operator.backupOperator.abs.storageAccount** | The name of the storage account for the Azure Blob Storage (ABS). It stores the value for the **storage-account** Secret key. |
 | **etcd-operator.backupOperator.abs.storageKey**     | The key value of the storage account for the ABS. It stores the value for the **storage-key** Secret key. |
-| **global.etcdBackupABS.containerName**              | The ABS container to store the backup. If set, the Service Catalog [sub-chart][sc-backup-sub-chart] installs the CronJob which executes periodically the [Etcd Backup][etcd-backup-app] application. For more information on how to configure the backup CronJob, see the [Etcd Backup][etcd-backup-app-readme] documentation. |
 
-> **NOTE:** If you set the **storageAccount**, **storageKey**, and **containerName** properties, the **etcd-operator.backupOperator.enabled** must be set to `true`. 
+> **NOTE:** If you set the **storageAccount**, **storageKey**, and **containerName** properties, the **global.etcdBackup.enabled** must be set to `true`. 
 
 ### Restore
 
@@ -58,7 +58,7 @@ export ABS_PATH=$(kubectl get cm -n kyma-system sc-recorded-etcd-backup-data -o=
 export SECRET_NAME=etcd-backup-abs-credentials
 ```
 
-> **NOTE:** The Secret name is defined [here][core-chart-values] under the **global.etcdBackupABS.secretName** property.
+> **NOTE:** The Secret name is defined [here][core-chart-values] under the **global.etcdBackup.secretName** property.
 
 5. Create the EtcdRestore Custom Resource which triggers a restore process:
 ```bash

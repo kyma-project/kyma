@@ -11,7 +11,7 @@ func TestEnableAzureBroker(t *testing.T) {
 	Convey("EnableAzureBroker", t, func() {
 		Convey("when InstallationData does not contain azure credentials overrides should be empty", func() {
 
-			installatioData := NewInstallationDataCreator().WithEmptyAzureCredentials().GetData()
+			installatioData, _ := NewInstallationDataCreator().WithEmptyAzureCredentials().GetData()
 			overridesMap, err := EnableAzureBroker(&installatioData)
 			So(err, ShouldBeNil)
 
@@ -28,7 +28,7 @@ func TestEnableAzureBroker(t *testing.T) {
   subscription_id: d5423a63-0ab6-4455-9efe-569c6e716625
   tenant_id: 7ffdff3c-daa6-420d-9cff-b04769031acf
 `
-			installatioData := NewInstallationDataCreator().WithDummyAzureCredentials().GetData()
+			installatioData, _ := NewInstallationDataCreator().WithDummyAzureCredentials().GetData()
 			overridesMap, err := EnableAzureBroker(&installatioData)
 			So(err, ShouldBeNil)
 

@@ -1,12 +1,12 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/ghodss/yaml"
 	"github.com/imdario/mergo"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage"
@@ -28,8 +28,14 @@ type Config struct {
 	Logger                     logger.Config
 	Port                       int              `default:"8080"`
 	Storage                    []storage.Config `valid:"required"`
-	BrokerName                 string           `valid:"required"`
 	BrokerRelistDurationWindow time.Duration    `valid:"required"`
+	ClusterScopedBrokerName    string           `valid:"required"`
+	// Before adjusting ui-api-layer and tests, this flag by default should be set to true.
+	ClusterScopedBrokerEnabled bool
+	// UniqueSelectorLabelKey and UniqueSelectorLabelValue allows unambiguously distinguish REB's pods.
+	UniqueSelectorLabelKey   string `valid:"required"`
+	UniqueSelectorLabelValue string `valid:"required"`
+	Namespace                string `valid:"required"`
 }
 
 // Load method has following strategy:
@@ -53,7 +59,7 @@ func Load(verbose bool) (*Config, error) {
 		outCfg = fileConfig
 		// fmt.Printf used, because logger will be created after reading configuration
 		if verbose {
-			fmt.Printf("Config after applying values from file: %+v\n", outCfg)
+			spew.Dump("Config after applying values from file", outCfg)
 		}
 	}
 
@@ -66,13 +72,13 @@ func Load(verbose bool) (*Config, error) {
 		return nil, errors.Wrap(err, "while merging config from environment variables")
 	}
 	if verbose {
-		fmt.Printf("Config after applying values from environment variables: %+v\n", outCfg)
+		spew.Dump("Config after applying values from environment variables", outCfg)
 	}
 
 	defaults.SetDefaults(&outCfg)
 
 	if verbose {
-		fmt.Printf("Config after applying defaults: %+v\n", outCfg)
+		spew.Dump("Config after applying defaults", outCfg)
 	}
 	if _, err := govalidator.ValidateStruct(outCfg); err != nil {
 		return nil, errors.Wrap(err, "while validating configuration object")

@@ -9,8 +9,8 @@ type resourceQuotaLister struct {
 	mock.Mock
 }
 
-// List provides a mock function with given fields: environment
-func (_m *resourceQuotaLister) List(environment string) ([]*v1.ResourceQuota, error) {
+// ListResourceQuotas provides a mock function with given fields: environment
+func (_m *resourceQuotaLister) ListResourceQuotas(environment string) ([]*v1.ResourceQuota, error) {
 	ret := _m.Called(environment)
 
 	var r0 []*v1.ResourceQuota

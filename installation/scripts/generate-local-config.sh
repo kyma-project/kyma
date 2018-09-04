@@ -40,7 +40,7 @@ bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placehol
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__K8S_APISERVER_URL__" --value "${MINIKUBE_IP}"
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__K8S_APISERVER_CA__" --value "${MINIKUBE_CA}"
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__ADMIN_GROUP__" --value ""
-bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__ENABLE_ETCD_BACKUP_OPERATOR__" --value "false"
+bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__ENABLE_ETCD_BACKUP__" --value "false"
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__ETCD_BACKUP_ABS_CONTAINER_NAME__" --value ""
 ##########
 
@@ -51,6 +51,12 @@ kubectl create namespace "kyma-installer"
 kubectl apply -f ${CONFIG_OUTPUT_PATH}
 
 rm ${CONFIG_OUTPUT_PATH}
+
+##########
+
+echo -e "\nConfiguring sub-components"
+
+bash ${ROOT_PATH}/configure-components.sh
 
 ##########
 

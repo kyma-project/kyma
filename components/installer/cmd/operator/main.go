@@ -11,6 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/installer/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/installer/pkg/installation"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
+	"github.com/kyma-project/kyma/components/installer/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/installer/pkg/release"
 	"github.com/kyma-project/kyma/components/installer/pkg/servicecatalog"
 	"github.com/kyma-project/kyma/components/installer/pkg/toolkit"
@@ -30,13 +31,13 @@ import (
 
 func main() {
 
-	log.Println("starting operator...")
+	log.Println("Starting operator...")
 
 	stop := make(chan struct{})
 
 	kubeconfig := flag.String("kubeconfig", "", "Path to a kubeconfig file")
 	helmHost := flag.String("helmhost", "tiller-deploy.kube-system.svc.cluster.local:44134", "Helm host")
-	kymaDir := flag.String("kymadir", "/kyma", "Chart directory")
+	kymaDir := flag.String("kymadir", "/kyma", "Directory where kyma packages will be extracted")
 
 	flag.Parse()
 
@@ -58,8 +59,7 @@ func main() {
 
 	helmClient := kymahelm.NewClient(*helmHost)
 	serviceCatalogClient := servicecatalog.NewClient(config)
-
-	kymaPackageClient := &steps.KymaPackageClient{}
+	kymaCommandExecutor := &toolkit.KymaCommandExecutor{}
 
 	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
 	internalInformerFactory := informers.NewSharedInformerFactory(internalClient, time.Second*30)
@@ -72,10 +72,11 @@ func main() {
 	installationFinalizerManager := finalizer.NewManager(consts.InstFinalizer)
 	releaseFinalizerManager := finalizer.NewManager(consts.RelFinalizer)
 
-	kymaCommandExecutor := &toolkit.KymaCommandExecutor{}
-	installationSteps := steps.New(helmClient, kubeClient, serviceCatalogClient, *kymaDir, kymaStatusManager, kymaActionManager, kymaCommandExecutor, kymaPackageClient)
+	kymaPackages := kymasources.NewKymaPackages(kymasources.NewFilesystemWrapper(), kymaCommandExecutor, *kymaDir)
 
-	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, *kymaDir, installationSteps, conditionManager, installationFinalizerManager, internalClient)
+	installationSteps := steps.New(helmClient, kubeClient, serviceCatalogClient, kymaStatusManager, kymaActionManager, kymaCommandExecutor, kymaPackages)
+
+	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, installationSteps, conditionManager, installationFinalizerManager, internalClient)
 	releaseController := release.NewController(kubeClient, internalInformerFactory, releaseFinalizerManager)
 
 	kubeInformerFactory.Start(stop)

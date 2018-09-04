@@ -42,14 +42,17 @@ func New(restConfig *rest.Config, remoteEnvironmentLister RemoteEnvironmentListe
 	environmentService := newEnvironmentService(client.Namespaces(), remoteEnvironmentLister)
 	deploymentService := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer())
-	resourceQuotaService := newResourceQuotaService(informerFactory.Core().V1().ResourceQuotas().Informer())
+
+	resourceQuotaService := newResourceQuotaService(informerFactory.Core().V1().ResourceQuotas().Informer(),
+		informerFactory.Apps().V1().ReplicaSets().Informer(), informerFactory.Apps().V1().StatefulSets().Informer(), client)
+	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, resourceQuotaService, deploymentService)
 
 	return &Resolver{
 		environmentResolver:   newEnvironmentResolver(environmentService),
 		secretResolver:        newSecretResolver(client),
 		deploymentResolver:    newDeploymentResolver(deploymentService, serviceBindingUsageLister, serviceBindingGetter),
 		limitRangeResolver:    newLimitRangeResolver(limitRangeService),
-		resourceQuotaResolver: newResourceQuotaResolver(resourceQuotaService),
+		resourceQuotaResolver: newResourceQuotaResolver(resourceQuotaService, resourceQuotaStatusService),
 		informerFactory:       informerFactory,
 	}, nil
 }

@@ -4,7 +4,9 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/access"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mode"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
+	listers "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/remoteenvironment/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/platform/idprovider"
 	"github.com/sirupsen/logrus"
 )
@@ -95,7 +97,16 @@ type (
 )
 
 // New creates instance of broker server.
-func New(remoteEnvironmentFinder reFinder, instStorage instanceStorage, opStorage operationStorage, accessChecker access.ProvisionChecker, reClient v1alpha1.RemoteenvironmentV1alpha1Interface, serviceInstanceGetter serviceInstanceGetter, log *logrus.Entry) *Server {
+func New(remoteEnvironmentFinder reFinder,
+	instStorage instanceStorage,
+	opStorage operationStorage,
+	accessChecker access.ProvisionChecker,
+	reClient v1alpha1.RemoteenvironmentV1alpha1Interface,
+	serviceInstanceGetter serviceInstanceGetter,
+	emLister listers.EnvironmentMappingLister,
+	brokerMode *mode.BrokerService,
+	log *logrus.Entry) *Server {
+
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {
 		idRaw, err := idpRaw()
@@ -105,11 +116,17 @@ func New(remoteEnvironmentFinder reFinder, instStorage instanceStorage, opStorag
 		return internal.OperationID(idRaw), nil
 	}
 
+	var enabledChecker reEnabledChecker = clusterScopedReEnabledChecker{}
+	if !brokerMode.IsClusterScoped() {
+		enabledChecker = access.NewEnvironmentMappingService(emLister)
+	}
+
 	stateService := &instanceStateService{operationCollectionGetter: opStorage}
 	return &Server{
 		catalogGetter: &catalogService{
-			finder: remoteEnvironmentFinder,
-			conv:   &reToServiceConverter{},
+			finder:           remoteEnvironmentFinder,
+			conv:             &reToServiceConverter{},
+			reEnabledChecker: enabledChecker,
 		},
 		provisioner:   NewProvisioner(instStorage, stateService, opStorage, opStorage, accessChecker, remoteEnvironmentFinder, serviceInstanceGetter, reClient, instStorage, idp, log),
 		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, log),
@@ -119,6 +136,15 @@ func New(remoteEnvironmentFinder reFinder, instStorage instanceStorage, opStorag
 		lastOpGetter: &getLastOperationService{
 			getter: opStorage,
 		},
-		logger: log.WithField("service", "broker:server"),
+		brokerMode: brokerMode,
+		logger:     log.WithField("service", "broker:server"),
 	}
+}
+
+type clusterScopedReEnabledChecker struct {
+}
+
+func (clusterScopedReEnabledChecker) IsRemoteEnvironmentEnabled(namespace, name string) (bool, error) {
+	// all RE are enabled for cluster scoped broker
+	return true, nil
 }

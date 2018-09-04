@@ -12,7 +12,6 @@ global:
   tlsCrt: "{{.ClusterTLSCert}}"
   tlsKey: "{{.ClusterTLSKey}}"
   isLocalEnv: {{.IsLocalInstallation}}
-  domainName: "{{.Domain}}"
   remoteEnvCa: "{{.RemoteEnvCa}}"
   remoteEnvCaKey: "{{.RemoteEnvCaKey}}"
   istio:
@@ -31,7 +30,7 @@ global:
 `
 
 // GetGlobalOverrides .
-func GetGlobalOverrides(installationData *config.InstallationData) (Map, error) {
+func GetGlobalOverrides(installationData *config.InstallationData, overrides Map) (Map, error) {
 
 	tmpl, err := template.New("").Parse(globalsTplStr)
 	if err != nil {
@@ -44,5 +43,14 @@ func GetGlobalOverrides(installationData *config.InstallationData) (Map, error) 
 		return nil, err
 	}
 
-	return ToMap(buf.String())
+	globalOverrides, err := ToMap(buf.String())
+	if err != nil {
+		return nil, err
+	}
+
+	allOverrides := Map{}
+	MergeMaps(allOverrides, overrides)
+	MergeMaps(allOverrides, globalOverrides)
+
+	return allOverrides, nil
 }

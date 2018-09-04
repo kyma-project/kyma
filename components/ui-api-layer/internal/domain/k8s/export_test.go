@@ -21,6 +21,6 @@ func NewSecretResolver(secretGetter v1.SecretsGetter) *secretResolver {
 	return newSecretResolver(secretGetter)
 }
 
-func NewResourceQuotaService(informer cache.SharedIndexInformer) *resourceQuotaService {
-	return newResourceQuotaService(informer)
+func NewResourceQuotaService(rqInformer cache.SharedIndexInformer, rsInformer cache.SharedIndexInformer, ssInformer cache.SharedIndexInformer, podClient v1.CoreV1Interface) *resourceQuotaService {
+	return newResourceQuotaService(rqInformer, rsInformer, ssInformer, podClient)
 }

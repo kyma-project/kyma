@@ -36,8 +36,8 @@ spec:
       allowOrigin:
       - "*"
       allowHeaders:
-      - "Authorization"
-      - "Content-Type"
+      - "authorization"
+      - "content-type"
       allowMethods:
       - "GET"
       - "POST"

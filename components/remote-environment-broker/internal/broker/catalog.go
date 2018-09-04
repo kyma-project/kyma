@@ -20,13 +20,18 @@ type converter interface {
 	Convert(name internal.RemoteEnvironmentName, source internal.Source, svc internal.Service) (osb.Service, error)
 }
 
+//go:generate mockery -name=reEnabledChecker -output=automock -outpkg=automock -case=underscore
+type reEnabledChecker interface {
+	IsRemoteEnvironmentEnabled(namespace, name string) (bool, error)
+}
+
 type catalogService struct {
-	finder remoteEnvironmentFinder
-	conv   converter
+	finder           remoteEnvironmentFinder
+	reEnabledChecker reEnabledChecker
+	conv             converter
 }
 
 func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*osb.CatalogResponse, error) {
-
 	reList, err := svc.finder.FindAll()
 	if err != nil {
 		return nil, errors.Wrap(err, "while finding Remote Environments")
@@ -35,6 +40,14 @@ func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*
 	resp := osb.CatalogResponse{}
 	resp.Services = make([]osb.Service, 0)
 	for _, re := range reList {
+		enabled, err := svc.reEnabledChecker.IsRemoteEnvironmentEnabled(osbCtx.BrokerNamespace, string(re.Name))
+		if err != nil {
+			return nil, errors.Wrap(err, "while checking if RE is enabled")
+		}
+		if !enabled {
+			continue
+		}
+
 		for _, reSvc := range re.Services {
 			s, err := svc.conv.Convert(re.Name, re.Source, reSvc)
 			if err != nil {

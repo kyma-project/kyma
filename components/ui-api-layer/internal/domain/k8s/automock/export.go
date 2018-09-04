@@ -11,3 +11,19 @@ func NewEnvLister() *envLister {
 func NewResourceQuotaLister() *resourceQuotaLister {
 	return new(resourceQuotaLister)
 }
+
+func NewStatefulSetLister() *statefulSetLister {
+	return new(statefulSetLister)
+}
+
+func NewReplicaSetLister() *replicaSetLister {
+	return new(replicaSetLister)
+}
+
+func NewPodsLister() *podsLister {
+	return new(podsLister)
+}
+
+func NewDeploymentGetter() *deploymentGetter {
+	return new(deploymentGetter)
+}

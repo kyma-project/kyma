@@ -1,6 +1,17 @@
-white-list-external: ["localhost", "console.kyma.local"]
+white-list-external: ["localhost", "kyma.local", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081"]
 black-list: ["/vendor/"]
+timeout: 60
+request-repeats: 5
 files:
-  - path: "./kyma/docs/tracing/docs/001-overview-tracing.md"
+  - path: "./kyma/tools/stability-checker/README.md"
     config:
-      white-list-external: ["jaegertracing.io"]
+      white-list-external: ["https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz"]
+  - path: "./kyma/docs/monitoring/docs/020-architecture-monitoring.md"
+    config:
+      white-list-external: ["https://grafana.{DOMAIN"]
+  - path: "./kyma/resources/core/charts/monitoring/charts/alertmanager/README.md"
+    config:
+      white-list-external: ["https://alert.victorops.com/integrations/generic/20131114/alert"]
+  - path: "./kyma/docs/application-connector/docs/012-details-serviceclass-documentation.md"
+    config:
+      white-list-external: ["https://www.orders.com/v1/orders"]

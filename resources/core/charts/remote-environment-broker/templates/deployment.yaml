@@ -35,10 +35,10 @@ spec:
             value: "{{ .Values.service.internalPort }}"
           - name: APP_CONFIG_FILE_NAME
             value: /etc/config/re-broker/config.yaml
-          - name: APP_BROKER_NAME
-            value: {{ template "fullname" . }}
           - name: APP_BROKER_RELIST_DURATION_WINDOW
             value: {{ .Values.brokerRelistDurationWindow }}
+          - name: APP_BROKER_NAME
+            value: {{ template "fullname" . }}
         volumeMounts:
         - mountPath: /etc/config/re-broker
           name: config-volume

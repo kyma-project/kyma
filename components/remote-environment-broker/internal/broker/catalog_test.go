@@ -1,6 +1,7 @@
 package broker_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -10,7 +11,48 @@ import (
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/broker/automock"
 )
+
+func TestGetCatalogHappyPath(t *testing.T) {
+	// GIVEN
+	tc := newCatalogTC()
+	defer tc.AssertExpectations(t)
+	tc.finderMock.On("FindAll").Return([]*internal.RemoteEnvironment{tc.fixRE()}, nil).Once()
+	tc.reEnabledCheckerMock.On("IsRemoteEnvironmentEnabled", "stage", string(tc.fixRE().Name)).Return(true, nil)
+	tc.converterMock.On("Convert", tc.fixRE().Name, tc.fixRE().Source, tc.fixRE().Services[0]).Return(tc.fixService(), nil)
+
+	svc := broker.NewCatalogService(tc.finderMock, tc.reEnabledCheckerMock, tc.converterMock)
+	osbCtx := broker.NewOSBContext("not", "important", "stage")
+
+	// WHEN
+	resp, err := svc.GetCatalog(context.Background(), *osbCtx)
+
+	// THEN
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.Len(t, resp.Services, 1)
+	assert.Equal(t, tc.fixService(), resp.Services[0])
+}
+
+func TestGetCatalogNotEnabled(t *testing.T) {
+	// GIVEN
+	tc := newCatalogTC()
+	defer tc.AssertExpectations(t)
+	tc.finderMock.On("FindAll").Return([]*internal.RemoteEnvironment{tc.fixRE()}, nil).Once()
+	tc.reEnabledCheckerMock.On("IsRemoteEnvironmentEnabled", "stage", string(tc.fixRE().Name)).Return(false, nil)
+
+	svc := broker.NewCatalogService(tc.finderMock, tc.reEnabledCheckerMock, tc.converterMock)
+	osbCtx := broker.NewOSBContext("not", "important", "stage")
+
+	// WHEN
+	resp, err := svc.GetCatalog(context.Background(), *osbCtx)
+
+	// THEN
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.Len(t, resp.Services, 0)
+}
 
 func TestConvertService(t *testing.T) {
 	const fixReName = "fix-re-name"
@@ -174,4 +216,42 @@ func fixOsbService(reName string) osb.Service {
 			},
 		},
 	}
+}
+
+type catalogTestCase struct {
+	finderMock           *automock.ReFinder
+	converterMock        *automock.Converter
+	reEnabledCheckerMock *automock.ReEnabledChecker
+}
+
+func newCatalogTC() *catalogTestCase {
+	return &catalogTestCase{
+		finderMock:           &automock.ReFinder{},
+		converterMock:        &automock.Converter{},
+		reEnabledCheckerMock: &automock.ReEnabledChecker{},
+	}
+}
+
+func (tc *catalogTestCase) AssertExpectations(t *testing.T) {
+	tc.finderMock.AssertExpectations(t)
+	tc.converterMock.AssertExpectations(t)
+}
+
+func (tc *catalogTestCase) fixRE() *internal.RemoteEnvironment {
+	return &internal.RemoteEnvironment{
+		Name: "ec-prod",
+		Services: []internal.Service{
+			{
+				ID: "00-1",
+				APIEntry: &internal.APIEntry{
+					GatewayURL:  "www.gate1.com",
+					AccessLabel: "free",
+				},
+			},
+		},
+	}
+}
+
+func (tc *catalogTestCase) fixService() osb.Service {
+	return osb.Service{ID: "bundleID"}
 }

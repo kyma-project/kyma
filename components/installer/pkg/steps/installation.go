@@ -2,13 +2,13 @@ package steps
 
 import (
 	"log"
-	"path"
 
 	actionmanager "github.com/kyma-project/kyma/components/installer/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
-	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 	internalerrors "github.com/kyma-project/kyma/components/installer/pkg/errors"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
+	"github.com/kyma-project/kyma/components/installer/pkg/kymainstallation"
+	"github.com/kyma-project/kyma/components/installer/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 	serviceCatalog "github.com/kyma-project/kyma/components/installer/pkg/servicecatalog"
 	statusmanager "github.com/kyma-project/kyma/components/installer/pkg/statusmanager"
@@ -22,94 +22,74 @@ type InstallationSteps struct {
 	kubeClientset       *kubernetes.Clientset
 	serviceCatalog      serviceCatalog.ClientInterface
 	errorHandlers       internalerrors.ErrorHandlersInterface
-	chartDir            string
 	statusManager       statusmanager.StatusManager
 	actionManager       actionmanager.ActionManager
 	kymaCommandExecutor toolkit.CommandExecutor
-	kymaPath            string
-	kymaPackageClient   KymaPackageInterface
+	kymaPackages        kymasources.KymaPackages
+
+	currentPackage   kymasources.KymaPackage
+	installedPackage kymasources.KymaPackage
 }
 
 // New .
-func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientset, serviceCatalog serviceCatalog.ClientInterface, kymaDir string, statusManager statusmanager.StatusManager, actionManager actionmanager.ActionManager, kymaCommandExecutor toolkit.CommandExecutor, kymaPackageClient KymaPackageInterface) *InstallationSteps {
+func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientset,
+	serviceCatalog serviceCatalog.ClientInterface, statusManager statusmanager.StatusManager,
+	actionManager actionmanager.ActionManager, kymaCommandExecutor toolkit.CommandExecutor,
+	kymaPackages kymasources.KymaPackages) *InstallationSteps {
 	steps := &InstallationSteps{
 		helmClient:          helmClient,
 		kubeClientset:       kubeClientset,
 		serviceCatalog:      serviceCatalog,
 		errorHandlers:       &internalerrors.ErrorHandlers{},
-		chartDir:            path.Join(kymaDir, "resources"),
 		statusManager:       statusManager,
 		actionManager:       actionManager,
 		kymaCommandExecutor: kymaCommandExecutor,
-		kymaPath:            kymaDir,
-		kymaPackageClient:   kymaPackageClient,
+		kymaPackages:        kymaPackages,
 	}
 
 	return steps
 }
 
 //InstallKyma .
-func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData) error {
+func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 
-	downloadKymaErr := steps.DownloadKyma(installationData)
+	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
 	if downloadKymaErr != nil {
 		return downloadKymaErr
 	}
 
-	if installationData.ShouldInstallComponent(consts.ClusterEssentialsComponent) {
-		if instErr := steps.InstallClusterEssentials(installationData); instErr != nil {
-			return instErr
-		}
-	}
+	steps.currentPackage = currentPackage
 
-	if installationData.ShouldInstallComponent(consts.IstioComponent) {
-		if instErr := steps.InstallIstio(installationData); instErr != nil {
-			return instErr
-		}
-	}
-	if installationData.ShouldInstallComponent(consts.PrometheusComponent) {
-		if instErr := steps.InstallPrometheus(installationData); instErr != nil {
-			return instErr
-		}
-	}
+	stepsFactory := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrides.NewLegacyProvider(overrideData, installationData, currentPackage, steps.errorHandlers))
 
-	if installationData.ShouldInstallComponent(consts.ProvisionBundlesComponent) {
-		if bundlesErr := steps.ProvisionBundles(installationData); bundlesErr != nil {
-			return bundlesErr
-		}
-	}
+	for _, component := range installationData.Components {
 
-	if installationData.ShouldInstallComponent(consts.DexComponent) {
-		if dexErr := steps.InstallDex(installationData); dexErr != nil {
-			return dexErr
-		}
-	}
+		stepName := "Installing " + component.GetReleaseName()
+		steps.PrintInstallationStep(stepName)
+		steps.statusManager.InProgress(stepName)
 
-	if installationData.ShouldInstallComponent(consts.CoreComponent) {
-		if instErr := steps.InstallCore(installationData); instErr != nil {
-			return instErr
+		if component.Name == "provision-bundles" { // Legacy support for bash provision-bundles script - to be deleted later
+			err := steps.ProvisionBundles(installationData)
+			if steps.errorHandlers.CheckError("Step installation error: ", err) {
+				steps.statusManager.Error(stepName)
+				return err
+			}
+		} else {
+			step := stepsFactory.NewStep(component)
+			steps.PrintInstallationStep(stepName)
+
+			installErr := step.Install()
+			if steps.errorHandlers.CheckError("Step installation error: ", installErr) {
+				steps.statusManager.Error(stepName)
+				return installErr
+			}
 		}
 
-		if upgradeErr := steps.UpgradeCore(installationData); upgradeErr != nil {
-			return upgradeErr
-		}
-	}
-
-	if installationData.ShouldInstallComponent(consts.RemoteEnvironments) {
-		if instErr := steps.InstallHmcDefaultRemoteEnvironments(installationData); instErr != nil {
-			return instErr
-		}
-
-		if instErr := steps.InstallEcDefaultRemoteEnvironments(installationData); instErr != nil {
-			return instErr
-		}
-	}
-
-	if instErr := steps.RemoveKymaSources(installationData); instErr != nil {
-		return instErr
+		log.Println(stepName + "...DONE")
 	}
 
 	err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
+
 	if steps.errorHandlers.CheckError("Error on removing label: ", err) {
 		return err
 	}
@@ -119,62 +99,52 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 		return err
 	}
 
+	log.Println("Kyma Installed")
+
 	return nil
 }
 
 //UpdateKyma .
-func (steps *InstallationSteps) UpdateKyma(installationData *config.InstallationData) error {
-	downloadKymaErr := steps.DownloadKyma(installationData)
+func (steps *InstallationSteps) UpdateKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
+
+	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
+
 	if downloadKymaErr != nil {
 		return downloadKymaErr
 	}
 
-	upgradeErr := steps.UpdateClusterEssentials(installationData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
+	steps.currentPackage = currentPackage
 
-	upgradeErr = steps.UpdateIstio(installationData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
+	stepsFactory := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrides.NewLegacyProvider(overrideData, installationData, currentPackage, steps.errorHandlers))
 
-	upgradeErr = steps.UpdatePrometheus(installationData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
+	for _, component := range installationData.Components {
 
-	bundlesErr := steps.UpdateBundles(installationData)
-	if bundlesErr != nil {
-		return bundlesErr
-	}
+		stepName := "Upgrading " + component.GetReleaseName()
+		steps.PrintInstallationStep(stepName)
+		steps.statusManager.InProgress(stepName)
 
-	dexErr := steps.UpdateDex(installationData)
-	if dexErr != nil {
-		return dexErr
-	}
+		if component.Name == "provision-bundles" { // Legacy support for bash provision-bundles script - to be deleted later
+			err := steps.UpdateBundles(installationData)
+			if steps.errorHandlers.CheckError("Step installation error: ", err) {
+				steps.statusManager.Error(stepName)
+				return err
+			}
+		} else {
+			step := stepsFactory.NewStep(component)
+			steps.PrintInstallationStep(stepName)
 
-	upgradeErr = steps.UpgradeCore(installationData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
+			installErr := step.Upgrade()
+			if steps.errorHandlers.CheckError("Step installation error: ", installErr) {
+				steps.statusManager.Error(stepName)
+				return installErr
+			}
+		}
 
-	upgradeErr = steps.UpdateHmcDefaultRemoteEnvironments(installationData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
-
-	upgradeErr = steps.UpdateEcDefaultRemoteEnvironments(installationData)
-	if upgradeErr != nil {
-		return upgradeErr
-	}
-
-	upgradeErr = steps.RemoveKymaSources(installationData)
-	if upgradeErr != nil {
-		return upgradeErr
+		log.Println(stepName + "...DONE")
 	}
 
 	err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
+
 	if steps.errorHandlers.CheckError("Error on removing label: ", err) {
 		return err
 	}

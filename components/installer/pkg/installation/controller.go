@@ -1,6 +1,7 @@
 package installation
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -27,6 +28,7 @@ import (
 	listers "github.com/kyma-project/kyma/components/installer/pkg/client/listers/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/installer/pkg/conditionmanager"
 	"github.com/kyma-project/kyma/components/installer/pkg/finalizer"
+	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
 	internalerrors "github.com/kyma-project/kyma/components/installer/pkg/errors"
@@ -58,7 +60,8 @@ type Controller struct {
 
 // NewController .
 func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kubeinformers.SharedInformerFactory,
-	internalInformerFactory informers.SharedInformerFactory, kymaDir string, installationSteps *steps.InstallationSteps, conditionManager conditionmanager.Interface, finalizerManager *finalizer.Manager, internalClientset *internalClientset.Clientset) *Controller {
+	internalInformerFactory informers.SharedInformerFactory, installationSteps *steps.InstallationSteps,
+	conditionManager conditionmanager.Interface, finalizerManager *finalizer.Manager, internalClientset *internalClientset.Clientset) *Controller {
 
 	installationInformer := internalInformerFactory.Installer().V1alpha1().Installations()
 
@@ -171,20 +174,25 @@ func (c *Controller) syncHandler(key string) error {
 		return err
 	}
 
-	//TODO: Validation happens here
-	domainName := installationData.Domain
-	if domainName == "" {
-		runtime.HandleError(err)
+	overrideProvider, overridesErr := overrides.New(c.kubeClientset)
+	if overridesErr != nil {
+		return overridesErr
+	}
+
+	domainName, exists := overrides.FindOverrideValue(overrideProvider.Common(), "global.domainName")
+	if !exists || domainName == "" {
+		runtime.HandleError(errors.New("'global.domainName' override not found"))
 		return nil
 	}
 
 	if installation.ShouldInstall() {
+
 		err = c.conditionManager.InstallStart()
 		if err != nil {
 			return err
 		}
 
-		err = c.kymaSteps.InstallKyma(installationData)
+		err = c.kymaSteps.InstallKyma(installationData, overrideProvider)
 		if err != nil {
 			c.conditionManager.InstallError()
 
@@ -213,12 +221,13 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 	} else if installation.ShouldUpdate() {
+
 		err = c.conditionManager.UpdateStart()
 		if err != nil {
 			return err
 		}
 
-		err = c.kymaSteps.UpdateKyma(installationData)
+		err = c.kymaSteps.UpdateKyma(installationData, overrideProvider)
 		if err != nil {
 			c.conditionManager.UpdateError()
 

@@ -276,6 +276,11 @@ type Deployment {
     boundServiceInstanceNames: [String]!
 }
 
+type ResourceValues {
+    memory: String
+    cpu: String
+}
+
 type ResourceQuota {
     name: String!
     pods: String
@@ -283,9 +288,9 @@ type ResourceQuota {
     requests: ResourceValues!
 }
 
-type ResourceValues {
-    memory: String
-    cpu: String
+type ResourceQuotaStatus {
+    exceeded: Boolean!
+    message: String!
 }
 
 # Remote Environments
@@ -444,6 +449,7 @@ type Query {
     environments(remoteEnvironment: String): [Environment]!
     deployments(environment: String!, excludeFunctions: Boolean): [Deployment]!
     resourceQuotas(environment: String!): [ResourceQuota]!
+    resourceQuotaStatus(environment: String!): ResourceQuotaStatus!
 
     functions(environment: String!, first: Int, offset: Int): [Function]!
 

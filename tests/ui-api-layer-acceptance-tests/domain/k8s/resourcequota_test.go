@@ -3,7 +3,6 @@
 package k8s
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -23,14 +22,14 @@ const (
 )
 
 type resourceQuotas struct {
-	ResourceQuotas []resourceQuota
+	ResourceQuotas []resourceQuota `json:"resourceQuotas"`
 }
 
 type resourceQuota struct {
-	Name     string
-	Pods     string
-	Limits   resourceValues
-	Requests resourceValues
+	Name     string         `json:"name"`
+	Pods     string         `json:"pods"`
+	Limits   resourceValues `json:"limits"`
+	Requests resourceValues `json:"requests"`
 }
 
 type resourceValues struct {
@@ -38,8 +37,12 @@ type resourceValues struct {
 	Cpu    string `json:"cpu"`
 }
 
+type resourceQuotaStatus struct {
+	Exceeded bool   `json:"exceeded"`
+	Message  string `json:"message"`
+}
+
 func TestResourceQuotaQuery(t *testing.T) {
-	// GIVEN
 	k8sClient, _, err := k8s.NewClientWithConfig()
 	require.NoError(t, err)
 
@@ -47,27 +50,12 @@ func TestResourceQuotaQuery(t *testing.T) {
 	require.NoError(t, err)
 	defer func() {
 		err := k8sClient.Namespaces().Delete(resourceQuotaNamespace, &metav1.DeleteOptions{})
-		require.NoError(t, err)
+		assert.NoError(t, err)
 	}()
 
 	_, err = k8sClient.ResourceQuotas(resourceQuotaNamespace).Create(fixResourceQuota())
 	require.NoError(t, err)
 
-	query := fmt.Sprintf(`
-	query {
-	  resourceQuotas(environment: "%s") {
-		name
-		pods
-		limits {
-		  memory
-		  cpu
-		}
-		requests {
-		  memory
-		  cpu
-		}
-	  }
-	}`, resourceQuotaNamespace)
 	c, err := graphql.New()
 	require.NoError(t, err)
 
@@ -79,13 +67,55 @@ func TestResourceQuotaQuery(t *testing.T) {
 		return false, err
 	}, time.Minute)
 
-	// WHEN
-	var result resourceQuotas
-	err = c.DoQuery(query, &result)
+	var listResult resourceQuotas
+	var statusResult resourceQuotaStatus
 
-	// THEN
+	err = c.Do(fixListResourceQuotasQuery(), &listResult)
 	require.NoError(t, err)
-	assert.Contains(t, result.ResourceQuotas, resourceQuota{
+	assert.Contains(t, listResult.ResourceQuotas, fixListResourceQuotasResponse())
+
+	err = c.Do(fixResourceQuotaStatusQuery(), &statusResult)
+	require.NoError(t, err)
+	assert.False(t, statusResult.Exceeded)
+
+}
+
+func fixListResourceQuotasQuery() *graphql.Request {
+	query := `query($environment: String!) {
+				resourceQuotas(environment: $environment) {
+					name
+					pods
+					limits {
+					  memory
+					  cpu
+					}
+					requests {
+					  memory
+					  cpu
+					}
+				}
+			}`
+	r := graphql.NewRequest(query)
+	r.SetVar("environment", resourceQuotaNamespace)
+
+	return r
+}
+
+func fixResourceQuotaStatusQuery() *graphql.Request {
+	query := `query($environment: String!) {
+				  resourceQuotaStatus(environment: $environment) {
+					exceeded
+					message
+				  }
+				}`
+	r := graphql.NewRequest(query)
+	r.SetVar("environment", resourceQuotaNamespace)
+
+	return r
+}
+
+func fixListResourceQuotasResponse() resourceQuota {
+	return resourceQuota{
 		Name: resourceQuotaName,
 		Pods: "10",
 		Limits: resourceValues{
@@ -96,7 +126,7 @@ func TestResourceQuotaQuery(t *testing.T) {
 			Cpu:    "500m",
 			Memory: "512Mi",
 		},
-	})
+	}
 }
 
 func fixNamespace(name string) *v1.Namespace {
