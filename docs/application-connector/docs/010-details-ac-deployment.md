@@ -17,9 +17,9 @@ helm install --name {remote-environment-name} --set deployment.args.sourceType=c
 
 You can override the following parameters:
 
-- **sourceEnvironment** is the Event source environment name
-- **sourceType** is the Event source type
-- **sourceNamespace** is the organization that publishes the Event
+- **sourceEnvironment** is the Event source Environment name.
+- **sourceType** is the Event source type.
+- **sourceNamespace** is the organization that publishes the Event.
 
 Follow the **Set up a Remote Environment on Minikube** getting started guide to learn more about installing and setting up a Remote Environment on
 a local Kyma installation.
@@ -40,11 +40,11 @@ nightly.cluster.kyma.cx
 
 You can override the following parameters:
 
-- **sourceEnvironment** is the Event source environment name
-- **sourceType** is the Event source type
-- **sourceNamespace** is the organization that publishes the Event
+- **sourceEnvironment** is the Event source Environment name.
+- **sourceType** is the Event source type.
+- **sourceNamespace** is the organization that publishes the Event.
 
-## Working with Helm
+## Work with Helm
 
 Helm provides the following commands:
 - `helm list` lists existing Helm releases
