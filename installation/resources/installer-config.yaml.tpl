@@ -30,7 +30,6 @@ data:
   is_local_installation: "__IS_LOCAL_INSTALLATION__"
   domain: "__DOMAIN__"
   slack_api_url: "__SLACK_API_URL_VALUE__"
-  slack_channel: "__SLACK_CHANNEL_VALUE__"
 ---
 apiVersion: v1
 kind: ConfigMap

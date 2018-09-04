@@ -81,12 +81,6 @@ spec:
               configMapKeyRef:
                 name: installation-config
                 key: domain
-          - name: SLACK_CHANNEL_VALUE
-            valueFrom:
-              configMapKeyRef:
-                name: installation-config
-                key: slack_channel
-                optional: true
           - name: SLACK_API_URL_VALUE
             valueFrom:
               configMapKeyRef:

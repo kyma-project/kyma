@@ -53,13 +53,6 @@ func (sc *InstallationDataCreator) WithLocalInstallation() *InstallationDataCrea
 	return sc
 }
 
-// WithSlackCredentials sets value for SlackChannel and SlackApiUrl properties
-func (sc *InstallationDataCreator) WithSlackCredentials(channel, apiurl string) *InstallationDataCreator {
-	sc.installationData.SlackChannel = channel
-	sc.installationData.SlackApiUrl = apiurl
-	return sc
-}
-
 ////////////////////////////////////////
 // GetData returns InstallationData created by InstallationDataCreator
 func (sc *InstallationDataCreator) GetData() (config.InstallationData, map[string]string) {

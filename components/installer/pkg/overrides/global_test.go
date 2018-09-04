@@ -16,7 +16,6 @@ func TestGetGlobalOverrides(t *testing.T) {
     credentials:
       slack:
         apiurl: ""
-        channel: ""
   domainName: kyma.local
   isLocalEnv: true
   istio:
@@ -41,7 +40,6 @@ func TestGetGlobalOverrides(t *testing.T) {
     credentials:
       slack:
         apiurl: ""
-        channel: ""
   domainName: kyma.local
   isLocalEnv: false
   istio:
@@ -65,7 +63,6 @@ func TestGetGlobalOverrides(t *testing.T) {
     credentials:
       slack:
         apiurl: ""
-        channel: ""
   domainName: kyma.local
   isLocalEnv: false
   istio:
@@ -89,7 +86,6 @@ func TestGetGlobalOverrides(t *testing.T) {
     credentials:
       slack:
         apiurl: ""
-        channel: ""
   domainName: kyma.local
   isLocalEnv: false
   istio:
@@ -112,8 +108,7 @@ func TestGetGlobalOverrides(t *testing.T) {
   alertTools:
     credentials:
       slack:
-        apiurl: slack_apiurl
-        channel: slack_channel
+        apiurl: ""
   domainName: kyma.local
   isLocalEnv: false
   istio:
@@ -122,7 +117,6 @@ func TestGetGlobalOverrides(t *testing.T) {
 `
 			installData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").
-				WithSlackCredentials("slack_channel", "slack_apiurl").
 				GetData()
 
 			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))

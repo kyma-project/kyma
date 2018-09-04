@@ -16,7 +16,6 @@ global:
   alertTools:
     credentials:
       slack:
-        channel: "{{ .SlackChannel }}"
         apiurl: "{{ .SlackApiUrl }}"
 `
 
