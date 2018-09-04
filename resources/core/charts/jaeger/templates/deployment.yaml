@@ -43,5 +43,6 @@ spec:
               path: "/"
               port: {{ .Values.jaeger.uiPort }}
             initialDelaySeconds: 5
-          resources:
+          args: ["--memory.max-traces=1000"]
+          resources: 
 {{ toYaml .Values.resources | indent 12 }}
