@@ -7,7 +7,6 @@ import (
 
 // Configuration of non-secret values in installer
 type installationConfig struct {
-	ExternalPublicIP           string
 	AzureBrokerTenantID        string
 	AzureBrokerClientID        string
 	AzureBrokerSubscriptionID  string
@@ -28,7 +27,6 @@ type installationConfig struct {
 // GetInstallationConfig returns all non-secret installation parameters from the Installer environment variables
 func GetInstallationConfig() *installationConfig {
 	return &installationConfig{
-		ExternalPublicIP:           os.Getenv("EXTERNAL_PUBLIC_IP"),
 		AzureBrokerTenantID:        os.Getenv("AZURE_BROKER_TENANT_ID"),
 		AzureBrokerClientID:        os.Getenv("AZURE_BROKER_CLIENT_ID"),
 		AzureBrokerSubscriptionID:  os.Getenv("AZURE_BROKER_SUBSCRIPTION_ID"),
