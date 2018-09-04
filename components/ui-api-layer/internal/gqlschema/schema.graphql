@@ -83,6 +83,7 @@ type ServiceClass {
     displayName: String
     creationTimestamp: Timestamp!
     description: String!
+    longDescription: String
     imageUrl: String
     documentationUrl: String
     providerDisplayName: String
