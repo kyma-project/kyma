@@ -13,7 +13,7 @@ about: Report a bug in the project
 <!-- Provide a clear and concise description of the problem.
 Describe where it appears, when it occurred, and what it affects.  -->
 
-<!-- Provide relevant technical details such as Kubernetes version, the cluster name and provider, Kyma version, the browser name and version, or the operating system. -->
+<!-- Provide relevant technical details such as the Kubernetes version, the cluster name and provider, the Kyma version, the browser name and version, or the operating system. -->
 
 **Expected result**
 
