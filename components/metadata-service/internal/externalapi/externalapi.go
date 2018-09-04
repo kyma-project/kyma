@@ -14,22 +14,26 @@ type MetadataHandler interface {
 	DeleteService(w http.ResponseWriter, r *http.Request)
 }
 
+type RedirectionHandler interface {
+	Redirect(w http.ResponseWriter, r *http.Request)
+}
+
 const apiSpecPath = "api.yaml"
 
 func NewHandler(handler MetadataHandler, middlewares []mux.MiddlewareFunc) http.Handler {
 	router := mux.NewRouter()
+
+	apiSpecRedirectHandler := NewRedirectionHandler("/{remoteEnvironment}/v1/metadata/api.yaml", http.StatusMovedPermanently)
 
 	for _, middleware := range middlewares {
 		router.Use(middleware)
 	}
 
 	router.Path("/v1/health").Handler(NewHealthCheckHandler()).Methods(http.MethodGet)
-
-	router.Path("/{remoteEnvironment}/v1").Handler(http.RedirectHandler("/{remoteEnvironment}/v1/metadataapi.yaml", http.StatusMovedPermanently)).Methods(http.MethodGet)
-
-	router.Path("/{remoteEnvironment}/v1/metadataapi.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
+	router.Path("/{remoteEnvironment}/v1/metadata/api.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
 
 	metadataRouter := router.PathPrefix("/{remoteEnvironment}/v1/metadata").Subrouter()
+	metadataRouter.HandleFunc("", apiSpecRedirectHandler.Redirect)
 	metadataRouter.HandleFunc("/services", handler.CreateService).Methods(http.MethodPost)
 	metadataRouter.HandleFunc("/services", handler.GetServices).Methods(http.MethodGet)
 	metadataRouter.HandleFunc("/services/{serviceId}", handler.GetService).Methods(http.MethodGet)
