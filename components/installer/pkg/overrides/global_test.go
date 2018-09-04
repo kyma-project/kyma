@@ -14,9 +14,6 @@ func TestGetGlobalOverrides(t *testing.T) {
 			const dummyOverridesForGlobal = `global:
   domainName: kyma.local
   isLocalEnv: true
-  istio:
-    tls:
-      secretName: istio-ingress-certs
 `
 
 			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithLocalInstallation().GetData()
@@ -34,9 +31,6 @@ func TestGetGlobalOverrides(t *testing.T) {
 			const dummyOverridesForGlobal = `global:
   domainName: kyma.local
   isLocalEnv: false
-  istio:
-    tls:
-      secretName: istio-ingress-certs
 `
 			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").GetData()
 
@@ -53,51 +47,8 @@ func TestGetGlobalOverrides(t *testing.T) {
 			const dummyOverridesForGlobal = `global:
   domainName: kyma.local
   isLocalEnv: false
-  istio:
-    tls:
-      secretName: istio-ingress-certs
 `
 			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").GetData()
-
-			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
-			So(err, ShouldBeNil)
-
-			overridesYaml, err := ToYaml(overridesMap)
-			So(err, ShouldBeNil)
-			So(overridesYaml, ShouldEqual, dummyOverridesForGlobal)
-		})
-
-		Convey("when remote env CA property is provided remoteEnvCa should exist", func() {
-
-			const dummyOverridesForGlobal = `global:
-  domainName: kyma.local
-  isLocalEnv: false
-  istio:
-    tls:
-      secretName: istio-ingress-certs
-`
-			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").GetData()
-
-			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
-			So(err, ShouldBeNil)
-
-			overridesYaml, err := ToYaml(overridesMap)
-			So(err, ShouldBeNil)
-			So(overridesYaml, ShouldEqual, dummyOverridesForGlobal)
-		})
-
-		Convey("when slack and victorops credentials are provided then alertTools.credentials.victorOps and alertTools.credentials.slack should exist", func() {
-
-			const dummyOverridesForGlobal = `global:
-  domainName: kyma.local
-  isLocalEnv: false
-  istio:
-    tls:
-      secretName: istio-ingress-certs
-`
-			installData, testOverrides := NewInstallationDataCreator().
-				WithGeneric("global.domainName", "kyma.local").
-				GetData()
 
 			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)

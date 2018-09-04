@@ -10,9 +10,6 @@ import (
 const globalsTplStr = `
 global:
   isLocalEnv: {{.IsLocalInstallation}}
-  istio:
-    tls:
-      secretName: "istio-ingress-certs"
 `
 
 // GetGlobalOverrides .
