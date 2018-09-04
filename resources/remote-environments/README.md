@@ -14,7 +14,7 @@ Read the [Application Connector documentation](../../docs/application-connector/
 
 ## Details
 
-This directory contains the Helm chart for the Gateway Service. A single instance of the Gateway Service allows to connect a single external solution to Kyma. Such connection is represented by a Remote Environment.  
+This directory contains the Helm chart for the Gateway Service and all of the Ingresses required to access Application Connector services in the context of the created Remote Environment. A single instance of the Gateway Service allows to connect a single external solution to Kyma. Such connection is represented by a Remote Environment.  
 
 ### Customize the Gateway Service installation
 
