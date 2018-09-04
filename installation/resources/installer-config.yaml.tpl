@@ -29,10 +29,8 @@ metadata:
 data:
   is_local_installation: "__IS_LOCAL_INSTALLATION__"
   domain: "__DOMAIN__"
-  etcd_backup_container_name: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   slack_api_url: "__SLACK_API_URL_VALUE__"
   slack_channel: "__SLACK_CHANNEL_VALUE__"
-  victor_ops_routing_key: "__VICTOR_OPS_ROUTING_KEY_VALUE__"
   victor_ops_api_key: "__VICTOR_OPS_API_KEY_VALUE__"
 ---
 apiVersion: v1

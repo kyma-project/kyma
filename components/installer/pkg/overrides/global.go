@@ -13,12 +13,9 @@ global:
   istio:
     tls:
       secretName: "istio-ingress-certs"
-  etcdBackupABS:
-    containerName: "{{.EtcdBackupABSContainerName}}"
   alertTools:
     credentials:
       victorOps:
-        routingkey: "{{ .VictorOpsRoutingKey }}"
         apikey: "{{ .VictorOpsApiKey }}"
       slack:
         channel: "{{ .SlackChannel }}"

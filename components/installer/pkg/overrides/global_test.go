@@ -19,10 +19,7 @@ func TestGetGlobalOverrides(t *testing.T) {
         channel: ""
       victorOps:
         apikey: ""
-        routingkey: ""
   domainName: kyma.local
-  etcdBackupABS:
-    containerName: ""
   isLocalEnv: true
   istio:
     tls:
@@ -49,10 +46,7 @@ func TestGetGlobalOverrides(t *testing.T) {
         channel: ""
       victorOps:
         apikey: ""
-        routingkey: ""
   domainName: kyma.local
-  etcdBackupABS:
-    containerName: ""
   isLocalEnv: false
   istio:
     tls:
@@ -78,10 +72,7 @@ func TestGetGlobalOverrides(t *testing.T) {
         channel: ""
       victorOps:
         apikey: ""
-        routingkey: ""
   domainName: kyma.local
-  etcdBackupABS:
-    containerName: ""
   isLocalEnv: false
   istio:
     tls:
@@ -107,10 +98,7 @@ func TestGetGlobalOverrides(t *testing.T) {
         channel: ""
       victorOps:
         apikey: ""
-        routingkey: ""
   domainName: kyma.local
-  etcdBackupABS:
-    containerName: ""
   isLocalEnv: false
   istio:
     tls:
@@ -126,37 +114,6 @@ func TestGetGlobalOverrides(t *testing.T) {
 			So(overridesYaml, ShouldEqual, dummyOverridesForGlobal)
 		})
 
-		Convey("when EtcdBackupABSContainerName property is provided then etcdBackupABS.containerName should exist", func() {
-
-			const dummyOverridesForGlobal = `global:
-  alertTools:
-    credentials:
-      slack:
-        apiurl: ""
-        channel: ""
-      victorOps:
-        apikey: ""
-        routingkey: ""
-  domainName: kyma.local
-  etcdBackupABS:
-    containerName: abs/container/name
-  isLocalEnv: false
-  istio:
-    tls:
-      secretName: istio-ingress-certs
-`
-			installData, testOverrides := NewInstallationDataCreator().
-				WithGeneric("global.domainName", "kyma.local").
-				WithEtcdBackupABSContainerName("abs/container/name").
-				GetData()
-
-			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
-			So(err, ShouldBeNil)
-			overridesYaml, err := ToYaml(overridesMap)
-			So(err, ShouldBeNil)
-			So(overridesYaml, ShouldEqual, dummyOverridesForGlobal)
-		})
-
 		Convey("when slack and victorops credentials are provided then alertTools.credentials.victorOps and alertTools.credentials.slack should exist", func() {
 
 			const dummyOverridesForGlobal = `global:
@@ -166,11 +123,8 @@ func TestGetGlobalOverrides(t *testing.T) {
         apiurl: slack_apiurl
         channel: slack_channel
       victorOps:
-        apikey: victorops_api_key
-        routingkey: victorops_routing_key
+        apikey: ""
   domainName: kyma.local
-  etcdBackupABS:
-    containerName: ""
   isLocalEnv: false
   istio:
     tls:
@@ -178,7 +132,6 @@ func TestGetGlobalOverrides(t *testing.T) {
 `
 			installData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").
-				WithVictorOpsCredentials("victorops_routing_key", "victorops_api_key").
 				WithSlackCredentials("slack_channel", "slack_apiurl").
 				GetData()
 

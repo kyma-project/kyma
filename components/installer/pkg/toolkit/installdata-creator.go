@@ -53,20 +53,6 @@ func (sc *InstallationDataCreator) WithLocalInstallation() *InstallationDataCrea
 	return sc
 }
 
-// WithEtcdBackupABSContainerName sets value for EtcdBackupABSContainerName property
-func (sc *InstallationDataCreator) WithEtcdBackupABSContainerName(path string) *InstallationDataCreator {
-	sc.installationData.EtcdBackupABSContainerName = path
-
-	return sc
-}
-
-// WithVictorOpsCredentials sets value for VictorOpsApiKey and VictorOpsRoutingKey properties
-func (sc *InstallationDataCreator) WithVictorOpsCredentials(routingkey, apikey string) *InstallationDataCreator {
-	sc.installationData.VictorOpsApiKey = apikey
-	sc.installationData.VictorOpsRoutingKey = routingkey
-	return sc
-}
-
 // WithSlackCredentials sets value for SlackChannel and SlackApiUrl properties
 func (sc *InstallationDataCreator) WithSlackCredentials(channel, apiurl string) *InstallationDataCreator {
 	sc.installationData.SlackChannel = channel
