@@ -12,7 +12,6 @@ type installationConfig struct {
 	AzureBrokerSubscriptionID  string
 	AzureBrokerClientSecret    string
 	ClusterTLSKey              string
-	ClusterTLSCert             string
 	RemoteEnvCa                string
 	RemoteEnvCaKey             string
 	EtcdBackupABSContainerName string
@@ -32,7 +31,6 @@ func GetInstallationConfig() *installationConfig {
 		AzureBrokerSubscriptionID:  os.Getenv("AZURE_BROKER_SUBSCRIPTION_ID"),
 		AzureBrokerClientSecret:    os.Getenv("AZURE_BROKER_CLIENT_SECRET"),
 		ClusterTLSKey:              os.Getenv("TLS_KEY"),
-		ClusterTLSCert:             os.Getenv("TLS_CERT"),
 		RemoteEnvCa:                os.Getenv("REMOTE_ENV_CA"),
 		RemoteEnvCaKey:             os.Getenv("REMOTE_ENV_CA_KEY"),
 		EtcdBackupABSContainerName: os.Getenv("ETCD_BACKUP_ABS_CONTAINER_NAME"),

@@ -71,11 +71,6 @@ spec:
                 name: azure-broker
                 key: azure_broker_client_secret
                 optional: true
-          - name: TLS_CERT
-            valueFrom:
-              configMapKeyRef:
-                name: cluster-certificate
-                key: tls_cert
           - name: TLS_KEY
             valueFrom:
               configMapKeyRef:

@@ -42,7 +42,6 @@ func (sc *InstallationDataCreator) WithDummyAzureCredentials() *InstallationData
 
 // WithCert sets Cert and CertKey properties
 func (sc *InstallationDataCreator) WithCert(cert, certKey string) *InstallationDataCreator {
-	sc.installationData.ClusterTLSCert = cert
 	sc.installationData.ClusterTLSKey = certKey
 	return sc
 }
