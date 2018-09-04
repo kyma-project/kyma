@@ -172,7 +172,7 @@ func (*resourceQuotaStatusService) containersUsage(containers []v1.Container, re
 func (svc *resourceQuotaStatusService) extractMaxUnavailable(environment string, name string, replicas int32) (int32, error) {
 	deploy, err := svc.deployGetter.Find(name, environment)
 	if err != nil {
-		return 0, errors.Wrapf(err, "while getting Deployment [name: %s][environment: %s]")
+		return 0, errors.Wrapf(err, "while getting Deployment [name: %s][environment: %s]", name, environment)
 	}
 	maxUnavailable := deploy.Spec.Strategy.RollingUpdate.MaxUnavailable.StrVal
 

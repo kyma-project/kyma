@@ -49,7 +49,7 @@ func (r *classResolver) ServiceClassQuery(ctx context.Context, name string) (*gq
 
 	result, err := r.classConverter.ToGQL(serviceClass)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting to %s type"), pretty.ServiceClass)
+		glog.Error(errors.Wrapf(err, "while converting to %s type", pretty.ServiceClass))
 		return nil, gqlerror.New(err, pretty.ServiceClass, gqlerror.WithName(name))
 	}
 
@@ -63,13 +63,13 @@ func (r *classResolver) ServiceClassesQuery(ctx context.Context, first *int, off
 	})
 
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing %s"), pretty.ServiceClasses)
+		glog.Error(errors.Wrapf(err, "while listing %s", pretty.ServiceClasses))
 		return nil, gqlerror.New(err, pretty.ServiceClasses)
 	}
 
 	serviceClasses, err := r.classConverter.ToGQLs(items)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s"), pretty.ServiceClasses)
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceClasses))
 		return nil, gqlerror.New(err, pretty.ServiceClasses)
 	}
 
@@ -90,7 +90,7 @@ func (r *classResolver) ServiceClassPlansField(ctx context.Context, obj *gqlsche
 
 	convertedPlans, err := r.planConverter.ToGQLs(items)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s"), pretty.ServicePlans)
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServicePlans))
 		return nil, gqlerror.New(err, pretty.ServicePlans)
 	}
 

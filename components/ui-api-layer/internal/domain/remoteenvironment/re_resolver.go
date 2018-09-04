@@ -48,7 +48,7 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentQuery(ctx context.Context, 
 	remoteEnvironment, err := r.reSvc.Find(name)
 
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting %s"), pretty.RemoteEnvironment)
+		glog.Error(errors.Wrapf(err, "while getting %s", pretty.RemoteEnvironment))
 		return nil, gqlerror.New(err, pretty.RemoteEnvironment, gqlerror.WithName(name))
 	}
 	if remoteEnvironment == nil {
@@ -66,7 +66,7 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentsQuery(ctx context.Context,
 	if environment == nil { // retrieve all
 		items, err = r.reSvc.List(pager.PagingParams{First: first, Offset: offset})
 		if err != nil {
-			glog.Error(errors.Wrapf(err, "while listing all %s"), pretty.RemoteEnvironments)
+			glog.Error(errors.Wrapf(err, "while listing all %s", pretty.RemoteEnvironments))
 			return []gqlschema.RemoteEnvironment{}, gqlerror.New(err, pretty.RemoteEnvironments)
 		}
 	} else { // retrieve only for given environment

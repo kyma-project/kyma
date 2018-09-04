@@ -32,13 +32,13 @@ func (r *brokerResolver) ServiceBrokersQuery(ctx context.Context, first *int, of
 	})
 
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing %s"), pretty.ServiceBrokers)
+		glog.Error(errors.Wrapf(err, "while listing %s", pretty.ServiceBrokers))
 		return nil, gqlerror.New(err, pretty.ServiceBrokers)
 	}
 
 	serviceBrokers, err := r.brokerConverter.ToGQLs(items)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s"), pretty.ServiceBrokers)
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceBrokers))
 		return nil, gqlerror.New(err, pretty.ServiceBrokers)
 	}
 
@@ -57,7 +57,7 @@ func (r *brokerResolver) ServiceBrokerQuery(ctx context.Context, name string) (*
 
 	result, err := r.brokerConverter.ToGQL(serviceBroker)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting to %s type"), pretty.ServiceBroker)
+		glog.Error(errors.Wrapf(err, "while converting to %s type", pretty.ServiceBroker))
 		return nil, gqlerror.New(err, pretty.ServiceBroker, gqlerror.WithName(name))
 	}
 
