@@ -21,7 +21,6 @@ type InstallationData struct {
 	AzureBrokerClientSecret   string
 	Components                []v1alpha1.KymaComponent
 	IsLocalInstallation       bool
-	SlackApiUrl               string
 }
 
 // NewInstallationData .
@@ -42,7 +41,6 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		AzureBrokerClientSecret:   installationConfig.AzureBrokerClientSecret,
 		Components:                installation.Spec.Components,
 		IsLocalInstallation:       installationConfig.IsLocalInstallation,
-		SlackApiUrl:               installationConfig.SlackApiUrl,
 	}
 	return res, nil
 }

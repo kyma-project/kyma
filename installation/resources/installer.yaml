@@ -81,12 +81,6 @@ spec:
               configMapKeyRef:
                 name: installation-config
                 key: domain
-          - name: SLACK_API_URL_VALUE
-            valueFrom:
-              configMapKeyRef:
-                name: installation-config
-                key: slack_api_url
-                optional: true
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1

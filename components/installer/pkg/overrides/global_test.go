@@ -12,10 +12,6 @@ func TestGetGlobalOverrides(t *testing.T) {
 		Convey("when IP address is not specified IsLocalEnv should be true", func() {
 
 			const dummyOverridesForGlobal = `global:
-  alertTools:
-    credentials:
-      slack:
-        apiurl: ""
   domainName: kyma.local
   isLocalEnv: true
   istio:
@@ -36,10 +32,6 @@ func TestGetGlobalOverrides(t *testing.T) {
 		Convey("when IP address is specified IsLocalEnv should be false", func() {
 
 			const dummyOverridesForGlobal = `global:
-  alertTools:
-    credentials:
-      slack:
-        apiurl: ""
   domainName: kyma.local
   isLocalEnv: false
   istio:
@@ -59,10 +51,6 @@ func TestGetGlobalOverrides(t *testing.T) {
 		Convey("when cert properties are provided tlsCrt and tlsKey should exist", func() {
 
 			const dummyOverridesForGlobal = `global:
-  alertTools:
-    credentials:
-      slack:
-        apiurl: ""
   domainName: kyma.local
   isLocalEnv: false
   istio:
@@ -82,10 +70,6 @@ func TestGetGlobalOverrides(t *testing.T) {
 		Convey("when remote env CA property is provided remoteEnvCa should exist", func() {
 
 			const dummyOverridesForGlobal = `global:
-  alertTools:
-    credentials:
-      slack:
-        apiurl: ""
   domainName: kyma.local
   isLocalEnv: false
   istio:
@@ -105,10 +89,6 @@ func TestGetGlobalOverrides(t *testing.T) {
 		Convey("when slack and victorops credentials are provided then alertTools.credentials.victorOps and alertTools.credentials.slack should exist", func() {
 
 			const dummyOverridesForGlobal = `global:
-  alertTools:
-    credentials:
-      slack:
-        apiurl: ""
   domainName: kyma.local
   isLocalEnv: false
   istio:

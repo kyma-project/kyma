@@ -13,10 +13,6 @@ global:
   istio:
     tls:
       secretName: "istio-ingress-certs"
-  alertTools:
-    credentials:
-      slack:
-        apiurl: "{{ .SlackApiUrl }}"
 `
 
 // GetGlobalOverrides .
