@@ -65,7 +65,12 @@ func main() {
 	scInformersGroup := scInformerFactory.Servicecatalog().V1beta1()
 
 	// instance populator
-	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), cfg.ClusterScopedBrokerName)
+	var instancePopulator Doer
+	if cfg.ClusterScopedBrokerEnabled {
+		instancePopulator = populator.NewInstancesFromClusterBroker(scClientSet, sFact.Instance(), &populator.Converter{}, cfg.ClusterScopedBrokerName)
+	} else {
+		instancePopulator = populator.NewInstancesFromNsBrokers(scClientSet, sFact.Instance(), &populator.Converter{})
+	}
 	popCtx, popCancelFunc := context.WithTimeout(context.Background(), time.Minute)
 	defer popCancelFunc()
 	log.Info("Instance storage population...")
@@ -141,4 +146,8 @@ func cancelOnInterrupt(ctx context.Context, ch chan<- struct{}, cancel context.C
 			cancel()
 		}
 	}()
+}
+
+type Doer interface {
+	Do(ctx context.Context) error
 }
