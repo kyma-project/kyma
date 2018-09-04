@@ -31,7 +31,6 @@ data:
   domain: "__DOMAIN__"
   slack_api_url: "__SLACK_API_URL_VALUE__"
   slack_channel: "__SLACK_CHANNEL_VALUE__"
-  victor_ops_api_key: "__VICTOR_OPS_API_KEY_VALUE__"
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -81,12 +81,6 @@ spec:
               configMapKeyRef:
                 name: installation-config
                 key: domain
-          - name: VICTOR_OPS_API_KEY_VALUE
-            valueFrom:
-              configMapKeyRef:
-                name: installation-config
-                key: victor_ops_api_key
-                optional: true
           - name: SLACK_CHANNEL_VALUE
             valueFrom:
               configMapKeyRef:

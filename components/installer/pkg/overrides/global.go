@@ -15,8 +15,6 @@ global:
       secretName: "istio-ingress-certs"
   alertTools:
     credentials:
-      victorOps:
-        apikey: "{{ .VictorOpsApiKey }}"
       slack:
         channel: "{{ .SlackChannel }}"
         apiurl: "{{ .SlackApiUrl }}"

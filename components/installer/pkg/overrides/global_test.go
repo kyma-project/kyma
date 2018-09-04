@@ -17,8 +17,6 @@ func TestGetGlobalOverrides(t *testing.T) {
       slack:
         apiurl: ""
         channel: ""
-      victorOps:
-        apikey: ""
   domainName: kyma.local
   isLocalEnv: true
   istio:
@@ -44,8 +42,6 @@ func TestGetGlobalOverrides(t *testing.T) {
       slack:
         apiurl: ""
         channel: ""
-      victorOps:
-        apikey: ""
   domainName: kyma.local
   isLocalEnv: false
   istio:
@@ -70,8 +66,6 @@ func TestGetGlobalOverrides(t *testing.T) {
       slack:
         apiurl: ""
         channel: ""
-      victorOps:
-        apikey: ""
   domainName: kyma.local
   isLocalEnv: false
   istio:
@@ -96,8 +90,6 @@ func TestGetGlobalOverrides(t *testing.T) {
       slack:
         apiurl: ""
         channel: ""
-      victorOps:
-        apikey: ""
   domainName: kyma.local
   isLocalEnv: false
   istio:
@@ -122,8 +114,6 @@ func TestGetGlobalOverrides(t *testing.T) {
       slack:
         apiurl: slack_apiurl
         channel: slack_channel
-      victorOps:
-        apikey: ""
   domainName: kyma.local
   isLocalEnv: false
   istio:

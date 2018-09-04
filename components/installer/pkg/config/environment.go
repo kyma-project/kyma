@@ -13,7 +13,6 @@ type installationConfig struct {
 	AzureBrokerClientSecret   string
 	ComponentsList            string
 	IsLocalInstallation       bool
-	VictorOpsApiKey           string
 	SlackChannel              string
 	SlackApiUrl               string
 }
@@ -27,7 +26,6 @@ func GetInstallationConfig() *installationConfig {
 		AzureBrokerClientSecret:   os.Getenv("AZURE_BROKER_CLIENT_SECRET"),
 		ComponentsList:            os.Getenv("COMPONENT_LIST"),
 		IsLocalInstallation:       isLocalInstallation(os.Getenv("IS_LOCAL_INSTALLATION")),
-		VictorOpsApiKey:           os.Getenv("VICTOR_OPS_API_KEY_VALUE"),
 		SlackChannel:              os.Getenv("SLACK_CHANNEL_VALUE"),
 		SlackApiUrl:               os.Getenv("SLACK_API_URL_VALUE"),
 	}
