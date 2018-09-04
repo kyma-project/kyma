@@ -44,15 +44,23 @@ func (r *instanceResolver) CreateServiceInstanceMutation(ctx context.Context, pa
 	// ServicePlan and ServiceClass references are empty just after the resource has been created
 	// Adding these references manually, because they are needed to resolve all Service Instance fields
 	serviceClass, err := r.classGetter.FindByExternalName(parameters.ExternalServiceClassName)
-	if err != nil || serviceClass == nil {
+	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s for externalName `%s`", pretty.ServiceClass, parameters.ExternalServiceClassName))
 		return nil, gqlerror.New(err, pretty.ServiceClass, gqlerror.WithCustomArgument("externalName", parameters.ExternalServiceClassName))
 	}
+	if serviceClass == nil {
+		glog.Error(fmt.Errorf("cannot find %s with externalName `%s`", pretty.ServiceClass, parameters.ExternalServiceClassName))
+		return nil, gqlerror.NewNotFound(pretty.ServiceClass, gqlerror.WithCustomArgument("externalName", parameters.ExternalServiceClassName))
+	}
 
 	servicePlan, err := r.planGetter.FindByExternalNameForClass(parameters.ExternalServicePlanName, serviceClass.Name)
-	if err != nil || servicePlan == nil {
-		glog.Error(errors.Wrapf(err, "while getting %s for externalName `%s`", pretty.ServicePlan, parameters.ExternalServicePlanName))
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while getting %s for externalName `%s` for %s `%s`", pretty.ServicePlan, parameters.ExternalServicePlanName, pretty.ServiceClass, serviceClass.Name))
 		return nil, gqlerror.New(err, pretty.ServicePlan, gqlerror.WithCustomArgument("externalName", parameters.ExternalServicePlanName))
+	}
+	if servicePlan == nil {
+		glog.Error(fmt.Errorf("cannot find %s with externalName `%s`", pretty.ServicePlan, parameters.ExternalServicePlanName))
+		return nil, gqlerror.NewNotFound(pretty.ServicePlan, gqlerror.WithCustomArgument("externalName", parameters.ExternalServicePlanName))
 	}
 
 	instanceCopy := item.DeepCopy()
