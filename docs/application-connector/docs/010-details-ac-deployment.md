@@ -1,34 +1,38 @@
 ---
-title: Deploy a new Application Connector
+title: Deploy a new Remote Environment
 type: Details
 ---
 
-By default, Kyma comes with two Application Connectors preconfigured. Those Application Connectors are installed in the `kyma-integration` Namespace.
+By default, Kyma comes with two Remote Environments preinstalled. Those Remote Environments are installed in the `kyma-integration` Namespace.
 
-### Install an Application Connector locally
+>**NOTE:** A Remote Environment represents a single connected external solution.
 
-For installation on Minikube, provide the NodePort as shown in this example:
+## Install a Remote Environment on a local Kyma deployment
 
-``` bash
+To install a new Remote Environment on Minikube, provide the NodePort as shown in this example:
+
+```
 helm install --name {remote-environment-name} --set deployment.args.sourceType=commerce --set global.isLocalEnv=true --set service.externalapi.nodePort=32001 --namespace kyma-integration ./resources/remote-environments
 ```
 
 You can override the following parameters:
 
-- **sourceEnvironment** is the Event source environment name
-- **sourceType** is the Event source type
-- **sourceNamespace** is the organization that publishes the Event
+- **sourceEnvironment** is the Event source Environment name.
+- **sourceType** is the Event source type.
+- **sourceNamespace** is the organization that publishes the Event.
 
-### Install an Application Connector on the cluster
+Follow the **Set up a Remote Environment on Minikube** getting started guide to learn more about installing and setting up a Remote Environment on
+a local Kyma installation.
 
-To add a new Application Connector to the cluster, download the [remote-environments.zip](assets/remote-environments.zip) package, unpack it, and place the content in the project's directory.
+## Install a Remote Environment on a cluster Kyma deployment
 
-To install a Remote Environment, use:
-``` bash
-helm install --name {remote-environment-name} --set deployment.args.sourceType=commerce --set global.isLocalEnv=false --set global.domainName={domain-name} --namespace kyma-integration ./remote-environments
+To add a new Remote Environment to the cluster, run this command:
+
+```
+helm install --name {remote-environment-name} --set deployment.args.sourceType=commerce --set global.isLocalEnv=false --set global.domainName={domain-name} --namespace kyma-integration ./resources/remote-environments
 ```
 
-- `global.domainName` override is required and cannot be omitted, example values can look like:
+The **global.domainName** is mandatory. Example values can look like:
 ```
 wormhole.cluster.kyma.cx
 nightly.cluster.kyma.cx
@@ -36,11 +40,11 @@ nightly.cluster.kyma.cx
 
 You can override the following parameters:
 
-- **sourceEnvironment** is the Event source environment name
-- **sourceType** is the Event source type
-- **sourceNamespace** is the organization that publishes the Event
+- **sourceEnvironment** is the Event source Environment name.
+- **sourceType** is the Event source type.
+- **sourceNamespace** is the organization that publishes the Event.
 
-### Working with Helm
+## Work with Helm
 
 Helm provides the following commands:
 - `helm list` lists existing Helm releases
@@ -52,10 +56,6 @@ Helm provides the following commands:
 The full list of the Helm commands is available in the [Helm documentation](https://docs.helm.sh/helm/).
 You can also use the `helm --help` command.
 
-### Use kubectl
+## Use kubectl
 
 To check if everything runs correctly, use the `kubectl get pods -n kyma-integration` or `kubectl get services -n kyma-integration` command.  
-
-### Examples
-
-Follow the **Running a new Application Connector on Minikube** tutorial to learn how to get a new Application Connector running on Minikube.
