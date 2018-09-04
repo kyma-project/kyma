@@ -109,8 +109,6 @@ func TestSpec(t *testing.T) {
 			t.Log("Update...")
 
 			api := *lastApi
-			//api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled, false)
-			//api.ResourceVersion = lastApi.ResourceVersion
 			api.Spec.Hostname = hostnameFor(testId, domainName, false)
 
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
@@ -150,8 +148,6 @@ func TestSpec(t *testing.T) {
 			t.Log("Update...")
 
 			api := *lastApi
-			//api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityEnabled, true)
-			//api.ResourceVersion = lastApi.ResourceVersion
 			authEnabled := true
 			api.Spec.AuthenticationEnabled = &authEnabled
 			api.Spec.Hostname = hostnameFor(testId, domainName, true)
@@ -177,10 +173,11 @@ func TestSpec(t *testing.T) {
 
 			t.Log("Update...")
 
-			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled, true)
-			api.ResourceVersion = lastApi.ResourceVersion
+			api := *lastApi
+			authEnabled := false
+			api.Spec.AuthenticationEnabled = &authEnabled
 
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
 
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
@@ -201,12 +198,11 @@ func TestSpec(t *testing.T) {
 
 			t.Log("Update...")
 
-			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityEnabled, true)
-			api.ResourceVersion = lastApi.ResourceVersion
+			api := *lastApi
 
-			setCustomJwtAuthenticationConfig(api)
+			setCustomJwtAuthenticationConfig(&api)
 
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
 
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
@@ -280,7 +276,7 @@ func setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
 	}
 
 	secured := true
-	if !(*api.Spec.AuthenticationEnabled) { // optional property, but if set earlier to false it will force auth disabled
+	if api.Spec.AuthenticationEnabled != nil && !(*api.Spec.AuthenticationEnabled) { // optional property, but if set earlier to false it will force auth disabled
 		api.Spec.AuthenticationEnabled = &secured
 	}
 	api.Spec.Authentication = rules
