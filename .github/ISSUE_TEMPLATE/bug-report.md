@@ -3,11 +3,10 @@ name: Bug report
 about: Report a bug in the project
 ---
 
-Confirm these statements before you submit the issue:
-
-- [ ] I have searched open and closed issues for duplicates.
-- [ ] I have read the contributing guidelines.
----
+<!-- Thank you for your contribution. Before you submit the issue:
+1. Search open and closed issues for duplicates.
+2. Read the contributing guidelines.
+-->
 
 **Description**
 
