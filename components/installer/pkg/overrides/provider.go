@@ -47,10 +47,10 @@ func (p legacyProvider) GetForRelease(component v1alpha1.KymaComponent) (string,
 	case "core":
 		overridesFunc = p.getCoreOverrides
 		break
-	case "hmc":
+	case "hmc-default":
 		overridesFunc = p.getHmcOverrides
 		break
-	case "ec":
+	case "ec-default":
 		overridesFunc = p.getEcOverrides
 		break
 	}
