@@ -339,7 +339,7 @@ a:
 			})
 		})
 
-		Convey("FindOverrideValue function", func() {
+		Convey("findOverrideValue function", func() {
 
 			Convey("Should find non-empty value in a map", func() {
 				flatmap := map[string]string{}
@@ -347,7 +347,7 @@ a:
 
 				oMap := UnflattenToMap(flatmap)
 
-				val, exists := FindOverrideValue(oMap, "a.b.c.d")
+				val, exists := FindOverrideStringValue(oMap, "a.b.c.d")
 				So(exists, ShouldBeTrue)
 				So(val, ShouldEqual, "testval")
 			})
@@ -358,7 +358,7 @@ a:
 
 				oMap := UnflattenToMap(flatmap)
 
-				val, exists := FindOverrideValue(oMap, "a.b.c.d")
+				val, exists := FindOverrideStringValue(oMap, "a.b.c.d")
 				So(exists, ShouldBeTrue)
 				So(val, ShouldBeBlank)
 			})
@@ -369,7 +369,7 @@ a:
 
 				oMap := UnflattenToMap(flatmap)
 
-				_, exists := FindOverrideValue(oMap, "a.b.c")
+				_, exists := FindOverrideStringValue(oMap, "a.b.c")
 				So(exists, ShouldBeFalse)
 			})
 
@@ -379,8 +379,36 @@ a:
 
 				oMap := UnflattenToMap(flatmap)
 
-				_, exists := FindOverrideValue(oMap, "a.b.f")
+				_, exists := FindOverrideStringValue(oMap, "a.b.f")
 				So(exists, ShouldBeFalse)
+			})
+		})
+
+		Convey("UnflattenToMap function", func() {
+
+			Convey("Should unflatten the map", func() {
+				flatmap := map[string]string{}
+				flatmap["a.b.c"] = "testval"
+
+				oMap := UnflattenToMap(flatmap)
+
+				val, exists := FindOverrideStringValue(oMap, "a.b.c")
+				So(exists, ShouldBeTrue)
+				So(val, ShouldEqual, "testval")
+			})
+
+			Convey("Should convert any strings that contain booleans to booleans", func() {
+				flatmap := map[string]string{}
+				flatmap["a.b.c"] = "true"
+				flatmap["a.b.d"] = "false"
+
+				oMap := UnflattenToMap(flatmap)
+
+				val:= findOverrideValue(oMap, "a.b.c")
+				val2 := findOverrideValue(oMap, "a.b.d")
+
+				So(val, ShouldBeTrue)
+				So(val2, ShouldBeFalse)
 			})
 		})
 	})
