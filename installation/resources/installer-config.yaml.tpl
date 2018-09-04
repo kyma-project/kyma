@@ -28,7 +28,6 @@ metadata:
   namespace: kyma-installer
 data:
   is_local_installation: "__IS_LOCAL_INSTALLATION__"
-  domain: "__DOMAIN__"
 ---
 apiVersion: v1
 kind: ConfigMap

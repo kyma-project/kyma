@@ -76,11 +76,6 @@ spec:
               configMapKeyRef:
                 name: installation-config
                 key: is_local_installation
-          - name: DOMAIN
-            valueFrom:
-              configMapKeyRef:
-                name: installation-config
-                key: domain
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
