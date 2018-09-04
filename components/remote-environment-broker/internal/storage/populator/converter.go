@@ -5,8 +5,10 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
 )
 
+// Converter is responsible for converting Service Catalog's Service Instance to internal representation
 type Converter struct{}
 
+// MapServiceInstance converts SC Service Instance to its internal representation
 func (c *Converter) MapServiceInstance(in *v1beta1.ServiceInstance) *internal.Instance {
 	var state internal.InstanceState
 

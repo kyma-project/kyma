@@ -16,6 +16,7 @@ import (
 )
 
 const (
+	// NamespacedBrokerName name of the namespaced Service Broker
 	NamespacedBrokerName = "remote-env-broker"
 	brokerLabelKey       = "namespaced-remote-env-broker"
 	brokerLabelValue     = "true"

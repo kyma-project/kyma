@@ -65,7 +65,7 @@ func main() {
 	scInformersGroup := scInformerFactory.Servicecatalog().V1beta1()
 
 	// instance populator
-	var instancePopulator Doer
+	var instancePopulator doer
 	if cfg.ClusterScopedBrokerEnabled {
 		instancePopulator = populator.NewInstancesFromClusterBroker(scClientSet, sFact.Instance(), &populator.Converter{}, cfg.ClusterScopedBrokerName)
 	} else {
@@ -148,6 +148,6 @@ func cancelOnInterrupt(ctx context.Context, ch chan<- struct{}, cancel context.C
 	}()
 }
 
-type Doer interface {
+type doer interface {
 	Do(ctx context.Context) error
 }

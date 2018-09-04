@@ -33,9 +33,9 @@ func TestPopulateOnlyREBInstances(t *testing.T) {
 
 	mockInserter.On("Insert", mock.MatchedBy(insertExpectations.OnInsertArgsChecker)).
 		Run(func(args mock.Arguments) {
-		actualInstance := args.Get(0).(*internal.Instance)
-		insertExpectations.ReportInsertingInstance(actualInstance)
-	}).
+			actualInstance := args.Get(0).(*internal.Instance)
+			insertExpectations.ReportInsertingInstance(actualInstance)
+		}).
 		Return(nil).Twice()
 
 	mockConverter := &automock.InstanceConverter{}
@@ -43,7 +43,7 @@ func TestPopulateOnlyREBInstances(t *testing.T) {
 
 	mockConverter.On("MapServiceInstance", fixRebServiceInstanceInDefaultNs()).Return(expectedServiceInstanceInDefaultNs())
 	mockConverter.On("MapServiceInstance", fixRebServiceInstnaceInProdNs()).Return(expectedServiceInstanceInProdNs())
-	sut := populator.NewInstancesFromClusterBroker(mockClientSet, mockInserter,mockConverter, fixREBrokerName())
+	sut := populator.NewInstancesFromClusterBroker(mockClientSet, mockInserter, mockConverter, fixREBrokerName())
 	// WHEN
 	actualErr := sut.Do(context.Background())
 	// THEN
@@ -59,8 +59,8 @@ func TestPopulateErrorOnInsert(t *testing.T) {
 
 	mockConverter := &automock.InstanceConverter{}
 	defer mockConverter.AssertExpectations(t)
-	mockConverter.On("MapServiceInstance")
-	sut := populator.NewInstancesFromClusterBroker(mockClientSet, mockInserter, fixREBrokerName())
+	mockConverter.On("MapServiceInstance", fixRebServiceInstanceInDefaultNs()).Return(expectedServiceInstanceInDefaultNs())
+	sut := populator.NewInstancesFromClusterBroker(mockClientSet, mockInserter, mockConverter, fixREBrokerName())
 	// WHEN
 	actualErr := sut.Do(context.Background())
 	// THEN
