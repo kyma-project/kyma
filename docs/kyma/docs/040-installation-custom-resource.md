@@ -28,7 +28,7 @@ spec:
   url: "https://sample.url.com/kyma_release.tar.gz"
 ```
 
-This table analyses the elements of the sample CR and the information it contains:
+This table lists all the possible parameters of a given resource together with their descriptions:
 
 | Field   |      Mandatory?      |  Description |
 |:----------:|:-------------:|:------|
