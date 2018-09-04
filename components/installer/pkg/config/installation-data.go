@@ -19,7 +19,6 @@ type InstallationData struct {
 	AzureBrokerClientID        string
 	AzureBrokerSubscriptionID  string
 	AzureBrokerClientSecret    string
-	RemoteEnvCa                string
 	EtcdBackupABSContainerName string
 	Components                 []v1alpha1.KymaComponent
 	IsLocalInstallation        bool
@@ -45,7 +44,6 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 		AzureBrokerClientID:        installationConfig.AzureBrokerClientID,
 		AzureBrokerSubscriptionID:  installationConfig.AzureBrokerSubscriptionID,
 		AzureBrokerClientSecret:    installationConfig.AzureBrokerClientSecret,
-		RemoteEnvCa:                installationConfig.RemoteEnvCa,
 		EtcdBackupABSContainerName: installationConfig.EtcdBackupABSContainerName,
 		Components:                 installation.Spec.Components,
 		IsLocalInstallation:        installationConfig.IsLocalInstallation,

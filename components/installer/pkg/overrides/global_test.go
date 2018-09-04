@@ -27,7 +27,6 @@ func TestGetGlobalOverrides(t *testing.T) {
   istio:
     tls:
       secretName: istio-ingress-certs
-  remoteEnvCa: ""
 `
 
 			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithLocalInstallation().GetData()
@@ -58,7 +57,6 @@ func TestGetGlobalOverrides(t *testing.T) {
   istio:
     tls:
       secretName: istio-ingress-certs
-  remoteEnvCa: ""
 `
 			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").GetData()
 
@@ -88,7 +86,6 @@ func TestGetGlobalOverrides(t *testing.T) {
   istio:
     tls:
       secretName: istio-ingress-certs
-  remoteEnvCa: ""
 `
 			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").GetData()
 
@@ -118,9 +115,8 @@ func TestGetGlobalOverrides(t *testing.T) {
   istio:
     tls:
       secretName: istio-ingress-certs
-  remoteEnvCa: xyz
 `
-			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithRemoteEnvCa("xyz").GetData()
+			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").GetData()
 
 			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
@@ -148,7 +144,6 @@ func TestGetGlobalOverrides(t *testing.T) {
   istio:
     tls:
       secretName: istio-ingress-certs
-  remoteEnvCa: ""
 `
 			installData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").
@@ -180,7 +175,6 @@ func TestGetGlobalOverrides(t *testing.T) {
   istio:
     tls:
       secretName: istio-ingress-certs
-  remoteEnvCa: ""
 `
 			installData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").

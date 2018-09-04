@@ -11,7 +11,6 @@ type installationConfig struct {
 	AzureBrokerClientID        string
 	AzureBrokerSubscriptionID  string
 	AzureBrokerClientSecret    string
-	RemoteEnvCa                string
 	EtcdBackupABSContainerName string
 	ComponentsList             string
 	IsLocalInstallation        bool
@@ -28,7 +27,6 @@ func GetInstallationConfig() *installationConfig {
 		AzureBrokerClientID:        os.Getenv("AZURE_BROKER_CLIENT_ID"),
 		AzureBrokerSubscriptionID:  os.Getenv("AZURE_BROKER_SUBSCRIPTION_ID"),
 		AzureBrokerClientSecret:    os.Getenv("AZURE_BROKER_CLIENT_SECRET"),
-		RemoteEnvCa:                os.Getenv("REMOTE_ENV_CA"),
 		EtcdBackupABSContainerName: os.Getenv("ETCD_BACKUP_ABS_CONTAINER_NAME"),
 		ComponentsList:             os.Getenv("COMPONENT_LIST"),
 		IsLocalInstallation:        isLocalInstallation(os.Getenv("IS_LOCAL_INSTALLATION")),

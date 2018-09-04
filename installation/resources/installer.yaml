@@ -71,12 +71,6 @@ spec:
                 name: azure-broker
                 key: azure_broker_client_secret
                 optional: true
-          - name: REMOTE_ENV_CA
-            valueFrom:
-              secretKeyRef:
-                name: remote-env-certificate
-                key: remote_env_ca
-                optional: true
           - name: IS_LOCAL_INSTALLATION
             valueFrom:
               configMapKeyRef:

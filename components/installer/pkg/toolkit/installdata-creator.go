@@ -53,13 +53,6 @@ func (sc *InstallationDataCreator) WithLocalInstallation() *InstallationDataCrea
 	return sc
 }
 
-// WithRemoteEnvCa sets RemoteEnvCa property in InstallationData
-func (sc *InstallationDataCreator) WithRemoteEnvCa(remoteEnvCa string) *InstallationDataCreator {
-	sc.installationData.RemoteEnvCa = remoteEnvCa
-
-	return sc
-}
-
 // WithEtcdBackupABSContainerName sets value for EtcdBackupABSContainerName property
 func (sc *InstallationDataCreator) WithEtcdBackupABSContainerName(path string) *InstallationDataCreator {
 	sc.installationData.EtcdBackupABSContainerName = path
