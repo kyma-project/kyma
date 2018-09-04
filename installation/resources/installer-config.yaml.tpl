@@ -11,7 +11,7 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: remote-env-certificate-verrides
+  name: remote-env-certificate-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
@@ -19,14 +19,6 @@ type: Opaque
 data:
   global.remoteEnvCa: "__REMOTE_ENV_CA__"
   global.remoteEnvCaKey: "__REMOTE_ENV_CA_KEY__"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: cluster-certificate
-  namespace: kyma-installer
-data:
-  tls_key: "__TLS_KEY__"
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -40,12 +40,6 @@ func (sc *InstallationDataCreator) WithDummyAzureCredentials() *InstallationData
 	return sc
 }
 
-// WithCert sets Cert and CertKey properties
-func (sc *InstallationDataCreator) WithCert(cert, certKey string) *InstallationDataCreator {
-	sc.installationData.ClusterTLSKey = certKey
-	return sc
-}
-
 // WithGeneric sets generic property in InstallationData
 func (sc *InstallationDataCreator) WithGeneric(key, value string) *InstallationDataCreator {
 	sc.genericOverrides[key] = value

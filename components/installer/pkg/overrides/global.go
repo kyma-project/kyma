@@ -9,7 +9,6 @@ import (
 
 const globalsTplStr = `
 global:
-  tlsKey: "{{.ClusterTLSKey}}"
   isLocalEnv: {{.IsLocalInstallation}}
   remoteEnvCa: "{{.RemoteEnvCa}}"
   remoteEnvCaKey: "{{.RemoteEnvCaKey}}"

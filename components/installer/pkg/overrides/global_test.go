@@ -29,8 +29,6 @@ func TestGetGlobalOverrides(t *testing.T) {
       secretName: istio-ingress-certs
   remoteEnvCa: ""
   remoteEnvCaKey: ""
-  tlsCrt: ""
-  tlsKey: ""
 `
 
 			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithLocalInstallation().GetData()
@@ -63,8 +61,6 @@ func TestGetGlobalOverrides(t *testing.T) {
       secretName: istio-ingress-certs
   remoteEnvCa: ""
   remoteEnvCaKey: ""
-  tlsCrt: ""
-  tlsKey: ""
 `
 			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").GetData()
 
@@ -96,10 +92,8 @@ func TestGetGlobalOverrides(t *testing.T) {
       secretName: istio-ingress-certs
   remoteEnvCa: ""
   remoteEnvCaKey: ""
-  tlsCrt: abc
-  tlsKey: def
 `
-			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithCert("abc", "def").GetData()
+			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").GetData()
 
 			overridesMap, err := GetGlobalOverrides(&installData, UnflattenToMap(testOverrides))
 			So(err, ShouldBeNil)
@@ -129,8 +123,6 @@ func TestGetGlobalOverrides(t *testing.T) {
       secretName: istio-ingress-certs
   remoteEnvCa: xyz
   remoteEnvCaKey: abc
-  tlsCrt: ""
-  tlsKey: ""
 `
 			installData, testOverrides := NewInstallationDataCreator().WithGeneric("global.domainName", "kyma.local").WithRemoteEnvCa("xyz").WithRemoteEnvCaKey("abc").GetData()
 
@@ -162,8 +154,6 @@ func TestGetGlobalOverrides(t *testing.T) {
       secretName: istio-ingress-certs
   remoteEnvCa: ""
   remoteEnvCaKey: ""
-  tlsCrt: ""
-  tlsKey: ""
 `
 			installData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").
@@ -197,8 +187,6 @@ func TestGetGlobalOverrides(t *testing.T) {
       secretName: istio-ingress-certs
   remoteEnvCa: ""
   remoteEnvCaKey: ""
-  tlsCrt: ""
-  tlsKey: ""
 `
 			installData, testOverrides := NewInstallationDataCreator().
 				WithGeneric("global.domainName", "kyma.local").
