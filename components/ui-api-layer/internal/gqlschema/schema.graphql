@@ -288,7 +288,7 @@ type ResourceQuota {
     requests: ResourceValues!
 }
 
-type ResourceQuotaStatus {
+type ResourceQuotasStatus {
     exceeded: Boolean!
     message: String!
 }
@@ -449,7 +449,7 @@ type Query {
     environments(remoteEnvironment: String): [Environment]!
     deployments(environment: String!, excludeFunctions: Boolean): [Deployment]!
     resourceQuotas(environment: String!): [ResourceQuota]!
-    resourceQuotaStatus(environment: String!): ResourceQuotaStatus!
+    resourceQuotasStatus(environment: String!): ResourceQuotasStatus!
 
     functions(environment: String!, first: Int, offset: Int): [Function]!
 

@@ -21,6 +21,7 @@ type Resolver struct {
 	*secretResolver
 	*deploymentResolver
 	*resourceQuotaResolver
+	*resourceQuotaStatusResolver
 	*limitRangeResolver
 
 	informerFactory informers.SharedInformerFactory
@@ -48,12 +49,13 @@ func New(restConfig *rest.Config, remoteEnvironmentLister RemoteEnvironmentListe
 	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, resourceQuotaService, deploymentService)
 
 	return &Resolver{
-		environmentResolver:   newEnvironmentResolver(environmentService),
-		secretResolver:        newSecretResolver(client),
-		deploymentResolver:    newDeploymentResolver(deploymentService, serviceBindingUsageLister, serviceBindingGetter),
-		limitRangeResolver:    newLimitRangeResolver(limitRangeService),
-		resourceQuotaResolver: newResourceQuotaResolver(resourceQuotaService, resourceQuotaStatusService),
-		informerFactory:       informerFactory,
+		environmentResolver:         newEnvironmentResolver(environmentService),
+		secretResolver:              newSecretResolver(client),
+		deploymentResolver:          newDeploymentResolver(deploymentService, serviceBindingUsageLister, serviceBindingGetter),
+		limitRangeResolver:          newLimitRangeResolver(limitRangeService),
+		resourceQuotaResolver:       newResourceQuotaResolver(resourceQuotaService),
+		resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),
+		informerFactory:             informerFactory,
 	}, nil
 }
 

@@ -42,13 +42,16 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded(
 	rsLister.On("ListReplicaSets", fixNamespaceName()).Return(fixReplicaSetExceeded(), nil)
 	podLister := automock.NewPodsLister()
 	podLister.On("ListPods", fixNamespaceName(), fixReplicaSetMatchLabels()).Return(fixReplicasExceeding(fixReplicaSetMatchLabels()), nil)
+	ssLister := automock.NewStatefulSetLister()
+	ssLister.On("ListStatefulSets", fixNamespaceName()).Return([]*apps.StatefulSet{}, nil)
 	defer func() {
 		rqLister.AssertExpectations(t)
 		rsLister.AssertExpectations(t)
 		podLister.AssertExpectations(t)
+		ssLister.AssertExpectations(t)
 	}()
 
-	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, nil, podLister, nil)
+	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, podLister, nil)
 
 	// WHEN
 	status, err := rqSvc.CheckResourceQuotaStatus(fixNamespaceName(), fixResourceNames())
@@ -97,17 +100,20 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded_
 	rsLister.On("ListReplicaSets", fixNamespaceName()).Return(fixReplicaSetWithOwnerReference(), nil)
 	podLister := automock.NewPodsLister()
 	podLister.On("ListPods", fixNamespaceName(), fixReplicaSetMatchLabels()).Return(fixReplicasExceeding(fixReplicaSetMatchLabels()), nil)
+	ssLister := automock.NewStatefulSetLister()
+	ssLister.On("ListStatefulSets", fixNamespaceName()).Return([]*apps.StatefulSet{}, nil)
 	defer func() {
 		rqLister.AssertExpectations(t)
 		rsLister.AssertExpectations(t)
 		podLister.AssertExpectations(t)
+		ssLister.AssertExpectations(t)
 	}()
 
 	client := fake.NewSimpleClientset(fixDeployWithPercentageMaxUnavailable())
 	informerFactory := informers.NewSharedInformerFactory(client, 0)
 	informer := informerFactory.Apps().V1beta2().Deployments().Informer()
 	deploySvc := newDeploymentService(informer)
-	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, nil, podLister, deploySvc)
+	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, podLister, deploySvc)
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 

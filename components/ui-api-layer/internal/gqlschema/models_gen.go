@@ -100,7 +100,7 @@ type RemoteEnvironmentSource struct {
 	Type        string `json:"type"`
 	Namespace   string `json:"namespace"`
 }
-type ResourceQuotaStatus struct {
+type ResourceQuotasStatus struct {
 	Exceeded bool   `json:"exceeded"`
 	Message  string `json:"message"`
 }
