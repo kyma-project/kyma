@@ -72,6 +72,9 @@ Invoke-Expression -Command $cmd
 $cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ETCD_BACKUP_ABS_CONTAINER_NAME__`" -value `"`""
 Invoke-Expression -Command $cmd
 
+$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__INGRESSGATEWAY_SERVICE_TYPE__`" --value `"NodePort`""
+Invoke-Expression -Command $cmd
+
 ##########
 
 Write-Output "Applying configuration"
