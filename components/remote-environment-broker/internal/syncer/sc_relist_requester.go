@@ -3,15 +3,21 @@ package syncer
 import (
 	"time"
 
+	"fmt"
+
 	"github.com/sirupsen/logrus"
 )
 
 const maxSyncRetries = 5
 
 //go:generate mockery -name=serviceCatalogSyncer -output=automock -outpkg=automock -case=underscore
-
 type serviceCatalogSyncer interface {
 	Sync(name string, retries int) error
+}
+
+//go:generate mockery -name=nsBrokerSyncer -output=automock -outpkg=automock -case=underscore
+type nsBrokerSyncer interface {
+	Sync(labelSelector string, retries int) error
 }
 
 // RelistRequester informs the Service Catalog that given Service Broker should be relisted.
@@ -19,7 +25,11 @@ type serviceCatalogSyncer interface {
 // result in a single Service Catalog relist trigger.
 type RelistRequester struct {
 	serviceCatalogSyncer serviceCatalogSyncer
+	nsBrokerSyncer       nsBrokerSyncer
 	brokerName           string
+	clusterBrokerEnabled bool
+	labelSelectorKey     string
+	labelSelectorValue   string
 	reListDurationWindow time.Duration
 	log                  logrus.FieldLogger
 
@@ -29,9 +39,13 @@ type RelistRequester struct {
 }
 
 // NewRelistRequester returns new instance of RelistRequester
-func NewRelistRequester(serviceCatalogSyncer serviceCatalogSyncer, brokerName string, reListDuration time.Duration, log logrus.FieldLogger) *RelistRequester {
+func NewRelistRequester(serviceCatalogSyncer serviceCatalogSyncer, nsBrokerSyncer nsBrokerSyncer, brokerName string, reListDuration time.Duration, clusterBrokerEnabled bool, labelSelectorKey string, labelSelectorValue string, log logrus.FieldLogger) *RelistRequester {
 	return &RelistRequester{
 		serviceCatalogSyncer: serviceCatalogSyncer,
+		nsBrokerSyncer:       nsBrokerSyncer,
+		clusterBrokerEnabled: clusterBrokerEnabled,
+		labelSelectorKey:     labelSelectorKey,
+		labelSelectorValue:   labelSelectorValue,
 		brokerName:           brokerName,
 		reListDurationWindow: reListDuration,
 		log:                  log.WithField("service", "syncer:sc-relist-requester"),
@@ -62,10 +76,20 @@ func (r *RelistRequester) Run(stopCh <-chan struct{}) {
 
 		select {
 		case <-r.relistRequested:
-			if err := r.serviceCatalogSyncer.Sync(r.brokerName, maxSyncRetries); err != nil {
-				r.log.Errorf("Error occurred when synchronizing broker %q [maxRetires=%d]: %v", r.brokerName, maxSyncRetries, err)
+			if r.clusterBrokerEnabled {
+				if err := r.serviceCatalogSyncer.Sync(r.brokerName, maxSyncRetries); err != nil {
+					r.log.Errorf("Error occurred when synchronizing broker %q [maxRetires=%d]: %v", r.brokerName, maxSyncRetries, err)
+				} else {
+					r.log.Infof("Relist request for ClusterServiceBroker %q fulfilled", r.brokerName)
+				}
+			} else {
+				labelSelector := fmt.Sprintf("%s=%s", r.labelSelectorKey, r.labelSelectorValue)
+				if err := r.nsBrokerSyncer.Sync(labelSelector, maxSyncRetries); err != nil {
+					r.log.Errorf("Error occurred when synchronizing ServiceBrokers [labelSelector: %s][maxRetires=%d]: %v", labelSelector, maxSyncRetries, err)
+				} else {
+					r.log.Infof("Relist request for ServiceBrokers [labelSelector: %s] fulfilled", labelSelector)
+				}
 			}
-			r.log.Infof("Relist request for Broker %q fulfilled", r.brokerName)
 		default:
 		}
 	}

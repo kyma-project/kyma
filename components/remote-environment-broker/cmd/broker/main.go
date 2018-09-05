@@ -80,7 +80,8 @@ func main() {
 	reInformersGroup := reInformerFactory.Remoteenvironment().V1alpha1()
 
 	// internal services
-	relistRequester := syncer.NewRelistRequester(scSDK, cfg.ClusterScopedBrokerName, cfg.BrokerRelistDurationWindow, log)
+	nsBrokerSyncer := syncer.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1())
+	relistRequester := syncer.NewRelistRequester(scSDK, nsBrokerSyncer, cfg.ClusterScopedBrokerName, cfg.BrokerRelistDurationWindow, cfg.ClusterScopedBrokerEnabled, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, log)
 	siFacade := broker.NewServiceInstanceFacade(scInformersGroup.ServiceInstances().Informer())
 	accessChecker := access.New(sFact.RemoteEnvironment(), reClient.RemoteenvironmentV1alpha1(), sFact.Instance())
 
