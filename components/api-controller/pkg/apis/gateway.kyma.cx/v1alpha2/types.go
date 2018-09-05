@@ -66,6 +66,10 @@ func (s *ApiStatus) IsError() bool {
 	return s.VirtualServiceStatus.IsError() || s.AuthenticationStatus.IsError()
 }
 
+func (s *ApiStatus) IsUpdateFailure() bool {
+	return s.VirtualServiceStatus.IsUpdateFailure()
+}
+
 func (s *ApiStatus) SetInProgress() {
 	s.AuthenticationStatus = kymaMeta.GatewayResourceStatus{
 		Code: kymaMeta.InProgress,
