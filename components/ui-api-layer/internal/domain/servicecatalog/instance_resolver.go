@@ -6,6 +6,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/listener"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
@@ -160,21 +161,16 @@ func (r *instanceResolver) ServiceInstancesQuery(ctx context.Context, environmen
 
 func (r *instanceResolver) ServiceInstanceEventSubscription(ctx context.Context, environment string) (<-chan gqlschema.ServiceInstanceEvent, error) {
 	channel := make(chan gqlschema.ServiceInstanceEvent, 1)
-	filter := func(object interface{}) bool {
-		instance, ok := object.(*v1beta1.ServiceInstance)
-		if !ok {
-			return false
-		}
-
-		return instance.Namespace == environment
+	filter := func(instance *v1beta1.ServiceInstance) bool {
+		return instance != nil && instance.Namespace == environment
 	}
 
-	listener := newInstanceListener(channel, filter, r.instanceConverter)
+	instanceListener := listener.NewInstance(channel, filter, r.instanceConverter)
 
-	r.instanceSvc.Subscribe(listener)
+	r.instanceSvc.Subscribe(instanceListener)
 	go func() {
 		defer close(channel)
-		defer r.instanceSvc.Unsubscribe(listener)
+		defer r.instanceSvc.Unsubscribe(instanceListener)
 		<-ctx.Done()
 	}()
 

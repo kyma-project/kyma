@@ -3,13 +3,11 @@ package graphql
 import (
 	"context"
 	"crypto/tls"
-	"net/http"
-	"time"
-
-	"fmt"
 	"net"
+	"net/http"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/golang/glog"
 	"github.com/machinebox/graphql"
@@ -17,27 +15,34 @@ import (
 )
 
 const (
-	ingressGatewayControllerServiceURL = "istio-ingressgateway.istio-system.svc.cluster.local"
-	timeout                            = 3 * time.Second
+	timeout = 3 * time.Second
 )
 
 type Client struct {
-	gqlClient *graphql.Client
+	gqlClient      *graphql.Client
+	token          string
+	endpoint       string
+	clusterContext func(ctx context.Context, network, addr string) (net.Conn, error)
 }
 
 func New() (*Client, error) {
-
 	config := loadConfig()
 
-	dexHttpClient := newHttpClient(config.localClusterHosts, nil)
+	clusterContext := dialContext(config.localClusterHosts)
+	token, err := authenticate(config.idProviderConfig, clusterContext)
+	if err != nil {
+		return nil, err
+	}
 
-	idTokenProvider := newDexIdTokenProvider(dexHttpClient, config.idProviderConfig)
+	httpClient := newAuthorizedClient(token, clusterContext)
+	gqlClient := graphql.NewClient(config.graphQlEndpoint, graphql.WithHTTPClient(httpClient))
 
-	gqlHttpClient := newHttpClient(config.localClusterHosts, idTokenProvider)
-
-	gqlClient := graphql.NewClient(config.graphQlEndpoint, graphql.WithHTTPClient(gqlHttpClient))
-
-	return &Client{gqlClient}, nil
+	return &Client{
+		gqlClient:      gqlClient,
+		token:          token,
+		clusterContext: clusterContext,
+		endpoint:       config.graphQlEndpoint,
+	}, nil
 }
 
 func (c *Client) DoQuery(q string, res interface{}) error {
@@ -52,38 +57,51 @@ func (c *Client) Do(req *Request, res interface{}) error {
 	return c.gqlClient.Run(ctx, req.req, res)
 }
 
-type transportWithIdTokensSupport struct {
-	http.Transport
-	idTokenProvider idTokenProvider
-	currentIdToken  string
-}
-
-func (t *transportWithIdTokensSupport) RoundTrip(req *http.Request) (*http.Response, error) {
-
-	if t.idTokenProvider != nil {
-
-		if t.currentIdToken == "" {
-			if idToken, err := t.idTokenProvider.fetchIdToken(); err != nil {
-				return nil, errors.Wrap(err, "Request canceled.")
-			} else {
-				t.currentIdToken = idToken
-			}
-		}
-
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", t.currentIdToken))
+func (c *Client) Subscribe(req *Request) *Subscription {
+	if req == nil {
+		return errorSubscription(errors.New("invalid request"))
 	}
-	return t.Transport.RoundTrip(req)
+
+	url := strings.Replace(c.endpoint, "http://", "ws://", -1)
+	url = strings.Replace(url, "https://", "wss://", -1)
+
+	connection, err := newWebsocket(url, c.token, req.req.Header, c.clusterContext)
+	if err != nil {
+		return errorSubscription(err)
+	}
+
+	err = connection.Handshake()
+	if err != nil {
+		return errorSubscription(err)
+	}
+
+	js, err := req.Json()
+	if err != nil {
+		return errorSubscription(errors.Wrapf(err, "while converting request to json"))
+	}
+
+	err = connection.Start(js)
+	if err != nil {
+		return errorSubscription(err)
+	}
+
+	return newSubscription(connection)
 }
 
-func newHttpClient(localClusterHosts []string, idTokenProvider idTokenProvider) *http.Client {
-
-	tr := &transportWithIdTokensSupport{
-		Transport: http.Transport{
+func authenticate(config idProviderConfig, dialContext func(ctx context.Context, network, addr string) (net.Conn, error)) (string, error) {
+	httpClient := &http.Client{
+		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			DialContext:     dialContext,
 		},
-		idTokenProvider: idTokenProvider,
 	}
 
+	idTokenProvider := newDexIdTokenProvider(httpClient, config)
+	token, err := idTokenProvider.fetchIdToken()
+	return token, err
+}
+
+func dialContext(localClusterHosts []string) func(ctx context.Context, network, addr string) (net.Conn, error) {
 	ingressGatewayControllerAddr, err := net.LookupHost(ingressGatewayControllerServiceURL)
 	if err != nil {
 
@@ -94,12 +112,8 @@ func newHttpClient(localClusterHosts []string, idTokenProvider idTokenProvider) 
 		}
 	}
 
-	if len(ingressGatewayControllerAddr) > 0 {
-
-		glog.Infof("Ingress controller address: '%s'", ingressGatewayControllerAddr[0])
-
-		tr.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
-
+	return func(ctx context.Context, network, addr string) (net.Conn, error) {
+		if len(ingressGatewayControllerAddr) > 0 {
 			glog.Infof("Resolving: %s", addr)
 			for _, host := range localClusterHosts {
 				if strings.HasPrefix(addr, host) {
@@ -108,18 +122,11 @@ func newHttpClient(localClusterHosts []string, idTokenProvider idTokenProvider) 
 				}
 			}
 			glog.Infof("Resolved: %s", addr)
-
-			dialer := net.Dialer{}
-			return dialer.DialContext(ctx, network, addr)
 		}
-	}
 
-	client := &http.Client{
-		Transport: tr,
-		Timeout:   time.Second * 10,
+		dialer := net.Dialer{}
+		return dialer.DialContext(ctx, network, addr)
 	}
-
-	return client
 }
 
 func tryToGetMinikubeIp() string {

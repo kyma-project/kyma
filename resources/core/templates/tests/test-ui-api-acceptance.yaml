@@ -10,7 +10,8 @@ spec:
   serviceAccountName:  "test-{{ template "fullname" . }}-ui-api-acceptance"
   containers:
     - name: "test-{{ template "fullname" . }}-ui-api-acceptance"
-      image: "{{ .Values.global.containerRegistry.path }}/ui-api-layer-acceptance-tests:0.3.342"
+      image: "{{ .Values.global.containerRegistry.path }}/snapshot/ui-api-layer-acceptance-tests:PR-666"
+      imagePullPolicy: Always
       env:
         - name: TILLER_HOST
           value: "tiller-deploy.kube-system.svc.cluster.local:44134"

@@ -25,3 +25,11 @@ required = [
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  name = "github.com/gorilla/websocket"
+  version = "1.4.0"
+
+[[constraint]]
+  name = "github.com/mitchellh/mapstructure"
+  version = "1.0.0"

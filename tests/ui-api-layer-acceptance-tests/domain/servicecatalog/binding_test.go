@@ -3,19 +3,19 @@
 package servicecatalog
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -29,6 +29,11 @@ type ServiceBinding struct {
 	Environment         string
 	Secret              Secret
 	Status              ServiceBindingStatus
+}
+
+type ServiceBindingEvent struct {
+	Type    string
+	Binding ServiceBinding
 }
 
 type CreateServiceBindingOutput struct {
@@ -85,6 +90,10 @@ func TestBindingMutationsAndQueries(t *testing.T) {
 	createBindingOutput := createBindingOutput(bindingName, instanceName)
 	deleteBindingOutput := deleteBindingOutput(bindingName)
 
+	t.Log("Subscribe bindings")
+	subscription := subscribeBinding(c, bindingEventDetailsFields(), binding.Environment, binding.ServiceInstanceName)
+	defer subscription.Close()
+
 	t.Log("Create Instance")
 	_, err = createInstance(c, "name", instance)
 	require.NoError(t, err)
@@ -96,6 +105,12 @@ func TestBindingMutationsAndQueries(t *testing.T) {
 
 	assert.NoError(t, err)
 	checkCreateBindingOutput(t, createBindingOutput, createRes.CreateServiceBinding)
+
+	t.Log("Check subscription event")
+	expectedEvent := bindingEvent("ADD", binding)
+	event, err := readServiceBindingEvent(subscription)
+	assert.NoError(t, err)
+	checkBindingEvent(t, expectedEvent, event)
 
 	waitForBindingReady(binding.Name, binding.Environment, svcatCli)
 
@@ -142,6 +157,21 @@ func TestBindingMutationsAndQueries(t *testing.T) {
 	t.Log("Wait for instance deletion")
 	err = waitForInstanceDeletion(instance.Name, instance.Environment, svcatCli)
 	assert.NoError(t, err)
+}
+
+func subscribeBinding(c *graphql.Client, resourceDetailsQuery string, environment, instanceName string) *graphql.Subscription {
+	query := fmt.Sprintf(`
+			subscription ($environment: String!, $instanceName: String!) {
+				serviceBindingEventForServiceInstance(environment: $environment, serviceInstanceName: $instanceName) {
+					%s
+				}
+			}
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("environment", environment)
+	req.SetVar("instanceName", instanceName)
+
+	return c.Subscribe(req)
 }
 
 func createBinding(c *graphql.Client, expectedResource CreateServiceBindingOutput) (bindingCreateMutationResponse, error) {
@@ -293,6 +323,13 @@ func binding(bindingName, instanceName string) ServiceBinding {
 	}
 }
 
+func bindingEvent(eventType string, binding ServiceBinding) ServiceBindingEvent {
+	return ServiceBindingEvent{
+		Type:    eventType,
+		Binding: binding,
+	}
+}
+
 func createBindingOutput(bindingName, instanceName string) CreateServiceBindingOutput {
 	return CreateServiceBindingOutput{
 		Name:                bindingName,
@@ -306,4 +343,28 @@ func deleteBindingOutput(bindingName string) DeleteServiceBindingOutput {
 		Name:        bindingName,
 		Environment: tester.DefaultNamespace,
 	}
+}
+
+func bindingEventDetailsFields() string {
+	return `
+		type
+        binding {
+			name
+        }
+    `
+}
+
+func readServiceBindingEvent(sub *graphql.Subscription) (ServiceBindingEvent, error) {
+	type Response struct {
+		ServiceBindingEventForServiceInstance ServiceBindingEvent
+	}
+	var bindingEvent Response
+	err := sub.Next(&bindingEvent)
+
+	return bindingEvent.ServiceBindingEventForServiceInstance, err
+}
+
+func checkBindingEvent(t *testing.T, expected, actual ServiceBindingEvent) {
+	assert.Equal(t, expected.Type, expected.Type)
+	assert.Equal(t, expected.Binding.Name, expected.Binding.Name)
 }

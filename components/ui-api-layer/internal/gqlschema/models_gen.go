@@ -394,39 +394,39 @@ func (e ServiceBindingUsageStatusType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type ServiceInstanceEventType string
+type SubscriptionEventType string
 
 const (
-	ServiceInstanceEventTypeAdd    ServiceInstanceEventType = "ADD"
-	ServiceInstanceEventTypeUpdate ServiceInstanceEventType = "UPDATE"
-	ServiceInstanceEventTypeDelete ServiceInstanceEventType = "DELETE"
+	SubscriptionEventTypeAdd    SubscriptionEventType = "ADD"
+	SubscriptionEventTypeUpdate SubscriptionEventType = "UPDATE"
+	SubscriptionEventTypeDelete SubscriptionEventType = "DELETE"
 )
 
-func (e ServiceInstanceEventType) IsValid() bool {
+func (e SubscriptionEventType) IsValid() bool {
 	switch e {
-	case ServiceInstanceEventTypeAdd, ServiceInstanceEventTypeUpdate, ServiceInstanceEventTypeDelete:
+	case SubscriptionEventTypeAdd, SubscriptionEventTypeUpdate, SubscriptionEventTypeDelete:
 		return true
 	}
 	return false
 }
 
-func (e ServiceInstanceEventType) String() string {
+func (e SubscriptionEventType) String() string {
 	return string(e)
 }
 
-func (e *ServiceInstanceEventType) UnmarshalGQL(v interface{}) error {
+func (e *SubscriptionEventType) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = ServiceInstanceEventType(str)
+	*e = SubscriptionEventType(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ServiceInstanceEventType", str)
+		return fmt.Errorf("%s is not a valid SubscriptionEventType", str)
 	}
 	return nil
 }
 
-func (e ServiceInstanceEventType) MarshalGQL(w io.Writer) {
+func (e SubscriptionEventType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

@@ -43,6 +43,8 @@ func loadConfig() config {
 	domain := os.Getenv("DOMAIN")
 	isLocalClusterStr := strings.ToLower(os.Getenv("IS_LOCAL_CLUSTER"))
 	graphQlEndpoint := os.Getenv("GRAPHQL_ENDPOINT")
+	username := os.Getenv("USERNAME")
+	password := os.Getenv("PASSWORD")
 
 	if domain == "" {
 		domain = "kyma.local"
@@ -51,10 +53,19 @@ func loadConfig() config {
 
 	if graphQlEndpoint == "" {
 
-		config.graphQlEndpoint = fmt.Sprintf("https://ui-api.%s/graphql", domain)
+		graphQlEndpoint = fmt.Sprintf("https://ui-api.%s/graphql", domain)
 		if isLocalCluster {
 			config.addLocalClusterHost(fmt.Sprintf("ui-api.%s", domain))
 		}
+	}
+	config.graphQlEndpoint = graphQlEndpoint
+
+	if username == "" {
+		username = "admin@kyma.cx"
+	}
+
+	if password == "" {
+		password = "nimda123"
 	}
 
 	config.idProviderConfig = idProviderConfig{
@@ -69,8 +80,8 @@ func loadConfig() config {
 		},
 
 		userCredentials: userCredentials{
-			username: "admin@kyma.cx",
-			password: "nimda123",
+			username: username,
+			password: password,
 		},
 	}
 

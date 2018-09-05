@@ -5,6 +5,7 @@ import (
 
 	"github.com/golang/glog"
 	api "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/listener"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
@@ -75,4 +76,24 @@ func (r *serviceBindingResolver) ServiceBindingsToInstanceQuery(ctx context.Cont
 	}
 
 	return r.converter.ToGQLs(list), nil
+}
+
+func (r *serviceBindingResolver) ServiceBindingEventForInstanceSubscription(ctx context.Context, instanceName, environment string) (<-chan gqlschema.ServiceBindingEvent, error) {
+	channel := make(chan gqlschema.ServiceBindingEvent, 1)
+	filter := func(binding *api.ServiceBinding) bool {
+		return binding != nil &&
+			binding.Namespace == environment &&
+			binding.Spec.ServiceInstanceRef.Name == instanceName
+	}
+
+	bindingListener := listener.NewBinding(channel, filter, &r.converter)
+
+	r.operations.Subscribe(bindingListener)
+	go func() {
+		defer close(channel)
+		defer r.operations.Unsubscribe(bindingListener)
+		<-ctx.Done()
+	}()
+
+	return channel, nil
 }

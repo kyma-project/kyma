@@ -24,6 +24,11 @@ const (
 	instanceDeletionTimeout = time.Second * 15
 )
 
+type ServiceInstanceEvent struct {
+	Type     string
+	Instance ServiceInstance
+}
+
 type ServiceInstance struct {
 	Name                    string
 	Environment             string
@@ -73,11 +78,21 @@ func TestInstanceMutationsAndQueries(t *testing.T) {
 	expectedResource := instance("test-instance")
 	resourceDetailsQuery := instanceDetailsFields()
 
+	t.Log("Subscribe instances")
+	subscription := subscribeInstance(c, instanceEventDetailsFields(), expectedResource.Environment)
+	defer subscription.Close()
+
 	t.Log("Create instance")
 	createRes, err := createInstance(c, resourceDetailsQuery, expectedResource)
 
 	require.NoError(t, err)
 	checkInstance(t, expectedResource, createRes.CreateServiceInstance)
+
+	t.Log("Check subscription event")
+	expectedEvent := instanceEvent("ADD", expectedResource)
+	event, err := readInstanceEvent(subscription)
+	assert.NoError(t, err)
+	checkInstanceEvent(t, expectedEvent, event)
 
 	t.Log("Wait For Instance Ready")
 	err = waitForInstanceReady(expectedResource.Name, expectedResource.Environment, svcatCli)
@@ -144,6 +159,20 @@ func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 	err := c.Do(req, &res)
 
 	return res, err
+}
+
+func subscribeInstance(c *graphql.Client, resourceDetailsQuery string, environment string) *graphql.Subscription {
+	query := fmt.Sprintf(`
+			subscription ($environment: String!) {
+				serviceInstanceEvent(environment: $environment) {
+					%s
+				}
+			}
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("environment", environment)
+
+	return c.Subscribe(req)
 }
 
 func querySingleInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource ServiceInstance) (instanceQueryResponse, error) {
@@ -261,7 +290,6 @@ func instanceDetailsFields() string {
 			tags
 			activated
 		}
-		bindable
 		serviceBindings {
 			name
 			serviceInstanceName
@@ -281,6 +309,15 @@ func instanceDetailsFields() string {
 			}
 		}
 	`
+}
+
+func instanceEventDetailsFields() string {
+	return fmt.Sprintf(`
+		type
+        instance {
+			%s
+        }
+    `, instanceDetailsFields())
 }
 
 func checkInstance(t *testing.T, expected, actual ServiceInstance) {
@@ -325,6 +362,13 @@ func instance(name string) ServiceInstance {
 	}
 }
 
+func instanceEvent(eventType string, serviceInstance ServiceInstance) ServiceInstanceEvent {
+	return ServiceInstanceEvent{
+		Type:     eventType,
+		Instance: serviceInstance,
+	}
+}
+
 func waitForInstanceReady(instanceName, environment string, svcatCli *clientset.Clientset) error {
 	return waiter.WaitAtMost(func() (bool, error) {
 		instance, err := svcatCli.ServicecatalogV1beta1().ServiceInstances(environment).Get(instanceName, metav1.GetOptions{})
@@ -356,4 +400,19 @@ func waitForInstanceDeletion(instanceName, environment string, svcatCli *clients
 
 		return false, nil
 	}, instanceDeletionTimeout)
+}
+
+func readInstanceEvent(sub *graphql.Subscription) (ServiceInstanceEvent, error) {
+	type Response struct {
+		ServiceInstanceEvent ServiceInstanceEvent
+	}
+	var bindingEvent Response
+	err := sub.Next(&bindingEvent)
+
+	return bindingEvent.ServiceInstanceEvent, err
+}
+
+func checkInstanceEvent(t *testing.T, expected, actual ServiceInstanceEvent) {
+	assert.Equal(t, expected.Type, expected.Type)
+	assert.Equal(t, expected.Instance.Name, expected.Instance.Name)
 }

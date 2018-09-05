@@ -5,6 +5,7 @@ import (
 
 	api "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
@@ -13,6 +14,7 @@ import (
 type serviceBindingService struct {
 	client   v1beta1.ServicecatalogV1beta1Interface
 	informer cache.SharedIndexInformer
+	notifier notifier
 }
 
 func newServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, informer cache.SharedIndexInformer) *serviceBindingService {
@@ -32,6 +34,11 @@ func newServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, inf
 			return []string{key}, nil
 		},
 	})
+
+	notifier := resource.NewNotifier()
+	informer.AddEventHandler(notifier)
+
+	svc.notifier = notifier
 
 	return svc
 }
@@ -62,6 +69,14 @@ func (f *serviceBindingService) ListForServiceInstance(env string, instanceName 
 	}
 
 	return f.toServiceBindings(items)
+}
+
+func (f *serviceBindingService) Subscribe(listener resource.Listener) {
+	f.notifier.AddListener(listener)
+}
+
+func (f *serviceBindingService) Unsubscribe(listener resource.Listener) {
+	f.notifier.DeleteListener(listener)
 }
 
 func (f *serviceBindingService) toServiceBinding(item interface{}) (*api.ServiceBinding, error) {

@@ -145,6 +145,8 @@ type serviceBindingOperations interface {
 	Delete(env string, name string) error
 	Find(env string, name string) (*v1beta1.ServiceBinding, error)
 	ListForServiceInstance(env string, instanceName string) ([]*v1beta1.ServiceBinding, error)
+	Subscribe(listener resource.Listener)
+	Unsubscribe(listener resource.Listener)
 }
 
 // Binding usage
@@ -155,4 +157,6 @@ type serviceBindingUsageOperations interface {
 	Delete(env string, name string) error
 	Find(env string, name string) (*api.ServiceBindingUsage, error)
 	ListForServiceInstance(env string, instanceName string) ([]*api.ServiceBindingUsage, error)
+	Subscribe(listener resource.Listener)
+	Unsubscribe(listener resource.Listener)
 }

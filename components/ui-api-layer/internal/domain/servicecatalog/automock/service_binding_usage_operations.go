@@ -2,6 +2,7 @@
 package automock
 
 import mock "github.com/stretchr/testify/mock"
+import resource "github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
 
 import v1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 
@@ -91,4 +92,14 @@ func (_m *serviceBindingUsageOperations) ListForServiceInstance(env string, inst
 	}
 
 	return r0, r1
+}
+
+// Subscribe provides a mock function with given fields: listener
+func (_m *serviceBindingUsageOperations) Subscribe(listener resource.Listener) {
+	_m.Called(listener)
+}
+
+// Unsubscribe provides a mock function with given fields: listener
+func (_m *serviceBindingUsageOperations) Unsubscribe(listener resource.Listener) {
+	_m.Called(listener)
 }

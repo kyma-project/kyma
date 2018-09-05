@@ -84,6 +84,12 @@
   version = "v0.2.0"
 
 [[projects]]
+  name = "github.com/gorilla/websocket"
+  packages = ["."]
+  revision = "66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d"
+  version = "v1.4.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/howeyc/gopass"
   packages = ["."]
@@ -136,6 +142,12 @@
   name = "github.com/machinebox/graphql"
   packages = ["."]
   revision = "05b17f3157491bbfa5d6fc2006443a272d960d15"
+
+[[projects]]
+  name = "github.com/mitchellh/mapstructure"
+  packages = ["."]
+  revision = "fa473d140ef3c6adf42d6b391fe76707f1f243c8"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -418,6 +430,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a677945e25d2ade2da6345fdd2a270d471ae7d537099e4f811c48721173c7dcd"
+  inputs-digest = "157b938d0975f0c9b08cff1162cc4f2e89f5dcc915f07c19c6c44ebe4e70b39b"
   solver-name = "gps-cdcl"
   solver-version = 1

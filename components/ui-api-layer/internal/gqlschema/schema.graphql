@@ -59,11 +59,11 @@ enum InstanceStatusType {
 }
 
 type ServiceInstanceEvent {
-    type: ServiceInstanceEventType!
-    instance: ServiceInstance
+    type: SubscriptionEventType!
+    instance: ServiceInstance!
 }
 
-enum ServiceInstanceEventType {
+enum SubscriptionEventType {
     ADD
     UPDATE
     DELETE
@@ -141,6 +141,11 @@ enum ServiceBindingStatusType {
     UNKNOWN
 }
 
+type ServiceBindingEvent {
+    type: SubscriptionEventType!
+    binding: ServiceBinding!
+}
+
 # We cannot use ServiceBinding as a result of create action
 # because secret at the moment of mutation execution is not available.
 type CreateServiceBindingOutput {
@@ -172,6 +177,11 @@ type ServiceBindingUsage {
     usedBy: LocalObjectReference!
     parameters: ServiceBindingUsageParameters
     status: ServiceBindingUsageStatus!
+}
+
+type ServiceBindingUsageEvent {
+    type: SubscriptionEventType!
+    bindingUsage: ServiceBindingUsage!
 }
 
 type ServiceBindingUsageStatus {
@@ -494,6 +504,8 @@ type Mutation {
 
 type Subscription {
     serviceInstanceEvent(environment: String!): ServiceInstanceEvent!
+    serviceBindingEventForServiceInstance(serviceInstanceName: String!, environment: String!): ServiceBindingEvent!
+    serviceBindingUsageEventForServiceInstance(serviceInstanceName: String!, environment: String!): ServiceBindingUsageEvent!
 }
 
 # Schema

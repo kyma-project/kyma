@@ -214,6 +214,10 @@ func (r *RootResolver) Query_serviceBinding(ctx context.Context, name string, en
 	return r.sc.ServiceBindingQuery(ctx, name, environment)
 }
 
+func (r *RootResolver) Subscription_serviceBindingEventForServiceInstance(ctx context.Context, instanceName, environment string) (<-chan gqlschema.ServiceBindingEvent, error) {
+	return r.sc.ServiceBindingEventForInstanceSubscription(ctx, instanceName, environment)
+}
+
 func (r *RootResolver) Mutation_createServiceBindingUsage(ctx context.Context, createServiceBindingUsageInput *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
 	return r.sc.CreateServiceBindingUsageMutation(ctx, createServiceBindingUsageInput)
 }
@@ -224,6 +228,10 @@ func (r *RootResolver) Mutation_deleteServiceBindingUsage(ctx context.Context, s
 
 func (r *RootResolver) Query_serviceBindingUsage(ctx context.Context, name, environment string) (*gqlschema.ServiceBindingUsage, error) {
 	return r.sc.ServiceBindingUsageQuery(ctx, name, environment)
+}
+
+func (r *RootResolver) Subscription_serviceBindingUsageEventForServiceInstance(ctx context.Context, instanceName, environment string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
+	return r.sc.ServiceBindingUsageEventForInstanceSubscription(ctx, instanceName, environment)
 }
 
 func (r *RootResolver) ServiceBindingUsage_serviceBinding(ctx context.Context, obj *gqlschema.ServiceBindingUsage) (*gqlschema.ServiceBinding, error) {

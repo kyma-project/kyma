@@ -1,6 +1,6 @@
 package gqlschema
 
 type ServiceInstanceEvent struct {
-	Type     ServiceInstanceEventType
-	Instance ServiceInstance
+	Type     SubscriptionEventType `json:"type"`
+	Instance ServiceInstance       `json:"instance"`
 }

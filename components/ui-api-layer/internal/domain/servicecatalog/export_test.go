@@ -8,7 +8,6 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 )
 
 func NewInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) *instanceService {
@@ -25,14 +24,6 @@ func NewMockInstanceConverter() *mockGqlInstanceConverter {
 
 func NewMockInstanceService() *mockInstanceSvc {
 	return new(mockInstanceSvc)
-}
-
-func NewInstanceListener(channel chan<- gqlschema.ServiceInstanceEvent, filter func(object interface{}) bool, instanceConverter gqlInstanceConverter) *instanceListener {
-	return &instanceListener{
-		channel:           channel,
-		filter:            filter,
-		instanceConverter: instanceConverter,
-	}
 }
 
 func NewInstanceCreateParameters(name, namespace string, labels []string, externalServicePlanName, externalServiceClassName string, schema map[string]interface{}) *instanceCreateParameters {
@@ -101,6 +92,6 @@ func NewServiceBindingUsageService(buInterface v1alpha1.ServicecatalogV1alpha1In
 	return newServiceBindingUsageService(buInterface, informer, bindingOp)
 }
 
-func NewServiceBindingUsageResolver(op serviceBindingUsageOperations) *serviceBindingUsageResolver {
-	return newServiceBindingUsageResolver(op)
+func NewServiceBindingUsageResolver(op serviceBindingUsageOperations, serviceBindingGetter serviceBindingGetter) *serviceBindingUsageResolver {
+	return newServiceBindingUsageResolver(op, serviceBindingGetter)
 }
