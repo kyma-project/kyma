@@ -18,4 +18,17 @@ func TestRequestRetrier_CheckResponse(t *testing.T) {
 		// then
 		assert.NoError(t, err)
 	})
+
+	t.Run("should not retry if flag is already set", func(t *testing.T) {
+		// given
+		rr := newRequestRetrier("", &proxy{}, &http.Request{})
+		rr.retried = true
+		response := &http.Response{StatusCode: 403}
+
+		// when
+		err := rr.CheckResponse(response)
+		
+		// then
+		assert.NoError(t, err)
+	})
 }
