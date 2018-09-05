@@ -10,6 +10,9 @@
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek
 
+# The `installation` PowerShell scripts
+/installation/**/*.ps1 @crabtree @venturasr
+
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @piotrmsc @PK85
 
