@@ -3,8 +3,7 @@ package pretty
 type Kind int
 
 const (
-	Unknown Kind = iota
-	EventActivation
+	EventActivation Kind = iota
 	EventActivations
 	EventActivationEvents
 	RemoteEnvironment

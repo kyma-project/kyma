@@ -3,8 +3,7 @@ package pretty
 type Kind int
 
 const (
-	Unknown Kind = iota
-	Deployment
+	Deployment Kind = iota
 	Deployments
 	Environment
 	Environments

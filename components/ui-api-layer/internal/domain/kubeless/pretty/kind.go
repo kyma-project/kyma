@@ -3,8 +3,7 @@ package pretty
 type Kind int
 
 const (
-	Unknown Kind = iota
-	Function
+	Function Kind = iota
 	Functions
 )
 

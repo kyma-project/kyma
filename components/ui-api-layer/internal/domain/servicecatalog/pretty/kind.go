@@ -3,8 +3,7 @@ package pretty
 type Kind int
 
 const (
-	Unknown Kind = iota
-	ServiceBinding
+	ServiceBinding Kind = iota
 	ServiceBindings
 	ServiceBindingUsage
 	ServiceBindingUsages

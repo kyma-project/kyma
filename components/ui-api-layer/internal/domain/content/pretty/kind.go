@@ -3,8 +3,7 @@ package pretty
 type Kind int
 
 const (
-	Unknown Kind = iota
-	ApiSpec
+	ApiSpec Kind = iota
 	AsyncApiSpec
 	Content
 	Topic
