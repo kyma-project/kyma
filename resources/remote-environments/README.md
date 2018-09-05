@@ -9,12 +9,12 @@
 
 ## Overview
 
-A Remote Environment (RE) is a representation of an external solution connected to Kyma. The traffic, connection, security, and events of REs are managed by the Application Connector - a proprietary implementation that consists of four services.
+A Remote Environment (RE) is a representation of an external solution connected to Kyma. The Application Connector manages the traffic, connection, security, and Events of REs. It is a proprietary implementation that consists of four services.
 Read the [Application Connector documentation](../../docs/application-connector/docs/001-overview-application-connector.md) for more details regarding the implementation.
 
 ## Details
 
-This directory contains the Remote Environment Helm chart that creates a new RE and installs the Gateway Service and all of the Ingresses required to access Application Connector services in the context of the created RE. A single RE allows to connect a single external solution to Kyma.
+This directory contains the Remote Environment Helm chart that creates a new RE. Additionally, the chart installs the Gateway Service and all of the Ingresses required to access Application Connector services in the context of the created RE. A single RE allows to connect a single external solution to Kyma.
 
 ### Customize the Gateway Service installation
 

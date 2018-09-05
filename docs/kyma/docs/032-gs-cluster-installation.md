@@ -21,7 +21,7 @@ Prepare these items:
 - A static IP address for the Kyma Istio Ingress (public external IP). Create a DNS record `*.kyma.example.com` that points to Kyma Istio Ingress IP Address.
 - A Static IP address for Remote Environments Ingress. Create a DNS record `gateway.kyma.example.com` that points to Remote Environments Ingress IP Address.
 
-Some providers doen't allow to pre-allocate IP addresses, such as is the case with AWS which does not support static IP assignment during ELB creation. For such providers, you must complete the configuration after you install Kyma. See the **DNS configuration** section for more details.
+Some providers don't allow to pre-allocate IP addresses, such as is the case with AWS which does not support static IP assignment during ELB creation. For such providers, you must complete the configuration after you install Kyma. See the **DNS configuration** section for more details.
 
 >**NOTE:** See the Application Connector documentation for more details on Remote Environments.
 
