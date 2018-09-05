@@ -2,13 +2,13 @@ package servicecatalog_test
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -44,7 +44,7 @@ func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testin
 		_, err := resolver.CreateServiceBindingUsageMutation(nil, binding)
 
 		require.Error(t, err)
-		assert.Equal(t, fmt.Sprintf("ServiceBindingUsage %s already exists", binding.Name), err.Error())
+		assert.True(t, gqlerror.IsAlreadyExists(err))
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -56,6 +56,7 @@ func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testin
 		_, err := resolver.CreateServiceBindingUsageMutation(nil, fixCreateServiceBindingUsageInput())
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
@@ -84,7 +85,7 @@ func TestServiceBindingUsageResolver_DeleteServiceBindingUsageMutation(t *testin
 		_, err := resolver.DeleteServiceBindingUsageMutation(nil, "test", "test")
 
 		require.Error(t, err)
-		assert.Equal(t, "ServiceBindingUsage test not found", err.Error())
+		assert.True(t, gqlerror.IsNotFound(err))
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -96,6 +97,7 @@ func TestServiceBindingUsageResolver_DeleteServiceBindingUsageMutation(t *testin
 		_, err := resolver.DeleteServiceBindingUsageMutation(nil, "test", "test")
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
@@ -133,6 +135,7 @@ func TestServiceBindingUsageResolver_ServiceBindingUsageQuery(t *testing.T) {
 		_, err := resolver.ServiceBindingUsageQuery(nil, "test", "test")
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
@@ -177,6 +180,7 @@ func TestServiceBindingUsageResolver_ServiceBindingUsagesOfInstanceQuery(t *test
 		_, err := resolver.ServiceBindingUsagesOfInstanceQuery(nil, "test", "test")
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 

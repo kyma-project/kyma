@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/api/core/v1"
@@ -52,7 +53,8 @@ func TestSecretResolverOnError(t *testing.T) {
 	// WHEN
 	_, err := resolver.SecretQuery(context.Background(), "my-secret", "production")
 	// THEN
-	assert.EqualError(t, err, "cannot get Secret")
+	require.Error(t, err)
+	assert.True(t, gqlerror.IsInternal(err))
 }
 
 func failingReactor(action k8sTesting.Action) (handled bool, ret runtime.Object, err error) {

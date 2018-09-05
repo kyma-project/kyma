@@ -2,7 +2,6 @@ package ui_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/ui/v1alpha1"
@@ -10,6 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -68,8 +68,8 @@ func TestIDPPresetResolver_CreateIDPPresetMutation(t *testing.T) {
 
 		// then
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsAlreadyExists(err))
 		require.Nil(t, gotIDP)
-		assert.Equal(t, fmt.Sprintf("IDP Preset with the name `%s` already exists", fixName), err.Error())
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -92,8 +92,8 @@ func TestIDPPresetResolver_CreateIDPPresetMutation(t *testing.T) {
 
 		// then
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 		require.Nil(t, gotIDP)
-		assert.Equal(t, fmt.Sprintf("Cannot create IDP Preset `%s`", fixName), err.Error())
 	})
 }
 
@@ -142,8 +142,8 @@ func TestIDPPresetResolver_DeleteIDPPresetMutation(t *testing.T) {
 
 		// then
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsNotFound(err))
 		require.Nil(t, gotIDP)
-		assert.Equal(t, fmt.Sprintf("Cannot find IDP Preset `%s`", fixName), err.Error())
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -165,8 +165,8 @@ func TestIDPPresetResolver_DeleteIDPPresetMutation(t *testing.T) {
 		gotIDP, err := resolver.DeleteIDPPresetMutation(context.Background(), fixName)
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 		require.Nil(t, gotIDP)
-		assert.EqualError(t, err, fmt.Sprintf("Cannot delete IDP Preset `%s`", fixName))
 	})
 }
 
@@ -234,8 +234,8 @@ func TestIDPPresetResolver_IDPPresetQuery(t *testing.T) {
 		gotIDP, err := resolver.IDPPresetQuery(context.Background(), fixName)
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 		require.Nil(t, gotIDP)
-		assert.Equal(t, fmt.Sprintf("Cannot query IDP Preset with name `%s`", fixName), err.Error())
 	})
 }
 
@@ -307,8 +307,8 @@ func TestIDPPresetResolver_IDPPresetsQuery(t *testing.T) {
 		gotIDPs, err := resolver.IDPPresetsQuery(context.Background(), nil, nil)
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 		assert.Equal(t, fixEmptyGQLIDPPresetsArray, gotIDPs)
 		assert.Len(t, gotIDPs, 0)
-		assert.Equal(t, fmt.Sprintf("Cannot query IDP Presets"), err.Error())
 	})
 }

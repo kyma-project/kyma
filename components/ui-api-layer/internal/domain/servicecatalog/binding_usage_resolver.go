@@ -2,12 +2,12 @@ package servicecatalog
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 type serviceBindingUsageResolver struct {
@@ -25,21 +25,19 @@ func newServiceBindingUsageResolver(op serviceBindingUsageOperations) *serviceBi
 func (r *serviceBindingUsageResolver) CreateServiceBindingUsageMutation(ctx context.Context, input *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
 	inBindingUsage, err := r.converter.InputToK8s(input)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while creating ServiceBindingUsage from input [%+v]", input))
-		return nil, r.genericErrorOnCreate()
+		glog.Error(errors.Wrapf(err, "while creating %s from input [%+v]", pretty.ServiceBindingUsage, input))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage)
 	}
 	bu, err := r.operations.Create(input.Environment, inBindingUsage)
-	switch {
-	case apierrors.IsAlreadyExists(err):
-		return nil, fmt.Errorf("ServiceBindingUsage %s already exists", input.Name)
-	case err != nil:
-		glog.Error(errors.Wrapf(err, "while creating ServiceBindingUsage from input [%v]", input))
-		return nil, r.genericErrorOnCreate()
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while creating %s from input [%v]", pretty.ServiceBindingUsage, input))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(input.Name), gqlerror.WithEnvironment(input.Environment))
 	}
 
 	out, err := r.converter.ToGQL(bu)
 	if err != nil {
-		return nil, err
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceBindingUsage))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(input.Name), gqlerror.WithEnvironment(input.Environment))
 	}
 
 	return out, nil
@@ -47,12 +45,9 @@ func (r *serviceBindingUsageResolver) CreateServiceBindingUsageMutation(ctx cont
 
 func (r *serviceBindingUsageResolver) DeleteServiceBindingUsageMutation(ctx context.Context, serviceBindingUsageName, namespace string) (*gqlschema.DeleteServiceBindingUsageOutput, error) {
 	err := r.operations.Delete(namespace, serviceBindingUsageName)
-	switch {
-	case apierrors.IsNotFound(err):
-		return nil, fmt.Errorf("ServiceBindingUsage %s not found", serviceBindingUsageName)
-	case err != nil:
-		glog.Error(errors.Wrapf(err, "while deleting ServiceBindingUsage %s", serviceBindingUsageName))
-		return nil, errors.New("cannot delete ServiceBindingUsage")
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while deleting %s with name `%s` from environment `%s`", pretty.ServiceBindingUsage, serviceBindingUsageName, namespace))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(serviceBindingUsageName), gqlerror.WithEnvironment(namespace))
 	}
 
 	return &gqlschema.DeleteServiceBindingUsageOutput{
@@ -64,17 +59,17 @@ func (r *serviceBindingUsageResolver) DeleteServiceBindingUsageMutation(ctx cont
 func (r *serviceBindingUsageResolver) ServiceBindingUsageQuery(ctx context.Context, name, environment string) (*gqlschema.ServiceBindingUsage, error) {
 	usage, err := r.operations.Find(environment, name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting single ServiceBindingUsage [name: %s, environment: %s]", name, environment))
-		return nil, r.genericErrorOnSingleGet()
+		glog.Error(errors.Wrapf(err, "while getting single %s [name: %s, environment: %s]", pretty.ServiceBindingUsage, name, environment))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
 	}
 
 	out, err := r.converter.ToGQL(usage)
 	if err != nil {
 		glog.Error(
 			errors.Wrapf(err,
-				"while getting single ServiceBindingUsage [name: %s, environment: %s]: while converting ServiceBindingUsage to QL representation",
-				name, environment))
-		return nil, r.genericErrorOnSingleGet()
+				"while getting single %s [name: %s, environment: %s]: while converting %s to QL representation", pretty.ServiceBindingUsage,
+				name, environment, pretty.ServiceBindingUsage))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
 	}
 	return out, nil
 }
@@ -83,25 +78,13 @@ func (r *serviceBindingUsageResolver) ServiceBindingUsagesOfInstanceQuery(ctx co
 	usages, err :=
 		r.operations.ListForServiceInstance(env, instanceName)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting ServiceBindingUsages of instance [environment: %s, instance: %s]", env, instanceName))
-		return nil, r.genericErrorOnMultipleGet()
+		glog.Error(errors.Wrapf(err, "while getting %s of instance [environment: %s, instance: %s]", pretty.ServiceBindingUsages, env, instanceName))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsages, gqlerror.WithEnvironment(env), gqlerror.WithCustomArgument("instanceName", instanceName))
 	}
 	out, err := r.converter.ToGQLs(usages)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting ServiceBindingUsages of instance [environment: %s, instance: %s]", env, instanceName))
-		return nil, r.genericErrorOnMultipleGet()
+		glog.Error(errors.Wrapf(err, "while converting %s of instance [environment: %s, instance: %s]", pretty.ServiceBindingUsages, env, instanceName))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsages, gqlerror.WithEnvironment(env), gqlerror.WithCustomArgument("instanceName", instanceName))
 	}
 	return out, nil
-}
-
-func (*serviceBindingUsageResolver) genericErrorOnCreate() error {
-	return errors.New("cannot create ServiceBindingUsage")
-}
-
-func (*serviceBindingUsageResolver) genericErrorOnSingleGet() error {
-	return errors.New("cannot get ServiceBindingUsage")
-}
-
-func (*serviceBindingUsageResolver) genericErrorOnMultipleGet() error {
-	return errors.New("Cannot get ServiceBindingUsages")
 }

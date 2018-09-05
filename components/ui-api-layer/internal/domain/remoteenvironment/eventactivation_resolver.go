@@ -2,9 +2,13 @@ package remoteenvironment
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/golang/glog"
+	contentPretty "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/pretty"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 )
 
@@ -25,8 +29,8 @@ func newEventActivationResolver(service eventActivationLister, asyncApiSpecGette
 func (r *eventActivationResolver) EventActivationsQuery(ctx context.Context, environment string) ([]gqlschema.EventActivation, error) {
 	items, err := r.service.List(environment)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing eventActivations in `%s` environment", environment))
-		return nil, err
+		glog.Error(errors.Wrapf(err, "while listing %s in `%s` environment", pretty.EventActivations, environment))
+		return nil, gqlerror.New(err, pretty.EventActivations, gqlerror.WithEnvironment(environment))
 	}
 
 	return r.converter.ToGQLs(items), nil
@@ -35,13 +39,13 @@ func (r *eventActivationResolver) EventActivationsQuery(ctx context.Context, env
 func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error) {
 	if eventActivation == nil {
 		glog.Errorf("EventActivation cannot be empty in order to resolve events field")
-		return nil, r.eventsError()
+		return nil, gqlerror.NewInternal()
 	}
 
 	asyncApiSpec, err := r.asyncApiSpecGetter.Find("service-class", eventActivation.Name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while gathering events for EventActivation %s", eventActivation.Name))
-		return nil, r.eventsError()
+		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", pretty.EventActivationEvents, pretty.EventActivation, eventActivation.Name))
+		return nil, gqlerror.New(err, pretty.EventActivationEvents, gqlerror.WithName(eventActivation.Name))
 	}
 
 	if asyncApiSpec == nil {
@@ -49,17 +53,10 @@ func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context
 	}
 
 	if asyncApiSpec.Data.AsyncAPI != "1.0.0" {
-		glog.Errorf("not supported version `%s` of asyncApiSpec", asyncApiSpec.Data.AsyncAPI)
-		return nil, r.eventsError()
+		details := fmt.Sprintf("not supported version `%s` of %s", asyncApiSpec.Data.AsyncAPI, contentPretty.AsyncApiSpec)
+		glog.Error(details)
+		return nil, gqlerror.NewInternal(gqlerror.WithDetails(details))
 	}
 
 	return r.converter.ToGQLEvents(asyncApiSpec), nil
-}
-
-func (r *eventActivationResolver) genericError() error {
-	return errors.New("Cannot get EventActivation")
-}
-
-func (r *eventActivationResolver) eventsError() error {
-	return errors.New("Cannot list Events")
 }

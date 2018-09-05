@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -55,6 +56,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		_, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
@@ -118,6 +120,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("env", "test"))
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 
 	t.Run("Nil", func(t *testing.T) {
@@ -127,6 +130,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		_, err := resolver.EventActivationEventsField(nil, nil)
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -138,6 +142,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("env", "test"))
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 

@@ -2,11 +2,12 @@ package servicecatalog
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 )
 
@@ -25,34 +26,30 @@ func newBrokerResolver(brokerLister brokerListGetter) *brokerResolver {
 }
 
 func (r *brokerResolver) ServiceBrokersQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.ServiceBroker, error) {
-	externalErr := errors.New("Cannot query ServiceBrokers")
-
 	items, err := r.brokerLister.List(pager.PagingParams{
 		First:  first,
 		Offset: offset,
 	})
 
 	if err != nil {
-		glog.Error(errors.Wrap(err, "while listing ServiceBrokers"))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while listing %s", pretty.ServiceBrokers))
+		return nil, gqlerror.New(err, pretty.ServiceBrokers)
 	}
 
 	serviceBrokers, err := r.brokerConverter.ToGQLs(items)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting ServiceBrokers"))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceBrokers))
+		return nil, gqlerror.New(err, pretty.ServiceBrokers)
 	}
 
 	return serviceBrokers, nil
 }
 
 func (r *brokerResolver) ServiceBrokerQuery(ctx context.Context, name string) (*gqlschema.ServiceBroker, error) {
-	externalErr := fmt.Errorf("Cannot query ServiceBroker with name `%s`", name)
-
 	serviceBroker, err := r.brokerLister.Find(name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting ServiceBroker"))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while getting %s", pretty.ServiceBroker))
+		return nil, gqlerror.New(err, pretty.ServiceBroker, gqlerror.WithName(name))
 	}
 	if serviceBroker == nil {
 		return nil, nil
@@ -60,8 +57,8 @@ func (r *brokerResolver) ServiceBrokerQuery(ctx context.Context, name string) (*
 
 	result, err := r.brokerConverter.ToGQL(serviceBroker)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting to ServiceBroker type"))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while converting to %s type", pretty.ServiceBroker))
+		return nil, gqlerror.New(err, pretty.ServiceBroker, gqlerror.WithName(name))
 	}
 
 	return result, nil

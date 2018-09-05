@@ -14,6 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 )
 
 func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
@@ -120,25 +121,25 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 	t.Run("Error with functions", func(t *testing.T) {
 		svc := automock.NewDeploymentLister()
 		svc.On("List", environment).Return(nil, errors.New("test")).Once()
-		svc.On("ListWithoutFunctions", mock.Anything, mock.Anything).Return(nil, errors.New("test")).Once()
+		defer svc.AssertExpectations(t)
 		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
 		_, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(false))
 
 		require.Error(t, err)
-		svc.AssertNotCalled(t, "ListWithoutFunctions", mock.Anything, mock.Anything)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 
 	t.Run("Error without functions", func(t *testing.T) {
 		svc := automock.NewDeploymentLister()
-		svc.On("List", mock.Anything, mock.Anything).Return(nil, errors.New("test")).Once()
 		svc.On("ListWithoutFunctions", environment).Return(nil, errors.New("test")).Once()
+		defer svc.AssertExpectations(t)
 		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
 		_, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(true))
 
 		require.Error(t, err)
-		svc.AssertNotCalled(t, "List", mock.Anything, mock.Anything)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
@@ -270,6 +271,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 		_, err := resolver.DeploymentBoundServiceInstanceNamesField(nil, nil)
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 
 	t.Run("Error while listing usages", func(t *testing.T) {
@@ -283,10 +285,12 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 		lister := new(automock.ServiceBindingUsageLister)
 		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{}, errors.New("trolololo"))
+		defer lister.AssertExpectations(t)
 		resolver := k8s.NewDeploymentResolver(nil, lister, nil)
 
 		_, err := resolver.DeploymentBoundServiceInstanceNamesField(nil, deployment)
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 
 	t.Run("Error while getting binding", func(t *testing.T) {
@@ -308,12 +312,15 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 		lister := new(automock.ServiceBindingUsageLister)
 		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
+		defer lister.AssertExpectations(t)
 		getter := new(automock.ServiceBindingGetter)
 		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(nil, errors.New("trolololo"))
+		defer getter.AssertExpectations(t)
 		resolver := k8s.NewDeploymentResolver(nil, lister, getter)
 
 		_, err := resolver.DeploymentBoundServiceInstanceNamesField(nil, deployment)
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 

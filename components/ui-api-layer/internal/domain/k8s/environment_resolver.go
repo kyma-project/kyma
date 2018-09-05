@@ -4,7 +4,9 @@ import (
 	"context"
 
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 )
 
@@ -35,8 +37,8 @@ func (r *environmentResolver) EnvironmentsQuery(ctx context.Context, remoteEnvir
 	}
 
 	if err != nil {
-		glog.Error(errors.Wrap(err, "while resolving environments"))
-		return nil, errors.New("Cannot list environments")
+		glog.Error(errors.Wrapf(err, "while listing %s", pretty.Environments))
+		return nil, gqlerror.New(err, pretty.Environments)
 	}
 
 	return envs, nil

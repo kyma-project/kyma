@@ -104,7 +104,7 @@ func (svc *remoteEnvironmentService) Find(name string) (*v1alpha1.RemoteEnvironm
 func (svc *remoteEnvironmentService) List(params pager.PagingParams) ([]*v1alpha1.RemoteEnvironment, error) {
 	reObjs, err := pager.From(svc.reInformer.GetStore()).Limit(params)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while listing remote environments with paging params [first: %v] [offset: %v]: %v", params.First, params.Offset)
+		return nil, errors.Wrapf(err, "while listing remote environments with paging params [first: %v] [offset: %v]", params.First, params.Offset)
 	}
 
 	res := make([]*v1alpha1.RemoteEnvironment, 0, len(reObjs))

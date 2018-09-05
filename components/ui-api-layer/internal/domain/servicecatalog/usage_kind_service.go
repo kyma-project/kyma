@@ -36,7 +36,7 @@ func newUsageKindService(client v1alpha12.ServicecatalogV1alpha1Interface, dynam
 func (svc *usageKindService) List(params pager.PagingParams) ([]*v1alpha1.UsageKind, error) {
 	targets, err := pager.From(svc.informer.GetStore()).Limit(params)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while listing UsageKinds with paging params [first: %v] [offset: %v]: %v", params.First, params.Offset)
+		return nil, errors.Wrapf(err, "while listing UsageKinds with paging params [first: %v] [offset: %v]", params.First, params.Offset)
 	}
 
 	res := make([]*v1alpha1.UsageKind, 0, len(targets))

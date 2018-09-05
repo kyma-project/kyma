@@ -209,7 +209,7 @@ func (swc *cache) contentHandler(id string) (interface{}, bool, error) {
 func (swc *cache) registerHandler(filename string, handler func(string) (interface{}, bool, error)) {
 	_, registered := swc.handlers[filename]
 	if registered {
-		glog.Warning("handler: `%s` already registered", filename)
+		glog.Warningf("handler: `%s` already registered", filename)
 	}
 	swc.handlers[filename] = handler
 }

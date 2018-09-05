@@ -7,8 +7,10 @@ import (
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/gateway"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 )
 
@@ -43,12 +45,11 @@ func NewRemoteEnvironmentResolver(reSvc reSvc, statusGetter statusGetter) *remot
 }
 
 func (r *remoteEnvironmentResolver) RemoteEnvironmentQuery(ctx context.Context, name string) (*gqlschema.RemoteEnvironment, error) {
-	externalErr := fmt.Errorf("Couldn't query RemoteEnvironment with name %s", name)
 	remoteEnvironment, err := r.reSvc.Find(name)
 
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting RemoteEnvironment"))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while getting %s", pretty.RemoteEnvironment))
+		return nil, gqlerror.New(err, pretty.RemoteEnvironment, gqlerror.WithName(name))
 	}
 	if remoteEnvironment == nil {
 		return nil, nil
@@ -62,24 +63,18 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentsQuery(ctx context.Context,
 	var items []*v1alpha1.RemoteEnvironment
 	var err error
 
-	logAndReturnCannotProcessErr := func(err error) ([]gqlschema.RemoteEnvironment, error) {
-		glog.Errorf(err.Error())
-		// Returning only general message all details are logged and not exposed to the end user.
-		// This resolver returns remote environments list, so when there are no entries we are returning empty slice.
-		// Because of that we do not have to support here error with type NotFound, Conflict etc.
-		return []gqlschema.RemoteEnvironment{}, fmt.Errorf("cannot process 'RemoteEnvironment' item")
-	}
-
 	if environment == nil { // retrieve all
 		items, err = r.reSvc.List(pager.PagingParams{First: first, Offset: offset})
 		if err != nil {
-			return logAndReturnCannotProcessErr(errors.Wrap(err, "while listing all remote environments"))
+			glog.Error(errors.Wrapf(err, "while listing all %s", pretty.RemoteEnvironments))
+			return []gqlschema.RemoteEnvironment{}, gqlerror.New(err, pretty.RemoteEnvironments)
 		}
 	} else { // retrieve only for given environment
 		// TODO: Add support for paging.
 		items, err = r.reSvc.ListInEnvironment(*environment)
 		if err != nil {
-			return logAndReturnCannotProcessErr(errors.Wrapf(err, "while listing remote environments for environment %v", environment))
+			glog.Error(errors.Wrapf(err, "while listing %s for environment %v", pretty.RemoteEnvironments, environment))
+			return []gqlschema.RemoteEnvironment{}, gqlerror.New(err, pretty.RemoteEnvironments, gqlerror.WithEnvironment(*environment))
 		}
 	}
 
@@ -94,7 +89,8 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentsQuery(ctx context.Context,
 func (r *remoteEnvironmentResolver) ConnectorServiceQuery(ctx context.Context, remoteEnvironment string) (gqlschema.ConnectorService, error) {
 	url, err := r.reSvc.GetConnectionUrl(remoteEnvironment)
 	if err != nil {
-		return gqlschema.ConnectorService{}, errors.Wrapf(err, "while getting Connection Url")
+		glog.Error(errors.Wrapf(err, "while getting %s for %s '%s'", pretty.ConnectorService, pretty.RemoteEnvironment, remoteEnvironment))
+		return gqlschema.ConnectorService{}, gqlerror.New(err, pretty.ConnectorService)
 	}
 
 	dto := gqlschema.ConnectorService{
@@ -108,7 +104,8 @@ func (r *remoteEnvironmentResolver) EnableRemoteEnvironmentMutation(ctx context.
 	em, err := r.reSvc.Enable(environment, remoteEnvironment)
 
 	if err != nil {
-		return nil, errors.Wrapf(err, "while enabling RemoteEnvironment")
+		glog.Error(errors.Wrapf(err, "while enabling %s", pretty.RemoteEnvironment))
+		return nil, gqlerror.New(err, pretty.RemoteEnvironment, gqlerror.WithName(remoteEnvironment), gqlerror.WithEnvironment(environment))
 	}
 
 	environmentMapping := &gqlschema.EnvironmentMapping{
@@ -123,7 +120,8 @@ func (r *remoteEnvironmentResolver) DisableRemoteEnvironmentMutation(ctx context
 	err := r.reSvc.Disable(environment, remoteEnvironment)
 
 	if err != nil {
-		return nil, errors.Wrapf(err, "while disabling RemoteEnvironment")
+		glog.Error(errors.Wrapf(err, "while disabling %s", pretty.RemoteEnvironment))
+		return nil, gqlerror.New(err, pretty.RemoteEnvironment, gqlerror.WithName(remoteEnvironment), gqlerror.WithEnvironment(environment))
 	}
 
 	environmentMapping := &gqlschema.EnvironmentMapping{
@@ -135,19 +133,15 @@ func (r *remoteEnvironmentResolver) DisableRemoteEnvironmentMutation(ctx context
 }
 
 func (r *remoteEnvironmentResolver) RemoteEnvironmentEnabledInEnvironmentsField(ctx context.Context, obj *gqlschema.RemoteEnvironment) ([]string, error) {
-	logAndReturnCannotProcessErr := func(err error) ([]string, error) {
-		// Returning only general message all details are logged and not exposed to the end user.
-		glog.Errorf(err.Error())
-		return []string{}, fmt.Errorf("cannot process 'EnabledInEnvironments' field")
-	}
-
 	if obj == nil {
-		return logAndReturnCannotProcessErr(fmt.Errorf("while resolving 'EnabledInEnvironments' field obj is empty"))
+		glog.Error(fmt.Errorf("while resolving 'EnabledInEnvironments' field obj is empty"))
+		return []string{}, gqlerror.NewInternal()
 	}
 
 	items, err := r.reSvc.ListNamespacesFor(obj.Name)
 	if err != nil {
-		return logAndReturnCannotProcessErr(errors.Wrapf(err, "while listing namespaces for remote environment %q", obj.Name))
+		glog.Error(errors.Wrapf(err, "while listing %s for %s %q", pretty.Environments, pretty.RemoteEnvironment, obj.Name))
+		return []string{}, gqlerror.New(err, pretty.Environments)
 	}
 	return items, nil
 }
@@ -162,6 +156,6 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentStatusField(ctx context.Con
 	case gateway.StatusNotConfigured:
 		return gqlschema.RemoteEnvironmentStatusGatewayNotConfigured, nil
 	default:
-		return gqlschema.RemoteEnvironmentStatus(""), fmt.Errorf("uknown remote environment status %s", status)
+		return gqlschema.RemoteEnvironmentStatus(""), gqlerror.NewInternal(gqlerror.WithDetails("unknown status"))
 	}
 }

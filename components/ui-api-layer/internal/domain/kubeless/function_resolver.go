@@ -2,11 +2,12 @@ package kubeless
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/kubeless/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 )
 
@@ -23,14 +24,13 @@ func newFunctionResolver(functionLister functionLister) *functionResolver {
 }
 
 func (r *functionResolver) FunctionsQuery(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.Function, error) {
-	externalErr := fmt.Errorf("Cannot query functions in environment `%s`", environment)
 	functions, err := r.functionLister.List(environment, pager.PagingParams{
 		First:  first,
 		Offset: offset,
 	})
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing Functions for environment %s", environment))
-		return nil, externalErr
+		glog.Error(errors.Wrapf(err, "while listing %s for environment %s", pretty.Functions, environment))
+		return nil, gqlerror.New(err, pretty.Functions, gqlerror.WithEnvironment(environment))
 	}
 
 	return r.functionConverter.ToGQLs(functions), nil

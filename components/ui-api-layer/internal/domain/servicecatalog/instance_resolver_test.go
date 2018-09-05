@@ -12,6 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/status"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -72,6 +73,7 @@ func TestInstanceResolver_ServiceInstanceQuery(t *testing.T) {
 		result, err := resolver.ServiceInstanceQuery(nil, name, environment)
 
 		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 		assert.Nil(t, result)
 	})
 }
@@ -144,6 +146,7 @@ func TestInstanceResolver_ServiceInstancesQuery(t *testing.T) {
 		_, err := resolver.ServiceInstancesQuery(nil, environment, nil, nil, nil)
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
@@ -244,6 +247,7 @@ func TestInstanceResolver_ServiceInstancesWithStatusQuery(t *testing.T) {
 		_, err := resolver.ServiceInstancesQuery(nil, environment, nil, nil, &gqlStatusType)
 
 		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
@@ -326,6 +330,7 @@ func TestInstanceResolver_ServiceInstanceServicePlanField(t *testing.T) {
 		result, err := resolver.ServiceInstanceServicePlanField(nil, &parentObj)
 
 		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 		assert.Nil(t, result)
 	})
 }
@@ -409,6 +414,7 @@ func TestInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) {
 		result, err := resolver.ServiceInstanceServiceClassField(nil, &parentObj)
 
 		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
 		assert.Nil(t, result)
 	})
 }
@@ -459,6 +465,7 @@ func TestInstanceResolver_ServiceInstanceBindableField(t *testing.T) {
 
 		if tc.shouldReturnError {
 			require.Error(t, err)
+			assert.True(t, gqlerror.IsInternal(err))
 		} else {
 			require.NoError(t, err)
 		}
