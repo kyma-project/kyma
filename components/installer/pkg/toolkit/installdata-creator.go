@@ -60,13 +60,6 @@ func (sc *InstallationDataCreator) WithLocalInstallation() *InstallationDataCrea
 	return sc
 }
 
-// WithIP sets IP address in InstallationData
-func (sc *InstallationDataCreator) WithIP(ipAddr string) *InstallationDataCreator {
-	sc.installationData.ExternalPublicIP = ipAddr
-
-	return sc
-}
-
 // WithRemoteEnvCa sets RemoteEnvCa property in InstallationData
 func (sc *InstallationDataCreator) WithRemoteEnvCa(remoteEnvCa string) *InstallationDataCreator {
 	sc.installationData.RemoteEnvCa = remoteEnvCa

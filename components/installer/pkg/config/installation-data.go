@@ -13,7 +13,6 @@ type InstallationContext struct {
 // InstallationData describes all installation attributes
 type InstallationData struct {
 	Context                    InstallationContext
-	ExternalPublicIP           string
 	KymaVersion                string
 	URL                        string
 	AzureBrokerTenantID        string
@@ -43,7 +42,6 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 
 	res := &InstallationData{
 		Context:                    ctx,
-		ExternalPublicIP:           installationConfig.ExternalPublicIP,
 		KymaVersion:                installation.Spec.KymaVersion,
 		URL:                        installation.Spec.URL,
 		AzureBrokerTenantID:        installationConfig.AzureBrokerTenantID,
