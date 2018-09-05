@@ -2,7 +2,6 @@ package populator_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -14,16 +13,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestPopulateOnlyREBInstances(t *testing.T) {
 	// GIVEN
-	mockClientSet := fake.NewSimpleClientset(
-		fixRedisServiceClass(),
-		fixRebServiceClass(),
-		fixRedisServiceInstance(),
-		fixRebServiceInstanceInDefaultNs(),
-		fixRebServiceInstnaceInProdNs())
+	mockClientSet := fake.NewSimpleClientset(fixAllSCObjects()...)
 
 	mockInserter := &automock.InstanceInserter{}
 	defer mockInserter.AssertExpectations(t)
@@ -41,8 +36,8 @@ func TestPopulateOnlyREBInstances(t *testing.T) {
 	mockConverter := &automock.InstanceConverter{}
 	defer mockConverter.AssertExpectations(t)
 
-	mockConverter.On("MapServiceInstance", fixRebServiceInstanceInDefaultNs()).Return(expectedServiceInstanceInDefaultNs())
-	mockConverter.On("MapServiceInstance", fixRebServiceInstnaceInProdNs()).Return(expectedServiceInstanceInProdNs())
+	mockConverter.On("MapServiceInstance", fixRebServiceInstanceFromClusterSCInDefaultNs()).Return(expectedServiceInstanceInDefaultNs())
+	mockConverter.On("MapServiceInstance", fixRebServiceInstanceFromClusterSCInProdNs()).Return(expectedServiceInstanceInProdNs())
 	sut := populator.NewInstancesFromClusterBroker(mockClientSet, mockInserter, mockConverter, fixREBrokerName())
 	// WHEN
 	actualErr := sut.Do(context.Background())
@@ -52,24 +47,54 @@ func TestPopulateOnlyREBInstances(t *testing.T) {
 
 func TestPopulateErrorOnInsert(t *testing.T) {
 	// GIVEN
-	mockClientSet := fake.NewSimpleClientset(fixRebServiceClass(), fixRebServiceInstanceInDefaultNs())
+	mockClientSet := fake.NewSimpleClientset(fixAllSCObjects()...)
 	mockInserter := &automock.InstanceInserter{}
 	defer mockInserter.AssertExpectations(t)
 	mockInserter.On("Insert", mock.Anything).Return(errors.New("some error"))
 
 	mockConverter := &automock.InstanceConverter{}
 	defer mockConverter.AssertExpectations(t)
-	mockConverter.On("MapServiceInstance", fixRebServiceInstanceInDefaultNs()).Return(expectedServiceInstanceInDefaultNs())
+	mockConverter.On("MapServiceInstance", mock.Anything).Return(&internal.Instance{})
 	sut := populator.NewInstancesFromClusterBroker(mockClientSet, mockInserter, mockConverter, fixREBrokerName())
 	// WHEN
 	actualErr := sut.Do(context.Background())
 	// THEN
-	assert.Error(t, actualErr)
-	fmt.Println(actualErr)
+	assert.EqualError(t, actualErr, "while inserting service instance: some error")
 
 }
 
-func fixRedisServiceClass() *scv1beta1.ClusterServiceClass {
+func fixREBrokerName() string {
+	return "remote-environment-broker"
+}
+
+func fixNsREBrokerName() string {
+	return "remote-env-broker"
+}
+
+func fixHelmBrokerName() string {
+	return "helm-broker"
+}
+
+func fixNsHelmBrokerName() string {
+	return "ns-helm-broker"
+}
+
+func fixAllSCObjects() []runtime.Object {
+	return []runtime.Object{
+		fixRedisClusterServiceClass(),
+		fixRebClusterServiceClass(),
+		fixNsRedisServiceClass(),
+		fixNsRebClusterServiceClass(),
+
+		fixRedisServiceInstanceFromClusterSC(),
+		fixRedisServiceInstanceFromNsSC(),
+		fixRebServiceInstanceFromClusterSCInDefaultNs(),
+		fixRebServiceInstanceFromClusterSCInProdNs(),
+		fixRebServiceInstanceFromNsSC(),
+	}
+}
+
+func fixRedisClusterServiceClass() *scv1beta1.ClusterServiceClass {
 	return &scv1beta1.ClusterServiceClass{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "service-class-redis",
@@ -80,7 +105,7 @@ func fixRedisServiceClass() *scv1beta1.ClusterServiceClass {
 	}
 }
 
-func fixRebServiceClass() *scv1beta1.ClusterServiceClass {
+func fixRebClusterServiceClass() *scv1beta1.ClusterServiceClass {
 	return &scv1beta1.ClusterServiceClass{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "service-class-reb",
@@ -91,25 +116,64 @@ func fixRebServiceClass() *scv1beta1.ClusterServiceClass {
 	}
 }
 
-func fixRedisServiceInstance() *scv1beta1.ServiceInstance {
+func fixNsRedisServiceClass() *scv1beta1.ServiceClass {
+	return &scv1beta1.ServiceClass{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "ns-service-class-redis",
+		},
+		Spec: scv1beta1.ServiceClassSpec{
+			ServiceBrokerName: fixNsHelmBrokerName(),
+		},
+	}
+}
+
+func fixNsRebClusterServiceClass() *scv1beta1.ServiceClass {
+	return &scv1beta1.ServiceClass{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "ns-service-class-reb",
+		},
+		Spec: scv1beta1.ServiceClassSpec{
+			ServiceBrokerName: fixNsREBrokerName(),
+		},
+	}
+}
+
+func fixRedisServiceInstanceFromClusterSC() *scv1beta1.ServiceInstance {
 	return &scv1beta1.ServiceInstance{
 		Spec: scv1beta1.ServiceInstanceSpec{
 			ClusterServiceClassRef: &scv1beta1.ClusterObjectReference{
 				Name: "service-class-redis",
 			},
-			ExternalID: "redis-external-id",
+			ExternalID: "redis-external-id-1",
 			ClusterServicePlanRef: &scv1beta1.ClusterObjectReference{
 				Name: "micro",
 			},
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: metav1.NamespaceDefault,
-			Name:      "redis-instance",
+			Name:      "redis-instance-1",
 		},
 	}
 }
 
-func fixRebServiceInstanceInDefaultNs() *scv1beta1.ServiceInstance {
+func fixRedisServiceInstanceFromNsSC() *scv1beta1.ServiceInstance {
+	return &scv1beta1.ServiceInstance{
+		Spec: scv1beta1.ServiceInstanceSpec{
+			ServiceClassRef: &scv1beta1.LocalObjectReference{
+				Name: "ns-service-class-redis",
+			},
+			ExternalID: "redis-external-id-2",
+			ServicePlanRef: &scv1beta1.LocalObjectReference{
+				Name: "micro",
+			},
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: metav1.NamespaceDefault,
+			Name:      "redis-instance-2",
+		},
+	}
+}
+func fixRebServiceInstanceFromClusterSCInDefaultNs() *scv1beta1.ServiceInstance {
 	return &scv1beta1.ServiceInstance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "orders-instance-1",
@@ -127,18 +191,7 @@ func fixRebServiceInstanceInDefaultNs() *scv1beta1.ServiceInstance {
 	}
 }
 
-func expectedServiceInstanceInDefaultNs() *internal.Instance {
-	return &internal.Instance{
-		ID:            internal.InstanceID("orders-external-id-1"),
-		Namespace:     internal.Namespace(metav1.NamespaceDefault),
-		ParamsHash:    "TODO",
-		ServicePlanID: internal.ServicePlanID("default"),
-		ServiceID:     internal.ServiceID("service-class-reb"),
-		State:         internal.InstanceStateFailed,
-	}
-}
-
-func fixRebServiceInstnaceInProdNs() *scv1beta1.ServiceInstance {
+func fixRebServiceInstanceFromClusterSCInProdNs() *scv1beta1.ServiceInstance {
 	return &scv1beta1.ServiceInstance{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "prod",
@@ -164,6 +217,43 @@ func fixRebServiceInstnaceInProdNs() *scv1beta1.ServiceInstance {
 	}
 }
 
+func fixRebServiceInstanceFromNsSC() *scv1beta1.ServiceInstance {
+	return &scv1beta1.ServiceInstance{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: "stage",
+			Name:      "promotions-instance-3",
+		},
+		Spec: scv1beta1.ServiceInstanceSpec{
+			ServiceClassRef: &scv1beta1.LocalObjectReference{
+				Name: "ns-service-class-reb",
+			},
+			ExternalID: "promotions-external-id-3",
+			ServicePlanRef: &scv1beta1.LocalObjectReference{
+				Name: "mini",
+			},
+		},
+		Status: scv1beta1.ServiceInstanceStatus{
+			Conditions: []scv1beta1.ServiceInstanceCondition{
+				{
+					Type:   scv1beta1.ServiceInstanceConditionReady,
+					Status: scv1beta1.ConditionTrue,
+				},
+			},
+		},
+	}
+}
+
+func expectedServiceInstanceInDefaultNs() *internal.Instance {
+	return &internal.Instance{
+		ID:            internal.InstanceID("orders-external-id-1"),
+		Namespace:     internal.Namespace(metav1.NamespaceDefault),
+		ParamsHash:    "TODO",
+		ServicePlanID: internal.ServicePlanID("default"),
+		ServiceID:     internal.ServiceID("service-class-reb"),
+		State:         internal.InstanceStateFailed,
+	}
+}
+
 func expectedServiceInstanceInProdNs() *internal.Instance {
 	return &internal.Instance{
 		ID:            internal.InstanceID("orders-external-id-2"),
@@ -175,12 +265,15 @@ func expectedServiceInstanceInProdNs() *internal.Instance {
 	}
 }
 
-func fixREBrokerName() string {
-	return "remote-environment-broker"
-}
-
-func fixHelmBrokerName() string {
-	return "helm-broker"
+func expectedServiceInstanceFromNsBroker() *internal.Instance {
+	return &internal.Instance{
+		ID:            internal.InstanceID("promotions-instance-3"),
+		Namespace:     internal.Namespace("stage"),
+		ParamsHash:    "TODO",
+		ServicePlanID: internal.ServicePlanID("mini"),
+		ServiceID:     internal.ServiceID("ns-service-class-reb"),
+		State:         internal.InstanceStateSucceeded,
+	}
 }
 
 type siInsertExpectations struct {
