@@ -87,7 +87,7 @@ podTemplate(label: label) {
 }
 
 def sendSlackNotification(text) {
-    def channel = "#c4core-kyma-team"
+    def channel = "#c4core-kyma-ci-force"
     echo "Sending notification on Slack to channel: ${channel}"
 
     withCredentials([string(credentialsId: 'kyma-slack-token', variable: 'token')]) {
