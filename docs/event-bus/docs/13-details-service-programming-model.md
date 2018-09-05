@@ -20,7 +20,7 @@ The Event Delivery workflow is as follows:
 
 ## Event Metadata
 
-The Following HTTP Headers provide information about the Event Metadata.
+The following HTTP Headers provide information about the Event Metadata.
 
 |Header| Description|
 |------|--------|
