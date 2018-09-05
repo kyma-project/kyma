@@ -52,8 +52,8 @@ func deleteNamespace(namespace string) {
 	}
 }
 
-func deployFun(namespace, name, runtime, depFile, codeFile, handler string) {
-	cmd := exec.Command("kubeless", "-n", namespace, "function", "deploy", name, "-r", runtime, "-d", depFile, "-f", codeFile, "--handler", handler)
+func deployFun(namespace, name, runtime, codeFile, handler string) {
+	cmd := exec.Command("kubeless", "-n", namespace, "function", "deploy", name, "-r", runtime, "-f", codeFile, "--handler", handler)
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatal("Unable to deploy function ", name, ":\n", string(stdoutStderr))
@@ -394,7 +394,7 @@ func main() {
 
 	go func() {
 		log.Println("Deploying test-hello function")
-		deployFun("kubeless-test", "test-hello", "nodejs6", "dependencies.json", "hello.js", "hello.handler")
+		deployFun("kubeless-test", "test-hello", "nodejs6", "hello.js", "hello.handler")
 		log.Println("Verifying correct function output for test-hello")
 		host := fmt.Sprintf("https://test-hello.%s", os.Getenv("DOMAIN_NAME"))
 		ensureOutputIsCorrect(host, "hello world", testID, "kubeless-test", "test-hello")
@@ -404,7 +404,7 @@ func main() {
 
 	go func() {
 		log.Println("Deploying test-event function")
-		deployFun("kubeless-test", "test-event", "nodejs6", "dependencies.json", "event.js", "event.handler")
+		deployFun("kubeless-test", "test-event", "nodejs6", "event.js", "event.handler")
 		log.Println("Publishing event to function test-event")
 		publishEvent(testID)
 		log.Println("Verifying correct event processing for test-event")
