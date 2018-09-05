@@ -18,11 +18,11 @@ This is a sample CR that represents user group available in the identity provide
 apiVersion: authentication.kyma-project.io/v1alpha1
 kind: Group
 metadata:
-    name: sample-group
+    name: "sample-group"
 spec:    
-    name: admins      
-    idpName: github
-    description: "admins" represent group of users with administrative privilages in the organization.
+    name: "admins"
+    idpName: "github"
+    description: "'admins' represents the group of users with administrative privilages in the organization."
 ```
 
 This table analyses the elements of the sample CR and the information it contains:
