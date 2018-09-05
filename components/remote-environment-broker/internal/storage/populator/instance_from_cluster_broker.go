@@ -2,39 +2,36 @@ package populator
 
 import (
 	"context"
-	"time"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	scv1beta "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions/servicecatalog/v1beta1"
 	listersv1beta "github.com/kubernetes-incubator/service-catalog/pkg/client/listers_generated/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 )
 
-const informerResyncPeriod = 30 * time.Minute
-
-// Instances provide method for populating Instance storage
-type Instances struct {
+// InstancesFromClusterBroker provide method for populating Instance storage
+type InstancesFromClusterBroker struct {
 	inserter    instanceInserter
+	converter   instanceConverter
 	scClientSet clientset.Interface
 	brokerName  string
 }
 
-// NewInstances is a constructor of Instances populator
-func NewInstances(scClientSet clientset.Interface, inserter instanceInserter, brokerName string) *Instances {
-	return &Instances{
+// NewInstancesFromClusterBroker is a constructor of InstancesFromClusterBroker populator
+func NewInstancesFromClusterBroker(scClientSet clientset.Interface, inserter instanceInserter, converter instanceConverter, brokerName string) *InstancesFromClusterBroker {
+	return &InstancesFromClusterBroker{
 		scClientSet: scClientSet,
 		inserter:    inserter,
+		converter:   converter,
 		brokerName:  brokerName,
 	}
 }
 
 // Do perform instances population
-func (p *Instances) Do(ctx context.Context) error {
+func (p *InstancesFromClusterBroker) Do(ctx context.Context) error {
 	siInformer := scv1beta.NewServiceInstanceInformer(p.scClientSet, v1.NamespaceAll, informerResyncPeriod, nil)
 	scInformer := scv1beta.NewClusterServiceClassInformer(p.scClientSet, informerResyncPeriod, nil)
 
@@ -69,46 +66,15 @@ func (p *Instances) Do(ctx context.Context) error {
 	}
 
 	for _, si := range serviceInstances {
-		if _, ex := rebClassNames[si.Spec.ClusterServiceClassRef.Name]; ex {
-			if err := p.inserter.Insert(p.mapServiceInstance(si)); err != nil {
-				return errors.Wrap(err, "while inserting service instance")
+		if si.Spec.ClusterServiceClassRef != nil {
+			if _, ex := rebClassNames[si.Spec.ClusterServiceClassRef.Name]; ex {
+				if err := p.inserter.Insert(p.converter.MapServiceInstance(si)); err != nil {
+					return errors.Wrap(err, "while inserting service instance")
+				}
 			}
 		}
 	}
 	return nil
-}
-
-func (p *Instances) mapServiceInstance(in *v1beta1.ServiceInstance) *internal.Instance {
-	var state internal.InstanceState
-
-	if p.isServiceInstanceReady(in) {
-		state = internal.InstanceStateSucceeded
-	} else {
-		state = internal.InstanceStateFailed
-	}
-
-	return &internal.Instance{
-		ID:            internal.InstanceID(in.Spec.ExternalID),
-		Namespace:     internal.Namespace(in.Namespace),
-		ParamsHash:    "TODO",
-		ServicePlanID: internal.ServicePlanID(in.Spec.ClusterServicePlanRef.Name),
-		ServiceID:     internal.ServiceID(in.Spec.ClusterServiceClassRef.Name),
-		State:         state,
-	}
-}
-
-//go:generate mockery -name=instanceInserter -output=automock -outpkg=automock -case=underscore
-type instanceInserter interface {
-	Insert(i *internal.Instance) error
-}
-
-func (p *Instances) isServiceInstanceReady(instance *v1beta1.ServiceInstance) bool {
-	for _, cond := range instance.Status.Conditions {
-		if cond.Type == v1beta1.ServiceInstanceConditionReady {
-			return cond.Status == v1beta1.ConditionTrue
-		}
-	}
-	return false
 }
 
 /*
