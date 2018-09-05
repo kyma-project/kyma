@@ -26,7 +26,7 @@ func TestHttpProxyCache_Create(t *testing.T) {
 		proxy := httputil.NewSingleHostReverseProxy(url)
 
 		// when
-		cacheObj := proxyCache.Add("id1", "", "", "", proxy)
+		cacheObj := proxyCache.Add("id1", "", "", "", proxy, "")
 
 		// then
 		require.NotNil(t, cacheObj)
@@ -54,7 +54,7 @@ func TestHttpProxyCache_Get(t *testing.T) {
 		proxyCache := NewProxyCache(false, 60)
 
 		// when
-		proxyCache.Add("id1", "", "", "", &httputil.ReverseProxy{})
+		proxyCache.Add("id1", "", "", "", &httputil.ReverseProxy{}, "")
 		cacheObj, _ := proxyCache.Get("id1")
 
 		// then
@@ -77,7 +77,7 @@ func TestHttpProxyCache_Get(t *testing.T) {
 		// given
 		proxyCache := NewProxyCache(false, 2)
 
-		proxyCache.Add("id1", "http://test.url", "", "", &httputil.ReverseProxy{})
+		proxyCache.Add("id1", "http://test.url", "", "", &httputil.ReverseProxy{}, "")
 
 		// when
 		time.Sleep(3 * time.Second)

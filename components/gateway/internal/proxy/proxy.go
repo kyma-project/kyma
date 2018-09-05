@@ -46,11 +46,12 @@ func NewInvalidStateHandler(message string) http.Handler {
 }
 
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var err apperrors.AppError
+
 	id := p.nameResolver.ExtractServiceId(r.Host)
 
 	cacheObj, found := p.httpProxyCache.Get(id)
 
-	var err apperrors.AppError
 	if !found {
 		cacheObj, err = p.createAndCacheProxy(id)
 		if err != nil {
@@ -69,7 +70,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 	requestWithContext := request.WithContext(ctx)
 
-	rr := newRequestRetrier(id, p, r)
+	rr := newRequestRetrier(id, p, r, cacheObj.TargetURL)
 	cacheObj.Proxy.ModifyResponse = rr.CheckResponse
 
 	cacheObj.Proxy.ServeHTTP(w, requestWithContext)
@@ -90,6 +91,7 @@ func (p *proxy) createAndCacheProxy(id string) (*proxycache.Proxy, apperrors.App
 			serviceApi.Credentials.Oauth.ClientID,
 			serviceApi.Credentials.Oauth.ClientSecret,
 			proxy,
+			serviceApi.TargetUrl,
 		), nil
 	}
 
@@ -99,6 +101,7 @@ func (p *proxy) createAndCacheProxy(id string) (*proxycache.Proxy, apperrors.App
 		"",
 		"",
 		proxy,
+		serviceApi.TargetUrl,
 	), nil
 }
 

@@ -14,11 +14,12 @@ type requestRetrier struct {
 	id      string
 	proxy   *proxy
 	request *http.Request
+	host    string
 	retried bool
 }
 
-func newRequestRetrier(id string, proxy *proxy, request *http.Request) *requestRetrier {
-	return &requestRetrier{id: id, proxy: proxy, request: request, retried: false}
+func newRequestRetrier(id string, proxy *proxy, request *http.Request, host string) *requestRetrier {
+	return &requestRetrier{id: id, proxy: proxy, request: request, host: host, retried: false}
 }
 
 func (rr *requestRetrier) CheckResponse(r *http.Response) error {
@@ -48,7 +49,7 @@ func (rr *requestRetrier) invalidateAndRetry() (*http.Response, error) {
 		return nil, appError
 	}
 
-	url := fmt.Sprintf("http://%s%s", rr.request.Host, rr.request.RequestURI)
+	url := fmt.Sprintf("%s%s", rr.host, rr.request.URL.Path)
 
 	request, err := http.NewRequest(rr.request.Method, url, rr.request.Body)
 	if err != nil {
@@ -68,16 +69,11 @@ func (rr *requestRetrier) invalidateAndRetry() (*http.Response, error) {
 
 	requestWithContext := request.WithContext(ctx)
 
-	log.Info("Retrying request")
-
 	client := &http.Client{}
 	response, err := client.Do(requestWithContext)
 	if err != nil {
 		return nil, err
 	}
-
-	log.Infof("Result: %s", response.StatusCode)
-	log.Infof("Returning response: %s", response)
 
 	return response, nil
 }
