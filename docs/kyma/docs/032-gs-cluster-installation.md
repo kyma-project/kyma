@@ -13,7 +13,7 @@ This Getting Started guide shows developers how to quickly deploy Kyma on a clus
 
 The cluster on which you install Kyma must run Kubernetes version `1.10` or higher.
 
-Prepare these items: 
+Prepare these items:
 
 - A domain name such as `kyma.example.com`.
 - A wildcard TLS certificate for your cluster domain. Generate it with [**Let's Encrypt**](https://letsencrypt.org/).
@@ -21,22 +21,20 @@ Prepare these items:
 - A static IP address for the Kyma Istio Ingress (public external IP). Create a DNS record `*.kyma.example.com` that points to Kyma Istio Ingress IP Address.
 - A Static IP address for Remote Environments Ingress. Create a DNS record `gateway.kyma.example.com` that points to Remote Environments Ingress IP Address.
 
-Some providers doen't allow to pre-allocate IP addresses, such as is the case with AWS which does not support static IP assignment during ELB creation. For such providers, you must complete the configuration after you install Kyma. See the **DNS configuration** section for more details. 
+Some providers doen't allow to pre-allocate IP addresses, such as is the case with AWS which does not support static IP assignment during ELB creation. For such providers, you must complete the configuration after you install Kyma. See the **DNS configuration** section for more details.
 
 >**NOTE:** See the Application Connector documentation for more details on Remote Environments.
 
 Configure the Kubernetes API Server following this template:
+
+>**NOTE:** Apply this configuration only when you set up your own cluster. This configuration does not work with managed clusters.
 
 ```
 "apiServerConfig": {
     "--enable-admission-plugins": "Initializers,NamespaceLifecycle,LimitRanger,ServiceAccount,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,DefaultStorageClass,ResourceQuota",
     "--runtime-config": "batch/v2alpha1=true,settings.k8s.io/v1alpha1=true,admissionregistration.k8s.io/v1alpha1=true",
     "--cors-allowed-origins": ".*",
-    "--feature-gates": "ReadOnlyAPIDataVolumes=false",
-    "--oidc-issuer-url": "https://dex.kyma.example.com",
-    "--oidc-client-id": "kyma-client",
-    "--oidc-username-claim": "email",
-    "--oidc-groups-claim": "groups"
+    "--feature-gates": "ReadOnlyAPIDataVolumes=false"
 },
 "kubeletConfig": {
     "--feature-gates": "ReadOnlyAPIDataVolumes=false",
