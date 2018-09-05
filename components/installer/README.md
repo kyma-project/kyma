@@ -120,9 +120,9 @@ Helm installation.
 
 ## Install selected components only
 
-By default, this tool installs predefined components. If necessary, you can specify which components to install by customizing the component list located in the [installer-cr.yaml.tpl](../../installation/resources/installer-cr.yaml.tpl) file. 
+This tool installs components specified in installation CR. Please see CR template in the [installer-cr.yaml.tpl](../../installation/resources/installer-cr.yaml.tpl) file for more details. 
 
-To define installation of a component you need to specify component name and namespace. You can also specify helm release name for installed component (by default the name of the component will be used).
+To define installation of a component you need to specify its name and namespace. You can also specify helm release name for installed component (by default the name of the component will be used).
 
 Example:
 
