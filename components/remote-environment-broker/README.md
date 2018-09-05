@@ -49,7 +49,7 @@ Before each commit, use the `before-commit.sh` script, which tests your changes.
 | Name | Required | Default | Description |
 |-----|---------|--------|------------|
 |**APP_PORT** | NO | `8080` | The port on which the HTTP server listens | 
-|**APP_BROKER_RELIST_DURATION_WINDOW** | YES | - | Synchronize REB in Service Catalog (if needed) at most once per this period |
+|**APP_BROKER_RELIST_DURATION_WINDOW** | YES | - | Time period after which the REB synchronizes with the Service Catalog if a new Remote Environment is added. In case more than one Remote Environment is added, synchronization is performed only once. |
 | **APP_CLUSTER_SCOPED_BROKER_NAME**| YES | - | Name of the ClusterServiceBroker. Applicable only if registered as a cluster-scoped broker |
 | **APP_CLUSTER_SCOPED_BROKER_ENABLED** | YES | - | Flag which defines if the REB is working as a ClusterServiceBroker or a ServiceBroker | 
 | **APP_UNIQUE_SELECTOR_LABEL_KEY** | YES | - | Defined label key selector which allows uniquely identify REB pod's |
