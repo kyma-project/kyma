@@ -9,9 +9,10 @@ The REB implements the [Service Broker API](https://github.com/openservicebroker
 The REB fetches all the remote environments' custom resources and exposes their APIs and Events as service classes to the Service Catalog.
 When the remote environments list is available in the Service Catalog, you can provision those service classes and enable Kyma services to use them.
 
-The REB can work in 2 modes: as a cluster-scoped or namespace-scoped broker.
-In the first case, on creation of a Remote Environment, Cluster Service Classes will be created automatically and will be available for every namespace.
-In the second case, on creation of a Environment Mapping, namespaced-scoped broker is registered in the specific namespace and  services from the Remote Environment are visible in this namespace.
+The REB can work in two modes: as a cluster-scoped or Namespace-scoped broker.
+- In the first case, Cluster Service Classes are created automatically while creating a Remote Environment, and are available for every Namespace.
+- In the second case, a Namespaced-scoped broker is registered in the specific Namespace while creating an Environment Mapping. Remote Environment's 
+services are visible in this Namespace.
 
 For more details about provisioning, deprovisioning, binding, and unbinding, see the [Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md) documentation.
 
@@ -47,13 +48,13 @@ Before each commit, use the `before-commit.sh` script, which tests your changes.
 
 | Name | Required | Default | Description |
 |-----|---------|--------|------------|
-|**APP_PORT** | false | 8080 | The port on which the HTTP server listen. | 
-|**APP_BROKER_RELIST_DURATION_WINDOW** | true | - | Synchronize REB in Service Catalog (if needed) at most once per this period |
-| **APP_CLUSTER_SCOPED_BROKER_NAME**| true | - | Name of the ClusterServiceBroker (if registered as a cluster-scoped broker) |
-| **APP_CLUSTER_SCOPED_BROKER_ENABLED** | true | - | Flag defines if REB is working as a ClusterServiceBroker or a ServiceBroker | 
-| **APP_UNIQUE_SELECTOR_LABEL_KEY** | true | - | Define label key selector which allows uniquely identify REB pod's |
-| **APP_UNIQUE_SELECTOR_LABEL_VALUE** | true | - | Define label value selector which allows uniquely identify REB pod's |
-| **NAMESPACE** | true | - | REB working namespace |
+|**APP_PORT** | NO | `8080` | The port on which the HTTP server listens | 
+|**APP_BROKER_RELIST_DURATION_WINDOW** | YES | - | Synchronize REB in Service Catalog (if needed) at most once per this period |
+| **APP_CLUSTER_SCOPED_BROKER_NAME**| YES | - | Name of the ClusterServiceBroker. Applicable only if registered as a cluster-scoped broker |
+| **APP_CLUSTER_SCOPED_BROKER_ENABLED** | YES | - | Flag which defines if the REB is working as a ClusterServiceBroker or a ServiceBroker | 
+| **APP_UNIQUE_SELECTOR_LABEL_KEY** | YES | - | Defined label key selector which allows uniquely identify REB pod's |
+| **APP_UNIQUE_SELECTOR_LABEL_VALUE** | YES | - | Defined label value selector which allows uniquely identify REB pod's |
+| **NAMESPACE** | YES | - | REB working Namespace |
   
  
 ## Code generation
