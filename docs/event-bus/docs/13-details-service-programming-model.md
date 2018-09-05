@@ -8,11 +8,11 @@ You can configure a microservice deployed in Kyma to receive Events from the Eve
 
 ## Event Delivery
 
-The Event Delivery workflow is as follows:
-
 The Event is delivered as an `HTTP POST` request. Event Metadata is a part of an HTTP request Headers. Event Payload is the body of the request.
 
 ![TEST](assets/service-programming-model.png)
+
+The Event Delivery workflow is as follows:
 
 1. The Event is published to the Kyma Event Bus from an external system instance in a bound Remote Environment.
 2. The Event Bus checks for the Event subscription and activation. It creates an `HTTP POST` request using Event Payload and Metadata.
