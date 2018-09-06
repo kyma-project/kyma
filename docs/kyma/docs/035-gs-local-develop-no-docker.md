@@ -3,8 +3,6 @@ title: Develop a service locally without using Docker
 type: Getting Started
 ---
 
-## Overview
-
 You can develop services in the local Kyma installation without extensive Docker knowledge or a need to build and publish a Docker image. The `minikube mount` feature allows you to mount a directory from your local disk into the local Kubernetes cluster.
 
 This guide shows how to use this feature, using the service example implemented in Golang.

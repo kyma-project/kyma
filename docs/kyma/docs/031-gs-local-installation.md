@@ -3,8 +3,6 @@ title: Local Kyma installation
 type: Getting Started
 ---
 
-## Overview
-
 This Getting Started guide shows developers how to quickly deploy Kyma locally on a Mac, Linux, or Windows. Kyma installs locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma locally and verify the deployment, as well as the troubleshooting tips.
 
 ## Prerequisites

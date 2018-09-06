@@ -3,12 +3,10 @@ title: Etcd Database
 type: Details
 ---
 
-## Overview
-
-The Service Catalog requires an `etcd` database cluster for a production use. 
-It has a separate `etcd` cluster defined in the Service Catalog [etcd][sc-etcd-sub-chart] sub-chart. 
+The Service Catalog requires an `etcd` database cluster for a production use.
+It has a separate `etcd` cluster defined in the Service Catalog [etcd][sc-etcd-sub-chart] sub-chart.
 The [etcd-operator][etcd-operator] installs and manages the `etcd` clusters deployed to Kubernetes,
-and also automates tasks related to operating an `etcd` cluster, for example executing [backup][etcd-backups] and [restore][etcd-restores] procedures. 
+and also automates tasks related to operating an `etcd` cluster, for example executing [backup][etcd-backups] and [restore][etcd-restores] procedures.
 
 > **NOTE:** The [etcd-operator][etcd-operator] is Namespace-scoped and is installed only in `kyma-system` Namespace.
 
@@ -27,7 +25,7 @@ To execute the backup process, you must set the following values in the [core][c
 | **etcd-operator.backupOperator.abs.storageAccount** | The name of the storage account for the Azure Blob Storage (ABS). It stores the value for the **storage-account** Secret key. |
 | **etcd-operator.backupOperator.abs.storageKey**     | The key value of the storage account for the ABS. It stores the value for the **storage-key** Secret key. |
 
-> **NOTE:** If you set the **storageAccount**, **storageKey**, and **containerName** properties, the **global.etcdBackup.enabled** must be set to `true`. 
+> **NOTE:** If you set the **storageAccount**, **storageKey**, and **containerName** properties, the **global.etcdBackup.enabled** must be set to `true`.
 
 ### Restore
 
@@ -43,7 +41,7 @@ kubectl create -f assets/etcd-restore/operator-deploy.yaml
 
 2. Create the EtcdRestore Custom Resource Definition:
 ```bash
-kubectl create -f assets/etcd-restore/restore-crd.yaml 
+kubectl create -f assets/etcd-restore/restore-crd.yaml
 ```
 
 3. Export the **ABS_PATH** environment variable with the path to the last successful backup file.
