@@ -32,7 +32,6 @@ The following HTTP Headers provide information about the Event Metadata.
 | **kyma-source-namespace** | Business Event's source Namespace delivered to the microservice. |
 | **kyma-source-type** | Business Event's source type delivered to the microservice. |
 | **kyma-subscription** | Subscription name defined in the subscription contract, or in a CRD. This business Event is published to its subscribers. |
-| **kyma-topic** | Topic name used internally by the Kyma Event Bus to deliver messages to the subscribers via a Message Bus. |
 | **x-b3-flags** | Header used by the Zipkin tracer in Envoy. It encodes one or more options. See more on Zipkin tracing [here](https://github.com/openzipkin/b3-propagation). |
 | **x-b3-parentspanid** | Header used by the Zipkin tracer in Envoy. The **ParentSpanId** is 64-bit in length and indicates the position of the parent operation in the trace tree. When the span is the root of the trace tree, the **ParentSpanId** is absent. |
 | **x-b3-sampled** | Header used by the Zipkin tracer in Envoy. When the **Sampled** flag is either not specified or set to `1`, the span is reported to the tracing system. Once **Sampled** is set to `0` or `1`, the same value should be consistently sent downstream. |
