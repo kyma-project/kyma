@@ -62,7 +62,7 @@ func (rr *requestRetrier) invalidateAndRetry() (*http.Response, error) {
 		}
 	}
 
-	request, appError = rr.proxy.handleHeaders(request, cacheObj)
+	request, appError = rr.proxy.invalidateAndHandleHeaders(request, cacheObj)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(rr.proxy.proxyTimeout)*time.Second)
 	defer cancel()
