@@ -87,7 +87,15 @@ podTemplate(label: label) {
                         // use HEAD of branch as revision, Jenkins does a merge to master commit before starting this script, which will not be available on the jobs triggered below
                         commitID = sh (script: "git rev-parse origin/${env.BRANCH_NAME}", returnStdout: true).trim()
                         changes = changedProjects()
-                        runIntegration = changes.size() > 0
+
+                        if (env.BRANCH_NAME == "master") {
+                            // integration runs on any change on master
+                            runIntegration = changes.size() > 0
+                        } else {
+                            // TODO remove PR integration skip when installer overrides are ready
+                            // integration only runs on changes to installation resources on PRs
+                            runIntegration = changes.intersect(additionalProjects).size() > 0
+                        }
                         if (changes.size() == 1 && changes[0] == "governance") {
                             runIntegration = false
                         }
@@ -120,32 +128,34 @@ podTemplate(label: label) {
     }
 }
 
-// gather all component versions
-stage('collect versions') {
-    versions = [:]
-    
-    changedProjects = jobs.keySet()
-    for (int i = 0; i < changedProjects.size(); i++) {
-        // only projects that have an associated docker image have a version to deploy
-        if (projects["${changedProjects[i]}"] != null) {
-            versions["${changedProjects[i]}"] = env.BRANCH_NAME == "master" ? appVersion : env.BRANCH_NAME
+// gather all component versions to pass to integration
+if (runIntegration) {
+    stage('collect versions') {
+        versions = [:]
+        
+        changedProjects = jobs.keySet()
+        for (int i = 0; i < changedProjects.size(); i++) {
+            // only projects that have an associated docker image have a version to deploy
+            if (projects["${changedProjects[i]}"] != null) {
+                versions["${changedProjects[i]}"] = env.BRANCH_NAME == "master" ? appVersion : env.BRANCH_NAME
+            }
         }
-    }
 
-    unchangedProjects = projects.keySet() - changedProjects
-    for (int i = 0; i < unchangedProjects.size(); i++) {
-        // only projects that have an associated docker image have a version to deploy
-        if (projects["${unchangedProjects[i]}"] != null) {
-            versions["${unchangedProjects[i]}"] = projectVersion("${unchangedProjects[i]}")
+        unchangedProjects = projects.keySet() - changedProjects
+        for (int i = 0; i < unchangedProjects.size(); i++) {
+            // only projects that have an associated docker image have a version to deploy
+            if (projects["${unchangedProjects[i]}"] != null) {
+                versions["${unchangedProjects[i]}"] = projectVersion("${unchangedProjects[i]}")
+            }
         }
-    }
 
-    // convert versions to JSON string to pass on
-    versions = versionsYaml(versions)
-    echo """
-Component versions:
-$versions
-"""
+        // convert versions to JSON string to pass on
+        versions = versionsYaml(versions)
+        echo """
+    Component versions:
+    $versions
+    """
+    }
 }
 
 // trigger jobs for projects that have changes, in parallel
