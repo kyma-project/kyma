@@ -31,6 +31,19 @@ kind: ServiceAccount
 metadata:
   name: kyma-installer
 ---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: kyma-installer
+subjects:
+- kind: ServiceAccount
+  name: kyma-installer
+  namespace: kyma-installer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -42,10 +55,37 @@ spec:
         name: kyma-installer
     spec:
       serviceAccountName: kyma-installer
+      initContainers:
+      - name: init-tiller
+        image: eu.gcr.io/kyma-project/alpine-net:0.2.74
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c', 'until nc -zv kube-dns.kube-system.svc.cluster.local 53; do echo waiting for k8s readiness; sleep 2; done;']
       containers:
-      - name: kyma-installer-container
+      - name: tiller
+        image: gcr.io/kubernetes-helm/tiller:v2.8.2
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TILLER_NAMESPACE
+          value: kyma-installer
+        ports:
+        - containerPort: 44134
+          name: tiller
+        livenessProbe:
+          httpGet:
+            path: /liveness
+            port: 44135
+          initialDelaySeconds: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 44135
+          initialDelaySeconds: 1
+          timeoutSeconds: 1
+      - name: kyma-installer
         image: eu.gcr.io/kyma-project/installer:0.3.281
         imagePullPolicy: IfNotPresent
+        args: ["-helmhost=localhost:44134"]
         env:
           - name: AZURE_BROKER_SUBSCRIPTION_ID
             valueFrom:
@@ -137,21 +177,8 @@ spec:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: kyma-installer-reader
+  name: kyma-installer
 rules:
 - apiGroups: ["*"]
   resources: ["*"]
   verbs: ["*"]
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: kyma-installer
-subjects:
-- kind: ServiceAccount
-  name: kyma-installer
-  namespace: kyma-installer
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: kyma-installer-reader
