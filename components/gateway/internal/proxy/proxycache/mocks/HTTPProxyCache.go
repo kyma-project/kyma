@@ -11,13 +11,13 @@ type HTTPProxyCache struct {
 	mock.Mock
 }
 
-// Add provides a mock function with given fields: id, oauthUrl, clientId, clientSecret, proxy, targetURL
-func (_m *HTTPProxyCache) Add(id string, oauthUrl string, clientId string, clientSecret string, proxy *httputil.ReverseProxy, targetURL string) *proxycache.Proxy {
-	ret := _m.Called(id, oauthUrl, clientId, clientSecret, proxy, targetURL)
+// Add provides a mock function with given fields: id, oauthUrl, clientId, clientSecret, proxy
+func (_m *HTTPProxyCache) Add(id string, oauthUrl string, clientId string, clientSecret string, proxy *httputil.ReverseProxy) *proxycache.Proxy {
+	ret := _m.Called(id, oauthUrl, clientId, clientSecret, proxy)
 
 	var r0 *proxycache.Proxy
-	if rf, ok := ret.Get(0).(func(string, string, string, string, *httputil.ReverseProxy, string) *proxycache.Proxy); ok {
-		r0 = rf(id, oauthUrl, clientId, clientSecret, proxy, targetURL)
+	if rf, ok := ret.Get(0).(func(string, string, string, string, *httputil.ReverseProxy) *proxycache.Proxy); ok {
+		r0 = rf(id, oauthUrl, clientId, clientSecret, proxy)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*proxycache.Proxy)

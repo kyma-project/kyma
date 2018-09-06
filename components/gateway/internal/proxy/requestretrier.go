@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"fmt"
-	"github.com/kyma-project/kyma/components/gateway/internal/apperrors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,8 +16,8 @@ type requestRetrier struct {
 	retried bool
 }
 
-func newRequestRetrier(id string, proxy *proxy, request *http.Request, host string) *requestRetrier {
-	return &requestRetrier{id: id, proxy: proxy, request: request, host: host, retried: false}
+func newRequestRetrier(id string, proxy *proxy, request *http.Request) *requestRetrier {
+	return &requestRetrier{id: id, proxy: proxy, request: request, retried: false}
 }
 
 func (rr *requestRetrier) CheckResponse(r *http.Response) error {
@@ -49,25 +47,16 @@ func (rr *requestRetrier) invalidateAndRetry() (*http.Response, error) {
 		return nil, appError
 	}
 
-	url := fmt.Sprintf("%s%s", rr.host, rr.request.URL.Path)
-
-	request, err := http.NewRequest(rr.request.Method, url, rr.request.Body)
-	if err != nil {
-		return nil, apperrors.Internal("Failed to create proxy request: %s", err.Error())
+	_, appError = rr.proxy.invalidateAndHandleAuthHeaders(rr.request, cacheObj)
+	if appError != nil {
+		return nil, appError
 	}
-
-	for header, values := range rr.request.Header {
-		for _, value := range values {
-			request.Header.Add(header, value)
-		}
-	}
-
-	request, appError = rr.proxy.invalidateAndHandleAuthHeaders(request, cacheObj)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(rr.proxy.proxyTimeout)*time.Second)
 	defer cancel()
 
-	requestWithContext := request.WithContext(ctx)
+	requestWithContext := rr.request.WithContext(ctx)
+	cacheObj.Proxy.Director(requestWithContext)
 
 	client := &http.Client{
 		Transport: cacheObj.Proxy.Transport,

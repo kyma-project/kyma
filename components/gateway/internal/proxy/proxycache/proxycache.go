@@ -14,12 +14,11 @@ type Proxy struct {
 	OauthUrl     string
 	ClientId     string
 	ClientSecret string
-	TargetURL    string
 }
 
 type HTTPProxyCache interface {
 	Get(id string) (*Proxy, bool)
-	Add(id, oauthUrl, clientId, clientSecret string, proxy *httputil.ReverseProxy, targetURL string) *Proxy
+	Add(id, oauthUrl, clientId, clientSecret string, proxy *httputil.ReverseProxy) *Proxy
 }
 
 type httpProxyCache struct {
@@ -43,8 +42,8 @@ func (p *httpProxyCache) Get(id string) (*Proxy, bool) {
 	return proxy.(*Proxy), found
 }
 
-func (p *httpProxyCache) Add(id, oauthUrl, clientId, clientSecret string, reverseProxy *httputil.ReverseProxy, targetURL string) *Proxy {
-	proxy := &Proxy{Proxy: reverseProxy, OauthUrl: oauthUrl, ClientId: clientId, ClientSecret: clientSecret, TargetURL: targetURL}
+func (p *httpProxyCache) Add(id, oauthUrl, clientId, clientSecret string, reverseProxy *httputil.ReverseProxy) *Proxy {
+	proxy := &Proxy{Proxy: reverseProxy, OauthUrl: oauthUrl, ClientId: clientId, ClientSecret: clientSecret}
 	p.proxyCache.Set(id, proxy, cache.DefaultExpiration)
 
 	return proxy

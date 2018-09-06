@@ -69,7 +69,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 	requestWithContext := r.WithContext(ctx)
 
-	rr := newRequestRetrier(id, p, r, cacheObj.TargetURL)
+	rr := newRequestRetrier(id, p, r)
 	cacheObj.Proxy.ModifyResponse = rr.CheckResponse
 
 	cacheObj.Proxy.ServeHTTP(w, requestWithContext)
@@ -90,7 +90,6 @@ func (p *proxy) createAndCacheProxy(id string) (*proxycache.Proxy, apperrors.App
 			serviceApi.Credentials.Oauth.ClientID,
 			serviceApi.Credentials.Oauth.ClientSecret,
 			proxy,
-			serviceApi.TargetUrl,
 		), nil
 	}
 
@@ -100,7 +99,6 @@ func (p *proxy) createAndCacheProxy(id string) (*proxycache.Proxy, apperrors.App
 		"",
 		"",
 		proxy,
-		serviceApi.TargetUrl,
 	), nil
 }
 
