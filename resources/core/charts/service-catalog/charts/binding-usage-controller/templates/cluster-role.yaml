@@ -21,7 +21,7 @@ rules:
   resources: ["servicebindingusages", "usagekinds"]
   verbs: ["get", "list", "watch", "update"]
 - apiGroups: ["servicecatalog.k8s.io"]
-  resources: ["servicebindings","serviceinstances","clusterserviceclasses"]
+  resources: ["servicebindings","serviceinstances","clusterserviceclasses","serviceclasses"]
   verbs:     ["get","list","watch"]
 - apiGroups: [""]
   resources: ["events"]
