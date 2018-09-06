@@ -18,7 +18,22 @@ spec:
       containers:
       - name:  azure-redis-cache-docs
         image: {{ .Values.global.containerRegistry.path }}/azure-redis-cache-docs:0.3.130
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  azure-mysql-docs
         image: {{ .Values.global.containerRegistry.path }}/azure-mysql-docs:0.3.130
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  azure-sql-docs
         image: {{ .Values.global.containerRegistry.path }}/azure-sql-docs:0.3.130
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}

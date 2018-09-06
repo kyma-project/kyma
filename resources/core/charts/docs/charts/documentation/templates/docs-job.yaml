@@ -18,23 +18,78 @@ spec:
       containers:
       - name:  kyma
         image: {{ .Values.global.containerRegistry.path }}/kyma-docs:{{ .Chart.AppVersion }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  service-catalog
         image: {{ .Values.global.containerRegistry.path }}/service-catalog-docs:{{ .Chart.AppVersion }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  service-brokers
         image: {{ .Values.global.containerRegistry.path }}/service-brokers-docs:{{ .Chart.AppVersion }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  application-connector
         image: {{ .Values.global.containerRegistry.path }}/application-connector-docs:{{ .Chart.AppVersion }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  event-bus
         image: {{ .Values.global.containerRegistry.path }}/event-bus-docs:{{ .Chart.AppVersion }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  service-mesh
         image: {{ .Values.global.containerRegistry.path }}/service-mesh-docs:{{ .Chart.AppVersion }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  serverless
         image: {{ .Values.global.containerRegistry.path }}/serverless-docs:{{ .Chart.AppVersion }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  monitoring
         image: {{ .Values.global.containerRegistry.path }}/monitoring-docs:{{ .Chart.AppVersion }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  tracing
         image: {{ .Values.global.containerRegistry.path }}/tracing-docs:{{ .Chart.AppVersion }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  api-gateway
         image: {{ .Values.global.containerRegistry.path }}/api-gateway-docs:{{ .Chart.AppVersion }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  authorization-and-authentication
         image: {{ .Values.global.containerRegistry.path }}/authorization-and-authentication-docs:{{ .Chart.AppVersion }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
