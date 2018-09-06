@@ -46,12 +46,11 @@ func NewInvalidStateHandler(message string) http.Handler {
 }
 
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var err apperrors.AppError
-
 	id := p.nameResolver.ExtractServiceId(r.Host)
 
 	cacheObj, found := p.httpProxyCache.Get(id)
 
+	var err apperrors.AppError
 	if !found {
 		cacheObj, err = p.createAndCacheProxy(id)
 		if err != nil {
@@ -60,7 +59,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	request, err := p.handleHeaders(r, cacheObj)
+	_, err = p.handleAuthHeaders(r, cacheObj)
 	if err != nil {
 		handleErrors(w, err)
 		return
@@ -68,7 +67,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(p.proxyTimeout)*time.Second)
 	defer cancel()
-	requestWithContext := request.WithContext(ctx)
+	requestWithContext := r.WithContext(ctx)
 
 	rr := newRequestRetrier(id, p, r, cacheObj.TargetURL)
 	cacheObj.Proxy.ModifyResponse = rr.CheckResponse
@@ -105,7 +104,7 @@ func (p *proxy) createAndCacheProxy(id string) (*proxycache.Proxy, apperrors.App
 	), nil
 }
 
-func (p *proxy) handleHeaders(r *http.Request, cacheObj *proxycache.Proxy) (*http.Request, apperrors.AppError) {
+func (p *proxy) handleAuthHeaders(r *http.Request, cacheObj *proxycache.Proxy) (*http.Request, apperrors.AppError) {
 	kymaAuthorization := r.Header.Get(httpconsts.HeaderAccessToken)
 	if kymaAuthorization != "" {
 		r.Header.Del(httpconsts.HeaderAccessToken)
@@ -128,12 +127,12 @@ func (p *proxy) addCredentials(r *http.Request, oauthUrl, clientId, clientSecret
 	}
 
 	r.Header.Set(httpconsts.HeaderAuthorization, token)
-	log.Infof("OAuth token fetched. Adding Authorization header: %s", r.Header.Get("Authorization"))
+	log.Infof("OAuth token fetched. Adding Authorization header: %s", r.Header.Get(httpconsts.HeaderAuthorization))
 
 	return nil
 }
 
-func (p *proxy) invalidateAndHandleHeaders(r *http.Request, cacheObj *proxycache.Proxy) (*http.Request, apperrors.AppError) {
+func (p *proxy) invalidateAndHandleAuthHeaders(r *http.Request, cacheObj *proxycache.Proxy) (*http.Request, apperrors.AppError) {
 	kymaAuthorization := r.Header.Get(httpconsts.HeaderAccessToken)
 	if kymaAuthorization != "" {
 		r.Header.Del(httpconsts.HeaderAccessToken)

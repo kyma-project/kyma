@@ -62,14 +62,17 @@ func (rr *requestRetrier) invalidateAndRetry() (*http.Response, error) {
 		}
 	}
 
-	request, appError = rr.proxy.invalidateAndHandleHeaders(request, cacheObj)
+	request, appError = rr.proxy.invalidateAndHandleAuthHeaders(request, cacheObj)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(rr.proxy.proxyTimeout)*time.Second)
 	defer cancel()
 
 	requestWithContext := request.WithContext(ctx)
 
-	client := &http.Client{}
+	client := &http.Client{
+		Transport: cacheObj.Proxy.Transport,
+	}
+
 	response, err := client.Do(requestWithContext)
 	if err != nil {
 		return nil, err

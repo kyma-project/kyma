@@ -45,7 +45,7 @@ func (oc *oauthClient) GetToken(clientID string, clientSecret string, authURL st
 		return "Bearer " + token, nil
 	}
 
-	tokenResponse, err := oc.makeTokenRequest(clientID, clientSecret, authURL)
+	tokenResponse, err := oc.requestToken(clientID, clientSecret, authURL)
 	if err != nil {
 		return "", err
 	}
@@ -58,7 +58,7 @@ func (oc *oauthClient) GetToken(clientID string, clientSecret string, authURL st
 func (oc *oauthClient) InvalidateAndRetry(clientID string, clientSecret string, authURL string) (string, apperrors.AppError) {
 	oc.tokenCache.Remove(clientID)
 
-	tokenResponse, err := oc.makeTokenRequest(clientID, clientSecret, authURL)
+	tokenResponse, err := oc.requestToken(clientID, clientSecret, authURL)
 	if err != nil {
 		return "", err
 	}
@@ -68,7 +68,7 @@ func (oc *oauthClient) InvalidateAndRetry(clientID string, clientSecret string, 
 	return "Bearer " + tokenResponse.AccessToken, nil
 }
 
-func (oc *oauthClient) makeTokenRequest(clientID string, clientSecret string, authURL string) (*oauthResponse, apperrors.AppError) {
+func (oc *oauthClient) requestToken(clientID string, clientSecret string, authURL string) (*oauthResponse, apperrors.AppError) {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
