@@ -96,7 +96,7 @@ func (oc *oauthClient) requestToken(clientID string, clientSecret string, authUR
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return nil, apperrors.UpstreamServerCallFailed("incorrect response code '%s' while getting token from %s", response.StatusCode, authURL)
+		return nil, apperrors.UpstreamServerCallFailed("incorrect response code '%d' while getting token from %s", response.StatusCode, authURL)
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
