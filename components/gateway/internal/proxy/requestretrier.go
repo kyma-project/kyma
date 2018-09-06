@@ -47,6 +47,8 @@ func (rr *requestRetrier) invalidateAndRetry() (*http.Response, error) {
 		return nil, appError
 	}
 
+	rr.request.RequestURI = ""
+
 	_, appError = rr.proxy.invalidateAndHandleAuthHeaders(rr.request, cacheObj)
 	if appError != nil {
 		return nil, appError
