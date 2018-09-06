@@ -57,16 +57,14 @@ kubectl create ns kyma-installer
 
 The Kyma installation process requires installation data specified in the `installer-config.yaml` file. Copy the `installer-config.yaml.tpl` template, rename it to `installer-config.yaml`, and fill in these placeholder values:
 
-- `__TLS_CERT__` for the TLS certificate
-- `__TLS_KEY__` for the TLS certificate key
+- `__TLS_CERT__` for the TLS certificate, this value must be a PEM format, base64-encoded TLS certifcate
+- `__TLS_KEY__` for the TLS certificate key, this value must be a base64-encoded TLS private key
 - `__REMOTE_ENV_CA__` for the Remote Environments CA
 - `__REMOTE_ENV_CA_KEY__` for the Remote Environments CA key
 - `__IS_LOCAL_INSTALLATION__` for controlling installation procedure. Set to `true` for local installation, otherwise cluster installation is assumed.
 - `__DOMAIN__` for the domain name such as `kyma.example.com`
-- `__EXTERNAL_PUBLIC_IP__` for the IP address of Kyma Istio Ingress (optional)
+- `__EXTERNAL_PUBLIC_IP__` for the IP address of Kyma Istio Gateway (optional)
 - `__REMOTE_ENV_IP__` for the IP address for Remote Environments Ingress (optional)
-- `__K8S_APISERVER_URL__` for the API server's URL
-- `__K8S_APISERVER_CA__` for your API Server CA
 - `__ADMIN_GROUP__` for the additional admin group. This value is optional.
 - `__ENABLE_ETCD_BACKUP__` set to true to install the [etcd-operator][etcd-backup-operator-chart] and CronJob which executes periodically the [Etcd Backup][etcd-backup-app] application.
 - `__ETCD_BACKUP_ABS_CONTAINER_NAME__` for the Azure Blob Storage name of `etcd` backups. You can leave the value blank when the backup operator is disabled.
