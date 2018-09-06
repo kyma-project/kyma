@@ -71,11 +71,68 @@ spec:
                 name: azure-broker
                 key: azure_broker_client_secret
                 optional: true
+          - name: TLS_CERT
+            valueFrom:
+              configMapKeyRef:
+                name: cluster-certificate
+                key: tls_cert
+          - name: TLS_KEY
+            valueFrom:
+              configMapKeyRef:
+                name: cluster-certificate
+                key: tls_key
+          - name: REMOTE_ENV_CA
+            valueFrom:
+              secretKeyRef:
+                name: remote-env-certificate
+                key: remote_env_ca
+                optional: true
+          - name: REMOTE_ENV_CA_KEY
+            valueFrom:
+              secretKeyRef:
+                name: remote-env-certificate
+                key: remote_env_ca_key
+                optional: true
           - name: IS_LOCAL_INSTALLATION
             valueFrom:
               configMapKeyRef:
                 name: installation-config
                 key: is_local_installation
+          - name: DOMAIN
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: domain
+          - name: ETCD_BACKUP_ABS_CONTAINER_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: etcd_backup_abs_container_name
+                optional: true
+          - name: VICTOR_OPS_API_KEY_VALUE
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: victor_ops_api_key
+                optional: true
+          - name: VICTOR_OPS_ROUTING_KEY_VALUE
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: victor_ops_routing_key
+                optional: true
+          - name: SLACK_CHANNEL_VALUE
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: slack_channel
+                optional: true
+          - name: SLACK_API_URL_VALUE
+            valueFrom:
+              configMapKeyRef:
+                name: installation-config
+                key: slack_api_url
+                optional: true
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
