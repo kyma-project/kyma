@@ -37,7 +37,7 @@ This table lists all the possible parameters of a given resource together with t
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the exposed API |
 | **service.name**, **service.port** | **YES** | Specifies the name and the communication port of the exposed service. |
-| **hostname** | **YES** | Specifies the service's external inbound communication address. |
-| **authentication** | **NO** | Allows to specify an array of authentication policies that secure the service. |
+| **spec.hostname** | **YES** | Specifies the service's external inbound communication address. |
+| **spec.authentication** | **NO** | Allows to specify an array of authentication policies that secure the service. |
 | **authentication.type** | **YES** | Specifies the desired authentication method that secures the exposed service. |
 | **authentication.jwt.issuer**, **authentication.jwt.jwksUri** | **YES** | Specifies the issuer of the tokens used to access the services, as well as the JWKS endpoint URI. |
