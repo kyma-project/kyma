@@ -182,7 +182,7 @@ func (ts *TestSuite) Bind(timeout time.Duration) {
 		select {
 		case <-done:
 			if b != nil {
-				require.Fail(ts.t, fmt.Sprintf("timeout while waiting for service binding %s to be ready. Status: %v", b.Name, b.Status))
+				require.Fail(ts.t, fmt.Sprintf("timeout while waiting for service binding %s to be ready. Status: %+v", b.Name, b.Status))
 			} else {
 				require.Fail(ts.t, "timeout while waiting for service binding to be ready")
 			}
