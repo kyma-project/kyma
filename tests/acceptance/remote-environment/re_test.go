@@ -45,7 +45,7 @@ func TestRemoteEnvironmentAPIAccess(t *testing.T) {
 	ts.ProvisionServiceInstance(10 * time.Second)
 
 	t.Logf("Binding")
-	ts.Bind(3 * time.Second)
+	ts.Bind(10 * time.Second)
 
 	ts.WaitForPodsAreRunning(45 * time.Second)
 	t.Logf("All pods are running")
