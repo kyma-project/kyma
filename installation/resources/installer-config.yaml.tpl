@@ -87,7 +87,7 @@ metadata:
     installer: overrides
     component: ec-default
 data:
-  deployment.args.sourceType: marketing
+  deployment.args.sourceType: commerce
   service.externalapi.nodePort: "32001"
 ---
 apiVersion: v1
@@ -99,5 +99,5 @@ metadata:
     installer: overrides
     component: hmc-default
 data:
-  deployment.args.sourceType: commerce
+  deployment.args.sourceType: marketing
   service.externalapi.nodePort: "32000"
