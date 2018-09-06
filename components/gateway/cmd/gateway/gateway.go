@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/gateway/internal/apperrors"
-	"github.com/kyma-project/kyma/components/gateway/internal/events/bus"
 	"github.com/kyma-project/kyma/components/gateway/internal/externalapi"
 	"github.com/kyma-project/kyma/components/gateway/internal/httptools"
 	"github.com/kyma-project/kyma/components/gateway/internal/k8sconsts"
@@ -33,8 +32,6 @@ func main() {
 
 	options := parseArgs()
 	log.Infof("Options: %s", options)
-
-	bus.Init(&options.sourceNamespace, &options.sourceType, &options.sourceEnvironment, &options.eventsTargetURL)
 
 	proxyCache := proxycache.NewProxyCache(options.skipVerify, options.proxyCacheTTL)
 
