@@ -38,3 +38,21 @@ acceptanceTest:
     name: gateway-acceptance-tests
     tag: 0.2.19
     pullPolicy: IfNotPresent
+
+eventService:
+  deployment:
+    image:
+      name: event-service
+      tag: 0.3.271
+      pullPolicy: IfNotPresent
+    args:
+      externalAPIPort: &eventServiceExternalAPIPort 8081
+      eventsTargetURL: http://core-publish.kyma-system.svc.cluster.local:8080/v1/events
+      requestTimeout: 10
+      requestLogging: false
+      sourceNamespace: com.org
+      sourceType: commerce
+      sourceEnvironment: stage
+  service:
+    externalapi:
+      port: *eventServiceExternalAPIPort

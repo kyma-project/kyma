@@ -8,8 +8,8 @@ metadata:
     heritage: {{ .Release.Service }}-gateway
 spec:
   source:
-    environment: {{ .Values.deployment.args.sourceEnvironment }} 
-    type: {{ .Values.deployment.args.sourceType }} 
-    namespace: {{ .Values.deployment.args.sourceNamespace }} 
+    environment: {{ .Values.eventService.deployment.args.sourceEnvironment }}
+    type: {{ .Values.eventService.deployment.args.sourceType }}
+    namespace: {{ .Values.eventService.deployment.args.sourceNamespace }}
   description: "This Remote Environment corresponds to the connected remote solution."
   accessLabel: "echo-access-label"
