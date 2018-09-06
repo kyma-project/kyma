@@ -103,11 +103,9 @@ func (p *proxy) createAndCacheProxy(id string) (*proxycache.Proxy, apperrors.App
 }
 
 func (p *proxy) handleAuthHeaders(r *http.Request, cacheObj *proxycache.Proxy) (*http.Request, apperrors.AppError) {
-	kymaAuthorization := r.Header.Get(httpconsts.HeaderAccessToken)
-	if kymaAuthorization != "" {
-		r.Header.Del(httpconsts.HeaderAccessToken)
-		r.Header.Set(httpconsts.HeaderAuthorization, kymaAuthorization)
-	} else if cacheObj.OauthUrl != "" {
+	kymaAuthorization := handleKymaAuthorization(r)
+
+	if !kymaAuthorization && cacheObj.OauthUrl != "" {
 		err := p.addCredentials(r, cacheObj.OauthUrl, cacheObj.ClientId, cacheObj.ClientSecret)
 		if err != nil {
 			return nil, err
@@ -131,11 +129,9 @@ func (p *proxy) addCredentials(r *http.Request, oauthUrl, clientId, clientSecret
 }
 
 func (p *proxy) invalidateAndHandleAuthHeaders(r *http.Request, cacheObj *proxycache.Proxy) (*http.Request, apperrors.AppError) {
-	kymaAuthorization := r.Header.Get(httpconsts.HeaderAccessToken)
-	if kymaAuthorization != "" {
-		r.Header.Del(httpconsts.HeaderAccessToken)
-		r.Header.Set(httpconsts.HeaderAuthorization, kymaAuthorization)
-	} else if cacheObj.OauthUrl != "" {
+	kymaAuthorization := handleKymaAuthorization(r)
+
+	if !kymaAuthorization && cacheObj.OauthUrl != "" {
 		err := p.invalidateAndAddCredentials(r, cacheObj.OauthUrl, cacheObj.ClientId, cacheObj.ClientSecret)
 		if err != nil {
 			return nil, err
@@ -173,4 +169,15 @@ func handleErrors(w http.ResponseWriter, apperr apperrors.AppError) {
 
 func oauthCredentialsProvided(credentials *serviceapi.Credentials) bool {
 	return credentials != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
+}
+
+func handleKymaAuthorization(r *http.Request) bool {
+	kymaAuthorization := r.Header.Get(httpconsts.HeaderAccessToken)
+	if kymaAuthorization != "" {
+		r.Header.Del(httpconsts.HeaderAccessToken)
+		r.Header.Set(httpconsts.HeaderAuthorization, kymaAuthorization)
+		return true
+	}
+
+	return false
 }
