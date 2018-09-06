@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}-oklog
+  labels:
+{{ include "labels.standard" . | indent 4 }}
+    component: oklog
+spec:
+  clusterIP: None
+  ports:
+    - name: api
+      port: 7650
+      targetPort: 7650
+      protocol: TCP
+    - name: ingest-fast
+      port: 7651
+      targetPort: 7651
+      protocol: TCP
+    - name: ingest-durable
+      port: 7652
+      targetPort: 7652
+      protocol: TCP
+    - name: ingest-bulk
+      port: 7653
+      targetPort: 7653
+      protocol: TCP
+    - name: ingest-cluster
+      port: 7659
+      targetPort: 7659
+      protocol: TCP
+    - name: ingest-cluster-udp
+      port: 7659
+      targetPort: 7659
+      protocol: UDP
+  selector:
+    component: oklog
+
+{{- if .Values.loadBalancerService.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "fullname" . }}-oklog-lb
+  labels:
+    app: {{ template "fullname" . }}-oklog-lb
+    component: oklog
+    {{ include "labels.standard" . | indent 4 }}
+{{- if .Values.loadBalancerService.annotations }}
+  annotations:
+{{ toYaml .Values.loadBalancerService.annotations | indent 4 }}
+{{- end}}
+spec:
+  ports:
+    - name: api
+      port: 7650
+      targetPort: 7650
+      protocol: TCP
+    - name: ingest-fast
+      port: 7651
+      targetPort: 7651
+      protocol: TCP
+  type: LoadBalancer
+  selector:
+    app: {{ template "fullname" . }}-oklog
+{{- end }}
