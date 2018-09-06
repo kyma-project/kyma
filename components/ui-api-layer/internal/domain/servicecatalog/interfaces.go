@@ -78,8 +78,8 @@ type classInstanceLister interface {
 
 //go:generate mockery -name=gqlInstanceConverter -inpkg -case=underscore
 type gqlInstanceConverter interface {
-	ToGQL(in *v1beta1.ServiceInstance) *gqlschema.ServiceInstance
-	ToGQLs(in []*v1beta1.ServiceInstance) []gqlschema.ServiceInstance
+	ToGQL(in *v1beta1.ServiceInstance) (*gqlschema.ServiceInstance, error)
+	ToGQLs(in []*v1beta1.ServiceInstance) ([]gqlschema.ServiceInstance, error)
 	GQLCreateInputToInstanceCreateParameters(in *gqlschema.ServiceInstanceCreateInput) *instanceCreateParameters
 	ServiceStatusTypeToGQLStatusType(in status.ServiceInstanceStatusType) gqlschema.InstanceStatusType
 	GQLStatusTypeToServiceStatusType(in gqlschema.InstanceStatusType) status.ServiceInstanceStatusType

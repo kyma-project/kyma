@@ -5,20 +5,28 @@ import (
 	"strings"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/status"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/resource"
+	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type instanceConverter struct {
 	extractor status.InstanceExtractor
 }
 
-func (c *instanceConverter) ToGQL(in *v1beta1.ServiceInstance) *gqlschema.ServiceInstance {
+func (c *instanceConverter) ToGQL(in *v1beta1.ServiceInstance) (*gqlschema.ServiceInstance, error) {
 	if in == nil {
-		return nil
+		return nil, nil
 	}
 
 	instanceLabels := c.extractLabels(in)
+	servicePlanSpec, err := c.extractServicePlanSpec(in.Spec.Parameters)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting servicePlanSpec for %s `%s`", pretty.ServiceInstance, in.Name)
+	}
 
 	var servicePlanName *string
 	if in.Spec.ClusterServicePlanRef != nil {
@@ -37,24 +45,28 @@ func (c *instanceConverter) ToGQL(in *v1beta1.ServiceInstance) *gqlschema.Servic
 		ServicePlanDisplayName:  in.Spec.ClusterServicePlanExternalName,
 		ServiceClassName:        serviceClassName,
 		ServiceClassDisplayName: in.Spec.ClusterServiceClassExternalName,
+		ServicePlanSpec:         servicePlanSpec,
 		Labels:                  instanceLabels,
 		Status:                  *c.ServiceStatusToGQLStatus(c.extractor.Status(in)),
 		CreationTimestamp:       in.CreationTimestamp.Time,
 	}
 
-	return &instance
+	return &instance, nil
 }
 
-func (c *instanceConverter) ToGQLs(in []*v1beta1.ServiceInstance) []gqlschema.ServiceInstance {
+func (c *instanceConverter) ToGQLs(in []*v1beta1.ServiceInstance) ([]gqlschema.ServiceInstance, error) {
 	var result []gqlschema.ServiceInstance
 	for _, u := range in {
-		converted := c.ToGQL(u)
+		converted, err := c.ToGQL(u)
+		if err != nil {
+			return nil, err
+		}
 
 		if converted != nil {
 			result = append(result, *converted)
 		}
 	}
-	return result
+	return result, nil
 }
 
 func (c *instanceConverter) GQLCreateInputToInstanceCreateParameters(in *gqlschema.ServiceInstanceCreateInput) *instanceCreateParameters {
@@ -169,4 +181,22 @@ func (c *instanceConverter) populateLabels(inputLabels interface{}) ([]string, e
 	}
 
 	return labels, nil
+}
+
+func (c *instanceConverter) extractServicePlanSpec(raw *runtime.RawExtension) (*gqlschema.JSON, error) {
+	if raw == nil {
+		return nil, nil
+	}
+
+	extracted, err := resource.ExtractRawToMap("ServicePlanSpec", raw.Raw)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(gqlschema.JSON)
+	for k, v := range extracted {
+		result[k] = v
+	}
+
+	return &result, err
 }

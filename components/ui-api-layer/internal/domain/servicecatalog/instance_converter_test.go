@@ -20,6 +20,19 @@ func TestInstanceConverter_ToGQL(t *testing.T) {
 	var zeroTimeStamp time.Time
 	t.Run("All properties are given", func(t *testing.T) {
 		converter := instanceConverter{}
+		parameterSchema := map[string]interface{}{
+			"first": "1",
+			"second": map[string]interface{}{
+				"value": "2",
+			},
+		}
+
+		parameterSchemaBytes, err := json.Marshal(parameterSchema)
+		require.NoError(t, err)
+
+		parameterSchemaJSON := new(gqlschema.JSON)
+		err = parameterSchemaJSON.UnmarshalGQL(parameterSchema)
+		require.NoError(t, err)
 
 		in := v1beta1.ServiceInstance{
 			ObjectMeta: metav1.ObjectMeta{
@@ -38,6 +51,7 @@ func TestInstanceConverter_ToGQL(t *testing.T) {
 				ClusterServicePlanRef: &v1beta1.ClusterObjectReference{
 					Name: "testPlan",
 				},
+				Parameters: &runtime.RawExtension{Raw: parameterSchemaBytes},
 			},
 			Status: v1beta1.ServiceInstanceStatus{
 				AsyncOpInProgress: false,
@@ -59,6 +73,7 @@ func TestInstanceConverter_ToGQL(t *testing.T) {
 			Environment:       "Environment",
 			ServiceClassName:  &testClassName,
 			ServicePlanName:   &testPlanName,
+			ServicePlanSpec:   parameterSchemaJSON,
 			Labels:            []string{"test1", "test2"},
 			CreationTimestamp: zeroTimeStamp,
 			Status: gqlschema.ServiceInstanceStatus{
@@ -68,8 +83,9 @@ func TestInstanceConverter_ToGQL(t *testing.T) {
 			},
 		}
 
-		result := converter.ToGQL(&in)
+		result, err := converter.ToGQL(&in)
 
+		require.NoError(t, err)
 		assert.Equal(t, &expected, result)
 	})
 
@@ -120,29 +136,52 @@ func TestInstanceConverter_ToGQL(t *testing.T) {
 			},
 		}
 
-		result := converter.ToGQL(&in)
+		result, err := converter.ToGQL(&in)
 
+		require.NoError(t, err)
 		assert.Equal(t, &expected, result)
 	})
 
 	t.Run("Empty", func(t *testing.T) {
 		converter := &instanceConverter{}
-		converter.ToGQL(&v1beta1.ServiceInstance{})
+		item, err := converter.ToGQL(&v1beta1.ServiceInstance{})
+
+		expected := &gqlschema.ServiceInstance{
+			Labels: []string{},
+			Status: gqlschema.ServiceInstanceStatus{
+				Type: gqlschema.InstanceStatusTypePending,
+			},
+		}
+
+		require.NoError(t, err)
+		assert.Equal(t, expected, item)
 	})
 
 	t.Run("Empty properties", func(t *testing.T) {
 		converter := &instanceConverter{}
-		converter.ToGQL(&v1beta1.ServiceInstance{
+		item, err := converter.ToGQL(&v1beta1.ServiceInstance{
 			Status: v1beta1.ServiceInstanceStatus{
 				InProgressProperties: &v1beta1.ServiceInstancePropertiesState{},
 				ExternalProperties:   &v1beta1.ServiceInstancePropertiesState{},
 			},
 		})
+
+		expected := &gqlschema.ServiceInstance{
+			Labels: []string{},
+			Status: gqlschema.ServiceInstanceStatus{
+				Type: gqlschema.InstanceStatusTypePending,
+			},
+		}
+
+		require.NoError(t, err)
+		assert.Equal(t, expected, item)
 	})
 
 	t.Run("Nil", func(t *testing.T) {
 		converter := &instanceConverter{}
-		item := converter.ToGQL(nil)
+		item, err := converter.ToGQL(nil)
+
+		require.NoError(t, err)
 		assert.Nil(t, item)
 	})
 }
@@ -199,8 +238,9 @@ func TestInstanceConverter_ToGQLs(t *testing.T) {
 		}
 
 		converter := instanceConverter{}
-		result := converter.ToGQLs(instances)
+		result, err := converter.ToGQLs(instances)
 
+		require.NoError(t, err)
 		assert.Len(t, result, 2)
 		assert.Equal(t, "exampleName", result[0].Name)
 	})
@@ -209,8 +249,9 @@ func TestInstanceConverter_ToGQLs(t *testing.T) {
 		var instances []*v1beta1.ServiceInstance
 
 		converter := instanceConverter{}
-		result := converter.ToGQLs(instances)
+		result, err := converter.ToGQLs(instances)
 
+		require.NoError(t, err)
 		assert.Empty(t, result)
 	})
 
@@ -222,8 +263,9 @@ func TestInstanceConverter_ToGQLs(t *testing.T) {
 		}
 
 		converter := instanceConverter{}
-		result := converter.ToGQLs(instances)
+		result, err := converter.ToGQLs(instances)
 
+		require.NoError(t, err)
 		assert.Len(t, result, 1)
 		assert.Equal(t, "exampleName", result[0].Name)
 	})

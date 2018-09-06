@@ -33,7 +33,7 @@ func TestInstanceResolver_ServiceInstanceQuery(t *testing.T) {
 		defer resourceGetter.AssertExpectations(t)
 
 		converter := servicecatalog.NewMockInstanceConverter()
-		converter.On("ToGQL", resource).Return(expected).Once()
+		converter.On("ToGQL", resource).Return(expected, nil).Once()
 		defer converter.AssertExpectations(t)
 
 		resolver := servicecatalog.NewInstanceResolver(resourceGetter, nil, nil)
@@ -104,7 +104,7 @@ func TestInstanceResolver_ServiceInstancesQuery(t *testing.T) {
 		defer resourceGetter.AssertExpectations(t)
 
 		converter := servicecatalog.NewMockInstanceConverter()
-		converter.On("ToGQLs", resources).Return(expected)
+		converter.On("ToGQLs", resources).Return(expected, nil)
 		defer converter.AssertExpectations(t)
 
 		resolver := servicecatalog.NewInstanceResolver(resourceGetter, nil, nil)
@@ -200,7 +200,7 @@ func TestInstanceResolver_ServiceInstancesWithStatusQuery(t *testing.T) {
 		defer resourceGetter.AssertExpectations(t)
 
 		converter := servicecatalog.NewMockInstanceConverter()
-		converter.On("ToGQLs", resources).Return(expected)
+		converter.On("ToGQLs", resources).Return(expected, nil)
 		converter.On("GQLStatusTypeToServiceStatusType", gqlStatusType).Return(statusType)
 		defer converter.AssertExpectations(t)
 

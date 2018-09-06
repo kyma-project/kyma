@@ -11,6 +11,7 @@ type ServiceClass struct {
 	LongDescription     *string
 	ImageUrl            *string
 	DocumentationUrl    *string
+	SupportUrl          *string
 	ProviderDisplayName *string
 	Tags                []string
 	activated           bool

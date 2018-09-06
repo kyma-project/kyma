@@ -9,6 +9,7 @@ type ServiceInstance struct {
 	ServiceClassDisplayName string
 	ServicePlanName         *string
 	ServicePlanDisplayName  string
+	ServicePlanSpec         *JSON
 	CreationTimestamp       time.Time
 	Labels                  []string
 	Status                  ServiceInstanceStatus
