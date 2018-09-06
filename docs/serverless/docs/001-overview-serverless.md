@@ -27,9 +27,6 @@ The use of lambdas in Kyma addresses several scenarios:
  * Version lambda functions
  * Chain multiple functions
 
-
-### Best use for lambda functions
-
 Lambda functions best serve integration purposes due to their ease of use. Lambda is a quick and ideal solution when the goal is to combine functionalities which are tightly coupled. And, in the context of Kyma, they provide integration with the Event system and Customer Engagement and Commerce tools. Lambda functions are not well-suited to building an application from scratch.
 
 The Serverless implementation of Kyma is based on [Kubeless](https://github.com/kubeless/kubeless).
