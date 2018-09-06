@@ -9,24 +9,7 @@ import (
 
 const globalsTplStr = `
 global:
-  tlsCrt: "{{.ClusterTLSCert}}"
-  tlsKey: "{{.ClusterTLSKey}}"
   isLocalEnv: {{.IsLocalInstallation}}
-  remoteEnvCa: "{{.RemoteEnvCa}}"
-  remoteEnvCaKey: "{{.RemoteEnvCaKey}}"
-  istio:
-    tls:
-      secretName: "istio-ingress-certs"
-  etcdBackupABS:
-    containerName: "{{.EtcdBackupABSContainerName}}"
-  alertTools:
-    credentials:
-      victorOps:
-        routingkey: "{{ .VictorOpsRoutingKey }}"
-        apikey: "{{ .VictorOpsApiKey }}"
-      slack:
-        channel: "{{ .SlackChannel }}"
-        apiurl: "{{ .SlackApiUrl }}"
 `
 
 // GetGlobalOverrides .

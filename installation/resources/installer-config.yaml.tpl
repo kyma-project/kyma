@@ -11,7 +11,7 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: remote-env-certificate-verrides
+  name: remote-env-certificate-overrides
   namespace: kyma-installer
   labels:
     installer: overrides

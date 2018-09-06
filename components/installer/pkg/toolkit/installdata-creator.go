@@ -40,13 +40,6 @@ func (sc *InstallationDataCreator) WithDummyAzureCredentials() *InstallationData
 	return sc
 }
 
-// WithCert sets Cert and CertKey properties
-func (sc *InstallationDataCreator) WithCert(cert, certKey string) *InstallationDataCreator {
-	sc.installationData.ClusterTLSCert = cert
-	sc.installationData.ClusterTLSKey = certKey
-	return sc
-}
-
 // WithGeneric sets generic property in InstallationData
 func (sc *InstallationDataCreator) WithGeneric(key, value string) *InstallationDataCreator {
 	sc.genericOverrides[key] = value
@@ -57,41 +50,6 @@ func (sc *InstallationDataCreator) WithGeneric(key, value string) *InstallationD
 func (sc *InstallationDataCreator) WithLocalInstallation() *InstallationDataCreator {
 	sc.installationData.IsLocalInstallation = true
 
-	return sc
-}
-
-// WithRemoteEnvCa sets RemoteEnvCa property in InstallationData
-func (sc *InstallationDataCreator) WithRemoteEnvCa(remoteEnvCa string) *InstallationDataCreator {
-	sc.installationData.RemoteEnvCa = remoteEnvCa
-
-	return sc
-}
-
-// WithRemoteEnvCaKey sets RemoteEnvCaKey property in InstallationData
-func (sc *InstallationDataCreator) WithRemoteEnvCaKey(remoteEnvCaKey string) *InstallationDataCreator {
-	sc.installationData.RemoteEnvCaKey = remoteEnvCaKey
-
-	return sc
-}
-
-// WithEtcdBackupABSContainerName sets value for EtcdBackupABSContainerName property
-func (sc *InstallationDataCreator) WithEtcdBackupABSContainerName(path string) *InstallationDataCreator {
-	sc.installationData.EtcdBackupABSContainerName = path
-
-	return sc
-}
-
-// WithVictorOpsCredentials sets value for VictorOpsApiKey and VictorOpsRoutingKey properties
-func (sc *InstallationDataCreator) WithVictorOpsCredentials(routingkey, apikey string) *InstallationDataCreator {
-	sc.installationData.VictorOpsApiKey = apikey
-	sc.installationData.VictorOpsRoutingKey = routingkey
-	return sc
-}
-
-// WithSlackCredentials sets value for SlackChannel and SlackApiUrl properties
-func (sc *InstallationDataCreator) WithSlackCredentials(channel, apiurl string) *InstallationDataCreator {
-	sc.installationData.SlackChannel = channel
-	sc.installationData.SlackApiUrl = apiurl
 	return sc
 }
 
