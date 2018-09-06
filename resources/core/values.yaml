@@ -33,7 +33,7 @@ test:
     password: nimda123
   acceptance:
     core:
-      imageTag: "0.3.175"
+      imageTag: "0.3.319"
       # environments used in remote-environment acceptance test
       remoteEnvironment: 
         disabled: "false"
