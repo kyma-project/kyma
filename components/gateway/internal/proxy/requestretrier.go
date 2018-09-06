@@ -34,8 +34,9 @@ func (rr *requestRetrier) CheckResponse(r *http.Response) error {
 		if err != nil {
 			return err
 		}
-
-		r = res
+		if res != nil {
+			r = res
+		}
 	}
 
 	return nil
@@ -45,6 +46,10 @@ func (rr *requestRetrier) invalidateAndRetry() (*http.Response, error) {
 	cacheObj, appError := rr.proxy.createAndCacheProxy(rr.id)
 	if appError != nil {
 		return nil, appError
+	}
+
+	if cacheObj.OauthUrl == "" {
+		return nil, nil
 	}
 
 	rr.request.RequestURI = ""
