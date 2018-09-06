@@ -139,7 +139,7 @@ func (p *proxy) invalidateAndHandleHeaders(r *http.Request, cacheObj *proxycache
 		r.Header.Del(httpconsts.HeaderAccessToken)
 		r.Header.Set(httpconsts.HeaderAuthorization, kymaAuthorization)
 	} else if cacheObj.OauthUrl != "" {
-		err := p.addCredentials(r, cacheObj.OauthUrl, cacheObj.ClientId, cacheObj.ClientSecret)
+		err := p.invalidateAndAddCredentials(r, cacheObj.OauthUrl, cacheObj.ClientId, cacheObj.ClientSecret)
 		if err != nil {
 			return nil, err
 		}
