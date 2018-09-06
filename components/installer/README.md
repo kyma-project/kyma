@@ -120,7 +120,7 @@ Helm installation.
 
 ## Install selected components only
 
-This tool installs components specified in installation CR. Please see CR template in the [installer-cr.yaml.tpl](../../installation/resources/installer-cr.yaml.tpl) file for more details. 
+This tool installs components specified in `Installation` CR. See the [installer-cr.yaml.tpl](../../installation/resources/installer-cr.yaml.tpl) file for more details. 
 
 To enable installation of a component, specify its name and Namespace. If you want the release name to be different from the component's name, provide the release parameter.
 
@@ -136,4 +136,4 @@ spec:
       release: "hmc-default"
 ```
 
-In the example above, the `remote-environments` component will be installed in the `kyma-integration` Namespace, using `hmc-default` as the release name.. Fields `name` and `namespace` are mandatory. The name of the component is also the name of the component subdirectory in the `resources` directory. Installer assumes that the component subdirectory is a valid Helm chart.
+In the example, the `remote-environments` component is installed in the `kyma-integration` Namespace, using `hmc-default` as the release name. The **name** and **namespace** fields are mandatory. The name of the component is also the name of the component subdirectory in the `resources` directory. The Installer assumes that the component subdirectory is a valid Helm chart.
