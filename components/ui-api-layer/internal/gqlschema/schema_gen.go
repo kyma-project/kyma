@@ -5016,6 +5016,8 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel []query.Selec
 			out.Values[i] = ec._ServiceClass_creationTimestamp(ctx, field, obj)
 		case "description":
 			out.Values[i] = ec._ServiceClass_description(ctx, field, obj)
+		case "longDescription":
+			out.Values[i] = ec._ServiceClass_longDescription(ctx, field, obj)
 		case "imageUrl":
 			out.Values[i] = ec._ServiceClass_imageUrl(ctx, field, obj)
 		case "documentationUrl":
@@ -5098,6 +5100,20 @@ func (ec *executionContext) _ServiceClass_description(ctx context.Context, field
 	defer rctx.Pop()
 	res := obj.Description
 	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _ServiceClass_longDescription(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "ServiceClass"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.LongDescription
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 func (ec *executionContext) _ServiceClass_imageUrl(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
@@ -7237,6 +7253,7 @@ type ServiceClass {
     displayName: String
     creationTimestamp: Timestamp!
     description: String!
+    longDescription: String
     imageUrl: String
     documentationUrl: String
     providerDisplayName: String

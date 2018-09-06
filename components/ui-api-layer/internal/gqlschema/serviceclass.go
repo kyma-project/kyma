@@ -8,6 +8,7 @@ type ServiceClass struct {
 	DisplayName         *string
 	CreationTimestamp   time.Time
 	Description         string
+	LongDescription     *string
 	ImageUrl            *string
 	DocumentationUrl    *string
 	ProviderDisplayName *string
