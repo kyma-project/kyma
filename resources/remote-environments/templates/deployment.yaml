@@ -98,6 +98,12 @@ spec:
             port: {{ .Values.eventService.deployment.args.externalAPIPort }}
           initialDelaySeconds: 5
           periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /v1/health
+            port: {{ .Values.eventService.deployment.args.externalAPIPort }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
         ports:
         - containerPort: {{ .Values.eventService.deployment.args.externalAPIPort }}
           name: http-api-port
