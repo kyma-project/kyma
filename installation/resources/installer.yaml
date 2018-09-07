@@ -44,7 +44,7 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/snapshot/installer:PR-554
+        image: eu.gcr.io/kyma-project/installer:0.3.313
         imagePullPolicy: IfNotPresent
         env:
           - name: IS_LOCAL_INSTALLATION

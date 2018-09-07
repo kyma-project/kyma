@@ -111,7 +111,19 @@ Example:
 ../../installation/scripts/create-cr.sh --output installer-cr.yaml --url {URL TO KYMA TAR GZ} --version 0.0.1
 ```
 
-To run the Kyma with the Azure Broker enabled, mark `azure-broker` subcomponent as enabled using `manage-component.sh` script and specify the Azure credentials in the `azure-broker-secret.yaml` Secret file which template is in `installation/resources` directory. Edit the file by providing the following properties along with their values encoded as base64 in the **data** definition: `azure-broker.subscription_id`, `azure-broker.tenant_id`, `azure-broker.client_id` and `azure-broker.client_secret`.
+### Enabling Azure Broker
+
+To run the Kyma with the Azure Broker enabled, mark `azure-broker` subcomponent as enabled using `manage-component.sh` script or manually. Specify the Azure credentials as the environment variables providing the following variables along with their values encoded as base64 strings: `AZURE_BROKER_SUBSCRIPTION_ID`, `AZURE_BROKER_TENANT_ID`, `AZURE_BROKER_CLIENT_ID` and `AZURE_BROKER_CLIENT_SECRET`.
+
+Example:
+```
+$ export AZURE_BROKER_SUBSCRIPTION_ID="..."
+$ export AZURE_BROKER_TENANT_ID="..."
+$ export AZURE_BROKER_CLIENT_ID="..."
+$ export AZURE_BROKER_CLIENT_SECRET="..."
+
+$ ../../installation/scripts/manage-component.sh azure-broker true
+```
 
 ## Static overrides for cluster installations
 
