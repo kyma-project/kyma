@@ -19,7 +19,7 @@ type InstallationData struct {
 }
 
 // NewInstallationData .
-func NewInstallationData(installation *v1alpha1.Installation, installationConfig *installationConfig) (*InstallationData, error) {
+func NewInstallationData(installation *v1alpha1.Installation) (*InstallationData, error) {
 
 	ctx := InstallationContext{
 		Name:      installation.Name,
