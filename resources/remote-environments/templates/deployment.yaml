@@ -28,16 +28,12 @@ spec:
           - "/gateway"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
-          - "--eventsTargetURL={{ .Values.deployment.args.eventsTargetURL }}"
           - "--remoteEnvironment={{ .Release.Name }}"
           - "--namespace={{ .Release.Namespace }}"
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
           - "--skipVerify={{ .Values.deployment.args.skipVerify }}"
           - "--proxyTimeout={{ .Values.deployment.args.proxyTimeout }}"
           - "--proxyCacheTTL={{ .Values.deployment.args.proxyCacheTTL }}"
-          - "--sourceNamespace={{ .Values.deployment.args.sourceNamespace }}"
-          - "--sourceType={{ .Values.deployment.args.sourceType }}"
-          - "--sourceEnvironment={{ .Values.deployment.args.sourceEnvironment }}"
           - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
         readinessProbe:
           httpGet:
