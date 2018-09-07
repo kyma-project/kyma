@@ -111,9 +111,9 @@ Example:
 ../../installation/scripts/create-cr.sh --output installer-cr.yaml --url {URL TO KYMA TAR GZ} --version 0.0.1
 ```
 
-### Enabling Azure Broker
+### Enable the Azure Broker
 
-To run the Kyma with the Azure Broker enabled, mark `azure-broker` subcomponent as enabled using `manage-component.sh` script or manually. Specify the Azure credentials as the environment variables providing the following variables along with their values encoded as base64 strings: `AZURE_BROKER_SUBSCRIPTION_ID`, `AZURE_BROKER_TENANT_ID`, `AZURE_BROKER_CLIENT_ID` and `AZURE_BROKER_CLIENT_SECRET`.
+To run the Kyma with the Azure Broker enabled, mark the `azure-broker` subcomponent as enabled either using the `manage-component.sh` script or manually. Specify the Azure credentials as the environment variables providing the following variables along with their values encoded as base64 strings: `AZURE_BROKER_SUBSCRIPTION_ID`, `AZURE_BROKER_TENANT_ID`, `AZURE_BROKER_CLIENT_ID`, and `AZURE_BROKER_CLIENT_SECRET`.
 
 Example:
 ```
