@@ -7,6 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/automock"
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	apps "k8s.io/api/apps/v1"
 	api "k8s.io/api/apps/v1beta2"
@@ -32,6 +33,8 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_HardEqualsUsed(t *t
 
 	// THEN
 	assert.True(t, status.Exceeded)
+	assert.Len(t, status.ExceededQuotas, 1)
+	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests, 2)
 }
 
 func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded(t *testing.T) {
@@ -59,6 +62,8 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded(
 
 	// THEN
 	assert.True(t, status.Exceeded)
+	assert.Len(t, status.ExceededQuotas, 1)
+	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests, 2)
 }
 
 func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded_MaxUnavailable(t *testing.T) {
@@ -123,6 +128,8 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded_
 
 	// THEN
 	assert.True(t, status.Exceeded)
+	assert.Len(t, status.ExceededQuotas, 1)
+	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests, 2)
 }
 
 func TestResourceQuotaStatusService_CheckResourceQuotaStatus_StatefulSetExceed(t *testing.T) {
@@ -149,6 +156,40 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_StatefulSetExceed(t
 
 	// THEN
 	assert.True(t, status.Exceeded)
+	assert.Len(t, status.ExceededQuotas, 1)
+	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests, 2)
+}
+
+func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ManyResourcesExceed(t *testing.T) {
+	// GIVEN
+	rqLister := automock.NewResourceQuotaLister()
+	rqLister.On("ListResourceQuotas", fixNamespaceName()).Return(fixResourceQuota(), nil)
+	rsLister := automock.NewReplicaSetLister()
+	rsLister.On("ListReplicaSets", fixNamespaceName()).Return(fixReplicaSetExceeded(), nil)
+	ssLister := automock.NewStatefulSetLister()
+	ssLister.On("ListStatefulSets", fixNamespaceName()).Return(fixStatefulSet(), nil)
+	podLister := automock.NewPodsLister()
+	podLister.On("ListPods", fixNamespaceName(), fixReplicaSetMatchLabels()).Return(fixReplicasExceeding(fixReplicaSetMatchLabels()), nil).Run(func(args mock.Arguments) {
+		podLister.On("ListPods", fixNamespaceName(), fixStatefulSetMatchLabels()).Return(fixReplicasExceeding(fixStatefulSetMatchLabels()), nil)
+	})
+	defer func() {
+		rqLister.AssertExpectations(t)
+		rsLister.AssertExpectations(t)
+		podLister.AssertExpectations(t)
+	}()
+
+	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, podLister, nil)
+
+	// WHEN
+	status, err := rqSvc.CheckResourceQuotaStatus(fixNamespaceName(), fixResourceNames())
+	require.NoError(t, err)
+
+	// THEN
+	assert.True(t, status.Exceeded)
+	assert.Len(t, status.ExceededQuotas, 1)
+	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests, 2)
+	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests[0].DemandingResources, 2)
+	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests[1].DemandingResources, 2)
 }
 
 func fixResourceNames() []v1.ResourceName {
@@ -165,21 +206,27 @@ func fixNamespaceName() string {
 	return "test-ns"
 }
 
+func fixName() string {
+	return "fix-name"
+}
+
 func fixResourceQuotaExceeded() []*v1.ResourceQuota {
 	return []*v1.ResourceQuota{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "name",
+				Name:      fixName(),
 				Namespace: fixNamespaceName(),
 			},
 			Spec: v1.ResourceQuotaSpec{
 				Hard: v1.ResourceList{
-					v1.ResourceLimitsMemory: resource.MustParse("1Gi"),
+					v1.ResourceLimitsMemory:   resource.MustParse("1Gi"),
+					v1.ResourceRequestsMemory: resource.MustParse("1Gi"),
 				},
 			},
 			Status: v1.ResourceQuotaStatus{
 				Used: v1.ResourceList{
-					v1.ResourceLimitsMemory: resource.MustParse("1Gi"),
+					v1.ResourceLimitsMemory:   resource.MustParse("1Gi"),
+					v1.ResourceRequestsMemory: resource.MustParse("1Gi"),
 				},
 			},
 		},
@@ -190,7 +237,7 @@ func fixResourceQuota() []*v1.ResourceQuota {
 	return []*v1.ResourceQuota{
 		{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "name",
+				Name:      fixName(),
 				Namespace: fixNamespaceName(),
 			},
 			Spec: v1.ResourceQuotaSpec{
@@ -207,6 +254,7 @@ func fixStatefulSet() []*apps.StatefulSet {
 	return []*apps.StatefulSet{
 		{
 			ObjectMeta: metav1.ObjectMeta{
+				Name:      fixName(),
 				Namespace: fixNamespaceName(),
 			},
 			Spec: apps.StatefulSetSpec{
@@ -245,6 +293,7 @@ func fixReplicaSetExceeded() []*apps.ReplicaSet {
 	return []*apps.ReplicaSet{
 		{
 			ObjectMeta: metav1.ObjectMeta{
+				Name:      fixName(),
 				Namespace: fixNamespaceName(),
 			},
 			Spec: apps.ReplicaSetSpec{
@@ -264,6 +313,7 @@ func fixReplicaSetWithOwnerReference() []*apps.ReplicaSet {
 	return []*apps.ReplicaSet{
 		{
 			ObjectMeta: metav1.ObjectMeta{
+				Name:      fixName(),
 				Namespace: fixNamespaceName(),
 				OwnerReferences: []metav1.OwnerReference{
 					{

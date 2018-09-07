@@ -100,10 +100,6 @@ type RemoteEnvironmentSource struct {
 	Type        string `json:"type"`
 	Namespace   string `json:"namespace"`
 }
-type ResourceQuotasStatus struct {
-	Exceeded bool   `json:"exceeded"`
-	Message  string `json:"message"`
-}
 type ResourceType struct {
 	Memory *string `json:"memory"`
 	Cpu    *string `json:"cpu"`
@@ -111,6 +107,10 @@ type ResourceType struct {
 type ResourceValues struct {
 	Memory *string `json:"memory"`
 	Cpu    *string `json:"cpu"`
+}
+type ResourcesRequests struct {
+	ResourceType       string   `json:"resourceType"`
+	DemandingResources []string `json:"demandingResources"`
 }
 type Secret struct {
 	Name        string `json:"name"`

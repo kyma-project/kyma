@@ -38,3 +38,7 @@ func (r *resourceQuotaStatusResolver) ResourceQuotasStatus(ctx context.Context, 
 
 	return exceeded, nil
 }
+
+func (r *resourceQuotaStatusResolver) ExceededQuotaResourceRequests(ctx context.Context, exceededQuota *gqlschema.ExceededQuota) ([]gqlschema.ResourcesRequests, error) {
+	return r.statusSvc.ExceededQuotaResourceRequests(exceededQuota), nil
+}

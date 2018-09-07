@@ -290,7 +290,17 @@ type ResourceQuota {
 
 type ResourceQuotasStatus {
     exceeded: Boolean!
-    message: String!
+    exceededQuotas: [ExceededQuota]!
+}
+
+type ExceededQuota {
+    name: String!
+    resourceRequests: [ResourcesRequests]!
+}
+
+type ResourcesRequests {
+    resourceType: String!
+    demandingResources: [String]!
 }
 
 # Remote Environments

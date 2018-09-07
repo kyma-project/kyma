@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
 	apps "k8s.io/api/apps/v1"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 )
 
 //go:generate mockery -name=replicaSetLister -output=automock -outpkg=automock -case=underscore
@@ -34,6 +34,7 @@ type exceededRef struct {
 }
 
 type resourceQuotaStatusService struct {
+	rqConv       resourceQuotaStatusConverter
 	rqLister     resourceQuotaLister
 	rsLister     replicaSetLister
 	ssLister     statefulSetLister
@@ -43,6 +44,7 @@ type resourceQuotaStatusService struct {
 
 func newResourceQuotaStatusService(rqInformer resourceQuotaLister, rsInformer replicaSetLister, ssInformer statefulSetLister, podClient podsLister, deployGetter deploymentGetter) *resourceQuotaStatusService {
 	return &resourceQuotaStatusService{
+		rqConv:       resourceQuotaStatusConverter{},
 		rqLister:     rqInformer,
 		rsLister:     rsInformer,
 		ssLister:     ssInformer,
@@ -65,41 +67,53 @@ func (svc *resourceQuotaStatusService) CheckResourceQuotaStatus(environment stri
 
 	if status := svc.compareQuotaValues(environment, resourcesToCheck, resourceQuotas); len(status) > 0 {
 		return gqlschema.ResourceQuotasStatus{
-			Exceeded: true,
-			Message:  status,
+			Exceeded:       true,
+			ExceededQuotas: status,
 		}, nil
 	}
 
-	statuses, err := svc.checkResourcesNeeds(environment, resourcesToCheck, resourceQuotas)
+	statuses, err := svc.checkResourcesRequests(environment, resourcesToCheck, resourceQuotas)
 	if err != nil {
 		return gqlschema.ResourceQuotasStatus{}, err
 	}
 	if len(statuses) > 0 {
 		return gqlschema.ResourceQuotasStatus{
-			Exceeded: true,
-			Message:  svc.composeStatuses(statuses),
+			Exceeded:       true,
+			ExceededQuotas: svc.rqConv.ToGQL(statuses),
 		}, nil
 	}
 
 	return gqlschema.ResourceQuotasStatus{Exceeded: false}, nil
 }
 
-func (svc *resourceQuotaStatusService) compareQuotaValues(environment string, resourcesToCheck []v1.ResourceName, resourceQuotas []*v1.ResourceQuota) string {
+func (svc *resourceQuotaStatusService) ExceededQuotaResourceRequests(exceededQuota *gqlschema.ExceededQuota) []gqlschema.ResourcesRequests {
+	result := make([]gqlschema.ResourcesRequests, 0)
+	for _, req := range exceededQuota.ResourcesRequests {
+		result = append(result, req)
+	}
+	return result
+}
+
+func (svc *resourceQuotaStatusService) compareQuotaValues(environment string, resourcesToCheck []v1.ResourceName, resourceQuotas []*v1.ResourceQuota) []gqlschema.ExceededQuota {
 	// You exceeded the ResourceQuota if at least one of the `.status.used` values equals or is bigger than its equivalent from the `.spec.hard` value.
-	result := make([]string, 0)
+	result := make([]gqlschema.ExceededQuota, 0)
 	for _, rq := range resourceQuotas {
+		resourcesReq := make([]gqlschema.ResourcesRequests, 0)
 		for _, name := range resourcesToCheck {
 			hard, hardExists := rq.Spec.Hard[name]
 			used := rq.Status.Used[name]
 			if hardExists && used.Value() >= hard.Value() {
-				result = append(result, svc.exceededMessage(rq.Name, name, environment))
+				resourcesReq = append(resourcesReq, gqlschema.ResourcesRequests{ResourceType: string(name)})
 			}
 		}
+		if len(resourcesReq) > 0 {
+			result = append(result, gqlschema.ExceededQuota{Name: rq.Name, ResourcesRequests: resourcesReq})
+		}
 	}
-	return strings.Join(result, " ")
+	return result
 }
 
-func (svc *resourceQuotaStatusService) checkResourcesNeeds(environment string, resourcesToCheck []v1.ResourceName, resourceQuotas []*v1.ResourceQuota) (map[string]map[v1.ResourceName][]string, error) {
+func (svc *resourceQuotaStatusService) checkResourcesRequests(environment string, resourcesToCheck []v1.ResourceName, resourceQuotas []*v1.ResourceQuota) (map[string]map[v1.ResourceName][]string, error) {
 	// If the desired number of replicas is not reached, check if any ResourceQuota blocks the progress of the ReplicaSet.
 	// To calculate how many resources the ReplicaSet needs to progress, sum up the resource usage of all containers in the replica Pod. You must also calculate the difference from `.spec.hard` and `.status.used`.
 	// In the ReplicaSet you have also check if it does not have OwnerReference to the Deployment. It is because that Deployment allows you to define maxUnavailable number of replicas. You must take this into account when you check number of desired replicas.
@@ -128,6 +142,7 @@ func (svc *resourceQuotaStatusService) checkResourcesNeeds(environment string, r
 			}
 			if exceed {
 				for _, exc := range exceededList {
+					result = svc.ensureStatusesMapEntry(exc.rqName, exc.resourceName, result)
 					result[exc.rqName][exc.resourceName] = append(result[exc.rqName][exc.resourceName], svc.kindExceedMessage(rsKind, rs.Name))
 				}
 			}
@@ -148,6 +163,7 @@ func (svc *resourceQuotaStatusService) checkResourcesNeeds(environment string, r
 			}
 			if exceed {
 				for _, exc := range exceededList {
+					result = svc.ensureStatusesMapEntry(exc.rqName, exc.resourceName, result)
 					result[exc.rqName][exc.resourceName] = append(result[exc.rqName][exc.resourceName], svc.kindExceedMessage(ssKind, ss.Name))
 				}
 			}
@@ -227,39 +243,16 @@ func (svc *resourceQuotaStatusService) extractMaxUnavailable(environment string,
 	}
 }
 
-func (svc *resourceQuotaStatusService) prepareQuotasMap(name string, resourceName string, quotasMap map[string]map[string][]string) map[string]map[string][]string {
-	if _, ok := quotasMap[name]; !ok {
-		quotasMap[name] = make(map[string][]string)
+func (svc *resourceQuotaStatusService) ensureStatusesMapEntry(name string, resourceName v1.ResourceName, statusesMap map[string]map[v1.ResourceName][]string) map[string]map[v1.ResourceName][]string {
+	if _, ok := statusesMap[name]; !ok {
+		statusesMap[name] = make(map[v1.ResourceName][]string)
 	}
-	if _, ok := quotasMap[name][resourceName]; !ok {
-		quotasMap[name][resourceName] = make([]string, 0)
+	if _, ok := statusesMap[name][resourceName]; !ok {
+		statusesMap[name][resourceName] = make([]string, 0)
 	}
-	return quotasMap
-}
-
-func (svc *resourceQuotaStatusService) composeStatuses(statuses map[string]map[v1.ResourceName][]string) string {
-	var result []string
-	for rqName, statusesMap := range statuses {
-		result = append(result, fmt.Sprintf("ResourceQuota [%s] is exceeded.", rqName))
-		for resourceName, messages := range statusesMap {
-			result = append(result, svc.resourceExceededMessage(resourceName, messages))
-		}
-	}
-	return strings.Join(result, " ")
+	return statusesMap
 }
 
 func (*resourceQuotaStatusService) kindExceedMessage(kind string, name string) string {
-	return fmt.Sprintf("%s[name: %s]", kind, name)
-}
-
-func (*resourceQuotaStatusService) exceededMessage(rqName string, resourceName v1.ResourceName, environment string) string {
-	return fmt.Sprintf("ResourceQuota [name: %s][environment: %s] exceeded the `%s` limit", rqName, environment, resourceName)
-}
-
-func (*resourceQuotaStatusService) resourceExceededMessage(resourceName v1.ResourceName, messages []string) string {
-	return fmt.Sprintf("[%s]: [%s]", resourceName, strings.Join(messages, ", "))
-}
-
-func (*resourceQuotaStatusService) summaryMessage(rqKey string, environment string, resourceName v1.ResourceName, messages []string) string {
-	return fmt.Sprintf("ResourceQuota[name: %s][environment: %s] exceeds its `%s` limit because of: %s.", rqKey, environment, resourceName, strings.Join(messages, ", "))
+	return fmt.Sprintf("%s/%s", kind, name)
 }

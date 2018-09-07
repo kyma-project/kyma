@@ -22,6 +22,8 @@ type Resolvers interface {
 
 	EventActivation_events(ctx context.Context, obj *EventActivation) ([]EventActivationEvent, error)
 
+	ExceededQuota_resourceRequests(ctx context.Context, obj *ExceededQuota) ([]ResourcesRequests, error)
+
 	Mutation_createServiceInstance(ctx context.Context, params ServiceInstanceCreateInput) (*ServiceInstance, error)
 	Mutation_deleteServiceInstance(ctx context.Context, name string, environment string) (*ServiceInstance, error)
 	Mutation_createServiceBinding(ctx context.Context, serviceBindingName string, serviceInstanceName string, environment string) (*CreateServiceBindingOutput, error)
@@ -1230,6 +1232,81 @@ func (ec *executionContext) _EventActivationSource_namespace(ctx context.Context
 	defer rctx.Pop()
 	res := obj.Namespace
 	return graphql.MarshalString(res)
+}
+
+var exceededQuotaImplementors = []string{"ExceededQuota"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ExceededQuota(ctx context.Context, sel []query.Selection, obj *ExceededQuota) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.Doc, sel, exceededQuotaImplementors, ec.Variables)
+
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ExceededQuota")
+		case "name":
+			out.Values[i] = ec._ExceededQuota_name(ctx, field, obj)
+		case "resourceRequests":
+			out.Values[i] = ec._ExceededQuota_resourceRequests(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _ExceededQuota_name(ctx context.Context, field graphql.CollectedField, obj *ExceededQuota) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "ExceededQuota"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Name
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _ExceededQuota_resourceRequests(ctx context.Context, field graphql.CollectedField, obj *ExceededQuota) graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Object: "ExceededQuota",
+		Args:   nil,
+		Field:  field,
+	})
+	return graphql.Defer(func() (ret graphql.Marshaler) {
+		defer func() {
+			if r := recover(); r != nil {
+				userErr := ec.Recover(ctx, r)
+				ec.Error(ctx, userErr)
+				ret = graphql.Null
+			}
+		}()
+
+		resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+			return ec.resolvers.ExceededQuota_resourceRequests(ctx, obj)
+		})
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+		if resTmp == nil {
+			return graphql.Null
+		}
+		res := resTmp.([]ResourcesRequests)
+		arr1 := graphql.Array{}
+		for idx1 := range res {
+			arr1 = append(arr1, func() graphql.Marshaler {
+				rctx := graphql.GetResolverContext(ctx)
+				rctx.PushIndex(idx1)
+				defer rctx.Pop()
+				return ec._ResourcesRequests(ctx, field.Selections, &res[idx1])
+			}())
+		}
+		return arr1
+	})
 }
 
 var functionImplementors = []string{"Function"}
@@ -4157,8 +4234,8 @@ func (ec *executionContext) _ResourceQuotasStatus(ctx context.Context, sel []que
 			out.Values[i] = graphql.MarshalString("ResourceQuotasStatus")
 		case "exceeded":
 			out.Values[i] = ec._ResourceQuotasStatus_exceeded(ctx, field, obj)
-		case "message":
-			out.Values[i] = ec._ResourceQuotasStatus_message(ctx, field, obj)
+		case "exceededQuotas":
+			out.Values[i] = ec._ResourceQuotasStatus_exceededQuotas(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4178,15 +4255,24 @@ func (ec *executionContext) _ResourceQuotasStatus_exceeded(ctx context.Context, 
 	return graphql.MarshalBoolean(res)
 }
 
-func (ec *executionContext) _ResourceQuotasStatus_message(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotasStatus) graphql.Marshaler {
+func (ec *executionContext) _ResourceQuotasStatus_exceededQuotas(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotasStatus) graphql.Marshaler {
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "ResourceQuotasStatus"
 	rctx.Args = nil
 	rctx.Field = field
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
-	res := obj.Message
-	return graphql.MarshalString(res)
+	res := obj.ExceededQuotas
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			rctx := graphql.GetResolverContext(ctx)
+			rctx.PushIndex(idx1)
+			defer rctx.Pop()
+			return ec._ExceededQuota(ctx, field.Selections, &res[idx1])
+		}())
+	}
+	return arr1
 }
 
 var resourceTypeImplementors = []string{"ResourceType"}
@@ -4293,6 +4379,62 @@ func (ec *executionContext) _ResourceValues_cpu(ctx context.Context, field graph
 		return graphql.Null
 	}
 	return graphql.MarshalString(*res)
+}
+
+var resourcesRequestsImplementors = []string{"ResourcesRequests"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ResourcesRequests(ctx context.Context, sel []query.Selection, obj *ResourcesRequests) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.Doc, sel, resourcesRequestsImplementors, ec.Variables)
+
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ResourcesRequests")
+		case "resourceType":
+			out.Values[i] = ec._ResourcesRequests_resourceType(ctx, field, obj)
+		case "demandingResources":
+			out.Values[i] = ec._ResourcesRequests_demandingResources(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _ResourcesRequests_resourceType(ctx context.Context, field graphql.CollectedField, obj *ResourcesRequests) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "ResourcesRequests"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.ResourceType
+	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _ResourcesRequests_demandingResources(ctx context.Context, field graphql.CollectedField, obj *ResourcesRequests) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "ResourcesRequests"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.DemandingResources
+	arr1 := graphql.Array{}
+	for idx1 := range res {
+		arr1 = append(arr1, func() graphql.Marshaler {
+			rctx := graphql.GetResolverContext(ctx)
+			rctx.PushIndex(idx1)
+			defer rctx.Pop()
+			return graphql.MarshalString(res[idx1])
+		}())
+	}
+	return arr1
 }
 
 var secretImplementors = []string{"Secret"}
@@ -7444,7 +7586,17 @@ type ResourceQuota {
 
 type ResourceQuotasStatus {
     exceeded: Boolean!
-    message: String!
+    exceededQuotas: [ExceededQuota]!
+}
+
+type ExceededQuota {
+    name: String!
+    resourceRequests: [ResourcesRequests]!
+}
+
+type ResourcesRequests {
+    resourceType: String!
+    demandingResources: [String]!
 }
 
 # Remote Environments

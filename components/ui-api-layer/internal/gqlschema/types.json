@@ -21,5 +21,7 @@
   "LimitRangeItem": "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.LimitRangeItem",
   "Section":"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Section",
   "TopicEntry":"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.TopicEntry",
-  "Title":"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Title"
+  "Title":"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Title",
+  "ResourceQuotasStatus":"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ResourceQuotasStatus",
+  "ExceededQuota":"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ExceededQuota"
 }
