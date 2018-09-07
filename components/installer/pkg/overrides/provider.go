@@ -76,10 +76,6 @@ func (p legacyProvider) getCoreOverrides(installationData *config.InstallationDa
 	p.errorHandlers.LogError("Couldn't get global overrides: ", err)
 	MergeMaps(allOverrides, globalOverrides)
 
-	azureBrokerOverrides, err := EnableAzureBroker(installationData)
-	p.errorHandlers.LogError("Enable azure-broker Error: ", err)
-	MergeMaps(allOverrides, azureBrokerOverrides)
-
 	coreOverrides, err := GetCoreOverrides(installationData, allOverrides)
 	p.errorHandlers.LogError("Couldn't get Kyma core overrides: ", err)
 
