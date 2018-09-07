@@ -16,7 +16,7 @@ After you complete the registration, [request](https://help.github.com/articles/
 
 ## Configure Dex
 
-Register the GitHub Dex connector by editing [this](../../../resources/dex/templates/dex-config-map.yaml) ConfigMap file. Follow this template:
+Register the GitHub Dex connector by editing the `dex-config-map.yaml` ConfigMap file located in the `kyma/resources/dex/templates` directory. Follow this template:
 
 ```
     connectors:
@@ -33,7 +33,7 @@ Register the GitHub Dex connector by editing [this](../../../resources/dex/templ
 
 This table explains the placeholders used in the template:
 
-|Placeholder | Description | 
+|Placeholder | Description |
 |---|---|
 | GITHUB_CLIENT_ID | Specifies the application's client ID. |
 | GITHUB_CLIENT_SECRET | Specifies the application's client Secret. |
@@ -60,4 +60,3 @@ This table explains the placeholders used in the template:
 | GITHUB_ORGANIZATION | Specifies the name of the GitHub organization. |
 | GITHUB_TEAM_A | Specifies the name of GitHub team to bind to the `kyma-admin-role` role. |
 | GITHUB_TEAM_B | Specifies the name of GitHub team to bind to the `kyma-reader-role` role. |
-
