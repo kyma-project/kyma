@@ -20,14 +20,7 @@ metadata:
 data:
   global.tlsCrt: "__TLS_CERT__"
   global.tlsKey: "__TLS_KEY__"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: installation-config
-  namespace: kyma-installer
-data:
-  is_local_installation: "__IS_LOCAL_INSTALLATION__"
+
 ---
 apiVersion: v1
 kind: ConfigMap
