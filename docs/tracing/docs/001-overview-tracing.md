@@ -14,19 +14,3 @@ Tracing in Kyma uses [Jaeger](https://www.jaegertracing.io/docs/) as a backend w
 - Performance and latency optimization
 
 Jaeger provides compatibility with the Zipkin protocol. The compatibility makes it possible to use Zipkin protocol and clients in Istio, Envoy, and Kyma services.
-
-## Access Jaeger
-
-To access the Jaeger UI, follow these steps:
-
-1. Run the following command to configure port-forwarding:
-
-```
-kubectl port-forward -n kyma-system $(kubectl get pod -n kyma-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686
-```
-
-2. Access the Jaeger UI at `http://localhost:16686`.
-
-## Propagate HTTP headers
-
-The envoy proxy controls the inbound and outbound traffic in the application and automatically sends the trace information to the Zipkin. However, to track the flow of the REST API calls or the service injections in Kyma, it requires the minimal application cooperation from the micro-services code. For this purpose, you need to configure the application to propagate the tracing context in HTTP headers when making outbound calls. See the [Istio documentation](https://istio.io/docs/tasks/telemetry/distributed-tracing.html#understanding-what-happened) for details on which headers are required to ensure the correct tracing in Kyma.

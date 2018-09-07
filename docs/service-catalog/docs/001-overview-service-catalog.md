@@ -7,8 +7,6 @@ The Service Catalog is a grouping of reusable, integrated services from all Serv
 
 Due to the fact that Kyma runs on Kubernetes, you can easily instantiate a service instance that a third party provides and maintains, such as a database. You can consume it from Kyma without extensive knowledge about the clustering of such a datastore service and the responsibility for its upgrades and maintenance. You can also easily provision an instance of the software offering that a Service Broker registered in Kyma exposes, and bind it with an application running in the Kyma cluster.
 
-## Operations
-
 You can perform the following cluster-wide operations in the Service Catalog:
 
 - Expose the consumable services by listing them with all the details, including the documentation and the consumption plans.
