@@ -182,11 +182,3 @@ func (steps *InstallationSteps) PrintInstallationStep(stepName string) {
 	log.Println(stepName)
 	log.Println("---------------------------")
 }
-
-func (steps *InstallationSteps) getStaticFileOverrides(installationData *config.InstallationData, chartDir string) overrides.StaticFile {
-	if installationData.IsLocalInstallation {
-		return overrides.NewLocalStaticFile()
-	}
-
-	return overrides.NewClusterStaticFile(chartDir)
-}

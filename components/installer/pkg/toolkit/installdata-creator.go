@@ -26,13 +26,6 @@ func (sc *InstallationDataCreator) WithGeneric(key, value string) *InstallationD
 	return sc
 }
 
-// WithLocalInstallation sets IsLocalInstallation poperty in InstallationData to true
-func (sc *InstallationDataCreator) WithLocalInstallation() *InstallationDataCreator {
-	sc.installationData.IsLocalInstallation = true
-
-	return sc
-}
-
 // GetData returns InstallationData created by InstallationDataCreator
 func (sc *InstallationDataCreator) GetData() (config.InstallationData, map[string]string) {
 
