@@ -120,12 +120,20 @@ Helm installation.
 
 ## Install selected components only
 
-By default, this tool installs a predefined component package. If necessary, you can specify which components to install by customizing the component list located in the [installer-cr.yaml.tpl](../../installation/resources/installer-cr.yaml.tpl) file. Available components:
+This tool installs components specified in `Installation` CR. See the [installer-cr.yaml.tpl](../../installation/resources/installer-cr.yaml.tpl) file for more details. 
 
-- cluster-essentials
-- istio
-- prometheus-operator
-- provision-bundles
-- dex
-- core
-- remote-environments
+To enable installation of a component, specify its name and Namespace. If you want the release name to be different from the component's name, provide the release parameter.
+
+Example:
+
+```
+spec:
+    ...
+    components:
+    ...
+    - name: "remote-environments"
+      namespace: "kyma-integration"
+      release: "hmc-default"
+```
+
+In the example, the `remote-environments` component is installed in the `kyma-integration` Namespace, using `hmc-default` as the release name. The **name** and **namespace** fields are mandatory. The name of the component is also the name of the component subdirectory in the `resources` directory. The Installer assumes that the component subdirectory is a valid Helm chart.
