@@ -31,6 +31,7 @@ projects = [
     "components/istio-webhook": "istio-webhook",
     "components/helm-broker": "helm-broker",
     "components/remote-environment-broker": "remote-environment-broker",
+    "components/remote-environment-controller": "remote-environment-controller",
     "components/metadata-service": "metadata-service",
     "components/gateway": "gateway",
     "components/installer": "installer",
