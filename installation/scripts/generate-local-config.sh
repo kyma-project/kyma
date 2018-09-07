@@ -37,8 +37,6 @@ bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placehol
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__DOMAIN__" --value "kyma.local"
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__EXTERNAL_PUBLIC_IP__" --value ""
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__REMOTE_ENV_IP__" --value ""
-bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__K8S_APISERVER_URL__" --value "${MINIKUBE_IP}"
-bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__K8S_APISERVER_CA__" --value "${MINIKUBE_CA}"
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__ADMIN_GROUP__" --value ""
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__ENABLE_ETCD_BACKUP__" --value "false"
 bash ${ROOT_PATH}/replace-placeholder.sh --path ${CONFIG_OUTPUT_PATH} --placeholder "__ETCD_BACKUP_ABS_CONTAINER_NAME__" --value ""

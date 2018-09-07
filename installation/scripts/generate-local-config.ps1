@@ -57,12 +57,6 @@ Invoke-Expression -Command $cmd
 $cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_IP__`" -value `"`""
 Invoke-Expression -Command $cmd
 
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__K8S_APISERVER_URL__`" -value `"${MINIKUBE_IP}`""
-Invoke-Expression -Command $cmd
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__K8S_APISERVER_CA__`" -value `"${MINIKUBE_CA}`""
-Invoke-Expression -Command $cmd
-
 $cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ADMIN_GROUP__`" -value `"`""
 Invoke-Expression -Command $cmd
 
