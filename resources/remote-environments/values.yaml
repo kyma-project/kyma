@@ -11,14 +11,10 @@ deployment:
   args:
     proxyPort: &proxyPort 8080
     externalAPIPort: &externalAPIPort 8081
-    eventsTargetURL: http://core-publish.kyma-system.svc.cluster.local:8080/v1/events
     requestTimeout: 10
     skipVerify: false
     proxyTimeout: 10
     proxyCacheTTL: 120
-    sourceNamespace: com.org
-    sourceType: commerce
-    sourceEnvironment: stage
     requestLogging: false
 
 service:
