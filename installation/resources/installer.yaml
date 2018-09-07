@@ -44,33 +44,9 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/installer:0.3.301
+        image: eu.gcr.io/kyma-project/installer:0.3.313
         imagePullPolicy: IfNotPresent
         env:
-          - name: AZURE_BROKER_SUBSCRIPTION_ID
-            valueFrom:
-              secretKeyRef:
-                name: azure-broker
-                key: azure_broker_subscription_id
-                optional: true
-          - name: AZURE_BROKER_TENANT_ID
-            valueFrom:
-              secretKeyRef:
-                name: azure-broker
-                key: azure_broker_tenant_id
-                optional: true
-          - name: AZURE_BROKER_CLIENT_ID
-            valueFrom:
-              secretKeyRef:
-                name: azure-broker
-                key: azure_broker_client_id
-                optional: true
-          - name: AZURE_BROKER_CLIENT_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: azure-broker
-                key: azure_broker_client_secret
-                optional: true
           - name: IS_LOCAL_INSTALLATION
             valueFrom:
               configMapKeyRef:

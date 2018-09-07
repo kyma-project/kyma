@@ -79,7 +79,7 @@ rm ${UI_TEST_OUTPUT_PATH}
 
 ##########
 
-# The following variables are optional and must be exported manually
+# The following variables are optional and must be exported manually in base64 encoded format
 # before running local installation (you need them only to enable Azure Broker):
 # AZURE_BROKER_TENANT_ID,
 # AZURE_BROKER_SUBSCRIPTION_ID,
