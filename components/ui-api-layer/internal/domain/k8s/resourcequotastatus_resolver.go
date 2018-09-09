@@ -27,7 +27,6 @@ func (r *resourceQuotaStatusResolver) ResourceQuotasStatus(ctx context.Context, 
 		v1.ResourceLimitsMemory,
 		v1.ResourceRequestsCPU,
 		v1.ResourceLimitsCPU,
-		v1.ResourcePods,
 	}
 	exceeded, err := r.statusSvc.CheckResourceQuotaStatus(environment, resourcesToCheck)
 	if err != nil {
@@ -37,8 +36,4 @@ func (r *resourceQuotaStatusResolver) ResourceQuotasStatus(ctx context.Context, 
 	}
 
 	return exceeded, nil
-}
-
-func (r *resourceQuotaStatusResolver) ExceededQuotaResourceRequests(ctx context.Context, exceededQuota *gqlschema.ExceededQuota) ([]gqlschema.ResourcesRequests, error) {
-	return r.statusSvc.ExceededQuotaResourceRequests(exceededQuota), nil
 }

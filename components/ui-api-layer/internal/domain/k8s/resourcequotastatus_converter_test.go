@@ -4,19 +4,21 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 	"k8s.io/api/core/v1"
 )
 
 func TestResourceQuotaStatusConverter_ToGQL(t *testing.T) {
 	// given
 	conv := resourceQuotaStatusConverter{}
+	fixQuotas := fixExceededQuotas()
 
 	// when
 	exQuotas := conv.ToGQL(fixStatusesMap())
 
 	// then
-	assert.Equal(t, exQuotas, fixExceededQuotas())
+	assert.Contains(t, exQuotas, fixQuotas[0])
+	assert.Contains(t, exQuotas, fixQuotas[1])
 }
 
 func fixStatusesMap() map[string]map[v1.ResourceName][]string {
@@ -37,25 +39,17 @@ func fixStatusesMap() map[string]map[v1.ResourceName][]string {
 func fixExceededQuotas() []gqlschema.ExceededQuota {
 	return []gqlschema.ExceededQuota{
 		{
-			Name: "rq-a",
-			ResourcesRequests: []gqlschema.ResourcesRequests{
-				{
-					ResourceType: string(v1.ResourceLimitsMemory),
-					DemandingResources: []string{
-						"fix-a", "fix-b",
-					},
-				},
+			QuotaName:    "rq-a",
+			ResourceName: string(v1.ResourceLimitsMemory),
+			AffectedResources: []string{
+				"fix-a", "fix-b",
 			},
 		},
 		{
-			Name: "rq-b",
-			ResourcesRequests: []gqlschema.ResourcesRequests{
-				{
-					ResourceType: string(v1.ResourceRequestsMemory),
-					DemandingResources: []string{
-						"fix-c",
-					},
-				},
+			QuotaName:    "rq-b",
+			ResourceName: string(v1.ResourceRequestsMemory),
+			AffectedResources: []string{
+				"fix-c",
 			},
 		},
 	}

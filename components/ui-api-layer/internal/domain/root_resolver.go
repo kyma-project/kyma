@@ -110,10 +110,6 @@ func (r *RootResolver) Query_resourceQuotasStatus(ctx context.Context, environme
 	return r.k8s.ResourceQuotasStatus(ctx, environment)
 }
 
-func (r *RootResolver) ExceededQuota_resourceRequests(ctx context.Context, exceededQuota *gqlschema.ExceededQuota) ([]gqlschema.ResourcesRequests, error) {
-	return r.k8s.ExceededQuotaResourceRequests(ctx, exceededQuota)
-}
-
 // Kubeless
 
 func (r *RootResolver) Query_functions(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.Function, error) {

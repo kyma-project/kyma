@@ -6,6 +6,7 @@ type ResourceQuotasStatus struct {
 }
 
 type ExceededQuota struct {
-	Name              string              `json:"name"`
-	ResourcesRequests []ResourcesRequests `json:"resourcesRequests"`
+	QuotaName         string   `json:"name"`
+	ResourceName      string   `json:"resourceName"`
+	AffectedResources []string `json:"affectedResources"`
 }

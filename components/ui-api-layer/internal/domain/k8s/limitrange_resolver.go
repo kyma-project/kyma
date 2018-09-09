@@ -8,13 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
 )
-
-//go:generate mockery -name=limitRangeLister -output=automock -outpkg=automock -case=underscore
-type limitRangeLister interface {
-	List(env string) ([]*v1.LimitRange, error)
-}
 
 func newLimitRangeResolver(svc *limitRangeService) *limitRangeResolver {
 	return &limitRangeResolver{

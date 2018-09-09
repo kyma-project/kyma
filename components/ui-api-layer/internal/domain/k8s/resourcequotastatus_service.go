@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
 	apps "k8s.io/api/apps/v1"
+	"k8s.io/api/apps/v1beta2"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -23,11 +23,6 @@ type statefulSetLister interface {
 	ListStatefulSets(environment string) ([]*apps.StatefulSet, error)
 }
 
-//go:generate mockery -name=podsLister -output=automock -outpkg=automock -case=underscore
-type podsLister interface {
-	ListPods(environment string, labelSelector map[string]string) ([]v1.Pod, error)
-}
-
 type exceededRef struct {
 	rqName       string
 	resourceName v1.ResourceName
@@ -38,17 +33,17 @@ type resourceQuotaStatusService struct {
 	rqLister     resourceQuotaLister
 	rsLister     replicaSetLister
 	ssLister     statefulSetLister
-	podLister    podsLister
+	lrLister     limitRangeLister
 	deployGetter deploymentGetter
 }
 
-func newResourceQuotaStatusService(rqInformer resourceQuotaLister, rsInformer replicaSetLister, ssInformer statefulSetLister, podClient podsLister, deployGetter deploymentGetter) *resourceQuotaStatusService {
+func newResourceQuotaStatusService(rqInformer resourceQuotaLister, rsInformer replicaSetLister, ssInformer statefulSetLister, lrInformer limitRangeLister, deployGetter deploymentGetter) *resourceQuotaStatusService {
 	return &resourceQuotaStatusService{
 		rqConv:       resourceQuotaStatusConverter{},
 		rqLister:     rqInformer,
 		rsLister:     rsInformer,
 		ssLister:     ssInformer,
-		podLister:    podClient,
+		lrLister:     lrInformer,
 		deployGetter: deployGetter,
 	}
 }
@@ -65,52 +60,18 @@ func (svc *resourceQuotaStatusService) CheckResourceQuotaStatus(environment stri
 		return gqlschema.ResourceQuotasStatus{}, errors.Wrapf(err, "while listing ResourceQuotas [environment: %s]", environment)
 	}
 
-	if status := svc.compareQuotaValues(environment, resourcesToCheck, resourceQuotas); len(status) > 0 {
-		return gqlschema.ResourceQuotasStatus{
-			Exceeded:       true,
-			ExceededQuotas: status,
-		}, nil
-	}
-
-	statuses, err := svc.checkResourcesRequests(environment, resourcesToCheck, resourceQuotas)
+	resourcesRequests, err := svc.checkResourcesRequests(environment, resourcesToCheck, resourceQuotas)
 	if err != nil {
 		return gqlschema.ResourceQuotasStatus{}, err
 	}
-	if len(statuses) > 0 {
+	if len(resourcesRequests) > 0 {
 		return gqlschema.ResourceQuotasStatus{
 			Exceeded:       true,
-			ExceededQuotas: svc.rqConv.ToGQL(statuses),
+			ExceededQuotas: svc.rqConv.ToGQL(resourcesRequests),
 		}, nil
 	}
 
 	return gqlschema.ResourceQuotasStatus{Exceeded: false}, nil
-}
-
-func (svc *resourceQuotaStatusService) ExceededQuotaResourceRequests(exceededQuota *gqlschema.ExceededQuota) []gqlschema.ResourcesRequests {
-	result := make([]gqlschema.ResourcesRequests, 0)
-	for _, req := range exceededQuota.ResourcesRequests {
-		result = append(result, req)
-	}
-	return result
-}
-
-func (svc *resourceQuotaStatusService) compareQuotaValues(environment string, resourcesToCheck []v1.ResourceName, resourceQuotas []*v1.ResourceQuota) []gqlschema.ExceededQuota {
-	// You exceeded the ResourceQuota if at least one of the `.status.used` values equals or is bigger than its equivalent from the `.spec.hard` value.
-	result := make([]gqlschema.ExceededQuota, 0)
-	for _, rq := range resourceQuotas {
-		resourcesReq := make([]gqlschema.ResourcesRequests, 0)
-		for _, name := range resourcesToCheck {
-			hard, hardExists := rq.Spec.Hard[name]
-			used := rq.Status.Used[name]
-			if hardExists && used.Value() >= hard.Value() {
-				resourcesReq = append(resourcesReq, gqlschema.ResourcesRequests{ResourceType: string(name)})
-			}
-		}
-		if len(resourcesReq) > 0 {
-			result = append(result, gqlschema.ExceededQuota{Name: rq.Name, ResourcesRequests: resourcesReq})
-		}
-	}
-	return result
 }
 
 func (svc *resourceQuotaStatusService) checkResourcesRequests(environment string, resourcesToCheck []v1.ResourceName, resourceQuotas []*v1.ResourceQuota) (map[string]map[v1.ResourceName][]string, error) {
@@ -118,6 +79,10 @@ func (svc *resourceQuotaStatusService) checkResourcesRequests(environment string
 	// To calculate how many resources the ReplicaSet needs to progress, sum up the resource usage of all containers in the replica Pod. You must also calculate the difference from `.spec.hard` and `.status.used`.
 	// In the ReplicaSet you have also check if it does not have OwnerReference to the Deployment. It is because that Deployment allows you to define maxUnavailable number of replicas. You must take this into account when you check number of desired replicas.
 	result := make(map[string]map[v1.ResourceName][]string)
+	defaultLimits, err := svc.getDefaultLimits(environment, resourcesToCheck)
+	if err != nil {
+		return nil, err
+	}
 	replicaSets, err := svc.rsLister.ListReplicaSets(environment)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while listing ReplicaSets [environment: %s]", environment)
@@ -136,15 +101,11 @@ func (svc *resourceQuotaStatusService) checkResourcesRequests(environment string
 			}
 		}
 		if *rs.Spec.Replicas > rs.Status.Replicas+maxUnavailable {
-			exceed, exceededList, err := svc.checkPodsUsage(environment, rs.Spec.Selector.MatchLabels, resourcesToCheck, resourceQuotas)
-			if err != nil {
-				return nil, err
-			}
-			if exceed {
-				for _, exc := range exceededList {
-					result = svc.ensureStatusesMapEntry(exc.rqName, exc.resourceName, result)
-					result[exc.rqName][exc.resourceName] = append(result[exc.rqName][exc.resourceName], svc.kindExceedMessage(rsKind, rs.Name))
-				}
+			replicaUsage := svc.nextReplicaUsage(rs.Spec.Template.Spec.Containers, resourcesToCheck, defaultLimits)
+			exceeded := svc.checkAvailableResources(replicaUsage, resourcesToCheck, resourceQuotas)
+			for _, exc := range exceeded {
+				result = svc.ensureStatusesMapEntry(exc.rqName, exc.resourceName, result)
+				result[exc.rqName][exc.resourceName] = append(result[exc.rqName][exc.resourceName], svc.affectedResourceRef(rsKind, rs.Name))
 			}
 		}
 	}
@@ -157,49 +118,62 @@ func (svc *resourceQuotaStatusService) checkResourcesRequests(environment string
 	}
 	for _, ss := range statefulSets {
 		if *ss.Spec.Replicas > ss.Status.Replicas {
-			exceed, exceededList, err := svc.checkPodsUsage(environment, ss.Spec.Selector.MatchLabels, resourcesToCheck, resourceQuotas)
-			if err != nil {
-				return nil, err
-			}
-			if exceed {
-				for _, exc := range exceededList {
-					result = svc.ensureStatusesMapEntry(exc.rqName, exc.resourceName, result)
-					result[exc.rqName][exc.resourceName] = append(result[exc.rqName][exc.resourceName], svc.kindExceedMessage(ssKind, ss.Name))
-				}
+			replicaUsage := svc.nextReplicaUsage(ss.Spec.Template.Spec.Containers, resourcesToCheck, defaultLimits)
+			exceeded := svc.checkAvailableResources(replicaUsage, resourcesToCheck, resourceQuotas)
+			for _, exc := range exceeded {
+				result = svc.ensureStatusesMapEntry(exc.rqName, exc.resourceName, result)
+				result[exc.rqName][exc.resourceName] = append(result[exc.rqName][exc.resourceName], svc.affectedResourceRef(ssKind, ss.Name))
 			}
 		}
 	}
 	return result, nil
 }
 
-func (svc *resourceQuotaStatusService) checkPodsUsage(environment string, labelSelector map[string]string, resourcesToCheck []v1.ResourceName, resourceQuotas []*v1.ResourceQuota) (bool, []exceededRef, error) {
-	pods, err := svc.podLister.ListPods(environment, labelSelector)
+func (svc *resourceQuotaStatusService) getDefaultLimits(environment string, resourcesToCheck []v1.ResourceName) (map[v1.ResourceName]*resource.Quantity, error) {
+	limitRanges, err := svc.lrLister.List(environment)
 	if err != nil {
-		return false, []exceededRef{}, errors.Wrapf(err, "while listing pods [environment: %s][labelSelector: %v]", environment, labelSelector)
+		return nil, errors.Wrapf(err, "while listing limitRanges [environment: %s]", environment)
 	}
-
-	result := make([]exceededRef, 0)
-	if len(pods) > 0 {
-		// We are checking only one Replica from the given Set, because every replica has the same resources usage.
-		limits := svc.containersUsage(pods[0].Spec.Containers, resourcesToCheck)
-		for _, rq := range resourceQuotas {
-			for _, name := range resourcesToCheck {
-				hard, hardExists := rq.Spec.Hard[name]
-				used := rq.Status.Used[name]
-				if hardExists && hard.Value()-used.Value() < limits[name].Value() {
-					result = append(result, exceededRef{rqName: rq.Name, resourceName: name})
+	limits := make(map[v1.ResourceName]*resource.Quantity)
+	for _, name := range resourcesToCheck {
+		limits[name] = &resource.Quantity{}
+	}
+	for _, lr := range limitRanges {
+		for _, limit := range lr.Spec.Limits {
+			if limit.Type == v1.LimitTypeContainer {
+				if limit.DefaultRequest.Memory().Value() > limits[v1.ResourceRequestsMemory].Value() {
+					limits[v1.ResourceRequestsMemory] = limit.DefaultRequest.Memory()
+				}
+				if limit.Default.Memory().Value() > limits[v1.ResourceLimitsMemory].Value() {
+					limits[v1.ResourceLimitsMemory] = limit.Default.Memory()
+				}
+				if limit.Default.Cpu().Value() > limits[v1.ResourceLimitsCPU].Value() {
+					limits[v1.ResourceLimitsCPU] = limit.Default.Cpu()
+				}
+				if limit.DefaultRequest.Cpu().Value() > limits[v1.ResourceRequestsCPU].Value() {
+					limits[v1.ResourceRequestsCPU] = limit.DefaultRequest.Cpu()
 				}
 			}
 		}
 	}
-	if len(result) > 0 {
-		return true, result, nil
-	}
-
-	return false, []exceededRef{}, nil
+	return limits, nil
 }
 
-func (*resourceQuotaStatusService) containersUsage(containers []v1.Container, resourcesToCheck []v1.ResourceName) map[v1.ResourceName]*resource.Quantity {
+func (*resourceQuotaStatusService) checkAvailableResources(limits map[v1.ResourceName]*resource.Quantity, resourcesToCheck []v1.ResourceName, resourceQuotas []*v1.ResourceQuota) []exceededRef {
+	result := make([]exceededRef, 0)
+	for _, rq := range resourceQuotas {
+		for _, name := range resourcesToCheck {
+			hard, hardExists := rq.Spec.Hard[name]
+			used := rq.Status.Used[name]
+			if hardExists && hard.Value()-used.Value() < limits[name].Value() {
+				result = append(result, exceededRef{rqName: rq.Name, resourceName: name})
+			}
+		}
+	}
+	return result
+}
+
+func (*resourceQuotaStatusService) nextReplicaUsage(containers []v1.Container, resourcesToCheck []v1.ResourceName, defaultLimits map[v1.ResourceName]*resource.Quantity) map[v1.ResourceName]*resource.Quantity {
 	limits := make(map[v1.ResourceName]*resource.Quantity)
 	for _, name := range resourcesToCheck {
 		limits[name] = &resource.Quantity{}
@@ -208,16 +182,29 @@ func (*resourceQuotaStatusService) containersUsage(containers []v1.Container, re
 		for _, name := range resourcesToCheck {
 			switch name {
 			case v1.ResourceRequestsMemory:
-				limits[name].Add(*container.Resources.Requests.Memory())
+				if container.Resources.Requests.Memory().IsZero() {
+					limits[name].Add(*defaultLimits[name])
+				} else {
+					limits[name].Add(*container.Resources.Requests.Memory())
+				}
 			case v1.ResourceRequestsCPU:
-				limits[name].Add(*container.Resources.Requests.Cpu())
+				if container.Resources.Requests.Cpu().IsZero() {
+					limits[name].Add(*defaultLimits[name])
+				} else {
+					limits[name].Add(*container.Resources.Requests.Cpu())
+				}
 			case v1.ResourceLimitsMemory:
-				limits[name].Add(*container.Resources.Limits.Memory())
+				if container.Resources.Limits.Memory().IsZero() {
+					limits[name].Add(*defaultLimits[name])
+				} else {
+					limits[name].Add(*container.Resources.Limits.Memory())
+				}
 			case v1.ResourceLimitsCPU:
-				limits[name].Add(*container.Resources.Limits.Cpu())
-			case v1.ResourcePods:
-			default:
-				glog.Infof("ui-api-layer doesn't support calculating the `%s` limit", name)
+				if container.Resources.Limits.Cpu().IsZero() {
+					limits[name].Add(*defaultLimits[name])
+				} else {
+					limits[name].Add(*container.Resources.Limits.Cpu())
+				}
 			}
 		}
 	}
@@ -227,23 +214,26 @@ func (*resourceQuotaStatusService) containersUsage(containers []v1.Container, re
 func (svc *resourceQuotaStatusService) extractMaxUnavailable(environment string, name string, replicas int32) (int32, error) {
 	deploy, err := svc.deployGetter.Find(name, environment)
 	if err != nil {
-		return 0, errors.Wrapf(err, "while getting Deployment [name: %s][environment: %s]", name, environment)
+		return 0, errors.Wrapf(err, "while getting Deployment[name: %s][environment: %s]", name, environment)
 	}
-	maxUnavailable := deploy.Spec.Strategy.RollingUpdate.MaxUnavailable.StrVal
+	if deploy.Spec.Strategy.Type == v1beta2.RollingUpdateDeploymentStrategyType {
+		maxUnavailable := deploy.Spec.Strategy.RollingUpdate.MaxUnavailable.StrVal
 
-	if strings.Contains(maxUnavailable, "%") {
-		maxUnavailable = maxUnavailable[:len(maxUnavailable)-1]
-		percent, err := strconv.ParseInt(maxUnavailable, 10, 64)
-		if err != nil {
-			return 0, err
+		if strings.Contains(maxUnavailable, "%") {
+			maxUnavailable = maxUnavailable[:len(maxUnavailable)-1]
+			percent, err := strconv.ParseInt(maxUnavailable, 10, 64)
+			if err != nil {
+				return 0, err
+			}
+			return int32(percent) * replicas / 100, nil
+		} else {
+			return deploy.Spec.Strategy.RollingUpdate.MaxUnavailable.IntVal, nil
 		}
-		return int32(percent) * replicas / 100, nil
-	} else {
-		return deploy.Spec.Strategy.RollingUpdate.MaxUnavailable.IntVal, nil
 	}
+	return 0, nil
 }
 
-func (svc *resourceQuotaStatusService) ensureStatusesMapEntry(name string, resourceName v1.ResourceName, statusesMap map[string]map[v1.ResourceName][]string) map[string]map[v1.ResourceName][]string {
+func (*resourceQuotaStatusService) ensureStatusesMapEntry(name string, resourceName v1.ResourceName, statusesMap map[string]map[v1.ResourceName][]string) map[string]map[v1.ResourceName][]string {
 	if _, ok := statusesMap[name]; !ok {
 		statusesMap[name] = make(map[v1.ResourceName][]string)
 	}
@@ -253,6 +243,6 @@ func (svc *resourceQuotaStatusService) ensureStatusesMapEntry(name string, resou
 	return statusesMap
 }
 
-func (*resourceQuotaStatusService) kindExceedMessage(kind string, name string) string {
+func (*resourceQuotaStatusService) affectedResourceRef(kind string, name string) string {
 	return fmt.Sprintf("%s/%s", kind, name)
 }

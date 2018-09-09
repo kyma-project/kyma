@@ -7,7 +7,6 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/automock"
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	apps "k8s.io/api/apps/v1"
 	api "k8s.io/api/apps/v1beta2"
@@ -19,42 +18,24 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 )
 
-func TestResourceQuotaStatusService_CheckResourceQuotaStatus_HardEqualsUsed(t *testing.T) {
-	// GIVEN
-	rqLister := automock.NewResourceQuotaLister()
-	rqLister.On("ListResourceQuotas", fixNamespaceName()).Return(fixResourceQuotaExceeded(), nil)
-	defer rqLister.AssertExpectations(t)
-
-	rqSvc := newResourceQuotaStatusService(rqLister, nil, nil, nil, nil)
-
-	// WHEN
-	status, err := rqSvc.CheckResourceQuotaStatus(fixNamespaceName(), fixResourceNames())
-	require.NoError(t, err)
-
-	// THEN
-	assert.True(t, status.Exceeded)
-	assert.Len(t, status.ExceededQuotas, 1)
-	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests, 2)
-}
-
 func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded(t *testing.T) {
 	// GIVEN
 	rqLister := automock.NewResourceQuotaLister()
 	rqLister.On("ListResourceQuotas", fixNamespaceName()).Return(fixResourceQuota(), nil)
 	rsLister := automock.NewReplicaSetLister()
 	rsLister.On("ListReplicaSets", fixNamespaceName()).Return(fixReplicaSetExceeded(), nil)
-	podLister := automock.NewPodsLister()
-	podLister.On("ListPods", fixNamespaceName(), fixReplicaSetMatchLabels()).Return(fixReplicasExceeding(fixReplicaSetMatchLabels()), nil)
 	ssLister := automock.NewStatefulSetLister()
 	ssLister.On("ListStatefulSets", fixNamespaceName()).Return([]*apps.StatefulSet{}, nil)
+	lrLister := automock.NewLimitRangeLister()
+	lrLister.On("List", fixNamespaceName()).Return(fixLimitRangeList(), nil)
 	defer func() {
 		rqLister.AssertExpectations(t)
 		rsLister.AssertExpectations(t)
-		podLister.AssertExpectations(t)
 		ssLister.AssertExpectations(t)
+		lrLister.AssertExpectations(t)
 	}()
 
-	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, podLister, nil)
+	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, lrLister, nil)
 
 	// WHEN
 	status, err := rqSvc.CheckResourceQuotaStatus(fixNamespaceName(), fixResourceNames())
@@ -63,7 +44,9 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded(
 	// THEN
 	assert.True(t, status.Exceeded)
 	assert.Len(t, status.ExceededQuotas, 1)
-	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests, 2)
+	assert.Len(t, status.ExceededQuotas[0].AffectedResources, 1)
+	assert.Equal(t, fixName(), status.ExceededQuotas[0].QuotaName)
+	assert.Equal(t, v1.ResourceLimitsMemory, v1.ResourceName(status.ExceededQuotas[0].ResourceName))
 }
 
 func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded_MaxUnavailable(t *testing.T) {
@@ -71,13 +54,16 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded_
 	rqLister := automock.NewResourceQuotaLister()
 	rqLister.On("ListResourceQuotas", fixNamespaceName()).Return(fixResourceQuota(), nil)
 	rsLister := automock.NewReplicaSetLister()
-	rsLister.On("ListReplicaSets", fixNamespaceName()).Return(fixReplicaSetWithOwnerReference(), nil)
+	rsLister.On("ListReplicaSets", fixNamespaceName()).Return(fixReplicaSetExceededWithOwnerReference(), nil)
 	ssLister := automock.NewStatefulSetLister()
 	ssLister.On("ListStatefulSets", fixNamespaceName()).Return([]*apps.StatefulSet{}, nil)
+	lrLister := automock.NewLimitRangeLister()
+	lrLister.On("List", fixNamespaceName()).Return(fixLimitRangeList(), nil)
 	defer func() {
 		rqLister.AssertExpectations(t)
 		rsLister.AssertExpectations(t)
 		ssLister.AssertExpectations(t)
+		lrLister.AssertExpectations(t)
 	}()
 
 	client := fake.NewSimpleClientset(fixDeploy())
@@ -87,7 +73,7 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded_
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, nil, deploySvc)
+	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, lrLister, deploySvc)
 
 	// WHEN
 	status, err := rqSvc.CheckResourceQuotaStatus(fixNamespaceName(), fixResourceNames())
@@ -102,23 +88,23 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded_
 	rqLister := automock.NewResourceQuotaLister()
 	rqLister.On("ListResourceQuotas", fixNamespaceName()).Return(fixResourceQuota(), nil)
 	rsLister := automock.NewReplicaSetLister()
-	rsLister.On("ListReplicaSets", fixNamespaceName()).Return(fixReplicaSetWithOwnerReference(), nil)
-	podLister := automock.NewPodsLister()
-	podLister.On("ListPods", fixNamespaceName(), fixReplicaSetMatchLabels()).Return(fixReplicasExceeding(fixReplicaSetMatchLabels()), nil)
+	rsLister.On("ListReplicaSets", fixNamespaceName()).Return(fixReplicaSetExceededWithOwnerReference(), nil)
 	ssLister := automock.NewStatefulSetLister()
 	ssLister.On("ListStatefulSets", fixNamespaceName()).Return([]*apps.StatefulSet{}, nil)
+	lrLister := automock.NewLimitRangeLister()
+	lrLister.On("List", fixNamespaceName()).Return(fixLimitRangeList(), nil)
 	defer func() {
 		rqLister.AssertExpectations(t)
 		rsLister.AssertExpectations(t)
-		podLister.AssertExpectations(t)
 		ssLister.AssertExpectations(t)
+		lrLister.AssertExpectations(t)
 	}()
 
 	client := fake.NewSimpleClientset(fixDeployWithPercentageMaxUnavailable())
 	informerFactory := informers.NewSharedInformerFactory(client, 0)
 	informer := informerFactory.Apps().V1beta2().Deployments().Informer()
 	deploySvc := newDeploymentService(informer)
-	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, podLister, deploySvc)
+	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, lrLister, deploySvc)
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
@@ -129,7 +115,7 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ReplicaSetExceeded_
 	// THEN
 	assert.True(t, status.Exceeded)
 	assert.Len(t, status.ExceededQuotas, 1)
-	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests, 2)
+	assert.Len(t, status.ExceededQuotas[0].AffectedResources, 1)
 }
 
 func TestResourceQuotaStatusService_CheckResourceQuotaStatus_StatefulSetExceed(t *testing.T) {
@@ -139,16 +125,17 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_StatefulSetExceed(t
 	rsLister := automock.NewReplicaSetLister()
 	rsLister.On("ListReplicaSets", fixNamespaceName()).Return([]*apps.ReplicaSet{}, nil)
 	ssLister := automock.NewStatefulSetLister()
-	ssLister.On("ListStatefulSets", fixNamespaceName()).Return(fixStatefulSet(), nil)
-	podLister := automock.NewPodsLister()
-	podLister.On("ListPods", fixNamespaceName(), fixStatefulSetMatchLabels()).Return(fixReplicasExceeding(fixStatefulSetMatchLabels()), nil)
+	ssLister.On("ListStatefulSets", fixNamespaceName()).Return(fixStatefulSetExceeded(), nil)
+	lrLister := automock.NewLimitRangeLister()
+	lrLister.On("List", fixNamespaceName()).Return(fixLimitRangeList(), nil)
 	defer func() {
 		rqLister.AssertExpectations(t)
 		rsLister.AssertExpectations(t)
-		podLister.AssertExpectations(t)
+		ssLister.AssertExpectations(t)
+		lrLister.AssertExpectations(t)
 	}()
 
-	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, podLister, nil)
+	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, lrLister, nil)
 
 	// WHEN
 	status, err := rqSvc.CheckResourceQuotaStatus(fixNamespaceName(), fixResourceNames())
@@ -157,7 +144,7 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_StatefulSetExceed(t
 	// THEN
 	assert.True(t, status.Exceeded)
 	assert.Len(t, status.ExceededQuotas, 1)
-	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests, 2)
+	assert.Len(t, status.ExceededQuotas[0].AffectedResources, 1)
 }
 
 func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ManyResourcesExceed(t *testing.T) {
@@ -167,18 +154,17 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ManyResourcesExceed
 	rsLister := automock.NewReplicaSetLister()
 	rsLister.On("ListReplicaSets", fixNamespaceName()).Return(fixReplicaSetExceeded(), nil)
 	ssLister := automock.NewStatefulSetLister()
-	ssLister.On("ListStatefulSets", fixNamespaceName()).Return(fixStatefulSet(), nil)
-	podLister := automock.NewPodsLister()
-	podLister.On("ListPods", fixNamespaceName(), fixReplicaSetMatchLabels()).Return(fixReplicasExceeding(fixReplicaSetMatchLabels()), nil).Run(func(args mock.Arguments) {
-		podLister.On("ListPods", fixNamespaceName(), fixStatefulSetMatchLabels()).Return(fixReplicasExceeding(fixStatefulSetMatchLabels()), nil)
-	})
+	ssLister.On("ListStatefulSets", fixNamespaceName()).Return(fixStatefulSetExceeded(), nil)
+	lrLister := automock.NewLimitRangeLister()
+	lrLister.On("List", fixNamespaceName()).Return(fixLimitRangeList(), nil)
 	defer func() {
 		rqLister.AssertExpectations(t)
 		rsLister.AssertExpectations(t)
-		podLister.AssertExpectations(t)
+		ssLister.AssertExpectations(t)
+		lrLister.AssertExpectations(t)
 	}()
 
-	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, podLister, nil)
+	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, lrLister, nil)
 
 	// WHEN
 	status, err := rqSvc.CheckResourceQuotaStatus(fixNamespaceName(), fixResourceNames())
@@ -187,9 +173,66 @@ func TestResourceQuotaStatusService_CheckResourceQuotaStatus_ManyResourcesExceed
 	// THEN
 	assert.True(t, status.Exceeded)
 	assert.Len(t, status.ExceededQuotas, 1)
-	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests, 2)
-	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests[0].DemandingResources, 2)
-	assert.Len(t, status.ExceededQuotas[0].ResourcesRequests[1].DemandingResources, 2)
+	assert.Len(t, status.ExceededQuotas[0].AffectedResources, 2)
+}
+
+func TestResourceQuotaStatusService_CheckResourceQuotaStatus_LimitRangeExceedQuota(t *testing.T) {
+	// GIVEN
+	rqLister := automock.NewResourceQuotaLister()
+	rqLister.On("ListResourceQuotas", fixNamespaceName()).Return(fixResourceQuota(), nil)
+	rsLister := automock.NewReplicaSetLister()
+	rsLister.On("ListReplicaSets", fixNamespaceName()).Return(fixReplicaSetExceededWithNoLimits(), nil)
+	ssLister := automock.NewStatefulSetLister()
+	ssLister.On("ListStatefulSets", fixNamespaceName()).Return(fixStatefulSet(), nil)
+	lrLister := automock.NewLimitRangeLister()
+	lrLister.On("List", fixNamespaceName()).Return(fixLimitRangeExceedingList(), nil)
+	defer func() {
+		rqLister.AssertExpectations(t)
+		rsLister.AssertExpectations(t)
+		ssLister.AssertExpectations(t)
+		lrLister.AssertExpectations(t)
+	}()
+
+	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, lrLister, nil)
+
+	// WHEN
+	status, err := rqSvc.CheckResourceQuotaStatus(fixNamespaceName(), fixResourceNames())
+	require.NoError(t, err)
+
+	// THEN
+	assert.True(t, status.Exceeded)
+	assert.Len(t, status.ExceededQuotas, 2)
+	assert.Len(t, status.ExceededQuotas[0].AffectedResources, 2)
+	assert.Len(t, status.ExceededQuotas[1].AffectedResources, 2)
+}
+
+func TestResourceQuotaStatusService_CheckResourceQuotaStatus_MultiContainers(t *testing.T) {
+	// GIVEN
+	rqLister := automock.NewResourceQuotaLister()
+	rqLister.On("ListResourceQuotas", fixNamespaceName()).Return(fixResourceQuota(), nil)
+	rsLister := automock.NewReplicaSetLister()
+	rsLister.On("ListReplicaSets", fixNamespaceName()).Return(fixReplicaSetMultiContainer(), nil)
+	ssLister := automock.NewStatefulSetLister()
+	ssLister.On("ListStatefulSets", fixNamespaceName()).Return([]*apps.StatefulSet{}, nil)
+	lrLister := automock.NewLimitRangeLister()
+	lrLister.On("List", fixNamespaceName()).Return(fixLimitRangeList(), nil)
+	defer func() {
+		rqLister.AssertExpectations(t)
+		rsLister.AssertExpectations(t)
+		ssLister.AssertExpectations(t)
+		lrLister.AssertExpectations(t)
+	}()
+
+	rqSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, lrLister, nil)
+
+	// WHEN
+	status, err := rqSvc.CheckResourceQuotaStatus(fixNamespaceName(), fixResourceNames())
+	require.NoError(t, err)
+
+	// THEN
+	assert.True(t, status.Exceeded)
+	assert.Len(t, status.ExceededQuotas, 1)
+	assert.Len(t, status.ExceededQuotas[0].AffectedResources, 1)
 }
 
 func fixResourceNames() []v1.ResourceName {
@@ -198,7 +241,6 @@ func fixResourceNames() []v1.ResourceName {
 		v1.ResourceLimitsMemory,
 		v1.ResourceRequestsCPU,
 		v1.ResourceLimitsCPU,
-		v1.ResourcePods,
 	}
 }
 
@@ -210,23 +252,76 @@ func fixName() string {
 	return "fix-name"
 }
 
-func fixResourceQuotaExceeded() []*v1.ResourceQuota {
-	return []*v1.ResourceQuota{
+func fixLimitRangeList() []*v1.LimitRange {
+	return []*v1.LimitRange{
 		{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      fixName(),
 				Namespace: fixNamespaceName(),
 			},
-			Spec: v1.ResourceQuotaSpec{
-				Hard: v1.ResourceList{
-					v1.ResourceLimitsMemory:   resource.MustParse("1Gi"),
-					v1.ResourceRequestsMemory: resource.MustParse("1Gi"),
+			Spec: v1.LimitRangeSpec{
+				Limits: []v1.LimitRangeItem{
+					{
+						Type: v1.LimitTypeContainer,
+						DefaultRequest: v1.ResourceList{
+							v1.ResourceMemory: resource.MustParse("500Mi"),
+							v1.ResourceCPU:    resource.MustParse("500Mi"),
+						},
+					},
 				},
 			},
-			Status: v1.ResourceQuotaStatus{
-				Used: v1.ResourceList{
-					v1.ResourceLimitsMemory:   resource.MustParse("1Gi"),
-					v1.ResourceRequestsMemory: resource.MustParse("1Gi"),
+		},
+	}
+}
+
+func fixReplicaSetMultiContainer() []*apps.ReplicaSet {
+	return []*apps.ReplicaSet{
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: fixNamespaceName(),
+			},
+			Spec: apps.ReplicaSetSpec{
+				Selector: &metav1.LabelSelector{
+					MatchLabels: fixReplicaSetMatchLabels(),
+				},
+				Replicas: ptrInt32(4),
+				Template: v1.PodTemplateSpec{
+					Spec: v1.PodSpec{
+						Containers: []v1.Container{
+							{Name: "test1"},
+							{Name: "test2"},
+							{Name: "test3"},
+						},
+					},
+				},
+			},
+			Status: apps.ReplicaSetStatus{
+				Replicas: 2,
+			},
+		},
+	}
+}
+
+func fixLimitRangeExceedingList() []*v1.LimitRange {
+	return []*v1.LimitRange{
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      fixName(),
+				Namespace: fixNamespaceName(),
+			},
+			Spec: v1.LimitRangeSpec{
+				Limits: []v1.LimitRangeItem{
+					{
+						Type: v1.LimitTypeContainer,
+						DefaultRequest: v1.ResourceList{
+							v1.ResourceMemory: resource.MustParse("2Gi"),
+							v1.ResourceCPU:    resource.MustParse("2Gi"),
+						},
+						Default: v1.ResourceList{
+							v1.ResourceMemory: resource.MustParse("2Gi"),
+							v1.ResourceCPU:    resource.MustParse("2Gi"),
+						},
+					},
 				},
 			},
 		},
@@ -262,6 +357,46 @@ func fixStatefulSet() []*apps.StatefulSet {
 					MatchLabels: fixStatefulSetMatchLabels(),
 				},
 				Replicas: ptrInt32(3),
+				Template: v1.PodTemplateSpec{
+					Spec: v1.PodSpec{
+						Containers: []v1.Container{
+							{Name: "test1"},
+						},
+					},
+				},
+			},
+			Status: apps.StatefulSetStatus{
+				Replicas: 2,
+			},
+		},
+	}
+}
+
+func fixStatefulSetExceeded() []*apps.StatefulSet {
+	return []*apps.StatefulSet{
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      fixName(),
+				Namespace: fixNamespaceName(),
+			},
+			Spec: apps.StatefulSetSpec{
+				Selector: &metav1.LabelSelector{
+					MatchLabels: fixStatefulSetMatchLabels(),
+				},
+				Replicas: ptrInt32(3),
+				Template: v1.PodTemplateSpec{
+					Spec: v1.PodSpec{
+						Containers: []v1.Container{
+							{
+								Resources: v1.ResourceRequirements{
+									Limits: v1.ResourceList{
+										v1.ResourceMemory: resource.MustParse("2Gi"),
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 			Status: apps.StatefulSetStatus{
 				Replicas: 2,
@@ -297,19 +432,54 @@ func fixReplicaSetExceeded() []*apps.ReplicaSet {
 				Namespace: fixNamespaceName(),
 			},
 			Spec: apps.ReplicaSetSpec{
-				Selector: &metav1.LabelSelector{
-					MatchLabels: fixReplicaSetMatchLabels(),
-				},
 				Replicas: ptrInt32(3),
+				Template: v1.PodTemplateSpec{
+					Spec: v1.PodSpec{
+						Containers: []v1.Container{
+							{
+								Resources: v1.ResourceRequirements{
+									Limits: v1.ResourceList{
+										v1.ResourceMemory: resource.MustParse("2Gi"),
+										v1.ResourceCPU:    resource.MustParse("10"),
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 			Status: apps.ReplicaSetStatus{
-				Replicas: 2,
+				Replicas: 1,
 			},
 		},
 	}
 }
 
-func fixReplicaSetWithOwnerReference() []*apps.ReplicaSet {
+func fixReplicaSetExceededWithNoLimits() []*apps.ReplicaSet {
+	return []*apps.ReplicaSet{
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      fixName(),
+				Namespace: fixNamespaceName(),
+			},
+			Spec: apps.ReplicaSetSpec{
+				Replicas: ptrInt32(3),
+				Template: v1.PodTemplateSpec{
+					Spec: v1.PodSpec{
+						Containers: []v1.Container{
+							{Name: "test1"},
+						},
+					},
+				},
+			},
+			Status: apps.ReplicaSetStatus{
+				Replicas: 1,
+			},
+		},
+	}
+}
+
+func fixReplicaSetExceededWithOwnerReference() []*apps.ReplicaSet {
 	return []*apps.ReplicaSet{
 		{
 			ObjectMeta: metav1.ObjectMeta{
@@ -324,10 +494,20 @@ func fixReplicaSetWithOwnerReference() []*apps.ReplicaSet {
 				},
 			},
 			Spec: apps.ReplicaSetSpec{
-				Selector: &metav1.LabelSelector{
-					MatchLabels: fixReplicaSetMatchLabels(),
-				},
 				Replicas: ptrInt32(3),
+				Template: v1.PodTemplateSpec{
+					Spec: v1.PodSpec{
+						Containers: []v1.Container{
+							{
+								Resources: v1.ResourceRequirements{
+									Limits: v1.ResourceList{
+										v1.ResourceMemory: resource.MustParse("2Gi"),
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 			Status: apps.ReplicaSetStatus{
 				Replicas: 2,
@@ -348,54 +528,6 @@ func fixStatefulSetMatchLabels() map[string]string {
 	}
 }
 
-func fixReplicasExceeding(labels map[string]string) []v1.Pod {
-	return []v1.Pod{
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: labels,
-			},
-			Spec: v1.PodSpec{
-				Containers: []v1.Container{
-					{
-						Resources: v1.ResourceRequirements{
-							Limits: v1.ResourceList{
-								v1.ResourceMemory: resource.MustParse("2Gi"),
-							},
-							Requests: v1.ResourceList{
-								v1.ResourceMemory: resource.MustParse("2Gi"),
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
-func fixReplicas(labels map[string]string) []v1.Pod {
-	return []v1.Pod{
-		{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: labels,
-			},
-			Spec: v1.PodSpec{
-				Containers: []v1.Container{
-					{
-						Resources: v1.ResourceRequirements{
-							Limits: v1.ResourceList{
-								v1.ResourceMemory: resource.MustParse("100Mi"),
-							},
-							Requests: v1.ResourceList{
-								v1.ResourceMemory: resource.MustParse("100Mi"),
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
 func fixDeploy() *api.Deployment {
 	return &api.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -404,6 +536,7 @@ func fixDeploy() *api.Deployment {
 		},
 		Spec: api.DeploymentSpec{
 			Strategy: api.DeploymentStrategy{
+				Type: api.RollingUpdateDeploymentStrategyType,
 				RollingUpdate: &api.RollingUpdateDeployment{
 					MaxUnavailable: &intstr.IntOrString{IntVal: 1, StrVal: "1"},
 				},

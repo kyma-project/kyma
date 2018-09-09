@@ -19,7 +19,7 @@ The Console calls for the ResourceQuota status. The calls are triggered after:
 - opening environment's details
  
 The idea is to create an endpoint which returns the ResourceQuotaStatus.
-The ResourceQuotaStatus contains the flag and the optional message. The value of this flag informs you if the ResourceQuota is exceeded.
+The ResourceQuotaStatus contains the flag and the list of exceeded ResourceQuotas limits, together with a set of resources which exceed the limits. The value of the flag informs you if any ResourceQuota is exceeded in any possible way.
 
 ## Multistage check
 
@@ -69,6 +69,64 @@ After all checks passed and the resources usage in the given Environment did not
 
 [Here](https://github.com/dtaylor113/origin-web-console/blob/master/app/scripts/services/quota.js#L86) you can find the example implementation of the checking logic in UI.
 
+### Example queries and responses
+
+The ResourceQuotaStatus query looks as follows:
+```graphql
+query{
+  resourceQuotasStatus(environment:"production"){
+    exceeded
+    exceededQuotas{
+      quotaName
+      resourceName
+      affectedResources
+    }
+  } 
+}
+```
+This query returns two types of response: exceeded and not exceeded.
+Not exceeded response looks as follows:
+```graphql endpoint doc
+  "data": {
+    "resourceQuotasStatus": {
+      "exceeded": false,
+      "exceededQuotas": []
+    }
+  }
+```
+Exceeded response can look like this:
+```graphql endpoint doc
+{
+  "data": {
+    "resourceQuotasStatus": {
+      "exceeded": true,
+      "exceededQuotas": [
+        {
+          "quotaName": "kyma-default",
+          "resourceName": "limits.memory",
+          "affectedResources": [
+            "ReplicaSet/redis-clientxd-5df45c4998",
+            "ReplicaSet/redis-clientxd-5df9544d7f"
+          ]
+        },
+        {
+          "quotaName": "custom-quota",
+           "resourceName": "requests.memory",
+           "affectedResources": [
+             "StatefulSet/example",
+             "ReplicaSet/redis-clientxd-5df9544d7f"
+           ]
+         },
+      ]
+    }
+  }
+}
+```
+- **exceeded** equals `true` if any ResourceQuota is exceeded.
+- **exceededQuotas** contains the list of exceeded ResourceQuotas limits and set of resources which exceed the limits.
+- **quotaName** represents the name of the ResourceQuota with exceeded limit.
+- **resourceName** represents the name of the resource which exceeded the ResourceQuota limit.
+- **affectedResources** contains the list of resources which exceed the defined **resourceName** limit from the **quotaName** ResourceQuota.
 
 ## Percentage usage of the ResourceQuota
 

@@ -46,7 +46,7 @@ func New(restConfig *rest.Config, remoteEnvironmentLister RemoteEnvironmentListe
 
 	resourceQuotaService := newResourceQuotaService(informerFactory.Core().V1().ResourceQuotas().Informer(),
 		informerFactory.Apps().V1().ReplicaSets().Informer(), informerFactory.Apps().V1().StatefulSets().Informer(), client)
-	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, resourceQuotaService, deploymentService)
+	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, limitRangeService, deploymentService)
 
 	return &Resolver{
 		environmentResolver:         newEnvironmentResolver(environmentService),

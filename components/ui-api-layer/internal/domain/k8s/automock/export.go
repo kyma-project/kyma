@@ -20,10 +20,10 @@ func NewReplicaSetLister() *replicaSetLister {
 	return new(replicaSetLister)
 }
 
-func NewPodsLister() *podsLister {
-	return new(podsLister)
-}
-
 func NewDeploymentGetter() *deploymentGetter {
 	return new(deploymentGetter)
+}
+
+func NewLimitRangeLister() *limitRangeLister {
+	return new(limitRangeLister)
 }
