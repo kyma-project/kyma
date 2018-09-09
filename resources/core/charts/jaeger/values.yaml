@@ -25,7 +25,7 @@ jaeger:
   tChannelPort: 14267
   collectorHTTPPort: 14268
   memory:
-    maxTraces: "20000"
+    maxTraces: "40000"
 resources:
   limits:
     memory: "512M"
