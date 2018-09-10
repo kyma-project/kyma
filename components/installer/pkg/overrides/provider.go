@@ -218,9 +218,9 @@ func NewLegacyProvider(overrideData OverrideData, installationData *config.Insta
 }
 
 func getStaticFileOverrides(overrides Map, chartDir string) StaticFile {
-	_, isLocalInst := FindOverrideStringValue(overrides, "global.isLocalEnv")
+	isLocalInst, _ := FindOverrideStringValue(overrides, "global.isLocalEnv")
 
-	if isLocalInst {
+	if isLocalInst == "true" {
 		return NewLocalStaticFile()
 	}
 
