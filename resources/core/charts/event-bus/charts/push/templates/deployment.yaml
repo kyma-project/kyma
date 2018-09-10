@@ -32,7 +32,11 @@ metadata:
   labels:
 {{ include "push.labels.standard" . | indent 4 }}
 spec:
+  {{ if .Values.global.isLocalEnv }}
+  replicas: 1
+  {{ else }}
   replicas: {{ .Values.replicaCount }}
+  {{ end }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
