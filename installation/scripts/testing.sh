@@ -116,7 +116,7 @@ function cleanupHelmTestPods() {
       log "FAILED cleaning test pods.\n" red
       return 1
     fi
-    log "End of cleaning test pods.\n" nc bold
+    log "Success cleaning test pods.\n" nc bold
 }
 
 function waitForTestPodsTermination() {
