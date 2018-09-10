@@ -12,6 +12,6 @@ RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/
 RUN mkdir -p /root/.kube && touch /root/.kube/config
 
 COPY counterTestPod.yaml /
-COPY test-logging /test-logging
+COPY bin/app /test-logging
 
 CMD ["/test-logging"]
