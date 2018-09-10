@@ -38,7 +38,7 @@ Follow these steps to configure the automatic connection between the Kyma Applic
 
   Alternatively, get the configuration URL with a valid token using `kubectl port-forward` or `kubectl proxy`.
 
-    - Request:
+   - Request:
 
       First, run:
       ```
@@ -48,7 +48,7 @@ Follow these steps to configure the automatic connection between the Kyma Applic
       ```
       curl -X POST http://localhost:8080/v1/remoteenvironments/{remote-environment-name}/tokens
       ```
-    - Response:
+   - Response:
       ```json
       {
           "url":"{CONFIGURATION_URL_WITH_TOKEN}",
@@ -57,11 +57,11 @@ Follow these steps to configure the automatic connection between the Kyma Applic
       ```
   When you connect an external solution to a local Kyma deployment, you must set NodePort of the `core-nginx-ingress-controller` for the Gateway Service and for the Event Service.
 
-    - To get the NodePort, run:
+   - To get the NodePort, run:
       ```
       kubectl -n kyma-system get svc core-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
       ```
-    - Set it for the Gateway Service and the Event Service using these calls:
+   - Set it for the Gateway Service and the Event Service using these calls:
       ```
       curl https://gateway.kyma.local:{NODE_PORT}/ec-default/v1/metadata/services --cert ec-default.crt --key ec-default.key -k
       ```
