@@ -3,11 +3,11 @@ title: Automatic connection configuration
 type: Details
 ---
 
-Kyma Application Connector allows to authenticate and securely communicate with different systems. Kyma provides an easy way to set up these external solutions with the mechanism for automatic connection configuration.
+Kyma Application Connector allows to authenticate and securely communicate with different external solutions. Kyma provides an easy way to set up such connection through the automatic connection configuration mechanism.
 
 ## Flow description
 
-The automatic configuration flow is presented in this diagram:
+The automatic connection configuration flow is presented in this diagram:
 ![Automatic Configuration Flow](./assets/002-automatic-configuration.png)
 
 This example assumes that a new Remote Environment intended to connect the external solution already exists and is in the `disconnected` state, which means that there are no external solutions connected to it.
@@ -27,34 +27,47 @@ Follow these steps to configure the automatic connection between the Kyma Applic
 
 1. Get the configuration address URL with a valid token.
 
-Using the UI:
+  Using the UI:
 
- - Go to the Kyma console UI.
- - Select **Administration**.
- - Select the **Remote Environments** from the **Integration** section.
- - Choose the Remote Environment to which you want to connect the external solution.
- - Click **Connect Remote Environment**.
- - Copy the token by clicking **Copy to clipboard**.
+   - Go to the Kyma console UI.
+   - Select **Administration**.
+   - Select the **Remote Environments** from the **Integration** section.
+   - Choose the Remote Environment to which you want to connect the external solution.
+   - Click **Connect Remote Environment**.
+   - Copy the token by clicking **Copy to clipboard**.
 
-Alternatively, get the configuration URL with a valid token using `kubectl port-forward` or `kubectl proxy`.
+  Alternatively, get the configuration URL with a valid token using `kubectl port-forward` or `kubectl proxy`.
 
-  - Request:
+   - Request:
 
-    First, run:
-    ```
-    kubectl -n=kyma-integration port-forward svc/connector-service-internal-api 8080:8080
-    ```
-    Send the request in a new terminal window:
-    ```
-    curl -X POST http://localhost:8080/v1/remoteenvironments/{remote-environment-name}/tokens
-    ```
-  - Response:
-    ```json
-    {
-        "url":"{CONFIGURATION_URL_WITH_TOKEN}",
-        "token":"example-token-123"
-    }
-    ```
+      First, run:
+      ```
+      kubectl -n=kyma-integration port-forward svc/connector-service-internal-api 8080:8080
+      ```
+      Send the request in a new terminal window:
+      ```
+      curl -X POST http://localhost:8080/v1/remoteenvironments/{remote-environment-name}/tokens
+      ```
+   - Response:
+      ```json
+      {
+          "url":"{CONFIGURATION_URL_WITH_TOKEN}",
+          "token":"example-token-123"
+      }
+      ```
+  When you connect an external solution to a local Kyma deployment, you must set the NodePort of the `core-nginx-ingress-controller` for the Gateway Service and for the Event Service.
+
+   - To get the NodePort, run:
+      ```
+      kubectl -n kyma-system get svc core-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
+      ```
+   - Set it for the Gateway Service and the Event Service using these calls:
+      ```
+      curl https://gateway.kyma.local:{NODE_PORT}/ec-default/v1/metadata/services --cert ec-default.crt --key ec-default.key -k
+      ```
+      ```
+      curl https://gateway.kyma.local:{NODE_PORT}/ec-default/v1/ec-default/v1/events --cert ec-default.crt --key ec-default.key -k
+      ```
 
 2. Use the provided link to fetch information about the Kyma URLs and CSR configuration.
 
@@ -83,25 +96,25 @@ Alternatively, get the configuration URL with a valid token using `kubectl port-
 
 3. Use values received in the `certificate.subject` field to create a CSR.
 
-    ```
-    openssl req -new -out test.csr -key ec-default.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN=ec-default"
-    ```
+      ```
+      openssl req -new -out test.csr -key ec-default.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN=ec-default"
+      ```
 
-After the CSR is ready, make the following call:
+  After you create the CSR, make the following call:
 
-  - Request:
+    - Request:
 
-    ```
-    curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' https://connector-service.CLUSTER_NAME.kyma.cluster.cx/v1/remoteenvironments/{remote-environment-name}/client-certs?token=example-token-456
-    ```
+      ```
+      curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' https://connector-service.CLUSTER_NAME.kyma.cluster.cx/v1/remoteenvironments/{remote-environment-name}/client-certs?token=example-token-456
+      ```
 
-  - Response:
+    - Response:
 
-    ```
-    {
-        "crt":"BASE64_ENCODED_CRT"
-    }
-    ```
+      ```
+      {
+          "crt":"BASE64_ENCODED_CRT"
+      }
+      ```
 
 4. The `crt` field contains a valid base64-encoded PEM block of a certificate signed by the Kyma CA.
 
