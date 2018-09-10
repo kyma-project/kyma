@@ -55,7 +55,7 @@ Follow these steps to configure the automatic connection between the Kyma Applic
           "token":"example-token-123"
       }
       ```
-  When you connect an external solution to a local Kyma deployment, you must set NodePort of the `core-nginx-ingress-controller` for the Gateway Service and for the Event Service.
+  When you connect an external solution to a local Kyma deployment, you must set the NodePort of the `core-nginx-ingress-controller` for the Gateway Service and for the Event Service.
 
    - To get the NodePort, run:
       ```
