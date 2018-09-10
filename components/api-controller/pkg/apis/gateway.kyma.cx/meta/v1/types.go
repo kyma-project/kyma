@@ -37,7 +37,7 @@ func (s StatusCode) IsError() bool {
 }
 
 func (s StatusCode) IsUpdateFailure() bool {
-	return s == Error
+	return s == UpdateFailure
 }
 
 type GatewayResourceStatus struct {

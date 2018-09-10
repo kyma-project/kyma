@@ -33,11 +33,11 @@ func New(i istioNetworking.Interface, k k8sClient.Interface, istioGateway string
 }
 
 type HostnameNotAvailableError struct {
-	errorMsg string
+	Hostname string
 }
 
 func (e HostnameNotAvailableError) Error() string {
-	return fmt.Sprint(e.errorMsg)
+	return fmt.Sprintf("the hostname %s is already in use", e.Hostname)
 }
 
 func (a *istioImpl) Create(dto *Dto) (*kymaMeta.GatewayResource, error) {
@@ -51,7 +51,7 @@ func (a *istioImpl) Create(dto *Dto) (*kymaMeta.GatewayResource, error) {
 		return nil, commons.HandleError(err, "error while creating virtual service")
 
 	} else if !isHostnameAvailable {
-		return nil, HostnameNotAvailableError{fmt.Sprintf("the hostname %s is already in use", dto.Hostname)}
+		return nil, HostnameNotAvailableError{dto.Hostname}
 	}
 
 	created, err := a.istioVirtualServiceInterface(dto.MetaDto.Namespace).Create(virtualService)
@@ -85,7 +85,7 @@ func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, erro
 			return gatewayResourceFrom(oldVirtualService), commons.HandleError(err, "error while updating virtual service")
 
 		} else if !isHostnameAvailable {
-			return gatewayResourceFrom(oldVirtualService), HostnameNotAvailableError{fmt.Sprintf("the hostname %s is already in use", newDto.Hostname)}
+			return gatewayResourceFrom(oldVirtualService), HostnameNotAvailableError{newDto.Hostname}
 		}
 	}
 
