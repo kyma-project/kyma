@@ -68,7 +68,7 @@ apiserver:
     etcd:
       # Whether to enable TLS communitation with etcd
       tls:
-        enabled: true # Remember to switch proto (http/https) in servers url accordingly
+        enabled: false # Remember to switch proto (http/https) in servers url accordingly
 
         ## If etcd tls is enabled you need to provide name of secret which stores 3 keys:
         ## etcd-client-ca.crt - SSL Certificate Authority file used to secure etcd communication
@@ -79,7 +79,7 @@ apiserver:
       # THIS IS INADEQUATE FOR PRODUCTION USE!
       useEmbedded: false
       # etcd URL(s); override this if NOT using embedded etcd
-      servers: https://core-service-catalog-etcd-client.kyma-system.svc.cluster.local:2379
+      servers: http://core-service-catalog-etcd-client.kyma-system.svc.cluster.local:2379
   # Log level; valid values are in the range 0 - 10
   verbosity: 1
   auth:
