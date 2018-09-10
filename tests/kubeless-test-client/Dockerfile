@@ -15,7 +15,7 @@ RUN curl -Lo /tmp/kubeless.zip https://github.com/kubeless/kubeless/releases/dow
 #RUN curl -Lo /tmp/kubeless.zip "$(curl -s https://api.github.com/repos/kubeless/kubeless/releases/latest | jq -r '.assets[]|select(.name=="kubeless_linux-amd64.zip").browser_download_url')" && unzip -q /tmp/kubeless.zip -d /tmp/ && mv /tmp/bundles/kubeless_linux-amd64/kubeless /usr/bin/ && rm -r /tmp/kubeless.zip /tmp/bundles && chmod +x /usr/bin/kubeless
 
 RUN mkdir -p /root/.kube && touch /root/.kube/config
-COPY ns.yaml hello.js event.js svc-instance.yaml /
+COPY ns.yaml hello.js event.js svc-instance.yaml svc-binding.yaml /
 COPY bin/app /test-kubeless
 
 CMD ["/test-kubeless"]

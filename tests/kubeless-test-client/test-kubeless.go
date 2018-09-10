@@ -350,6 +350,34 @@ func ensureSvcInstanceIsDeployed(namespace, svcInstance string) {
 	}
 }
 
+func ensureServceBindingIsReady(namespace, svcBinding string) {
+	timeout := time.After(5 * time.Minute)
+	tick := time.Tick(1 * time.Second)
+
+	for {
+		select {
+		case <-timeout:
+			cmd := exec.Command("kubectl", "describe", "-n", namespace, "servicebinding", svcBinding)
+			stdoutStderr, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Fatalf("Unable to fetch service instance binding %v:\n%v", svcBinding, string(stdoutStderr))
+			}
+			log.Fatalf("Timeout waiting to get service instance binding ProvisionedSuccessfully %v: %v", svcBinding, string(stdoutStderr))
+		case <-tick:
+			cmd := exec.Command("kubectl", "-n", namespace, "get", "servicebinding", svcBinding, "-o=jsonpath={.items[*]}{.status.conditions[*].status}")
+			stdoutStderr, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Fatalf("Error fetching service instance binding %v: %v", svcBinding, err)
+			}
+			if string(stdoutStderr) == "True" {
+				return
+			}
+		}
+
+	}
+
+}
+
 func cleanup() {
 	log.Println("Cleaning up")
 	var wg sync.WaitGroup
@@ -417,6 +445,9 @@ func main() {
 		log.Println("Deploying svc-instance")
 		deployK8s("svc-instance.yaml")
 		ensureSvcInstanceIsDeployed("kubeless-test", "redis")
+		log.Println("Deploying service binding")
+		deployK8s("svc-binding.yaml")
+		ensureServceBindingIsReady("kubeless-test", "redis-binding")
 		log.Println("Deploying svcbind-lambda")
 		deployK8s("k8syaml/svcbind-lambda.yaml")
 		ensureFunctionIsRunning("kubeless-test", "test-svcbind", true)
