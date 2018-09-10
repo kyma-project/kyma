@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: counter-test-pod
+spec:
+  containers:
+  - name: count
+    image: ubuntu:14.04
+    args: [bash, -c, 
+           'for ((i = 0; ; i++)); do echo "$i: oklogTest-$(date)"; sleep 1; done']
