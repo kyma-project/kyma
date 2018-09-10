@@ -14,7 +14,8 @@ Monorepo root orchestrator: This Jenkinsfile runs the Jenkinsfiles of all subpro
 
 */
 def label = "kyma-${UUID.randomUUID().toString()}"
-appVersion = "0.3." + env.BUILD_NUMBER
+isMaster = env.BRANCH_NAME == 'master'
+appVersion = ''
 
 /*
     Projects that are built when changed, consisting of pairs [project path, produced docker image]. Projects producing multiple Docker images only need to provide one of them.
@@ -88,9 +89,10 @@ podTemplate(label: label) {
                         checkout scm
                         // use HEAD of branch as revision, Jenkins does a merge to master commit before starting this script, which will not be available on the jobs triggered below
                         commitID = sh (script: "git rev-parse origin/${env.BRANCH_NAME}", returnStdout: true).trim()
+                        appVersion = commitID.substring(0,8)
                         changes = changedProjects()
 
-                        if (env.BRANCH_NAME == "master") {
+                        if (isMaster) {
                             // integration runs on any change on master
                             runIntegration = changes.size() > 0
                         } else {
@@ -139,7 +141,7 @@ if (runIntegration) {
         for (int i = 0; i < changedProjects.size(); i++) {
             // only projects that have an associated docker image have a version to deploy
             if (projects["${changedProjects[i]}"] != null) {
-                versions["${changedProjects[i]}"] = env.BRANCH_NAME == "master" ? appVersion : env.BRANCH_NAME
+                versions["${changedProjects[i]}"] = isMaster ? appVersion : env.BRANCH_NAME
             }
         }
 
@@ -280,40 +282,65 @@ String projectVersion(project) {
 @NonCPS
 def versionsYaml(versions) {
     def overrides = 
-"""global:
-  kyma:
-    versions:
-      docs: ${versions['docs']}
-      api-controller: ${versions['components/api-controller']}
-      binding-usage-controller: ${versions['components/binding-usage-controller']}
-      configurations-generator: ${versions['components/configurations-generator']}
-      environments: ${versions['components/environments']}
-      istio-webhook: ${versions['components/istio-webhook']}
-      helm-broker: ${versions['components/helm-broker']}
-      remote-environment-broker: ${versions['components/remote-environment-broker']}
-      remote-environment-controller: ${versions['components/remote-environment-controller']}
-      metadata-service: ${versions['components/metadata-service']}
-      gateway: ${versions['components/gateway']}
-      installer: ${versions['components/installer']}
-      connector-service: ${versions['components/connector-service']}
-      ui-api-layer: ${versions['components/ui-api-layer']}
-      event-bus: ${versions['components/event-bus']}
-      alpine-net: ${versions['tools/alpine-net']}
-      watch-pods: ${versions['tools/watch-pods']}
-      stability-checker: ${versions['tools/stability-checker']}
-      etcd-backup: ${versions['tools/etcd-backup']}
-      test-logging-monitoring: ${versions['tests/test-logging-monitoring']}
-      acceptance-tests: ${versions['tests/acceptance']}
-      ui-api-layer-acceptance-tests: ${versions['tests/ui-api-layer-acceptance-tests']}
-      gateway-tests: ${versions['tests/gateway-tests']}
-      test-environments: ${versions['tests/test-environments']}
-      kubeless-test-client: ${versions['tests/kubeless-test-client']}
-      api-controller-acceptance-tests: ${versions['tests/api-controller-acceptance-tests']}
-      connector-service-tests: ${versions['tests/connector-service-tests']}
-      metadata-service-tests: ${versions['tests/metadata-service-tests']}
-      event-bus-tests: ${versions['tests/event-bus']}
-      test-logging: ${versions['tests/logging']}
-
+"""
+global.docs.version: ${versions['docs']}
+global.docs.dir: ${versions['docs'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.api-controller.version: ${versions['components/api-controller']}
+global.api-controller.dir: ${versions['components/api-controller'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.binding-usage-controller.version: ${versions['components/binding-usage-controller']}
+global.binding-usage-controller.dir: ${versions['components/binding-usage-controller'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.configurations-generator.version: ${versions['components/configurations-generator']}
+global.configurations-generator.dir: ${versions['components/configurations-generator'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.environments.version: ${versions['components/environments']}
+global.environments.dir: ${versions['components/environments'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.istio-webhook.version: ${versions['components/istio-webhook']}
+global.istio-webhook.dir: ${versions['components/istio-webhook'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.helm-broker.version: ${versions['components/helm-broker']}
+global.helm-broker.dir: ${versions['components/helm-broker'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.remote-environment-broker.version: ${versions['components/remote-environment-broker']}
+global.remote-environment-broker.dir: ${versions['components/remote-environment-broker'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.metadata-service.version: ${versions['components/metadata-service']}
+global.metadata-service.dir: ${versions['components/metadata-service'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.gateway.version: ${versions['components/gateway']}
+global.gateway.dir: ${versions['components/gateway'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.installer.version: ${versions['components/installer']}
+global.installer.dir: ${versions['components/installer'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.connector-service.version: ${versions['components/connector-service']}
+global.connector-service.dir: ${versions['components/connector-service'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.ui-api-layer.version: ${versions['components/ui-api-layer']}
+global.ui-api-layer.dir: ${versions['components/ui-api-layer'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.event-bus.version: ${versions['components/event-bus']}
+global.event-bus.dir: ${versions['components/event-bus'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.alpine-net.version: ${versions['tools/alpine-net']}
+global.alpine-net.dir: ${versions['tools/alpine-net'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.watch-pods.version: ${versions['tools/watch-pods']}
+global.watch-pods.dir: ${versions['tools/watch-pods'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.stability-checker.version: ${versions['tools/stability-checker']}
+global.stability-checker.dir: ${versions['tools/stability-checker'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.etcd-backup.version: ${versions['tools/etcd-backup']}
+global.etcd-backup.dir: ${versions['tools/etcd-backup'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.test-logging-monitoring.version: ${versions['tests/test-logging-monitoring']}
+global.test-logging-monitoring.dir: ${versions['tests/test-logging-monitoring'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.acceptance-tests.version: ${versions['tests/acceptance']}
+global.acceptance-tests.dir: ${versions['tests/acceptance'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.ui-api-layer-acceptance-tests.version: ${versions['tests/ui-api-layer-acceptance-tests']}
+global.ui-api-layer-acceptance-tests.dir: ${versions['tests/ui-api-layer-acceptance-tests'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.gateway-tests.version: ${versions['tests/gateway-tests']}
+global.gateway-tests.dir: ${versions['tests/gateway-tests'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.test-environments.version: ${versions['tests/test-environments']}
+global.test-environments.dir: ${versions['tests/test-environments'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.kubeless-test-client.version: ${versions['tests/kubeless-test-client']}
+global.kubeless-test-client.dir: ${versions['tests/kubeless-test-client'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.api-controller-acceptance-tests.version: ${versions['tests/api-controller-acceptance-tests']}
+global.api-controller-acceptance-tests.dir: ${versions['tests/api-controller-acceptance-tests'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.connector-service-tests.version: ${versions['tests/connector-service-tests']}
+global.connector-service-tests.dir: ${versions['tests/connector-service-tests'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.metadata-service-tests.version: ${versions['tests/metadata-service-tests']}
+global.metadata-service-tests.dir: ${versions['tests/metadata-service-tests'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.event-bus-tests.version: ${versions['tests/event-bus']}
+global.event-bus-tests.dir: ${versions['tests/event-bus'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.test-logging.version=${versions['tests/logging']}
+global.test-logging.dir=${versions['test-logging'] == env.BRANCH_NAME ? 'pr' : 'develop'}
 """
 
     return "$overrides"
