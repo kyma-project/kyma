@@ -2,7 +2,6 @@ package overrides
 
 import (
 	"fmt"
-	"log"
 	"path"
 	"strconv"
 
@@ -36,7 +35,6 @@ func (p legacyProvider) GetForRelease(component v1alpha1.KymaComponent) (string,
 
 	switch component.GetReleaseName() {
 	case "cluster-essentials":
-		log.Println("cluster-essentials")
 		overridesFunc = p.getClusterEssentialsOverrides
 		break
 	case "istio":
@@ -103,8 +101,6 @@ func (p legacyProvider) getClusterEssentialsOverrides(installationData *config.I
 	globalOverrides, err := GetGlobalOverrides(installationData, allOverrides)
 	p.errorHandlers.LogError("Couldn't get global overrides: ", err)
 	MergeMaps(allOverrides, globalOverrides)
-
-	log.Println("getClusterEssentialsOverrides")
 
 	staticOverrides := p.getStaticFileOverrides(overrides, chartDir)
 	if staticOverrides.HasOverrides() == true {
