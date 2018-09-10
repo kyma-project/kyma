@@ -1,7 +1,10 @@
 package overrides
 
 import (
+	"fmt"
+	"log"
 	"path"
+	"strconv"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
@@ -33,6 +36,7 @@ func (p legacyProvider) GetForRelease(component v1alpha1.KymaComponent) (string,
 
 	switch component.GetReleaseName() {
 	case "cluster-essentials":
+		log.Println("cluster-essentials")
 		overridesFunc = p.getClusterEssentialsOverrides
 		break
 	case "istio":
@@ -81,7 +85,7 @@ func (p legacyProvider) getCoreOverrides(installationData *config.InstallationDa
 
 	MergeMaps(allOverrides, coreOverrides)
 
-	staticOverrides := getStaticFileOverrides(overrides, chartDir)
+	staticOverrides := p.getStaticFileOverrides(overrides, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
 		p.errorHandlers.LogError("Couldn't get additional overrides: ", err)
@@ -100,7 +104,9 @@ func (p legacyProvider) getClusterEssentialsOverrides(installationData *config.I
 	p.errorHandlers.LogError("Couldn't get global overrides: ", err)
 	MergeMaps(allOverrides, globalOverrides)
 
-	staticOverrides := getStaticFileOverrides(overrides, chartDir)
+	log.Println("getClusterEssentialsOverrides")
+
+	staticOverrides := p.getStaticFileOverrides(overrides, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
 		p.errorHandlers.LogError("Couldn't get additional overrides: ", err)
@@ -123,7 +129,7 @@ func (p legacyProvider) getIstioOverrides(installationData *config.InstallationD
 	p.errorHandlers.LogError("Couldn't get Istio overrides: ", err)
 	MergeMaps(allOverrides, istioOverrides)
 
-	staticOverrides := getStaticFileOverrides(overrides, chartDir)
+	staticOverrides := p.getStaticFileOverrides(overrides, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
 		p.errorHandlers.LogError("Couldn't get additional overrides: ", err)
@@ -139,7 +145,7 @@ func (p legacyProvider) getPrometheusOverrides(installationData *config.Installa
 
 	MergeMaps(allOverrides, overrides)
 
-	staticOverrides := getStaticFileOverrides(overrides, chartDir)
+	staticOverrides := p.getStaticFileOverrides(overrides, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
 		p.errorHandlers.LogError("Couldn't get additional overrides: ", err)
@@ -159,7 +165,7 @@ func (p legacyProvider) getDexOverrides(installationData *config.InstallationDat
 	p.errorHandlers.LogError("Couldn't get global overrides: ", err)
 	MergeMaps(allOverrides, globalOverrides)
 
-	staticOverrides := getStaticFileOverrides(overrides, chartDir)
+	staticOverrides := p.getStaticFileOverrides(overrides, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
 		p.errorHandlers.LogError("Couldn't get additional overrides: ", err)
@@ -178,7 +184,7 @@ func (p legacyProvider) getHmcOverrides(installationData *config.InstallationDat
 	p.errorHandlers.LogError("Couldn't get global overrides: ", err)
 	MergeMaps(allOverrides, globalOverrides)
 
-	staticOverrides := getStaticFileOverrides(overrides, chartDir)
+	staticOverrides := p.getStaticFileOverrides(overrides, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
 		p.errorHandlers.LogError("Couldn't get additional overrides: ", err)
@@ -197,7 +203,7 @@ func (p legacyProvider) getEcOverrides(installationData *config.InstallationData
 	p.errorHandlers.LogError("Couldn't get global overrides: ", err)
 	MergeMaps(allOverrides, globalOverrides)
 
-	staticOverrides := getStaticFileOverrides(overrides, chartDir)
+	staticOverrides := p.getStaticFileOverrides(overrides, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
 		p.errorHandlers.LogError("Couldn't get additional overrides: ", err)
@@ -217,10 +223,18 @@ func NewLegacyProvider(overrideData OverrideData, installationData *config.Insta
 	}
 }
 
-func getStaticFileOverrides(overrides Map, chartDir string) StaticFile {
-	isLocalInst, _ := FindOverrideStringValue(overrides, "global.isLocalEnv")
+func (p legacyProvider) getStaticFileOverrides(overrides Map, chartDir string) StaticFile {
+	isLocalEnv := FindOverrideValue(overrides, "global.isLocalEnv")
+	strIsLocalEnv := fmt.Sprintf("%v", isLocalEnv)
 
-	if isLocalInst == "true" {
+	isLocalInst, err := strconv.ParseBool(strIsLocalEnv)
+
+	if err != nil {
+		p.errorHandlers.LogError("global.isLocalEnv is not a boolean value. Fallback to false", err)
+		isLocalInst = false
+	}
+
+	if isLocalInst {
 		return NewLocalStaticFile()
 	}
 
