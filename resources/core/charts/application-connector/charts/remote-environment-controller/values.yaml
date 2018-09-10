@@ -1,0 +1,8 @@
+controller:
+  image:
+    name: snapshot/remote-environment-controller
+    tag: PR-587
+    pullPolicy: IfNotPresent
+  args:
+    appName: remote-environment-controller
+    tillerUrl: tiller-deploy.kube-system.svc.cluster.local:44134

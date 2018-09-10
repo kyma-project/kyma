@@ -1,0 +1,44 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: {{ .Chart.Name }}-manager-role
+rules:  # TODO: adjust / merge with application connector cluster role if possible
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - remoteenvironment.kyma.cx
+  resources:
+  - remoteenvironments
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  creationTimestamp: null
+  name: {{ .Chart.Name }}-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Chart.Name }}-manager-role
+subjects:
+- kind: User
+  name: system:serviceaccount:{{ .Values.global.namespace }}:default
+  namespace: {{ .Values.global.namespace }}

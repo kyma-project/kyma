@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}-manager-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    control-plane: {{ .Chart.Name }}-manager
+    controller-tools.k8s.io: "1.0"
+spec:
+  selector:
+    control-plane: {{ .Chart.Name }}-manager
+    controller-tools.k8s.io: "1.0"
+  ports:
+  - port: 443
