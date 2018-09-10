@@ -1,11 +1,4 @@
-```
-    _    ____ ___    ____            _             _ _
-   / \  |  _ \_ _|  / ___|___  _ __ | |_ _ __ ___ | | | ___ _ __
-  / _ \ | |_) | |  | |   / _ \| '_ \| __| '__/ _ \| | |/ _ \ '__|
- / ___ \|  __/| |  | |__| (_) | | | | |_| | | (_) | | |  __/ |
-/_/   \_\_|  |___|  \____\___/|_| |_|\__|_|  \___/|_|_|\___|_|
-```
-
+# API Controller
 
 ## Overview
 
@@ -42,7 +35,7 @@ Use these environment variables to configure the application:
 | **API_CONTROLLER_LOG_LEVEL** | No | `info` | Show detailed logs in the application. | `info`, `debug`
 | **DEFAULT_ISSUER** | Yes | - | Used to set default issuer in NetworkPolicy. | any string |
 | **DEFAULT_JWKS_URI** | Yes | - | Used to set default jwksUri in NetworkPolicy. | any string |
-| **GATEWAY_FQDN** | Yes | - | Used to set gateway in VirtualServices specification. | any string |
+| **GATEWAY_FQDN** | Yes | - | Used to set gateway in the VirtualServices specification. | any string |
 | **DOMAIN_NAME** | Yes | - | Used to set a hostname in the VirtualServices specification if a short version of the hostname is provided. | any string |
 
 
