@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: jaegertracing/all-in-one
-  tag: 1.2.0
+  tag: 1.6.0
   pullPolicy: IfNotPresent
 
 service:
@@ -24,6 +24,8 @@ jaeger:
   configPort: 5778
   tChannelPort: 14267
   collectorHTTPPort: 14268
+  memory:
+    maxTraces: "40000"
 resources:
   limits:
-    memory: "256M"
+    memory: "512M"
