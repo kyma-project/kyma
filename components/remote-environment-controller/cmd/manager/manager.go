@@ -38,11 +38,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	log.Printf("Setting up controller.")
+
 	overridesData := controller.OverridesData{
 		DomainName: options.domainName,
 	}
 
-	log.Printf("Setting up controller.")
 	err = controller.InitRemoteEnvironmentController(mgr, overridesData, options.namespace, options.appName, options.tillerUrl)
 	if err != nil {
 		log.Fatal(err)
