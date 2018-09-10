@@ -9,6 +9,6 @@ Remote Environment Controller detects changes in Remote Environment custom resou
 
 Remote Environment Controller performs different operations as a result of the following events:
 
- - Remote Environment created - Controller installs Helm chart containing all the necessary Kubernetes resources.
+ - Remote Environment created - Controller installs Helm chart containing all the necessary Kubernetes resources required for the RE to work.
  - Remote Environment deleted - Controller deletes Helm chart corresponding to the given RE.
  
