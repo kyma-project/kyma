@@ -1,3 +1,4 @@
+{{ if .Values.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -12,3 +13,4 @@ spec:
     controller-tools.k8s.io: "1.0"
   ports:
   - port: 443
+{{ end }}

@@ -9,7 +9,7 @@ metadata:
 rules:
 - apiGroups: ["remoteenvironment.kyma.cx"]
   resources: ["remoteenvironments"]
-  verbs: ["get", "list", "update","create", "delete"]
+  verbs: ["get", "list", "update","create", "delete", "watch"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
