@@ -52,7 +52,6 @@ var (
 	pushServer         *httptest.Server
 	subscriberServerV1 *httptest.Server
 	subscriberServerV2 *httptest.Server
-	pushRequest        *http.Request
 )
 
 func startNats() (*server.StanServer, error) {
@@ -75,19 +74,13 @@ func TestMain(m *testing.M) {
 	subscriberServerV1 = util.NewSubscriberServerV1()
 	subscriberServerV2 = util.NewSubscriberServerV2()
 
-	requestProvider := common.RequestProvider(func(method, url string, body io.Reader) (*http.Request, error) {
-		var err error
-		pushRequest, err = http.NewRequest(method, url, body)
-		return pushRequest, err
-	})
-
 	pushOpts := opts.DefaultOptions
 	pushOpts.NatsStreamingClusterID = clusterID
 	pushApplication := pushapp.NewPushApplication(&pushOpts, newFakeInformer())
 	subscriptionsSupervisor1 := pushApplication.SubscriptionsSupervisor
 	subscription1 := util.NewSubscription("test-sub", metav1.NamespaceDefault, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion,
 		sourceEnvironmentV1, sourceNamespaceV1, sourceType)
-	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, requestProvider)
+	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, common.DefaultRequestProvider)
 
 	subscriptionsSupervisor2 := pushApplication.SubscriptionsSupervisor
 	subscription2 := util.NewSubscription("test-sub", metav1.NamespaceDefault, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion,
@@ -247,6 +240,53 @@ func checkIfError(err error, t *testing.T) {
 }
 
 func Test_pushRequestShouldNotIncludeKymaTopicHeader(t *testing.T) {
+	var pushRequest *http.Request
+	requestProvider := common.RequestProvider(func(method, url string, body io.Reader) (*http.Request, error) {
+		var err error
+		pushRequest, err = http.NewRequest(method, url, body)
+		return pushRequest, err
+	})
+	pushOpts := opts.DefaultOptions
+	pushOpts.ClientID = "event-bus-push-test"
+	pushOpts.NatsStreamingClusterID = clusterID
+	pushApplication := pushapp.NewPushApplication(&pushOpts, newFakeInformer())
+
+	subscriptionsSupervisor1 := pushApplication.SubscriptionsSupervisor
+	subscription1 := util.NewSubscription("test-sub-1", metav1.NamespaceDefault, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion,
+		sourceEnvironmentV1, sourceNamespaceV1, sourceType)
+	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, requestProvider)
+	{
+		payloadV1 := makePayload(sourceNamespaceV1, sourceType, sourceEnvironmentV1, eventType, eventTypeVersion, eventDataV1)
+		res, err := http.Post(publishServer.URL+"/v1/events", "application/json", strings.NewReader(payloadV1))
+		checkIfError(err, t)
+		verifyStatusCode(res, 200, t)
+		log.Print(res)
+		respObj := &api.PublishResponse{}
+		body, err := ioutil.ReadAll(res.Body)
+		defer res.Body.Close()
+		err = json.Unmarshal(body, &respObj)
+		assert.NotNil(t, respObj.EventID)
+		assert.NotEmpty(t, respObj.EventID)
+		log.Printf("%v", respObj)
+
+		var ok bool
+		for i := 0; i < 10; i++ {
+			time.Sleep(1 * time.Second)
+			res, err := http.Get(subscriberServerV1.URL + util.SubServer1ResultsPath)
+			assert.Nil(t, err)
+			body, err := ioutil.ReadAll(res.Body)
+			var resp string
+			json.Unmarshal(body, &resp)
+			res.Body.Close()
+			if len(resp) == 0 {
+				continue
+			}
+			assert.Equal(t, eventDataV1, resp)
+			ok = true
+			break
+		}
+		assert.True(t, ok)
+	}
 	if pushRequest == nil {
 		t.Fatal("push request should not be nil")
 	}
