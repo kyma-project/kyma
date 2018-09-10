@@ -3,8 +3,6 @@ title: The Node.js Programming Model
 type: Model
 ---
 
-## Overview
-
 Kyma supports Node.js 6 and 8. The function interface is the same for both versions. It is still best practice to start with Node.js 8, as it supports Promises out of the box. The result is less complicated code.
 
 Please set the runtime version (Node.js 6 or 8) while creating a function.
@@ -40,8 +38,8 @@ event:
   data:                                         # Event data
     foo: "bar"                                  # The data is parsed as JSON when required
   extensions:                                   # Optional parameters
-    request: ...                                # Reference to the request received 
-    response: ...                               # Reference to the response to send 
+    request: ...                                # Reference to the request received
+    response: ...                               # Reference to the response to send
                                                 # (specific properties will depend on the function language)
 context:
     function-name: "pubsub-nodejs"

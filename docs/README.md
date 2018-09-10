@@ -1,7 +1,5 @@
 # Documentation
 
-## Overview
-
 The `docs` folder contains end-to-end documentation on Kyma and its components.
 
 Start with the overarching [Kyma](kyma/docs) documentation where you can find the general information on Kyma and the Getting Started guides. Then, read about the product in more detail:   

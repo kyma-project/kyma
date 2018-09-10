@@ -3,8 +3,6 @@ title: Sample service deployment on local
 type: Getting Started
 ---
 
-## Overview
-
 This Getting Started guide is intended for the developers who want to quickly learn how to deploy a sample service and test it with Kyma installed locally on Mac.
 
 This guide uses a standalone sample service written in the [Go](http://golang.org) language .

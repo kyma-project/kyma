@@ -3,8 +3,6 @@ title: Expose Custom Metrics in Kyma
 type: Getting Started
 ---
 
-## Overview
-
 This Getting Started guide shows how to expose custom metrics to Prometheus with a Golang service in Kyma. To do so, follow these steps:
 
 1. Configure Istio.
@@ -58,9 +56,9 @@ This is a basic example where `Gauge` and `Counter` metrics are exported using t
 1. Deploy the sample metrics application.
     ```bash
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/monitoring-custom-metrics/deployment/deployment.yaml
-    
+
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/monitoring-custom-metrics/deployment/service-8080.yaml
-    
+
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/monitoring-custom-metrics/deployment/service-8081.yaml
 
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/monitoring-custom-metrics/deployment/service-monitor.yaml
@@ -80,7 +78,7 @@ This is a basic example where `Gauge` and `Counter` metrics are exported using t
     kubectl port-forward svc/sample-metrics-8081 8081:8081
     ```
     Open a browser and access [`http://localhost:8081/metrics`](http://localhost:8081/metrics)
-    
+
     ![metrics on port 8081](assets/sample-metrics-2.png)
 
 Find the source code for the sample application [here](https://github.com/kyma-project/examples/blob/master/monitoring-custom-metrics/main.go). See the [package prometheus](https://godoc.org/github.com/prometheus/client_golang/prometheus) for the reference documentation. Read [this](https://prometheus.io/docs/concepts/metric_types/) documentation to learn more about the Prometheus metric types.
@@ -88,7 +86,7 @@ Find the source code for the sample application [here](https://github.com/kyma-p
 ### Access the exposed metrics in Prometheus
 
  Run the `port-forward` command on the `core-prometheus` service:
-    
+
 ```bash
 kubectl port-forward svc/core-prometheus -n kyma-system 9090:9090
 Forwarding from 127.0.0.1:9090 -> 9090

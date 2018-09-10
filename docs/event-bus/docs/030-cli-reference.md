@@ -3,8 +3,6 @@ title: CLI reference
 type: CLI reference
 ---
 
-## Overview
-
  Management of the Event Bus is based on the custom resources specifically defined for Kyma. Manage all of these resources through [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/).
 
 ## Details

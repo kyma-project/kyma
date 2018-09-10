@@ -3,8 +3,6 @@ title: Deploy with a private Docker registry
 type: Details
 ---
 
-## Overview
-
 Docker is a free tool to deploy applications and servers. To run an application on Kyma, provide the application binary file as a Docker image located in a Docker registry. Use the `DockerHub` public registry to upload your Docker images for free access to the public. Use a private Docker registry to ensure privacy, increased security, and better availability.
 
 This document shows how to deploy a Docker image from your private Docker registry to the Kyma cluster.

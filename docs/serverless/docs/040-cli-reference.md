@@ -3,8 +3,6 @@ title: CLI reference
 type: CLI reference
 ---
 
-## Overview
-
 This section provides you with useful command line examples used in Kyma.
 
 ## Prerequisites

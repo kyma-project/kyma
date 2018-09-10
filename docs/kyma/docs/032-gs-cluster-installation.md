@@ -3,8 +3,6 @@ title: Cluster Kyma installation
 type: Getting Started
 ---
 
-## Overview
-
 This Getting Started guide shows developers how to quickly deploy Kyma on a cluster. Kyma installs on a cluster using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma on a cluster and verify the deployment, as well as the troubleshooting tips.
 
 >**NOTE:** To learn how to install Kyma on a [Gardener](https://github.com/gardener/gardener) cluster, see the **Install Kyma on Gardener** document.
