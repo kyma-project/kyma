@@ -6,17 +6,14 @@ import (
 	"testing"
 
 	"github.com/Masterminds/semver"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
-
-	"github.com/kyma-project/kyma/components/helm-broker/platform/ptr"
-
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker/automock"
+	"github.com/kyma-project/kyma/components/helm-broker/platform/ptr"
+	"github.com/pkg/errors"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetCatalog(t *testing.T) {
@@ -86,9 +83,9 @@ func TestBundleConversion(t *testing.T) {
 		"displayName":         fixBundle.Metadata.DisplayName,
 		"providerDisplayName": fixBundle.Metadata.ProviderDisplayName,
 		"longDescription":     fixBundle.Metadata.LongDescription,
-		"documentationURL":    fixBundle.Metadata.DocumentationURL,
-		"supportURL":          fixBundle.Metadata.SupportURL,
-		"imageURL":            fixBundle.Metadata.ImageURL,
+		"documentationUrl":    fixBundle.Metadata.DocumentationURL,
+		"supportUrl":          fixBundle.Metadata.SupportURL,
+		"imageUrl":            fixBundle.Metadata.ImageURL,
 	}, s.Metadata)
 
 	require.Len(t, s.Plans, 2)

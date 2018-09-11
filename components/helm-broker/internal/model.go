@@ -156,9 +156,9 @@ func (b BundleMetadata) ToMap() map[string]interface{} {
 		DisplayName         string `structs:"displayName"`
 		ProviderDisplayName string `structs:"providerDisplayName"`
 		LongDescription     string `structs:"longDescription"`
-		DocumentationURL    string `structs:"documentationURL"`
-		SupportURL          string `structs:"supportURL"`
-		ImageURL            string `structs:"imageURL"`
+		DocumentationURL    string `structs:"documentationUrl"`
+		SupportURL          string `structs:"supportUrl"`
+		ImageURL            string `structs:"imageUrl"`
 	}
 	return structs.Map(mapped(b))
 }
