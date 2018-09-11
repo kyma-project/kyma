@@ -210,11 +210,11 @@ func (a *istioImpl) isHostnameAvailable(metaDto meta.Dto, hostname string, assig
 		for _, vs := range vsList.Items {
 			for _, occupiedHostname := range vs.Spec.Hosts {
 				if occupiedHostname == hostname {
-					//if hostname is not used by virtualservice actually assigned to CR
-					if vs.UID != assignedVirtualServiceUID {
-						return false, nil
+					//if hostname is used by virtualservice actually assigned to CR
+					if vs.UID == assignedVirtualServiceUID {
+						return true, nil
 					}
-
+					return false, nil
 				}
 			}
 		}
