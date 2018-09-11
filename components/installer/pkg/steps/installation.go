@@ -65,7 +65,6 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 	for _, component := range installationData.Components {
 
 		stepName := "Installing " + component.GetReleaseName()
-		steps.PrintInstallationStep(stepName)
 		steps.statusManager.InProgress(stepName)
 
 		if component.Name == "provision-bundles" { // Legacy support for bash provision-bundles script - to be deleted later
@@ -120,7 +119,6 @@ func (steps *InstallationSteps) UpdateKyma(installationData *config.Installation
 	for _, component := range installationData.Components {
 
 		stepName := "Upgrading " + component.GetReleaseName()
-		steps.PrintInstallationStep(stepName)
 		steps.statusManager.InProgress(stepName)
 
 		if component.Name == "provision-bundles" { // Legacy support for bash provision-bundles script - to be deleted later
