@@ -3,7 +3,7 @@ initImage:
   # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 image:
-  tag: 0.2.37
+  tag: 0.3.330
   # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 service:
