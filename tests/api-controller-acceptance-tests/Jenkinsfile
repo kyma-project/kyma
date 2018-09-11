@@ -3,9 +3,9 @@ def label = "kyma-${UUID.randomUUID().toString()}"
 def application = 'api-controller-acceptance-tests'
 def isMaster = params.GIT_BRANCH == 'master'
 
-def dockerPushRoot = isMaster 
-    ? "${env.DOCKER_REGISTRY}"
-    : "${env.DOCKER_REGISTRY}snapshot/"
+def dockerPushRoot = isMaster
+    ? "${env.DOCKER_REGISTRY}develop/"
+    : "${env.DOCKER_REGISTRY}pr/"
 
 def dockerImageTag = isMaster
     ? params.APP_VERSION
