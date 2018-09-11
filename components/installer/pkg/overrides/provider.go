@@ -1,9 +1,7 @@
 package overrides
 
 import (
-	"fmt"
 	"path"
-	"strconv"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
@@ -221,16 +219,10 @@ func NewLegacyProvider(overrideData OverrideData, installationData *config.Insta
 
 func (p legacyProvider) getStaticFileOverrides(overrides Map, chartDir string) StaticFile {
 	isLocalEnv := FindOverrideValue(overrides, "global.isLocalEnv")
-	strIsLocalEnv := fmt.Sprintf("%v", isLocalEnv)
 
-	isLocalInst, err := strconv.ParseBool(strIsLocalEnv)
+	isLocalInst, isBool := isLocalEnv.(bool)
 
-	if err != nil {
-		p.errorHandlers.LogError("global.isLocalEnv is not a boolean value. Fallback to false", err)
-		isLocalInst = false
-	}
-
-	if isLocalInst {
+	if isBool && isLocalInst {
 		return NewLocalStaticFile()
 	}
 
