@@ -1,10 +1,10 @@
 controller:
   image:
-    name: szymongib/re-controller
-    tag: 0.0.11
+    name: # TODO: set image name
+    tag: # TODO: set image tag
     pullPolicy: IfNotPresent
   args:
     appName: remote-environment-controller
     tillerUrl: tiller-deploy.kube-system.svc.cluster.local:44134
 
-enabled: true
+enabled: false
