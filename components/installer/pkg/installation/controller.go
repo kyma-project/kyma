@@ -169,7 +169,7 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	//TODO: Fill it with proper data and install UpdateStatus func
-	installationData, err := config.NewInstallationData(installation, config.GetInstallationConfig())
+	installationData, err := config.NewInstallationData(installation)
 	if c.errorHandlers.CheckError("Error while building installation data: ", err) {
 		return err
 	}

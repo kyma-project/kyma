@@ -99,17 +99,18 @@ func MergeMaps(baseMap, overridesMap Map) {
 //FindOverrideStringValue looks for a string value assigned to the provided flat key.
 func FindOverrideStringValue(overrides Map, flatName string) (string, bool) {
 
-	res, isString := findOverrideValue(overrides, flatName).(string)
+	res, isString := FindOverrideValue(overrides, flatName).(string)
 	if isString {
 		return res, true
 	}
 	return "", false
 }
 
-func findOverrideValue(overrides Map, flatName string) (interface{}) {
-	var findOverride func(m map[string]interface{}, keys []string) (interface{})
+//FindOverrideValue looks for a value assigned to the provided flat key.
+func FindOverrideValue(overrides Map, flatName string) interface{} {
+	var findOverride func(m map[string]interface{}, keys []string) interface{}
 
-	findOverride = func(m map[string]interface{}, keys []string) (interface{}) {
+	findOverride = func(m map[string]interface{}, keys []string) interface{} {
 		if len(keys) == 1 {
 			return m[keys[0]]
 		}
@@ -119,7 +120,7 @@ func findOverrideValue(overrides Map, flatName string) (interface{}) {
 			return findOverride(nestedMap, keys[1:])
 		}
 
-		return nil		
+		return nil
 	}
 
 	keys := strings.Split(flatName, ".")

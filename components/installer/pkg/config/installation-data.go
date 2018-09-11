@@ -12,15 +12,14 @@ type InstallationContext struct {
 
 // InstallationData describes all installation attributes
 type InstallationData struct {
-	Context             InstallationContext
-	KymaVersion         string
-	URL                 string
-	Components          []v1alpha1.KymaComponent
-	IsLocalInstallation bool
+	Context     InstallationContext
+	KymaVersion string
+	URL         string
+	Components  []v1alpha1.KymaComponent
 }
 
 // NewInstallationData .
-func NewInstallationData(installation *v1alpha1.Installation, installationConfig *installationConfig) (*InstallationData, error) {
+func NewInstallationData(installation *v1alpha1.Installation) (*InstallationData, error) {
 
 	ctx := InstallationContext{
 		Name:      installation.Name,
@@ -28,11 +27,10 @@ func NewInstallationData(installation *v1alpha1.Installation, installationConfig
 	}
 
 	res := &InstallationData{
-		Context:             ctx,
-		KymaVersion:         installation.Spec.KymaVersion,
-		URL:                 installation.Spec.URL,
-		Components:          installation.Spec.Components,
-		IsLocalInstallation: installationConfig.IsLocalInstallation,
+		Context:     ctx,
+		KymaVersion: installation.Spec.KymaVersion,
+		URL:         installation.Spec.URL,
+		Components:  installation.Spec.Components,
 	}
 	return res, nil
 }

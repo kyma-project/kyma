@@ -404,8 +404,8 @@ a:
 
 				oMap := UnflattenToMap(flatmap)
 
-				val:= findOverrideValue(oMap, "a.b.c")
-				val2 := findOverrideValue(oMap, "a.b.d")
+				val := FindOverrideValue(oMap, "a.b.c")
+				val2 := FindOverrideValue(oMap, "a.b.d")
 
 				So(val, ShouldBeTrue)
 				So(val2, ShouldBeFalse)
