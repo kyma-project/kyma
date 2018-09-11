@@ -35,7 +35,7 @@ do
       echo "$POD is running..."
       break
     else
-      echo "$POD is not running -  waiting 5s..." $(kubectl get event -n "$1" -o json | POD="$POD" jq -c '.items[] | select(.involvedObject.name==env.POD) | .message' | tail -1)
+      echo "$POD is not running -  waiting 5s..." $(kubectl get event -n "$1" -o go-template='{{range .items}}{{if eq .involvedObject.name "'$POD'"}}{{.message}}{{"\n"}}{{end}}{{end}}' | tail -1)
       sleep 5
     fi
   done
