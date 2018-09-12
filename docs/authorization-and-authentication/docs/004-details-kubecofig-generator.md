@@ -7,9 +7,7 @@ The Kubeconfig generator is a proprietary tool that generates a `kubeconfig` fil
 
 The Kubeconfig generator rewrites the ID token issued for the user by Dex into the generated `kubeconfig` file. The TTL of the ID token is 24 hours, which effectively means that the TTL of the generated `kubeconfig` file is 24 hours as well.
 
-The generator is a publicly exposed service. You can access it directly under the `https://configurations-generator.{YOUR_CLUSTER_DOMAIN}`.
-
-When the user attempts to download the `kubeconfig` file for the cluster, the generator calls the publicly exposed API Server proxy to verify the identity of the user.
+The generator is a publicly exposed service. You can access it directly under the `https://configurations-generator.{YOUR_CLUSTER_DOMAIN}`. The service requires a valid ID token issued by Dex to return a successful result.
 
 ## Get the kubeconfig file and configure the CLI
 
