@@ -264,7 +264,7 @@ def commitHashForBuild(build) {
 String projectVersion(project) {
     try {
         def img = projects[project]
-        def json = "https://eu.gcr.io/v2/kyma-project/${img}/manifests/latest".toURL().getText(requestProperties: [Accept: 'application/vnd.docker.distribution.manifest.v1+prettyjws'])
+        def json = "https://eu.gcr.io/v2/kyma-project/develop/${img}/manifests/latest".toURL().getText(requestProperties: [Accept: 'application/vnd.docker.distribution.manifest.v1+prettyjws'])
         def slurper = new JsonSlurperClassic()
         def doc = slurper.parseText(json)
         doc = slurper.parseText(doc.history[0].v1Compatibility)
