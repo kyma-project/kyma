@@ -30,8 +30,8 @@ metadata:
     installer: overrides
 type: Opaque
 data:
-  test.auth.username: "YWRtaW5Aa3ltYS5jeA==" # admin@kyma.cx
-  test.auth.password: "bmltZGExMjM=" # nimda123
+  test.auth.username: "YWRtaW5Aa3ltYS5jeA=="
+  test.auth.password: "bmltZGExMjM="
 ---
 apiVersion: v1
 kind: ConfigMap

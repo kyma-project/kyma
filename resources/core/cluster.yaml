@@ -1,0 +1,28 @@
+service-catalog:
+  etcd:
+    cluster:
+      replicaCount: 3
+
+sidecar-injector:
+  includeIPRanges: "10.244.0.0/16,10.240.0.0/16"
+
+minio:
+  accessKey: "admin"
+  secretKey: "topSecretKey"
+  persistence:
+    storageClass: "managed-standard"
+
+event-bus:
+  nats-streaming:
+    persistence:
+      storageClass: "managed-standard"
+
+monitoring:
+  grafana:
+    persistence:
+      storageClass: "managed-standard"
+
+acceptanceTest:
+  # environments used in remote-environment acceptance test
+  remoteEnvironment:
+    disabled: "true" #the remote environment acceptance test is disabled on cluster, needs investigations

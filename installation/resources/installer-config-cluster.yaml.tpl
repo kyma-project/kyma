@@ -35,7 +35,7 @@ data:
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
   global.alertTools.credentials.slack.apiurl: "__SLACK_API_URL_VALUE__"
   global.alertTools.credentials.slack.channel: "__SLACK_CHANNEL_VALUE__"
-  global.alertTools.credentials.victorOps.routingkey: "__VICTOR_OPS_API_KEY_VALUE__"
+  global.alertTools.credentials.victorOps.routingkey: "__VICTOR_OPS_ROUTING_KEY_VALUE__"
   global.alertTools.credentials.victorOps.apikey: "__VICTOR_OPS_API_KEY_VALUE__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   configurations-generator.kubeConfig.clusterName: "__DOMAIN__"
