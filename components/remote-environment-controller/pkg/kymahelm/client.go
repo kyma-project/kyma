@@ -21,12 +21,10 @@ func NewClient(host string) HelmClient {
 	}
 }
 
-// ListReleases .
 func (hc *helmClient) ListReleases() (*rls.ListReleasesResponse, error) {
 	return hc.helm.ListReleases()
 }
 
-// InstallRelease .
 func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error) {
 	return hc.helm.InstallRelease(
 		chartDir,
@@ -38,7 +36,6 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName, overrid
 	)
 }
 
-// DeleteRelease .
 func (hc *helmClient) DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error) {
 	return hc.helm.DeleteRelease(
 		releaseName,

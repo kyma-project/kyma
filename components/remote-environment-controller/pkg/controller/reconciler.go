@@ -79,7 +79,6 @@ func (r *remoteEnvironmentReconciler) installNewREChart(name string) {
 	}
 }
 
-// TODO: consider returning error to requeue the request
 func (r *remoteEnvironmentReconciler) deleteREChart(name string) {
 	_, err := r.helmClient.DeleteRelease(name)
 	if err != nil {
