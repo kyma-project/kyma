@@ -266,14 +266,14 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 		for {
 			select {
 			case <-timeout:
-				log.Printf("[%v] Timeout: Check if virtual service has been created", testName)
+				log.Printf("[%v] Timeout: Check if Virtual Service has been created", testName)
 				printDebugLogsAPIServiceFailed(namespace, testName)
-				cmd := exec.Command("kubectl", "-n", namespace, "get", "virtualservices.networking.istio.io")
+				cmd := exec.Command("kubectl", "-n", namespace, "get", "virtualservices.networking.istio.io", "-l", "apiName="+testName)
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
-					log.Fatalf("[%v] Unable to fetch virtual Service for: %v. Because of following error: %v", testName, testName, err)
+					log.Fatalf("[%v] Unable to fetch Virtual Service for: %v. Because of following error: %v", testName, testName, string(stdoutStderr))
 				}
-				log.Printf("[%v] Timeout: Virtual Service is: %v", testName, string(stdoutStderr))
+				log.Printf("[%v] Timeout: Getting Virtual Service: '%v' and result is: %v", testName, testName, string(stdoutStderr))
 
 				log.Printf("[%v] Timeout: Check http Get one last time", testName)
 				resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
