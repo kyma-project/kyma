@@ -42,11 +42,11 @@ func main() {
 	registerer := crd.NewRegistrar(apiExtensionsClientSet)
 	registerer.Register(v1alpha2.Crd(domainName))
 
-	istioNetworkingClientSet := istioNetworkingClient.NewForConfigOrDie(kubeConfig)
-	istioNetworkingV1Interface := istioNetworkingV1.New(istioNetworkingClientSet, istioGateway)
-
 	k8sClientSet := k8sClient.NewForConfigOrDie(kubeConfig)
 	serviceV1Interface := serviceV1.New(k8sClientSet)
+
+	istioNetworkingClientSet := istioNetworkingClient.NewForConfigOrDie(kubeConfig)
+	istioNetworkingV1Interface := istioNetworkingV1.New(istioNetworkingClientSet, k8sClientSet, istioGateway)
 
 	istioAuthenticationClientSet := istioAuthenticationClient.NewForConfigOrDie(kubeConfig)
 	authenticationV2Interface := authenticationV2.New(istioAuthenticationClientSet, jwtDefaultConfig)

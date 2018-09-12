@@ -100,16 +100,18 @@ func TestSpec(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+
+			time.Sleep(3 * time.Second)
 		})
 
 		Convey("update API with hostname without domain", func() {
 
 			t.Log("Update...")
 
-			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled, false)
-			api.ResourceVersion = lastApi.ResourceVersion
+			api := *lastApi
+			api.Spec.Hostname = hostnameFor(testId, domainName, false)
 
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
 
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
@@ -122,28 +124,35 @@ func TestSpec(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+			So(lastApi.Spec.AuthenticationEnabled, ShouldNotBeNil)
+
+			time.Sleep(3 * time.Second)
 		})
 
 		Convey("do not update API with wrong domain", func() {
 
 			t.Log("Update...")
 
-			api := apiFor(testId, domainName + ".com", fixture.SampleAppService, apiSecurityDisabled, true)
+			api := apiFor(testId, domainName+".com", fixture.SampleAppService, apiSecurityDisabled, true)
 			api.ResourceVersion = lastApi.ResourceVersion
 
 			_, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
 
 			So(err, ShouldNotBeNil)
+
+			time.Sleep(3 * time.Second)
 		})
 
 		Convey("update API with default jwt configuration to enable authentication", func() {
 
 			t.Log("Update...")
 
-			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityEnabled, true)
-			api.ResourceVersion = lastApi.ResourceVersion
+			api := *lastApi
+			authEnabled := true
+			api.Spec.AuthenticationEnabled = &authEnabled
+			api.Spec.Hostname = hostnameFor(testId, domainName, true)
 
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
 
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
@@ -156,16 +165,19 @@ func TestSpec(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+
+			time.Sleep(3 * time.Second)
 		})
 
 		Convey("update API to disable authentication", func() {
 
 			t.Log("Update...")
 
-			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled, true)
-			api.ResourceVersion = lastApi.ResourceVersion
+			api := *lastApi
+			authEnabled := false
+			api.Spec.AuthenticationEnabled = &authEnabled
 
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
 
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
@@ -178,18 +190,19 @@ func TestSpec(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+
+			time.Sleep(3 * time.Second)
 		})
 
 		Convey("update API with custom jwt configuration", func() {
 
 			t.Log("Update...")
 
-			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityEnabled, true)
-			api.ResourceVersion = lastApi.ResourceVersion
+			api := *lastApi
 
-			setCustomJwtAuthenticationConfig(api)
+			setCustomJwtAuthenticationConfig(&api)
 
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
 
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
@@ -202,6 +215,8 @@ func TestSpec(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+
+			time.Sleep(3 * time.Second)
 		})
 
 		Convey("delete API", func() {
@@ -217,6 +232,8 @@ func TestSpec(t *testing.T) {
 			_, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
 
 			So(err, ShouldNotBeNil)
+
+			time.Sleep(3 * time.Second)
 		})
 	})
 }
@@ -259,7 +276,7 @@ func setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
 	}
 
 	secured := true
-	if !(*api.Spec.AuthenticationEnabled) { // optional property, but if set earlier to false it will force auth disabled
+	if api.Spec.AuthenticationEnabled != nil && !(*api.Spec.AuthenticationEnabled) { // optional property, but if set earlier to false it will force auth disabled
 		api.Spec.AuthenticationEnabled = &secured
 	}
 	api.Spec.Authentication = rules

@@ -1,8 +1,9 @@
 package v1
 
 import (
-	"k8s.io/apimachinery/pkg/types"
 	"fmt"
+
+	"k8s.io/apimachinery/pkg/types"
 )
 
 type StatusCode int
@@ -12,10 +13,11 @@ func (c *StatusCode) String() string {
 }
 
 const (
-	Empty      StatusCode = iota
+	Empty StatusCode = iota
 	InProgress
 	Done
 	Error
+	UpdateFailure
 )
 
 func (s StatusCode) IsEmpty() bool {
@@ -32,6 +34,10 @@ func (s StatusCode) IsDone() bool {
 
 func (s StatusCode) IsError() bool {
 	return s == Error
+}
+
+func (s StatusCode) IsUpdateFailure() bool {
+	return s == UpdateFailure
 }
 
 type GatewayResourceStatus struct {
@@ -58,6 +64,10 @@ func (s *GatewayResourceStatus) IsDone() bool {
 
 func (s *GatewayResourceStatus) IsError() bool {
 	return s.Code.IsError()
+}
+
+func (s *GatewayResourceStatus) IsUpdateFailure() bool {
+	return s.Code.IsUpdateFailure()
 }
 
 type GatewayResource struct {
