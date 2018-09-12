@@ -96,10 +96,6 @@ func (p legacyProvider) getClusterEssentialsOverrides(installationData *config.I
 
 	MergeMaps(allOverrides, overrides)
 
-	globalOverrides, err := GetGlobalOverrides(installationData, allOverrides)
-	p.errorHandlers.LogError("Couldn't get global overrides: ", err)
-	MergeMaps(allOverrides, globalOverrides)
-
 	staticOverrides := p.getStaticFileOverrides(overrides, chartDir)
 	if staticOverrides.HasOverrides() == true {
 		fileOverrides, err := staticOverrides.GetOverrides()
@@ -114,14 +110,6 @@ func (p legacyProvider) getIstioOverrides(installationData *config.InstallationD
 	allOverrides := Map{}
 
 	MergeMaps(allOverrides, overrides)
-
-	globalOverrides, err := GetGlobalOverrides(installationData, allOverrides)
-	p.errorHandlers.LogError("Couldn't get global overrides: ", err)
-	MergeMaps(allOverrides, globalOverrides)
-
-	istioOverrides, err := GetIstioOverrides(installationData, allOverrides)
-	p.errorHandlers.LogError("Couldn't get Istio overrides: ", err)
-	MergeMaps(allOverrides, istioOverrides)
 
 	staticOverrides := p.getStaticFileOverrides(overrides, chartDir)
 	if staticOverrides.HasOverrides() == true {
