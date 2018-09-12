@@ -122,7 +122,6 @@ func (p legacyProvider) getIstioOverrides(installationData *config.InstallationD
 }
 
 func (p legacyProvider) getPrometheusOverrides(installationData *config.InstallationData, chartDir string, overrides Map) (string, error) {
-	//TODO: this does not get globalOverrides... Is that a problem if global will carry all external ones (overrides.yaml + from configMaps/secrets?)
 	allOverrides := Map{}
 
 	MergeMaps(allOverrides, overrides)
@@ -142,10 +141,6 @@ func (p legacyProvider) getDexOverrides(installationData *config.InstallationDat
 	allOverrides := Map{}
 
 	MergeMaps(allOverrides, overrides)
-
-	globalOverrides, err := GetGlobalOverrides(installationData, allOverrides)
-	p.errorHandlers.LogError("Couldn't get global overrides: ", err)
-	MergeMaps(allOverrides, globalOverrides)
 
 	staticOverrides := p.getStaticFileOverrides(overrides, chartDir)
 	if staticOverrides.HasOverrides() == true {
