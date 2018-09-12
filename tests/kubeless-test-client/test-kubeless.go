@@ -149,6 +149,33 @@ func printLogsFunctionPodContainers(namespace, name string) {
 	log.Printf("Logs from %s container in pod %s:\n%s\n", name, string(functionPodName), string(functionContainerLog))
 }
 
+func printDebugLogsAPIServiceFailed(namespace, name string) {
+	functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name)
+
+	functionPodsStdOutStdErr, err := functionPodsCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching pods for function: %v\n", err)
+	}
+	log.Printf("Function pods status:\n%s\n", string(functionPodsStdOutStdErr))
+
+	controllerNamespace := os.Getenv("KUBELESS_NAMESPACE")
+	apiControllerPodNameCmd := exec.Command("kubectl", "-n", controllerNamespace, "get", "po", "-l", "app=api-controller", "-o", "jsonpath={.items[0].metadata.name}")
+
+	apiControllerPodName, err := apiControllerPodNameCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching API Controller pod: \n%s\n", string(apiControllerPodName))
+	}
+
+	apiControllerLogsCmd := exec.Command("kubectl", "-n", controllerNamespace, "log", string(apiControllerPodName))
+
+	apiControllerLogsCmdOutErr, err := apiControllerLogsCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching logs for API Controller: %v\n", string(apiControllerLogsCmdOutErr))
+	}
+	log.Printf("Logs from API Controller:\n%s\n", string(apiControllerLogsCmdOutErr))
+
+}
+
 func printDebugLogsSvcBindingUsageFailed(namespace, name string) {
 
 	functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name)
@@ -240,6 +267,7 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 			select {
 			case <-timeout:
 				log.Printf("[%v] Timeout: Check if virtual service has been created", testName)
+				printDebugLogsAPIServiceFailed(namespace, testName)
 				cmd := exec.Command("kubectl", "-n", namespace, "get", "virtualservices.networking.istio.io")
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
@@ -275,8 +303,8 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 						log.Printf("[%v] Name of the Successful Pod is: %v", testName, string(functionPodName))
 						return
 					}
-					log.Fatalf("[%v] Response is not equal to expected output: %v != %v", testName, string(bodyBytes), expectedOutput)
 					log.Printf("[%v] Name of the Failed Pod is: %v", testName, string(functionPodName))
+					log.Fatalf("[%v] Response is not equal to expected output: %v != %v", testName, string(bodyBytes), expectedOutput)
 				}
 			}
 		}
@@ -388,12 +416,11 @@ func ensureServceBindingIsReady(namespace, svcBinding string) {
 				log.Fatalf("Error fetching service instance binding %v: %v", svcBinding, err)
 			}
 			if string(stdoutStderr) == "True" {
+				log.Printf("Service binding has been successfully created.")
 				return
 			}
 		}
-
 	}
-
 }
 
 func cleanup() {
