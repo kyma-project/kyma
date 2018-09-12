@@ -26,8 +26,10 @@ type ServiceClass struct {
 	DisplayName         string
 	CreationTimestamp   int
 	Description         string
+	LongDescription     string
 	ImageUrl            string
 	DocumentationUrl    string
+	SupportUrl          string
 	ProviderDisplayName string
 	Tags                []string
 	Activated           bool
@@ -56,8 +58,10 @@ func TestClassesQueries(t *testing.T) {
 		displayName
 		creationTimestamp
 		description
+		longDescription
 		imageUrl
 		documentationUrl
+		supportUrl
 		providerDisplayName
 		tags
 		plans {

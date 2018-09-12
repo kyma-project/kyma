@@ -197,7 +197,7 @@ func (s *bindingUsageTestSuite) deleteBinding() error {
 
 func (s *bindingUsageTestSuite) createBindingUsage() (bindingUsageCreateMutationResponse, error) {
 	query := fmt.Sprintf(`
-		mutation ($name: String!, $environment: String!, $serviceBindingRefName: String!, $usedByName: String!, $usedByKind: BindingUsageReferenceType!) {
+		mutation ($name: String!, $environment: String!, $serviceBindingRefName: String!, $usedByName: String!, $usedByKind: String!) {
 			createServiceBindingUsage(createServiceBindingUsageInput: {
 				name: $name,
 				environment: $environment,

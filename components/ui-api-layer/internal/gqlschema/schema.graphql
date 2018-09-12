@@ -33,6 +33,7 @@ type ServiceInstance {
     ServiceClassDisplayName: String!
     servicePlanName: String
     servicePlanDisplayName: String!
+    servicePlanSpec: JSON
     creationTimestamp: Timestamp!
     labels: [String]!
     status: ServiceInstanceStatus
@@ -86,6 +87,7 @@ type ServiceClass {
     longDescription: String
     imageUrl: String
     documentationUrl: String
+    supportUrl: String
     providerDisplayName: String
     tags: [String]!
     plans: [ServicePlan]!

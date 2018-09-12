@@ -9,7 +9,7 @@ import (
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
@@ -31,6 +31,7 @@ type ServiceInstance struct {
 	ServiceClassDisplayName string
 	ServicePlanName         string
 	ServicePlanDisplayName  string
+	ServicePlanSpec         map[string]interface{}
 	ServicePlan             ServicePlan
 	ServiceClass            ServiceClass
 	CreationTimestamp       int
@@ -118,13 +119,14 @@ func TestInstanceMutationsAndQueries(t *testing.T) {
 
 func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource ServiceInstance) (instanceCreateMutationResponse, error) {
 	query := fmt.Sprintf(`
-			mutation ($name: String!, $environment: String!, $externalPlanName: String!, $externalServiceClassName: String!, $labels: [String!]!) {
+			mutation ($name: String!, $environment: String!, $externalPlanName: String!, $externalServiceClassName: String!, $labels: [String!]!, $parameterSchema: JSON) {
 				createServiceInstance(params:{
     				name: $name,
     				environment: $environment,
     				externalPlanName: $externalPlanName,
     				externalServiceClassName: $externalServiceClassName,
-    				labels: $labels
+    				labels: $labels,
+					parameterSchema: $parameterSchema
 				}) {
 					%s
 				}
@@ -136,6 +138,7 @@ func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 	req.SetVar("externalPlanName", expectedResource.ServicePlan.ExternalName)
 	req.SetVar("externalServiceClassName", expectedResource.ServiceClass.ExternalName)
 	req.SetVar("labels", expectedResource.Labels)
+	req.SetVar("parameterSchema", expectedResource.ServicePlanSpec)
 
 	var res instanceCreateMutationResponse
 	err := c.Do(req, &res)
@@ -228,6 +231,7 @@ func instanceDetailsFields() string {
 		ServiceClassDisplayName
 		servicePlanName
 		servicePlanDisplayName
+		servicePlanSpec
 		creationTimestamp
 		labels
 		status {
@@ -249,8 +253,10 @@ func instanceDetailsFields() string {
 			displayName
 			creationTimestamp
 			description
+			longDescription
 			imageUrl
 			documentationUrl
+			supportUrl
 			providerDisplayName
 			tags
 			activated
@@ -302,6 +308,12 @@ func instance(name string) ServiceInstance {
 		Name:        name,
 		Environment: tester.DefaultNamespace,
 		Labels:      []string{"test", "test2"},
+		ServicePlanSpec: map[string]interface{}{
+			"first": "1",
+			"second": map[string]interface{}{
+				"value": "2",
+			},
+		},
 		ServicePlan: ServicePlan{
 			Name:         "86064792-7ea2-467b-af93-ac9694d96d52",
 			ExternalName: "default",

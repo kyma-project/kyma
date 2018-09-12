@@ -71,7 +71,12 @@ func (r *instanceResolver) CreateServiceInstanceMutation(ctx context.Context, pa
 		Name: serviceClass.Name,
 	}
 
-	instance := r.instanceConverter.ToGQL(instanceCopy)
+	instance, err := r.instanceConverter.ToGQL(instanceCopy)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceInstance))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(params.Name), gqlerror.WithEnvironment(params.Environment))
+	}
+
 	return instance, nil
 }
 
@@ -94,7 +99,11 @@ func (r *instanceResolver) DeleteServiceInstanceMutation(ctx context.Context, na
 		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
 	}
 
-	deletedInstance := r.instanceConverter.ToGQL(instanceCopy)
+	deletedInstance, err := r.instanceConverter.ToGQL(instanceCopy)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceInstance))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
+	}
 
 	return deletedInstance, nil
 }
@@ -109,7 +118,11 @@ func (r *instanceResolver) ServiceInstanceQuery(ctx context.Context, name string
 		return nil, nil
 	}
 
-	result := r.instanceConverter.ToGQL(serviceInstance)
+	result, err := r.instanceConverter.ToGQL(serviceInstance)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceInstance))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
+	}
 
 	return result, nil
 }
@@ -136,7 +149,11 @@ func (r *instanceResolver) ServiceInstancesQuery(ctx context.Context, environmen
 		return nil, gqlerror.New(err, pretty.ServiceInstances, gqlerror.WithEnvironment(environment))
 	}
 
-	serviceInstances := r.instanceConverter.ToGQLs(items)
+	serviceInstances, err := r.instanceConverter.ToGQLs(items)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceInstances))
+		return nil, gqlerror.New(err, pretty.ServiceInstances, gqlerror.WithEnvironment(environment))
+	}
 
 	return serviceInstances, nil
 }

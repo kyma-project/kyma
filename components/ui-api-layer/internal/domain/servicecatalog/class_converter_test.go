@@ -25,6 +25,7 @@ func TestClassConverter_ToGQL(t *testing.T) {
 			"imageUrl":            "exampleImageUrl",
 			"documentationUrl":    "exampleDocumentationUrl",
 			"longDescription":     "exampleLongDescription",
+			"supportUrl":          "exampleSupportUrl",
 		}
 
 		byteMaps, err := json.Marshal(maps)
@@ -48,6 +49,7 @@ func TestClassConverter_ToGQL(t *testing.T) {
 		providerDisplayName := "exampleProviderName"
 		imageUrl := "exampleImageUrl"
 		documentationUrl := "exampleDocumentationUrl"
+		supportUrl := "exampleSupportUrl"
 		displayName := "exampleDisplayName"
 		longDescription := "exampleLongDescription"
 		expected := gqlschema.ServiceClass{
@@ -59,8 +61,10 @@ func TestClassConverter_ToGQL(t *testing.T) {
 			ProviderDisplayName: &providerDisplayName,
 			ImageUrl:            &imageUrl,
 			DocumentationUrl:    &documentationUrl,
+			SupportUrl:          &supportUrl,
 			CreationTimestamp:   zeroTimeStamp,
-			Tags:                []string{"tag1", "tag2"}}
+			Tags:                []string{"tag1", "tag2"},
+		}
 
 		result, err := converter.ToGQL(&item)
 
@@ -158,6 +162,7 @@ func fixServiceClass(t require.TestingT) *v1beta1.ClusterServiceClass {
 		"imageUrl":            "exampleImageUrl",
 		"documentationUrl":    "exampleDocumentationUrl",
 		"longDescription":     "exampleLongDescription",
+		"supportUrl":          "exampleSupportUrl",
 	}
 
 	byteMaps, err := json.Marshal(maps)

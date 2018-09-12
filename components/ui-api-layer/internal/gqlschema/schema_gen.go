@@ -5022,6 +5022,8 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel []query.Selec
 			out.Values[i] = ec._ServiceClass_imageUrl(ctx, field, obj)
 		case "documentationUrl":
 			out.Values[i] = ec._ServiceClass_documentationUrl(ctx, field, obj)
+		case "supportUrl":
+			out.Values[i] = ec._ServiceClass_supportUrl(ctx, field, obj)
 		case "providerDisplayName":
 			out.Values[i] = ec._ServiceClass_providerDisplayName(ctx, field, obj)
 		case "tags":
@@ -5138,6 +5140,20 @@ func (ec *executionContext) _ServiceClass_documentationUrl(ctx context.Context, 
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.DocumentationUrl
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+func (ec *executionContext) _ServiceClass_supportUrl(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "ServiceClass"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.SupportUrl
 	if res == nil {
 		return graphql.Null
 	}
@@ -5371,6 +5387,8 @@ func (ec *executionContext) _ServiceInstance(ctx context.Context, sel []query.Se
 			out.Values[i] = ec._ServiceInstance_servicePlanName(ctx, field, obj)
 		case "servicePlanDisplayName":
 			out.Values[i] = ec._ServiceInstance_servicePlanDisplayName(ctx, field, obj)
+		case "servicePlanSpec":
+			out.Values[i] = ec._ServiceInstance_servicePlanSpec(ctx, field, obj)
 		case "creationTimestamp":
 			out.Values[i] = ec._ServiceInstance_creationTimestamp(ctx, field, obj)
 		case "labels":
@@ -5465,6 +5483,17 @@ func (ec *executionContext) _ServiceInstance_servicePlanDisplayName(ctx context.
 	defer rctx.Pop()
 	res := obj.ServicePlanDisplayName
 	return graphql.MarshalString(res)
+}
+
+func (ec *executionContext) _ServiceInstance_servicePlanSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "ServiceInstance"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.ServicePlanSpec
+	return res
 }
 
 func (ec *executionContext) _ServiceInstance_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
@@ -7203,6 +7232,7 @@ type ServiceInstance {
     ServiceClassDisplayName: String!
     servicePlanName: String
     servicePlanDisplayName: String!
+    servicePlanSpec: JSON
     creationTimestamp: Timestamp!
     labels: [String]!
     status: ServiceInstanceStatus
@@ -7256,6 +7286,7 @@ type ServiceClass {
     longDescription: String
     imageUrl: String
     documentationUrl: String
+    supportUrl: String
     providerDisplayName: String
     tags: [String]!
     plans: [ServicePlan]!
