@@ -158,6 +158,13 @@ func printDebugLogsAPIServiceFailed(namespace, name string) {
 	}
 	log.Printf("Function pods status:\n%s\n", string(functionPodsStdOutStdErr))
 
+	apiListCmd := exec.Command("kubectl", "-n", namespace, "get", "api", "-l", "function="+name)
+	apiListStdOutErr, err := apiListCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching list APIs: %v\n", err)
+	}
+	log.Printf("API List:\n%s\n", string(apiListStdOutErr))
+
 	controllerNamespace := os.Getenv("KUBELESS_NAMESPACE")
 	apiControllerPodNameCmd := exec.Command("kubectl", "-n", controllerNamespace, "get", "po", "-l", "app=api-controller", "-o", "jsonpath={.items[0].metadata.name}")
 
