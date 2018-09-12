@@ -179,7 +179,7 @@
 /tests/test-logging-monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
 # test-logging tests
-/tests/test-logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+/tests/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
 # api-controller acceptance tests
 /tests/api-controller-acceptance-tests/ @piotrmsc

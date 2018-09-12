@@ -14,12 +14,11 @@ import (
 const expectedLogSpout = 1
 const expectedOKLog = 1
 const namespace = "kyma-system"
-const yamlFile = "counterTestPod.yaml"
+const yamlFile = "testCounterPod.yaml"
 
 func getPodStatus(stdout string) (podName string, isReady bool) {
 	isReady = false
 	stdoutArr := regexp.MustCompile("( )+").Split(stdout, -1)
-	log.Printf("I am here: %v", stdoutArr)
 	podName = stdoutArr[0]
 	readyCount := strings.Split(stdoutArr[1], "/")
 	status := stdoutArr[2]
@@ -47,7 +46,7 @@ func testPodsAreReady() {
 				log.Fatalf("Expected 'OKLog' pods healthy is %d but got %d instances", expectedOKLog, actualOKLog)
 			}
 		case <-tick:
-			cmd := exec.Command("kubectl", "get", "pods", "-l", "app in (oklog, logspout)", "-n", namespace, "--no-headers")
+			cmd := exec.Command("kubectl", "get", "pods", "-l", "component in (oklog, logspout)", "-n", namespace, "--no-headers")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Fatalf("Error while kubectl get: %s ", err)
@@ -77,7 +76,7 @@ func testPodsAreReady() {
 }
 
 func testOKLogUI() {
-	resp, err := http.Get("http://oklog:7650/ui/")
+	resp, err := http.Get("http://core-logging-oklog-0.core-logging-oklog:7650/ui/")
 
 	if err != nil {
 		log.Fatalf("Test Check OKLogUI Failed: error is: %v and response is: %v", err, resp)
@@ -94,16 +93,16 @@ func testOKLogUI() {
 func testLogSpout() {
 	timeout := time.After(2 * time.Minute)
 	tick := time.Tick(1 * time.Second)
-	var testDataRegex = regexp.MustCompile(`(?m)oklog.kyma-system:7651*`)
+	var testDataRegex = regexp.MustCompile(`(?m)core-logging-oklog\.kyma-system:7651*`)
 
 	for {
 		select {
 		case <-timeout:
-			cmd := exec.Command("kubectl", "-n", namespace, "logs", "-l", "app=logspout")
+			cmd := exec.Command("kubectl", "-n", namespace, "logs", "-l", "component=logspout")
 			stdoutStderr, _ := cmd.CombinedOutput()
 			log.Fatal("Timed out getting the correct log for pod logspout", ":\n", string(stdoutStderr))
 		case <-tick:
-			cmd := exec.Command("kubectl", "-n", namespace, "logs", "-l", "app=logspout")
+			cmd := exec.Command("kubectl", "-n", namespace, "logs", "-l", "component=logspout")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Fatal("Unable to obtain function log for pod logspout", ":\n", string(stdoutStderr))
@@ -134,57 +133,55 @@ func waitForDummyPodToRun() {
 		select {
 		case <-timeout:
 			log.Println("Test LogStreaming: result: Timed out!!")
-			cmd := exec.Command("kubectl", "get", "pods", "-l", "app=counterTestPod", "-n", namespace, "--no-headers")
+			cmd := exec.Command("kubectl", "get", "pods", "-l", "component=test-counter-pod", "-n", namespace, "--no-headers")
 			stdoutStderr, _ := cmd.CombinedOutput()
-			log.Fatal("Test LogStreaming: result: Timed out!!. Current state is", ":\n", string(stdoutStderr))
+			log.Fatal("Test LogStreaming: result: Timed out!! Current state is", ":\n", string(stdoutStderr))
 		case <-tick:
-			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "counter-test-pod", "-ojsonpath={.status.phase}")
+			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "test-counter-pod", "-ojsonpath={.status.phase}")
 			stdoutStderr, err := cmd.CombinedOutput()
 
 			if err == nil && strings.Contains(string(stdoutStderr), "Running") {
-				log.Printf("Returning")
+				log.Printf("test-counter-pod is running!")
 				return
 			}
+			log.Printf("Waiting for the test-counter-pod to be Running!")
 		}
 	}
 }
 
 func testLogs() {
-	log.Println("Starting")
 	c := &http.Client{
 		Timeout: 45 * time.Second,
 	}
 
-	res, err := c.Get("http://oklog:7650/store/stream?q=oklogTest-")
+	res, err := c.Get("http://core-logging-oklog-0.core-logging-oklog:7650/store/stream?q=oklogTest-")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error in HTTP GET to http://core-logging-oklog-0.core-logging-oklog:7650/store/stream?q=oklogTest-: %v\n", err)
 	}
 	defer res.Body.Close()
 	var testDataRegex = regexp.MustCompile(`(?m)oklogTest-*`)
-
-	log.Println("Here")
 
 	reader := bufio.NewReader(res.Body)
 	for {
 		line, err := reader.ReadBytes('\n')
 		if err != nil {
+			log.Fatalf("Error in reading from log stream: %v", err)
 			return
 		}
-		println(string(line))
 		submatches := testDataRegex.FindStringSubmatch(string(line))
 		if submatches != nil {
-			log.Printf("The string 'oklogtest-' is present in logs: %v", submatches)
+			log.Printf("The string 'oklogtest-' is present in logs: %v", string(line))
 			return
 		}
 	}
 }
 
 func testLogStream() {
-	log.Println("Deploying Dummy Pod")
+	log.Println("Deploying test-counter-pod Pod")
 	deployDummyPod()
 	waitForDummyPodToRun()
 	testLogs()
-	log.Println("Test Log Stream Succeeded!!")
+	log.Println("Test Logging Succeeded!")
 }
 
 func cleanup() {
@@ -192,13 +189,13 @@ func cleanup() {
 	stdoutStderr, err := cmd.CombinedOutput()
 	output := string(stdoutStderr)
 	if err != nil && !strings.Contains(output, "NotFound") {
-		log.Fatal("Unable to delete:\n", output)
+		log.Fatalf("Unable to delete test-counter-pod:%s\n", output)
 	}
-
+	log.Println("Cleanup is successful!")
 }
 
 func main() {
-	log.Println("Starting Test")
+	log.Println("Starting logging test")
 	cleanup()
 	log.Println("Test if all the OKLog pods are ready")
 	testPodsAreReady()
@@ -208,6 +205,5 @@ func main() {
 	testLogSpout()
 	log.Println("Test if logs from a dummy Pod are streamed by OKLog")
 	testLogStream()
-
 	cleanup()
 }
