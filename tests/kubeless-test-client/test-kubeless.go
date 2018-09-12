@@ -87,6 +87,7 @@ func ensureFunctionIsRunning(namespace, name string, serviceBinding bool) {
 	sbuID := ""
 	if serviceBinding {
 		sbuID = getSBUID(namespace, name)
+		log.Printf("[%v] Service binding Usage ID is: %v", name, sbuID)
 	}
 	timeout := time.After(6 * time.Minute)
 	tick := time.Tick(1 * time.Second)
@@ -95,19 +96,28 @@ func ensureFunctionIsRunning(namespace, name string, serviceBinding bool) {
 		case <-timeout:
 			cmd := exec.Command("kubectl", "-n", namespace, "describe", "pod", "-l", "function="+name)
 			if sbuID != "" {
+				log.Printf("[%v] Timed out: Service binding Usage ID is: %v", name, sbuID)
 				cmd = exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name, "-l", "use-"+sbuID)
 				printDebugLogsSvcBindingUsageFailed(namespace, name)
 			}
 			stdoutStderr, _ := cmd.CombinedOutput()
 			printLogsFunctionPodContainers(namespace, name)
-			log.Fatal("Timed out waiting for ", name, " function pod to be running:\n", string(stdoutStderr))
+			log.Fatalf("[%v] Timed out waiting for: %v function pod to be running. Because of following error: %v ", name, name, string(stdoutStderr))
 		case <-tick:
 			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name, "-ojsonpath={range .items[*]}{.status.phase}{end}")
 			if sbuID != "" {
+				log.Printf("[%v] Tick: Service binding Usage ID is: %v", name, sbuID)
 				cmd = exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name, "-l", "use-"+sbuID, "-ojsonpath={range .items[*]}{.status.phase}{end}")
 			}
 			stdoutStderr, err := cmd.CombinedOutput()
+
+			functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name, "-ojsonpath={.items[0].metadata.name}")
+			functionPodName, err := functionPodsCmd.CombinedOutput()
+			if err != nil {
+				log.Printf("[%v] Error is fetch function pod when verifying function is running: %v", name, string(functionPodName))
+			}
 			if err == nil && strings.Contains(string(stdoutStderr), "Running") {
+				log.Printf("[%v] Pod: %v: and SBU ID is: %v", name, string(functionPodName), sbuID)
 				return
 			}
 		}
@@ -137,6 +147,40 @@ func printLogsFunctionPodContainers(namespace, name string) {
 
 	functionContainerLog, _ := functionContainerLogCmd.CombinedOutput()
 	log.Printf("Logs from %s container in pod %s:\n%s\n", name, string(functionPodName), string(functionContainerLog))
+}
+
+func printDebugLogsAPIServiceFailed(namespace, name string) {
+	functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name)
+
+	functionPodsStdOutStdErr, err := functionPodsCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching pods for function: %v\n", err)
+	}
+	log.Printf("Function pods status:\n%s\n", string(functionPodsStdOutStdErr))
+
+	apiListCmd := exec.Command("kubectl", "-n", namespace, "get", "api", "-l", "function="+name)
+	apiListStdOutErr, err := apiListCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching list APIs: %v\n", err)
+	}
+	log.Printf("API List:\n%s\n", string(apiListStdOutErr))
+
+	controllerNamespace := os.Getenv("KUBELESS_NAMESPACE")
+	apiControllerPodNameCmd := exec.Command("kubectl", "-n", controllerNamespace, "get", "po", "-l", "app=api-controller", "-o", "jsonpath={.items[0].metadata.name}")
+
+	apiControllerPodName, err := apiControllerPodNameCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching API Controller pod: \n%s\n", string(apiControllerPodName))
+	}
+
+	apiControllerLogsCmd := exec.Command("kubectl", "-n", controllerNamespace, "log", string(apiControllerPodName))
+
+	apiControllerLogsCmdOutErr, err := apiControllerLogsCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching logs for API Controller: %v\n", string(apiControllerLogsCmdOutErr))
+	}
+	log.Printf("Logs from API Controller:\n%s\n", string(apiControllerLogsCmdOutErr))
+
 }
 
 func printDebugLogsSvcBindingUsageFailed(namespace, name string) {
@@ -212,13 +256,13 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 
 	ingressGatewayControllerAddr, err := net.LookupHost(ingressGatewayControllerServiceURL)
 	if err != nil {
-		log.Printf("Unable to resolve host '%s'. Root cause: %v", ingressGatewayControllerServiceURL, err)
+		log.Printf("[%v] Unable to resolve host '%s'. Root cause: %v", testName, ingressGatewayControllerServiceURL, err)
 		if minikubeIP := getMinikubeIP(); minikubeIP != "" {
 			ingressGatewayControllerAddr = []string{minikubeIP}
 		}
 	}
 	if len(ingressGatewayControllerAddr) > 0 {
-		log.Printf("Ingress controller address: '%s'", ingressGatewayControllerAddr[0])
+		log.Printf("[%v] Ingress controller address: '%s'", testName, ingressGatewayControllerAddr[0])
 
 		http.DefaultTransport.(*http.Transport).DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 			addr = ingressGatewayControllerAddr[0] + ":443"
@@ -229,36 +273,45 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 		for {
 			select {
 			case <-timeout:
-				log.Println("Timeout: Check if virtual service has been created")
-				cmd := exec.Command("kubectl", "-n", namespace, "get", "virtualservices.networking.istio.io")
+				log.Printf("[%v] Timeout: Check if Virtual Service has been created", testName)
+				printDebugLogsAPIServiceFailed(namespace, testName)
+				cmd := exec.Command("kubectl", "-n", namespace, "get", "virtualservices.networking.istio.io", "-l", "apiName="+testName)
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
-					log.Fatal("Unable to fetch virtual Service for", testName, ":\n", err)
+					log.Fatalf("[%v] Unable to fetch Virtual Service for: %v. Because of following error: %v", testName, testName, string(stdoutStderr))
 				}
-				log.Printf("Timeout: Virtual Service is: %v", string(stdoutStderr))
+				log.Printf("[%v] Timeout: Getting Virtual Service: '%v' and result is: %v", testName, testName, string(stdoutStderr))
 
-				log.Println("Timeout: Check http Get one last time")
+				log.Printf("[%v] Timeout: Check http Get one last time", testName)
 				resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
 				if err != nil {
-					log.Fatal("Timeout: Unable to call host ", host, ":\n", err)
+					log.Fatalf("[%v] Timeout: Unable to call host: %v. Because of following error: %v ", testName, host, err)
 				}
-				log.Fatalf("Timeout: Response is: %v", resp)
+				log.Fatalf("[%v] Timeout: Response is: %v", testName, resp)
 
 			case <-tick:
 				resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
 				if err != nil {
-					log.Fatal("Unable to call host ", host, ":\n", err)
+					log.Fatalf("[%v] Unable to call host: %v. Because of following error: %v", testName, host, err)
 				}
 				if resp.StatusCode == http.StatusOK {
 					bodyBytes, err := ioutil.ReadAll(resp.Body)
 					if err != nil {
-						log.Fatalf("Unable to get response: %v", err)
+						log.Fatalf("[%v] Unable to get response: %v", testName, err)
+					}
+
+					functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+testName, "-ojsonpath={.items[0].metadata.name}")
+					functionPodName, err := functionPodsCmd.CombinedOutput()
+					if err != nil {
+						log.Printf("[%v] Error is fetch function pod when verifying correct output: %v", testName, string(functionPodName))
 					}
 					if string(bodyBytes) == expectedOutput {
-						log.Printf("Response is equal to expected output: %v == %v", string(bodyBytes), expectedOutput)
+						log.Printf("[%v] Response is equal to expected output: %v == %v", testName, string(bodyBytes), expectedOutput)
+						log.Printf("[%v] Name of the Successful Pod is: %v", testName, string(functionPodName))
 						return
 					}
-					log.Fatalf("Response is not equal to expected output: %v != %v", string(bodyBytes), expectedOutput)
+					log.Printf("[%v] Name of the Failed Pod is: %v", testName, string(functionPodName))
+					log.Fatalf("[%v] Response is not equal to expected output: %v != %v", testName, string(bodyBytes), expectedOutput)
 				}
 			}
 		}
@@ -370,12 +423,11 @@ func ensureServceBindingIsReady(namespace, svcBinding string) {
 				log.Fatalf("Error fetching service instance binding %v: %v", svcBinding, err)
 			}
 			if string(stdoutStderr) == "True" {
+				log.Printf("Service binding has been successfully created.")
 				return
 			}
 		}
-
 	}
-
 }
 
 func cleanup() {
