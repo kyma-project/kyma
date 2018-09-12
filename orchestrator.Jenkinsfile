@@ -311,6 +311,8 @@ global.ui-api-layer.version: ${versions['components/ui-api-layer']}
 global.ui-api-layer.dir: ${versions['components/ui-api-layer'] == env.BRANCH_NAME ? 'pr' : 'develop'}
 global.event-bus.version: ${versions['components/event-bus']}
 global.event-bus.dir: ${versions['components/event-bus'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.event-service.version: ${versions['components/event-service']}
+global.event-service.dir: ${versions['components/event-service'] == env.BRANCH_NAME ? 'pr' : 'develop'}
 global.alpine-net.version: ${versions['tools/alpine-net']}
 global.alpine-net.dir: ${versions['tools/alpine-net'] == env.BRANCH_NAME ? 'pr' : 'develop'}
 global.watch-pods.version: ${versions['tools/watch-pods']}
@@ -319,6 +321,8 @@ global.stability-checker.version: ${versions['tools/stability-checker']}
 global.stability-checker.dir: ${versions['tools/stability-checker'] == env.BRANCH_NAME ? 'pr' : 'develop'}
 global.etcd-backup.version: ${versions['tools/etcd-backup']}
 global.etcd-backup.dir: ${versions['tools/etcd-backup'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.etcd-tls-setup.version: ${versions['tools/etcd-tls-setup']}
+global.etcd-tls-setup.dir: ${versions['tools/etcd-tls-setup'] == env.BRANCH_NAME ? 'pr' : 'develop'}
 global.test-logging-monitoring.version: ${versions['tests/test-logging-monitoring']}
 global.test-logging-monitoring.dir: ${versions['tests/test-logging-monitoring'] == env.BRANCH_NAME ? 'pr' : 'develop'}
 global.acceptance-tests.version: ${versions['tests/acceptance']}
