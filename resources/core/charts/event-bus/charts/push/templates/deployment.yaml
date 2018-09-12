@@ -59,7 +59,6 @@ spec:
             - --cluster_id={{ .Values.global.natsStreaming.clusterID }}
             - --tls_skip_verify={{ .Values.http.tlsSkipVerify }}
             - --subscription_name_header={{ .Values.global.push.http.subscriptionNameHeader }}
-            - --topic_header={{ .Values.global.push.http.topicHeader }}
             - --trace_api_url={{ .Values.global.trace.apiURL }}
             - --trace_service_name={{ .Values.trace.serviceName }}
             - --trace_operation_name={{ .Values.trace.operationName }}

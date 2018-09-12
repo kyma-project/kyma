@@ -67,7 +67,6 @@ type Options struct {
 	ConnectWait            time.Duration
 	QueueGroup             string
 	SubscriptionNameHeader string
-	TopicHeader            string
 	AckWait                time.Duration
 	MaxIdleConns           int
 	IdleConnTimeout        time.Duration
@@ -130,7 +129,6 @@ func configureOptions(fs *flag.FlagSet, args []string, printVersion, printHelp f
 	fs.StringVar(&opts.QueueGroup, "queue_group", defaultQueueGroup, "queue group name")
 	fs.BoolVar(&opts.TLSSkipVerify, "tls_skip_verify", false, "Skip TLS certificate verification, allow insecure connection")
 	fs.StringVar(&opts.SubscriptionNameHeader, "subscription_name_header", "", "Push Subscription name header")
-	fs.StringVar(&opts.TopicHeader, "topic_header", "", "Topic header")
 	fs.StringVar(&opts.APIURL, "trace_api_url", trace.DefaultTraceAPIURL, "Trace API URL")
 	fs.StringVar(&opts.HostPort, "trace_host_port", trace.DefaultTraceHostPort, "Trace host port")
 	fs.StringVar(&opts.ServiceName, "trace_service_name", trace.DefaultTraceServiceName, "Push service name")

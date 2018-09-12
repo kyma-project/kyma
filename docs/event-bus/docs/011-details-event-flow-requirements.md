@@ -30,7 +30,6 @@ See the table for the explanation of parameters in the Subscription custom resou
 | Parameter | Description |
 |----------------|------|
 | **include_subscription_name_header** | It indicates whether the lambda or the service includes the name of the Subscription when receiving an Event. |
-| **include_topic_header** | It indicates whether the service or app includes the name of the topic when receiving an Event. |
 | **max_inflight** | It indicates the maximum number of Events which can be delivered concurrently. The final value is the **max_inflight** number multiplied by the number of the `push` applications. |
 | **push_request_timeout_ms** | It indicates the time for which the `push` waits for the response when delivering an Event to the lambda or the service. After the specified time passes, the request times out and the Event Bus retries delivering the Event. Setting the **minimum** parameter to `0` applies the default value of 1000ms. |
 | **event_type** | The name of the Event type. For example, `order-created`.|
