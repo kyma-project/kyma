@@ -7,7 +7,7 @@ $FINAL_IMAGE="kyma-on-minikube"
 $KUBECTL_CLI_VERSION = "1.10.0"
 $KUBELESS_CLI_VERSION = "1.0.0-alpha.7"
 $MINIKUBE_VERSION = "0.28.2"
-$HELM_VERSION = "2.8.2"
+$HELM_VERSION = "2.10.0"
 
 Push-Location $ROOT_DIR
 
