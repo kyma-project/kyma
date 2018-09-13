@@ -1,73 +1,9 @@
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 
-$CONFIG_TPL_PATH = "${CURRENT_DIR}\..\resources\installer-config.yaml.tpl"
+$CONFIG_TPL_PATH = "${CURRENT_DIR}\..\resources\installer-config-local.yaml.tpl"
 $CONFIG_OUTPUT_PATH = (New-TemporaryFile).FullName
 
 Copy-Item -Path $CONFIG_TPL_PATH -Destination $CONFIG_OUTPUT_PATH
-
-##########
-
-Write-Output "Generating configmap for cluster certificate ..."
-
-$TLS_FILE="${CURRENT_DIR}\..\resources\local-tls-certs.yaml"
-$TLS_CRT = Get-Content -Path "${TLS_FILE}" | Select-String -Pattern 'tls.crt: .*'
-$TLS_CRT = $TLS_CRT.ToString().Replace("tls.crt:", "").Trim()
-
-$TLS_KEY = Get-Content -Path "${TLS_FILE}" | Select-String -Pattern 'tls.key: .*'
-$TLS_KEY = $TLS_KEY.ToString().Replace("tls.key:", "").Trim()
-
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__TLS_CERT__`" -value `"${TLS_CRT}`""
-Invoke-Expression -Command $cmd
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__TLS_KEY__`" -value `"${TLS_KEY}`""
-Invoke-Expression -Command $cmd
-
-##########
-
-Write-Output "Generating secret for Remote Environemnts"
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_CA__`" -value `"`""
-Invoke-Expression -Command $cmd
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_CA_KEY__`" -value `"`""
-Invoke-Expression -Command $cmd
-
-##########
-
-Write-Output "Generating config map for installation ..."
-
-$cmd = "minikube.exe ip"
-$MINIKUBE_IP = (Invoke-Expression -Command $cmd | Out-String).ToString().Trim()
-
-$MINIKUBE_CA_CRT = Get-Content -Path "${HOME}\.minikube\ca.crt"
-$MINIKUBE_CA = [System.Convert]::ToBase64String(
-    [System.Text.Encoding]::UTF8.GetBytes($MINIKUBE_CA_CRT))
-
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__IS_LOCAL_INSTALLATION__`" -value `"true`""
-Invoke-Expression -Command $cmd
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__DOMAIN__`" -value `"kyma.local`""
-Invoke-Expression -Command $cmd
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__EXTERNAL_PUBLIC_IP__`" -value `"`""
-Invoke-Expression -Command $cmd
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__REMOTE_ENV_IP__`" -value `"`""
-Invoke-Expression -Command $cmd
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ADMIN_GROUP__`" -value `"`""
-Invoke-Expression -Command $cmd
-
-$cmd = "${SCRIPTS_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ENABLE_ETCD_BACKUP__`" -value `"false`""
-Invoke-Expression -Command $cmd
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__ETCD_BACKUP_ABS_CONTAINER_NAME__`" -value `"`""
-Invoke-Expression -Command $cmd
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${CONFIG_OUTPUT_PATH} -placeholder `"__INGRESSGATEWAY_SERVICE_TYPE__`" -value `"NodePort`""
-Invoke-Expression -Command $cmd
 
 ##########
 
@@ -84,29 +20,6 @@ Invoke-Expression -Command $cmd
 Write-Output "Configuring sub-components ..."
 
 $cmd = "${CURRENT_DIR}\configure-components.ps1"
-Invoke-Expression -Command $cmd
-
-##########
-
-Write-Output "Generating secret for UI Test ..."
-
-$UI_TEST_USER = [System.Convert]::ToBase64String(
-    [System.Text.Encoding]::UTF8.GetBytes("admin@kyma.cx"))
-$UI_TEST_PASSWORD = [System.Convert]::ToBase64String(
-    [System.Text.Encoding]::UTF8.GetBytes("nimda123"))
-
-$UI_TEST_SECRET_TPL_PATH = "${CURRENT_DIR}\..\resources\ui-test-secret.yaml.tpl"
-$UI_TEST_SECRET_PATH = (New-TemporaryFile).FullName
-
-Copy-Item -Path $UI_TEST_SECRET_TPL_PATH -Destination $UI_TEST_SECRET_PATH
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${UI_TEST_SECRET_PATH} -placeholder `"__UI_TEST_USER__`" -value `"${UI_TEST_USER}`""
-Invoke-Expression -Command $cmd
-
-$cmd = "${CURRENT_DIR}\replace-placeholder.ps1 -path ${UI_TEST_SECRET_PATH} -placeholder `"__UI_TEST_PASSWORD__`" -value `"${UI_TEST_PASSWORD}`""
-Invoke-Expression -Command $cmd
-
-$cmd = "kubectl apply -f ${UI_TEST_SECRET_PATH}"
 Invoke-Expression -Command $cmd
 
 ##########

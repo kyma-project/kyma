@@ -49,9 +49,9 @@ Run the following command:
 kubectl create ns kyma-installer
 ```
 
-2. Fill in the `installer-config.yaml.tpl` template.
+2. Fill in the `installer-config-cluster.yaml.tpl` template.
 
-The Kyma installation process requires installation data specified in the `installer-config.yaml` file. Copy the `installer-config.yaml.tpl` template, rename it to `installer-config.yaml`, and fill in these placeholder values:
+The Kyma installation process requires installation data specified in the `installer-config-cluster.yaml` file. Copy the `installer-config-cluster.yaml.tpl` template, rename it to `installer-config-cluster.yaml`, and fill in these placeholder values:
 
 - `__TLS_CERT__` for the TLS certificate, this value must be a PEM format, base64-encoded TLS certifcate
 - `__TLS_KEY__` for the TLS certificate key, this value must be a base64-encoded TLS private key
@@ -70,7 +70,7 @@ The Kyma installation process requires installation data specified in the `insta
 When you fill in all required placeholder values, run the following command to provide the cluster with the installation data:
 
 ```
-kubectl apply -f installer-config.yaml
+kubectl apply -f installer-config-cluster.yaml
 ```
 
 3. Bind the default RBAC role.
