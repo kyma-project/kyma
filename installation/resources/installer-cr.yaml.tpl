@@ -8,7 +8,7 @@ metadata:
     - finalizer.installer.kyma.cx
 spec:
   version: "__VERSION__"
-  url: ""
+  url: "__URL__"
   components: 
     - name: "cluster-essentials"
       namespace: "kyma-system"
