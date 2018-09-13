@@ -68,6 +68,7 @@ func NewController(
 			event := CreateEvent{
 				api: obj.(*kymaApi.Api),
 			}
+			log.Infof("Event: %#+v", event)
 			c.queue.AddRateLimited(event)
 		},
 		UpdateFunc: func(old, new interface{}) {
@@ -83,6 +84,7 @@ func NewController(
 				newApi: newApiDef.DeepCopy(),
 				oldApi: oldApiDef.DeepCopy(),
 			}
+			log.Infof("Event: %#+v", event)
 			c.queue.AddRateLimited(event)
 		},
 		DeleteFunc: func(obj interface{}) {
@@ -90,6 +92,7 @@ func NewController(
 			event := DeleteEvent{
 				api: obj.(*kymaApi.Api),
 			}
+			log.Infof("Event: %#+v", event)
 			c.queue.AddRateLimited(event)
 		},
 	})
