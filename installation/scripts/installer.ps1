@@ -5,16 +5,6 @@ param (
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 
-# Istio CRDs need to be applied before istio installation because we are not using helm 2.10.
-# With helm 2.10 in place it can be safely removed.
-# See: https://istio.io/docs/setup/kubernetes/helm-install/#installation-steps
-$cmd = "kubectl apply -f ${CURRENT_DIR}\..\..\resources\istio\templates\crds.yaml"
-Invoke-Expression -Command $cmd
-
-$cmd = "kubectl apply -f ${CURRENT_DIR}\..\..\resources\istio\charts\certmanager\templates\crds.yaml"
-Invoke-Expression -Command $cmd
-
-
 $cmd = "kubectl apply -f ${CURRENT_DIR}\..\resources\default-sa-rbac-role.yaml"
 Invoke-Expression -Command $cmd
 
