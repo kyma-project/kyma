@@ -9,6 +9,11 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   type: {{ .Values.apiserver.service.type }}
+  {{- if eq .Values.apiserver.service.type "ClusterIP" }}
+  {{- if .Values.apiserver.service.clusterIP }}
+  clusterIP: {{ .Values.apiserver.service.clusterIP }}
+  {{- end }}
+  {{- end }}
   selector:
     app: {{ template "fullname" . }}-apiserver
   ports:
@@ -21,4 +26,3 @@ spec:
     nodePort: {{ .Values.apiserver.service.nodePort.securePort }}
     {{- end }}
     {{ end }}
-
