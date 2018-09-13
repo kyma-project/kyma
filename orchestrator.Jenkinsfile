@@ -31,6 +31,7 @@ projects = [
     "components/istio-webhook": "istio-webhook",
     "components/helm-broker": "helm-broker",
     "components/remote-environment-broker": "remote-environment-broker",
+    "components/remote-environment-controller": "remote-environment-controller",
     "components/metadata-service": "metadata-service",
     "components/gateway": "gateway",
     "components/installer": "installer",
@@ -289,6 +290,7 @@ def versionsYaml(versions) {
       istio-webhook: ${versions['components/istio-webhook']}
       helm-broker: ${versions['components/helm-broker']}
       remote-environment-broker: ${versions['components/remote-environment-broker']}
+      remote-environment-controller: ${versions['components/remote-environment-controller']}
       metadata-service: ${versions['components/metadata-service']}
       gateway: ${versions['components/gateway']}
       installer: ${versions['components/installer']}

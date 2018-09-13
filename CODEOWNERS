@@ -152,8 +152,11 @@
 # Connector Service Component
 /components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib
 
-# Application Connector Component
+# Metadata Service Component
 /components/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib
+
+# Remote Environment Controller Component
+/components/remote-environment-controller/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # Gateway Component
 /components/gateway/ @lszymik @akgalwas @janmedrek @Szymongib
