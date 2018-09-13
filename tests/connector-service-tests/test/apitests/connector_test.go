@@ -10,8 +10,8 @@ import (
 
 	"github.com/kyma-project/kyma/tests/connector-service-tests/test/testkit"
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
 )
 
 func TestConnector(t *testing.T) {
@@ -177,7 +177,7 @@ func TestConnector(t *testing.T) {
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusInternalServerError, err.StatusCode)
 		require.Equal(t, http.StatusInternalServerError, err.ErrorResponse.Code)
-		require.Equal(t, "Error while decoding base64 string: illegal base64 data at input byte 5", err.ErrorResponse.Error)
+		require.Equal(t, "Error while decoding base64 string. Internal error from base64 library: illegal base64 data at input byte 5", err.ErrorResponse.Error)
 	})
 }
 
