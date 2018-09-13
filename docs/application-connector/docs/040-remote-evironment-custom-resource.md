@@ -59,7 +59,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.source.type** |    **YES**   | Specifies the type of the connected Remote Environment. |
 | **spec.source.namespace** |    **YES**   | Specifies the namespace of the connected Remote Environment. |
 | **spec.description** |    **NO**   | Describes the connected Remote Environment.  |
-| **spec.accessLabel** |    **NO**   | Labels the environment when the [EnvironmentMapping](././service-brokers/docs/040-environment-mapping-custom-resource.md) is created. |
+| **spec.accessLabel** |    **NO**   | Labels the environment when the [EnvironmentMapping](041-environment-mapping-custom-resource.md) is created. |
 | **spec.services** |    **NO**   | Contains all services that the Remote Environment provides. |
 | **spec.services.id** |    **YES**   | Identifies the service provided by the Remote Environment. |
 | **spec.services.displayName** |    **YES**   | Specifies a human-readable name of the Remote Environment service. |
