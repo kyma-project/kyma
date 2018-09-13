@@ -1,7 +1,7 @@
 controller:
   image:
-    name: # TODO: set image name
-    tag: # TODO: set image tag
+    name: remote-environment-controller
+    tag: 0.3.361
     pullPolicy: IfNotPresent
   args:
     appName: remote-environment-controller

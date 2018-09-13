@@ -27,8 +27,8 @@ spec:
         - "--domainName={{ .Values.global.domainName }}"
         - "--namespace={{ .Values.global.namespace }}"
         - "--tillerUrl={{ .Values.controller.args.tillerUrl }}"
-        image: {{ .Values.controller.image.name }}:{{ .Values.controller.image.tag }}
-        resources:  #TODO: adjust resources
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.controller.image.name }}:{{ .Values.controller.image.tag }}"
+        resources:
           limits:
             cpu: 100m
             memory: 30Mi
