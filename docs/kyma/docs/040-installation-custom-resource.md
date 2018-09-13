@@ -3,11 +3,11 @@ title: Installation
 type: Custom Resource
 ---
 
-The `installations.installer.kyma-project.io` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format used to control the Kyma Installer, a proprietary solution based on the
+The `installations.installer.kyma.cx` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format used to control the Kyma Installer, a proprietary solution based on the
 [Kubernetes operator](https://coreos.com/operators/) principles. To get the up-to-date CRD and show the output in the `yaml` format, run this command:  
 
 ```
-kubectl get crd installations.installer.kyma-project.io -o yaml
+kubectl get crd installations.installer.kyma.cx -o yaml
 ```
 
 ## Sample Custom Resource
@@ -15,14 +15,14 @@ kubectl get crd installations.installer.kyma-project.io -o yaml
 This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma.
 
 ```
-apiVersion: "installer.kyma-project.io/v1alpha1"
+apiVersion: "installer.kyma.cx/v1alpha1"
 kind: Installation
 metadata:
   name: kyma-installation
   labels:
     action: install
   finalizers:
-    - finalizer.installer.kyma-project.io
+    - finalizer.installer.kyma.cx
 spec:
   version: "1.0.0"
   url: "https://sample.url.com/kyma_release.tar.gz"

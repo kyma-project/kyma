@@ -1,9 +1,9 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-    name: installations.installer.kyma-project.io
+    name: installations.installer.kyma.cx
 spec:
-  group: installer.kyma-project.io
+  group: installer.kyma.cx
   version: v1alpha1
   scope: Namespaced
   names:
@@ -15,9 +15,9 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-    name: releases.release.kyma-project.io
+    name: releases.release.kyma.cx
 spec:
-  group: release.kyma-project.io
+  group: release.kyma.cx
   version: v1alpha1
   scope: Namespaced
   names:
