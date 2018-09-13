@@ -1,4 +1,3 @@
-{{- if .Values.global.isLocalEnv }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -8,14 +7,26 @@ spec:
   hosts:
   - jaeger.{{ .Values.global.domainName }}
   gateways:
-  - {{ .Values.global.istio.gateway.name }}
+  - core-{{ .Chart.Name }}-gateway
   http:
   - match:
-    - uri:
-        regex: /.*
     route:
     - destination:
+        host: core-{{ .Chart.Name }}
         port:
           number: {{ .Values.service.uiPort }}
-        host: core-{{ .Chart.Name }}
-{{- end }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: core-{{ .Chart.Name }}-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - jaeger.{{ .Values.global.domainName }}

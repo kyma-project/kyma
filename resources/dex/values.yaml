@@ -8,6 +8,8 @@ oidc:
   consoleClientName: 'Console'
   grafanaClientId: grafana
   grafanaClientName: 'Grafana UI'
+  jaegerClientId: jaeger
+  jaegerClientName: 'Jaeger UI'
 
 global:
   gateway:
