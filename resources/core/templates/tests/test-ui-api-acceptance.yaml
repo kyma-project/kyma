@@ -10,7 +10,7 @@ spec:
   serviceAccountName:  "test-{{ template "fullname" . }}-ui-api-acceptance"
   containers:
     - name: "test-{{ template "fullname" . }}-ui-api-acceptance"
-      image: "{{ .Values.global.containerRegistry.path }}/ui-api-layer-acceptance-tests:0.3.232"
+      image: "{{ .Values.global.containerRegistry.path }}/ui-api-layer-acceptance-tests:0.3.342"
       env:
         - name: TILLER_HOST
           value: "tiller-deploy.kube-system.svc.cluster.local:44134"
