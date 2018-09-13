@@ -310,6 +310,7 @@ def versionsYaml(versions) {
       connector-service-tests: ${versions['tests/connector-service-tests']}
       metadata-service-tests: ${versions['tests/metadata-service-tests']}
       event-bus-tests: ${versions['tests/event-bus']}
+      test-logging: ${versions['tests/logging']}
 
 """
 
