@@ -41,7 +41,7 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 	case v1alpha1.SchemeGroupVersion.WithResource("installations"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Installer().V1alpha1().Installations().Informer()}, nil
 
-		// Group=release.kyma.cx, Version=v1alpha1
+		// Group=release.kyma-project.io, Version=v1alpha1
 	case release_v1alpha1.SchemeGroupVersion.WithResource("releases"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Release().V1alpha1().Releases().Informer()}, nil
 

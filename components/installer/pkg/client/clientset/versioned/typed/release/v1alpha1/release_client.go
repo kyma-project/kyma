@@ -14,7 +14,7 @@ type ReleaseV1alpha1Interface interface {
 	ReleasesGetter
 }
 
-// ReleaseV1alpha1Client is used to interact with features provided by the release.kyma.cx group.
+// ReleaseV1alpha1Client is used to interact with features provided by the release.kyma-project.io group.
 type ReleaseV1alpha1Client struct {
 	restClient rest.Interface
 }
