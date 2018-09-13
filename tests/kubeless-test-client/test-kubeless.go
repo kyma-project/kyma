@@ -36,15 +36,16 @@ func deleteK8s(yamlFile string) {
 }
 
 func deleteNamespace(namespace string) {
-	timeout := time.After(3 * time.Minute)
+	timeout := time.After(6 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 	for {
 		select {
 		case <-timeout:
 			log.Fatal("Timed out waiting for namespace ", namespace, " to be deleted\n")
 		case <-tick:
-			cmd := exec.Command("kubectl", "delete", "ns", namespace)
+			cmd := exec.Command("kubectl", "delete", "ns", namespace, "--grace-period=0", "--force")
 			stdoutStderr, err := cmd.CombinedOutput()
+
 			if err != nil && strings.Contains(string(stdoutStderr), "NotFound") {
 				return
 			}
