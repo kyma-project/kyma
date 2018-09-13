@@ -45,6 +45,7 @@ projects = [
     "tools/etcd-backup": "etcd-backup",
     "tools/etcd-tls-setup": "etcd-tls-setup",
     "tests/test-logging-monitoring": "test-logging-monitoring",
+    "tests/logging": "test-logging",
     "tests/acceptance": "acceptance-tests",
     "tests/ui-api-layer-acceptance-tests": "ui-api-layer-acceptance-tests",
     "tests/gateway-tests": "gateway-acceptance-tests",
@@ -311,6 +312,7 @@ def versionsYaml(versions) {
       connector-service-tests: ${versions['tests/connector-service-tests']}
       metadata-service-tests: ${versions['tests/metadata-service-tests']}
       event-bus-tests: ${versions['tests/event-bus']}
+      test-logging: ${versions['tests/logging']}
 
 """
 
