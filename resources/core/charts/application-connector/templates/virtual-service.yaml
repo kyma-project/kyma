@@ -1,0 +1,62 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  labels:
+    app: gateway-virtualservice
+    heritage: Tiller
+  name: gateway-virtualservice
+  namespace: kyma-integration
+spec:
+  gateways:
+  - kyma-gateway.kyma-system.svc.cluster.local
+  hosts:
+  - "gateway.{{.Values.global.domainName}}"
+  http:
+  - match:
+    - uri:
+        prefix: /hmc-default/v1/metadata
+    route:
+    - destination:
+        host: metadata-service-external-api
+        port:
+          number: 8081
+  - match:
+    - uri:
+        prefix: /hmc-default/v1/events
+    route:
+    - destination:
+        host: hmc-default-event-service-external-api
+        port:
+          number: 8081
+  - match:
+    - uri:
+        prefix: /hmc-default
+    route:
+    - destination:
+        host: hmc-default-gateway-external-api
+        port:
+          number: 8081
+  - match:
+    - uri:
+        prefix: /ec-default/v1/metadata
+    route:
+    - destination:
+        host: metadata-service-external-api
+        port:
+          number: 8081
+  - match:
+    - uri:
+        prefix: /ec-default/v1/events
+    route:
+    - destination:
+        host: ec-default-event-service-external-api
+        port:
+          number: 8081
+  - match:
+    - uri:
+        prefix: /ec-default
+    route:
+    - destination:
+        host: ec-default-gateway-external-api
+        port:
+          number: 8081

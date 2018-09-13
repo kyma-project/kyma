@@ -9,6 +9,17 @@ spec:
   servers:
   - port:
       number: 443
+      name: gateway-port
+      protocol: HTTPS
+    tls:
+      mode: MUTUAL
+      caCertificates: /etc/istio/ingressgateway-ca-certs/tls.crt
+      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
+      privateKey: /etc/istio/ingressgateway-certs/tls.key
+    hosts:
+    - "gateway.{{.Values.global.domainName}}"
+  - port:
+      number: 443
       name: https
       protocol: HTTPS
     tls:
