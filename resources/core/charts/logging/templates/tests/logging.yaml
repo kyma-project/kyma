@@ -10,7 +10,7 @@ rules:
   resources: ["pods"]
   verbs: ["create", "delete", "get", "list"]
 - apiGroups: [""]
-  resources: ["services", "services/proxy", "configmaps", "pods/log"]
+  resources: ["pods/log"]
   verbs: ["get", "list"]
 ---
 apiVersion: v1
