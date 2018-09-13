@@ -100,8 +100,6 @@ func TestSpec(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-
-			time.Sleep(3 * time.Second)
 		})
 
 		Convey("update API with hostname without domain", func() {
@@ -125,8 +123,6 @@ func TestSpec(t *testing.T) {
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 			So(lastApi.Spec.AuthenticationEnabled, ShouldNotBeNil)
-
-			time.Sleep(3 * time.Second)
 		})
 
 		Convey("do not update API with wrong domain", func() {
@@ -139,8 +135,6 @@ func TestSpec(t *testing.T) {
 			_, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
 
 			So(err, ShouldNotBeNil)
-
-			time.Sleep(3 * time.Second)
 		})
 
 		Convey("update API with default jwt configuration to enable authentication", func() {
@@ -165,8 +159,6 @@ func TestSpec(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-
-			time.Sleep(3 * time.Second)
 		})
 
 		Convey("update API to disable authentication", func() {
@@ -190,8 +182,6 @@ func TestSpec(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-
-			time.Sleep(3 * time.Second)
 		})
 
 		Convey("update API with custom jwt configuration", func() {
@@ -215,8 +205,51 @@ func TestSpec(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+		})
 
+		Convey("update API with hostname already occupied by another API or virtualservice", func() {
+
+			t.Log("Update...")
+
+			api := *lastApi
+			api.Spec.Hostname = hostnameFor("console", domainName, true) // "console" is used here, because it is a main Kyma component and it is exposed with virtualservice
+
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
+
+			So(err, ShouldBeNil)
+			So(lastApi, ShouldNotBeNil)
+			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+
+			// wait for UpdateFailure status to be set on the updated resource
 			time.Sleep(3 * time.Second)
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+
+			So(err, ShouldBeNil)
+			So(lastApi, ShouldNotBeNil)
+			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+			So(lastApi.Status.IsUpdateFailure(), ShouldBeTrue)
+		})
+
+		Convey("update API with hostname used before unsuccessful update to occupied hostname", func() {
+			t.Log("Update...")
+
+			api := *lastApi
+			api.Spec.Hostname = hostnameFor(testId, domainName, true)
+
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
+
+			So(err, ShouldBeNil)
+			So(lastApi, ShouldNotBeNil)
+			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+
+			validateApiSecured(httpClient, lastApi)
+
+			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+
+			So(err, ShouldBeNil)
+			So(lastApi, ShouldNotBeNil)
+			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+			So(lastApi.Status.IsUpdateFailure(), ShouldBeFalse)
 		})
 
 		Convey("delete API", func() {

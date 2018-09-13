@@ -1,6 +1,6 @@
 image:
   name: "api-controller"
-  tag: "0.3.159"
+  tag: "0.3.345"
   
 tests:
   enabled: true

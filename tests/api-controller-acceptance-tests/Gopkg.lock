@@ -90,7 +90,7 @@
     "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned/scheme",
     "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned/typed/gateway.kyma.cx/v1alpha2"
   ]
-  revision = "e22316a37f7ed482fedcd934ee55d6cd3131e814"
+  revision = "7dafcb7d39eabd592831345d9ffc4e03d87ce316"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
