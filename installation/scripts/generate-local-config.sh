@@ -37,6 +37,12 @@ fi
 
 ##########
 
+echo -e "\nDetermining versions of components"
+
+bash ${ROOT_PATH}/fetch-components-versions.sh
+
+##########
+
 # The following variables are optional and must be exported manually in base64 encoded format
 # before running local installation (you need them only to enable Azure Broker):
 # AZURE_BROKER_TENANT_ID,

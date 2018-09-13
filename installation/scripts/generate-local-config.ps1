@@ -38,6 +38,12 @@ if([System.IO.File]::Exists($VERSIONS_FILE_PATH)){
 
 ##########
 
+Write-Output "Determining versions of components"
+
+$cmd = "${CURRENT_DIR}\fetch-components-versions.ps1"
+Invoke-Expression -Command $cmd
+
+##########
 if (Test-Path env.AZURE_BROKER_SUBSCRIPTION_ID) {
     Write-Output "Generating secret for Azure Broker ..."
     $AB_SECRET_TPL_PATH = "${CURRENT_DIR}\..\resources\azure-broker-secret.yaml.tpl"
