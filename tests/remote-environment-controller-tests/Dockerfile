@@ -7,7 +7,6 @@ ADD . $SRC_DIR
 
 WORKDIR $SRC_DIR
 
-RUN go test -c ./test/apitests
-RUN go test -c ./test/k8stests
+RUN go test -c ./test/controllertests
 
 ENTRYPOINT ./scripts/entrypoint.sh

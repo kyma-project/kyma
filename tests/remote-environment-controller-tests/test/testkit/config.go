@@ -9,11 +9,12 @@ import (
 
 const (
 	namespaceEnvName          = "NAMESPACE"
+	tillerHostEnvName	= "TILLER_HOST"
 )
 
 type TestConfig struct {
-	MetadataServiceUrl string
 	Namespace          string
+	TillerHost	string
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -22,8 +23,14 @@ func ReadConfig() (TestConfig, error) {
 		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", namespaceEnvName))
 	}
 
+	tillerHost, found := os.LookupEnv(tillerHostEnvName)
+	if !found {
+		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", tillerHostEnvName))
+	}
+
 	config := TestConfig{
 		Namespace:          namespace,
+		TillerHost: tillerHost,
 	}
 
 	log.Printf("Read configuration: %+v", config)

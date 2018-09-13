@@ -5,17 +5,22 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	v1core "k8s.io/api/core/v1"
+	v1apps "k8s.io/api/apps/v1"
+	v1rbac "k8s.io/api/rbac/v1"
+	v1extensions "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 )
 
 type K8sResourcesClient interface {
+	GetDeployment(name string, options v1.GetOptions) (*v1apps.Deployment, error)
 	GetService(name string, options v1.GetOptions) (*v1core.Service, error)
-	GetSecret(name string, options v1.GetOptions) (*v1core.Secret, error)
-	GetRemoteEnvironmentServices(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error)
-	CreateDummyRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error)
+	GetIngress(name string, options v1.GetOptions) (*v1extensions.Ingress, error)
+	GetRole(name string, options v1.GetOptions) (*v1rbac.Role, error)
+	GetRoleBinding(name string, options v1.GetOptions) (*v1rbac.RoleBinding, error)
+	GetRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error)
+	CreateDummyRemoteEnvironment(name string) (*v1alpha1.RemoteEnvironment, error)
 	DeleteRemoteEnvironment(name string, options *v1.DeleteOptions) error
 }
 
@@ -54,6 +59,22 @@ func initClient(k8sConfig *restclient.Config, namespace string) (K8sResourcesCli
 	}, nil
 }
 
+func (c *k8sResourcesClient) GetDeployment(name string, options v1.GetOptions) (*v1apps.Deployment, error) {
+	return c.coreClient.AppsV1().Deployments(c.namespace).Get(name, options)
+}
+
+func (c *k8sResourcesClient) GetIngress(name string, options v1.GetOptions) (*v1extensions.Ingress, error) {
+	return c.coreClient.ExtensionsV1beta1().Ingresses(c.namespace).Get(name, options)
+}
+
+func (c *k8sResourcesClient) GetRole(name string, options v1.GetOptions) (*v1rbac.Role, error) {
+	return c.coreClient.RbacV1().Roles(c.namespace).Get(name, options)
+}
+
+func (c *k8sResourcesClient) GetRoleBinding(name string, options v1.GetOptions) (*v1rbac.RoleBinding, error) {
+	return c.coreClient.RbacV1().RoleBindings(c.namespace).Get(name, options)
+}
+
 func (c *k8sResourcesClient) GetService(name string, options v1.GetOptions) (*v1core.Service, error) {
 	return c.coreClient.CoreV1().Services(c.namespace).Get(name, options)
 }
@@ -62,11 +83,11 @@ func (c *k8sResourcesClient) GetSecret(name string, options v1.GetOptions) (*v1c
 	return c.coreClient.CoreV1().Secrets(c.namespace).Get(name, options)
 }
 
-func (c *k8sResourcesClient) GetRemoteEnvironmentServices(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error) {
+func (c *k8sResourcesClient) GetRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error) {
 	return c.remoteEnvironmentClient.RemoteenvironmentV1alpha1().RemoteEnvironments().Get(name, options)
 }
 
-func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error) {
+func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string) (*v1alpha1.RemoteEnvironment, error) {
 	dummyRe := &v1alpha1.RemoteEnvironment{
 		TypeMeta:   v1.TypeMeta{Kind: "RemoteEnvironment", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: name, Namespace: c.namespace},
