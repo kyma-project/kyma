@@ -50,7 +50,7 @@ spec:
 
       containers:
       - name: tiller
-        image: gcr.io/kubernetes-helm/tiller:v2.8.2
+        image: gcr.io/kubernetes-helm/tiller:v2.10.0
         imagePullPolicy: IfNotPresent
         env:
         - name: TILLER_NAMESPACE

@@ -33,12 +33,6 @@ echo "
 ################################################################################
 "
 
-# Istio CRDs need to be applied before istio installation because we are not using helm 2.10.
-# With helm 2.10 in place it can be safely removed.
-# See: https://istio.io/docs/setup/kubernetes/helm-install/#installation-steps
-kubectl apply -f ${CURRENT_DIR}/../../resources/istio/templates/crds.yaml
-kubectl apply -f ${CURRENT_DIR}/../../resources/istio/charts/certmanager/templates/crds.yaml
-
 kubectl apply -f ${CURRENT_DIR}/../resources/default-sa-rbac-role.yaml
 kubectl apply -f ${CURRENT_DIR}/../resources/limit-range-installer.yaml
 kubectl apply -f ${CURRENT_DIR}/../resources/resource-quotas-installer.yaml
