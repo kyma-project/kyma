@@ -37,7 +37,7 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=installer.kyma.cx, Version=v1alpha1
+	// Group=installer.kyma-project.io, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("installations"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Installer().V1alpha1().Installations().Informer()}, nil
 
