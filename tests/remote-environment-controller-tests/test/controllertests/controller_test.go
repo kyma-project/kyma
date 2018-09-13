@@ -10,7 +10,7 @@ import (
 
 const (
 	initialWaitTime = 5
-	retryWaitTime = 3
+	retryWaitTime = 2
 	retryCount = 3
 )
 
@@ -34,14 +34,16 @@ func TestRemoteEnvironmentCreation(t *testing.T) {
 		require.NoError(t, err)
 		time.Sleep(initialWaitTime*time.Second)
 
-		// when
-		exists, err := helmClient.ShouldExist(testRe.Name)
+		t.Run("Helm release and k8s resources should exist", func(t *testing.T) {
+			// when
+			exists, err := helmClient.ShouldExist(testRe.Name)
 
-		//then
-		require.NoError(t, err)
-		require.True(t, exists)
+			//then
+			require.NoError(t, err)
+			require.True(t, exists)
 
-		// TODO: check k8s resources
+			checkK8sResources(t, testRe.Name, k8sResourcesClient)
+		})
 
 		// when
 		err = k8sResourcesClient.DeleteRemoteEnvironment(testReName, &v1.DeleteOptions{})
@@ -80,7 +82,13 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 		//then
 		require.NoError(t, err)
 		require.False(t, exists)
-
-		// TODO: check k8s resources
 	})
+}
+
+func checkK8sResources(t *testing.T, reName string, client testkit.K8sResourcesClient) {
+	testkit.CheckDeployments(t, reName, client)
+	testkit.CheckIngress(t, reName, client)
+	testkit.CheckRole(t, reName, client)
+	testkit.CheckRoleBinding(t, reName, client)
+	testkit.CheckServices(t, reName, client)
 }
