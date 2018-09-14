@@ -60,7 +60,7 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 
 	steps.currentPackage = currentPackage
 
-	stepsFactory := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrides.NewLegacyProvider(overrideData, installationData, currentPackage, steps.errorHandlers))
+	stepsFactory := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrides.NewLegacyProvider(overrideData, currentPackage, steps.errorHandlers))
 
 	for _, component := range installationData.Components {
 
@@ -114,7 +114,7 @@ func (steps *InstallationSteps) UpdateKyma(installationData *config.Installation
 
 	steps.currentPackage = currentPackage
 
-	stepsFactory := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrides.NewLegacyProvider(overrideData, installationData, currentPackage, steps.errorHandlers))
+	stepsFactory := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrides.NewLegacyProvider(overrideData, currentPackage, steps.errorHandlers))
 
 	for _, component := range installationData.Components {
 
