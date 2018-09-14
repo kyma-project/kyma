@@ -58,6 +58,7 @@ projects = [
     "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
     "tests/connector-service-tests": "connector-service-tests",
     "tests/metadata-service-tests": "metadata-service-tests",
+    "tests/remote-environment-controller-tests": "remote-environment-controller-tests",
     "tests/event-bus": "event-bus-e2e-tester",
     "governance": null
 ]
