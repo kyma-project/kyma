@@ -132,7 +132,7 @@ function addDevDomainsToEtcHosts() {
 }
 
 function increaseFsInotifyMaxUserInstances() {
-    # Default value of 128 is not enough to "log -f" from pods, hence increased to 524288
+    # Default value of 128 is not enough to perform “kubectl log -f” from pods, hence increased to 524288
     if [[ "$VM_DRIVER" != "none" ]]; then
         minikube ssh -- "sudo sysctl -w fs.inotify.max_user_instances=524288"
         log "fs.inotify.max_user_instances is increased" green

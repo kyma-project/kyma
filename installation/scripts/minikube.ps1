@@ -78,6 +78,12 @@ function WaitForMinikubeToBeUp() {
     }
 }
 
+function IncreaseFsInotifyMaxUserInstances() {
+    # Default value of 128 is not enough to perform “kubectl log -f” from pods, hence increased to 524288
+    $cmd = "minikube ssh -- \"sudo sysctl -w fs.inotify.max_user_instances=524288\""
+    Invoke-Expression -Command $cmd
+}
+
 function AddDevDomainsToEtcHosts([string[]]$hostnamesPrefixes) {
     $n = 6 # 7 hostnames in one line, others in next line. Windows can't read more than 9 hostnames in the same line.
     $hostnames = $hostnamesPrefixes | ForEach-Object {"$_.${DOMAIN}"} # for minikube ssh
@@ -105,3 +111,4 @@ InitializeMinikubeConfig
 StartMinikube
 WaitForMinikubeToBeUp
 AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "dex", "docs", "lambdas-ui", "ui-api", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service"
+IncreaseFsInotifyMaxUserInstances
