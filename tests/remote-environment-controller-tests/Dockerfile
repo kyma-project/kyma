@@ -1,4 +1,4 @@
-FROM golang:1.9-alpine3.7
+FROM golang:1.9-alpine3.7 as builder
 LABEL source=git@github.com:kyma-project/kyma.git
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/remote-environment-controller-tests
@@ -7,6 +7,13 @@ ADD . $SRC_DIR
 
 WORKDIR $SRC_DIR
 
-RUN go test -c ./test/controllertests
+RUN go test -o controllertests.test -c ./test/controllertests
 
-ENTRYPOINT ./scripts/entrypoint.sh
+FROM alpine
+
+LABEL source=git@github.com:kyma-project/kyma.git
+
+COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/remote-environment-controller-tests .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/remote-environment-controller-tests/scripts/entrypoint.sh .
+
+ENTRYPOINT ./entrypoint.sh
