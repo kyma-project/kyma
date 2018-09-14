@@ -11,46 +11,40 @@ import (
 func TestResourceQuotaStatusConverter_ToGQL(t *testing.T) {
 	// given
 	conv := resourceQuotaStatusConverter{}
-	fixQuotas := fixExceededQuotas()
-
-	// when
-	exQuotas := conv.ToGQL(fixStatusesMap())
-
-	// then
-	assert.Contains(t, exQuotas, fixQuotas[0])
-	assert.Contains(t, exQuotas, fixQuotas[1])
-}
-
-func fixStatusesMap() map[string]map[v1.ResourceName][]string {
-	return map[string]map[v1.ResourceName][]string{
-		"rq-a": {
-			v1.ResourceLimitsMemory: {
-				"fix-a", "fix-b",
+	for tn, tc := range map[string]struct {
+		InputMap       map[string]map[v1.ResourceName][]string
+		ExceededQuotas []gqlschema.ExceededQuota
+	}{
+		"success": {
+			InputMap: map[string]map[v1.ResourceName][]string{
+				"rq-a": {
+					v1.ResourceLimitsMemory: {
+						"fix-a", "fix-b",
+					},
+				},
+			},
+			ExceededQuotas: []gqlschema.ExceededQuota{
+				{
+					QuotaName:    "rq-a",
+					ResourceName: string(v1.ResourceLimitsMemory),
+					AffectedResources: []string{
+						"fix-a", "fix-b",
+					},
+				},
 			},
 		},
-		"rq-b": {
-			v1.ResourceRequestsMemory: {
-				"fix-c",
-			},
+		"nil input": {
+			InputMap:       nil,
+			ExceededQuotas: []gqlschema.ExceededQuota{},
 		},
-	}
-}
-
-func fixExceededQuotas() []gqlschema.ExceededQuota {
-	return []gqlschema.ExceededQuota{
-		{
-			QuotaName:    "rq-a",
-			ResourceName: string(v1.ResourceLimitsMemory),
-			AffectedResources: []string{
-				"fix-a", "fix-b",
-			},
+		"empty input": {
+			InputMap:       map[string]map[v1.ResourceName][]string{},
+			ExceededQuotas: []gqlschema.ExceededQuota{},
 		},
-		{
-			QuotaName:    "rq-b",
-			ResourceName: string(v1.ResourceRequestsMemory),
-			AffectedResources: []string{
-				"fix-c",
-			},
-		},
+	} {
+		t.Run(tn, func(t *testing.T) {
+			status := conv.ToGQL(tc.InputMap)
+			assert.Equal(t, status, tc.ExceededQuotas)
+		})
 	}
 }

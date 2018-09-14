@@ -7528,7 +7528,7 @@ type ResourceQuotasStatus {
 type ExceededQuota {
     quotaName: String!
     resourceName: String!
-    affectedResources: [String]!
+    affectedResources: [String!]!
 }
 
 # Remote Environments

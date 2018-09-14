@@ -8,30 +8,27 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
 )
 
-func newResourceQuotaStatusResolver(resourceQuotaStatusService *resourceQuotaStatusService) *resourceQuotaStatusResolver {
+//go:generate mockery -name=resourceQuotaStatusChecker -output=automock -outpkg=automock -case=underscore
+type resourceQuotaStatusChecker interface {
+	CheckResourceQuotaStatus(environment string) (gqlschema.ResourceQuotasStatus, error)
+}
+
+func newResourceQuotaStatusResolver(checker resourceQuotaStatusChecker) *resourceQuotaStatusResolver {
 	return &resourceQuotaStatusResolver{
-		statusSvc: resourceQuotaStatusService,
+		statusChecker: checker,
 	}
 }
 
 type resourceQuotaStatusResolver struct {
-	statusSvc *resourceQuotaStatusService
+	statusChecker resourceQuotaStatusChecker
 }
 
 func (r *resourceQuotaStatusResolver) ResourceQuotasStatus(ctx context.Context, environment string) (gqlschema.ResourceQuotasStatus, error) {
-	resourcesToCheck := []v1.ResourceName{
-		v1.ResourceRequestsMemory,
-		v1.ResourceLimitsMemory,
-		v1.ResourceRequestsCPU,
-		v1.ResourceLimitsCPU,
-	}
-	exceeded, err := r.statusSvc.CheckResourceQuotaStatus(environment, resourcesToCheck)
+	exceeded, err := r.statusChecker.CheckResourceQuotaStatus(environment)
 	if err != nil {
-		glog.Error(
-			errors.Wrapf(err, "while getting %s [environment: %s]", pretty.ResourceQuotaStatus, environment))
+		glog.Error(errors.Wrapf(err, "while getting %s [environment: %s]", pretty.ResourceQuotaStatus, environment))
 		return gqlschema.ResourceQuotasStatus{}, gqlerror.New(err, pretty.ResourceQuotaStatus, gqlerror.WithEnvironment(environment))
 	}
 

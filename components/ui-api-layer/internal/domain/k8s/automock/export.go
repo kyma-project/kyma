@@ -27,3 +27,7 @@ func NewDeploymentGetter() *deploymentGetter {
 func NewLimitRangeLister() *limitRangeLister {
 	return new(limitRangeLister)
 }
+
+func NewResourceQuotaStatusChecker() *resourceQuotaStatusChecker {
+	return new(resourceQuotaStatusChecker)
+}

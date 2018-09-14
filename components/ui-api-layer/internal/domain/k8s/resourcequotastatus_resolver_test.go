@@ -2,50 +2,41 @@ package k8s
 
 import (
 	"context"
+	"errors"
 	"testing"
 
-	"time"
-
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/automock"
-	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/api/core/v1"
-	"k8s.io/client-go/informers"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
 func TestResourceQuotaStatusResolver_ResourceQuotaStatus_HappyPath(t *testing.T) {
 	// GIVEN
-	rqLister := automock.NewResourceQuotaLister()
-	rqLister.On("ListResourceQuotas", fixNamespaceName()).Return(fixResourceQuota(), nil)
-	rsLister := automock.NewReplicaSetLister()
-	rsLister.On("ListReplicaSets", fixNamespaceName()).Return(fixReplicaSet(), nil)
-	ssLister := automock.NewStatefulSetLister()
-	ssLister.On("ListStatefulSets", fixNamespaceName()).Return(fixStatefulSet(), nil)
-	lrLister := automock.NewLimitRangeLister()
-	lrLister.On("List", fixNamespaceName()).Return([]*v1.LimitRange{fixLimitRange()}, nil)
+	statusChecker := automock.NewResourceQuotaStatusChecker()
+	statusChecker.On("CheckResourceQuotaStatus", fixNamespaceName()).Return(gqlschema.ResourceQuotasStatus{Exceeded: false}, nil)
 
-	defer func() {
-		rqLister.AssertExpectations(t)
-		rsLister.AssertExpectations(t)
-		ssLister.AssertExpectations(t)
-		lrLister.AssertExpectations(t)
-	}()
-
-	client := fake.NewSimpleClientset()
-	informerFactory := informers.NewSharedInformerFactory(client, 0)
-	informer := informerFactory.Apps().V1beta2().Deployments().Informer()
-	deploySvc := newDeploymentService(informer)
-	rqStatusSvc := newResourceQuotaStatusService(rqLister, rsLister, ssLister, lrLister, deploySvc)
-
-	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
-
-	resolver := newResourceQuotaStatusResolver(rqStatusSvc)
+	resolver := newResourceQuotaStatusResolver(statusChecker)
 
 	// WHEN
 	status, err := resolver.ResourceQuotasStatus(context.Background(), fixNamespaceName())
 
+	// THEN
 	require.NoError(t, err)
 	assert.False(t, status.Exceeded)
+}
+
+func TestResourceQuotaStatusResolver_ResourceQuotaStatus_Error(t *testing.T) {
+	// GIVEN
+	statusChecker := automock.NewResourceQuotaStatusChecker()
+	statusChecker.On("CheckResourceQuotaStatus", fixNamespaceName()).Return(gqlschema.ResourceQuotasStatus{}, errors.New("something went wrong"))
+
+	resolver := newResourceQuotaStatusResolver(statusChecker)
+
+	// WHEN
+	status, err := resolver.ResourceQuotasStatus(context.Background(), fixNamespaceName())
+
+	// THEN
+	require.Error(t, err)
+	assert.Empty(t, status.ExceededQuotas)
 }

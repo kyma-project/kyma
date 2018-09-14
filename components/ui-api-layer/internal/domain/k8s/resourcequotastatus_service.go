@@ -2,13 +2,11 @@ package k8s
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
 	apps "k8s.io/api/apps/v1"
-	"k8s.io/api/apps/v1beta2"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -28,41 +26,54 @@ type exceededRef struct {
 	resourceName v1.ResourceName
 }
 
+type (
+	limits struct {
+		Memory resource.Quantity
+		CPU    resource.Quantity
+	}
+	ranges struct {
+		Requests limits
+		Limit    limits
+	}
+)
+
 type resourceQuotaStatusService struct {
-	rqConv       resourceQuotaStatusConverter
-	rqLister     resourceQuotaLister
-	rsLister     replicaSetLister
-	ssLister     statefulSetLister
-	lrLister     limitRangeLister
-	deployGetter deploymentGetter
+	rqConv   resourceQuotaStatusConverter
+	rqLister resourceQuotaLister
+	rsLister replicaSetLister
+	ssLister statefulSetLister
+	lrLister limitRangeLister
 }
 
-func newResourceQuotaStatusService(rqInformer resourceQuotaLister, rsInformer replicaSetLister, ssInformer statefulSetLister, lrInformer limitRangeLister, deployGetter deploymentGetter) *resourceQuotaStatusService {
+func newResourceQuotaStatusService(rqInformer resourceQuotaLister, rsInformer replicaSetLister, ssInformer statefulSetLister, lrInformer limitRangeLister) *resourceQuotaStatusService {
 	return &resourceQuotaStatusService{
-		rqConv:       resourceQuotaStatusConverter{},
-		rqLister:     rqInformer,
-		rsLister:     rsInformer,
-		ssLister:     ssInformer,
-		lrLister:     lrInformer,
-		deployGetter: deployGetter,
+		rqConv:   resourceQuotaStatusConverter{},
+		rqLister: rqInformer,
+		rsLister: rsInformer,
+		ssLister: ssInformer,
+		lrLister: lrInformer,
 	}
 }
 
 const (
-	rsKind     = "ReplicaSet"
-	ssKind     = "StatefulSet"
-	deployKind = "Deployment"
+	rsKind  = "ReplicaSet"
+	stsKind = "StatefulSet"
 )
 
-func (svc *resourceQuotaStatusService) CheckResourceQuotaStatus(environment string, resourcesToCheck []v1.ResourceName) (gqlschema.ResourceQuotasStatus, error) {
+func (svc *resourceQuotaStatusService) CheckResourceQuotaStatus(environment string) (gqlschema.ResourceQuotasStatus, error) {
+	resourcesToCheck := []v1.ResourceName{
+		v1.ResourceRequestsMemory,
+		v1.ResourceLimitsMemory,
+		v1.ResourceRequestsCPU,
+		v1.ResourceLimitsCPU,
+	}
 	resourceQuotas, err := svc.rqLister.ListResourceQuotas(environment)
 	if err != nil {
-		return gqlschema.ResourceQuotasStatus{}, errors.Wrapf(err, "while listing ResourceQuotas [environment: %s]", environment)
+		return gqlschema.ResourceQuotasStatus{}, errors.Wrapf(err, "while listing %s [environment: %s]", pretty.ResourceQuotas, environment)
 	}
-
 	resourcesRequests, err := svc.checkResourcesRequests(environment, resourcesToCheck, resourceQuotas)
 	if err != nil {
-		return gqlschema.ResourceQuotasStatus{}, err
+		return gqlschema.ResourceQuotasStatus{}, errors.Wrapf(err, "while checking resources requests [environment: %s]", environment)
 	}
 	if len(resourcesRequests) > 0 {
 		return gqlschema.ResourceQuotasStatus{
@@ -79,28 +90,16 @@ func (svc *resourceQuotaStatusService) checkResourcesRequests(environment string
 	// To calculate how many resources the ReplicaSet needs to progress, sum up the resource usage of all containers in the replica Pod. You must also calculate the difference from `.spec.hard` and `.status.used`.
 	// In the ReplicaSet you have also check if it does not have OwnerReference to the Deployment. It is because that Deployment allows you to define maxUnavailable number of replicas. You must take this into account when you check number of desired replicas.
 	result := make(map[string]map[v1.ResourceName][]string)
-	defaultLimits, err := svc.getDefaultLimits(environment, resourcesToCheck)
+	defaultLimits, err := svc.getDefaultLimits(environment)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "while getting default limits [environment: %s]", environment)
 	}
 	replicaSets, err := svc.rsLister.ListReplicaSets(environment)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while listing ReplicaSets [environment: %s]", environment)
+		return nil, errors.Wrapf(err, "while listing %s [environment: %s]", pretty.ReplicaSets, environment)
 	}
 	for _, rs := range replicaSets {
-		var maxUnavailable int32
-		if len(rs.GetOwnerReferences()) > 0 {
-			for _, ownerRef := range rs.GetOwnerReferences() {
-				if ownerRef.Kind == deployKind {
-					maxUnavailable, err = svc.extractMaxUnavailable(environment, ownerRef.Name, *rs.Spec.Replicas)
-					if err != nil {
-						return nil, err
-					}
-					break
-				}
-			}
-		}
-		if *rs.Spec.Replicas > rs.Status.Replicas+maxUnavailable {
+		if *rs.Spec.Replicas > rs.Status.Replicas {
 			replicaUsage := svc.nextReplicaUsage(rs.Spec.Template.Spec.Containers, resourcesToCheck, defaultLimits)
 			exceeded := svc.checkAvailableResources(replicaUsage, resourcesToCheck, resourceQuotas)
 			for _, exc := range exceeded {
@@ -114,7 +113,7 @@ func (svc *resourceQuotaStatusService) checkResourcesRequests(environment string
 	// To calculate how many resources the StatefulSet needs to progress, sum up the resource usage of all containers in the replica Pod. You must also calculate the difference from `.spec.hard` and `.status.used`.
 	statefulSets, err := svc.ssLister.ListStatefulSets(environment)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while listing StatefulSets [environment: %s]", environment)
+		return nil, errors.Wrapf(err, "while listing %s [environment: %s]", pretty.StatefulSets, environment)
 	}
 	for _, ss := range statefulSets {
 		if *ss.Spec.Replicas > ss.Status.Replicas {
@@ -122,41 +121,38 @@ func (svc *resourceQuotaStatusService) checkResourcesRequests(environment string
 			exceeded := svc.checkAvailableResources(replicaUsage, resourcesToCheck, resourceQuotas)
 			for _, exc := range exceeded {
 				result = svc.ensureStatusesMapEntry(exc.rqName, exc.resourceName, result)
-				result[exc.rqName][exc.resourceName] = append(result[exc.rqName][exc.resourceName], svc.affectedResourceRef(ssKind, ss.Name))
+				result[exc.rqName][exc.resourceName] = append(result[exc.rqName][exc.resourceName], svc.affectedResourceRef(stsKind, ss.Name))
 			}
 		}
 	}
 	return result, nil
 }
 
-func (svc *resourceQuotaStatusService) getDefaultLimits(environment string, resourcesToCheck []v1.ResourceName) (map[v1.ResourceName]*resource.Quantity, error) {
+func (svc *resourceQuotaStatusService) getDefaultLimits(environment string) (ranges, error) {
 	limitRanges, err := svc.lrLister.List(environment)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while listing limitRanges [environment: %s]", environment)
+		return ranges{}, errors.Wrapf(err, "while listing %s [environment: %s]", pretty.LimitRanges, environment)
 	}
-	limits := make(map[v1.ResourceName]*resource.Quantity)
-	for _, name := range resourcesToCheck {
-		limits[name] = &resource.Quantity{}
-	}
+	defaultRanges := ranges{}
 	for _, lr := range limitRanges {
 		for _, limit := range lr.Spec.Limits {
 			if limit.Type == v1.LimitTypeContainer {
-				if limit.DefaultRequest.Memory().Value() > limits[v1.ResourceRequestsMemory].Value() {
-					limits[v1.ResourceRequestsMemory] = limit.DefaultRequest.Memory()
+				if limit.DefaultRequest.Memory().Value() > defaultRanges.Requests.Memory.Value() {
+					defaultRanges.Requests.Memory = *limit.DefaultRequest.Memory()
 				}
-				if limit.Default.Memory().Value() > limits[v1.ResourceLimitsMemory].Value() {
-					limits[v1.ResourceLimitsMemory] = limit.Default.Memory()
+				if limit.DefaultRequest.Cpu().Value() > defaultRanges.Requests.CPU.Value() {
+					defaultRanges.Requests.CPU = *limit.DefaultRequest.Cpu()
 				}
-				if limit.Default.Cpu().Value() > limits[v1.ResourceLimitsCPU].Value() {
-					limits[v1.ResourceLimitsCPU] = limit.Default.Cpu()
+				if limit.Default.Memory().Value() > defaultRanges.Limit.Memory.Value() {
+					defaultRanges.Limit.Memory = *limit.Default.Memory()
 				}
-				if limit.DefaultRequest.Cpu().Value() > limits[v1.ResourceRequestsCPU].Value() {
-					limits[v1.ResourceRequestsCPU] = limit.DefaultRequest.Cpu()
+				if limit.Default.Cpu().Value() > defaultRanges.Limit.CPU.Value() {
+					defaultRanges.Limit.CPU = *limit.Default.Cpu()
 				}
 			}
 		}
 	}
-	return limits, nil
+	return defaultRanges, nil
 }
 
 func (*resourceQuotaStatusService) checkAvailableResources(limits map[v1.ResourceName]*resource.Quantity, resourcesToCheck []v1.ResourceName, resourceQuotas []*v1.ResourceQuota) []exceededRef {
@@ -164,8 +160,8 @@ func (*resourceQuotaStatusService) checkAvailableResources(limits map[v1.Resourc
 	for _, rq := range resourceQuotas {
 		for _, name := range resourcesToCheck {
 			hard, hardExists := rq.Spec.Hard[name]
-			used := rq.Status.Used[name]
-			if hardExists && hard.Value()-used.Value() < limits[name].Value() {
+			used, usedExist := rq.Status.Used[name]
+			if hardExists && usedExist && hard.Value()-used.Value() < limits[name].Value() {
 				result = append(result, exceededRef{rqName: rq.Name, resourceName: name})
 			}
 		}
@@ -173,7 +169,8 @@ func (*resourceQuotaStatusService) checkAvailableResources(limits map[v1.Resourc
 	return result
 }
 
-func (*resourceQuotaStatusService) nextReplicaUsage(containers []v1.Container, resourcesToCheck []v1.ResourceName, defaultLimits map[v1.ResourceName]*resource.Quantity) map[v1.ResourceName]*resource.Quantity {
+// nextReplicaUsage calculates the amount of resources which will be requested to scale up StatefulSet or ReplicaSet
+func (*resourceQuotaStatusService) nextReplicaUsage(containers []v1.Container, resourcesToCheck []v1.ResourceName, defaultLimits ranges) map[v1.ResourceName]*resource.Quantity {
 	limits := make(map[v1.ResourceName]*resource.Quantity)
 	for _, name := range resourcesToCheck {
 		limits[name] = &resource.Quantity{}
@@ -183,25 +180,25 @@ func (*resourceQuotaStatusService) nextReplicaUsage(containers []v1.Container, r
 			switch name {
 			case v1.ResourceRequestsMemory:
 				if container.Resources.Requests.Memory().IsZero() {
-					limits[name].Add(*defaultLimits[name])
+					limits[name].Add(defaultLimits.Requests.Memory)
 				} else {
 					limits[name].Add(*container.Resources.Requests.Memory())
 				}
 			case v1.ResourceRequestsCPU:
 				if container.Resources.Requests.Cpu().IsZero() {
-					limits[name].Add(*defaultLimits[name])
+					limits[name].Add(defaultLimits.Requests.CPU)
 				} else {
 					limits[name].Add(*container.Resources.Requests.Cpu())
 				}
 			case v1.ResourceLimitsMemory:
 				if container.Resources.Limits.Memory().IsZero() {
-					limits[name].Add(*defaultLimits[name])
+					limits[name].Add(defaultLimits.Limit.Memory)
 				} else {
 					limits[name].Add(*container.Resources.Limits.Memory())
 				}
 			case v1.ResourceLimitsCPU:
 				if container.Resources.Limits.Cpu().IsZero() {
-					limits[name].Add(*defaultLimits[name])
+					limits[name].Add(defaultLimits.Limit.CPU)
 				} else {
 					limits[name].Add(*container.Resources.Limits.Cpu())
 				}
@@ -209,28 +206,6 @@ func (*resourceQuotaStatusService) nextReplicaUsage(containers []v1.Container, r
 		}
 	}
 	return limits
-}
-
-func (svc *resourceQuotaStatusService) extractMaxUnavailable(environment string, name string, replicas int32) (int32, error) {
-	deploy, err := svc.deployGetter.Find(name, environment)
-	if err != nil {
-		return 0, errors.Wrapf(err, "while getting Deployment[name: %s][environment: %s]", name, environment)
-	}
-	if deploy.Spec.Strategy.Type == v1beta2.RollingUpdateDeploymentStrategyType {
-		maxUnavailable := deploy.Spec.Strategy.RollingUpdate.MaxUnavailable.StrVal
-
-		if strings.Contains(maxUnavailable, "%") {
-			maxUnavailable = maxUnavailable[:len(maxUnavailable)-1]
-			percent, err := strconv.ParseInt(maxUnavailable, 10, 64)
-			if err != nil {
-				return 0, err
-			}
-			return int32(percent) * replicas / 100, nil
-		} else {
-			return deploy.Spec.Strategy.RollingUpdate.MaxUnavailable.IntVal, nil
-		}
-	}
-	return 0, nil
 }
 
 func (*resourceQuotaStatusService) ensureStatusesMapEntry(name string, resourceName v1.ResourceName, statusesMap map[string]map[v1.ResourceName][]string) map[string]map[v1.ResourceName][]string {
