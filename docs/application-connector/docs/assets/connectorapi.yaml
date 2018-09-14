@@ -6,14 +6,14 @@ paths:
   /v1/remoteenvironments/{remoteEnvName}/tokens:
     post:
       parameters:
-        - in: path
-          name: remoteEnvName
-          description: 'Name of remote environment.'
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: remoteEnvName
+        description: 'Name of remote environment.'
+        required: true
+        schema:
+          type: string
       tags:
-        - internal API
+      - internal API
       summary: 'Creates a token used for certificate signing flow.'
       responses:
         '201':
@@ -31,20 +31,20 @@ paths:
   /v1/remoteenvironments/{remoteEnvName}/info:
     get:
       parameters:
-        - in: path
-          name: remoteEnvName
-          description: 'Name of remote environment.'
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: token
-          description: 'Access Token fetched from /tokens endpoint.'
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: remoteEnvName
+        description: 'Name of remote environment.'
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: token
+        description: 'Access Token fetched from /tokens endpoint.'
+        required: true
+        schema:
+          type: string
       tags:
-        - external API
+      - external API
       summary: 'Allows for fetching proper information for future CSR.'
       responses:
         '200':
@@ -68,20 +68,20 @@ paths:
   /v1/remoteenvironments/{remoteEnvName}/client-certs:
     post:
       parameters:
-        - in: path
-          name: remoteEnvName
-          description: 'Name of remote environment.'
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: token
-          description: 'Access Token fetched from /tokens endpoint.'
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: remoteEnvName
+        description: 'Name of remote environment.'
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: token
+        description: 'Access Token fetched from /tokens endpoint.'
+        required: true
+        schema:
+          type: string
       tags:
-        - external API
+      - external API
       summary: 'Signs CSR.'
       requestBody:
         description: 'The CSR to be signed'
@@ -97,6 +97,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/csrResponse'
+        '400':
+          description: 'Improper subject values or lack of values in CSR.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
         '403':
           description: 'Invalid token'
           content:

@@ -335,7 +335,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeForbidden, err.Code())
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 		assert.Contains(t, err.Error(), "No country")
 	})
 
@@ -357,7 +357,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeForbidden, err.Code())
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 		assert.Contains(t, err.Error(), "Invalid CName")
 	})
 
@@ -379,7 +379,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeForbidden, err.Code())
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 		assert.Contains(t, err.Error(), "Invalid country")
 
 	})
@@ -402,7 +402,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeForbidden, err.Code())
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 		assert.Contains(t, err.Error(), "CSR: Invalid organization provided.")
 	})
 
@@ -424,7 +424,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeForbidden, err.Code())
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 		assert.Contains(t, err.Error(), "CSR: Invalid organizational unit provided.")
 	})
 
@@ -446,7 +446,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeForbidden, err.Code())
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 		assert.Contains(t, err.Error(), "CSR: Invalid locality provided.")
 	})
 
@@ -468,7 +468,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeForbidden, err.Code())
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 		assert.Contains(t, err.Error(), "CSR: Invalid province provided.")
 	})
 }

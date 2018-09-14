@@ -43,7 +43,7 @@ func (cu *certificateUtility) decodeBytesFromBase64(bytes []byte) (decodedData [
 	data := make([]byte, base64.StdEncoding.DecodedLen(len(bytes)))
 	_, err := base64.StdEncoding.Decode(data, bytes)
 	if err != nil {
-		return nil, apperrors.Internal("Error while decoding base64 bytes: %s", err)
+		return nil, apperrors.Internal("There was an error while parsing the base64 content. An incorrect value was provided.")
 	}
 
 	return data, nil
@@ -52,7 +52,7 @@ func (cu *certificateUtility) decodeBytesFromBase64(bytes []byte) (decodedData [
 func (cu *certificateUtility) decodeStringFromBase64(bytes string) (decodedData []byte, appError apperrors.AppError) {
 	data, err := base64.StdEncoding.DecodeString(bytes)
 	if err != nil {
-		return nil, apperrors.Internal("Error while decoding base64 string: %s", err)
+		return nil, apperrors.Internal("There was an error while parsing the base64 content. An incorrect value was provided.")
 	}
 
 	return data, nil
@@ -118,37 +118,37 @@ func (cu *certificateUtility) LoadCSR(encodedData string) (csr *x509.Certificate
 
 func (cu *certificateUtility) CheckCSRValues(csr *x509.CertificateRequest, subject CSRSubject) apperrors.AppError {
 	if csr.Subject.CommonName != subject.CName {
-		return apperrors.Forbidden("CSR: Invalid CName provided.")
+		return apperrors.WrongInput("CSR: Invalid CName provided.")
 	}
 
 	if csr.Subject.Country == nil {
-		return apperrors.Forbidden("CSR: No country provided.")
+		return apperrors.WrongInput("CSR: No country provided.")
 	} else if csr.Subject.Country[0] != subject.Country {
-		return apperrors.Forbidden("CSR: Invalid country provided.")
+		return apperrors.WrongInput("CSR: Invalid country provided.")
 	}
 
 	if csr.Subject.Organization == nil {
-		return apperrors.Forbidden("CSR: No organization provided.")
+		return apperrors.WrongInput("CSR: No organization provided.")
 	} else if csr.Subject.Organization[0] != subject.Organization {
-		return apperrors.Forbidden("CSR: Invalid organization provided.")
+		return apperrors.WrongInput("CSR: Invalid organization provided.")
 	}
 
 	if csr.Subject.OrganizationalUnit == nil {
-		return apperrors.Forbidden("CSR: No organizational unit provided.")
+		return apperrors.WrongInput("CSR: No organizational unit provided.")
 	} else if csr.Subject.OrganizationalUnit[0] != subject.OrganizationalUnit {
-		return apperrors.Forbidden("CSR: Invalid organizational unit provided.")
+		return apperrors.WrongInput("CSR: Invalid organizational unit provided.")
 	}
 
 	if csr.Subject.Locality == nil {
-		return apperrors.Forbidden("CSR: No locality provided.")
+		return apperrors.WrongInput("CSR: No locality provided.")
 	} else if csr.Subject.Locality[0] != subject.Locality {
-		return apperrors.Forbidden("CSR: Invalid locality provided.")
+		return apperrors.WrongInput("CSR: Invalid locality provided.")
 	}
 
 	if csr.Subject.Province == nil {
-		return apperrors.Forbidden("CSR: No province provided.")
+		return apperrors.WrongInput("CSR: No province provided.")
 	} else if csr.Subject.Province[0] != subject.Province {
-		return apperrors.Forbidden("CSR: Invalid province provided.")
+		return apperrors.WrongInput("CSR: Invalid province provided.")
 	}
 	return nil
 }
