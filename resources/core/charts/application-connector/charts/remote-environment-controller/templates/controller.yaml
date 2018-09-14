@@ -2,25 +2,25 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Chart.Name }}-manager
+  name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
   labels:
-    control-plane: {{ .Chart.Name }}-manager
+    control-plane: {{ .Chart.Name }}
     controller-tools.k8s.io: "1.0"
 spec:
   selector:
     matchLabels:
-      control-plane: {{ .Chart.Name }}-manager
+      control-plane: {{ .Chart.Name }}
       controller-tools.k8s.io: "1.0"
-  serviceName: {{ .Chart.Name }}-manager-service
+  serviceName: {{ .Chart.Name }}-service
   template:
     metadata:
       labels:
-        control-plane: {{ .Chart.Name }}-manager
+        control-plane: {{ .Chart.Name }}
         controller-tools.k8s.io: "1.0"
     spec:
       containers:
-      - name: {{ .Chart.Name }}-manager
+      - name: {{ .Chart.Name }}
         args:
         - "/manager"
         - "--appName={{ .Values.controller.args.appName }}"
