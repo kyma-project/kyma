@@ -19,10 +19,10 @@ type Step interface {
 }
 
 type step struct {
-	helmClient              kymahelm.ClientInterface
-	kymaPackage             kymasources.KymaPackage
-	component               v1alpha1.KymaComponent
-	legacyOverridesProvider overrides.LegacyProvider
+	helmClient   kymahelm.ClientInterface
+	kymaPackage  kymasources.KymaPackage
+	component    v1alpha1.KymaComponent
+	overrideData overrides.OverrideData
 }
 
 // ToString method returns step details in readable string
@@ -34,7 +34,7 @@ func (s step) ToString() string {
 func (s step) Install() error {
 	chartDir := path.Join(s.kymaPackage.GetChartsDirPath(), s.component.Name)
 
-	overrides, overridesErr := s.legacyOverridesProvider.GetForRelease(s.component)
+	overrides, overridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
 
 	if overridesErr != nil {
 		return overridesErr
@@ -72,7 +72,7 @@ func (s step) Install() error {
 func (s step) Upgrade() error {
 	chartDir := path.Join(s.kymaPackage.GetChartsDirPath(), s.component.Name)
 
-	overrides, overridesErr := s.legacyOverridesProvider.GetForRelease(s.component)
+	overrides, overridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
 
 	if overridesErr != nil {
 		return overridesErr
