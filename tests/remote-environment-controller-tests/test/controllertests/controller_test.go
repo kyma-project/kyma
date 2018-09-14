@@ -23,8 +23,8 @@ func TestRemoteEnvironmentCreation(t *testing.T) {
 	require.NoError(t, err)
 
 	helmClient := testkit.NewHelmClient(config.TillerHost, retryCount, retryWaitTime*time.Second)
-
 	testReName := "test-create-re"
+	k8sResourcesChecker := testkit.NewK8sResourceChecker(testReName, k8sResourcesClient)
 
 	t.Run("should create complete RE helm chart when new RE is created", func(t *testing.T) {
 		// when
@@ -32,17 +32,18 @@ func TestRemoteEnvironmentCreation(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
+		require.NotNil(t, testRe)
 		time.Sleep(initialWaitTime*time.Second)
 
 		t.Run("Helm release and k8s resources should exist", func(t *testing.T) {
 			// when
-			exists, err := helmClient.ShouldExist(testRe.Name)
+			exists, err := helmClient.ShouldExist(testReName)
 
 			//then
 			require.NoError(t, err)
 			require.True(t, exists)
 
-			checkK8sResources(t, testRe.Name, k8sResourcesClient)
+			k8sResourcesChecker.CheckK8sResources(t, requireNoError, requireNotEmpty)
 		})
 
 		// when
@@ -64,6 +65,7 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 	helmClient := testkit.NewHelmClient(config.TillerHost, retryCount, retryWaitTime*time.Second)
 
 	testReName := "test-delete-re"
+	k8sResourcesChecker := testkit.NewK8sResourceChecker(testReName, k8sResourcesClient)
 
 	testRe, err := k8sResourcesClient.CreateDummyRemoteEnvironment(testReName)
 	require.NoError(t, err)
@@ -82,13 +84,23 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 		//then
 		require.NoError(t, err)
 		require.False(t, exists)
+
+		k8sResourcesChecker.CheckK8sResources(t, requireError, requireEmpty)
 	})
 }
 
-func checkK8sResources(t *testing.T, reName string, client testkit.K8sResourcesClient) {
-	testkit.CheckDeployments(t, reName, client)
-	testkit.CheckIngress(t, reName, client)
-	testkit.CheckRole(t, reName, client)
-	testkit.CheckRoleBinding(t, reName, client)
-	testkit.CheckServices(t, reName, client)
+func requireError(t *testing.T, err error){
+	require.Error(t, err)
+}
+
+func requireNoError(t *testing.T, err error){
+	require.NoError(t, err)
+}
+
+func requireNotEmpty(t *testing.T, obj interface{}){
+	require.NotEmpty(t, obj)
+}
+
+func requireEmpty(t *testing.T, obj interface{}){
+	require.Empty(t, obj)
 }
