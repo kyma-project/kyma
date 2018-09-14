@@ -4,3 +4,6 @@
 resources:
   requests:
     memory: 96Mi
+
+persistence:
+  enabled: false
