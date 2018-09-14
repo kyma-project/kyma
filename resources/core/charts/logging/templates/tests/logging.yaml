@@ -8,7 +8,11 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["pods"]
-  verbs: ["create", "delete", "get", "list"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods"]
+  resourceNames: ["test-counter-pod"]
+  verbs: ["get", "list", "create", "delete"]
 - apiGroups: [""]
   resources: ["pods/log"]
   verbs: ["get", "list"]
