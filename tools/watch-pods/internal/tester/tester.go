@@ -167,7 +167,7 @@ func (cs *ClusterState) UpdateState(c Container, update StateUpdate) {
 // GetUnstableContainers returns all Containers which are not ready or restarts in recent requiredStabilityPeriod
 func (cs *ClusterState) GetUnstableContainers(requiredStabilityPeriod time.Duration) []ContainerAndState {
 	cs.mtx.Lock()
-	cs.mtx.Unlock()
+	defer cs.mtx.Unlock()
 
 	unstable := make([]ContainerAndState, 0)
 
