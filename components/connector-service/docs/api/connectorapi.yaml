@@ -98,11 +98,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/csrResponse'
         '400':
-          description: 'Invalid CSR.'
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/appError'
+          description: 'Improper subject values or lack of values in CSR.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
         '403':
           description: 'Invalid token'
           content:

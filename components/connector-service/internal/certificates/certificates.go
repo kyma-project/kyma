@@ -43,7 +43,7 @@ func (cu *certificateUtility) decodeBytesFromBase64(bytes []byte) (decodedData [
 	data := make([]byte, base64.StdEncoding.DecodedLen(len(bytes)))
 	_, err := base64.StdEncoding.Decode(data, bytes)
 	if err != nil {
-		return nil, apperrors.Internal("Error while decoding base64 bytes. Internal error from base64 library: %s", err)
+		return nil, apperrors.Internal("There was an error while parsing the base64 content. An incorrect value was provided.")
 	}
 
 	return data, nil
@@ -52,7 +52,7 @@ func (cu *certificateUtility) decodeBytesFromBase64(bytes []byte) (decodedData [
 func (cu *certificateUtility) decodeStringFromBase64(bytes string) (decodedData []byte, appError apperrors.AppError) {
 	data, err := base64.StdEncoding.DecodeString(bytes)
 	if err != nil {
-		return nil, apperrors.Internal("Error while decoding base64 string. Internal error from base64 library: %s", err)
+		return nil, apperrors.Internal("There was an error while parsing the base64 content. An incorrect value was provided.")
 	}
 
 	return data, nil
