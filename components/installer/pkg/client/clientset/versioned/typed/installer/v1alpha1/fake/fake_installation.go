@@ -18,9 +18,9 @@ type FakeInstallations struct {
 	ns   string
 }
 
-var installationsResource = schema.GroupVersionResource{Group: "installer.kyma.cx", Version: "v1alpha1", Resource: "installations"}
+var installationsResource = schema.GroupVersionResource{Group: "installer.kyma-project.io", Version: "v1alpha1", Resource: "installations"}
 
-var installationsKind = schema.GroupVersionKind{Group: "installer.kyma.cx", Version: "v1alpha1", Kind: "Installation"}
+var installationsKind = schema.GroupVersionKind{Group: "installer.kyma-project.io", Version: "v1alpha1", Kind: "Installation"}
 
 // Get takes name of the installation, and returns the corresponding installation object, and an error if there is any.
 func (c *FakeInstallations) Get(name string, options v1.GetOptions) (result *v1alpha1.Installation, err error) {

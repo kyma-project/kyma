@@ -8,7 +8,7 @@ import (
 
 const (
 	// Group .
-	Group = "release.kyma.cx"
+	Group = "release.kyma-project.io"
 	// Version .
 	Version = "v1alpha1"
 )
