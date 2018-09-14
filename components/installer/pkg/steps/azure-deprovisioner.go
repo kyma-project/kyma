@@ -41,7 +41,7 @@ func DefaultDeprovisionConfig() *DeprovisionConfig {
 func (steps *InstallationSteps) DeprovisionAzureResources(config *DeprovisionConfig, installation installationConfig.InstallationContext) error {
 
 	const stepName string = "Deprovisioning Azure Broker resources"
-	steps.PrintInstallationStep(stepName)
+	steps.PrintStep(stepName)
 
 	steps.statusManager.InProgress(stepName)
 

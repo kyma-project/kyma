@@ -11,7 +11,7 @@ import (
 // ProvisionBundles .
 func (steps InstallationSteps) ProvisionBundles(installationData *config.InstallationData) error {
 	const stepName string = "Provisioning helm broker repo bundles"
-	steps.PrintInstallationStep(stepName)
+	steps.PrintStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
 	helmBrokerScriptPath := path.Join(steps.currentPackage.GetChartsDirPath(), "helm-broker-repo/install.sh")
@@ -31,7 +31,7 @@ func (steps InstallationSteps) ProvisionBundles(installationData *config.Install
 // UpdateBundles .
 func (steps InstallationSteps) UpdateBundles(installationData *config.InstallationData) error {
 	const stepName string = "Updating helm broker repo bundles"
-	steps.PrintInstallationStep(stepName)
+	steps.PrintStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
 	helmBrokerScriptPath := path.Join(steps.currentPackage.GetChartsDirPath(), "helm-broker-repo/update.sh")

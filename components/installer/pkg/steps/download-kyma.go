@@ -11,7 +11,7 @@ import (
 //DownloadKyma .
 func (steps InstallationSteps) DownloadKyma(installationData *config.InstallationData) (kymasources.KymaPackage, error) {
 	const stepName string = "Downloading Kyma"
-	steps.PrintInstallationStep(stepName)
+	steps.PrintStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
 	if steps.kymaPackages.HasInjectedSources() {
