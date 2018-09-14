@@ -28,6 +28,12 @@ bash ${ROOT_PATH}/configure-components.sh
 
 ##########
 
+echo -e "\nDetermining versions of components"
+
+bash ${ROOT_PATH}/fetch-components-versions.sh
+
+##########
+
 echo -e "\nConfiguring versions"
 
 if [ -f "${VERSIONS_FILE_PATH}" ]; then

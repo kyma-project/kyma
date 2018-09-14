@@ -26,6 +26,13 @@ Invoke-Expression -Command $cmd
 
 ##########
 
+Write-Output "Determining versions of components"
+
+$cmd = "${CURRENT_DIR}\fetch-components-versions.ps1"
+Invoke-Expression -Command $cmd
+
+##########
+
 Write-Output "Configuring versions ..."
 
 if([System.IO.File]::Exists($VERSIONS_FILE_PATH)){
