@@ -101,10 +101,6 @@
   branch = "master"
   name = "github.com/kyma-project/kyma"
   packages = [
-    "components/metadata-service/pkg/apis/istio/v1alpha2",
-    "components/metadata-service/pkg/client/clientset/versioned",
-    "components/metadata-service/pkg/client/clientset/versioned/scheme",
-    "components/metadata-service/pkg/client/clientset/versioned/typed/istio/v1alpha2",
     "components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1",
     "components/remote-environment-broker/pkg/client/clientset/versioned",
     "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
@@ -505,6 +501,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7daab92d71da0dd0d31e17a06cc02ca470acaa3992efb5b147573e293f46a158"
+  inputs-digest = "fa41e0b72fc7399263acfb9980a8d95bb784548ffd171585970747d41511a881"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,13 +1,12 @@
 package testkit
 
 import (
-	istioclient "github.com/kyma-project/kyma/components/metadata-service/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
-	v1core "k8s.io/api/core/v1"
 	v1apps "k8s.io/api/apps/v1"
-	v1rbac "k8s.io/api/rbac/v1"
+	v1core "k8s.io/api/core/v1"
 	v1extensions "k8s.io/api/extensions/v1beta1"
+	v1rbac "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -19,17 +18,14 @@ type K8sResourcesClient interface {
 	GetIngress(name string, options v1.GetOptions) (*v1extensions.Ingress, error)
 	GetRole(name string, options v1.GetOptions) (*v1rbac.Role, error)
 	GetRoleBinding(name string, options v1.GetOptions) (*v1rbac.RoleBinding, error)
-	GetRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error)
 	CreateDummyRemoteEnvironment(name string) (*v1alpha1.RemoteEnvironment, error)
 	DeleteRemoteEnvironment(name string, options *v1.DeleteOptions) error
 }
 
 type k8sResourcesClient struct {
 	coreClient              *kubernetes.Clientset
-	istioClient             *istioclient.Clientset
 	remoteEnvironmentClient *versioned.Clientset
 	namespace               string
-	remoteEnvironmentName   string
 }
 
 func NewK8sResourcesClient(namespace string) (K8sResourcesClient, error) {
@@ -77,14 +73,6 @@ func (c *k8sResourcesClient) GetRoleBinding(name string, options v1.GetOptions) 
 
 func (c *k8sResourcesClient) GetService(name string, options v1.GetOptions) (*v1core.Service, error) {
 	return c.coreClient.CoreV1().Services(c.namespace).Get(name, options)
-}
-
-func (c *k8sResourcesClient) GetSecret(name string, options v1.GetOptions) (*v1core.Secret, error) {
-	return c.coreClient.CoreV1().Secrets(c.namespace).Get(name, options)
-}
-
-func (c *k8sResourcesClient) GetRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error) {
-	return c.remoteEnvironmentClient.RemoteenvironmentV1alpha1().RemoteEnvironments().Get(name, options)
 }
 
 func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string) (*v1alpha1.RemoteEnvironment, error) {

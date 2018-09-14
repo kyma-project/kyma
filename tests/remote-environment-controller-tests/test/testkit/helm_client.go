@@ -6,33 +6,33 @@ import (
 )
 
 type HelmClient interface {
-	ShouldExist(releaseName string) (bool, error)
-	ShouldNotExist(releaseName string) (bool, error)
+	ExistWhenShould(releaseName string) (bool, error)
+	ExistWhenShouldNot(releaseName string) (bool, error)
 }
 
 type helmClient struct {
-	helm *helm.Client
-	retryCount int
+	helm          *helm.Client
+	retryCount    int
 	retryWaitTime time.Duration
 }
 
 func NewHelmClient(host string, retryCount int, retryWaitTime time.Duration) HelmClient {
 	return &helmClient{
-		helm: helm.NewClient(helm.Host(host)),
-		retryCount: retryCount,
+		helm:          helm.NewClient(helm.Host(host)),
+		retryCount:    retryCount,
 		retryWaitTime: retryWaitTime,
 	}
 }
 
-func (hc *helmClient) ShouldExist(releaseName string) (bool, error) {
+func (hc *helmClient) ExistWhenShould(releaseName string) (bool, error) {
 	return hc.checkExistenceWithRetriesIf(releaseName, shouldRetryIfNotExists)
 }
 
-func (hc *helmClient) ShouldNotExist(releaseName string) (bool, error) {
+func (hc *helmClient) ExistWhenShouldNot(releaseName string) (bool, error) {
 	return hc.checkExistenceWithRetriesIf(releaseName, shouldRetryIfExists)
 }
 
-func (hc *helmClient) checkExistenceWithRetriesIf(releaseName string, shouldRetry func(releaseExists bool, err error)bool) (bool, error){
+func (hc *helmClient) checkExistenceWithRetriesIf(releaseName string, shouldRetry func(releaseExists bool, err error) bool) (bool, error) {
 	var exists bool
 	var err error
 

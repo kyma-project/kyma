@@ -1,17 +1,17 @@
 package controllertests
 
 import (
-	"testing"
-	"github.com/stretchr/testify/require"
 	"github.com/kyma-project/kyma/tests/remote-environment-controller-tests/test/testkit"
+	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"testing"
 	"time"
 )
 
 const (
 	initialWaitTime = 5
-	retryWaitTime = 2
-	retryCount = 3
+	retryWaitTime   = 2
+	retryCount      = 3
 )
 
 func TestRemoteEnvironmentCreation(t *testing.T) {
@@ -33,11 +33,11 @@ func TestRemoteEnvironmentCreation(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		require.NotNil(t, testRe)
-		time.Sleep(initialWaitTime*time.Second)
+		time.Sleep(initialWaitTime * time.Second)
 
 		t.Run("Helm release and k8s resources should exist", func(t *testing.T) {
 			// when
-			exists, err := helmClient.ShouldExist(testReName)
+			exists, err := helmClient.ExistWhenShould(testReName)
 
 			//then
 			require.NoError(t, err)
@@ -69,7 +69,7 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 
 	testRe, err := k8sResourcesClient.CreateDummyRemoteEnvironment(testReName)
 	require.NoError(t, err)
-	time.Sleep(initialWaitTime*time.Second)
+	time.Sleep(initialWaitTime * time.Second)
 
 	t.Run("should delete RE helm chart when RE is deleted", func(t *testing.T) {
 		// when
@@ -79,7 +79,7 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		exists, err := helmClient.ShouldNotExist(testRe.Name)
+		exists, err := helmClient.ExistWhenShouldNot(testRe.Name)
 
 		//then
 		require.NoError(t, err)
@@ -89,18 +89,18 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 	})
 }
 
-func requireError(t *testing.T, err error){
+func requireError(t *testing.T, err error) {
 	require.Error(t, err)
 }
 
-func requireNoError(t *testing.T, err error){
+func requireNoError(t *testing.T, err error) {
 	require.NoError(t, err)
 }
 
-func requireNotEmpty(t *testing.T, obj interface{}){
+func requireNotEmpty(t *testing.T, obj interface{}) {
 	require.NotEmpty(t, obj)
 }
 
-func requireEmpty(t *testing.T, obj interface{}){
+func requireEmpty(t *testing.T, obj interface{}) {
 	require.Empty(t, obj)
 }

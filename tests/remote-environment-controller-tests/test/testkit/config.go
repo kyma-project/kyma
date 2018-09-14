@@ -8,13 +8,13 @@ import (
 )
 
 const (
-	namespaceEnvName          = "NAMESPACE"
-	tillerHostEnvName	= "TILLER_HOST"
+	namespaceEnvName  = "NAMESPACE"
+	tillerHostEnvName = "TILLER_HOST"
 )
 
 type TestConfig struct {
-	Namespace          string
-	TillerHost	string
+	Namespace  string
+	TillerHost string
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -29,7 +29,7 @@ func ReadConfig() (TestConfig, error) {
 	}
 
 	config := TestConfig{
-		Namespace:          namespace,
+		Namespace:  namespace,
 		TillerHost: tillerHost,
 	}
 

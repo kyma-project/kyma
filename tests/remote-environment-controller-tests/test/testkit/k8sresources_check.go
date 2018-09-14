@@ -1,20 +1,20 @@
 package testkit
 
 import (
-	"testing"
 	"fmt"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"testing"
 )
 
 const (
-	gatewayNameFormat = "%s-gateway"
-	gatewayRoleFormat = "%s-gateway-role"
+	gatewayNameFormat        = "%s-gateway"
+	gatewayRoleFormat        = "%s-gateway-role"
 	gatewayRoleBindingFormat = "%s-gateway-rolebinding"
-	gatewayApiFormat = "%s-gateway-external-api"
-	gatewayEchoFormat = "%s-gateway-echo"
+	gatewayApiFormat         = "%s-gateway-external-api"
+	gatewayEchoFormat        = "%s-gateway-echo"
 
-	eventServiceNameFromat = "%s-event-service"
-	eventServiceApiFormat = "%s-gateway-external-api"
+	eventServiceNameFormat = "%s-event-service"
+	eventServiceApiFormat  = "%s-gateway-external-api"
 )
 
 type K8sChecker interface {
@@ -24,13 +24,13 @@ type K8sChecker interface {
 func NewK8sResourceChecker(reName string, client K8sResourcesClient) K8sChecker {
 	return &k8sChecker{
 		remoteEnvName: reName,
-		client: client,
+		client:        client,
 	}
 }
 
 type k8sChecker struct {
 	remoteEnvName string
-	client K8sResourcesClient
+	client        K8sResourcesClient
 }
 
 func (checker *k8sChecker) CheckK8sResources(t *testing.T, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
@@ -43,7 +43,7 @@ func (checker *k8sChecker) CheckK8sResources(t *testing.T, errCheckFunc func(*te
 
 func (checker *k8sChecker) checkDeployments(t *testing.T, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
 	gatewayName := fmt.Sprintf(gatewayNameFormat, checker.remoteEnvName)
-	eventServiceName := fmt.Sprintf(eventServiceNameFromat, checker.remoteEnvName)
+	eventServiceName := fmt.Sprintf(eventServiceNameFormat, checker.remoteEnvName)
 
 	gatewayDeploy, err := checker.client.GetDeployment(gatewayName, v1.GetOptions{})
 	errCheckFunc(t, err)
