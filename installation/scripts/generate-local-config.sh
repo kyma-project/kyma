@@ -6,6 +6,8 @@ ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 CONFIG_TPL_PATH="${ROOT_PATH}/../resources/installer-config-local.yaml.tpl"
 CONFIG_OUTPUT_PATH=$(mktemp)
 
+VERSIONS_FILE_PATH="${ROOT_PATH}/../versions.env"
+
 cp $CONFIG_TPL_PATH $CONFIG_OUTPUT_PATH
 
 ##########
@@ -23,6 +25,15 @@ rm ${CONFIG_OUTPUT_PATH}
 echo -e "\nConfiguring sub-components"
 
 bash ${ROOT_PATH}/configure-components.sh
+
+##########
+
+echo -e "\nConfiguring versions"
+
+if [ -f "${VERSIONS_FILE_PATH}" ]; then
+    kubectl create configmap versions --from-env-file="${VERSIONS_FILE_PATH}" -n "kyma-installer"
+    kubectl label configmap/versions installer=overrides -n "kyma-installer"
+fi
 
 ##########
 
