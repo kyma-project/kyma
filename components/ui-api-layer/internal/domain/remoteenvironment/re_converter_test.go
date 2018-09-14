@@ -68,7 +68,7 @@ func TestRemoteEnvironmentConverter_ToGQL(t *testing.T) {
 		require.Len(t, dto.Services[0].Entries, 1)
 		assert.Equal(t, dto.Services[0].Entries[0].Type, fix.Spec.Services[0].Entries[0].Type)
 		assert.Equal(t, dto.Services[0].Entries[0].AccessLabel, &fix.Spec.Services[0].Entries[0].AccessLabel)
-		assert.Equal(t, dto.Services[0].Entries[0].GatewayUrl, &fix.Spec.Services[0].Entries[0].GatewayUrl)
+		assert.Equal(t, dto.Services[0].Entries[0].GatewayURL, &fix.Spec.Services[0].Entries[0].GatewayUrl)
 	})
 
 	t.Run("Empty", func(t *testing.T) {

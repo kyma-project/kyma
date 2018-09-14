@@ -49,7 +49,7 @@ func (mapper *remoteEnvironmentConverter) mapEntriesCRToDTO(entries []v1alpha1.E
 			dtos = append(dtos, gqlschema.RemoteEnvironmentEntry{
 				Type:        entry.Type,
 				AccessLabel: mapper.ptrString(entry.AccessLabel),
-				GatewayUrl:  mapper.ptrString(entry.GatewayUrl),
+				GatewayURL:  mapper.ptrString(entry.GatewayUrl),
 			})
 		case "Events":
 			dtos = append(dtos, gqlschema.RemoteEnvironmentEntry{

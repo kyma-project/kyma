@@ -15,6 +15,6 @@ func (c *idpPresetConverter) ToGQL(in *v1alpha1.IDPPreset) gqlschema.IDPPreset {
 	return gqlschema.IDPPreset{
 		Name:    in.Name,
 		Issuer:  in.Spec.Issuer,
-		JwksUri: in.Spec.JwksUri,
+		JwksURI: in.Spec.JwksUri,
 	}
 }

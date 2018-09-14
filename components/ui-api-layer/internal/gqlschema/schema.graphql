@@ -35,13 +35,13 @@ type ServiceInstance {
     servicePlanDisplayName: String!
     servicePlanSpec: JSON
     creationTimestamp: Timestamp!
-    labels: [String]!
+    labels: [String!]!
     status: ServiceInstanceStatus
     servicePlan: ServicePlan
     serviceClass: ServiceClass
     bindable: Boolean!
-    serviceBindings: [ServiceBinding]!
-    serviceBindingUsages: [ServiceBindingUsage]!
+    serviceBindings: [ServiceBinding!]!
+    serviceBindingUsages: [ServiceBindingUsage!]!
 }
 
 type ServiceInstanceStatus {
@@ -74,7 +74,7 @@ input ServiceInstanceCreateInput {
     environment: String!
     externalServiceClassName: String!
     externalPlanName: String!
-    labels: [String]!
+    labels: [String!]!
     parameterSchema: JSON
 }
 
@@ -89,8 +89,8 @@ type ServiceClass {
     documentationUrl: String
     supportUrl: String
     providerDisplayName: String
-    tags: [String]!
-    plans: [ServicePlan]!
+    tags: [String!]!
+    plans: [ServicePlan!]!
     activated: Boolean!
     apiSpec: JSON
     asyncApiSpec: JSON
@@ -212,7 +212,7 @@ type EnvPrefix {
 
 type LimitRange {
     name: String!
-    limits: [LimitRangeItem]!
+    limits: [LimitRangeItem!]!
 }
 
 type LimitRangeItem {
@@ -267,7 +267,7 @@ type DeploymentStatus {
     updatedReplicas: Int!
     readyReplicas: Int!
     availableReplicas: Int!
-    conditions: DeploymentCondition!
+    conditions: [DeploymentCondition!]!
 }
 
 type DeploymentCondition {
@@ -285,8 +285,8 @@ type Deployment {
     creationTimestamp: Timestamp!
     status: DeploymentStatus!
     labels: JSON!
-    containers: [Container]!
-    boundServiceInstanceNames: [String]!
+    containers: [Container!]!
+    boundServiceInstanceNames: [String!]!
 }
 
 type ResourceValues {
@@ -316,15 +316,15 @@ type ExceededQuota {
 
 type Environment {
     name: String!
-    remoteEnvironments: [String]!
+    remoteEnvironments: [String!]!
 }
 
 type RemoteEnvironment {
     name: String!
     description: String!
     source: RemoteEnvironmentSource!
-    services: [RemoteEnvironmentService]!
-    enabledInEnvironments: [String]!
+    services: [RemoteEnvironmentService!]!
+    enabledInEnvironments: [String!]!
     status: RemoteEnvironmentStatus!
 }
 
@@ -348,8 +348,8 @@ type RemoteEnvironmentService {
     displayName: String!
     longDescription: String!
     providerDisplayName: String!
-    tags: [String]!
-    entries: [RemoteEnvironmentEntry]!
+    tags: [String!]!
+    entries: [RemoteEnvironmentEntry!]!
 }
 
 type RemoteEnvironmentEntry {
@@ -380,7 +380,7 @@ type EventActivation {
     name: String!
     displayName: String!
     source: EventActivationSource!
-    events: [EventActivationEvent]!
+    events: [EventActivationEvent!]!
 }
 
 type UsageKind {
@@ -440,17 +440,17 @@ type API {
     name: String!
     hostname: String!
     service: Service!
-    authenticationPolicies: [AuthenticationPolicy]!
+    authenticationPolicies: [AuthenticationPolicy!]!
 }
 
 # Queries
 
 type Query {
     serviceInstance(name: String!, environment: String!): ServiceInstance
-    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance]!
-    serviceClasses(first: Int, offset: Int): [ServiceClass]!
+    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]!
+    serviceClasses(first: Int, offset: Int): [ServiceClass!]!
     serviceClass(name: String!): ServiceClass
-    serviceBrokers(first: Int, offset: Int): [ServiceBroker]!
+    serviceBrokers(first: Int, offset: Int): [ServiceBroker!]!
     serviceBroker(name: String!): ServiceBroker
     serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
     serviceBinding(name: String!, environment: String!): ServiceBinding
@@ -462,20 +462,19 @@ type Query {
     apis(environment: String!, serviceName: String, hostname: String): [API!]!
 
     remoteEnvironment(name: String!): RemoteEnvironment
-    remoteEnvironments(environment: String, first: Int, offset: Int): [RemoteEnvironment]!
+    remoteEnvironments(environment: String, first: Int, offset: Int): [RemoteEnvironment!]!
     connectorService(remoteEnvironment: String!): ConnectorService!
 
-    environments(remoteEnvironment: String): [Environment]!
-    deployments(environment: String!, excludeFunctions: Boolean): [Deployment]!
-    resourceQuotas(environment: String!): [ResourceQuota]!
-    resourceQuotasStatus(environment: String!): ResourceQuotasStatus!
+    environments(remoteEnvironment: String): [Environment!]!
+    deployments(environment: String!, excludeFunctions: Boolean): [Deployment!]!
+    resourceQuotas(environment: String!): [ResourceQuota!]!
+    resourceQuotaStatus(environment: String!): ResourceQuotasStatus!
 
-    functions(environment: String!, first: Int, offset: Int): [Function]!
+    functions(environment: String!, first: Int, offset: Int): [Function!]!
 
-    #TODO: it is not possible to define 'type' as argument name
     content(contentType: String!, id: String!): JSON
-    topics(input: [InputTopic]!, internal: Boolean): [TopicEntry]
-    eventActivations(environment: String!): [EventActivation]!
+    topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
+    eventActivations(environment: String!): [EventActivation!]!
 
     limitRanges(environment: String!): [LimitRange!]!
 

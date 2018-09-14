@@ -8,16 +8,3 @@ type ServiceBindingUsage struct {
 	Status             ServiceBindingUsageStatus
 	Parameters         *ServiceBindingUsageParameters
 }
-
-type LocalObjectReference struct {
-	Kind string
-	Name string
-}
-
-type ServiceBindingUsageParameters struct {
-	EnvPrefix *EnvPrefix
-}
-
-type EnvPrefix struct {
-	Name string
-}

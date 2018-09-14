@@ -2,6 +2,23 @@
 
 
 [[projects]]
+  name = "github.com/99designs/gqlgen"
+  packages = [
+    "complexity",
+    "graphql",
+    "graphql/introspection",
+    "handler"
+  ]
+  revision = "636435b68700211441303f1a5ed92f3768ba5774"
+  version = "v0.5.1"
+
+[[projects]]
+  name = "github.com/agnivade/levenshtein"
+  packages = ["."]
+  revision = "3d21ba515fe27b856f230847e856431ae1724adc"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/allegro/bigcache"
   packages = [
     ".",
@@ -298,18 +315,24 @@
   version = "0.2"
 
 [[projects]]
-  name = "github.com/vektah/gqlgen"
+  name = "github.com/urfave/cli"
+  packages = ["."]
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/vektah/gqlparser"
   packages = [
-    "graphql",
-    "handler",
-    "neelance/common",
-    "neelance/errors",
-    "neelance/introspection",
-    "neelance/query",
-    "neelance/schema",
-    "neelance/validation"
+    ".",
+    "ast",
+    "gqlerror",
+    "lexer",
+    "parser",
+    "validator",
+    "validator/rules"
   ]
-  revision = "e1fd79fed15f60c47471d901c8250ab56aff1c55"
+  revision = "14e83ae06ec152e6d0afb9766a00e0c0918aa8fc"
 
 [[projects]]
   name = "github.com/vrischmann/envconfig"
@@ -634,6 +657,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f595076b316799046ca977e2bd30b7d9111f46499156060e3cbe2034411e70fe"
+  inputs-digest = "10cf4ddb54ca8d90394f132bc3761b9c16e22f9c9e86a32889e6c6522e67f7ca"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -22,10 +22,10 @@ func TestClassConverter_ToGQL(t *testing.T) {
 		maps := map[string]string{
 			"displayName":         "exampleDisplayName",
 			"providerDisplayName": "exampleProviderName",
-			"imageUrl":            "exampleImageUrl",
-			"documentationUrl":    "exampleDocumentationUrl",
+			"imageURL":            "exampleImageURL",
+			"documentationURL":    "exampleDocumentationURL",
 			"longDescription":     "exampleLongDescription",
-			"supportUrl":          "exampleSupportUrl",
+			"supportURL":          "exampleSupportURL",
 		}
 
 		byteMaps, err := json.Marshal(maps)
@@ -47,9 +47,9 @@ func TestClassConverter_ToGQL(t *testing.T) {
 		}
 
 		providerDisplayName := "exampleProviderName"
-		imageUrl := "exampleImageUrl"
-		documentationUrl := "exampleDocumentationUrl"
-		supportUrl := "exampleSupportUrl"
+		imageURL := "exampleImageURL"
+		documentationURL := "exampleDocumentationURL"
+		supportURL := "exampleSupportURL"
 		displayName := "exampleDisplayName"
 		longDescription := "exampleLongDescription"
 		expected := gqlschema.ServiceClass{
@@ -59,9 +59,9 @@ func TestClassConverter_ToGQL(t *testing.T) {
 			Description:         "ExampleDescription",
 			LongDescription:     &longDescription,
 			ProviderDisplayName: &providerDisplayName,
-			ImageUrl:            &imageUrl,
-			DocumentationUrl:    &documentationUrl,
-			SupportUrl:          &supportUrl,
+			ImageURL:            &imageURL,
+			DocumentationURL:    &documentationURL,
+			SupportURL:          &supportURL,
 			CreationTimestamp:   zeroTimeStamp,
 			Tags:                []string{"tag1", "tag2"},
 		}
@@ -159,10 +159,10 @@ func fixServiceClass(t require.TestingT) *v1beta1.ClusterServiceClass {
 	maps := map[string]string{
 		"displayName":         "exampleDisplayName",
 		"providerDisplayName": "exampleProviderName",
-		"imageUrl":            "exampleImageUrl",
-		"documentationUrl":    "exampleDocumentationUrl",
+		"imageURL":            "exampleImageURL",
+		"documentationURL":    "exampleDocumentationURL",
 		"longDescription":     "exampleLongDescription",
-		"supportUrl":          "exampleSupportUrl",
+		"supportURL":          "exampleSupportURL",
 	}
 
 	byteMaps, err := json.Marshal(maps)

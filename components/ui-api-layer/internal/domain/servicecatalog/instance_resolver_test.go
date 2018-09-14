@@ -176,7 +176,7 @@ func TestInstanceResolver_ServiceInstancesWithStatusQuery(t *testing.T) {
 		expected := []gqlschema.ServiceInstance{
 			{
 				Name: "Test",
-				Status: gqlschema.ServiceInstanceStatus{
+				Status: &gqlschema.ServiceInstanceStatus{
 					Type:    gqlschema.InstanceStatusTypeRunning,
 					Message: "Working",
 					Reason:  "Testing",
@@ -184,7 +184,7 @@ func TestInstanceResolver_ServiceInstancesWithStatusQuery(t *testing.T) {
 			},
 			{
 				Name: "Test",
-				Status: gqlschema.ServiceInstanceStatus{
+				Status: &gqlschema.ServiceInstanceStatus{
 					Type:    gqlschema.InstanceStatusTypeRunning,
 					Message: "Working",
 					Reason:  "Testing",

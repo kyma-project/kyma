@@ -170,7 +170,7 @@ func (svc *remoteEnvironmentService) Disable(namespace, name string) error {
 	return svc.client.EnvironmentMappings(namespace).Delete(name, &metav1.DeleteOptions{})
 }
 
-func (svc *remoteEnvironmentService) GetConnectionUrl(remoteEnvironment string) (string, error) {
+func (svc *remoteEnvironmentService) GetConnectionURL(remoteEnvironment string) (string, error) {
 	if ok := svc.reNameRegex.MatchString(remoteEnvironment); !ok {
 		return "", fmt.Errorf("Remote evironment name %q does not match regex: %s", remoteEnvironment, reNameRegex)
 	}

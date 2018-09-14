@@ -47,7 +47,7 @@ func (c *instanceConverter) ToGQL(in *v1beta1.ServiceInstance) (*gqlschema.Servi
 		ServiceClassDisplayName: in.Spec.ClusterServiceClassExternalName,
 		ServicePlanSpec:         servicePlanSpec,
 		Labels:                  instanceLabels,
-		Status:                  *c.ServiceStatusToGQLStatus(c.extractor.Status(in)),
+		Status:                  c.ServiceStatusToGQLStatus(c.extractor.Status(in)),
 		CreationTimestamp:       in.CreationTimestamp.Time,
 	}
 
@@ -79,10 +79,15 @@ func (c *instanceConverter) GQLCreateInputToInstanceCreateParameters(in *gqlsche
 		parameterSchema = *in.ParameterSchema
 	}
 
+	var labels []string
+	for _, label := range in.Labels {
+		labels = append(labels, label)
+	}
+
 	parameters := instanceCreateParameters{
 		Name:                     in.Name,
 		Namespace:                in.Environment,
-		Labels:                   in.Labels,
+		Labels:                   labels,
 		ExternalServicePlanName:  in.ExternalPlanName,
 		ExternalServiceClassName: in.ExternalServiceClassName,
 		Schema: parameterSchema,

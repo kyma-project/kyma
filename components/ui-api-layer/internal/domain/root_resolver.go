@@ -84,230 +84,318 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.content.WaitForCacheSync(stopCh)
 }
 
-// K8S
-
-func (r *RootResolver) Query_environments(ctx context.Context, remoteEnvironment *string) ([]gqlschema.Environment, error) {
-	return r.k8s.EnvironmentsQuery(ctx, remoteEnvironment)
+func (r *RootResolver) Deployment() gqlschema.DeploymentResolver {
+	return &deploymentResolver{r.k8s}
 }
 
-func (r *RootResolver) Query_deployments(ctx context.Context, environment string, excludeFunctions *bool) ([]gqlschema.Deployment, error) {
-	return r.k8s.DeploymentsQuery(ctx, environment, excludeFunctions)
+func (r *RootResolver) EventActivation() gqlschema.EventActivationResolver {
+	return &eventActivationResolver{r.re}
 }
 
-func (r *RootResolver) Deployment_boundServiceInstanceNames(ctx context.Context, deployment *gqlschema.Deployment) ([]string, error) {
-	return r.k8s.DeploymentBoundServiceInstanceNamesField(ctx, deployment)
+func (r *RootResolver) RemoteEnvironment() gqlschema.RemoteEnvironmentResolver {
+	return &reResolver{r.re}
 }
 
-func (r *RootResolver) Query_limitRanges(ctx context.Context, env string) ([]gqlschema.LimitRange, error) {
-	return r.k8s.LimitRangesQuery(ctx, env)
+func (r *RootResolver) ServiceBinding() gqlschema.ServiceBindingResolver {
+	return &serviceBindingResolver{r.k8s}
 }
 
-func (r *RootResolver) Query_resourceQuotas(ctx context.Context, environment string) ([]gqlschema.ResourceQuota, error) {
-	return r.k8s.ResourceQuotasQuery(ctx, environment)
+func (r *RootResolver) ServiceBindingUsage() gqlschema.ServiceBindingUsageResolver {
+	return &serviceBindingUsageResolver{r.sc}
 }
 
-func (r *RootResolver) Query_resourceQuotasStatus(ctx context.Context, environment string) (gqlschema.ResourceQuotasStatus, error) {
-	return r.k8s.ResourceQuotasStatus(ctx, environment)
+func (r *RootResolver) ServiceClass() gqlschema.ServiceClassResolver {
+	return &serviceClassResolver{r.sc}
 }
 
-// Kubeless
-
-func (r *RootResolver) Query_functions(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.Function, error) {
-	return r.kubeless.FunctionsQuery(ctx, environment, first, offset)
+func (r *RootResolver) ServiceInstance() gqlschema.ServiceInstanceResolver {
+	return &serviceInstanceResolver{r.sc}
 }
 
-// Service Catalog
+func (r *RootResolver) Query() gqlschema.QueryResolver {
+	return &queryResolver{r}
+}
 
-func (r *RootResolver) Mutation_createServiceInstance(ctx context.Context, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
+func (r *RootResolver) Mutation() gqlschema.MutationResolver {
+	return &mutationResolver{r}
+}
+
+func (r *RootResolver) Subscription() gqlschema.SubscriptionResolver {
+	return &subscriptionResolver{r}
+}
+
+// Mutations
+
+type mutationResolver struct {
+	*RootResolver
+}
+
+func (r *mutationResolver) CreateServiceInstance(ctx context.Context, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
 	return r.sc.CreateServiceInstanceMutation(ctx, params)
 }
 
-func (r *RootResolver) Subscription_serviceInstanceEvent(ctx context.Context, environment string) (<-chan gqlschema.ServiceInstanceEvent, error) {
-	return r.sc.ServiceInstanceEventSubscription(ctx, environment)
-}
-
-func (r *RootResolver) Query_serviceInstance(ctx context.Context, name string, environment string) (*gqlschema.ServiceInstance, error) {
-	return r.sc.ServiceInstanceQuery(ctx, name, environment)
-}
-
-func (r *RootResolver) Query_serviceInstances(ctx context.Context, environment string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]gqlschema.ServiceInstance, error) {
-	return r.sc.ServiceInstancesQuery(ctx, environment, first, offset, status)
-}
-
-func (r *RootResolver) Query_serviceClasses(ctx context.Context, first *int, offset *int) ([]gqlschema.ServiceClass, error) {
-	return r.sc.ServiceClassesQuery(ctx, first, offset)
-}
-
-func (r *RootResolver) Query_serviceClass(ctx context.Context, name string) (*gqlschema.ServiceClass, error) {
-	return r.sc.ServiceClassQuery(ctx, name)
-}
-
-func (r *RootResolver) Query_serviceBrokers(ctx context.Context, first *int, offset *int) ([]gqlschema.ServiceBroker, error) {
-	return r.sc.ServiceBrokersQuery(ctx, first, offset)
-}
-
-func (r *RootResolver) Query_serviceBroker(ctx context.Context, name string) (*gqlschema.ServiceBroker, error) {
-	return r.sc.ServiceBrokerQuery(ctx, name)
-}
-
-func (r *RootResolver) Query_usageKinds(ctx context.Context, first *int, offset *int) ([]gqlschema.UsageKind, error) {
-	return r.sc.ListUsageKinds(ctx, first, offset)
-}
-
-func (r *RootResolver) Query_usageKindResources(ctx context.Context, usageKind string, environment string) ([]gqlschema.UsageKindResource, error) {
-	return r.sc.ListServiceUsageKindResources(ctx, usageKind, environment)
-}
-
-func (r *RootResolver) ServiceClass_activated(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error) {
-	return r.sc.ServiceClassActivatedField(ctx, obj)
-}
-
-func (r *RootResolver) ServiceClass_plans(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServicePlan, error) {
-	return r.sc.ServiceClassPlansField(ctx, obj)
-}
-
-func (r *RootResolver) ServiceClass_apiSpec(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.ServiceClassApiSpecField(ctx, obj)
-}
-
-func (r *RootResolver) ServiceClass_asyncApiSpec(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.ServiceClassAsyncApiSpecField(ctx, obj)
-}
-
-func (r *RootResolver) ServiceClass_content(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.ServiceClassContentField(ctx, obj)
-}
-
-func (r *RootResolver) ServiceInstance_servicePlan(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ServicePlan, error) {
-	return r.sc.ServiceInstanceServicePlanField(ctx, obj)
-}
-
-func (r *RootResolver) ServiceInstance_serviceClass(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ServiceClass, error) {
-	return r.sc.ServiceInstanceServiceClassField(ctx, obj)
-}
-
-func (r *RootResolver) ServiceInstance_bindable(ctx context.Context, obj *gqlschema.ServiceInstance) (bool, error) {
-	return r.sc.ServiceInstanceBindableField(ctx, obj)
-}
-
-func (r *RootResolver) ServiceInstance_serviceBindings(ctx context.Context, obj *gqlschema.ServiceInstance) ([]gqlschema.ServiceBinding, error) {
-	return r.sc.ServiceBindingsToInstanceQuery(ctx, obj.Name, obj.Environment)
-}
-
-func (r *RootResolver) ServiceInstance_serviceBindingUsages(ctx context.Context, obj *gqlschema.ServiceInstance) ([]gqlschema.ServiceBindingUsage, error) {
-	return r.sc.ServiceBindingUsagesOfInstanceQuery(ctx, obj.Name, obj.Environment)
-}
-
-func (r *RootResolver) Mutation_deleteServiceInstance(ctx context.Context, name string, environment string) (*gqlschema.ServiceInstance, error) {
+func (r *mutationResolver) DeleteServiceInstance(ctx context.Context, name string, environment string) (*gqlschema.ServiceInstance, error) {
 	return r.sc.DeleteServiceInstanceMutation(ctx, name, environment)
 }
 
-func (r *RootResolver) Mutation_createServiceBinding(ctx context.Context, serviceBindingName, serviceInstanceName, env string) (*gqlschema.CreateServiceBindingOutput, error) {
+func (r *mutationResolver) CreateServiceBinding(ctx context.Context, serviceBindingName, serviceInstanceName, env string) (*gqlschema.CreateServiceBindingOutput, error) {
 	return r.sc.CreateServiceBindingMutation(ctx, serviceBindingName, serviceInstanceName, env)
 }
 
-func (r *RootResolver) Mutation_deleteServiceBinding(ctx context.Context, serviceBindingName string, env string) (*gqlschema.DeleteServiceBindingOutput, error) {
+func (r *mutationResolver) DeleteServiceBinding(ctx context.Context, serviceBindingName string, env string) (*gqlschema.DeleteServiceBindingOutput, error) {
 	return r.sc.DeleteServiceBindingMutation(ctx, serviceBindingName, env)
 }
 
-func (r *RootResolver) Query_serviceBinding(ctx context.Context, name string, environment string) (*gqlschema.ServiceBinding, error) {
-	return r.sc.ServiceBindingQuery(ctx, name, environment)
-}
-
-func (r *RootResolver) Subscription_serviceBindingEventForServiceInstance(ctx context.Context, instanceName, environment string) (<-chan gqlschema.ServiceBindingEvent, error) {
-	return r.sc.ServiceBindingEventForInstanceSubscription(ctx, instanceName, environment)
-}
-
-func (r *RootResolver) Mutation_createServiceBindingUsage(ctx context.Context, createServiceBindingUsageInput *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
+func (r *mutationResolver) CreateServiceBindingUsage(ctx context.Context, createServiceBindingUsageInput *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
 	return r.sc.CreateServiceBindingUsageMutation(ctx, createServiceBindingUsageInput)
 }
 
-func (r *RootResolver) Mutation_deleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, env string) (*gqlschema.DeleteServiceBindingUsageOutput, error) {
+func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, env string) (*gqlschema.DeleteServiceBindingUsageOutput, error) {
 	return r.sc.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, env)
 }
 
-func (r *RootResolver) Query_serviceBindingUsage(ctx context.Context, name, environment string) (*gqlschema.ServiceBindingUsage, error) {
-	return r.sc.ServiceBindingUsageQuery(ctx, name, environment)
-}
-
-func (r *RootResolver) Subscription_serviceBindingUsageEventForServiceInstance(ctx context.Context, instanceName, environment string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
-	return r.sc.ServiceBindingUsageEventForInstanceSubscription(ctx, instanceName, environment)
-}
-
-func (r *RootResolver) ServiceBindingUsage_serviceBinding(ctx context.Context, obj *gqlschema.ServiceBindingUsage) (*gqlschema.ServiceBinding, error) {
-	return r.sc.ServiceBindingQuery(ctx, obj.ServiceBindingName, obj.Environment)
-}
-
-func (r *RootResolver) ServiceBinding_secret(ctx context.Context, serviceBinding *gqlschema.ServiceBinding) (*gqlschema.Secret, error) {
-	return r.k8s.SecretQuery(ctx, serviceBinding.SecretName, serviceBinding.Environment)
-}
-
-func (r *RootResolver) Query_content(ctx context.Context, contentType, id string) (*gqlschema.JSON, error) {
-	return r.content.ContentQuery(ctx, contentType, id)
-}
-
-func (r *RootResolver) Query_topics(ctx context.Context, input []gqlschema.InputTopic, internal *bool) ([]gqlschema.TopicEntry, error) {
-	return r.content.TopicsQuery(ctx, input, internal)
-}
-
-// Remote Environments
-
-func (r *RootResolver) Mutation_enableRemoteEnvironment(ctx context.Context, remoteEnvironment string, environment string) (*gqlschema.EnvironmentMapping, error) {
+func (r *mutationResolver) EnableRemoteEnvironment(ctx context.Context, remoteEnvironment string, environment string) (*gqlschema.EnvironmentMapping, error) {
 	return r.re.EnableRemoteEnvironmentMutation(ctx, remoteEnvironment, environment)
 }
 
-func (r *RootResolver) Mutation_disableRemoteEnvironment(ctx context.Context, remoteEnvironment string, environment string) (*gqlschema.EnvironmentMapping, error) {
+func (r *mutationResolver) DisableRemoteEnvironment(ctx context.Context, remoteEnvironment string, environment string) (*gqlschema.EnvironmentMapping, error) {
 	return r.re.DisableRemoteEnvironmentMutation(ctx, remoteEnvironment, environment)
 }
 
-func (r *RootResolver) Query_remoteEnvironment(ctx context.Context, name string) (*gqlschema.RemoteEnvironment, error) {
+func (r *mutationResolver) CreateIDPPreset(ctx context.Context, name string, issuer string, jwksURI string) (*gqlschema.IDPPreset, error) {
+	return r.idpPreset.CreateIDPPresetMutation(ctx, name, issuer, jwksURI)
+}
+
+func (r *mutationResolver) DeleteIDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
+	return r.idpPreset.DeleteIDPPresetMutation(ctx, name)
+}
+
+// Queries
+
+type queryResolver struct {
+	*RootResolver
+}
+
+func (r *queryResolver) Environments(ctx context.Context, remoteEnvironment *string) ([]gqlschema.Environment, error) {
+	return r.k8s.EnvironmentsQuery(ctx, remoteEnvironment)
+}
+
+func (r *queryResolver) Deployments(ctx context.Context, environment string, excludeFunctions *bool) ([]gqlschema.Deployment, error) {
+	return r.k8s.DeploymentsQuery(ctx, environment, excludeFunctions)
+}
+
+func (r *queryResolver) LimitRanges(ctx context.Context, env string) ([]gqlschema.LimitRange, error) {
+	return r.k8s.LimitRangesQuery(ctx, env)
+}
+
+func (r *queryResolver) ResourceQuotas(ctx context.Context, environment string) ([]gqlschema.ResourceQuota, error) {
+	return r.k8s.ResourceQuotasQuery(ctx, environment)
+}
+
+func (r *RootResolver) ResourceQuotaStatus(ctx context.Context, environment string) (gqlschema.ResourceQuotasStatus, error) {
+	return r.k8s.ResourceQuotasStatus(ctx, environment)
+}
+
+func (r *queryResolver) Functions(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.Function, error) {
+	return r.kubeless.FunctionsQuery(ctx, environment, first, offset)
+}
+
+func (r *queryResolver) ServiceInstance(ctx context.Context, name string, environment string) (*gqlschema.ServiceInstance, error) {
+	return r.sc.ServiceInstanceQuery(ctx, name, environment)
+}
+
+func (r *queryResolver) ServiceInstances(ctx context.Context, environment string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]gqlschema.ServiceInstance, error) {
+	return r.sc.ServiceInstancesQuery(ctx, environment, first, offset, status)
+}
+
+func (r *queryResolver) ServiceClasses(ctx context.Context, first *int, offset *int) ([]gqlschema.ServiceClass, error) {
+	return r.sc.ServiceClassesQuery(ctx, first, offset)
+}
+
+func (r *queryResolver) ServiceClass(ctx context.Context, name string) (*gqlschema.ServiceClass, error) {
+	return r.sc.ServiceClassQuery(ctx, name)
+}
+
+func (r *queryResolver) ServiceBrokers(ctx context.Context, first *int, offset *int) ([]gqlschema.ServiceBroker, error) {
+	return r.sc.ServiceBrokersQuery(ctx, first, offset)
+}
+
+func (r *queryResolver) ServiceBroker(ctx context.Context, name string) (*gqlschema.ServiceBroker, error) {
+	return r.sc.ServiceBrokerQuery(ctx, name)
+}
+
+func (r *queryResolver) UsageKinds(ctx context.Context, first *int, offset *int) ([]gqlschema.UsageKind, error) {
+	return r.sc.ListUsageKinds(ctx, first, offset)
+}
+
+func (r *queryResolver) UsageKindResources(ctx context.Context, usageKind string, environment string) ([]gqlschema.UsageKindResource, error) {
+	return r.sc.ListServiceUsageKindResources(ctx, usageKind, environment)
+}
+
+func (r *queryResolver) ServiceBinding(ctx context.Context, name string, environment string) (*gqlschema.ServiceBinding, error) {
+	return r.sc.ServiceBindingQuery(ctx, name, environment)
+}
+
+func (r *queryResolver) ServiceBindingUsage(ctx context.Context, name, environment string) (*gqlschema.ServiceBindingUsage, error) {
+	return r.sc.ServiceBindingUsageQuery(ctx, name, environment)
+}
+
+func (r *queryResolver) Content(ctx context.Context, contentType, id string) (*gqlschema.JSON, error) {
+	return r.content.ContentQuery(ctx, contentType, id)
+}
+
+func (r *queryResolver) Topics(ctx context.Context, input []gqlschema.InputTopic, internal *bool) ([]gqlschema.TopicEntry, error) {
+	return r.content.TopicsQuery(ctx, input, internal)
+}
+
+func (r *queryResolver) RemoteEnvironment(ctx context.Context, name string) (*gqlschema.RemoteEnvironment, error) {
 	return r.re.RemoteEnvironmentQuery(ctx, name)
 }
 
-func (r *RootResolver) Query_remoteEnvironments(ctx context.Context, environment *string, first *int, offset *int) ([]gqlschema.RemoteEnvironment, error) {
+func (r *queryResolver) RemoteEnvironments(ctx context.Context, environment *string, first *int, offset *int) ([]gqlschema.RemoteEnvironment, error) {
 	return r.re.RemoteEnvironmentsQuery(ctx, environment, first, offset)
 }
 
-func (r *RootResolver) Query_connectorService(ctx context.Context, remoteEnvironment string) (gqlschema.ConnectorService, error) {
+func (r *queryResolver) ConnectorService(ctx context.Context, remoteEnvironment string) (gqlschema.ConnectorService, error) {
 	return r.re.ConnectorServiceQuery(ctx, remoteEnvironment)
 }
 
-func (r *RootResolver) RemoteEnvironment_enabledInEnvironments(ctx context.Context, obj *gqlschema.RemoteEnvironment) ([]string, error) {
-	return r.re.RemoteEnvironmentEnabledInEnvironmentsField(ctx, obj)
-}
-
-func (r *RootResolver) RemoteEnvironment_status(ctx context.Context, obj *gqlschema.RemoteEnvironment) (gqlschema.RemoteEnvironmentStatus, error) {
-	return r.re.RemoteEnvironmentStatusField(ctx, obj)
-}
-
-func (r *RootResolver) Query_eventActivations(ctx context.Context, environment string) ([]gqlschema.EventActivation, error) {
+func (r *queryResolver) EventActivations(ctx context.Context, environment string) ([]gqlschema.EventActivation, error) {
 	return r.re.EventActivationsQuery(ctx, environment)
 }
 
-func (r *RootResolver) EventActivation_events(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error) {
-	return r.re.EventActivationEventsField(ctx, eventActivation)
-}
-
-// API controller
-
-func (r *RootResolver) Query_apis(ctx context.Context, environment string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
+func (r *queryResolver) Apis(ctx context.Context, environment string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
 	return r.ac.APIsQuery(ctx, environment, serviceName, hostname)
 }
 
-// UI
-
-func (r *RootResolver) Query_IDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
+func (r *queryResolver) IDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
 	return r.idpPreset.IDPPresetQuery(ctx, name)
 }
 
-func (r *RootResolver) Query_IDPPresets(ctx context.Context, first *int, offset *int) ([]gqlschema.IDPPreset, error) {
+func (r *queryResolver) IDPPresets(ctx context.Context, first *int, offset *int) ([]gqlschema.IDPPreset, error) {
 	return r.idpPreset.IDPPresetsQuery(ctx, first, offset)
 }
 
-func (r *RootResolver) Mutation_createIDPPreset(ctx context.Context, name string, issuer string, jwksUri string) (*gqlschema.IDPPreset, error) {
-	return r.idpPreset.CreateIDPPresetMutation(ctx, name, issuer, jwksUri)
+// Subscriptions
+
+type subscriptionResolver struct {
+	*RootResolver
 }
 
-func (r *RootResolver) Mutation_deleteIDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
-	return r.idpPreset.DeleteIDPPresetMutation(ctx, name)
+func (r *subscriptionResolver) ServiceInstanceEvent(ctx context.Context, environment string) (<-chan gqlschema.ServiceInstanceEvent, error) {
+	return r.sc.ServiceInstanceEventSubscription(ctx, environment)
+}
+
+func (r *subscriptionResolver) ServiceBindingUsageEventForServiceInstance(ctx context.Context, instanceName, environment string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
+	return r.sc.ServiceBindingUsageEventForInstanceSubscription(ctx, instanceName, environment)
+}
+
+func (r *subscriptionResolver) ServiceBindingEventForServiceInstance(ctx context.Context, instanceName, environment string) (<-chan gqlschema.ServiceBindingEvent, error) {
+	return r.sc.ServiceBindingEventForInstanceSubscription(ctx, instanceName, environment)
+}
+
+// Service Instance
+
+type serviceInstanceResolver struct {
+	sc *servicecatalog.Resolver
+}
+
+func (r *serviceInstanceResolver) ServicePlan(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ServicePlan, error) {
+	return r.sc.ServiceInstanceServicePlanField(ctx, obj)
+}
+
+func (r *serviceInstanceResolver) ServiceClass(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ServiceClass, error) {
+	return r.sc.ServiceInstanceServiceClassField(ctx, obj)
+}
+
+func (r *serviceInstanceResolver) Bindable(ctx context.Context, obj *gqlschema.ServiceInstance) (bool, error) {
+	return r.sc.ServiceInstanceBindableField(ctx, obj)
+}
+
+func (r *serviceInstanceResolver) ServiceBindings(ctx context.Context, obj *gqlschema.ServiceInstance) ([]gqlschema.ServiceBinding, error) {
+	return r.sc.ServiceBindingsToInstanceQuery(ctx, obj.Name, obj.Environment)
+}
+
+func (r *serviceInstanceResolver) ServiceBindingUsages(ctx context.Context, obj *gqlschema.ServiceInstance) ([]gqlschema.ServiceBindingUsage, error) {
+	return r.sc.ServiceBindingUsagesOfInstanceQuery(ctx, obj.Name, obj.Environment)
+}
+
+// Service Binding
+
+type serviceBindingResolver struct {
+	k8s *k8s.Resolver
+}
+
+func (r *serviceBindingResolver) Secret(ctx context.Context, serviceBinding *gqlschema.ServiceBinding) (*gqlschema.Secret, error) {
+	return r.k8s.SecretQuery(ctx, serviceBinding.SecretName, serviceBinding.Environment)
+}
+
+// Service Binding Usage
+
+type serviceBindingUsageResolver struct {
+	sc *servicecatalog.Resolver
+}
+
+func (r *serviceBindingUsageResolver) ServiceBinding(ctx context.Context, obj *gqlschema.ServiceBindingUsage) (*gqlschema.ServiceBinding, error) {
+	return r.sc.ServiceBindingQuery(ctx, obj.ServiceBindingName, obj.Environment)
+}
+
+// Remote Environment
+
+type reResolver struct {
+	re *remoteenvironment.Resolver
+}
+
+func (r *reResolver) EnabledInEnvironments(ctx context.Context, obj *gqlschema.RemoteEnvironment) ([]string, error) {
+	return r.re.RemoteEnvironmentEnabledInEnvironmentsField(ctx, obj)
+}
+
+func (r *reResolver) Status(ctx context.Context, obj *gqlschema.RemoteEnvironment) (gqlschema.RemoteEnvironmentStatus, error) {
+	return r.re.RemoteEnvironmentStatusField(ctx, obj)
+}
+
+// Deployment
+
+type deploymentResolver struct {
+	k8s *k8s.Resolver
+}
+
+func (r *deploymentResolver) BoundServiceInstanceNames(ctx context.Context, deployment *gqlschema.Deployment) ([]string, error) {
+	return r.k8s.DeploymentBoundServiceInstanceNamesField(ctx, deployment)
+}
+
+// Event Activation
+
+type eventActivationResolver struct {
+	re *remoteenvironment.Resolver
+}
+
+func (r *eventActivationResolver) Events(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error) {
+	return r.re.EventActivationEventsField(ctx, eventActivation)
+}
+
+// Service Class
+
+type serviceClassResolver struct {
+	sc *servicecatalog.Resolver
+}
+
+func (r *serviceClassResolver) Activated(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error) {
+	return r.sc.ServiceClassActivatedField(ctx, obj)
+}
+
+func (r *serviceClassResolver) Plans(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServicePlan, error) {
+	return r.sc.ServiceClassPlansField(ctx, obj)
+}
+
+func (r *serviceClassResolver) APISpec(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
+	return r.sc.ServiceClassApiSpecField(ctx, obj)
+}
+
+func (r *serviceClassResolver) AsyncAPISpec(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
+	return r.sc.ServiceClassAsyncApiSpecField(ctx, obj)
+}
+
+func (r *serviceClassResolver) Content(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
+	return r.sc.ServiceClassContentField(ctx, obj)
 }

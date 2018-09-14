@@ -66,13 +66,13 @@ dep ensure -vendor-only
 
 #### Generate code from GraphQL schema
 
-This project uses the [GQLGen](https://github.com/vektah/gqlgen) library, which improves development by generating code from the [GraphQL schema definition](internal/gqlschema/schema.graphql).
+This project uses the [GQLGen](https://github.com/99designs/gqlgen) library, which improves development by generating code from the [GraphQL schema definition](internal/gqlschema/schema.graphql).
 
 1.  Define types and their fields in `/internal/gqlschema/schema.graphql` using the [Schema Definition Language](https://graphql.org/learn/schema/).
 1.  Execute the `./codegen.sh` script to run the code generator.
 1.  Navigate to the `/internal/gqlschema/` directory.
-1.  Find newly generated methods in the `Resolvers` interface located in `./schema_gen.go`.
-1.  Implement resolvers in specific domains according to the project structure and rules in this guide. Use generated models from `./models_gen.go` in your business logic. Move them to a new file in the `gqlschema` package and include in the `./types.json` file, if you want to customize them.
+1.  Find newly generated methods in the `ResolverRoot` interface located in `./schema_gen.go`.
+1.  Implement resolvers in specific domains according to the project structure and rules in this guide. Use generated models from `./models_gen.go` in your business logic. If you want to customize them, move them to a new file in the `gqlschema` package and include in the `./config.yml` file.
 
 To use advanced features, such as custom scalars, read the [documentation](https://gqlgen.com/) of the used library.
 

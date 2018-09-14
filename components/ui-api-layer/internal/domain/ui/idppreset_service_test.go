@@ -91,7 +91,7 @@ func TestIDPPreset(t *testing.T) {
 		var (
 			fixName         = "fixIDPPreset"
 			fixIssuer       = "issuer"
-			fixJwksUri      = "uri"
+			fixJwksURI      = "uri"
 			fixIDPPresetObj = fixIDPPreset()
 		)
 
@@ -107,7 +107,7 @@ func TestIDPPreset(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, idp)
 		assert.Equal(t, idp.Name, fixName)
-		assert.Equal(t, idp.Spec.JwksUri, fixJwksUri)
+		assert.Equal(t, idp.Spec.JwksUri, fixJwksURI)
 		assert.Equal(t, idp.Spec.Issuer, fixIssuer)
 	})
 

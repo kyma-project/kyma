@@ -24,9 +24,9 @@ func (c *classConverter) ToGQL(in *v1beta1.ClusterServiceClass) (*gqlschema.Serv
 	}
 
 	providerDisplayName := resource.ToStringPtr(externalMetadata["providerDisplayName"])
-	imageUrl := resource.ToStringPtr(externalMetadata["imageUrl"])
-	documentationUrl := resource.ToStringPtr(externalMetadata["documentationUrl"])
-	supportUrl := resource.ToStringPtr(externalMetadata["supportUrl"])
+	imageURL := resource.ToStringPtr(externalMetadata["imageURL"])
+	documentationURL := resource.ToStringPtr(externalMetadata["documentationURL"])
+	supportURL := resource.ToStringPtr(externalMetadata["supportURL"])
 	displayName := resource.ToStringPtr(externalMetadata["displayName"])
 	longDescription := resource.ToStringPtr(externalMetadata["longDescription"])
 
@@ -37,9 +37,9 @@ func (c *classConverter) ToGQL(in *v1beta1.ClusterServiceClass) (*gqlschema.Serv
 		Description:         in.Spec.Description,
 		LongDescription:     longDescription,
 		ProviderDisplayName: providerDisplayName,
-		ImageUrl:            imageUrl,
-		DocumentationUrl:    documentationUrl,
-		SupportUrl:          supportUrl,
+		ImageURL:            imageURL,
+		DocumentationURL:    documentationURL,
+		SupportURL:          supportURL,
 		CreationTimestamp:   in.CreationTimestamp.Time,
 		Tags:                in.Spec.Tags,
 	}

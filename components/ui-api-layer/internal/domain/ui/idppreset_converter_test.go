@@ -18,7 +18,7 @@ func TestIDPPresetConverter_ToGQL(t *testing.T) {
 			Spec: v1alpha1.IDPPresetSpec{
 				Name:    "name",
 				Issuer:  "issuer",
-				JwksUri: "jwksUri",
+				JwksUri: "jwksURI",
 			},
 		}
 
@@ -30,7 +30,7 @@ func TestIDPPresetConverter_ToGQL(t *testing.T) {
 		// then
 		assert.Equal(t, dto.Name, fix.Spec.Name)
 		assert.Equal(t, dto.Issuer, fix.Spec.Issuer)
-		assert.Equal(t, dto.JwksUri, fix.Spec.JwksUri)
+		assert.Equal(t, dto.JwksURI, fix.Spec.JwksUri)
 	})
 
 	t.Run("Empty", func(t *testing.T) {

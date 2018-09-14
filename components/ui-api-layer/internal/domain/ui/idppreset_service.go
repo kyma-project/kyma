@@ -24,7 +24,7 @@ func newIDPPresetService(client idppresetv1alpha1.UiV1alpha1Interface, reInforme
 	}
 }
 
-func (svc *idpPresetService) Create(name string, issuer string, jwksUri string) (*v1alpha1.IDPPreset, error) {
+func (svc *idpPresetService) Create(name string, issuer string, jwksURI string) (*v1alpha1.IDPPreset, error) {
 	idpPreset := v1alpha1.IDPPreset{
 		TypeMeta: v1.TypeMeta{
 			APIVersion: "ui.kyma.cx/v1alpha1",
@@ -36,7 +36,7 @@ func (svc *idpPresetService) Create(name string, issuer string, jwksUri string) 
 		Spec: v1alpha1.IDPPresetSpec{
 			Name:    name,
 			Issuer:  issuer,
-			JwksUri: jwksUri,
+			JwksUri: jwksURI,
 		},
 	}
 

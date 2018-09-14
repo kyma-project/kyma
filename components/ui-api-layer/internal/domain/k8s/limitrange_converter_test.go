@@ -51,7 +51,7 @@ func TestLimitRangeConverter_ToGQL(t *testing.T) {
 					{
 						Max: gqlschema.ResourceType{
 							Memory: nil,
-							Cpu:    nil,
+							CPU:    nil,
 						},
 					},
 				},
@@ -96,15 +96,15 @@ func fixLimitRange() *v1.LimitRange {
 				{
 					Max: v1.ResourceList{
 						v1.ResourceMemory: resource.MustParse(*fixLimits()[0].Max.Memory),
-						v1.ResourceCPU:    resource.MustParse(*fixLimits()[0].Max.Cpu),
+						v1.ResourceCPU:    resource.MustParse(*fixLimits()[0].Max.CPU),
 					},
 					Default: v1.ResourceList{
 						v1.ResourceMemory: resource.MustParse(*fixLimits()[0].Default.Memory),
-						v1.ResourceCPU:    resource.MustParse(*fixLimits()[0].Default.Cpu),
+						v1.ResourceCPU:    resource.MustParse(*fixLimits()[0].Default.CPU),
 					},
 					DefaultRequest: v1.ResourceList{
 						v1.ResourceMemory: resource.MustParse(*fixLimits()[0].DefaultRequest.Memory),
-						v1.ResourceCPU:    resource.MustParse(*fixLimits()[0].DefaultRequest.Cpu),
+						v1.ResourceCPU:    resource.MustParse(*fixLimits()[0].DefaultRequest.CPU),
 					},
 				},
 			},
@@ -138,15 +138,15 @@ func fixLimits() []gqlschema.LimitRangeItem {
 		{
 			Max: gqlschema.ResourceType{
 				Memory: ptrStr("120Mi"),
-				Cpu:    ptrStr("100m"),
+				CPU:    ptrStr("100m"),
 			},
 			Default: gqlschema.ResourceType{
 				Memory: ptrStr("120Mi"),
-				Cpu:    ptrStr("10"),
+				CPU:    ptrStr("10"),
 			},
 			DefaultRequest: gqlschema.ResourceType{
 				Memory: ptrStr("120Mi"),
-				Cpu:    ptrStr("1200m"),
+				CPU:    ptrStr("1200m"),
 			},
 		},
 	}
