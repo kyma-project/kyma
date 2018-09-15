@@ -1,4 +1,3 @@
-{{- if .Values.cluster.TLS.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -24,7 +23,7 @@ spec:
       serviceAccountName: {{ template "etcd-fullname" . }}-tls-setup
       containers:
       - command: [ "/etcd-tls-setup/bin/run.sh" ]
-        image: eu.gcr.io/kyma-project/snapshot/etcd-tls-setup:etcd-tls
+        image: "{{ .Values.tlsSetup.image }}:{{ .Values.tlsSetup.imageTag }}"
         name: etcd-tls-setup
         env:
         - name: NAMESPACE
@@ -59,7 +58,7 @@ metadata:
   name: {{ template "etcd-fullname" . }}-tls-setup
   namespace: "{{ .Release.Namespace }}"
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "etcd-fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
@@ -90,4 +89,3 @@ metadata:
     "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "5"
     "helm.sh/hook-delete-policy": before-hook-creation
-{{ end }}
