@@ -22,10 +22,10 @@ func TestClassConverter_ToGQL(t *testing.T) {
 		maps := map[string]string{
 			"displayName":         "exampleDisplayName",
 			"providerDisplayName": "exampleProviderName",
-			"imageURL":            "exampleImageURL",
-			"documentationURL":    "exampleDocumentationURL",
+			"imageUrl":            "exampleImageURL",
+			"documentationUrl":    "exampleDocumentationURL",
 			"longDescription":     "exampleLongDescription",
-			"supportURL":          "exampleSupportURL",
+			"supportUrl":          "exampleSupportURL",
 		}
 
 		byteMaps, err := json.Marshal(maps)
@@ -159,10 +159,10 @@ func fixServiceClass(t require.TestingT) *v1beta1.ClusterServiceClass {
 	maps := map[string]string{
 		"displayName":         "exampleDisplayName",
 		"providerDisplayName": "exampleProviderName",
-		"imageURL":            "exampleImageURL",
-		"documentationURL":    "exampleDocumentationURL",
+		"imageUrl":            "exampleImageURL",
+		"documentationUrl":    "exampleDocumentationURL",
 		"longDescription":     "exampleLongDescription",
-		"supportURL":          "exampleSupportURL",
+		"supportUrl":          "exampleSupportURL",
 	}
 
 	byteMaps, err := json.Marshal(maps)

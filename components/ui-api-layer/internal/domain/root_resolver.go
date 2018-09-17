@@ -192,7 +192,7 @@ func (r *queryResolver) ResourceQuotas(ctx context.Context, environment string) 
 	return r.k8s.ResourceQuotasQuery(ctx, environment)
 }
 
-func (r *RootResolver) ResourceQuotaStatus(ctx context.Context, environment string) (gqlschema.ResourceQuotasStatus, error) {
+func (r *RootResolver) ResourceQuotasStatus(ctx context.Context, environment string) (gqlschema.ResourceQuotasStatus, error) {
 	return r.k8s.ResourceQuotasStatus(ctx, environment)
 }
 

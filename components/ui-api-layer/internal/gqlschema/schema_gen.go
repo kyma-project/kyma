@@ -196,31 +196,31 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		ServiceInstance     func(childComplexity int, name string, environment string) int
-		ServiceInstances    func(childComplexity int, environment string, first *int, offset *int, status *InstanceStatusType) int
-		ServiceClasses      func(childComplexity int, first *int, offset *int) int
-		ServiceClass        func(childComplexity int, name string) int
-		ServiceBrokers      func(childComplexity int, first *int, offset *int) int
-		ServiceBroker       func(childComplexity int, name string) int
-		ServiceBindingUsage func(childComplexity int, name string, environment string) int
-		ServiceBinding      func(childComplexity int, name string, environment string) int
-		UsageKinds          func(childComplexity int, first *int, offset *int) int
-		UsageKindResources  func(childComplexity int, usageKind string, environment string) int
-		Apis                func(childComplexity int, environment string, serviceName *string, hostname *string) int
-		RemoteEnvironment   func(childComplexity int, name string) int
-		RemoteEnvironments  func(childComplexity int, environment *string, first *int, offset *int) int
-		ConnectorService    func(childComplexity int, remoteEnvironment string) int
-		Environments        func(childComplexity int, remoteEnvironment *string) int
-		Deployments         func(childComplexity int, environment string, excludeFunctions *bool) int
-		ResourceQuotas      func(childComplexity int, environment string) int
-		ResourceQuotaStatus func(childComplexity int, environment string) int
-		Functions           func(childComplexity int, environment string, first *int, offset *int) int
-		Content             func(childComplexity int, contentType string, id string) int
-		Topics              func(childComplexity int, input []InputTopic, internal *bool) int
-		EventActivations    func(childComplexity int, environment string) int
-		LimitRanges         func(childComplexity int, environment string) int
-		Idppreset           func(childComplexity int, name string) int
-		Idppresets          func(childComplexity int, first *int, offset *int) int
+		ServiceInstance      func(childComplexity int, name string, environment string) int
+		ServiceInstances     func(childComplexity int, environment string, first *int, offset *int, status *InstanceStatusType) int
+		ServiceClasses       func(childComplexity int, first *int, offset *int) int
+		ServiceClass         func(childComplexity int, name string) int
+		ServiceBrokers       func(childComplexity int, first *int, offset *int) int
+		ServiceBroker        func(childComplexity int, name string) int
+		ServiceBindingUsage  func(childComplexity int, name string, environment string) int
+		ServiceBinding       func(childComplexity int, name string, environment string) int
+		UsageKinds           func(childComplexity int, first *int, offset *int) int
+		UsageKindResources   func(childComplexity int, usageKind string, environment string) int
+		Apis                 func(childComplexity int, environment string, serviceName *string, hostname *string) int
+		RemoteEnvironment    func(childComplexity int, name string) int
+		RemoteEnvironments   func(childComplexity int, environment *string, first *int, offset *int) int
+		ConnectorService     func(childComplexity int, remoteEnvironment string) int
+		Environments         func(childComplexity int, remoteEnvironment *string) int
+		Deployments          func(childComplexity int, environment string, excludeFunctions *bool) int
+		ResourceQuotas       func(childComplexity int, environment string) int
+		ResourceQuotasStatus func(childComplexity int, environment string) int
+		Functions            func(childComplexity int, environment string, first *int, offset *int) int
+		Content              func(childComplexity int, contentType string, id string) int
+		Topics               func(childComplexity int, input []InputTopic, internal *bool) int
+		EventActivations     func(childComplexity int, environment string) int
+		LimitRanges          func(childComplexity int, environment string) int
+		Idppreset            func(childComplexity int, name string) int
+		Idppresets           func(childComplexity int, first *int, offset *int) int
 	}
 
 	RemoteEnvironment struct {
@@ -473,7 +473,7 @@ type QueryResolver interface {
 	Environments(ctx context.Context, remoteEnvironment *string) ([]Environment, error)
 	Deployments(ctx context.Context, environment string, excludeFunctions *bool) ([]Deployment, error)
 	ResourceQuotas(ctx context.Context, environment string) ([]ResourceQuota, error)
-	ResourceQuotaStatus(ctx context.Context, environment string) (ResourceQuotasStatus, error)
+	ResourceQuotasStatus(ctx context.Context, environment string) (ResourceQuotasStatus, error)
 	Functions(ctx context.Context, environment string, first *int, offset *int) ([]Function, error)
 	Content(ctx context.Context, contentType string, id string) (*JSON, error)
 	Topics(ctx context.Context, input []InputTopic, internal *bool) ([]TopicEntry, error)
@@ -1218,7 +1218,7 @@ func field_Query_resourceQuotas_args(rawArgs map[string]interface{}) (map[string
 
 }
 
-func field_Query_resourceQuotaStatus_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query_resourceQuotasStatus_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["environment"]; ok {
@@ -2347,17 +2347,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ResourceQuotas(childComplexity, args["environment"].(string)), true
 
-	case "Query.resourceQuotaStatus":
-		if e.complexity.Query.ResourceQuotaStatus == nil {
+	case "Query.resourceQuotasStatus":
+		if e.complexity.Query.ResourceQuotasStatus == nil {
 			break
 		}
 
-		args, err := field_Query_resourceQuotaStatus_args(rawArgs)
+		args, err := field_Query_resourceQuotasStatus_args(rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.ResourceQuotaStatus(childComplexity, args["environment"].(string)), true
+		return e.complexity.Query.ResourceQuotasStatus(childComplexity, args["environment"].(string)), true
 
 	case "Query.functions":
 		if e.complexity.Query.Functions == nil {
@@ -6516,10 +6516,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
-		case "resourceQuotaStatus":
+		case "resourceQuotasStatus":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_resourceQuotaStatus(ctx, field)
+				out.Values[i] = ec._Query_resourceQuotasStatus(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -7414,9 +7414,9 @@ func (ec *executionContext) _Query_resourceQuotas(ctx context.Context, field gra
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Query_resourceQuotaStatus(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _Query_resourceQuotasStatus(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_resourceQuotaStatus_args(rawArgs)
+	args, err := field_Query_resourceQuotasStatus_args(rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -7428,7 +7428,7 @@ func (ec *executionContext) _Query_resourceQuotaStatus(ctx context.Context, fiel
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.Query().ResourceQuotaStatus(ctx, args["environment"].(string))
+		return ec.resolvers.Query().ResourceQuotasStatus(ctx, args["environment"].(string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -10827,6 +10827,9 @@ func (ec *executionContext) _ServiceInstance(ctx context.Context, sel ast.Select
 			}
 		case "status":
 			out.Values[i] = ec._ServiceInstance_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "servicePlan":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -11099,12 +11102,18 @@ func (ec *executionContext) _ServiceInstance_status(ctx context.Context, field g
 		return obj.Status, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*ServiceInstanceStatus)
 	rctx.Result = res
 
 	if res == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 
@@ -13837,7 +13846,7 @@ type ServiceInstance {
     servicePlanSpec: JSON
     creationTimestamp: Timestamp!
     labels: [String!]!
-    status: ServiceInstanceStatus
+    status: ServiceInstanceStatus!
     servicePlan: ServicePlan
     serviceClass: ServiceClass
     bindable: Boolean!
@@ -14269,7 +14278,7 @@ type Query {
     environments(remoteEnvironment: String): [Environment!]!
     deployments(environment: String!, excludeFunctions: Boolean): [Deployment!]!
     resourceQuotas(environment: String!): [ResourceQuota!]!
-    resourceQuotaStatus(environment: String!): ResourceQuotasStatus!
+    resourceQuotasStatus(environment: String!): ResourceQuotasStatus!
 
     functions(environment: String!, first: Int, offset: Int): [Function!]!
 

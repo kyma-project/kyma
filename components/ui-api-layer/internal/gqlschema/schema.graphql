@@ -36,7 +36,7 @@ type ServiceInstance {
     servicePlanSpec: JSON
     creationTimestamp: Timestamp!
     labels: [String!]!
-    status: ServiceInstanceStatus
+    status: ServiceInstanceStatus!
     servicePlan: ServicePlan
     serviceClass: ServiceClass
     bindable: Boolean!
@@ -468,7 +468,7 @@ type Query {
     environments(remoteEnvironment: String): [Environment!]!
     deployments(environment: String!, excludeFunctions: Boolean): [Deployment!]!
     resourceQuotas(environment: String!): [ResourceQuota!]!
-    resourceQuotaStatus(environment: String!): ResourceQuotasStatus!
+    resourceQuotasStatus(environment: String!): ResourceQuotasStatus!
 
     functions(environment: String!, first: Int, offset: Int): [Function!]!
 

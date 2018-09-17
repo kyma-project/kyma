@@ -76,7 +76,7 @@ func TestInstanceConverter_ToGQL(t *testing.T) {
 			ServicePlanSpec:   parameterSchemaJSON,
 			Labels:            []string{"test1", "test2"},
 			CreationTimestamp: zeroTimeStamp,
-			Status: &gqlschema.ServiceInstanceStatus{
+			Status: gqlschema.ServiceInstanceStatus{
 				Type:    gqlschema.InstanceStatusTypeRunning,
 				Reason:  "Testing",
 				Message: "Working",
@@ -129,7 +129,7 @@ func TestInstanceConverter_ToGQL(t *testing.T) {
 			ServicePlanName:   &testPlanName,
 			Labels:            []string{},
 			CreationTimestamp: zeroTimeStamp,
-			Status: &gqlschema.ServiceInstanceStatus{
+			Status: gqlschema.ServiceInstanceStatus{
 				Type:    gqlschema.InstanceStatusTypeRunning,
 				Reason:  "Testing",
 				Message: "Working",
@@ -148,7 +148,7 @@ func TestInstanceConverter_ToGQL(t *testing.T) {
 
 		expected := &gqlschema.ServiceInstance{
 			Labels: []string{},
-			Status: &gqlschema.ServiceInstanceStatus{
+			Status: gqlschema.ServiceInstanceStatus{
 				Type: gqlschema.InstanceStatusTypePending,
 			},
 		}
@@ -168,7 +168,7 @@ func TestInstanceConverter_ToGQL(t *testing.T) {
 
 		expected := &gqlschema.ServiceInstance{
 			Labels: []string{},
-			Status: &gqlschema.ServiceInstanceStatus{
+			Status: gqlschema.ServiceInstanceStatus{
 				Type: gqlschema.InstanceStatusTypePending,
 			},
 		}
@@ -285,9 +285,9 @@ func TestInstanceConverter_ServiceStatusToGQLStatus(t *testing.T) {
 		}
 
 		converter := instanceConverter{}
-		result := converter.ServiceStatusToGQLStatus(&s)
+		result := converter.ServiceStatusToGQLStatus(s)
 
-		assert.Equal(t, &expected, result)
+		assert.Equal(t, expected, result)
 	})
 }
 
@@ -333,9 +333,9 @@ func TestInstanceConverter_ServiceStatusToGQLStatusWithConvert(t *testing.T) {
 		}
 
 		converter := instanceConverter{}
-		result := converter.ServiceStatusToGQLStatus(converter.extractor.Status(&instance))
+		result := converter.ServiceStatusToGQLStatus(converter.extractor.Status(instance))
 
-		assert.Equal(t, &expected, result)
+		assert.Equal(t, expected, result)
 	})
 }
 

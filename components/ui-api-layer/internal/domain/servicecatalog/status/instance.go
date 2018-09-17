@@ -24,28 +24,24 @@ type ServiceInstanceStatus struct {
 	Message string
 }
 
-func (ext *InstanceExtractor) Status(serviceInstance *v1beta1.ServiceInstance) *ServiceInstanceStatus {
-	if serviceInstance == nil {
-		return nil
-	}
-
+func (ext *InstanceExtractor) Status(serviceInstance v1beta1.ServiceInstance) ServiceInstanceStatus {
 	conditions := serviceInstance.Status.Conditions
 	activeCondition := ext.findActiveConditions(conditions)
 
 	if len(conditions) == 0 {
-		return &ServiceInstanceStatus{
+		return ServiceInstanceStatus{
 			Type: ServiceInstanceStatusTypePending,
 		}
 	}
 	if cond, found := ext.findConditionOfType(activeCondition, v1beta1.ServiceInstanceConditionReady); found {
-		return &ServiceInstanceStatus{
+		return ServiceInstanceStatus{
 			Type:    ServiceInstanceStatusTypeRunning,
 			Reason:  cond.Reason,
 			Message: cond.Message,
 		}
 	}
 	if cond, found := ext.findConditionOfType(activeCondition, v1beta1.ServiceInstanceConditionFailed); found {
-		return &ServiceInstanceStatus{
+		return ServiceInstanceStatus{
 			Type:    ServiceInstanceStatusTypeFailed,
 			Reason:  cond.Reason,
 			Message: cond.Message,
@@ -53,7 +49,7 @@ func (ext *InstanceExtractor) Status(serviceInstance *v1beta1.ServiceInstance) *
 	}
 
 	condition, _ := ext.findConditionOfType(conditions, v1beta1.ServiceInstanceConditionReady)
-	return &ServiceInstanceStatus{
+	return ServiceInstanceStatus{
 		Type:    ext.getProvisioningStatus(condition.Reason),
 		Message: condition.Message,
 		Reason:  condition.Reason,

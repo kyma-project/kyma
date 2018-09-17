@@ -47,7 +47,7 @@ func (c *instanceConverter) ToGQL(in *v1beta1.ServiceInstance) (*gqlschema.Servi
 		ServiceClassDisplayName: in.Spec.ClusterServiceClassExternalName,
 		ServicePlanSpec:         servicePlanSpec,
 		Labels:                  instanceLabels,
-		Status:                  c.ServiceStatusToGQLStatus(c.extractor.Status(in)),
+		Status:                  c.ServiceStatusToGQLStatus(c.extractor.Status(*in)),
 		CreationTimestamp:       in.CreationTimestamp.Time,
 	}
 
@@ -146,12 +146,8 @@ func (c *instanceConverter) GQLStatusToServiceStatus(in *gqlschema.ServiceInstan
 	}
 }
 
-func (c *instanceConverter) ServiceStatusToGQLStatus(in *status.ServiceInstanceStatus) *gqlschema.ServiceInstanceStatus {
-	if in == nil {
-		return nil
-	}
-
-	return &gqlschema.ServiceInstanceStatus{
+func (c *instanceConverter) ServiceStatusToGQLStatus(in status.ServiceInstanceStatus) gqlschema.ServiceInstanceStatus {
+	return gqlschema.ServiceInstanceStatus{
 		Type:    c.ServiceStatusTypeToGQLStatusType(in.Type),
 		Reason:  in.Reason,
 		Message: in.Message,

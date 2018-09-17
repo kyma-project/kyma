@@ -24,9 +24,9 @@ func (c *classConverter) ToGQL(in *v1beta1.ClusterServiceClass) (*gqlschema.Serv
 	}
 
 	providerDisplayName := resource.ToStringPtr(externalMetadata["providerDisplayName"])
-	imageURL := resource.ToStringPtr(externalMetadata["imageURL"])
-	documentationURL := resource.ToStringPtr(externalMetadata["documentationURL"])
-	supportURL := resource.ToStringPtr(externalMetadata["supportURL"])
+	imageURL := resource.ToStringPtr(externalMetadata["imageUrl"])
+	documentationURL := resource.ToStringPtr(externalMetadata["documentationUrl"])
+	supportURL := resource.ToStringPtr(externalMetadata["supportUrl"])
 	displayName := resource.ToStringPtr(externalMetadata["displayName"])
 	longDescription := resource.ToStringPtr(externalMetadata["longDescription"])
 
