@@ -4,29 +4,34 @@ type: Getting Started
 ---
 
 Kyma components are packaged as [Helm](https://github.com/helm/helm/tree/master/docs) charts and are installed by the [Installer](../../../components/installer/README.md).
-This document describes how to configure Installer with overrides for Helm [charts](https://github.com/helm/helm/blob/master/docs/charts.md).
+This document describes how to configure Installer with override values for Helm [charts](https://github.com/helm/helm/blob/master/docs/charts.md).
 
 
 ## Overview
 
 The Installer is a Kubernetes Operator that uses Helm to install Kyma components.
-In order to customize installation for particular environment, one can use Helm *overrides* mechanism.
+Helm provides an *overrides* feature to customize installation of charts (e.g: to configure environment-specific thing).
 When using Installer for Kyma installation, users can't interact with Helm directly (installation is not an interactive process).
-Instead, the Installer exposes a generic mechanism for providing user-defined overrides.
+To customize Kyma installation, Installer exposes a generic mechanism for configuring Helm overrides called **user-defined** overrides.
+
 
 ## User-defined overrides
 
 Installer finds user-defined overrides by reading ConfigMaps and Secrets deployed in `kyma-installer` namespace and marked with `installer:overrides` label.
-Installer constructs the override by inspecting the ConfigMap/Secret entry key name. The key name should be a dot-separated sequence of strings, corresponding to the structure of keys in chart values.yaml file. See Examples below.
+Installer constructs a single override by inspecting the ConfigMap/Secret entry key name. The key name should be a dot-separated sequence of strings, corresponding to the structure of keys in chart's values.yaml file, or the entry in chart's template(see examples below).
+Installer merges all overrides recursively into a single YAML stream and passes this to Helm during Kyma installation/upgrade operation.
+
 
 ### Common vs component overides
 
 Installer looks for available overrides each time a component installation/update operation is due.
-Overrides for the component are composed from two sets: common overrides and component-specific overrides.
+Overrides for the component are composed from two sets: **common** overrides and **component-specific** overrides.
 - Common overrides are used for installation of all components. They are defined in ConfigMaps/Secrets marked with `installer:overrides` label only.
-- Component-specific overrides are used only for the installation of the component. They are defined in ConfigMaps/Secrets marked with both: `installer:overrides` and `component: <name>` labels, where `<name>` is the component name. Component-Specific overrides have precedence over Common ones.
+- Component-specific overrides are used only for the installation of the specific component. They are defined in ConfigMaps/Secrets marked with both: `installer:overrides` and `component: <name>` labels, where `<name>` is the component name. Component-Specific overrides have precedence over Common ones in case of conflicting entries.
+
 
 ### Examples
+
 
 #### Top-level charts overrides
 
@@ -100,11 +105,56 @@ Once the installation starts, Installer generates overrides based on the map ent
 
 #### Global overrides
 
-There are important parameters that are shared across the charts, like Domain name.
-These are defined using `global` prefix.
+Some important parameters are usually shared across the charts.
+Helm convention to provide these is by using `global` override key.
 
-For example, to define `global.domain` just use that as key name in ConfigMap/Secret for Installer.
-Once the installation starts, Installer is parsing all map entries and collect all global entries together for the purpose of installation.
+For example, to define `global.domain` override, just use "global.domin" as the name of the key in ConfigMap/Secret for Installer.
+Once the installation starts, Installer is merging all map entries and collect all global entries together (under `global` top-level key) for the purpose of installation.
+
+
+## Merging and conflicting entries
+
+When installer encounters two overrides with the same key prefix, it tries to merge them.
+If both of them represent a map (they have nested sub-keys), their nested keys are recursively merged.
+If at least one of keys points to a final value,  Installer performs the merge in non-deterministic order, so either one or the other override is rendered to the final YAML.
+Considering that, avoid overrides having the same keys for final values.
+
+### Example of non-conflicting merge:
+
+Having two overrides with a *common* key prefix ("a.b"):
+`
+"a.b.c": "first"
+"a.b.d": "second"
+`
+
+Installer yields correct output:
+`
+a:
+  b:
+    c: first
+    d: second
+`
+
+### Example of conflicting merge:
+
+Having two overrides with *the same* key ("a.b"):
+
+`
+"a.b": "first"
+"a.b": "second"
+`
+
+Installer yields either:
+`
+a:
+  b: "first"
+`
+
+Or (due to non-deterministic merge order):
+`
+a:
+  b: "second"
+`
 
 
 ## Values and types
