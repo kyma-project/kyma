@@ -32,6 +32,15 @@ podTemplate(label: label) {
                         stage("setup") {
                             checkout scm
 
+                            echo "DEBUG -->"
+
+                            sh (script: "pwd; ls -al", returnStdout: true).trim()
+
+                            commitID = sh (script: "git rev-parse origin/${env.BRANCH_NAME}", returnStdout: true).trim()
+                            echo "$commitID"
+
+                            echo "DEBUG <--"
+
                             if(dockerImageTag == ""){
                                 error("No version for docker tag defined, please set APP_VERSION parameter for master branch or GIT_BRANCH parameter for any branch")
                             }
