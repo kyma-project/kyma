@@ -5,6 +5,7 @@ import (
 
 	actionmanager "github.com/kyma-project/kyma/components/installer/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
+	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 	internalerrors "github.com/kyma-project/kyma/components/installer/pkg/errors"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymainstallation"
@@ -51,7 +52,7 @@ func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientse
 }
 
 //InstallKyma .
-func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
+func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData, action string) error {
 
 	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
 	if downloadKymaErr != nil {
@@ -62,23 +63,33 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 
 	stepsFactory := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrideData)
 
+	log.Println("Processing Kyma components")
+
 	for _, component := range installationData.Components {
 
-		stepName := "Installing " + component.GetReleaseName()
+		stepName := "Processing component " + component.GetReleaseName()
 		steps.statusManager.InProgress(stepName)
 
 		if component.Name == "provision-bundles" { // Legacy support for bash provision-bundles script - to be deleted later
-			err := steps.ProvisionBundles(installationData)
-			if steps.errorHandlers.CheckError("Step installation error: ", err) {
-				steps.statusManager.Error(stepName)
-				return err
+			if action == consts.InstallAction {
+				err := steps.ProvisionBundles(installationData)
+				if steps.errorHandlers.CheckError("Step error: ", err) {
+					steps.statusManager.Error(stepName)
+					return err
+				}
+			} else {
+				err := steps.UpdateBundles(installationData)
+				if steps.errorHandlers.CheckError("Step installation error: ", err) {
+					steps.statusManager.Error(stepName)
+					return err
+				}
 			}
 		} else {
 			step := stepsFactory.NewStep(component)
-			steps.PrintInstallationStep(stepName)
+			steps.PrintStep(stepName)
 
-			installErr := step.Install()
-			if steps.errorHandlers.CheckError("Step installation error: ", installErr) {
+			installErr := step.Run()
+			if steps.errorHandlers.CheckError("Step error: ", installErr) {
 				steps.statusManager.Error(stepName)
 				return installErr
 			}
@@ -98,59 +109,7 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 		return err
 	}
 
-	log.Println("Kyma Installed")
-
-	return nil
-}
-
-//UpdateKyma .
-func (steps *InstallationSteps) UpdateKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
-
-	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
-
-	if downloadKymaErr != nil {
-		return downloadKymaErr
-	}
-
-	steps.currentPackage = currentPackage
-
-	stepsFactory := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrideData)
-
-	for _, component := range installationData.Components {
-
-		stepName := "Upgrading " + component.GetReleaseName()
-		steps.statusManager.InProgress(stepName)
-
-		if component.Name == "provision-bundles" { // Legacy support for bash provision-bundles script - to be deleted later
-			err := steps.UpdateBundles(installationData)
-			if steps.errorHandlers.CheckError("Step installation error: ", err) {
-				steps.statusManager.Error(stepName)
-				return err
-			}
-		} else {
-			step := stepsFactory.NewStep(component)
-			steps.PrintInstallationStep(stepName)
-
-			installErr := step.Upgrade()
-			if steps.errorHandlers.CheckError("Step installation error: ", installErr) {
-				steps.statusManager.Error(stepName)
-				return installErr
-			}
-		}
-
-		log.Println(stepName + "...DONE")
-	}
-
-	err := steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
-
-	if steps.errorHandlers.CheckError("Error on removing label: ", err) {
-		return err
-	}
-
-	err = steps.statusManager.UpdateDone(installationData.URL, installationData.KymaVersion)
-	if err != nil {
-		return err
-	}
+	log.Println("Processing Kyma components ...DONE!")
 
 	return nil
 }
@@ -174,8 +133,8 @@ func (steps *InstallationSteps) UninstallKyma(installationData *config.Installat
 	return nil
 }
 
-//PrintInstallationStep .
-func (steps *InstallationSteps) PrintInstallationStep(stepName string) {
+//PrintStep .
+func (steps *InstallationSteps) PrintStep(stepName string) {
 	log.Println("---------------------------")
 	log.Println(stepName)
 	log.Println("---------------------------")

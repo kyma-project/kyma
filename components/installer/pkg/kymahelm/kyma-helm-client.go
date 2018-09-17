@@ -62,7 +62,7 @@ func (hc *Client) InstallReleaseFromChart(chartdir, ns, releaseName, overrides s
 		chart,
 		ns,
 		helm.ReleaseName(string(releaseName)),
-		helm.ValueOverrides([]byte(overrides)), //Without it default "values.yaml" file is ignored!
+		helm.ValueOverrides([]byte(overrides)),
 		helm.InstallWait(true),
 		helm.InstallTimeout(3600),
 	)
@@ -74,7 +74,7 @@ func (hc *Client) InstallRelease(chartdir, ns, releasename, overrides string) (*
 		chartdir,
 		ns,
 		helm.ReleaseName(releasename),
-		helm.ValueOverrides([]byte(overrides)), //Without it default "values.yaml" file is ignored!
+		helm.ValueOverrides([]byte(overrides)),
 		helm.InstallWait(true),
 		helm.InstallTimeout(3600),
 	)
@@ -86,7 +86,7 @@ func (hc *Client) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides
 		chartdir,
 		ns,
 		helm.ReleaseName(releasename),
-		helm.ValueOverrides([]byte(overrides)), //Without it default "values.yaml" file is ignored!
+		helm.ValueOverrides([]byte(overrides)),
 		helm.InstallWait(false),
 		helm.InstallTimeout(3600),
 	)
@@ -97,7 +97,7 @@ func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.
 	return hc.helm.UpdateRelease(
 		releaseName,
 		chartDir,
-		helm.UpdateValueOverrides([]byte(overrides+"\nglobal:\n  install: true\n")), //Without it default "values.yaml" file is ignored!
+		helm.UpdateValueOverrides([]byte(overrides)),
 		helm.ReuseValues(true),
 		helm.UpgradeTimeout(3600),
 	)

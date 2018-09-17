@@ -13,26 +13,50 @@ type StepFactory interface {
 }
 
 type stepFactory struct {
-	kymaPackage  kymasources.KymaPackage
-	helmClient   kymahelm.ClientInterface
-	overrideData overrides.OverrideData
+	kymaPackage       kymasources.KymaPackage
+	helmClient        kymahelm.ClientInterface
+	installedReleases map[string]bool
+	overrideData      overrides.OverrideData
 }
 
 // NewStep method returns instance of the step based on component details
 func (sf stepFactory) NewStep(component v1alpha1.KymaComponent) Step {
-	return step{
+	step := step{
 		kymaPackage:  sf.kymaPackage,
 		helmClient:   sf.helmClient,
 		overrideData: sf.overrideData,
 		component:    component,
 	}
+
+	if sf.installedReleases[component.GetReleaseName()] {
+		return upgradeStep{
+			step: step,
+		}
+	}
+
+	return installStep{
+		step: step,
+	}
 }
 
 // NewStepFactory returns implementation of StepFactory implementation
 func NewStepFactory(kymaPackage kymasources.KymaPackage, helmClient kymahelm.ClientInterface, overrideData overrides.OverrideData) StepFactory {
+	installedReleases := make(map[string]bool)
+	relesesRes, err := helmClient.ListReleases()
+	if err != nil {
+		panic(err)
+	}
+
+	if relesesRes != nil {
+		for _, release := range relesesRes.Releases {
+			installedReleases[release.Name] = true
+		}
+	}
+
 	return stepFactory{
-		kymaPackage:  kymaPackage,
-		helmClient:   helmClient,
-		overrideData: overrideData,
+		kymaPackage:       kymaPackage,
+		helmClient:        helmClient,
+		installedReleases: installedReleases,
+		overrideData:      overrideData,
 	}
 }

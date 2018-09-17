@@ -12,8 +12,7 @@ import (
 
 // Step represents contract for installation step
 type Step interface {
-	Install() error
-	Upgrade() error
+	Run() error
 	Status() (string, error)
 	ToString() string
 }
@@ -30,8 +29,17 @@ func (s step) ToString() string {
 	return fmt.Sprintf("Component: %s, Release: %s, Namespace: %s", s.component.Name, s.component.GetReleaseName(), s.component.Namespace)
 }
 
-// Install method triggers step installation via helm
-func (s step) Install() error {
+// Status returns helm release status
+func (s step) Status() (string, error) {
+	return s.helmClient.ReleaseStatus(s.component.GetReleaseName())
+}
+
+type installStep struct {
+	step
+}
+
+// Run method for installStep triggers step installation via helm
+func (s installStep) Run() error {
 	chartDir := path.Join(s.kymaPackage.GetChartsDirPath(), s.component.Name)
 
 	overrides, overridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
@@ -68,8 +76,12 @@ func (s step) Install() error {
 	return nil
 }
 
-// Upgrade method triggers step upgrade via helm
-func (s step) Upgrade() error {
+type upgradeStep struct {
+	step
+}
+
+// Run method for upgradeStep triggers step upgrade via helm
+func (s upgradeStep) Run() error {
 	chartDir := path.Join(s.kymaPackage.GetChartsDirPath(), s.component.Name)
 
 	overrides, overridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
@@ -90,9 +102,4 @@ func (s step) Upgrade() error {
 	s.helmClient.PrintRelease(upgradeResp.Release)
 
 	return nil
-}
-
-// Status returns helm release status
-func (s step) Status() (string, error) {
-	return s.helmClient.ReleaseStatus(s.component.GetReleaseName())
 }
