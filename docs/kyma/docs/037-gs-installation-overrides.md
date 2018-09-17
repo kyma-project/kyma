@@ -121,7 +121,7 @@ Considering that, avoid overrides having the same keys for final values.
 
 ### Example of non-conflicting merge:
 
-Having two overrides with a *common* key prefix ("a.b"):
+Having two overrides with a common *key prefix* ("a.b"):
 
 ```
 "a.b.c": "first"
