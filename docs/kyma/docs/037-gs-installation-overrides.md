@@ -117,7 +117,7 @@ Once the installation starts, Installer is merging all map entries and collect a
 When installer encounters two overrides with the same key prefix, it tries to merge them.
 If both of them represent a map (they have nested sub-keys), their nested keys are recursively merged.
 If at least one of keys points to a final value,  Installer performs the merge in non-deterministic order, so either one or the other override is rendered to the final YAML.
-Considering that, avoid overrides having the same keys for final values.
+Considering that, **avoid overrides having the same keys for final values**.
 
 ### Example of non-conflicting merge:
 
