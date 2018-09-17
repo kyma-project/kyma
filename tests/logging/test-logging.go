@@ -118,7 +118,7 @@ func testLogSpout() {
 }
 
 func deployDummyPod() {
-	cmd := exec.Command("kubectl", "create", "-f", yamlFile)
+	cmd := exec.Command("kubectl", "-n", namespace, "create", "-f", yamlFile)
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatal("Unable to deploy:\n", string(stdoutStderr))
@@ -185,7 +185,7 @@ func testLogStream() {
 }
 
 func cleanup() {
-	cmd := exec.Command("kubectl", "delete", "-f", yamlFile)
+	cmd := exec.Command("kubectl", "-n", namespace, "delete", "-f", yamlFile, "--force", "--grace-period=0")
 	stdoutStderr, err := cmd.CombinedOutput()
 	output := string(stdoutStderr)
 	if err != nil && !strings.Contains(output, "NotFound") {
