@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	initialWaitTime = 6
-	retryWaitTime   = 3
+	initialWaitTime = 10
+	retryWaitTime   = 5
 	retryCount      = 3
 )
 
@@ -41,7 +41,7 @@ func TestRemoteEnvironmentCreation(t *testing.T) {
 
 			//then
 			require.NoError(t, err)
-			require.True(t, exists)
+			require.True(t, exists, "Release %s should exist but does not", testReName)
 
 			k8sResourcesChecker.CheckK8sResources(t, requireNoError, requireNotEmpty)
 		})

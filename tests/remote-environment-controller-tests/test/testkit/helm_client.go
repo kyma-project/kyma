@@ -38,7 +38,7 @@ func (hc *helmClient) checkExistenceWithRetriesIf(releaseName string, shouldRetr
 
 	for i := 0; i < hc.retryCount && shouldRetry(exists, err); i++ {
 		exists, err = hc.checkReleaseExistence(releaseName)
-		if shouldRetryIfExists(exists, err) {
+		if shouldRetry(exists, err) {
 			time.Sleep(hc.retryWaitTime)
 		}
 	}
