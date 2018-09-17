@@ -26,7 +26,7 @@ spec:
               maxLength: 32
             name:
               type: string
-              maxLength: 32
+              maxLength: 64
             description:
               type: string
               maxLength: 256
