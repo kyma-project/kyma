@@ -363,7 +363,7 @@ global.metadata-service-tests.dir=${versions['tests/metadata-service-tests'] == 
 global.event-bus-tests.version=${versions['tests/event-bus']}
 global.event-bus-tests.dir=${versions['tests/event-bus'] == env.BRANCH_NAME ? 'pr' : 'develop'}
 global.test-logging.version=${versions['tests/logging']}
-global.test-logging.dir=${versions['test-logging'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.test-logging.dir=${versions['tests/logging'] == env.BRANCH_NAME ? 'pr' : 'develop'}
 """
 
     return "$overrides"
