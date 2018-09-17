@@ -7,6 +7,7 @@ import (
 type OverrideData interface {
 	Common() Map
 	ForComponent(componentName string) Map
+	ForRelease(releaseName string) (string, error)
 }
 
 type Provider struct {
@@ -35,6 +36,16 @@ func (o *Provider) ForComponent(componentName string) Map {
 	}
 
 	return res
+}
+
+//ForRelease returns overrides for release
+func (o *Provider) ForRelease(releaseName string) (string, error) {
+	allOverrides := Map{}
+
+	MergeMaps(allOverrides, o.Common())
+	MergeMaps(allOverrides, o.ForComponent(releaseName))
+
+	return ToYaml(allOverrides)
 }
 
 //New returns new Data instance.
