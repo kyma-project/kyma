@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	initialWaitTime = 5
-	retryWaitTime   = 2
+	initialWaitTime = 6
+	retryWaitTime   = 3
 	retryCount      = 3
 )
 
