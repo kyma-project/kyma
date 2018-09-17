@@ -25,7 +25,7 @@ func NewHelmClient(host string, retryCount int, retryWaitTime time.Duration) Hel
 }
 
 func (hc *helmClient) ExistWhenShould(releaseName string) (bool, error) {
-	return hc.checkExistenceWithRetriesIf(releaseName, shouldRetryIfNotExists)
+	return hc.checkExistenceWithRetriesIf(releaseName, shouldRetryIfNotExist)
 }
 
 func (hc *helmClient) ExistWhenShouldNot(releaseName string) (bool, error) {
@@ -46,12 +46,12 @@ func (hc *helmClient) checkExistenceWithRetriesIf(releaseName string, shouldRetr
 	return exists, err
 }
 
-func shouldRetryIfNotExists(releaseExists bool, err error) bool {
+func shouldRetryIfNotExist(releaseExists bool, err error) bool {
 	return err != nil || releaseExists == false
 }
 
 func shouldRetryIfExists(releaseExists bool, err error) bool {
-	return err != nil || releaseExists == false
+	return err != nil || releaseExists == true
 }
 
 func (hc *helmClient) checkReleaseExistence(name string) (bool, error) {

@@ -37,7 +37,7 @@ func TestRemoteEnvironmentCreation(t *testing.T) {
 
 		t.Run("Helm release and k8s resources should exist", func(t *testing.T) {
 			// when
-			exists, err := helmClient.ExistWhenShould(testReName)
+			exists, err := helmClient.ExistWhenShould(testRe.Name)
 
 			//then
 			require.NoError(t, err)
@@ -73,7 +73,7 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 
 	t.Run("should delete RE helm chart when RE is deleted", func(t *testing.T) {
 		// when
-		err := k8sResourcesClient.DeleteRemoteEnvironment(testReName, &v1.DeleteOptions{})
+		err := k8sResourcesClient.DeleteRemoteEnvironment(testRe.Name, &v1.DeleteOptions{})
 
 		// then
 		require.NoError(t, err)
