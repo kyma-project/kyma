@@ -8,18 +8,18 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 )
 
-//go:generate mockery -name=GQLBindingConverter -output=automock -outpkg=automock -case=underscore
-type GQLBindingConverter interface {
+//go:generate mockery -name=gqlBindingConverter -output=automock -outpkg=automock -case=underscore
+type gqlBindingConverter interface {
 	ToGQL(in *api.ServiceBinding) *gqlschema.ServiceBinding
 }
 
 type Binding struct {
 	channel   chan<- gqlschema.ServiceBindingEvent
 	filter    func(bindingUsage *api.ServiceBinding) bool
-	converter GQLBindingConverter
+	converter gqlBindingConverter
 }
 
-func NewBinding(channel chan<- gqlschema.ServiceBindingEvent, filter func(binding *api.ServiceBinding) bool, converter GQLBindingConverter) *Binding {
+func NewBinding(channel chan<- gqlschema.ServiceBindingEvent, filter func(binding *api.ServiceBinding) bool, converter gqlBindingConverter) *Binding {
 	return &Binding{
 		channel:   channel,
 		filter:    filter,

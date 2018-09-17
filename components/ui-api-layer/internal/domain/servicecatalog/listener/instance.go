@@ -9,18 +9,18 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=GQLInstanceConverter -output=automock -outpkg=automock -case=underscore
-type GQLInstanceConverter interface {
+//go:generate mockery -name=gqlInstanceConverter -output=automock -outpkg=automock -case=underscore
+type gqlInstanceConverter interface {
 	ToGQL(in *api.ServiceInstance) (*gqlschema.ServiceInstance, error)
 }
 
 type Instance struct {
 	channel   chan<- gqlschema.ServiceInstanceEvent
 	filter    func(instance *api.ServiceInstance) bool
-	converter GQLInstanceConverter
+	converter gqlInstanceConverter
 }
 
-func NewInstance(channel chan<- gqlschema.ServiceInstanceEvent, filter func(instance *api.ServiceInstance) bool, converter GQLInstanceConverter) *Instance {
+func NewInstance(channel chan<- gqlschema.ServiceInstanceEvent, filter func(instance *api.ServiceInstance) bool, converter gqlInstanceConverter) *Instance {
 	return &Instance{
 		channel:   channel,
 		filter:    filter,

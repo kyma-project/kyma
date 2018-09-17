@@ -313,7 +313,7 @@ func instanceDetailsFields() string {
 
 func instanceEventDetailsFields() string {
 	return fmt.Sprintf(`
-		type
+        type
         instance {
 			%s
         }
@@ -407,7 +407,7 @@ func readInstanceEvent(sub *graphql.Subscription) (ServiceInstanceEvent, error) 
 		ServiceInstanceEvent ServiceInstanceEvent
 	}
 	var bindingEvent Response
-	err := sub.Next(&bindingEvent)
+	err := sub.Next(&bindingEvent, tester.DefaultSubscriptionTimeout)
 
 	return bindingEvent.ServiceInstanceEvent, err
 }

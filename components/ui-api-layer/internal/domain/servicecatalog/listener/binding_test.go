@@ -15,7 +15,7 @@ func TestBinding_OnAdd(t *testing.T) {
 		// given
 		gqlBinding := new(gqlschema.ServiceBinding)
 		binding := new(api.ServiceBinding)
-		converter := new(automock.GQLBindingConverter)
+		converter := automock.NewGQLBindingConverter()
 
 		channel := make(chan gqlschema.ServiceBindingEvent, 1)
 		defer close(channel)
@@ -51,7 +51,7 @@ func TestBinding_OnAdd(t *testing.T) {
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
 		binding := new(api.ServiceBinding)
-		converter := new(automock.GQLBindingConverter)
+		converter := automock.NewGQLBindingConverter()
 
 		converter.On("ToGQL", binding).Return(nil).Once()
 		defer converter.AssertExpectations(t)
@@ -75,7 +75,7 @@ func TestBinding_OnDelete(t *testing.T) {
 		// given
 		gqlBinding := new(gqlschema.ServiceBinding)
 		binding := new(api.ServiceBinding)
-		converter := new(automock.GQLBindingConverter)
+		converter := automock.NewGQLBindingConverter()
 
 		channel := make(chan gqlschema.ServiceBindingEvent, 1)
 		defer close(channel)
@@ -112,7 +112,7 @@ func TestBinding_OnDelete(t *testing.T) {
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
 		binding := new(api.ServiceBinding)
-		converter := new(automock.GQLBindingConverter)
+		converter := automock.NewGQLBindingConverter()
 
 		converter.On("ToGQL", binding).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -136,7 +136,7 @@ func TestBinding_OnUpdate(t *testing.T) {
 		// given
 		gqlBinding := new(gqlschema.ServiceBinding)
 		binding := new(api.ServiceBinding)
-		converter := new(automock.GQLBindingConverter)
+		converter := automock.NewGQLBindingConverter()
 
 		channel := make(chan gqlschema.ServiceBindingEvent, 1)
 		defer close(channel)
@@ -173,7 +173,7 @@ func TestBinding_OnUpdate(t *testing.T) {
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
 		binding := new(api.ServiceBinding)
-		converter := new(automock.GQLBindingConverter)
+		converter := automock.NewGQLBindingConverter()
 
 		converter.On("ToGQL", binding).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)

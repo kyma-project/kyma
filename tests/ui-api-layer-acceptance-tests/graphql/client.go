@@ -26,22 +26,25 @@ type Client struct {
 }
 
 func New() (*Client, error) {
-	config := loadConfig()
+	config, err := loadConfig()
+	if err != nil {
+		return nil, errors.Wrap(err, "while loading config")
+	}
 
-	clusterContext := dialContext(config.localClusterHosts)
-	token, err := authenticate(config.idProviderConfig, clusterContext)
+	clusterContext := dialContext(config.LocalClusterHosts)
+	token, err := authenticate(config.IdProviderConfig, clusterContext)
 	if err != nil {
 		return nil, err
 	}
 
 	httpClient := newAuthorizedClient(token, clusterContext)
-	gqlClient := graphql.NewClient(config.graphQlEndpoint, graphql.WithHTTPClient(httpClient))
+	gqlClient := graphql.NewClient(config.GraphQlEndpoint, graphql.WithHTTPClient(httpClient))
 
 	return &Client{
 		gqlClient:      gqlClient,
 		token:          token,
 		clusterContext: clusterContext,
-		endpoint:       config.graphQlEndpoint,
+		endpoint:       config.GraphQlEndpoint,
 	}, nil
 }
 

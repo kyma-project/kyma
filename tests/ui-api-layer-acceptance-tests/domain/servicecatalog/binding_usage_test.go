@@ -402,14 +402,14 @@ func (s *bindingUsageTestSuite) readServiceBindingUsageEvent(sub *graphql.Subscr
 		ServiceBindingUsageEventForServiceInstance ServiceBindingUsageEvent
 	}
 	var bindingEvent Response
-	err := sub.Next(&bindingEvent)
+	err := sub.Next(&bindingEvent, tester.DefaultSubscriptionTimeout)
 
 	return bindingEvent.ServiceBindingUsageEventForServiceInstance, err
 }
 
 func (s *bindingUsageTestSuite) bindingUsageEventDetailsFields() string {
 	return `
-		type
+        type
         bindingUsage {
 			name
         }

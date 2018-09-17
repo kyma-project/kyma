@@ -40,10 +40,10 @@ func (p *dexIdTokenProvider) fetchIdToken() (string, error) {
 
 func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 
-	authorizeResp, err1 := p.httpClient.PostForm(p.config.dexConfig.authorizeEndpoint, url.Values{
+	authorizeResp, err1 := p.httpClient.PostForm(p.config.DexConfig.AuthorizeEndpoint, url.Values{
 		"response_type": {"id_token token"},
-		"client_id":     {p.config.clientConfig.id},
-		"redirect_uri":  {p.config.clientConfig.redirectUri},
+		"client_id":     {p.config.ClientConfig.ID},
+		"redirect_uri":  {p.config.ClientConfig.RedirectUri},
 		"scope":         {"openid profile email groups"},
 		"nonce":         {"vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM"},
 	})
@@ -60,14 +60,14 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 		return nil, errors.New(fmt.Sprintf("Login - Redirected with error: '%s'", loginEndpoint))
 	}
 
-	_, err2 := p.httpClient.Get(p.config.dexConfig.baseUrl + loginEndpoint)
+	_, err2 := p.httpClient.Get(p.config.DexConfig.BaseUrl + loginEndpoint)
 	if err2 != nil {
 		return nil, err2
 	}
 
-	loginResp, err3 := p.httpClient.PostForm(p.config.dexConfig.baseUrl+loginEndpoint, url.Values{
-		"login":    {p.config.userCredentials.username},
-		"password": {p.config.userCredentials.password},
+	loginResp, err3 := p.httpClient.PostForm(p.config.DexConfig.BaseUrl+loginEndpoint, url.Values{
+		"login":    {p.config.UserCredentials.Username},
+		"password": {p.config.UserCredentials.Password},
 	})
 	if err3 != nil {
 		return nil, err3
@@ -81,7 +81,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	if strings.Contains(approvalEndpoint, "#.*error") {
 		return nil, errors.New(fmt.Sprintf("Approval - Redirected with error: '%s'", approvalEndpoint))
 	}
-	approvalResp, err4 := p.httpClient.Get(p.config.dexConfig.baseUrl + approvalEndpoint)
+	approvalResp, err4 := p.httpClient.Get(p.config.DexConfig.BaseUrl + approvalEndpoint)
 	if err4 != nil {
 		return nil, err4
 	}

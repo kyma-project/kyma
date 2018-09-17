@@ -7,6 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/listener"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/listener/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,7 +16,7 @@ func TestInstanceListener_OnAdd(t *testing.T) {
 		// given
 		gqlInstance := new(gqlschema.ServiceInstance)
 		instance := new(v1beta1.ServiceInstance)
-		converter := new(automock.GQLInstanceConverter)
+		converter := automock.NewGQLInstanceConverter()
 
 		channel := make(chan gqlschema.ServiceInstanceEvent, 1)
 		defer close(channel)
@@ -51,7 +52,7 @@ func TestInstanceListener_OnAdd(t *testing.T) {
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
 		instance := new(v1beta1.ServiceInstance)
-		converter := new(automock.GQLInstanceConverter)
+		converter := automock.NewGQLInstanceConverter()
 
 		converter.On("ToGQL", instance).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -68,6 +69,19 @@ func TestInstanceListener_OnAdd(t *testing.T) {
 		// when
 		instanceListener.OnAdd(new(struct{}))
 	})
+
+	t.Run("Conversion error", func(t *testing.T) {
+		// given
+		instance := new(v1beta1.ServiceInstance)
+		converter := automock.NewGQLInstanceConverter()
+
+		converter.On("ToGQL", instance).Return(nil, errors.New("Conversion error")).Once()
+		defer converter.AssertExpectations(t)
+		instanceListener := listener.NewInstance(nil, filterInstanceTrue, converter)
+
+		// when
+		instanceListener.OnAdd(instance)
+	})
 }
 
 func TestInstanceListener_OnDelete(t *testing.T) {
@@ -75,7 +89,7 @@ func TestInstanceListener_OnDelete(t *testing.T) {
 		// given
 		gqlInstance := new(gqlschema.ServiceInstance)
 		instance := new(v1beta1.ServiceInstance)
-		converter := new(automock.GQLInstanceConverter)
+		converter := automock.NewGQLInstanceConverter()
 
 		channel := make(chan gqlschema.ServiceInstanceEvent, 1)
 		defer close(channel)
@@ -112,7 +126,7 @@ func TestInstanceListener_OnDelete(t *testing.T) {
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
 		instance := new(v1beta1.ServiceInstance)
-		converter := new(automock.GQLInstanceConverter)
+		converter := automock.NewGQLInstanceConverter()
 
 		converter.On("ToGQL", instance).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -129,6 +143,19 @@ func TestInstanceListener_OnDelete(t *testing.T) {
 		// when
 		instanceListener.OnDelete(new(struct{}))
 	})
+
+	t.Run("Conversion error", func(t *testing.T) {
+		// given
+		instance := new(v1beta1.ServiceInstance)
+		converter := automock.NewGQLInstanceConverter()
+
+		converter.On("ToGQL", instance).Return(nil, errors.New("Conversion error")).Once()
+		defer converter.AssertExpectations(t)
+		instanceListener := listener.NewInstance(nil, filterInstanceTrue, converter)
+
+		// when
+		instanceListener.OnDelete(instance)
+	})
 }
 
 func TestInstanceListener_OnUpdate(t *testing.T) {
@@ -136,7 +163,7 @@ func TestInstanceListener_OnUpdate(t *testing.T) {
 		// given
 		gqlInstance := new(gqlschema.ServiceInstance)
 		instance := new(v1beta1.ServiceInstance)
-		converter := new(automock.GQLInstanceConverter)
+		converter := automock.NewGQLInstanceConverter()
 
 		channel := make(chan gqlschema.ServiceInstanceEvent, 1)
 		defer close(channel)
@@ -173,7 +200,7 @@ func TestInstanceListener_OnUpdate(t *testing.T) {
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
 		instance := new(v1beta1.ServiceInstance)
-		converter := new(automock.GQLInstanceConverter)
+		converter := automock.NewGQLInstanceConverter()
 
 		converter.On("ToGQL", instance).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -189,6 +216,19 @@ func TestInstanceListener_OnUpdate(t *testing.T) {
 
 		// when
 		instanceListener.OnUpdate(new(struct{}), new(struct{}))
+	})
+
+	t.Run("Conversion error", func(t *testing.T) {
+		// given
+		instance := new(v1beta1.ServiceInstance)
+		converter := automock.NewGQLInstanceConverter()
+
+		converter.On("ToGQL", instance).Return(nil, errors.New("Conversion error")).Once()
+		defer converter.AssertExpectations(t)
+		instanceListener := listener.NewInstance(nil, filterInstanceTrue, converter)
+
+		// when
+		instanceListener.OnUpdate(nil, instance)
 	})
 }
 

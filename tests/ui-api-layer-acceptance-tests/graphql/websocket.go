@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/mitchellh/mapstructure"
@@ -75,14 +76,14 @@ func (c *clusterWebsocket) Start(query json.RawMessage) error {
 type Subscription struct {
 	Close        func() error
 	IsCloseError func(err error, codes ...int) bool
-	Next         func(response interface{}) error
+	Next         func(response interface{}, timeout time.Duration) error
 }
 
 func errorSubscription(err error) *Subscription {
 	return &Subscription{
 		Close:        func() error { return nil },
 		IsCloseError: func(error, ...int) bool { return false },
-		Next:         func(interface{}) error { return err },
+		Next:         func(interface{}, time.Duration) error { return err },
 	}
 }
 
@@ -90,15 +91,19 @@ func newSubscription(connection *clusterWebsocket) *Subscription {
 	return &Subscription{
 		Close:        connection.Close,
 		IsCloseError: websocket.IsCloseError,
-		Next: func(response interface{}) error {
+		Next: func(response interface{}, timeout time.Duration) error {
 			var op operationMessage
-			connection.ReadJSON(&op)
+			connection.SetReadDeadline(time.Now().Add(timeout))
+			err := connection.ReadJSON(&op)
+			if err != nil {
+				return errors.Wrap(err, "while reading JSON from subscription")
+			}
 			if op.Type != dataMsg {
 				return fmt.Errorf("expected data message, got %s with payload %s", op.Type, op.Payload)
 			}
 
 			respDataRaw := map[string]interface{}{}
-			err := json.Unmarshal(op.Payload, &respDataRaw)
+			err = json.Unmarshal(op.Payload, &respDataRaw)
 			if err != nil {
 				return errors.Wrap(err, "while decoding response")
 			}

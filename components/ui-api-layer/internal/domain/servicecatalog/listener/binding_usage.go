@@ -9,18 +9,18 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=GQLBindingUsageConverter -output=automock -outpkg=automock -case=underscore
-type GQLBindingUsageConverter interface {
+//go:generate mockery -name=gqlBindingUsageConverter -output=automock -outpkg=automock -case=underscore
+type gqlBindingUsageConverter interface {
 	ToGQL(in *api.ServiceBindingUsage) (*gqlschema.ServiceBindingUsage, error)
 }
 
 type BindingUsage struct {
 	channel   chan<- gqlschema.ServiceBindingUsageEvent
 	filter    func(bindingUsage *api.ServiceBindingUsage) bool
-	converter GQLBindingUsageConverter
+	converter gqlBindingUsageConverter
 }
 
-func NewBindingUsage(channel chan<- gqlschema.ServiceBindingUsageEvent, filter func(bindingUsage *api.ServiceBindingUsage) bool, converter GQLBindingUsageConverter) *BindingUsage {
+func NewBindingUsage(channel chan<- gqlschema.ServiceBindingUsageEvent, filter func(bindingUsage *api.ServiceBindingUsage) bool, converter gqlBindingUsageConverter) *BindingUsage {
 	return &BindingUsage{
 		channel:   channel,
 		filter:    filter,

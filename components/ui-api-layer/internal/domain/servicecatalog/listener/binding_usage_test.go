@@ -16,7 +16,7 @@ func TestBindingUsage_OnAdd(t *testing.T) {
 		// given
 		gqlBindingUsage := new(gqlschema.ServiceBindingUsage)
 		bindingUsage := new(api.ServiceBindingUsage)
-		converter := new(automock.GQLBindingUsageConverter)
+		converter := automock.NewGQLBindingUsageConverter()
 
 		channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
 		defer close(channel)
@@ -52,7 +52,7 @@ func TestBindingUsage_OnAdd(t *testing.T) {
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
 		bindingUsage := new(api.ServiceBindingUsage)
-		converter := new(automock.GQLBindingUsageConverter)
+		converter := automock.NewGQLBindingUsageConverter()
 
 		converter.On("ToGQL", bindingUsage).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -73,7 +73,7 @@ func TestBindingUsage_OnAdd(t *testing.T) {
 	t.Run("Conversion error", func(t *testing.T) {
 		// given
 		bindingUsage := new(api.ServiceBindingUsage)
-		converter := new(automock.GQLBindingUsageConverter)
+		converter := automock.NewGQLBindingUsageConverter()
 
 		converter.On("ToGQL", bindingUsage).Return(nil, errors.New("random error")).Once()
 		defer converter.AssertExpectations(t)
@@ -89,7 +89,7 @@ func TestBindingUsage_OnDelete(t *testing.T) {
 		// given
 		gqlBindingUsage := new(gqlschema.ServiceBindingUsage)
 		bindingUsage := new(api.ServiceBindingUsage)
-		converter := new(automock.GQLBindingUsageConverter)
+		converter := automock.NewGQLBindingUsageConverter()
 
 		channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
 		defer close(channel)
@@ -126,7 +126,7 @@ func TestBindingUsage_OnDelete(t *testing.T) {
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
 		bindingUsage := new(api.ServiceBindingUsage)
-		converter := new(automock.GQLBindingUsageConverter)
+		converter := automock.NewGQLBindingUsageConverter()
 
 		converter.On("ToGQL", bindingUsage).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -147,7 +147,7 @@ func TestBindingUsage_OnDelete(t *testing.T) {
 	t.Run("Conversion error", func(t *testing.T) {
 		// given
 		bindingUsage := new(api.ServiceBindingUsage)
-		converter := new(automock.GQLBindingUsageConverter)
+		converter := automock.NewGQLBindingUsageConverter()
 
 		converter.On("ToGQL", bindingUsage).Return(nil, errors.New("random error")).Once()
 		defer converter.AssertExpectations(t)
@@ -163,7 +163,7 @@ func TestBindingUsage_OnUpdate(t *testing.T) {
 		// given
 		gqlBindingUsage := new(gqlschema.ServiceBindingUsage)
 		bindingUsage := new(api.ServiceBindingUsage)
-		converter := new(automock.GQLBindingUsageConverter)
+		converter := automock.NewGQLBindingUsageConverter()
 
 		channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
 		defer close(channel)
@@ -200,7 +200,7 @@ func TestBindingUsage_OnUpdate(t *testing.T) {
 	t.Run("Nil GQL Type", func(t *testing.T) {
 		// given
 		bindingUsage := new(api.ServiceBindingUsage)
-		converter := new(automock.GQLBindingUsageConverter)
+		converter := automock.NewGQLBindingUsageConverter()
 
 		converter.On("ToGQL", bindingUsage).Return(nil, nil).Once()
 		defer converter.AssertExpectations(t)
@@ -221,7 +221,7 @@ func TestBindingUsage_OnUpdate(t *testing.T) {
 	t.Run("Conversion error", func(t *testing.T) {
 		// given
 		bindingUsage := new(api.ServiceBindingUsage)
-		converter := new(automock.GQLBindingUsageConverter)
+		converter := automock.NewGQLBindingUsageConverter()
 
 		converter.On("ToGQL", bindingUsage).Return(nil, errors.New("random error")).Once()
 		defer converter.AssertExpectations(t)

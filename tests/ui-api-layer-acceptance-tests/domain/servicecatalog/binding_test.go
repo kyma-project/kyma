@@ -347,7 +347,7 @@ func deleteBindingOutput(bindingName string) DeleteServiceBindingOutput {
 
 func bindingEventDetailsFields() string {
 	return `
-		type
+        type
         binding {
 			name
         }
@@ -359,7 +359,7 @@ func readServiceBindingEvent(sub *graphql.Subscription) (ServiceBindingEvent, er
 		ServiceBindingEventForServiceInstance ServiceBindingEvent
 	}
 	var bindingEvent Response
-	err := sub.Next(&bindingEvent)
+	err := sub.Next(&bindingEvent, tester.DefaultSubscriptionTimeout)
 
 	return bindingEvent.ServiceBindingEventForServiceInstance, err
 }
