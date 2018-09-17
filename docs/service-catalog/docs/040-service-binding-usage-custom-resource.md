@@ -52,9 +52,9 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.parameters.envPrefix** |    **NO**   | Defines the prefix of environment variables injected by the ServiceBindingUsage. The prefixing is disabled by default. |
 | **spec.parameters.envPrefix.name** |    **YES**   | Specifies the name of the prefix. This field is mandatory if the **envPrefix** is specified.  |
 | **status.conditions** |    **NO**   | Specifies the state of the ServiceBindingUsage.|
-| **status.conditions.lastTransitionTime** |    **NO**   | Specifies the time when the Binding Usage Controller processes the ServiceBindingUsage for the first time or when the status field changes. |
-| **status.conditions.lastUpdateTime** |    **NO**   | Specifies the time of the last ServiceBindingUsage update. |
-| **status.conditions.status** |    **NO**   |  Specifies if the ServiceBinding injection is successful. |
-| **status.conditions.type** |    **NO**   | Defines whether the condition is `ready` or not. |
+| **status.conditions.lastTransitionTime** |    **NO**   | Specifies the time when the Binding Usage Controller processes the ServiceBindingUsage for the first time or when the **status.conditions.status** field changes. |
+| **status.conditions.lastUpdateTime** |    **NO**   | Specifies the time of the last ServiceBindingUsage condition update. |
+| **status.conditions.status** |    **NO**   |  Specifies whether the status of the **status.conditions.type** field is `True` or `False`. |
+| **status.conditions.type** |    **NO**   | Defines the type of the condition. The value of this field is always `Ready`. |
 | **message** |    **NO**   | Describes in a human-readable way why the ServiceBinding injection has failed. |
-| **reason** |    **NO**   | Provides a simplified designation of the reason why the ServiceBinding injection has failed. |
+| **reason** |    **NO**   | Specifies a unique, one-word, CamelCase reason for the condition's last transition. |
