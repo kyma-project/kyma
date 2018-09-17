@@ -1,14 +1,15 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: example
+  name: {{ .Chart.Name }}-envoy-filter
+  namespace: {{ .Values.global.namespace }}
 spec:
+  workloadLabels:
+    app: {{ .Chart.Name }}
   filters:
   - listenerMatch:
       listenerType: ANY
       portNumber: {{ .Values.deployment.args.externalAPIPort }}
-    workloadLabels:
-      app: {{ .Chart.Name }}
     filterName: envoy.lua
     filterType: HTTP
     filterConfig:
@@ -17,33 +18,26 @@ spec:
           headers = request_handle:headers()
           path = headers:get(":path")
 
-          response = ""
-
           s = split(path, "/")
           reName = s[2]
 
-          response = response .. " RE: "
-          response = response .. reName
-
+          --[[ This section depends on the approach we choose in the future ]]--
+          --[[
           conn = request_handle:connection()
           if conn:ssl() == nil then
-            response = response .. " INSECURE"
-            request_handle:respond({[":status"] = "403"}, "Blocked by envoy filter." .. response)
+            request_handle:respond({[":status"] = "403"}, "Blocked by envoy filter. No valid certificate presented by peer.")
           else
-            response = response .. " SECURE"
+            --[[ Here we need to fetch CName from certificate or header ]]--
             subjCName = "ec-default"
-          end
-
-          --[[
-          if s[2] ~= subjCName then
-            response = response .. " INVALID SUBJECT "
-            request_handle:respond({[":status"] = "403"}, "Blocked by envoy filter." .. response)
-          else
-            response = response .. " PROPER SUBJECT "
-            request_handle:respond({[":status"] = "403"}, "Blocked by envoy filter." .. response)
           end
           ]]--
 
+          --[[ This section should compare reName with CName fetched earlier ]]--
+          --[[
+          if reName ~= subjCName then
+            request_handle:respond({[":status"] = "403"}, "Blocked by envoy filter. Certificate does not match this RE.")
+          end
+          ]]--
         end
 
         function split(s, delimiter)

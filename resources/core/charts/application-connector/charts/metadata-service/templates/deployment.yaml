@@ -4,6 +4,8 @@ metadata:
   name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
   labels:
+    traffic.sidecar.istio.io/includeInboundPorts: "{{ .Values.deployment.args.proxyPort }}"
+    traffic.sidecar.istio.io/includeInboundPorts: "{{ .Values.deployment.args.externalAPIPort }}"
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
     heritage: {{ .Release.Service }}
@@ -17,8 +19,6 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
-        traffic.sidecar.istio.io/includeInboundPorts: "{{ .Values.deployment.args.proxyPort }}"
-        traffic.sidecar.istio.io/includeInboundPorts: "{{ .Values.deployment.args.externalAPIPort }}"
       labels:
         app: {{ .Chart.Name }}
         release: {{ .Chart.Name }}
@@ -48,8 +48,8 @@ spec:
                 key: secretkey
         ports:
           - containerPort: {{ .Values.deployment.args.proxyPort }}
-            name: proxy-port
+            name: meta-proxy
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
-            name: ext-api-port
+            name: meta-ext
           - containerPort: 9090
             name: metrics-port
