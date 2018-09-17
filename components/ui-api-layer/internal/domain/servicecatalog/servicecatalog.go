@@ -71,7 +71,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, asyncApiSp
 			brokerResolver:              newBrokerResolver(brokerService),
 			classResolver:               newClassResolver(classService, planService, instanceService, asyncApiSpecGetter, apiSpecGetter, contentGetter),
 			serviceBindingResolver:      newServiceBindingResolver(bindingService),
-			serviceBindingUsageResolver: newServiceBindingUsageResolver(bindingUsageService),
+			serviceBindingUsageResolver: newServiceBindingUsageResolver(bindingUsageService, bindingService),
 			usageKindResolver:           newUsageKindResolver(usageKindService),
 		},
 		ServiceBindingUsageLister: bindingUsageService,

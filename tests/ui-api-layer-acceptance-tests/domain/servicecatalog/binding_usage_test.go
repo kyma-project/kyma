@@ -25,6 +25,11 @@ type ServiceBindingUsage struct {
 	Status         ServiceBindingUsageStatus
 }
 
+type ServiceBindingUsageEvent struct {
+	Type         string
+	BindingUsage ServiceBindingUsage
+}
+
 type DeleteServiceBindingUsageOutput struct {
 	Name        string
 	Environment string
@@ -63,6 +68,10 @@ func TestBindingUsageMutationsAndQueries(t *testing.T) {
 	suite.prepareInstanceAndBinding()
 	defer suite.deleteServiceInstanceAndBinding()
 
+	t.Log("Subscribe Binding Usage")
+	subscription := suite.subscribeBindingUsage()
+	defer subscription.Close()
+
 	// WHEN
 	t.Log("Create Binding Usage")
 	createRes, err := suite.createBindingUsage()
@@ -70,6 +79,14 @@ func TestBindingUsageMutationsAndQueries(t *testing.T) {
 	// THEN
 	assert.NoError(t, err)
 	suite.assertEqualBindingUsage(suite.givenBindingUsage, createRes.CreateServiceBindingUsage)
+
+	// WHEN
+	event, err := suite.readServiceBindingUsageEvent(subscription)
+
+	// THEN
+	t.Log("Check subscription event")
+	assert.NoError(t, err)
+	suite.assertEqualBindingUsageEvent(event)
 
 	// WHEN
 	t.Log("Query Single Binding Usage")
@@ -363,4 +380,43 @@ func (s *bindingUsageTestSuite) bindingUsageDetailsFields() string {
 			type
 		}
 	`
+}
+
+func (s *bindingUsageTestSuite) subscribeBindingUsage() *graphql.Subscription {
+	query := fmt.Sprintf(`
+			subscription ($environment: String!, $instanceName: String!) {
+				serviceBindingUsageEventForServiceInstance(environment: $environment, serviceInstanceName: $instanceName) {
+					%s
+				}
+			}
+		`, s.bindingUsageEventDetailsFields())
+	req := graphql.NewRequest(query)
+	req.SetVar("environment", s.givenBindingUsage.Environment)
+	req.SetVar("instanceName", s.givenInstance.Name)
+
+	return s.gqlCli.Subscribe(req)
+}
+
+func (s *bindingUsageTestSuite) readServiceBindingUsageEvent(sub *graphql.Subscription) (ServiceBindingUsageEvent, error) {
+	type Response struct {
+		ServiceBindingUsageEventForServiceInstance ServiceBindingUsageEvent
+	}
+	var bindingEvent Response
+	err := sub.Next(&bindingEvent, tester.DefaultSubscriptionTimeout)
+
+	return bindingEvent.ServiceBindingUsageEventForServiceInstance, err
+}
+
+func (s *bindingUsageTestSuite) bindingUsageEventDetailsFields() string {
+	return `
+        type
+        bindingUsage {
+			name
+        }
+    `
+}
+
+func (s *bindingUsageTestSuite) assertEqualBindingUsageEvent(event ServiceBindingUsageEvent) {
+	assert.Equal(s.t, "ADD", event.Type)
+	assert.Equal(s.t, s.givenBindingUsage.Name, event.BindingUsage.Name)
 }

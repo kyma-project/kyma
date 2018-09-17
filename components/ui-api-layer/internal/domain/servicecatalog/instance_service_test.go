@@ -9,6 +9,7 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog"
+	listener "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/listener"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/status"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
@@ -256,25 +257,25 @@ func TestInstanceService_IsBindable(t *testing.T) {
 func TestInstanceService_Subscribe(t *testing.T) {
 	t.Run("Simple", func(t *testing.T) {
 		svc := servicecatalog.NewInstanceService(fixInformer(), nil)
-		listener := servicecatalog.NewInstanceListener(nil, nil, nil)
-		svc.Subscribe(listener)
+		instanceListener := listener.NewInstance(nil, nil, nil)
+		svc.Subscribe(instanceListener)
 	})
 
 	t.Run("Duplicated", func(t *testing.T) {
 		svc := servicecatalog.NewInstanceService(fixInformer(), nil)
-		listener := servicecatalog.NewInstanceListener(nil, nil, nil)
+		instanceListener := listener.NewInstance(nil, nil, nil)
 
-		svc.Subscribe(listener)
-		svc.Subscribe(listener)
+		svc.Subscribe(instanceListener)
+		svc.Subscribe(instanceListener)
 	})
 
 	t.Run("Multiple", func(t *testing.T) {
 		svc := servicecatalog.NewInstanceService(fixInformer(), nil)
-		listenerA := servicecatalog.NewInstanceListener(nil, nil, nil)
-		listenerB := servicecatalog.NewInstanceListener(nil, nil, nil)
+		instanceListenerA := listener.NewInstance(nil, nil, nil)
+		instanceListenerB := listener.NewInstance(nil, nil, nil)
 
-		svc.Subscribe(listenerA)
-		svc.Subscribe(listenerB)
+		svc.Subscribe(instanceListenerA)
+		svc.Subscribe(instanceListenerB)
 	})
 
 	t.Run("Nil", func(t *testing.T) {
@@ -287,29 +288,29 @@ func TestInstanceService_Subscribe(t *testing.T) {
 func TestInstanceService_Unsubscribe(t *testing.T) {
 	t.Run("Existing", func(t *testing.T) {
 		svc := servicecatalog.NewInstanceService(fixInformer(), nil)
-		listener := servicecatalog.NewInstanceListener(nil, nil, nil)
-		svc.Subscribe(listener)
+		instanceListener := listener.NewInstance(nil, nil, nil)
+		svc.Subscribe(instanceListener)
 
-		svc.Unsubscribe(listener)
+		svc.Unsubscribe(instanceListener)
 	})
 
 	t.Run("Duplicated", func(t *testing.T) {
 		svc := servicecatalog.NewInstanceService(fixInformer(), nil)
-		listener := servicecatalog.NewInstanceListener(nil, nil, nil)
-		svc.Subscribe(listener)
-		svc.Subscribe(listener)
+		instanceListener := listener.NewInstance(nil, nil, nil)
+		svc.Subscribe(instanceListener)
+		svc.Subscribe(instanceListener)
 
-		svc.Unsubscribe(listener)
+		svc.Unsubscribe(instanceListener)
 	})
 
 	t.Run("Multiple", func(t *testing.T) {
 		svc := servicecatalog.NewInstanceService(fixInformer(), nil)
-		listenerA := servicecatalog.NewInstanceListener(nil, nil, nil)
-		listenerB := servicecatalog.NewInstanceListener(nil, nil, nil)
-		svc.Subscribe(listenerA)
-		svc.Subscribe(listenerB)
+		instanceListenerA := listener.NewInstance(nil, nil, nil)
+		instanceListenerB := listener.NewInstance(nil, nil, nil)
+		svc.Subscribe(instanceListenerA)
+		svc.Subscribe(instanceListenerB)
 
-		svc.Unsubscribe(listenerA)
+		svc.Unsubscribe(instanceListenerA)
 	})
 
 	t.Run("Nil", func(t *testing.T) {

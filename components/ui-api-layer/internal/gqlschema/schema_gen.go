@@ -78,6 +78,8 @@ type Resolvers interface {
 	ServiceInstance_serviceBindingUsages(ctx context.Context, obj *ServiceInstance) ([]ServiceBindingUsage, error)
 
 	Subscription_serviceInstanceEvent(ctx context.Context, environment string) (<-chan ServiceInstanceEvent, error)
+	Subscription_serviceBindingEventForServiceInstance(ctx context.Context, serviceInstanceName string, environment string) (<-chan ServiceBindingEvent, error)
+	Subscription_serviceBindingUsageEventForServiceInstance(ctx context.Context, serviceInstanceName string, environment string) (<-chan ServiceBindingUsageEvent, error)
 }
 
 type executableSchema struct {
@@ -4644,6 +4646,53 @@ func (ec *executionContext) _ServiceBinding_status(ctx context.Context, field gr
 	return ec._ServiceBindingStatus(ctx, field.Selections, &res)
 }
 
+var serviceBindingEventImplementors = []string{"ServiceBindingEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ServiceBindingEvent(ctx context.Context, sel []query.Selection, obj *ServiceBindingEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.Doc, sel, serviceBindingEventImplementors, ec.Variables)
+
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ServiceBindingEvent")
+		case "type":
+			out.Values[i] = ec._ServiceBindingEvent_type(ctx, field, obj)
+		case "binding":
+			out.Values[i] = ec._ServiceBindingEvent_binding(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _ServiceBindingEvent_type(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingEvent) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "ServiceBindingEvent"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Type
+	return res
+}
+
+func (ec *executionContext) _ServiceBindingEvent_binding(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingEvent) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "ServiceBindingEvent"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Binding
+	return ec._ServiceBinding(ctx, field.Selections, &res)
+}
+
 var serviceBindingStatusImplementors = []string{"ServiceBindingStatus"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -4826,6 +4875,53 @@ func (ec *executionContext) _ServiceBindingUsage_status(ctx context.Context, fie
 	defer rctx.Pop()
 	res := obj.Status
 	return ec._ServiceBindingUsageStatus(ctx, field.Selections, &res)
+}
+
+var serviceBindingUsageEventImplementors = []string{"ServiceBindingUsageEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ServiceBindingUsageEvent(ctx context.Context, sel []query.Selection, obj *ServiceBindingUsageEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.Doc, sel, serviceBindingUsageEventImplementors, ec.Variables)
+
+	out := graphql.NewOrderedMap(len(fields))
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ServiceBindingUsageEvent")
+		case "type":
+			out.Values[i] = ec._ServiceBindingUsageEvent_type(ctx, field, obj)
+		case "bindingUsage":
+			out.Values[i] = ec._ServiceBindingUsageEvent_bindingUsage(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	return out
+}
+
+func (ec *executionContext) _ServiceBindingUsageEvent_type(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsageEvent) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "ServiceBindingUsageEvent"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.Type
+	return res
+}
+
+func (ec *executionContext) _ServiceBindingUsageEvent_bindingUsage(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsageEvent) graphql.Marshaler {
+	rctx := graphql.GetResolverContext(ctx)
+	rctx.Object = "ServiceBindingUsageEvent"
+	rctx.Args = nil
+	rctx.Field = field
+	rctx.PushField(field.Alias)
+	defer rctx.Pop()
+	res := obj.BindingUsage
+	return ec._ServiceBindingUsage(ctx, field.Selections, &res)
 }
 
 var serviceBindingUsageParametersImplementors = []string{"ServiceBindingUsageParameters"}
@@ -6018,6 +6114,10 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel []query.Selec
 	switch fields[0].Name {
 	case "serviceInstanceEvent":
 		return ec._Subscription_serviceInstanceEvent(ctx, fields[0])
+	case "serviceBindingEventForServiceInstance":
+		return ec._Subscription_serviceBindingEventForServiceInstance(ctx, fields[0])
+	case "serviceBindingUsageEventForServiceInstance":
+		return ec._Subscription_serviceBindingUsageEventForServiceInstance(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -6048,6 +6148,84 @@ func (ec *executionContext) _Subscription_serviceInstanceEvent(ctx context.Conte
 		}
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler { return ec._ServiceInstanceEvent(ctx, field.Selections, &res) }())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_serviceBindingEventForServiceInstance(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := field.Args["serviceInstanceName"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(ctx, err)
+			return nil
+		}
+	}
+	args["serviceInstanceName"] = arg0
+	var arg1 string
+	if tmp, ok := field.Args["environment"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(ctx, err)
+			return nil
+		}
+	}
+	args["environment"] = arg1
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
+	results, err := ec.resolvers.Subscription_serviceBindingEventForServiceInstance(ctx, args["serviceInstanceName"].(string), args["environment"].(string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler { return ec._ServiceBindingEvent(ctx, field.Selections, &res) }())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_serviceBindingUsageEventForServiceInstance(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := field.Args["serviceInstanceName"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(ctx, err)
+			return nil
+		}
+	}
+	args["serviceInstanceName"] = arg0
+	var arg1 string
+	if tmp, ok := field.Args["environment"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			ec.Error(ctx, err)
+			return nil
+		}
+	}
+	args["environment"] = arg1
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{Field: field})
+	results, err := ec.resolvers.Subscription_serviceBindingUsageEventForServiceInstance(ctx, args["serviceInstanceName"].(string), args["environment"].(string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler { return ec._ServiceBindingUsageEvent(ctx, field.Selections, &res) }())
 		return &out
 	}
 }
@@ -7336,11 +7514,11 @@ enum InstanceStatusType {
 }
 
 type ServiceInstanceEvent {
-    type: ServiceInstanceEventType!
-    instance: ServiceInstance
+    type: SubscriptionEventType!
+    instance: ServiceInstance!
 }
 
-enum ServiceInstanceEventType {
+enum SubscriptionEventType {
     ADD
     UPDATE
     DELETE
@@ -7418,6 +7596,11 @@ enum ServiceBindingStatusType {
     UNKNOWN
 }
 
+type ServiceBindingEvent {
+    type: SubscriptionEventType!
+    binding: ServiceBinding!
+}
+
 # We cannot use ServiceBinding as a result of create action
 # because secret at the moment of mutation execution is not available.
 type CreateServiceBindingOutput {
@@ -7449,6 +7632,11 @@ type ServiceBindingUsage {
     usedBy: LocalObjectReference!
     parameters: ServiceBindingUsageParameters
     status: ServiceBindingUsageStatus!
+}
+
+type ServiceBindingUsageEvent {
+    type: SubscriptionEventType!
+    bindingUsage: ServiceBindingUsage!
 }
 
 type ServiceBindingUsageStatus {
@@ -7771,6 +7959,8 @@ type Mutation {
 
 type Subscription {
     serviceInstanceEvent(environment: String!): ServiceInstanceEvent!
+    serviceBindingEventForServiceInstance(serviceInstanceName: String!, environment: String!): ServiceBindingEvent!
+    serviceBindingUsageEventForServiceInstance(serviceInstanceName: String!, environment: String!): ServiceBindingUsageEvent!
 }
 
 # Schema

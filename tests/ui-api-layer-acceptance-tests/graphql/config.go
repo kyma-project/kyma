@@ -2,85 +2,94 @@ package graphql
 
 import (
 	"fmt"
-	"os"
 	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/vrischmann/envconfig"
 )
 
+type envConfig struct {
+	Domain          string `envconfig:"default=kyma.local"`
+	GraphQLEndpoint string `envconfig:"optional,GRAPHQL_ENDPOINT"`
+	Username        string `envconfig:"default=admin@kyma.cx"`
+	Password        string `envconfig:"default=nimda123"`
+	IsLocalCluster  bool   `envconfig:"default=true"`
+}
+
 type config struct {
-	graphQlEndpoint   string
-	localClusterHosts []string
-	idProviderConfig  idProviderConfig
+	GraphQlEndpoint   string
+	LocalClusterHosts []string
+	IdProviderConfig  idProviderConfig
 }
 
 type idProviderConfig struct {
-	dexConfig       dexConfig
-	clientConfig    clientConfig
-	userCredentials userCredentials
+	DexConfig       dexConfig
+	ClientConfig    clientConfig
+	UserCredentials userCredentials
 }
 
 type dexConfig struct {
-	baseUrl           string
-	authorizeEndpoint string
-	tokenEndpoint     string
+	BaseUrl           string
+	AuthorizeEndpoint string
+	TokenEndpoint     string
 }
 
 type clientConfig struct {
-	id          string
-	redirectUri string
+	ID          string
+	RedirectUri string
 }
 
 type userCredentials struct {
-	username string
-	password string
+	Username string
+	Password string
 }
 
-func loadConfig() config {
+func loadConfig() (config, error) {
+	env := envConfig{}
+	err := envconfig.Init(&env)
+	if err != nil {
+		return config{}, errors.Wrap(err, "while loading environment variables")
+	}
 
 	config := config{
-		localClusterHosts: make([]string, 0, 2),
+		LocalClusterHosts: make([]string, 0, 2),
 	}
 
-	domain := os.Getenv("DOMAIN")
-	isLocalClusterStr := strings.ToLower(os.Getenv("IS_LOCAL_CLUSTER"))
-	graphQlEndpoint := os.Getenv("GRAPHQL_ENDPOINT")
-
-	if domain == "" {
-		domain = "kyma.local"
-	}
-	isLocalCluster := isLocalClusterStr == "" || isLocalClusterStr == "true" || isLocalClusterStr == "yes" || isLocalClusterStr == "y"
-
-	if graphQlEndpoint == "" {
-
-		config.graphQlEndpoint = fmt.Sprintf("https://ui-api.%s/graphql", domain)
-		if isLocalCluster {
-			config.addLocalClusterHost(fmt.Sprintf("ui-api.%s", domain))
-		}
+	graphQLEndpoint := env.GraphQLEndpoint
+	if graphQLEndpoint == "" {
+		graphQLEndpoint = fmt.Sprintf("https://ui-api.%s/graphql", env.Domain)
 	}
 
-	config.idProviderConfig = idProviderConfig{
-		dexConfig: dexConfig{
-			baseUrl:           fmt.Sprintf("https://dex.%s", domain),
-			authorizeEndpoint: fmt.Sprintf("https://dex.%s/auth", domain),
-			tokenEndpoint:     fmt.Sprintf("https://dex.%s/token", domain),
+	config.GraphQlEndpoint = graphQLEndpoint
+
+	config.IdProviderConfig = idProviderConfig{
+		DexConfig: dexConfig{
+			BaseUrl:           fmt.Sprintf("https://dex.%s", env.Domain),
+			AuthorizeEndpoint: fmt.Sprintf("https://dex.%s/auth", env.Domain),
+			TokenEndpoint:     fmt.Sprintf("https://dex.%s/token", env.Domain),
 		},
-		clientConfig: clientConfig{
-			id:          "kyma-client",
-			redirectUri: "http://127.0.0.1:5555/callback",
+		ClientConfig: clientConfig{
+			ID:          "kyma-client",
+			RedirectUri: "http://127.0.0.1:5555/callback",
 		},
 
-		userCredentials: userCredentials{
-			username: "admin@kyma.cx",
-			password: "nimda123",
+		UserCredentials: userCredentials{
+			Username: env.Username,
+			Password: env.Password,
 		},
 	}
 
-	if isLocalCluster {
-		config.addLocalClusterHost(fmt.Sprintf("dex.%s", domain))
+	if env.IsLocalCluster {
+		config.addLocalClusterHost(config.GraphQlEndpoint)
+		config.addLocalClusterHost(config.IdProviderConfig.DexConfig.BaseUrl)
 	}
 
-	return config
+	return config, nil
 }
 
 func (c *config) addLocalClusterHost(host string) {
-	c.localClusterHosts = append(c.localClusterHosts, host)
+	url := strings.TrimPrefix(host, "http://")
+	url = strings.TrimPrefix(host, "https://")
+
+	c.LocalClusterHosts = append(c.LocalClusterHosts, url)
 }

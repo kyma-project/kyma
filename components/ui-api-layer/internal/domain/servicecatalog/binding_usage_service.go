@@ -6,6 +6,7 @@ import (
 
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
@@ -15,6 +16,7 @@ type serviceBindingUsageService struct {
 	client         v1alpha1.ServicecatalogV1alpha1Interface
 	informer       cache.SharedIndexInformer
 	bindingService serviceBindingOperations
+	notifier       notifier
 }
 
 func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, service serviceBindingOperations) *serviceBindingUsageService {
@@ -36,6 +38,11 @@ func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interfa
 			return []string{key}, nil
 		},
 	})
+
+	notifier := resource.NewNotifier()
+	informer.AddEventHandler(notifier)
+
+	svc.notifier = notifier
 
 	return svc
 }
@@ -100,6 +107,14 @@ func (f *serviceBindingUsageService) ListForDeployment(environment, kind, deploy
 	}
 
 	return f.toServiceBindingUsages(items)
+}
+
+func (f *serviceBindingUsageService) Subscribe(listener resource.Listener) {
+	f.notifier.AddListener(listener)
+}
+
+func (f *serviceBindingUsageService) Unsubscribe(listener resource.Listener) {
+	f.notifier.DeleteListener(listener)
 }
 
 func (f *serviceBindingUsageService) toServiceBindingUsages(items []interface{}) ([]*api.ServiceBindingUsage, error) {
