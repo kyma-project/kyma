@@ -75,6 +75,8 @@ spec:
         {{- end }}
         - --feature-gates
         - OriginatingIdentity={{.Values.originatingIdentityEnabled}}
+        - --feature-gates
+        - ServicePlanDefaults={{.Values.servicePlanDefaultsEnabled}}
         {{- if .Values.asyncBindingOperationsEnabled }}
         - --feature-gates
         - AsyncBindingOperations=true
