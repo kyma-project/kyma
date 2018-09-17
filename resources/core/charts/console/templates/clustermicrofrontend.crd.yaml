@@ -19,8 +19,9 @@ spec:
       properties:
         spec:
           type: object
-          required: 
-          - "navigation"
+          required:
+            - "appName"
+            - "navigationNodes"
           properties:
             appName:
               type: string
@@ -29,20 +30,27 @@ spec:
             version:
               type: string
               pattern: "[a-zA-Z0-9]+"
-            location: 
+            placement:
               type: string
-              pattern: '^https://.+$'
-              maxLength: 512
-            navigation:
-              type: object
-              required: 
-              - "category"
-              properties:
-                category:
-                  type: string
-                location: 
-                  type: string
-                order:
-                  type: integer
-                  minimum: 1
-                  maximum: 100
+              pattern: "[a-z]+"
+            category:
+              type: string
+            viewBaseUrl:
+              type: string
+            navigationNodes:
+              type: array
+              items:
+                type: object
+                required:
+                - "label"
+                properties:
+                  category:
+                    type: string
+                  label:
+                    type: string
+                  navigationPath:
+                    type: string
+                  viewUrl:
+                    type: string
+                  showInNavigation:
+                    type: boolean
