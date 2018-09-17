@@ -65,8 +65,8 @@ func TestConnector(t *testing.T) {
 
 		// then
 		require.NotNil(t, err)
-		require.Equal(t, http.StatusForbidden, err.StatusCode)
-		require.Equal(t, http.StatusForbidden, err.ErrorResponse.Code)
+		require.Equal(t, http.StatusBadRequest, err.StatusCode)
+		require.Equal(t, http.StatusBadRequest, err.ErrorResponse.Code)
 		require.Equal(t, "CSR: Invalid CName provided.", err.ErrorResponse.Error)
 	})
 
