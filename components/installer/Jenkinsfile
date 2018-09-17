@@ -4,6 +4,8 @@ def application = 'installer'
 def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
 def dockerImageTag = params.APP_VERSION
 
+def gitCommitHash = ""
+
 echo """
 ********************************
 Job started with the following parameters:
@@ -27,6 +29,15 @@ podTemplate(label: label) {
                         stage("setup") {
                             checkout scm
 
+                            def status = sh(returnStatus: true, script: "git rev-parse HEAD^2")
+                            if(status == 0) {
+                                gitCommitHash = sh(script: 'git rev-parse HEAD^2',
+                                returnStdout: true) 
+                            } else {
+                                gitCommitHash = sh(script: 'git show -q --format=%P',
+                                returnStdout: true)
+                            }
+
                             if(dockerImageTag == ""){
                                 error("No version for docker tag defined, please set APP_VERSION parameter for master branch or GIT_BRANCH parameter for any branch")
                             }
@@ -45,7 +56,7 @@ podTemplate(label: label) {
                         }
 
                         stage("build $application") {
-                            execute("CGO_ENABLED=0 go build -o installer cmd/operator/main.go")
+                            execute("CGO_ENABLED=0 go build -ldflags \"-X main.gitCommitHash=${gitCommitHash}\" -o installer cmd/operator/main.go")
                         }
 
                         stage("test $application") {
