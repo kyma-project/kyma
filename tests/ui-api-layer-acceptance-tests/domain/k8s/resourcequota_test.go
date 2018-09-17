@@ -74,7 +74,7 @@ func TestResourceQuotaQuery(t *testing.T) {
 	require.NoError(t, err)
 	assert.Contains(t, listResult.ResourceQuotas, fixListResourceQuotasResponse())
 
-	err = c.Do(fixResourceQuotaStatusQuery(), &statusResult)
+	err = c.Do(fixResourceQuotasStatusQuery(), &statusResult)
 	require.NoError(t, err)
 	assert.False(t, statusResult.Exceeded)
 
@@ -101,11 +101,10 @@ func fixListResourceQuotasQuery() *graphql.Request {
 	return r
 }
 
-func fixResourceQuotaStatusQuery() *graphql.Request {
+func fixResourceQuotasStatusQuery() *graphql.Request {
 	query := `query($environment: String!) {
-				  resourceQuotaStatus(environment: $environment) {
+				  resourceQuotasStatus(environment: $environment) {
 					exceeded
-					message
 				  }
 				}`
 	r := graphql.NewRequest(query)

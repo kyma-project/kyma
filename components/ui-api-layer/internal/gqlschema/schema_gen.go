@@ -11107,17 +11107,10 @@ func (ec *executionContext) _ServiceInstance_status(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*ServiceInstanceStatus)
+	res := resTmp.(ServiceInstanceStatus)
 	rctx.Result = res
 
-	if res == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-
-	return ec._ServiceInstanceStatus(ctx, field.Selections, res)
+	return ec._ServiceInstanceStatus(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
