@@ -11,5 +11,5 @@ enabled: true
 
 tests:
   image:
-    name: remote-environment-controller-tests
+    name: snapshot/remote-environment-controller-tests
     tag: PR-710
