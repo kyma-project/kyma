@@ -191,7 +191,7 @@ func TestInstanceExtractor_Status(t *testing.T) {
 			},
 		},
 	} {
-		instance := &v1beta1.ServiceInstance{
+		instance := v1beta1.ServiceInstance{
 			Status: v1beta1.ServiceInstanceStatus{
 				AsyncOpInProgress: false,
 				Conditions:        tc.given,
@@ -199,7 +199,7 @@ func TestInstanceExtractor_Status(t *testing.T) {
 		}
 		t.Run(tn, func(t *testing.T) {
 			result := ext.Status(instance)
-			assert.Equal(t, &tc.expected, result)
+			assert.Equal(t, tc.expected, result)
 		})
 	}
 }

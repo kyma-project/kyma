@@ -26,7 +26,7 @@ func fixIDPPresets() []*v1alpha1.IDPPreset {
 func fixIDPPresetGQL() gqlschema.IDPPreset {
 	return gqlschema.IDPPreset{
 		Name:    "fixIDPPreset",
-		JwksUri: "uri",
+		JwksURI: "uri",
 		Issuer:  "issuer",
 	}
 }

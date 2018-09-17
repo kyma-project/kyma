@@ -1,19 +1,18 @@
 #!/bin/sh
+
 COLOR='\033[0;36m'
 NO_COLOR='\033[0m'
 
-APP_NAME='gqlgen'
-REPOSITORY="github.com/vektah/$APP_NAME"
-TEMP_DIR="./temp_$APP_NAME"
-
-PACKAGE='gqlschema'
-SCHEMA_DIR="./internal/$PACKAGE"
+APP_NAME="gqlgen"
+PACKAGE_DIR="./vendor/github.com/99designs/$APP_NAME"
+BASE_DIR="./internal/gqlschema"
 
 echo "${COLOR}Building generator...${NO_COLOR}"
-go build -o $TEMP_DIR/$APP_NAME ./vendor/$REPOSITORY
+go build -o ${BASE_DIR}/${APP_NAME} ${PACKAGE_DIR}
 
 echo "${COLOR}Generating code from GraphQL schema...${NO_COLOR}"
-$TEMP_DIR/$APP_NAME -schema $SCHEMA_DIR/schema.graphql -typemap $SCHEMA_DIR/types.json -out $SCHEMA_DIR/schema_gen.go -models $SCHEMA_DIR/models_gen.go -package $PACKAGE
+cd ${BASE_DIR}
+./${APP_NAME} -v --config ./config.yml
 
 echo "${COLOR}Cleaning up...${NO_COLOR}"
-rm -rf $TEMP_DIR
+rm ./${APP_NAME}

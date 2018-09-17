@@ -84,7 +84,7 @@ type gqlInstanceConverter interface {
 	ServiceStatusTypeToGQLStatusType(in status.ServiceInstanceStatusType) gqlschema.InstanceStatusType
 	GQLStatusTypeToServiceStatusType(in gqlschema.InstanceStatusType) status.ServiceInstanceStatusType
 	GQLStatusToServiceStatus(in *gqlschema.ServiceInstanceStatus) *status.ServiceInstanceStatus
-	ServiceStatusToGQLStatus(in *status.ServiceInstanceStatus) *gqlschema.ServiceInstanceStatus
+	ServiceStatusToGQLStatus(in status.ServiceInstanceStatus) gqlschema.ServiceInstanceStatus
 }
 
 // Plan

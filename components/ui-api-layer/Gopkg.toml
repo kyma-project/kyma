@@ -1,5 +1,6 @@
 required = [
     "golang.org/x/tools/cmd/goimports",
+    "github.com/urfave/cli"
 ]
 
 [[override]]
@@ -43,8 +44,8 @@ required = [
   version = "4.0.8"
 
 [[constraint]]
-  revision = "e1fd79fed15f60c47471d901c8250ab56aff1c55"
-  name = "github.com/vektah/gqlgen"
+  name = "github.com/99designs/gqlgen"
+  version = "v0.5.1"
 
 [[constraint]]
   name = "github.com/kubeless/kubeless"
@@ -72,5 +73,6 @@ required = [
   non-go = true
 
   [[prune.project]]
-      name = "github.com/vektah/gqlgen"
+      name = "github.com/99designs/gqlgen"
       unused-packages = false
+

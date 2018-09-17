@@ -48,7 +48,7 @@ func (lr *limitRangeConverter) limitsToGQL(item v1.LimitRangeItem) gqlschema.Lim
 func (lr *limitRangeConverter) extractResourceValues(item v1.ResourceList) gqlschema.ResourceType {
 	rt := gqlschema.ResourceType{}
 	if item, ok := item[v1.ResourceCPU]; ok {
-		rt.Cpu = lr.stringPtr(item.String())
+		rt.CPU = lr.stringPtr(item.String())
 	}
 	if item, ok := item[v1.ResourceMemory]; ok {
 		rt.Memory = lr.stringPtr(item.String())

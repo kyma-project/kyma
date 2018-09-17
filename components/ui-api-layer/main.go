@@ -7,20 +7,20 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/signal"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
-	"github.com/vektah/gqlgen/graphql"
 	"github.com/vrischmann/envconfig"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/99designs/gqlgen/handler"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
-	"github.com/vektah/gqlgen/handler"
 )
 
 type config struct {
@@ -49,7 +49,7 @@ func main() {
 	stopCh := signal.SetupChannel()
 	resolvers.WaitForCacheSync(stopCh)
 
-	executableSchema := gqlschema.MakeExecutableSchema(resolvers)
+	executableSchema := gqlschema.NewExecutableSchema(gqlschema.Config{Resolvers: resolvers})
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
 	runServer(stopCh, addr, cfg.AllowedOrigins, executableSchema)

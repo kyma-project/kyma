@@ -49,7 +49,11 @@ func newInstanceService(informer cache.SharedIndexInformer, client clientset.Int
 				return nil, fmt.Errorf("Cannot convert item")
 			}
 
-			key := fmt.Sprintf("%s/%s", serviceInstance.ObjectMeta.Namespace, instanceExt.Status(serviceInstance).Type)
+			if obj == nil {
+				return nil, fmt.Errorf("Nil reference")
+			}
+
+			key := fmt.Sprintf("%s/%s", serviceInstance.ObjectMeta.Namespace, instanceExt.Status(*serviceInstance).Type)
 			return []string{key}, nil
 		},
 	})

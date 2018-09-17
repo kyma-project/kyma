@@ -17,11 +17,11 @@ func (c *resourceQuotaConverter) ToGQL(in *v1.ResourceQuota) *gqlschema.Resource
 		Pods: c.extractValue(in, v1.ResourcePods),
 		Limits: gqlschema.ResourceValues{
 			Memory: c.extractValue(in, v1.ResourceLimitsMemory),
-			Cpu:    c.extractValue(in, v1.ResourceLimitsCPU),
+			CPU:    c.extractValue(in, v1.ResourceLimitsCPU),
 		},
 		Requests: gqlschema.ResourceValues{
 			Memory: c.extractValue(in, v1.ResourceRequestsMemory),
-			Cpu:    c.extractValue(in, v1.ResourceRequestsCPU),
+			CPU:    c.extractValue(in, v1.ResourceRequestsCPU),
 		},
 	}
 	return out

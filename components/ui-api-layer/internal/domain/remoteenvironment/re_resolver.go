@@ -22,7 +22,7 @@ type reSvc interface {
 	List(params pager.PagingParams) ([]*v1alpha1.RemoteEnvironment, error)
 	Disable(namespace, name string) error
 	Enable(namespace, name string) (*v1alpha1.EnvironmentMapping, error)
-	GetConnectionUrl(remoteEnvironment string) (string, error)
+	GetConnectionURL(remoteEnvironment string) (string, error)
 }
 
 //go:generate mockery -name=statusGetter -output=automock -outpkg=automock -case=underscore
@@ -87,14 +87,14 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentsQuery(ctx context.Context,
 }
 
 func (r *remoteEnvironmentResolver) ConnectorServiceQuery(ctx context.Context, remoteEnvironment string) (gqlschema.ConnectorService, error) {
-	url, err := r.reSvc.GetConnectionUrl(remoteEnvironment)
+	url, err := r.reSvc.GetConnectionURL(remoteEnvironment)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s for %s '%s'", pretty.ConnectorService, pretty.RemoteEnvironment, remoteEnvironment))
 		return gqlschema.ConnectorService{}, gqlerror.New(err, pretty.ConnectorService)
 	}
 
 	dto := gqlschema.ConnectorService{
-		Url: url,
+		URL: url,
 	}
 
 	return dto, nil

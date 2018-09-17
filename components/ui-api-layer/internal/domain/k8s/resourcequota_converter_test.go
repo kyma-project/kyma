@@ -66,11 +66,11 @@ func TestResourceQuotaConverter_ToGQL(t *testing.T) {
 				Name: "mem-default",
 				Pods: ptrStr("10"),
 				Limits: gqlschema.ResourceValues{
-					Cpu:    ptrStr("900m"),
+					CPU:    ptrStr("900m"),
 					Memory: ptrStr("1Gi"),
 				},
 				Requests: gqlschema.ResourceValues{
-					Cpu:    ptrStr("500m"),
+					CPU:    ptrStr("500m"),
 					Memory: ptrStr("512Mi"),
 				},
 			},

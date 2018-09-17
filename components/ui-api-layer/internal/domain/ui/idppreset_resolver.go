@@ -14,7 +14,7 @@ import (
 
 //go:generate mockery -name=idpPresetSvc -output=automock -outpkg=automock -case=underscore
 type idpPresetSvc interface {
-	Create(name string, issuer string, jwksUri string) (*v1alpha1.IDPPreset, error)
+	Create(name string, issuer string, jwksURI string) (*v1alpha1.IDPPreset, error)
 	Delete(name string) error
 	Find(name string) (*v1alpha1.IDPPreset, error)
 	List(params pager.PagingParams) ([]*v1alpha1.IDPPreset, error)
@@ -37,8 +37,8 @@ func newIDPPresetResolver(idpPresetSvc idpPresetSvc) *idpPresetResolver {
 	}
 }
 
-func (r *idpPresetResolver) CreateIDPPresetMutation(ctx context.Context, name string, issuer string, jwksUri string) (*gqlschema.IDPPreset, error) {
-	item, err := r.idpPresetSvc.Create(name, issuer, jwksUri)
+func (r *idpPresetResolver) CreateIDPPresetMutation(ctx context.Context, name string, issuer string, jwksURI string) (*gqlschema.IDPPreset, error) {
+	item, err := r.idpPresetSvc.Create(name, issuer, jwksURI)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.IDPPreset, name))
 		return nil, gqlerror.New(err, pretty.IDPPreset, gqlerror.WithName(name))

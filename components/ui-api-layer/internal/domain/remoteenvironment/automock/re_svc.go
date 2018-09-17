@@ -71,8 +71,8 @@ func (_m *reSvc) Find(name string) (*v1alpha1.RemoteEnvironment, error) {
 	return r0, r1
 }
 
-// GetConnectionUrl provides a mock function with given fields: remoteEnvironment
-func (_m *reSvc) GetConnectionUrl(remoteEnvironment string) (string, error) {
+// GetConnectionURL provides a mock function with given fields: remoteEnvironment
+func (_m *reSvc) GetConnectionURL(remoteEnvironment string) (string, error) {
 	ret := _m.Called(remoteEnvironment)
 
 	var r0 string

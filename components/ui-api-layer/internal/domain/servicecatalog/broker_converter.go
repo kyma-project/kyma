@@ -31,7 +31,7 @@ func (c *brokerConverter) ToGQL(item *v1beta1.ClusterServiceBroker) (*gqlschema.
 		Status:            returnStatus,
 		CreationTimestamp: item.CreationTimestamp.Time,
 		Labels:            *labels,
-		Url:               item.Spec.URL,
+		URL:               item.Spec.URL,
 	}
 
 	return &broker, nil

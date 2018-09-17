@@ -285,9 +285,9 @@ func TestInstanceConverter_ServiceStatusToGQLStatus(t *testing.T) {
 		}
 
 		converter := instanceConverter{}
-		result := converter.ServiceStatusToGQLStatus(&s)
+		result := converter.ServiceStatusToGQLStatus(s)
 
-		assert.Equal(t, &expected, result)
+		assert.Equal(t, expected, result)
 	})
 }
 
@@ -333,9 +333,9 @@ func TestInstanceConverter_ServiceStatusToGQLStatusWithConvert(t *testing.T) {
 		}
 
 		converter := instanceConverter{}
-		result := converter.ServiceStatusToGQLStatus(converter.extractor.Status(&instance))
+		result := converter.ServiceStatusToGQLStatus(converter.extractor.Status(instance))
 
-		assert.Equal(t, &expected, result)
+		assert.Equal(t, expected, result)
 	})
 }
 

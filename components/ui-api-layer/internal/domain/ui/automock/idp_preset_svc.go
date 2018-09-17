@@ -11,13 +11,13 @@ type idpPresetSvc struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: name, issuer, jwksUri
-func (_m *idpPresetSvc) Create(name string, issuer string, jwksUri string) (*v1alpha1.IDPPreset, error) {
-	ret := _m.Called(name, issuer, jwksUri)
+// Create provides a mock function with given fields: name, issuer, jwksURI
+func (_m *idpPresetSvc) Create(name string, issuer string, jwksURI string) (*v1alpha1.IDPPreset, error) {
+	ret := _m.Called(name, issuer, jwksURI)
 
 	var r0 *v1alpha1.IDPPreset
 	if rf, ok := ret.Get(0).(func(string, string, string) *v1alpha1.IDPPreset); ok {
-		r0 = rf(name, issuer, jwksUri)
+		r0 = rf(name, issuer, jwksURI)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.IDPPreset)
@@ -26,7 +26,7 @@ func (_m *idpPresetSvc) Create(name string, issuer string, jwksUri string) (*v1a
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string, string) error); ok {
-		r1 = rf(name, issuer, jwksUri)
+		r1 = rf(name, issuer, jwksURI)
 	} else {
 		r1 = ret.Error(1)
 	}

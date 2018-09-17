@@ -72,22 +72,22 @@ func TestConnectorServiceQuerySuccess(t *testing.T) {
 		fixRemoteEnvName = "env-name"
 		fixURL           = "http://some-url-with-token"
 		fixGQLObj        = gqlschema.ConnectorService{
-			Url: "http://some-url-with-token",
+			URL: "http://some-url-with-token",
 		}
 	)
 
 	serviceMock := automock.NewReSvc()
 	defer serviceMock.AssertExpectations(t)
-	serviceMock.On("GetConnectionUrl", fixRemoteEnvName).Return(fixURL, nil)
+	serviceMock.On("GetConnectionURL", fixRemoteEnvName).Return(fixURL, nil)
 
 	resolver := remoteenvironment.NewRemoteEnvironmentResolver(serviceMock, nil)
 
 	// when
-	gotUrlObj, err := resolver.ConnectorServiceQuery(context.Background(), fixRemoteEnvName)
+	gotURLObj, err := resolver.ConnectorServiceQuery(context.Background(), fixRemoteEnvName)
 
 	// then
 	require.NoError(t, err)
-	assert.Equal(t, fixGQLObj, gotUrlObj)
+	assert.Equal(t, fixGQLObj, gotURLObj)
 }
 
 func TestConnectorServiceQueryFail(t *testing.T) {
@@ -99,15 +99,15 @@ func TestConnectorServiceQueryFail(t *testing.T) {
 
 	serviceMock := automock.NewReSvc()
 	defer serviceMock.AssertExpectations(t)
-	serviceMock.On("GetConnectionUrl", fixRemoteEnvName).Return("", fixErr)
+	serviceMock.On("GetConnectionURL", fixRemoteEnvName).Return("", fixErr)
 
 	resolver := remoteenvironment.NewRemoteEnvironmentResolver(serviceMock, nil)
 
 	// when
-	gotUrlObj, err := resolver.ConnectorServiceQuery(context.Background(), fixRemoteEnvName)
+	gotURLObj, err := resolver.ConnectorServiceQuery(context.Background(), fixRemoteEnvName)
 
 	// then
 	require.Error(t, err)
 	assert.True(t, gqlerror.IsInternal(err))
-	assert.Zero(t, gotUrlObj)
+	assert.Zero(t, gotURLObj)
 }

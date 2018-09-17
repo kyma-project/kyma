@@ -154,7 +154,7 @@ func TestServiceListRemoteEnvironmentsInEnvironmentSuccess(t *testing.T) {
 	assert.Contains(t, nsList, &fixREB)
 }
 
-func TestGetConnectionUrlSuccess(t *testing.T) {
+func TestGetConnectionURLSuccess(t *testing.T) {
 	// given
 	testServer := newTestServer(`{"url": "http://gotURL-with-token", "token": "token"}`, http.StatusCreated)
 	defer testServer.Close()
@@ -168,19 +168,19 @@ func TestGetConnectionUrlSuccess(t *testing.T) {
 	svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, config, newDummyInformer(), nil, nil)
 	require.NoError(t, err)
 	// when
-	gotURL, err := svc.GetConnectionUrl("fixRemoteEnvironmentName")
+	gotURL, err := svc.GetConnectionURL("fixRemoteEnvironmentName")
 
 	// then
 	require.NoError(t, err)
 	assert.Equal(t, "http://gotURL-with-token", gotURL)
 }
 
-func TestGetConnectionUrlFailure(t *testing.T) {
+func TestGetConnectionURLFailure(t *testing.T) {
 	t.Run("Should return an error in case of improper remote environment name", func(t *testing.T) {
 		// given
 		cfg := remoteenvironment.Config{
 			Connector: remoteenvironment.ConnectorSvcCfg{
-				URL: "connectorUrl",
+				URL: "connectorURL",
 			},
 		}
 
@@ -188,7 +188,7 @@ func TestGetConnectionUrlFailure(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		gotURL, err := svc.GetConnectionUrl("invalid/RemoteEnvironmentName")
+		gotURL, err := svc.GetConnectionURL("invalid/RemoteEnvironmentName")
 
 		// then
 		require.Error(t, err)
@@ -211,7 +211,7 @@ func TestGetConnectionUrlFailure(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		gotURL, err := svc.GetConnectionUrl("fixRemoteEnvironment")
+		gotURL, err := svc.GetConnectionURL("fixRemoteEnvironment")
 
 		// then
 		require.Error(t, err)
@@ -234,7 +234,7 @@ func TestGetConnectionUrlFailure(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		gotURL, err := svc.GetConnectionUrl("fixRemoteEnvironment")
+		gotURL, err := svc.GetConnectionURL("fixRemoteEnvironment")
 
 		// then
 		require.Error(t, err)

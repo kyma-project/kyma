@@ -30,7 +30,7 @@ func TestBrokerConverter_ToGQL(t *testing.T) {
 			Name:              "exampleName",
 			CreationTimestamp: zeroTimeStamp,
 			Labels:            *labelsJSON,
-			Url:               "ExampleURL",
+			URL:               "ExampleURL",
 			Status: gqlschema.ServiceBrokerStatus{
 				Ready:   true,
 				Reason:  "ExampleReason",

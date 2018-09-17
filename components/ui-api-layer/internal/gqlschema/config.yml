@@ -1,0 +1,83 @@
+schema: schema.graphql
+
+# Let gqlgen know where to put the generated server
+exec:
+  filename: schema_gen.go
+  package: gqlschema
+
+# Let gqlgen know where to the generated models (if any)
+model:
+  filename: models_gen.go
+  package: gqlschema
+
+# Optional turns on binding to field names by tag provided
+struct_tag: json
+
+# Tell gqlgen about any existing models you want to reuse for
+# graphql. These normally come from the db or a remote api.
+models:
+  JSON:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.JSON"
+  Timestamp:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Timestamp"
+  ServiceInstance:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ServiceInstance"
+    fields:
+      bindable:
+        resolver: true
+      serviceBindings:
+        resolver: true
+      serviceBindingUsages:
+        resolver: true
+      serviceClass:
+        resolver: true
+      servicePlan:
+        resolver: true
+  ServiceInstanceEvent:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ServiceInstanceEvent"
+  ServiceClass:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ServiceClass"
+    fields:
+      plans:
+        resolver: true
+      activated:
+        resolver: true
+      apiSpec:
+        resolver: true
+      asyncApiSpec:
+        resolver: true
+      content:
+        resolver: true
+  RemoteEnvironment:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.RemoteEnvironment"
+    fields:
+      enabledInEnvironments:
+        resolver: true
+      status:
+        resolver: true
+  ServiceBinding:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ServiceBinding"
+    fields:
+      secret:
+        resolver: true
+  ServiceBindingUsage:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ServiceBindingUsage"
+    fields:
+      serviceBinding:
+        resolver: true
+  Deployment:
+    fields:
+      boundServiceInstanceNames:
+        resolver: true
+  DeploymentStatus:
+  EventActivation:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.EventActivation"
+    fields:
+      events:
+        resolver: true
+  Section:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Section"
+  TopicEntry:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.TopicEntry"
+  Title:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Title"
