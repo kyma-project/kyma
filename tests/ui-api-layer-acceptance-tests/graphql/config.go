@@ -90,6 +90,7 @@ func loadConfig() (config, error) {
 func (c *config) addLocalClusterHost(host string) {
 	url := strings.TrimPrefix(host, "http://")
 	url = strings.TrimPrefix(host, "https://")
+	url = strings.Split(url, "/")[0]
 
 	c.LocalClusterHosts = append(c.LocalClusterHosts, url)
 }
