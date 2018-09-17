@@ -95,14 +95,7 @@ podTemplate(label: label) {
                         configureBuilds(commitID)
                         changes = changedProjects()
 
-                        if (isMaster) {
-                            // integration runs on any change on master
-                            runIntegration = changes.size() > 0
-                        } else {
-                            // TODO remove PR integration skip when installer overrides are ready
-                            // integration only runs on changes to installation resources on PRs
-                            runIntegration = changes.intersect(additionalProjects).size() > 0
-                        }
+                        runIntegration = changes.size() > 0
                         if (changes.size() == 1 && changes[0] == "governance") {
                             runIntegration = false
                         }
