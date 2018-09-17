@@ -17,25 +17,20 @@ def api_gateway = "api-gateway"
 def authorization_and_authentication = "authorization-and-authentication"
 def label = "kyma-${UUID.randomUUID().toString()}"
 
-def isMaster = params.GIT_BRANCH == 'master'
-
-def dockerPushRoot = isMaster
-    ? "${env.DOCKER_REGISTRY}develop/"
-    : "${env.DOCKER_REGISTRY}pr/"
-
-def dockerImageTag = isMaster
-    ? params.APP_VERSION
-    : params.GIT_BRANCH
+def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
+def dockerImageTag = params.APP_VERSION
 
 echo """
 ********************************
 Job started with the following parameters:
 DOCKER_REGISTRY=${env.DOCKER_REGISTRY}
+PUSH_DIR=${params.PUSH_DIR}
 DOCKER_CREDENTIALS=${env.DOCKER_CREDENTIALS}
 GIT_REVISION=${params.GIT_REVISION}
 GIT_BRANCH=${params.GIT_BRANCH}
 APP_VERSION=${params.APP_VERSION}
 APP_FOLDER=${env.APP_FOLDER}
+FULL_BUILD=${params.FULL_BUILD}
 ********************************
 """
 
@@ -142,7 +137,7 @@ podTemplate(label: label) {
                             sh "docker tag ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:latest ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:$dockerImageTag"
 
-                            if (isMaster) {
+                            if (params.GIT_BRANCH == 'master') {
                                 sh "docker push ${dockerPushRoot}$kyma-$docs_image_suffix:latest"
                                 sh "docker push ${dockerPushRoot}$service_catalog-$docs_image_suffix:latest"
                                 sh "docker push ${dockerPushRoot}$service_brokers-$docs_image_suffix:latest"

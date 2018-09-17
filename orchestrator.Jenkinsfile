@@ -10,12 +10,15 @@ Monorepo root orchestrator: This Jenkinsfile runs the Jenkinsfiles of all subpro
         - revision
         - branch
         - current app version
+        - docker registry directory to push images based on branch
         - all component versions
 
 */
 def label = "kyma-${UUID.randomUUID().toString()}"
+prRegex = /^PR-([0-9]+)$/ // PR format: PR-66
 isMaster = env.BRANCH_NAME == 'master'
 appVersion = ''
+dockerPushRoot = ''
 
 /*
     Projects that are built when changed, consisting of pairs [project path, produced docker image]. Projects producing multiple Docker images only need to provide one of them.
@@ -89,7 +92,7 @@ podTemplate(label: label) {
                         checkout scm
                         // use HEAD of branch as revision, Jenkins does a merge to master commit before starting this script, which will not be available on the jobs triggered below
                         commitID = sh (script: "git rev-parse origin/${env.BRANCH_NAME}", returnStdout: true).trim()
-                        appVersion = commitID.substring(0,8)
+                        configureBuilds(commitID)
                         changes = changedProjects()
 
                         if (isMaster) {
@@ -116,7 +119,9 @@ podTemplate(label: label) {
                                             parameters: [
                                                 string(name:'GIT_REVISION', value: "$commitID"),
                                                 string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
-                                                string(name:'APP_VERSION', value: "$appVersion")
+                                                string(name:'APP_VERSION', value: "$appVersion"),
+                                                string(name:'PUSH_DIR', value: "$dockerPushRoot"),
+                                                booleanParam(name:'FULL_BUILD', value: isMaster)
                                             ]
                             }
                         }
@@ -141,7 +146,7 @@ if (runIntegration) {
         for (int i = 0; i < changedProjects.size(); i++) {
             // only projects that have an associated docker image have a version to deploy
             if (projects["${changedProjects[i]}"] != null) {
-                versions["${changedProjects[i]}"] = isMaster ? appVersion : env.BRANCH_NAME
+                versions["${changedProjects[i]}"] = "$appVersion"
             }
         }
 
@@ -184,6 +189,27 @@ if (runIntegration) {
 
 
 /* -------- Helper Functions -------- */
+
+/** Configure the parameters for the components to build:
+ * - master: push root: "/develop" / image tag: APP_VERSION
+ * - PR: push root: "/pr" / image tag: BRANCH NAME
+ */
+@NonCPS
+def configureBuilds(commitID) {
+    switch(env.BRANCH_NAME) {
+        case "master": // master development builds
+            dockerPushRoot = "develop/"
+            appVersion = commitID.substring(0,8)
+            break
+        case ~prRegex: // PR changeset builds
+            dockerPushRoot = "pr/"
+            appVersion = env.BRANCH_NAME
+            break
+        default:
+            error("Branch ${env.BRANCH_NAME} not supported in this pipeline.")
+            break
+    }
+}
 
 /**
  * Provides a list with the projects that have changes within the given projects list.
