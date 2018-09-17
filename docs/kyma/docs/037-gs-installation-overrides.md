@@ -122,12 +122,14 @@ Considering that, avoid overrides having the same keys for final values.
 ### Example of non-conflicting merge:
 
 Having two overrides with a *common* key prefix ("a.b"):
+
 `
 "a.b.c": "first"
 "a.b.d": "second"
 `
 
 Installer yields correct output:
+
 `
 a:
   b:
@@ -145,12 +147,14 @@ Having two overrides with *the same* key ("a.b"):
 `
 
 Installer yields either:
+
 `
 a:
   b: "first"
 `
 
 Or (due to non-deterministic merge order):
+
 `
 a:
   b: "second"
