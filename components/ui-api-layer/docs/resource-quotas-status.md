@@ -2,7 +2,7 @@
 
 [ResourceQuota](https://kubernetes.io/docs/concepts/policy/resource-quotas/) provides constraints that limit the aggregate resource consumption per Namespace.
 
-The ResourceQuota values can be as follows:
+The example ResourceQuota values looks as follows:
 ```bash
 Name:            kyma-default
 Resource         Used       Hard
@@ -14,13 +14,13 @@ When the `used` values of the ResourceQuota exceed the `hard` values, the resour
 
 The ResourceQuotasStatus contains the flag and the list of exceeded ResourceQuotas limits, together with a set of resources which exceed that limits. The value of the flag informs you if any ResourceQuota is exceeded in any possible way.
 
-The ResourceQuotasStatus detects if any ReplicaSet or StatefulSet in your Environment is blocked by the ResourceQuota and cannot progress.
+The ResourceQuotasStatus detects if any ReplicaSet or StatefulSet in your Environment is blocked by the ResourceQuota and therefore cannot progress.
 To check if any ReplicaSet or StatefulSet is blocked, calculate the required number of resources to create another replica. If there are not enough resources to create another replica, return the ResourceQuotaStatus with the flag set to `true`.
 
 ## The Console calls
 
 The Console calls for the ResourceQuotasStatus automatically. The calls are triggered after: 
-- switching the environment
+- switching the Environment
 - uploading a resource
 - creating a lambda 
 - opening Environment's details
@@ -33,14 +33,14 @@ This section contains the steps of the ResourceQuotaStatus implementation.
 
 To calculate the number of available resources in the given Environment, list the ResourceQuotas and loop through them.
 You can get the available number of resources by calculating the difference from **.spec.hard** and **.status.used** in each ResourceQuota.
-For each resource limit specified in the ResourceQuotas, you must calculate the available amount of resources using the ResourceQuota with the lowest `.spec.hard` value for that resource type.
+For each resource limit specified in the ResourceQuotas, you must calculate the available number of resources using the ResourceQuota with the lowest **.spec.hard** value for that resource type.
 
 ### Calculate the necessary resources to create the next replica
 
-To calculate how much resources you need to create the next replica, sum up the resource usage of all containers in the replica Pod.
-If some resource limit is not specified directly in the replica's template, check if any LimitRange is not specifying it.
+To calculate how many resources you need to create the next replica, sum up the resource usage of all containers in the replica Pod.
+If some resource limit is not specified directly in the replica's template, check if any LimitRange does not specify it.
 In this situation, add the proper LimitRange limit to the list of necessary resources.
-When the same limit is specified in the LimitRange and in the replica template, the replica's template limit has priority.
+When the same limit is specified in the LimitRange and in the replica's template, the replica's template limit has priority.
 
 ### Check the ReplicaSets
 
@@ -60,7 +60,7 @@ If there is not enough resources to create the next replica and the number of re
 
 When both checks have passed and the resources usage in the given Environment did not exceed any ResourceQuota limit, return the ResourceQuotasStatus with a flag set to `false`.
 
-## Examples of the query and response
+## Examples of the query and the response
 
 The ResourceQuotasStatus query looks as follows:
 ```graphql
@@ -75,7 +75,7 @@ query{
   } 
 }
 ```
-This query returns two types of response: exceeded or not exceeded.
+This query returns two types of response: exceeded and not exceeded.
 Not exceeded response looks as follows:
 ```graphql endpoint doc
     "resourceQuotasStatus": {
@@ -83,7 +83,7 @@ Not exceeded response looks as follows:
       "exceededQuotas": []
     }
 ```
-Exceeded response can look like this:
+Exceeded response looks like this:
 ```graphql endpoint doc
     "resourceQuotasStatus": {
       "exceeded": true,
@@ -108,7 +108,7 @@ Exceeded response can look like this:
     }
 ```
 - **exceeded** equals `true` if any ResourceQuota is exceeded.
-- **exceededQuotas** contains the list of exceeded ResourceQuotas limits and set of resources which exceed the limits. The list will be empty if there is no exceeded ResourceQuotas in your Environment.
+- **exceededQuotas** contains the list of exceeded ResourceQuotas limits and set of resources which exceed the limits. The list is empty if there are no exceeded ResourceQuotas in your Environment.
 - **quotaName** represents the name of the ResourceQuota with exceeded limit.
 - **resourceName** represents the name of the resource which exceeded the ResourceQuota limit.
 - **affectedResources** contains the list of resources which exceed the defined **resourceName** limit from the **quotaName** ResourceQuota.
