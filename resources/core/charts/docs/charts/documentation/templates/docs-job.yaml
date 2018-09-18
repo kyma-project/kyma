@@ -93,3 +93,10 @@ spec:
              memory: {{ .Values.resources.documentation.requests.memory }}
            limits:
              memory: {{ .Values.resources.documentation.limits.memory }}
+      - name:  logging
+        image: {{ .Values.global.containerRegistry.path }}/logging-docs:{{ .Chart.AppVersion }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
