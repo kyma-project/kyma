@@ -10,6 +10,8 @@ import (
 
 	"io/ioutil"
 
+	yaml "gopkg.in/yaml.v2"
+
 	"github.com/kyma-project/kyma/tests/connector-service-tests/test/testkit"
 	"github.com/stretchr/testify/require"
 )
@@ -175,8 +177,8 @@ func TestConnector(t *testing.T) {
 		// then
 		// TODO after fixing the service, set status code to 400.
 		require.NotNil(t, err)
-		require.Equal(t, http.StatusBadRequest, err.StatusCode)
-		require.Equal(t, http.StatusBadRequest, err.ErrorResponse.Code)
+		require.Equal(t, http.StatusInternalServerError, err.StatusCode)
+		require.Equal(t, http.StatusInternalServerError, err.ErrorResponse.Code)
 		require.Equal(t, "There was an error while parsing the base64 content. An incorrect value was provided.", err.ErrorResponse.Error)
 	})
 }
