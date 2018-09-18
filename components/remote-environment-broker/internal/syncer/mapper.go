@@ -2,7 +2,7 @@ package syncer
 
 import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 )
 
 type reCRMapper struct{}
@@ -19,10 +19,13 @@ func (re *reCRMapper) ToModel(dto *v1alpha1.RemoteEnvironment) *internal.RemoteE
 	for _, svc := range dto.Spec.Services {
 		dmSvc := internal.Service{
 			ID:                  internal.RemoteServiceID(svc.ID),
+			Name:                svc.Name,
 			DisplayName:         svc.DisplayName,
+			Description:         svc.Description,
 			LongDescription:     svc.LongDescription,
 			ProviderDisplayName: svc.ProviderDisplayName,
 			Tags:                svc.Tags,
+			Labels:              svc.Labels,
 			APIEntry:            re.extractAPIEntryAsModel(svc.Entries),
 			EventProvider:       re.extractEventEntryAsModel(svc.Entries),
 		}
@@ -33,11 +36,6 @@ func (re *reCRMapper) ToModel(dto *v1alpha1.RemoteEnvironment) *internal.RemoteE
 	dm := &internal.RemoteEnvironment{
 		Name:        internal.RemoteEnvironmentName(dto.Name),
 		Description: dto.Spec.Description,
-		Source: internal.Source{
-			Type:        dto.Spec.Source.Type,
-			Namespace:   dto.Spec.Source.Namespace,
-			Environment: dto.Spec.Source.Environment,
-		},
 		Services:    reServices,
 		AccessLabel: dto.Spec.AccessLabel,
 	}

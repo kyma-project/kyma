@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
-	versioned "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	versioned "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -21,7 +21,7 @@ type remoteEnvironmentFinder interface {
 }
 
 // NewMappingExistsProvisionChecker creates new access checker
-func NewMappingExistsProvisionChecker(reFinder remoteEnvironmentFinder, reInterface versioned.RemoteenvironmentV1alpha1Interface) *MappingExistsProvisionChecker {
+func NewMappingExistsProvisionChecker(reFinder remoteEnvironmentFinder, reInterface versioned.ApplicationconnectorV1alpha1Interface) *MappingExistsProvisionChecker {
 	return &MappingExistsProvisionChecker{
 		reInterface: reInterface,
 		reFinder:    reFinder,
@@ -30,7 +30,7 @@ func NewMappingExistsProvisionChecker(reFinder remoteEnvironmentFinder, reInterf
 
 // MappingExistsProvisionChecker is a checker which can wait some time for EnvironmentMapping before it forbids provisioning
 type MappingExistsProvisionChecker struct {
-	reInterface versioned.RemoteenvironmentV1alpha1Interface
+	reInterface versioned.ApplicationconnectorV1alpha1Interface
 	reFinder    remoteEnvironmentFinder
 }
 

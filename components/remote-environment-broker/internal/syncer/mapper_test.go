@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,11 +17,6 @@ func TestReCRMapperToModel(t *testing.T) {
 			Name: "re",
 		},
 		Spec: v1alpha1.RemoteEnvironmentSpec{
-			Source: v1alpha1.Source{
-				Environment: "production",
-				Type:        "commerce",
-				Namespace:   "com.hakuna.matata",
-			},
 			Description: "EC description",
 			Services: []v1alpha1.Service{
 				{
@@ -53,10 +48,6 @@ func TestReCRMapperToModel(t *testing.T) {
 	// then
 	assert.Equal(t, dm.Description, fix.Spec.Description)
 	assert.Equal(t, dm.Name, internal.RemoteEnvironmentName(fix.Name))
-
-	assert.Equal(t, dm.Source.Type, fix.Spec.Source.Type)
-	assert.Equal(t, dm.Source.Environment, fix.Spec.Source.Environment)
-	assert.Equal(t, dm.Source.Namespace, fix.Spec.Source.Namespace)
 
 	require.Len(t, dm.Services, 1)
 	assert.Equal(t, string(dm.Services[0].ID), fix.Spec.Services[0].ID)

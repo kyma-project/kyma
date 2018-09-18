@@ -1,4 +1,4 @@
 // +k8s:deepcopy-gen=package,register
 
-// +groupName=remoteenvironment.kyma.cx
+// +groupName=applicationconnector.kyma-project.io
 package v1alpha1

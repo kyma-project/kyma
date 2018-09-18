@@ -3,7 +3,7 @@
 package fake
 
 import (
-	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -14,13 +14,13 @@ import (
 
 // FakeEventActivations implements EventActivationInterface
 type FakeEventActivations struct {
-	Fake *FakeRemoteenvironmentV1alpha1
+	Fake *FakeApplicationconnectorV1alpha1
 	ns   string
 }
 
-var eventactivationsResource = schema.GroupVersionResource{Group: "remoteenvironment.kyma.cx", Version: "v1alpha1", Resource: "eventactivations"}
+var eventactivationsResource = schema.GroupVersionResource{Group: "applicationconnector.kyma-project.io", Version: "v1alpha1", Resource: "eventactivations"}
 
-var eventactivationsKind = schema.GroupVersionKind{Group: "remoteenvironment.kyma.cx", Version: "v1alpha1", Kind: "EventActivation"}
+var eventactivationsKind = schema.GroupVersionKind{Group: "applicationconnector.kyma-project.io", Version: "v1alpha1", Kind: "EventActivation"}
 
 // Get takes name of the eventActivation, and returns the corresponding eventActivation object, and an error if there is any.
 func (c *FakeEventActivations) Get(name string, options v1.GetOptions) (result *v1alpha1.EventActivation, err error) {

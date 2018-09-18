@@ -1,7 +1,7 @@
 package access
 
 import (
-	emListers "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/remoteenvironment/v1alpha1"
+	emListers "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 )
