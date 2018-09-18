@@ -35,7 +35,9 @@ func main() {
 
 	log.Println("Starting operator...")
 
-	log.Println("Git commit hash:", gitCommitHash)
+	if gitCommitHash != "" {
+		log.Println("Git commit hash:", gitCommitHash)
+	}
 
 	stop := make(chan struct{})
 
