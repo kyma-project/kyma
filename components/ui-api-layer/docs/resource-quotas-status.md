@@ -17,8 +17,6 @@ The ResourceQuotasStatus contains the flag and the list of exceeded ResourceQuot
 The ResourceQuotasStatus detects if any ReplicaSet or StatefulSet in your Environment is blocked by the ResourceQuota and therefore cannot progress.
 To check if any ReplicaSet or StatefulSet is blocked, calculate the required number of resources to create another replica. If there are not enough resources to create another replica, return the ResourceQuotaStatus with the flag set to `true`.
 
-## The Console calls
-
 The Console calls for the ResourceQuotasStatus automatically. The calls are triggered after: 
 - switching the Environment
 - uploading a resource
