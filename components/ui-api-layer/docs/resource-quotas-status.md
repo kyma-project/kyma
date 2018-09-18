@@ -2,7 +2,7 @@
 
 [ResourceQuota](https://kubernetes.io/docs/concepts/policy/resource-quotas/) provides constraints that limit the aggregate resource consumption per Namespace.
 
-The example ResourceQuota values looks as follows:
+The example ResourceQuota values look as follows:
 ```bash
 Name:            kyma-default
 Resource         Used       Hard
