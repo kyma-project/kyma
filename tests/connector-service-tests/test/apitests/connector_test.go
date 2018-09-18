@@ -175,7 +175,6 @@ func TestConnector(t *testing.T) {
 		_, err := client.CreateClientCert(t, "wrong-csr", infoResponse.CertUrl)
 
 		// then
-		// TODO after fixing the service, set status code to 400.
 		require.NotNil(t, err)
 		require.Equal(t, http.StatusBadRequest, err.StatusCode)
 		require.Equal(t, http.StatusBadRequest, err.ErrorResponse.Code)
