@@ -12,7 +12,7 @@ spec:
       containers:
       - name: istio-kyma-patch
         imagePullPolicy: Never
-        image: local/istio-patch:latest
+        image: local/istio-kyma-patch:latest
         env:
         - name: IS_LOCAL_INSTALLATION
           value: "true"
