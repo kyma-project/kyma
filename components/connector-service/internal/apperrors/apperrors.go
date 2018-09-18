@@ -8,6 +8,7 @@ const (
 	CodeAlreadyExists = 3
 	CodeWrongInput    = 4
 	CodeForbidden     = 5
+	CodeBadRequest    = 6
 )
 
 type AppError interface {
@@ -43,6 +44,11 @@ func WrongInput(format string, a ...interface{}) AppError {
 func Forbidden(format string, a ...interface{}) AppError {
 	return errorf(CodeForbidden, format, a...)
 }
+
+func BadRequest(format string, a ...interface{}) AppError {
+	return errorf(CodeBadRequest, format, a...)
+}
+
 func (ae appError) Code() int {
 	return ae.code
 }

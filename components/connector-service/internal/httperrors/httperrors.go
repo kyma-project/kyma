@@ -23,6 +23,8 @@ func errorCodeToHttpStatus(code int) int {
 		return http.StatusBadRequest
 	case apperrors.CodeForbidden:
 		return http.StatusForbidden
+	case apperrors.CodeBadRequest:
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}
