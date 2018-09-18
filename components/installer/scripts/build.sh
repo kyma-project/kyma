@@ -22,7 +22,7 @@ else
     echo "Building installer version: ${IMAGE_VERSION}"
 fi
 
-IMAGE_NAME=eu.gcr.io/kyma-project/installer:${IMAGE_VERSION}
+IMAGE_NAME=madziq/kyma-installer:${IMAGE_VERSION}
 
 pushd ${ROOT_DIR}
 
@@ -40,7 +40,7 @@ if [[ "${KYMA_PATH}" ]]; then
     cp -r ${KYMA_PATH}/installation kyma
 
     eval $(minikube docker-env --shell bash)
-    docker build -t ${IMAGE_NAME} -f deploy/installer/Dockerfile .
+    docker build -t ${IMAGE_NAME} -f deploy/installer/kyma.Dockerfile .
 fi
 
 popd
