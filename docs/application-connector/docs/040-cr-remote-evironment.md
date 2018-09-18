@@ -23,15 +23,17 @@ spec:
   accessLabel: "re-access-label"
   services:
     - id: "ac031e8c-9aa4-4cb7-8999-0d358726ffaa"
-
+      name: "promotions-ac031e8c"
       displayName: "Promotions"
-      longDescription: "Promotions APIs"
+      description: "Short desc for Promotions APIs"
+      longDescription: "Long description for Promotions APIs"
       providerDisplayName: "Organization name"
 
       tags:
       - occ
       - Promotions
-
+      labels:
+        connected-app: "ec-prod"
       entries:
       - type: API
         gatewayUrl: "http://promotions-gateway.production.svc.cluster.local"
@@ -57,13 +59,13 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.services** |    **NO**   | Contains all services that the Remote Environment provides. |
 | **spec.services.id** |    **YES**   | Identifies the service that the Remote Environment provides. |
 | **spec.services.identifier** |    **NO**   | Provides an additional identifier of the ServiceClass. |
-| **spec.services.name** |    **NO**   | Represents a unique name of the service used by the Service Catalog. |
+| **spec.services.name** |    **YES**   | Specifies the CLI-friendly name of the Remote Environment service. It must contain only lowercase characters, numbers, and hyphens, with no spaces. This field must be unique across all service objects returned in the Remote Environment custom resource. |
 | **spec.services.displayName** |    **YES**   | Specifies a human-readable name of the Remote Environment service. |
 | **spec.services.description** |    **NO**   | Provides a short, human-readable description of the Remote Environment service. |
-| **spec.services.longDescription** |    **NO**   | Provides a human-readable description of the Remote Environment service. |
+| **spec.services.longDescription** |    **NO**   | Provides a detailed, human-readable description of the Remote Environment service. |
 | **spec.services.providerDisplayName** |    **YES**   | Specifies a human-readable name of the Remote Environment service provider. |
 | **spec.services.tags** |    **NO**   | Specifies the categories of the Remote Environment service. |
-| **spec.services.labels** |    **NO**   | Specifies the additional labels of the Remote Environment service. |
+| **spec.services.labels** |    **NO**   | Specifies labels used to add the additional meta-information to the Remote Environment service. This field must contain the `connected-app` label. |
 | **spec.services.entries** |    **YES**   | Contains information about APIs and Events that the Remote Environment service provides. |
 | **spec.services.entries.type** |    **YES**   | Specifies whether the entry is of API or Event type. |
 | **spec.services.entries.gatewayUrl** |    **NO**   | Specifies the URL of the Application Connector. This field is required for the API entry type. |
