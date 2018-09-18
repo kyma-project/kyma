@@ -22,11 +22,7 @@ spec:
       serviceAccountName: {{ template "name" . }}-service-account
       containers:
         - name: {{ .Chart.Name }}
-        {{ if .Values.global.environments.dir }}
-          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}/environments:{{ .Values.global.environments.version }}
-        {{ else }}
-          image: {{ .Values.global.containerRegistry.path }}/environments:0.1.2
-        {{ end }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}environments:{{ .Values.global.environments.version }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           env:

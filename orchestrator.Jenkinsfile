@@ -184,8 +184,8 @@ if (runIntegration) {
 /* -------- Helper Functions -------- */
 
 /** Configure the parameters for the components to build:
- * - master: push root: "/develop" / image tag: APP_VERSION
- * - PR: push root: "/pr" / image tag: BRANCH NAME
+ * - master: push root: "develop/" / image tag: APP_VERSION
+ * - PR: push root: "pr/" / image tag: BRANCH NAME
  */
 @NonCPS
 def configureBuilds(commitID) {
@@ -303,67 +303,67 @@ def versionsYaml(versions) {
     def overrides = 
 """
 global.docs.version=${versions['docs']}
-global.docs.dir=${versions['docs'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.docs.dir=${versions['docs'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.api-controller.version=${versions['components/api-controller']}
-global.api-controller.dir=${versions['components/api-controller'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.api-controller.dir=${versions['components/api-controller'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.binding-usage-controller.version=${versions['components/binding-usage-controller']}
-global.binding-usage-controller.dir=${versions['components/binding-usage-controller'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.binding-usage-controller.dir=${versions['components/binding-usage-controller'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.configurations-generator.version=${versions['components/configurations-generator']}
-global.configurations-generator.dir=${versions['components/configurations-generator'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.configurations-generator.dir=${versions['components/configurations-generator'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.environments.version=${versions['components/environments']}
-global.environments.dir=${versions['components/environments'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.environments.dir=${versions['components/environments'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.istio-webhook.version=${versions['components/istio-webhook']}
-global.istio-webhook.dir=${versions['components/istio-webhook'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.istio-webhook.dir=${versions['components/istio-webhook'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.helm-broker.version=${versions['components/helm-broker']}
-global.helm-broker.dir=${versions['components/helm-broker'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.helm-broker.dir=${versions['components/helm-broker'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.remote-environment-broker.version=${versions['components/remote-environment-broker']}
-global.remote-environment-broker.dir=${versions['components/remote-environment-broker'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.remote-environment-broker.dir=${versions['components/remote-environment-broker'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.metadata-service.version=${versions['components/metadata-service']}
-global.metadata-service.dir=${versions['components/metadata-service'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.metadata-service.dir=${versions['components/metadata-service'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.gateway.version=${versions['components/gateway']}
-global.gateway.dir=${versions['components/gateway'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.gateway.dir=${versions['components/gateway'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.installer.version=${versions['components/installer']}
-global.installer.dir=${versions['components/installer'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.installer.dir=${versions['components/installer'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.connector-service.version=${versions['components/connector-service']}
-global.connector-service.dir=${versions['components/connector-service'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.connector-service.dir=${versions['components/connector-service'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.ui-api-layer.version=${versions['components/ui-api-layer']}
-global.ui-api-layer.dir=${versions['components/ui-api-layer'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.ui-api-layer.dir=${versions['components/ui-api-layer'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.event-bus.version=${versions['components/event-bus']}
-global.event-bus.dir=${versions['components/event-bus'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.event-bus.dir=${versions['components/event-bus'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.event-service.version=${versions['components/event-service']}
-global.event-service.dir=${versions['components/event-service'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.event-service.dir=${versions['components/event-service'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.alpine-net.version=${versions['tools/alpine-net']}
-global.alpine-net.dir=${versions['tools/alpine-net'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.alpine-net.dir=${versions['tools/alpine-net'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.watch-pods.version=${versions['tools/watch-pods']}
-global.watch-pods.dir=${versions['tools/watch-pods'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.watch-pods.dir=${versions['tools/watch-pods'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.stability-checker.version=${versions['tools/stability-checker']}
-global.stability-checker.dir=${versions['tools/stability-checker'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.stability-checker.dir=${versions['tools/stability-checker'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.etcd-backup.version=${versions['tools/etcd-backup']}
-global.etcd-backup.dir=${versions['tools/etcd-backup'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.etcd-backup.dir=${versions['tools/etcd-backup'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.etcd-tls-setup.version=${versions['tools/etcd-tls-setup']}
-global.etcd-tls-setup.dir=${versions['tools/etcd-tls-setup'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.etcd-tls-setup.dir=${versions['tools/etcd-tls-setup'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.test-logging-monitoring.version=${versions['tests/test-logging-monitoring']}
-global.test-logging-monitoring.dir=${versions['tests/test-logging-monitoring'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.test-logging-monitoring.dir=${versions['tests/test-logging-monitoring'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.acceptance-tests.version=${versions['tests/acceptance']}
-global.acceptance-tests.dir=${versions['tests/acceptance'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.acceptance-tests.dir=${versions['tests/acceptance'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.ui-api-layer-acceptance-tests.version=${versions['tests/ui-api-layer-acceptance-tests']}
-global.ui-api-layer-acceptance-tests.dir=${versions['tests/ui-api-layer-acceptance-tests'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.ui-api-layer-acceptance-tests.dir=${versions['tests/ui-api-layer-acceptance-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.gateway-tests.version=${versions['tests/gateway-tests']}
-global.gateway-tests.dir=${versions['tests/gateway-tests'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.gateway-tests.dir=${versions['tests/gateway-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.test-environments.version=${versions['tests/test-environments']}
-global.test-environments.dir=${versions['tests/test-environments'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.test-environments.dir=${versions['tests/test-environments'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.kubeless-test-client.version=${versions['tests/kubeless-test-client']}
-global.kubeless-test-client.dir=${versions['tests/kubeless-test-client'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.kubeless-test-client.dir=${versions['tests/kubeless-test-client'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.api-controller-acceptance-tests.version=${versions['tests/api-controller-acceptance-tests']}
-global.api-controller-acceptance-tests.dir=${versions['tests/api-controller-acceptance-tests'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.api-controller-acceptance-tests.dir=${versions['tests/api-controller-acceptance-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.connector-service-tests.version=${versions['tests/connector-service-tests']}
-global.connector-service-tests.dir=${versions['tests/connector-service-tests'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.connector-service-tests.dir=${versions['tests/connector-service-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.metadata-service-tests.version=${versions['tests/metadata-service-tests']}
-global.metadata-service-tests.dir=${versions['tests/metadata-service-tests'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.metadata-service-tests.dir=${versions['tests/metadata-service-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.event-bus-tests.version=${versions['tests/event-bus']}
-global.event-bus-tests.dir=${versions['tests/event-bus'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.event-bus-tests.dir=${versions['tests/event-bus'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.test-logging.version=${versions['tests/logging']}
-global.test-logging.dir=${versions['tests/logging'] == env.BRANCH_NAME ? 'pr' : 'develop'}
+global.test-logging.dir=${versions['tests/logging'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 """
 
     return "$overrides"
