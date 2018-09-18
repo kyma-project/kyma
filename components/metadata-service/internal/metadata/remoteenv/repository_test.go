@@ -7,7 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv/mocks"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -446,14 +446,8 @@ func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
 		Entries:             []v1alpha1.Entry{reService2Entry},
 	}
 
-	reSource1 := v1alpha1.Source{
-		Environment: "production",
-		Type:        "commerce",
-		Namespace:   "local.kyma.commerce"}
-
 	reSpec1 := v1alpha1.RemoteEnvironmentSpec{
 		Description: "test_1",
-		Source:      reSource1,
 		Services: []v1alpha1.Service{
 			reService1,
 			reService2,
