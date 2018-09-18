@@ -5,19 +5,20 @@ import (
 	"fmt"
 	"strings"
 
-	re_type_v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	re_type_v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 )
 
 type reCRValidator struct{}
 
 const (
-	apiEntryType   = "API"
-	eventEntryType = "Event"
+	apiEntryType         = "API"
+	eventEntryType       = "Event"
+	connectedAppLabelKey = "connected-app"
 )
 
 // Validate validates RemoteEnvironment custom resource.
-func (*reCRValidator) Validate(dto *re_type_v1alpha1.RemoteEnvironment) error {
-	messages := []string{}
+func (v *reCRValidator) Validate(dto *re_type_v1alpha1.RemoteEnvironment) error {
+	var messages []string
 
 	for _, svc := range dto.Spec.Services {
 		if len(svc.Entries) == 0 {
@@ -50,6 +51,10 @@ func (*reCRValidator) Validate(dto *re_type_v1alpha1.RemoteEnvironment) error {
 		if EventEntryCnt > 1 {
 			messages = append(messages, fmt.Sprintf("Service with id %q is invalid. Only one element with type Event is allowed but found %d", svc.ID, EventEntryCnt))
 		}
+
+		if !v.containsConnectedAppLabel(svc.Labels) {
+			messages = append(messages, fmt.Sprintf("Service with id %q is invalid. Labels field does not contains %s entry", svc.ID, connectedAppLabelKey))
+		}
 	}
 
 	if len(messages) > 0 {
@@ -57,4 +62,13 @@ func (*reCRValidator) Validate(dto *re_type_v1alpha1.RemoteEnvironment) error {
 	}
 
 	return nil
+}
+
+func (*reCRValidator) containsConnectedAppLabel(labels map[string]string) bool {
+	for key := range labels {
+		if key == connectedAppLabelKey {
+			return true
+		}
+	}
+	return false
 }

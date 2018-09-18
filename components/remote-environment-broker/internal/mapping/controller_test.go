@@ -11,7 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mapping"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mapping/automock"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/platform/logger/spy"
@@ -388,7 +388,7 @@ func newEmInformerFromFakeClientset(fixEM *v1alpha1.EnvironmentMapping) cache.Sh
 		client = fake.NewSimpleClientset()
 	}
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	remoteEnvironmentSharedInformers := informerFactory.Remoteenvironment().V1alpha1()
+	remoteEnvironmentSharedInformers := informerFactory.Applicationconnector().V1alpha1()
 	emInformer := remoteEnvironmentSharedInformers.EnvironmentMappings().Informer()
 	return emInformer
 }

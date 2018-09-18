@@ -3,11 +3,6 @@ kind: RemoteEnvironment
 metadata:
   name: ec-prod
 spec:
-  source:
-    environment: "production"
-    type: "commerce"
-    namespace: "com.hakuna.matata"
-
   description: "EC description"
 
   services:
@@ -20,6 +15,8 @@ spec:
       tags:
       - occ
       - promotions
+      labels:
+        connected-app: "ec-prod"
 
       entries:
       - type: API
@@ -31,6 +28,8 @@ spec:
       displayName: "Orders"
       longDescription: "Orders API"
       providerDisplayName: "HakunaMatata"
+      labels:
+        connected-app: "ec-prod"
       entries:
       - type: API
         gatewayUrl: "http://orders-gateway.production.svc.cluster.local/"

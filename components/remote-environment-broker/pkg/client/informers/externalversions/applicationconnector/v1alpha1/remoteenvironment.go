@@ -5,10 +5,10 @@ package v1alpha1
 import (
 	time "time"
 
-	remoteenvironment_v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	applicationconnector_v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	versioned "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/remoteenvironment/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -44,16 +44,16 @@ func NewFilteredRemoteEnvironmentInformer(client versioned.Interface, resyncPeri
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.RemoteenvironmentV1alpha1().RemoteEnvironments().List(options)
+				return client.ApplicationconnectorV1alpha1().RemoteEnvironments().List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.RemoteenvironmentV1alpha1().RemoteEnvironments().Watch(options)
+				return client.ApplicationconnectorV1alpha1().RemoteEnvironments().Watch(options)
 			},
 		},
-		&remoteenvironment_v1alpha1.RemoteEnvironment{},
+		&applicationconnector_v1alpha1.RemoteEnvironment{},
 		resyncPeriod,
 		indexers,
 	)
@@ -64,7 +64,7 @@ func (f *remoteEnvironmentInformer) defaultInformer(client versioned.Interface, 
 }
 
 func (f *remoteEnvironmentInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&remoteenvironment_v1alpha1.RemoteEnvironment{}, f.defaultInformer)
+	return f.factory.InformerFor(&applicationconnector_v1alpha1.RemoteEnvironment{}, f.defaultInformer)
 }
 
 func (f *remoteEnvironmentInformer) Lister() v1alpha1.RemoteEnvironmentLister {

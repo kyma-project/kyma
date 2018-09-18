@@ -3,7 +3,7 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	scheme "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -37,7 +37,7 @@ type eventActivations struct {
 }
 
 // newEventActivations returns a EventActivations
-func newEventActivations(c *RemoteenvironmentV1alpha1Client, namespace string) *eventActivations {
+func newEventActivations(c *ApplicationconnectorV1alpha1Client, namespace string) *eventActivations {
 	return &eventActivations{
 		client: c.RESTClient(),
 		ns:     namespace,

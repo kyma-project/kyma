@@ -3,38 +3,38 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/scheme"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )
 
-type RemoteenvironmentV1alpha1Interface interface {
+type ApplicationconnectorV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	EnvironmentMappingsGetter
 	EventActivationsGetter
 	RemoteEnvironmentsGetter
 }
 
-// RemoteenvironmentV1alpha1Client is used to interact with features provided by the remoteenvironment.kyma.cx group.
-type RemoteenvironmentV1alpha1Client struct {
+// ApplicationconnectorV1alpha1Client is used to interact with features provided by the applicationconnector.kyma-project.io group.
+type ApplicationconnectorV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *RemoteenvironmentV1alpha1Client) EnvironmentMappings(namespace string) EnvironmentMappingInterface {
+func (c *ApplicationconnectorV1alpha1Client) EnvironmentMappings(namespace string) EnvironmentMappingInterface {
 	return newEnvironmentMappings(c, namespace)
 }
 
-func (c *RemoteenvironmentV1alpha1Client) EventActivations(namespace string) EventActivationInterface {
+func (c *ApplicationconnectorV1alpha1Client) EventActivations(namespace string) EventActivationInterface {
 	return newEventActivations(c, namespace)
 }
 
-func (c *RemoteenvironmentV1alpha1Client) RemoteEnvironments() RemoteEnvironmentInterface {
+func (c *ApplicationconnectorV1alpha1Client) RemoteEnvironments() RemoteEnvironmentInterface {
 	return newRemoteEnvironments(c)
 }
 
-// NewForConfig creates a new RemoteenvironmentV1alpha1Client for the given config.
-func NewForConfig(c *rest.Config) (*RemoteenvironmentV1alpha1Client, error) {
+// NewForConfig creates a new ApplicationconnectorV1alpha1Client for the given config.
+func NewForConfig(c *rest.Config) (*ApplicationconnectorV1alpha1Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
@@ -43,12 +43,12 @@ func NewForConfig(c *rest.Config) (*RemoteenvironmentV1alpha1Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &RemoteenvironmentV1alpha1Client{client}, nil
+	return &ApplicationconnectorV1alpha1Client{client}, nil
 }
 
-// NewForConfigOrDie creates a new RemoteenvironmentV1alpha1Client for the given config and
+// NewForConfigOrDie creates a new ApplicationconnectorV1alpha1Client for the given config and
 // panics if there is an error in the config.
-func NewForConfigOrDie(c *rest.Config) *RemoteenvironmentV1alpha1Client {
+func NewForConfigOrDie(c *rest.Config) *ApplicationconnectorV1alpha1Client {
 	client, err := NewForConfig(c)
 	if err != nil {
 		panic(err)
@@ -56,9 +56,9 @@ func NewForConfigOrDie(c *rest.Config) *RemoteenvironmentV1alpha1Client {
 	return client
 }
 
-// New creates a new RemoteenvironmentV1alpha1Client for the given RESTClient.
-func New(c rest.Interface) *RemoteenvironmentV1alpha1Client {
-	return &RemoteenvironmentV1alpha1Client{c}
+// New creates a new ApplicationconnectorV1alpha1Client for the given RESTClient.
+func New(c rest.Interface) *ApplicationconnectorV1alpha1Client {
+	return &ApplicationconnectorV1alpha1Client{c}
 }
 
 func setConfigDefaults(config *rest.Config) error {
@@ -76,7 +76,7 @@ func setConfigDefaults(config *rest.Config) error {
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *RemoteenvironmentV1alpha1Client) RESTClient() rest.Interface {
+func (c *ApplicationconnectorV1alpha1Client) RESTClient() rest.Interface {
 	if c == nil {
 		return nil
 	}

@@ -3,7 +3,7 @@
 package fake
 
 import (
-	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -14,13 +14,13 @@ import (
 
 // FakeEnvironmentMappings implements EnvironmentMappingInterface
 type FakeEnvironmentMappings struct {
-	Fake *FakeRemoteenvironmentV1alpha1
+	Fake *FakeApplicationconnectorV1alpha1
 	ns   string
 }
 
-var environmentmappingsResource = schema.GroupVersionResource{Group: "remoteenvironment.kyma.cx", Version: "v1alpha1", Resource: "environmentmappings"}
+var environmentmappingsResource = schema.GroupVersionResource{Group: "applicationconnector.kyma-project.io", Version: "v1alpha1", Resource: "environmentmappings"}
 
-var environmentmappingsKind = schema.GroupVersionKind{Group: "remoteenvironment.kyma.cx", Version: "v1alpha1", Kind: "EnvironmentMapping"}
+var environmentmappingsKind = schema.GroupVersionKind{Group: "applicationconnector.kyma-project.io", Version: "v1alpha1", Kind: "EnvironmentMapping"}
 
 // Get takes name of the environmentMapping, and returns the corresponding environmentMapping object, and an error if there is any.
 func (c *FakeEnvironmentMappings) Get(name string, options v1.GetOptions) (result *v1alpha1.EnvironmentMapping, err error) {

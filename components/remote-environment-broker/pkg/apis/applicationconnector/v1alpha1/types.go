@@ -91,17 +91,9 @@ func (pw *RemoteEnvironment) GetObjectKind() schema.ObjectKind {
 // RemoteEnvironmentSpec defines spec section of the RemoteEnvironment custom resource
 type RemoteEnvironmentSpec struct {
 	Description string    `json:"description"`
-	Source      Source    `json:"source"`
 	Services    []Service `json:"services"`
 	// AccessLabel is not required, 'omitempty' is needed because of regexp validation
 	AccessLabel string `json:"accessLabel,omitempty"`
-}
-
-// Source defines attributes, which identifies remote environments.
-type Source struct {
-	Environment string `json:"environment"`
-	Type        string `json:"type"`
-	Namespace   string `json:"namespace"`
 }
 
 // Entry defines, what is enabled by activating the service.
@@ -117,12 +109,15 @@ type Entry struct {
 
 // Service represents part of the remote environment, which is mapped 1 to 1 to service class in the service-catalog
 type Service struct {
-	ID                  string   `json:"id"`
-	DisplayName         string   `json:"displayName"`
-	LongDescription     string   `json:"longDescription"`
-	ProviderDisplayName string   `json:"providerDisplayName"`
-	Tags                []string `json:"tags,omitempty"`
-	Entries             []Entry  `json:"entries"`
+	ID                  string            `json:"id"`
+	Name                string            `json:"name"`
+	DisplayName         string            `json:"displayName"`
+	Description         string            `json:"description"`
+	Labels              map[string]string `json:"labels,omitempty"`
+	LongDescription     string            `json:"longDescription,omitempty"`
+	ProviderDisplayName string            `json:"providerDisplayName"`
+	Tags                []string          `json:"tags,omitempty"`
+	Entries             []Entry           `json:"entries"`
 }
 
 // +genclient
@@ -138,7 +133,7 @@ type EventActivation struct {
 
 type EventActivationSpec struct {
 	DisplayName string `json:"displayName"`
-	Source      Source `json:"source"`
+	SourceID    string `json:"sourceId"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

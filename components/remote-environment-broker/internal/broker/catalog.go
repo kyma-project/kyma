@@ -2,22 +2,16 @@ package broker
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
-	"regexp"
-	"strings"
-	"unicode"
-
-	"github.com/pkg/errors"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
+	"github.com/pkg/errors"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
 )
 
 //go:generate mockery -name=converter -output=automock -outpkg=automock -case=underscore
 type converter interface {
-	Convert(name internal.RemoteEnvironmentName, source internal.Source, svc internal.Service) (osb.Service, error)
+	Convert(name internal.RemoteEnvironmentName, svc internal.Service) (osb.Service, error)
 }
 
 //go:generate mockery -name=reEnabledChecker -output=automock -outpkg=automock -case=underscore
@@ -49,7 +43,7 @@ func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*
 		}
 
 		for _, reSvc := range re.Services {
-			s, err := svc.conv.Convert(re.Name, re.Source, reSvc)
+			s, err := svc.conv.Convert(re.Name, reSvc)
 			if err != nil {
 				return nil, errors.Wrap(err, "while converting bundle to service")
 			}
@@ -66,20 +60,18 @@ const (
 	defaultPlanDescription = "Default plan"
 )
 
-var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
-
 type reToServiceConverter struct{}
 
-func (c *reToServiceConverter) Convert(name internal.RemoteEnvironmentName, source internal.Source, svc internal.Service) (osb.Service, error) {
-	metadata, err := c.osbMetadata(name, source, svc)
+func (c *reToServiceConverter) Convert(name internal.RemoteEnvironmentName, svc internal.Service) (osb.Service, error) {
+	metadata, err := c.osbMetadata(name, svc)
 	if err != nil {
 		return osb.Service{}, errors.Wrap(err, "while creating the metadata object")
 	}
 
 	osbService := osb.Service{
-		Name:        c.createOsbServiceName(svc.DisplayName, svc.ID),
+		Name:        svc.Name,
 		ID:          string(svc.ID),
-		Description: svc.LongDescription,
+		Description: svc.Description,
 		Bindable:    c.isSvcBindable(svc),
 		Metadata:    metadata,
 		Plans:       c.osbPlans(svc.ID),
@@ -89,17 +81,13 @@ func (c *reToServiceConverter) Convert(name internal.RemoteEnvironmentName, sour
 	return osbService, nil
 }
 
-func (c *reToServiceConverter) osbMetadata(name internal.RemoteEnvironmentName, source internal.Source, svc internal.Service) (map[string]interface{}, error) {
+func (c *reToServiceConverter) osbMetadata(name internal.RemoteEnvironmentName, svc internal.Service) (map[string]interface{}, error) {
 	metadata := map[string]interface{}{
 		"displayName":                svc.DisplayName,
-		"providerDisplayName":        c.osbProviderDisplayName(name, svc),
+		"providerDisplayName":        svc.ProviderDisplayName,
 		"longDescription":            svc.LongDescription,
 		"remoteEnvironmentServiceId": string(svc.ID),
-		"source": map[string]interface{}{
-			"environment": source.Environment,
-			"type":        source.Type,
-			"namespace":   source.Namespace,
-		},
+		"labels":                     svc.Labels,
 	}
 
 	// TODO(entry-simplification): this is an accepted simplification until
@@ -114,12 +102,6 @@ func (c *reToServiceConverter) osbMetadata(name internal.RemoteEnvironmentName, 
 	}
 
 	return metadata, nil
-}
-
-// osbProviderDisplayName returns the ProviderDisplayName in a such way that we are able to easily distinguish the remote environment from the same provider
-// e.g. instead of having always `3rd Party Provider`, we will have `3rd Party Provider - stage`, `3rd Party Provider - prod-us`
-func (*reToServiceConverter) osbProviderDisplayName(name internal.RemoteEnvironmentName, svc internal.Service) string {
-	return fmt.Sprintf("%s - %s", svc.ProviderDisplayName, name)
 }
 
 // isSvcBindable checks if service is bindable. If APIEntry is not set then service provides only events,
@@ -151,37 +133,4 @@ func (*reToServiceConverter) buildBindingLabels(accLabel string) (map[string]str
 	bindingLabels[accLabel] = "true"
 
 	return bindingLabels, nil
-}
-
-// createOsbServiceName creates the OSB Service Name for given RemoteEnvironment Service.
-// The OSB Service Name is used in the Service Catalog as the clusterServiceClassExternalName, so it need to be normalized.
-//
-// Normalization rules:
-// - MUST only contain lowercase characters, numbers and hyphens (no spaces).
-// - MUST be unique across all service objects returned in this response. MUST be a non-empty string.
-func (*reToServiceConverter) createOsbServiceName(name string, id internal.RemoteServiceID) string {
-	// generate 5 characters suffix from the id
-	sha := sha1.New()
-	sha.Write([]byte(id))
-	suffix := hex.EncodeToString(sha.Sum(nil))[:5]
-
-	// remove all characters, which is not alpha numeric
-	name = nonAlphaNumeric.ReplaceAllString(name, "-")
-
-	// to lower
-	name = strings.Map(unicode.ToLower, name)
-
-	// trim dashes if exists
-	name = strings.TrimSuffix(name, "-")
-	if len(name) > 57 {
-		name = name[:57]
-	}
-
-	// add suffix
-	name = fmt.Sprintf("%s-%s", name, suffix)
-
-	// remove dash prefix if exists
-	//  - can happen, if the name was empty before adding suffix empty or had dash prefix
-	name = strings.TrimPrefix(name, "-")
-	return name
 }

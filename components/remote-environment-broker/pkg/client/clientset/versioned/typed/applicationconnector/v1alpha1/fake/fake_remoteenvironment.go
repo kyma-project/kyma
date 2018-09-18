@@ -3,7 +3,7 @@
 package fake
 
 import (
-	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -14,12 +14,12 @@ import (
 
 // FakeRemoteEnvironments implements RemoteEnvironmentInterface
 type FakeRemoteEnvironments struct {
-	Fake *FakeRemoteenvironmentV1alpha1
+	Fake *FakeApplicationconnectorV1alpha1
 }
 
-var remoteenvironmentsResource = schema.GroupVersionResource{Group: "remoteenvironment.kyma.cx", Version: "v1alpha1", Resource: "remoteenvironments"}
+var remoteenvironmentsResource = schema.GroupVersionResource{Group: "applicationconnector.kyma-project.io", Version: "v1alpha1", Resource: "remoteenvironments"}
 
-var remoteenvironmentsKind = schema.GroupVersionKind{Group: "remoteenvironment.kyma.cx", Version: "v1alpha1", Kind: "RemoteEnvironment"}
+var remoteenvironmentsKind = schema.GroupVersionKind{Group: "applicationconnector.kyma-project.io", Version: "v1alpha1", Kind: "RemoteEnvironment"}
 
 // Get takes name of the remoteEnvironment, and returns the corresponding remoteEnvironment object, and an error if there is any.
 func (c *FakeRemoteEnvironments) Get(name string, options v1.GetOptions) (result *v1alpha1.RemoteEnvironment, err error) {

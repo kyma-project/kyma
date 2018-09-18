@@ -3,7 +3,7 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	scheme "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -37,7 +37,7 @@ type remoteEnvironments struct {
 }
 
 // newRemoteEnvironments returns a RemoteEnvironments
-func newRemoteEnvironments(c *RemoteenvironmentV1alpha1Client) *remoteEnvironments {
+func newRemoteEnvironments(c *ApplicationconnectorV1alpha1Client) *remoteEnvironments {
 	return &remoteEnvironments{
 		client: c.RESTClient(),
 	}
