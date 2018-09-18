@@ -3,7 +3,7 @@ title: Architecture
 type: Architecture
 ---
 
-This document outlines the logging architecture of Kyma, highlighting information sources that Logspout extracts logs from containers and feeds them to OK Log.
+This document outlines the logging architecture of Kyma. It highlights information sources from which Logspout extracts logs to feed to OK Log.
 
 Logspout is deployed as a stateless Daemonset and shares `/var/run/docker.sock` from the node. It then feeds the logs to OK Log through the ingest API.
 
