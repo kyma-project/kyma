@@ -1,7 +1,7 @@
 test:
   image:
     name: test-logging
-    tag: 0.3.361
+    tag: 0.3.387
 
 logspout:
   resources:
