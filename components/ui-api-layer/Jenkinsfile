@@ -44,7 +44,7 @@ podTemplate(label: label) {
                             execute("./before-commit.sh ci")
                         }
 
-                        if (params.GIT_BRANCH == 'master') {
+                        if (params.FULL_BUILD) {
                             stage("IP scan $application (Sourceclear)") {
                                 withCredentials([string(credentialsId: 'SRCCLR_API_TOKEN', variable: 'SRCCLR_API_TOKEN')]) {
                                     execute("make scan","SRCCLR_API_TOKEN=$SRCCLR_API_TOKEN")
@@ -61,7 +61,7 @@ podTemplate(label: label) {
                         stage("push image $application") {
                             sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
-                            if (params.FULL_BUILD) {
+                            if (params.GIT_BRANCH == 'master') {
                                 sh "docker push ${dockerPushRoot}${application}:latest"
                             }
                         }
