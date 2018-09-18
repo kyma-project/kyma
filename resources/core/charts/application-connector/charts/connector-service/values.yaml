@@ -26,5 +26,5 @@ service:
 tests:
   image:
     name: connector-service-tests
-    tag: 0.3.205
+    tag: 0.3.383
     pullPolicy: IfNotPresent
