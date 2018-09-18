@@ -219,7 +219,7 @@ func TestCertificateUtility_LoadCSR(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		assert.Equal(t, apperrors.CodeBadRequest, err.Code())
 		assert.Nil(t, crt)
 	})
 
@@ -232,7 +232,7 @@ func TestCertificateUtility_LoadCSR(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		assert.Equal(t, apperrors.CodeBadRequest, err.Code())
 		assert.Nil(t, crt)
 	})
 
@@ -245,7 +245,7 @@ func TestCertificateUtility_LoadCSR(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		assert.Equal(t, apperrors.CodeBadRequest, err.Code())
 		assert.Nil(t, crt)
 	})
 
@@ -278,7 +278,7 @@ RCBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0K`
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		assert.Equal(t, apperrors.CodeBadRequest, err.Code())
 		assert.Nil(t, crt)
 	})
 }

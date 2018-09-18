@@ -52,7 +52,7 @@ func (cu *certificateUtility) decodeBytesFromBase64(bytes []byte) (decodedData [
 func (cu *certificateUtility) decodeStringFromBase64(bytes string) (decodedData []byte, appError apperrors.AppError) {
 	data, err := base64.StdEncoding.DecodeString(bytes)
 	if err != nil {
-		return nil, apperrors.Internal("There was an error while parsing the base64 content. An incorrect value was provided.")
+		return nil, apperrors.BadRequest("There was an error while parsing the base64 content. An incorrect value was provided.")
 	}
 
 	return data, nil
@@ -100,17 +100,17 @@ func (cu *certificateUtility) LoadCSR(encodedData string) (csr *x509.Certificate
 
 	pemBlock, _ := pem.Decode(decodedData)
 	if pemBlock == nil {
-		return nil, apperrors.Internal("Error while decoding pem block.")
+		return nil, apperrors.BadRequest("Error while decoding pem block.")
 	}
 
 	clientCSR, err := x509.ParseCertificateRequest(pemBlock.Bytes)
 	if err != nil {
-		return nil, apperrors.Internal("Error while parsing CSR: %s", err)
+		return nil, apperrors.BadRequest("Error while parsing CSR: %s", err)
 	}
 
 	err = clientCSR.CheckSignature()
 	if err != nil {
-		return nil, apperrors.Internal("CSR signature invalid: %s", err)
+		return nil, apperrors.BadRequest("CSR signature invalid: %s", err)
 	}
 
 	return clientCSR, nil
