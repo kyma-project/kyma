@@ -61,12 +61,12 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.description** |    **NO**   | Describes the connected Remote Environment.  |
 | **spec.accessLabel** |    **NO**   | Labels the environment when the [EnvironmentMapping](041-environment-mapping-custom-resource.md) is created. |
 | **spec.services** |    **NO**   | Contains all services that the Remote Environment provides. |
-| **spec.services.id** |    **YES**   | Identifies the service provided by the Remote Environment. |
+| **spec.services.id** |    **YES**   | Identifies the service that the Remote Environment provides. |
 | **spec.services.displayName** |    **YES**   | Specifies a human-readable name of the Remote Environment service. |
 | **spec.services.longDescription** |    **NO**   | Provides a human-readable description of the Remote Environment service. |
 | **spec.services.providerDisplayName** |    **YES**   | Specifies a human-readable name of the Remote Environment service provider. |
 | **spec.services.tags** |    **NO**   | Specifies the categories of the Remote Environment service. |
-| **spec.services.entries** |    **YES**   | Contains information about APIs and Events provided by the Remote Environment service. |
+| **spec.services.entries** |    **YES**   | Contains information about APIs and Events that the Remote Environment service provides. |
 | **spec.services.entries.type** |    **YES**   | Specifies whether the entry is of API or Event type. |
 | **spec.services.entries.gatewayUrl** |    **NO**   | Specifies the URL of the Application Connector. This field is required for the API entry type. |
 | **spec.services.entries.accessLabel** |    **NO**   | Specifies the label used in Istio rules in the Application Connector. This field is required for the API entry type. |

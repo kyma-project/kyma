@@ -11,7 +11,7 @@ kubectl get crd usagekinds.servicecatalog.kyma.cx -o yaml
 
 ## Sample custom resource
 
-This is a sample resource that allows binding a given resource with the ServiceBinding. This example has a **resource** section specified as `function`. You can adjust this section to point to any other kind of resource.
+This is a sample resource that allows you to bind a given resource with the ServiceBinding. This example has a **resource** section specified as `function`. You can adjust this section to point to any other kind of resource.
 
 ```
 apiVersion: servicecatalog.kyma.cx/v1alpha1
@@ -40,4 +40,4 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.resource.group** |    **YES**   | Specifies the group of the resource. |
 | **spec.resource.kind** |    **YES**   | Specifies the kind of the resource. |
 | **spec.resource.version** |    **YES**   | Specifies the version of the resource. |
-| **spec.labelsPath** |    **YES**   | Specifies a path to the key containing labels which are later injected into Pods. |
+| **spec.labelsPath** |    **YES**   | Specifies a path to the key that contains labels which are later injected into Pods. |
