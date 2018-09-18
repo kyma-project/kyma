@@ -5,7 +5,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	"github.com/stretchr/testify/require"
 )
@@ -15,11 +15,11 @@ func (ts *TestSuite) createRemoteEnvironmentResources() {
 	require.NoError(ts.t, err)
 
 	displayName := fmt.Sprintf("acc-test-re-name-%s", ts.TestID)
-	rei := client.RemoteenvironmentV1alpha1().RemoteEnvironments()
+	rei := client.ApplicationconnectorV1alpha1().RemoteEnvironments()
 	_, err = rei.Create(fixRemoteEnvironment(ts.remoteEnvironmentName, ts.accessLabel, ts.osbServiceId, ts.gatewayUrl, displayName))
 	require.NoError(ts.t, err)
 
-	emi := client.RemoteenvironmentV1alpha1().EnvironmentMappings(ts.namespace)
+	emi := client.ApplicationconnectorV1alpha1().EnvironmentMappings(ts.namespace)
 	_, err = emi.Create(fixEnvironmentMapping(ts.remoteEnvironmentName))
 	require.NoError(ts.t, err)
 }
@@ -28,7 +28,7 @@ func (ts *TestSuite) deleteRemoteEnvironment() {
 	client, err := versioned.NewForConfig(ts.config)
 	require.NoError(ts.t, err)
 
-	rei := client.RemoteenvironmentV1alpha1().RemoteEnvironments()
+	rei := client.ApplicationconnectorV1alpha1().RemoteEnvironments()
 	err = rei.Delete(ts.remoteEnvironmentName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 }
@@ -55,11 +55,6 @@ func fixRemoteEnvironment(name, accessLabel, serviceId, gatewayUrl, displayName 
 			Name: name,
 		},
 		Spec: v1alpha1.RemoteEnvironmentSpec{
-			Source: v1alpha1.Source{
-				Namespace:   "com.ns",
-				Type:        "commerce",
-				Environment: "production",
-			},
 			AccessLabel: "re-access-label",
 			Description: "Remote Environment used by remote-environment acceptance test",
 			Services: []v1alpha1.Service{

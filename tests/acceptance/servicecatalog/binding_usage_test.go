@@ -13,9 +13,9 @@ import (
 	bucClient "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
 	bucInterface "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 
-	reTypes "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	reTypes "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	reClient "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
-	reInterface "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
+	reInterface "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 
 	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog/wait"
 	"github.com/stretchr/testify/require"
@@ -145,7 +145,7 @@ func (ts *TestSuite) enableRemoteEnvironmentInTestNamespace() {
 	reCli, err := reClient.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
 
-	emCli := reCli.RemoteenvironmentV1alpha1().EnvironmentMappings(ts.namespace)
+	emCli := reCli.ApplicationconnectorV1alpha1().EnvironmentMappings(ts.namespace)
 	_, err = emCli.Create(ts.fixEnvironmentMapping())
 	require.NoError(ts.t, err)
 }
@@ -154,7 +154,7 @@ func (ts *TestSuite) remoteEnvironmentClient() reInterface.RemoteEnvironmentInte
 	client, err := reClient.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
 
-	return client.RemoteenvironmentV1alpha1().RemoteEnvironments()
+	return client.ApplicationconnectorV1alpha1().RemoteEnvironments()
 }
 
 func (ts *TestSuite) fixEnvironmentMapping() *reTypes.EnvironmentMapping {
@@ -179,11 +179,6 @@ func (ts *TestSuite) fixRemoteEnvironment() *reTypes.RemoteEnvironment {
 			Name: ts.remoteEnvironmentName,
 		},
 		Spec: reTypes.RemoteEnvironmentSpec{
-			Source: reTypes.Source{
-				Namespace:   "local.kyma.commerce",
-				Type:        "commerce",
-				Environment: "production",
-			},
 			AccessLabel: "re-access-label",
 			Description: "Remote Environment used by acceptance test",
 			Services: []reTypes.Service{
