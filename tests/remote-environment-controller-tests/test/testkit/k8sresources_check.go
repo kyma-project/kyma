@@ -107,7 +107,6 @@ func (checker *k8sChecker) getDeploymentWithRetries(name string, options v1.GetO
 	var err error
 
 	for i := 0; i < checker.retryCount; i++ {
-		fmt.Println("trying to get deploy")
 		deployment, err = checker.client.GetDeployment(name, v1.GetOptions{})
 		if !shouldRetry(err, shouldFail) {
 			break

@@ -11,7 +11,7 @@ import (
 const (
 	initialWaitTime = 10
 	retryWaitTime   = 5
-	retryCount      = 5
+	retryCount      = 6
 )
 
 func TestRemoteEnvironmentCreation(t *testing.T) {
@@ -41,7 +41,7 @@ func TestRemoteEnvironmentCreation(t *testing.T) {
 
 			//then
 			require.NoError(t, err)
-			require.True(t, exists, "Release %s should exist but does not", testReName)
+			require.True(t, exists, "Release %s should exist but does not", testRe.Name)
 
 			k8sResourcesChecker.CheckK8sResources(t, false, requireNoError, requireNotEmpty)
 		})
@@ -84,7 +84,7 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 
 		//then
 		require.NoError(t, err)
-		require.False(t, exists)
+		require.False(t, exists, "Release %s should not exist does", testRe.Name)
 
 		k8sResourcesChecker.CheckK8sResources(t, true, requireError, requireEmpty)
 	})
