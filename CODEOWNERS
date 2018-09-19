@@ -20,7 +20,7 @@
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel
 
 # The `api-controller` subchart
-/resources/core/charts/api-controller/ @piotrmsc @kubadz
+/resources/core/charts/api-controller/ @piotrmsc @kubadz @sjanota
 
 # The `apiserver-proxy` subchart
 /resources/core/charts/apiserver-proxy/ @piotrmsc @kubadz @sjanota
@@ -119,6 +119,9 @@
 /resources/remote-environments/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # Components
+#API server proxy Component
+/components/api-server/ @piotrmsc @kubadz @sjanota
+
 # Api controller Component
 /components/api-controller/ @piotrmsc @kubadz
 
