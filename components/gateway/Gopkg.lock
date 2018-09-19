@@ -95,17 +95,16 @@
   version = "1.1.3"
 
 [[projects]]
-  branch = "master"
-  digest = "1:66b9b59b0165901cf6b34445aa4f29379928b12dd9375868650a9a6742451b55"
+  digest = "1:6de3e15e3db624ed0bb0308cccd1c2ba4f08d86177760b6b362a55b8fc4f347b"
   name = "github.com/kyma-project/kyma"
   packages = [
-    "components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1",
+    "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
     "components/remote-environment-broker/pkg/client/clientset/versioned",
     "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1",
+    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "c4e06fbb6c180bffec61adf3c296d826c1465cd9"
+  revision = "7400291c88b0dde7d2b674f02a40efc5eb1934e5"
 
 [[projects]]
   digest = "1:2f42fa12d6911c7b7659738758631bec870b7e9b4c6be5444f963cdcfccc191f"
@@ -452,7 +451,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/gorilla/mux",
-    "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1",
+    "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned",
     "github.com/patrickmn/go-cache",
     "github.com/sirupsen/logrus",
