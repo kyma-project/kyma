@@ -53,7 +53,7 @@ spec:
   ports:
   - port: {{ .Values.eventService.service.externalapi.port }}
     protocol: TCP
-    name: http-api-port
+    name: ext-api-port
   selector:
     app: {{ .Release.Name }}-event-service
     release: {{ .Release.Name }}-event-service

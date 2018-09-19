@@ -102,4 +102,4 @@ spec:
           periodSeconds: 10
         ports:
         - containerPort: {{ .Values.eventService.deployment.args.externalAPIPort }}
-          name: http-api-port
+          name: ext-api-port
