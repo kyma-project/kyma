@@ -3,7 +3,6 @@ package remoteenv
 
 import (
 	"fmt"
-
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -38,10 +37,18 @@ type ServiceAPI struct {
 type Service struct {
 	// Mapped to id in Remote Environment CRD
 	ID string
+	// Mapped to identifier in Remote Environment CRD
+	Identifier string
 	// Mapped to displayName in Remote Environment CRD
 	DisplayName string
+	// Mapped to name in Remote Environment CRD
+	Name string
+	// Mapped to shortDescription in Remote Environment CRD
+	ShortDescription string
 	// Mapped to longDescription in Remote Environment CRD
 	LongDescription string
+	// Mapped to labels in Remote Environment CRD
+	Labels map[string]string
 	// Mapped to providerDisplayName in Remote Environment CRD
 	ProviderDisplayName string
 	// Mapped to tags in Remote Environment CRD
