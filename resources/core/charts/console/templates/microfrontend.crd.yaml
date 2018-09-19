@@ -29,7 +29,7 @@ spec:
               pattern: "[a-zA-Z0-9]+"
             placement:
               type: string
-              pattern: "[a-z]+"
+              pattern: "^(environment|cluster)$"
             category:
               type: string
             viewBaseUrl:
@@ -41,8 +41,6 @@ spec:
                 required:
                 - "label"
                 properties:
-                  category:
-                    type: string
                   label:
                     type: string
                   navigationPath:
