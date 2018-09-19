@@ -20,7 +20,7 @@ const (
 )
 
 type K8sChecker interface {
-	CheckK8sResources(t *testing.T, shouldFail bool, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{}))
+	CheckK8sResources(t *testing.T, resourcesShouldExist bool, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{}))
 }
 
 func NewK8sResourceChecker(reName string, client K8sResourcesClient, retryCount int, retryWaitTime time.Duration) K8sChecker {
@@ -39,24 +39,33 @@ type k8sChecker struct {
 	retryWaitTime time.Duration
 }
 
-func (checker *k8sChecker) CheckK8sResources(t *testing.T, shouldFail bool, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
-	checker.checkDeployments(t, shouldFail, errCheckFunc, resourceCheckFunc)
+func (checker *k8sChecker) CheckK8sResources(t *testing.T, resourcesShouldExist bool, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
+	checker.checkDeployments(t, resourcesShouldExist, errCheckFunc, resourceCheckFunc)
 	checker.checkIngress(t, errCheckFunc, resourceCheckFunc)
 	checker.checkRole(t, errCheckFunc, resourceCheckFunc)
 	checker.checkRoleBinding(t, errCheckFunc, resourceCheckFunc)
 	checker.checkServices(t, errCheckFunc, resourceCheckFunc)
 }
 
-func (checker *k8sChecker) checkDeployments(t *testing.T, shouldFail bool, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
+func (checker *k8sChecker) checkDeployments(t *testing.T, resourcesShouldExist bool, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
 	gatewayName := fmt.Sprintf(gatewayNameFormat, checker.remoteEnvName)
 	eventServiceName := fmt.Sprintf(eventServiceNameFormat, checker.remoteEnvName)
 
-	gatewayDeploy, err := checker.getDeploymentWithRetries(gatewayName, v1.GetOptions{}, shouldFail)
-	errCheckFunc(t, err)
+	var gatewayDeploy, eventsDeploy *v1apps.Deployment
+	var gatewayErr, eventsErr error
+
+	if resourcesShouldExist {
+		gatewayDeploy, gatewayErr = checker.client.GetDeployment(gatewayName, v1.GetOptions{})
+		eventsDeploy, eventsErr = checker.client.GetDeployment(eventServiceName, v1.GetOptions{})
+	} else {
+		gatewayDeploy, gatewayErr = checker.getDeletedDeployment(gatewayName, v1.GetOptions{})
+		eventsDeploy, eventsErr = checker.getDeletedDeployment(eventServiceName, v1.GetOptions{})
+	}
+
+	errCheckFunc(t, gatewayErr)
 	resourceCheckFunc(t, gatewayDeploy)
 
-	eventsDeploy, err := checker.client.GetDeployment(eventServiceName, v1.GetOptions{})
-	errCheckFunc(t, err)
+	errCheckFunc(t, eventsErr)
 	resourceCheckFunc(t, eventsDeploy)
 }
 
@@ -102,27 +111,17 @@ func (checker *k8sChecker) checkServices(t *testing.T, errCheckFunc func(*testin
 	resourceCheckFunc(t, eventsSvc)
 }
 
-func (checker *k8sChecker) getDeploymentWithRetries(name string, options v1.GetOptions, shouldFail bool) (*v1apps.Deployment, error) {
+func (checker *k8sChecker) getDeletedDeployment(name string, options v1.GetOptions) (*v1apps.Deployment, error) {
 	var deployment *v1apps.Deployment
 	var err error
 
 	for i := 0; i < checker.retryCount; i++ {
 		deployment, err = checker.client.GetDeployment(name, v1.GetOptions{})
-		if !shouldRetry(err, shouldFail) {
+		if err != nil {
 			break
 		}
 		time.Sleep(checker.retryWaitTime)
 	}
 
 	return deployment, err
-}
-
-func shouldRetry(err error, shouldFail bool) bool {
-	if err != nil && shouldFail {
-		return false
-	} else if err == nil && !shouldFail {
-		return false
-	}
-
-	return true
 }

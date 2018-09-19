@@ -22,7 +22,9 @@ func TestRemoteEnvironmentCreation(t *testing.T) {
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	helmClient := testkit.NewHelmClient(config.TillerHost, retryCount, retryWaitTime*time.Second)
+	retryWaitTimeSeconds := retryWaitTime*time.Second
+
+	helmClient := testkit.NewHelmClient(config.TillerHost, retryCount, retryWaitTimeSeconds)
 	testReName := "test-create-re"
 	k8sResourcesChecker := testkit.NewK8sResourceChecker(testReName, k8sResourcesClient, retryCount, retryWaitTime*time.Second)
 
@@ -62,7 +64,9 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	helmClient := testkit.NewHelmClient(config.TillerHost, retryCount, retryWaitTime*time.Second)
+	retryWaitTimeSeconds := retryWaitTime*time.Second
+
+	helmClient := testkit.NewHelmClient(config.TillerHost, retryCount, retryWaitTimeSeconds)
 
 	testReName := "test-delete-re"
 	k8sResourcesChecker := testkit.NewK8sResourceChecker(testReName, k8sResourcesClient, retryCount, retryWaitTime*time.Second)
