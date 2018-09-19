@@ -210,7 +210,6 @@ func initService(serviceDef *ServiceDefinition, id, remoteEnvironment string) *r
 		ID:                  id,
 		Identifier:          serviceDef.Identifier,
 		DisplayName:         serviceDef.Name,
-		ShortDescription:    serviceDef.ShortDescription,
 		LongDescription:     serviceDef.Description,
 		ProviderDisplayName: serviceDef.Provider,
 		Tags:                make([]string, 0),
@@ -218,6 +217,12 @@ func initService(serviceDef *ServiceDefinition, id, remoteEnvironment string) *r
 
 	service.Name = createServiceName(service.DisplayName, id)
 	service.Events = serviceDef.Events != nil
+
+	if serviceDef.ShortDescription == "" {
+		service.ShortDescription = serviceDef.Description
+	} else {
+		service.ShortDescription = serviceDef.ShortDescription
+	}
 
 	if serviceDef.Labels != nil {
 		service.Labels = overrideLabels(remoteEnvironment, *serviceDef.Labels)

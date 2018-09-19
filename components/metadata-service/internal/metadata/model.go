@@ -14,7 +14,7 @@ type ServiceDefinition struct {
 	Provider string
 	// Description of a service
 	Description string
-	// Long description of a service
+	// Short description of a service
 	ShortDescription string
 	// Labels of a service
 	Labels *map[string]string

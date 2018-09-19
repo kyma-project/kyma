@@ -41,6 +41,8 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         serviceAPI,
+			Labels:      &map[string]string{"connected-app": "re"},
+			Identifier:  "Some cool external identifier",
 			Events: &Events{
 				Spec: []byte("events spec"),
 			},
@@ -57,7 +59,9 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Identifier:          "Some cool external identifier",
 			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
@@ -105,6 +109,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
@@ -148,6 +153,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
@@ -191,6 +197,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
@@ -256,6 +263,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
@@ -283,6 +291,95 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator.AssertExpectations(t)
 		serviceAPIService.AssertExpectations(t)
+		serviceRepository.AssertExpectations(t)
+		minioService.AssertExpectations(t)
+	})
+
+	t.Run("should override connected-app label", func(t *testing.T) {
+		// given
+		serviceDefinition := ServiceDefinition{
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Labels:        &map[string]string{"connected-app": "wrong-re"},
+			Api:           nil,
+			Events:        nil,
+			Documentation: nil,
+		}
+
+		remoteEnvService := remoteenv.Service{
+			ID:                  "uuid-1",
+			DisplayName:         "Some service",
+			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
+			ProviderDisplayName: "Service Provider",
+			Name:                "some-service-cadf8",
+			Labels:              map[string]string{"connected-app": "re"},
+			Tags:                make([]string, 0),
+			API:                 nil,
+			Events:              false,
+		}
+		uuidGenerator := new(uuidmocks.Generator)
+		uuidGenerator.On("NewUUID").Return("uuid-1")
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
+		minioService := new(miniomocks.Service)
+		minioService.On("Put", "uuid-1", empty, empty, empty).Return(nil)
+
+		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, minioService)
+
+		// when
+		serviceID, err := service.Create("re", &serviceDefinition)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, "uuid-1", serviceID)
+
+		uuidGenerator.AssertExpectations(t)
+		serviceRepository.AssertExpectations(t)
+		minioService.AssertExpectations(t)
+	})
+
+	t.Run("should create connected-app label if not provided", func(t *testing.T) {
+		// given
+		serviceDefinition := ServiceDefinition{
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Api:           nil,
+			Events:        nil,
+			Documentation: nil,
+		}
+
+		remoteEnvService := remoteenv.Service{
+			ID:                  "uuid-1",
+			DisplayName:         "Some service",
+			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
+			ProviderDisplayName: "Service Provider",
+			Name:                "some-service-cadf8",
+			Labels:              map[string]string{"connected-app": "re"},
+			Tags:                make([]string, 0),
+			API:                 nil,
+			Events:              false,
+		}
+		uuidGenerator := new(uuidmocks.Generator)
+		uuidGenerator.On("NewUUID").Return("uuid-1")
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
+		minioService := new(miniomocks.Service)
+		minioService.On("Put", "uuid-1", empty, empty, empty).Return(nil)
+
+		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, minioService)
+
+		// when
+		serviceID, err := service.Create("re", &serviceDefinition)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, "uuid-1", serviceID)
+
+		uuidGenerator.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
 		minioService.AssertExpectations(t)
 	})
@@ -421,6 +518,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
@@ -705,6 +803,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
@@ -758,6 +857,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
@@ -822,6 +922,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
@@ -885,6 +986,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
@@ -948,6 +1050,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
@@ -1020,6 +1123,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},

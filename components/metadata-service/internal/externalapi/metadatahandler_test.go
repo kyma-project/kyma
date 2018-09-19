@@ -36,9 +36,12 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 
 		// given
 		serviceDetails := ServiceDetails{
-			Name:        "service name",
-			Provider:    "service provider",
-			Description: "service description",
+			Name:             "service name",
+			Provider:         "service provider",
+			Description:      "service description",
+			ShortDescription: "service short description",
+			Identifier:       "service identifier",
+			Labels:           &map[string]string{"showcase": "true"},
 			Api: &API{
 				TargetUrl: "http://service.com",
 				Credentials: &Credentials{
@@ -62,9 +65,12 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		}
 
 		serviceDefinition := &metadata.ServiceDefinition{
-			Name:        "service name",
-			Provider:    "service provider",
-			Description: "service description",
+			Name:             "service name",
+			Provider:         "service provider",
+			Description:      "service description",
+			ShortDescription: "service short description",
+			Identifier:       "service identifier",
+			Labels:           &map[string]string{"showcase": "true"},
 			Api: &serviceapi.API{
 				TargetUrl: "http://service.com",
 				Credentials: &serviceapi.Credentials{
