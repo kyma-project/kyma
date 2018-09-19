@@ -2,26 +2,20 @@
 
 def label = "kyma-${UUID.randomUUID().toString()}"
 def application = "helm-broker"
-
-def isMaster = params.GIT_BRANCH == 'master'
-
-def dockerPushRoot = isMaster
-    ? "${env.DOCKER_REGISTRY}"
-    : "${env.DOCKER_REGISTRY}snapshot/"
-
-def dockerImageTag = isMaster
-    ? params.APP_VERSION
-    : params.GIT_BRANCH
+def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
+def dockerImageTag = params.APP_VERSION
 
 echo """
 ********************************
 Job started with the following parameters:
 DOCKER_REGISTRY=${env.DOCKER_REGISTRY}
+PUSH_DIR=${params.PUSH_DIR}
 DOCKER_CREDENTIALS=${env.DOCKER_CREDENTIALS}
 GIT_REVISION=${params.GIT_REVISION}
 GIT_BRANCH=${params.GIT_BRANCH}
 APP_VERSION=${params.APP_VERSION}
 APP_FOLDER=${env.APP_FOLDER}
+FULL_BUILD=${params.FULL_BUILD}
 ********************************
 """
 
@@ -47,7 +41,7 @@ podTemplate(label: label) {
                             execute "./before-commit.sh ci"
                         }
 
-                        if (isMaster) {
+                        if (params.FULL_BUILD) {
                             stage("IP scan $application (Sourceclear)"){
                                 withCredentials([string(credentialsId: 'SRCCLR_API_TOKEN', variable: 'SRCCLR_API_TOKEN')]) {
                                     execute("make scan","SRCCLR_API_TOKEN=$SRCCLR_API_TOKEN")
@@ -78,7 +72,7 @@ podTemplate(label: label) {
                             sh "docker tag ${dockerPushRoot}helm-broker-tools:latest ${dockerPushRoot}helm-broker-tools:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}helm-broker-tools:${dockerImageTag}"
 
-                            if (isMaster) {
+                            if (params.GIT_BRANCH == 'master') {
                                 sh "docker push ${dockerPushRoot}helm-broker:latest"
                                 sh "docker push ${dockerPushRoot}helm-broker-reposerver:latest"
                                 sh "docker push ${dockerPushRoot}helm-broker-tools:latest"
