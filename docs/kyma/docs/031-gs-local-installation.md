@@ -45,6 +45,7 @@ Follow these steps to "always trust" the Kyma certificate on Mac:
 
 ## Install Kyma on Minikube
 
+You can install Kyma with all core subcomponents or only with the selected ones. This section describes how to install all core subcomponents. To learn how to install only the specific ones, see the **Install subcomponents** document for details.
 
 > **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube.
 
@@ -108,27 +109,6 @@ See the example of the website address:
 ```
 http://192.168.64.44:30000
 ```
-
-## Subcomponents
-
-It is up to the user to decide which subcomponents will be installed as parts of the `core` release. By default, most of the core subcomponents are enabled. To specify whether to install a core subcomponent, use the `manage-component.sh` script before triggering the Kyma installation. The script consumes two parameters:
-
-- name of the core subcomponent
-- a Boolean value that determines whether the subcomponent should be installed (true) or not (false)
-
-Example:
-
-To enable the `Azure Broker` subcomponent, run the following command:
-```
-scripts/manage-component.sh azure-broker true
-```
-
-Alternatively, to disable the subcomponent, run
-```
-scripts/manage-component.sh azure-broker false
-```
-
->**NOTE:** Some of the subcomponents may require additional configuration to work properly.
 
 ## Troubleshooting
 
