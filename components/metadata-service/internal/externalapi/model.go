@@ -19,7 +19,7 @@ type ServiceDetails struct {
 	Provider         string             `json:"provider" valid:"required~Provider field cannot be empty."`
 	Name             string             `json:"name" valid:"required~Name field cannot be empty."`
 	Description      string             `json:"description" valid:"required~Description field cannot be empty."`
-	ShortDescription string             `json:"longDescription,omitempty"`
+	ShortDescription string             `json:"shortDescription,omitempty"`
 	Identifier       string             `json:"identifier,omitempty"`
 	Labels           *map[string]string `json:"labels,omitempty"`
 	Api              *API               `json:"api,omitempty"`
