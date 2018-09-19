@@ -120,7 +120,7 @@
 
 # Components
 #API server proxy Component
-/components/api-server/ @piotrmsc @kubadz @sjanota
+/components/apiserver-proxy/ @piotrmsc @kubadz @sjanota
 
 # Api controller Component
 /components/api-controller/ @piotrmsc @kubadz
