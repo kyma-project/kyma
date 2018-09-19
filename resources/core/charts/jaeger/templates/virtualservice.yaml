@@ -7,7 +7,7 @@ spec:
   hosts:
   - jaeger.{{ .Values.global.domainName }}
   gateways:
-  - core-{{ .Chart.Name }}-gateway
+  - {{ .Values.global.istio.gateway.name }}
   http:
   - match:
     route:
@@ -15,18 +15,3 @@ spec:
         host: core-{{ .Chart.Name }}
         port:
           number: {{ .Values.service.uiPort }}
----
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: core-{{ .Chart.Name }}-gateway
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - jaeger.{{ .Values.global.domainName }}
