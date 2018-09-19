@@ -23,7 +23,7 @@
 /resources/core/charts/api-controller/ @piotrmsc @kubadz
 
 # The `apiserver-proxy` subchart
-/resources/core/charts/apiserver-proxy/ @piotrmsc @kubadz
+/resources/core/charts/apiserver-proxy/ @piotrmsc @kubadz @sjanota
 
 # The `azure-broker` subchart
 /resources/core/charts/azure-broker/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
