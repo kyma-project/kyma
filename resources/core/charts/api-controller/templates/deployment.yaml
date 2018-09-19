@@ -15,7 +15,7 @@ spec:
     spec:
       serviceAccount: api-controller-account
       containers:
-      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
+      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.api-controller.dir }}api-controller:{{ .Values.global.api-controller.version }}
         name: api-controller
         env:
         - name: DOMAIN_NAME

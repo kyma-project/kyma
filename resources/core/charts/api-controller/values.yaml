@@ -1,9 +1,2 @@
-image:
-  name: "api-controller"
-  tag: "0.3.362"
-  
 tests:
   enabled: true
-  image:
-    name: "api-controller-acceptance-tests"
-    tag: "0.3.159"
