@@ -9,10 +9,12 @@ import (
 )
 
 type Service struct {
-	ID          string `json:"id"`
-	Provider    string `json:"provider"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          string             `json:"id"`
+	Provider    string             `json:"provider"`
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	Identifier  string             `json:"identifier,omitempty"`
+	Labels      *map[string]string `json:"labels,omitempty"`
 }
 
 type ServiceDetails struct {
@@ -73,6 +75,8 @@ func serviceDefinitionToService(serviceDefinition metadata.ServiceDefinition) Se
 		Name:        serviceDefinition.Name,
 		Provider:    serviceDefinition.Provider,
 		Description: serviceDefinition.Description,
+		Identifier:  serviceDefinition.Identifier,
+		Labels:      serviceDefinition.Labels,
 	}
 }
 
