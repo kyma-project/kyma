@@ -29,7 +29,7 @@ func TestBinding_OnAdd(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeAdd, result.Type)
-		assert.Equal(t, *gqlBinding, result.Binding)
+		assert.Equal(t, *gqlBinding, result.ServiceBinding)
 	})
 
 	t.Run("Filtered out", func(t *testing.T) {
@@ -89,7 +89,7 @@ func TestBinding_OnDelete(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeDelete, result.Type)
-		assert.Equal(t, *gqlBinding, result.Binding)
+		assert.Equal(t, *gqlBinding, result.ServiceBinding)
 
 	})
 
@@ -150,7 +150,7 @@ func TestBinding_OnUpdate(t *testing.T) {
 
 		// then
 		assert.Equal(t, gqlschema.SubscriptionEventTypeUpdate, result.Type)
-		assert.Equal(t, *gqlBinding, result.Binding)
+		assert.Equal(t, *gqlBinding, result.ServiceBinding)
 
 	})
 

@@ -29,14 +29,31 @@ models:
         resolver: true
       serviceBindingUsages:
         resolver: true
+      servicePlan:
+        resolver: true
       serviceClass:
         resolver: true
-      servicePlan:
+      clusterServicePlan:
+        resolver: true
+      clusterServiceClass:
         resolver: true
   ServiceInstanceEvent:
     model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ServiceInstanceEvent"
   ServiceClass:
     model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ServiceClass"
+    fields:
+      plans:
+        resolver: true
+      activated:
+        resolver: true
+      apiSpec:
+        resolver: true
+      asyncApiSpec:
+        resolver: true
+      content:
+        resolver: true
+  ClusterServiceClass:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ClusterServiceClass"
     fields:
       plans:
         resolver: true

@@ -58,8 +58,8 @@ func (l *Binding) notify(eventType gqlschema.SubscriptionEventType, binding *api
 	}
 
 	event := gqlschema.ServiceBindingEvent{
-		Type:    eventType,
-		Binding: *gqlBinding,
+		Type:           eventType,
+		ServiceBinding: *gqlBinding,
 	}
 
 	l.channel <- event
