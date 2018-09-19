@@ -74,6 +74,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceAPIService.On("New", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
+		serviceRepository.On("GetAll", "re").Return(nil, nil)
 		minioService := new(miniomocks.Service)
 		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(nil)
 
@@ -550,6 +551,47 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceRepository.AssertExpectations(t)
 		minioService.AssertExpectations(t)
 	})
+
+	t.Run("should return an error when identifier conflict occurs", func(t *testing.T) {
+		// given
+		serviceDefinition := ServiceDefinition{
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Identifier:    "Same identifier",
+			Api:           nil,
+			Events:        nil,
+			Documentation: nil,
+		}
+
+		remoteEnvService := remoteenv.Service{
+			ID:                  "uuid-1",
+			DisplayName:         "Some service",
+			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
+			ProviderDisplayName: "Service Provider",
+			Identifier:          "Same identifier",
+			Name:                "some-service-cadf8",
+			Labels:              map[string]string{"connected-app": "re"},
+			Tags:                make([]string, 0),
+			API:                 nil,
+			Events:              false,
+		}
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("GetAll", "re").Return([]remoteenv.Service{remoteEnvService}, nil)
+
+		service := NewServiceDefinitionService(nil, nil, serviceRepository, nil)
+
+		// when
+		serviceID, err := service.Create("re", &serviceDefinition)
+
+		// then
+		assert.Empty(t, serviceID)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "service with identifier Same identifier is already registered.")
+
+		serviceRepository.AssertExpectations(t)
+	})
 }
 
 func TestServiceDefinitionService_GetAll(t *testing.T) {
@@ -563,6 +605,7 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 				DisplayName:         "Service1",
 				LongDescription:     "Service1 description",
 				ProviderDisplayName: "Service1 Provider",
+				Labels:              map[string]string{"connected-app": "re"},
 				Tags:                nil,
 				API: &remoteenv.ServiceAPI{
 					TargetUrl:             "http://service1.com",
@@ -574,6 +617,7 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 				ID:                  "uuid-2",
 				DisplayName:         "Service2",
 				LongDescription:     "Service2 description",
+				Labels:              map[string]string{"connected-app": "re"},
 				ProviderDisplayName: "Service2 Provider",
 				Tags:                nil,
 				API:                 nil,
@@ -592,12 +636,14 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 		assert.Contains(t, result, ServiceDefinition{
 			ID:          "uuid-1",
 			Name:        "Service1",
+			Labels:      &map[string]string{"connected-app": "re"},
 			Description: "Service1 description",
 			Provider:    "Service1 Provider",
 		})
 		assert.Contains(t, result, ServiceDefinition{
 			ID:          "uuid-2",
 			Name:        "Service2",
+			Labels:      &map[string]string{"connected-app": "re"},
 			Description: "Service2 description",
 			Provider:    "Service2 Provider",
 		})

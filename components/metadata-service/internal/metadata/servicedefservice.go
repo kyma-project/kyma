@@ -62,9 +62,21 @@ func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService
 
 // Create adds new ServiceDefinition. Based on ServiceDefinition a new service is added to RemoteEnvironment.
 func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef *ServiceDefinition) (string, apperrors.AppError) {
+	if serviceDef.Identifier != "" {
+		identifierConflict, err := sds.isIdentifierConflictPresent(serviceDef.Identifier, remoteEnvironment)
+		if err != nil {
+			return "", err
+		}
+
+		if identifierConflict {
+			return "", apperrors.Conflict("service with identifier %s is already registered.", serviceDef.Identifier)
+		}
+	}
+
 	id := sds.uuidGenerator.NewUUID()
 
 	service := initService(serviceDef, id, remoteEnvironment)
+	service.Identifier = serviceDef.Identifier
 
 	if apiDefined(serviceDef) {
 		serviceAPI, err := sds.serviceAPIService.New(remoteEnvironment, id, serviceDef.Api)
@@ -208,7 +220,6 @@ func (sds *serviceDefinitionService) GetAPI(remoteEnvironment, serviceId string)
 func initService(serviceDef *ServiceDefinition, id, remoteEnvironment string) *remoteenv.Service {
 	service := remoteenv.Service{
 		ID:                  id,
-		Identifier:          serviceDef.Identifier,
 		DisplayName:         serviceDef.Name,
 		LongDescription:     serviceDef.Description,
 		ProviderDisplayName: serviceDef.Provider,
@@ -238,9 +249,26 @@ func convertServiceBaseInfo(service remoteenv.Service) ServiceDefinition {
 	return ServiceDefinition{
 		ID:          service.ID,
 		Name:        service.DisplayName,
+		Identifier:  service.Identifier,
+		Labels:      &service.Labels,
 		Description: service.LongDescription,
 		Provider:    service.ProviderDisplayName,
 	}
+}
+
+func (sds *serviceDefinitionService) isIdentifierConflictPresent(identifier, remoteEnvironment string) (bool, apperrors.AppError) {
+	services, err := sds.GetAll(remoteEnvironment)
+	if err != nil {
+		return true, err
+	}
+
+	for _, service := range services {
+		if service.Identifier == identifier {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func (sds *serviceDefinitionService) readService(remoteEnvironment string, service remoteenv.Service) (ServiceDefinition, apperrors.AppError) {
