@@ -95,6 +95,17 @@ function set_external_load_balancer() {
   fi
 }
 
+function check_requirements() {
+  while read crd; do
+    echo "    Require CRD crd"
+    kubectl get crd ${crd}
+    if [ $? -ne 0 ]; then
+        echo "Cannot find required CRD $crd"
+    fi
+  done <${DIR}/required-crds
+}
+
+check_requirements
 run_all_patches
 remove_not_used
 apply_all
