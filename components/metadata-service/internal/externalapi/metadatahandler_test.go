@@ -706,6 +706,51 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
+
+	t.Run("should return 404 when service not found", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "service name",
+			Provider:    "service provider",
+			Description: "service description",
+		}
+
+		serviceDefinition := &metadata.ServiceDefinition{
+			Name:        "service name",
+			Provider:    "service provider",
+			Description: "service description",
+		}
+
+		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+			return nil
+		})
+
+		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
+		serviceDefinitionService.On("Update", "re", "654321", serviceDefinition).Return(apperrors.NotFound(""))
+
+		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
+
+		serviceDetailsData, err := json.Marshal(serviceDetails)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodPut, "/re/v1/metadata/services/1234", bytes.NewReader(serviceDetailsData))
+		require.NoError(t, err)
+
+		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "654321"})
+		rr := httptest.NewRecorder()
+
+		// when
+		metadataHandler.UpdateService(rr, req)
+
+		// then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var serviceDetailsResponse ServiceDetails
+		json.Unmarshal(responseBody, &serviceDetailsResponse)
+
+		assert.Equal(t, http.StatusNotFound, rr.Code)
+	})
 }
 
 func TestMetadataHandler_DeleteService(t *testing.T) {

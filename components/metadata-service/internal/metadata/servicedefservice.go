@@ -3,13 +3,14 @@ package metadata
 
 import (
 	"encoding/json"
+	"net/url"
+
 	"github.com/go-openapi/spec"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/minio"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid"
-	"net/url"
 )
 
 const targetSwaggerVersion = "2.0"
@@ -117,7 +118,7 @@ func (sds *serviceDefinitionService) GetAll(remoteEnvironment string) ([]Service
 func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, serviceDef *ServiceDefinition) apperrors.AppError {
 	_, err := sds.GetByID(remoteEnvironment, id)
 	if err != nil {
-		if err.Code() != apperrors.CodeNotFound {
+		if err.Code() == apperrors.CodeNotFound {
 			return apperrors.NotFound("failed to get service before update, %s", err)
 		}
 		return apperrors.Internal("failed to read service, %s", err)

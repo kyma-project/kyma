@@ -5,6 +5,7 @@ import (
 
 	"bytes"
 	"encoding/json"
+
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	miniomocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/minio/mocks"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
@@ -725,6 +726,63 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
 		minioService.AssertExpectations(t)
+	})
+
+	t.Run("should return not found when update a not existing service", func(t *testing.T) {
+		// given
+		serviceAPI := &serviceapi.API{
+			TargetUrl: "http://target.com",
+			Credentials: &serviceapi.Credentials{
+				Oauth: serviceapi.Oauth{
+					URL:          "http://oauth.com/token",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
+				},
+			},
+			Spec: []byte("{\"api\":\"spec\"}"),
+		}
+
+		serviceDefinition := ServiceDefinition{
+			Name:        "Some service",
+			Description: "Some cool service",
+			Provider:    "Service Provider",
+			Api:         serviceAPI,
+			Events: &Events{
+				Spec: []byte("events spec"),
+			},
+			Documentation: []byte("documentation"),
+		}
+
+		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
+			TargetUrl:             "http://target.com",
+			OauthUrl:              "http://oauth.com/token",
+			AccessLabel:           "access-label",
+			GatewayURL:            "gateway-url",
+			CredentialsSecretName: "secret-name",
+		}
+
+		serviceAPIService := new(serviceapimocks.Service)
+		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
+		serviceAPIService.On("Read", "re", remoteEnvServiceAPI).Return(serviceAPI, nil)
+
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("Get", "re", "uuid-1").Return(remoteenv.Service{}, apperrors.NotFound("missing"))
+
+		uuidGenerator := new(uuidmocks.Generator)
+		uuidGenerator.On("NewUUID").Return("uuid-1")
+
+		minioService := new(miniomocks.Service)
+		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(nil)
+		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
+
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+
+		// when
+		err := service.Update("re", "uuid-1", &serviceDefinition)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
 
 	t.Run("should update a service when no API was given", func(t *testing.T) {
