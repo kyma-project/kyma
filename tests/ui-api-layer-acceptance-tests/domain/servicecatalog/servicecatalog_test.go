@@ -13,6 +13,7 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/brokerinstaller"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
 	"github.com/pkg/errors"
@@ -24,6 +25,10 @@ import (
 const brokerReadyTimeout = time.Second * 300
 
 func TestMain(m *testing.M) {
+	if dex.IsSCIEnabled() {
+		log.Println("Skipping configuration, because SCI is enabled")
+		return
+	}
 	k8sClient, _, err := k8s.NewClientWithConfig()
 	exitOnError(err, "while initializing K8S Client")
 
