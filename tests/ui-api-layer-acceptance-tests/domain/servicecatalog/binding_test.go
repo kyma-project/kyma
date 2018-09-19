@@ -9,6 +9,7 @@ import (
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
@@ -76,6 +77,10 @@ type bindingDeleteMutationResponse struct {
 }
 
 func TestBindingMutationsAndQueries(t *testing.T) {
+	if dex.IsSCIEnabled() {
+		t.Skip("SCI Enabled")
+	}
+
 	c, err := graphql.New()
 	require.NoError(t, err)
 
