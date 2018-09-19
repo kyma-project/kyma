@@ -812,7 +812,7 @@
     ]
   },
   "timezone": "browser",
-  "title": "Istio Mesh Dashboard new",
-  "uid": "11",
-  "version": 21
+  "title": "Istio Mesh Dashboard",
+  "uid": "1",
+  "version": 2
 }
