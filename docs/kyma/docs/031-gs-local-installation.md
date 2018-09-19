@@ -109,6 +109,27 @@ See the example of the website address:
 http://192.168.64.44:30000
 ```
 
+## Subcomponents
+
+It is up to the user to decide which subcomponents will be installed as parts of the `core` release. By default, most of the core subcomponents are enabled. To specify whether to install a core subcomponent, use the `manage-component.sh` script before triggering the Kyma installation. The script consumes two parameters:
+
+- name of the core subcomponent
+- a Boolean value that determines whether the subcomponent should be installed (true) or not (false)
+
+Example:
+
+To enable the `Azure Broker` subcomponent, run the following command:
+```
+scripts/manage-component.sh azure-broker true
+```
+
+Alternatively, to disable the subcomponent, run
+```
+scripts/manage-component.sh azure-broker false
+```
+
+>**NOTE:** Some of the subcomponents may require additional configuration to work properly.
+
 ## Troubleshooting
 
 If the installer does not respond as expected, check the installation status using the `is-installed.sh` script with the `--verbose` flag added. Run:

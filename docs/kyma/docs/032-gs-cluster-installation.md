@@ -141,6 +141,25 @@ If the cluster provider doesn't allow to pre-allocate IP addresses, the cluster 
 - Find `core-nginx-ingress-controller` in the `kyma-system` Namespace. This entry specifies the IP address for the Remote Environments Ingress. Create a DNS entry `gateway.kyma.example.com` that points to this address.
 
 
+## Subcomponents
+
+It is up to the user to decide which subcomponents will be installed as parts of the `core` release. This is based on Helm conditions described in `requirements.yaml` file [(Read more)](https://github.com/helm/helm/blob/master/docs/charts.md#tags-and-condition-fields-in-requirementsyaml). By default, most of the core subcomponents are enabled. To specify whether to install a core subcomponent, provide override values **before** triggering the installation.
+
+Example:
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kyma-sub-components
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+data:
+  azure-broker.enabled: "true"
+```
+
+>**NOTE:** Some of the subcomponents may require additional configuration to work properly.
+
 ## Troubleshooting
 
 To troubleshoot the installation, start by reviewing logs of the `Installer` component:
