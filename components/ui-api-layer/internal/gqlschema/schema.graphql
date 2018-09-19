@@ -322,7 +322,6 @@ type Environment {
 type RemoteEnvironment {
     name: String!
     description: String!
-    source: RemoteEnvironmentSource!
     services: [RemoteEnvironmentService!]!
     enabledInEnvironments: [String!]!
     status: RemoteEnvironmentStatus!
@@ -335,12 +334,6 @@ type ConnectorService {
 type EnvironmentMapping {
     environment: String!
     remoteEnvironment: String!
-}
-
-type RemoteEnvironmentSource {
-    environment: String!
-    type: String!
-    namespace: String!
 }
 
 type RemoteEnvironmentService {
@@ -364,12 +357,6 @@ enum RemoteEnvironmentStatus {
     GATEWAY_NOT_CONFIGURED
 }
 
-type EventActivationSource {
-    environment: String!
-    type: String!
-    namespace: String!
-}
-
 type EventActivationEvent {
     eventType: String!
     version: String!
@@ -379,7 +366,7 @@ type EventActivationEvent {
 type EventActivation {
     name: String!
     displayName: String!
-    source: EventActivationSource!
+    sourceId: String!
     events: [EventActivationEvent!]!
 }
 

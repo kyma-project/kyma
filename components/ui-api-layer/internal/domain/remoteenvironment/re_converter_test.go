@@ -3,7 +3,7 @@ package remoteenvironment
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,11 +17,6 @@ func TestRemoteEnvironmentConverter_ToGQL(t *testing.T) {
 				Name: "re",
 			},
 			Spec: v1alpha1.RemoteEnvironmentSpec{
-				Source: v1alpha1.Source{
-					Environment: "production",
-					Type:        "commerce",
-					Namespace:   "local.kyma.commerce",
-				},
 				Description: "EC description",
 				Services: []v1alpha1.Service{
 					{
@@ -53,10 +48,6 @@ func TestRemoteEnvironmentConverter_ToGQL(t *testing.T) {
 		// then
 		assert.Equal(t, dto.Description, fix.Spec.Description)
 		assert.Equal(t, dto.Name, fix.Name)
-
-		assert.Equal(t, dto.Source.Type, fix.Spec.Source.Type)
-		assert.Equal(t, dto.Source.Environment, fix.Spec.Source.Environment)
-		assert.Equal(t, dto.Source.Namespace, fix.Spec.Source.Namespace)
 
 		require.Len(t, dto.Services, 1)
 		assert.Equal(t, dto.Services[0].ID, fix.Spec.Services[0].ID)

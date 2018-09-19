@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/client-go/rest"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/gateway"
@@ -47,13 +47,13 @@ func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Durati
 	}
 
 	informerFactory := externalversions.NewSharedInformerFactory(client, informerResyncPeriod)
-	remoteEnvironmentGroup := informerFactory.Remoteenvironment().V1alpha1()
+	remoteEnvironmentGroup := informerFactory.Applicationconnector().V1alpha1()
 
 	envMappingInformer := remoteEnvironmentGroup.EnvironmentMappings().Informer()
 	envMappingLister := remoteEnvironmentGroup.EnvironmentMappings().Lister()
 	remoteEnvInformer := remoteEnvironmentGroup.RemoteEnvironments().Informer()
 
-	service, err := newRemoteEnvironmentService(client.RemoteenvironmentV1alpha1(), reCfg, envMappingInformer, envMappingLister, remoteEnvInformer)
+	service, err := newRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), reCfg, envMappingInformer, envMappingLister, remoteEnvInformer)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating remote environment service")
 	}
