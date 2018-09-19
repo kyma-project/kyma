@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+//TODO: Take identifier into account, we should re-generate the client
 func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) {
 	var api *ServiceAPI
 	var events bool
@@ -32,9 +33,11 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 	}
 
 	return Service{
-		ID:                  service.ID,
-		DisplayName:         service.DisplayName,
-		LongDescription:     service.LongDescription,
+		ID:              service.ID,
+		DisplayName:     service.DisplayName,
+		LongDescription: service.LongDescription,
+		Labels:          service.Labels,
+		//Identifier: 		 service.Identifier,
 		ProviderDisplayName: service.ProviderDisplayName,
 		Tags:                service.Tags,
 		API:                 api,
@@ -62,8 +65,10 @@ func convertToK8sType(service Service) v1alpha1.Service {
 	}
 
 	return v1alpha1.Service{
-		ID:                  service.ID,
-		DisplayName:         service.DisplayName,
+		ID:          service.ID,
+		DisplayName: service.DisplayName,
+		Labels:      service.Labels,
+		//Identifier: 		 service.Identifier,
 		LongDescription:     service.LongDescription,
 		ProviderDisplayName: service.ProviderDisplayName,
 		Tags:                service.Tags,

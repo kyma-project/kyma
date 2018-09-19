@@ -28,6 +28,7 @@ func TestApiMetadata(t *testing.T) {
 			Name:        "test service",
 			Provider:    "service provider",
 			Description: "service description",
+			Identifier:  "service identifier",
 			Api: &testkit.API{
 				TargetUrl: "http://service.com",
 				Credentials: &testkit.Credentials{
@@ -80,6 +81,8 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "test service", postedService.Name)
 			require.Equal(t, "service provider", postedService.Provider)
 			require.Equal(t, "service description", postedService.Description)
+			require.Equal(t, "service identifier", postedService.Identifier)
+			require.Equal(t, map[string]string{"connected-app": "dummy-re"}, postedService.Labels)
 
 			// clean up
 			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
