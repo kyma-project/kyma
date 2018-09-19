@@ -1,7 +1,6 @@
 package installation
 
 import (
-	"errors"
 	"log"
 	"time"
 
@@ -178,12 +177,6 @@ func (c *Controller) syncHandler(key string) error {
 	overrideProvider, overridesErr := overrides.New(c.kubeClientset)
 	if overridesErr != nil {
 		return overridesErr
-	}
-
-	domainName, exists := overrides.FindOverrideStringValue(overrideProvider.Common(), "global.domainName")
-	if !exists || domainName == "" {
-		runtime.HandleError(errors.New("'global.domainName' override not found"))
-		return nil
 	}
 
 	if installation.ShouldInstall() {
