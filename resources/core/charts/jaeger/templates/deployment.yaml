@@ -62,6 +62,7 @@ spec:
         - --client-id=jaeger
         - --client-secret=oiEWUWOIEwedfgg
         - --resources=uri=/*|methods=GET,POST,PUT,DELETE
+        - --redirection-url=https://jaeger.{{ .Values.global.domainName }}
         - --verbose=true
         - --listen=0.0.0.0:{{ .Values.kcproxy.inPort }}
         - --upstream-url=http://localhost:{{ .Values.jaeger.uiPort }}
@@ -80,7 +81,7 @@ spec:
         - --upstream-keepalives=true
         - --upstream-keepalive-timeout=60s
         - --enable-logout-redirect=true
-        - --oauth-uri=/kyma-oauth
+        - --oauth-uri=/oauth
         - --cookie-domain=https://jaeger.{{ .Values.global.domainName }}
         - --cookie-access-name=KYMA_TOKEN
         ports:
