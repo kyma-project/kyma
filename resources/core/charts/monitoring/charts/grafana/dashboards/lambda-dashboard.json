@@ -112,7 +112,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PROMETHEUS}",
+            "datasource": "Prometheus",
             "fill": 1,
             "gridPos": {
                 "h": 9,
@@ -234,7 +234,7 @@
                 "rgba(237, 129, 40, 0.89)",
                 "#d44a3a"
             ],
-            "datasource": "${DS_PROMETHEUS}",
+            "datasource": "Prometheus",
             "format": "percent",
             "gauge": {
                 "maxValue": 100,
@@ -316,7 +316,7 @@
                 "rgba(237, 129, 40, 0.89)",
                 "rgba(245, 54, 54, 0.9)"
             ],
-            "datasource": "${DS_PROMETHEUS}",
+            "datasource": "Prometheus",
             "editable": true,
             "format": "s",
             "gauge": {
@@ -399,7 +399,7 @@
                 "rgba(237, 129, 40, 0.89)",
                 "rgba(50, 172, 45, 0.97)"
             ],
-            "datasource": "${DS_PROMETHEUS}",
+            "datasource": "Prometheus",
             "format": "percentunit",
             "gauge": {
                 "maxValue": 100,
@@ -484,7 +484,7 @@
                 "rgba(237, 129, 40, 0.89)",
                 "rgba(50, 172, 45, 0.97)"
             ],
-            "datasource": "${DS_PROMETHEUS}",
+            "datasource": "Prometheus",
             "format": "s",
             "gauge": {
                 "maxValue": 100,
@@ -566,7 +566,7 @@
                 "rgba(237, 129, 40, 0.89)",
                 "#d44a3a"
             ],
-            "datasource": "${DS_PROMETHEUS}",
+            "datasource": "Prometheus",
             "format": "none",
             "gauge": {
                 "maxValue": 100,
@@ -687,7 +687,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PROMETHEUS}",
+            "datasource": "Prometheus",
             "fill": 0,
             "gridPos": {
                 "h": 13,
@@ -775,7 +775,7 @@
             "bars": false,
             "dashLength": 10,
             "dashes": false,
-            "datasource": "${DS_PROMETHEUS}",
+            "datasource": "Prometheus",
             "fill": 1,
             "gridPos": {
                 "h": 13,
@@ -895,7 +895,7 @@
             {
                 "allValue": null,
                 "current": {},
-                "datasource": "${DS_PROMETHEUS}",
+                "datasource": "Prometheus",
                 "hide": 2,
                 "includeAll": true,
                 "label": "Source",
@@ -932,7 +932,7 @@
             {
                 "allValue": null,
                 "current": {},
-                "datasource": "${DS_PROMETHEUS}",
+                "datasource": "Prometheus",
                 "hide": 2,
                 "includeAll": true,
                 "label": "Destination",
@@ -952,7 +952,7 @@
             {
                 "allValue": null,
                 "current": {},
-                "datasource": "${DS_PROMETHEUS}",
+                "datasource": "Prometheus",
                 "hide": 0,
                 "includeAll": false,
                 "label": "Environment",
@@ -972,7 +972,7 @@
             {
                 "allValue": null,
                 "current": {},
-                "datasource": "${DS_PROMETHEUS}",
+                "datasource": "Prometheus",
                 "hide": 0,
                 "includeAll": false,
                 "label": "Lambda Function",
@@ -992,7 +992,7 @@
             {
                 "allValue": null,
                 "current": {},
-                "datasource": "${DS_PROMETHEUS}",
+                "datasource": "Prometheus",
                 "hide": 2,
                 "includeAll": false,
                 "label": "HTTP Destination",
@@ -1058,7 +1058,7 @@
         ]
     },
     "timezone": "browser",
-    "title": "Lambda Dashboard-new",
+    "title": "Lambda Dashboard",
     "uid": "opc3b8Tyik",
     "version": 11
 }
