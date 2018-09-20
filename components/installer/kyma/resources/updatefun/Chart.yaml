@@ -1,0 +1,8 @@
+name: updatefun
+version: 0.0.1
+description: updatefun for Kyma
+keywords:
+  - update
+  - fun
+  - kyma
+appVersion: v2.9.0

@@ -1,0 +1,6 @@
+name: configurations-generator
+version: 0.1.0
+description: Generator of configurations used in Kyma.
+keywords:
+  - configurations-generator
+appVersion: 0.2.0

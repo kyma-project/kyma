@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name:  bundles-repository-provisioner
+  labels:
+    app: bundles-repository-provisioner
+spec:
+  containers:
+    - name: bundles-repository-provisioner
+      image: eu.gcr.io/kyma-project/helm-broker-tools:0.2.37
+      imagePullPolicy: "IfNotPresent"
+      volumeMounts:
+      - mountPath: /data
+        name: data
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: helm-broker-bundles-storage

@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tiller
+  namespace: kube-system
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: tiller-cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: tiller
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: helm
+    name: tiller
+  name: tiller-deploy
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: helm
+      name: tiller
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: helm
+        name: tiller
+    spec:
+      serviceAccountName: tiller
+
+      initContainers:
+      - name: init-tiller
+        image: eu.gcr.io/kyma-project/alpine-net:0.2.74
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c', 'until nc -zv kube-dns.kube-system.svc.cluster.local 53; do echo waiting for k8s readiness; sleep 2; done;']
+
+      containers:
+      - name: tiller
+        image: gcr.io/kubernetes-helm/tiller:v2.10.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: TILLER_NAMESPACE
+          value: kube-system
+
+        ports:
+        - containerPort: 44134
+          name: tiller
+        livenessProbe:
+          httpGet:
+            path: /liveness
+            port: 44135
+          initialDelaySeconds: 1
+          timeoutSeconds: 1
+
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 44135
+          initialDelaySeconds: 1
+          timeoutSeconds: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: helm
+    name: tiller
+  name: tiller-deploy
+  namespace: kube-system
+  annotations:
+    auth.istio.io/44134: NONE
+
+spec:
+  selector:
+    app: helm
+    name: tiller
+  ports:
+  - name: tiller
+    port: 44134
+    targetPort: tiller
+  type: ClusterIP

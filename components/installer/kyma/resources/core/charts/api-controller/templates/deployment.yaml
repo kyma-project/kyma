@@ -1,0 +1,28 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: api-controller
+  namespace:  {{ .Release.Namespace }}
+  labels:
+    app: api-controller    
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: api-controller
+    spec:
+      serviceAccount: api-controller-account
+      containers:
+      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.api_controller.dir }}api-controller:{{ .Values.global.api_controller.version }}
+        name: api-controller
+        env:
+        - name: DOMAIN_NAME
+          value: {{ .Values.global.domainName }}
+        - name: DEFAULT_ISSUER
+          value: https://dex.{{ .Values.global.domainName }}
+        - name: DEFAULT_JWKS_URI
+          value: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+        - name: GATEWAY_FQDN
+          value: {{ .Values.global.istio.gateway.name }}.{{ .Release.Namespace }}.svc.cluster.local

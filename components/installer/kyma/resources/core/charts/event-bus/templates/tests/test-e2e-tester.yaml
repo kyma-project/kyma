@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name:  {{ .Values.e2eTests.nameTester }}
+  labels:
+    helm-chart-test: "true"  
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: test-core-event-bus-subs
+  labels:
+    helm-chart-test: "true"  
+rules:
+- apiGroups: ["eventing.kyma.cx"]
+  resources: ["subscriptions"]
+  verbs: ["create","get", "watch", "list", "delete"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: test-core-event-bus-subs
+  labels:
+    helm-chart-test: "true"  
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.e2eTests.nameTester }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: test-core-event-bus-subs
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: test-core-event-bus-eas
+  labels:
+    helm-chart-test: "true"  
+rules:
+- apiGroups: ["remoteenvironment.kyma.cx"]
+  resources: ["eventactivations"]
+  verbs: ["create", "get", "watch", "list", "delete"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: test-core-event-bus-eas
+  labels:
+    helm-chart-test: "true"  
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.e2eTests.nameTester }}
+  namespace: {{ .Release.Namespace }}   
+roleRef:
+  kind: ClusterRole
+  name: test-core-event-bus-eas
+  apiGroup: rbac.authorization.k8s.io        
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: test-core-event-bus-k8s
+  labels:
+    helm-chart-test: "true"  
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["pods", "pods/status", "services"]
+  verbs: ["*"]  
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: test-core-event-bus-k8s
+  labels:
+    helm-chart-test: "true"  
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.e2eTests.nameTester }}
+  namespace: {{ .Release.Namespace }}   
+roleRef:
+  kind: ClusterRole
+  name: test-core-event-bus-k8s
+  apiGroup: rbac.authorization.k8s.io        
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Values.e2eTests.nameTester }}
+  labels:
+    helm-chart-test: "true"
+  annotations:
+#    sidecar.istio.io/inject: "true"   # needed if the tester could run with side cars
+    helm.sh/hook: test-success  
+spec:
+  serviceAccount: {{ .Values.e2eTests.nameTester }}
+  containers:
+  - image: "{{ .Values.global.containerRegistry.path }}/event-bus-e2e-tester:{{ .Values.global.eventBusVersion }}"
+    imagePullPolicy: IfNotPresent
+    name: {{ .Values.e2eTests.nameTester }}
+    args:
+      - -subscriber-image={{ .Values.global.containerRegistry.path }}/event-bus-e2e-subscriber:{{ .Values.global.eventBusVersion }}
+  restartPolicy: Never

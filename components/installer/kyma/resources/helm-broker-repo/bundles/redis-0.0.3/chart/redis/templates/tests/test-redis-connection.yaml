@@ -1,0 +1,28 @@
+{{- $name := printf "test-connection-%s" .Release.Name | trunc 63  }}
+{{- $host := printf "%s.%s.svc.cluster.local" (include "redis.fullname" .) .Release.Namespace }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ $name }}
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+      "helm-chart-test": "true"
+spec:
+  containers:
+  - name: {{ $name }}
+    image: "redis:3.2-alpine"
+    env:
+      - name: REDIS_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: {{ template "redis.fullname" . }}
+            key: redis-password
+    command: ["redis-cli"]
+    args: [
+      "-h", "{{ $host }}",
+      "-p", "6379",
+      "-a", "$(REDIS_PASSWORD)",
+      "ping"
+    ]
+  restartPolicy: Never

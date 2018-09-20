@@ -1,0 +1,15 @@
+{{- if .Release.IsUpgrade -}}
+{{- if .Values.registerBroker }}
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ClusterServiceBroker
+metadata:
+  name: {{ template "fullname" . }}
+spec:
+  url: http://{{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  authInfo:
+    basic:
+      secretRef:
+        name: "{{ template "fullname" . }}-basic-auth"
+        namespace: {{ .Release.Namespace | quote }}
+{{- end }}
+{{- end }}

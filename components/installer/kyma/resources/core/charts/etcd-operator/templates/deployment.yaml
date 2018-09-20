@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
+      release: {{ .Release.Name }}
+  replicas: 1
+  template:
+    metadata:
+      name: {{ template "name" . }}
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "fullname" . }}
+      containers:
+      - name: etcd-operator
+        image: "{{ .Values.etcdOperator.image.repository }}:{{ .Values.etcdOperator.image.tag }}"
+        command:
+        - etcd-operator
+        - --create-crd=false
+        env:
+        - name: MY_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        resources:
+          limits:
+            cpu: {{ .Values.etcdOperator.resources.cpu }}
+            memory: {{ .Values.etcdOperator.resources.memory }}
+          requests:
+            cpu: {{ .Values.etcdOperator.resources.cpu }}
+            memory: {{ .Values.etcdOperator.resources.memory }}
+        {{- if .Values.etcdOperator.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /readyz
+            port: 8080
+          initialDelaySeconds: {{ .Values.etcdOperator.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.etcdOperator.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.etcdOperator.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.etcdOperator.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.etcdOperator.livenessProbe.failureThreshold }}
+        {{- end}}
+        {{- if .Values.etcdOperator.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8080
+          initialDelaySeconds: {{ .Values.etcdOperator.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.etcdOperator.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.etcdOperator.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.etcdOperator.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.etcdOperator.readinessProbe.failureThreshold }}
+        {{- end }}

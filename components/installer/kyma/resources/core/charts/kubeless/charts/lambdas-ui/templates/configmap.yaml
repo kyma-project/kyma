@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  config.js: |
+    window.clusterConfig = {
+      domain: '{{ .Values.global.domainName }}',
+      graphqlApiUrl: 'https://ui-api.{{ .Values.global.domainName }}/graphql'
+    };
+    

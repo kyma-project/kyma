@@ -33,7 +33,7 @@ var gitCommitHash string
 
 func main() {
 
-	log.Println("Starting operator...")
+	log.Println("Starting operator with: helm.ReuseValues(false) ...")
 
 	if gitCommitHash != "" {
 		log.Println("Git commit hash:", gitCommitHash)

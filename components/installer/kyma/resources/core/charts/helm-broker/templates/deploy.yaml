@@ -1,0 +1,158 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+    spec:
+      serviceAccountName: {{ template "fullname" . }}
+
+      initContainers:
+      - name: "init-{{ .Chart.Name }}"
+        image: "{{ .Values.global.containerRegistry.path }}/alpine-net:{{ .Values.initImage.tag }}"
+        imagePullPolicy: {{ .Values.initImage.pullPolicy }}
+        command: ['sh', '-c', 'until $(curl --output /dev/null --silent --fail http://core-helm-broker-etcd.kyma-system.svc.cluster.local:2379/health); do echo waiting for etcd service; sleep 2; done;']
+
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.global.containerRegistry.path }}/helm-broker:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: APP_TMP_DIR
+            value: /tmp
+          - name: APP_PORT
+            value: "{{ .Values.service.internalPort }}"
+          - name: APP_CONFIG_FILE_NAME
+            value: /etc/config/helm-broker/config.yaml
+          - name: APP_HELM_TILLER_HOST
+            value: "tiller-deploy.kube-system.svc.cluster.local:44134"
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-empty-dir
+
+        - mountPath: /etc/config/helm-broker
+          name: config-volume
+
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+        # Temporary solution for readiness probe
+        # Ref: https://github.com/istio/istio/issues/2628
+        readinessProbe:
+          exec:
+            command:
+              - curl
+              - localhost:{{ .Values.service.internalPort }}/statusz
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 2
+        livenessProbe:
+          exec:
+            command:
+              - curl
+              - localhost:{{ .Values.service.internalPort }}/statusz
+          periodSeconds: 10
+          timeoutSeconds: 2
+          successThreshold: 1
+
+      volumes:
+      - name: tmp-empty-dir
+        emptyDir:
+          medium: "Memory" # mount a tmpfs (RAM-backed filesystem). Default emptyDir volumes are stored on whatever medium is backing the node - that might be disk or SSD or network storage, depending on your environment.
+      - name: config-volume
+        configMap:
+          name: helm-config-map
+
+---
+
+{{ if .Values.embeddedRepository.provision  }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "reposerver-fullname" . }}
+  labels:
+    app: {{ template "reposerver-name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "reposerver-name" . }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ template "reposerver-name" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+    spec:
+      serviceAccountName: {{ template "fullname" . }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.global.containerRegistry.path }}/helm-broker-reposerver:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+        volumeMounts:
+        - mountPath: /data
+          name: bundle-repository
+
+        ports:
+        - containerPort: 8080
+        # Temporary solution for readiness probe
+        # Ref: https://github.com/istio/istio/issues/2628
+        readinessProbe:
+          exec:
+            command:
+              - curl
+              - localhost:{{ .Values.embeddedRepository.service.internalPort }}/index.yaml
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 2
+        livenessProbe:
+          exec:
+            command:
+              - curl
+              - localhost:{{ .Values.embeddedRepository.service.internalPort }}/index.yaml
+          periodSeconds: 10
+          timeoutSeconds: 2
+          successThreshold: 1
+
+      volumes:
+      - name: tmp-empty-dir
+        emptyDir:
+          medium: "Memory" # mount a tmpfs (RAM-backed filesystem). Default emptyDir volumes are stored on whatever medium is backing the node - that might be disk or SSD or network storage, depending on your environment.
+      - name: config-volume
+        configMap:
+          name: helm-config-map
+      - name: bundle-repository
+        persistentVolumeClaim:
+          claimName: {{ .Values.bundlesStorage.claimName }}
+{{ end }}

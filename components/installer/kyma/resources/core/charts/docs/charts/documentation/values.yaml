@@ -1,0 +1,10 @@
+# Default values for service-instances-ui.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+resources:
+  documentation:
+    requests:
+      memory: 16Mi
+    limits:
+      memory: 32Mi

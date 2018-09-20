@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Publish Helm chart.
+name: publish
+version: 0.1.0

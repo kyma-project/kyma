@@ -1,0 +1,62 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: test-{{ template "fullname" . }}
+  labels:
+    helm-chart-test: "true"
+rules:
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["create", "get", "delete"]
+- apiGroups: ["", "rbac.authorization.k8s.io"]
+  resources: ["limitranges", "resourcequotas", "secrets", "roles"]
+  verbs: ["get"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-{{ template "fullname" . }}
+  labels:
+    helm-chart-test: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: test-{{ template "fullname" . }}
+  labels:
+    helm-chart-test: "true"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: test-{{ template "fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: test-{{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-{{ template "fullname" . }}
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+      "helm-chart-test": "true"
+spec:
+  serviceAccountName: test-{{ template "fullname" . }}
+  containers:
+  - name: test-{{ template "fullname" . }}
+    image: {{ .Values.global.containerRegistry.path }}/test-environments:0.1.0
+    env:
+      - name: EXPECTED_LIMIT_RANGE_MEMORY_DEFAULT_REQUEST
+        value: "{{ .Values.limitRanges.defaultRequest }}"
+      - name: EXPECTED_LIMIT_RANGE_MEMORY_DEFAULT
+        value: "{{ .Values.limitRanges.default }}"
+      - name: EXPECTED_LIMIT_RANGE_MEMORY_MAX
+        value: "{{ .Values.limitRanges.max }}"
+      - name: EXPECTED_RESOURCE_QUOTA_LIMITS_MEMORY
+        value: "{{ .Values.resourceQuota.limitsMemory}}"
+      - name: EXPECTED_RESOURCE_QUOTA_REQUESTS_MEMORY
+        value: "{{ .Values.resourceQuota.requestsMemory}}"
+  restartPolicy: Never
+---

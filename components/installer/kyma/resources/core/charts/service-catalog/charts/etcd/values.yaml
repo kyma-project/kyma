@@ -1,0 +1,21 @@
+cluster:
+  version: 3.2.14
+  replicaCount: 1
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      memory: 32Mi
+  TLS:
+    enabled: true
+
+nameOverride: service-catalog-etcd
+
+backupApp:
+  image:
+    tag: 0.3.187
+    pullPolicy: IfNotPresent
+  cronJobSchedule: "*/30 * * * *"
+  cleaner:
+    leaveMinNewestBackupBlobs: 3
+    expirationBlobTime: "72h"

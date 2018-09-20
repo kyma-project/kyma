@@ -1,0 +1,51 @@
+# NOTE: The Role, ServiceAccount, and RoleBinding are created once during installation and not removed after (or recreated before) each test. This is a limitation of Helm: it can only create a Pod during testing.
+# (This applies to Helm 2.7.2.)
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: test-{{ template "fullname" . }}
+  labels:
+    helm-chart-test: "true"
+rules:
+- apiGroups: [""]
+  resources: ["pods", "nodes"]
+  verbs: ["list", "get"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-{{ template "fullname" . }}
+  labels:
+    helm-chart-test: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: test-{{ template "fullname" . }}
+  labels:
+    helm-chart-test: "true"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: test-{{ template "fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: test-{{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-{{ template "fullname" . }}
+  labels:
+    helm-chart-test: "true"
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  serviceAccount: test-{{ template "fullname" . }}
+  containers:
+  - name: test-{{ template "fullname" . }}
+    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.test.image.name }}:{{ .Values.test.image.tag }}
+    imagePullPolicy: IfNotPresent
+  restartPolicy: Never

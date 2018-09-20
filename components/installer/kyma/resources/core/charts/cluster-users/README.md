@@ -1,0 +1,39 @@
+```
+   _____ _           _              _    _                   
+  / ____| |         | |            | |  | |                  
+ | |    | |_   _ ___| |_ ___ _ __  | |  | |___  ___ _ __ ___
+ | |    | | | | / __| __/ _ \ '__| | |  | / __|/ _ \ '__/ __|
+ | |____| | |_| \__ \ ||  __/ |    | |__| \__ \  __/ |  \__ \
+  \_____|_|\__,_|___/\__\___|_|     \____/|___/\___|_|  |___/
+
+  ```
+
+## Overview
+
+The `cluster-users` sub-chart uses role-based access control (RBAC) to define roles and accesses in Kyma. Kyma does not have a user base, but it has an admin defined as **admin@kyma.cx**. The admin's password is **nimda123**. Additionally, admin roles are bound to group of users named **kyma-admins**.
+
+## Details
+
+This section describes how to add a new user and define the user's role. It also describes the relation between the `apiGroup` and the user's role.
+
+### Add a new user and define the user's role
+
+1. To add a new user, register it in the [dex config map](../../../dex/templates/dex-config-map.yaml).
+
+    For more details about the `dex` component, see the [README.md](../../../dex/README.md) documentation.
+
+2. Define the user's role inside the [`rbac-roles.yaml`](templates/rbac-roles.yaml) file within a namespace with a `ClusterRole`.
+
+3. Bind the user to the user's role in the [`rbac-roles.yaml`](templates/rbac-roles.yaml) file within a namespace with a `ClusterRoleBinding`.
+
+> **NOTE:** The `dex` component defines the user. The `cluster-users` component defines the user's role and assigns the role to the user.
+
+### Add a role binding to user group
+
+For a newly created or existing role in the [`rbac-roles.yaml`](templates/rbac-roles.yaml) file:
+
+1. Bind the desired group to the role in the [`rbac-roles.yaml`](templates/rbac-roles.yaml) file within a namespace with a `ClusterRoleBinding` by adding a new entry in the `subject` section with the kind `Group`. Note that the name of the group can be anything. However, the name has to reflect user groups in the Identity Provider. You can find the existing binding to the group `kyma-admins` in the [`rbac-roles.yaml`](templates/rbac-roles.yaml) file.
+
+### API groups
+
+One of the parameters that you set when defining the role is the `apiGroup`. The `apiGroup` attribute defines the Kubernetes APIs that the user has access to. When you define a new API group on the cluster, add the group to the user's role in the [`rbac-roles.yaml`](templates/rbac-roles.yaml) file to give the user access to the API group. Control the access by limiting it to specific API resources and methods.

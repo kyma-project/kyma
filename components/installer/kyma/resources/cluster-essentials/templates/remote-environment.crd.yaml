@@ -1,0 +1,88 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: remoteenvironments.remoteenvironment.kyma.cx
+spec:
+  group: remoteenvironment.kyma.cx
+  version: v1alpha1
+  scope: Cluster
+  names:
+    plural: remoteenvironments
+    singular: remoteenvironment
+    kind: RemoteEnvironment
+    shortNames:
+    - re
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          properties:
+            accessLabel:
+              type: string
+              maxLength: 63
+              pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
+            source:
+              type: object
+              required:
+              - "environment"
+              - "type"
+              - "namespace"
+              properties:
+                environment:
+                  type: string
+                  minLength: 1
+                  pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
+                type:
+                  type: string
+                  minLength: 1
+                  pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
+                namespace:
+                  type: string
+                  minLength: 1
+                  pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
+            services:
+              type: array
+              items:
+                type: object
+                required:
+                - "id"
+                - "displayName"
+                - "providerDisplayName"
+                - "entries"
+                properties:
+                  id:
+                    type: string
+                  displayName:
+                    type: string
+                  longDescription:
+                    type: string
+                  providerDisplayName:
+                    type: string
+                  entries:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - "type"
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                          - "API"
+                          - "Events"
+                        gatewayUrl:
+                          type: string
+                        accessLabel:
+                          type: string
+                          maxLength: 63
+                          pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
+                        targetUrl:
+                          type: string
+                        oauthUrl:
+                          type: string       
+                        credentialsSecretName:
+                          type: string  
+                  tags:
+                    type: array
+                    items:
+                      type: string

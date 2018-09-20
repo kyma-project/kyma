@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Subscription validator Helm chart.
+name: sub-validator
+version: 0.1.0
