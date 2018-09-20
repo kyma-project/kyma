@@ -29,6 +29,7 @@ dockerPushRoot = ''
 projects = [
     "docs": "kyma-docs",
     "components/api-controller": "api-controller",
+    "components/apiserver-proxy": "apiserver-proxy",
     "components/binding-usage-controller": "binding-usage-controller",
     "components/configurations-generator": "configurations-generator",
     "components/environments": "environments",
