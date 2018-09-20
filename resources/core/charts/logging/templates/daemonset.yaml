@@ -10,6 +10,10 @@ spec:
 {{ include "labels.standard" . | indent 8 }}
         component: logspout
     spec:
+{{- if .Values.logspout.tolerations }}
+      tolerations:
+{{ toYaml .Values.logspout.tolerations | indent 8 }}
+{{- end }}
       hostPID: true
       containers:
       - resources:

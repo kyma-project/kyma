@@ -9,11 +9,14 @@ logspout:
       cpu: 125m
       memory: 96Mi
     limits:
-      memory: 1Gi
+      memory: 400Mi
   image:
     repository: gliderlabs/logspout
     tag: "v3.2.5"
     pullPolicy: IfNotPresent
+  tolerations:
+  - effect: NoSchedule
+    operator: Exists
 
 oklog:
   image:
