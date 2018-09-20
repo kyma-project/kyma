@@ -29,9 +29,15 @@ import (
 	informers "github.com/kyma-project/kyma/components/installer/pkg/client/informers/externalversions"
 )
 
+var gitCommitHash string
+
 func main() {
 
 	log.Println("Starting operator...")
+
+	if gitCommitHash != "" {
+		log.Println("Git commit hash:", gitCommitHash)
+	}
 
 	stop := make(chan struct{})
 
