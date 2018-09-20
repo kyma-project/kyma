@@ -40,3 +40,7 @@ Kyma comes bundled with tools that give you the most accurate and up-to-date mon
 ## Tracing
 
 The tracing in Kyma uses the [Jaeger](https://github.com/jaegertracing) distributed tracing system. Use it to analyze performance by scrutinizing the path of the requests sent to and from your service. This information helps you optimize the latency and performance of your solution.
+
+## Logging
+
+Logging in Kyma uses [Logspout](https://github.com/gliderlabs/logspout) and [OK Log](https://github.com/oklog/oklog). Use a plaintext or a regular expression to fetch logs from pods using the OK Log UI.
