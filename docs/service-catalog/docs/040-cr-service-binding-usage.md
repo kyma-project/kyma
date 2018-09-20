@@ -47,7 +47,7 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is created. |
 | **spec.serviceBindingRef.name** |    **YES**   | Specifies the name of the ServiceBinding. |
 | **spec.usedBy** |    **YES**   | Specifies the application into which the Secret is injected. |
-| **spec.usedBy.kind** |    **YES**   | Specifies the name of the [UsageKind](041-usage-kind-custom-resource.md). |
+| **spec.usedBy.kind** |    **YES**   | Specifies the name of the [UsageKind](041-cr-usage-kind.md). |
 | **spec.usedBy.name** |    **YES**   | Specifies the name of the application. |
 | **spec.parameters.envPrefix** |    **NO**   | Defines the prefix of environment variables environment variables that the ServiceBindingUsage injects. The prefixing is disabled by default. |
 | **spec.parameters.envPrefix.name** |    **YES**   | Specifies the name of the prefix. This field is mandatory if **envPrefix** is specified.  |
