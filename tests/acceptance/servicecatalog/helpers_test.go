@@ -17,7 +17,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func getServiceBrokerServices(t *testing.T, url string) []osb.Service {
+func getCatalogForBroker(t *testing.T, url string) []osb.Service {
 	config := osb.DefaultClientConfiguration()
 	config.URL = url
 
