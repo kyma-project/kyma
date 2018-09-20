@@ -1,6 +1,5 @@
 ---
 title: Architecture
-type: Architecture
 ---
 
 The diagram and steps describe the basic Service Catalog workflow:

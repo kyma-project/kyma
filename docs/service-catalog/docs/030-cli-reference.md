@@ -1,6 +1,5 @@
 ---
 title: CLI reference
-type: CLI reference
 ---
 
 Management of the Service Catalog is based on Kubernetes resources and the custom resources specifically defined for Kyma. Manage all of these resources through [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/).
