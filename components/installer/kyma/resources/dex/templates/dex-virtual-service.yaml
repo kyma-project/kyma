@@ -1,0 +1,25 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: dex-virtualservice
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: dex
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  hosts:
+  - "dex.{{ .Values.global.domainName }}"
+  gateways:
+  - {{ .Values.global.gateway.name }}
+  http:
+  - match:
+    - uri:
+        regex: /.*
+    route:
+    - destination:
+        port:
+          number: {{ .Values.containerPort }}
+        host: dex-service
+    corsPolicy:
+      allowOrigin:
+      - "*"        

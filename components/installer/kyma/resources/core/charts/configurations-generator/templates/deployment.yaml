@@ -1,0 +1,30 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "name" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+      - image: {{ .Values.global.containerRegistry.path }}/{{ .Chart.Name }}:{{ .Chart.Version }}
+        name: {{ template "name" . }}
+        command: [
+          "/app",
+          "-kube-config-custer-name={{ .Values.kubeConfig.clusterName }}",
+          "-kube-config-url=https://apiserver.{{ .Values.global.domainName }}",
+          "-kube-config-ca={{ .Values.global.tlsCrt }}"
+        ]
+        ports:
+          - name: http
+            containerPort: 8000

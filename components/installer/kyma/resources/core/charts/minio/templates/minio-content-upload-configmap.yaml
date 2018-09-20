@@ -1,0 +1,18 @@
+#
+# This is a temporary hack because there is no separate chart with documentation in Kyma.
+# TODO: Move file to separate chart 
+#
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "minio.fullname" . }}-docs-upload
+data:
+  APP_UPLOAD_ENDPOINT: {{ template "minio.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  APP_UPLOAD_SECURE: 'false'
+  APP_UPLOAD_PORT: '{{ .Values.service.port }}'
+  APP_BUCKET_NAME: content
+  APP_BUCKET_REGION: us-east-1
+  APP_EXTERNAL_ENDPOINT: https://minio.{{ .Values.global.domainName }}
+  APP_ASSETS_FOLDER: assets
+  APP_VERBOSE: 'true'

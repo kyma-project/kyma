@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helm-config-map
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+{{ if .Values.config }}
+data:
+  config.yaml: |-
+{{ .Values.config | toYaml | indent 4 }}
+{{ end }}

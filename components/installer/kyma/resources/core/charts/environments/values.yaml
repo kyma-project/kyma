@@ -1,0 +1,20 @@
+limitRanges:
+  # If a container does not specify memory request, this default value will be applied.
+  # The scheduler considers this value when scheduling a container to a node.
+  # If a node has not enough memory, such pod will not be created. The value
+  defaultRequest: 32Mi
+
+  # If a container does not specify memory limit, this default value will be applied.
+  # If a container tries to allocate more memory, container will be OOM killed.
+  default: 512Mi
+
+  # Maximum memory that a container can request
+  max: 1Gi
+
+# resourceQuota defines quotas per environment. Values are defined as a standard Kubernetes quantity,
+# for example: 1Gi, 512Mi
+resourceQuota:
+  # Sum of all container memory requests must not exceed this value.
+  requestsMemory: 2.8Gi
+  # Sum of all container memory limits must not exceed this value.
+  limitsMemory: 3Gi

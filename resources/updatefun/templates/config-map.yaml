@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: updatefun-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: updatefun
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  httpEndpoint: 0.0.0.0:{{ .Values.containerPort }}
+  issuer: https://updatefun.{{ .Values.global.domainName }}
+  limit: {{ .Values.funupdate.limit }}
+  logger-level: debug
+  logger-format: text
+

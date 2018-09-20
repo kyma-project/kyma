@@ -1,0 +1,12 @@
+name: instances
+replicaCount: 1
+image:
+  pullPolicy: IfNotPresent
+service:
+  internalPort: 80
+  externalPort: 80
+  protocol: TCP
+virtualservice:
+  enabled: true
+  annotations: {}
+resources: {}

@@ -1,0 +1,2 @@
+istio:
+  namespace: istio-system

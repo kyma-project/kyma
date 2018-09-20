@@ -1,0 +1,22 @@
+apiVersion: "etcd.database.coreos.com/v1beta2"
+kind: "EtcdCluster"
+metadata:
+  name: {{ template "etcd-fullname" . }}
+  namespace: "{{ .Release.Namespace }}"
+spec:
+  size: {{ .Values.cluster.replicaCount }}
+  version: {{ .Values.cluster.version }}
+  pod:
+    resources:
+      limits:
+        memory: "{{ .Values.cluster.resources.limits.memory }}"
+      requests:
+        memory: "{{ .Values.cluster.resources.requests.memory }}"
+  {{- if .Values.cluster.TLS.enabled }}
+  TLS:
+    static:
+      member:
+        peerSecret: "{{ template "etcd-fullname" . }}-etcd-peer-tls"
+        serverSecret: "{{ template "etcd-fullname" . }}-etcd-server-tls"
+      operatorSecret: "{{ template "etcd-fullname" . }}-etcd-client-tls"
+  {{ end }}

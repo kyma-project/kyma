@@ -14,4 +14,6 @@ RUN /bin/bash -c 'printf "\n########################################\nkubectl ve
 
 ADD installer ./installer
 
+COPY /kyma /kyma/injected
+
 ENTRYPOINT ["/installer"]

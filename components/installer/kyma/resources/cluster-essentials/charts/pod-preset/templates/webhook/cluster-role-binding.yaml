@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "pod-preset.fullname" . }}-webhook
+  labels:
+    app: {{ template "pod-preset.name" . }}-webhook
+    chart: {{ template "pod-preset.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "pod-preset.fullname" . }}-webhook
+subjects:
+- kind: ServiceAccount
+  name: {{ template "pod-preset.fullname" . }}-webhook
+  namespace: "{{ .Release.Namespace }}"

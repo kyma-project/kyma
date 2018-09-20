@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: console
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  config.js: |
+    window.clusterConfig = {
+      authRedirectUri: 'https://console.{{ js .Values.global.domainName }}',
+      domain: '{{ js .Values.global.domainName }}',
+      consoleClientId: '{{ js .Values.cluster.consoleClientId }}',
+      scope: '{{ js .Values.cluster.scope }}',
+      orgId: '{{ js .Values.cluster.orgId }}',
+      orgName: '{{ js .Values.cluster.orgName }}',
+      gateway_kyma_cx_api_version: 'v1alpha2'
+    };
+    

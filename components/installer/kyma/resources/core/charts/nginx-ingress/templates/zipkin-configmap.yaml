@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  enable-opentracing: "true"
+  enable-vts-status: "false"
+  zipkin-collector-host: zipkin.kyma-system
+kind: ConfigMap
+metadata:
+  name: nginx-configuration
