@@ -12,9 +12,8 @@ spec:
   serviceAccount: api-controller-test-account
   containers:
   - name: test-api-controller-acceptance
-    {{ $image_name := "api-controller-acceptance-test" }}
-    {{ $image := index .Values.global $image_name }}
-    image: {{ .Values.global.containerRegistry.path }}/{{ $image.dir }}{{ $image_name }}:{{ $image.version }}
+    {{ $image := .Values.global.api_controller_acceptance_test }}
+    image: {{ .Values.global.containerRegistry.path }}/{{ $image.dir }}api-controller-acceptance-test:{{ $image.version }}
     resources:
       limits:
         memory: 400Mi
