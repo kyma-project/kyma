@@ -1,6 +1,6 @@
 ---
 title: Sidecar Proxy Injection
-type: Overview
+type: Details
 ---
 
 By default, the Istio Sidecar Injector watches all Pod creation operations on all Namespaces but it does not inject the newly created Pods with a sidecar proxy.

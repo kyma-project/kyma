@@ -1,5 +1,5 @@
 ---
-title: Helm Broker workflow
+title: Helm Broker architecture
 type: Architecture
 ---
 
