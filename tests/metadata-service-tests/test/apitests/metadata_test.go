@@ -186,9 +186,10 @@ func TestApiMetadata(t *testing.T) {
 			}
 
 			// when
-			statusCode, _ := metadataServiceClient.UpdateService(t, "12345", updatedServiceDefinition)
+			statusCode, err := metadataServiceClient.UpdateService(t, "12345", updatedServiceDefinition)
 
 			// then
+			require.NoError(t, err)
 			require.Equal(t, http.StatusNotFound, statusCode)
 		})
 
