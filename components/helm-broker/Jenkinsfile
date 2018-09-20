@@ -41,14 +41,6 @@ podTemplate(label: label) {
                             execute "./before-commit.sh ci"
                         }
 
-                        if (params.FULL_BUILD) {
-                            stage("IP scan $application (Sourceclear)"){
-                                withCredentials([string(credentialsId: 'SRCCLR_API_TOKEN', variable: 'SRCCLR_API_TOKEN')]) {
-                                    execute("make scan","SRCCLR_API_TOKEN=$SRCCLR_API_TOKEN")
-                                }
-                            }
-                        }
-
                         stage("build image $application") {
                             dir(env.APP_FOLDER){
                                 sh "cp ./broker deploy/broker/helm-broker"
