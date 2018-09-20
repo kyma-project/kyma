@@ -85,7 +85,7 @@ func fixReService(name, namespace, reName string) *apiv1.Service {
 			Selector: map[string]string{"app": "svc"},
 			Ports: []apiv1.ServicePort{
 				{
-					Name:       "ext-api-port",
+					Name:       "http-api-port",
 					Protocol:   "TCP",
 					Port:       80,
 					TargetPort: intstr.IntOrString{Type: intstr.Int, IntVal: 8080},
