@@ -93,7 +93,8 @@ type RemoteEnvironmentSpec struct {
 	Description string    `json:"description"`
 	Services    []Service `json:"services"`
 	// AccessLabel is not required, 'omitempty' is needed because of regexp validation
-	AccessLabel string `json:"accessLabel,omitempty"`
+	AccessLabel string            `json:"accessLabel,omitempty"`
+	Labels      map[string]string `json:"labels"`
 }
 
 // Entry defines, what is enabled by activating the service.
@@ -110,6 +111,7 @@ type Entry struct {
 // Service represents part of the remote environment, which is mapped 1 to 1 to service class in the service-catalog
 type Service struct {
 	ID                  string            `json:"id"`
+	Identifier          string            `json:"identifier"`
 	Name                string            `json:"name"`
 	DisplayName         string            `json:"displayName"`
 	Description         string            `json:"description"`
