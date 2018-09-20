@@ -29,6 +29,7 @@ dockerPushRoot = ''
 projects = [
     "docs": "kyma-docs",
     "components/api-controller": "api-controller",
+    "components/apiserver-proxy": "apiserver-proxy",
     "components/binding-usage-controller": "binding-usage-controller",
     "components/configurations-generator": "configurations-generator",
     "components/environments": "environments",
@@ -304,6 +305,8 @@ def versionsYaml(versions) {
 """
 global.docs.version=${versions['docs']}
 global.docs.dir=${versions['docs'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.apiserver_proxy.version=${versions['components/apiserver-proxy']}
+global.apiserver_proxy.dir=${versions['components/apiserver-proxy'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.api_controller.version=${versions['components/api-controller']}
 global.api_controller.dir=${versions['components/api-controller'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.binding_usage_controller.version=${versions['components/binding-usage-controller']}
