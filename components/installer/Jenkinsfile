@@ -72,6 +72,8 @@ podTemplate(label: label) {
                                 sh "ls -al .."
                                 sh "ls -al ../.."
                                 sh "cp ./$application deploy/installer/$application"
+                                sh "cp -R ../../installation deploy/installer/"
+                                sh "cp -R ../../resources deploy/installer/"
                                 sh "docker build -t ${dockerPushRoot}${application}:latest deploy/installer --label version=${dockerImageTag} --label component=${application}"
                             }
                         }

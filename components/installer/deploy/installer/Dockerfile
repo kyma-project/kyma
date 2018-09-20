@@ -14,7 +14,7 @@ RUN /bin/bash -c 'printf "\n########################################\nkubectl ve
 
 ADD installer ./installer
 
-COPY ../../resources /kyma/injected/resources
-COPY ../../installation /kyma/injected/installation
+COPY resources /kyma/injected/resources
+COPY installation /kyma/injected/installation
 
 ENTRYPOINT ["/installer"]
