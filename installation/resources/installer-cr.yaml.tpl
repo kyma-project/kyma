@@ -9,7 +9,7 @@ metadata:
 spec:
   version: "__VERSION__"
   url: "__URL__"
-  components: 
+  components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
     - name: "istio"
@@ -27,3 +27,5 @@ spec:
     - name: "remote-environments"
       namespace: "kyma-integration"
       release: "hmc-default"
+    - name: "updatefun"
+      namespace: "kyma-system"
