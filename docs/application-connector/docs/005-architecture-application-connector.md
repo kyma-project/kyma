@@ -1,5 +1,5 @@
 ---
-title: Application Connector components
+title: Architecture
 type: Architecture
 ---
 

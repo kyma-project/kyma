@@ -1,6 +1,6 @@
 ---
 title: The Node.js Programming Model
-type: Model
+type: Details
 ---
 
 Kyma supports Node.js 6 and 8. The function interface is the same for both versions. It is still best practice to start with Node.js 8, as it supports Promises out of the box. The result is less complicated code.
