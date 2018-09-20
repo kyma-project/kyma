@@ -107,7 +107,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var postResponse CreateServiceResponse
-		json.Unmarshal(responseBody, &postResponse)
+		err = json.Unmarshal(responseBody, &postResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, "1", postResponse.ID)
@@ -160,7 +160,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var postResponse CreateServiceResponse
-		json.Unmarshal(responseBody, &postResponse)
+		err = json.Unmarshal(responseBody, &postResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, "1", postResponse.ID)
@@ -196,7 +196,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var errorResponse httperrors.ErrorResponse
-		json.Unmarshal(responseBody, &errorResponse)
+		err = json.Unmarshal(responseBody, &errorResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, errorResponse.Code)
@@ -242,7 +242,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var errorResponse httperrors.ErrorResponse
-		json.Unmarshal(responseBody, &errorResponse)
+		err = json.Unmarshal(responseBody, &errorResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
@@ -293,7 +293,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		require.NoError(t, err)
 
 		var serviceDetails ServiceDetails
-		json.Unmarshal(responseBody, &serviceDetails)
+		err = json.Unmarshal(responseBody, &serviceDetails)
 
 		require.NoError(t, err)
 		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
@@ -353,7 +353,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		require.NoError(t, err)
 
 		var serviceDetails ServiceDetails
-		json.Unmarshal(responseBody, &serviceDetails)
+		err = json.Unmarshal(responseBody, &serviceDetails)
 
 		require.NoError(t, err)
 		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
@@ -400,7 +400,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		require.NoError(t, err)
 
 		var serviceDetails ServiceDetails
-		json.Unmarshal(responseBody, &serviceDetails)
+		err = json.Unmarshal(responseBody, &serviceDetails)
 
 		require.NoError(t, err)
 		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
@@ -434,7 +434,6 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		metadataHandler.GetService(rr, req)
 
 		// then
-		require.NoError(t, err)
 		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "654321")
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
@@ -465,7 +464,7 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		require.NoError(t, err)
 
 		var services []Service
-		json.Unmarshal(responseBody, &services)
+		err = json.Unmarshal(responseBody, &services)
 
 		require.NoError(t, err)
 		serviceDefinitionService.AssertExpectations(t)
@@ -498,7 +497,7 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		require.NoError(t, err)
 
 		var services []Service
-		json.Unmarshal(responseBody, &services)
+		err = json.Unmarshal(responseBody, &services)
 
 		require.NoError(t, err)
 		serviceDefinitionService.AssertExpectations(t)
@@ -527,7 +526,7 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		require.NoError(t, err)
 
 		var errorResponse httperrors.ErrorResponse
-		json.Unmarshal(responseBody, &errorResponse)
+		err = json.Unmarshal(responseBody, &errorResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
@@ -611,8 +610,9 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var serviceDetailsResponse ServiceDetails
-		json.Unmarshal(responseBody, &serviceDetailsResponse)
+		err = json.Unmarshal(responseBody, &serviceDetailsResponse)
 
+		require.NoError(t, err)
 		assert.Equal(t, "service name", serviceDetailsResponse.Name)
 		assert.Equal(t, "service provider", serviceDetailsResponse.Provider)
 		assert.Equal(t, "service description", serviceDetailsResponse.Description)
@@ -659,7 +659,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var errorResponse httperrors.ErrorResponse
-		json.Unmarshal(responseBody, &errorResponse)
+		err = json.Unmarshal(responseBody, &errorResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, errorResponse.Code)
@@ -700,7 +700,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var errorResponse httperrors.ErrorResponse
-		json.Unmarshal(responseBody, &errorResponse)
+		err = json.Unmarshal(responseBody, &errorResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
@@ -747,8 +747,9 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var serviceDetailsResponse ServiceDetails
-		json.Unmarshal(responseBody, &serviceDetailsResponse)
+		err = json.Unmarshal(responseBody, &serviceDetailsResponse)
 
+		require.NoError(t, err)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
 }

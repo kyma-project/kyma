@@ -150,7 +150,7 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 
 	err = sds.remoteEnvironmentRepository.Update(remoteEnvironment, *service)
 	if err != nil {
-		return apperrors.Internal("failed to update service in RE repository, %s")
+		return apperrors.Internal("failed to update service in RE repository, %s", err)
 	}
 
 	serviceDef.ID = id
@@ -188,7 +188,7 @@ func (sds *serviceDefinitionService) GetAPI(remoteEnvironment, serviceId string)
 	}
 
 	if service.API == nil {
-		return nil, apperrors.WrongInput("service with ID '%s' has no API")
+		return nil, apperrors.WrongInput("service with ID '%s' has no API", serviceId)
 	}
 
 	api, err := sds.serviceAPIService.Read(remoteEnvironment, service.API)
