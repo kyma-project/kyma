@@ -18,7 +18,10 @@ import (
 	"unicode"
 )
 
-const targetSwaggerVersion = "2.0"
+const (
+	targetSwaggerVersion = "2.0"
+	connectedApp         = "connected-app"
+)
 
 var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
 
@@ -63,13 +66,9 @@ func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService
 // Create adds new ServiceDefinition. Based on ServiceDefinition a new service is added to RemoteEnvironment.
 func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef *ServiceDefinition) (string, apperrors.AppError) {
 	if serviceDef.Identifier != "" {
-		identifierConflict, err := sds.isIdentifierConflictPresent(serviceDef.Identifier, remoteEnvironment)
+		err := sds.ensureUniqueIdentifier(serviceDef.Identifier, remoteEnvironment)
 		if err != nil {
 			return "", err
-		}
-
-		if identifierConflict {
-			return "", apperrors.Conflict("service with identifier %s is already registered.", serviceDef.Identifier)
 		}
 	}
 
@@ -238,8 +237,7 @@ func initService(serviceDef *ServiceDefinition, id, remoteEnvironment string) *r
 	if serviceDef.Labels != nil {
 		service.Labels = overrideLabels(remoteEnvironment, *serviceDef.Labels)
 	} else {
-		service.Labels = make(map[string]string)
-		service.Labels["connected-app"] = remoteEnvironment
+		service.Labels = map[string]string{connectedApp: remoteEnvironment}
 	}
 
 	return &service
@@ -256,19 +254,19 @@ func convertServiceBaseInfo(service remoteenv.Service) ServiceDefinition {
 	}
 }
 
-func (sds *serviceDefinitionService) isIdentifierConflictPresent(identifier, remoteEnvironment string) (bool, apperrors.AppError) {
+func (sds *serviceDefinitionService) ensureUniqueIdentifier(identifier, remoteEnvironment string) apperrors.AppError {
 	services, err := sds.GetAll(remoteEnvironment)
 	if err != nil {
-		return true, err
+		return err
 	}
 
 	for _, service := range services {
 		if service.Identifier == identifier {
-			return true, nil
+			return apperrors.AlreadyExists("Service with Identifier %s already exists.", identifier)
 		}
 	}
 
-	return false, nil
+	return nil
 }
 
 func (sds *serviceDefinitionService) readService(remoteEnvironment string, service remoteenv.Service) (ServiceDefinition, apperrors.AppError) {
@@ -368,9 +366,9 @@ func updateBaseUrl(apiSpec spec.Swagger, gatewayUrl string) (spec.Swagger, apper
 }
 
 func overrideLabels(remoteEnvironment string, labels map[string]string) map[string]string {
-	_, found := labels["connected-app"]
+	_, found := labels[connectedApp]
 	if found {
-		labels["connected-app"] = remoteEnvironment
+		labels[connectedApp] = remoteEnvironment
 	}
 
 	return labels

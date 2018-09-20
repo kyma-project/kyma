@@ -588,7 +588,8 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		// then
 		assert.Empty(t, serviceID)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "service with identifier Same identifier is already registered.")
+		assert.Equal(t, apperrors.CodeAlreadyExists, err.Code())
+		assert.Contains(t, err.Error(), "Service with Identifier Same identifier already exists.")
 
 		serviceRepository.AssertExpectations(t)
 	})
