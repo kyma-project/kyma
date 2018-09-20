@@ -227,7 +227,7 @@
     "components/remote-environment-broker/pkg/client/informers/externalversions/internalinterfaces",
     "components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
   ]
-  revision = "cf56aef707f8b2776dc4c89ae8e64776ed06186f"
+  revision = "c98f6e13a1beca119c634814c423df90d3aa8ad7"
 
 [[projects]]
   name = "github.com/magiconair/properties"
@@ -662,6 +662,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b11b59642294af60c5818066a6e59e465b85fcdd2ed4670fd4d0b50c65beb6c0"
+  inputs-digest = "881938cf5aa6b9b77ad64be7cc9f3f0d555eea12b979d41ae337069f36f41066"
   solver-name = "gps-cdcl"
   solver-version = 1

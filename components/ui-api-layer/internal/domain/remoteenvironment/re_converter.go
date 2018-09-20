@@ -29,11 +29,25 @@ func (c *remoteEnvironmentConverter) ToGQL(in *v1alpha1.RemoteEnvironment) gqlsc
 
 	dto := gqlschema.RemoteEnvironment{
 		Name:        in.Name,
+		Labels:      c.toJSONLabels(in.Spec.Labels),
 		Description: in.Spec.Description,
 		Services:    reServices,
 	}
 
 	return dto
+}
+
+func (c *remoteEnvironmentConverter) toJSONLabels(labels map[string]string) gqlschema.JSON {
+	if len(labels) == 0 {
+		return nil
+	}
+
+	jLabels := make(gqlschema.JSON, len(labels))
+	for k, v := range labels {
+		jLabels[k] = v
+	}
+
+	return jLabels
 }
 
 func (c *remoteEnvironmentConverter) mapEntriesCRToDTO(entries []v1alpha1.Entry) []gqlschema.RemoteEnvironmentEntry {

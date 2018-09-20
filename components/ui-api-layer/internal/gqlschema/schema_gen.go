@@ -220,6 +220,7 @@ type ComplexityRoot struct {
 	RemoteEnvironment struct {
 		Name                  func(childComplexity int) int
 		Description           func(childComplexity int) int
+		Labels                func(childComplexity int) int
 		Services              func(childComplexity int) int
 		EnabledInEnvironments func(childComplexity int) int
 		Status                func(childComplexity int) int
@@ -2422,6 +2423,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.RemoteEnvironment.Description(childComplexity), true
+
+	case "RemoteEnvironment.labels":
+		if e.complexity.RemoteEnvironment.Labels == nil {
+			break
+		}
+
+		return e.complexity.RemoteEnvironment.Labels(childComplexity), true
 
 	case "RemoteEnvironment.services":
 		if e.complexity.RemoteEnvironment.Services == nil {
@@ -7713,6 +7721,11 @@ func (ec *executionContext) _RemoteEnvironment(ctx context.Context, sel ast.Sele
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "labels":
+			out.Values[i] = ec._RemoteEnvironment_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "services":
 			out.Values[i] = ec._RemoteEnvironment_services(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -7789,6 +7802,28 @@ func (ec *executionContext) _RemoteEnvironment_description(ctx context.Context, 
 	res := resTmp.(string)
 	rctx.Result = res
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _RemoteEnvironment_labels(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironment) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "RemoteEnvironment",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	return res
 }
 
 // nolint: vetshadow
@@ -13822,6 +13857,7 @@ type Environment {
 type RemoteEnvironment {
     name: String!
     description: String!
+    labels: JSON!
     services: [RemoteEnvironmentService!]!
     enabledInEnvironments: [String!]!
     status: RemoteEnvironmentStatus!

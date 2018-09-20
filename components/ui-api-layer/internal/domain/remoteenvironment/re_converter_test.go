@@ -35,6 +35,9 @@ func TestRemoteEnvironmentConverter_ToGQL(t *testing.T) {
 								Type: "Event",
 							},
 						},
+						Labels: map[string]string{
+							"Key-1": "value-1",
+						},
 					},
 				},
 			},
@@ -60,6 +63,14 @@ func TestRemoteEnvironmentConverter_ToGQL(t *testing.T) {
 		assert.Equal(t, dto.Services[0].Entries[0].Type, fix.Spec.Services[0].Entries[0].Type)
 		assert.Equal(t, dto.Services[0].Entries[0].AccessLabel, &fix.Spec.Services[0].Entries[0].AccessLabel)
 		assert.Equal(t, dto.Services[0].Entries[0].GatewayURL, &fix.Spec.Services[0].Entries[0].GatewayUrl)
+
+		require.Len(t, dto.Labels, len(fix.Spec.Labels))
+		for k, v := range fix.Spec.Labels {
+			gotLabel, found := dto.Labels[k]
+
+			assert.True(t, found)
+			assert.Equal(t, v, gotLabel)
+		}
 	})
 
 	t.Run("Empty", func(t *testing.T) {

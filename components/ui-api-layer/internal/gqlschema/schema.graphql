@@ -322,6 +322,7 @@ type Environment {
 type RemoteEnvironment {
     name: String!
     description: String!
+    labels: JSON!
     services: [RemoteEnvironmentService!]!
     enabledInEnvironments: [String!]!
     status: RemoteEnvironmentStatus!
