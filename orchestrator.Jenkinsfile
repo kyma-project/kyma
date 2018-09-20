@@ -282,8 +282,9 @@ def commitHashForBuild(build) {
  * More info: https://docs.docker.com/registry/spec/manifest-v2-1/
  */
 String projectVersion(project) {
+    def img = projects[project]
+    
     try {
-        def img = projects[project]
         def json = "https://eu.gcr.io/v2/kyma-project/develop/${img}/manifests/latest".toURL().getText(requestProperties: [Accept: 'application/vnd.docker.distribution.manifest.v1+prettyjws'])
         def slurper = new JsonSlurperClassic()
         def doc = slurper.parseText(json)
