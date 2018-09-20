@@ -2,16 +2,16 @@
 title: Overview
 ---
 
-The Application Connector is a proprietary Kyma implementation that allows you to connect with external solutions. The Application Connector consists of four
-components that ensure the security of the connection and the access to all of the external solution's Events and APIs. The implementation handles routing of the calls and Events coming from an external solution to Kyma, and the API calls sent from Kyma to the connected external solution.
+The Application Connector is a part of the Kyma project which simplifies integration of various systems with Kyma.
 
-These are the components of the Application Connector:
+No matter if you want to integrate an on-premise or a cloud system, the Application Connector ensures that integration works in the same way and developers are not distracted by the configuration or networking issues.
 
-- The **Connector Service** generates the required certificates and ensures a secure and trusted connection between Kyma and an external solution. This is a global service that works in the context of
-a given Remote Environment.
-- The **Metadata Service** allows you to register all of the external solution's APIs and Event catalogs which Kyma consumes. You can register the APIs along with additional documentation and Swagger files.
-This is a global service that works in the context of a given Remote Environment.
-- The **Gateway Service** proxies the API calls sent from Kyma to the connected external solution and handles OAuth2 tokens. A new instance of this service is deployed for every Remote Environment.
-- The **Event Service** delivers the Events sent from a connected external solution to Kyma. A new instance of this service is deployed for every Remote Environment.
+The Application Connector ensures that a connected system communicates with Kyma securely using the client certificate which can be acquired from the Connector service. A client certificate ensures that each connected system is separated.
 
-To ensure maximum security and separation, a single Remote Environment allows you to connect only to a single external solution.
+The Application Connector provides a possibility to communicate with services and lambdas deployed in Kyma in an asynchronous matter using events. A system can send an event which triggers a subscribed service or lambda. Developers can benefit from the built-in monitoring and tracing which allow troubleshooting of the event delivery.
+
+The Application Connector integrates a connected system with a Service Catalog. All APIs and all Events which are available in the system can be registered using the Metadata service. The registration process integrates all components into the Service Catalog. Developers can browser documentation of the registered APIs and Event Catalog and can control the access to it. [Better description required]
+
+The Application Connector Proxy service is tunneling requests to the system's API. Developers don't need to take care of the endpoint configuration. The Proxy service is also able to automate the security token handling. The API can be registered together with client credentials, and OAuth token will be acquired and cached automatically.
+
+All components of the Application Connector can be scaled independently to adjust to the need of the solution which is being built on the top of the Kyma.
