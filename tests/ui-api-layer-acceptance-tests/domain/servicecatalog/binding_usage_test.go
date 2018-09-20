@@ -13,6 +13,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
 )
@@ -63,6 +64,10 @@ type bindingUsageDeleteMutationResponse struct {
 }
 
 func TestBindingUsageMutationsAndQueries(t *testing.T) {
+	if dex.IsSCIEnabled() {
+		t.Skip("SCI Enabled")
+	}
+
 	// GIVEN
 	suite := newBindingUsageSuite(t)
 	suite.prepareInstanceAndBinding()

@@ -12,7 +12,7 @@ spec:
   serviceAccount: api-controller-test-account
   containers:
   - name: test-api-controller-acceptance
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.tests.image.name }}:{{ .Values.tests.image.tag }}
+    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.api_controller_acceptance_tests.dir }}api-controller-acceptance-tests:{{ .Values.global.api_controller_acceptance_tests.version }}
     resources:
       limits:
         memory: 400Mi
