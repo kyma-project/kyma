@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Application Connector for Kyma
-name: metadata-service
-version: 0.0.1

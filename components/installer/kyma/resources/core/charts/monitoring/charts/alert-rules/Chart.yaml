@@ -1,7 +1,0 @@
-apiVersion: v1
-description: Alert rules for Kyma
-name: alert-rules
-version: 0.1.0
-keywords:
-- monitoring
-- kyma

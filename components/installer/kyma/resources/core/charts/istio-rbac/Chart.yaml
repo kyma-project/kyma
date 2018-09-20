@@ -1,7 +1,0 @@
-name: isito-rbac
-version: 0.0.1
-description: Configures Istio RBAC handler
-keywords:
-  - istio
-  - rbac
-

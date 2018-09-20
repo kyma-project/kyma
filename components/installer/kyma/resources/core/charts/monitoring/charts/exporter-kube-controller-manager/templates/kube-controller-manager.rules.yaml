@@ -1,5 +1,0 @@
-{{ define "kube-controller-manager.rules.yaml.tpl" }}
-groups:
-- name: kube-controller-manager.rules
-  rules:
-{{ end }}
