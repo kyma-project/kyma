@@ -74,6 +74,8 @@ podTemplate(label: label) {
                                 sh "cp ./$application deploy/installer/$application"
                                 sh "cp -R ../../installation deploy/installer/"
                                 sh "cp -R ../../resources deploy/installer/"
+                                sh "mkdir deploy/installer/installation/scripts"
+                                sh "cp -R scripts/is-ready.sh deploy/installer/installation/scripts/"
                                 sh "docker build -t ${dockerPushRoot}${application}:latest deploy/installer --label version=${dockerImageTag} --label component=${application}"
                             }
                         }
