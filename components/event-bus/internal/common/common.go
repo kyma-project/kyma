@@ -12,25 +12,14 @@ import (
 type EventDetails struct {
 	eventType        string
 	eventTypeVersion string
-	source           *source
-}
-
-type source struct {
-	sourceEnvironment string
-	sourceNamespace   string
-	sourceType        string
+	sourceID         string
 }
 
 func FromPublishRequest(r *api.PublishRequest) *EventDetails {
-	sourceStruct := &source{
-		sourceEnvironment: r.Source.SourceEnvironment,
-		sourceNamespace:   r.Source.SourceNamespace,
-		sourceType:        r.Source.SourceType,
-	}
 	return &EventDetails{
 		eventType:        r.EventType,
 		eventTypeVersion: r.EventTypeVersion,
-		source:           sourceStruct,
+		sourceID:         r.SourceID,
 	}
 }
 
@@ -41,30 +30,23 @@ func escapePeriodsAndBackSlashes(in *string) string {
 }
 
 /*
-Encode formats the event details into a NATS streaming compliant subject name literal.
-Encoded subject is constructed by using the Period (`.`) character be added between tokens as a delimeter.
+Encode formats the event details into a NATS Streaming compliant subject name literal.
+Encoded subject is constructed by using the Period (`.`) character be added between tokens as a delimiter.
 Period character in a token literal will be escaped with a forward slash (`\.`), ex: `env.prod` will be `env\.prod`.
-Return value is astring literal composed of the event details tokens as: `sourceEnvironment + sourceNamespace + sourceType + eventType + eventTypeVersion`.
+Return value is a string literal composed of the event details tokens as: `sourceID + eventType + eventTypeVersion`.
 */
 func (e *EventDetails) Encode() string {
-	return fmt.Sprintf(`%s.%s.%s.%s.%s`,
-		escapePeriodsAndBackSlashes(&e.source.sourceEnvironment),
-		escapePeriodsAndBackSlashes(&e.source.sourceNamespace),
-		escapePeriodsAndBackSlashes(&e.source.sourceType),
+	return fmt.Sprintf(`%s.%s.%s`,
+		escapePeriodsAndBackSlashes(&e.sourceID),
 		escapePeriodsAndBackSlashes(&e.eventType),
 		escapePeriodsAndBackSlashes(&e.eventTypeVersion))
 }
 
 func FromSubscriptionSpec(s v1alpha1.SubscriptionSpec) *EventDetails {
-	sourceStruct := &source{
-		sourceEnvironment: s.Source.SourceEnvironment,
-		sourceNamespace:   s.Source.SourceNamespace,
-		sourceType:        s.Source.SourceType,
-	}
 	return &EventDetails{
+		sourceID:         s.SourceID,
 		eventType:        s.EventType,
 		eventTypeVersion: s.EventTypeVersion,
-		source:           sourceStruct,
 	}
 }
 

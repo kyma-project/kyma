@@ -7,40 +7,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_ValidatePublish_MissingSource(t *testing.T) {
+func Test_ValidatePublish_MissingSourceId(t *testing.T) {
 	publishRequest := buildTestPublishRequest()
-	publishRequest.Source = nil
+	publishRequest.SourceID = ""
 	err := ValidatePublish(&publishRequest)
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, FieldSource, err.Details[0].Field)
-}
-
-func Test_ValidatePublish_MissingSourceType(t *testing.T) {
-	publishRequest := buildTestPublishRequest()
-	publishRequest.Source.SourceType = ""
-	err := ValidatePublish(&publishRequest)
-	assert.NotEqual(t, len(err.Details), 0)
-	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, FieldSourceType, err.Details[0].Field)
-}
-
-func Test_ValidatePublish_MissingSourceNamespace(t *testing.T) {
-	publishRequest := buildTestPublishRequest()
-	publishRequest.Source.SourceNamespace = ""
-	err := ValidatePublish(&publishRequest)
-	assert.NotEqual(t, len(err.Details), 0)
-	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, FieldSourceNamespace, err.Details[0].Field)
-}
-
-func Test_ValidatePublish_MissingSourceEnvironment(t *testing.T) {
-	publishRequest := buildTestPublishRequest()
-	publishRequest.Source.SourceEnvironment = ""
-	err := ValidatePublish(&publishRequest)
-	assert.NotEqual(t, len(err.Details), 0)
-	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, FieldSourceEnvironment, err.Details[0].Field)
+	assert.Equal(t, FieldSourceId, err.Details[0].Field)
 }
 
 func Test_ValidatePublish_MissingEventType(t *testing.T) {
@@ -88,33 +61,6 @@ func Test_ValidatePublish_EmptyData(t *testing.T) {
 	assert.Equal(t, FieldData, err.Details[0].Field)
 }
 
-func Test_ValidatePublish_InvalidSourceEnvironment(t *testing.T) {
-	publishRequest := buildTestPublishRequest()
-	publishRequest.Source.SourceEnvironment = ".invalid."
-	err := ValidatePublish(&publishRequest)
-	assert.NotEqual(t, len(err.Details), 0)
-	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, FieldSourceEnvironment, err.Details[0].Field)
-}
-
-func Test_ValidatePublish_InvalidSourceNamespace(t *testing.T) {
-	publishRequest := buildTestPublishRequest()
-	publishRequest.Source.SourceNamespace = ".invalid."
-	err := ValidatePublish(&publishRequest)
-	assert.NotEqual(t, len(err.Details), 0)
-	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, FieldSourceNamespace, err.Details[0].Field)
-}
-
-func Test_ValidatePublish_InvalidSourceType(t *testing.T) {
-	publishRequest := buildTestPublishRequest()
-	publishRequest.Source.SourceType = ".invalid."
-	err := ValidatePublish(&publishRequest)
-	assert.NotEqual(t, len(err.Details), 0)
-	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, FieldSourceType, err.Details[0].Field)
-}
-
 func Test_ValidatePublish_InvalidEventType(t *testing.T) {
 	publishRequest := buildTestPublishRequest()
 	publishRequest.EventType = "invalid/event-type"
@@ -157,39 +103,6 @@ func Test_ValidatePublish_Success(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestSourceEnvironmentRegex(t *testing.T) {
-	testRegex(t, isValidSourceEnvironment, "stage", true)        // alphabet
-	testRegex(t, isValidSourceEnvironment, "prod123", true)      // alphanumeric
-	testRegex(t, isValidSourceEnvironment, "my.s3.bucket", true) // . allowed
-	testRegex(t, isValidSourceEnvironment, "my-s3-bucket", true) // - allowed
-	testRegex(t, isValidSourceEnvironment, "my_s3_bucket", true) // _ allowed
-	testRegex(t, isValidSourceEnvironment, "1stage", false)      // cannot start with number
-	testRegex(t, isValidSourceEnvironment, ".stage", false)      // cannot start with symbol
-	testRegex(t, isValidSourceEnvironment, "stage.", false)      // cannot end with symbol
-}
-
-func TestSourceNamespaceRegex(t *testing.T) {
-	testRegex(t, isValidSourceNamespace, "kafka", true)              // alphabet
-	testRegex(t, isValidSourceNamespace, "kafka10", true)            // alphanumeric
-	testRegex(t, isValidSourceNamespace, "kafka.apache.org", true)   // . allowed
-	testRegex(t, isValidSourceNamespace, "kafka-apache-org", true)   // - allowed
-	testRegex(t, isValidSourceNamespace, "kafka_apache_org", true)   // _ allowed
-	testRegex(t, isValidSourceNamespace, "1kafka.apache.org", false) // cannot start with number
-	testRegex(t, isValidSourceNamespace, ".kafka.apache.org", false) // cannot start with symbol
-	testRegex(t, isValidSourceNamespace, "kafka.apache.org.", false) // cannot end with symbol
-}
-
-func TestSourceTypeRegex(t *testing.T) {
-	testRegex(t, isValidSourceType, "commerce", true)       // alphabet
-	testRegex(t, isValidSourceType, "s3", true)             // alphanumeric
-	testRegex(t, isValidSourceType, "marketing.beta", true) // . allowed
-	testRegex(t, isValidSourceType, "marketing-beta", true) // - allowed
-	testRegex(t, isValidSourceType, "marketing_beta", true) // _ allowed
-	testRegex(t, isValidSourceType, "1marketing", false)    // cannot start with number
-	testRegex(t, isValidSourceType, ".marketing", false)    // cannot start with symbol
-	testRegex(t, isValidSourceType, "marketing.", false)    // cannot end with symbol
-}
-
 func TestEventTypeRegex(t *testing.T) {
 	testRegex(t, isValidEventType, "created", true)         // alphabet
 	testRegex(t, isValidEventType, "created1", true)        // alphanumeric
@@ -223,11 +136,7 @@ func buildTestPublishRequest() PublishRequest {
 		EventTime:        "2012-11-01T22:08:41+00:00",
 		EventType:        "test-event-type",
 		EventTypeVersion: "v1",
-		Source: &EventSource{
-			SourceEnvironment: "test-source-environment",
-			SourceNamespace:   "test-source-namespace",
-			SourceType:        "test-source-type",
-		},
+		SourceID:         "stage.com.org.commerce",
 	}
 	return publishRequest
 }

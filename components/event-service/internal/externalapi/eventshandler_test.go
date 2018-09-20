@@ -12,8 +12,8 @@ import (
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
-	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
 )
 
 func TestEventOk(t *testing.T) {
@@ -72,8 +72,8 @@ func TestPropagateTraceHeaders(t *testing.T) {
 	defer func() { bus.InitEventSender(httptools.DefaultHttpClientProvider, httptools.DefaultHttpRequestProvider) }()
 
 	// init source config
-	sourceNamespace, sourceType, sourceEnvironment, targetUrl := "", "", "", "http://kyma-domain/v1/events"
-	bus.Init(sourceNamespace, sourceType, sourceEnvironment, targetUrl)
+	sourceId, targetUrl := "", "http://kyma-domain/v1/events"
+	bus.Init(sourceId, targetUrl)
 
 	// simulate request from outside of event-service
 	event := "{\"event-type\":\"order.created\",\"event-type-version\":\"v1\",\"event-id\":\"31109198-4d69-4ae0-972d-76117f3748c8\",\"event-time\":\"2012-11-01T22:08:41+00:00\",\"data\":\"{'key':'value'}\"}"
