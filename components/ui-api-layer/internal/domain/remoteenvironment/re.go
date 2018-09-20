@@ -47,11 +47,11 @@ func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Durati
 	}
 
 	informerFactory := externalversions.NewSharedInformerFactory(client, informerResyncPeriod)
-	remoteEnvironmentGroup := informerFactory.Applicationconnector().V1alpha1()
+	applicationConnectorGroup := informerFactory.Applicationconnector().V1alpha1()
 
-	envMappingInformer := remoteEnvironmentGroup.EnvironmentMappings().Informer()
-	envMappingLister := remoteEnvironmentGroup.EnvironmentMappings().Lister()
-	remoteEnvInformer := remoteEnvironmentGroup.RemoteEnvironments().Informer()
+	envMappingInformer := applicationConnectorGroup.EnvironmentMappings().Informer()
+	envMappingLister := applicationConnectorGroup.EnvironmentMappings().Lister()
+	remoteEnvInformer := applicationConnectorGroup.RemoteEnvironments().Informer()
 
 	service, err := newRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), reCfg, envMappingInformer, envMappingLister, remoteEnvInformer)
 	if err != nil {
@@ -63,7 +63,7 @@ func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Durati
 		return nil, errors.Wrap(err, "while creating gateway service")
 	}
 
-	eventActivationService := newEventActivationService(remoteEnvironmentGroup.EventActivations().Informer())
+	eventActivationService := newEventActivationService(applicationConnectorGroup.EventActivations().Informer())
 	return &Container{
 		Resolver: &Resolver{
 			remoteEnvironmentResolver: NewRemoteEnvironmentResolver(service, gatewayService),
