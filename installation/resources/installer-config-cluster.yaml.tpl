@@ -46,10 +46,6 @@ data:
   sidecar-injector.includeIPRanges: "10.244.0.0/16,10.240.0.0/16"
   minio.accessKey: "admin"
   minio.secretKey: "topSecretKey"
-  minio.persistence.storageClass: "managed-standard"
-  event-bus.nats-streaming.persistence.storageClass: "managed-standard"
-  monitoring.grafana.persistence.storageClass: "managed-standard"
-  logging.persistence.storageClass: "managed-standard"
   acceptanceTest.remoteEnvironment.disabled: "true"
 ---
 apiVersion: v1
