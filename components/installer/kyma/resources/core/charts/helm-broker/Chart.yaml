@@ -1,4 +1,0 @@
-name: helm-broker
-description: Helm service-broker deployment chart.
-appVersion: 0.2.37
-version: 0.1.4

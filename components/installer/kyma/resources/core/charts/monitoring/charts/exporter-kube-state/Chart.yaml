@@ -1,7 +1,0 @@
-apiVersion: v1
-name: exporter-kube-state
-description: Exporter for kube-state
-version: 0.1.17
-keywords:
-- monitoring
-- kyma

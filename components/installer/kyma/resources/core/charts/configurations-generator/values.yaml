@@ -1,5 +1,0 @@
-kubeConfig:
-  clusterName: minikube  
-service:
-  port: 8000
-  name: configurations-generator

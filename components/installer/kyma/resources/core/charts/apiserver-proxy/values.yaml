@@ -1,9 +1,0 @@
-tls:
-  secretName: "istio-ingress-certs"
-
-configmapName: oidc-ca
-containerPort: 8444  
-
-image: 
-  name: kube-rbac-proxy
-  tag: 0.3.1
