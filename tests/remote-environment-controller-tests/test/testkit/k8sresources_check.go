@@ -3,6 +3,7 @@ package testkit
 import (
 	"fmt"
 	v1apps "k8s.io/api/apps/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
 	"time"
@@ -58,6 +59,7 @@ func (checker *k8sChecker) checkDeployments(t *testing.T, resourcesShouldExist b
 		gatewayDeploy, gatewayErr = checker.client.GetDeployment(gatewayName, v1.GetOptions{})
 		eventsDeploy, eventsErr = checker.client.GetDeployment(eventServiceName, v1.GetOptions{})
 	} else {
+		// Deleting deployments is slow (all the pods needs to be deleted) so that we need to retry checks
 		gatewayDeploy, gatewayErr = checker.getDeletedDeployment(gatewayName, v1.GetOptions{})
 		eventsDeploy, eventsErr = checker.getDeletedDeployment(eventServiceName, v1.GetOptions{})
 	}
@@ -117,7 +119,7 @@ func (checker *k8sChecker) getDeletedDeployment(name string, options v1.GetOptio
 
 	for i := 0; i < checker.retryCount; i++ {
 		deployment, err = checker.client.GetDeployment(name, v1.GetOptions{})
-		if err != nil {
+		if err != nil && k8serrors.IsNotFound(err) {
 			break
 		}
 		time.Sleep(checker.retryWaitTime)

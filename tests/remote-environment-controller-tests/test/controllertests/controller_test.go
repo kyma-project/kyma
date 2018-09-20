@@ -3,15 +3,16 @@ package controllertests
 import (
 	"github.com/kyma-project/kyma/tests/remote-environment-controller-tests/test/testkit"
 	"github.com/stretchr/testify/require"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
 	"time"
 )
 
 const (
-	initialWaitTime = 10
-	retryWaitTime   = 5
-	retryCount      = 6
+	initialWaitTimeSeconds = 10 * time.Second
+	retryWaitTimeSeconds   = 5 * time.Second
+	retryCount             = 6
 )
 
 func TestRemoteEnvironmentCreation(t *testing.T) {
@@ -22,11 +23,9 @@ func TestRemoteEnvironmentCreation(t *testing.T) {
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	retryWaitTimeSeconds := retryWaitTime*time.Second
-
 	helmClient := testkit.NewHelmClient(config.TillerHost, retryCount, retryWaitTimeSeconds)
 	testReName := "test-create-re"
-	k8sResourcesChecker := testkit.NewK8sResourceChecker(testReName, k8sResourcesClient, retryCount, retryWaitTime*time.Second)
+	k8sResourcesChecker := testkit.NewK8sResourceChecker(testReName, k8sResourcesClient, retryCount, retryWaitTimeSeconds)
 
 	t.Run("should create complete RE helm chart when new RE is created", func(t *testing.T) {
 		// when
@@ -35,7 +34,7 @@ func TestRemoteEnvironmentCreation(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		require.NotNil(t, testRe)
-		time.Sleep(initialWaitTime * time.Second)
+		time.Sleep(initialWaitTimeSeconds)
 
 		t.Run("Helm release and k8s resources should exist", func(t *testing.T) {
 			// when
@@ -64,16 +63,14 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	retryWaitTimeSeconds := retryWaitTime*time.Second
-
 	helmClient := testkit.NewHelmClient(config.TillerHost, retryCount, retryWaitTimeSeconds)
 
 	testReName := "test-delete-re"
-	k8sResourcesChecker := testkit.NewK8sResourceChecker(testReName, k8sResourcesClient, retryCount, retryWaitTime*time.Second)
+	k8sResourcesChecker := testkit.NewK8sResourceChecker(testReName, k8sResourcesClient, retryCount, retryWaitTimeSeconds)
 
 	testRe, err := k8sResourcesClient.CreateDummyRemoteEnvironment(testReName)
 	require.NoError(t, err)
-	time.Sleep(initialWaitTime * time.Second)
+	time.Sleep(initialWaitTimeSeconds)
 
 	t.Run("should delete RE helm chart when RE is deleted", func(t *testing.T) {
 		// when
@@ -81,7 +78,7 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		time.Sleep(initialWaitTime * time.Second)
+		time.Sleep(initialWaitTimeSeconds)
 
 		// when
 		exists, err := helmClient.ExistWhenShouldNot(testRe.Name)
@@ -96,6 +93,7 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 
 func requireError(t *testing.T, err error) {
 	require.Error(t, err)
+	require.True(t, k8serrors.IsNotFound(err))
 }
 
 func requireNoError(t *testing.T, err error) {
