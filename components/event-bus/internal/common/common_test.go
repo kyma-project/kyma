@@ -8,7 +8,7 @@ func TestEventDetails_Encode(t *testing.T) {
 	type fields struct {
 		eventType        string
 		eventTypeVersion string
-		source           *source
+		sourceID         string
 	}
 	tests := []struct {
 		name   string
@@ -17,48 +17,32 @@ func TestEventDetails_Encode(t *testing.T) {
 	}{
 		{name: "event1",
 			fields: fields{
+				sourceID:         "prod.local.kyma.commerce.ec",
 				eventType:        "order.created",
 				eventTypeVersion: "v1",
-				source: &source{
-					sourceEnvironment: "prod",
-					sourceNamespace:   "local.kyma.commerce",
-					sourceType:        "ec",
-				},
 			},
-			want: `prod.local\.kyma\.commerce.ec.order\.created.v1`},
+			want: `prod\.local\.kyma\.commerce\.ec.order\.created.v1`},
 		{name: "event2",
 			fields: fields{
+				sourceID:         "prod.com.local.kyma.ec",
 				eventType:        "order.created",
 				eventTypeVersion: "v1",
-				source: &source{
-					sourceEnvironment: "prod.com",
-					sourceNamespace:   "local.kyma",
-					sourceType:        "ec",
-				},
 			},
-			want: `prod\.com.local\.kyma.ec.order\.created.v1`},
+			want: `prod\.com\.local\.kyma\.ec.order\.created.v1`},
 		{name: "event3",
 			fields: fields{
+				sourceID:         "local.kyma.commerce.prod.local.kyma.commerce.ec",
 				eventType:        "order.created.v1",
 				eventTypeVersion: "",
-				source: &source{
-					sourceEnvironment: "local.kyma.commerce.prod",
-					sourceNamespace:   "local.kyma.commerce",
-					sourceType:        "ec",
-				},
 			},
-			want: `local\.kyma\.commerce\.prod.local\.kyma\.commerce.ec.order\.created\.v1.`},
+			want: `local\.kyma\.commerce\.prod\.local\.kyma\.commerce\.ec.order\.created\.v1.`},
 		{name: "event4",
 			fields: fields{
+				sourceID:         `prod\.com.ec`,
 				eventType:        `order\.created`,
 				eventTypeVersion: "v1",
-				source: &source{
-					sourceEnvironment: `prod\`,
-					sourceNamespace:   `com.sap.\hybris`,
-					sourceType:        "ec",
-				},
 			},
-			want: `prod\\.com\.sap\.\\hybris.ec.order\\\.created.v1`},
+			want: `prod\\\.com\.ec.order\\\.created.v1`},
 	}
 
 	for _, tt := range tests {
@@ -66,7 +50,7 @@ func TestEventDetails_Encode(t *testing.T) {
 			e := &EventDetails{
 				eventType:        tt.fields.eventType,
 				eventTypeVersion: tt.fields.eventTypeVersion,
-				source:           tt.fields.source,
+				sourceID:         tt.fields.sourceID,
 			}
 			if got := e.Encode(); got != tt.want {
 				t.Errorf("\nat %v EventDetails.Encode() = %v, want %v", tt.name, got, tt.want)

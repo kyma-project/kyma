@@ -22,9 +22,7 @@ The Event-Service has the following parameters:
 
 The parameters for the Event API correspond to the fields in the [Remote Environment](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/040-cr-remote-evironment.md):
 
-- **sourceEnvironment** - The name of the Event source environment.
-- **sourceType** - The type of the Event source.
-- **sourceNamespace** - The organization that publishes the Event.
+- **sourceId** - The identifier of the Events' source.
 
 ### Unit tests
 
