@@ -1,6 +1,6 @@
 ---
 title: Security
-type: Security
+type: Details
 ---
 
 When you expose a service in Kyma, you can secure it by specifying the **authentication** attribute in the Custom Resource (CR). To successfully secure the exposed service, you must specify all of these attributes in the CR:

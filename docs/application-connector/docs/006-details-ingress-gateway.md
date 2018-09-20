@@ -1,6 +1,6 @@
 ---
 title: Ingress-Gateway controller
-type: Architecture
+type: Details
 ---
 
 The Ingress-Gateway controller exposes the Kyma gateways to the outside world by the public IP address/DNS name.
