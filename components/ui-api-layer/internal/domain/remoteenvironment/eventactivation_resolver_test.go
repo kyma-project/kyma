@@ -3,7 +3,7 @@ package remoteenvironment_test
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/automock"
@@ -150,11 +150,7 @@ func fixGQLEventActivation(environment, name string) *gqlschema.EventActivation 
 	return &gqlschema.EventActivation{
 		Name:        name,
 		DisplayName: "aha!",
-		Source: gqlschema.EventActivationSource{
-			Namespace:   "com.sap.test",
-			Type:        "taaa",
-			Environment: environment,
-		},
+		SourceID:    "picco-bello",
 	}
 }
 

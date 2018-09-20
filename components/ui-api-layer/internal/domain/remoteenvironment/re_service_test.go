@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
@@ -27,7 +27,7 @@ func TestServiceListNamespacesForRemoteEnvironmentSuccess(t *testing.T) {
 	client := fake.NewSimpleClientset(&fixMapping)
 
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	reSharedInformers := informerFactory.Remoteenvironment().V1alpha1()
+	reSharedInformers := informerFactory.Applicationconnector().V1alpha1()
 	emInformer := reSharedInformers.EnvironmentMappings().Informer()
 
 	svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, emInformer, nil, nil)
@@ -53,7 +53,7 @@ func TestServiceFindRemoteEnvironmentSuccess(t *testing.T) {
 	client := fake.NewSimpleClientset(fixRemoteEnv)
 
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	reSharedInformers := informerFactory.Remoteenvironment().V1alpha1()
+	reSharedInformers := informerFactory.Applicationconnector().V1alpha1()
 	reInformer := reSharedInformers.RemoteEnvironments().Informer()
 
 	svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, reSharedInformers.EnvironmentMappings().Informer(), nil, reInformer)
@@ -76,7 +76,7 @@ func TestServiceFindRemoteEnvironmentFail(t *testing.T) {
 	client := fake.NewSimpleClientset()
 
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	reSharedInformers := informerFactory.Remoteenvironment().V1alpha1()
+	reSharedInformers := informerFactory.Applicationconnector().V1alpha1()
 	reInformer := reSharedInformers.RemoteEnvironments().Informer()
 
 	svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, reSharedInformers.EnvironmentMappings().Informer(), nil, reInformer)
@@ -100,7 +100,7 @@ func TestServiceListAllRemoteEnvironmentsSuccess(t *testing.T) {
 	client := fake.NewSimpleClientset(&fixREA, &fixREB)
 
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	reSharedInformers := informerFactory.Remoteenvironment().V1alpha1()
+	reSharedInformers := informerFactory.Applicationconnector().V1alpha1()
 	reInformer := reSharedInformers.RemoteEnvironments().Informer()
 
 	svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, reSharedInformers.EnvironmentMappings().Informer(), nil, reInformer)
@@ -131,7 +131,7 @@ func TestServiceListRemoteEnvironmentsInEnvironmentSuccess(t *testing.T) {
 	client := fake.NewSimpleClientset(&fixREA, &fixREB, &fixMappingREA, &fixMappingREB)
 
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	reSharedInformers := informerFactory.Remoteenvironment().V1alpha1()
+	reSharedInformers := informerFactory.Applicationconnector().V1alpha1()
 
 	reInformer := reSharedInformers.RemoteEnvironments().Informer()
 	emInformer := reSharedInformers.EnvironmentMappings().Informer()

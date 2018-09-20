@@ -1,12 +1,12 @@
 package remoteenvironment
 
 import (
-	remoteenvironmentv1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
-	reMappinglister "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/remoteenvironment/v1alpha1"
+	remoteenvironmentv1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	reMappinglister "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"k8s.io/client-go/tools/cache"
 )
 
-func NewRemoteEnvironmentService(client remoteenvironmentv1alpha1.RemoteenvironmentV1alpha1Interface, config Config, mappingInformer cache.SharedIndexInformer, mappingLister reMappinglister.EnvironmentMappingLister, reInformer cache.SharedIndexInformer) (*remoteEnvironmentService, error) {
+func NewRemoteEnvironmentService(client remoteenvironmentv1alpha1.ApplicationconnectorV1alpha1Interface, config Config, mappingInformer cache.SharedIndexInformer, mappingLister reMappinglister.EnvironmentMappingLister, reInformer cache.SharedIndexInformer) (*remoteEnvironmentService, error) {
 	return newRemoteEnvironmentService(client, config, mappingInformer, mappingLister, reInformer)
 }
 
