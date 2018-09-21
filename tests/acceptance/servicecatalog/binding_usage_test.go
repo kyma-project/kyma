@@ -161,7 +161,7 @@ func (ts *TestSuite) fixEnvironmentMapping() *reTypes.EnvironmentMapping {
 	return &reTypes.EnvironmentMapping{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "EnvironmentMapping",
-			APIVersion: "applicationconnector.kyma-project.io",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: ts.remoteEnvironmentName,
@@ -173,7 +173,7 @@ func (ts *TestSuite) fixRemoteEnvironment() *reTypes.RemoteEnvironment {
 	return &reTypes.RemoteEnvironment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "RemoteEnvironment",
-			APIVersion: "applicationconnector.kyma-project.io",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: ts.remoteEnvironmentName,
