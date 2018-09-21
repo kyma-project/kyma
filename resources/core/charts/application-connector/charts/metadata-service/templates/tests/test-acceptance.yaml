@@ -1,4 +1,3 @@
-{{ if not .Values.global.isLocalEnv }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -19,4 +18,3 @@ spec:
       - name: NAMESPACE
         value: {{ .Values.global.namespace }}
   restartPolicy: Never
-{{ end }}
