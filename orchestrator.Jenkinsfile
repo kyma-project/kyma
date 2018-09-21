@@ -59,6 +59,7 @@ projects = [
     "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
     "tests/connector-service-tests": "connector-service-tests",
     "tests/metadata-service-tests": "metadata-service-tests",
+    "tests/remote-environment-controller-tests": "remote-environment-controller-tests",
     "tests/event-bus": "event-bus-e2e-tester",
     "governance": null
 ]
@@ -364,6 +365,8 @@ global.connector_service_tests.version=${versions['tests/connector-service-tests
 global.connector_service_tests.dir=${versions['tests/connector-service-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.metadata_service_tests.version=${versions['tests/metadata-service-tests']}
 global.metadata_service_tests.dir=${versions['tests/metadata-service-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.remote_environment_controller_tests.version=${versions['tests/remote-environment-controller-tests']}
+global.remote_environment_controller_tests.dir=${versions['tests/remote-environment-controller-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.event_bus_tests.version=${versions['tests/event-bus']}
 global.event_bus_tests.dir=${versions['tests/event-bus'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.test_logging.version=${versions['tests/logging']}

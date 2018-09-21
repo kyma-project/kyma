@@ -193,8 +193,11 @@
 # Connector Service Tests
 /tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib
 
-# Application Connector Tests
+# Metadata Service Tests
 /tests/metadata-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib
+
+# Remote Environment Controller Tests
+/tests/remote-environment-controller-tests/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # Tools
 # Stability Checker Component
