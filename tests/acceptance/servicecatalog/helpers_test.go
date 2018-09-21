@@ -9,7 +9,7 @@ import (
 
 	catalog "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,7 +17,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-func getServiceBrokerServices(t *testing.T, url string) []osb.Service {
+func getCatalogForBroker(t *testing.T, url string) []osb.Service {
 	config := osb.DefaultClientConfiguration()
 	config.URL = url
 

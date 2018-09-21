@@ -64,6 +64,9 @@
 # The `kubeless` subchart
 /resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
+# The `logging` subchart
+/resources/core/charts/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+
 # The `minio` subchart
 /resources/core/charts/minio/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
@@ -193,8 +196,11 @@
 # Connector Service Tests
 /tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib
 
-# Application Connector Tests
+# Metadata Service Tests
 /tests/metadata-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib
+
+# Remote Environment Controller Tests
+/tests/remote-environment-controller-tests/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # Tools
 # Stability Checker Component

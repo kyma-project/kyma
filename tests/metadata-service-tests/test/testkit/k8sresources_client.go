@@ -3,7 +3,7 @@ package testkit
 import (
 	"github.com/kyma-project/kyma/components/metadata-service/pkg/apis/istio/v1alpha2"
 	istioclient "github.com/kyma-project/kyma/components/metadata-service/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	v1core "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -85,7 +85,7 @@ func (c *k8sResourcesClient) GetChecknothing(name string, options v1.GetOptions)
 }
 
 func (c *k8sResourcesClient) GetRemoteEnvironmentServices(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error) {
-	return c.remoteEnvironmentClient.RemoteenvironmentV1alpha1().RemoteEnvironments().Get(name, options)
+	return c.remoteEnvironmentClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Get(name, options)
 }
 
 func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error) {
@@ -93,14 +93,13 @@ func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, options v
 		TypeMeta:   v1.TypeMeta{Kind: "RemoteEnvironment", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: name, Namespace: c.namespace},
 		Spec: v1alpha1.RemoteEnvironmentSpec{
-			Source:   v1alpha1.Source{Environment: "test", Type: "test", Namespace: c.namespace},
 			Services: []v1alpha1.Service{},
 		},
 	}
 
-	return c.remoteEnvironmentClient.RemoteenvironmentV1alpha1().RemoteEnvironments().Create(dummyRe)
+	return c.remoteEnvironmentClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Create(dummyRe)
 }
 
 func (c *k8sResourcesClient) DeleteRemoteEnvironment(name string, options *v1.DeleteOptions) error {
-	return c.remoteEnvironmentClient.RemoteenvironmentV1alpha1().RemoteEnvironments().Delete(name, options)
+	return c.remoteEnvironmentClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Delete(name, options)
 }

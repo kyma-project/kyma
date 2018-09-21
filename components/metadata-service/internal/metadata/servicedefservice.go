@@ -3,17 +3,19 @@ package metadata
 
 import (
 	"encoding/json"
-	"net/url"
-
 	"github.com/go-openapi/spec"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/minio"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid"
+	"net/url"
 )
 
-const targetSwaggerVersion = "2.0"
+const (
+	targetSwaggerVersion = "2.0"
+	connectedApp         = "connected-app"
+)
 
 // ServiceDefinitionService is a service that manages ServiceDefinition objects.
 type ServiceDefinitionService interface {
@@ -27,7 +29,7 @@ type ServiceDefinitionService interface {
 	GetAll(remoteEnvironment string) (serviceDefinitions []ServiceDefinition, err apperrors.AppError)
 
 	// Update updates a service definition with provided ID.
-	Update(remoteEnvironment, id string, serviceDef *ServiceDefinition) apperrors.AppError
+	Update(remoteEnvironment, id string, serviceDef *ServiceDefinition) (ServiceDefinition, apperrors.AppError)
 
 	// Delete deletes a ServiceDefinition.
 	Delete(remoteEnvironment, id string) apperrors.AppError
@@ -55,9 +57,16 @@ func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService
 
 // Create adds new ServiceDefinition. Based on ServiceDefinition a new service is added to RemoteEnvironment.
 func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef *ServiceDefinition) (string, apperrors.AppError) {
+	if serviceDef.Identifier != "" {
+		err := sds.ensureUniqueIdentifier(serviceDef.Identifier, remoteEnvironment)
+		if err != nil {
+			return "", err
+		}
+	}
+
 	id := sds.uuidGenerator.NewUUID()
 
-	service := initService(serviceDef, id)
+	service := initService(serviceDef, id, serviceDef.Identifier, remoteEnvironment)
 
 	if apiDefined(serviceDef) {
 		serviceAPI, err := sds.serviceAPIService.New(remoteEnvironment, id, serviceDef.Api)
@@ -115,46 +124,46 @@ func (sds *serviceDefinitionService) GetAll(remoteEnvironment string) ([]Service
 }
 
 // Update updates a service with provided ID.
-func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, serviceDef *ServiceDefinition) apperrors.AppError {
-	_, err := sds.GetByID(remoteEnvironment, id)
+func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, serviceDef *ServiceDefinition) (ServiceDefinition, apperrors.AppError) {
+	existingSvc, err := sds.GetByID(remoteEnvironment, id)
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {
-			return apperrors.NotFound("failed to get service before update, %s", err)
+			return ServiceDefinition{}, apperrors.NotFound("failed to get service before update, %existingSvc", err)
 		}
-		return apperrors.Internal("failed to read service, %s", err)
+		return ServiceDefinition{}, apperrors.Internal("failed to read service, %existingSvc", err)
 	}
 
-	service := initService(serviceDef, id)
+	service := initService(serviceDef, id, existingSvc.Identifier, remoteEnvironment)
 
 	if !apiDefined(serviceDef) {
 		err = sds.serviceAPIService.Delete(remoteEnvironment, id)
 		if err != nil {
-			return apperrors.Internal("failed to delete API, %s", err)
+			return ServiceDefinition{}, apperrors.Internal("failed to delete API, %existingSvc", err)
 		}
 	} else {
 		service.API, err = sds.serviceAPIService.Update(remoteEnvironment, id, serviceDef.Api)
 		if err != nil {
-			return apperrors.Internal("failed to update API, %s", err)
+			return ServiceDefinition{}, apperrors.Internal("failed to update API, %existingSvc", err)
 		}
 
 		serviceDef.Api.Spec, err = modifyAPISpec(serviceDef.Api.Spec, service.API.GatewayURL)
 		if err != nil {
-			return apperrors.Internal("failed to modify API spec, %s", err)
+			return ServiceDefinition{}, apperrors.Internal("failed to modify API spec, %existingSvc", err)
 		}
 	}
 
 	err = sds.insertSpecs(id, serviceDef.Documentation, serviceDef.Api, serviceDef.Events)
 	if err != nil {
-		return apperrors.Internal("failed to insert specification to Minio, %s", err)
+		return ServiceDefinition{}, apperrors.Internal("failed to insert specification to Minio, %existingSvc", err)
 	}
 
 	err = sds.remoteEnvironmentRepository.Update(remoteEnvironment, *service)
 	if err != nil {
-		return apperrors.Internal("failed to update service in RE repository, %s", err)
+		return ServiceDefinition{}, apperrors.Internal("failed to update service in RE repository, %existingSvc")
 	}
 
 	serviceDef.ID = id
-	return nil
+	return convertServiceBaseInfo(*service), nil
 }
 
 // Delete deletes a service with given id.
@@ -188,7 +197,7 @@ func (sds *serviceDefinitionService) GetAPI(remoteEnvironment, serviceId string)
 	}
 
 	if service.API == nil {
-		return nil, apperrors.WrongInput("service with ID '%s' has no API", serviceId)
+		return nil, apperrors.WrongInput("service with ID '%s' has no API")
 	}
 
 	api, err := sds.serviceAPIService.Read(remoteEnvironment, service.API)
@@ -198,9 +207,10 @@ func (sds *serviceDefinitionService) GetAPI(remoteEnvironment, serviceId string)
 	return api, nil
 }
 
-func initService(serviceDef *ServiceDefinition, id string) *remoteenv.Service {
+func initService(serviceDef *ServiceDefinition, id, identifier, remoteEnvironment string) *remoteenv.Service {
 	service := remoteenv.Service{
 		ID:                  id,
+		Identifier:          identifier,
 		DisplayName:         serviceDef.Name,
 		LongDescription:     serviceDef.Description,
 		ProviderDisplayName: serviceDef.Provider,
@@ -209,6 +219,18 @@ func initService(serviceDef *ServiceDefinition, id string) *remoteenv.Service {
 
 	service.Events = serviceDef.Events != nil
 
+	if serviceDef.ShortDescription == "" {
+		service.ShortDescription = serviceDef.Description
+	} else {
+		service.ShortDescription = serviceDef.ShortDescription
+	}
+
+	if serviceDef.Labels != nil {
+		service.Labels = overrideLabels(remoteEnvironment, *serviceDef.Labels)
+	} else {
+		service.Labels = map[string]string{connectedApp: remoteEnvironment}
+	}
+
 	return &service
 }
 
@@ -216,9 +238,26 @@ func convertServiceBaseInfo(service remoteenv.Service) ServiceDefinition {
 	return ServiceDefinition{
 		ID:          service.ID,
 		Name:        service.DisplayName,
+		Identifier:  service.Identifier,
+		Labels:      &service.Labels,
 		Description: service.LongDescription,
 		Provider:    service.ProviderDisplayName,
 	}
+}
+
+func (sds *serviceDefinitionService) ensureUniqueIdentifier(identifier, remoteEnvironment string) apperrors.AppError {
+	services, err := sds.GetAll(remoteEnvironment)
+	if err != nil {
+		return err
+	}
+
+	for _, service := range services {
+		if service.Identifier == identifier {
+			return apperrors.AlreadyExists("Service with Identifier %s already exists.", identifier)
+		}
+	}
+
+	return nil
 }
 
 func (sds *serviceDefinitionService) readService(remoteEnvironment string, service remoteenv.Service) (ServiceDefinition, apperrors.AppError) {
@@ -315,4 +354,13 @@ func updateBaseUrl(apiSpec spec.Swagger, gatewayUrl string) (spec.Swagger, apper
 	apiSpec.Schemes = []string{"http"}
 
 	return apiSpec, nil
+}
+
+func overrideLabels(remoteEnvironment string, labels map[string]string) map[string]string {
+	_, found := labels[connectedApp]
+	if found {
+		labels[connectedApp] = remoteEnvironment
+	}
+
+	return labels
 }

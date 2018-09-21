@@ -1,5 +1,5 @@
 ---
-title: The Remote Environment Broker workflow
+title: The Remote Environment Broker architecture
 type: Architecture
 ---
 

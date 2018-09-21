@@ -29,22 +29,15 @@ import (
 )
 
 const (
-	clusterID        = "kyma-nats-streaming"
-	eventType        = "test-publish-push-success"
-	eventTypeVersion = "v1"
-	sourceType       = "ec"
-
-	sourceEnvironmentV1 = "test"
-	sourceNamespaceV1   = "local.kyma.commerce"
-	eventDataV1         = "test-event-1"
-
-	sourceEnvironmentV2 = "test.com"
-	sourceNamespaceV2   = "sap.hybris"
-	eventDataV2         = "test-event-2"
-
+	clusterID               = "kyma-nats-streaming"
+	eventType               = "test-publish-push-success"
+	eventTypeVersion        = "v1"
+	sourceIDV1              = "test.local.kyma.commerce.ec"
+	eventDataV1             = "test-event-1"
+	sourceIDV2              = "test.local.kyma.commerce.ec"
+	eventDataV2             = "test-event-2"
 	publishServerStatusPath = "/v1/status/ready"
-
-	headerKymaTopic = "kyma-topic"
+	headerKymaTopic         = "kyma-topic"
 )
 
 var (
@@ -79,12 +72,12 @@ func TestMain(m *testing.M) {
 	pushApplication := pushapp.NewPushApplication(&pushOpts, newFakeInformer())
 	subscriptionsSupervisor1 := pushApplication.SubscriptionsSupervisor
 	subscription1 := util.NewSubscription("test-sub", metav1.NamespaceDefault, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion,
-		sourceEnvironmentV1, sourceNamespaceV1, sourceType)
+		sourceIDV1)
 	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, common.DefaultRequestProvider)
 
 	subscriptionsSupervisor2 := pushApplication.SubscriptionsSupervisor
 	subscription2 := util.NewSubscription("test-sub", metav1.NamespaceDefault, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion,
-		sourceEnvironmentV2, sourceNamespaceV2, sourceType)
+		sourceIDV2)
 	subscriptionsSupervisor2.StartSubscriptionReq(subscription2, common.DefaultRequestProvider)
 
 	pushServer = httptest.NewServer(util.Logger(pushApplication.ServerMux))
@@ -130,22 +123,14 @@ func Test_Subscriber_Status(t *testing.T) {
 	verifyStatusCode(res2, http.StatusOK, t)
 }
 
-func makePayload(
-	sourceNamespace string,
-	sourceType string,
-	sourceEnvironment string,
-	eventType string,
-	eventTypeVersion string,
-	eventData string) string {
-	return fmt.Sprintf(
-		`{"source": {"source-namespace": "%s","source-type": "%s","source-environment": "%s"},
-		"event-type": "%s","event-type-version": "%s","event-time": "2018-11-02T22:08:41+00:00","data": "%s"}`,
-		sourceNamespace, sourceType, sourceEnvironment, eventType, eventTypeVersion, eventData)
+func makePayload(sourceID, eventType, eventTypeVersion, eventData string) string {
+	return fmt.Sprintf(`{"source-id": "%s", "event-type": "%s","event-type-version": "%s","event-time": "2018-11-02T22:08:41+00:00","data": "%s"}`,
+		sourceID, eventType, eventTypeVersion, eventData)
 }
 
 func Test_Publish_Push_Request(t *testing.T) {
 	{
-		payloadV1 := makePayload(sourceNamespaceV1, sourceType, sourceEnvironmentV1, eventType, eventTypeVersion, eventDataV1)
+		payloadV1 := makePayload(sourceIDV1, eventType, eventTypeVersion, eventDataV1)
 		res, err := http.Post(publishServer.URL+"/v1/events", "application/json", strings.NewReader(payloadV1))
 		checkIfError(err, t)
 		verifyStatusCode(res, 200, t)
@@ -178,7 +163,7 @@ func Test_Publish_Push_Request(t *testing.T) {
 	}
 
 	{
-		payloadV2 := makePayload(sourceNamespaceV2, sourceType, sourceEnvironmentV2, eventType, eventTypeVersion, eventDataV2)
+		payloadV2 := makePayload(sourceIDV2, eventType, eventTypeVersion, eventDataV2)
 		res, err := http.Post(publishServer.URL+"/v1/events", "application/json", strings.NewReader(payloadV2))
 		checkIfError(err, t)
 		verifyStatusCode(res, 200, t)
@@ -218,9 +203,7 @@ func newFakeInformer() cache.SharedIndexInformer {
 		subscriberServerV1.URL+util.SubServer1EventsPath,
 		eventType,
 		eventTypeVersion,
-		sourceEnvironmentV1,
-		sourceNamespaceV1,
-		sourceType)
+		sourceIDV1)
 	clientSet := fake.NewSimpleClientset(sub)
 	informer := v1alpha1.NewSubscriptionInformer(clientSet, metav1.NamespaceAll, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 	informer.GetIndexer().Add(sub)
@@ -253,10 +236,10 @@ func Test_pushRequestShouldNotIncludeKymaTopicHeader(t *testing.T) {
 
 	subscriptionsSupervisor1 := pushApplication.SubscriptionsSupervisor
 	subscription1 := util.NewSubscription("test-sub-1", metav1.NamespaceDefault, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion,
-		sourceEnvironmentV1, sourceNamespaceV1, sourceType)
+		sourceIDV1)
 	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, requestProvider)
 	{
-		payloadV1 := makePayload(sourceNamespaceV1, sourceType, sourceEnvironmentV1, eventType, eventTypeVersion, eventDataV1)
+		payloadV1 := makePayload(sourceIDV1, eventType, eventTypeVersion, eventDataV1)
 		res, err := http.Post(publishServer.URL+"/v1/events", "application/json", strings.NewReader(payloadV1))
 		checkIfError(err, t)
 		verifyStatusCode(res, 200, t)

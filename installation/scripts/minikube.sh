@@ -131,6 +131,14 @@ function addDevDomainsToEtcHosts() {
 	log "Domain added to /etc/hosts" green
 }
 
+function increaseFsInotifyMaxUserInstances() {
+    # Default value of 128 is not enough to perform “kubectl log -f” from pods, hence increased to 524288
+    if [[ "$VM_DRIVER" != "none" ]]; then
+        minikube ssh -- "sudo sysctl -w fs.inotify.max_user_instances=524288"
+        log "fs.inotify.max_user_instances is increased" green
+    fi
+}
+
 function start() {
     checkMinikubeVersion
 
@@ -159,6 +167,8 @@ function start() {
 
     # Adding domains to /etc/hosts files
     addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} ui-api.${MINIKUBE_DOMAIN} minio.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN}  configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN}"
+
+    increaseFsInotifyMaxUserInstances
 }
 
 start

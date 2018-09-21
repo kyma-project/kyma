@@ -1,0 +1,33 @@
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ template "fullname" . }}-logspout
+spec:
+  template:
+    metadata:
+      labels:
+{{ include "labels.standard" . | indent 8 }}
+        component: logspout
+    spec:
+      hostPID: true
+      containers:
+      - resources:
+{{ toYaml .Values.logspout.resources | indent 12}}
+        securityContext:
+          privileged: true
+        env:
+          - name: SYSLOG_DATA
+            value: {{ "{\"container\" :\"{{ .Container.Name }}\",\"labels\": {{ .Container.Config.Labels }},\"timestamp\":\"{{ .Time.Format \"2006-01-02T15:04:05Z07:00\" }}\",\"source\" :\"{{ .Source }}\",\"message\": {{ .Data }} }" | quote }}
+          - name: ROUTE_URIS
+            value: syslog+tcp://{{ template "fullname" . }}-oklog.{{ .Release.Namespace }}:7651/data/ingest
+        image: {{ .Values.logspout.image.repository }}:{{ .Values.logspout.image.tag }}
+        imagePullPolicy: {{ .Values.logspout.image.pullPolicy }}
+        name: logspout
+        volumeMounts:
+        - name: log
+          mountPath: /var/run/docker.sock
+      volumes:
+        - name: log
+          hostPath:
+              path: /var/run/docker.sock

@@ -8,4 +8,4 @@ spec:
     requests.memory: 7Gi
 
     # The sum of all pod memory limit must not exceed this value.
-    limits.memory: 12Gi
+    limits.memory: 15Gi

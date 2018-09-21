@@ -15,7 +15,7 @@ import (
 	"github.com/nats-io/nats-streaming-server/server"
 	"github.com/stretchr/testify/assert"
 
-	stan "github.com/nats-io/go-nats-streaming"
+	"github.com/nats-io/go-nats-streaming"
 )
 
 const (
@@ -93,7 +93,7 @@ func TestPublishWithBadPayload(t *testing.T) {
 func TestPublishWithoutSource(t *testing.T) {
 	payload := buildDefaultTestPayloadWithoutSource()
 	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldSource, api.ErrorTypeValidationViolation)
+	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldSourceId, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishWithoutEventType(t *testing.T) {
@@ -127,21 +127,21 @@ func TestPublishWithEmptyData(t *testing.T) {
 }
 
 func TestPublishInvalidEventTypeVersion(t *testing.T) {
-	payload := buildTestPayload(testSourceNamespace, testSourceType, testSourceEnvironment, testEventType, testEventTypeVersionInvalid, testEventID,
+	payload := buildTestPayload(testSourceID, testEventType, testEventTypeVersionInvalid, testEventID,
 		testEventTime, testData)
 	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
 	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventTypeVersion, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishInvalidEventTime(t *testing.T) {
-	payload := buildTestPayload(testSourceNamespace, testSourceType, testSourceEnvironment, testEventType, testEventTypeVersion, testEventID,
+	payload := buildTestPayload(testSourceID, testEventType, testEventTypeVersion, testEventID,
 		testEventTimeInvalid, testData)
 	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
 	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventTime, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishInvalidEventId(t *testing.T) {
-	payload := buildTestPayload(testSourceNamespace, testSourceType, testSourceEnvironment, testEventType, testEventTypeVersion, testEventIDInvalid,
+	payload := buildTestPayload(testSourceID, testEventType, testEventTypeVersion, testEventIDInvalid,
 		testEventTime, testData)
 	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
 	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventId, api.ErrorTypeValidationViolation)
