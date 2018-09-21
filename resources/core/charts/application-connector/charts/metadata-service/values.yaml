@@ -1,7 +1,7 @@
 deployment:
   image:
-    name: metadata-service
-    tag: 0.3.280
+    name: develop/metadata-service
+    tag: c389a326
     pullPolicy: IfNotPresent
   args:
     proxyPort: &proxyPort 8080
@@ -18,6 +18,6 @@ minioUserSecretName: remoteenvironments-minio-user
 
 tests:
   image:
-    name: metadata-service-tests
-    tag: 0.3.280
+    name: develop/metadata-service-tests
+    tag: c389a326
     pullPolicy: IfNotPresent
