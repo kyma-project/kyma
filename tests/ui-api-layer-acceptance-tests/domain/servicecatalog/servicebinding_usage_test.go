@@ -187,8 +187,8 @@ func (s *bindingUsageTestSuite) createInstance() error {
 		},
 		Spec: catalog.ServiceInstanceSpec{
 			PlanReference: catalog.PlanReference{
-				ClusterServiceClassExternalName: s.givenInstance.ServiceClass.ExternalName,
-				ClusterServicePlanExternalName:  s.givenInstance.ServicePlan.ExternalName,
+				ClusterServiceClassExternalName: s.givenInstance.ClusterServiceClass.ExternalName,
+				ClusterServicePlanExternalName:  s.givenInstance.ClusterServicePlan.ExternalName,
 			},
 		},
 	})

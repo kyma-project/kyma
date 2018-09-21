@@ -74,7 +74,7 @@ func TestBrokerQueries(t *testing.T) {
 	t.Run("SingleResource", func(t *testing.T) {
 		query := fmt.Sprintf(`
 			query($name: String!) {
-				serviceBroker(name: $name) {
+				clusterServiceBroker(name: $name) {
 					%s
 				}
 			}
