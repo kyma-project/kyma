@@ -11,8 +11,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: istio-kyma-patch
-        imagePullPolicy: Never
-        image: local/istio-kyma-patch:latest
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.istio_kyma_patch.dir }}istio-kyma-patch:{{ .Values.global.istio_kyma_patch.version }}
         volumeMounts:
         - name: config-volume
           mountPath: /etc/config
