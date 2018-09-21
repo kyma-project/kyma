@@ -94,9 +94,9 @@ func (r *serviceInstanceResolver) CreateServiceInstanceMutation(ctx context.Cont
 	var servicePlan *v1beta1.ServicePlan
 
 	if parameters.PlanRef.ClusterWide {
-		clusterServicePlan, err = r.clusterServicePlanGetter.FindByExternalName(parameters.PlanRef.ExternalName, serviceClass.Name)
+		clusterServicePlan, err = r.clusterServicePlanGetter.FindByExternalName(parameters.PlanRef.ExternalName, clusterServiceClass.Name)
 		if err != nil {
-			glog.Error(errors.Wrapf(err, "while getting %s for externalName `%s` for %s `%s`", pretty.ClusterServicePlan, parameters.PlanRef.ExternalName, pretty.ClusterServiceClass, serviceClass.Name))
+			glog.Error(errors.Wrapf(err, "while getting %s for externalName `%s` for %s `%s`", pretty.ClusterServicePlan, parameters.PlanRef.ExternalName, pretty.ClusterServiceClass, clusterServiceClass.Name))
 			return nil, gqlerror.New(err, pretty.ClusterServicePlan, gqlerror.WithCustomArgument("externalName", parameters.PlanRef.ExternalName))
 		}
 		if clusterServicePlan == nil {
