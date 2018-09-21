@@ -3,9 +3,14 @@ package remoteenv
 import (
 	"fmt"
 
+	"crypto/sha1"
+	"encoding/hex"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	log "github.com/sirupsen/logrus"
+	"regexp"
+	"strings"
+	"unicode"
 )
 
 func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) {
@@ -65,6 +70,7 @@ func convertToK8sType(service Service) v1alpha1.Service {
 
 	return v1alpha1.Service{
 		ID:                  service.ID,
+		Name: 				 createServiceName(service.DisplayName, service.ID),
 		DisplayName:         service.DisplayName,
 		Labels:              service.Labels,
 		Identifier:          service.Identifier,
@@ -125,4 +131,34 @@ func getServiceIndex(id string, re *v1alpha1.RemoteEnvironment) int {
 	}
 
 	return -1
+}
+
+var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
+
+// createServiceName creates the OSB Service Name for given RemoteEnvironment Service.
+// The OSB Service Name is used in the Service Catalog as the clusterServiceClassExternalName, so it need to be normalized.
+//
+// Normalization rules:
+// - MUST only contain lowercase characters, numbers and hyphens (no spaces).
+// - MUST be unique across all service objects returned in this response. MUST be a non-empty string.
+func createServiceName(serviceDisplayName, id string) string {
+	// generate 5 characters suffix from the id
+	sha := sha1.New()
+	sha.Write([]byte(id))
+	suffix := hex.EncodeToString(sha.Sum(nil))[:5]
+	// remove all characters, which is not alpha numeric
+	serviceDisplayName = nonAlphaNumeric.ReplaceAllString(serviceDisplayName, "-")
+	// to lower
+	serviceDisplayName = strings.Map(unicode.ToLower, serviceDisplayName)
+	// trim dashes if exists
+	serviceDisplayName = strings.TrimSuffix(serviceDisplayName, "-")
+	if len(serviceDisplayName) > 57 {
+		serviceDisplayName = serviceDisplayName[:57]
+	}
+	// add suffix
+	serviceDisplayName = fmt.Sprintf("%s-%s", serviceDisplayName, suffix)
+	// remove dash prefix if exists
+	//  - can happen, if the name was empty before adding suffix empty or had dash prefix
+	serviceDisplayName = strings.TrimPrefix(serviceDisplayName, "-")
+	return serviceDisplayName
 }

@@ -62,7 +62,6 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Identifier:          "Some cool external identifier",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 remoteEnvServiceAPI,
@@ -112,7 +111,6 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
@@ -156,7 +154,6 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
@@ -200,7 +197,6 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
@@ -266,7 +262,6 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 remoteEnvServiceAPI,
@@ -314,7 +309,6 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
@@ -358,7 +352,6 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
@@ -521,7 +514,6 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 remoteEnvServiceAPI,
@@ -571,7 +563,6 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Identifier:          "Same identifier",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
@@ -854,7 +845,6 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 remoteEnvServiceAPI,
@@ -910,7 +900,6 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
@@ -965,7 +954,6 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
 			Identifier:          "ServiceIdentifier",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
@@ -1032,7 +1020,6 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
@@ -1098,7 +1085,6 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
@@ -1164,7 +1150,6 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
@@ -1239,7 +1224,6 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
-			Name:                "some-service-cadf8",
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 remoteEnvServiceAPI,
@@ -1471,41 +1455,6 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 		assert.Nil(t, result)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.Contains(t, err.Error(), "some error")
-	})
-}
-
-func TestServiceDefinitionService_NameNormalization(t *testing.T) {
-
-	t.Run("should replace upper case with lower case", func(t *testing.T) {
-		// when
-		normalised := createServiceName("DisplayName", "id")
-
-		// then
-		assert.Equal(t, "displayname-87ea5", normalised)
-	})
-
-	t.Run("should replace non alpha numeric characters with --", func(t *testing.T) {
-		// when
-		normalised := createServiceName("display_!@#$%^&*()name", "id")
-
-		// then
-		assert.Equal(t, "display-name-87ea5", normalised)
-	})
-
-	t.Run("should remove leading dashes", func(t *testing.T) {
-		// when
-		normalised := createServiceName("-----displayname", "id")
-
-		// then
-		assert.Equal(t, "displayname-87ea5", normalised)
-	})
-
-	t.Run("should trim if name too long", func(t *testing.T) {
-		// when
-		normalised := createServiceName("VeryVeryVeryVeryVeryVeryVEryVeryVeryVeryVeryVeryVeryVeryLongDescription", "id")
-
-		// then
-		assert.Equal(t, "veryveryveryveryveryveryveryveryveryveryveryveryveryveryl-87ea5", normalised)
 	})
 }
 
