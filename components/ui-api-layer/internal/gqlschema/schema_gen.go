@@ -129,7 +129,7 @@ type ComplexityRoot struct {
 	EventActivation struct {
 		Name        func(childComplexity int) int
 		DisplayName func(childComplexity int) int
-		Source      func(childComplexity int) int
+		SourceId    func(childComplexity int) int
 		Events      func(childComplexity int) int
 	}
 
@@ -137,12 +137,6 @@ type ComplexityRoot struct {
 		EventType   func(childComplexity int) int
 		Version     func(childComplexity int) int
 		Description func(childComplexity int) int
-	}
-
-	EventActivationSource struct {
-		Environment func(childComplexity int) int
-		Type        func(childComplexity int) int
-		Namespace   func(childComplexity int) int
 	}
 
 	ExceededQuota struct {
@@ -226,7 +220,7 @@ type ComplexityRoot struct {
 	RemoteEnvironment struct {
 		Name                  func(childComplexity int) int
 		Description           func(childComplexity int) int
-		Source                func(childComplexity int) int
+		Labels                func(childComplexity int) int
 		Services              func(childComplexity int) int
 		EnabledInEnvironments func(childComplexity int) int
 		Status                func(childComplexity int) int
@@ -245,12 +239,6 @@ type ComplexityRoot struct {
 		ProviderDisplayName func(childComplexity int) int
 		Tags                func(childComplexity int) int
 		Entries             func(childComplexity int) int
-	}
-
-	RemoteEnvironmentSource struct {
-		Environment func(childComplexity int) int
-		Type        func(childComplexity int) int
-		Namespace   func(childComplexity int) int
 	}
 
 	ResourceQuota struct {
@@ -1834,12 +1822,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EventActivation.DisplayName(childComplexity), true
 
-	case "EventActivation.source":
-		if e.complexity.EventActivation.Source == nil {
+	case "EventActivation.sourceId":
+		if e.complexity.EventActivation.SourceId == nil {
 			break
 		}
 
-		return e.complexity.EventActivation.Source(childComplexity), true
+		return e.complexity.EventActivation.SourceId(childComplexity), true
 
 	case "EventActivation.events":
 		if e.complexity.EventActivation.Events == nil {
@@ -1868,27 +1856,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EventActivationEvent.Description(childComplexity), true
-
-	case "EventActivationSource.environment":
-		if e.complexity.EventActivationSource.Environment == nil {
-			break
-		}
-
-		return e.complexity.EventActivationSource.Environment(childComplexity), true
-
-	case "EventActivationSource.type":
-		if e.complexity.EventActivationSource.Type == nil {
-			break
-		}
-
-		return e.complexity.EventActivationSource.Type(childComplexity), true
-
-	case "EventActivationSource.namespace":
-		if e.complexity.EventActivationSource.Namespace == nil {
-			break
-		}
-
-		return e.complexity.EventActivationSource.Namespace(childComplexity), true
 
 	case "ExceededQuota.quotaName":
 		if e.complexity.ExceededQuota.QuotaName == nil {
@@ -2457,12 +2424,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RemoteEnvironment.Description(childComplexity), true
 
-	case "RemoteEnvironment.source":
-		if e.complexity.RemoteEnvironment.Source == nil {
+	case "RemoteEnvironment.labels":
+		if e.complexity.RemoteEnvironment.Labels == nil {
 			break
 		}
 
-		return e.complexity.RemoteEnvironment.Source(childComplexity), true
+		return e.complexity.RemoteEnvironment.Labels(childComplexity), true
 
 	case "RemoteEnvironment.services":
 		if e.complexity.RemoteEnvironment.Services == nil {
@@ -2547,27 +2514,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.RemoteEnvironmentService.Entries(childComplexity), true
-
-	case "RemoteEnvironmentSource.environment":
-		if e.complexity.RemoteEnvironmentSource.Environment == nil {
-			break
-		}
-
-		return e.complexity.RemoteEnvironmentSource.Environment(childComplexity), true
-
-	case "RemoteEnvironmentSource.type":
-		if e.complexity.RemoteEnvironmentSource.Type == nil {
-			break
-		}
-
-		return e.complexity.RemoteEnvironmentSource.Type(childComplexity), true
-
-	case "RemoteEnvironmentSource.namespace":
-		if e.complexity.RemoteEnvironmentSource.Namespace == nil {
-			break
-		}
-
-		return e.complexity.RemoteEnvironmentSource.Namespace(childComplexity), true
 
 	case "ResourceQuota.name":
 		if e.complexity.ResourceQuota.Name == nil {
@@ -4946,8 +4892,8 @@ func (ec *executionContext) _EventActivation(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "source":
-			out.Values[i] = ec._EventActivation_source(ctx, field, obj)
+		case "sourceId":
+			out.Values[i] = ec._EventActivation_sourceId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -5016,7 +4962,7 @@ func (ec *executionContext) _EventActivation_displayName(ctx context.Context, fi
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _EventActivation_source(ctx context.Context, field graphql.CollectedField, obj *EventActivation) graphql.Marshaler {
+func (ec *executionContext) _EventActivation_sourceId(ctx context.Context, field graphql.CollectedField, obj *EventActivation) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "EventActivation",
 		Args:   nil,
@@ -5024,7 +4970,7 @@ func (ec *executionContext) _EventActivation_source(ctx context.Context, field g
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Source, nil
+		return obj.SourceID, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -5032,10 +4978,9 @@ func (ec *executionContext) _EventActivation_source(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(EventActivationSource)
+	res := resTmp.(string)
 	rctx.Result = res
-
-	return ec._EventActivationSource(ctx, field.Selections, &res)
+	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
@@ -5187,112 +5132,6 @@ func (ec *executionContext) _EventActivationEvent_description(ctx context.Contex
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Description, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
-}
-
-var eventActivationSourceImplementors = []string{"EventActivationSource"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _EventActivationSource(ctx context.Context, sel ast.SelectionSet, obj *EventActivationSource) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, eventActivationSourceImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("EventActivationSource")
-		case "environment":
-			out.Values[i] = ec._EventActivationSource_environment(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "type":
-			out.Values[i] = ec._EventActivationSource_type(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "namespace":
-			out.Values[i] = ec._EventActivationSource_namespace(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _EventActivationSource_environment(ctx context.Context, field graphql.CollectedField, obj *EventActivationSource) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "EventActivationSource",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Environment, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _EventActivationSource_type(ctx context.Context, field graphql.CollectedField, obj *EventActivationSource) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "EventActivationSource",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Type, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _EventActivationSource_namespace(ctx context.Context, field graphql.CollectedField, obj *EventActivationSource) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "EventActivationSource",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -7882,8 +7721,8 @@ func (ec *executionContext) _RemoteEnvironment(ctx context.Context, sel ast.Sele
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "source":
-			out.Values[i] = ec._RemoteEnvironment_source(ctx, field, obj)
+		case "labels":
+			out.Values[i] = ec._RemoteEnvironment_labels(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -7966,7 +7805,7 @@ func (ec *executionContext) _RemoteEnvironment_description(ctx context.Context, 
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _RemoteEnvironment_source(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironment) graphql.Marshaler {
+func (ec *executionContext) _RemoteEnvironment_labels(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironment) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "RemoteEnvironment",
 		Args:   nil,
@@ -7974,7 +7813,7 @@ func (ec *executionContext) _RemoteEnvironment_source(ctx context.Context, field
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Source, nil
+		return obj.Labels, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -7982,10 +7821,9 @@ func (ec *executionContext) _RemoteEnvironment_source(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(RemoteEnvironmentSource)
+	res := resTmp.(JSON)
 	rctx.Result = res
-
-	return ec._RemoteEnvironmentSource(ctx, field.Selections, &res)
+	return res
 }
 
 // nolint: vetshadow
@@ -8425,112 +8263,6 @@ func (ec *executionContext) _RemoteEnvironmentService_entries(ctx context.Contex
 	}
 	wg.Wait()
 	return arr1
-}
-
-var remoteEnvironmentSourceImplementors = []string{"RemoteEnvironmentSource"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _RemoteEnvironmentSource(ctx context.Context, sel ast.SelectionSet, obj *RemoteEnvironmentSource) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, remoteEnvironmentSourceImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("RemoteEnvironmentSource")
-		case "environment":
-			out.Values[i] = ec._RemoteEnvironmentSource_environment(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "type":
-			out.Values[i] = ec._RemoteEnvironmentSource_type(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "namespace":
-			out.Values[i] = ec._RemoteEnvironmentSource_namespace(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _RemoteEnvironmentSource_environment(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironmentSource) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "RemoteEnvironmentSource",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Environment, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _RemoteEnvironmentSource_type(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironmentSource) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "RemoteEnvironmentSource",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Type, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _RemoteEnvironmentSource_namespace(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironmentSource) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "RemoteEnvironmentSource",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Namespace, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
 }
 
 var resourceQuotaImplementors = []string{"ResourceQuota"}
@@ -14125,7 +13857,7 @@ type Environment {
 type RemoteEnvironment {
     name: String!
     description: String!
-    source: RemoteEnvironmentSource!
+    labels: JSON!
     services: [RemoteEnvironmentService!]!
     enabledInEnvironments: [String!]!
     status: RemoteEnvironmentStatus!
@@ -14138,12 +13870,6 @@ type ConnectorService {
 type EnvironmentMapping {
     environment: String!
     remoteEnvironment: String!
-}
-
-type RemoteEnvironmentSource {
-    environment: String!
-    type: String!
-    namespace: String!
 }
 
 type RemoteEnvironmentService {
@@ -14167,12 +13893,6 @@ enum RemoteEnvironmentStatus {
     GATEWAY_NOT_CONFIGURED
 }
 
-type EventActivationSource {
-    environment: String!
-    type: String!
-    namespace: String!
-}
-
 type EventActivationEvent {
     eventType: String!
     version: String!
@@ -14182,7 +13902,7 @@ type EventActivationEvent {
 type EventActivation {
     name: String!
     displayName: String!
-    source: EventActivationSource!
+    sourceId: String!
     events: [EventActivationEvent!]!
 }
 

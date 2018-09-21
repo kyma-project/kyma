@@ -11,17 +11,15 @@ import (
 // check if an event activation custom resource exists having the same "namespace" as the "sub" namespace and the same "Source"
 func checkEventActivationForSubscription(eaClient *eaclientset.Clientset, subObj *subApis.Subscription) bool {
 	subNamespace := subObj.GetNamespace()
-	subSource := subObj.SubscriptionSpec.Source
+	subSourceID := subObj.SubscriptionSpec.SourceID
 
-	eaList, err := eaClient.RemoteenvironmentV1alpha1().EventActivations(subNamespace).List(metav1.ListOptions{})
+	eaList, err := eaClient.ApplicationconnectorV1alpha1().EventActivations(subNamespace).List(metav1.ListOptions{})
 	if err != nil {
 		log.Printf("Error: List Event Activation call failed for the subscription:\n    %v;\n    Error:%v\n", subObj, err)
 		return false
 	}
 	for _, e := range eaList.Items {
-		if subSource.SourceEnvironment == e.Source.Environment &&
-			subSource.SourceNamespace == e.Source.Namespace &&
-			subSource.SourceType == e.Source.Type {
+		if subSourceID == e.SourceID {
 			return true
 		}
 	}

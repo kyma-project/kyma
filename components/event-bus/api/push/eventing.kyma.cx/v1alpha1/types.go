@@ -23,13 +23,7 @@ type SubscriptionSpec struct {
 	PushRequestTimeoutMS          int64  `json:"push_request_timeout_ms"`
 	EventType                     string `json:"event_type"`
 	EventTypeVersion              string `json:"event_type_version"`
-	Source                        Source `json:"source"`
-}
-
-type Source struct {
-	SourceNamespace   string `json:"source_namespace"`
-	SourceType        string `json:"source_type"`
-	SourceEnvironment string `json:"source_environment"`
+	SourceID                      string `json:"source_id"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

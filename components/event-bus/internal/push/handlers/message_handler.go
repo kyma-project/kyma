@@ -21,13 +21,11 @@ import (
 
 const (
 	// push request headers to endpoint
-	headerSourceNamespace   = "KYMA-Source-Namespace"
-	headerSourceType        = "KYMA-Source-Type"
-	headerSourceEnvironment = "KYMA-Source-Environment"
-	headerEventType         = "KYMA-Event-Type"
-	headerEventTypeVersion  = "KYMA-Event-Type-Version"
-	headerEventID           = "KYMA-Event-ID"
-	headerEventTime         = "KYMA-Event-Time"
+	headerSourceID         = "KYMA-Source-ID"
+	headerEventType        = "KYMA-Event-Type"
+	headerEventTypeVersion = "KYMA-Event-Type-Version"
+	headerEventID          = "KYMA-Event-ID"
+	headerEventTime        = "KYMA-Event-Time"
 )
 
 type MessageHandlerFactory struct {
@@ -135,9 +133,7 @@ func (mhf *MessageHandlerFactory) NewMsgHandler(sub *v1alpha1.Subscription, opts
 }
 func annotateCloudEventHeaders(req *http.Request, cloudEvent *api.CloudEvent) {
 	// add cloud event properties as request headers except the data field
-	req.Header.Add(headerSourceNamespace, cloudEvent.Source.SourceNamespace)
-	req.Header.Add(headerSourceType, cloudEvent.Source.SourceType)
-	req.Header.Add(headerSourceEnvironment, cloudEvent.Source.SourceEnvironment)
+	req.Header.Add(headerSourceID, cloudEvent.SourceID)
 	req.Header.Add(headerEventType, cloudEvent.EventType)
 	req.Header.Add(headerEventTypeVersion, cloudEvent.EventTypeVersion)
 	req.Header.Add(headerEventID, cloudEvent.EventID)

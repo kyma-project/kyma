@@ -4,7 +4,7 @@ package versioned
 
 import (
 	glog "github.com/golang/glog"
-	remoteenvironmentv1alpha1 "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned/typed/remoteenvironment.kyma.cx/v1alpha1"
+	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned/typed/applicationconnector.kyma.cx/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
@@ -12,27 +12,27 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	RemoteenvironmentV1alpha1() remoteenvironmentv1alpha1.RemoteenvironmentV1alpha1Interface
+	ApplicationconnectorV1alpha1() applicationconnectorv1alpha1.ApplicationconnectorV1alpha1Interface
 	// Deprecated: please explicitly pick a version if possible.
-	Remoteenvironment() remoteenvironmentv1alpha1.RemoteenvironmentV1alpha1Interface
+	Applicationconnector() applicationconnectorv1alpha1.ApplicationconnectorV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	remoteenvironmentV1alpha1 *remoteenvironmentv1alpha1.RemoteenvironmentV1alpha1Client
+	applicationconnectorV1alpha1 *applicationconnectorv1alpha1.ApplicationconnectorV1alpha1Client
 }
 
-// RemoteenvironmentV1alpha1 retrieves the RemoteenvironmentV1alpha1Client
-func (c *Clientset) RemoteenvironmentV1alpha1() remoteenvironmentv1alpha1.RemoteenvironmentV1alpha1Interface {
-	return c.remoteenvironmentV1alpha1
+// ApplicationconnectorV1alpha1 retrieves the ApplicationconnectorV1alpha1Client
+func (c *Clientset) ApplicationconnectorV1alpha1() applicationconnectorv1alpha1.ApplicationconnectorV1alpha1Interface {
+	return c.applicationconnectorV1alpha1
 }
 
-// Deprecated: Remoteenvironment retrieves the default version of RemoteenvironmentClient.
+// Deprecated: Applicationconnector retrieves the default version of ApplicationconnectorClient.
 // Please explicitly pick a version.
-func (c *Clientset) Remoteenvironment() remoteenvironmentv1alpha1.RemoteenvironmentV1alpha1Interface {
-	return c.remoteenvironmentV1alpha1
+func (c *Clientset) Applicationconnector() applicationconnectorv1alpha1.ApplicationconnectorV1alpha1Interface {
+	return c.applicationconnectorV1alpha1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -51,7 +51,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	}
 	var cs Clientset
 	var err error
-	cs.remoteenvironmentV1alpha1, err = remoteenvironmentv1alpha1.NewForConfig(&configShallowCopy)
+	cs.applicationconnectorV1alpha1, err = applicationconnectorv1alpha1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 // panics if there is an error in the config.
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
-	cs.remoteenvironmentV1alpha1 = remoteenvironmentv1alpha1.NewForConfigOrDie(c)
+	cs.applicationconnectorV1alpha1 = applicationconnectorv1alpha1.NewForConfigOrDie(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(c)
 	return &cs
@@ -77,7 +77,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.remoteenvironmentV1alpha1 = remoteenvironmentv1alpha1.New(c)
+	cs.applicationconnectorV1alpha1 = applicationconnectorv1alpha1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs
