@@ -7,9 +7,6 @@ metadata:
     release: {{ .Release.Name }}-gateway
     heritage: {{ .Release.Service }}-gateway
 spec:
-  source:
-    environment: {{ .Values.eventService.deployment.args.sourceEnvironment }}
-    type: {{ .Values.eventService.deployment.args.sourceType }}
-    namespace: {{ .Values.eventService.deployment.args.sourceNamespace }}
+  sourceId: {{ .Values.eventService.deployment.args.sourceId }}
   description: "This Remote Environment corresponds to the connected remote solution."
   accessLabel: "echo-access-label"
