@@ -119,7 +119,7 @@ data:
       name: istio-webhook
     data:
       plugin.lua: |
-{{ .Files.Get "scripts/webhook/plugin.lua" | indent 8  }}
+{{ .Files.Get "scripts/webhook.lua" | indent 8  }}
     ---
     apiVersion: extensions/v1beta1
     kind: Deployment
@@ -141,7 +141,7 @@ data:
             - containerPort: 5000
             args:
             - --script
-            - /istio-webhook/scripts/plugin.lua
+            - /istio-webhook/scripts/webhook.lua
             - --port
             - "5000"
             volumeMounts:
