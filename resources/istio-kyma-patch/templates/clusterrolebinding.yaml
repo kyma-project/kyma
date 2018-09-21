@@ -9,4 +9,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: istio-kyma-patch
-  namespace: default
+  namespace: istio-system

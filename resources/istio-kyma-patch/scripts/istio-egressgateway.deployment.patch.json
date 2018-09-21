@@ -1,7 +1,0 @@
-[
-  {
-    "op": "replace",
-    "path": "/spec/template/spec/containers/0/args/15",
-    "value": "zipkin.kyma-system:9411"
-  }
-]

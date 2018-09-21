@@ -13,6 +13,13 @@ spec:
       - name: istio-kyma-patch
         imagePullPolicy: Never
         image: local/istio-kyma-patch:latest
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
         env:
-        - name: IS_LOCAL_INSTALLATION
-          value: "true"
+        - name: CONFIG_DIR
+          value: /etc/config
+      volumes:
+      - name: config-volume
+        configMap:
+          name: istio-kyma-patch-config

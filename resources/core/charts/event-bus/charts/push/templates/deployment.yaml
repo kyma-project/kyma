@@ -44,6 +44,7 @@ spec:
   template:
     metadata:
       annotations:
+        traffic.sidecar.istio.io/includeOutboundIPRanges: "10.0.0.1/8"
         sidecar.istio.io/inject: "true"
       labels:
         app: {{ template "push.name" . }}
