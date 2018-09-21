@@ -41,6 +41,8 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         serviceAPI,
+			Labels:      &map[string]string{"connected-app": "re"},
+			Identifier:  "Some cool external identifier",
 			Events: &Events{
 				Spec: []byte("events spec"),
 			},
@@ -57,7 +59,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Identifier:          "Some cool external identifier",
+			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 remoteEnvServiceAPI,
 			Events:              true,
@@ -68,6 +73,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceAPIService.On("New", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
+		serviceRepository.On("GetAll", "re").Return(nil, nil)
 		minioService := new(miniomocks.Service)
 		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(nil)
 
@@ -103,7 +109,9 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
 			Events:              true,
@@ -144,7 +152,9 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
 			Events:              false,
@@ -185,7 +195,9 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
 			Events:              false,
@@ -248,7 +260,9 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 remoteEnvServiceAPI,
 			Events:              true,
@@ -273,6 +287,93 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator.AssertExpectations(t)
 		serviceAPIService.AssertExpectations(t)
+		serviceRepository.AssertExpectations(t)
+		minioService.AssertExpectations(t)
+	})
+
+	t.Run("should override connected-app label", func(t *testing.T) {
+		// given
+		serviceDefinition := ServiceDefinition{
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Labels:        &map[string]string{"connected-app": "wrong-re"},
+			Api:           nil,
+			Events:        nil,
+			Documentation: nil,
+		}
+
+		remoteEnvService := remoteenv.Service{
+			ID:                  "uuid-1",
+			DisplayName:         "Some service",
+			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
+			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
+			Tags:                make([]string, 0),
+			API:                 nil,
+			Events:              false,
+		}
+		uuidGenerator := new(uuidmocks.Generator)
+		uuidGenerator.On("NewUUID").Return("uuid-1")
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
+		minioService := new(miniomocks.Service)
+		minioService.On("Put", "uuid-1", empty, empty, empty).Return(nil)
+
+		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, minioService)
+
+		// when
+		serviceID, err := service.Create("re", &serviceDefinition)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, "uuid-1", serviceID)
+
+		uuidGenerator.AssertExpectations(t)
+		serviceRepository.AssertExpectations(t)
+		minioService.AssertExpectations(t)
+	})
+
+	t.Run("should create connected-app label if not provided", func(t *testing.T) {
+		// given
+		serviceDefinition := ServiceDefinition{
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Api:           nil,
+			Events:        nil,
+			Documentation: nil,
+		}
+
+		remoteEnvService := remoteenv.Service{
+			ID:                  "uuid-1",
+			DisplayName:         "Some service",
+			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
+			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
+			Tags:                make([]string, 0),
+			API:                 nil,
+			Events:              false,
+		}
+		uuidGenerator := new(uuidmocks.Generator)
+		uuidGenerator.On("NewUUID").Return("uuid-1")
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
+		minioService := new(miniomocks.Service)
+		minioService.On("Put", "uuid-1", empty, empty, empty).Return(nil)
+
+		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, minioService)
+
+		// when
+		serviceID, err := service.Create("re", &serviceDefinition)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, "uuid-1", serviceID)
+
+		uuidGenerator.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
 		minioService.AssertExpectations(t)
 	})
@@ -411,7 +512,9 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 remoteEnvServiceAPI,
 			Events:              false,
@@ -440,6 +543,47 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceRepository.AssertExpectations(t)
 		minioService.AssertExpectations(t)
 	})
+
+	t.Run("should return an error when identifier conflict occurs", func(t *testing.T) {
+		// given
+		serviceDefinition := ServiceDefinition{
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Identifier:    "Same identifier",
+			Api:           nil,
+			Events:        nil,
+			Documentation: nil,
+		}
+
+		remoteEnvService := remoteenv.Service{
+			ID:                  "uuid-1",
+			DisplayName:         "Some service",
+			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
+			ProviderDisplayName: "Service Provider",
+			Identifier:          "Same identifier",
+			Labels:              map[string]string{"connected-app": "re"},
+			Tags:                make([]string, 0),
+			API:                 nil,
+			Events:              false,
+		}
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("GetAll", "re").Return([]remoteenv.Service{remoteEnvService}, nil)
+
+		service := NewServiceDefinitionService(nil, nil, serviceRepository, nil)
+
+		// when
+		serviceID, err := service.Create("re", &serviceDefinition)
+
+		// then
+		assert.Empty(t, serviceID)
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeAlreadyExists, err.Code())
+		assert.Contains(t, err.Error(), "Service with Identifier Same identifier already exists.")
+
+		serviceRepository.AssertExpectations(t)
+	})
 }
 
 func TestServiceDefinitionService_GetAll(t *testing.T) {
@@ -453,6 +597,7 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 				DisplayName:         "Service1",
 				LongDescription:     "Service1 description",
 				ProviderDisplayName: "Service1 Provider",
+				Labels:              map[string]string{"connected-app": "re"},
 				Tags:                nil,
 				API: &remoteenv.ServiceAPI{
 					TargetUrl:             "http://service1.com",
@@ -464,6 +609,7 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 				ID:                  "uuid-2",
 				DisplayName:         "Service2",
 				LongDescription:     "Service2 description",
+				Labels:              map[string]string{"connected-app": "re"},
 				ProviderDisplayName: "Service2 Provider",
 				Tags:                nil,
 				API:                 nil,
@@ -482,12 +628,14 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 		assert.Contains(t, result, ServiceDefinition{
 			ID:          "uuid-1",
 			Name:        "Service1",
+			Labels:      &map[string]string{"connected-app": "re"},
 			Description: "Service1 description",
 			Provider:    "Service1 Provider",
 		})
 		assert.Contains(t, result, ServiceDefinition{
 			ID:          "uuid-2",
 			Name:        "Service2",
+			Labels:      &map[string]string{"connected-app": "re"},
 			Description: "Service2 description",
 			Provider:    "Service2 Provider",
 		})
@@ -674,6 +822,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
+			Identifier:  "Identifier",
 			Api:         serviceAPI,
 			Events: &Events{
 				Spec: []byte("events spec"),
@@ -691,9 +840,12 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
+			Identifier:          "Identifier",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 remoteEnvServiceAPI,
 			Events:              true,
@@ -717,7 +869,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.NoError(t, err)
@@ -733,6 +885,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
+			Identifier:  "Identifier",
 			Api:         nil,
 			Events: &Events{
 				Spec: []byte("events spec"),
@@ -742,9 +895,12 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
+			Identifier:          "Identifier",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
 			Events:              true,
@@ -767,7 +923,61 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
+
+		// then
+		assert.NoError(t, err)
+
+		serviceAPIService.AssertExpectations(t)
+		serviceRepository.AssertExpectations(t)
+		minioService.AssertExpectations(t)
+	})
+
+	t.Run("should preserve a service identifier", func(t *testing.T) {
+		// given
+		serviceDefinition := ServiceDefinition{
+			Name:        "Some service",
+			Description: "Some cool service",
+			Provider:    "Service Provider",
+			Identifier:  "DifferentIdentifier",
+			Api:         nil,
+			Events: &Events{
+				Spec: []byte("events spec"),
+			},
+			Documentation: []byte("documentation"),
+		}
+
+		remoteEnvService := remoteenv.Service{
+			ID:                  "uuid-1",
+			DisplayName:         "Some service",
+			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
+			ProviderDisplayName: "Service Provider",
+			Identifier:          "ServiceIdentifier",
+			Labels:              map[string]string{"connected-app": "re"},
+			Tags:                make([]string, 0),
+			API:                 nil,
+			Events:              true,
+		}
+
+		serviceAPIService := new(serviceapimocks.Service)
+		serviceAPIService.On("Delete", "re", "uuid-1").Return(nil)
+
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
+		serviceRepository.On("Update", "re", remoteEnvService).Return(nil)
+
+		uuidGenerator := new(uuidmocks.Generator)
+		uuidGenerator.On("NewUUID").Return("uuid-1")
+
+		minioService := new(miniomocks.Service)
+		minioService.On("Put", "uuid-1", []byte("documentation"), []byte(nil), []byte("events spec")).Return(nil)
+		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
+
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+
+		// when
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.NoError(t, err)
@@ -795,6 +1005,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
+			Identifier:  "Identifier",
 			Api:         serviceAPI,
 			Events: &Events{
 				Spec: []byte("events spec"),
@@ -804,9 +1015,12 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
+			Identifier:          "Identifier",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
 			Events:              true,
@@ -828,7 +1042,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)
@@ -856,6 +1070,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
+			Identifier:  "Identifier",
 			Api:         serviceAPI,
 			Events: &Events{
 				Spec: []byte("events spec"),
@@ -865,9 +1080,12 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
+			Identifier:          "Identifier",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
 			Events:              true,
@@ -889,7 +1107,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)
@@ -917,6 +1135,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
+			Identifier:  "Identifier",
 			Api:         serviceAPI,
 			Events: &Events{
 				Spec: []byte("events spec"),
@@ -926,9 +1145,12 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
+			Identifier:          "Identifier",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
 			Events:              true,
@@ -950,7 +1172,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)
@@ -979,6 +1201,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
+			Identifier:  "Identifier",
 			Api:         serviceAPI,
 			Events: &Events{
 				Spec: []byte("events spec"),
@@ -996,9 +1219,12 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
+			Identifier:          "Identifier",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
 			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 remoteEnvServiceAPI,
 			Events:              true,
@@ -1022,7 +1248,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)

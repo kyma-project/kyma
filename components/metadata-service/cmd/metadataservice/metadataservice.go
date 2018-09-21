@@ -156,7 +156,7 @@ func newRemoteEnvironmentRepository(config *restclient.Config) (remoteenv.Servic
 		return nil, apperrors.Internal("failed to create k8s remote environment client, %s", err)
 	}
 
-	rei := remoteEnvironmentClientset.RemoteenvironmentV1alpha1().RemoteEnvironments()
+	rei := remoteEnvironmentClientset.ApplicationconnectorV1alpha1().RemoteEnvironments()
 
 	return remoteenv.NewServiceRepository(rei), nil
 }

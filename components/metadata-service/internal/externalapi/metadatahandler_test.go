@@ -36,9 +36,12 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 
 		// given
 		serviceDetails := ServiceDetails{
-			Name:        "service name",
-			Provider:    "service provider",
-			Description: "service description",
+			Name:             "service name",
+			Provider:         "service provider",
+			Description:      "service description",
+			ShortDescription: "service short description",
+			Identifier:       "service identifier",
+			Labels:           &map[string]string{"showcase": "true"},
 			Api: &API{
 				TargetUrl: "http://service.com",
 				Credentials: &Credentials{
@@ -62,9 +65,12 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		}
 
 		serviceDefinition := &metadata.ServiceDefinition{
-			Name:        "service name",
-			Provider:    "service provider",
-			Description: "service description",
+			Name:             "service name",
+			Provider:         "service provider",
+			Description:      "service description",
+			ShortDescription: "service short description",
+			Identifier:       "service identifier",
+			Labels:           &map[string]string{"showcase": "true"},
 			Api: &serviceapi.API{
 				TargetUrl: "http://service.com",
 				Credentials: &serviceapi.Credentials{
@@ -590,7 +596,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", serviceDefinition).Return(nil)
+		serviceDefinitionService.On("Update", "re", "1234", serviceDefinition).Return(*serviceDefinition, nil)
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
 
@@ -679,7 +685,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", mock.Anything).Return(apperrors.Internal(""))
+		serviceDefinitionService.On("Update", "re", "1234", mock.Anything).Return(metadata.ServiceDefinition{}, apperrors.Internal(""))
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
 
