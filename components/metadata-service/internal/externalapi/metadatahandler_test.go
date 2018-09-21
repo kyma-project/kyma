@@ -732,7 +732,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		})
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "654321", serviceDefinition).Return(apperrors.NotFound(""))
+		serviceDefinitionService.On("Update", "re", "654321", serviceDefinition).Return(metadata.ServiceDefinition{}, apperrors.NotFound(""))
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
 
