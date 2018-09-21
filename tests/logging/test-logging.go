@@ -29,7 +29,7 @@ func getPodStatus(stdout string) (podName string, isReady bool) {
 }
 
 func testPodsAreReady() {
-	timeout := time.After(3 * time.Minute)
+	timeout := time.After(10 * time.Minute)
 	tick := time.Tick(5 * time.Second)
 
 	for {
@@ -38,13 +38,13 @@ func testPodsAreReady() {
 
 		select {
 		case <-timeout:
-			log.Println("Test if all the OKLog pods are up and running: result: Timed out!!")
 			if expectedLogSpout != actualLogSpout {
-				log.Fatalf("Expected 'Logspout' pods healthy is %d but got %d instances", expectedLogSpout, actualLogSpout)
+				log.Printf("Expected 'Logspout' pods healthy is %d but got %d instances", expectedLogSpout, actualLogSpout)
 			}
 			if expectedOKLog != actualOKLog {
-				log.Fatalf("Expected 'OKLog' pods healthy is %d but got %d instances", expectedOKLog, actualOKLog)
+				log.Printf("Expected 'OKLog' pods healthy is %d but got %d instances", expectedOKLog, actualOKLog)
 			}
+			log.Fatalf("Test if all the OKLog/Logspout pods are up and running: result: Timed out!!")
 		case <-tick:
 			cmd := exec.Command("kubectl", "get", "pods", "-l", "component in (oklog, logspout)", "-n", namespace, "--no-headers")
 			stdoutStderr, err := cmd.CombinedOutput()
