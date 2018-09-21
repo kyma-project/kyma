@@ -216,7 +216,7 @@ func initService(serviceDef *ServiceDefinition, id, identifier, remoteEnvironmen
 		ProviderDisplayName: serviceDef.Provider,
 		Tags:                make([]string, 0),
 	}
-	
+
 	service.Events = serviceDef.Events != nil
 
 	if serviceDef.ShortDescription == "" {

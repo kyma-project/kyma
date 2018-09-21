@@ -70,7 +70,7 @@ func convertToK8sType(service Service) v1alpha1.Service {
 
 	return v1alpha1.Service{
 		ID:                  service.ID,
-		Name: 				 createServiceName(service.DisplayName, service.ID),
+		Name:                createServiceName(service.DisplayName, service.ID),
 		DisplayName:         service.DisplayName,
 		Labels:              service.Labels,
 		Identifier:          service.Identifier,

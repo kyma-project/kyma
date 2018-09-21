@@ -215,7 +215,7 @@ func TestCreateServices(t *testing.T) {
 
 		newService := remoteenv.Service{
 			ID:              "id1",
-			Name:			"promotions-api-c48fe",
+			Name:            "promotions-api-c48fe",
 			DisplayName:     "Promotions API",
 			LongDescription: "This is Promotions API",
 			Tags:            []string{"promotions"},
@@ -369,7 +369,7 @@ func TestUpdateServices(t *testing.T) {
 
 		service := remoteenv.Service{
 			ID:                  "id1",
-			Name: 				 "promotions-api-4e89d",
+			Name:                "promotions-api-4e89d",
 			DisplayName:         "Promotions API",
 			LongDescription:     "This is Promotions API",
 			ProviderDisplayName: "SAP Labs Poland",
@@ -495,7 +495,7 @@ func createK8sService() v1alpha1.Service {
 
 	return v1alpha1.Service{
 		ID:                  "id3",
-		Name: 				"promotions-api-c48fe",
+		Name:                "promotions-api-c48fe",
 		DisplayName:         "Promotions API",
 		LongDescription:     "This is Promotions API",
 		ProviderDisplayName: "SAP Hybris",
