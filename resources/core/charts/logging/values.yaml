@@ -54,7 +54,6 @@ loadBalancerService:
 ## Persist data to a persitent volume
 persistence:
   enabled: true
-  storageClass: standard
   accessMode: ReadWriteOnce
   size: 5Gi
   mountPath: /data

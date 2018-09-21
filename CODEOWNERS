@@ -64,6 +64,9 @@
 # The `kubeless` subchart
 /resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
+# The `logging` subchart
+/resources/core/charts/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+
 # The `minio` subchart
 /resources/core/charts/minio/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
