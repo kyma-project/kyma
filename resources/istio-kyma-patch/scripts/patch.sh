@@ -8,7 +8,7 @@ fi
 
 function run_all_patches() {
   echo "--> Patch resources"
-  for f in $(find ${CONFIG_DIR} -name '*\.patch\.json'); do
+  for f in $(find ${CONFIG_DIR} -name '*\.patch\.json' -maxdepth 1); do
     local type=$(basename ${f} | cut -d. -f2)
     local name=$(basename ${f} | cut -d. -f1)
     echo "    Patch $type $name from: ${f}"
@@ -51,7 +51,7 @@ function configure_sidecar_injector() {
 
 function apply_all() {
   echo "--> Apply resources"
-  for f in $(find ${DIR} -name '*\.yaml' | xargs -I '{}' basename '{}'); do
+  for f in $(find ${CONFIG_DIR} -name '*\.yaml' -maxdepth 1 | xargs -I '{}' basename '{}'); do
     echo "    Apply $f"
     kubectl apply -f ${CONFIG_DIR}/${f}
   done

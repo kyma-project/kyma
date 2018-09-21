@@ -119,7 +119,7 @@ data:
       name: istio-webhook
     data:
       plugin.lua: |
-      {{ .Files.Get "scripts/webhook/plugin.lua" | indent 8  }}
+{{ .Files.Get "scripts/webhook/plugin.lua" | indent 8  }}
     ---
     apiVersion: extensions/v1beta1
     kind: Deployment
