@@ -596,7 +596,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", serviceDefinition).Return(nil)
+		serviceDefinitionService.On("Update", "re", "1234", serviceDefinition).Return(*serviceDefinition, nil)
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
 
@@ -685,7 +685,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", mock.Anything).Return(apperrors.Internal(""))
+		serviceDefinitionService.On("Update", "re", "1234", mock.Anything).Return(metadata.ServiceDefinition{}, apperrors.Internal(""))
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
 
