@@ -93,7 +93,7 @@ func fixRemoteEnvironment() *v1alpha1.RemoteEnvironment {
 	return &v1alpha1.RemoteEnvironment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "RemoteEnvironment",
-			APIVersion: "remoteenvironment.kyma.cx/v1alpha1",
+			APIVersion: "applicationconnector.kyma-project.io",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test-remote-env",
