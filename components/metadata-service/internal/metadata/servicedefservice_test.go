@@ -831,6 +831,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
+			Identifier:  "Identifier",
 			Api:         serviceAPI,
 			Events: &Events{
 				Spec: []byte("events spec"),
@@ -848,6 +849,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
+			Identifier:          "Identifier",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
@@ -893,6 +895,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
+			Identifier:  "Identifier",
 			Api:         nil,
 			Events: &Events{
 				Spec: []byte("events spec"),
@@ -902,6 +905,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
+			Identifier:          "Identifier",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
@@ -1013,6 +1017,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
+			Identifier:  "Identifier",
 			Api:         serviceAPI,
 			Events: &Events{
 				Spec: []byte("events spec"),
@@ -1022,6 +1027,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
+			Identifier:          "Identifier",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
@@ -1077,6 +1083,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
+			Identifier:  "Identifier",
 			Api:         serviceAPI,
 			Events: &Events{
 				Spec: []byte("events spec"),
@@ -1086,6 +1093,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
+			Identifier:          "Identifier",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
@@ -1141,6 +1149,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
+			Identifier:  "Identifier",
 			Api:         serviceAPI,
 			Events: &Events{
 				Spec: []byte("events spec"),
@@ -1150,6 +1159,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
+			Identifier:          "Identifier",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
@@ -1206,6 +1216,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
+			Identifier:  "Identifier",
 			Api:         serviceAPI,
 			Events: &Events{
 				Spec: []byte("events spec"),
@@ -1223,6 +1234,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
+			Identifier:          "Identifier",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
 			ShortDescription:    "Some cool service",
