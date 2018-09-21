@@ -52,13 +52,17 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **spec.source** |    **NO**   | Identifies the Remote Environment in the cluster. |
 | **spec.description** |    **NO**   | Describes the connected Remote Environment.  |
+| **spec.labels** |    **NO**   | Labels indentified Remote Environment taxonomy.  |
 | **spec.accessLabel** |    **NO**   | Labels the environment when the [EnvironmentMapping](041-cr-environment-mapping.md) is created. |
 | **spec.services** |    **NO**   | Contains all services that the Remote Environment provides. |
 | **spec.services.id** |    **YES**   | Identifies the service that the Remote Environment provides. |
+| **spec.services.identifier** |    **NO**   | Additional identifier of the service class. |
 | **spec.services.displayName** |    **YES**   | Specifies a human-readable name of the Remote Environment service. |
+| **spec.services.description** |    **NO**   | Provides a short human-readable description of the Remote Environment service. |
 | **spec.services.longDescription** |    **NO**   | Provides a human-readable description of the Remote Environment service. |
 | **spec.services.providerDisplayName** |    **YES**   | Specifies a human-readable name of the Remote Environment service provider. |
 | **spec.services.tags** |    **NO**   | Specifies the categories of the Remote Environment service. |
+| **spec.services.labels** |    **NO**   | Specifies the additional labels of the Remote Environment service. |
 | **spec.services.entries** |    **YES**   | Contains information about APIs and Events that the Remote Environment service provides. |
 | **spec.services.entries.type** |    **YES**   | Specifies whether the entry is of API or Event type. |
 | **spec.services.entries.gatewayUrl** |    **NO**   | Specifies the URL of the Application Connector. This field is required for the API entry type. |
