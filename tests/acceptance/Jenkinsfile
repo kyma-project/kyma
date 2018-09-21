@@ -45,15 +45,6 @@ podTemplate(label: label) {
                                     + "--enable=vet "
                                     + "./...")
                         }
-
-
-                        if (params.FULL_BUILD) {
-                            stage("IP scan $application (Sourceclear)"){
-                                withCredentials([string(credentialsId: 'SRCCLR_API_TOKEN', variable: 'SRCCLR_API_TOKEN')]) {
-                                    execute('curl -sSL https://download.sourceclear.com/ci.sh | sh', "SRCCLR_API_TOKEN=$SRCCLR_API_TOKEN")
-                                }
-                            }
-                        }
                         
                         stage("build image $application") {
                             dir(env.APP_FOLDER) {
