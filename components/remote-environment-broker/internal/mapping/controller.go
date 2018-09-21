@@ -45,6 +45,11 @@ type nsBrokerFacade interface {
 	Exist(destinationNs string) (bool, error)
 }
 
+//go:generate mockery -name=mappingLister -output=automock -outpkg=automock -case=underscore
+type mappingLister interface {
+	ListEnvironmentMappings(environment string) ([]*v1alpha1.EnvironmentMapping, error)
+}
+
 // Controller populates local storage with all EnvironmentMapping custom resources created in k8s cluster.
 type Controller struct {
 	manageNsBrokers bool
@@ -54,6 +59,7 @@ type Controller struct {
 	nsPatcher       nsPatcher
 	reGetter        reGetter
 	nsBrokerFacade  nsBrokerFacade
+	mappingSvc      mappingLister
 	log             logrus.FieldLogger
 }
 
@@ -68,6 +74,7 @@ func New(manageNsBrokers bool, emInformer cache.SharedIndexInformer, nsInformer 
 		nsPatcher:       nsPatcher,
 		reGetter:        reGetter,
 		nsBrokerFacade:  nsBrokerFacade,
+		mappingSvc:      newMappingService(emInformer),
 	}
 
 	// EventHandler reacts every time when we add, update or delete EnvironmentMapping
@@ -189,7 +196,7 @@ func (c *Controller) processItem(key string) error {
 			return err
 		}
 		if c.manageNsBrokers {
-			if err := c.ensureNsBrokerNotRegistered(namespace); err != nil {
+			if err := c.ensureNsBrokerNotRegisteredIfNoMappings(namespace); err != nil {
 				return err
 			}
 		}
@@ -236,14 +243,14 @@ func (c *Controller) ensureNsBrokerRegistered(envMapping *v1alpha1.EnvironmentMa
 	if brokerExist {
 		return nil
 	}
-	if err := c.nsBrokerFacade.Create(envMapping.Namespace); err != nil {
+	if err = c.nsBrokerFacade.Create(envMapping.Namespace); err != nil {
 		return errors.Wrapf(err, "while creating namespaced broker in namespace [%s]", envMapping.Namespace)
 	}
 
 	return nil
 }
 
-func (c *Controller) ensureNsBrokerNotRegistered(namespace string) error {
+func (c *Controller) ensureNsBrokerNotRegisteredIfNoMappings(namespace string) error {
 	brokerExist, err := c.nsBrokerFacade.Exist(namespace)
 	if err != nil {
 		return errors.Wrapf(err, "while checking if namespaced broker exist in namespace [%s]", namespace)
@@ -251,8 +258,15 @@ func (c *Controller) ensureNsBrokerNotRegistered(namespace string) error {
 	if !brokerExist {
 		return nil
 	}
-
-	if err := c.nsBrokerFacade.Delete(namespace); err != nil {
+	mappings, err := c.mappingSvc.ListEnvironmentMappings(namespace)
+	if err != nil {
+		return errors.Wrapf(err, "while listing environment mappings from namespace [%s]", namespace)
+	}
+	// delete broker only if there're no environment mappings left in the namespace
+	if len(mappings) > 0 {
+		return nil
+	}
+	if err = c.nsBrokerFacade.Delete(namespace); err != nil {
 		return errors.Wrapf(err, "while removing namespaced broker from namespace [%s]", namespace)
 	}
 	return nil
