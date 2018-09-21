@@ -30,21 +30,25 @@ type ServiceInstanceEvent struct {
 	Instance ServiceInstance
 }
 
+type ServiceInstanceResourceRef struct {
+	Name        string
+	DisplayName string
+	ClusterWide bool
+}
+
 type ServiceInstance struct {
-	Name                    string
-	Environment             string
-	ServiceClassName        string
-	ServiceClassDisplayName string
-	ServicePlanName         string
-	ServicePlanDisplayName  string
-	ServicePlanSpec         map[string]interface{}
-	ServicePlan             ServicePlan
-	ServiceClass            ServiceClass
-	CreationTimestamp       int
-	Labels                  []string
-	Status                  ServiceInstanceStatus
-	ServiceBindings         []ServiceBinding
-	ServiceBindingUsages    []ServiceBindingUsage
+	Name                 string
+	Environment          string
+	ClassReference       ServiceInstanceResourceRef
+	PlanReference        ServiceInstanceResourceRef
+	ServicePlanSpec      map[string]interface{}
+	ClusterServicePlan   ClusterServicePlan
+	ClusterServiceClass  ClusterServiceClass
+	CreationTimestamp    int
+	Labels               []string
+	Status               ServiceInstanceStatus
+	ServiceBindings      []ServiceBinding
+	ServiceBindingUsages []ServiceBindingUsage
 }
 
 type ServiceInstanceStatus struct {
@@ -143,8 +147,14 @@ func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 				createServiceInstance(params:{
     				name: $name,
     				environment: $environment,
-    				externalPlanName: $externalPlanName,
-    				externalServiceClassName: $externalServiceClassName,
+					classRef: {
+						externalName: $externalServiceClassName,
+						clusterWide: true,
+					},
+					planRef: {
+						externalName: $externalPlanName,
+						clusterWide: true,
+					},
     				labels: $labels,
 					parameterSchema: $parameterSchema
 				}) {
@@ -155,8 +165,8 @@ func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 	req := graphql.NewRequest(query)
 	req.SetVar("name", expectedResource.Name)
 	req.SetVar("environment", expectedResource.Environment)
-	req.SetVar("externalPlanName", expectedResource.ServicePlan.ExternalName)
-	req.SetVar("externalServiceClassName", expectedResource.ServiceClass.ExternalName)
+	req.SetVar("externalPlanName", expectedResource.ClusterServicePlan.ExternalName)
+	req.SetVar("externalServiceClassName", expectedResource.ClusterServiceClass.ExternalName)
 	req.SetVar("labels", expectedResource.Labels)
 	req.SetVar("parameterSchema", expectedResource.ServicePlanSpec)
 
@@ -261,17 +271,46 @@ func instanceDetailsFields() string {
 	return `
 		name
 		environment
-		serviceClassName
-		ServiceClassDisplayName
-		servicePlanName
-		servicePlanDisplayName
-		servicePlanSpec
+		planSpec
+		classReference {
+			name
+			displayName
+			clusterWide	
+		}
+		planReference {
+			name
+			displayName
+			clusterWide
+		}
+		bindable
 		creationTimestamp
 		labels
 		status {
 			type
 			reason
 			message
+		}
+		clusterServicePlan {
+			name
+			displayName
+			externalName
+			description
+			relatedServiceClassName
+			instanceCreateParameterSchema
+		}
+		 clusterServiceClass {
+			name
+			externalName
+			displayName
+			creationTimestamp
+			description
+			longDescription
+			imageUrl
+			documentationUrl
+			supportUrl
+			providerDisplayName
+			tags
+			activated
 		}
 		servicePlan {
 			name
@@ -281,7 +320,7 @@ func instanceDetailsFields() string {
 			relatedServiceClassName
 			instanceCreateParameterSchema
 		}
-		serviceClass {
+		 serviceClass {
 			name
 			externalName
 			displayName
@@ -328,8 +367,8 @@ func instanceEventDetailsFields() string {
 func checkInstance(t *testing.T, expected, actual ServiceInstance) {
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Equal(t, expected.Environment, actual.Environment)
-	assert.Equal(t, expected.ServicePlan.Name, actual.ServicePlan.Name)
-	assert.Equal(t, expected.ServiceClass.Name, actual.ServiceClass.Name)
+	assert.Equal(t, expected.ClusterServicePlan.Name, actual.ClusterServicePlan.Name)
+	assert.Equal(t, expected.ClusterServiceClass.Name, actual.ClusterServiceClass.Name)
 }
 
 func assertInstanceExistsAndEqual(t *testing.T, expectedElement ServiceInstance, arr []ServiceInstance) {
@@ -356,11 +395,11 @@ func instance(name string) ServiceInstance {
 				"value": "2",
 			},
 		},
-		ServicePlan: ServicePlan{
+		ClusterServicePlan: ClusterServicePlan{
 			Name:         "86064792-7ea2-467b-af93-ac9694d96d52",
 			ExternalName: "default",
 		},
-		ServiceClass: ServiceClass{
+		ClusterServiceClass: ClusterServiceClass{
 			Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
 			ExternalName: "user-provided-service",
 		},

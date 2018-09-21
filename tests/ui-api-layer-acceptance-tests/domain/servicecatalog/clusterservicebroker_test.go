@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type ServiceBroker struct {
+type ClusterServiceBroker struct {
 	Name              string
 	CreationTimestamp int
 	Url               string
@@ -27,11 +27,11 @@ type ServiceBrokerStatus struct {
 }
 
 type brokersQueryResponse struct {
-	ServiceBrokers []ServiceBroker
+	ServiceBrokers []ClusterServiceBroker
 }
 
 type brokerQueryResponse struct {
-	ServiceBroker ServiceBroker
+	ServiceBroker ClusterServiceBroker
 }
 
 func TestBrokerQueries(t *testing.T) {
@@ -58,7 +58,7 @@ func TestBrokerQueries(t *testing.T) {
 	t.Run("MultipleResources", func(t *testing.T) {
 		query := fmt.Sprintf(`
 			query {
-				serviceBrokers {
+				clusterServiceBrokers {
 					%s
 				}
 			}	
@@ -90,7 +90,7 @@ func TestBrokerQueries(t *testing.T) {
 	})
 }
 
-func checkBroker(t *testing.T, expected, actual ServiceBroker) {
+func checkBroker(t *testing.T, expected, actual ClusterServiceBroker) {
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Contains(t, actual.Url, expected.Name)
 
@@ -100,7 +100,7 @@ func checkBroker(t *testing.T, expected, actual ServiceBroker) {
 	assert.NotEmpty(t, actual.Status.Reason)
 }
 
-func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedElement ServiceBroker) {
+func assertBrokerExistsAndEqual(t *testing.T, arr []ClusterServiceBroker, expectedElement ClusterServiceBroker) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
@@ -113,8 +113,8 @@ func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedEleme
 	}, "Resource does not exist")
 }
 
-func broker() ServiceBroker {
-	return ServiceBroker{
+func broker() ClusterServiceBroker {
+	return ClusterServiceBroker{
 		Name: "ups-broker",
 		Status: ServiceBrokerStatus{
 			Ready: true,

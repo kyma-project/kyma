@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type ServicePlan struct {
+type ClusterServicePlan struct {
 	Name                          string
 	DisplayName                   string
 	ExternalName                  string
@@ -21,7 +21,7 @@ type ServicePlan struct {
 	InstanceCreateParameterSchema map[string]interface{}
 }
 
-type ServiceClass struct {
+type ClusterServiceClass struct {
 	Name                string
 	ExternalName        string
 	DisplayName         string
@@ -34,18 +34,18 @@ type ServiceClass struct {
 	ProviderDisplayName string
 	Tags                []string
 	Activated           bool
-	Plans               []ServicePlan
+	Plans               []ClusterServicePlan
 	apiSpec             map[string]interface{}
 	asyncApiSpec        map[string]interface{}
 	content             map[string]interface{}
 }
 
 type classesQueryResponse struct {
-	ServiceClasses []ServiceClass
+	ServiceClasses []ClusterServiceClass
 }
 
 type classQueryResponse struct {
-	ServiceClass ServiceClass
+	ServiceClass ClusterServiceClass
 }
 
 func TestClassesQueries(t *testing.T) {
@@ -83,7 +83,7 @@ func TestClassesQueries(t *testing.T) {
 	t.Run("MultipleResources", func(t *testing.T) {
 		query := fmt.Sprintf(`
 			query {
-				serviceClasses {
+				clusterServiceClasses {
 					%s
 				}
 			}	
@@ -99,7 +99,7 @@ func TestClassesQueries(t *testing.T) {
 	t.Run("SingleResource", func(t *testing.T) {
 		query := fmt.Sprintf(`
 			query($name: String!) {
-				serviceClass(name: $name) {
+				clusterServiceClass(name: $name) {
 					%s
 				}
 			}	
@@ -116,7 +116,7 @@ func TestClassesQueries(t *testing.T) {
 
 }
 
-func checkClass(t *testing.T, expected, actual ServiceClass) {
+func checkClass(t *testing.T, expected, actual ClusterServiceClass) {
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Equal(t, expected.ExternalName, actual.ExternalName)
 
@@ -125,13 +125,13 @@ func checkClass(t *testing.T, expected, actual ServiceClass) {
 	assertPlanExistsAndEqual(t, actual.Plans, expected.Plans[0])
 }
 
-func checkPlan(t *testing.T, expected, actual ServicePlan) {
+func checkPlan(t *testing.T, expected, actual ClusterServicePlan) {
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Equal(t, expected.ExternalName, actual.ExternalName)
 	assert.Equal(t, expected.RelatedServiceClassName, actual.RelatedServiceClassName)
 }
 
-func assertClassExistsAndEqual(t *testing.T, arr []ServiceClass, expectedElement ServiceClass) {
+func assertClassExistsAndEqual(t *testing.T, arr []ClusterServiceClass, expectedElement ClusterServiceClass) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
@@ -144,7 +144,7 @@ func assertClassExistsAndEqual(t *testing.T, arr []ServiceClass, expectedElement
 	}, "Resource does not exist")
 }
 
-func assertPlanExistsAndEqual(t *testing.T, arr []ServicePlan, expectedElement ServicePlan) {
+func assertPlanExistsAndEqual(t *testing.T, arr []ClusterServicePlan, expectedElement ClusterServicePlan) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
@@ -157,12 +157,12 @@ func assertPlanExistsAndEqual(t *testing.T, arr []ServicePlan, expectedElement S
 	}, "Resource does not exist")
 }
 
-func class() ServiceClass {
-	return ServiceClass{
+func class() ClusterServiceClass {
+	return ClusterServiceClass{
 		Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
 		ExternalName: "user-provided-service",
 		Activated:    false,
-		Plans: []ServicePlan{
+		Plans: []ClusterServicePlan{
 			{
 				Name:                    "86064792-7ea2-467b-af93-ac9694d96d52",
 				ExternalName:            "default",
