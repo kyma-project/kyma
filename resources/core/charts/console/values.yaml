@@ -27,3 +27,5 @@ cluster:
   # Organization data for which the Kyma cluster is installed
   orgId: 'my-org-123'
   orgName: 'My Organization'
+  headerLogoUrl: 'https://vignette.wikia.nocookie.net/le-miiverse-resource/images/6/6c/Hat-Luigi-icon.png'
+  headerTitle: 'Maskopatol'
