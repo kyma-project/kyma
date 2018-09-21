@@ -10,26 +10,14 @@ var (
 	isValidEventID = regexp.MustCompile(AllowedEventIDChars).MatchString
 
 	// fully-qualified topic name components
-	isValidSourceEnvironment = regexp.MustCompile(AllowedSourceEnvironmentChars).MatchString
-	isValidSourceNamespace   = regexp.MustCompile(AllowedSourceNamespaceChars).MatchString
-	isValidSourceType        = regexp.MustCompile(AllowedSourceTypeChars).MatchString
-	isValidEventType         = regexp.MustCompile(AllowedEventTypeChars).MatchString
-	isValidEventTypeVersion  = regexp.MustCompile(AllowedEventTypeVersionChars).MatchString
+	isValidEventType        = regexp.MustCompile(AllowedEventTypeChars).MatchString
+	isValidEventTypeVersion = regexp.MustCompile(AllowedEventTypeVersionChars).MatchString
 )
 
 //ValidatePublish validates a publish POST request
 func ValidatePublish(r *PublishRequest) *Error {
-	if r.Source == nil {
-		return ErrorResponseMissingFieldSource()
-	}
-	if r.Source.SourceType == "" {
-		return ErrorResponseMissingFieldSourceType()
-	}
-	if r.Source.SourceNamespace == "" {
-		return ErrorResponseMissingFieldSourceNamespace()
-	}
-	if r.Source.SourceEnvironment == "" {
-		return ErrorResponseMissingFieldSourceEnvironment()
+	if len(r.SourceID) == 0 {
+		return ErrorResponseMissingFieldSourceId()
 	}
 	if len(r.EventType) == 0 {
 		return ErrorResponseMissingFieldEventType()
@@ -47,15 +35,6 @@ func ValidatePublish(r *PublishRequest) *Error {
 	}
 
 	// validate the fully-qualified topic name components
-	if !isValidSourceEnvironment(r.Source.SourceEnvironment) {
-		return ErrorResponseWrongSourceEnvironment()
-	}
-	if !isValidSourceNamespace(r.Source.SourceNamespace) {
-		return ErrorResponseWrongSourceNamespace()
-	}
-	if !isValidSourceType(r.Source.SourceType) {
-		return ErrorResponseWrongSourceType()
-	}
 	if !isValidEventType(r.EventType) {
 		return ErrorResponseWrongEventType()
 	}

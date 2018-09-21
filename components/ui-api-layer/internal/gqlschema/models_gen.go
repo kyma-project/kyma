@@ -106,12 +106,6 @@ type EventActivationEvent struct {
 	Description string `json:"description"`
 }
 
-type EventActivationSource struct {
-	Environment string `json:"environment"`
-	Type        string `json:"type"`
-	Namespace   string `json:"namespace"`
-}
-
 type ExceededQuota struct {
 	QuotaName         string   `json:"quotaName"`
 	ResourceName      string   `json:"resourceName"`
@@ -172,12 +166,6 @@ type RemoteEnvironmentService struct {
 	ProviderDisplayName string                   `json:"providerDisplayName"`
 	Tags                []string                 `json:"tags"`
 	Entries             []RemoteEnvironmentEntry `json:"entries"`
-}
-
-type RemoteEnvironmentSource struct {
-	Environment string `json:"environment"`
-	Type        string `json:"type"`
-	Namespace   string `json:"namespace"`
 }
 
 type ResourceQuota struct {

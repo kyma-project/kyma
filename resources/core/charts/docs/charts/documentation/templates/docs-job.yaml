@@ -93,3 +93,4 @@ spec:
              memory: {{ .Values.resources.documentation.requests.memory }}
            limits:
              memory: {{ .Values.resources.documentation.limits.memory }}
+     

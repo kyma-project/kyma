@@ -91,7 +91,7 @@ func fixApi(name string) *v1alpha2.Api {
 				Name: "test-service",
 				Port: 8080,
 			},
-			Authentication: v1alpha2.Authentication{
+			Authentication: []v1alpha2.AuthenticationRule{
 				{
 					Type: v1alpha2.JwtType,
 					Jwt: v1alpha2.JwtAuthentication{

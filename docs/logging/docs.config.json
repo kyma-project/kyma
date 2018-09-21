@@ -1,0 +1,8 @@
+{
+  "spec": {
+    "id": "logging",
+    "displayName": "Logging",
+    "description": "Overal documentation for Logging",
+    "type": "Components"
+  }
+}

@@ -29,6 +29,7 @@ dockerPushRoot = ''
 projects = [
     "docs": "kyma-docs",
     "components/api-controller": "api-controller",
+    "components/apiserver-proxy": "apiserver-proxy",
     "components/binding-usage-controller": "binding-usage-controller",
     "components/configurations-generator": "configurations-generator",
     "components/environments": "environments",
@@ -281,8 +282,9 @@ def commitHashForBuild(build) {
  * More info: https://docs.docker.com/registry/spec/manifest-v2-1/
  */
 String projectVersion(project) {
+    def img = projects[project]
+    
     try {
-        def img = projects[project]
         def json = "https://eu.gcr.io/v2/kyma-project/develop/${img}/manifests/latest".toURL().getText(requestProperties: [Accept: 'application/vnd.docker.distribution.manifest.v1+prettyjws'])
         def slurper = new JsonSlurperClassic()
         def doc = slurper.parseText(json)
@@ -304,6 +306,8 @@ def versionsYaml(versions) {
 """
 global.docs.version=${versions['docs']}
 global.docs.dir=${versions['docs'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.apiserver_proxy.version=${versions['components/apiserver-proxy']}
+global.apiserver_proxy.dir=${versions['components/apiserver-proxy'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.api_controller.version=${versions['components/api-controller']}
 global.api_controller.dir=${versions['components/api-controller'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.binding_usage_controller.version=${versions['components/binding-usage-controller']}

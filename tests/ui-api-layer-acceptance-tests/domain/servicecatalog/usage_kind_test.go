@@ -7,6 +7,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
 	"github.com/stretchr/testify/assert"
@@ -44,6 +45,10 @@ const (
 )
 
 func TestUsageKind(t *testing.T) {
+	if dex.IsSCIEnabled() {
+		t.Skip("SCI Enabled")
+	}
+
 	c, err := graphql.New()
 	require.NoError(t, err)
 

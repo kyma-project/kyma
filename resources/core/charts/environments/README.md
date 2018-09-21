@@ -11,4 +11,4 @@
 
 Environments is the name of the controller that injects limit ranges and resource quotas into user-created Namespaces. It also adds two default roles, `kyma-reader-role` and `kyma-admin-role`, which it then copies into user-created Environments.
 
-Read the [environments](../../../../docs/kyma/docs/005-environments.md) document to learn more about Environments in Kyma.
+Read the [environments](../../../../docs/kyma/docs/005-details-environments.md) document to learn more about Environments in Kyma.

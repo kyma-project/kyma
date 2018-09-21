@@ -1,0 +1,26 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}-oklog
+  labels:
+    component: oklog
+{{ include "labels.standard" . | indent 4 }}
+{{- $nodeCount := .Values.oklog.replicas | int }}
+data:
+  start.sh: |
+     #!/bin/sh
+     /oklog ingeststore \
+      -ingest.fast tcp://${POD_IP}:7651 \
+      -ingest.durable tcp://${POD_IP}:7652 \
+      -ingest.bulk tcp://${POD_IP}:7653 \
+      -cluster tcp://${POD_IP}:7659 \
+      -store.segment-target-size {{ .Values.oklog.config.targetSize }} \
+      -store.segment-replication-factor {{ .Values.oklog.config.replicationFactor }} \
+      -store.segment-retain {{ .Values.oklog.config.retention }} \
+      -store.segment-purge {{ .Values.oklog.config.purge }} \
+      -ingest.path               /data/ingest \
+      -store.path                /data/store \
+     {{- range $i := until $nodeCount }}
+      -peer {{ template "fullname" $ }}-oklog-{{$i}}.{{ template "fullname" $ }}-oklog.{{ $.Release.Namespace }}.svc.cluster.local:7659 \
+     {{- end }}

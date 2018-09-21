@@ -17,14 +17,14 @@ import (
 
 const (
 	remoteEnvironmentLabelName = "remoteEnvironment"
-	externalAPIPortName        = "ext-api-port"
+	externalAPIPortName        = "http-api-port"
 )
 
 /*
 The contract, which describes, how to find service for given remote environment:
 
 1. K8s service is labelled with key remoteEnvironment, value is the name of the remote environment
-2. K8s Service contains one port with name “ext-api-port” and this port is used for status check.
+2. K8s Service contains one port with name “http-api-port” and this port is used for status check.
 3. K8s Service is in the ysf-integration namespace (this can be changed in ui-api-layer chart configuration)
 4. The endpoint is /v1/health, and we are expecting HTTP 200, any other status code means service is not healthy.
 */

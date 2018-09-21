@@ -40,7 +40,7 @@ The Gateway has the following parameters:
 - **proxyTimeout** - A time-out for request send through Gateway proxy in seconds. The default is `10`.
 - **proxyCacheTTL** - Time to live of Remote API information stored in proxy cache. The value is provided in seconds and the default is `120`.
 
-The parameters for the Event API correspond to the fields in the [Remote Environment](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/040-remote-evironment-custom-resource.md):
+The parameters for the Event API correspond to the fields in the [Remote Environment](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/040-cr-remote-evironment.md):
 
 - **sourceEnvironment** - The name of the Event source environment.
 - **sourceType** - The type of the Event source.
@@ -115,7 +115,7 @@ The UI API Facade must check the status of the Gateway instance that represents 
 In the current solution, the UI API Facade iterates through services to find those which match the criteria, and then uses the health endpoint to determine the status.
 The UI API Facade has the following obligatory requirements:
 - The Kubernetes Gateway service uses the `remoteEnvironment` key, with the value as the name of the remote environment.
-- The Kubernetes Gateway service contains one port with the `ext-api-port` name. The system uses this port for the status check.
+- The Kubernetes Gateway service contains one port with the `http-api-port` name. The system uses this port for the status check.
 - Find the Kubernetes Gateway service in the `kyma-integration` Namespace. You can change its location in the `ui-api-layer` chart configuration.
 - The `/v1/health` endpoint returns a status of `HTTP 200`. Any other status code indicates the service is not healthy.
 
@@ -142,7 +142,7 @@ The UI API Facade must check the status of the Application Connector service ins
 In the current solution, the UI API Facade iterates through services to find those which match the criteria, and then uses the health endpoint to determine the status.
 The UI API Facade has the following obligatory requirements:
 - The Kubernetes service for each Application Connector service that uses the **remoteEnvironment** key with the name of the Remote Environment as a value.
-- The Kubernetes service for each Application Connector service which contains one port with the `ext-api-port` name. The system uses this port for the status check.
+- The Kubernetes service for each Application Connector service which contains one port with the `http-api-port` name. The system uses this port for the status check.
 - Find the Kubernetes Application Connector service in the `kyma-integration` Namespace. You can change its location in the `ui-api-layer` chart configuration.
 - The `/v1/health` endpoint which returns an `HTTP 200` status. Any other status code indicates that the service is not healthy.
 

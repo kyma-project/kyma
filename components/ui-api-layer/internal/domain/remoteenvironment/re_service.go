@@ -8,9 +8,9 @@ import (
 	"regexp"
 
 	"github.com/golang/glog"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
-	remoteenvironmentv1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
-	reMappinglister "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	remoteenvironmentv1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	reMappinglister "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/iosafety"
 	"github.com/pkg/errors"
@@ -29,7 +29,7 @@ const (
 // remoteEnvironmentService provides listing environments along with remote environments.
 // It provides also remote environment enabling/disabling in given namespace.
 type remoteEnvironmentService struct {
-	client          remoteenvironmentv1alpha1.RemoteenvironmentV1alpha1Interface
+	client          remoteenvironmentv1alpha1.ApplicationconnectorV1alpha1Interface
 	mappingLister   reMappinglister.EnvironmentMappingLister
 	mappingInformer cache.SharedIndexInformer
 	reInformer      cache.SharedIndexInformer
@@ -38,7 +38,7 @@ type remoteEnvironmentService struct {
 	reNameRegex     *regexp.Regexp
 }
 
-func newRemoteEnvironmentService(client remoteenvironmentv1alpha1.RemoteenvironmentV1alpha1Interface, cfg Config, mappingInformer cache.SharedIndexInformer, mappingLister reMappinglister.EnvironmentMappingLister, reInformer cache.SharedIndexInformer) (*remoteEnvironmentService, error) {
+func newRemoteEnvironmentService(client remoteenvironmentv1alpha1.ApplicationconnectorV1alpha1Interface, cfg Config, mappingInformer cache.SharedIndexInformer, mappingLister reMappinglister.EnvironmentMappingLister, reInformer cache.SharedIndexInformer) (*remoteEnvironmentService, error) {
 	mappingInformer.AddIndexers(cache.Indexers{
 		remoteMappingNameIndex: func(obj interface{}) ([]string, error) {
 			mapping, ok := obj.(*v1alpha1.EnvironmentMapping)

@@ -48,21 +48,14 @@ type PublishEventResponses struct {
 	Error *Error
 }
 
-// EventSource implements the Source definition of the outbound messaging API
-type EventSource struct {
-	SourceNamespace   string `json:"source-namespace,omitempty"`
-	SourceType        string `json:"source-type,omitempty"`
-	SourceEnvironment string `json:"source-environment,omitempty"`
-}
-
 // SendEventParameters implements the request to the outbound messaging API
 type SendEventParameters struct {
-	Eventsource      EventSource `json:"source,omitempty"`
-	EventType        string      `json:"event-type,omitempty"`
-	EventTypeVersion string      `json:"event-type-version,omitempty"`
-	EventId          string      `json:"event-id,omitempty"`
-	EventTime        string      `json:"event-time,omitempty"`
-	Data             AnyValue    `json:"data,omitempty"`
+	SourceId         string   `json:"source-id,omitempty"`
+	EventType        string   `json:"event-type,omitempty"`
+	EventTypeVersion string   `json:"event-type-version,omitempty"`
+	EventId          string   `json:"event-id,omitempty"`
+	EventTime        string   `json:"event-time,omitempty"`
+	Data             AnyValue `json:"data,omitempty"`
 }
 
 // SendEventResponse holds the response from outbound messaging API

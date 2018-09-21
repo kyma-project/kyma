@@ -8,6 +8,7 @@ WORKDIR ${BASE_APP_DIR}
 #
 
 COPY ./brokerinstaller/ ${BASE_APP_DIR}/brokerinstaller/
+COPY ./dex/ ${BASE_APP_DIR}/dex/
 COPY ./domain/ ${BASE_APP_DIR}/domain/
 COPY ./graphql/ ${BASE_APP_DIR}/graphql/
 COPY ./k8s/ ${BASE_APP_DIR}/k8s/

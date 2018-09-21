@@ -2,21 +2,15 @@ package util
 
 import (
 	apiv1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
-	eaApis "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/remoteenvironment.kyma.cx/v1alpha1"
+	eaApis "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma.cx/v1alpha1"
 	"github.com/satori/go.uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
 // NewSubscription creates a new subscription
-func NewSubscription(name string,
-	namespace string,
-	subscriberEventEndpointURL string,
-	eventType string,
-	eventTypeVersion string,
-	sourceEnvironment string,
-	sourceNamespace string,
-	sourceType string) *apiv1.Subscription {
+func NewSubscription(name string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
+	sourceID string) *apiv1.Subscription {
 	uid := uuid.NewV4().String()
 	return &apiv1.Subscription{
 		TypeMeta: metav1.TypeMeta{APIVersion: apiv1.SchemeGroupVersion.String()},
@@ -31,7 +25,7 @@ func NewSubscription(name string,
 			IncludeSubscriptionNameHeader: false,
 			MaxInflight:                   100,
 			PushRequestTimeoutMS:          10,
-			Source:                        apiv1.Source{SourceEnvironment: sourceEnvironment, SourceNamespace: sourceNamespace, SourceType: sourceType},
+			SourceID:                      sourceID,
 			EventType:                     eventType,
 			EventTypeVersion:              eventTypeVersion,
 		},
@@ -39,11 +33,7 @@ func NewSubscription(name string,
 }
 
 // NewEventActivation creates a new event activation
-func NewEventActivation(name string,
-	namespace string,
-	sourceEnvironment string,
-	sourceNamespace string,
-	sourceType string) *eaApis.EventActivation {
+func NewEventActivation(name string, namespace string, sourceID string) *eaApis.EventActivation {
 	return &eaApis.EventActivation{
 		TypeMeta: metav1.TypeMeta{APIVersion: apiv1.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
@@ -52,9 +42,7 @@ func NewEventActivation(name string,
 		},
 		EventActivationSpec: eaApis.EventActivationSpec{
 			DisplayName: name,
-			Source: eaApis.Source{Environment: sourceEnvironment,
-				Namespace: sourceNamespace,
-				Type:      sourceType},
+			SourceID:    sourceID,
 		},
 	}
 }

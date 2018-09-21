@@ -273,7 +273,7 @@ func (ts *TestSuite) createAndWaitForServiceBinding(bindingName, instanceName st
 	})
 	require.NoError(ts.t, err)
 
-	wait.AtMost(ts.t, func() error {
+	wait.ForFuncAtMost(ts.t, func() error {
 		b, err := bindingClient.Get(bindingName, metav1.GetOptions{})
 		if err != nil {
 			return err
@@ -371,7 +371,7 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 	})
 	require.NoError(ts.t, err)
 
-	wait.AtMost(ts.t, func() error {
+	wait.ForFuncAtMost(ts.t, func() error {
 		si, err := siClient.Get(instanceName, metav1.GetOptions{})
 		if err != nil {
 			return err
@@ -396,8 +396,8 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 
 // ServiceClass helpers
 func (ts *TestSuite) waitForREServiceClasses(timeout time.Duration) {
-	wait.AtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
-	wait.AtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
+	wait.ForFuncAtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
+	wait.ForFuncAtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
 }
 
 func (ts *TestSuite) serviceClassIsAvailableA() func() error {
@@ -507,7 +507,7 @@ func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.De
 func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, timeout time.Duration) {
 	req := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs?name=%s&value=%s", ts.namespace, envName, envValue)
 
-	wait.AtMost(ts.t, func() error {
+	wait.ForFuncAtMost(ts.t, func() error {
 		resp, err := http.Get(req)
 		if err != nil {
 			return err
