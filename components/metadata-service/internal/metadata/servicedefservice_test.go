@@ -877,7 +877,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.NoError(t, err)
@@ -930,7 +930,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.NoError(t, err)
@@ -985,7 +985,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.NoError(t, err)
@@ -1049,7 +1049,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)
@@ -1113,7 +1113,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)
@@ -1177,7 +1177,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)
@@ -1252,7 +1252,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
 
 		// when
-		err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", "uuid-1", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)
