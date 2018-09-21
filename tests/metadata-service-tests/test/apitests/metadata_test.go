@@ -26,13 +26,13 @@ func TestApiMetadata(t *testing.T) {
 
 	metadataServiceClient := testkit.NewMetadataServiceClient(config.MetadataServiceUrl + "/" + dummyRE.Name + "/v1/metadata/services")
 
-	expectedLabels := map[string]string{connectedApp:"dummy-re"}
+	expectedLabels := map[string]string{connectedApp: "dummy-re"}
 
 	t.Run("registration API", func(t *testing.T) {
 		t.Run("should register service (with API, Events catalog, Documentation)", func(t *testing.T) {
 			// when
 			initialServiceDefinition := prepareServiceDetails("service-identifier", map[string]string{})
-			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels)
+			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, "service-identifier")
 
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
@@ -74,7 +74,7 @@ func TestApiMetadata(t *testing.T) {
 		t.Run("should register service (overriding connected-app label)", func(t *testing.T) {
 			// when
 			initialServiceDefinition := prepareServiceDetails("service-identifier-2", map[string]string{"connected-app": "different-re"})
-			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels)
+			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, "service-identifier-2")
 
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
@@ -149,7 +149,7 @@ func TestApiMetadata(t *testing.T) {
 				},
 			}
 
-			expectedServiceDefinition := getExpectedDefinition(updatedServiceDefinition, expectedLabels)
+			expectedServiceDefinition := getExpectedDefinition(updatedServiceDefinition, expectedLabels, "service-identifier-3")
 
 			// when
 			statusCode, err := metadataServiceClient.UpdateService(t, postResponseData.ID, updatedServiceDefinition)
@@ -221,7 +221,7 @@ func TestApiMetadata(t *testing.T) {
 		t.Run("should get service (with API, Events catalog, Documentation) - setup", func(t *testing.T) {
 			// given
 			initialServiceDefinition := prepareServiceDetails("service-identifier-5", map[string]string{})
-			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels)
+			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, "service-identifier-5")
 
 			postStatusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
@@ -345,8 +345,9 @@ func findPostedService(existingServices []testkit.Service, searchedID string) *t
 	return nil
 }
 
-func getExpectedDefinition(initialDefinition testkit.ServiceDetails, expectedLabels map[string]string) testkit.ServiceDetails {
+func getExpectedDefinition(initialDefinition testkit.ServiceDetails, expectedLabels map[string]string, identifier string) testkit.ServiceDetails {
 	initialDefinition.Labels = expectedLabels
+	initialDefinition.Identifier = identifier
 	return hideClientCredentials(initialDefinition)
 }
 
