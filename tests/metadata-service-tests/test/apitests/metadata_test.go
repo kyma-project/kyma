@@ -23,37 +23,10 @@ func TestApiMetadata(t *testing.T) {
 	metadataServiceClient := testkit.NewMetadataServiceClient(config.MetadataServiceUrl + "/" + dummyRE.Name + "/v1/metadata/services")
 
 	t.Run("registration API", func(t *testing.T) {
-		// setup
-		initialServiceDefinition := testkit.ServiceDetails{
-			Name:        "test service",
-			Provider:    "service provider",
-			Description: "service description",
-			Identifier:  "service identifier",
-			Api: &testkit.API{
-				TargetUrl: "http://service.com",
-				Credentials: &testkit.Credentials{
-					Oauth: testkit.Oauth{
-						URL:          "http://oauth.com",
-						ClientID:     "clientId",
-						ClientSecret: "clientSecret",
-					},
-				},
-				Spec: testkit.ApiRawSpec,
-			},
-			Events: &testkit.Events{
-				Spec: testkit.EventsRawSpec,
-			},
-			Documentation: &testkit.Documentation{
-				DisplayName: "documentation name",
-				Description: "documentation description",
-				Type:        "documentation type",
-				Tags:        []string{"tag1", "tag2"},
-				Docs:        []testkit.DocsObject{{Title: "docs title", Type: "docs type", Source: "docs source"}},
-			},
-		}
-
 		t.Run("should register service (with API, Events catalog, Documentation)", func(t *testing.T) {
 			// when
+			initialServiceDefinition := prepareServiceDetails("service-identifier", map[string]string{})
+
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 
@@ -81,7 +54,7 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "test service", postedService.Name)
 			require.Equal(t, "service provider", postedService.Provider)
 			require.Equal(t, "service description", postedService.Description)
-			require.Equal(t, "service identifier", postedService.Identifier)
+			require.Equal(t, "service-identifier", postedService.Identifier)
 			require.Equal(t, map[string]string{"connected-app": "dummy-re"}, postedService.Labels)
 
 			// clean up
@@ -93,7 +66,8 @@ func TestApiMetadata(t *testing.T) {
 
 		t.Run("should register service (overriding connected-app label)", func(t *testing.T) {
 			// when
-			initialServiceDefinition.Labels = map[string]string{"connected-app": "different-re"}
+			initialServiceDefinition := prepareServiceDetails("service-identifier-2", map[string]string{"connected-app": "different-re"})
+
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 
@@ -121,7 +95,7 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "test service", postedService.Name)
 			require.Equal(t, "service provider", postedService.Provider)
 			require.Equal(t, "service description", postedService.Description)
-			require.Equal(t, "service identifier", postedService.Identifier)
+			require.Equal(t, "service-identifier-2", postedService.Identifier)
 			require.Equal(t, map[string]string{"connected-app": "dummy-re"}, postedService.Labels)
 
 			// clean up
@@ -134,6 +108,8 @@ func TestApiMetadata(t *testing.T) {
 
 		t.Run("should update service (with API, Events catalog, Documentation)", func(t *testing.T) {
 			// given
+			initialServiceDefinition := prepareServiceDetails("service-identifier-3", map[string]string{})
+
 			postStatusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusOK, postStatusCode)
@@ -202,6 +178,8 @@ func TestApiMetadata(t *testing.T) {
 
 		t.Run("should delete service (with API, Events catalog, Documentation) - setup", func(t *testing.T) {
 			// given
+			initialServiceDefinition := prepareServiceDetails("service-identifier-4", map[string]string{})
+
 			postStatusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusOK, postStatusCode)
@@ -232,6 +210,8 @@ func TestApiMetadata(t *testing.T) {
 
 		t.Run("should get service (with API, Events catalog, Documentation) - setup", func(t *testing.T) {
 			// given
+			initialServiceDefinition := prepareServiceDetails("service-identifier-5", map[string]string{})
+
 			postStatusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusOK, postStatusCode)
@@ -265,6 +245,8 @@ func TestApiMetadata(t *testing.T) {
 
 		t.Run("should get all services (with API, Events catalog, Documentation)", func(t *testing.T) {
 			// given
+			initialServiceDefinition := prepareServiceDetails("service-identifier-6", map[string]string{})
+
 			postStatusCode1, postResponseData1, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusOK, postStatusCode1)
@@ -311,6 +293,37 @@ func TestApiMetadata(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func prepareServiceDetails(identifier string, labels map[string]string) testkit.ServiceDetails {
+	return testkit.ServiceDetails{
+		Name:        "test service",
+		Provider:    "service provider",
+		Description: "service description",
+		Identifier:  identifier,
+		Labels:      labels,
+		Api: &testkit.API{
+			TargetUrl: "http://service.com",
+			Credentials: &testkit.Credentials{
+				Oauth: testkit.Oauth{
+					URL:          "http://oauth.com",
+					ClientID:     "clientId",
+					ClientSecret: "clientSecret",
+				},
+			},
+			Spec: testkit.ApiRawSpec,
+		},
+		Events: &testkit.Events{
+			Spec: testkit.EventsRawSpec,
+		},
+		Documentation: &testkit.Documentation{
+			DisplayName: "documentation name",
+			Description: "documentation description",
+			Type:        "documentation type",
+			Tags:        []string{"tag1", "tag2"},
+			Docs:        []testkit.DocsObject{{Title: "docs title", Type: "docs type", Source: "docs source"}},
+		},
+	}
+}
+
 func findPostedService(existingServices []testkit.Service, searchedID string) *testkit.Service {
 	for _, e := range existingServices {
 		if e.ID == searchedID {
@@ -325,6 +338,8 @@ func hideClientCredentials(original testkit.ServiceDetails) testkit.ServiceDetai
 		Name:        original.Name,
 		Provider:    original.Provider,
 		Description: original.Description,
+		Identifier:  original.Identifier,
+		Labels:      original.Labels,
 	}
 
 	if original.Api != nil {
