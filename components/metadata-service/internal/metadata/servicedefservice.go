@@ -134,7 +134,7 @@ func (sds *serviceDefinitionService) GetAll(remoteEnvironment string) ([]Service
 
 // Update updates a service with provided ID.
 func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, serviceDef *ServiceDefinition) apperrors.AppError {
-	_, err := sds.GetByID(remoteEnvironment, id)
+	s, err := sds.GetByID(remoteEnvironment, id)
 	if err != nil {
 		if err.Code() != apperrors.CodeNotFound {
 			return apperrors.NotFound("failed to get service before update, %s", err)
@@ -143,6 +143,7 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 	}
 
 	service := initService(serviceDef, id, remoteEnvironment)
+	service.Identifier = s.Identifier
 
 	if !apiDefined(serviceDef) {
 		err = sds.serviceAPIService.Delete(remoteEnvironment, id)

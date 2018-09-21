@@ -940,6 +940,61 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		minioService.AssertExpectations(t)
 	})
 
+	t.Run("should preserve a service identifier", func(t *testing.T) {
+		// given
+		serviceDefinition := ServiceDefinition{
+			Name:        "Some service",
+			Description: "Some cool service",
+			Provider:    "Service Provider",
+			Identifier:  "DifferentIdentifier",
+			Api:         nil,
+			Events: &Events{
+				Spec: []byte("events spec"),
+			},
+			Documentation: []byte("documentation"),
+		}
+
+		remoteEnvService := remoteenv.Service{
+			ID:                  "uuid-1",
+			DisplayName:         "Some service",
+			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
+			ProviderDisplayName: "Service Provider",
+			Identifier:          "ServiceIdentifier",
+			Name:                "some-service-cadf8",
+			Labels:              map[string]string{"connected-app": "re"},
+			Tags:                make([]string, 0),
+			API:                 nil,
+			Events:              true,
+		}
+
+		serviceAPIService := new(serviceapimocks.Service)
+		serviceAPIService.On("Delete", "re", "uuid-1").Return(nil)
+
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
+		serviceRepository.On("Update", "re", remoteEnvService).Return(nil)
+
+		uuidGenerator := new(uuidmocks.Generator)
+		uuidGenerator.On("NewUUID").Return("uuid-1")
+
+		minioService := new(miniomocks.Service)
+		minioService.On("Put", "uuid-1", []byte("documentation"), []byte(nil), []byte("events spec")).Return(nil)
+		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
+
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+
+		// when
+		err := service.Update("re", "uuid-1", &serviceDefinition)
+
+		// then
+		assert.NoError(t, err)
+
+		serviceAPIService.AssertExpectations(t)
+		serviceRepository.AssertExpectations(t)
+		minioService.AssertExpectations(t)
+	})
+
 	t.Run("should return an error if cache initialization failed", func(t *testing.T) {
 		// given
 		serviceAPI := &serviceapi.API{
