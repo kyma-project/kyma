@@ -85,7 +85,7 @@ func (r *TestRunner) throttleTest(ctx context.Context) bool {
 func (r *TestRunner) saveTestStatus(startTime time.Time, id string, pass bool) error {
 	key := fmt.Sprintf("%d", startTime.Unix())
 
-	testStatus, err := json.Marshal(internal.TestStatus{
+	testStatus, err := json.Marshal(internal.ExecutionStatus{
 		ID:   id,
 		Pass: pass,
 	})

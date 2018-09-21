@@ -9,6 +9,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/kyma-project/kyma/tools/stability-checker/internal/summary"
+
 	"github.com/kyma-project/kyma/tools/stability-checker/internal/notifier"
 	"github.com/kyma-project/kyma/tools/stability-checker/internal/runner"
 	"github.com/kyma-project/kyma/tools/stability-checker/platform/logger"
@@ -18,18 +20,25 @@ import (
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+
+	podlogger "github.com/kyma-project/kyma/tools/stability-checker/internal/log"
 )
 
 // Config holds application configuration
 type Config struct {
-	Logger               logger.Config
-	Port                 int           `envconfig:"default=8080"`
-	KubeConfigPath       string        `envconfig:"optional"`
-	TestThrottle         time.Duration `envconfig:"default=5m"`
-	WorkingNamespace     string        `envconfig:"default=kyma-system"`
-	PodName              string        `envconfig:"HOSTNAME"`
-	TestConfigMapName    string        `envconfig:"default=stability-checker"`
-	PathToTestingScript  string
+	Logger              logger.Config
+	Port                int           `envconfig:"default=8080"`
+	KubeConfigPath      string        `envconfig:"optional"`
+	TestThrottle        time.Duration `envconfig:"default=5m"`
+	WorkingNamespace    string        `envconfig:"default=kyma-system"`
+	PodName             string        `envconfig:"HOSTNAME"`
+	TestConfigMapName   string        `envconfig:"default=stability-checker"`
+	PathToTestingScript string
+	Stats               struct {
+		Enabled              bool
+		FailingTestRegexp    string
+		SuccessfulTestRegexp string
+	}
 	TestResultWindowTime time.Duration `envconfig:"default=6h"`
 	SlackClient          notifier.SlackClientConfig
 }
@@ -66,7 +75,12 @@ func main() {
 	testRenderer, err := notifier.NewTestRenderer()
 	fatalOnError(err)
 
-	sNotifier := notifier.New(slackClient, testRenderer, cfgMapClient, cfg.TestConfigMapName, cfg.TestResultWindowTime, cfg.PodName, cfg.WorkingNamespace, log)
+	logFetcher := podlogger.NewPodLogFetcher(cfg.WorkingNamespace, cfg.PodName)
+	outputProcessor, err := summary.NewOutputTestProcessor(cfg.Stats.FailingTestRegexp, cfg.Stats.SuccessfulTestRegexp)
+	fatalOnError(err)
+	summarizer := summary.NewService(logFetcher, outputProcessor)
+
+	sNotifier := notifier.New(slackClient, testRenderer, summarizer, cfgMapClient, cfg.TestConfigMapName, cfg.TestResultWindowTime, cfg.PodName, cfg.WorkingNamespace, cfg.Stats.Enabled, log)
 	go sNotifier.Run(ctx)
 
 	// Test runner
