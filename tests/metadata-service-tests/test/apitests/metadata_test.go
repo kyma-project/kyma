@@ -186,6 +186,43 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, http.StatusNoContent, statusCode)
 		})
 
+		t.Run("should return not found 404 when updating not existing service", func(t *testing.T) {
+			// given
+			updatedServiceDefinition := testkit.ServiceDetails{
+				Name:        "updated test service",
+				Provider:    "updated service provider",
+				Description: "updated service description",
+				Api: &testkit.API{
+					TargetUrl: "http://service.com",
+					Credentials: &testkit.Credentials{
+						Oauth: testkit.Oauth{
+							URL:          "http://oauth.com",
+							ClientID:     "clientId",
+							ClientSecret: "clientSecret",
+						},
+					},
+					Spec: testkit.ApiRawSpec,
+				},
+				Events: &testkit.Events{
+					Spec: testkit.EventsRawSpec,
+				},
+				Documentation: &testkit.Documentation{
+					DisplayName: "documentation name",
+					Description: "documentation description",
+					Type:        "documentation type",
+					Tags:        []string{"tag1", "tag2"},
+					Docs:        []testkit.DocsObject{{Title: "docs title", Type: "docs type", Source: "docs source"}},
+				},
+			}
+
+			// when
+			statusCode, err := metadataServiceClient.UpdateService(t, "12345", updatedServiceDefinition)
+
+			// then
+			require.NoError(t, err)
+			require.Equal(t, http.StatusNotFound, statusCode)
+		})
+
 		t.Run("should delete service (with API, Events catalog, Documentation) - setup", func(t *testing.T) {
 			// given
 			initialServiceDefinition := prepareServiceDetails("service-identifier-4", map[string]string{})
