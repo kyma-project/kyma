@@ -102,5 +102,5 @@ spec:
     imagePullPolicy: IfNotPresent
     name: {{ .Values.e2eTests.nameTester }}
     args:
-      - -subscriber-image="{{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-bus-e2e-subscriber:564b7bb1"
+      - -subscriber-image={{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-bus-e2e-subscriber:564b7bb1
   restartPolicy: Never
