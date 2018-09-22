@@ -85,22 +85,22 @@ roleRef:
   kind: ClusterRole
   name: test-core-event-bus-k8s
   apiGroup: rbac.authorization.k8s.io        
-#---
-#apiVersion: v1
-#kind: Pod
-#metadata:
-#  name: {{ .Values.e2eTests.nameTester }}
-#  labels:
-#    helm-chart-test: "false"
-#  annotations:
-##    sidecar.istio.io/inject: "true"   # needed if the tester could run with side cars
-#    helm.sh/hook: test-success
-#spec:
-#  serviceAccount: {{ .Values.e2eTests.nameTester }}
-#  containers:
-#  - image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-bus-e2e-tester:c33e5390"
-#    imagePullPolicy: IfNotPresent
-#    name: {{ .Values.e2eTests.nameTester }}
-#    args:
-#      - -subscriber-image="{{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-bus-e2e-subscriber:c33e5390"
-#  restartPolicy: Never
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Values.e2eTests.nameTester }}
+  labels:
+    helm-chart-test: "true"
+  annotations:
+#    sidecar.istio.io/inject: "true"   # needed if the tester could run with side cars
+    helm.sh/hook: test-success
+spec:
+  serviceAccount: {{ .Values.e2eTests.nameTester }}
+  containers:
+  - image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-bus-e2e-tester:564b7bb1"
+    imagePullPolicy: IfNotPresent
+    name: {{ .Values.e2eTests.nameTester }}
+    args:
+      - -subscriber-image="{{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-bus-e2e-subscriber:564b7bb1"
+  restartPolicy: Never
