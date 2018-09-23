@@ -64,11 +64,13 @@ loop:
 
 // dependencies
 
+//go:generate mockery -name=logProcessor -output=automock -outpkg=automock -case=underscore
 type logProcessor interface {
 	Process([]byte) error
 	GetResults() []SpecificTestStats
 }
 
+//go:generate mockery -name=logFetcher -output=automock -outpkg=automock -case=underscore
 type logFetcher interface {
 	GetLogsFromPod() (io.ReadCloser, error)
 }
