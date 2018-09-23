@@ -6,115 +6,117 @@ import (
 	"github.com/pkg/errors"
 )
 
-// OutputTestProcessor ...
-type OutputTestProcessor struct {
-	FailRegexp    *regexp.Regexp
-	SuccessRegexp *regexp.Regexp
+// OutputProcessor process output from executing tests and detects test successes and test failures.
+type OutputProcessor struct {
+	failRegexp    *regexp.Regexp
+	successRegexp *regexp.Regexp
 	aggregator    statsAggregator
 }
 
-// NewOutputTestProcessor ...
-func NewOutputTestProcessor(failRegexp, successRegexp string) (*OutputTestProcessor, error) {
+// NewOutputProcessor is a constructor for OutputProcessor.
+// failRegexp and successRegexp defines indicator of failure and success. Both regexp has to define capturing group for a test name.
+func NewOutputProcessor(failRegexp, successRegexp string) (*OutputProcessor, error) {
 	successR, err := regexp.Compile(successRegexp)
 	if err != nil {
 		return nil, errors.Wrap(err, "while compiling regexp indicating successful tests")
 	}
 
 	if len(successR.SubexpNames()) != 2 {
-		return nil, errors.Wrap(err, "regexp indicating successful tests has to have one capturing group (test name)")
+		return nil, errors.New("regexp indicating successful tests has to have one capturing group (test name)")
 	}
 
 	failureR, err := regexp.Compile(failRegexp)
-	if len(failureR.SubexpNames()) != 2 {
-		return nil, errors.Wrap(err, "regexp indicating failed tests has to have one capturing group (test name)")
-	}
-
 	if err != nil {
 		return nil, errors.Wrap(err, "while compiling regexp indication failed tests")
 	}
 
-	return &OutputTestProcessor{
-		FailRegexp:    failureR,
-		SuccessRegexp: successR,
+	if len(failureR.SubexpNames()) != 2 {
+		return nil, errors.New( "regexp indicating failed tests has to have one capturing group (test name)")
+	}
+
+
+
+	return &OutputProcessor{
+		failRegexp:    failureR,
+		successRegexp: successR,
 		aggregator:    newStatsAggregator(),
 	}, nil
 }
 
-// Process just do
-func (p *OutputTestProcessor) Process(input []byte) error {
+// Process process test ouptut and stores results internally.
+// This method can be called many times. To get results, use GetResults method.
+func (p *OutputProcessor) Process(input []byte) error {
 	if err := p.findSuccessIndicator(input); err != nil {
 		return err
 	}
 	return p.findFailureIndicator(input)
 }
 
-func (p *OutputTestProcessor) findSuccessIndicator(input []byte) error {
-	successSubmatches := p.SuccessRegexp.FindAllSubmatch([]byte(input), -1)
+func (p *OutputProcessor) findSuccessIndicator(input []byte) error {
+	successSubmatches := p.successRegexp.FindAllSubmatch([]byte(input), -1)
 	for _, sm := range successSubmatches {
 		if len(sm) != 2 {
-			return errors.New("some error")
+			return errors.New("incorrect regexp for test success occurrences")
 		}
 		testName := sm[1]
-		p.aggregator.Add(string(testName), true)
+		p.aggregator.addTestResult(string(testName), true)
 	}
 	return nil
 }
 
-func (p *OutputTestProcessor) findFailureIndicator(input []byte) error {
-	failedMatches := p.FailRegexp.FindAllSubmatch([]byte(input), -1)
+func (p *OutputProcessor) findFailureIndicator(input []byte) error {
+	failedMatches := p.failRegexp.FindAllSubmatch([]byte(input), -1)
 	for _, fm := range failedMatches {
 		if len(fm) != 2 {
-			return errors.New("some error")
+			return errors.New("incorrect regexp for test failure occurrences")
 		}
 		testName := fm[1]
-		p.aggregator.Add(string(testName), false)
+		p.aggregator.addTestResult(string(testName), false)
 	}
 
 	return nil
 }
 
-// GetResults ...
-func (p *OutputTestProcessor) GetResults() []SpecificTestStats {
+// GetResults returns statistics how many times every test passed and failed.
+func (p *OutputProcessor) GetResults() []SpecificTestStats {
 	list := make([]SpecificTestStats, len(p.aggregator.m))
 	i := 0
 	for _, v := range p.aggregator.m {
-		list[i] = v
+		list[i] = *v
 		i++
 	}
 	return list
 }
 
 type statsAggregator struct {
-	m map[string]SpecificTestStats
+	m map[string]*SpecificTestStats
 }
 
 func newStatsAggregator() statsAggregator {
 	return statsAggregator{
-		m: make(map[string]SpecificTestStats),
+		m: make(map[string]*SpecificTestStats),
 	}
 }
 
-// Add adds
-func (sc *statsAggregator) Add(testName string, result bool) {
-	curr, ex := sc.m[testName]
+func (sc *statsAggregator) addTestResult(testName string, result bool) {
+	_, ex := sc.m[testName]
 	if ex {
-		curr.Add(result)
+		sc.m[testName].add(result)
 	} else {
-		b := SpecificTestStats{Name: testName}
-		b.Add(result)
-		sc.m[testName] = b
+		newTest := &SpecificTestStats{Name: testName}
+		newTest.add(result)
+		sc.m[testName] = newTest
 	}
 }
 
-// SpecificTestStats ...
+// SpecificTestStats aggregates information how many specific test ends up with success and failure.
 type SpecificTestStats struct {
 	Name      string
 	Successes int
 	Failures  int
 }
 
-// Add adds ...
-func (b *SpecificTestStats) Add(val bool) {
+func (b *SpecificTestStats) add(val bool) {
 	if val {
 		b.Successes++
 	} else {

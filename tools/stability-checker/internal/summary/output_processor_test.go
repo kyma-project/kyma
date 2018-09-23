@@ -1,38 +1,95 @@
 package summary_test
 
 import (
+	"github.com/kyma-project/kyma/tools/stability-checker/internal/summary"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestProcessorHappyPath(t *testing.T) {
-	//// GIVEN
-	//passed := "PASSED: ([0-9A-Za-z_-]+)"
-	//failed := "FAILED: ([0-9A-Za-z_-]+)"
-	//sut, err := analyzer.NewOutputTestProcessor(failed, passed)
-	//require.NoError(t, err)
-	//// WHEN
-	//err := sut.Process(exampleTestOutput)
-	//// THEN
-	//require.NoError(t, err)
-	//
-	//assert.Len(t, results, 3)
-	//assert.Contains(t, results, analyzer.SpecificTestStats{
-	//	Name:      "test-core-environments",
-	//	Successes: 1,
-	//})
-	//assert.Contains(t, results, analyzer.SpecificTestStats{
-	//	Name:      "test-core-core-acceptance",
-	//	Successes: 1,
-	//})
-	//assert.Contains(t, results, analyzer.SpecificTestStats{
-	//	Name:     "test-core-kubeless",
-	//	Failures: 1,
-	//})
-
+	// GIVEN
+	sut, err := summary.NewOutputProcessor(fixFailureRegexp(), fixSuccessRegexp())
+	require.NoError(t, err)
+	// WHEN
+	err = sut.Process(exampleTestOutput)
+	// THEN
+	require.NoError(t, err)
+	results := sut.GetResults()
+	assert.Len(t, results, 3)
+	assert.Contains(t, results, summary.SpecificTestStats{
+		Name:      "test-core-environments",
+		Successes: 1,
+	})
+	assert.Contains(t, results, summary.SpecificTestStats{
+		Name:      "test-core-core-acceptance",
+		Successes: 1,
+	})
+	assert.Contains(t, results, summary.SpecificTestStats{
+		Name:     "test-core-kubeless",
+		Failures: 1,
+	})
 }
 
 func TestProcessorOnEmptyInput(t *testing.T) {
-	// TBD
+	// GIVEN
+	sut, err := summary.NewOutputProcessor(fixFailureRegexp(), fixSuccessRegexp())
+	require.NoError(t, err)
+	// WHEN
+	err = sut.Process(nil)
+	// THEN
+	require.NoError(t, err)
+	results := sut.GetResults()
+	assert.Len(t, results, 0)
+}
+
+func TestProcessorAccumulateResults(t *testing.T) {
+	// GIVEN
+	givenRepetition := 3
+	sut, err := summary.NewOutputProcessor(fixFailureRegexp(), fixSuccessRegexp())
+	require.NoError(t, err)
+	// WHEN
+	for i := 0; i < givenRepetition; i++ {
+		err = sut.Process(exampleTestOutput)
+		require.NoError(t,err)
+	}
+	// THEN
+	results := sut.GetResults()
+	assert.Len(t,results,3)
+
+	assert.Contains(t, results, summary.SpecificTestStats{
+		Name:      "test-core-environments",
+		Successes: givenRepetition,
+	})
+	assert.Contains(t, results, summary.SpecificTestStats{
+		Name:      "test-core-core-acceptance",
+		Successes: givenRepetition,
+	})
+	assert.Contains(t, results, summary.SpecificTestStats{
+		Name:     "test-core-kubeless",
+		Failures: givenRepetition,
+	})
+}
+
+func TestNewOutputProcessorReturnErrorsOnWrongRegexp(t *testing.T) {
+	t.Run("for success", func (t *testing.T) {
+		_, err := summary.NewOutputProcessor(fixFailureRegexp(), "abcd")
+		assert.EqualError(t, err, "regexp indicating successful tests has to have one capturing group (test name)")
+
+	})
+
+	t.Run("for failure", func(t *testing.T) {
+		_, err := summary.NewOutputProcessor("abcd", fixSuccessRegexp())
+		assert.EqualError(t, err, "regexp indicating failed tests has to have one capturing group (test name)")
+	})
+}
+
+func fixSuccessRegexp() string {
+	return "PASSED: ([0-9A-Za-z_-]+)"
+}
+
+func fixFailureRegexp() string {
+	return "FAILED: ([0-9A-Za-z_-]+)"
 }
 
 var exampleTestOutput = []byte(`

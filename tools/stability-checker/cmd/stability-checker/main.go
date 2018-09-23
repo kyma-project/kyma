@@ -76,7 +76,7 @@ func main() {
 	fatalOnError(err)
 
 	logFetcher := podlogger.NewPodLogFetcher(cfg.WorkingNamespace, cfg.PodName)
-	outputProcessor, err := summary.NewOutputTestProcessor(cfg.Stats.FailingTestRegexp, cfg.Stats.SuccessfulTestRegexp)
+	outputProcessor, err := summary.NewOutputProcessor(cfg.Stats.FailingTestRegexp, cfg.Stats.SuccessfulTestRegexp)
 	fatalOnError(err)
 	summarizer := summary.NewService(logFetcher, outputProcessor)
 

@@ -18,7 +18,7 @@ const (
  	  {{"\n"}}Showing tests statistics:
       {{- range .TestStats -}}
         {{"\n"}}Name: {{.Name}}, successes: {{.Successes}}, failures: {{.Failures}}
-	  {{-else }}
+	  {{- else }}
 		No test statistics
 	  {{- end }}
 	  

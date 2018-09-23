@@ -8,17 +8,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-// dependencies
-type logProcessor interface {
-	Process([]byte) error
-	GetResults() []SpecificTestStats
+// Service is responsible for producing summary for test executions.
+type Service struct {
+	logFetcher logFetcher
+	processor  logProcessor
 }
 
-type logFetcher interface {
-	GetLogsFromPod() (io.ReadCloser, error)
-}
-
-// NewService ...
+// NewService returns Service
 func NewService(logFetcher logFetcher, processor logProcessor) *Service {
 	return &Service{
 		logFetcher: logFetcher,
@@ -26,13 +22,7 @@ func NewService(logFetcher logFetcher, processor logProcessor) *Service {
 	}
 }
 
-// Service ...
-type Service struct {
-	logFetcher logFetcher
-	processor  logProcessor
-}
-
-// GetTestSummaryForExecutions ...
+// GetTestSummaryForExecutions analyzes logs from test executions and produces summary for specific tests.
 func (c *Service) GetTestSummaryForExecutions(testIDs []string) ([]SpecificTestStats, error) {
 	readCloser, err := c.logFetcher.GetLogsFromPod()
 	if err != nil {
@@ -42,7 +32,11 @@ func (c *Service) GetTestSummaryForExecutions(testIDs []string) ([]SpecificTestS
 	stream := json.NewDecoder(readCloser)
 
 	testIDMap := func(ids []string) map[string]struct{} {
-		return nil
+		out := map[string]struct{}{}
+		for _, id := range ids {
+			out[id] = struct{}{}
+		}
+		return out
 	}(testIDs)
 
 loop:
@@ -66,4 +60,15 @@ loop:
 	}
 
 	return c.processor.GetResults(), nil
+}
+
+// dependencies
+
+type logProcessor interface {
+	Process([]byte) error
+	GetResults() []SpecificTestStats
+}
+
+type logFetcher interface {
+	GetLogsFromPod() (io.ReadCloser, error)
 }
