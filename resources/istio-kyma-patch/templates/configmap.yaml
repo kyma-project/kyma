@@ -97,8 +97,8 @@ data:
   istio-ingressgateway-certs.yaml: |
     apiVersion: v1
     data:
-      "tls.key": {{ .Values.global.tls.key }}
-      "tls.crt": {{ .Values.global.tls.crt }}
+      "tls.key": {{ .Values.global.tlsKey }}
+      "tls.crt": {{ .Values.global.tlsCrt }}
     kind: Secret
     metadata:
       name: istio-ingressgateway-certs
