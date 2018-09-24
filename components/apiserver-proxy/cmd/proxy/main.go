@@ -285,8 +285,7 @@ func main() {
 // Returns intiliazed config, allows local usage (outside cluster) based on provided kubeconfig or in-cluter
 func initKubeConfig(kcLocation string) *rest.Config {
 
-	if kcLocation != "" {
-		println(kcLocation)
+	if kcLocation != "" {		
 		kubeConfig, err := clientcmd.BuildConfigFromFlags("", kcLocation)
 		if err != nil {
 			glog.Fatalf("unable to build rest config based on provided path to kubeconfig file %s", err.Error())
