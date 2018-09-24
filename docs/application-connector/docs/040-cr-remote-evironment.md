@@ -57,6 +57,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.services** |    **NO**   | Contains all services that the Remote Environment provides. |
 | **spec.services.id** |    **YES**   | Identifies the service that the Remote Environment provides. |
 | **spec.services.identifier** |    **NO**   | Additional identifier of the service class. |
+| **spec.services.name** |    **NO**   | Unique name of the service used by the Service Catalog. |
 | **spec.services.displayName** |    **YES**   | Specifies a human-readable name of the Remote Environment service. |
 | **spec.services.description** |    **NO**   | Provides a short human-readable description of the Remote Environment service. |
 | **spec.services.longDescription** |    **NO**   | Provides a human-readable description of the Remote Environment service. |
