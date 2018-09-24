@@ -106,7 +106,7 @@ The Remote Environment can be updated using either Console UI or Kubectl.
 - Change the description and labels
 - Click Save.
 
-### Using Kubeclt
+### Using Kubectl
 
 Update the file: `re-production-1.yaml`
 
