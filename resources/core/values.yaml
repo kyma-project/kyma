@@ -33,7 +33,7 @@ test:
     password: nimda123
   acceptance:
     core:
-      imageTag: "timeout-fix"
+      imageTag: "09bf23c0"
       # environments used in remote-environment acceptance test
       remoteEnvironment: 
         disabled: "false"
