@@ -252,6 +252,10 @@ func (r *queryResolver) UsageKindResources(ctx context.Context, usageKind string
 	return r.sc.ListServiceUsageKindResources(ctx, usageKind, environment)
 }
 
+func (r *queryResolver) BindableResources(ctx context.Context, environment string) ([]gqlschema.BindableResourcesOutputItem, error) {
+	return r.sc.ListBindableResources(ctx, environment)
+}
+
 func (r *queryResolver) ServiceBinding(ctx context.Context, name string, environment string) (*gqlschema.ServiceBinding, error) {
 	return r.sc.ServiceBindingQuery(ctx, name, environment)
 }

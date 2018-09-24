@@ -106,3 +106,9 @@ func NewStatusBindingUsageExtractor() *statusBindingUsageExtractor {
 func NewUsageKindServices() *usageKindServices {
 	return new(usageKindServices)
 }
+
+// Bindable Resources
+
+func NewBindableResourcesLister() *bindableResourceLister {
+	return new(bindableResourceLister)
+}

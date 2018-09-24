@@ -30,6 +30,7 @@ const (
 	UsageKinds
 	UsageKindResource
 	UsageKindResources
+	BindableResources
 )
 
 func (k Kind) String() string {
@@ -78,6 +79,8 @@ func (k Kind) String() string {
 		return "Usage Kind Resource"
 	case UsageKindResources:
 		return "Usage Kind Resources"
+	case BindableResources:
+		return "Bindable Resources"
 	default:
 		return ""
 	}
