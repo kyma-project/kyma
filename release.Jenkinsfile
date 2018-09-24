@@ -138,27 +138,32 @@ stage('launch Kyma integration') {
         ]
 }
 
-if (isRelease) {
-    stage("Publish Release ${appVersion}") {
-        def slurper = new JsonSlurperClassic()
-        def zip = "${appVersion}.tar.gz"
-        
-        // create release zip
-        writeFile file: "./installation/versions.env", text: "${versionsYaml()}"
-        sh "tar -czf ${zip} ./installation ./resources"
+stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
+    def slurper = new JsonSlurperClassic()
+    def zip = "${appVersion}.tar.gz"
+    
+    // create release zip
+    writeFile file: "./installation/versions.env", text: "${versionsYaml()}"
+    sh "tar -czf ${zip} ./installation ./resources"
 
-        // create release on github
-        withCredentials([string(credentialsId: 'public-github-token', variable: 'token')]) {
-            // TODO add changelog as "body"
-            def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"Release ${appVersion}\",\"draft\": false,\"prerelease\": false}'"
-            def json = sh (script: "curl --data ${data} -H \"Authorization: token $token\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
-            def releaseID = slurper.parseText(json).id
+    // create release on github
+    withCredentials([string(credentialsId: 'public-github-token', variable: 'token')]) {
+        // TODO add changelog as "body"
+        def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"Release ${appVersion}\",\"draft\": false,\"prerelease\": ${isRelease ? 'false' : 'true'}}'"
+        def json = sh (script: "curl --data ${data} -H \"Authorization: token $token\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
+        def releaseID = slurper.parseText(json).id
 
-            // upload zip file
-            sh "curl --data-binary @$zip -H \"Authorization: token $token\" -H \"Content-Type: application/zip\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${zip}"
-        }
+        // upload zip file
+        sh "curl --data-binary @$zip -H \"Authorization: token $token\" -H \"Content-Type: application/zip\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${zip}"
+        // upload versions env file
+        sh "curl --data-binary @installation/versions.env -H \"Authorization: token $token\" -H \"Content-Type: text/plain\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${appVersion}.env"
     }
 }
+
+stage("Upload versions file to azure") {
+    // TODO upload RC versions.env to azure
+}
+
 
 
 
@@ -176,7 +181,7 @@ def configureBuilds(commitID) {
     } else {
         echo ("Building Release Candidate for ${params.RELEASE_BRANCH}")
         dockerPushRoot = "rc/"
-        appVersion = commitID.substring(0,8)
+        appVersion = (params.RELEASE_BRANCH =~ /([0-9]+\.[0-9]+)$/)[0][1] // release branch number (e.g. 1.0)
     }   
 }
 
