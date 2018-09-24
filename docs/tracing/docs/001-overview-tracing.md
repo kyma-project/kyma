@@ -1,6 +1,5 @@
 ---
 title: Overview
-type: Overview
 ---
 
 The micro-services based architecture differs from the traditional monoliths in many aspects. From the request observability perspective, there are asynchronous boundaries among various different micro-services that compose a request flow. Moreover, these micro-services can have heterogeneous semantics when it comes to monitoring and observability. It is required to have a tracing solution that can provide a holistic view of the request flow and help the developer understand the system better to take informed decisions regarding troubleshooting and performance optimization.

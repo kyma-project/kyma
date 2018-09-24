@@ -1,6 +1,5 @@
 ---
 title: Overview
-type: Overview
 ---
 
 Kyma Service Mesh is the component responsible for service-to-service communication, proxying, service discovery, traceability, and security. Kyma Service Mesh
