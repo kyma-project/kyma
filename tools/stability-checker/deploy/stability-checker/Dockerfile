@@ -16,7 +16,6 @@ RUN chmod +x  /tmp/linux-amd64/helm && mv /tmp/linux-amd64/helm /usr/local/bin/
 COPY ./stability-checker /root/stability-checker
 COPY ./logs-printer /bin/logs-printer
 
-
 LABEL source=git@github.com:kyma-project/kyma.git
 
 ENTRYPOINT ["/root/stability-checker"]

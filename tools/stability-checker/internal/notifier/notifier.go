@@ -37,7 +37,6 @@ type (
 	testRenderer interface {
 		RenderTestSummary(in RenderTestSummaryInput) (string, string, string, error)
 	}
-
 	summarizer interface {
 		GetTestSummaryForExecutions(testIDs []string) ([]summary.SpecificTestStats, error)
 	}
@@ -116,6 +115,8 @@ func (s *SlackNotifier) Run(ctx context.Context) {
 
 		if err := s.slack.Send(header, body, footer, color(failedTests)); err != nil {
 			s.log.Errorf("Cannot send test summary, got error: %v", err)
+		} else {
+			s.log.Info("Sent slack notification successfully")
 		}
 	}
 }

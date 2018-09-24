@@ -195,7 +195,7 @@ latestTagsErr=$?
 
 
 
-if [ ${testErr} -ne 0] || [ ${latestTagsErr} -ne 0 ] || [ ${checkErr} -ne 0 ] ]
+if [ ${testErr} -ne 0 ] || [ ${latestTagsErr} -ne 0 ] || [ ${checkErr} -ne 0 ]
 then
     exit 1
 else

@@ -8,6 +8,17 @@ import (
 	"github.com/pkg/errors"
 )
 
+// dependencies
+//go:generate mockery -name=logProcessor -output=automock -outpkg=automock -case=underscore
+type logProcessor interface {
+	Process([]byte) (map[string]SpecificTestStats, error)
+}
+
+//go:generate mockery -name=logFetcher -output=automock -outpkg=automock -case=underscore
+type logFetcher interface {
+	GetLogsFromPod() (io.ReadCloser, error)
+}
+
 // Service is responsible for producing summary for test executions.
 type Service struct {
 	logFetcher logFetcher
@@ -60,16 +71,4 @@ loop:
 	}
 
 	return aggregated.ToList(), nil
-}
-
-// dependencies
-
-//go:generate mockery -name=logProcessor -output=automock -outpkg=automock -case=underscore
-type logProcessor interface {
-	Process([]byte) (map[string]SpecificTestStats, error)
-}
-
-//go:generate mockery -name=logFetcher -output=automock -outpkg=automock -case=underscore
-type logFetcher interface {
-	GetLogsFromPod() (io.ReadCloser, error)
 }
