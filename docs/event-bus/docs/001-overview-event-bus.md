@@ -1,6 +1,5 @@
 ---
 title: Overview
-type: Overview
 ---
 
 Kyma Event Bus enables the integration of various external solutions with Kyma. The integration is achieved using the `publish-subscribe` messaging pattern that allows Kyma to receive business Events from different solutions, enrich them, and trigger business flows using lambdas or services defined in Kyma.

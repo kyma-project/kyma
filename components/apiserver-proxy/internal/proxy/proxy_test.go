@@ -65,6 +65,52 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 	}
 }
 
+func TestRequestResolver(t *testing.T) {
+
+	rir := newRequestInfoResolver()
+	cases := []struct {
+		method            string
+		path              string
+		isResourceRequest bool
+		resource          string
+		apiVersion        string
+		namespace         string
+	}{
+		{"GET", "/api/v1/namespaces", true, "namespaces", "v1", ""},
+		{"GET", "/apis/authentication/v1/namespaces/default/groups", true, "groups", "v1", "default"},
+		{"GET", "/openapi/v2/", false, "", "", ""},
+	}
+
+	for _, c := range cases {
+
+		t.Run(c.path, func(t *testing.T) {
+			req := requestFor(c.method, c.path)
+
+			info, err := rir.NewRequestInfo(req)
+
+			if err != nil {
+				t.Fatalf("Resolving request info failed : %s", err.Error())
+			}
+
+			if info == nil {
+				t.Fatalf("Fore request path %s request info object is nil", c.path)
+			}
+
+			if info.Resource != c.resource {
+				t.Fatalf("Resource does not match. Expected %s actual %s ", c.resource, info.Resource)
+			}
+
+			if info.APIVersion != c.apiVersion {
+				t.Fatalf("APIVersion does not match. Expected %s actual %s ", c.apiVersion, info.APIVersion)
+			}
+
+			if info.IsResourceRequest != c.isResourceRequest {
+				t.Fatalf("IsResourceRequest does not match. Expected %t actual %t ", c.isResourceRequest, info.IsResourceRequest)
+			}
+		})
+	}
+}
+
 func setupTestScenario() []testCase {
 	testScenario := []testCase{
 		{
@@ -103,8 +149,14 @@ func setupTestScenario() []testCase {
 }
 
 func fakeJWTRequest(method, path, token string) *http.Request {
-	req := httptest.NewRequest(method, path, nil)
+	req := requestFor(method, path)
 	req.Header.Add("Authorization", token)
+
+	return req
+}
+
+func requestFor(method, path string) *http.Request {
+	req := httptest.NewRequest(method, path, nil)
 
 	return req
 }

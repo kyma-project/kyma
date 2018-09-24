@@ -72,7 +72,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:acaa523fe984dfbc41f6f0866508bbe855242f9c5451cec0871a4f380df3466c"
+  digest = "1:a15d62f5c06d32f19c53be8b375aca27303b52d74cfa5eb3c0e95959a378d6bb"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/event-bus/api/publish",
@@ -89,7 +89,7 @@
     "components/event-bus/test/util",
   ]
   pruneopts = ""
-  revision = "5a57f4bec92a89281a0cccaa698508baee39c7f2"
+  revision = "a76117d66d3acb52ff19fe4a333ad19970f24c21"
 
 [[projects]]
   digest = "1:0c0ff2a89c1bb0d01887e1dac043ad7efbf3ec77482ef058ac423d13497e16fd"

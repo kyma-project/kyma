@@ -1,6 +1,5 @@
 ---
 title: CLI reference
-type: CLI reference
 ---
 
 This section provides you with useful command line examples used in Kyma.

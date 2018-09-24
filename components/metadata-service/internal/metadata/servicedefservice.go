@@ -127,7 +127,7 @@ func (sds *serviceDefinitionService) GetAll(remoteEnvironment string) ([]Service
 func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, serviceDef *ServiceDefinition) (ServiceDefinition, apperrors.AppError) {
 	existingSvc, err := sds.GetByID(remoteEnvironment, id)
 	if err != nil {
-		if err.Code() != apperrors.CodeNotFound {
+		if err.Code() == apperrors.CodeNotFound {
 			return ServiceDefinition{}, apperrors.NotFound("failed to get service before update, %existingSvc", err)
 		}
 		return ServiceDefinition{}, apperrors.Internal("failed to read service, %existingSvc", err)
@@ -159,7 +159,7 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 
 	err = sds.remoteEnvironmentRepository.Update(remoteEnvironment, *service)
 	if err != nil {
-		return ServiceDefinition{}, apperrors.Internal("failed to update service in RE repository, %existingSvc")
+		return ServiceDefinition{}, apperrors.Internal("failed to update service in RE repository, %s", existingSvc.ID)
 	}
 
 	serviceDef.ID = id
@@ -197,7 +197,7 @@ func (sds *serviceDefinitionService) GetAPI(remoteEnvironment, serviceId string)
 	}
 
 	if service.API == nil {
-		return nil, apperrors.WrongInput("service with ID '%s' has no API")
+		return nil, apperrors.WrongInput("service with ID '%s' has no API", service.ID)
 	}
 
 	api, err := sds.serviceAPIService.Read(remoteEnvironment, service.API)

@@ -1,6 +1,5 @@
 ---
 title: Architecture
-type: Architecture
 ---
 
 The Application Connector consists of the following components:

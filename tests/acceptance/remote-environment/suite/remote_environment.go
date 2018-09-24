@@ -59,10 +59,14 @@ func fixRemoteEnvironment(name, accessLabel, serviceId, gatewayUrl, displayName 
 			Description: "Remote Environment used by remote-environment acceptance test",
 			Services: []v1alpha1.Service{
 				{
-					ID:                  serviceId,
+					ID:   serviceId,
+					Name: serviceId,
+					Labels: map[string]string{
+						"connected-app": name,
+					},
 					ProviderDisplayName: "provider",
 					DisplayName:         displayName,
-					LongDescription:     "Remote Environment Service Class used by remote-environment acceptance test",
+					Description:         "Remote Environment Service Class used by remote-environment acceptance test",
 					Tags:                []string{},
 					Entries: []v1alpha1.Entry{
 						{
