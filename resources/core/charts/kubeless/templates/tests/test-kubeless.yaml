@@ -34,7 +34,7 @@ rules:
 - apiGroups: ["gateway.kyma.cx"]
   resources: ["apis"]
   verbs: ["create", "delete", "get", "list"]
-- apiGroups: ["remoteenvironment.kyma.cx"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["eventactivations"]
   verbs: ["create", "delete", "get", "list"]
 - apiGroups: ["networking.istio.io"]
