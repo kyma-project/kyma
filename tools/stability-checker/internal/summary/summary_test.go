@@ -33,10 +33,12 @@ func TestForGettingTestSummaryForExecutions(t *testing.T) {
 
 	sut := summary.NewService(mockLogFetcher, mockLogProcessor)
 	// WHEN
-	stats, err := sut.GetTestSummaryForExecutions(fixTestIDs())
+	actualStats, err := sut.GetTestSummaryForExecutions(fixTestIDs())
 	// THEN
 	require.NoError(t, err)
-	assert.Equal(t, fixResults(), stats)
+	assert.Len(t, actualStats, 2)
+	assert.Contains(t, actualStats, summary.SpecificTestStats{Name: "test-a", Failures:3})
+	assert.Contains(t, actualStats, summary.SpecificTestStats{Name: "test-b", Successes:3})
 	assert.True(t, givenReadCloser.CloseCalled)
 }
 
@@ -45,19 +47,6 @@ func fixTestIDs() []string {
 		"id-0",
 		"id-2",
 		"id-3",
-	}
-}
-
-func fixResults() []summary.SpecificTestStats {
-	return []summary.SpecificTestStats{
-		{
-			Name:     "test-a",
-			Failures: 3,
-		},
-		{
-			Name:      "test-b",
-			Successes: 3,
-		},
 	}
 }
 
