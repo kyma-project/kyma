@@ -15,7 +15,13 @@ function run_all_patches() {
     local name=$(basename ${f} | cut -d. -f1)
     echo "    Patch $type $name from: ${f}"
     local patch=$(cat ${f})
-    kubectl patch ${type} -n istio-system ${name} --patch "$patch" --type json
+    set +e
+    local out=$(kubectl patch ${type} -n istio-system ${name} --patch "$patch" --type json)
+    local result=$?
+    set -e
+    if [ ${result} -ne 0 ] && [[ ! "$out" = *"not patched"* ]]; then
+        exit ${result}
+    fi
   done
 }
 
@@ -25,7 +31,9 @@ function remove_not_used() {
     echo "    Delete $line"
     local type=$(cut -d' ' -f1 <<< ${line})
     local name=$(cut -d' ' -f2 <<< ${line})
+    set +e
     kubectl delete ${type} ${name} -n istio-system
+    set -e
   done <${CONFIG_DIR}/delete
 }
 
