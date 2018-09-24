@@ -17,7 +17,7 @@ items:
     type: {{ .Values.service.type }}
     ports:
       - port: {{ .Values.service.uiPort }}
-        targetPort: {{ .Values.jaeger.uiPort }}
+        targetPort: {{ .Values.kcproxy.inPort }}
         protocol: TCP
         name: http
     selector:

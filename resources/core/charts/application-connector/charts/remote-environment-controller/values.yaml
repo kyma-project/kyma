@@ -8,3 +8,8 @@ controller:
     tillerUrl: tiller-deploy.kube-system.svc.cluster.local:44134
 
 enabled: false
+
+tests:
+  image:
+    name: develop/remote-environment-controller-tests
+    tag: c13f3a0e

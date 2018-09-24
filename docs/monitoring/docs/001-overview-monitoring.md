@@ -1,6 +1,5 @@
 ---
 title: Overview
-type: Overview
 ---
 
 To enrich Kyma with monitoring functionality, third-party resources come by default as packaged tools. The `kube-prometheus` package is a Prometheus operator from CoreOS responsible for delivering these tools. Monitoring in Kyma includes three primary elements:

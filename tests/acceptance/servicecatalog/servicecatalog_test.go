@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
-	reclient "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
+	reclient "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog/wait"
 	"github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
@@ -85,7 +85,7 @@ func remoteEnvironmentsClient(t *testing.T) reclient.RemoteEnvironmentInterface 
 	reClient, err := versioned.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 
-	rei := reClient.RemoteenvironmentV1alpha1().RemoteEnvironments()
+	rei := reClient.ApplicationconnectorV1alpha1().RemoteEnvironments()
 	return rei
 }
 
@@ -93,17 +93,12 @@ func fixRemoteEnvironment() *v1alpha1.RemoteEnvironment {
 	return &v1alpha1.RemoteEnvironment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "RemoteEnvironment",
-			APIVersion: "remoteenvironment.kyma.cx/v1alpha1",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test-remote-env",
 		},
 		Spec: v1alpha1.RemoteEnvironmentSpec{
-			Source: v1alpha1.Source{
-				Namespace:   "com.ns",
-				Type:        "commerce",
-				Environment: "production",
-			},
 			Description: "Remote Environment used by acceptance test",
 			Services: []v1alpha1.Service{
 				{

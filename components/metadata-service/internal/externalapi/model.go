@@ -9,19 +9,24 @@ import (
 )
 
 type Service struct {
-	ID          string `json:"id"`
-	Provider    string `json:"provider"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          string             `json:"id"`
+	Provider    string             `json:"provider"`
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	Identifier  string             `json:"identifier,omitempty"`
+	Labels      *map[string]string `json:"labels,omitempty"`
 }
 
 type ServiceDetails struct {
-	Provider      string         `json:"provider" valid:"required~Provider field cannot be empty."`
-	Name          string         `json:"name" valid:"required~Name field cannot be empty."`
-	Description   string         `json:"description" valid:"required~Description field cannot be empty."`
-	Api           *API           `json:"api,omitempty"`
-	Events        *Events        `json:"events,omitempty"`
-	Documentation *Documentation `json:"documentation,omitempty"`
+	Provider         string             `json:"provider" valid:"required~Provider field cannot be empty."`
+	Name             string             `json:"name" valid:"required~Name field cannot be empty."`
+	Description      string             `json:"description" valid:"required~Description field cannot be empty."`
+	ShortDescription string             `json:"shortDescription,omitempty"`
+	Identifier       string             `json:"identifier,omitempty"`
+	Labels           *map[string]string `json:"labels,omitempty"`
+	Api              *API               `json:"api,omitempty"`
+	Events           *Events            `json:"events,omitempty"`
+	Documentation    *Documentation     `json:"documentation,omitempty"`
 }
 
 type CreateServiceResponse struct {
@@ -70,14 +75,22 @@ func serviceDefinitionToService(serviceDefinition metadata.ServiceDefinition) Se
 		Name:        serviceDefinition.Name,
 		Provider:    serviceDefinition.Provider,
 		Description: serviceDefinition.Description,
+		Identifier:  serviceDefinition.Identifier,
+		Labels:      serviceDefinition.Labels,
 	}
 }
 
 func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinition) (ServiceDetails, apperrors.AppError) {
 	serviceDetails := ServiceDetails{
-		Provider:    serviceDefinition.Provider,
-		Name:        serviceDefinition.Name,
-		Description: serviceDefinition.Description,
+		Provider:         serviceDefinition.Provider,
+		Name:             serviceDefinition.Name,
+		Description:      serviceDefinition.Description,
+		ShortDescription: serviceDefinition.ShortDescription,
+		Identifier:       serviceDefinition.Identifier,
+	}
+
+	if serviceDefinition.Labels != nil {
+		serviceDetails.Labels = serviceDefinition.Labels
 	}
 
 	if serviceDefinition.Api != nil {
@@ -116,9 +129,15 @@ func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinit
 
 func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (metadata.ServiceDefinition, apperrors.AppError) {
 	serviceDefinition := metadata.ServiceDefinition{
-		Provider:    serviceDetails.Provider,
-		Name:        serviceDetails.Name,
-		Description: serviceDetails.Description,
+		Provider:         serviceDetails.Provider,
+		Name:             serviceDetails.Name,
+		Description:      serviceDetails.Description,
+		ShortDescription: serviceDetails.ShortDescription,
+		Identifier:       serviceDetails.Identifier,
+	}
+
+	if serviceDetails.Labels != nil {
+		serviceDefinition.Labels = serviceDetails.Labels
 	}
 
 	if serviceDetails.Api != nil {

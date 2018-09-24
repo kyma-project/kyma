@@ -156,7 +156,7 @@ func (svc *remoteEnvironmentService) Enable(namespace, name string) (*v1alpha1.E
 	em, err := svc.client.EnvironmentMappings(namespace).Create(&v1alpha1.EnvironmentMapping{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "EnvironmentMapping",
-			APIVersion: "remoteenvironment.kyma.cx/v1alpha1",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,

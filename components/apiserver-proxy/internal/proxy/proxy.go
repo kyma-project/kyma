@@ -9,12 +9,17 @@ import (
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authn"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authz"
+
 	yaml "gopkg.in/yaml.v2"
+	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/authorization/authorizer"
+	apirequest "k8s.io/apiserver/pkg/endpoints/request"
 	clientset "k8s.io/client-go/kubernetes"
 )
+
+const KUBERNETES_SERVICE = "kubernetes.default"
 
 // Config holds proxy authorization and authentication settings
 type Config struct {
@@ -88,11 +93,12 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 }
 
 func newKubeRBACProxyAuthorizerAttributesGetter(authzConfig *authz.Config) authorizer.RequestAttributesGetter {
-	return krpAuthorizerAttributesGetter{authzConfig}
+	return krpAuthorizerAttributesGetter{authzConfig, newRequestInfoResolver()}
 }
 
 type krpAuthorizerAttributesGetter struct {
 	authzConfig *authz.Config
+	reqInfoResolver *apirequest.RequestInfoFactory
 }
 
 // GetRequestAttributes populates authorizer attributes for the requests to kube-rbac-proxy.
@@ -152,6 +158,24 @@ func (n krpAuthorizerAttributesGetter) GetRequestAttributes(u user.Info, r *http
 			Name:            n.authzConfig.ResourceAttributes.Name,
 			ResourceRequest: true,
 		}
+	} else {
+		// attributes based on request		
+		reqInfo, err := n.reqInfoResolver.NewRequestInfo(r)
+
+		if err != nil {
+			glog.Fatalf("Unable to create request info object. %v", err)
+		}
+
+		attrs.User = u
+		attrs.Verb = reqInfo.Verb
+		attrs.APIGroup = reqInfo.APIGroup
+		attrs.APIVersion = reqInfo.APIVersion
+		attrs.Name = reqInfo.Name
+		attrs.Namespace = reqInfo.Namespace
+		attrs.ResourceRequest = reqInfo.IsResourceRequest
+		attrs.Resource = reqInfo.Resource
+		attrs.Subresource = reqInfo.Subresource
+		attrs.Path = reqInfo.Path
 	}
 
 	glog.V(5).Infof("kube-rbac-proxy request attributes: attrs=%#v", attrs)
@@ -200,4 +224,14 @@ func (c *Config) DeepCopy() *Config {
 	}
 
 	return res
+}
+
+func newRequestInfoResolver() *apirequest.RequestInfoFactory {
+	apiPrefixes := sets.NewString("apis", "api")
+	legacyAPIPrefixes := sets.NewString("api")
+
+	return &apirequest.RequestInfoFactory{
+		APIPrefixes:          apiPrefixes,
+		GrouplessAPIPrefixes: legacyAPIPrefixes,
+	}
 }

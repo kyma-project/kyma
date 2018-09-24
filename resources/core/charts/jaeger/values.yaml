@@ -29,3 +29,5 @@ jaeger:
 resources:
   limits:
     memory: "512M"
+kcproxy:
+  inPort: 3000
