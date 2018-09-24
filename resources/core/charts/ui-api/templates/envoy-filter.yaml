@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: graphql-websocket-header-rewrite
+  namespace: {{ .Release.Namespace }}
+spec:
+  workloadLabels:
+    app: {{ template "name" . }}
+  filters:
+  - listenerMatch:
+      listenerProtocol: HTTP
+      listenerType: SIDECAR_INBOUND
+      portNumber: {{ .Values.service.externalPort }}
+    filterName: envoy.lua
+    filterType: HTTP
+    filterConfig:
+      inlineCode: |
+        function envoy_on_request(request_handle)
+          wsProtocolHeader = request_handle:headers():get("sec-websocket-protocol")
+          if (wsProtocolHeader ~= nil and wsProtocolHeader ~= '') then
+            protocol, token = wsProtocolHeader:match("([^, ]+), ([^, ]+)")
+            if (token ~= nil and token ~= '') then
+              request_handle:headers():add("authorization", "Bearer " .. token)
+            end
+          end
+        end
