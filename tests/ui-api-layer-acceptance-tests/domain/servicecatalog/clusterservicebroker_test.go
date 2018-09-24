@@ -27,11 +27,11 @@ type ServiceBrokerStatus struct {
 }
 
 type brokersQueryResponse struct {
-	ServiceBrokers []ClusterServiceBroker
+	ClusterServiceBrokers []ClusterServiceBroker
 }
 
 type brokerQueryResponse struct {
-	ServiceBroker ClusterServiceBroker
+	ClusterServiceBroker ClusterServiceBroker
 }
 
 func TestClusterServiceBrokerQueries(t *testing.T) {
@@ -68,7 +68,7 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 		err = c.DoQuery(query, &res)
 
 		require.NoError(t, err)
-		assertBrokerExistsAndEqual(t, res.ServiceBrokers, expectedResource)
+		assertBrokerExistsAndEqual(t, res.ClusterServiceBrokers, expectedResource)
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
@@ -86,7 +86,7 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 		err = c.Do(req, &res)
 
 		require.NoError(t, err)
-		checkBroker(t, expectedResource, res.ServiceBroker)
+		checkBroker(t, expectedResource, res.ClusterServiceBroker)
 	})
 }
 

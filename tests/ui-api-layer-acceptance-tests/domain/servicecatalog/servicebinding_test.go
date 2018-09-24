@@ -33,8 +33,8 @@ type ServiceBinding struct {
 }
 
 type ServiceBindingEvent struct {
-	Type    string
-	Binding ServiceBinding
+	Type           string
+	ServiceBinding ServiceBinding
 }
 
 type CreateServiceBindingOutput struct {
@@ -331,7 +331,7 @@ func binding(bindingName, instanceName string) ServiceBinding {
 func bindingEvent(eventType string, binding ServiceBinding) ServiceBindingEvent {
 	return ServiceBindingEvent{
 		Type:    eventType,
-		Binding: binding,
+		ServiceBinding: binding,
 	}
 }
 
@@ -370,6 +370,6 @@ func readServiceBindingEvent(sub *graphql.Subscription) (ServiceBindingEvent, er
 }
 
 func checkBindingEvent(t *testing.T, expected, actual ServiceBindingEvent) {
-	assert.Equal(t, expected.Type, expected.Type)
-	assert.Equal(t, expected.Binding.Name, expected.Binding.Name)
+	assert.Equal(t, expected.Type, actual.Type)
+	assert.Equal(t, expected.ServiceBinding.Name, actual.ServiceBinding.Name)
 }

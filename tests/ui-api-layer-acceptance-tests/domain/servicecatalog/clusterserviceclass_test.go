@@ -13,12 +13,12 @@ import (
 )
 
 type ClusterServicePlan struct {
-	Name                          string
-	DisplayName                   string
-	ExternalName                  string
-	Description                   string
-	RelatedServiceClassName       string
-	InstanceCreateParameterSchema map[string]interface{}
+	Name                           string
+	DisplayName                    string
+	ExternalName                   string
+	Description                    string
+	RelatedClusterServiceClassName string
+	InstanceCreateParameterSchema  map[string]interface{}
 }
 
 type ClusterServiceClass struct {
@@ -41,11 +41,11 @@ type ClusterServiceClass struct {
 }
 
 type classesQueryResponse struct {
-	ServiceClasses []ClusterServiceClass
+	ClusterServiceClasses []ClusterServiceClass
 }
 
 type classQueryResponse struct {
-	ServiceClass ClusterServiceClass
+	ClusterServiceClass ClusterServiceClass
 }
 
 func TestClusterServiceClassesQueries(t *testing.T) {
@@ -93,7 +93,7 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 		err = c.DoQuery(query, &res)
 
 		require.NoError(t, err)
-		assertClassExistsAndEqual(t, res.ServiceClasses, expectedResource)
+		assertClassExistsAndEqual(t, res.ClusterServiceClasses, expectedResource)
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
@@ -111,7 +111,7 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 		err = c.Do(req, &res)
 
 		require.NoError(t, err)
-		checkClass(t, expectedResource, res.ServiceClass)
+		checkClass(t, expectedResource, res.ClusterServiceClass)
 	})
 
 }
@@ -128,7 +128,7 @@ func checkClass(t *testing.T, expected, actual ClusterServiceClass) {
 func checkPlan(t *testing.T, expected, actual ClusterServicePlan) {
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Equal(t, expected.ExternalName, actual.ExternalName)
-	assert.Equal(t, expected.RelatedServiceClassName, actual.RelatedServiceClassName)
+	assert.Equal(t, expected.RelatedClusterServiceClassName, actual.RelatedClusterServiceClassName)
 }
 
 func assertClassExistsAndEqual(t *testing.T, arr []ClusterServiceClass, expectedElement ClusterServiceClass) {
@@ -166,7 +166,7 @@ func class() ClusterServiceClass {
 			{
 				Name:                    "86064792-7ea2-467b-af93-ac9694d96d52",
 				ExternalName:            "default",
-				RelatedServiceClassName: "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
+				RelatedClusterServiceClassName: "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
 			},
 		},
 	}

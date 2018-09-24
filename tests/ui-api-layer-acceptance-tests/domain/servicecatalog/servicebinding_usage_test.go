@@ -28,7 +28,7 @@ type ServiceBindingUsage struct {
 
 type ServiceBindingUsageEvent struct {
 	Type         string
-	BindingUsage ServiceBindingUsage
+	ServiceBindingUsage ServiceBindingUsage
 }
 
 type DeleteServiceBindingUsageOutput struct {
@@ -423,5 +423,5 @@ func (s *bindingUsageTestSuite) bindingUsageEventDetailsFields() string {
 
 func (s *bindingUsageTestSuite) assertEqualBindingUsageEvent(event ServiceBindingUsageEvent) {
 	assert.Equal(s.t, "ADD", event.Type)
-	assert.Equal(s.t, s.givenBindingUsage.Name, event.BindingUsage.Name)
+	assert.Equal(s.t, s.givenBindingUsage.Name, event.ServiceBindingUsage.Name)
 }

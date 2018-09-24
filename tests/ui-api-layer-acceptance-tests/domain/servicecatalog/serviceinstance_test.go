@@ -26,8 +26,8 @@ const (
 )
 
 type ServiceInstanceEvent struct {
-	Type     string
-	Instance ServiceInstance
+	Type            string
+	ServiceInstance ServiceInstance
 }
 
 type ServiceInstanceResourceRef struct {
@@ -41,7 +41,7 @@ type ServiceInstance struct {
 	Environment          string
 	ClassReference       ServiceInstanceResourceRef
 	PlanReference        ServiceInstanceResourceRef
-	ServicePlanSpec      map[string]interface{}
+	PlanSpec             map[string]interface{}
 	ClusterServicePlan   ClusterServicePlan
 	ClusterServiceClass  ClusterServiceClass
 	CreationTimestamp    int
@@ -168,7 +168,7 @@ func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 	req.SetVar("externalPlanName", expectedResource.ClusterServicePlan.ExternalName)
 	req.SetVar("externalServiceClassName", expectedResource.ClusterServiceClass.ExternalName)
 	req.SetVar("labels", expectedResource.Labels)
-	req.SetVar("parameterSchema", expectedResource.ServicePlanSpec)
+	req.SetVar("parameterSchema", expectedResource.PlanSpec)
 
 	var res instanceCreateMutationResponse
 	err := c.Do(req, &res)
@@ -358,7 +358,7 @@ func instanceDetailsFields() string {
 func instanceEventDetailsFields() string {
 	return fmt.Sprintf(`
         type
-        instance {
+        serviceInstance {
 			%s
         }
     `, instanceDetailsFields())
@@ -389,7 +389,7 @@ func instance(name string) ServiceInstance {
 		Name:        name,
 		Environment: tester.DefaultNamespace,
 		Labels:      []string{"test", "test2"},
-		ServicePlanSpec: map[string]interface{}{
+		PlanSpec: map[string]interface{}{
 			"first": "1",
 			"second": map[string]interface{}{
 				"value": "2",
@@ -409,7 +409,7 @@ func instance(name string) ServiceInstance {
 func instanceEvent(eventType string, serviceInstance ServiceInstance) ServiceInstanceEvent {
 	return ServiceInstanceEvent{
 		Type:     eventType,
-		Instance: serviceInstance,
+		ServiceInstance: serviceInstance,
 	}
 }
 
@@ -457,6 +457,6 @@ func readInstanceEvent(sub *graphql.Subscription) (ServiceInstanceEvent, error) 
 }
 
 func checkInstanceEvent(t *testing.T, expected, actual ServiceInstanceEvent) {
-	assert.Equal(t, expected.Type, expected.Type)
-	assert.Equal(t, expected.Instance.Name, expected.Instance.Name)
+	assert.Equal(t, expected.Type, actual.Type)
+	assert.Equal(t, expected.ServiceInstance.Name, actual.ServiceInstance.Name)
 }
