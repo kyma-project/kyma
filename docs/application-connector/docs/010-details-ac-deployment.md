@@ -25,17 +25,17 @@ You can install a Remote Environment using either the Console UI or kubectl
 
 ### Using Console:
 
-- Go to the Kyma console UI.
-- Select Administration.
-- Select the Remote Environments from the Integration section.
-- Click Create Remote Environment.
+- Go to the Kyma Console.
+- Select **Administration**.
+- Select the **Remote Environments** from the **Integration** section.
+- Click **Create Remote Environment**..
 
 ![Add RE](./assets/create-re.png)
 
 - Provide the following details:
     - Name
     - Description
-    - Labels of your choice which are key-value pairs
+    - Optional labels of your choice which are key-value pairs
    
 ![Update RE](./assets/edit-re.png)
 
@@ -73,8 +73,8 @@ The Remote Environment can be removed from Kyma using either Console UI or Kubec
 ### Using Console:
 
 - Go to the Kyma console UI.
-- Select Administration.
-- Select the Remote Environments from the Integration section.
+- Select **Administration**.
+- Select the **Remote Environments** from the **Integration** section.
 - Choose the Remote Environment to which you want to delete.
 - Click Delete.
 
@@ -100,8 +100,8 @@ The Remote Environment can be updated using either Console UI or Kubectl.
 ### Using Console:
 
 - Go to the Kyma console UI.
-- Select Administration.
-- Select the Remote Environments from the Integration section.
+- Select **Administration**.
+- Select the **Remote Environments** from the **Integration** section.
 - Choose the Remote Environment to which you want to update.
 - Change the description and labels
 - Click Save.
