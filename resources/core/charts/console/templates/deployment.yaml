@@ -17,8 +17,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          # image: "{{ .Values.global.containerRegistry.path }}/console:{{ .Values.image.tag }}"
-          image: "eu.gcr.io/kyma-project/snapshot/console:PR-155"
+          image: "{{ .Values.global.containerRegistry.path }}/console:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
