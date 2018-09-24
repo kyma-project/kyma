@@ -39,12 +39,13 @@ You can install a Remote Environment using either the Console UI or kubectl
    
 ![Update RE](./assets/edit-re.png)
 
- - Click Create and the new Remote Environment will be created and you can check status in Remote Environment view.
+ - Click **Create**.
  
+The new Remote Environment is created. You can check its status in the **Remote Environment** view.
 
-### Using Kubectl
+### Using kubectl
 
-New Remote Environment can be created using the Kubectl apply command with the following yaml file:
+You can create a new Remote Environment using the kubectl `apply` command for the `re-production-1.yaml` file:
 
 re-production-1.yaml:
 
@@ -54,61 +55,64 @@ kind: RemoteEnvironment
 metadata:
   name: production-1
 spec:
-  description: This Remote Environment for connecting production system 1.
+  description: This is a Remote Environment for connecting production system 1.
   labels:
     region: us
     kind: production
 ```
 
-Then you can execute the following command:
+Run the following command:
 
 ``` bash
 kubectl apply -f ./re-production-1.yaml
 ```
 
+### How to check if your remote environment was successfully created.
+
+The new Remote Environment appears on the **Remote Environments** list with the `Serving` status`.
+
 ## Delete a Remote Environment
 
-The Remote Environment can be removed from Kyma using either Console UI or Kubectl.
+You can remove a Remote Environment from Kyma using either the Console UI or kubectl.
+
 
 ### Using Console:
 
 - Go to the Kyma console UI.
 - Select **Administration**.
 - Select the **Remote Environments** from the **Integration** section.
-- Choose the Remote Environment to which you want to delete.
-- Click Delete.
+- Choose the Remote Environment you want to delete.
+- Click **Delete**.
 
 ![Delete RE](./assets/delete-re.png)
  
 
-### Using Kubectl
+### Using kubectl
 
-The Remote Environment can be deleted using the following command:
-
-Then you can execute the following command:
+Delete the Remote Environment using the following command:
 
 ```bash
 kubectl delete re name-of-remote-environment
 ```
 
-## Update Remote Environment
+## Update a Remote Environment
 
-The Remote Environment can be updated using either Console UI or Kubectl.
+You can update a Remote Environment using either the Console UI or kubectl.
 
->**NOTE:** The name of Remote Environment cannot be changed.
+>**NOTE:** You cannot change the name of a Remote Environment.
 
 ### Using Console:
 
-- Go to the Kyma console UI.
+- Go to the Kyma Console UI.
 - Select **Administration**.
 - Select the **Remote Environments** from the **Integration** section.
 - Choose the Remote Environment to which you want to update.
-- Change the description and labels
-- Click Save.
+- Change the description and labels.
+- Click **Save**.
 
-### Using Kubectl
+### Using kubectl
 
-Update the file: `re-production-1.yaml`
+Update the `re-production-1.yaml` file
 
 ``` yaml
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
@@ -116,18 +120,15 @@ kind: RemoteEnvironment
 metadata:
   name: production-1
 spec:
-  description: This is new description.
+  description: This is a new description.
   labels:
     region: new-region
     kind: production
 ```
 
-Then you can execute the following command:
+Run the following command:
 
 ``` bash
 kubectl apply -f ./re-production-1.yaml
 ```
 
-## How to check if your remote environment was successfully created.
-
-The new Remote Environment appears on the **Remote Environments** list with the `Serving` status`
