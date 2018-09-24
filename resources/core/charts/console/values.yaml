@@ -27,5 +27,7 @@ cluster:
   # Organization data for which the Kyma cluster is installed
   orgId: 'my-org-123'
   orgName: 'My Organization'
+  # Provide custom logo image url that should replace the default kyma logo in the console app header component
   headerLogoUrl: 'assets/logo.svg'
+  # Provide custom title for the UI application that will be shown in the header component
   headerTitle: ''
