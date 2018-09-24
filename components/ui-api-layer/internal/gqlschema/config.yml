@@ -37,8 +37,6 @@ models:
         resolver: true
       clusterServiceClass:
         resolver: true
-  ServiceInstanceEvent:
-    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ServiceInstanceEvent"
   ServiceClass:
     model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ServiceClass"
     fields:

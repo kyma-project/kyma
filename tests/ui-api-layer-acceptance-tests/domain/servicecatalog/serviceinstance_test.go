@@ -73,7 +73,7 @@ type instanceDeleteMutationResponse struct {
 	DeleteServiceInstance ServiceInstance
 }
 
-func TestInstanceMutationsAndQueries(t *testing.T) {
+func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	if dex.IsSCIEnabled() {
 		t.Skip("SCI Enabled")
 	}
@@ -295,10 +295,10 @@ func instanceDetailsFields() string {
 			displayName
 			externalName
 			description
-			relatedServiceClassName
+			relatedClusterServiceClassName
 			instanceCreateParameterSchema
 		}
-		 clusterServiceClass {
+		clusterServiceClass {
 			name
 			externalName
 			displayName

@@ -354,8 +354,8 @@ type ComplexityRoot struct {
 	}
 
 	ServiceBindingUsageEvent struct {
-		Type         func(childComplexity int) int
-		BindingUsage func(childComplexity int) int
+		Type                func(childComplexity int) int
+		ServiceBindingUsage func(childComplexity int) int
 	}
 
 	ServiceBindingUsageParameters struct {
@@ -427,8 +427,8 @@ type ComplexityRoot struct {
 	}
 
 	ServiceInstanceEvent struct {
-		Type     func(childComplexity int) int
-		Instance func(childComplexity int) int
+		Type            func(childComplexity int) int
+		ServiceInstance func(childComplexity int) int
 	}
 
 	ServiceInstanceResourceRef struct {
@@ -3230,12 +3230,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceBindingUsageEvent.Type(childComplexity), true
 
-	case "ServiceBindingUsageEvent.bindingUsage":
-		if e.complexity.ServiceBindingUsageEvent.BindingUsage == nil {
+	case "ServiceBindingUsageEvent.serviceBindingUsage":
+		if e.complexity.ServiceBindingUsageEvent.ServiceBindingUsage == nil {
 			break
 		}
 
-		return e.complexity.ServiceBindingUsageEvent.BindingUsage(childComplexity), true
+		return e.complexity.ServiceBindingUsageEvent.ServiceBindingUsage(childComplexity), true
 
 	case "ServiceBindingUsageParameters.envPrefix":
 		if e.complexity.ServiceBindingUsageParameters.EnvPrefix == nil {
@@ -3573,12 +3573,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceInstanceEvent.Type(childComplexity), true
 
-	case "ServiceInstanceEvent.instance":
-		if e.complexity.ServiceInstanceEvent.Instance == nil {
+	case "ServiceInstanceEvent.serviceInstance":
+		if e.complexity.ServiceInstanceEvent.ServiceInstance == nil {
 			break
 		}
 
-		return e.complexity.ServiceInstanceEvent.Instance(childComplexity), true
+		return e.complexity.ServiceInstanceEvent.ServiceInstance(childComplexity), true
 
 	case "ServiceInstanceResourceRef.name":
 		if e.complexity.ServiceInstanceResourceRef.Name == nil {
@@ -11209,8 +11209,8 @@ func (ec *executionContext) _ServiceBindingUsageEvent(ctx context.Context, sel a
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "bindingUsage":
-			out.Values[i] = ec._ServiceBindingUsageEvent_bindingUsage(ctx, field, obj)
+		case "serviceBindingUsage":
+			out.Values[i] = ec._ServiceBindingUsageEvent_serviceBindingUsage(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -11248,7 +11248,7 @@ func (ec *executionContext) _ServiceBindingUsageEvent_type(ctx context.Context, 
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceBindingUsageEvent_bindingUsage(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsageEvent) graphql.Marshaler {
+func (ec *executionContext) _ServiceBindingUsageEvent_serviceBindingUsage(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsageEvent) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsageEvent",
 		Args:   nil,
@@ -11256,7 +11256,7 @@ func (ec *executionContext) _ServiceBindingUsageEvent_bindingUsage(ctx context.C
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.BindingUsage, nil
+		return obj.ServiceBindingUsage, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -12876,8 +12876,8 @@ func (ec *executionContext) _ServiceInstanceEvent(ctx context.Context, sel ast.S
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "instance":
-			out.Values[i] = ec._ServiceInstanceEvent_instance(ctx, field, obj)
+		case "serviceInstance":
+			out.Values[i] = ec._ServiceInstanceEvent_serviceInstance(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -12915,7 +12915,7 @@ func (ec *executionContext) _ServiceInstanceEvent_type(ctx context.Context, fiel
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceInstanceEvent_instance(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceEvent) graphql.Marshaler {
+func (ec *executionContext) _ServiceInstanceEvent_serviceInstance(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceEvent) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstanceEvent",
 		Args:   nil,
@@ -12923,7 +12923,7 @@ func (ec *executionContext) _ServiceInstanceEvent_instance(ctx context.Context, 
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Instance, nil
+		return obj.ServiceInstance, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -15644,7 +15644,7 @@ enum InstanceStatusType {
 
 type ServiceInstanceEvent {
     type: SubscriptionEventType!
-    instance: ServiceInstance!
+    serviceInstance: ServiceInstance!
 }
 
 type ServiceBrokerEvent {
@@ -15819,7 +15819,7 @@ type ServiceBindingUsage {
 
 type ServiceBindingUsageEvent {
     type: SubscriptionEventType!
-    bindingUsage: ServiceBindingUsage!
+    serviceBindingUsage: ServiceBindingUsage!
 }
 
 type ServiceBindingUsageStatus {

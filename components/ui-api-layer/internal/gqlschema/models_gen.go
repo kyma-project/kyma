@@ -239,8 +239,8 @@ type ServiceBindingStatus struct {
 }
 
 type ServiceBindingUsageEvent struct {
-	Type         SubscriptionEventType `json:"type"`
-	BindingUsage ServiceBindingUsage   `json:"bindingUsage"`
+	Type                SubscriptionEventType `json:"type"`
+	ServiceBindingUsage ServiceBindingUsage   `json:"serviceBindingUsage"`
 }
 
 type ServiceBindingUsageParameters struct {
@@ -289,6 +289,11 @@ type ServiceInstanceCreateInput struct {
 type ServiceInstanceCreateInputResourceRef struct {
 	ExternalName string `json:"externalName"`
 	ClusterWide  bool   `json:"clusterWide"`
+}
+
+type ServiceInstanceEvent struct {
+	Type            SubscriptionEventType `json:"type"`
+	ServiceInstance ServiceInstance       `json:"serviceInstance"`
 }
 
 type ServiceInstanceResourceRef struct {

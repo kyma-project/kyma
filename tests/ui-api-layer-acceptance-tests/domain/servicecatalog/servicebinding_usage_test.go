@@ -63,7 +63,7 @@ type bindingUsageDeleteMutationResponse struct {
 	DeleteServiceBindingUsage DeleteServiceBindingUsageOutput
 }
 
-func TestBindingUsageMutationsAndQueries(t *testing.T) {
+func TestServiceBindingUsageMutationsAndQueries(t *testing.T) {
 	if dex.IsSCIEnabled() {
 		t.Skip("SCI Enabled")
 	}

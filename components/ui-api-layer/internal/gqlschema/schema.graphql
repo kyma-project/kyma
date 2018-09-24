@@ -66,7 +66,7 @@ enum InstanceStatusType {
 
 type ServiceInstanceEvent {
     type: SubscriptionEventType!
-    instance: ServiceInstance!
+    serviceInstance: ServiceInstance!
 }
 
 type ServiceBrokerEvent {
@@ -241,7 +241,7 @@ type ServiceBindingUsage {
 
 type ServiceBindingUsageEvent {
     type: SubscriptionEventType!
-    bindingUsage: ServiceBindingUsage!
+    serviceBindingUsage: ServiceBindingUsage!
 }
 
 type ServiceBindingUsageStatus {

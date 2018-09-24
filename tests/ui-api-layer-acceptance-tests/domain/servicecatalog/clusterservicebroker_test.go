@@ -34,7 +34,7 @@ type brokerQueryResponse struct {
 	ServiceBroker ClusterServiceBroker
 }
 
-func TestBrokerQueries(t *testing.T) {
+func TestClusterServiceBrokerQueries(t *testing.T) {
 	if dex.IsSCIEnabled() {
 		t.Skip("SCI Enabled")
 	}

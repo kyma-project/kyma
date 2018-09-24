@@ -48,7 +48,7 @@ type classQueryResponse struct {
 	ServiceClass ClusterServiceClass
 }
 
-func TestClassesQueries(t *testing.T) {
+func TestClusterServiceClassesQueries(t *testing.T) {
 	if dex.IsSCIEnabled() {
 		t.Skip("SCI Enabled")
 	}
@@ -74,7 +74,7 @@ func TestClassesQueries(t *testing.T) {
 			displayName
 			externalName
 			description
-			relatedServiceClassName
+			relatedClusterServiceClassName
 			instanceCreateParameterSchema
 		}
 		activated

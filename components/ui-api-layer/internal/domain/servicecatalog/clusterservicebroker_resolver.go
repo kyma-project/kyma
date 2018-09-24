@@ -85,12 +85,12 @@ func (r *clusterServiceBrokerResolver) ClusterServiceBrokerEventSubscription(ctx
 		return true
 	}
 
-	instanceListener := listener.NewClusterServiceBroker(channel, filter, r.brokerConverter)
+	brokerListener := listener.NewClusterServiceBroker(channel, filter, r.brokerConverter)
 
-	r.clusterServiceBrokerSvc.Subscribe(instanceListener)
+	r.clusterServiceBrokerSvc.Subscribe(brokerListener)
 	go func() {
 		defer close(channel)
-		defer r.clusterServiceBrokerSvc.Unsubscribe(instanceListener)
+		defer r.clusterServiceBrokerSvc.Unsubscribe(brokerListener)
 		<-ctx.Done()
 	}()
 

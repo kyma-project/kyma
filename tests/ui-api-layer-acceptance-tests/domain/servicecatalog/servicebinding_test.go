@@ -76,7 +76,7 @@ type bindingDeleteMutationResponse struct {
 	DeleteServiceBinding DeleteServiceBindingOutput
 }
 
-func TestBindingMutationsAndQueries(t *testing.T) {
+func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	if dex.IsSCIEnabled() {
 		t.Skip("SCI Enabled")
 	}
@@ -353,7 +353,7 @@ func deleteBindingOutput(bindingName string) DeleteServiceBindingOutput {
 func bindingEventDetailsFields() string {
 	return `
         type
-        binding {
+        serviceBinding {
 			name
         }
     `
