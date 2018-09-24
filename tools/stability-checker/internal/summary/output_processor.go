@@ -39,8 +39,7 @@ func NewOutputProcessor(failRegexp, successRegexp string) (*OutputProcessor, err
 	}, nil
 }
 
-// Process process test ouptut and stores results internally.
-// This method can be called many times. To get results, use GetResults method.
+// Process process test output and returns statistics for specific tests
 func (p *OutputProcessor) Process(input []byte) (map[string]SpecificTestStats, error) {
 	aggr := newStatsAggregator()
 	if err := p.findSuccessIndicator(input, aggr); err != nil {

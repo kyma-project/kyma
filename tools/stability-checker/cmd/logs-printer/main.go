@@ -32,12 +32,13 @@ func main() {
 	err := envconfig.InitWithPrefix(&cfg, "APP")
 	fatalOnError(errors.Wrap(err, "while reading configuration from environment variables"))
 
-	logFetcher := podlogger.NewPodLogFetcher(cfg.WorkingNamespace, cfg.PodName)
-	logReader, err := logFetcher.GetLogsFromPod()
+	logFetcher, err := podlogger.NewPodLogFetcher(cfg.WorkingNamespace, cfg.PodName)
+	fatalOnError(err)
+	logReadCloser, err := logFetcher.GetLogsFromPod()
 	fatalOnError(errors.Wrap(err, "while getting logs from pod"))
-	defer logReader.Close()
+	defer logReadCloser.Close()
 
-	stream := json.NewDecoder(logReader)
+	stream := json.NewDecoder(logReadCloser)
 
 	err = printer.
 		New(stream, requestedTestIDs.ToSlice()).

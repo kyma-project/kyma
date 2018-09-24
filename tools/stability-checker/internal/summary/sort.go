@@ -2,16 +2,16 @@ package summary
 
 import "strings"
 
-// By ...
+// By defines function comparing SpecificTestStats
 type By func(r1, r2 *SpecificTestStats) bool
 
-// ResultsSorter ...
+// ResultsSorter implements sort.Interface for SpecificTestStats
 type ResultsSorter struct {
 	List []SpecificTestStats
 	by   By
 }
 
-// NewResultsSorter ...
+// NewResultsSorter returns ResultsSorter
 func NewResultsSorter(list []SpecificTestStats, by By) *ResultsSorter {
 	return &ResultsSorter{
 		List: list,

@@ -180,20 +180,22 @@ function printImagesWithLatestTag(){
 
 
 echo "----------------------------"
-echo "- Testing Kyma..."
+echo "- Testing Dummy..."
 echo "----------------------------"
 
-echo "- Testing Core components..."
-# timeout set to 10 minutes
+echo "- Testing dummy components..."
 helm test dummy
-coreTestErr=$?
+testErr=$?
 
 checkAndCleanupTest kyma-system
-testCheckCore=$?
+checkErr=$?
+
+printImagesWithLatestTag
+latestTagsErr=$?
 
 
 
-if [ ${coreTestErr} -ne 0 ]
+if [ ${testErr} -ne 0] || [ ${latestTagsErr} -ne 0 ] || [ ${checkErr} -ne 0 ] ]
 then
     exit 1
 else

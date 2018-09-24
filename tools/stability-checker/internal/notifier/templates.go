@@ -5,15 +5,6 @@ const (
 	body   = `
 	{{- if .FailedExecutions }}
 	*Summary:* {{ .TotalTestsCnt }} test executions and {{ len .FailedExecutions }} of them failed :sad-frog:
-		{{block "list" .FailedExecutions }}
-		Failed tests IDs:
-			{{ range . }}
-			{{printf "- %q" .ID }}
-			{{- end}}
-		{{end}}
-	{{- else -}}
-	*Summary:* {{ .TotalTestsCnt }} test executions and all of them passed :very_nice:
-	{{- end -}}
 	{{- if .ShowTestStats -}}
  	  {{"\n"}}Showing tests statistics:
       {{- range .TestStats -}}
@@ -21,9 +12,17 @@ const (
 	  {{- else }}
 		No test statistics
 	  {{- end }}
-	  
-
 	{{- end }}
+
+		{{block "list" .FailedExecutions }}
+		Failed test executions IDs:
+			{{ range . }}
+			{{printf "- %q" .ID }}
+			{{- end}}
+		{{end}}
+	{{- else -}}
+	*Summary:* {{ .TotalTestsCnt }} test executions and all of them passed :very_nice:
+	{{- end -}}
 	`
 	footer = `
 	{{- if .FailedExecutions }}

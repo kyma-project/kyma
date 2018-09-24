@@ -1,20 +1,18 @@
 package notifier
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/kyma-project/kyma/tools/stability-checker/internal/summary"
 	"github.com/stretchr/testify/require"
 )
 
-func TestAbc(t *testing.T) {
+func TestSummaryIsRendered(t *testing.T) {
 	r, err := NewTestRenderer()
 	require.NoError(t, err)
 
-	a, b, c, err := r.RenderTestSummary(RenderTestSummaryInput{
+	_, _, _, err = r.RenderTestSummary(RenderTestSummaryInput{
 		ShowTestStats: true,
-		// TODO
 		TestStats: []summary.SpecificTestStats{
 			{
 				Name:      "test-kubeless",
@@ -28,7 +26,4 @@ func TestAbc(t *testing.T) {
 			},
 		}})
 	require.NoError(t, err)
-	fmt.Println(a)
-	fmt.Println(b)
-	fmt.Println(c)
 }

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"testing"
 
 	"github.com/kyma-project/kyma/tools/stability-checker/internal/log"
@@ -20,7 +19,8 @@ func TestForGettingTestSummaryForExecutions(t *testing.T) {
 	defer mockLogFetcher.AssertExpectations(t)
 	mockLogProcessor := &automock.LogProcessor{}
 	defer mockLogProcessor.AssertExpectations(t)
-
+	givenReadCloser := fixReadCloser()
+	mockLogFetcher.On("GetLogsFromPod").Return(givenReadCloser, nil).Once()
 	mockLogProcessor.On("Process", []byte("FAILED test-a. SUCCESS test-b.")).Return(map[string]summary.SpecificTestStats{
 		"test-a": {
 			Name:     "test-a",
@@ -30,7 +30,6 @@ func TestForGettingTestSummaryForExecutions(t *testing.T) {
 			Name:      "test-b",
 			Successes: 1,
 		}}, nil).Times(3)
-	mockLogFetcher.On("GetLogsFromPod").Return(fixReadCloser(), nil).Once()
 
 	sut := summary.NewService(mockLogFetcher, mockLogProcessor)
 	// WHEN
@@ -38,6 +37,7 @@ func TestForGettingTestSummaryForExecutions(t *testing.T) {
 	// THEN
 	require.NoError(t, err)
 	assert.Equal(t, fixResults(), stats)
+	assert.True(t, givenReadCloser.CloseCalled)
 }
 
 func fixTestIDs() []string {
@@ -61,19 +61,7 @@ func fixResults() []summary.SpecificTestStats {
 	}
 }
 
-func fixLogEntries() []log.Entry {
-	out := make([]log.Entry, 4)
-	for i := 0; i < 4; i++ {
-		e := log.Entry{}
-		e.Log.Message = "FAILED test-a. SUCCESS test-b."
-		e.Log.TestRunID = fmt.Sprintf("id-%d", i)
-		out[i] = e
-	}
-
-	return out
-}
-
-func fixReadCloser() io.ReadCloser {
+func fixReadCloser() *fakeReadCloser {
 	buff := bytes.NewBuffer(nil)
 	for _, e := range fixLogEntries() {
 		b, _ := json.Marshal(e)
@@ -83,6 +71,18 @@ func fixReadCloser() io.ReadCloser {
 	out := &fakeReadCloser{
 		Buffer: buff,
 	}
+	return out
+}
+
+func fixLogEntries() []log.Entry {
+	out := make([]log.Entry, 4)
+	for i := 0; i < 4; i++ {
+		e := log.Entry{}
+		e.Log.Message = "FAILED test-a. SUCCESS test-b."
+		e.Log.TestRunID = fmt.Sprintf("id-%d", i)
+		out[i] = e
+	}
+
 	return out
 }
 

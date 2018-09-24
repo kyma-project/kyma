@@ -31,13 +31,10 @@ func (c *Service) GetTestSummaryForExecutions(testIDs []string) ([]SpecificTestS
 	defer readCloser.Close()
 	stream := json.NewDecoder(readCloser)
 
-	testIDMap := func(ids []string) map[string]struct{} {
-		out := map[string]struct{}{}
-		for _, id := range ids {
-			out[id] = struct{}{}
-		}
-		return out
-	}(testIDs)
+	testIDMap := map[string]struct{}{}
+	for _, id := range testIDs {
+		testIDMap[id] = struct{}{}
+	}
 
 	aggregated := newStatsAggregator()
 loop:

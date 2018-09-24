@@ -110,13 +110,7 @@ function cleanupHelmTestPods() {
 
     log "\nCleaning up helm test pods" nc bold
     kubectl delete pod -n ${namespace} -l helm-chart-test=true
-    deleteErr=$?
-    if [ ${deleteErr} -ne 0 ]
-    then
-      log "FAILED cleaning test pods.\n" red
-      return 1
-    fi
-    log "Success cleaning test pods.\n" nc bold
+    log "End of cleaning test pods.\n" nc bold
 }
 
 function waitForTestPodsTermination() {
@@ -152,9 +146,8 @@ function checkAndCleanupTest() {
     checkTestPodLabelErr=$?
 
     cleanupHelmTestPods ${namespace}
-    cleanupErr=$?
 
-    if [ ${checkTestPodTerminatedErr} -ne 0 ] || [ ${checkTestPodLabelErr} -ne 0 ] | [ ${cleanupErr} -ne 0 ]
+    if [ ${checkTestPodTerminatedErr} -ne 0 ] || [ ${checkTestPodLabelErr} -ne 0 ]
     then
         return 1
     fi
@@ -180,7 +173,7 @@ function printImagesWithLatestTag(){
 
 
 echo "----------------------------"
-echo "- Testing Kyma..."
+echo "- Testing Kyma ..."
 echo "----------------------------"
 
 echo "- Testing Core components..."
@@ -189,7 +182,21 @@ helm test core --timeout 600
 coreTestErr=$?
 
 checkAndCleanupTest kyma-system
-testCheckCore=$?
+testCheckKymaCore=$?
+
+echo "- Testing Istio components..."
+helm test istio
+istioTestErr=$?
+
+checkAndCleanupTest istio-system
+testCheckIstio=$?
+
+echo "- Testing Remote Environments"
+helm test ec-default
+ecTestErr=$?
+
+helm test hmc-default
+gatewayTestErr=$?
 
 checkAndCleanupTest kyma-integration
 testCheckGateway=$?
@@ -197,7 +204,10 @@ testCheckGateway=$?
 printImagesWithLatestTag
 latestTagsErr=$?
 
-if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]
+if  [ ${coreTestErr} -ne 0 ] || [ ${testCheckKymaCore} -ne 0 ] || [ ${istioTestErr} -ne 0 ] ||
+    [ ${testCheckIstio} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${gatewayTestErr} -ne 0 ] ||
+    [ ${testCheckGateway} -ne 0 ] || [ ${latestTagsErr} -ne 0 ]
+
 then
     exit 1
 else

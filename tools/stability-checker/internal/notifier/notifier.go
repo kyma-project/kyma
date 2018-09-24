@@ -87,14 +87,10 @@ func (s *SlackNotifier) Run(ctx context.Context) {
 
 		var testStats []summary.SpecificTestStats
 		if s.showTestStats {
-			execIDs := (func() []string {
-				var out []string
-				for _, res := range execResults {
-					out = append(out, res.ID)
-				}
-				return out
-			})()
-
+			execIDs := make([]string, 0)
+			for _, res := range execResults {
+				execIDs = append(execIDs, res.ID)
+			}
 			testStats, err = s.summarizer.GetTestSummaryForExecutions(execIDs)
 			if err != nil {
 				s.log.Errorf("Cannot get test summary for execution IDs [%v], got error: %v", execIDs, err)
@@ -133,7 +129,7 @@ func (s *SlackNotifier) getTestExecutionFromTimeWindow(cfgMap *v1.ConfigMap) []i
 	for k, v := range cfgMap.Data {
 		testTime, err := s.parseToTime(k)
 		if err != nil {
-			s.log.Errorf("Cannot get exec time, got error: %s", err)
+			s.log.Errorf("Cannot get test execution time, got error: %s", err)
 			continue
 		}
 

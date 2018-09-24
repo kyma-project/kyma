@@ -35,8 +35,11 @@ type Config struct {
 	TestConfigMapName   string        `envconfig:"default=stability-checker"`
 	PathToTestingScript string
 	Stats               struct {
-		Enabled              bool
-		FailingTestRegexp    string
+		// if true, statistics for individual tests will be send in the notification
+		Enabled bool
+		// indicator that a test has failed. It has to contain capturing group identifying test name
+		FailingTestRegexp string
+		// indicator that a test has passed. It has to contain capturing group identifying test name
 		SuccessfulTestRegexp string
 	}
 	TestResultWindowTime time.Duration `envconfig:"default=6h"`
@@ -75,7 +78,8 @@ func main() {
 	testRenderer, err := notifier.NewTestRenderer()
 	fatalOnError(err)
 
-	logFetcher := podlogger.NewPodLogFetcher(cfg.WorkingNamespace, cfg.PodName)
+	logFetcher, err := podlogger.NewPodLogFetcher(cfg.WorkingNamespace, cfg.PodName)
+	fatalOnError(err)
 	outputProcessor, err := summary.NewOutputProcessor(cfg.Stats.FailingTestRegexp, cfg.Stats.SuccessfulTestRegexp)
 	fatalOnError(err)
 	summarizer := summary.NewService(logFetcher, outputProcessor)
