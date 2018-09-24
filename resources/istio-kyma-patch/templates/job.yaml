@@ -2,6 +2,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: istio-kyma-patch
+  annotations:
+    "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   template:
     metadata:
