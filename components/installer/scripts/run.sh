@@ -40,4 +40,16 @@ fi
 
 bash ${CURRENT_DIR}/build.sh ${KYMA_PATH}
 bash ${KYMA_PATH}/installation/scripts/generate-local-config.sh
-bash ${KYMA_PATH}/installation/scripts/installer.sh ${CR_PATH} ${LOCAL_KYMA}
+
+if [[ -z ${CR_PATH} ]]; then
+    TMPDIR=`mktemp -d "${KYMA_PATH}/temp-XXXXXXXXXX"`
+    CR_PATH="${TMPDIR}/installer-cr-local.yaml"
+    bash ${KYMA_PATH}/installation/scripts/create-cr.sh --url "" --output "${CR_PATH}" --version 0.0.1
+    CR_PATH="--cr $CR_PATH"
+fi
+
+bash ${KYMA_PATH}/installation/scripts/installer.sh ${LOCAL_KYMA} ${CR_PATH}
+
+if [ -f "${TMPDIR}/installer-cr-local.yaml" ]; then
+    rm -rf $TMPDIR
+fi 
