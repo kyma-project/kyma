@@ -39,6 +39,7 @@ func (c *Service) GetTestSummaryForExecutions(testIDs []string) ([]SpecificTestS
 		return out
 	}(testIDs)
 
+	aggregated := newStatsAggregator()
 loop:
 	for {
 		var e log.Entry
@@ -52,22 +53,23 @@ loop:
 
 		_, contains := testIDMap[e.Log.TestRunID]
 		if contains {
-			if err := c.processor.Process([]byte(e.Log.Message)); err != nil {
+			tm, err := c.processor.Process([]byte(e.Log.Message))
+			if err != nil {
 				return nil, errors.Wrap(err, "while processing test output")
 			}
+			aggregated.Merge(tm)
 		}
 
 	}
 
-	return c.processor.GetResults(), nil
+	return aggregated.ToList(), nil
 }
 
 // dependencies
 
 //go:generate mockery -name=logProcessor -output=automock -outpkg=automock -case=underscore
 type logProcessor interface {
-	Process([]byte) error
-	GetResults() []SpecificTestStats
+	Process([]byte) (map[string]SpecificTestStats, error)
 }
 
 //go:generate mockery -name=logFetcher -output=automock -outpkg=automock -case=underscore

@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"testing"
+
 	"github.com/kyma-project/kyma/tools/stability-checker/internal/log"
 	"github.com/kyma-project/kyma/tools/stability-checker/internal/summary"
 	"github.com/kyma-project/kyma/tools/stability-checker/internal/summary/automock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"io"
-	"testing"
 )
 
 func TestForGettingTestSummaryForExecutions(t *testing.T) {
@@ -20,8 +21,15 @@ func TestForGettingTestSummaryForExecutions(t *testing.T) {
 	mockLogProcessor := &automock.LogProcessor{}
 	defer mockLogProcessor.AssertExpectations(t)
 
-	mockLogProcessor.On("Process", []byte("FAILED test-a. SUCCESS test-b.")).Return(nil).Times(3)
-	mockLogProcessor.On("GetResults").Return(fixResults()).Once()
+	mockLogProcessor.On("Process", []byte("FAILED test-a. SUCCESS test-b.")).Return(map[string]summary.SpecificTestStats{
+		"test-a": {
+			Name:     "test-a",
+			Failures: 1,
+		},
+		"test-b": {
+			Name:      "test-b",
+			Successes: 1,
+		}}, nil).Times(3)
 	mockLogFetcher.On("GetLogsFromPod").Return(fixReadCloser(), nil).Once()
 
 	sut := summary.NewService(mockLogFetcher, mockLogProcessor)
@@ -58,7 +66,7 @@ func fixLogEntries() []log.Entry {
 	for i := 0; i < 4; i++ {
 		e := log.Entry{}
 		e.Log.Message = "FAILED test-a. SUCCESS test-b."
-		e.Log.TestRunID= fmt.Sprintf("id-%d", i)
+		e.Log.TestRunID = fmt.Sprintf("id-%d", i)
 		out[i] = e
 	}
 

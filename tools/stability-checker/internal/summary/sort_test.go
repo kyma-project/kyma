@@ -1,10 +1,11 @@
 package summary_test
 
 import (
-	"github.com/kyma-project/kyma/tools/stability-checker/internal/summary"
-	"github.com/stretchr/testify/assert"
 	"sort"
 	"testing"
+
+	"github.com/kyma-project/kyma/tools/stability-checker/internal/summary"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSortByNames(t *testing.T) {
@@ -13,9 +14,9 @@ func TestSortByNames(t *testing.T) {
 	// WHEN
 	sort.Sort(sut)
 	// THEN
-	assert.Len(t,sut.List, 3)
-	assert.Equal(t,sut.List[0].Name, "a")
-	assert.Equal(t,sut.List[1].Name, "d")
+	assert.Len(t, sut.List, 3)
+	assert.Equal(t, sut.List[0].Name, "a")
+	assert.Equal(t, sut.List[1].Name, "d")
 	assert.Equal(t, sut.List[2].Name, "z")
 
 }
@@ -26,9 +27,9 @@ func TestSortByMostFailures(t *testing.T) {
 	// WHEN
 	sort.Sort(sut)
 	// THEN
-	assert.Len(t,sut.List, 3)
-	assert.Equal(t,sut.List[0].Failures, 10)
-	assert.Equal(t,sut.List[1].Failures, 7)
+	assert.Len(t, sut.List, 3)
+	assert.Equal(t, sut.List[0].Failures, 10)
+	assert.Equal(t, sut.List[1].Failures, 7)
 	assert.Equal(t, sut.List[2].Failures, 3)
 }
 
