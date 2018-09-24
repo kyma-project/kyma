@@ -28,12 +28,18 @@ The Remote Environment can be removed from Kyma using either Console UI or Kubec
 - Go to the Kyma console UI.
 - Select Administration.
 - Select the Remote Environments from the Integration section.
-- Click Add New Remote Environment.
+- Click Create Remote Environment.
+
+![Add RE](./assets/create-re.png)
+
 - Provide the following details:
     - Name
     - Description
     - Labels of your choice which are key-value pairs
- - Click Ok and the new Remote Environment will be created and you can check status in Remote Environment view.
+   
+![Update RE](./assets/edit-re.png)
+
+ - Click Create and the new Remote Environment will be created and you can check status in Remote Environment view.
  
 
 ### Using Kubectl
@@ -71,6 +77,8 @@ The Remote Environment can be removed from Kyma using either Console UI or Kubec
 - Select the Remote Environments from the Integration section.
 - Choose the Remote Environment to which you want to delete.
 - Click Delete.
+
+![Delete RE](./assets/delete-re.png)
  
 
 ### Using Kubectl
