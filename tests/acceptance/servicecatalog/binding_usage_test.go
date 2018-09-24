@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	timeoutPerStep = 30 * time.Second
+	timeoutPerStep = time.Minute
 	baseEnvName    = "GATEWAY_URL"
 )
 
@@ -183,10 +183,14 @@ func (ts *TestSuite) fixRemoteEnvironment() *reTypes.RemoteEnvironment {
 			Description: "Remote Environment used by acceptance test",
 			Services: []reTypes.Service{
 				{
-					ID:                  ts.reSvcNameA,
+					ID:   ts.reSvcNameA,
+					Name: ts.reSvcNameA,
+					Labels: map[string]string{
+						"connected-app": ts.remoteEnvironmentName,
+					},
 					ProviderDisplayName: "SAP Hybris",
 					DisplayName:         "Some testable RE service",
-					LongDescription:     "Remote Environment Service Class used by remote-environment acceptance test",
+					Description:         "Remote Environment Service Class used by remote-environment acceptance test",
 					Tags:                []string{},
 					Entries: []reTypes.Entry{
 						{
@@ -197,10 +201,14 @@ func (ts *TestSuite) fixRemoteEnvironment() *reTypes.RemoteEnvironment {
 					},
 				},
 				{
-					ID:                  ts.reSvcNameB,
+					ID:   ts.reSvcNameB,
+					Name: ts.reSvcNameB,
+					Labels: map[string]string{
+						"connected-app": ts.remoteEnvironmentName,
+					},
 					ProviderDisplayName: "SAP Hybris",
 					DisplayName:         "Some testable RE service",
-					LongDescription:     "Remote Environment Service Class used by remote-environment acceptance test",
+					Description:         "Remote Environment Service Class used by remote-environment acceptance test",
 					Tags:                []string{},
 					Entries: []reTypes.Entry{
 						{
