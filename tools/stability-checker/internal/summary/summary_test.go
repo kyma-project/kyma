@@ -37,8 +37,8 @@ func TestForGettingTestSummaryForExecutions(t *testing.T) {
 	// THEN
 	require.NoError(t, err)
 	assert.Len(t, actualStats, 2)
-	assert.Contains(t, actualStats, summary.SpecificTestStats{Name: "test-a", Failures:3})
-	assert.Contains(t, actualStats, summary.SpecificTestStats{Name: "test-b", Successes:3})
+	assert.Contains(t, actualStats, summary.SpecificTestStats{Name: "test-a", Failures: 3})
+	assert.Contains(t, actualStats, summary.SpecificTestStats{Name: "test-b", Successes: 3})
 	assert.True(t, givenReadCloser.CloseCalled)
 }
 
