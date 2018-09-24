@@ -40,7 +40,7 @@ data:
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   configurations-generator.kubeConfig.clusterName: "__DOMAIN__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
-  gateways.istio-ingressgateway.service.externalPublicIp: "__EXTERNAL_PUBLIC_IP__"
+  gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   gateways.istio-ingressgateway.type: "LoadBalancer"
   service-catalog.etcd.cluster.replicaCount: "3"
   sidecar-injector.includeIPRanges: "10.244.0.0/16,10.240.0.0/16"

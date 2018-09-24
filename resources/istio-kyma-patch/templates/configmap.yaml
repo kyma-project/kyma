@@ -53,13 +53,6 @@ data:
         "value": 443
       }
       {{ end }}
-      {{ if .Values.global.externalPublicIp }}
-      ,{
-        "op": "replace",
-        "path": "/spec/loadBalancerIP",
-        "value": "{{ .Values.global.externalPublicIp }}"
-      }
-      {{ end }}
     ]
 
   istio-pilot.deployment.patch.json: |
