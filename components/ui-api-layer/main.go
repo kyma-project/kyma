@@ -17,10 +17,12 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/99designs/gqlgen/handler"
+	"github.com/gorilla/websocket"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/origin"
 )
 
 type config struct {
@@ -97,7 +99,26 @@ func runServer(stop <-chan struct{}, addr string, allowedOrigins []string, schem
 
 	mux := http.NewServeMux()
 	mux.Handle("/", handler.Playground("Dataloader", "/graphql"))
-	mux.Handle("/graphql", handler.GraphQL(schema))
+	mux.Handle("/graphql", handler.GraphQL(schema,
+		handler.WebsocketUpgrader(websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				if r == nil {
+					return false
+				}
+
+				requestOrigin := r.Header.Get("Origin")
+				for _, allowed := range allowedOrigins {
+					if origin.Match(requestOrigin, allowed) {
+						return true
+					}
+				}
+
+				return false
+			},
+			ReadBufferSize:  1024,
+			WriteBufferSize: 1024,
+		}),
+	))
 	serverHandler := cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
 		AllowedMethods: []string{
