@@ -15,7 +15,7 @@ Monorepo releaser: This Jenkinsfile runs the Jenkinsfiles of all subprojects bas
 */
 def label = "kyma-${UUID.randomUUID().toString()}"
 semVerRegex = /^([0-9]+\.[0-9]+\.[0-9]+)$/ // semVer format: 1.2.3
-releaseBranchRegex = /^release\/([0-9]+\.[0-9]+)$/ // release branch format: release/1.5
+releaseBranchRegex = /^release\-([0-9]+\.[0-9]+)$/ // release branch format: release-1.5
 isRelease = params.RELEASE_VERSION ==~ semVerRegex
 
 commitID = ''
@@ -86,7 +86,7 @@ podTemplate(label: label) {
                             error("Release version ${params.RELEASE_VERSION} does not follow semantic versioning.")
                         }
                         if (!params.RELEASE_BRANCH ==~ releaseBranchRegex) {
-                            error("Release branch ${params.RELEASE_BRANCH} is not a valid branch. Provide a branch such as 'release/0.5'")
+                            error("Release branch ${params.RELEASE_BRANCH} is not a valid branch. Provide a branch such as 'release-1.5'")
                         }
                     
                         commitID = sh (script: "git rev-parse origin/${params.RELEASE_BRANCH}", returnStdout: true).trim()
