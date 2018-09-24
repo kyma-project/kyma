@@ -18,6 +18,7 @@ function run_all_patches() {
     set +e
     local out=$(kubectl patch ${type} -n istio-system ${name} --patch "$patch" --type json)
     local result=$?
+    echo "$out"
     set -e
     if [ ${result} -ne 0 ] && [[ ! "$out" = *"not patched"* ]]; then
         exit ${result}
