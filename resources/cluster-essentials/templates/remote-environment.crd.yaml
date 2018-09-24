@@ -35,22 +35,18 @@ spec:
                 properties:
                   id:
                     type: string
-                    minLength: 1
                   name:
                     type: string
-                    minLength: 1
                   identifier:
                     type: string
                   displayName:
                     type: string
                   description:
                     type: string
-                    minLength: 1
                   longDescription:
                     type: string
                   providerDisplayName:
                     type: string
-                    minLength: 1
                   entries:
                     type: array
                     items:
