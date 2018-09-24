@@ -3,7 +3,7 @@ title: Deploy a new Remote Environment
 type: Details
 ---
 
-The Remote Environment controller is responsible for provisioning and de-provisioning of necessary deployments for created Remote Environments. 
+The Remote Environment Controller provisions and de-provisions necessary deployments for the created Remote Environments.
 
 The following operations are available:
 
