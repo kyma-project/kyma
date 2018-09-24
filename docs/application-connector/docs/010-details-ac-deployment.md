@@ -130,4 +130,4 @@ kubectl apply -f ./re-production-1.yaml
 
 ## How to check if your remote environment was successfully created.
 
-The new Remote Environment will appear on the Remote Environment lists and will have status `Serving.`
+The new Remote Environment appears on the **Remote Environments** list with the `Serving` status`
