@@ -15,11 +15,16 @@ spec:
       release: {{ .Release.Name }}
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
       labels:
         app: {{ template "jaeger.name" . }}
         release: {{ .Release.Name }}
         jaeger-infra: jaeger-pod
     spec:
+      {{- if .Values.global.isLocalEnv }}
+      hostNetwork: true   #only for minikube
+      {{- end }}
       containers:
       -   env:
           - name: COLLECTOR_ZIPKIN_HTTP_PORT
@@ -42,9 +47,43 @@ spec:
             httpGet:
               path: "/"
               port: {{ .Values.jaeger.uiPort }}
-            initialDelaySeconds: 5
+            initialDelaySeconds: 10
         {{- if .Values.jaeger.memory }}
           args: ["--memory.max-traces={{ .Values.jaeger.memory.maxTraces }}"]
         {{- end }}
           resources: 
 {{ toYaml .Values.resources | indent 12 }}
+      - image: quay.io/gambol99/keycloak-proxy:v2.3.0
+        imagePullPolicy: IfNotPresent
+        name: kcproxy
+        args:
+        - --discovery-url=https://dex.{{ .Values.global.domainName }}
+        - --skip-openid-provider-tls-verify=true
+        - --client-id=jaeger
+        - --client-secret=oiEWUWOIEwedfgg
+        - --resources=uri=/*|methods=GET,POST,PUT,DELETE
+        - --redirection-url=https://jaeger.{{ .Values.global.domainName }}
+        - --verbose=true
+        - --listen=0.0.0.0:{{ .Values.kcproxy.inPort }}
+        - --upstream-url=http://localhost:{{ .Values.jaeger.uiPort }}
+        - --enable-session-cookies=true
+        - --enable-logging=true
+        - --secure-cookie=true
+        - --enable-authorization-cookies=false
+        - --enable-token-header=false
+        - --enable-encrypted-token=true
+        - --enable-security-filter=true
+        - --filter-browser-xss=true
+        - --filter-content-nosniff=true
+        - --filter-frame-deny=true
+        - --encryption-key=AgXa7xRcoClDEU0ZDSH4X0XhL5Qy2Z2j
+        - --http-only-cookie=true
+        - --upstream-keepalives=true
+        - --upstream-keepalive-timeout=60s
+        - --enable-logout-redirect=true
+        - --oauth-uri=/oauth
+        - --cookie-domain=https://jaeger.{{ .Values.global.domainName }}
+        - --cookie-access-name=KYMA_TOKEN
+        ports:
+        - containerPort: {{ .Values.kcproxy.inPort }}
+
