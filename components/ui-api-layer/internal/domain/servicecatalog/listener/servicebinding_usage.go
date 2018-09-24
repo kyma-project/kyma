@@ -63,7 +63,7 @@ func (l *BindingUsage) notify(eventType gqlschema.SubscriptionEventType, binding
 	}
 
 	event := gqlschema.ServiceBindingUsageEvent{
-		Type:         eventType,
+		Type:                eventType,
 		ServiceBindingUsage: *gqlBindingUsage,
 	}
 

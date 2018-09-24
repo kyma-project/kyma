@@ -330,7 +330,7 @@ func binding(bindingName, instanceName string) ServiceBinding {
 
 func bindingEvent(eventType string, binding ServiceBinding) ServiceBindingEvent {
 	return ServiceBindingEvent{
-		Type:    eventType,
+		Type:           eventType,
 		ServiceBinding: binding,
 	}
 }

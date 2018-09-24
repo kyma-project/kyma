@@ -63,7 +63,7 @@ func (l *Instance) notify(eventType gqlschema.SubscriptionEventType, instance *a
 	}
 
 	event := gqlschema.ServiceInstanceEvent{
-		Type:     eventType,
+		Type:            eventType,
 		ServiceInstance: *gqlInstance,
 	}
 

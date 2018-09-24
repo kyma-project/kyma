@@ -164,8 +164,8 @@ func class() ClusterServiceClass {
 		Activated:    false,
 		Plans: []ClusterServicePlan{
 			{
-				Name:                    "86064792-7ea2-467b-af93-ac9694d96d52",
-				ExternalName:            "default",
+				Name:                           "86064792-7ea2-467b-af93-ac9694d96d52",
+				ExternalName:                   "default",
 				RelatedClusterServiceClassName: "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
 			},
 		},

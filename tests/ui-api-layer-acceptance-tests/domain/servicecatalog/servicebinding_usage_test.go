@@ -27,7 +27,7 @@ type ServiceBindingUsage struct {
 }
 
 type ServiceBindingUsageEvent struct {
-	Type         string
+	Type                string
 	ServiceBindingUsage ServiceBindingUsage
 }
 
