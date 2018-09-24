@@ -415,7 +415,7 @@ func (s *bindingUsageTestSuite) readServiceBindingUsageEvent(sub *graphql.Subscr
 func (s *bindingUsageTestSuite) bindingUsageEventDetailsFields() string {
 	return `
         type
-        bindingUsage {
+        serviceBindingUsage {
 			name
         }
     `

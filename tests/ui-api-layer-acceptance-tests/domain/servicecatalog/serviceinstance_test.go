@@ -49,6 +49,7 @@ type ServiceInstance struct {
 	Status               ServiceInstanceStatus
 	ServiceBindings      []ServiceBinding
 	ServiceBindingUsages []ServiceBindingUsage
+	Bindable             bool
 }
 
 type ServiceInstanceStatus struct {
@@ -408,7 +409,7 @@ func instance(name string) ServiceInstance {
 
 func instanceEvent(eventType string, serviceInstance ServiceInstance) ServiceInstanceEvent {
 	return ServiceInstanceEvent{
-		Type:     eventType,
+		Type:            eventType,
 		ServiceInstance: serviceInstance,
 	}
 }
