@@ -28,16 +28,13 @@ spec:
     name: test-event
     port: 8080
 ---
-apiVersion: remoteenvironment.kyma.cx/v1alpha1
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: EventActivation
 metadata:
   namespace: kubeless-test
   name: test-event
 spec:
-  source:
-    namespace: test
-    type: test
-    environment: test
+  sourceId: "dummy"
 ---
 apiVersion: eventing.kyma.cx/v1alpha1
 kind: Subscription
@@ -51,8 +48,5 @@ spec:
   include_subscription_name_header: true
   event_type: test
   event_type_version: v1
-  source:
-    source_namespace: test
-    source_type: test
-    source_environment: test
+  source_id: "dummy"
 {{ end }}
