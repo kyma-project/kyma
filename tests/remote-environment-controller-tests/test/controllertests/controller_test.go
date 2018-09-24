@@ -44,7 +44,7 @@ func TestRemoteEnvironmentCreation(t *testing.T) {
 			require.NoError(t, err)
 			require.True(t, exists, "Release %s should exist but does not", testRe.Name)
 
-			k8sResourcesChecker.CheckK8sResources(t, false, requireNoError, requireNotEmpty)
+			k8sResourcesChecker.CheckK8sResources(t, true, requireNoError, requireNotEmpty)
 		})
 
 		// when
@@ -87,7 +87,7 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 		require.NoError(t, err)
 		require.False(t, exists, "Release %s should not exist does", testRe.Name)
 
-		k8sResourcesChecker.CheckK8sResources(t, true, requireError, requireEmpty)
+		k8sResourcesChecker.CheckK8sResources(t, false, requireError, requireEmpty)
 	})
 }
 
