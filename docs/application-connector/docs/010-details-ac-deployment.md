@@ -9,9 +9,9 @@ The following operations are available:
 
 - Create a new Remote Environment
 - Delete the Remote Environment
-- Update Remote Environment configuration
+- Update the Remote Environment configuration
 
-All operation can be done from within the `Console UI` or using `Kubectl` - command line tool.
+You can perform all these operations using the Console UI or kubectl.
 
 
 All Remote Environments are installed in the `kyma-integration` Namespace.
@@ -21,9 +21,9 @@ All Remote Environments are installed in the `kyma-integration` Namespace.
 
 ## Install a Remote Environment
 
-The Remote Environment can be removed from Kyma using either Console UI or Kubectl.
+You can install a Remote Environment using either the Console UI or kubectl
 
-### Using the UI:
+### Using Console:
 
 - Go to the Kyma console UI.
 - Select Administration.
@@ -70,7 +70,7 @@ kubectl apply -f ./re-production-1.yaml
 
 The Remote Environment can be removed from Kyma using either Console UI or Kubectl.
 
-### Using the UI:
+### Using Console:
 
 - Go to the Kyma console UI.
 - Select Administration.
@@ -97,7 +97,7 @@ The Remote Environment can be updated using either Console UI or Kubectl.
 
 >**NOTE:** The name of Remote Environment cannot be changed.
 
-### Using the UI:
+### Using Console:
 
 - Go to the Kyma console UI.
 - Select Administration.
