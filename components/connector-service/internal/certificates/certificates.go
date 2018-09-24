@@ -177,9 +177,17 @@ func (cu *certificateUtility) SignWithCA(caCrt *x509.Certificate, csr *x509.Cert
 		return "", apperrors.Internal("Error while creating certificate: %s", err)
 	}
 
-	clientCrt := &bytes.Buffer{}
+	serverCrt := pemEncodeCrt(caCrt.Raw)
 
-	pem.Encode(clientCrt, &pem.Block{Type: "CERTIFICATE", Bytes: clientCrtRaw})
+	clientCrt := pemEncodeCrt(clientCrtRaw)
 
-	return cu.encodeStringBase64(clientCrt.Bytes()), nil
+	certChain := append(serverCrt.Bytes(), clientCrt.Bytes()...)
+
+	return cu.encodeStringBase64(certChain), nil
+}
+
+func pemEncodeCrt(crtRaw []byte) *bytes.Buffer {
+	crt := &bytes.Buffer{}
+	pem.Encode(crt, &pem.Block{Type: "CERTIFICATE", Bytes: crtRaw})
+	return crt
 }
