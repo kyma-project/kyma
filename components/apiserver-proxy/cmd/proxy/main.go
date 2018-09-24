@@ -1,22 +1,7 @@
-/*
-Copyright 2017 Frederic Branczyk All rights reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package main
 
-import (
+import (	
+	"strings"
 	"crypto/tls"
 	stdflag "flag"
 	"fmt"
@@ -28,8 +13,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"k8s.io/apiserver/pkg/authentication/authenticator"
-
 	"github.com/golang/glog"
 	"github.com/hkwi/h2c"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authn"
@@ -37,6 +20,7 @@ import (
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/proxy"
 	flag "github.com/spf13/pflag"
 	"golang.org/x/net/http2"
+	"k8s.io/apiserver/pkg/authentication/authenticator"
 	k8sapiflag "k8s.io/apiserver/pkg/util/flag"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -162,21 +146,32 @@ func main() {
 		glog.Fatalf("Failed to create authorizer: %v", err)
 	}
 
-	auth, err := proxy.New(kubeClient, cfg.auth, authorizer, authenticator)
+	authProxy, err := proxy.New(kubeClient, cfg.auth, authorizer, authenticator)
 
 	if err != nil {
 		glog.Fatalf("Failed to create rbac-proxy: %v", err)
 	}
 
-	proxy := httputil.NewSingleHostReverseProxy(upstreamURL)
+	proxyForApiserver := strings.Contains(cfg.upstream, proxy.KUBERNETES_SERVICE)
+
+	rp := httputil.NewSingleHostReverseProxy(upstreamURL)
+	
+	if proxyForApiserver {
+		t, err := rest.TransportFor(kcfg)
+			if err != nil {
+				glog.Fatalf("unable to set HTTP Transport for the upstream. Details : %s", err.Error())
+			}
+		rp.Transport = t
+	}	
+	
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		ok := auth.Handle(w, req)
+		ok := authProxy.Handle(w, req)
 		if !ok {
 			return
 		}
 
-		proxy.ServeHTTP(w, req)
+		rp.ServeHTTP(w, req)
 	}))
 
 	if cfg.secureListenAddress != "" {
@@ -221,11 +216,11 @@ func main() {
 	}
 
 	if cfg.insecureListenAddress != "" {
-		if cfg.upstreamForceH2C {
+		if cfg.upstreamForceH2C && !proxyForApiserver {
 			// Force http/2 for connections to the upstream i.e. do not start with HTTP1.1 UPGRADE req to
 			// initialize http/2 session.
 			// See https://github.com/golang/go/issues/14141#issuecomment-219212895 for more context
-			proxy.Transport = &http2.Transport{
+			rp.Transport = &http2.Transport{
 				// Allow http schema. This doesn't automatically disable TLS
 				AllowHTTP: true,
 				// Do disable TLS.
@@ -291,9 +286,10 @@ func main() {
 func initKubeConfig(kcLocation string) *rest.Config {
 
 	if kcLocation != "" {
+		println(kcLocation)
 		kubeConfig, err := clientcmd.BuildConfigFromFlags("", kcLocation)
 		if err != nil {
-			glog.Fatal("unable to build rest config based on provided path to kubeconfig file")
+			glog.Fatalf("unable to build rest config based on provided path to kubeconfig file %s", err.Error())
 		}
 		return kubeConfig
 	}
