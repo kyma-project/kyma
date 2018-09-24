@@ -181,7 +181,7 @@ func (cu *certificateUtility) SignWithCA(caCrt *x509.Certificate, csr *x509.Cert
 
 	clientCrt := pemEncodeCrt(clientCrtRaw)
 
-	certChain := append(serverCrt.Bytes(), clientCrt.Bytes()...)
+	certChain := append(clientCrt.Bytes(), serverCrt.Bytes()...)
 
 	return cu.encodeStringBase64(certChain), nil
 }
