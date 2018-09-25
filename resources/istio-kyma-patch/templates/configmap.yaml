@@ -137,7 +137,7 @@ data:
             version: v1
         spec:
           containers:
-          - image: eu.gcr.io/kyma-project/istio-webhook:2.0.0
+          - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.istio_webhook.dir }}istio-webhook:{{ .Values.global.istio_webhook.version }}
             name: istio-webhook
             ports:
             - containerPort: 5000
