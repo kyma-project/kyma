@@ -39,16 +39,15 @@ Kyma uses component-specific overrides only for the installation of specific com
 
 #### Top-level charts overrides
 
-Overrides for top-level charts are straightforward. Just use template value from the chart (without leading ".Values." prefix) as the entry key in ConfigMap/Secret.
+Overrides for top-level charts are straightforward. Just use the template value from the chart (without leading ".Values." prefix) as the entry key in the ConfigMap or Secret.
 
 Example:
 
-There's a `core` top-level chart, that is installed by the Installer.
-In one of it's templates there's a following line with a value reference:
+The Installer uses a `core` top-level chart that contains a template with the following value reference:
 ```
 memory: {{ .Values.test.acceptance.ui.requests.memory }}
 ```
-In order to resolve this template, there's a default value for "test.acceptance.ui.requests.memory" in the `values.yaml` file of the chart.
+The chart's default value `test.acceptance.ui.requests.memory` in the `values.yaml` file resolves the template.
 The following fragment of `values.yaml` shows this definition:
 ```
 test:
