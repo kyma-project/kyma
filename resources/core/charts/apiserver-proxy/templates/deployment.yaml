@@ -25,8 +25,8 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       {{ end }}
       containers:
-      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.tag }}
-        name: kube-rbac-proxy
+      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
+        name: auth-proxy
         {{ if not .Values.global.isLocalEnv }}
         resources:
           limits:
