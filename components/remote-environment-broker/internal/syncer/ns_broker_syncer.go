@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	v1beta12 "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/nsbroker"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -77,4 +78,28 @@ func (r *ServiceBrokerSync) Sync(labelSelector string, maxSyncRetries int) error
 		return nil
 	}
 	return resultErr
+}
+
+// SyncBroker syncing the default REB ns-broker in the given namespace
+func (r *ServiceBrokerSync) SyncBroker(namespace string) error {
+	brokerClient := r.serviceBrokerGetter.ServiceBrokers(namespace)
+	name := nsbroker.NamespacedBrokerName
+
+	for i := 0; i < maxSyncRetries; i++ {
+		broker, err := brokerClient.Get(name, v1.GetOptions{})
+		if err != nil {
+			return errors.Wrapf(err, "while getting ServiceBroker %q [namespace: %s]", name, namespace)
+		}
+
+		broker.Spec.RelistRequests = broker.Spec.RelistRequests + 1
+
+		_, err = brokerClient.Update(broker)
+		if err == nil {
+			return nil
+		}
+		if !apiErrors.IsConflict(err) {
+			return fmt.Errorf("could not sync service broker (%s)", err)
+		}
+	}
+	return fmt.Errorf("could not sync service broker (%s) after %d retries", nsbroker.NamespacedBrokerName, maxSyncRetries)
 }
