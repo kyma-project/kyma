@@ -1,5 +1,15 @@
-# Kyma Installer
+# Local Kyma installation
 
-## Overview
+./installation/scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
 
-The Kyma installer is a proprietary solution based on the Kubernetes operator. See the [Local Kyma installation](../docs/kyma/docs/031-gs-local-installation.md) document for basic information on how to use the installer and run Kyma locally. Read [this](../docs/kyma/docs/032-gs-cluster-installation.md) Getting Started guide to learn how to install Kyma on a cluster.
+kc apply -f ./installation/resources/default-sa-rbac-role.yaml
+
+wait for kube-dns running 3/3
+
+./installation/scripts/install-tiller.sh
+
+kc apply -f ./release/local-kyma-installer.yaml
+
+kubectl label installation/kyma-installation action=install
+
+./installation/scripts/is-installed.sh
