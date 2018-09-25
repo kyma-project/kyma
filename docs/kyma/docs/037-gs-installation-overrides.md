@@ -3,14 +3,14 @@ title: Helm overrides for Kyma installation
 type: Getting Started
 ---
 
-Kyma components are packaged as [Helm](https://github.com/helm/helm/tree/master/docs) charts and are installed by the [Installer](../../../components/installer/README.md).
-This document describes how to configure Installer with override values for Helm [charts](https://github.com/helm/helm/blob/master/docs/charts.md).
+Kyma packages its components into [Helm](https://github.com/helm/helm/tree/master/docs) charts that the [Installer](../../../components/installer/README.md) uses.
+This document describes how to configure the Installer with override values for Helm [charts](https://github.com/helm/helm/blob/master/docs/charts.md).
 
 
 ## Overview
 
 The Installer is a Kubernetes Operator that uses Helm to install Kyma components.
-Helm provides an *overrides* feature to customize installation of charts (e.g: to configure environment-specific values).
+Helm provides an *overrides* feature to customize the installation of charts, such as to configure environment-specific values.
 When using Installer for Kyma installation, users can't interact with Helm directly (installation is not an interactive process).
 To customize Kyma installation, Installer exposes a generic mechanism for configuring Helm overrides called **user-defined** overrides.
 
