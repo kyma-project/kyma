@@ -92,11 +92,10 @@ try {
                     }
 
                     stage('collect projects') {
-                        buildableProjects = projects.keySet() // only projects that have build jobs
-                        for (int i=0; i < buildableProjects.size(); i++) {
+                        for (int i=0; i < projects.size(); i++) {
                             def index = i
-                            jobs["${buildableProjects[index]}"] = { ->
-                                    build job: "kyma/"+buildableProjects[index],
+                            jobs["${projects[index]}"] = { ->
+                                    build job: "kyma/"+projects[index],
                                             wait: true,
                                             parameters: [
                                                 string(name:'GIT_REVISION', value: "$commitID"),
