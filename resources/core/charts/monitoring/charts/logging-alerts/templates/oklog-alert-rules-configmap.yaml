@@ -18,5 +18,5 @@ data:
 {{- end }}
 {{ else }}
   alert.rules: |-
-    {{- include "unhealthy-pods-rules.yaml.tpl" . | indent 4}}
+    {{- include "logging-component-rules.yaml.tpl" . | indent 4}}
 {{ end }}
