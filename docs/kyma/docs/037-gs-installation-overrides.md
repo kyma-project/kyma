@@ -57,12 +57,13 @@ test:
         memory: "1Gi"
 ```
 
-If you want to override this value, for example to "2Gi", proceed as follows:
-- Create a ConfigMap in `kyma-installer` namespace, labelled with: `installer:overrides` (or reuse an existing one)
+To override this value, for example to "2Gi", proceed as follows:
+- Create a ConfigMap in the `kyma-installer` Namespace, labelled with: `installer:overrides` (or reuse an existing one).
 - Add an entry `test.acceptance.ui.requests.memory: 2Gi` to the map.
 
-Once the installation starts, Installer generates overrides based on the map entries and value of "2Gi" will be used instead of default "1Gi" from the chart `values.yaml` file.
-For values that should be kept in Secrets, just define a Secret object instead of ConfigMap with the same key and value. Don't forget to label the Secret with `installer:overrides` and remember that values in Secrets must be base64-encoded.
+Once the installation starts, the Installer generates overrides based on the map entries. The system uses the value of "2Gi" instead of the default "1Gi" from the chart `values.yaml` file.
+
+For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and value. Don't forget to label the Secret with `installer:overrides`. Remember that values in Secrets must be base64-encoded. (TODO: same key and value, but base64...)
 
 
 #### Sub-chart overrides
