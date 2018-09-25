@@ -13,3 +13,5 @@ Tracing in Kyma uses [Jaeger](https://www.jaegertracing.io/docs/) as a backend w
 - Performance and latency optimization
 
 Jaeger provides compatibility with the Zipkin protocol. The compatibility makes it possible to use Zipkin protocol and clients in Istio, Envoy, and Kyma services.
+
+You can access the Jaeger UI either locally at `https://jaeger.kyma.local` or on a cluster at `https://jaeger.{domain-of-kyma-cluster}`. 
