@@ -61,17 +61,9 @@ function configure_sidecar_injector() {
   fi
 }
 
-function apply_all() {
-  echo "--> Apply resources"
-  for f in $(find ${CONFIG_DIR} -name '*\.yaml' -maxdepth 1 | xargs -I '{}' basename '{}'); do
-    echo "    Apply $f"
-    kubectl apply -f ${CONFIG_DIR}/${f}
-  done
-}
-
 function check_requirements() {
   while read crd; do
-    echo "    Require CRD crd"
+    echo "    Require CRD crd $crd"
     kubectl get crd ${crd}
     if [ $? -ne 0 ]; then
         echo "Cannot find required CRD $crd"
@@ -83,4 +75,3 @@ configure_sidecar_injector
 check_requirements
 run_all_patches
 remove_not_used
-apply_all
