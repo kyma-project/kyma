@@ -28,8 +28,10 @@ Installer merges all overrides recursively into a single YAML stream and passes 
 
 The Installer looks for available overrides each time a component installation or update operation is due.
 Overrides for the component are composed from two sets: **common** overrides and **component-specific** overrides.
-- Common overrides are used for installation of all components. They are defined in ConfigMaps/Secrets marked with `installer:overrides` label only.
-- Component-specific overrides are used only for the installation of the specific component. They are defined in ConfigMaps/Secrets marked with both: `installer:overrides` and `component: <name>` labels, where `<name>` is the component name. Component-Specific overrides have precedence over Common ones in case of conflicting entries.
+
+Kyma uses common overrides for the installation of all components. Only ConfigMaps or Secrets marked with the installer:overrides Label contain the definition of overrides (TODO: Fix it).
+
+Kyma uses component-specific overrides only for the installation of specific components. ConfigMaps and Secrets marked with both installer:overrides and component: <name> Labels, where <name> is the component name, contain the definition. Component-specific overrides have precedence over Common ones in case of conflicting entries.
 
 
 ### Examples
