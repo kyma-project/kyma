@@ -2,4 +2,4 @@ apiVersion: v1
 name: instances-ui
 description: Catalog Service Instances UI embedded in the Console
 version: 0.1.0
-appVersion: 0.1.158
+appVersion: 0.1.171
