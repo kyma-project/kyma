@@ -118,11 +118,11 @@ Once the installation starts, the Installer generates overrides based on the map
 
 #### Global overrides
 
-Some important parameters are usually shared across the charts.
-Helm convention to provide these is by using `global` override key.
+There are several important parameters usually shared across the charts.
+Helm convention to provide these requires the use of the `global` override key.
+For example, to define the `global.domain` override, just use "global.domain" as the name of the key in ConfigMap or Secret for the Installer.
 
-For example, to define `global.domain` override, just use "global.domin" as the name of the key in ConfigMap/Secret for Installer.
-Once the installation starts, Installer is merging all map entries and collect all global entries together (under `global` top-level key) for the purpose of installation.
+Once the installation starts, the Installer merges all of the map entries and collects all of the global entries under the `global` top-level key to use for installation.
 
 
 ## Merging and conflicting entries
