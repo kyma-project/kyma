@@ -85,7 +85,7 @@ spec:
         - "--eventsTargetURL={{ .Values.eventService.deployment.args.eventsTargetURL }}"
         - "--requestTimeout={{ .Values.eventService.deployment.args.requestTimeout }}"
         - "--requestLogging={{ .Values.eventService.deployment.args.requestLogging }}"
-        - "--sourceId={{ .Values.eventService.deployment.args.sourceId }}"
+        - "--sourceId={{ .Release.Name }}"
         readinessProbe:
           httpGet:
             path: /v1/health
