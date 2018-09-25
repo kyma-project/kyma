@@ -11,5 +11,5 @@ enabled: true
 
 tests:
   image:
-    name: snapshot/remote-environment-controller-tests
-    tag: retry-fix
+    name: develop/remote-environment-controller-tests
+    tag: 345add9f
