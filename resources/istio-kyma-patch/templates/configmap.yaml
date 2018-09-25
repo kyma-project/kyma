@@ -73,6 +73,15 @@ data:
       }
     ]
 
+  istio-telemetry.deployment.patch.json: |
+    [
+      {
+        "op": "replace",
+        "path": "/spec/template/spec/containers/0/args/4",
+        "value": "--trace_zipkin_url=http://zipkin.kyma-system:9411/api/v1/spans"
+      }
+    ]
+
 
   delete: |
     deployment prometheus

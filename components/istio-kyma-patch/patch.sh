@@ -45,6 +45,7 @@ function configure_sidecar_injector() {
   if [[ -n ${alreadyEnabled} ]]; then
     # Disable automatic injecting
     configmap=$(sed 's/policy: enabled/policy: disabled/' <<< "$configmap")
+    configmap=$(sed 's/\[\[ \.ProxyConfig\.ZipkinAddress \]\]/zipkin.kyma-system:9411/g' <<< "$configmap")
 
     # Set limits for sidecar. Our namespaces have resource quota set thus every container needs to have limits defined.
     # Add limits to already existing resources sections
