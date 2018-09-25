@@ -142,8 +142,8 @@ func (r *mutationResolver) DeleteServiceInstance(ctx context.Context, name strin
 	return r.sc.DeleteServiceInstanceMutation(ctx, name, environment)
 }
 
-func (r *mutationResolver) CreateServiceBinding(ctx context.Context, serviceBindingName, serviceInstanceName, env string) (*gqlschema.CreateServiceBindingOutput, error) {
-	return r.sc.CreateServiceBindingMutation(ctx, serviceBindingName, serviceInstanceName, env)
+func (r *mutationResolver) CreateServiceBinding(ctx context.Context, serviceBindingName *string, serviceInstanceName, env string, parameters *gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
+	return r.sc.CreateServiceBindingMutation(ctx, serviceBindingName, serviceInstanceName, env, parameters)
 }
 
 func (r *mutationResolver) DeleteServiceBinding(ctx context.Context, serviceBindingName string, env string) (*gqlschema.DeleteServiceBindingOutput, error) {

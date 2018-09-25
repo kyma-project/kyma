@@ -293,7 +293,7 @@ type ResourceType {
 }
 
 input CreateServiceBindingUsageInput {
-    name: String!
+    name: String
     environment: String!
     serviceBindingRef: ServiceBindingRefInput!
     usedBy: LocalObjectReferenceInput!
@@ -550,7 +550,7 @@ type Query {
 type Mutation {
     createServiceInstance(params: ServiceInstanceCreateInput!): ServiceInstance
     deleteServiceInstance(name: String!, environment: String!): ServiceInstance
-    createServiceBinding(serviceBindingName: String!, serviceInstanceName: String!, environment: String!): CreateServiceBindingOutput
+    createServiceBinding(serviceBindingName: String, serviceInstanceName: String!, environment: String!, parameters: JSON): CreateServiceBindingOutput
     deleteServiceBinding(serviceBindingName: String!, environment: String!): DeleteServiceBindingOutput
     createServiceBindingUsage(createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage
     deleteServiceBindingUsage(serviceBindingUsageName: String!, environment: String!): DeleteServiceBindingUsageOutput

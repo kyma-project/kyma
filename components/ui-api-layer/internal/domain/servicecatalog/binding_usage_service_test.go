@@ -24,7 +24,7 @@ import (
 func TestBindingUsageServiceCreate(t *testing.T) {
 	// GIVEN
 	fakeClient := fake.NewSimpleClientset()
-	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), fixBindingUsageInformer(fakeClient), nil)
+	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), fixBindingUsageInformer(fakeClient), nil, "sbu-name")
 	// WHEN
 	_, err := sut.Create("prod", fixBindingUsage())
 	// THEN
@@ -32,13 +32,27 @@ func TestBindingUsageServiceCreate(t *testing.T) {
 	actualUsage, err := fakeClient.ServicecatalogV1alpha1().ServiceBindingUsages("prod").Get("usage", v1.GetOptions{})
 	require.NoError(t, err)
 	assert.NotNil(t, actualUsage)
+}
 
+func TestBindingUsageServiceCreateWithGeneratedName(t *testing.T) {
+	// GIVEN
+	fakeClient := fake.NewSimpleClientset()
+	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), fixBindingUsageInformer(fakeClient), nil, "generated-sbu-name")
+	sbu := fixBindingUsage()
+	sbu.Name = ""
+	// WHEN
+	_, err := sut.Create("prod", sbu)
+	// THEN
+	require.NoError(t, err)
+	actualUsage, err := fakeClient.ServicecatalogV1alpha1().ServiceBindingUsages("prod").Get("generated-sbu-name", v1.GetOptions{})
+	require.NoError(t, err)
+	assert.NotNil(t, actualUsage)
 }
 
 func TestBindingUsageServiceDelete(t *testing.T) {
 	// GIVEN
 	fakeClient := fake.NewSimpleClientset(fixBindingUsage())
-	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), fixBindingUsageInformer(fakeClient), nil)
+	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), fixBindingUsageInformer(fakeClient), nil, "sbu-name")
 	// WHEN
 	err := sut.Delete("prod", "usage")
 	// THEN
@@ -51,7 +65,7 @@ func TestBindingUsageServiceFind(t *testing.T) {
 	// GIVEN
 	fakeClient := fake.NewSimpleClientset(fixBindingUsage())
 	informer := fixBindingUsageInformer(fakeClient)
-	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, nil)
+	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, nil, "sbu-name")
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 	// WHEN
 	actual, err := sut.Find("prod", "usage")
@@ -67,7 +81,7 @@ func TestBindingUsageServiceList(t *testing.T) {
 	us2.Name = "second-usage"
 	fakeClient := fake.NewSimpleClientset(us1, us2)
 	informer := fixBindingUsageInformer(fakeClient)
-	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, nil)
+	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, nil, "")
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 	// WHEN
 	actualUsages, err := sut.List("prod")
@@ -114,7 +128,7 @@ func TestBindingUsageServiceListForServiceInstance(t *testing.T) {
 				}},
 		}, nil)
 
-	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, mockBindingFacade)
+	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, mockBindingFacade, "sbu-name")
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 	// WHEN
 	usages, err := sut.ListForServiceInstance("prod", "redis-instance")
@@ -133,7 +147,7 @@ func TestBindingUsageServiceListForServiceInstanceErrors(t *testing.T) {
 		mockBindingFacade := automock.NewServiceBindingOperations()
 		defer mockBindingFacade.AssertExpectations(t)
 		mockBindingFacade.On("ListForServiceInstance", mock.Anything, mock.Anything).Return(nil, errors.New("some error"))
-		sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, mockBindingFacade)
+		sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, mockBindingFacade, "sbu-name")
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 		// WHEN
 		_, err := sut.ListForServiceInstance("prod", "redis-instance")
@@ -150,7 +164,7 @@ func TestBindingUsageServiceListForDeployment(t *testing.T) {
 
 	fakeClient := fake.NewSimpleClientset(us1, us2, us3)
 	informer := fixBindingUsageInformer(fakeClient)
-	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, nil)
+	sut := servicecatalog.NewServiceBindingUsageService(fakeClient.ServicecatalogV1alpha1(), informer, nil, "sbu-name")
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 	// WHEN
 	usages, err := sut.ListForDeployment("prod", "deployment", "app")

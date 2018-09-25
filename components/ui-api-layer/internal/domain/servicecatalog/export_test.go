@@ -142,14 +142,18 @@ func NewClusterServicePlanService(informer cache.SharedIndexInformer) *clusterSe
 func NewServiceBindingResolver(sbService serviceBindingOperations) *serviceBindingResolver {
 	return newServiceBindingResolver(sbService)
 }
-func NewServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, informer cache.SharedIndexInformer) *serviceBindingService {
-	return newServiceBindingService(client, informer)
+func NewServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, informer cache.SharedIndexInformer, sbName string) *serviceBindingService {
+	return newServiceBindingService(client, informer, func() string{
+		return sbName
+	})
 }
 
 // Binding usage
 
-func NewServiceBindingUsageService(buInterface v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, bindingOp serviceBindingOperations) *serviceBindingUsageService {
-	return newServiceBindingUsageService(buInterface, informer, bindingOp)
+func NewServiceBindingUsageService(buInterface v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, bindingOp serviceBindingOperations, sbuName string) *serviceBindingUsageService {
+	return newServiceBindingUsageService(buInterface, informer, bindingOp, func() string {
+		return sbuName
+	})
 }
 
 func NewServiceBindingUsageResolver(op serviceBindingUsageOperations, serviceBindingGetter serviceBindingGetter) *serviceBindingUsageResolver {

@@ -226,7 +226,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateServiceInstance     func(childComplexity int, params ServiceInstanceCreateInput) int
 		DeleteServiceInstance     func(childComplexity int, name string, environment string) int
-		CreateServiceBinding      func(childComplexity int, serviceBindingName string, serviceInstanceName string, environment string) int
+		CreateServiceBinding      func(childComplexity int, serviceBindingName *string, serviceInstanceName string, environment string, parameters *JSON) int
 		DeleteServiceBinding      func(childComplexity int, serviceBindingName string, environment string) int
 		CreateServiceBindingUsage func(childComplexity int, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
 		DeleteServiceBindingUsage func(childComplexity int, serviceBindingUsageName string, environment string) int
@@ -509,7 +509,7 @@ type EventActivationResolver interface {
 type MutationResolver interface {
 	CreateServiceInstance(ctx context.Context, params ServiceInstanceCreateInput) (*ServiceInstance, error)
 	DeleteServiceInstance(ctx context.Context, name string, environment string) (*ServiceInstance, error)
-	CreateServiceBinding(ctx context.Context, serviceBindingName string, serviceInstanceName string, environment string) (*CreateServiceBindingOutput, error)
+	CreateServiceBinding(ctx context.Context, serviceBindingName *string, serviceInstanceName string, environment string, parameters *JSON) (*CreateServiceBindingOutput, error)
 	DeleteServiceBinding(ctx context.Context, serviceBindingName string, environment string) (*DeleteServiceBindingOutput, error)
 	CreateServiceBindingUsage(ctx context.Context, createServiceBindingUsageInput *CreateServiceBindingUsageInput) (*ServiceBindingUsage, error)
 	DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, environment string) (*DeleteServiceBindingUsageOutput, error)
@@ -625,10 +625,15 @@ func field_Mutation_deleteServiceInstance_args(rawArgs map[string]interface{}) (
 
 func field_Mutation_createServiceBinding_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["serviceBindingName"]; ok {
 		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg0 = &ptr1
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -652,6 +657,20 @@ func field_Mutation_createServiceBinding_args(rawArgs map[string]interface{}) (m
 		}
 	}
 	args["environment"] = arg2
+	var arg3 *JSON
+	if tmp, ok := rawArgs["parameters"]; ok {
+		var err error
+		var ptr1 JSON
+		if tmp != nil {
+			err = (&ptr1).UnmarshalGQL(tmp)
+			arg3 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["parameters"] = arg3
 	return args, nil
 
 }
@@ -2489,7 +2508,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateServiceBinding(childComplexity, args["serviceBindingName"].(string), args["serviceInstanceName"].(string), args["environment"].(string)), true
+		return e.complexity.Mutation.CreateServiceBinding(childComplexity, args["serviceBindingName"].(*string), args["serviceInstanceName"].(string), args["environment"].(string), args["parameters"].(*JSON)), true
 
 	case "Mutation.deleteServiceBinding":
 		if e.complexity.Mutation.DeleteServiceBinding == nil {
@@ -7614,7 +7633,7 @@ func (ec *executionContext) _Mutation_createServiceBinding(ctx context.Context, 
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.Mutation().CreateServiceBinding(ctx, args["serviceBindingName"].(string), args["serviceInstanceName"].(string), args["environment"].(string))
+		return ec.resolvers.Mutation().CreateServiceBinding(ctx, args["serviceBindingName"].(*string), args["serviceInstanceName"].(string), args["environment"].(string), args["parameters"].(*JSON))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -15548,7 +15567,12 @@ func UnmarshalCreateServiceBindingUsageInput(v interface{}) (CreateServiceBindin
 		switch k {
 		case "name":
 			var err error
-			it.Name, err = graphql.UnmarshalString(v)
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.Name = &ptr1
+			}
+
 			if err != nil {
 				return it, err
 			}
@@ -16101,7 +16125,7 @@ type ResourceType {
 }
 
 input CreateServiceBindingUsageInput {
-    name: String!
+    name: String
     environment: String!
     serviceBindingRef: ServiceBindingRefInput!
     usedBy: LocalObjectReferenceInput!
@@ -16358,7 +16382,7 @@ type Query {
 type Mutation {
     createServiceInstance(params: ServiceInstanceCreateInput!): ServiceInstance
     deleteServiceInstance(name: String!, environment: String!): ServiceInstance
-    createServiceBinding(serviceBindingName: String!, serviceInstanceName: String!, environment: String!): CreateServiceBindingOutput
+    createServiceBinding(serviceBindingName: String, serviceInstanceName: String!, environment: String!, parameters: JSON): CreateServiceBindingOutput
     deleteServiceBinding(serviceBindingName: String!, environment: String!): DeleteServiceBindingOutput
     createServiceBindingUsage(createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage
     deleteServiceBindingUsage(serviceBindingUsageName: String!, environment: String!): DeleteServiceBindingUsageOutput

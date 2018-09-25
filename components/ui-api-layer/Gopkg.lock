@@ -34,6 +34,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/docker/docker"
+  packages = ["pkg/random"]
+  revision = "092cba3727bb9b4a2f0e922cd6c0f93ea270e363"
+  version = "v1.13.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/dustin/go-humanize"
   packages = ["."]
@@ -263,6 +269,12 @@
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
   revision = "3864e76763d94a6df2f9960b16a20a33da9f9a66"
+
+[[projects]]
+  name = "github.com/moby/moby"
+  packages = ["pkg/namesgenerator"]
+  revision = "092cba3727bb9b4a2f0e922cd6c0f93ea270e363"
+  version = "v1.13.1"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -699,6 +711,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "282dcda7eb48242ccdb492108a9ab387372f7926331261b2973c3c4019616cd3"
+  inputs-digest = "6596b3f4158ee93b9d309100ff8f0cdb4fc307f532e06ff9e02d1af3e53b57f2"
   solver-name = "gps-cdcl"
   solver-version = 1

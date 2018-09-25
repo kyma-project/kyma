@@ -9,6 +9,7 @@ import (
 	bindingUsageApi "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	bindingUsageClientset "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
 	bindingUsageInformers "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/name"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
@@ -62,7 +63,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, asyncApiSp
 	clusterServiceBrokerService := newClusterServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ClusterServiceBrokers().Informer())
 	serviceBrokerService := newServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ServiceBrokers().Informer())
 
-	bindingService := newServiceBindingService(client.ServicecatalogV1beta1(), informerFactory.Servicecatalog().V1beta1().ServiceBindings().Informer())
+	bindingService := newServiceBindingService(client.ServicecatalogV1beta1(), informerFactory.Servicecatalog().V1beta1().ServiceBindings().Informer(), name.Generate)
 
 	bindingUsageClient, err := bindingUsageClientset.NewForConfig(restConfig)
 	if err != nil {
@@ -76,7 +77,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, asyncApiSp
 
 	bindingUsageInformerFactory := bindingUsageInformers.NewSharedInformerFactory(bindingUsageClient, informerResyncPeriod)
 	usageKindService := newUsageKindService(bindingUsageClient.ServicecatalogV1alpha1(), dynamicClient, bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer())
-	bindingUsageService := newServiceBindingUsageService(bindingUsageClient.ServicecatalogV1alpha1(), bindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer(), bindingService)
+	bindingUsageService := newServiceBindingUsageService(bindingUsageClient.ServicecatalogV1alpha1(), bindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer(), bindingService, name.Generate)
 
 	return &Container{
 		Resolver: &Resolver{

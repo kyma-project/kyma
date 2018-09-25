@@ -2,15 +2,18 @@ package servicecatalog
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/golang/glog"
 	api "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/listener"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/name"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type serviceBindingResolver struct {
@@ -25,21 +28,32 @@ func newServiceBindingResolver(op serviceBindingOperations) *serviceBindingResol
 	}
 }
 
-func (r *serviceBindingResolver) CreateServiceBindingMutation(ctx context.Context, serviceBindingName, serviceInstanceName, env string) (*gqlschema.CreateServiceBindingOutput, error) {
-	sb, err := r.operations.Create(env, &api.ServiceBinding{
+func (r *serviceBindingResolver) CreateServiceBindingMutation(ctx context.Context, serviceBindingName *string, serviceInstanceName, env string, parameters *gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
+	sbToCreate := &api.ServiceBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: serviceBindingName,
+			Name: name.EmptyIfNil(serviceBindingName),
 		},
 		Spec: api.ServiceBindingSpec{
 			ServiceInstanceRef: api.LocalObjectReference{
 				Name: serviceInstanceName,
 			},
 		},
-	})
+	}
+	if parameters != nil {
+		byteArray, err := json.Marshal(parameters)
+		if err != nil {
+			glog.Error(errors.Wrapf(err, "while marshalling parameters %s `%s` parameters: %+v", pretty.ServiceBinding, serviceBindingName, parameters))
+			return nil, gqlerror.New(err, pretty.ServiceBinding, gqlerror.WithName(name.EmptyIfNil(serviceBindingName)), gqlerror.WithEnvironment(env))
+		}
+		sbToCreate.Spec.Parameters = &runtime.RawExtension{
+			Raw: byteArray,
+		}
+	}
 
+	sb, err := r.operations.Create(env, sbToCreate)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.ServiceBinding, serviceBindingName))
-		return nil, gqlerror.New(err, pretty.ServiceBinding, gqlerror.WithName(serviceBindingName), gqlerror.WithEnvironment(env))
+		return nil, gqlerror.New(err, pretty.ServiceBinding, gqlerror.WithName(name.EmptyIfNil(serviceBindingName)), gqlerror.WithEnvironment(env))
 	}
 
 	return r.converter.ToCreateOutputGQL(sb), nil

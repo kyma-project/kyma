@@ -1,6 +1,7 @@
 package servicecatalog_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	api "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -13,20 +14,46 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func TestServiceBindingResolver_CreateServiceBindingMutation(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
+	t.Run("Success empty name", func(t *testing.T) {
 		svc := automock.NewServiceBindingOperations()
 		binding := fixServiceBindingToRedis()
 		binding.Namespace = ""
+		binding.Name = ""
 		svc.On("Create", "production", binding).
 			Return(fixServiceBindingToRedis(), nil).Once()
 		defer svc.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceBindingResolver(svc)
 
-		result, err := resolver.CreateServiceBindingMutation(nil, "redis-binding", "redis", "production")
+		result, err := resolver.CreateServiceBindingMutation(nil, nil, "redis", "production", nil)
+
+		require.NoError(t, err)
+		assert.Equal(t, fixCreateServiceBindingOutput(), result)
+	})
+
+	t.Run("Success", func(t *testing.T) {
+		svc := automock.NewServiceBindingOperations()
+		params := gqlschema.JSON(map[string]interface{}{
+			"key": "value",
+		})
+		binding := fixServiceBindingToRedis()
+		binding.Namespace = ""
+		binding.Name = "generated-name"
+		byteArray, err := json.Marshal(params)
+		require.NoError(t, err)
+		binding.Spec.Parameters = &runtime.RawExtension{
+			Raw: byteArray,
+		}
+		svc.On("Create", "production", binding).
+			Return(fixServiceBindingToRedis(), nil).Once()
+		defer svc.AssertExpectations(t)
+		resolver := servicecatalog.NewServiceBindingResolver(svc)
+
+		result, err := resolver.CreateServiceBindingMutation(nil, ptr("generated-name"), "redis", "production", &params)
 
 		require.NoError(t, err)
 		assert.Equal(t, fixCreateServiceBindingOutput(), result)
@@ -38,7 +65,7 @@ func TestServiceBindingResolver_CreateServiceBindingMutation(t *testing.T) {
 		defer svc.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceBindingResolver(svc)
 
-		_, err := resolver.CreateServiceBindingMutation(nil, "redis-binding", "redis", "production")
+		_, err := resolver.CreateServiceBindingMutation(nil, ptr("redis-binding"), "redis", "production", nil)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsAlreadyExists(err))
@@ -50,7 +77,7 @@ func TestServiceBindingResolver_CreateServiceBindingMutation(t *testing.T) {
 		defer svc.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceBindingResolver(svc)
 
-		_, err := resolver.CreateServiceBindingMutation(nil, "redis-binding", "redis", "production")
+		_, err := resolver.CreateServiceBindingMutation(nil, ptr("redis-binding"), "redis", "production", nil)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -201,4 +228,8 @@ func fixCreateServiceBindingOutput() *gqlschema.CreateServiceBindingOutput {
 		ServiceInstanceName: "redis",
 		Name:                "redis-binding",
 	}
+}
+
+func ptr(s string) *string {
+	return &s
 }

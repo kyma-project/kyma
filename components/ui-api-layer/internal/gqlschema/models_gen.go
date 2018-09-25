@@ -65,7 +65,7 @@ type CreateServiceBindingOutput struct {
 }
 
 type CreateServiceBindingUsageInput struct {
-	Name              string                              `json:"name"`
+	Name              *string                             `json:"name"`
 	Environment       string                              `json:"environment"`
 	ServiceBindingRef ServiceBindingRefInput              `json:"serviceBindingRef"`
 	UsedBy            LocalObjectReferenceInput           `json:"usedBy"`
