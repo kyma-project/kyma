@@ -10,6 +10,6 @@ if [ -f $INSTALLER_YAML_PATH ]; then
     VERSION=$(grep "image: " $INSTALLER_YAML_PATH | cut -f3 -d":") 
     echo $VERSION
 else
-    echo ${INSTALLER_YAML_PATH} not found
+    echo "${INSTALLER_YAML_PATH} not found"
     exit 1
 fi 
