@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 def label = "kyma-${UUID.randomUUID().toString()}"
-def application = 'kyma'
+def application = 'kyma-installer'
 def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
 def dockerImageTag = params.APP_VERSION
 def installerImageTag = null
@@ -11,10 +11,8 @@ Job started with the following parameters:
 DOCKER_REGISTRY=${env.DOCKER_REGISTRY}
 PUSH_DIR=${params.PUSH_DIR}
 DOCKER_CREDENTIALS=${env.DOCKER_CREDENTIALS}
-GIT_REVISION=${params.GIT_REVISION}
 GIT_BRANCH=${params.GIT_BRANCH}
 APP_VERSION=${params.APP_VERSION}
-FULL_BUILD=${params.FULL_BUILD}
 ********************************
 """
 
@@ -37,15 +35,16 @@ podTemplate(label: label) {
                         }
 
                         stage("fetch installer image version") {
-                            dir("release") {
-                                installerImageTag = sh(returnStdout: true, script: "bash extract-installer-version.sh")
+                            installerImageTag = sh(returnStdout: true, script: "bash installation/scripts/extract-installer-version.sh")
+                            installerImageTag = installerImageTag.trim()
+                            
+                            if(installerImageTag == ""){
+                                error("No installer image tag found")
                             }
                         }
 
                         stage("build image $application") {
-                            dir("release"){
-                                sh "docker build -t ${dockerPushRoot}${application}:latest . --build-arg INSTALLER_VERSION=${installerImageTag} --label version=${dockerImageTag} --label component=${application}"
-                            }
+                            sh "docker build -t ${dockerPushRoot}${application}:latest -f ${application}/kyma.Dockerfile . --build-arg INSTALLER_VERSION=${installerImageTag} --label version=${dockerImageTag} --label component=${application}"
                         }
 
                         stage("push image") {
@@ -65,11 +64,4 @@ podTemplate(label: label) {
             emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
         }
     }
-}
-
-def execute(command, envs = '') {
-    def buildpack = 'golang-buildpack:0.0.8'
-    def envText = envs=='' ? '' : "--env $envs"
-    workDir = pwd()
-    sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/kyma/ -w /go/src/github.com/kyma-project/kyma/$env.APP_FOLDER $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
 }
