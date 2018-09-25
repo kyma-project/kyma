@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/kyma-project/kyma/tools/stability-checker/internal/log"
+
 	"github.com/kyma-project/kyma/tools/stability-checker/internal/runner"
 )
 
@@ -38,7 +40,7 @@ func New(stream *json.Decoder, ids []string) *LogPrinter {
 // PrintFailedTestOutput prints failed tests outputs.
 func (l *LogPrinter) PrintFailedTestOutput() error {
 	for {
-		var e logEntry
+		var e log.Entry
 		switch err := l.stream.Decode(&e); err {
 		case nil:
 		case io.EOF:
@@ -59,7 +61,7 @@ func (l *LogPrinter) PrintFailedTestOutput() error {
 	}
 }
 
-func (l *LogPrinter) shouldSkipLogMsg(entry logEntry) bool {
+func (l *LogPrinter) shouldSkipLogMsg(entry log.Entry) bool {
 	if entry.Level != "error" {
 		return true
 	}

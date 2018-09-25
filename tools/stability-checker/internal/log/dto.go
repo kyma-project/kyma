@@ -1,6 +1,7 @@
-package printer
+package log
 
-type logEntry struct {
+// Entry represents log entry
+type Entry struct {
 	Level string `json:"level"`
 	Log   struct {
 		Message   string `json:"message"`
