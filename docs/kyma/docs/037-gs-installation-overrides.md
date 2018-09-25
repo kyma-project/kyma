@@ -178,6 +178,7 @@ a:
 
 ## Values and types
 
-Installer generally recognizes all override values as **strings** and internally render overrides to Helm as YAML stream with only **string** values.
-There is one exception to this rule with respect to handling booleans: Whenever a string "true" or "false" is encountered, it's converted to a corresponding boolean value (true/false).
+Installer generally recognizes all override values as strings. It internally renders overrides to Helm as a YAML stream with only string values.
 
+There is one exception to this rule with respect to handling booleans:
+The system converts "true" or "false" strings that it encounters to a corresponding boolean value (true/false).
