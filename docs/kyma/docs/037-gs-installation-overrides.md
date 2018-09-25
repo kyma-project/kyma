@@ -80,10 +80,10 @@ All template values for a sub-chart must be prefixed with a sub-chart "path" tha
 This is not an Installer-specific requirement. The same considerations apply when you provide overrides manually using the `helm` command-line tool.
 
 Here is an example.
-
-There's a `core` top-level chart, that is installed by the Installer.
+There's a `core` top-level chart, that the Installer installs.
 There's an `application-connector` sub-chart in `core` with another nested sub-chart: `connector-service`.
-In one of it's templates there's a following fragment (shortened):
+In one of its templates there's a following fragment (shortened):
+
 ```
 spec:
   containers:
