@@ -95,21 +95,25 @@ spec:
 	  - "--tokenExpirationMinutes={{ .Values.deployment.args.tokenExpirationMinutes }}"
 ```
 
-The following fragment of `values.yaml` file in `connector-service` chart defines default value for `tokenExpirationMinutes`:
+The following fragment of the `values.yaml` file in `connector-service` chart defines the default value for `tokenExpirationMinutes`:
+
 ```
 deployment:
   args:
     tokenExpirationMinutes: 60
 ```
 
-If you want to override this value, for example to "90", do as follows:
-- Create a ConfigMap in kyma-installer namespace, labelled with: `installer:overrides` (or reuse existing one)
+To override this value, such as to change "60 to "90", do the following:
+
+- Create a ConfigMap in the `kyma-installer` Namespace labeled with `installer:overrides` or reuse existing one.
 - Add an entry `application-connector.connector-service.deployment.args.tokenExpirationMinutes: 90` to the map.
 
-Notice that the user-provided override key is now composed from two parts:
-  - Chart "path" inside top-level `core` chart: **application-connector.connector-service**
-  - Original template value reference from the chart (without .Values. prefix): **deployment.args.tokenExpirationMinutes**
-Once the installation starts, Installer generates overrides based on the map entries and value of "90" will be used instead of default "60" from the chart `values.yaml` file.
+Notice that the user-provided override key now contains two parts:
+
+- The chart "path" inside the top-level `core` chart: `application-connector.connector-service`
+- The original template value reference from the chart without the .Values. prefix: `deployment.args.tokenExpirationMinutes`.
+
+Once the installation starts, the Installer generates overrides based on the map entries. The system uses the value of "90" instead of the default value of "60" from the `values.yaml` chart file.
 
 
 #### Global overrides
