@@ -11,7 +11,7 @@ _  __     _                          _                       _____ _____    ____
 
 ## Overview
 
-This API Server Proxy is an [kube-rbac-proxy](https://github.com/brancz/kube-rbac-proxy)-based, transparent proxy for the Kubernetes API. It is exposed for the external communication.
+This API Server Proxy is a transparent proxy for the Kubernetes API based on [kube-rbac-proxy](https://github.com/brancz/kube-rbac-proxy). It is exposed for the external communication.
 
 
 ## Details
