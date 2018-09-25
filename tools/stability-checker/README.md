@@ -36,4 +36,4 @@ Use the following helpers for the local development:
     helm install ./dummy --name dummy --namespace=kyma-system
 ```
 - `./local_helm_install.sh` which installs the Stability Checker Helm chart with predefined values. 
-The testing script points to the `testing-dummy.sh`.This script is a simplified version of `testing-kyma.sh`, where `dummy` chart is used to speed up testing.
+The testing script points to the `testing-dummy.sh` which is a simplified version of `testing-kyma.sh`. The`dummy` chart is used in the `testing-dummy.sh` to speed up testing.
