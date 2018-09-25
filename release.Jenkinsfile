@@ -85,7 +85,7 @@ podTemplate(label: label) {
                         checkout scm
 
                         // validate parameters
-                        if (!isRelease && !params.RELEASE_VERSION.empty()) {
+                        if (!isRelease && !params.RELEASE_VERSION.isEmpty()) {
                             error("Release version ${params.RELEASE_VERSION} does not follow semantic versioning.")
                         }
                         if (!params.RELEASE_BRANCH ==~ releaseBranchRegex) {
