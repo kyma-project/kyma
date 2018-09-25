@@ -3,15 +3,6 @@ kind: ClusterRole
 metadata:
   name: istio-kyma-patch
 rules:
-- apiGroups: [""]
-  resources: ["services", "serviceaccounts", "secrets", "configmaps", "pods"]
-  verbs: ["*"]
-- apiGroups: ["extensions"]
-  resources: ["deployments", "replicasets"]
-  verbs: ["*"]
-- apiGroups: ["batch"]
-  resources: ["jobs"]
-  verbs: ["*"]
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
   verbs: ["get", "list", "watch"]
