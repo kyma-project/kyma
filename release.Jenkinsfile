@@ -14,6 +14,9 @@ Monorepo releaser: This Jenkinsfile runs the Jenkinsfiles of all subprojects bas
 
 */
 def label = "kyma-${UUID.randomUUID().toString()}"
+def registry = 'eu.gcr.io/kyma-project'
+def acsImageName = 'acs-installer:0.0.4'
+
 semVerRegex = /^([0-9]+\.[0-9]+\.[0-9]+)$/ // semVer format: 1.2.3
 releaseBranchRegex = /^release\-([0-9]+\.[0-9]+)$/ // release branch format: release-1.5
 isRelease = params.RELEASE_VERSION ==~ semVerRegex
@@ -138,34 +141,66 @@ stage('launch Kyma integration') {
         ]
 }
 
-stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
-    def slurper = new JsonSlurperClassic()
-    def zip = "${appVersion}.tar.gz"
-    
-    // create release zip
-    writeFile file: "./installation/versions.env", text: "${versionsYaml()}"
-    sh "tar -czf ${zip} ./installation ./resources"
+podTemplate(label: label) {
+        node(label) {
+            try {
+                timestamps {
+                    ansiColor('xterm') {
+                        stage("setup") {
+                            checkout scm
+                        }
 
-    // create release on github
-    withCredentials([string(credentialsId: 'public-github-token', variable: 'token')]) {
-        // TODO add changelog as "body"
-        def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"Release ${appVersion}\",\"draft\": false,\"prerelease\": ${isRelease ? 'false' : 'true'}}'"
-        def json = sh (script: "curl --data ${data} -H \"Authorization: token $token\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
-        def releaseID = slurper.parseText(json).id
+                        stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
+                            def slurper = new JsonSlurperClassic()
+                            def zip = "${appVersion}.tar.gz"
+                            
+                            // create release zip
+                            writeFile file: "installation/versions.env", text: "${versionsYaml()}"
+                            sh "tar -czf ${zip} ./installation ./resources"
 
-        // upload zip file
-        sh "curl --data-binary @$zip -H \"Authorization: token $token\" -H \"Content-Type: application/zip\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${zip}"
-        // upload versions env file
-        sh "curl --data-binary @installation/versions.env -H \"Authorization: token $token\" -H \"Content-Type: text/plain\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${appVersion}.env"
+                            // create release on github
+                            withCredentials([string(credentialsId: 'public-github-token', variable: 'token')]) {
+                                // TODO add changelog as "body"
+                                def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"Release ${appVersion}\",\"draft\": false,\"prerelease\": ${isRelease ? 'false' : 'true'}}'"
+                                def json = sh (script: "curl --data ${data} -H \"Authorization: token $token\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
+                                def releaseID = slurper.parseText(json).id
+
+                                // upload zip file
+                                sh "curl --data-binary @$zip -H \"Authorization: token $token\" -H \"Content-Type: application/zip\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${zip}"
+                                // upload versions env file
+                                sh "curl --data-binary @installation/versions.env -H \"Authorization: token $token\" -H \"Content-Type: text/plain\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${appVersion}.env"
+                            }
+                        }
+
+                        stage("Upload versions file to azure") {
+                            def file = ''
+                            if (isRelease) {
+                                file = '${appVersion}.env'
+                            } else {
+                                file = "rc/${appVersion}.env"
+                            }
+                             withCredentials([
+                                string(credentialsId: 'azure-broker-tenant-id', variable: 'AZBR_TENANT_ID'),
+                                string(credentialsId: 'azure-broker-subscription-id', variable: 'AZBR_SUBSCRIPTION_ID'),
+                                usernamePassword(credentialsId: 'azure-broker-spn', passwordVariable: 'AZBR_CLIENT_SECRET', usernameVariable: 'AZBR_CLIENT_ID')
+                                ]) {
+                                    def dockerEnv = "-e AZBR_CLIENT_SECRET -e AZBR_CLIENT_ID -e AZBR_TENANT_ID -e AZBR_SUBSCRIPTION_ID \
+                                    -e 'KYMA_VERSIONS_FILE_NAME=${file}'"
+                                    def dockerOpts = "--rm --volume ${pwd()}/installation:/installation"
+                                    def dockerEntry = "--entrypoint /installation/scripts/upload-versions.sh"
+                                     sh "docker run $dockerOpts $dockerEnv $dockerEntry $registry/$acsImageName"
+                            }
+                        }
+                    }
+                }
+            }  catch (ex) {
+                echo "Got exception: ${ex}"
+                currentBuild.result = "FAILURE"
+                def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${env.BRANCH_NAME}. See details: ${env.BUILD_URL}"
+                emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+            }
+        }
     }
-}
-
-stage("Upload versions file to azure") {
-    // TODO upload RC versions.env to azure
-}
-
-
-
 
 /* -------- Helper Functions -------- */
 
@@ -181,7 +216,7 @@ def configureBuilds(commitID) {
     } else {
         echo ("Building Release Candidate for ${params.RELEASE_BRANCH}")
         dockerPushRoot = "rc/"
-        appVersion = (params.RELEASE_BRANCH =~ /([0-9]+\.[0-9]+)$/)[0][1] // release branch number (e.g. 1.0)
+        appVersion = "${(params.RELEASE_BRANCH =~ /([0-9]+\.[0-9]+)$/)[0][1]}-rc" // release branch number + '-rc' suffix (e.g. 1.0-rc)
     }   
 }
 
