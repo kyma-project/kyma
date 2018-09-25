@@ -17,14 +17,16 @@ To customize Kyma installation, Installer exposes a generic mechanism for config
 
 ## User-defined overrides
 
-Installer finds user-defined overrides by reading ConfigMaps and Secrets deployed in `kyma-installer` namespace and marked with `installer:overrides` label.
-Installer constructs a single override by inspecting the ConfigMap/Secret entry key name. The key name should be a dot-separated sequence of strings, corresponding to the structure of keys in chart's values.yaml file, or the entry in chart's template(see examples below).
-Installer merges all overrides recursively into a single YAML stream and passes this to Helm during Kyma installation/upgrade operation.
+The Installer finds user-defined overrides by reading the ConfigMaps and Secrets deployed in the `kyma-installer` Namespace and marked with the `installer:overrides` Label.
+
+The Installer constructs a single override by inspecting the ConfigMap or Secret entry key name. The key name should be a dot-separated sequence of strings corresponding to the structure of keys in the chart's `values.yaml` file or the entry in chart's template. See the examples below.
+
+Installer merges all overrides recursively into a single YAML stream and passes it to Helm during the Kyma installation/upgrade operation.
 
 
 ### Common vs component overides
 
-Installer looks for available overrides each time a component installation/update operation is due.
+The Installer looks for available overrides each time a component installation or update operation is due.
 Overrides for the component are composed from two sets: **common** overrides and **component-specific** overrides.
 - Common overrides are used for installation of all components. They are defined in ConfigMaps/Secrets marked with `installer:overrides` label only.
 - Component-specific overrides are used only for the installation of the specific component. They are defined in ConfigMaps/Secrets marked with both: `installer:overrides` and `component: <name>` labels, where `<name>` is the component name. Component-Specific overrides have precedence over Common ones in case of conflicting entries.
