@@ -6,7 +6,7 @@ metadata:
     "helm.sh/hook": post-install
     "helm.sh/hook-delete-policy": hook-succeeded
 spec:
-#  backoffLimit: 1
+  backoffLimit: 1
   template:
     metadata:
       name: istio-kyma-patch
