@@ -180,6 +180,14 @@ components:
           type: 'string'
         description:
           type: 'string'
+        shortDescription:
+          type: 'string'
+        identifier:
+          type: 'string'
+        labels:
+          type: 'object'
+          additionalProperties:
+            type: 'string'
         api:
           $ref: '#/components/schemas/Api'
         events:
@@ -202,6 +210,12 @@ components:
           type: 'string'
         description:
           type: 'string'
+        identifier:
+          type: 'string'
+        labels:
+          type: 'object'
+          additionalProperties:
+            type: 'string'
     Api:
       type: 'object'
       properties:
