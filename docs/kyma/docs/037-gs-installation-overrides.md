@@ -136,14 +136,14 @@ It is important to avoid overrides having the same keys for final values.
 
 ### Example of non-conflicting merge:
 
-Having two overrides with a common *key prefix* ("a.b"):
+Two overrides with a common *key prefix* ("a.b"):
 
 ```
 "a.b.c": "first"
 "a.b.d": "second"
 ```
 
-Installer yields correct output:
+The Installer yields correct output:
 
 ```
 a:
@@ -154,14 +154,14 @@ a:
 
 ### Example of conflicting merge:
 
-Having two overrides with *the same* key ("a.b"):
+Two overrides with *the same* key ("a.b"):
 
 ```
 "a.b": "first"
 "a.b": "second"
 ```
 
-Installer yields either:
+The Installer yields either:
 
 ```
 a:
