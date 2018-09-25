@@ -27,13 +27,13 @@ As another option, you can run the following:
 
 ```helm install https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz```
 
-## Local development
-For local development, following helpers can be used:
-- `./local_minikube_build.sh` - builds Stability Checker docker image on minikube registry
-- `./local/provision_volume.sh` - provisions PVC with testing scripts.
-- chart `./local/charts/dummy` that contains simple and fast tests. To install it, execute following command:
+## Development
+Use the following helpers for the local development:
+- `./local_minikube_build.sh` which builds the Stability Checker Docker image on a Minikube registry.
+- `./local/provision_volume.sh` which provisions a PersistentVolumeClaim (PVC) with testing scripts.
+- `./local/charts/dummy` chart which contains simple and fast tests. To install it, execute the following command:
 ```
-helm install ./dummy --name dummy --namespace=kyma-system
+    helm install ./dummy --name dummy --namespace=kyma-system
 ```
-- `./local_helm_install.sh` - install Stability Checker helm chart with predefined values. Note that, testing script points to `testing-dummy.sh`.
-This script is a simplified version of `testing-kyma.sh`, where `dummy` chart is used to speed up testing.
+- `./local_helm_install.sh` which installs the Stability Checker Helm chart with predefined values. 
+The testing script points to the `testing-dummy.sh`.This script is a simplified version of `testing-kyma.sh`, where `dummy` chart is used to speed up testing.
