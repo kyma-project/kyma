@@ -19,4 +19,3 @@
 .project
 .idea/
 *.tmproj
-templates/tests/test-ui-acceptance.yaml

@@ -5,12 +5,13 @@ metadata:
   annotations:
     "helm.sh/hook": test-success
   labels:
-    "helm-chart-test": "false"
+    "helm-chart-test": "true"
 spec:
   hostNetwork: true
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
-      image: {{ .Values.global.containerRegistry.path }}/ui-tests:0.1.151
+      image: {{ .Values.global.containerRegistry.path }}/ui-tests:0.1.205
+      imagePullPolicy: IfNotPresent
       resources:
          requests:
            memory: {{ .Values.test.acceptance.ui.requests.memory }}
@@ -25,4 +26,17 @@ spec:
           value: {{ .Values.test.auth.username }}
         - name: PASSWORD
           value: {{ .Values.test.auth.password }}
+        - name: DEX_CONFIG
+          value: /etc/dex/cfg/config.yaml
+      volumeMounts:
+        - name: dex-config
+          mountPath: /etc/dex/cfg
+  # Needed for detecting if static user is disabled 
+  volumes:
+    - name: dex-config
+      configMap:
+        name: dex-config
+        items:
+          - key: config.yaml
+            path: config.yaml
   restartPolicy: Never   
