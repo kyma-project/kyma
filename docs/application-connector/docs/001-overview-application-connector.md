@@ -15,3 +15,17 @@ The Application Connector integrates a connected system with a Service Catalog. 
 The Application Connector Proxy service is tunneling requests to the system's API. Developers don't need to take care of the endpoint configuration. The Proxy service is also able to automate the security token handling. The API can be registered together with client credentials, and OAuth token will be acquired and cached automatically.
 
 All components of the Application Connector can be scaled independently to adjust to the need of the solution which is being built on the top of the Kyma.
+
+
+## Functionality
+
+The Application Connector brings the following functionality to Kyma:
+
+- Manage the lifecycle of the Remote Environment which is representing the connected system.
+- Establishing secured connection and generation of the client certificate used by the system which is connecting to Kyma.
+- Register of the external system APIs and Event catalogs.
+- Deliver of events from the external system to Kyma Eventbus.
+- Proxing calls from the Kyma to external APIs registered by connected systems.
+- Mapping the Remote Environment to Kyma Environment in which registered APIs and Event catalogs will be used.
+- Integrate the registered APIs and Event catalogs with Kyma Service Catalog.
+
