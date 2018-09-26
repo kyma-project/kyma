@@ -39,16 +39,6 @@ func NewCertificateUtility() CertificateUtility {
 	return &certificateUtility{}
 }
 
-func decodeBytesFromBase64(bytes []byte) (decodedData []byte, appError apperrors.AppError) {
-	data := make([]byte, base64.StdEncoding.DecodedLen(len(bytes)))
-	_, err := base64.StdEncoding.Decode(data, bytes)
-	if err != nil {
-		return nil, apperrors.Internal("There was an error while parsing the base64 content. An incorrect value was provided.")
-	}
-
-	return data, nil
-}
-
 func decodeStringFromBase64(bytes string) (decodedData []byte, appError apperrors.AppError) {
 	data, err := base64.StdEncoding.DecodeString(bytes)
 	if err != nil {
