@@ -37,6 +37,7 @@ type Resolver struct {
 	*serviceBindingResolver
 	*serviceBindingUsageResolver
 	*usageKindResolver
+	*bindableResourcesResolver
 
 	informerFactory             catalogInformers.SharedInformerFactory
 	bindingUsageInformerFactory bindingUsageInformers.SharedInformerFactory
@@ -68,7 +69,11 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, asyncApiSp
 		return nil, errors.Wrap(err, "while initializing Binding Usage Clientset")
 	}
 
-	dynamicClient := dynamic.NewDynamicClientPool(restConfig)
+	dynamicClient, err := dynamic.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing Dynamic Clientset")
+	}
+
 	bindingUsageInformerFactory := bindingUsageInformers.NewSharedInformerFactory(bindingUsageClient, informerResyncPeriod)
 	usageKindService := newUsageKindService(bindingUsageClient.ServicecatalogV1alpha1(), dynamicClient, bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer())
 	bindingUsageService := newServiceBindingUsageService(bindingUsageClient.ServicecatalogV1alpha1(), bindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer(), bindingService)
@@ -85,6 +90,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, asyncApiSp
 			serviceBindingResolver:       newServiceBindingResolver(bindingService),
 			serviceBindingUsageResolver:  newServiceBindingUsageResolver(bindingUsageService, bindingService),
 			usageKindResolver:            newUsageKindResolver(usageKindService),
+			bindableResourcesResolver:    newBindableResourcesResolver(usageKindService),
 		},
 		ServiceBindingUsageLister: bindingUsageService,
 		ServiceBindingGetter:      bindingService,

@@ -61,6 +61,11 @@ type ComplexityRoot struct {
 		JwksUri func(childComplexity int) int
 	}
 
+	BindableResourcesOutputItem struct {
+		Kind      func(childComplexity int) int
+		Resources func(childComplexity int) int
+	}
+
 	ClusterServiceBroker struct {
 		Name              func(childComplexity int) int
 		Status            func(childComplexity int) int
@@ -246,6 +251,7 @@ type ComplexityRoot struct {
 		ServiceBinding        func(childComplexity int, name string, environment string) int
 		UsageKinds            func(childComplexity int, first *int, offset *int) int
 		UsageKindResources    func(childComplexity int, usageKind string, environment string) int
+		BindableResources     func(childComplexity int, environment string) int
 		Apis                  func(childComplexity int, environment string, serviceName *string, hostname *string) int
 		RemoteEnvironment     func(childComplexity int, name string) int
 		RemoteEnvironments    func(childComplexity int, environment *string, first *int, offset *int) int
@@ -527,6 +533,7 @@ type QueryResolver interface {
 	ServiceBinding(ctx context.Context, name string, environment string) (*ServiceBinding, error)
 	UsageKinds(ctx context.Context, first *int, offset *int) ([]UsageKind, error)
 	UsageKindResources(ctx context.Context, usageKind string, environment string) ([]UsageKindResource, error)
+	BindableResources(ctx context.Context, environment string) ([]BindableResourcesOutputItem, error)
 	Apis(ctx context.Context, environment string, serviceName *string, hostname *string) ([]API, error)
 	RemoteEnvironment(ctx context.Context, name string) (*RemoteEnvironment, error)
 	RemoteEnvironments(ctx context.Context, environment *string, first *int, offset *int) ([]RemoteEnvironment, error)
@@ -1232,6 +1239,21 @@ func field_Query_usageKindResources_args(rawArgs map[string]interface{}) (map[st
 
 }
 
+func field_Query_bindableResources_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["environment"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["environment"] = arg0
+	return args, nil
+
+}
+
 func field_Query_apis_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1802,6 +1824,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AuthenticationPolicy.JwksUri(childComplexity), true
+
+	case "BindableResourcesOutputItem.kind":
+		if e.complexity.BindableResourcesOutputItem.Kind == nil {
+			break
+		}
+
+		return e.complexity.BindableResourcesOutputItem.Kind(childComplexity), true
+
+	case "BindableResourcesOutputItem.resources":
+		if e.complexity.BindableResourcesOutputItem.Resources == nil {
+			break
+		}
+
+		return e.complexity.BindableResourcesOutputItem.Resources(childComplexity), true
 
 	case "ClusterServiceBroker.name":
 		if e.complexity.ClusterServiceBroker.Name == nil {
@@ -2706,6 +2742,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.UsageKindResources(childComplexity, args["usageKind"].(string), args["environment"].(string)), true
+
+	case "Query.bindableResources":
+		if e.complexity.Query.BindableResources == nil {
+			break
+		}
+
+		args, err := field_Query_bindableResources_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BindableResources(childComplexity, args["environment"].(string)), true
 
 	case "Query.apis":
 		if e.complexity.Query.Apis == nil {
@@ -4161,6 +4209,118 @@ func (ec *executionContext) _AuthenticationPolicy_jwksURI(ctx context.Context, f
 	res := resTmp.(string)
 	rctx.Result = res
 	return graphql.MarshalString(res)
+}
+
+var bindableResourcesOutputItemImplementors = []string{"BindableResourcesOutputItem"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _BindableResourcesOutputItem(ctx context.Context, sel ast.SelectionSet, obj *BindableResourcesOutputItem) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, bindableResourcesOutputItemImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("BindableResourcesOutputItem")
+		case "kind":
+			out.Values[i] = ec._BindableResourcesOutputItem_kind(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "resources":
+			out.Values[i] = ec._BindableResourcesOutputItem_resources(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _BindableResourcesOutputItem_kind(ctx context.Context, field graphql.CollectedField, obj *BindableResourcesOutputItem) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "BindableResourcesOutputItem",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Kind, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _BindableResourcesOutputItem_resources(ctx context.Context, field graphql.CollectedField, obj *BindableResourcesOutputItem) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "BindableResourcesOutputItem",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Resources, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]UsageKindResource)
+	rctx.Result = res
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._UsageKindResource(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 var clusterServiceBrokerImplementors = []string{"ClusterServiceBroker"}
@@ -7803,6 +7963,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "bindableResources":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_bindableResources(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "apis":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -8565,6 +8734,67 @@ func (ec *executionContext) _Query_usageKindResources(ctx context.Context, field
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._UsageKindResource(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_bindableResources(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_bindableResources_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Query().BindableResources(ctx, args["environment"].(string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]BindableResourcesOutputItem)
+	rctx.Result = res
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._BindableResourcesOutputItem(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -16022,6 +16252,11 @@ type UsageKindResource {
     namespace: String!
 }
 
+type BindableResourcesOutputItem {
+    kind: String!
+    resources: [UsageKindResource!]!
+}
+
 # IDP PRESETS
 
 type IDPPreset {
@@ -16091,6 +16326,9 @@ type Query {
 
     # The query returns all instances of the resources specified by the usageKind parameter in the given environment. The result contains the resources which do not have the metadata.ownerReference.
     usageKindResources(usageKind: String!, environment: String!): [UsageKindResource!]!
+
+    # The query returns all instance of the resources which could be bound (proper UsageKind exists).
+    bindableResources(environment: String!): [BindableResourcesOutputItem!]!
 
     apis(environment: String!, serviceName: String, hostname: String): [API!]!
 

@@ -22,6 +22,11 @@ type AuthenticationPolicy struct {
 	JwksURI string                   `json:"jwksURI"`
 }
 
+type BindableResourcesOutputItem struct {
+	Kind      string              `json:"kind"`
+	Resources []UsageKindResource `json:"resources"`
+}
+
 type ClusterServiceBroker struct {
 	Name              string              `json:"name"`
 	Status            ServiceBrokerStatus `json:"status"`
