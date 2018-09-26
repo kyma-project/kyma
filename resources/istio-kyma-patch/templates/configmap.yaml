@@ -16,25 +16,6 @@ data:
       }
     ]
 
-  istio-ingress.deployment.patch.json: |
-    [
-      {
-        "op": "replace",
-        "path": "/spec/template/spec/containers/0/args/15",
-        "value": "zipkin.kyma-system:9411"
-      }
-    ]
-
-  istio-mixer-post-install.job.patch.json: |
-    [
-      {
-        "op": "replace",
-        "path": "/metadata/annotations/helm.sh~1hook-delete-policy",
-        "value": "hook-succeeded"
-      }
-    ]
-
-
   istio-ingressgateway.deployment.patch.json: |
     [
       {
