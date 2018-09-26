@@ -4,6 +4,9 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/base64"
+	"encoding/pem"
+	"fmt"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
@@ -82,6 +85,49 @@ UkZDaTRSYTZwQm1vMW5vZ3c0R3pMWlAvVTFMQktMCjhuTEJ5L1ZyaDVxSCtWUW1T
 SEdTQ3h1SnB4STQvZXFtWWRFbis3T1JqSWltVXFqQ0RsOWp1dGhSakpmNHVwdjIK
 U0ZRVnZMbkxhdncxV2FPNFhHRFBZcWZQdndsbnJZSXdjMUFHQmVnTjhnPT0KLS0t
 LS1FTkQgQ0VSVElGSUNBVEUgUkVRVUVTVC0tLS0tCg==`
+
+	CrtChain = `-----BEGIN CERTIFICATE-----
+MIIDPDCCAiSgAwIBAgIBAjANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UEBhMCVVMx
+DjAMBgNVBAgMBXN0YXRlMQ0wCwYDVQQHDARjaXR5MRAwDgYDVQQKDAdjb21wYW55
+MRAwDgYDVQQLDAdzZWN0aW9uMRQwEgYDVQQDDAtob3N0LmV4LmNvbTEbMBkGCSqG
+SIb3DQEJARYMZW1haWxAZXguY29tMB4XDTE4MDkyNjA5MjQ0MFoXDTE4MTIyNTA5
+MjQ0MFowFjEUMBIGA1UEAxMLaG9zdC5leC5jb20wggEiMA0GCSqGSIb3DQEBAQUA
+A4IBDwAwggEKAoIBAQCxFMs7w1t30mZqV8qK8/7PkJTdIWz5AOJEIu0LiQYOibSC
+xnQSj9FiUEnxU3CjWqtxP4VcShCco78mgeY7rpSFKWz3JWhwBr3VkgSFHPCQWNN0
+wLUDu7WVBkVkiDUs+Nbz3/Po9oh4+syZKfrdkHVXpSepoU8Gl+Kb8Apb55Q/RW/T
+0MZHJ4sJps0j3fjpyQUKH9pt9768Aw3cJ8KuS8MtgNS46+PnjtA02tebzQdfO6F6
+mi7PfG9Wp7AX9cJNukGiZaMjsk93OrPei4c3CIkKEBsqVtC4yVXwk/szUD+KxSDr
+Eq+NwfxHY5pemHVIN2U4YuNfK+xEtG2trVIIu8oTAgMBAAGjJzAlMA4GA1UdDwEB
+/wQEAwIHgDATBgNVHSUEDDAKBggrBgEFBQcDAjANBgkqhkiG9w0BAQsFAAOCAQEA
+On0/O1iBwRA+bCNguRaIaHojLqEENAVneNA7HbRYLwIN1nUwfZvII1ZsKs0xo5M+
+1XfLukKDTOIWE6NvQ4q1Y5zzMHVg5/N+o5tMze+aZxvtlBKfV2dgwddnwgCK/huO
+G6gfxQO88Y7JpZmLmIl4TLH4a2TFH/t1rEQNXE8e+HwNCKOYxhnYfvvt6U1pZhNz
+XExXcKBJ5oiblhW+NiqoiSHxRk9JWV679Wa51nML66khttQOUCZzVkAMhIPIJc0k
+JEEx2RazbgxRj23+bclb/nrPQj4X1G5d2JsvM6jcRiyrp/llfQOn3TgiqtiIUCA0
+JK2K4FJavFZ2tpvqVXyQpg==
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MIIDhDCCAmwCCQCCgClWcqHk4DANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UEBhMC
+VVMxDjAMBgNVBAgMBXN0YXRlMQ0wCwYDVQQHDARjaXR5MRAwDgYDVQQKDAdjb21w
+YW55MRAwDgYDVQQLDAdzZWN0aW9uMRQwEgYDVQQDDAtob3N0LmV4LmNvbTEbMBkG
+CSqGSIb3DQEJARYMZW1haWxAZXguY29tMB4XDTE4MDYxMTA4MDMyM1oXDTIxMDMz
+MTA4MDMyM1owgYMxCzAJBgNVBAYTAlVTMQ4wDAYDVQQIDAVzdGF0ZTENMAsGA1UE
+BwwEY2l0eTEQMA4GA1UECgwHY29tcGFueTEQMA4GA1UECwwHc2VjdGlvbjEUMBIG
+A1UEAwwLaG9zdC5leC5jb20xGzAZBgkqhkiG9w0BCQEWDGVtYWlsQGV4LmNvbTCC
+ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKUlhfEb6lR7uhpcEedvFH7m
+gQy0PcW3TVNeGrQB3/T7n6qBJnUY0Tq3x072rmzKjbftlDWRYdcizROwIPZpZiwA
+iWv9H1/QQPeg6SJjHQNVXzzj354RxooWHLNQGSbXOez4yO6dgFbJHSgn+4k7eYCz
+N3zBM1GgR3lfgpwpOKQgyQi22Knfl1wfo1/mMMXRAhqY4RPeunhPauYDdVz6/TEK
+HMR0qJOJVpP0stop4vU5SmUlr3QygdnjMcsuowWJfXaP+t1bNWTKLYzR1LzKcS2l
+WG/G+drm9qihjfKvZIMrK/j5l/Zkqt96dLkOu7xBWsYfzIOE6FNB4UKQH4sDpE0C
+AwEAATANBgkqhkiG9w0BAQsFAAOCAQEAYccH2RdbliHmEVhTajfId66xl0lmwTVx
+rVkMRvtEJ1M8rIwABVCu/w+DSorm8sNq8n9ZCwhXflFCEySk8wevg5/lLtSz4ghn
+A97O/CNEABohwLZXQYkOQqGDXz6yWmCugtt8Y5of16NDj2AzqXZ++tUvo/CvB/Q8
+1iL+JpgQs15b0QEIpXRyxOAc5FdHm+I9qtx+BeA3I3tMPhYlM9mDVev8fdHtURN8
+9QM4wWFHncmNvlTK51HPexFI3TF9sEqDUQ7dozcUD8GexHlsvZh95+5TmSlA0kfl
+fWXUGZObOGD246zwfHLHP3AwzFKU0bfIvqckcw23I+ZUMIbdajw9eg==
+-----END CERTIFICATE-----
+`
 
 	invalidCert = `-----BEGIN CERTIFICATE-----
 -----END CERTIFICATE-----`
@@ -473,22 +519,72 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 	})
 }
 
-func TestCertificateUtility_SignWithCA(t *testing.T) {
+func TestCertificateUtility_CreateCrtChain(t *testing.T) {
 
-	t.Run("should create client certificate", func(t *testing.T) {
+	t.Run("should create certificate chain", func(t *testing.T) {
 		// given
 		certificateUtility := NewCertificateUtility()
 
-		caCrt, _ := certificateUtility.LoadCert(encodedCert)
-		csr, _ := certificateUtility.LoadCSR(CSR)
-		key, _ := certificateUtility.LoadKey(encodedKey)
+		caCrt, csr, key := prepareCrtAndKey(certificateUtility)
 
 		// when
-		crtBase64, err := certificateUtility.SignWithCA(caCrt, csr, key)
+		crtBase64, err := certificateUtility.CreateCrtChain(caCrt, csr, key)
 
 		// then
+		rawCrt, decodeErr := base64.StdEncoding.DecodeString(crtBase64)
+		decodedCrt := rawCrtTox509Certificates(rawCrt)
+
+		expectedRawCrt := rawCrtTox509Certificates([]byte(CrtChain))
+
 		require.NoError(t, err)
-		assert.NotEqual(t, "", crtBase64)
+		require.NoError(t, decodeErr)
+
+		clientCrtSubject := expectedRawCrt[0].Subject
+
+		expectedSubject := decodedCrt[0].Subject
+
+		assert.Equal(t, clientCrtSubject, expectedSubject)
+	})
+
+	t.Run("certificate validity days should equal 90", func(t *testing.T) {
+		// given
+		certificateUtility := NewCertificateUtility()
+
+		caCrt, csr, key := prepareCrtAndKey(certificateUtility)
+
+		// when
+		crtBase64, err := certificateUtility.CreateCrtChain(caCrt, csr, key)
+
+		// then
+		rawCrt, decodeErr := base64.StdEncoding.DecodeString(crtBase64)
+		decodedCrt := rawCrtTox509Certificates(rawCrt)
+
+		require.NoError(t, err)
+		require.NoError(t, decodeErr)
+
+		expectedvValidityTime := calculateValidityTime(decodedCrt[0])
+
+		assert.Equal(t, Certificate_Validity_Days, expectedvValidityTime)
+	})
+
+	t.Run("should return two certificates in chain", func(t *testing.T) {
+
+		// given
+		certificateUtility := NewCertificateUtility()
+
+		caCrt, csr, key := prepareCrtAndKey(certificateUtility)
+
+		// when
+		crtBase64, err := certificateUtility.CreateCrtChain(caCrt, csr, key)
+
+		// then
+		rawCrt, decodeErr := base64.StdEncoding.DecodeString(crtBase64)
+		decodedCrt := rawCrtTox509Certificates(rawCrt)
+
+		require.NoError(t, err)
+		require.NoError(t, decodeErr)
+		assert.Equal(t, 2, len(decodedCrt))
+
 	})
 
 	t.Run("should fail creating certificate", func(t *testing.T) {
@@ -500,11 +596,41 @@ func TestCertificateUtility_SignWithCA(t *testing.T) {
 		certificateUtility := NewCertificateUtility()
 
 		// when
-		crtBase64, err := certificateUtility.SignWithCA(caCrt, csr, key)
+		crtBase64, err := certificateUtility.CreateCrtChain(caCrt, csr, key)
 
 		// then
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.Equal(t, "", crtBase64)
 	})
+}
+func calculateValidityTime(certificate *x509.Certificate) int {
+	expirationDate := certificate.NotAfter
+	fmt.Print(expirationDate.String())
+	creationDate := certificate.NotBefore
+	fmt.Println(creationDate.String())
+	difference := expirationDate.Sub(creationDate)
+
+	const hoursInDay = 24
+
+	daysFloat := difference.Hours() / hoursInDay
+
+	return int(daysFloat)
+}
+
+func prepareCrtAndKey(certificateUtility CertificateUtility) (*x509.Certificate, *x509.CertificateRequest, *rsa.PrivateKey) {
+	caCrt, _ := certificateUtility.LoadCert(encodedCert)
+	csr, _ := certificateUtility.LoadCSR(CSR)
+	key, _ := certificateUtility.LoadKey(encodedKey)
+	return caCrt, csr, key
+}
+
+func rawCrtTox509Certificates(rawCrt []byte) []*x509.Certificate {
+	pemBlock, rest := pem.Decode(rawCrt)
+	pemBlock2, _ := pem.Decode(rest)
+
+	pemBlocks := append(pemBlock.Bytes, pemBlock2.Bytes...)
+
+	decodedCrt, _ := x509.ParseCertificates(pemBlocks)
+	return decodedCrt
 }
