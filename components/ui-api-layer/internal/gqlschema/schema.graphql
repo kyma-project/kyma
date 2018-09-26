@@ -40,7 +40,7 @@ type ServiceInstance {
     servicePlan: ServicePlan
     clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
-    serviceBindings: [ServiceBinding!]!
+    serviceBindings: ServiceBindings!
     serviceBindingUsages: [ServiceBindingUsage!]!
 }
 
@@ -178,6 +178,18 @@ type ServiceBrokerStatus {
     ready: Boolean!
     reason: String!
     message: String!
+}
+
+type ServiceBindings {
+    serviceBindings: [ServiceBinding!]!
+    stats: ServiceBindingsStats!
+}
+
+type ServiceBindingsStats {
+    ready: Int!
+    failed: Int!
+    pending: Int!
+    unknown: Int!
 }
 
 type ServiceBinding {

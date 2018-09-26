@@ -28,28 +28,45 @@ func TestServiceBindingConverter_ToGQL(t *testing.T) {
 func TestServiceBindingConverter_ToGQLs(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		bindings := []*api.ServiceBinding{
-			fixBinding(),
-			fixBinding(),
+			fixBinding(api.ServiceBindingConditionReady),
+			fixBinding(api.ServiceBindingConditionFailed),
+			fixBinding(api.ServiceBindingConditionType("")),
 		}
 
-		expected := []gqlschema.ServiceBinding{
-			{
-				Name:                "service-binding",
-				Environment:         "production",
-				ServiceInstanceName: "instance",
-				SecretName:          "secret-name",
-				Status: gqlschema.ServiceBindingStatus{
-					Type: gqlschema.ServiceBindingStatusTypePending,
+		expected := gqlschema.ServiceBindings{
+			ServiceBindings: []gqlschema.ServiceBinding{
+				{
+					Name:                "service-binding",
+					Environment:         "production",
+					ServiceInstanceName: "instance",
+					SecretName:          "secret-name",
+					Status: gqlschema.ServiceBindingStatus{
+						Type: gqlschema.ServiceBindingStatusTypeReady,
+					},
+				},
+				{
+					Name:                "service-binding",
+					Environment:         "production",
+					ServiceInstanceName: "instance",
+					SecretName:          "secret-name",
+					Status: gqlschema.ServiceBindingStatus{
+						Type: gqlschema.ServiceBindingStatusTypeFailed,
+					},
+				},
+				{
+					Name:                "service-binding",
+					Environment:         "production",
+					ServiceInstanceName: "instance",
+					SecretName:          "secret-name",
+					Status: gqlschema.ServiceBindingStatus{
+						Type: gqlschema.ServiceBindingStatusTypeUnknown,
+					},
 				},
 			},
-			{
-				Name:                "service-binding",
-				Environment:         "production",
-				ServiceInstanceName: "instance",
-				SecretName:          "secret-name",
-				Status: gqlschema.ServiceBindingStatus{
-					Type: gqlschema.ServiceBindingStatusTypePending,
-				},
+			Stats: gqlschema.ServiceBindingsStats{
+				Ready:   1,
+				Failed:  1,
+				Unknown: 1,
 			},
 		}
 
@@ -65,25 +82,30 @@ func TestServiceBindingConverter_ToGQLs(t *testing.T) {
 		converter := serviceBindingConverter{}
 		result := converter.ToGQLs(bindings)
 
-		assert.Empty(t, result)
+		assert.Empty(t, result.ServiceBindings)
 	})
 
 	t.Run("With nil", func(t *testing.T) {
 		bindings := []*api.ServiceBinding{
 			nil,
-			fixBinding(),
+			fixBinding(api.ServiceBindingConditionReady),
 			nil,
 		}
 
-		expected := []gqlschema.ServiceBinding{
-			{
-				Name:                "service-binding",
-				Environment:         "production",
-				ServiceInstanceName: "instance",
-				SecretName:          "secret-name",
-				Status: gqlschema.ServiceBindingStatus{
-					Type: gqlschema.ServiceBindingStatusTypePending,
+		expected := gqlschema.ServiceBindings{
+			ServiceBindings: []gqlschema.ServiceBinding{
+				{
+					Name:                "service-binding",
+					Environment:         "production",
+					ServiceInstanceName: "instance",
+					SecretName:          "secret-name",
+					Status: gqlschema.ServiceBindingStatus{
+						Type: gqlschema.ServiceBindingStatusTypeReady,
+					},
 				},
+			},
+			Stats: gqlschema.ServiceBindingsStats{
+				Ready: 1,
 			},
 		}
 
@@ -114,7 +136,7 @@ func TestServiceBindingConversionToGQL(t *testing.T) {
 	// GIVEN
 	sut := serviceBindingConverter{}
 	// WHEN
-	actual := sut.ToGQL(fixBinding())
+	actual := sut.ToGQL(fixBinding(api.ServiceBindingConditionReady))
 	// THEN
 	assert.Equal(t, "service-binding", actual.Name)
 	assert.Equal(t, "production", actual.Environment)
@@ -126,14 +148,14 @@ func TestServicebindingConversionToCreateOutputGQL(t *testing.T) {
 	// GIVEN
 	sut := serviceBindingConverter{}
 	// WHEN
-	actual := sut.ToCreateOutputGQL(fixBinding())
+	actual := sut.ToCreateOutputGQL(fixBinding(api.ServiceBindingConditionReady))
 	// THEN
 	assert.Equal(t, "service-binding", actual.Name)
 	assert.Equal(t, "production", actual.Environment)
 	assert.Equal(t, "instance", actual.ServiceInstanceName)
 }
 
-func fixBinding() *api.ServiceBinding {
+func fixBinding(conditionType api.ServiceBindingConditionType) *api.ServiceBinding {
 	return &api.ServiceBinding{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "service-binding",
@@ -142,6 +164,14 @@ func fixBinding() *api.ServiceBinding {
 		Spec: api.ServiceBindingSpec{
 			ServiceInstanceRef: api.LocalObjectReference{Name: "instance"},
 			SecretName:         "secret-name",
+		},
+		Status: api.ServiceBindingStatus{
+			Conditions: []api.ServiceBindingCondition{
+				{
+					Type:   conditionType,
+					Status: api.ConditionTrue,
+				},
+			},
 		},
 	}
 }

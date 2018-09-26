@@ -262,6 +262,18 @@ type ServiceBindingUsageStatus struct {
 	Message string                        `json:"message"`
 }
 
+type ServiceBindings struct {
+	ServiceBindings []ServiceBinding     `json:"serviceBindings"`
+	Stats           ServiceBindingsStats `json:"stats"`
+}
+
+type ServiceBindingsStats struct {
+	Ready   int `json:"ready"`
+	Failed  int `json:"failed"`
+	Pending int `json:"pending"`
+	Unknown int `json:"unknown"`
+}
+
 type ServiceBroker struct {
 	Name              string              `json:"name"`
 	Environment       string              `json:"environment"`

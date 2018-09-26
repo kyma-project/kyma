@@ -374,6 +374,18 @@ type ComplexityRoot struct {
 		Message func(childComplexity int) int
 	}
 
+	ServiceBindings struct {
+		ServiceBindings func(childComplexity int) int
+		Stats           func(childComplexity int) int
+	}
+
+	ServiceBindingsStats struct {
+		Ready   func(childComplexity int) int
+		Failed  func(childComplexity int) int
+		Pending func(childComplexity int) int
+		Unknown func(childComplexity int) int
+	}
+
 	ServiceBroker struct {
 		Name              func(childComplexity int) int
 		Environment       func(childComplexity int) int
@@ -573,7 +585,7 @@ type ServiceInstanceResolver interface {
 	ServicePlan(ctx context.Context, obj *ServiceInstance) (*ServicePlan, error)
 	ClusterServicePlan(ctx context.Context, obj *ServiceInstance) (*ClusterServicePlan, error)
 	Bindable(ctx context.Context, obj *ServiceInstance) (bool, error)
-	ServiceBindings(ctx context.Context, obj *ServiceInstance) ([]ServiceBinding, error)
+	ServiceBindings(ctx context.Context, obj *ServiceInstance) (ServiceBindings, error)
 	ServiceBindingUsages(ctx context.Context, obj *ServiceInstance) ([]ServiceBindingUsage, error)
 }
 type SubscriptionResolver interface {
@@ -3312,6 +3324,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ServiceBindingUsageStatus.Message(childComplexity), true
+
+	case "ServiceBindings.serviceBindings":
+		if e.complexity.ServiceBindings.ServiceBindings == nil {
+			break
+		}
+
+		return e.complexity.ServiceBindings.ServiceBindings(childComplexity), true
+
+	case "ServiceBindings.stats":
+		if e.complexity.ServiceBindings.Stats == nil {
+			break
+		}
+
+		return e.complexity.ServiceBindings.Stats(childComplexity), true
+
+	case "ServiceBindingsStats.ready":
+		if e.complexity.ServiceBindingsStats.Ready == nil {
+			break
+		}
+
+		return e.complexity.ServiceBindingsStats.Ready(childComplexity), true
+
+	case "ServiceBindingsStats.failed":
+		if e.complexity.ServiceBindingsStats.Failed == nil {
+			break
+		}
+
+		return e.complexity.ServiceBindingsStats.Failed(childComplexity), true
+
+	case "ServiceBindingsStats.pending":
+		if e.complexity.ServiceBindingsStats.Pending == nil {
+			break
+		}
+
+		return e.complexity.ServiceBindingsStats.Pending(childComplexity), true
+
+	case "ServiceBindingsStats.unknown":
+		if e.complexity.ServiceBindingsStats.Unknown == nil {
+			break
+		}
+
+		return e.complexity.ServiceBindingsStats.Unknown(childComplexity), true
 
 	case "ServiceBroker.name":
 		if e.complexity.ServiceBroker.Name == nil {
@@ -11657,6 +11711,252 @@ func (ec *executionContext) _ServiceBindingUsageStatus_message(ctx context.Conte
 	return graphql.MarshalString(res)
 }
 
+var serviceBindingsImplementors = []string{"ServiceBindings"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ServiceBindings(ctx context.Context, sel ast.SelectionSet, obj *ServiceBindings) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, serviceBindingsImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ServiceBindings")
+		case "serviceBindings":
+			out.Values[i] = ec._ServiceBindings_serviceBindings(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "stats":
+			out.Values[i] = ec._ServiceBindings_stats(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBindings_serviceBindings(ctx context.Context, field graphql.CollectedField, obj *ServiceBindings) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBindings",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.ServiceBindings, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ServiceBinding)
+	rctx.Result = res
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ServiceBinding(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBindings_stats(ctx context.Context, field graphql.CollectedField, obj *ServiceBindings) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBindings",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Stats, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ServiceBindingsStats)
+	rctx.Result = res
+
+	return ec._ServiceBindingsStats(ctx, field.Selections, &res)
+}
+
+var serviceBindingsStatsImplementors = []string{"ServiceBindingsStats"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ServiceBindingsStats(ctx context.Context, sel ast.SelectionSet, obj *ServiceBindingsStats) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, serviceBindingsStatsImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ServiceBindingsStats")
+		case "ready":
+			out.Values[i] = ec._ServiceBindingsStats_ready(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "failed":
+			out.Values[i] = ec._ServiceBindingsStats_failed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "pending":
+			out.Values[i] = ec._ServiceBindingsStats_pending(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "unknown":
+			out.Values[i] = ec._ServiceBindingsStats_unknown(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBindingsStats_ready(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingsStats) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBindingsStats",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Ready, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBindingsStats_failed(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingsStats) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBindingsStats",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Failed, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBindingsStats_pending(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingsStats) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBindingsStats",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Pending, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBindingsStats_unknown(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingsStats) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBindingsStats",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Unknown, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	return graphql.MarshalInt(res)
+}
+
 var serviceBrokerImplementors = []string{"ServiceBroker"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -12994,42 +13294,10 @@ func (ec *executionContext) _ServiceInstance_serviceBindings(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]ServiceBinding)
+	res := resTmp.(ServiceBindings)
 	rctx.Result = res
 
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: &res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				return ec._ServiceBinding(ctx, field.Selections, &res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
+	return ec._ServiceBindings(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
@@ -15848,7 +16116,7 @@ type ServiceInstance {
     servicePlan: ServicePlan
     clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
-    serviceBindings: [ServiceBinding!]!
+    serviceBindings: ServiceBindings!
     serviceBindingUsages: [ServiceBindingUsage!]!
 }
 
@@ -15986,6 +16254,18 @@ type ServiceBrokerStatus {
     ready: Boolean!
     reason: String!
     message: String!
+}
+
+type ServiceBindings {
+    serviceBindings: [ServiceBinding!]!
+    stats: ServiceBindingsStats!
+}
+
+type ServiceBindingsStats {
+    ready: Int!
+    failed: Int!
+    pending: Int!
+    unknown: Int!
 }
 
 type ServiceBinding {
