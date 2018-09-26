@@ -7,7 +7,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 rules:
-- apiGroups: ["remoteenvironment.kyma.cx"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["remoteenvironments"]
   verbs: ["get", "list", "update","create", "delete", "watch"]
 ---
