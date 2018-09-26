@@ -1,7 +1,7 @@
 controller:
   image:
     name: develop/remote-environment-controller
-    tag: 8bd1565b
+    tag: cc559ab5
     pullPolicy: IfNotPresent
   args:
     appName: remote-environment-controller
