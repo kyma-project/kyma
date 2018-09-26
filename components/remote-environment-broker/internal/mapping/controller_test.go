@@ -61,7 +61,7 @@ func TestControllerRunSuccess(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	svc := mapping.New(false, emInformer, nsInformer, nsClientMock, reGetterMock, nil, spy.NewLogDummy())
+	svc := mapping.New(false, emInformer, nsInformer, nsClientMock, reGetterMock, nil, nil, spy.NewLogDummy())
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 	awaitInformerStartAtMost(t, time.Second, nsInformer)
@@ -92,7 +92,7 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 		Return(fixExpectedNS, nil).
 		Once()
 
-	svc := mapping.New(false, emInformer, nil, nsClientMock, nil, nil, spy.NewLogDummy())
+	svc := mapping.New(false, emInformer, nil, nsClientMock, nil, nil, nil, spy.NewLogDummy())
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 
@@ -132,7 +132,7 @@ func TestControllerRunFailure(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	svc := mapping.New(false, emInformer, nil, nsClientMock, reGetter, nil, spy.NewLogDummy())
+	svc := mapping.New(false, emInformer, nil, nsClientMock, reGetter, nil, nil, spy.NewLogDummy())
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 
@@ -150,6 +150,7 @@ type tcNsBrokersEnabled struct {
 	name                  string
 	prepareNsBrokerFacade func() *automock.NsBrokerFacade
 	prepareMappingSvc     func() *automock.MappingLister
+	prepareNsBrokerSyncer func() *automock.NsBrokerSyncer
 	errorMsg              string
 }
 
@@ -162,13 +163,20 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 				nsBrokerFacade.On("Exist", fixNSName).Return(false, nil)
 				nsBrokerFacade.On("Create", fixNSName).Return(nil)
 				return nsBrokerFacade
-			}},
+			},
+			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
+				return &automock.NsBrokerSyncer{}
+			},
+		},
 		{
 			name: "error on checking if namespaced broker exist",
 			prepareNsBrokerFacade: func() *automock.NsBrokerFacade {
 				nsBrokerFacade := &automock.NsBrokerFacade{}
 				nsBrokerFacade.On("Exist", fixNSName).Return(false, errors.New("some error"))
 				return nsBrokerFacade
+			},
+			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
+				return &automock.NsBrokerSyncer{}
 			},
 			errorMsg: "while checking if namespaced broker exist in namespace [production]: some error",
 		},
@@ -180,14 +188,22 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 				nsBrokerFacade.On("Create", fixNSName).Return(errors.New("some error"))
 				return nsBrokerFacade
 			},
+			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
+				return &automock.NsBrokerSyncer{}
+			},
 			errorMsg: "while creating namespaced broker in namespace [production]: some error",
 		},
 		{
-			name: "namespace broker already exist",
+			name: "sync namespaced broker if it already exist",
 			prepareNsBrokerFacade: func() *automock.NsBrokerFacade {
 				nsBrokerFacade := &automock.NsBrokerFacade{}
 				nsBrokerFacade.On("Exist", fixNSName).Return(true, nil)
 				return nsBrokerFacade
+			},
+			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
+				nsBrokerSyncer := &automock.NsBrokerSyncer{}
+				nsBrokerSyncer.On("SyncBroker", fixNSName).Return(nil)
+				return nsBrokerSyncer
 			},
 		},
 	} {
@@ -219,7 +235,10 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerFacade := tc.prepareNsBrokerFacade()
 			defer nsBrokerFacade.AssertExpectations(t)
 
-			svc := mapping.New(true, emInformer, nsInformer, nsClientMock, reGetterMock, nsBrokerFacade, spy.NewLogDummy())
+			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
+			defer nsBrokerSyncer.AssertExpectations(t)
+
+			svc := mapping.New(true, emInformer, nsInformer, nsClientMock, reGetterMock, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy())
 
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixREName))
 			if tc.errorMsg == "" {
@@ -246,6 +265,9 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 				mappingSvc.On("ListEnvironmentMappings", fixNSName).Return([]*v1alpha1.EnvironmentMapping{}, nil)
 				return mappingSvc
 			},
+			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
+				return &automock.NsBrokerSyncer{}
+			},
 		},
 		{
 			name: "error on checking if namespaced broker exist",
@@ -256,6 +278,9 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			},
 			prepareMappingSvc: func() *automock.MappingLister {
 				return &automock.MappingLister{}
+			},
+			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
+				return &automock.NsBrokerSyncer{}
 			},
 			errorMsg: "while checking if namespaced broker exist in namespace [production]: some error",
 		},
@@ -272,6 +297,9 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 				mappingSvc.On("ListEnvironmentMappings", fixNSName).Return([]*v1alpha1.EnvironmentMapping{}, nil)
 				return mappingSvc
 			},
+			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
+				return &automock.NsBrokerSyncer{}
+			},
 			errorMsg: "while removing namespaced broker from namespace [production]: some error",
 		},
 		{
@@ -284,9 +312,12 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			prepareMappingSvc: func() *automock.MappingLister {
 				return &automock.MappingLister{}
 			},
+			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
+				return &automock.NsBrokerSyncer{}
+			},
 		},
 		{
-			name: "broker won't be removed if at least 1 mapping exists",
+			name: "sync broker if at least 1 mapping exists instead of deleting it",
 			prepareNsBrokerFacade: func() *automock.NsBrokerFacade {
 				nsBrokerFacade := &automock.NsBrokerFacade{}
 				nsBrokerFacade.On("Exist", fixNSName).Return(true, nil)
@@ -303,6 +334,11 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 				}, nil)
 				return mappingSvc
 			},
+			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
+				nsBrokerSyncer := &automock.NsBrokerSyncer{}
+				nsBrokerSyncer.On("SyncBroker", fixNSName).Return(nil)
+				return nsBrokerSyncer
+			},
 		},
 		{
 			name: "error while listing environment mappings",
@@ -315,6 +351,9 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 				mappingSvc := &automock.MappingLister{}
 				mappingSvc.On("ListEnvironmentMappings", fixNSName).Return(nil, errors.New("some error"))
 				return mappingSvc
+			},
+			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
+				return &automock.NsBrokerSyncer{}
 			},
 			errorMsg: fmt.Sprintf("while listing environment mappings from namespace [%s]: some error", fixNSName),
 		},
@@ -342,7 +381,10 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			mappingSvc := tc.prepareMappingSvc()
 			defer mappingSvc.AssertExpectations(t)
 
-			svc := mapping.New(true, emInformer, nsInformer, nsClientMock, nil, nsBrokerFacade, spy.NewLogDummy()).
+			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
+			defer nsBrokerSyncer.AssertExpectations(t)
+
+			svc := mapping.New(true, emInformer, nsInformer, nsClientMock, nil, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy()).
 				WithMappingLister(mappingSvc)
 			// WHEN
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixREName))
