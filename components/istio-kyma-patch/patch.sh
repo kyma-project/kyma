@@ -16,11 +16,12 @@ function run_all_patches() {
     echo "    Patch $type $name from: ${f}"
     local patch=$(cat ${f})
     set +e
-    local out=$(kubectl patch ${type} -n istio-system ${name} --patch "$patch" --type json)
+    local out
+    out=$(kubectl patch ${type} -n istio-system ${name} --patch "$patch" --type json)
+    set -e
     local result=$?
     echo "$out"
-    set -e
-    if [ ${result} -ne 0 ] && [[ ! "$out" = *"not patched"* ]]; then
+    if [[ ${result} -ne 0 ]] && [[ ! "$out" = *"NotFound"* ]]; then
         exit ${result}
     fi
   done
@@ -71,7 +72,7 @@ function check_requirements() {
   done <${CONFIG_DIR}/required-crds
 }
 
-configure_sidecar_injector
 check_requirements
+configure_sidecar_injector
 run_all_patches
 remove_not_used
