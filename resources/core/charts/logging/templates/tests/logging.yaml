@@ -48,7 +48,7 @@ spec:
   restartPolicy: Never
   containers:
   - name: test-{{ template "fullname" . }}
-    image: eu.gcr.io/kyma-project/develop/test-logging:09bf23c0
+    image: eu.gcr.io/kyma-project/develop/test-logging:6e0a7fe2
     imagePullPolicy: IfNotPresent
     command:
       - "/bin/sh"
