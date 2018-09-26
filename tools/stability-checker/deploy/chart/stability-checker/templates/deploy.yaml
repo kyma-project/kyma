@@ -57,6 +57,13 @@ spec:
             value: "{{ .Values.testThrottle }}"
           - name: APP_TEST_RESULT_WINDOW_TIME
             value: "{{ .Values.testResultWindowTime }}"
+          - name: APP_STATS_ENABLED
+            value: "{{ .Values.stats.enabled }}"
+          - name: APP_STATS_FAILING_TEST_REGEXP
+            value: "{{ .Values.stats.failingTestRegexp }}"
+          - name: APP_STATS_SUCCESSFUL_TEST_REGEXP
+            value: "{{ .Values.stats.successfulTestRegexp }}"
+
 
 
         volumeMounts:

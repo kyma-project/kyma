@@ -34,7 +34,7 @@ rules:
 - apiGroups: ["gateway.kyma.cx"]
   resources: ["apis"]
   verbs: ["create", "delete", "get", "list"]
-- apiGroups: ["remoteenvironment.kyma.cx"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["eventactivations"]
   verbs: ["create", "delete", "get", "list"]
 - apiGroups: ["networking.istio.io"]
@@ -77,7 +77,7 @@ spec:
   serviceAccount: "test-{{ template "fullname" . }}"
   containers:
   - name: test-{{ template "fullname" . }}
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.test.image.name }}:{{ .Values.test.image.tag }}
+    image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}kubeless-test-client:6e0a7fe2"
     volumeMounts:
     - name: k8syaml
       mountPath: /k8syaml

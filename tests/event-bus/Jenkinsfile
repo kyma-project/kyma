@@ -68,14 +68,6 @@ podTemplate(label: label) {
                             }
                         }
 
-                        if (params.FULL_BUILD) {
-                            stage("IP scan $application (Sourceclear)"){
-                                withCredentials([string(credentialsId: 'SRCCLR_API_TOKEN', variable: 'SRCCLR_API_TOKEN')]) {
-                                    execute("/", "make scan", "SRCCLR_API_TOKEN=$SRCCLR_API_TOKEN")
-                                }
-                            }
-                        }
-
                         stage("push image - event-bus-e2e-tester") {
                             def imageName = "${dockerPushRoot}${imageNameTester}:${dockerImageTag}"
                             sh "docker tag event-bus-e2e-tester:${dockerImageTag} ${imageName}"

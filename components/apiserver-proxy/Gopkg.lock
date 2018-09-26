@@ -393,6 +393,7 @@
 [[projects]]
   name = "k8s.io/apiserver"
   packages = [
+    "pkg/apis/audit",
     "pkg/authentication/authenticator",
     "pkg/authentication/authenticatorfactory",
     "pkg/authentication/group",
@@ -406,6 +407,7 @@
     "pkg/authentication/user",
     "pkg/authorization/authorizer",
     "pkg/authorization/authorizerfactory",
+    "pkg/endpoints/request",
     "pkg/util/flag",
     "pkg/util/webhook",
     "pkg/util/wsstream",
@@ -503,6 +505,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "969aa333f3a52590cc7292fcd401a09fe476774b4fd4b0b9793c35b865b33729"
+  inputs-digest = "f6c0113c1f44b208252edb1ed2e522c9016a70b56fbc0d45269d489cc2ad1f6d"
   solver-name = "gps-cdcl"
   solver-version = 1

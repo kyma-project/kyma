@@ -12,7 +12,6 @@ import (
 	"github.com/kyma-project/kyma/components/installer/pkg/installation"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymasources"
-	"github.com/kyma-project/kyma/components/installer/pkg/release"
 	"github.com/kyma-project/kyma/components/installer/pkg/servicecatalog"
 	"github.com/kyma-project/kyma/components/installer/pkg/toolkit"
 
@@ -76,20 +75,17 @@ func main() {
 	conditionManager := conditionmanager.New(internalClient, installationLister)
 
 	installationFinalizerManager := finalizer.NewManager(consts.InstFinalizer)
-	releaseFinalizerManager := finalizer.NewManager(consts.RelFinalizer)
 
 	kymaPackages := kymasources.NewKymaPackages(kymasources.NewFilesystemWrapper(), kymaCommandExecutor, *kymaDir)
 
 	installationSteps := steps.New(helmClient, kubeClient, serviceCatalogClient, kymaStatusManager, kymaActionManager, kymaCommandExecutor, kymaPackages)
 
 	installationController := installation.NewController(kubeClient, kubeInformerFactory, internalInformerFactory, installationSteps, conditionManager, installationFinalizerManager, internalClient)
-	releaseController := release.NewController(kubeClient, internalInformerFactory, releaseFinalizerManager)
 
 	kubeInformerFactory.Start(stop)
 	internalInformerFactory.Start(stop)
 
 	installationController.Run(2, stop)
-	releaseController.Run(2, stop)
 }
 
 func getClientConfig(kubeconfig string) (*rest.Config, error) {
