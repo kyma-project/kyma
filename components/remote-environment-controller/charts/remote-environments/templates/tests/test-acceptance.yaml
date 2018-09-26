@@ -24,3 +24,4 @@ spec:
       - name: REMOTE_ENVIRONMENT
         value: {{ .Release.Name }}
   restartPolicy: Never
+  
