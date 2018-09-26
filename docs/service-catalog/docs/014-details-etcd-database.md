@@ -5,7 +5,7 @@ type: Details
 
 The Service Catalog requires an `etcd` database cluster for a production use.
 It has a separate `etcd` cluster defined in the Service Catalog [etcd-stateful][sc-etcd-sub-chart] sub-chart.
-The [etcd-backup-operator][etcd-backup-operator] is executing backup procedure.
+The [etcd-backup-operator][etcd-backup-operator] executes the backup procedure.
 
 ## Details
 
@@ -34,11 +34,13 @@ export ABS_PATH=$(kubectl get cm -n kyma-system sc-recorded-etcd-backup-data -o=
 export BACKUP_FILE_NAME=etcd.backup
 ```
 
-2. Download the backup to local workstation
+2. Download the backup to the local workstation. You can do it from the portal or by using [azure cli][az-cli]. Set the downloaded file path:
 
-You can do it from portal or using az cli. Set path to downloaded file as `$BACKUP_FILE_NAME`
+```bash
+export BACKUP_FILE_NAME=/path/to/downloaded/file
+```
 
-2. Copy backup file to every running pod of statefulset
+3. Copy the backup file to every running Pod of the StatefulSet.
 
 ```bash
 for i in {0..2};
@@ -47,7 +49,7 @@ kubectl cp ./$BACKUP_FILE_NAME kyma-system/core-catalog-etcd-stateful-$i:/$BACKU
 done
 ```
 
-3. Restore backup on every pod of statefulset
+4. Restore the backup on every Pod of the StatefulSet.
 
 ```bash
 for i in {0..2};
@@ -68,7 +70,7 @@ do
 done
 ```
 
-4. Delete old pods
+5. Delete old Pods.
 
 ```bash
 kubectl delete pod core-catalog-etcd-stateful-0 core-catalog-etcd-stateful-1 core-catalog-etcd-stateful-2 -n kyma-system
@@ -77,6 +79,8 @@ kubectl delete pod core-catalog-etcd-stateful-0 core-catalog-etcd-stateful-1 cor
 [etcd-backup-operator]:https://github.com/coreos/etcd-operator/blob/master/doc/user/walkthrough/backup-operator.md
 
 <!-- These absolute paths should be replaced with the relative links after adding this functionality to Kyma -->
+[az-cli]:https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest
+
 [sc-etcd-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd-stateful/templates/etcd-cluster.yaml
 [sc-backup-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd-stateful/templates/backup-job.yaml
 [etcd-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd
