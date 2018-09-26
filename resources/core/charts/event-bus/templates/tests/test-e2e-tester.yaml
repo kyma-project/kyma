@@ -98,9 +98,9 @@ metadata:
 spec:
   serviceAccount: {{ .Values.e2eTests.nameTester }}
   containers:
-  - image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-bus-e2e-tester:564b7bb1"
+  - image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-tester:{{ .Values.global.event_bus_tests.version }}"
     imagePullPolicy: IfNotPresent
     name: {{ .Values.e2eTests.nameTester }}
     args:
-      - -subscriber-image={{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-bus-e2e-subscriber:564b7bb1
+      - -subscriber-image={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-subscriber:{{ .Values.global.event_bus_tests.version }}
   restartPolicy: Never

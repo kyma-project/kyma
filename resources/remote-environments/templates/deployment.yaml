@@ -77,7 +77,7 @@ spec:
     spec:
       containers:
       - name: {{ .Release.Name }}-event-service
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-service:f832e878"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service.dir }}event-service:{{ .Values.global.event_service.version }}"
         imagePullPolicy: {{ .Values.eventService.deployment.image.pullPolicy }}
         args:
         - "/eventservice"
