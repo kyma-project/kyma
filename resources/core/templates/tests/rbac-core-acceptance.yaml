@@ -28,7 +28,7 @@ rules:
     resources: ["servicebindingusages"]
     verbs: ["get", "delete", "create", "list"]
     nonResourceURLs: []
-  - apiGroups: ["remoteenvironment.kyma.cx"]
+  - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["remoteenvironments", "environmentmappings"]
     verbs: ["create", "delete"]
     nonResourceURLs: []

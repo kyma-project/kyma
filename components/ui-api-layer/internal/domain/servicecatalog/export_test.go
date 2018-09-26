@@ -10,74 +10,134 @@ import (
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 )
 
-func NewInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) *instanceService {
-	return newInstanceService(informer, client)
+func NewServiceInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) *serviceInstanceService {
+	return newServiceInstanceService(informer, client)
 }
 
-func NewInstanceResolver(iS instanceSvc, pG planGetter, cG classGetter) *instanceResolver {
-	return newInstanceResolver(iS, pG, cG)
+func NewServiceInstanceResolver(serviceInstanceSvc serviceInstanceSvc, clusterServicePlanGetter clusterServicePlanGetter, clusterServiceClassGetter clusterServiceClassGetter, servicePlanGetter servicePlanGetter, serviceClassGetter serviceClassGetter) *serviceInstanceResolver {
+	return newServiceInstanceResolver(serviceInstanceSvc, clusterServicePlanGetter, clusterServiceClassGetter, servicePlanGetter, serviceClassGetter)
 }
 
-func NewMockInstanceConverter() *mockGqlInstanceConverter {
+func NewMockServiceInstanceConverter() *mockGqlInstanceConverter {
 	return new(mockGqlInstanceConverter)
 }
 
-func NewMockInstanceService() *mockInstanceSvc {
-	return new(mockInstanceSvc)
+func NewMockServiceInstanceService() *mockServiceInstanceSvc {
+	return new(mockServiceInstanceSvc)
 }
 
-func NewInstanceCreateParameters(name, namespace string, labels []string, externalServicePlanName, externalServiceClassName string, schema map[string]interface{}) *instanceCreateParameters {
-	return &instanceCreateParameters{
-		Name:                     name,
-		Namespace:                namespace,
-		Labels:                   labels,
-		ExternalServicePlanName:  externalServicePlanName,
-		ExternalServiceClassName: externalServiceClassName,
+func NewServiceInstanceCreateParameters(name, namespace string, labels []string, externalServicePlanName string, servicePlanClusterWide bool, externalServiceClassName string, serviceClassClusterWide bool, schema map[string]interface{}) *serviceInstanceCreateParameters {
+	return &serviceInstanceCreateParameters{
+		Name:      name,
+		Namespace: namespace,
+		Labels:    labels,
+		PlanRef: instanceCreateResourceRef{
+			ExternalName: externalServicePlanName,
+			ClusterWide:  servicePlanClusterWide,
+		},
+		ClassRef: instanceCreateResourceRef{
+			ExternalName: externalServiceClassName,
+			ClusterWide:  serviceClassClusterWide,
+		},
 		Schema: schema,
 	}
 }
 
-func (r *instanceResolver) SetInstanceConverter(converter gqlInstanceConverter) {
+func (r *serviceInstanceResolver) SetInstanceConverter(converter gqlServiceInstanceConverter) {
 	r.instanceConverter = converter
 }
 
-func (r *instanceResolver) SetClassConverter(converter gqlClassConverter) {
-	r.classConverter = converter
+func (r *serviceInstanceResolver) SetClusterServiceClassConverter(converter gqlClusterServiceClassConverter) {
+	r.clusterServiceClassConverter = converter
 }
 
-func (r *instanceResolver) SetPlanConverter(converter gqlPlanConverter) {
-	r.planConverter = converter
+func (r *serviceInstanceResolver) SetClusterServicePlanConverter(converter gqlClusterServicePlanConverter) {
+	r.clusterServicePlanConverter = converter
+}
+
+func (r *serviceInstanceResolver) SetServiceClassConverter(converter gqlServiceClassConverter) {
+	r.serviceClassConverter = converter
+}
+
+func (r *serviceInstanceResolver) SetServicePlanConverter(converter gqlServicePlanConverter) {
+	r.servicePlanConverter = converter
 }
 
 // ServiceClass
 
-func NewClassService(informer cache.SharedIndexInformer) *classService {
-	return newClassService(informer)
+func NewServiceClassService(informer cache.SharedIndexInformer) *serviceClassService {
+	return newServiceClassService(informer)
 }
 
-func NewClassResolver(classLister classListGetter, planLister planLister, instanceLister classInstanceLister, asyncApiSpecGetter AsyncApiSpecGetter, apiSpecGetter ApiSpecGetter, contentGetter ContentGetter) *classResolver {
-	return newClassResolver(classLister, planLister, instanceLister, asyncApiSpecGetter, apiSpecGetter, contentGetter)
+func NewServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, asyncApiSpecGetter AsyncApiSpecGetter, apiSpecGetter ApiSpecGetter, contentGetter ContentGetter) *serviceClassResolver {
+	return newServiceClassResolver(classLister, planLister, instanceLister, asyncApiSpecGetter, apiSpecGetter, contentGetter)
 }
 
-func (r *classResolver) SetClassConverter(converter gqlClassConverter) {
+func (r *serviceClassResolver) SetClassConverter(converter gqlServiceClassConverter) {
 	r.classConverter = converter
 }
 
-func (r *classResolver) SetPlanConverter(converter gqlPlanConverter) {
+func (r *serviceClassResolver) SetPlanConverter(converter gqlServicePlanConverter) {
 	r.planConverter = converter
+}
+
+// ClusterServiceClass
+
+func NewClusterServiceClassService(informer cache.SharedIndexInformer) *clusterServiceClassService {
+	return newClusterServiceClassService(informer)
+}
+
+func NewClusterServiceClassResolver(classLister clusterServiceClassListGetter, planLister clusterServicePlanLister, instanceLister instanceListerByClusterServiceClass, asyncApiSpecGetter AsyncApiSpecGetter, apiSpecGetter ApiSpecGetter, contentGetter ContentGetter) *clusterServiceClassResolver {
+	return newClusterServiceClassResolver(classLister, planLister, instanceLister, asyncApiSpecGetter, apiSpecGetter, contentGetter)
+}
+
+func (r *clusterServiceClassResolver) SetClassConverter(converter gqlClusterServiceClassConverter) {
+	r.classConverter = converter
+}
+
+func (r *clusterServiceClassResolver) SetPlanConverter(converter gqlClusterServicePlanConverter) {
+	r.planConverter = converter
+}
+
+// ClusterServiceBroker
+
+func NewClusterServiceBrokerResolver(brokerSvc clusterServiceBrokerSvc) *clusterServiceBrokerResolver {
+	return newClusterServiceBrokerResolver(brokerSvc)
+}
+
+func (r *clusterServiceBrokerResolver) SetBrokerConverter(converter gqlClusterServiceBrokerConverter) {
+	r.brokerConverter = converter
+}
+
+func NewClusterServiceBrokerService(informer cache.SharedIndexInformer) *clusterServiceBrokerService {
+	return newClusterServiceBrokerService(informer)
 }
 
 // ServiceBroker
 
-func NewBrokerService(informer cache.SharedIndexInformer) *brokerService {
-	return newBrokerService(informer)
+func NewServiceBrokerResolver(brokerSvc serviceBrokerSvc) *serviceBrokerResolver {
+	return newServiceBrokerResolver(brokerSvc)
+}
+
+func (r *serviceBrokerResolver) SetBrokerConverter(converter gqlServiceBrokerConverter) {
+	r.brokerConverter = converter
+}
+
+func NewServiceBrokerService(informer cache.SharedIndexInformer) *serviceBrokerService {
+	return newServiceBrokerService(informer)
 }
 
 // ServicePlan
 
-func NewPlanService(informer cache.SharedIndexInformer) *planService {
-	return newPlanService(informer)
+func NewServicePlanService(informer cache.SharedIndexInformer) *servicePlanService {
+	return newServicePlanService(informer)
 }
+
+func NewClusterServicePlanService(informer cache.SharedIndexInformer) *clusterServicePlanService {
+	return newClusterServicePlanService(informer)
+}
+
+// ServiceBinding
 
 func NewServiceBindingResolver(sbService serviceBindingOperations) *serviceBindingResolver {
 	return newServiceBindingResolver(sbService)

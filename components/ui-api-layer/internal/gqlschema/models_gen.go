@@ -22,6 +22,33 @@ type AuthenticationPolicy struct {
 	JwksURI string                   `json:"jwksURI"`
 }
 
+type BindableResourcesOutputItem struct {
+	Kind      string              `json:"kind"`
+	Resources []UsageKindResource `json:"resources"`
+}
+
+type ClusterServiceBroker struct {
+	Name              string              `json:"name"`
+	Status            ServiceBrokerStatus `json:"status"`
+	CreationTimestamp time.Time           `json:"creationTimestamp"`
+	URL               string              `json:"url"`
+	Labels            JSON                `json:"labels"`
+}
+
+type ClusterServiceBrokerEvent struct {
+	Type                 SubscriptionEventType `json:"type"`
+	ClusterServiceBroker ClusterServiceBroker  `json:"clusterServiceBroker"`
+}
+
+type ClusterServicePlan struct {
+	Name                           string  `json:"name"`
+	DisplayName                    *string `json:"displayName"`
+	ExternalName                   string  `json:"externalName"`
+	Description                    string  `json:"description"`
+	RelatedClusterServiceClassName string  `json:"relatedClusterServiceClassName"`
+	InstanceCreateParameterSchema  *JSON   `json:"instanceCreateParameterSchema"`
+}
+
 type ConnectorService struct {
 	URL string `json:"url"`
 }
@@ -202,8 +229,8 @@ type Service struct {
 }
 
 type ServiceBindingEvent struct {
-	Type    SubscriptionEventType `json:"type"`
-	Binding ServiceBinding        `json:"binding"`
+	Type           SubscriptionEventType `json:"type"`
+	ServiceBinding ServiceBinding        `json:"serviceBinding"`
 }
 
 type ServiceBindingRefInput struct {
@@ -217,8 +244,8 @@ type ServiceBindingStatus struct {
 }
 
 type ServiceBindingUsageEvent struct {
-	Type         SubscriptionEventType `json:"type"`
-	BindingUsage ServiceBindingUsage   `json:"bindingUsage"`
+	Type                SubscriptionEventType `json:"type"`
+	ServiceBindingUsage ServiceBindingUsage   `json:"serviceBindingUsage"`
 }
 
 type ServiceBindingUsageParameters struct {
@@ -237,10 +264,16 @@ type ServiceBindingUsageStatus struct {
 
 type ServiceBroker struct {
 	Name              string              `json:"name"`
+	Environment       string              `json:"environment"`
 	Status            ServiceBrokerStatus `json:"status"`
 	CreationTimestamp time.Time           `json:"creationTimestamp"`
 	URL               string              `json:"url"`
 	Labels            JSON                `json:"labels"`
+}
+
+type ServiceBrokerEvent struct {
+	Type          SubscriptionEventType `json:"type"`
+	ServiceBroker ServiceBroker         `json:"serviceBroker"`
 }
 
 type ServiceBrokerStatus struct {
@@ -250,12 +283,28 @@ type ServiceBrokerStatus struct {
 }
 
 type ServiceInstanceCreateInput struct {
-	Name                     string   `json:"name"`
-	Environment              string   `json:"environment"`
-	ExternalServiceClassName string   `json:"externalServiceClassName"`
-	ExternalPlanName         string   `json:"externalPlanName"`
-	Labels                   []string `json:"labels"`
-	ParameterSchema          *JSON    `json:"parameterSchema"`
+	Name            string                                `json:"name"`
+	Environment     string                                `json:"environment"`
+	ClassRef        ServiceInstanceCreateInputResourceRef `json:"classRef"`
+	PlanRef         ServiceInstanceCreateInputResourceRef `json:"planRef"`
+	Labels          []string                              `json:"labels"`
+	ParameterSchema *JSON                                 `json:"parameterSchema"`
+}
+
+type ServiceInstanceCreateInputResourceRef struct {
+	ExternalName string `json:"externalName"`
+	ClusterWide  bool   `json:"clusterWide"`
+}
+
+type ServiceInstanceEvent struct {
+	Type            SubscriptionEventType `json:"type"`
+	ServiceInstance ServiceInstance       `json:"serviceInstance"`
+}
+
+type ServiceInstanceResourceRef struct {
+	Name        string `json:"name"`
+	DisplayName string `json:"displayName"`
+	ClusterWide bool   `json:"clusterWide"`
 }
 
 type ServiceInstanceStatus struct {
@@ -266,6 +315,7 @@ type ServiceInstanceStatus struct {
 
 type ServicePlan struct {
 	Name                          string  `json:"name"`
+	Environment                   string  `json:"environment"`
 	DisplayName                   *string `json:"displayName"`
 	ExternalName                  string  `json:"externalName"`
 	Description                   string  `json:"description"`

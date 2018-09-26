@@ -1,3 +1,42 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kyma-installer
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: kyma-default
+  namespace: kyma-installer
+spec:
+  limits:
+  - max:
+      memory: 1024Mi # Maximum memory that a container can request
+    default:
+      # If a container does not specify memory limit, this default value will be applied.
+      # If a container tries to allocate more memory, container will be OOM killed.
+      memory: 96Mi
+    defaultRequest:
+      # If a container does not specify memory request, this default value will be applied.
+      # The scheduler considers this value when scheduling a container to a node.
+      # If a node has not enough memory, such pod will not be created.
+      memory: 32Mi
+    type: Container
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: kyma-default
+  namespace: kyma-installer
+spec:
+  hard:
+    # The sum of all pod memory requests must not exceed this value.
+    requests.memory: 384Mi
+
+    # The sum of all pod memory limit must not exceed this value.
+    limits.memory: 512Gi
+---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -30,11 +69,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: kyma-installer
+  namespace: kyma-installer
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: kyma-installer
+  namespace: kyma-installer
 spec:
   template:
     metadata:
