@@ -5,9 +5,9 @@ type: Details
 
 Find the Application Connector API documentation in the included Swagger files.
 
-- See [this file](assets/eventsapi.yaml) for the Events API specification.
-- See [this file](assets/metadataapi.yaml) for the Metadata API specification.
-- See [this file](assets/connectorapi.yaml) for the Connector API specification.
+- See [this file](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/assets/eventsapi.yaml) for the Events API specification.
+- See [this file](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/assets/metadataapi.yaml) for the Metadata API specification.
+- See [this file](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/assets/connectorapi.yaml) for the Connector API specification.
 
 
 You can acquire the API specification of the Metadata Service for a given version using the following command:
