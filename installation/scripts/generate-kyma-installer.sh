@@ -18,6 +18,8 @@ if [ ! -f ${INSTALLER_YAML_PATH} ]; then
     exit 1
 fi
 
+#TODO should be fixed with https://github.com/kyma-project/kyma/issues/959
+
 echo "---" > ${LOCAL_KYMA_INSTALLER_YAML_PATH}
 kubectl create cm versions --from-env-file ${VERSIONS_ENV_PATH} -n kyma-installer --dry-run -o yaml >> ${LOCAL_KYMA_INSTALLER_YAML_PATH}
 echo "  labels:" >> ${LOCAL_KYMA_INSTALLER_YAML_PATH}
