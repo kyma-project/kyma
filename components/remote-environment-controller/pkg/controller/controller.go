@@ -14,7 +14,7 @@ const (
   domainName: {{ .DomainName }}
   gatewayImage: {{ .GatewayImage }}
   eventServiceImage: {{ .EventServiceImage }}
-  eventServiceTestsImage: {{ EventServiceTestsImage }}`
+  eventServiceTestsImage: {{ .EventServiceTestsImage }}`
 )
 
 type OverridesData struct {
