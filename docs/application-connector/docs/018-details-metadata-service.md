@@ -1,5 +1,5 @@
 ---
-title: Connector Service
+title: Metadata Service
 type: Details
 ---
 
