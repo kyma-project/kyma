@@ -1,0 +1,17 @@
+tlsSetup:
+  image: "eu.gcr.io/kyma-project/etcd-tls-setup"
+  imageTag: "0.3.367"
+
+etcd:
+  image: "quay.io/coreos/etcd"
+  imageTag: "v3.3.9"
+  secure: false
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+replicaCount: 1

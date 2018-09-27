@@ -1,8 +1,0 @@
-cluster:
-  version: 3.2.14
-  replicaCount: 1
-  resources:
-    limits:
-      memory: 128Mi
-    requests:
-      memory: 32Mi

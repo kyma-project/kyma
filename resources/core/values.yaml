@@ -3,9 +3,8 @@ dex:
     createSecret: false
 
 service-catalog:
-  etcd:
-    cluster:
-      replicaCount: 1
+  etcd-stateful:
+    replicaCount: 1
 
 minio:
   service:
