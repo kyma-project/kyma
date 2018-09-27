@@ -41,7 +41,7 @@ This table explains the placeholders used in the template:
 
 ## Configure authorization rules
 
-To bind Github groups to the default roles added to every Kyma Environment, add the **bindings** section to [this](../../../resources/core/charts/cluster-users/values.yaml) file. Follow this template:
+To bind Github groups to the default roles added to every Kyma Environment, add the **bindings** section to [this](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/cluster-users/values.yaml) file. Follow this template:
 
 ```
 bindings:
