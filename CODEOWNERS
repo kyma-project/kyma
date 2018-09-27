@@ -115,6 +115,9 @@
 # The `istio` subdirectory
 /resources/istio/ @piotrmsc @kubadz @sjanota
 
+# The `istio-kyma-patch` subdirectory
+/resources/istio-kyma-patch/ @piotrmsc @kubadz @sjanota
+
 # The `jaeger` charts
 /resources/core/charts/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
@@ -145,6 +148,9 @@
 
 # Istio Extensions Component
 /components/istio-webhook/ @piotrmsc
+
+# Istio Extensions Component
+/components/istio-kyma-patch/ @piotrmsc @sjanota @kubadz
 
 # Remote environment controller Component
 /components/remote-environment-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
