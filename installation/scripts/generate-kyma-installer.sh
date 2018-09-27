@@ -52,8 +52,6 @@ TMPDIR=`mktemp -d "${KYMA_PATH}/temp-XXXXXXXXXX"`
 CR_PATH="${TMPDIR}/installer-cr-local.yaml"
 bash ${KYMA_PATH}/installation/scripts/create-cr.sh --url "" --output "${CR_PATH}" --version 0.0.1
 
-echo "---" > ${OUTPUT_PATH}
-
 cat ${INSTALLER_YAML_PATH} >> ${OUTPUT_PATH}
 
 echo "---" >> ${OUTPUT_PATH}
@@ -65,11 +63,6 @@ echo "---" >> ${OUTPUT_PATH}
 cat ${CR_PATH} >> ${OUTPUT_PATH}
 
 echo "---" >> ${OUTPUT_PATH}
-
-if [ "$1" == "cluster" ]; then
-    cat ${UI_TEST_SECRET_PATH} >> ${OUTPUT_PATH}
-    echo -e "\n---" >> ${OUTPUT_PATH}
-fi
 
 #TODO should be fixed with https://github.com/kyma-project/kyma/issues/959
 
