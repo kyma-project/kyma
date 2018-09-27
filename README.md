@@ -4,21 +4,9 @@
 
 ## Overview
 
-Kyma is a cloud-native application development framework.
+Kyma allows you to connect applications and third-party services in a cloud-native environment. Use it to create extensions for the existing systems, regardless of the language they are written in. Customize extensions with minimum effort and time devoted to learning their configuration details.
 
-It provides the last mile capabilities that a developer needs to build a cloud-native application using several open-source projects under the Cloud Native Computing Foundation (CNCF), such as Kubernetes, Istio, NATS, Kubeless, and Prometheus, to name a few.
-It is designed natively on Kubernetes and, therefore, it is portable to all major cloud providers.
-
-Kyma allows you to connect and extend products in a quick and modern way, using serverless computing and microservice architecture.
-
-The extensions and customizations you create are decoupled from the core applications, which means that:
-* deployments are quick
-* scaling is independent from the core applications
-* the changes you make can be easily reverted without causing downtime of the production system
-
-Living outside of the core product, Kyma allows you to be completely language-agnostic and customize your solution using the technology stack you want to use, not the one the core product dictates. Additionally, Kyma follows the "batteries included" principle and comes with all of the "plumbing code" ready to use, allowing you to focus entirely on writing the domain code and business logic.
-
-Read the [documentation](docs/README.md) to learn about the product, its technology stack, and components.
+Go to the [Kyma project website](https://kyma-project.io/) to learn more about the product, its features, and components.
 
 ## Installation
 
@@ -65,7 +53,7 @@ Every project runs differently. Follow instructions in the main `README.md` docu
 Do not forget about creating unit and acceptance tests if needed. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. For the details concerning the acceptance tests, go to the corresponding directory inside the `tests` directory.
 Find the information on how to run changes on the cluster without a Docker image in the [Develop a service locally without using Docker](docs/kyma/docs/035-gs-local-develop-no-docker.md) document.
 
->**NOTE:** For more details about testing, go to the [Testing Kyma](docs/kyma/docs/026-details-testing.md) document.
+>**NOTE:** For more details about testing, go to the [Testing Kyma](docs/kyma/docs/013-details-testing.md) document.
 
 6. Test your changes.
 
