@@ -9,7 +9,7 @@ Connector Service is responsible for generating client certificates used to secu
 
 ## Basic concepts 
 
-Creating a new client certificate is the first step of configuring external system represented by Remote Environment. Kyma stores root certificate and serves in this case as a Certificate Authority. In order to make validation possible Connector Service returns complete certificate chain: created client certificate along with root certificate. 
+Creating a new client certificate is the first step of configuring external system represented by Remote Environment. Kyma stores root certificate and serves in this case as a Certificate Authority. In order to make validation possible Connector Service returns complete certificate chain: created client certificate along with the root certificate. 
     
 There are two APIs exposed by Connector Service:
 - Internal API available inside Kyma cluster allowing to initiate certificate generation
@@ -21,8 +21,8 @@ Certificate generation is comprised of the following steps:
 - creating a Certificate Signing Request
 - creating a client certificate for specified CSR using Connector Service External API   
 
-For a complete information on using Connector Service, please see [Obtaining the Certificate Guide]() 
+For a complete information on using Connector Service APIs, please see [Obtaining the Certificate Guide](TODO) 
 
 ## API
 
-Both internal and external APIs are described [here]().    
+Both internal and external APIs are described [here](TODO).    
