@@ -6,6 +6,7 @@ usage () {
     echo 'Provide correct input arguments'
     echo 'First argument: "local" or "cluster" - decide which installer you want to generate'
     echo "Second argument: path to versions.env file"
+    echo "Third argument: path to installer-config file, cluster or local"
     exit 1
 }
 
@@ -13,20 +14,18 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 KYMA_PATH="${CURRENT_DIR}/../.."
 INSTALLER_YAML_PATH="${KYMA_PATH}/installation/resources/installer.yaml"
 
-VERSIONS_ENV_PATH=""
-INSTALLER_CONFIG=""
-OUTPUT_PATH=""
-
-if [[ ! $# -eq 2 ]] ; then
+if [[ ! $# -eq 3 ]] ; then
     usage
 fi
 
+VERSIONS_ENV_PATH=""
+OUTPUT_PATH=""
+INSTALLER_CONFIG="$3"
+
 case "$1" in
     "local")   
-        INSTALLER_CONFIG="${KYMA_PATH}/installation/resources/installer-config-local.yaml.tpl"
         OUTPUT_PATH="${KYMA_PATH}/kyma-installer/local-kyma-installer.yaml" ;;
     "cluster") 
-        INSTALLER_CONFIG="${KYMA_PATH}/installation/resources/installer-config-cluster.yaml.tpl"
         OUTPUT_PATH="${KYMA_PATH}/kyma-installer/cluster-kyma-installer.yaml" ;;    
     *)  usage ;;
 esac
