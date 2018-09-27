@@ -27,8 +27,7 @@ groups:
       description: Pod {{`{{$labels.namespace}}`}}/{{`{{$labels.pod_name}}`}} is using {{`{{$value}}`}} % of the available volume.
       summary: "LogSpout memory usage is high"
   - alert: LogspoutDaemonSetRolloutStuck
-    expr: kube_daemonset_status_number_ready / kube_daemonset_status_desired_number_scheduled
-      * 100 < 100
+    expr: kube_daemonset_status_number_ready{daemonset="core-logging-logspout",namespace="kyma-system"}/kube_daemonset_status_desired_number_scheduled{daemonset="core-logging-logspout",namespace="kyma-system"} * 100 < 100
     for: 30m
     labels:
       severity: critical
