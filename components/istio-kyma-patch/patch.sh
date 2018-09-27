@@ -18,8 +18,8 @@ function run_all_patches() {
     set +e
     local out
     out=$(kubectl patch ${type} -n istio-system ${name} --patch "$patch" --type json)
-    set -e
     local result=$?
+    set -e
     echo "$out"
     if [[ ${result} -ne 0 ]] && [[ ! "$out" = *"NotFound"* ]]; then
         exit ${result}
