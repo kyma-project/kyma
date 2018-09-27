@@ -30,6 +30,6 @@ following format:
 
     ```<kind> <resource-name>```
     
-    Every line must describe an istio resource to delete. Patch allows that resource to delete does not exist.
-    See [job ConfigMap](../../resources/istio-kyma-patch/templates/configmap.yaml) to see which patches are applied by 
-    default.
+    Every line must describe an istio resource to delete. Resources are deleted from `istio-system` namespace. 
+    Patch allows that resource to delete does not exist. See [job ConfigMap](../../resources/istio-kyma-patch/templates/configmap.yaml) 
+    to see which patches are applied by default.
