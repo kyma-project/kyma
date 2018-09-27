@@ -2,6 +2,13 @@
 
 set -o errexit
 
+usage () {
+    echo 'Provide correct input arguments'
+    echo 'First argument: "local" or "cluster" - decide which installer you want to generate'
+    echo "Second argument: path to versions.env file"
+    exit 1
+}
+
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 KYMA_PATH="${CURRENT_DIR}/../.."
 INSTALLER_YAML_PATH="${KYMA_PATH}/installation/resources/installer.yaml"
@@ -12,8 +19,7 @@ INSTALLER_CONFIG=""
 OUTPUT_PATH=""
 
 if [[ ! $# -eq 2 ]] ; then
-    echo 'Provide correct input arguments'
-    exit 1
+    usage
 fi
 
 case "$1" in
@@ -23,17 +29,13 @@ case "$1" in
     "cluster") 
         INSTALLER_CONFIG="${KYMA_PATH}/installation/resources/installer-config-cluster.yaml.tpl"
         OUTPUT_PATH="${KYMA_PATH}/kyma-installer/cluster-kyma-installer.yaml" ;;    
-    *) 
-        echo 'Provide which installer you want to generate by passing as argument "local" or "cluster"'
-        exit 1 ;;
+    *)  usage ;;
 esac
 
 case "$2" in
     */versions.env)
         VERSIONS_ENV_PATH="$2" ;;
-    *)
-        echo "Provide correct versions.env path"
-        exit 1 ;;
+    *)  usage ;;
 esac
 
 if [ ! -f ${VERSIONS_ENV_PATH} ]; then
