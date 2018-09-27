@@ -42,6 +42,9 @@ func main() {
 
 	overridesData := controller.OverridesData{
 		DomainName: options.domainName,
+		GatewayImage: options.gatewayImage,
+		EventServiceImage: options.eventServiceImage,
+		EventServiceTestsImage: options.eventServiceTestsImage,
 	}
 
 	err = controller.InitRemoteEnvironmentController(mgr, overridesData, options.namespace, options.appName, options.tillerUrl)

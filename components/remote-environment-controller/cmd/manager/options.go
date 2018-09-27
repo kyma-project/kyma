@@ -39,7 +39,7 @@ func parseArgs() *options {
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s --tillerUrl=%s" +
+	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s --tillerUrl=%s " +
 		"--gatewayImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s",
 		o.appName, o.domainName, o.namespace, o.tillerUrl,
 		o.gatewayImage, o.eventServiceImage, o.eventServiceTestsImage)

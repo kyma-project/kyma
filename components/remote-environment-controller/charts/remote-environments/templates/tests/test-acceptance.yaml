@@ -9,7 +9,7 @@ metadata:
 spec:
   containers:
     - name: test-{{.Release.Name }}-event-service-acceptance
-      image: {{ .Values.global.eventServiceTestsImage }}"
+      image: {{ .Values.global.eventServiceTestsImage }}
       imagePullPolicy: {{ .Values.acceptanceTest.image.pullPolicy }}
       env:
       - name: GATEWAY_URL
