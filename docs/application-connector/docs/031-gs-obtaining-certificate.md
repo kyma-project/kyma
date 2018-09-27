@@ -107,5 +107,5 @@ In the response there is a valid certificate signed by Kyma's Certificate Author
 ```
 
 After you've received your certificate you can start registering your services in
-Metadata Service API, you can find details on this topic in the next section of
+Metadata Service API, you will find details on this topic in the next section of
 this Getting Started doc.
