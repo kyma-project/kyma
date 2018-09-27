@@ -50,9 +50,9 @@ function configure_sidecar_injector() {
 
     # Set limits for sidecar. Our namespaces have resource quota set thus every container needs to have limits defined.
     # Add limits to already existing resources sections
-    configmap=$(sed 's|    resources:|    resources:\'$'\n      limits: { memory: 50Mi }|' <<< "$configmap")
+    configmap=$(sed 's|    resources:|    resources:\'$'\n      limits: { memory: 128Mi; cpu: 100m }|' <<< "$configmap")
     # In case there is no limits section add one at the beginning of container definition. It serves as default.
-    configmap=$(sed 's|  - name: istio-\(.*\)|  - name: istio-\1\'$'\n    resources: { limits: { memory: 50Mi } }|' <<< "$configmap")
+    configmap=$(sed 's|  - name: istio-\(.*\)|  - name: istio-\1\'$'\n    resources: { limits: { memory: 128Mi; cpu: 100m } }|' <<< "$configmap")
 
     # Escape new lines and double quotes for kubectl
     configmap=$(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' <<< "$configmap")
