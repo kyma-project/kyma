@@ -3,7 +3,7 @@ groups:
 - name: logging-component
   rules:
   - alert: OKLogDataVolumeUsageIsHigh
-    expr: kube_persistentvolumeclaim_status_phase{namespace="kyma-system",persistentvolumeclaim="core-grafana",phase="Bound"} == 1 and kubelet_volume_stats_used_bytes{namespace="kube-system",persistentvolumeclaim="core-grafana"} / kubelet_volume_stats_available_bytes{namespace="kube-system",persistentvolumeclaim="core-grafana"} * 100 > 80
+    expr: kubelet_volume_stats_used_bytes{namespace="kube-system",persistentvolumeclaim="data-core-logging-oklog-0"} / kubelet_volume_stats_available_bytes{namespace="kube-system",persistentvolumeclaim="data-core-logging-oklog-0"} * 100 > 80
     for: 10m
     labels:
       severity: critical
