@@ -39,7 +39,7 @@ podTemplate(label: label) {
                         stage("install dependencies $application") {
                             execute("make resolve")
                         }
-                        
+
                         stage("code quality $application") {
                             execute("make validate")
                         }
@@ -51,14 +51,6 @@ podTemplate(label: label) {
                         stage("test $application") {
                             execute("make test-report")
                             junit '**/unit-tests.xml'
-                        }
-
-                        if (params.FULL_BUILD) {
-                            stage("IP scan $application (Sourceclear)"){
-                                withCredentials([string(credentialsId: 'SRCCLR_API_TOKEN', variable: 'SRCCLR_API_TOKEN')]) {
-                                    execute("make scan","SRCCLR_API_TOKEN=$SRCCLR_API_TOKEN")
-                                }
-                            }
                         }
 
                         stage("build image $application") {
