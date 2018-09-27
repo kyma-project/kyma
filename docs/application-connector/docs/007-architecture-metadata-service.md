@@ -15,11 +15,7 @@ Service contains the following:
 - Events catalog following [Asynchronous API standard](https://github.com/asyncapi/asyncapi/blob/develop/schema/asyncapi.json).
 - Documentation 
 
-Service may specify:
-- API
-- Events Catalog
-- Both API and Events catalog
-
+Service definition may contain both API and Events Catalog definition or only one of those. Providing documentation is optional.  
 
 Metadata Service supports registering APIs secured with OAuth - the user can specify OAuth server url along with client id and client secret.
 

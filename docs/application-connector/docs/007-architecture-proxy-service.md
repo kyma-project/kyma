@@ -12,7 +12,7 @@ The following diagram illustrates how Proxy Service interacts with Kyma componen
 
 Lambdas and services call the access service which is created once registering API in Metadata Service. 
 
-Proxy Service is exposed via the access service and dispatches requests sent by lambdas or services deployed on Kyma. Access service's name is of the following form:
+Proxy Service is exposed using the access service and dispatches requests sent by lambdas or services deployed on Kyma. Access service's name is of the following form:
 ```
 re-{remote-environment-name}-gateway-{service-id}
 ```

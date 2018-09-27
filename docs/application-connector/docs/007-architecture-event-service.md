@@ -7,7 +7,7 @@ type: Architecture
 
 Event Service is responsible for publishing events in Kyma.
 
-##API
+## API
 
 Event Service exposes API for publishing events to the [Even Bus](https://github.com/kyma-project/kyma/tree/master/docs/event-bus/docs).
 It verifies event payload and proxies the event to the Event Bus.
