@@ -10,8 +10,6 @@ global:
 
 deployment:
   image:
-    name: develop/gateway
-    tag: c8e79413
     pullPolicy: IfNotPresent
   args:
     proxyPort: &proxyPort 8080
