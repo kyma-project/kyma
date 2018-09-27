@@ -50,7 +50,7 @@ TMPDIR=`mktemp -d "${KYMA_PATH}/temp-XXXXXXXXXX"`
 CR_PATH="${TMPDIR}/installer-cr-local.yaml"
 bash ${KYMA_PATH}/installation/scripts/create-cr.sh --url "" --output "${CR_PATH}" --version 0.0.1
 
-cat ${INSTALLER_YAML_PATH} >> ${OUTPUT_PATH}
+cat ${INSTALLER_YAML_PATH} > ${OUTPUT_PATH}
 
 echo "---" >> ${OUTPUT_PATH}
 
