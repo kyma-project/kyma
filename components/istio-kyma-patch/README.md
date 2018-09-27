@@ -15,7 +15,7 @@ Patch consists of several steps:
 1. Configuration of sidecar injector - istio-sidecar-injector configmap has following changes:
     * `policy` is set to `disabled`
     * `zipkinAddress` is changed so it points to zipkin deployed in kyma-system namespace
-    * all containers have set default `resources.limits.memory` to `50Mi`
+    * all containers have set default `resources.limits.memory` to `128Mi` and `resources.limits.cpu` to `100m`
 
 1. Check if required CRDs are deployed on setup - script is looking for file named `required-crds`. In each line of this 
 file should contain one name of CRD which kyma requires to start.
