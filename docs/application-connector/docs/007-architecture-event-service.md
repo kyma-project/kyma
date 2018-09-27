@@ -1,12 +1,11 @@
 ---
 title: Event Service
-type: Details
+type: Architecture
 ---
 
 ## Overview
 Event Service is responsible for publishing events in Kyma.
 
-## Basic concepts
 Event Service exposes API for publishing events to the [Even Bus](https://github.com/kyma-project/kyma/tree/master/docs/event-bus/docs).
 It verifies event payload and proxies the event to the Event Bus.
 
