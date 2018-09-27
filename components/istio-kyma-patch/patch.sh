@@ -8,6 +8,10 @@ if [[ -z ${CONFIG_DIR} ]]; then
     CONFIG_DIR=${DIR}
 fi
 
+function require_istio_system() {
+    kubectl get namespace istio-system
+}
+
 function run_all_patches() {
   echo "--> Patch resources"
   for f in $(find ${CONFIG_DIR} -name '*\.patch\.json' -maxdepth 1); do
@@ -72,6 +76,7 @@ function check_requirements() {
   done <${CONFIG_DIR}/required-crds
 }
 
+require_istio_system
 check_requirements
 configure_sidecar_injector
 run_all_patches
