@@ -532,10 +532,11 @@ func TestCertificateUtility_CreateCrtChain(t *testing.T) {
 
 		// then
 		rawCrt, decodeErr := base64.StdEncoding.DecodeString(crtBase64)
-		decodedCrt := rawCrtTox509Certificates(rawCrt)
+		decodedCrt, singleCertErr := rawCrtTox509Certificates(rawCrt)
 
-		expectedRawCrt := rawCrtTox509Certificates([]byte(CrtChain))
+		expectedRawCrt, singleCertErr := rawCrtTox509Certificates([]byte(CrtChain))
 
+		require.NoError(t, singleCertErr)
 		require.NoError(t, err)
 		require.NoError(t, decodeErr)
 
@@ -557,8 +558,9 @@ func TestCertificateUtility_CreateCrtChain(t *testing.T) {
 
 		// then
 		rawCrt, decodeErr := base64.StdEncoding.DecodeString(crtBase64)
-		decodedCrt := rawCrtTox509Certificates(rawCrt)
+		decodedCrt, singleCertErr := rawCrtTox509Certificates(rawCrt)
 
+		require.NoError(t, singleCertErr)
 		require.NoError(t, err)
 		require.NoError(t, decodeErr)
 
@@ -579,8 +581,9 @@ func TestCertificateUtility_CreateCrtChain(t *testing.T) {
 
 		// then
 		rawCrt, decodeErr := base64.StdEncoding.DecodeString(crtBase64)
-		decodedCrt := rawCrtTox509Certificates(rawCrt)
+		decodedCrt, singleCertErr := rawCrtTox509Certificates(rawCrt)
 
+		require.NoError(t, singleCertErr)
 		require.NoError(t, err)
 		require.NoError(t, decodeErr)
 		assert.Equal(t, 2, len(decodedCrt))
@@ -625,12 +628,17 @@ func prepareCrtAndKey(certificateUtility CertificateUtility) (*x509.Certificate,
 	return caCrt, csr, key
 }
 
-func rawCrtTox509Certificates(rawCrt []byte) []*x509.Certificate {
+func rawCrtTox509Certificates(rawCrt []byte) (certificates []*x509.Certificate, err error) {
 	pemBlock, rest := pem.Decode(rawCrt)
+
+	if len(rest) == 0 {
+		return nil, err
+	}
+
 	pemBlock2, _ := pem.Decode(rest)
 
 	pemBlocks := append(pemBlock.Bytes, pemBlock2.Bytes...)
 
 	decodedCrt, _ := x509.ParseCertificates(pemBlocks)
-	return decodedCrt
+	return decodedCrt, nil
 }
