@@ -11,11 +11,6 @@ spec:
     - name: test-{{.Release.Name }}-event-service-acceptance
       image: {{ .Values.global.eventServiceTestsImage }}"
       imagePullPolicy: {{ .Values.acceptanceTest.image.pullPolicy }}
-      resources:
-        limits:
-          memory: 900Mi
-        requests:
-          memory: 900Mi
       env:
       - name: GATEWAY_URL
         value: http://{{.Release.Name }}-event-service-external-api.{{ .Release.Namespace }}.svc.cluster.local:8081
