@@ -12,7 +12,6 @@ usage () {
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 KYMA_PATH="${CURRENT_DIR}/../.."
 INSTALLER_YAML_PATH="${KYMA_PATH}/installation/resources/installer.yaml"
-UI_TEST_SECRET_PATH="${KYMA_PATH}/installation/resources/ui-test-secret.yaml.tpl"
 
 VERSIONS_ENV_PATH=""
 INSTALLER_CONFIG=""
