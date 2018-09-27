@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Hi there")
 	data, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
 		panic(err)
