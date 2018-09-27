@@ -53,22 +53,26 @@ func CreateCsr(t *testing.T, certInfo CertInfo, keys *rsa.PrivateKey) []byte {
 	return csr
 }
 
-// CrtResponseToPemBytes decodes certificate form CrtResponse and return pemBlock.Bytes
+// CrtResponseToPemBytes decodes certificates chain from CrtResponse and return pemBlocks
 func CrtResponseToPemBytes(t *testing.T, certResponse *CrtResponse) []byte {
 	crtBytes, err := base64.StdEncoding.DecodeString(certResponse.Crt)
 	require.NoError(t, err)
 
-	pemBlock, _ := pem.Decode(crtBytes)
+	pemBlock, rest := pem.Decode(crtBytes)
 	require.NotNil(t, pemBlock)
+	require.NotEqual(t, 0, len(rest))
+	pemBlock2, _ := pem.Decode(rest)
 
-	return pemBlock.Bytes
+	pemBlocks := append(pemBlock.Bytes, pemBlock2.Bytes...)
+
+	return pemBlocks
 }
 
-// DecodeAndParseCert decodes base64 encoded certificate and parses it
-func DecodeAndParseCert(t *testing.T, crtResponse *CrtResponse) *x509.Certificate {
+// DecodeAndParseCert decodes base64 encoded certificates chain and parses it
+func DecodeAndParseCert(t *testing.T, crtResponse *CrtResponse) []*x509.Certificate {
 	certBytes := CrtResponseToPemBytes(t, crtResponse)
 
-	certificate, err := x509.ParseCertificate(certBytes)
+	certificate, err := x509.ParseCertificates(certBytes)
 	require.NoError(t, err)
 
 	return certificate
@@ -85,6 +89,16 @@ func CheckIfSubjectEquals(t *testing.T, expectedSubject string, certificate *x50
 	require.Equal(t, []string{subjectInfo["OU"]}, actualSubject.OrganizationalUnit)
 	require.Equal(t, []string{subjectInfo["L"]}, actualSubject.Locality)
 	require.Equal(t, []string{subjectInfo["ST"]}, actualSubject.Province)
+}
+
+// CheckIfCertIsSigned verifies that client certificate is signed by server certificate
+func CheckIfCertIsSigned(t *testing.T, certificates []*x509.Certificate) {
+	clientCrt := certificates[0]
+	serverCrt := certificates[1]
+
+	err := clientCrt.CheckSignatureFrom(serverCrt)
+
+	require.NoError(t, err)
 }
 
 func EncodeBase64(src []byte) string {

@@ -35,10 +35,40 @@ func TestConnector(t *testing.T) {
 		require.NotEmpty(t, crtResponse.Crt)
 
 		// when
-		certificate := testkit.DecodeAndParseCert(t, crtResponse)
+		certificates := testkit.DecodeAndParseCert(t, crtResponse)
 
 		// then
-		testkit.CheckIfSubjectEquals(t, infoResponse.Certificate.Subject, certificate)
+
+		clientsCrt := certificates[0]
+		testkit.CheckIfSubjectEquals(t, infoResponse.Certificate.Subject, clientsCrt)
+	})
+
+	t.Run("should create two certificates in a chain", func(t *testing.T) {
+		// when
+		crtResponse, _ := createClientCertificate(t, client, clientKey)
+
+		//then
+		require.NotEmpty(t, crtResponse.Crt)
+
+		// when
+		certificates := testkit.DecodeAndParseCert(t, crtResponse)
+
+		// then
+		require.Equal(t, 2, len(certificates))
+	})
+
+	t.Run("client cert should be signed by server cert", func(t *testing.T) {
+		//when
+		crtResponse, _ := createClientCertificate(t, client, clientKey)
+
+		//then
+		require.NotEmpty(t, crtResponse.Crt)
+
+		// when
+		certificates := testkit.DecodeAndParseCert(t, crtResponse)
+
+		//then
+		testkit.CheckIfCertIsSigned(t, certificates)
 	})
 
 	t.Run("should validate CSR subject", func(t *testing.T) {
