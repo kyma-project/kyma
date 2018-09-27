@@ -1,0 +1,39 @@
+{{ define "logging-component-rules.yaml.tpl" }}
+groups:
+- name: logging-component
+  rules:
+  - alert: OKLogDataVolumeUsageIsHigh
+    expr: kube_persistentvolumeclaim_status_phase{namespace="kyma-system",persistentvolumeclaim="core-grafana",phase="Bound"} == 1 and kubelet_volume_stats_used_bytes{namespace="kube-system",persistentvolumeclaim="core-grafana"} / kubelet_volume_stats_available_bytes{namespace="kube-system",persistentvolumeclaim="core-grafana"} * 100 > 80
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      description: Pod {{`{{$labels.namespaces}}`}}/{{`{{$labels.pod}}`}} is using {{`{{$value}}`}} % of the available volume.
+      summary: "PVC core-logging usage is high"
+  - alert: OKLogPodMemoryUsageIsHigh
+    expr: container_memory_usage_bytes{namespace="kyma-system",pod_name="core-logging-oklog-0", container_name="oklog"} / container_spec_memory_limit_bytes{namespace="kyma-system", pod_name="core-logging-oklog-0", container_name="oklog"} * 100 > 90
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      description: Pod {{`{{$labels.namespaces}}`}}/{{`{{$labels.pod}}`}} is using {{`{{$value}}`}} % of the available memory.
+      summary: "OK Log pod memory usage is high"
+  - alert: LogspoutPodMemoryUsageIsHigh
+    expr: container_memory_usage_bytes{namespace="kyma-system", pod_name=~"core-logging-logspout(.*)",container_name="logspout"} / container_spec_memory_limit_bytes{namespace="kyma-system", pod_name=~"core-logging-logspout(.*)",container_name="logspout"} * 100 > 90
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      description: Pod {{`{{$labels.namespaces}}`}}/{{`{{$labels.pod}}`}} is using {{`{{$value}}`}} % of the available volume.
+      summary: "OK Log pod memory usage is high"
+  - alert: LogspoutDaemonSetRolloutStuck
+    expr: kube_daemonset_status_number_ready / kube_daemonset_status_desired_number_scheduled
+      * 100 < 100
+    for: 30m
+    labels:
+      severity: critical
+    annotations:
+      description: Only {{`{{$value}}`}}% of desired pods scheduled and ready for daemon
+        set {{`{{$labels.namespaces}}`}}/{{`{{$labels.daemonset}}`}}
+
+{{ end }}
