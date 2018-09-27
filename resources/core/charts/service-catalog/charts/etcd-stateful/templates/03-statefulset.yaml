@@ -79,6 +79,11 @@ spec:
             STATE="new"
             PEERS=""
             CLIENT_URLS=""
+            # Restore from backup if exists
+            if [ -d /var/run/etcd/backup.etcd ]; then
+              rm -rf /var/run/etcd/default.etcd
+              mv /var/run/etcd/backup.etcd /var/run/etcd/default.etcd
+            fi
             #
             # only needed on etcdctl if enabling authorization
             # --cert=/etc/etcdctl/server/server.crt \
