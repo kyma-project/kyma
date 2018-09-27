@@ -10,7 +10,7 @@ Proxy Service is responsible for sending requests to external APIs registered wi
 ## Basic concepts 
 
 The following diagram illustrates how Proxy Service interacts with Kyma components and external APIs secured with OAuth.
-![Proxy Service Diagram](assets/019-details-proxy-service.png) 
+![Proxy Service Diagram](assets/007-architecture-proxy-service.png) 
 
 Lambdas and services call the access service which is created once registering API in [Metadata Service](TODO). 
 
@@ -22,7 +22,7 @@ re-{remote-environment-name}-gateway-{service-id}
 Proxy Service performs the following actions:
 - analyzes Host header and extracts name of the remote environment and identifier of the service registered with Metadata Service
 - looks up for API data (target API url, OAuth url) in the Remote Environment CRD
-- obtains token  
+- obtains OAuth token  
 - proxies call to the appropriate target url with token obtained in the previous step        
 
 ## Implementation Details
