@@ -7,7 +7,7 @@ This Getting Started guide shows you how to perform operations on remote environ
 An instance of the EnvironmentMapping enables the RemoteEnvironment with the same name in a given Namespace. In this example, the EnvironmentMapping enables the `ec-prod` remote environment in the `production` Namespace:
 
 ```yaml
-apiVersion: remoteenvironment.kyma.cx/v1alpha1
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: EnvironmentMapping
 metadata:
   name: ec-prod
