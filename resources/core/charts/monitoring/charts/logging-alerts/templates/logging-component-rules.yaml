@@ -8,7 +8,7 @@ groups:
     labels:
       severity: critical
     annotations:
-      description: Pod {{`{{$labels.namespaces}}`}}/{{`{{$labels.pod}}`}} is using {{`{{$value}}`}} % of the available volume.
+      description: PVC {{`{{$labels.namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume
       summary: "PVC core-logging usage is high"
   - alert: OKLogPodMemoryUsageIsHigh
     expr: container_memory_usage_bytes{namespace="kyma-system",pod_name="core-logging-oklog-0", container_name="oklog"} / container_spec_memory_limit_bytes{namespace="kyma-system", pod_name="core-logging-oklog-0", container_name="oklog"} * 100 > 90
@@ -16,7 +16,7 @@ groups:
     labels:
       severity: critical
     annotations:
-      description: Pod {{`{{$labels.namespaces}}`}}/{{`{{$labels.pod}}`}} is using {{`{{$value}}`}} % of the available memory.
+      description: Pod {{`{{$labels.namespace}}`}}/{{`{{$labels.pod_name}}`}} is using {{`{{$value}}`}} % of the available memory.
       summary: "OK Log pod memory usage is high"
   - alert: LogspoutPodMemoryUsageIsHigh
     expr: container_memory_usage_bytes{namespace="kyma-system", pod_name=~"core-logging-logspout(.*)",container_name="logspout"} / container_spec_memory_limit_bytes{namespace="kyma-system", pod_name=~"core-logging-logspout(.*)",container_name="logspout"} * 100 > 90
@@ -24,8 +24,8 @@ groups:
     labels:
       severity: critical
     annotations:
-      description: Pod {{`{{$labels.namespaces}}`}}/{{`{{$labels.pod}}`}} is using {{`{{$value}}`}} % of the available volume.
-      summary: "OK Log pod memory usage is high"
+      description: Pod {{`{{$labels.namespace}}`}}/{{`{{$labels.pod_name}}`}} is using {{`{{$value}}`}} % of the available volume.
+      summary: "LogSpout memory usage is high"
   - alert: LogspoutDaemonSetRolloutStuck
     expr: kube_daemonset_status_number_ready / kube_daemonset_status_desired_number_scheduled
       * 100 < 100
@@ -34,6 +34,6 @@ groups:
       severity: critical
     annotations:
       description: Only {{`{{$value}}`}}% of desired pods scheduled and ready for daemon
-        set {{`{{$labels.namespaces}}`}}/{{`{{$labels.daemonset}}`}}
+        set {{`{{$labels.namespace}}`}}/{{`{{$labels.daemonset}}`}}
 
 {{ end }}

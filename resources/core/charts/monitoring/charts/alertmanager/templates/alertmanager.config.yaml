@@ -50,8 +50,8 @@ receivers:
     send_resolved: true
     api_url: {{ .Values.global.alertTools.credentials.slack.apiurl | quote }}
     icon_emoji: ":ghost:"
-    title: '[{{`{{ .Status | toUpper }}`}}{{`{{ if eq .Status "firing" }}`}}:{{`{{ .Alerts.Firing | len }}`}}{{`{{ end }}`}}] Monitoring Event Notification'
-    text: "<!channel> \nsummary: {{`{{ .CommonAnnotations.summary }}`}}\ndescription: {{`{{ .CommonAnnotations.description }}`}}"
+    title: "{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"
+    text: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
 {{- end }}
 {{- end }}
 {{ end }}
