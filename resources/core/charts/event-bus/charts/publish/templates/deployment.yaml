@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-bus-publish:f832e878"
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}event-bus-publish:{{ .Values.global.event_bus.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --client_id=$(POD_NAME)

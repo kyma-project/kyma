@@ -31,8 +31,6 @@ ingress:
 
 acceptanceTest:
   image:
-    name: gateway-acceptance-tests
-    tag: 0.2.19
     pullPolicy: IfNotPresent
 
 eventService:
