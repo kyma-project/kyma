@@ -45,7 +45,7 @@ data:
 
 >**NOTE:** Some subcomponents can require additional configuration to work properly.
 
-## Specify components versions
+## Specify subcomponents versions
 
 Versions of the Kyma components are specified in `values.yaml` file in charts. Each component version is described by two properties: `version` and `dir`. The first defines actual docker image tag. The second describes directory under which the tagged image is pushed follwed by a `/` or this value can be empty.
 
