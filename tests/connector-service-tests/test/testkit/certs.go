@@ -53,17 +53,25 @@ func CreateCsr(t *testing.T, certInfo CertInfo, keys *rsa.PrivateKey) []byte {
 	return csr
 }
 
-// CrtResponseToPemBytes decodes certificates chain from CrtResponse and return pemBlocks
-func CrtResponseToPemBytes(t *testing.T, certResponse *CrtResponse) []byte {
-	crtBytes, err := base64.StdEncoding.DecodeString(certResponse.Crt)
-	require.NoError(t, err)
+// CrtResponseSinglePemBlock Decodes single pem block from CrtResponse
+func CrtResponseSinglePemBlock(t *testing.T, certResponse *CrtResponse) (pemBlockBytes []byte, rest []byte) {
+	crtBytes := decodeCertResponse(certResponse, t)
 
 	pemBlock, rest := pem.Decode(crtBytes)
 	require.NotNil(t, pemBlock)
+
+	return pemBlock.Bytes, rest
+}
+
+// CrtResponseToPemBytes decodes certificates chain from CrtResponse and return pemBlocks
+func CrtResponseToPemBytes(t *testing.T, certResponse *CrtResponse) []byte {
+
+	pemBlock, rest := CrtResponseSinglePemBlock(t, certResponse)
+
 	require.NotEqual(t, 0, len(rest))
 	pemBlock2, _ := pem.Decode(rest)
 
-	pemBlocks := append(pemBlock.Bytes, pemBlock2.Bytes...)
+	pemBlocks := append(pemBlock, pemBlock2.Bytes...)
 
 	return pemBlocks
 }
@@ -103,6 +111,12 @@ func CheckIfCertIsSigned(t *testing.T, certificates []*x509.Certificate) {
 
 func EncodeBase64(src []byte) string {
 	return base64.StdEncoding.EncodeToString(src)
+}
+
+func decodeCertResponse(certResponse *CrtResponse, t *testing.T) []byte {
+	crtBytes, err := base64.StdEncoding.DecodeString(certResponse.Crt)
+	require.NoError(t, err)
+	return crtBytes
 }
 
 func extractSubject(subject string) map[string]string {

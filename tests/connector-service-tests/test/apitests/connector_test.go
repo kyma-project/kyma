@@ -274,7 +274,7 @@ func TestCertificateValidation(t *testing.T) {
 		// given
 		crtResponse, _ := createClientCertificate(t, client, clientKey)
 		require.NotEmpty(t, crtResponse.Crt)
-		pemBytes := testkit.CrtResponseToPemBytes(t, crtResponse)
+		pemBytes, _ := testkit.CrtResponseSinglePemBlock(t, crtResponse)
 		tlsClient := createTLSClient(pemBytes, clientKey)
 
 		// when
@@ -289,7 +289,7 @@ func TestCertificateValidation(t *testing.T) {
 		// given
 		crtResponse, _ := createClientCertificate(t, client, clientKey)
 		require.NotEmpty(t, crtResponse.Crt)
-		pemBytes := testkit.CrtResponseToPemBytes(t, crtResponse)
+		pemBytes, _ := testkit.CrtResponseSinglePemBlock(t, crtResponse)
 		tlsClient := createTLSClient(pemBytes, clientKey)
 
 		// when
