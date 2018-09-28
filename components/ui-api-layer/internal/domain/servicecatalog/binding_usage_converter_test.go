@@ -181,7 +181,7 @@ func TestBindingUsageConversionInput(t *testing.T) {
 		},
 		"with env prefix": {
 			givenSBUInput: &gqlschema.CreateServiceBindingUsageInput{
-				Name:        "usage",
+				Name:        ptr("usage"),
 				Environment: "production",
 				ServiceBindingRef: gqlschema.ServiceBindingRefInput{
 					Name: "redis-binding",
@@ -218,7 +218,7 @@ func TestBindingUsageConversionInput(t *testing.T) {
 		},
 		"without env prefix": {
 			givenSBUInput: &gqlschema.CreateServiceBindingUsageInput{
-				Name:        "usage",
+				Name:        ptr("usage"),
 				Environment: "production",
 				ServiceBindingRef: gqlschema.ServiceBindingRefInput{
 					Name: "redis-binding",
@@ -281,4 +281,8 @@ func fixRedisUsage() *api.ServiceBindingUsage {
 			},
 		},
 	}
+}
+
+func ptr(s string) *string {
+	return &s
 }
