@@ -53,4 +53,4 @@ Possible values of `dir` property:
 - `pr/` - contains images built from Pull Request
 - `develop/` - contains images built from master branch
 - `rc/` - contains images built for pre-release
-- `` - (empty) contains images build for releas
+- `` - (empty) contains images built for releas
