@@ -23,8 +23,16 @@ spec:
           "/app",
           "-kube-config-custer-name={{ .Values.kubeConfig.clusterName }}",
           "-kube-config-url=https://apiserver.{{ .Values.global.domainName }}",
-          "-kube-config-ca={{ .Values.global.tlsCrt }}"
+          "-kube-config-ca-file=/etc/kube-config-cert/tls.crt"
         ]
         ports:
           - name: http
             containerPort: 8000
+        volumeMounts:
+        - name: kube-config-cert
+          mountPath: "/etc/kube-config-cert"
+          readOnly: true
+      volumes:
+      - name: kube-config-cert
+        secret:
+          secretName: kube-config-cert
