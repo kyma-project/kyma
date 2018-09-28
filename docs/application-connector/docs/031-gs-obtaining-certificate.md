@@ -31,7 +31,7 @@ After you've got your key you can proceed to the next step.
 
 ## Retrieving token
 
->**NOTE:** In this step we are beginning so-called 'one click integration', you can check the whole flow with all the details described in [here.](TODO)
+>**NOTE:** In this step we are beginning so-called 'one click integration', you can check the whole flow with all the details described in Connector Service tab in Architecture doc.
 
 You can get the required token in two ways, first one makes the use of Kyma
 console UI:
