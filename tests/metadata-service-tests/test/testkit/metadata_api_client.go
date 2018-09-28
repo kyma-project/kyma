@@ -178,7 +178,11 @@ func (client *metadataServiceClient) requestWithRetries(t *testing.T, data reque
 	var response *http.Response
 	var err error
 
-	for i := 0; i < retryCount && shouldRetry(err, response); i++ {
+	for i := 0; i < retryCount; i++ {
+		if response != nil {
+			response.Body.Close()
+		}
+
 		request, reqErr := createRequest(data, i)
 		if reqErr != nil {
 			t.Log(reqErr)
@@ -186,27 +190,14 @@ func (client *metadataServiceClient) requestWithRetries(t *testing.T, data reque
 		}
 
 		response, err = client.httpClient.Do(request)
+		if err == nil && response.StatusCode < 500 {
+			return response, err
+		}
 
 		time.Sleep(retryDelay)
 	}
 
 	return response, err
-}
-
-func shouldRetry(err error, response *http.Response) bool {
-	if err != nil || response == nil {
-		if response != nil {
-			defer response.Body.Close()
-		}
-		return true
-	}
-
-	if response.StatusCode >= 500 {
-		defer response.Body.Close()
-		return true
-	}
-
-	return false
 }
 
 func logResponse(t *testing.T, resp *http.Response) {
