@@ -81,9 +81,9 @@ kubectl delete pod core-catalog-etcd-stateful-0 core-catalog-etcd-stateful-1 cor
 <!-- These absolute paths should be replaced with the relative links after adding this functionality to Kyma -->
 [az-cli]:https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest
 
-[sc-etcd-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd-stateful/templates/etcd-cluster.yaml
-[sc-backup-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd-stateful/templates/backup-job.yaml
-[etcd-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd
+[sc-etcd-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd-stateful/templates
+[sc-backup-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd-stateful/templates/05-backup-job.yaml
+[etcd-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator
 [etcd-backup-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator/templates/backup-deployment.yaml
 [core-chart-values]:https://github.com/kyma-project/kyma/blob/master/resources/core/values.yaml
 
