@@ -1,4 +1,4 @@
-apiVersion: remoteenvironment.kyma.cx/v1alpha1
+apiVersion: applicationconnector.kyma-project.io
 kind: EnvironmentMapping
 metadata:
   # Remote Environment "ec-prod" is enabled in "production" environment

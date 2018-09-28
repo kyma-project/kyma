@@ -59,7 +59,7 @@ func (r *TestRunner) Run(ctx context.Context) {
 				testLogger.WithField(r.markAsTestOutput()).Errorf("%v", testOutput.output)
 			}
 
-			if err := r.saveTestStatus(startTime, testID, testOutput.result); err != nil {
+			if err := r.saveTestStatus(time.Now(), testID, testOutput.result); err != nil {
 				testLogger.Errorf("Cannot save test results, got err: %v", err)
 			}
 		}
@@ -82,10 +82,10 @@ func (r *TestRunner) throttleTest(ctx context.Context) bool {
 	return false
 }
 
-func (r *TestRunner) saveTestStatus(startTime time.Time, id string, pass bool) error {
-	key := fmt.Sprintf("%d", startTime.Unix())
+func (r *TestRunner) saveTestStatus(endTime time.Time, id string, pass bool) error {
+	key := fmt.Sprintf("%d", endTime.Unix())
 
-	testStatus, err := json.Marshal(internal.TestStatus{
+	testStatus, err := json.Marshal(internal.ExecutionStatus{
 		ID:   id,
 		Pass: pass,
 	})

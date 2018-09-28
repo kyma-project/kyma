@@ -10,7 +10,6 @@ import (
 	versioned "github.com/kyma-project/kyma/components/installer/pkg/client/clientset/versioned"
 	installer "github.com/kyma-project/kyma/components/installer/pkg/client/informers/externalversions/installer"
 	internalinterfaces "github.com/kyma-project/kyma/components/installer/pkg/client/informers/externalversions/internalinterfaces"
-	release "github.com/kyma-project/kyma/components/installer/pkg/client/informers/externalversions/release"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -109,13 +108,8 @@ type SharedInformerFactory interface {
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
 	Installer() installer.Interface
-	Release() release.Interface
 }
 
 func (f *sharedInformerFactory) Installer() installer.Interface {
 	return installer.New(f, f.namespace, f.tweakListOptions)
-}
-
-func (f *sharedInformerFactory) Release() release.Interface {
-	return release.New(f, f.namespace, f.tweakListOptions)
 }

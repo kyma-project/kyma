@@ -98,9 +98,17 @@ metadata:
 spec:
   serviceAccount: {{ .Values.e2eTests.nameTester }}
   containers:
+<<<<<<< HEAD
   - image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-bus-e2e-tester:564b7bb1"
     imagePullPolicy: IfNotPresent
     name: {{ .Values.e2eTests.nameTester }}
     args:
       - -subscriber-image={{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-bus-e2e-subscriber:564b7bb1
+=======
+  - image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-tester:{{ .Values.global.event_bus_tests.version }}"
+    imagePullPolicy: IfNotPresent
+    name: {{ .Values.e2eTests.nameTester }}
+    args:
+      - -subscriber-image={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-subscriber:{{ .Values.global.event_bus_tests.version }}
+>>>>>>> 3197318cb508054446a3b70ff5f9ff349eada481
   restartPolicy: Never

@@ -1,6 +1,5 @@
 ---
 title: Architecture
-type: Architecture
 ---
 
 See the diagram and steps for an overview of the basic Event Bus flow:

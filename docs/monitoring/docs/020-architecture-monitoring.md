@@ -1,6 +1,5 @@
 ---
 title: Architecture
-type: Architecture
 ---
 
 This document outlines the monitoring architecture of Kyma, highlighting information sources that Prometheus polls for data to process.

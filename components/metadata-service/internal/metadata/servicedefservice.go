@@ -127,10 +127,10 @@ func (sds *serviceDefinitionService) GetAll(remoteEnvironment string) ([]Service
 func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, serviceDef *ServiceDefinition) (ServiceDefinition, apperrors.AppError) {
 	existingSvc, err := sds.GetByID(remoteEnvironment, id)
 	if err != nil {
-		if err.Code() != apperrors.CodeNotFound {
-			return ServiceDefinition{}, apperrors.NotFound("failed to get service before update, %existingSvc", err)
+		if err.Code() == apperrors.CodeNotFound {
+			return ServiceDefinition{}, apperrors.NotFound("Cannot update the service %s, %s", id, err.Error())
 		}
-		return ServiceDefinition{}, apperrors.Internal("failed to read service, %existingSvc", err)
+		return ServiceDefinition{}, apperrors.Internal("Cannot update the service %s, %s", id, err.Error())
 	}
 
 	service := initService(serviceDef, id, existingSvc.Identifier, remoteEnvironment)
@@ -138,28 +138,28 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 	if !apiDefined(serviceDef) {
 		err = sds.serviceAPIService.Delete(remoteEnvironment, id)
 		if err != nil {
-			return ServiceDefinition{}, apperrors.Internal("failed to delete API, %existingSvc", err)
+			return ServiceDefinition{}, apperrors.Internal("Cannot update the service %s, failed to delete API, %s", id, err.Error())
 		}
 	} else {
 		service.API, err = sds.serviceAPIService.Update(remoteEnvironment, id, serviceDef.Api)
 		if err != nil {
-			return ServiceDefinition{}, apperrors.Internal("failed to update API, %existingSvc", err)
+			return ServiceDefinition{}, apperrors.Internal("Cannot update the service %s, failed to update API, %s", id, err.Error())
 		}
 
 		serviceDef.Api.Spec, err = modifyAPISpec(serviceDef.Api.Spec, service.API.GatewayURL)
 		if err != nil {
-			return ServiceDefinition{}, apperrors.Internal("failed to modify API spec, %existingSvc", err)
+			return ServiceDefinition{}, apperrors.Internal("Cannot update the service %s, failed to modify API spec, %s", id, err.Error())
 		}
 	}
 
 	err = sds.insertSpecs(id, serviceDef.Documentation, serviceDef.Api, serviceDef.Events)
 	if err != nil {
-		return ServiceDefinition{}, apperrors.Internal("failed to insert specification to Minio, %existingSvc", err)
+		return ServiceDefinition{}, apperrors.Internal("Cannot update the service %s, failed to insert specification to Minio, %s", id, err.Error())
 	}
 
 	err = sds.remoteEnvironmentRepository.Update(remoteEnvironment, *service)
 	if err != nil {
-		return ServiceDefinition{}, apperrors.Internal("failed to update service in RE repository, %existingSvc")
+		return ServiceDefinition{}, apperrors.Internal("Cannot update the service %s, failed to update service in RE repository, %s", id, err.Error())
 	}
 
 	serviceDef.ID = id
@@ -197,7 +197,7 @@ func (sds *serviceDefinitionService) GetAPI(remoteEnvironment, serviceId string)
 	}
 
 	if service.API == nil {
-		return nil, apperrors.WrongInput("service with ID '%s' has no API")
+		return nil, apperrors.WrongInput("service with ID '%s' has no API", service.ID)
 	}
 
 	api, err := sds.serviceAPIService.Read(remoteEnvironment, service.API)

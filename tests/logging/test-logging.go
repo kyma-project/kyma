@@ -11,7 +11,6 @@ import (
 	"time"
 )
 
-const expectedLogSpout = 1
 const expectedOKLog = 1
 const namespace = "kyma-system"
 const yamlFile = "testCounterPod.yaml"
@@ -28,28 +27,50 @@ func getPodStatus(stdout string) (podName string, isReady bool) {
 	return
 }
 
-func testPodsAreReady() {
-	timeout := time.After(3 * time.Minute)
-	tick := time.Tick(5 * time.Second)
+func getNumberOfNodes() int {
+	cmd := exec.Command("kubectl", "get", "nodes")
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while kubectl get nodes: %v", string(stdoutStderr))
+	}
+	outputArr := strings.Split(string(stdoutStderr), "\n")
+	return len(outputArr) - 2
+}
 
+func testPodsAreReady() {
+	timeout := time.After(10 * time.Minute)
+	tick := time.Tick(5 * time.Second)
+	expectedLogSpout := getNumberOfNodes()
 	for {
 		actualLogSpout := 0
 		actualOKLog := 0
 
 		select {
 		case <-timeout:
-			log.Println("Test if all the OKLog pods are up and running: result: Timed out!!")
 			if expectedLogSpout != actualLogSpout {
-				log.Fatalf("Expected 'Logspout' pods healthy is %d but got %d instances", expectedLogSpout, actualLogSpout)
+				log.Printf("Expected 'Logspout' pods healthy is %d but got %d instances", expectedLogSpout, actualLogSpout)
+				cmd := exec.Command("kubectl", "describe", "pods", "-l", "component=logspout", "-n", namespace)
+				stdoutStderr, err := cmd.CombinedOutput()
+				if err != nil {
+					log.Fatalf("Error while kubectl describe: %s ", string(stdoutStderr))
+				}
+				log.Printf("Existing pods for logspout:\n%s\n", string(stdoutStderr))
 			}
 			if expectedOKLog != actualOKLog {
-				log.Fatalf("Expected 'OKLog' pods healthy is %d but got %d instances", expectedOKLog, actualOKLog)
+				log.Printf("Expected 'OKLog' pods healthy is %d but got %d instances", expectedOKLog, actualOKLog)
+				cmd := exec.Command("kubectl", "describe", "pods", "-l", "component=oklog", "-n", namespace)
+				stdoutStderr, err := cmd.CombinedOutput()
+				if err != nil {
+					log.Fatalf("Error while kubectl describe: %s ", string(stdoutStderr))
+				}
+				log.Printf("Existing pods for oklog:\n%s\n", string(stdoutStderr))
 			}
+			log.Fatalf("Test if all the OKLog/Logspout pods are up and running: result: Timed out!!")
 		case <-tick:
 			cmd := exec.Command("kubectl", "get", "pods", "-l", "component in (oklog, logspout)", "-n", namespace, "--no-headers")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Fatalf("Error while kubectl get: %s ", err)
+				log.Fatalf("Error while kubectl get: %s ", string(stdoutStderr))
 			}
 			outputArr := strings.Split(string(stdoutStderr), "\n")
 			for index := range outputArr {
@@ -67,10 +88,10 @@ func testPodsAreReady() {
 				}
 			}
 			if expectedLogSpout == actualLogSpout && expectedOKLog == actualOKLog {
-				log.Println("Test pods status: All OKLog pods are ready!!")
+				log.Println("Test pods status: All OKLog/LogSpout pods are ready!!")
 				return
 			}
-			log.Println("Waiting for OKLog pods to be READY!!")
+			log.Println("Waiting for OKLog/Logspout pods to be READY!!")
 		}
 	}
 }
@@ -90,27 +111,54 @@ func testOKLogUI() {
 	log.Printf("Test Check OKLogUI Passed. Response code is: %v", resp.StatusCode)
 }
 
+func getLogSpoutPods() []string {
+	cmd := exec.Command("kubectl", "-n", namespace, "get", "pods", "-l", "component=logspout", "-ojsonpath={range .items[*]}{.metadata.name}\n{end}")
+
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while getting all logspout pods: %v", string(stdoutStderr))
+	}
+	pods := strings.Split(string(stdoutStderr), "\n")
+	var podsCleaned []string
+	for _, pod := range pods {
+		if len(strings.Trim(pod, " ")) != 0 {
+			podsCleaned = append(podsCleaned, pod)
+		}
+	}
+	return podsCleaned
+}
+
 func testLogSpout() {
-	timeout := time.After(2 * time.Minute)
+	timeout := time.After(10 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 	var testDataRegex = regexp.MustCompile(`(?m)core-logging-oklog\.kyma-system:7651*`)
-
+	pods := getLogSpoutPods()
+	log.Println("LogSpout pods are: ", pods)
 	for {
 		select {
 		case <-timeout:
-			cmd := exec.Command("kubectl", "-n", namespace, "logs", "-l", "component=logspout")
-			stdoutStderr, _ := cmd.CombinedOutput()
-			log.Fatal("Timed out getting the correct log for pod logspout", ":\n", string(stdoutStderr))
-		case <-tick:
-			cmd := exec.Command("kubectl", "-n", namespace, "logs", "-l", "component=logspout")
-			stdoutStderr, err := cmd.CombinedOutput()
-			if err != nil {
-				log.Fatal("Unable to obtain function log for pod logspout", ":\n", string(stdoutStderr))
+			for _, pod := range pods {
+				cmd := exec.Command("kubectl", "-n", namespace, "log", pod)
+				stdoutStderr, _ := cmd.CombinedOutput()
+				log.Printf("Logs for pod %s:\n%s", pod, string(stdoutStderr))
 			}
-
-			submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
-			if submatches != nil {
-				log.Printf("Test Check LogSpout has Passed. OKLog Service is set in logspout: %v", submatches)
+			log.Fatalf("Timed out getting the correct logs for Logspout pods")
+		case <-tick:
+			matchesCount := 0
+			for _, pod := range pods {
+				cmd := exec.Command("kubectl", "-n", namespace, "log", pod)
+				stdoutStderr, err := cmd.CombinedOutput()
+				if err != nil {
+					log.Fatalf("Unable to obtain log for pod[%s]:\n%s\n", pod, string(stdoutStderr))
+				}
+				submatches := testDataRegex.FindStringSubmatch(string(stdoutStderr))
+				if submatches != nil {
+					matchesCount += 1
+					log.Printf("Matched logs from pod: [%s]\n%v", pod, submatches)
+				}
+			}
+			if matchesCount == len(pods) {
+				log.Printf("Test Check LogSpout passed. OKLog Service is set in all %d logsSpout pods", len(pods))
 				return
 			}
 		}
@@ -126,14 +174,14 @@ func deployDummyPod() {
 }
 
 func waitForDummyPodToRun() {
-	timeout := time.After(2 * time.Minute)
+	timeout := time.After(10 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 
 	for {
 		select {
 		case <-timeout:
 			log.Println("Test LogStreaming: result: Timed out!!")
-			cmd := exec.Command("kubectl", "get", "pods", "-l", "component=test-counter-pod", "-n", namespace, "--no-headers")
+			cmd := exec.Command("kubectl", "describe", "pods", "-l", "component=test-counter-pod", "-n", namespace)
 			stdoutStderr, _ := cmd.CombinedOutput()
 			log.Fatal("Test LogStreaming: result: Timed out!! Current state is", ":\n", string(stdoutStderr))
 		case <-tick:

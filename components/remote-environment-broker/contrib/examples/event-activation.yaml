@@ -1,4 +1,4 @@
-apiVersion: remoteenvironment.kyma.cx/v1alpha1
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: EventActivation
 metadata:
   # name is exactly the same as RemoteEnvironment service ID
@@ -7,7 +7,4 @@ metadata:
 spec:
   displayName: "Orders"
   # source identifies remote environment in the cluster
-  source:
-    environment: "prod"
-    type: "commerce"
-    namespace: "com.hakuna.matata"
+  sourceId: "ec-prod"

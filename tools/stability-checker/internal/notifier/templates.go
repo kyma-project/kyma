@@ -3,23 +3,33 @@ package notifier
 const (
 	header = "_Tests execution summary report from last *{{ .TestResultWindowTime }}*_"
 	body   = `
-	{{- if .FailedTests }}
-	*Summary:* {{ .TotalTestsCnt }} test executions and {{ len .FailedTests }} of them failed :sad-frog:
-		{{block "list" .FailedTests }}
-		Failed tests IDs:
+	{{- if .FailedExecutions }}
+	*Summary:* {{ .TotalTestsCnt }} test executions and {{ len .FailedExecutions }} of them failed :sad-frog:
+	{{- if .ShowTestStats -}}
+ 	  {{"\n"}}Showing tests statistics:
+      {{- range .TestStats -}}
+        {{"\n"}}Name: {{.Name}}, successes: {{.Successes}}, failures: {{.Failures}}
+	  {{- else }}
+		No test statistics
+	  {{- end }}
+	{{- end }}
+
+		{{block "list" .FailedExecutions }}
+		Failed test executions IDs:
 			{{ range . }}
 			{{printf "- %q" .ID }}
 			{{- end}}
 		{{end}}
 	{{- else -}}
 	*Summary:* {{ .TotalTestsCnt }} test executions and all of them passed :very_nice:
-	{{- end -}}`
+	{{- end -}}
+	`
 	footer = `
-	{{- if .FailedTests }}
+	{{- if .FailedExecutions }}
 	_*Run*_` +
 		"```" +
 		"kubectl exec -n {{ .TestRunnerInfo.Namespace }} {{ .TestRunnerInfo.PodName }} -- logs-printer --ids=" + `
-			{{- range $index, $element := .FailedTests -}}
+			{{- range $index, $element := .FailedExecutions -}}
 					{{- if ne $index 0 -}},{{- end -}}
 					{{- $element.ID -}}
 			{{- end -}}` +

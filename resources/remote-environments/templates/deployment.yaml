@@ -77,7 +77,11 @@ spec:
     spec:
       containers:
       - name: {{ .Release.Name }}-event-service
+<<<<<<< HEAD
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-service:f832e878"
+=======
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service.dir }}event-service:{{ .Values.global.event_service.version }}"
+>>>>>>> 3197318cb508054446a3b70ff5f9ff349eada481
         imagePullPolicy: {{ .Values.eventService.deployment.image.pullPolicy }}
         args:
         - "/eventservice"
@@ -85,7 +89,11 @@ spec:
         - "--eventsTargetURL={{ .Values.eventService.deployment.args.eventsTargetURL }}"
         - "--requestTimeout={{ .Values.eventService.deployment.args.requestTimeout }}"
         - "--requestLogging={{ .Values.eventService.deployment.args.requestLogging }}"
+<<<<<<< HEAD
         - "--sourceId={{ .Values.eventService.deployment.args.sourceId }}"
+=======
+        - "--sourceId={{ .Release.Name }}"
+>>>>>>> 3197318cb508054446a3b70ff5f9ff349eada481
         readinessProbe:
           httpGet:
             path: /v1/health

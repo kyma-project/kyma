@@ -102,10 +102,14 @@ func fixRemoteEnvironment() *v1alpha1.RemoteEnvironment {
 			Description: "Remote Environment used by acceptance test",
 			Services: []v1alpha1.Service{
 				{
-					ID:                  "id-00000-1234-test",
+					ID:   "id-00000-1234-test",
+					Name: "provider-4951",
+					Labels: map[string]string{
+						"connected-app": "test-remote-env",
+					},
 					ProviderDisplayName: "provider",
 					DisplayName:         "test-remote-env",
-					LongDescription:     "Remote Environment Service Class used by acceptance test",
+					Description:         "Remote Environment Service Class used by acceptance test",
 					Tags:                []string{},
 					Entries: []v1alpha1.Entry{
 						{

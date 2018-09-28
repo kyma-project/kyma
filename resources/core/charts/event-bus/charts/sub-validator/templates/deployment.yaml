@@ -69,7 +69,11 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
+<<<<<<< HEAD
           image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}event-bus-sub-validator:f832e878"
+=======
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}event-bus-sub-validator:{{ .Values.global.event_bus.version }}"
+>>>>>>> 3197318cb508054446a3b70ff5f9ff349eada481
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --resyncPeriod={{ .Values.global.subValidator.resyncPeriod }}

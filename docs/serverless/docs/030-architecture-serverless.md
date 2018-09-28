@@ -1,6 +1,5 @@
 ---
 title: Architecture
-type: Architecture
 ---
 
 The term "serverless" refers to an architecture that is Internet-based. Application development that uses serverless technology relies solely on a combination of cloud-based, third-party services, client-side logic, and service-hosted remote procedure calls, also known as "Functions as a Service" or FaaS. Developers use lambdas to create this combination. As a result, this combination replaces the common use of a server. In the context of Kyma, lambda functions connect third-party services and Kyma. Developing with this serverless approach reduces the implementation and operation effort of an application to the absolute minimum.

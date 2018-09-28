@@ -1,4 +1,4 @@
-FROM golang:1.10.2-alpine3.7 as builder
+FROM golang:1.10.4-alpine3.8 as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests
 WORKDIR ${BASE_APP_DIR}
@@ -27,7 +27,7 @@ RUN cd ${BASE_APP_DIR}/domain && \
     go test -tags=acceptance ./${dir} -c \
     ; done
 
-FROM alpine:3.7
+FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
@@ -41,6 +41,12 @@ ENV TEST_SERVICE_CATALOG_DIR /app/tests/servicecatalog
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 #
+# Copy test run script
+#
+
+COPY ./run-compiled-tests.sh /app/tests/
+
+#
 # Copy binaries
 #
 
@@ -51,8 +57,4 @@ COPY --from=builder ${TESTS_DIR} /app/tests/
 # Run tests
 #
 
-CMD cd /app/tests/ && \
-        for f in *.test; do \
-        chmod +x ./${f} && ./${f} \
-        ; done
-
+CMD cd /app/tests/ && ./run-compiled-tests.sh

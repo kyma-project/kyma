@@ -1,6 +1,5 @@
 ---
 title: Architecture
-type: Architecture
 ---
 
 The following diagram illustrates the authorization and authentication flow in Kyma. The representation assumes the Kyma Console UI as the user's point of entry.

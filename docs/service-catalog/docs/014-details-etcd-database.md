@@ -4,11 +4,8 @@ type: Details
 ---
 
 The Service Catalog requires an `etcd` database cluster for a production use.
-It has a separate `etcd` cluster defined in the Service Catalog [etcd][sc-etcd-sub-chart] sub-chart.
-The [etcd-operator][etcd-operator] installs and manages the `etcd` clusters deployed to Kubernetes,
-and also automates tasks related to operating an `etcd` cluster, for example executing [backup][etcd-backups] and [restore][etcd-restores] procedures.
-
-> **NOTE:** The [etcd-operator][etcd-operator] is Namespace-scoped and is installed only in `kyma-system` Namespace.
+It has a separate `etcd` cluster defined in the Service Catalog [etcd-stateful][sc-etcd-sub-chart] sub-chart.
+The [etcd-backup-operator][etcd-backup-operator] executes the backup procedure.
 
 ## Details
 
@@ -30,80 +27,63 @@ To execute the backup process, you must set the following values in the [core][c
 ### Restore
 
 Follow this instruction to restore an `etcd` cluster from the existing backup.
-Execute all restore commands in the `docs/service-catalog/docs` directory.
 
-> **NOTE:** You must have the backup files created by the CronJob backup application from the previous section.
-
-1. Install the etcd-restore-operator:
-```bash
-kubectl create -f assets/etcd-restore/operator-deploy.yaml
-```
-
-2. Create the EtcdRestore Custom Resource Definition:
-```bash
-kubectl create -f assets/etcd-restore/restore-crd.yaml
-```
-
-3. Export the **ABS_PATH** environment variable with the path to the last successful backup file.
+1. Export the **ABS_PATH** environment variable with the path to the last successful backup file.
 ```bash
 export ABS_PATH=$(kubectl get cm -n kyma-system sc-recorded-etcd-backup-data -o=jsonpath='{.data.abs-backup-file-path-from-last-success}')
+export BACKUP_FILE_NAME=etcd.backup
 ```
 
-> **NOTE:** The ConfigMap name is defined [here][sc-backup-sub-chart] as the **APP_BACKUP_CONFIG_MAP_NAME_FOR_TRACING**.
+2. Download the backup to the local workstation. You can do it from the portal or by using [azure cli][az-cli]. Set the downloaded file path:
 
-4. Export the **SECRET_NAME** environment variable with the Secret name to the ABS:
 ```bash
-export SECRET_NAME=etcd-backup-abs-credentials
+export BACKUP_FILE_NAME=/path/to/downloaded/file
 ```
 
-> **NOTE:** The Secret name is defined [here][core-chart-values] under the **global.etcdBackup.secretName** property.
+3. Copy the backup file to every running Pod of the StatefulSet.
 
-5. Create the EtcdRestore Custom Resource which triggers a restore process:
 ```bash
-sed -e "s|<full-abs-path>|$ABS_PATH|g" \
-    -e "s|<abs-secret>|$SECRET_NAME|g" \
-    assets/etcd-restore/restore-cr.tpl.yaml \
-    | kubectl create -f -
+for i in {0..2};
+do
+kubectl cp ./$BACKUP_FILE_NAME kyma-system/core-catalog-etcd-stateful-$i:/$BACKUP_FILE_NAME
+done
 ```
 
-Now the etcd-restore-operator restores a new cluster from the backup.
+4. Restore the backup on every Pod of the StatefulSet.
 
-6. See the status of the Pods and wait until all of them are ready:
 ```bash
-watch -n 1 kubectl get pod -n kyma-system -l app=etcd,etcd_cluster=core-service-catalog-etcd
+for i in {0..2};
+do
+  remoteCommand="etcdctl snapshot restore /$BACKUP_FILE_NAME "
+  remoteCommand+="--name core-catalog-etcd-stateful-$i --initial-cluster "
+  remoteCommand+="core-catalog-etcd-stateful-0=https://core-catalog-etcd-stateful-0.core-catalog-etcd-stateful.kyma-system.svc.cluster.local:2380,"
+  remoteCommand+="core-catalog-etcd-stateful-1=https://core-catalog-etcd-stateful-1.core-catalog-etcd-stateful.kyma-system.svc.cluster.local:2380,"
+  remoteCommand+="core-catalog-etcd-stateful-2=https://core-catalog-etcd-stateful-2.core-catalog-etcd-stateful.kyma-system.svc.cluster.local:2380 "
+  remoteCommand+="--initial-cluster-token etcd-cluster-1 "
+  remoteCommand+="--initial-advertise-peer-urls https://core-catalog-etcd-stateful-$i.core-catalog-etcd-stateful.kyma-system.svc.cluster.local:2380"
+
+  kubectl exec core-catalog-etcd-stateful-$i -n kyma-system -- sh -c "rm -rf core-catalog-etcd-stateful-$i.etcd"
+  kubectl exec core-catalog-etcd-stateful-$i -n kyma-system -- sh -c "rm -rf /var/run/etcd/backup.etcd"
+  kubectl exec core-catalog-etcd-stateful-$i -n kyma-system -- sh -c "$remoteCommand"
+  kubectl exec core-catalog-etcd-stateful-$i -n kyma-system -- sh -c "mv -f core-catalog-etcd-stateful-$i.etcd /var/run/etcd/backup.etcd"
+  kubectl exec core-catalog-etcd-stateful-$i -n kyma-system -- sh -c "rm $BACKUP_FILE_NAME"
+done
 ```
 
-Before going to the next step, check the number of the Pods which should be in the`RUNNING` state.
-Run this command:
+5. Delete old Pods.
+
 ```bash
-kubectl get EtcdCluster core-service-catalog-etcd -n kyma-system  -o jsonpath='{.spec.size}'
+kubectl delete pod core-catalog-etcd-stateful-0 core-catalog-etcd-stateful-1 core-catalog-etcd-stateful-2 -n kyma-system
 ```
 
-7. Restart the Service Catalog `apiserver` Pod:
-```bash
-kubectl delete pod -n kyma-system -l app=core-catalog-apiserver
-```
-
-8. Restart the Service Catalog `controller-manager` Pod:
-```bash
-kubectl delete pod -n kyma-system -l app=core-catalog-controller-manager
-```
-
-9. Clean-up the etcd-restore-operator and EtcdRestore CR:
-```bash
-kubectl delete -f assets/etcd-restore/restore-cr.tpl.yaml
-kubectl delete -f assets/etcd-restore/restore-crd.yaml
-kubectl delete -f assets/etcd-restore/operator-deploy.yaml
-```
-
-[etcd-operator]:https://github.com/coreos/etcd-operator
-[etcd-backups]:https://github.com/coreos/etcd-operator/blob/master/doc/user/walkthrough/backup-operator.md
-[etcd-restores]:https://github.com/coreos/etcd-operator/blob/master/doc/user/walkthrough/restore-operator.md
+[etcd-backup-operator]:https://github.com/coreos/etcd-operator/blob/master/doc/user/walkthrough/backup-operator.md
 
 <!-- These absolute paths should be replaced with the relative links after adding this functionality to Kyma -->
-[sc-etcd-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd/templates/etcd-cluster.yaml
-[sc-backup-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd/templates/backup-job.yaml
-[etcd-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd
+[az-cli]:https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest
+
+[sc-etcd-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd-stateful/templates
+[sc-backup-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd-stateful/templates/05-backup-job.yaml
+[etcd-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator
 [etcd-backup-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator/templates/backup-deployment.yaml
 [core-chart-values]:https://github.com/kyma-project/kyma/blob/master/resources/core/values.yaml
 

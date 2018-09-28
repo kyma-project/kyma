@@ -49,4 +49,8 @@ spec:
   event_type: test
   event_type_version: v1
   source_id: "dummy"
+<<<<<<< HEAD
 {{ end }}
+=======
+{{ end }}
+>>>>>>> 3197318cb508054446a3b70ff5f9ff349eada481

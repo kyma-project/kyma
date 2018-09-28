@@ -1,7 +1,11 @@
 deployment:
   image:
     name: develop/metadata-service
+<<<<<<< HEAD
     tag: c389a326
+=======
+    tag: 4a0708e8
+>>>>>>> 3197318cb508054446a3b70ff5f9ff349eada481
     pullPolicy: IfNotPresent
   args:
     proxyPort: &proxyPort 8080

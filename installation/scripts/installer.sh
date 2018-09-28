@@ -34,12 +34,10 @@ echo "
 "
 
 kubectl apply -f ${CURRENT_DIR}/../resources/default-sa-rbac-role.yaml
-kubectl apply -f ${CURRENT_DIR}/../resources/limit-range-installer.yaml
-kubectl apply -f ${CURRENT_DIR}/../resources/resource-quotas-installer.yaml
 
 bash ${CURRENT_DIR}/install-tiller.sh
 
-kubectl apply -f ${CURRENT_DIR}/../resources/installer.yaml -n "kyma-installer"
+kubectl apply -f ${CURRENT_DIR}/../resources/installer.yaml
 
 ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
 

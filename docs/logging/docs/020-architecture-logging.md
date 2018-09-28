@@ -1,6 +1,5 @@
 ---
 title: Architecture
-type: Architecture
 ---
 
 This document outlines the logging architecture of Kyma. It highlights information sources from which Logspout extracts logs to feed to OK Log.

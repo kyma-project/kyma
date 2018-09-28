@@ -1,15 +1,27 @@
 controller:
   image:
     name: develop/remote-environment-controller
+<<<<<<< HEAD
     tag: 8bd1565b
+=======
+    tag: cc559ab5
+>>>>>>> 3197318cb508054446a3b70ff5f9ff349eada481
     pullPolicy: IfNotPresent
   args:
     appName: remote-environment-controller
     tillerUrl: tiller-deploy.kube-system.svc.cluster.local:44134
 
+<<<<<<< HEAD
 enabled: false
+=======
+enabled: true
+>>>>>>> 3197318cb508054446a3b70ff5f9ff349eada481
 
 tests:
   image:
     name: develop/remote-environment-controller-tests
+<<<<<<< HEAD
     tag: c13f3a0e
+=======
+    tag: 345add9f
+>>>>>>> 3197318cb508054446a3b70ff5f9ff349eada481
