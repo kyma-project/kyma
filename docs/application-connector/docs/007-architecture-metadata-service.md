@@ -22,7 +22,7 @@ Metadata Service supports registering APIs secured with OAuth - the user can spe
 It is possible to register many services for particular Remote Environment. The Metadata Service API offers a great deal of flexibility as the user may decide how they want to expose their APIs.      
 
 Metadata Service API is described [here](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/assets/metadataapi.yaml).
-For a complete information on registering services, please see [Managing registered services with Metadata API Guide](TODO).
+For a complete information on registering services, please see Managing Registered Services with Metadata API Guide.
 
 
 ## Implementation Details
@@ -46,5 +46,5 @@ Minio storage contains:
 Metadata Service interacts with Kubernetes APIs to perform the following tasks:
 - Modifying Remote Environment CRD instance
 - Creating secrets containing client id and client secret used to access OAuth secured APIs
-- Creating service used to access [Proxy Service](TODO) from lambda or service deployed on Kyma  
+- Creating service used to access Proxy Service from lambda or service deployed on Kyma  
 

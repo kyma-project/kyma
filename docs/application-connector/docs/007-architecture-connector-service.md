@@ -28,6 +28,6 @@ Certificate generation is comprised of the following steps:
 The following diagram illustrates the operation flow in details:
 ![Client certificate generation operation flow](assets/002-automatic-configuration.png) 
 
-For a complete information on using Connector Service APIs, please see [Obtaining the Certificate Guide](TODO). 
+For a complete information on using Connector Service APIs, please see Obtaining the Certificate Guide. 
 
     

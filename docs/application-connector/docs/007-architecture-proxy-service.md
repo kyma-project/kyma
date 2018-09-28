@@ -4,7 +4,7 @@ type: Details
 ---
 
 ## Overview
-Proxy Service is responsible for sending requests to external APIs registered with the [Metadata Service](TODO).         
+Proxy Service is responsible for sending requests to external APIs registered with the Metadata Service.         
     
 
 The following diagram illustrates how Proxy Service interacts with Kyma components and external APIs secured with OAuth.
