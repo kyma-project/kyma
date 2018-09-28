@@ -31,8 +31,8 @@ bash ${ROOT_PATH}/configure-components.sh
 echo -e "\nConfiguring versions"
 
 if [ -f "${VERSIONS_FILE_PATH}" ]; then
-    kubectl create configmap versions --from-env-file="${VERSIONS_FILE_PATH}" -n "kyma-installer"
-    kubectl label configmap/versions installer=overrides -n "kyma-installer"
+    kubectl create configmap versions-overrides --from-env-file="${VERSIONS_FILE_PATH}" -n "kyma-installer"
+    kubectl label configmap/versions-overrides installer=overrides -n "kyma-installer"
 fi
 
 ##########
