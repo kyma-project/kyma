@@ -16,7 +16,7 @@ func TestProcessorHappyPath(t *testing.T) {
 	results, err := sut.Process(exampleTestOutput)
 	// THEN
 	require.NoError(t, err)
-	assert.Len(t, results, 3)
+	assert.Len(t, results, 5)
 	assert.Equal(t, results["test-core-environments"], summary.SpecificTestStats{
 		Name:      "test-core-environments",
 		Successes: 1,
@@ -29,6 +29,15 @@ func TestProcessorHappyPath(t *testing.T) {
 		Name:     "test-core-kubeless",
 		Failures: 1,
 	})
+	assert.Equal(t, results["test-core-monitoring"], summary.SpecificTestStats{
+		Name:     "test-core-monitoring",
+		Failures: 1,
+	})
+	assert.Equal(t, results["remote-environment-controller-tests"], summary.SpecificTestStats{
+		Name:     "remote-environment-controller-tests",
+		Failures: 1,
+	})
+
 }
 
 func TestProcessorOnEmptyInput(t *testing.T) {
@@ -60,7 +69,7 @@ func fixSuccessRegexp() string {
 }
 
 func fixFailureRegexp() string {
-	return "FAILED: ([0-9A-Za-z_-]+)"
+	return "(?:FAILED: |ERROR: pods \\\\\")([0-9A-Za-z_-]+)"
 }
 
 var exampleTestOutput = []byte(`
@@ -69,6 +78,10 @@ var exampleTestOutput = []byte(`
 - Testing Kyma...
 ----------------------------
 - Testing Core components...
+RUNNING: test-core-monitoring
+ERROR: pods \"test-core-monitoring\" already exists
+RUNNING: remote-environment-controller-tests
+ERROR: pods \"remote-environment-controller-tests\" is forbidden: exceeded quota: kyma-default, requested: limits.memory=96Mi, used: limits.memory=3038Mi, limited: limits.memory=3Gi
 RUNNING: test-core-environments
 PASSED: test-core-environments
 RUNNING: test-core-core-acceptance
