@@ -6,7 +6,7 @@ ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 CONFIG_TPL_PATH="${ROOT_PATH}/../resources/installer-config-local.yaml.tpl"
 CONFIG_OUTPUT_PATH=$(mktemp)
 
-VERSIONS_FILE_PATH="${ROOT_PATH}/../versions.env"
+VERSIONS_FILE_PATH="${ROOT_PATH}/../versions-overrides.env"
 
 cp $CONFIG_TPL_PATH $CONFIG_OUTPUT_PATH
 
@@ -25,12 +25,6 @@ rm ${CONFIG_OUTPUT_PATH}
 echo -e "\nConfiguring sub-components"
 
 bash ${ROOT_PATH}/configure-components.sh
-
-##########
-
-echo -e "\nDetermining versions of components"
-
-bash ${ROOT_PATH}/fetch-components-versions.sh
 
 ##########
 
