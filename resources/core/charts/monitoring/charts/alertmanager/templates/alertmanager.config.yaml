@@ -51,7 +51,7 @@ receivers:
     api_url: {{ .Values.global.alertTools.credentials.slack.apiurl | quote }}
     icon_emoji: ":ghost:"
     title: '{{`{{$n := .Alerts.Firing | len}}`}}{{`{{range $i, $alert := .Alerts }}`}}[{{`{{$alert.Status | toUpper}}`}}{{`{{ if eq $alert.Status "firing" }}`}}:{{`{{ $n }}`}}{{`{{end}}`}}]{{`{{ .Annotations.summary }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
-    text: '{{`{{ range .Alerts }}`}}<!channel> \n{{`{{ .Annotations.description }}`}}\n{{`{{ end }}`}}'
+    text: '{{`{{ range .Alerts }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.description }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
 {{- end }}
 {{- end }}
 {{ end }}
