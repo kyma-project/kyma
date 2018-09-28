@@ -48,7 +48,7 @@ spec:
   restartPolicy: Never
   containers:
   - name: test-{{ template "fullname" . }}
-    image: eu.gcr.io/kyma-project/develop/test-logging:6e0a7fe2
+    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.environments.dir }}{{ .Values.test.image.name }}:{{ .Values.global.test_logging.version }}
     imagePullPolicy: IfNotPresent
     command:
       - "/bin/sh"
