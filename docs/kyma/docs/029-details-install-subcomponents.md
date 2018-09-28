@@ -47,16 +47,17 @@ data:
 
 ## Specify subcomponents versions
 
-Versions of the Kyma components are specified in `values.yaml` file in charts. Each component version is described by two properties: `version` and `dir`. The first defines actual docker image tag. The second describes directory under which the tagged image is pushed follwed by a `/` or this value can be empty.
+Versions of the Kyma components are specified in the `values.yaml` file in charts. Two properties, `version` and `dir`, describe each component version. The first one defines the actual docker image tag. The second property describes the directory under which the tagged image is pushed. It is optional and is followed by a forward slash (/).
 
-Possible values of `dir` property:
-- `pr/` - contains images built from Pull Request
-- `develop/` - contains images built from master branch
-- `rc/` - contains images built for pre-release
-- `` - (empty) contains images built for release
+Possible values of the `dir` property:
+- `pr/` contains images built from the pull request
+- `develop/` contains images built from the `master` branch
+- `rc/` contains images built for a pre-release
+- `` (empty) contains images built for a release
 
-To override subcomponents versions during Kyma startup, create `versions-overrides.env` file in `installation` directory. The example overrides Environments component setting its image version to `0.0.1` from `develop` directory
+To override subcomponents versions during Kyma startup, create the `versions-overrides.env` file in the `installation` directory. 
 
+The example overrides the `Environments` component and sets the image version to `0.0.1`, based on the version from the `develop` directory.
 
 Example:
 
