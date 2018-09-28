@@ -15,10 +15,7 @@ import (
 
 const (
 	// publish request
-	testUrl                     = "/v1/events/"
-	testSourceType              = "test-source-type"
-	testSourceNamespace         = "test-source-namespace"
-	testSourceEnvironment       = "test-source-environment"
+	testSourceID                = "test-source-id"
 	testEventType               = "test-event-type"
 	testEventTypeVersion        = "v1"
 	testEventTypeVersionInvalid = "#"
@@ -31,7 +28,7 @@ const (
 
 	// event payload format
 	eventFormat            = "{%v}"
-	sourceFormat           = "\"source\":{\"source-namespace\":\"%v\",\"source-type\":\"%v\",\"source-environment\":\"%v\"}"
+	sourceIDFormat         = "\"source-id\":\"%v\""
 	eventTypeFormat        = "\"event-type\":\"%v\""
 	eventTypeVersionFormat = "\"event-type-version\":\"%v\""
 	eventIDFormat          = "\"event-id\":\"%v\""
@@ -56,24 +53,20 @@ func (b *eventBuilder) String() string {
 	return fmt.Sprintf(eventFormat, b.Buffer.String())
 }
 
-func buildTestPublishRequest(sourceNamespace, sourceType, sourceEnvironment, eventType, eventTypeVersion, eventID, eventTime, data string) api.PublishRequest {
+func buildTestPublishRequest(sourceID, eventType, eventTypeVersion, eventID, eventTime, data string) api.PublishRequest {
 	publishRequest := api.PublishRequest{
 		Data:             data,
 		EventID:          eventID,
 		EventTime:        eventTime,
 		EventType:        eventType,
 		EventTypeVersion: eventTypeVersion,
-		Source: &api.EventSource{
-			SourceEnvironment: sourceEnvironment,
-			SourceNamespace:   sourceNamespace,
-			SourceType:        sourceType,
-		},
+		SourceID:         sourceID,
 	}
 	return publishRequest
 }
 
 func buildDefaultTestPublishRequest() api.PublishRequest {
-	return buildTestPublishRequest(testSourceNamespace, testSourceType, testSourceEnvironment, testEventType, testEventTypeVersion, testEventID, testEventTime, testData)
+	return buildTestPublishRequest(testSourceID, testEventType, testEventTypeVersion, testEventID, testEventTime, testData)
 }
 
 func buildDefaultTestSubjectAndPayload() (string, string) {
@@ -83,20 +76,20 @@ func buildDefaultTestSubjectAndPayload() (string, string) {
 }
 
 func buildDefaultTestSubject() string {
-	return buildTestSubject(testSourceEnvironment, testSourceNamespace, testSourceType, testEventType, testEventTypeVersion)
+	return buildTestSubject(testSourceID, testEventType, testEventTypeVersion)
 }
 
-func buildTestSubject(sourceEnvironment, sourceNamespace, sourceType, eventType, eventTypeVersion string) string {
-	return encodeSubject(buildTestPublishRequest(sourceNamespace, sourceType, sourceEnvironment, eventType, eventTypeVersion, testEventID, testEventTime, testData))
+func buildTestSubject(sourceID, eventType, eventTypeVersion string) string {
+	return encodeSubject(buildTestPublishRequest(sourceID, eventType, eventTypeVersion, testEventID, testEventTime, testData))
 }
 
 func buildDefaultTestPayload() string {
-	return buildTestPayload(testSourceNamespace, testSourceType, testSourceEnvironment, testEventType, testEventTypeVersion, testEventID, testEventTime, testData)
+	return buildTestPayload(testSourceID, testEventType, testEventTypeVersion, testEventID, testEventTime, testData)
 }
 
-func buildTestPayload(sourceNamespace, sourceType, sourceEnvironment, eventType, eventTypeVersion, eventID, eventTime, data string) string {
+func buildTestPayload(sourceID, eventType, eventTypeVersion, eventID, eventTime, data string) string {
 	builder := new(eventBuilder).
-		build(sourceFormat, sourceNamespace, sourceType, sourceEnvironment).
+		build(sourceIDFormat, sourceID).
 		build(eventTypeFormat, eventType).
 		build(eventTypeVersionFormat, eventTypeVersion).
 		build(eventIDFormat, eventID).
@@ -108,7 +101,7 @@ func buildTestPayload(sourceNamespace, sourceType, sourceEnvironment, eventType,
 
 func buildDefaultTestBadPayload() string {
 	builder := new(eventBuilder).
-		build(sourceFormat, testSourceNamespace, testSourceType, testSourceEnvironment).
+		build(sourceIDFormat, testSourceID).
 		build(eventTypeFormat, testEventType).
 		build(eventTypeVersionFormat, testEventTypeVersion).
 		build(eventIDFormat, testEventID).
@@ -132,7 +125,7 @@ func buildDefaultTestPayloadWithoutSource() string {
 
 func buildDefaultTestPayloadWithoutEventType() string {
 	builder := new(eventBuilder).
-		build(sourceFormat, testSourceNamespace, testSourceType, testSourceEnvironment).
+		build(sourceIDFormat, testSourceID).
 		build(eventTypeVersionFormat, testEventTypeVersion).
 		build(eventIDFormat, testEventID).
 		build(eventTimeFormat, testEventTime).
@@ -143,7 +136,7 @@ func buildDefaultTestPayloadWithoutEventType() string {
 
 func buildDefaultTestPayloadWithoutEventTypeVersion() string {
 	builder := new(eventBuilder).
-		build(sourceFormat, testSourceNamespace, testSourceType, testSourceEnvironment).
+		build(sourceIDFormat, testSourceID).
 		build(eventTypeFormat, testEventType).
 		build(eventIDFormat, testEventID).
 		build(eventTimeFormat, testEventTime).
@@ -154,7 +147,7 @@ func buildDefaultTestPayloadWithoutEventTypeVersion() string {
 
 func buildDefaultTestPayloadWithoutEventTime() string {
 	builder := new(eventBuilder).
-		build(sourceFormat, testSourceNamespace, testSourceType, testSourceEnvironment).
+		build(sourceIDFormat, testSourceID).
 		build(eventTypeFormat, testEventType).
 		build(eventTypeVersionFormat, testEventTypeVersion).
 		build(eventIDFormat, testEventID).
@@ -165,7 +158,7 @@ func buildDefaultTestPayloadWithoutEventTime() string {
 
 func buildDefaultTestPayloadWithoutData() string {
 	builder := new(eventBuilder).
-		build(sourceFormat, testSourceNamespace, testSourceType, testSourceEnvironment).
+		build(sourceIDFormat, testSourceID).
 		build(eventTypeFormat, testEventType).
 		build(eventTypeVersionFormat, testEventTypeVersion).
 		build(eventIDFormat, testEventID).
@@ -176,7 +169,7 @@ func buildDefaultTestPayloadWithoutData() string {
 
 func buildDefaultTestPayloadWithEmptyData() string {
 	builder := new(eventBuilder).
-		build(sourceFormat, testSourceNamespace, testSourceType, testSourceEnvironment).
+		build(sourceIDFormat, testSourceID).
 		build(eventTypeFormat, testEventType).
 		build(eventTypeVersionFormat, testEventTypeVersion).
 		build(eventIDFormat, testEventID).
@@ -187,12 +180,7 @@ func buildDefaultTestPayloadWithEmptyData() string {
 }
 
 func encodeSubject(r api.PublishRequest) string {
-	return fmt.Sprintf("%s.%s.%s.%s.%s",
-		r.Source.SourceEnvironment,
-		r.Source.SourceNamespace,
-		r.Source.SourceType,
-		r.EventType,
-		r.EventTypeVersion)
+	return fmt.Sprintf("%s.%s.%s", r.SourceID, r.EventType, r.EventTypeVersion)
 }
 
 func performPublishRequest(t *testing.T, publishURL string, payload string) ([]byte, int) {

@@ -39,16 +39,6 @@ spec:
               type: string
               minLength: 1
               pattern: '^[a-zA-Z0-9]+$'
-            source:
-              source_environment:
-                type: string
-                minLength: 1
-                pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
-              source_namespace:
-                type: string
-                minLength: 1
-                pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
-              source_type:
-                type: string
-                minLength: 1
-                pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
+            source_id:
+              type: string
+              minLength: 1

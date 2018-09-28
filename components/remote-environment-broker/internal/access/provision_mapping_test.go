@@ -7,7 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/access"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/access/automock"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,7 +23,7 @@ func TestMappingExistsProvisionCheckerWhenProvisionAcceptable(t *testing.T) {
 	defer mockREStorage.AssertExpectations(t)
 	mockREStorage.On("FindOneByServiceID", fixRemoteServiceID()).Return(fixRemoteEnvModel(), nil)
 
-	sut := access.NewMappingExistsProvisionChecker(mockREStorage, mockClientSet.RemoteenvironmentV1alpha1())
+	sut := access.NewMappingExistsProvisionChecker(mockREStorage, mockClientSet.ApplicationconnectorV1alpha1())
 	// WHEN
 	canProvisionOutput, err := sut.CanProvision(fixRemoteServiceID(), internal.Namespace(fixProdNs()), time.Nanosecond)
 	// THEN
@@ -41,7 +41,7 @@ func TestMappingExistsProvisionCheckerWhenProvisionNotAcceptable(t *testing.T) {
 	defer mockREStorage.AssertExpectations(t)
 	mockREStorage.On("FindOneByServiceID", fixRemoteServiceID()).Return(fixRemoteEnvModel(), nil)
 
-	sut := access.NewMappingExistsProvisionChecker(mockREStorage, mockClientSet.RemoteenvironmentV1alpha1())
+	sut := access.NewMappingExistsProvisionChecker(mockREStorage, mockClientSet.ApplicationconnectorV1alpha1())
 	// WHEN
 	canProvisionOutput, err := sut.CanProvision(fixRemoteServiceID(), internal.Namespace("stage"), time.Nanosecond)
 	// THEN

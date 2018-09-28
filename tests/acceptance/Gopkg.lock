@@ -102,15 +102,17 @@
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
+    "components/binding-usage-controller/pkg/apis/settings/v1alpha1",
     "components/binding-usage-controller/pkg/client/clientset/versioned",
     "components/binding-usage-controller/pkg/client/clientset/versioned/scheme",
     "components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
-    "components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1",
+    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
+    "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
     "components/remote-environment-broker/pkg/client/clientset/versioned",
     "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
+    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
   ]
-  revision = "5d75b1cfda3dfc393351e71d89ea1c7a750ec89c"
+  revision = "7400291c88b0dde7d2b674f02a40efc5eb1934e5"
 
 [[projects]]
   name = "github.com/pborman/uuid"
@@ -125,10 +127,10 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/pmorie/go-open-service-broker-client"
   packages = ["v2"]
-  revision = "8c972749a053d23305bfcb237a9ed64afedecd6c"
+  revision = "9cc214e88d00504888af633376c9462e0ab2bd8b"
+  version = "0.0.11"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
@@ -384,6 +386,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "235827c706ce7f49ebef7dbca4e56dfbcdbb3fd0728d3b3d9c8630c90f22d985"
+  inputs-digest = "a64381af7274815f1355db86f2063d69cc5042da0f3494f2350b62e6ccb86f60"
   solver-name = "gps-cdcl"
   solver-version = 1

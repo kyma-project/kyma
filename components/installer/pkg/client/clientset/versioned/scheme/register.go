@@ -4,7 +4,6 @@ package scheme
 
 import (
 	installerv1alpha1 "github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
-	releasev1alpha1 "github.com/kyma-project/kyma/components/installer/pkg/apis/release/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -36,5 +35,4 @@ func init() {
 // correctly.
 func AddToScheme(scheme *runtime.Scheme) {
 	installerv1alpha1.AddToScheme(scheme)
-	releasev1alpha1.AddToScheme(scheme)
 }

@@ -68,11 +68,11 @@ func (r *serviceBindingResolver) ServiceBindingQuery(ctx context.Context, name, 
 	return r.converter.ToGQL(binding), nil
 }
 
-func (r *serviceBindingResolver) ServiceBindingsToInstanceQuery(ctx context.Context, instanceName, environment string) ([]gqlschema.ServiceBinding, error) {
+func (r *serviceBindingResolver) ServiceBindingsToInstanceQuery(ctx context.Context, instanceName, environment string) (gqlschema.ServiceBindings, error) {
 	list, err := r.operations.ListForServiceInstance(environment, instanceName)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting many %s to Instance [instance name: %s. environment: %s]", pretty.ServiceBindings, instanceName, environment))
-		return nil, gqlerror.New(err, pretty.ServiceBinding, gqlerror.WithEnvironment(environment))
+		return gqlschema.ServiceBindings{}, gqlerror.New(err, pretty.ServiceBinding, gqlerror.WithEnvironment(environment))
 	}
 
 	return r.converter.ToGQLs(list), nil

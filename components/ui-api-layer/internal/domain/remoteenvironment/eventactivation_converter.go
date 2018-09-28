@@ -3,7 +3,7 @@ package remoteenvironment
 import (
 	"strings"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 )
@@ -18,7 +18,7 @@ func (c *eventActivationConverter) ToGQL(in *v1alpha1.EventActivation) *gqlschem
 	return &gqlschema.EventActivation{
 		Name:        in.Name,
 		DisplayName: in.Spec.DisplayName,
-		Source:      c.toGQLSource(*in),
+		SourceID:    in.Spec.SourceID,
 	}
 }
 
@@ -32,14 +32,6 @@ func (c *eventActivationConverter) ToGQLs(in []*v1alpha1.EventActivation) []gqls
 	}
 
 	return result
-}
-
-func (c *eventActivationConverter) toGQLSource(in v1alpha1.EventActivation) gqlschema.EventActivationSource {
-	return gqlschema.EventActivationSource{
-		Environment: in.Spec.Source.Environment,
-		Namespace:   in.Spec.Source.Namespace,
-		Type:        in.Spec.Source.Type,
-	}
 }
 
 func (c *eventActivationConverter) ToGQLEvents(in *storage.AsyncApiSpec) []gqlschema.EventActivationEvent {

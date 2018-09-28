@@ -30,7 +30,7 @@ spec:
       - name: "init-{{ .Chart.Name }}"
         image: "{{ .Values.global.containerRegistry.path }}/alpine-net:{{ .Values.initImage.tag }}"
         imagePullPolicy: {{ .Values.initImage.pullPolicy }}
-        command: ['sh', '-c', 'until $(curl --output /dev/null --silent --fail http://core-helm-broker-etcd.kyma-system.svc.cluster.local:2379/health); do echo waiting for etcd service; sleep 2; done;']
+        command: ['sh', '-c', 'until $(curl --output /dev/null --silent --fail http://core-helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379/health); do echo waiting for etcd service; sleep 2; done;']
 
       containers:
       - name: {{ .Chart.Name }}

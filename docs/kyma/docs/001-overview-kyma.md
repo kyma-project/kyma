@@ -1,6 +1,5 @@
 ---
 title: Overview
-type: Overview
 ---
 
 Kyma is the easiest and fastest way to connect and extend products in a cloud-native way. Kyma is designed as a centerpiece that brings together different external products and increases their agility and customizability.

@@ -21,6 +21,11 @@ slackClientToken: "123-need-to-be-provided"
 testThrottle: "5m"
 testResultWindowTime: "6h"
 
+stats:
+  enabled: false
+  failingTestRegexp: "TBD"
+  successfulTestRegexp: "TBD"
+
 service:
   type: NodePort
   externalPort: 80

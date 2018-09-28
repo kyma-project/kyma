@@ -31,6 +31,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	ClusterServiceClass() ClusterServiceClassResolver
 	Deployment() DeploymentResolver
 	EventActivation() EventActivationResolver
 	Mutation() MutationResolver
@@ -58,6 +59,52 @@ type ComplexityRoot struct {
 		Type    func(childComplexity int) int
 		Issuer  func(childComplexity int) int
 		JwksUri func(childComplexity int) int
+	}
+
+	BindableResourcesOutputItem struct {
+		Kind      func(childComplexity int) int
+		Resources func(childComplexity int) int
+	}
+
+	ClusterServiceBroker struct {
+		Name              func(childComplexity int) int
+		Status            func(childComplexity int) int
+		CreationTimestamp func(childComplexity int) int
+		Url               func(childComplexity int) int
+		Labels            func(childComplexity int) int
+	}
+
+	ClusterServiceBrokerEvent struct {
+		Type                 func(childComplexity int) int
+		ClusterServiceBroker func(childComplexity int) int
+	}
+
+	ClusterServiceClass struct {
+		Name                func(childComplexity int) int
+		ExternalName        func(childComplexity int) int
+		DisplayName         func(childComplexity int) int
+		CreationTimestamp   func(childComplexity int) int
+		Description         func(childComplexity int) int
+		LongDescription     func(childComplexity int) int
+		ImageUrl            func(childComplexity int) int
+		DocumentationUrl    func(childComplexity int) int
+		SupportUrl          func(childComplexity int) int
+		ProviderDisplayName func(childComplexity int) int
+		Tags                func(childComplexity int) int
+		Plans               func(childComplexity int) int
+		Activated           func(childComplexity int) int
+		ApiSpec             func(childComplexity int) int
+		AsyncApiSpec        func(childComplexity int) int
+		Content             func(childComplexity int) int
+	}
+
+	ClusterServicePlan struct {
+		Name                           func(childComplexity int) int
+		DisplayName                    func(childComplexity int) int
+		ExternalName                   func(childComplexity int) int
+		Description                    func(childComplexity int) int
+		RelatedClusterServiceClassName func(childComplexity int) int
+		InstanceCreateParameterSchema  func(childComplexity int) int
 	}
 
 	ConnectorService struct {
@@ -129,7 +176,7 @@ type ComplexityRoot struct {
 	EventActivation struct {
 		Name        func(childComplexity int) int
 		DisplayName func(childComplexity int) int
-		Source      func(childComplexity int) int
+		SourceId    func(childComplexity int) int
 		Events      func(childComplexity int) int
 	}
 
@@ -137,12 +184,6 @@ type ComplexityRoot struct {
 		EventType   func(childComplexity int) int
 		Version     func(childComplexity int) int
 		Description func(childComplexity int) int
-	}
-
-	EventActivationSource struct {
-		Environment func(childComplexity int) int
-		Type        func(childComplexity int) int
-		Namespace   func(childComplexity int) int
 	}
 
 	ExceededQuota struct {
@@ -196,37 +237,42 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		ServiceInstance      func(childComplexity int, name string, environment string) int
-		ServiceInstances     func(childComplexity int, environment string, first *int, offset *int, status *InstanceStatusType) int
-		ServiceClasses       func(childComplexity int, first *int, offset *int) int
-		ServiceClass         func(childComplexity int, name string) int
-		ServiceBrokers       func(childComplexity int, first *int, offset *int) int
-		ServiceBroker        func(childComplexity int, name string) int
-		ServiceBindingUsage  func(childComplexity int, name string, environment string) int
-		ServiceBinding       func(childComplexity int, name string, environment string) int
-		UsageKinds           func(childComplexity int, first *int, offset *int) int
-		UsageKindResources   func(childComplexity int, usageKind string, environment string) int
-		Apis                 func(childComplexity int, environment string, serviceName *string, hostname *string) int
-		RemoteEnvironment    func(childComplexity int, name string) int
-		RemoteEnvironments   func(childComplexity int, environment *string, first *int, offset *int) int
-		ConnectorService     func(childComplexity int, remoteEnvironment string) int
-		Environments         func(childComplexity int, remoteEnvironment *string) int
-		Deployments          func(childComplexity int, environment string, excludeFunctions *bool) int
-		ResourceQuotas       func(childComplexity int, environment string) int
-		ResourceQuotasStatus func(childComplexity int, environment string) int
-		Functions            func(childComplexity int, environment string, first *int, offset *int) int
-		Content              func(childComplexity int, contentType string, id string) int
-		Topics               func(childComplexity int, input []InputTopic, internal *bool) int
-		EventActivations     func(childComplexity int, environment string) int
-		LimitRanges          func(childComplexity int, environment string) int
-		Idppreset            func(childComplexity int, name string) int
-		Idppresets           func(childComplexity int, first *int, offset *int) int
+		ServiceInstance       func(childComplexity int, name string, environment string) int
+		ServiceInstances      func(childComplexity int, environment string, first *int, offset *int, status *InstanceStatusType) int
+		ClusterServiceClasses func(childComplexity int, first *int, offset *int) int
+		ClusterServiceClass   func(childComplexity int, name string) int
+		ServiceClasses        func(childComplexity int, environment string, first *int, offset *int) int
+		ServiceClass          func(childComplexity int, environment string, name string) int
+		ClusterServiceBrokers func(childComplexity int, first *int, offset *int) int
+		ClusterServiceBroker  func(childComplexity int, name string) int
+		ServiceBrokers        func(childComplexity int, environment string, first *int, offset *int) int
+		ServiceBroker         func(childComplexity int, name string, environment string) int
+		ServiceBindingUsage   func(childComplexity int, name string, environment string) int
+		ServiceBinding        func(childComplexity int, name string, environment string) int
+		UsageKinds            func(childComplexity int, first *int, offset *int) int
+		UsageKindResources    func(childComplexity int, usageKind string, environment string) int
+		BindableResources     func(childComplexity int, environment string) int
+		Apis                  func(childComplexity int, environment string, serviceName *string, hostname *string) int
+		RemoteEnvironment     func(childComplexity int, name string) int
+		RemoteEnvironments    func(childComplexity int, environment *string, first *int, offset *int) int
+		ConnectorService      func(childComplexity int, remoteEnvironment string) int
+		Environments          func(childComplexity int, remoteEnvironment *string) int
+		Deployments           func(childComplexity int, environment string, excludeFunctions *bool) int
+		ResourceQuotas        func(childComplexity int, environment string) int
+		ResourceQuotasStatus  func(childComplexity int, environment string) int
+		Functions             func(childComplexity int, environment string, first *int, offset *int) int
+		Content               func(childComplexity int, contentType string, id string) int
+		Topics                func(childComplexity int, input []InputTopic, internal *bool) int
+		EventActivations      func(childComplexity int, environment string) int
+		LimitRanges           func(childComplexity int, environment string) int
+		Idppreset             func(childComplexity int, name string) int
+		Idppresets            func(childComplexity int, first *int, offset *int) int
 	}
 
 	RemoteEnvironment struct {
 		Name                  func(childComplexity int) int
 		Description           func(childComplexity int) int
-		Source                func(childComplexity int) int
+		Labels                func(childComplexity int) int
 		Services              func(childComplexity int) int
 		EnabledInEnvironments func(childComplexity int) int
 		Status                func(childComplexity int) int
@@ -245,12 +291,6 @@ type ComplexityRoot struct {
 		ProviderDisplayName func(childComplexity int) int
 		Tags                func(childComplexity int) int
 		Entries             func(childComplexity int) int
-	}
-
-	RemoteEnvironmentSource struct {
-		Environment func(childComplexity int) int
-		Type        func(childComplexity int) int
-		Namespace   func(childComplexity int) int
 	}
 
 	ResourceQuota struct {
@@ -300,8 +340,8 @@ type ComplexityRoot struct {
 	}
 
 	ServiceBindingEvent struct {
-		Type    func(childComplexity int) int
-		Binding func(childComplexity int) int
+		Type           func(childComplexity int) int
+		ServiceBinding func(childComplexity int) int
 	}
 
 	ServiceBindingStatus struct {
@@ -320,8 +360,8 @@ type ComplexityRoot struct {
 	}
 
 	ServiceBindingUsageEvent struct {
-		Type         func(childComplexity int) int
-		BindingUsage func(childComplexity int) int
+		Type                func(childComplexity int) int
+		ServiceBindingUsage func(childComplexity int) int
 	}
 
 	ServiceBindingUsageParameters struct {
@@ -334,12 +374,30 @@ type ComplexityRoot struct {
 		Message func(childComplexity int) int
 	}
 
+	ServiceBindings struct {
+		ServiceBindings func(childComplexity int) int
+		Stats           func(childComplexity int) int
+	}
+
+	ServiceBindingsStats struct {
+		Ready   func(childComplexity int) int
+		Failed  func(childComplexity int) int
+		Pending func(childComplexity int) int
+		Unknown func(childComplexity int) int
+	}
+
 	ServiceBroker struct {
 		Name              func(childComplexity int) int
+		Environment       func(childComplexity int) int
 		Status            func(childComplexity int) int
 		CreationTimestamp func(childComplexity int) int
 		Url               func(childComplexity int) int
 		Labels            func(childComplexity int) int
+	}
+
+	ServiceBrokerEvent struct {
+		Type          func(childComplexity int) int
+		ServiceBroker func(childComplexity int) int
 	}
 
 	ServiceBrokerStatus struct {
@@ -350,6 +408,7 @@ type ComplexityRoot struct {
 
 	ServiceClass struct {
 		Name                func(childComplexity int) int
+		Environment         func(childComplexity int) int
 		ExternalName        func(childComplexity int) int
 		DisplayName         func(childComplexity int) int
 		CreationTimestamp   func(childComplexity int) int
@@ -368,26 +427,32 @@ type ComplexityRoot struct {
 	}
 
 	ServiceInstance struct {
-		Name                    func(childComplexity int) int
-		Environment             func(childComplexity int) int
-		ServiceClassName        func(childComplexity int) int
-		ServiceClassDisplayName func(childComplexity int) int
-		ServicePlanName         func(childComplexity int) int
-		ServicePlanDisplayName  func(childComplexity int) int
-		ServicePlanSpec         func(childComplexity int) int
-		CreationTimestamp       func(childComplexity int) int
-		Labels                  func(childComplexity int) int
-		Status                  func(childComplexity int) int
-		ServicePlan             func(childComplexity int) int
-		ServiceClass            func(childComplexity int) int
-		Bindable                func(childComplexity int) int
-		ServiceBindings         func(childComplexity int) int
-		ServiceBindingUsages    func(childComplexity int) int
+		Name                 func(childComplexity int) int
+		Environment          func(childComplexity int) int
+		PlanSpec             func(childComplexity int) int
+		CreationTimestamp    func(childComplexity int) int
+		Labels               func(childComplexity int) int
+		Status               func(childComplexity int) int
+		ClassReference       func(childComplexity int) int
+		PlanReference        func(childComplexity int) int
+		ServiceClass         func(childComplexity int) int
+		ClusterServiceClass  func(childComplexity int) int
+		ServicePlan          func(childComplexity int) int
+		ClusterServicePlan   func(childComplexity int) int
+		Bindable             func(childComplexity int) int
+		ServiceBindings      func(childComplexity int) int
+		ServiceBindingUsages func(childComplexity int) int
 	}
 
 	ServiceInstanceEvent struct {
-		Type     func(childComplexity int) int
-		Instance func(childComplexity int) int
+		Type            func(childComplexity int) int
+		ServiceInstance func(childComplexity int) int
+	}
+
+	ServiceInstanceResourceRef struct {
+		Name        func(childComplexity int) int
+		DisplayName func(childComplexity int) int
+		ClusterWide func(childComplexity int) int
 	}
 
 	ServiceInstanceStatus struct {
@@ -398,6 +463,7 @@ type ComplexityRoot struct {
 
 	ServicePlan struct {
 		Name                          func(childComplexity int) int
+		Environment                   func(childComplexity int) int
 		DisplayName                   func(childComplexity int) int
 		ExternalName                  func(childComplexity int) int
 		Description                   func(childComplexity int) int
@@ -409,6 +475,8 @@ type ComplexityRoot struct {
 		ServiceInstanceEvent                       func(childComplexity int, environment string) int
 		ServiceBindingEventForServiceInstance      func(childComplexity int, serviceInstanceName string, environment string) int
 		ServiceBindingUsageEventForServiceInstance func(childComplexity int, serviceInstanceName string, environment string) int
+		ServiceBrokerEvent                         func(childComplexity int, environment string) int
+		ClusterServiceBrokerEvent                  func(childComplexity int) int
 	}
 
 	Title struct {
@@ -437,6 +505,13 @@ type ComplexityRoot struct {
 	}
 }
 
+type ClusterServiceClassResolver interface {
+	Plans(ctx context.Context, obj *ClusterServiceClass) ([]ClusterServicePlan, error)
+	Activated(ctx context.Context, obj *ClusterServiceClass) (bool, error)
+	APISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
+	AsyncAPISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
+	Content(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
+}
 type DeploymentResolver interface {
 	BoundServiceInstanceNames(ctx context.Context, obj *Deployment) ([]string, error)
 }
@@ -458,14 +533,19 @@ type MutationResolver interface {
 type QueryResolver interface {
 	ServiceInstance(ctx context.Context, name string, environment string) (*ServiceInstance, error)
 	ServiceInstances(ctx context.Context, environment string, first *int, offset *int, status *InstanceStatusType) ([]ServiceInstance, error)
-	ServiceClasses(ctx context.Context, first *int, offset *int) ([]ServiceClass, error)
-	ServiceClass(ctx context.Context, name string) (*ServiceClass, error)
-	ServiceBrokers(ctx context.Context, first *int, offset *int) ([]ServiceBroker, error)
-	ServiceBroker(ctx context.Context, name string) (*ServiceBroker, error)
+	ClusterServiceClasses(ctx context.Context, first *int, offset *int) ([]ClusterServiceClass, error)
+	ClusterServiceClass(ctx context.Context, name string) (*ClusterServiceClass, error)
+	ServiceClasses(ctx context.Context, environment string, first *int, offset *int) ([]ServiceClass, error)
+	ServiceClass(ctx context.Context, environment string, name string) (*ServiceClass, error)
+	ClusterServiceBrokers(ctx context.Context, first *int, offset *int) ([]ClusterServiceBroker, error)
+	ClusterServiceBroker(ctx context.Context, name string) (*ClusterServiceBroker, error)
+	ServiceBrokers(ctx context.Context, environment string, first *int, offset *int) ([]ServiceBroker, error)
+	ServiceBroker(ctx context.Context, name string, environment string) (*ServiceBroker, error)
 	ServiceBindingUsage(ctx context.Context, name string, environment string) (*ServiceBindingUsage, error)
 	ServiceBinding(ctx context.Context, name string, environment string) (*ServiceBinding, error)
 	UsageKinds(ctx context.Context, first *int, offset *int) ([]UsageKind, error)
 	UsageKindResources(ctx context.Context, usageKind string, environment string) ([]UsageKindResource, error)
+	BindableResources(ctx context.Context, environment string) ([]BindableResourcesOutputItem, error)
 	Apis(ctx context.Context, environment string, serviceName *string, hostname *string) ([]API, error)
 	RemoteEnvironment(ctx context.Context, name string) (*RemoteEnvironment, error)
 	RemoteEnvironments(ctx context.Context, environment *string, first *int, offset *int) ([]RemoteEnvironment, error)
@@ -500,16 +580,20 @@ type ServiceClassResolver interface {
 	Content(ctx context.Context, obj *ServiceClass) (*JSON, error)
 }
 type ServiceInstanceResolver interface {
-	ServicePlan(ctx context.Context, obj *ServiceInstance) (*ServicePlan, error)
 	ServiceClass(ctx context.Context, obj *ServiceInstance) (*ServiceClass, error)
+	ClusterServiceClass(ctx context.Context, obj *ServiceInstance) (*ClusterServiceClass, error)
+	ServicePlan(ctx context.Context, obj *ServiceInstance) (*ServicePlan, error)
+	ClusterServicePlan(ctx context.Context, obj *ServiceInstance) (*ClusterServicePlan, error)
 	Bindable(ctx context.Context, obj *ServiceInstance) (bool, error)
-	ServiceBindings(ctx context.Context, obj *ServiceInstance) ([]ServiceBinding, error)
+	ServiceBindings(ctx context.Context, obj *ServiceInstance) (ServiceBindings, error)
 	ServiceBindingUsages(ctx context.Context, obj *ServiceInstance) ([]ServiceBindingUsage, error)
 }
 type SubscriptionResolver interface {
 	ServiceInstanceEvent(ctx context.Context, environment string) (<-chan ServiceInstanceEvent, error)
 	ServiceBindingEventForServiceInstance(ctx context.Context, serviceInstanceName string, environment string) (<-chan ServiceBindingEvent, error)
 	ServiceBindingUsageEventForServiceInstance(ctx context.Context, serviceInstanceName string, environment string) (<-chan ServiceBindingUsageEvent, error)
+	ServiceBrokerEvent(ctx context.Context, environment string) (<-chan ServiceBrokerEvent, error)
+	ClusterServiceBrokerEvent(ctx context.Context) (<-chan ClusterServiceBrokerEvent, error)
 }
 
 func field_Mutation_createServiceInstance_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -829,7 +913,7 @@ func field_Query_serviceInstances_args(rawArgs map[string]interface{}) (map[stri
 
 }
 
-func field_Query_serviceClasses_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query_clusterServiceClasses_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 *int
 	if tmp, ok := rawArgs["first"]; ok {
@@ -863,7 +947,123 @@ func field_Query_serviceClasses_args(rawArgs map[string]interface{}) (map[string
 
 }
 
+func field_Query_clusterServiceClass_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+
+}
+
+func field_Query_serviceClasses_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["environment"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["environment"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg2
+	return args, nil
+
+}
+
 func field_Query_serviceClass_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["environment"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["environment"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	return args, nil
+
+}
+
+func field_Query_clusterServiceBrokers_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg1
+	return args, nil
+
+}
+
+func field_Query_clusterServiceBroker_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
@@ -880,22 +1080,17 @@ func field_Query_serviceClass_args(rawArgs map[string]interface{}) (map[string]i
 
 func field_Query_serviceBrokers_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["first"]; ok {
+	var arg0 string
+	if tmp, ok := rawArgs["environment"]; ok {
 		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg0 = &ptr1
-		}
-
+		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["first"] = arg0
+	args["environment"] = arg0
 	var arg1 *int
-	if tmp, ok := rawArgs["offset"]; ok {
+	if tmp, ok := rawArgs["first"]; ok {
 		var err error
 		var ptr1 int
 		if tmp != nil {
@@ -907,7 +1102,21 @@ func field_Query_serviceBrokers_args(rawArgs map[string]interface{}) (map[string
 			return nil, err
 		}
 	}
-	args["offset"] = arg1
+	args["first"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg2
 	return args, nil
 
 }
@@ -923,6 +1132,15 @@ func field_Query_serviceBroker_args(rawArgs map[string]interface{}) (map[string]
 		}
 	}
 	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["environment"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["environment"] = arg1
 	return args, nil
 
 }
@@ -1029,6 +1247,21 @@ func field_Query_usageKindResources_args(rawArgs map[string]interface{}) (map[st
 		}
 	}
 	args["environment"] = arg1
+	return args, nil
+
+}
+
+func field_Query_bindableResources_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["environment"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["environment"] = arg0
 	return args, nil
 
 }
@@ -1497,6 +1730,21 @@ func field_Subscription_serviceBindingUsageEventForServiceInstance_args(rawArgs 
 
 }
 
+func field_Subscription_serviceBrokerEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["environment"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["environment"] = arg0
+	return args, nil
+
+}
+
 func field___Type_fields_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 bool
@@ -1588,6 +1836,223 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AuthenticationPolicy.JwksUri(childComplexity), true
+
+	case "BindableResourcesOutputItem.kind":
+		if e.complexity.BindableResourcesOutputItem.Kind == nil {
+			break
+		}
+
+		return e.complexity.BindableResourcesOutputItem.Kind(childComplexity), true
+
+	case "BindableResourcesOutputItem.resources":
+		if e.complexity.BindableResourcesOutputItem.Resources == nil {
+			break
+		}
+
+		return e.complexity.BindableResourcesOutputItem.Resources(childComplexity), true
+
+	case "ClusterServiceBroker.name":
+		if e.complexity.ClusterServiceBroker.Name == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceBroker.Name(childComplexity), true
+
+	case "ClusterServiceBroker.status":
+		if e.complexity.ClusterServiceBroker.Status == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceBroker.Status(childComplexity), true
+
+	case "ClusterServiceBroker.creationTimestamp":
+		if e.complexity.ClusterServiceBroker.CreationTimestamp == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceBroker.CreationTimestamp(childComplexity), true
+
+	case "ClusterServiceBroker.url":
+		if e.complexity.ClusterServiceBroker.Url == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceBroker.Url(childComplexity), true
+
+	case "ClusterServiceBroker.labels":
+		if e.complexity.ClusterServiceBroker.Labels == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceBroker.Labels(childComplexity), true
+
+	case "ClusterServiceBrokerEvent.type":
+		if e.complexity.ClusterServiceBrokerEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceBrokerEvent.Type(childComplexity), true
+
+	case "ClusterServiceBrokerEvent.clusterServiceBroker":
+		if e.complexity.ClusterServiceBrokerEvent.ClusterServiceBroker == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceBrokerEvent.ClusterServiceBroker(childComplexity), true
+
+	case "ClusterServiceClass.name":
+		if e.complexity.ClusterServiceClass.Name == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.Name(childComplexity), true
+
+	case "ClusterServiceClass.externalName":
+		if e.complexity.ClusterServiceClass.ExternalName == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.ExternalName(childComplexity), true
+
+	case "ClusterServiceClass.displayName":
+		if e.complexity.ClusterServiceClass.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.DisplayName(childComplexity), true
+
+	case "ClusterServiceClass.creationTimestamp":
+		if e.complexity.ClusterServiceClass.CreationTimestamp == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.CreationTimestamp(childComplexity), true
+
+	case "ClusterServiceClass.description":
+		if e.complexity.ClusterServiceClass.Description == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.Description(childComplexity), true
+
+	case "ClusterServiceClass.longDescription":
+		if e.complexity.ClusterServiceClass.LongDescription == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.LongDescription(childComplexity), true
+
+	case "ClusterServiceClass.imageUrl":
+		if e.complexity.ClusterServiceClass.ImageUrl == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.ImageUrl(childComplexity), true
+
+	case "ClusterServiceClass.documentationUrl":
+		if e.complexity.ClusterServiceClass.DocumentationUrl == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.DocumentationUrl(childComplexity), true
+
+	case "ClusterServiceClass.supportUrl":
+		if e.complexity.ClusterServiceClass.SupportUrl == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.SupportUrl(childComplexity), true
+
+	case "ClusterServiceClass.providerDisplayName":
+		if e.complexity.ClusterServiceClass.ProviderDisplayName == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.ProviderDisplayName(childComplexity), true
+
+	case "ClusterServiceClass.tags":
+		if e.complexity.ClusterServiceClass.Tags == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.Tags(childComplexity), true
+
+	case "ClusterServiceClass.plans":
+		if e.complexity.ClusterServiceClass.Plans == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.Plans(childComplexity), true
+
+	case "ClusterServiceClass.activated":
+		if e.complexity.ClusterServiceClass.Activated == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.Activated(childComplexity), true
+
+	case "ClusterServiceClass.apiSpec":
+		if e.complexity.ClusterServiceClass.ApiSpec == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.ApiSpec(childComplexity), true
+
+	case "ClusterServiceClass.asyncApiSpec":
+		if e.complexity.ClusterServiceClass.AsyncApiSpec == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.AsyncApiSpec(childComplexity), true
+
+	case "ClusterServiceClass.content":
+		if e.complexity.ClusterServiceClass.Content == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.Content(childComplexity), true
+
+	case "ClusterServicePlan.name":
+		if e.complexity.ClusterServicePlan.Name == nil {
+			break
+		}
+
+		return e.complexity.ClusterServicePlan.Name(childComplexity), true
+
+	case "ClusterServicePlan.displayName":
+		if e.complexity.ClusterServicePlan.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.ClusterServicePlan.DisplayName(childComplexity), true
+
+	case "ClusterServicePlan.externalName":
+		if e.complexity.ClusterServicePlan.ExternalName == nil {
+			break
+		}
+
+		return e.complexity.ClusterServicePlan.ExternalName(childComplexity), true
+
+	case "ClusterServicePlan.description":
+		if e.complexity.ClusterServicePlan.Description == nil {
+			break
+		}
+
+		return e.complexity.ClusterServicePlan.Description(childComplexity), true
+
+	case "ClusterServicePlan.relatedClusterServiceClassName":
+		if e.complexity.ClusterServicePlan.RelatedClusterServiceClassName == nil {
+			break
+		}
+
+		return e.complexity.ClusterServicePlan.RelatedClusterServiceClassName(childComplexity), true
+
+	case "ClusterServicePlan.instanceCreateParameterSchema":
+		if e.complexity.ClusterServicePlan.InstanceCreateParameterSchema == nil {
+			break
+		}
+
+		return e.complexity.ClusterServicePlan.InstanceCreateParameterSchema(childComplexity), true
 
 	case "ConnectorService.url":
 		if e.complexity.ConnectorService.Url == nil {
@@ -1834,12 +2299,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EventActivation.DisplayName(childComplexity), true
 
-	case "EventActivation.source":
-		if e.complexity.EventActivation.Source == nil {
+	case "EventActivation.sourceId":
+		if e.complexity.EventActivation.SourceId == nil {
 			break
 		}
 
-		return e.complexity.EventActivation.Source(childComplexity), true
+		return e.complexity.EventActivation.SourceId(childComplexity), true
 
 	case "EventActivation.events":
 		if e.complexity.EventActivation.Events == nil {
@@ -1868,27 +2333,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EventActivationEvent.Description(childComplexity), true
-
-	case "EventActivationSource.environment":
-		if e.complexity.EventActivationSource.Environment == nil {
-			break
-		}
-
-		return e.complexity.EventActivationSource.Environment(childComplexity), true
-
-	case "EventActivationSource.type":
-		if e.complexity.EventActivationSource.Type == nil {
-			break
-		}
-
-		return e.complexity.EventActivationSource.Type(childComplexity), true
-
-	case "EventActivationSource.namespace":
-		if e.complexity.EventActivationSource.Namespace == nil {
-			break
-		}
-
-		return e.complexity.EventActivationSource.Namespace(childComplexity), true
 
 	case "ExceededQuota.quotaName":
 		if e.complexity.ExceededQuota.QuotaName == nil {
@@ -2167,6 +2611,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ServiceInstances(childComplexity, args["environment"].(string), args["first"].(*int), args["offset"].(*int), args["status"].(*InstanceStatusType)), true
 
+	case "Query.clusterServiceClasses":
+		if e.complexity.Query.ClusterServiceClasses == nil {
+			break
+		}
+
+		args, err := field_Query_clusterServiceClasses_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ClusterServiceClasses(childComplexity, args["first"].(*int), args["offset"].(*int)), true
+
+	case "Query.clusterServiceClass":
+		if e.complexity.Query.ClusterServiceClass == nil {
+			break
+		}
+
+		args, err := field_Query_clusterServiceClass_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ClusterServiceClass(childComplexity, args["name"].(string)), true
+
 	case "Query.serviceClasses":
 		if e.complexity.Query.ServiceClasses == nil {
 			break
@@ -2177,7 +2645,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceClasses(childComplexity, args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.ServiceClasses(childComplexity, args["environment"].(string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.serviceClass":
 		if e.complexity.Query.ServiceClass == nil {
@@ -2189,7 +2657,31 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceClass(childComplexity, args["name"].(string)), true
+		return e.complexity.Query.ServiceClass(childComplexity, args["environment"].(string), args["name"].(string)), true
+
+	case "Query.clusterServiceBrokers":
+		if e.complexity.Query.ClusterServiceBrokers == nil {
+			break
+		}
+
+		args, err := field_Query_clusterServiceBrokers_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ClusterServiceBrokers(childComplexity, args["first"].(*int), args["offset"].(*int)), true
+
+	case "Query.clusterServiceBroker":
+		if e.complexity.Query.ClusterServiceBroker == nil {
+			break
+		}
+
+		args, err := field_Query_clusterServiceBroker_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ClusterServiceBroker(childComplexity, args["name"].(string)), true
 
 	case "Query.serviceBrokers":
 		if e.complexity.Query.ServiceBrokers == nil {
@@ -2201,7 +2693,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceBrokers(childComplexity, args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.ServiceBrokers(childComplexity, args["environment"].(string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.serviceBroker":
 		if e.complexity.Query.ServiceBroker == nil {
@@ -2213,7 +2705,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceBroker(childComplexity, args["name"].(string)), true
+		return e.complexity.Query.ServiceBroker(childComplexity, args["name"].(string), args["environment"].(string)), true
 
 	case "Query.serviceBindingUsage":
 		if e.complexity.Query.ServiceBindingUsage == nil {
@@ -2262,6 +2754,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.UsageKindResources(childComplexity, args["usageKind"].(string), args["environment"].(string)), true
+
+	case "Query.bindableResources":
+		if e.complexity.Query.BindableResources == nil {
+			break
+		}
+
+		args, err := field_Query_bindableResources_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BindableResources(childComplexity, args["environment"].(string)), true
 
 	case "Query.apis":
 		if e.complexity.Query.Apis == nil {
@@ -2457,12 +2961,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RemoteEnvironment.Description(childComplexity), true
 
-	case "RemoteEnvironment.source":
-		if e.complexity.RemoteEnvironment.Source == nil {
+	case "RemoteEnvironment.labels":
+		if e.complexity.RemoteEnvironment.Labels == nil {
 			break
 		}
 
-		return e.complexity.RemoteEnvironment.Source(childComplexity), true
+		return e.complexity.RemoteEnvironment.Labels(childComplexity), true
 
 	case "RemoteEnvironment.services":
 		if e.complexity.RemoteEnvironment.Services == nil {
@@ -2547,27 +3051,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.RemoteEnvironmentService.Entries(childComplexity), true
-
-	case "RemoteEnvironmentSource.environment":
-		if e.complexity.RemoteEnvironmentSource.Environment == nil {
-			break
-		}
-
-		return e.complexity.RemoteEnvironmentSource.Environment(childComplexity), true
-
-	case "RemoteEnvironmentSource.type":
-		if e.complexity.RemoteEnvironmentSource.Type == nil {
-			break
-		}
-
-		return e.complexity.RemoteEnvironmentSource.Type(childComplexity), true
-
-	case "RemoteEnvironmentSource.namespace":
-		if e.complexity.RemoteEnvironmentSource.Namespace == nil {
-			break
-		}
-
-		return e.complexity.RemoteEnvironmentSource.Namespace(childComplexity), true
 
 	case "ResourceQuota.name":
 		if e.complexity.ResourceQuota.Name == nil {
@@ -2730,12 +3213,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceBindingEvent.Type(childComplexity), true
 
-	case "ServiceBindingEvent.binding":
-		if e.complexity.ServiceBindingEvent.Binding == nil {
+	case "ServiceBindingEvent.serviceBinding":
+		if e.complexity.ServiceBindingEvent.ServiceBinding == nil {
 			break
 		}
 
-		return e.complexity.ServiceBindingEvent.Binding(childComplexity), true
+		return e.complexity.ServiceBindingEvent.ServiceBinding(childComplexity), true
 
 	case "ServiceBindingStatus.type":
 		if e.complexity.ServiceBindingStatus.Type == nil {
@@ -2807,12 +3290,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceBindingUsageEvent.Type(childComplexity), true
 
-	case "ServiceBindingUsageEvent.bindingUsage":
-		if e.complexity.ServiceBindingUsageEvent.BindingUsage == nil {
+	case "ServiceBindingUsageEvent.serviceBindingUsage":
+		if e.complexity.ServiceBindingUsageEvent.ServiceBindingUsage == nil {
 			break
 		}
 
-		return e.complexity.ServiceBindingUsageEvent.BindingUsage(childComplexity), true
+		return e.complexity.ServiceBindingUsageEvent.ServiceBindingUsage(childComplexity), true
 
 	case "ServiceBindingUsageParameters.envPrefix":
 		if e.complexity.ServiceBindingUsageParameters.EnvPrefix == nil {
@@ -2842,12 +3325,61 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceBindingUsageStatus.Message(childComplexity), true
 
+	case "ServiceBindings.serviceBindings":
+		if e.complexity.ServiceBindings.ServiceBindings == nil {
+			break
+		}
+
+		return e.complexity.ServiceBindings.ServiceBindings(childComplexity), true
+
+	case "ServiceBindings.stats":
+		if e.complexity.ServiceBindings.Stats == nil {
+			break
+		}
+
+		return e.complexity.ServiceBindings.Stats(childComplexity), true
+
+	case "ServiceBindingsStats.ready":
+		if e.complexity.ServiceBindingsStats.Ready == nil {
+			break
+		}
+
+		return e.complexity.ServiceBindingsStats.Ready(childComplexity), true
+
+	case "ServiceBindingsStats.failed":
+		if e.complexity.ServiceBindingsStats.Failed == nil {
+			break
+		}
+
+		return e.complexity.ServiceBindingsStats.Failed(childComplexity), true
+
+	case "ServiceBindingsStats.pending":
+		if e.complexity.ServiceBindingsStats.Pending == nil {
+			break
+		}
+
+		return e.complexity.ServiceBindingsStats.Pending(childComplexity), true
+
+	case "ServiceBindingsStats.unknown":
+		if e.complexity.ServiceBindingsStats.Unknown == nil {
+			break
+		}
+
+		return e.complexity.ServiceBindingsStats.Unknown(childComplexity), true
+
 	case "ServiceBroker.name":
 		if e.complexity.ServiceBroker.Name == nil {
 			break
 		}
 
 		return e.complexity.ServiceBroker.Name(childComplexity), true
+
+	case "ServiceBroker.environment":
+		if e.complexity.ServiceBroker.Environment == nil {
+			break
+		}
+
+		return e.complexity.ServiceBroker.Environment(childComplexity), true
 
 	case "ServiceBroker.status":
 		if e.complexity.ServiceBroker.Status == nil {
@@ -2877,6 +3409,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceBroker.Labels(childComplexity), true
 
+	case "ServiceBrokerEvent.type":
+		if e.complexity.ServiceBrokerEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.ServiceBrokerEvent.Type(childComplexity), true
+
+	case "ServiceBrokerEvent.serviceBroker":
+		if e.complexity.ServiceBrokerEvent.ServiceBroker == nil {
+			break
+		}
+
+		return e.complexity.ServiceBrokerEvent.ServiceBroker(childComplexity), true
+
 	case "ServiceBrokerStatus.ready":
 		if e.complexity.ServiceBrokerStatus.Ready == nil {
 			break
@@ -2904,6 +3450,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ServiceClass.Name(childComplexity), true
+
+	case "ServiceClass.environment":
+		if e.complexity.ServiceClass.Environment == nil {
+			break
+		}
+
+		return e.complexity.ServiceClass.Environment(childComplexity), true
 
 	case "ServiceClass.externalName":
 		if e.complexity.ServiceClass.ExternalName == nil {
@@ -3024,40 +3577,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceInstance.Environment(childComplexity), true
 
-	case "ServiceInstance.serviceClassName":
-		if e.complexity.ServiceInstance.ServiceClassName == nil {
+	case "ServiceInstance.planSpec":
+		if e.complexity.ServiceInstance.PlanSpec == nil {
 			break
 		}
 
-		return e.complexity.ServiceInstance.ServiceClassName(childComplexity), true
-
-	case "ServiceInstance.ServiceClassDisplayName":
-		if e.complexity.ServiceInstance.ServiceClassDisplayName == nil {
-			break
-		}
-
-		return e.complexity.ServiceInstance.ServiceClassDisplayName(childComplexity), true
-
-	case "ServiceInstance.servicePlanName":
-		if e.complexity.ServiceInstance.ServicePlanName == nil {
-			break
-		}
-
-		return e.complexity.ServiceInstance.ServicePlanName(childComplexity), true
-
-	case "ServiceInstance.servicePlanDisplayName":
-		if e.complexity.ServiceInstance.ServicePlanDisplayName == nil {
-			break
-		}
-
-		return e.complexity.ServiceInstance.ServicePlanDisplayName(childComplexity), true
-
-	case "ServiceInstance.servicePlanSpec":
-		if e.complexity.ServiceInstance.ServicePlanSpec == nil {
-			break
-		}
-
-		return e.complexity.ServiceInstance.ServicePlanSpec(childComplexity), true
+		return e.complexity.ServiceInstance.PlanSpec(childComplexity), true
 
 	case "ServiceInstance.creationTimestamp":
 		if e.complexity.ServiceInstance.CreationTimestamp == nil {
@@ -3080,12 +3605,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceInstance.Status(childComplexity), true
 
-	case "ServiceInstance.servicePlan":
-		if e.complexity.ServiceInstance.ServicePlan == nil {
+	case "ServiceInstance.classReference":
+		if e.complexity.ServiceInstance.ClassReference == nil {
 			break
 		}
 
-		return e.complexity.ServiceInstance.ServicePlan(childComplexity), true
+		return e.complexity.ServiceInstance.ClassReference(childComplexity), true
+
+	case "ServiceInstance.planReference":
+		if e.complexity.ServiceInstance.PlanReference == nil {
+			break
+		}
+
+		return e.complexity.ServiceInstance.PlanReference(childComplexity), true
 
 	case "ServiceInstance.serviceClass":
 		if e.complexity.ServiceInstance.ServiceClass == nil {
@@ -3093,6 +3625,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ServiceInstance.ServiceClass(childComplexity), true
+
+	case "ServiceInstance.clusterServiceClass":
+		if e.complexity.ServiceInstance.ClusterServiceClass == nil {
+			break
+		}
+
+		return e.complexity.ServiceInstance.ClusterServiceClass(childComplexity), true
+
+	case "ServiceInstance.servicePlan":
+		if e.complexity.ServiceInstance.ServicePlan == nil {
+			break
+		}
+
+		return e.complexity.ServiceInstance.ServicePlan(childComplexity), true
+
+	case "ServiceInstance.clusterServicePlan":
+		if e.complexity.ServiceInstance.ClusterServicePlan == nil {
+			break
+		}
+
+		return e.complexity.ServiceInstance.ClusterServicePlan(childComplexity), true
 
 	case "ServiceInstance.bindable":
 		if e.complexity.ServiceInstance.Bindable == nil {
@@ -3122,12 +3675,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceInstanceEvent.Type(childComplexity), true
 
-	case "ServiceInstanceEvent.instance":
-		if e.complexity.ServiceInstanceEvent.Instance == nil {
+	case "ServiceInstanceEvent.serviceInstance":
+		if e.complexity.ServiceInstanceEvent.ServiceInstance == nil {
 			break
 		}
 
-		return e.complexity.ServiceInstanceEvent.Instance(childComplexity), true
+		return e.complexity.ServiceInstanceEvent.ServiceInstance(childComplexity), true
+
+	case "ServiceInstanceResourceRef.name":
+		if e.complexity.ServiceInstanceResourceRef.Name == nil {
+			break
+		}
+
+		return e.complexity.ServiceInstanceResourceRef.Name(childComplexity), true
+
+	case "ServiceInstanceResourceRef.displayName":
+		if e.complexity.ServiceInstanceResourceRef.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.ServiceInstanceResourceRef.DisplayName(childComplexity), true
+
+	case "ServiceInstanceResourceRef.clusterWide":
+		if e.complexity.ServiceInstanceResourceRef.ClusterWide == nil {
+			break
+		}
+
+		return e.complexity.ServiceInstanceResourceRef.ClusterWide(childComplexity), true
 
 	case "ServiceInstanceStatus.type":
 		if e.complexity.ServiceInstanceStatus.Type == nil {
@@ -3156,6 +3730,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ServicePlan.Name(childComplexity), true
+
+	case "ServicePlan.environment":
+		if e.complexity.ServicePlan.Environment == nil {
+			break
+		}
+
+		return e.complexity.ServicePlan.Environment(childComplexity), true
 
 	case "ServicePlan.displayName":
 		if e.complexity.ServicePlan.DisplayName == nil {
@@ -3227,6 +3808,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.ServiceBindingUsageEventForServiceInstance(childComplexity, args["serviceInstanceName"].(string), args["environment"].(string)), true
+
+	case "Subscription.serviceBrokerEvent":
+		if e.complexity.Subscription.ServiceBrokerEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_serviceBrokerEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.ServiceBrokerEvent(childComplexity, args["environment"].(string)), true
+
+	case "Subscription.clusterServiceBrokerEvent":
+		if e.complexity.Subscription.ClusterServiceBrokerEvent == nil {
+			break
+		}
+
+		return e.complexity.Subscription.ClusterServiceBrokerEvent(childComplexity), true
 
 	case "Title.name":
 		if e.complexity.Title.Name == nil {
@@ -3663,6 +4263,1044 @@ func (ec *executionContext) _AuthenticationPolicy_jwksURI(ctx context.Context, f
 	res := resTmp.(string)
 	rctx.Result = res
 	return graphql.MarshalString(res)
+}
+
+var bindableResourcesOutputItemImplementors = []string{"BindableResourcesOutputItem"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _BindableResourcesOutputItem(ctx context.Context, sel ast.SelectionSet, obj *BindableResourcesOutputItem) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, bindableResourcesOutputItemImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("BindableResourcesOutputItem")
+		case "kind":
+			out.Values[i] = ec._BindableResourcesOutputItem_kind(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "resources":
+			out.Values[i] = ec._BindableResourcesOutputItem_resources(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _BindableResourcesOutputItem_kind(ctx context.Context, field graphql.CollectedField, obj *BindableResourcesOutputItem) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "BindableResourcesOutputItem",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Kind, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _BindableResourcesOutputItem_resources(ctx context.Context, field graphql.CollectedField, obj *BindableResourcesOutputItem) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "BindableResourcesOutputItem",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Resources, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]UsageKindResource)
+	rctx.Result = res
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._UsageKindResource(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+var clusterServiceBrokerImplementors = []string{"ClusterServiceBroker"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ClusterServiceBroker(ctx context.Context, sel ast.SelectionSet, obj *ClusterServiceBroker) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, clusterServiceBrokerImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterServiceBroker")
+		case "name":
+			out.Values[i] = ec._ClusterServiceBroker_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "status":
+			out.Values[i] = ec._ClusterServiceBroker_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "creationTimestamp":
+			out.Values[i] = ec._ClusterServiceBroker_creationTimestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "url":
+			out.Values[i] = ec._ClusterServiceBroker_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "labels":
+			out.Values[i] = ec._ClusterServiceBroker_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceBroker_name(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceBroker",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceBroker_status(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceBroker",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ServiceBrokerStatus)
+	rctx.Result = res
+
+	return ec._ServiceBrokerStatus(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceBroker_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceBroker",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.CreationTimestamp, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	return MarshalTimestamp(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceBroker_url(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceBroker",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.URL, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceBroker_labels(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceBroker",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	return res
+}
+
+var clusterServiceBrokerEventImplementors = []string{"ClusterServiceBrokerEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ClusterServiceBrokerEvent(ctx context.Context, sel ast.SelectionSet, obj *ClusterServiceBrokerEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, clusterServiceBrokerEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterServiceBrokerEvent")
+		case "type":
+			out.Values[i] = ec._ClusterServiceBrokerEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "clusterServiceBroker":
+			out.Values[i] = ec._ClusterServiceBrokerEvent_clusterServiceBroker(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceBrokerEvent_type(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBrokerEvent) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceBrokerEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceBrokerEvent_clusterServiceBroker(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBrokerEvent) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceBrokerEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.ClusterServiceBroker, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ClusterServiceBroker)
+	rctx.Result = res
+
+	return ec._ClusterServiceBroker(ctx, field.Selections, &res)
+}
+
+var clusterServiceClassImplementors = []string{"ClusterServiceClass"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ClusterServiceClass(ctx context.Context, sel ast.SelectionSet, obj *ClusterServiceClass) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, clusterServiceClassImplementors)
+
+	var wg sync.WaitGroup
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterServiceClass")
+		case "name":
+			out.Values[i] = ec._ClusterServiceClass_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "externalName":
+			out.Values[i] = ec._ClusterServiceClass_externalName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "displayName":
+			out.Values[i] = ec._ClusterServiceClass_displayName(ctx, field, obj)
+		case "creationTimestamp":
+			out.Values[i] = ec._ClusterServiceClass_creationTimestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "description":
+			out.Values[i] = ec._ClusterServiceClass_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "longDescription":
+			out.Values[i] = ec._ClusterServiceClass_longDescription(ctx, field, obj)
+		case "imageUrl":
+			out.Values[i] = ec._ClusterServiceClass_imageUrl(ctx, field, obj)
+		case "documentationUrl":
+			out.Values[i] = ec._ClusterServiceClass_documentationUrl(ctx, field, obj)
+		case "supportUrl":
+			out.Values[i] = ec._ClusterServiceClass_supportUrl(ctx, field, obj)
+		case "providerDisplayName":
+			out.Values[i] = ec._ClusterServiceClass_providerDisplayName(ctx, field, obj)
+		case "tags":
+			out.Values[i] = ec._ClusterServiceClass_tags(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "plans":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterServiceClass_plans(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "activated":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterServiceClass_activated(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "apiSpec":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterServiceClass_apiSpec(ctx, field, obj)
+				wg.Done()
+			}(i, field)
+		case "asyncApiSpec":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterServiceClass_asyncApiSpec(ctx, field, obj)
+				wg.Done()
+			}(i, field)
+		case "content":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterServiceClass_content(ctx, field, obj)
+				wg.Done()
+			}(i, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_name(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_externalName(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.ExternalName, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_displayName(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.DisplayName, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.CreationTimestamp, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	return MarshalTimestamp(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_description(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Description, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_longDescription(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.LongDescription, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_imageUrl(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.ImageURL, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_documentationUrl(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.DocumentationURL, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_supportUrl(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.SupportURL, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_providerDisplayName(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.ProviderDisplayName, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_tags(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Tags, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+
+	arr1 := make(graphql.Array, len(res))
+
+	for idx1 := range res {
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalString(res[idx1])
+		}()
+	}
+
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_plans(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.ClusterServiceClass().Plans(ctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ClusterServicePlan)
+	rctx.Result = res
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ClusterServicePlan(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_activated(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.ClusterServiceClass().Activated(ctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	return graphql.MarshalBoolean(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_apiSpec(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.ClusterServiceClass().APISpec(ctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*JSON)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_asyncApiSpec(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.ClusterServiceClass().AsyncAPISpec(ctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*JSON)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_content(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.ClusterServiceClass().Content(ctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*JSON)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
+}
+
+var clusterServicePlanImplementors = []string{"ClusterServicePlan"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ClusterServicePlan(ctx context.Context, sel ast.SelectionSet, obj *ClusterServicePlan) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, clusterServicePlanImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ClusterServicePlan")
+		case "name":
+			out.Values[i] = ec._ClusterServicePlan_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "displayName":
+			out.Values[i] = ec._ClusterServicePlan_displayName(ctx, field, obj)
+		case "externalName":
+			out.Values[i] = ec._ClusterServicePlan_externalName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "description":
+			out.Values[i] = ec._ClusterServicePlan_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "relatedClusterServiceClassName":
+			out.Values[i] = ec._ClusterServicePlan_relatedClusterServiceClassName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "instanceCreateParameterSchema":
+			out.Values[i] = ec._ClusterServicePlan_instanceCreateParameterSchema(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServicePlan_name(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServicePlan",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServicePlan_displayName(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServicePlan",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.DisplayName, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServicePlan_externalName(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServicePlan",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.ExternalName, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServicePlan_description(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServicePlan",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Description, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServicePlan_relatedClusterServiceClassName(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServicePlan",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.RelatedClusterServiceClassName, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServicePlan_instanceCreateParameterSchema(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServicePlan",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.InstanceCreateParameterSchema, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*JSON)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
 }
 
 var connectorServiceImplementors = []string{"ConnectorService"}
@@ -4946,8 +6584,8 @@ func (ec *executionContext) _EventActivation(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "source":
-			out.Values[i] = ec._EventActivation_source(ctx, field, obj)
+		case "sourceId":
+			out.Values[i] = ec._EventActivation_sourceId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -5016,7 +6654,7 @@ func (ec *executionContext) _EventActivation_displayName(ctx context.Context, fi
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _EventActivation_source(ctx context.Context, field graphql.CollectedField, obj *EventActivation) graphql.Marshaler {
+func (ec *executionContext) _EventActivation_sourceId(ctx context.Context, field graphql.CollectedField, obj *EventActivation) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "EventActivation",
 		Args:   nil,
@@ -5024,7 +6662,7 @@ func (ec *executionContext) _EventActivation_source(ctx context.Context, field g
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Source, nil
+		return obj.SourceID, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -5032,10 +6670,9 @@ func (ec *executionContext) _EventActivation_source(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(EventActivationSource)
+	res := resTmp.(string)
 	rctx.Result = res
-
-	return ec._EventActivationSource(ctx, field.Selections, &res)
+	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
@@ -5187,112 +6824,6 @@ func (ec *executionContext) _EventActivationEvent_description(ctx context.Contex
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Description, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
-}
-
-var eventActivationSourceImplementors = []string{"EventActivationSource"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _EventActivationSource(ctx context.Context, sel ast.SelectionSet, obj *EventActivationSource) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, eventActivationSourceImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("EventActivationSource")
-		case "environment":
-			out.Values[i] = ec._EventActivationSource_environment(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "type":
-			out.Values[i] = ec._EventActivationSource_type(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "namespace":
-			out.Values[i] = ec._EventActivationSource_namespace(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _EventActivationSource_environment(ctx context.Context, field graphql.CollectedField, obj *EventActivationSource) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "EventActivationSource",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Environment, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _EventActivationSource_type(ctx context.Context, field graphql.CollectedField, obj *EventActivationSource) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "EventActivationSource",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Type, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _EventActivationSource_namespace(ctx context.Context, field graphql.CollectedField, obj *EventActivationSource) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "EventActivationSource",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -6396,6 +7927,21 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "clusterServiceClasses":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_clusterServiceClasses(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "clusterServiceClass":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_clusterServiceClass(ctx, field)
+				wg.Done()
+			}(i, field)
 		case "serviceClasses":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -6409,6 +7955,21 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_serviceClass(ctx, field)
+				wg.Done()
+			}(i, field)
+		case "clusterServiceBrokers":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_clusterServiceBrokers(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "clusterServiceBroker":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_clusterServiceBroker(ctx, field)
 				wg.Done()
 			}(i, field)
 		case "serviceBrokers":
@@ -6451,6 +8012,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_usageKindResources(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "bindableResources":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_bindableResources(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -6686,6 +8256,97 @@ func (ec *executionContext) _Query_serviceInstances(ctx context.Context, field g
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Query_clusterServiceClasses(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_clusterServiceClasses_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Query().ClusterServiceClasses(ctx, args["first"].(*int), args["offset"].(*int))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ClusterServiceClass)
+	rctx.Result = res
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ClusterServiceClass(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_clusterServiceClass(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_clusterServiceClass_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Query().ClusterServiceClass(ctx, args["name"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ClusterServiceClass)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ClusterServiceClass(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Query_serviceClasses(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_serviceClasses_args(rawArgs)
@@ -6700,7 +8361,7 @@ func (ec *executionContext) _Query_serviceClasses(ctx context.Context, field gra
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.Query().ServiceClasses(ctx, args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().ServiceClasses(ctx, args["environment"].(string), args["first"].(*int), args["offset"].(*int))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -6761,7 +8422,7 @@ func (ec *executionContext) _Query_serviceClass(ctx context.Context, field graph
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.Query().ServiceClass(ctx, args["name"].(string))
+		return ec.resolvers.Query().ServiceClass(ctx, args["environment"].(string), args["name"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -6774,6 +8435,97 @@ func (ec *executionContext) _Query_serviceClass(ctx context.Context, field graph
 	}
 
 	return ec._ServiceClass(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_clusterServiceBrokers(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_clusterServiceBrokers_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Query().ClusterServiceBrokers(ctx, args["first"].(*int), args["offset"].(*int))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ClusterServiceBroker)
+	rctx.Result = res
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ClusterServiceBroker(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_clusterServiceBroker(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_clusterServiceBroker_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Query().ClusterServiceBroker(ctx, args["name"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ClusterServiceBroker)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ClusterServiceBroker(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -6791,7 +8543,7 @@ func (ec *executionContext) _Query_serviceBrokers(ctx context.Context, field gra
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.Query().ServiceBrokers(ctx, args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().ServiceBrokers(ctx, args["environment"].(string), args["first"].(*int), args["offset"].(*int))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -6852,7 +8604,7 @@ func (ec *executionContext) _Query_serviceBroker(ctx context.Context, field grap
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.Query().ServiceBroker(ctx, args["name"].(string))
+		return ec.resolvers.Query().ServiceBroker(ctx, args["name"].(string), args["environment"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -7036,6 +8788,67 @@ func (ec *executionContext) _Query_usageKindResources(ctx context.Context, field
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._UsageKindResource(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_bindableResources(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_bindableResources_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Query().BindableResources(ctx, args["environment"].(string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]BindableResourcesOutputItem)
+	rctx.Result = res
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._BindableResourcesOutputItem(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -7882,8 +9695,8 @@ func (ec *executionContext) _RemoteEnvironment(ctx context.Context, sel ast.Sele
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "source":
-			out.Values[i] = ec._RemoteEnvironment_source(ctx, field, obj)
+		case "labels":
+			out.Values[i] = ec._RemoteEnvironment_labels(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -7966,7 +9779,7 @@ func (ec *executionContext) _RemoteEnvironment_description(ctx context.Context, 
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _RemoteEnvironment_source(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironment) graphql.Marshaler {
+func (ec *executionContext) _RemoteEnvironment_labels(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironment) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "RemoteEnvironment",
 		Args:   nil,
@@ -7974,7 +9787,7 @@ func (ec *executionContext) _RemoteEnvironment_source(ctx context.Context, field
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Source, nil
+		return obj.Labels, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -7982,10 +9795,9 @@ func (ec *executionContext) _RemoteEnvironment_source(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(RemoteEnvironmentSource)
+	res := resTmp.(JSON)
 	rctx.Result = res
-
-	return ec._RemoteEnvironmentSource(ctx, field.Selections, &res)
+	return res
 }
 
 // nolint: vetshadow
@@ -8425,112 +10237,6 @@ func (ec *executionContext) _RemoteEnvironmentService_entries(ctx context.Contex
 	}
 	wg.Wait()
 	return arr1
-}
-
-var remoteEnvironmentSourceImplementors = []string{"RemoteEnvironmentSource"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _RemoteEnvironmentSource(ctx context.Context, sel ast.SelectionSet, obj *RemoteEnvironmentSource) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, remoteEnvironmentSourceImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("RemoteEnvironmentSource")
-		case "environment":
-			out.Values[i] = ec._RemoteEnvironmentSource_environment(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "type":
-			out.Values[i] = ec._RemoteEnvironmentSource_type(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "namespace":
-			out.Values[i] = ec._RemoteEnvironmentSource_namespace(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _RemoteEnvironmentSource_environment(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironmentSource) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "RemoteEnvironmentSource",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Environment, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _RemoteEnvironmentSource_type(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironmentSource) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "RemoteEnvironmentSource",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Type, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _RemoteEnvironmentSource_namespace(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironmentSource) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "RemoteEnvironmentSource",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Namespace, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
 }
 
 var resourceQuotaImplementors = []string{"ResourceQuota"}
@@ -9409,8 +11115,8 @@ func (ec *executionContext) _ServiceBindingEvent(ctx context.Context, sel ast.Se
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "binding":
-			out.Values[i] = ec._ServiceBindingEvent_binding(ctx, field, obj)
+		case "serviceBinding":
+			out.Values[i] = ec._ServiceBindingEvent_serviceBinding(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -9448,7 +11154,7 @@ func (ec *executionContext) _ServiceBindingEvent_type(ctx context.Context, field
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceBindingEvent_binding(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingEvent) graphql.Marshaler {
+func (ec *executionContext) _ServiceBindingEvent_serviceBinding(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingEvent) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingEvent",
 		Args:   nil,
@@ -9456,7 +11162,7 @@ func (ec *executionContext) _ServiceBindingEvent_binding(ctx context.Context, fi
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Binding, nil
+		return obj.ServiceBinding, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -9787,8 +11493,8 @@ func (ec *executionContext) _ServiceBindingUsageEvent(ctx context.Context, sel a
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "bindingUsage":
-			out.Values[i] = ec._ServiceBindingUsageEvent_bindingUsage(ctx, field, obj)
+		case "serviceBindingUsage":
+			out.Values[i] = ec._ServiceBindingUsageEvent_serviceBindingUsage(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -9826,7 +11532,7 @@ func (ec *executionContext) _ServiceBindingUsageEvent_type(ctx context.Context, 
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceBindingUsageEvent_bindingUsage(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsageEvent) graphql.Marshaler {
+func (ec *executionContext) _ServiceBindingUsageEvent_serviceBindingUsage(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsageEvent) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsageEvent",
 		Args:   nil,
@@ -9834,7 +11540,7 @@ func (ec *executionContext) _ServiceBindingUsageEvent_bindingUsage(ctx context.C
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.BindingUsage, nil
+		return obj.ServiceBindingUsage, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -10005,6 +11711,252 @@ func (ec *executionContext) _ServiceBindingUsageStatus_message(ctx context.Conte
 	return graphql.MarshalString(res)
 }
 
+var serviceBindingsImplementors = []string{"ServiceBindings"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ServiceBindings(ctx context.Context, sel ast.SelectionSet, obj *ServiceBindings) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, serviceBindingsImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ServiceBindings")
+		case "serviceBindings":
+			out.Values[i] = ec._ServiceBindings_serviceBindings(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "stats":
+			out.Values[i] = ec._ServiceBindings_stats(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBindings_serviceBindings(ctx context.Context, field graphql.CollectedField, obj *ServiceBindings) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBindings",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.ServiceBindings, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ServiceBinding)
+	rctx.Result = res
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ServiceBinding(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBindings_stats(ctx context.Context, field graphql.CollectedField, obj *ServiceBindings) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBindings",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Stats, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ServiceBindingsStats)
+	rctx.Result = res
+
+	return ec._ServiceBindingsStats(ctx, field.Selections, &res)
+}
+
+var serviceBindingsStatsImplementors = []string{"ServiceBindingsStats"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ServiceBindingsStats(ctx context.Context, sel ast.SelectionSet, obj *ServiceBindingsStats) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, serviceBindingsStatsImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ServiceBindingsStats")
+		case "ready":
+			out.Values[i] = ec._ServiceBindingsStats_ready(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "failed":
+			out.Values[i] = ec._ServiceBindingsStats_failed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "pending":
+			out.Values[i] = ec._ServiceBindingsStats_pending(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "unknown":
+			out.Values[i] = ec._ServiceBindingsStats_unknown(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBindingsStats_ready(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingsStats) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBindingsStats",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Ready, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBindingsStats_failed(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingsStats) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBindingsStats",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Failed, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBindingsStats_pending(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingsStats) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBindingsStats",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Pending, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBindingsStats_unknown(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingsStats) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBindingsStats",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Unknown, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	return graphql.MarshalInt(res)
+}
+
 var serviceBrokerImplementors = []string{"ServiceBroker"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -10021,6 +11973,11 @@ func (ec *executionContext) _ServiceBroker(ctx context.Context, sel ast.Selectio
 			out.Values[i] = graphql.MarshalString("ServiceBroker")
 		case "name":
 			out.Values[i] = ec._ServiceBroker_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "environment":
+			out.Values[i] = ec._ServiceBroker_environment(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -10065,6 +12022,28 @@ func (ec *executionContext) _ServiceBroker_name(ctx context.Context, field graph
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBroker_environment(ctx context.Context, field graphql.CollectedField, obj *ServiceBroker) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBroker",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Environment, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -10164,6 +12143,86 @@ func (ec *executionContext) _ServiceBroker_labels(ctx context.Context, field gra
 	res := resTmp.(JSON)
 	rctx.Result = res
 	return res
+}
+
+var serviceBrokerEventImplementors = []string{"ServiceBrokerEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ServiceBrokerEvent(ctx context.Context, sel ast.SelectionSet, obj *ServiceBrokerEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, serviceBrokerEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ServiceBrokerEvent")
+		case "type":
+			out.Values[i] = ec._ServiceBrokerEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "serviceBroker":
+			out.Values[i] = ec._ServiceBrokerEvent_serviceBroker(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBrokerEvent_type(ctx context.Context, field graphql.CollectedField, obj *ServiceBrokerEvent) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBrokerEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBrokerEvent_serviceBroker(ctx context.Context, field graphql.CollectedField, obj *ServiceBrokerEvent) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBrokerEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.ServiceBroker, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ServiceBroker)
+	rctx.Result = res
+
+	return ec._ServiceBroker(ctx, field.Selections, &res)
 }
 
 var serviceBrokerStatusImplementors = []string{"ServiceBrokerStatus"}
@@ -10292,6 +12351,11 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "environment":
+			out.Values[i] = ec._ServiceClass_environment(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "externalName":
 			out.Values[i] = ec._ServiceClass_externalName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -10381,6 +12445,28 @@ func (ec *executionContext) _ServiceClass_name(ctx context.Context, field graphq
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceClass_environment(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Environment, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -10799,22 +12885,8 @@ func (ec *executionContext) _ServiceInstance(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "serviceClassName":
-			out.Values[i] = ec._ServiceInstance_serviceClassName(ctx, field, obj)
-		case "ServiceClassDisplayName":
-			out.Values[i] = ec._ServiceInstance_ServiceClassDisplayName(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "servicePlanName":
-			out.Values[i] = ec._ServiceInstance_servicePlanName(ctx, field, obj)
-		case "servicePlanDisplayName":
-			out.Values[i] = ec._ServiceInstance_servicePlanDisplayName(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "servicePlanSpec":
-			out.Values[i] = ec._ServiceInstance_servicePlanSpec(ctx, field, obj)
+		case "planSpec":
+			out.Values[i] = ec._ServiceInstance_planSpec(ctx, field, obj)
 		case "creationTimestamp":
 			out.Values[i] = ec._ServiceInstance_creationTimestamp(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -10830,16 +12902,32 @@ func (ec *executionContext) _ServiceInstance(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "classReference":
+			out.Values[i] = ec._ServiceInstance_classReference(ctx, field, obj)
+		case "planReference":
+			out.Values[i] = ec._ServiceInstance_planReference(ctx, field, obj)
+		case "serviceClass":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ServiceInstance_serviceClass(ctx, field, obj)
+				wg.Done()
+			}(i, field)
+		case "clusterServiceClass":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ServiceInstance_clusterServiceClass(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		case "servicePlan":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._ServiceInstance_servicePlan(ctx, field, obj)
 				wg.Done()
 			}(i, field)
-		case "serviceClass":
+		case "clusterServicePlan":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._ServiceInstance_serviceClass(ctx, field, obj)
+				out.Values[i] = ec._ServiceInstance_clusterServicePlan(ctx, field, obj)
 				wg.Done()
 			}(i, field)
 		case "bindable":
@@ -10925,7 +13013,7 @@ func (ec *executionContext) _ServiceInstance_environment(ctx context.Context, fi
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceInstance_serviceClassName(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+func (ec *executionContext) _ServiceInstance_planSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
@@ -10933,97 +13021,7 @@ func (ec *executionContext) _ServiceInstance_serviceClassName(ctx context.Contex
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.ServiceClassName, nil
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	rctx.Result = res
-
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ServiceInstance_ServiceClassDisplayName(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "ServiceInstance",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.ServiceClassDisplayName, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ServiceInstance_servicePlanName(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "ServiceInstance",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.ServicePlanName, nil
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	rctx.Result = res
-
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ServiceInstance_servicePlanDisplayName(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "ServiceInstance",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.ServicePlanDisplayName, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ServiceInstance_servicePlanSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
-	rctx := &graphql.ResolverContext{
-		Object: "ServiceInstance",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.ServicePlanSpec, nil
+		return obj.PlanSpec, nil
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -11114,7 +13112,7 @@ func (ec *executionContext) _ServiceInstance_status(ctx context.Context, field g
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceInstance_servicePlan(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+func (ec *executionContext) _ServiceInstance_classReference(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
@@ -11122,19 +13120,43 @@ func (ec *executionContext) _ServiceInstance_servicePlan(ctx context.Context, fi
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.ServiceInstance().ServicePlan(ctx, obj)
+		return obj.ClassReference, nil
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*ServicePlan)
+	res := resTmp.(*ServiceInstanceResourceRef)
 	rctx.Result = res
 
 	if res == nil {
 		return graphql.Null
 	}
 
-	return ec._ServicePlan(ctx, field.Selections, res)
+	return ec._ServiceInstanceResourceRef(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceInstance_planReference(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceInstance",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.PlanReference, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ServiceInstanceResourceRef)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ServiceInstanceResourceRef(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -11159,6 +13181,78 @@ func (ec *executionContext) _ServiceInstance_serviceClass(ctx context.Context, f
 	}
 
 	return ec._ServiceClass(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceInstance_clusterServiceClass(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceInstance",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.ServiceInstance().ClusterServiceClass(ctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ClusterServiceClass)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ClusterServiceClass(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceInstance_servicePlan(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceInstance",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.ServiceInstance().ServicePlan(ctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ServicePlan)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ServicePlan(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceInstance_clusterServicePlan(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceInstance",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.ServiceInstance().ClusterServicePlan(ctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ClusterServicePlan)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ClusterServicePlan(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -11200,42 +13294,10 @@ func (ec *executionContext) _ServiceInstance_serviceBindings(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]ServiceBinding)
+	res := resTmp.(ServiceBindings)
 	rctx.Result = res
 
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: &res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				return ec._ServiceBinding(ctx, field.Selections, &res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
+	return ec._ServiceBindings(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
@@ -11312,8 +13374,8 @@ func (ec *executionContext) _ServiceInstanceEvent(ctx context.Context, sel ast.S
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "instance":
-			out.Values[i] = ec._ServiceInstanceEvent_instance(ctx, field, obj)
+		case "serviceInstance":
+			out.Values[i] = ec._ServiceInstanceEvent_serviceInstance(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -11351,7 +13413,7 @@ func (ec *executionContext) _ServiceInstanceEvent_type(ctx context.Context, fiel
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceInstanceEvent_instance(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceEvent) graphql.Marshaler {
+func (ec *executionContext) _ServiceInstanceEvent_serviceInstance(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceEvent) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstanceEvent",
 		Args:   nil,
@@ -11359,7 +13421,7 @@ func (ec *executionContext) _ServiceInstanceEvent_instance(ctx context.Context, 
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.Instance, nil
+		return obj.ServiceInstance, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -11371,6 +13433,112 @@ func (ec *executionContext) _ServiceInstanceEvent_instance(ctx context.Context, 
 	rctx.Result = res
 
 	return ec._ServiceInstance(ctx, field.Selections, &res)
+}
+
+var serviceInstanceResourceRefImplementors = []string{"ServiceInstanceResourceRef"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ServiceInstanceResourceRef(ctx context.Context, sel ast.SelectionSet, obj *ServiceInstanceResourceRef) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, serviceInstanceResourceRefImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ServiceInstanceResourceRef")
+		case "name":
+			out.Values[i] = ec._ServiceInstanceResourceRef_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "displayName":
+			out.Values[i] = ec._ServiceInstanceResourceRef_displayName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "clusterWide":
+			out.Values[i] = ec._ServiceInstanceResourceRef_clusterWide(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceInstanceResourceRef_name(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceResourceRef) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceInstanceResourceRef",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceInstanceResourceRef_displayName(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceResourceRef) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceInstanceResourceRef",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.DisplayName, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceInstanceResourceRef_clusterWide(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceResourceRef) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceInstanceResourceRef",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.ClusterWide, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	return graphql.MarshalBoolean(res)
 }
 
 var serviceInstanceStatusImplementors = []string{"ServiceInstanceStatus"}
@@ -11498,6 +13666,11 @@ func (ec *executionContext) _ServicePlan(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "environment":
+			out.Values[i] = ec._ServicePlan_environment(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "displayName":
 			out.Values[i] = ec._ServicePlan_displayName(ctx, field, obj)
 		case "externalName":
@@ -11538,6 +13711,28 @@ func (ec *executionContext) _ServicePlan_name(ctx context.Context, field graphql
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServicePlan_environment(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServicePlan",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Environment, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -11682,6 +13877,10 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_serviceBindingEventForServiceInstance(ctx, fields[0])
 	case "serviceBindingUsageEventForServiceInstance":
 		return ec._Subscription_serviceBindingUsageEventForServiceInstance(ctx, fields[0])
+	case "serviceBrokerEvent":
+		return ec._Subscription_serviceBrokerEvent(ctx, fields[0])
+	case "clusterServiceBrokerEvent":
+		return ec._Subscription_clusterServiceBrokerEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -11766,6 +13965,56 @@ func (ec *executionContext) _Subscription_serviceBindingUsageEventForServiceInst
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._ServiceBindingUsageEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_serviceBrokerEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_serviceBrokerEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	results, err := ec.resolvers.Subscription().ServiceBrokerEvent(ctx, args["environment"].(string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._ServiceBrokerEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_clusterServiceBrokerEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	results, err := ec.resolvers.Subscription().ClusterServiceBrokerEvent(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._ClusterServiceBrokerEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -13731,15 +15980,15 @@ func UnmarshalServiceInstanceCreateInput(v interface{}) (ServiceInstanceCreateIn
 			if err != nil {
 				return it, err
 			}
-		case "externalServiceClassName":
+		case "classRef":
 			var err error
-			it.ExternalServiceClassName, err = graphql.UnmarshalString(v)
+			it.ClassRef, err = UnmarshalServiceInstanceCreateInputResourceRef(v)
 			if err != nil {
 				return it, err
 			}
-		case "externalPlanName":
+		case "planRef":
 			var err error
-			it.ExternalPlanName, err = graphql.UnmarshalString(v)
+			it.PlanRef, err = UnmarshalServiceInstanceCreateInputResourceRef(v)
 			if err != nil {
 				return it, err
 			}
@@ -13768,6 +16017,30 @@ func UnmarshalServiceInstanceCreateInput(v interface{}) (ServiceInstanceCreateIn
 				it.ParameterSchema = &ptr1
 			}
 
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalServiceInstanceCreateInputResourceRef(v interface{}) (ServiceInstanceCreateInputResourceRef, error) {
+	var it ServiceInstanceCreateInputResourceRef
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "externalName":
+			var err error
+			it.ExternalName, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "clusterWide":
+			var err error
+			it.ClusterWide, err = graphql.UnmarshalBoolean(v)
 			if err != nil {
 				return it, err
 			}
@@ -13832,19 +16105,25 @@ type TopicEntry {
 type ServiceInstance {
     name: String!
     environment: String!
-    serviceClassName: String
-    ServiceClassDisplayName: String!
-    servicePlanName: String
-    servicePlanDisplayName: String!
-    servicePlanSpec: JSON
+    planSpec: JSON
     creationTimestamp: Timestamp!
     labels: [String!]!
     status: ServiceInstanceStatus!
-    servicePlan: ServicePlan
+    classReference: ServiceInstanceResourceRef
+    planReference: ServiceInstanceResourceRef
     serviceClass: ServiceClass
+    clusterServiceClass: ClusterServiceClass
+    servicePlan: ServicePlan
+    clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
-    serviceBindings: [ServiceBinding!]!
+    serviceBindings: ServiceBindings!
     serviceBindingUsages: [ServiceBindingUsage!]!
+}
+
+type ServiceInstanceResourceRef {
+    name: String!
+    displayName: String!
+    clusterWide: Boolean!
 }
 
 type ServiceInstanceStatus {
@@ -13863,7 +16142,17 @@ enum InstanceStatusType {
 
 type ServiceInstanceEvent {
     type: SubscriptionEventType!
-    instance: ServiceInstance!
+    serviceInstance: ServiceInstance!
+}
+
+type ServiceBrokerEvent {
+    type: SubscriptionEventType!
+    serviceBroker: ServiceBroker!
+}
+
+type ClusterServiceBrokerEvent {
+    type: SubscriptionEventType!
+    clusterServiceBroker: ClusterServiceBroker!
 }
 
 enum SubscriptionEventType {
@@ -13875,14 +16164,20 @@ enum SubscriptionEventType {
 input ServiceInstanceCreateInput {
     name: String!
     environment: String!
-    externalServiceClassName: String!
-    externalPlanName: String!
+    classRef: ServiceInstanceCreateInputResourceRef!
+    planRef: ServiceInstanceCreateInputResourceRef!
     labels: [String!]!
     parameterSchema: JSON
 }
 
+input ServiceInstanceCreateInputResourceRef {
+    externalName: String!
+    clusterWide: Boolean!
+}
+
 type ServiceClass {
     name: String!
+    environment: String!
     externalName: String!
     displayName: String
     creationTimestamp: Timestamp!
@@ -13900,8 +16195,28 @@ type ServiceClass {
     content: JSON
 }
 
+type ClusterServiceClass {
+    name: String!
+    externalName: String!
+    displayName: String
+    creationTimestamp: Timestamp!
+    description: String!
+    longDescription: String
+    imageUrl: String
+    documentationUrl: String
+    supportUrl: String
+    providerDisplayName: String
+    tags: [String!]!
+    plans: [ClusterServicePlan!]!
+    activated: Boolean!
+    apiSpec: JSON
+    asyncApiSpec: JSON
+    content: JSON
+}
+
 type ServicePlan {
     name: String!
+    environment: String!
     displayName: String
     externalName: String!
     description: String!
@@ -13909,7 +16224,25 @@ type ServicePlan {
     instanceCreateParameterSchema: JSON
 }
 
+type ClusterServicePlan {
+    name: String!
+    displayName: String
+    externalName: String!
+    description: String!
+    relatedClusterServiceClassName: String!
+    instanceCreateParameterSchema: JSON
+}
+
 type ServiceBroker {
+    name: String!
+    environment: String!
+    status: ServiceBrokerStatus!
+    creationTimestamp: Timestamp!
+    url: String!
+    labels: JSON!
+}
+
+type ClusterServiceBroker {
     name: String!
     status: ServiceBrokerStatus!
     creationTimestamp: Timestamp!
@@ -13921,6 +16254,18 @@ type ServiceBrokerStatus {
     ready: Boolean!
     reason: String!
     message: String!
+}
+
+type ServiceBindings {
+    serviceBindings: [ServiceBinding!]!
+    stats: ServiceBindingsStats!
+}
+
+type ServiceBindingsStats {
+    ready: Int!
+    failed: Int!
+    pending: Int!
+    unknown: Int!
 }
 
 type ServiceBinding {
@@ -13946,7 +16291,7 @@ enum ServiceBindingStatusType {
 
 type ServiceBindingEvent {
     type: SubscriptionEventType!
-    binding: ServiceBinding!
+    serviceBinding: ServiceBinding!
 }
 
 # We cannot use ServiceBinding as a result of create action
@@ -13984,7 +16329,7 @@ type ServiceBindingUsage {
 
 type ServiceBindingUsageEvent {
     type: SubscriptionEventType!
-    bindingUsage: ServiceBindingUsage!
+    serviceBindingUsage: ServiceBindingUsage!
 }
 
 type ServiceBindingUsageStatus {
@@ -14125,7 +16470,7 @@ type Environment {
 type RemoteEnvironment {
     name: String!
     description: String!
-    source: RemoteEnvironmentSource!
+    labels: JSON!
     services: [RemoteEnvironmentService!]!
     enabledInEnvironments: [String!]!
     status: RemoteEnvironmentStatus!
@@ -14138,12 +16483,6 @@ type ConnectorService {
 type EnvironmentMapping {
     environment: String!
     remoteEnvironment: String!
-}
-
-type RemoteEnvironmentSource {
-    environment: String!
-    type: String!
-    namespace: String!
 }
 
 type RemoteEnvironmentService {
@@ -14167,12 +16506,6 @@ enum RemoteEnvironmentStatus {
     GATEWAY_NOT_CONFIGURED
 }
 
-type EventActivationSource {
-    environment: String!
-    type: String!
-    namespace: String!
-}
-
 type EventActivationEvent {
     eventType: String!
     version: String!
@@ -14182,7 +16515,7 @@ type EventActivationEvent {
 type EventActivation {
     name: String!
     displayName: String!
-    source: EventActivationSource!
+    sourceId: String!
     events: [EventActivationEvent!]!
 }
 
@@ -14197,6 +16530,11 @@ type UsageKind {
 type UsageKindResource {
     name: String!
     namespace: String!
+}
+
+type BindableResourcesOutputItem {
+    kind: String!
+    resources: [UsageKindResource!]!
 }
 
 # IDP PRESETS
@@ -14251,16 +16589,26 @@ type API {
 type Query {
     serviceInstance(name: String!, environment: String!): ServiceInstance
     serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]!
-    serviceClasses(first: Int, offset: Int): [ServiceClass!]!
-    serviceClass(name: String!): ServiceClass
-    serviceBrokers(first: Int, offset: Int): [ServiceBroker!]!
-    serviceBroker(name: String!): ServiceBroker
+
+    clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]!
+    clusterServiceClass(name: String!): ClusterServiceClass
+    serviceClasses(environment: String!, first: Int, offset: Int): [ServiceClass!]!
+    serviceClass(environment: String!, name: String!): ServiceClass
+
+    clusterServiceBrokers(first: Int, offset: Int): [ClusterServiceBroker!]!
+    clusterServiceBroker(name: String!): ClusterServiceBroker
+    serviceBrokers(environment: String!, first: Int, offset: Int): [ServiceBroker!]!
+    serviceBroker(name: String!, environment: String!): ServiceBroker
+
     serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
     serviceBinding(name: String!, environment: String!): ServiceBinding
     usageKinds(first: Int, offset: Int): [UsageKind!]!
 
     # The query returns all instances of the resources specified by the usageKind parameter in the given environment. The result contains the resources which do not have the metadata.ownerReference.
     usageKindResources(usageKind: String!, environment: String!): [UsageKindResource!]!
+
+    # The query returns all instance of the resources which could be bound (proper UsageKind exists).
+    bindableResources(environment: String!): [BindableResourcesOutputItem!]!
 
     apis(environment: String!, serviceName: String, hostname: String): [API!]!
 
@@ -14308,6 +16656,8 @@ type Subscription {
     serviceInstanceEvent(environment: String!): ServiceInstanceEvent!
     serviceBindingEventForServiceInstance(serviceInstanceName: String!, environment: String!): ServiceBindingEvent!
     serviceBindingUsageEventForServiceInstance(serviceInstanceName: String!, environment: String!): ServiceBindingUsageEvent!
+    serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
+    clusterServiceBrokerEvent: ClusterServiceBrokerEvent!
 }
 
 # Schema

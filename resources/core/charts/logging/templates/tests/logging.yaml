@@ -1,0 +1,62 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: test-{{ template "fullname" . }}
+  labels:
+    helm-chart-test: "true"
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["watch", "get", "list", "create", "delete"]
+- apiGroups: [""]
+  resources: ["nodes", "pods/log"]
+  verbs: ["get", "list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-{{ template "fullname" . }}
+  labels:
+    helm-chart-test: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: test-{{ template "fullname" . }}
+  labels:
+    helm-chart-test: "true"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: test-{{ template "fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: test-{{ template "fullname" . }}
+  namespace: kyma-system
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-{{ template "fullname" . }}
+  labels:
+    helm-chart-test: "true"
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  serviceAccount: test-{{ template "fullname" . }}
+  restartPolicy: Never
+  containers:
+  - name: test-{{ template "fullname" . }}
+    image: eu.gcr.io/kyma-project/develop/test-logging:6e0a7fe2
+    imagePullPolicy: IfNotPresent
+    command:
+      - "/bin/sh"
+    args:
+    - "-c"
+    - "./test-logging"
+    resources:
+      requests:
+        memory: 96Mi
+      limits:
+        memory: 200Mi

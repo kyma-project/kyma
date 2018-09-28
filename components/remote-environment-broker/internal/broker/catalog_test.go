@@ -20,7 +20,7 @@ func TestGetCatalogHappyPath(t *testing.T) {
 	defer tc.AssertExpectations(t)
 	tc.finderMock.On("FindAll").Return([]*internal.RemoteEnvironment{tc.fixRE()}, nil).Once()
 	tc.reEnabledCheckerMock.On("IsRemoteEnvironmentEnabled", "stage", string(tc.fixRE().Name)).Return(true, nil)
-	tc.converterMock.On("Convert", tc.fixRE().Name, tc.fixRE().Source, tc.fixRE().Services[0]).Return(tc.fixService(), nil)
+	tc.converterMock.On("Convert", tc.fixRE().Name, tc.fixRE().Services[0]).Return(tc.fixService(), nil)
 
 	svc := broker.NewCatalogService(tc.finderMock, tc.reEnabledCheckerMock, tc.converterMock)
 	osbCtx := broker.NewOSBContext("not", "important", "stage")
@@ -58,50 +58,19 @@ func TestConvertService(t *testing.T) {
 	const fixReName = "fix-re-name"
 
 	for tn, tc := range map[string]struct {
-		givenSource  func() internal.Source
 		givenService func() internal.Service
 
 		expectedService func() osb.Service
 	}{
 		"simpleAPIBasedService": {
-			givenSource: fixSource,
 			givenService: func() internal.Service {
 				svc := fixAPIBasedService()
 				svc.DisplayName = "*Service Name\ną-'#$\tÜ"
 				return svc
 			},
 			expectedService: func() osb.Service {
-				svc := fixOsbService(fixReName)
-				svc.Name = "service-name-c7fe3"
+				svc := fixOsbService()
 				svc.Metadata["displayName"] = "*Service Name\ną-'#$\tÜ"
-				return svc
-			},
-		},
-		"emptyDisplayName": {
-			givenSource: fixSource,
-			givenService: func() internal.Service {
-				svc := fixAPIBasedService()
-				svc.DisplayName = ""
-				return svc
-			},
-			expectedService: func() osb.Service {
-				svc := fixOsbService(fixReName)
-				svc.Name = "c7fe3"
-				svc.Metadata["displayName"] = ""
-				return svc
-			},
-		},
-		"longDisplayName": {
-			givenSource: fixSource,
-			givenService: func() internal.Service {
-				svc := fixAPIBasedService()
-				svc.DisplayName = "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
-				return svc
-			},
-			expectedService: func() osb.Service {
-				svc := fixOsbService(fixReName)
-				svc.Name = "123456789012345678901234567890123456789012345678901234567-c7fe3"
-				svc.Metadata["displayName"] = "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
 				return svc
 			},
 		},
@@ -111,7 +80,7 @@ func TestConvertService(t *testing.T) {
 			converter := broker.NewConverter()
 
 			// when
-			result, err := converter.Convert(fixReName, tc.givenSource(), tc.givenService())
+			result, err := converter.Convert(fixReName, tc.givenService())
 			require.NoError(t, err)
 
 			// then
@@ -127,7 +96,7 @@ func TestFailConvertServiceWhenAccessLabelNotProvided(t *testing.T) {
 	converter := broker.NewConverter()
 
 	// when
-	_, err := converter.Convert("fix-re-name", fixSource(), internal.Service{
+	_, err := converter.Convert("fix-re-name", internal.Service{
 		APIEntry: &internal.APIEntry{},
 	})
 
@@ -141,7 +110,7 @@ func TestIsBindableFalseForEventsBasedService(t *testing.T) {
 	converter := broker.NewConverter()
 
 	// when
-	a, err := converter.Convert("fix-re-name", fixSource(), fixEventsBasedService())
+	a, err := converter.Convert("fix-re-name", fixEventsBasedService())
 
 	// then
 	assert.NoError(t, err)
@@ -153,7 +122,7 @@ func TestIsBindableTrueForAPIBasedService(t *testing.T) {
 	converter := broker.NewConverter()
 
 	// when
-	a, err := converter.Convert("fix-re-name", fixSource(), fixAPIBasedService())
+	a, err := converter.Convert("fix-re-name", fixAPIBasedService())
 
 	// then
 	assert.NoError(t, err)
@@ -164,9 +133,14 @@ func fixAPIBasedService() internal.Service {
 	return internal.Service{
 		ID:                  internal.RemoteServiceID("0023-abcd-2098"),
 		LongDescription:     "long description",
-		DisplayName:         "service name",
+		Name:                "servicename",
+		Description:         "short description",
+		DisplayName:         "Service Name",
 		ProviderDisplayName: "HakunaMatata",
 		Tags:                []string{"tag1", "tag2"},
+		Labels: map[string]string{
+			"connected-app": "ec-prod",
+		},
 		APIEntry: &internal.APIEntry{
 			AccessLabel: "access-label-1",
 			GatewayURL:  "www.gate.com",
@@ -178,20 +152,12 @@ func fixEventsBasedService() internal.Service {
 	return internal.Service{}
 }
 
-func fixSource() internal.Source {
-	return internal.Source{
-		Environment: "prod",
-		Type:        "commerce",
-		Namespace:   "com.hakuna.matata",
-	}
-}
-
-func fixOsbService(reName string) osb.Service {
+func fixOsbService() osb.Service {
 	return osb.Service{
 		ID:          "0023-abcd-2098",
-		Description: "long description",
+		Name:        "servicename",
+		Description: "short description",
 		Bindable:    true,
-		Name:        "serviceName",
 		Plans: []osb.Plan{{
 			Name:        "default",
 			Description: "Default plan",
@@ -202,17 +168,15 @@ func fixOsbService(reName string) osb.Service {
 		}},
 		Tags: []string{"tag1", "tag2"},
 		Metadata: map[string]interface{}{
-			"providerDisplayName":        "HakunaMatata" + " - " + reName,
+			"providerDisplayName":        "HakunaMatata",
 			"displayName":                "service-name",
 			"longDescription":            "long description",
 			"remoteEnvironmentServiceId": "0023-abcd-2098",
-			"source": map[string]interface{}{
-				"environment": "prod",
-				"type":        "commerce",
-				"namespace":   "com.hakuna.matata",
-			},
 			"bindingLabels": map[string]string{
 				"access-label-1": "true",
+			},
+			"labels": map[string]string{
+				"connected-app": "ec-prod",
 			},
 		},
 	}

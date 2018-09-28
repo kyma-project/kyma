@@ -13,6 +13,9 @@
 # The `installation` PowerShell scripts
 /installation/**/*.ps1 @crabtree @venturasr
 
+# The `kyma-installer` directory
+/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek
+
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @piotrmsc @PK85
 
@@ -20,10 +23,10 @@
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel
 
 # The `api-controller` subchart
-/resources/core/charts/api-controller/ @piotrmsc @kubadz
+/resources/core/charts/api-controller/ @piotrmsc @kubadz @sjanota
 
 # The `apiserver-proxy` subchart
-/resources/core/charts/apiserver-proxy/ @piotrmsc @kubadz
+/resources/core/charts/apiserver-proxy/ @piotrmsc @kubadz @sjanota
 
 # The `azure-broker` subchart
 /resources/core/charts/azure-broker/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
@@ -63,6 +66,9 @@
 
 # The `kubeless` subchart
 /resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+
+# The `logging` subchart
+/resources/core/charts/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
 # The `minio` subchart
 /resources/core/charts/minio/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
@@ -119,6 +125,9 @@
 /resources/remote-environments/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # Components
+#API server proxy Component
+/components/apiserver-proxy/ @piotrmsc @kubadz @sjanota
+
 # Api controller Component
 /components/api-controller/ @piotrmsc @kubadz
 
@@ -190,8 +199,11 @@
 # Connector Service Tests
 /tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib
 
-# Application Connector Tests
+# Metadata Service Tests
 /tests/metadata-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib
+
+# Remote Environment Controller Tests
+/tests/remote-environment-controller-tests/ @lszymik @akgalwas @janmedrek @Szymongib
 
 # Tools
 # Stability Checker Component
@@ -226,6 +238,12 @@ milv.config.yaml @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
 
 # Orchestrator file
 orchestrator.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh
+
+# Release file
+release.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh
+
+# integration file
+Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh
 
 # Governance file
 governance.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu

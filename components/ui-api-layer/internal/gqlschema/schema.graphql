@@ -29,19 +29,25 @@ type TopicEntry {
 type ServiceInstance {
     name: String!
     environment: String!
-    serviceClassName: String
-    ServiceClassDisplayName: String!
-    servicePlanName: String
-    servicePlanDisplayName: String!
-    servicePlanSpec: JSON
+    planSpec: JSON
     creationTimestamp: Timestamp!
     labels: [String!]!
     status: ServiceInstanceStatus!
-    servicePlan: ServicePlan
+    classReference: ServiceInstanceResourceRef
+    planReference: ServiceInstanceResourceRef
     serviceClass: ServiceClass
+    clusterServiceClass: ClusterServiceClass
+    servicePlan: ServicePlan
+    clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
-    serviceBindings: [ServiceBinding!]!
+    serviceBindings: ServiceBindings!
     serviceBindingUsages: [ServiceBindingUsage!]!
+}
+
+type ServiceInstanceResourceRef {
+    name: String!
+    displayName: String!
+    clusterWide: Boolean!
 }
 
 type ServiceInstanceStatus {
@@ -60,7 +66,17 @@ enum InstanceStatusType {
 
 type ServiceInstanceEvent {
     type: SubscriptionEventType!
-    instance: ServiceInstance!
+    serviceInstance: ServiceInstance!
+}
+
+type ServiceBrokerEvent {
+    type: SubscriptionEventType!
+    serviceBroker: ServiceBroker!
+}
+
+type ClusterServiceBrokerEvent {
+    type: SubscriptionEventType!
+    clusterServiceBroker: ClusterServiceBroker!
 }
 
 enum SubscriptionEventType {
@@ -72,14 +88,20 @@ enum SubscriptionEventType {
 input ServiceInstanceCreateInput {
     name: String!
     environment: String!
-    externalServiceClassName: String!
-    externalPlanName: String!
+    classRef: ServiceInstanceCreateInputResourceRef!
+    planRef: ServiceInstanceCreateInputResourceRef!
     labels: [String!]!
     parameterSchema: JSON
 }
 
+input ServiceInstanceCreateInputResourceRef {
+    externalName: String!
+    clusterWide: Boolean!
+}
+
 type ServiceClass {
     name: String!
+    environment: String!
     externalName: String!
     displayName: String
     creationTimestamp: Timestamp!
@@ -97,8 +119,28 @@ type ServiceClass {
     content: JSON
 }
 
+type ClusterServiceClass {
+    name: String!
+    externalName: String!
+    displayName: String
+    creationTimestamp: Timestamp!
+    description: String!
+    longDescription: String
+    imageUrl: String
+    documentationUrl: String
+    supportUrl: String
+    providerDisplayName: String
+    tags: [String!]!
+    plans: [ClusterServicePlan!]!
+    activated: Boolean!
+    apiSpec: JSON
+    asyncApiSpec: JSON
+    content: JSON
+}
+
 type ServicePlan {
     name: String!
+    environment: String!
     displayName: String
     externalName: String!
     description: String!
@@ -106,7 +148,25 @@ type ServicePlan {
     instanceCreateParameterSchema: JSON
 }
 
+type ClusterServicePlan {
+    name: String!
+    displayName: String
+    externalName: String!
+    description: String!
+    relatedClusterServiceClassName: String!
+    instanceCreateParameterSchema: JSON
+}
+
 type ServiceBroker {
+    name: String!
+    environment: String!
+    status: ServiceBrokerStatus!
+    creationTimestamp: Timestamp!
+    url: String!
+    labels: JSON!
+}
+
+type ClusterServiceBroker {
     name: String!
     status: ServiceBrokerStatus!
     creationTimestamp: Timestamp!
@@ -118,6 +178,18 @@ type ServiceBrokerStatus {
     ready: Boolean!
     reason: String!
     message: String!
+}
+
+type ServiceBindings {
+    serviceBindings: [ServiceBinding!]!
+    stats: ServiceBindingsStats!
+}
+
+type ServiceBindingsStats {
+    ready: Int!
+    failed: Int!
+    pending: Int!
+    unknown: Int!
 }
 
 type ServiceBinding {
@@ -143,7 +215,7 @@ enum ServiceBindingStatusType {
 
 type ServiceBindingEvent {
     type: SubscriptionEventType!
-    binding: ServiceBinding!
+    serviceBinding: ServiceBinding!
 }
 
 # We cannot use ServiceBinding as a result of create action
@@ -181,7 +253,7 @@ type ServiceBindingUsage {
 
 type ServiceBindingUsageEvent {
     type: SubscriptionEventType!
-    bindingUsage: ServiceBindingUsage!
+    serviceBindingUsage: ServiceBindingUsage!
 }
 
 type ServiceBindingUsageStatus {
@@ -322,7 +394,7 @@ type Environment {
 type RemoteEnvironment {
     name: String!
     description: String!
-    source: RemoteEnvironmentSource!
+    labels: JSON!
     services: [RemoteEnvironmentService!]!
     enabledInEnvironments: [String!]!
     status: RemoteEnvironmentStatus!
@@ -335,12 +407,6 @@ type ConnectorService {
 type EnvironmentMapping {
     environment: String!
     remoteEnvironment: String!
-}
-
-type RemoteEnvironmentSource {
-    environment: String!
-    type: String!
-    namespace: String!
 }
 
 type RemoteEnvironmentService {
@@ -364,12 +430,6 @@ enum RemoteEnvironmentStatus {
     GATEWAY_NOT_CONFIGURED
 }
 
-type EventActivationSource {
-    environment: String!
-    type: String!
-    namespace: String!
-}
-
 type EventActivationEvent {
     eventType: String!
     version: String!
@@ -379,7 +439,7 @@ type EventActivationEvent {
 type EventActivation {
     name: String!
     displayName: String!
-    source: EventActivationSource!
+    sourceId: String!
     events: [EventActivationEvent!]!
 }
 
@@ -394,6 +454,11 @@ type UsageKind {
 type UsageKindResource {
     name: String!
     namespace: String!
+}
+
+type BindableResourcesOutputItem {
+    kind: String!
+    resources: [UsageKindResource!]!
 }
 
 # IDP PRESETS
@@ -448,16 +513,26 @@ type API {
 type Query {
     serviceInstance(name: String!, environment: String!): ServiceInstance
     serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]!
-    serviceClasses(first: Int, offset: Int): [ServiceClass!]!
-    serviceClass(name: String!): ServiceClass
-    serviceBrokers(first: Int, offset: Int): [ServiceBroker!]!
-    serviceBroker(name: String!): ServiceBroker
+
+    clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]!
+    clusterServiceClass(name: String!): ClusterServiceClass
+    serviceClasses(environment: String!, first: Int, offset: Int): [ServiceClass!]!
+    serviceClass(environment: String!, name: String!): ServiceClass
+
+    clusterServiceBrokers(first: Int, offset: Int): [ClusterServiceBroker!]!
+    clusterServiceBroker(name: String!): ClusterServiceBroker
+    serviceBrokers(environment: String!, first: Int, offset: Int): [ServiceBroker!]!
+    serviceBroker(name: String!, environment: String!): ServiceBroker
+
     serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
     serviceBinding(name: String!, environment: String!): ServiceBinding
     usageKinds(first: Int, offset: Int): [UsageKind!]!
 
     # The query returns all instances of the resources specified by the usageKind parameter in the given environment. The result contains the resources which do not have the metadata.ownerReference.
     usageKindResources(usageKind: String!, environment: String!): [UsageKindResource!]!
+
+    # The query returns all instance of the resources which could be bound (proper UsageKind exists).
+    bindableResources(environment: String!): [BindableResourcesOutputItem!]!
 
     apis(environment: String!, serviceName: String, hostname: String): [API!]!
 
@@ -505,6 +580,8 @@ type Subscription {
     serviceInstanceEvent(environment: String!): ServiceInstanceEvent!
     serviceBindingEventForServiceInstance(serviceInstanceName: String!, environment: String!): ServiceBindingEvent!
     serviceBindingUsageEventForServiceInstance(serviceInstanceName: String!, environment: String!): ServiceBindingUsageEvent!
+    serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
+    clusterServiceBrokerEvent: ClusterServiceBrokerEvent!
 }
 
 # Schema

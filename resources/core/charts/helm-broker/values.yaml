@@ -33,7 +33,7 @@ config:
 
       etcd:
         endpoints:
-          - http://core-helm-broker-etcd-client.kyma-system.svc.cluster.local:2379
+          - http://core-helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379
     - driver: memory
       provide:
         chart: ~

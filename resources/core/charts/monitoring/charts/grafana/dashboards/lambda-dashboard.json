@@ -1,4 +1,59 @@
 {
+    "__inputs": [
+        {
+            "name": "DS_PROMETHEUS",
+            "label": "Prometheus",
+            "description": "",
+            "type": "datasource",
+            "pluginId": "prometheus",
+            "pluginName": "Prometheus"
+        },
+        {
+            "name": "VAR_SOURCE_VERSION",
+            "type": "constant",
+            "label": "Source Version",
+            "value": "unknown",
+            "description": ""
+        },
+        {
+            "name": "VAR_DESTINATION_VERSION",
+            "type": "constant",
+            "label": "Destination Version",
+            "description": ""
+        }
+    ],
+    "__requires": [
+        {
+            "type": "grafana",
+            "id": "grafana",
+            "name": "Grafana",
+            "version": "5.2.4"
+        },
+        {
+            "type": "panel",
+            "id": "graph",
+            "name": "Graph",
+            "version": "5.0.0"
+        },
+        {
+            "type": "datasource",
+            "id": "prometheus",
+            "name": "Prometheus",
+            "version": "5.0.0"
+        },
+        {
+            "type": "panel",
+            "id": "singlestat",
+            "name": "Singlestat",
+            "version": "5.0.0"
+        },
+        {
+            "type": "panel",
+            "id": "text",
+            "name": "Text",
+            "version": "5.0.0"
+        }
+    ],
     "annotations": {
         "list": [
             {
@@ -15,8 +70,8 @@
     "editable": true,
     "gnetId": null,
     "graphTooltip": 0,
-    "id": 6,
-    "iteration": 1531123853368,
+    "id": null,
+    "iteration": 1537271589360,
     "links": [],
     "panels": [
         {
@@ -89,7 +144,7 @@
             "steppedLine": false,
             "targets": [
                 {
-                    "expr": "label_replace(sum(irate(istio_request_count{destination_service=~\"$http_destination\",response_code=~\"5.*\"}[2m])) by (destination_service, response_code) / sum(irate(istio_request_count{destination_service=~\"$http_destination\"}[2m])) by (destination_service, response_code), \"destination_service\", \"$1\", \"destination_service\", \"$lambda_service.$environment.*\")",
+                    "expr": "label_replace(sum(irate(istio_requests_total{destination_service=~\"$http_destination\",response_code=~\"5.*\"}[2m])) by (destination_service, response_code) / sum(irate(istio_requests_total{destination_service=~\"$http_destination\"}[2m])) by (destination_service, response_code), \"destination_service\", \"$1\", \"destination_service\", \"$lambda_service.$environment.*\")",
                     "format": "time_series",
                     "hide": false,
                     "intervalFactor": 1,
@@ -97,7 +152,7 @@
                     "refId": "B"
                 },
                 {
-                    "expr": "label_replace(sum(irate(istio_request_count{destination_service=~\"$http_destination\",response_code=~\"2.*\"}[2m])) by (destination_service, response_code) / sum(irate(istio_request_count{destination_service=~\"$http_destination\",}[2m])) by (destination_service, response_code), \"destination_service\", \"$1\", \"destination_service\", \"$lambda_service.$environment.*\")",
+                    "expr": "label_replace(sum(irate(istio_requests_total{destination_service=~\"$http_destination\",response_code=~\"2.*\"}[2m])) by (destination_service, response_code) / sum(irate(istio_requests_total{destination_service=~\"$http_destination\",}[2m])) by (destination_service, response_code), \"destination_service\", \"$1\", \"destination_service\", \"$lambda_service.$environment.*\")",
                     "format": "time_series",
                     "hide": false,
                     "instant": false,
@@ -105,6 +160,13 @@
                     "legendFormat": "{{ response_code }} response code",
                     "refId": "A",
                     "step": 2
+                },
+                {
+                    "expr": "sum(irate(istio_requests_total{destination_service=~\"$http_destination\",response_code=~\"5.*\"}[2m]))",
+                    "format": "time_series",
+                    "hide": true,
+                    "intervalFactor": 1,
+                    "refId": "C"
                 }
             ],
             "thresholds": [],
@@ -390,7 +452,7 @@
             "tableColumn": "",
             "targets": [
                 {
-                    "expr": "sum(rate(istio_request_count{destination_service=~\"$http_destination\", response_code=~\"2.*\"}[2m])) / sum(rate(istio_request_count{destination_service=~\"$http_destination\"}[2m])) ",
+                    "expr": "sum(rate(istio_requests_total{destination_service=~\"$http_destination\", response_code=~\"2.*\"}[2m])) / sum(rate(istio_requests_total{destination_service=~\"$http_destination\"}[2m])) ",
                     "format": "time_series",
                     "hide": false,
                     "intervalFactor": 1,
@@ -474,7 +536,7 @@
             "tableColumn": "",
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.95, sum(irate(istio_request_duration_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
+                    "expr": "histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
                     "format": "time_series",
                     "intervalFactor": 1,
                     "refId": "A",
@@ -617,9 +679,6 @@
             "id": 54,
             "panels": [],
             "repeat": "http_destination",
-            "scopedVars": {
-                "http_destination": {}
-            },
             "title": "$http_destination",
             "type": "row"
         },
@@ -654,16 +713,13 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "scopedVars": {
-                "http_destination": {}
-            },
             "seriesOverrides": [],
             "spaceLength": 10,
             "stack": false,
             "steppedLine": false,
             "targets": [
                 {
-                    "expr": "round(sum(irate(istio_request_count{destination_service=~\"$http_destination\"}[2m])) by (destination_service, response_code), 0.001)",
+                    "expr": "round(sum(irate(istio_requests_total{destination_service=~\"$http_destination\"}[2m])) by (destination_service, response_code), 0.001)",
                     "format": "time_series",
                     "hide": false,
                     "intervalFactor": 1,
@@ -747,16 +803,13 @@
             "pointradius": 5,
             "points": false,
             "renderer": "flot",
-            "scopedVars": {
-                "http_destination": {}
-            },
             "seriesOverrides": [],
             "spaceLength": 10,
             "stack": false,
             "steppedLine": false,
             "targets": [
                 {
-                    "expr": "histogram_quantile(0.50, sum(irate(istio_request_duration_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
+                    "expr": "histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
                     "format": "time_series",
                     "hide": false,
                     "intervalFactor": 1,
@@ -765,7 +818,7 @@
                     "step": 2
                 },
                 {
-                    "expr": "histogram_quantile(0.90, sum(irate(istio_request_duration_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
+                    "expr": "histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
                     "format": "time_series",
                     "hide": false,
                     "intervalFactor": 1,
@@ -774,7 +827,7 @@
                     "step": 2
                 },
                 {
-                    "expr": "histogram_quantile(0.95, sum(irate(istio_request_duration_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
+                    "expr": "histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
                     "format": "time_series",
                     "hide": false,
                     "intervalFactor": 1,
@@ -783,7 +836,7 @@
                     "step": 2
                 },
                 {
-                    "expr": "histogram_quantile(0.99, sum(irate(istio_request_duration_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
+                    "expr": "histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{destination_service=~\"$http_destination\"}[2m])) by (destination_service, le))",
                     "format": "time_series",
                     "hide": false,
                     "intervalFactor": 1,
@@ -849,7 +902,7 @@
                 "multi": true,
                 "name": "source",
                 "options": [],
-                "query": "label_values(istio_request_count{source_service=~\"istio-ingress.istio-system.*\"}, source_service)",
+                "query": "label_values(istio_requests_total{source_workload=~\"istio-ingressgateway*\"}, source_service)",
                 "refresh": 1,
                 "regex": "",
                 "sort": 0,
@@ -860,18 +913,20 @@
                 "useTags": false
             },
             {
-                "current": {},
+                "current": {
+                    "value": "${VAR_SOURCE_VERSION}",
+                    "text": "${VAR_SOURCE_VERSION}"
+                },
                 "hide": 2,
                 "label": "Source Version",
                 "name": "source_version",
                 "options": [
                     {
-                        "selected": true,
-                        "text": "unknown",
-                        "value": "unknown"
+                        "value": "${VAR_SOURCE_VERSION}",
+                        "text": "${VAR_SOURCE_VERSION}"
                     }
                 ],
-                "query": "unknown",
+                "query": "${VAR_SOURCE_VERSION}",
                 "type": "constant"
             },
             {
@@ -944,7 +999,7 @@
                 "multi": false,
                 "name": "http_destination",
                 "options": [],
-                "query": "label_values(istio_request_count{destination_service=~\"$lambda_service.$environment.*\"}, destination_service)",
+                "query": "label_values(istio_requests_total{destination_service=~\"$lambda_service.$environment.*\"}, destination_service)",
                 "refresh": 1,
                 "regex": "",
                 "sort": 1,
@@ -955,24 +1010,26 @@
                 "useTags": false
             },
             {
-                "current": {},
+                "current": {
+                    "value": "${VAR_DESTINATION_VERSION}",
+                    "text": "${VAR_DESTINATION_VERSION}"
+                },
                 "hide": 2,
                 "label": "Destination Version",
                 "name": "destination_version",
                 "options": [
                     {
-                        "selected": true,
-                        "text": "unknown",
-                        "value": "unknown"
+                        "value": "${VAR_DESTINATION_VERSION}",
+                        "text": "${VAR_DESTINATION_VERSION}"
                     }
                 ],
-                "query": "unknown",
+                "query": "${VAR_DESTINATION_VERSION}",
                 "type": "constant"
             }
         ]
     },
     "time": {
-        "from": "now-5m",
+        "from": "now-15m",
         "to": "now"
     },
     "timepicker": {
@@ -1002,5 +1059,6 @@
     },
     "timezone": "browser",
     "title": "Lambda Dashboard",
-    "version": 1
+    "uid": "opc3b8Tyik",
+    "version": 2
 }

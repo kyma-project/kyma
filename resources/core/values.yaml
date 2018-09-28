@@ -3,9 +3,8 @@ dex:
     createSecret: false
 
 service-catalog:
-  etcd:
-    cluster:
-      replicaCount: 1
+  etcd-stateful:
+    replicaCount: 1
 
 minio:
   service:
@@ -33,7 +32,7 @@ test:
     password: nimda123
   acceptance:
     core:
-      imageTag: "0.3.319"
+      imageTag: "748c2f57"
       # environments used in remote-environment acceptance test
       remoteEnvironment: 
         disabled: "false"

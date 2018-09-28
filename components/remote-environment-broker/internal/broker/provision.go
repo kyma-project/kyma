@@ -8,8 +8,8 @@ import (
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/access"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
-	v1client "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	v1client "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
@@ -19,7 +19,7 @@ import (
 const serviceCatalogAPIVersion = "servicecatalog.k8s.io/v1beta1"
 
 // NewProvisioner creates provisioner
-func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, reSvcFinder reSvcFinder, serviceInstanceGetter serviceInstanceGetter, reClient v1client.RemoteenvironmentV1alpha1Interface, iStateUpdater instanceStateUpdater,
+func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, reSvcFinder reSvcFinder, serviceInstanceGetter serviceInstanceGetter, reClient v1client.ApplicationconnectorV1alpha1Interface, iStateUpdater instanceStateUpdater,
 	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger) *ProvisionService {
 	return &ProvisionService{
 		instanceInserter:      instanceInserter,
@@ -46,7 +46,7 @@ type ProvisionService struct {
 	instanceStateGetter   instanceStateGetter
 	operationIDProvider   func() (internal.OperationID, error)
 	reSvcFinder           reSvcFinder
-	reClient              v1client.RemoteenvironmentV1alpha1Interface
+	reClient              v1client.ApplicationconnectorV1alpha1Interface
 	accessChecker         access.ProvisionChecker
 	serviceInstanceGetter serviceInstanceGetter
 
@@ -138,7 +138,8 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 		OperationKey: &opKey,
 		Async:        true,
 	}
-	svc.doAsync(iID, opID, getRemoteServiceID(req), namespace, re.Source, service.EventProvider, service.DisplayName)
+
+	svc.doAsync(iID, opID, re.Name, getRemoteServiceID(req), namespace, service.EventProvider, service.DisplayName)
 	return resp, nil
 }
 
@@ -146,16 +147,16 @@ func getRemoteServiceID(req *osb.ProvisionRequest) internal.RemoteServiceID {
 	return internal.RemoteServiceID(req.ServiceID)
 }
 
-func (svc *ProvisionService) doAsync(iID internal.InstanceID, opID internal.OperationID, remEnvID internal.RemoteServiceID, ns internal.Namespace, source internal.Source, eventProvider bool, displayName string) {
-	go svc.do(iID, opID, remEnvID, ns, source, eventProvider, displayName)
+func (svc *ProvisionService) doAsync(iID internal.InstanceID, opID internal.OperationID, reName internal.RemoteEnvironmentName, reID internal.RemoteServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
+	go svc.do(iID, opID, reName, reID, ns, eventProvider, displayName)
 }
 
-func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.OperationID, remEnvID internal.RemoteServiceID, ns internal.Namespace, source internal.Source, eventProvider bool, displayName string) {
+func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.OperationID, reName internal.RemoteEnvironmentName, reID internal.RemoteServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
 	if svc.asyncHook != nil {
 		defer svc.asyncHook()
 	}
-	canProvisionOutput, err := svc.accessChecker.CanProvision(iID, remEnvID, ns, svc.maxWaitTime)
-	svc.log.Infof("Access checker: canProvisionInstance(remEnvID=[%s], ns=[%s]) returned: canProvisionOutput=[%+v], error=[%v]", remEnvID, ns, canProvisionOutput, err)
+	canProvisionOutput, err := svc.accessChecker.CanProvision(iID, reID, ns, svc.maxWaitTime)
+	svc.log.Infof("Access checker: canProvisionInstance(reName=[%s], reID=[%s], ns=[%s]) returned: canProvisionOutput=[%+v], error=[%v]", reName, reID, ns, canProvisionOutput, err)
 
 	var instanceState internal.InstanceState
 	var opState internal.OperationState
@@ -168,13 +169,13 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 	} else if !canProvisionOutput.Allowed {
 		instanceState = internal.InstanceStateFailed
 		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("Forbidden provisioning instance [%s] for remote environment [id: %s] in namespace: [%s]. Reason: [%s]", iID, remEnvID, ns, canProvisionOutput.Reason)
+		opDesc = fmt.Sprintf("Forbidden provisioning instance [%s] for remote environment [name: %s, id: %s] in namespace: [%s]. Reason: [%s]", iID, reName, reID, ns, canProvisionOutput.Reason)
 	} else {
 		instanceState = internal.InstanceStateSucceeded
 		opState = internal.OperationStateSucceeded
 		opDesc = "provisioning succeeded"
 		if eventProvider {
-			err := svc.createEaOnSuccessProvision(string(remEnvID), string(ns), source, displayName, iID)
+			err := svc.createEaOnSuccessProvision(string(reName), string(reID), string(ns), displayName, iID)
 			if err != nil {
 				instanceState = internal.InstanceStateFailed
 				opState = internal.OperationStateFailed
@@ -193,7 +194,7 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 	}
 }
 
-func (svc *ProvisionService) createEaOnSuccessProvision(reID, ns string, source internal.Source, displayName string, iID internal.InstanceID) error {
+func (svc *ProvisionService) createEaOnSuccessProvision(reName, reID, ns string, displayName string, iID internal.InstanceID) error {
 	// instance ID is the serviceInstance.Spec.ExternalID
 	si, err := svc.serviceInstanceGetter.GetByNamespaceAndExternalID(ns, string(iID))
 	if err != nil {
@@ -216,11 +217,7 @@ func (svc *ProvisionService) createEaOnSuccessProvision(reID, ns string, source 
 			},
 			Spec: v1alpha1.EventActivationSpec{
 				DisplayName: displayName,
-				Source: v1alpha1.Source{
-					Namespace:   source.Namespace,
-					Type:        source.Type,
-					Environment: source.Environment,
-				},
+				SourceID:    reName,
 			},
 		})
 	if err != nil {

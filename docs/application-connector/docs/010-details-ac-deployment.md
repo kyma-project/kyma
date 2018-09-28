@@ -3,59 +3,132 @@ title: Deploy a new Remote Environment
 type: Details
 ---
 
-By default, Kyma comes with two Remote Environments preinstalled. Those Remote Environments are installed in the `kyma-integration` Namespace.
+The Remote Environment Controller provisions and de-provisions necessary deployments for the created Remote Environments.
+
+The following operations are available:
+
+- Create a new Remote Environment
+- Delete the Remote Environment
+- Update the Remote Environment configuration
+
+You can perform all these operations using the Console UI or kubectl.
+
+
+All Remote Environments are installed in the `kyma-integration` Namespace.
 
 >**NOTE:** A Remote Environment represents a single connected external solution.
 
-## Install a Remote Environment on a local Kyma deployment
 
-To install a new Remote Environment on Minikube, provide the NodePort as shown in this example:
+## Install a Remote Environment
 
+You can install a Remote Environment using either the Console UI or kubectl
+
+### Using Console:
+
+- Go to the Kyma Console.
+- Select **Administration**.
+- Select the **Remote Environments** from the **Integration** section.
+- Click **Create Remote Environment**..
+
+![Add RE](./assets/create-re.png)
+
+- Provide the following details:
+    - Name
+    - Description
+    - Optional labels of your choice which are key-value pairs
+   
+![Update RE](./assets/edit-re.png)
+
+ - Click **Create**.
+ 
+The new Remote Environment is created. You can check its status in the **Remote Environment** view.
+
+### Using kubectl
+
+You can create a new Remote Environment using the kubectl `apply` command for the `re-production-1.yaml` file:
+
+re-production-1.yaml:
+
+``` yaml
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: RemoteEnvironment
+metadata:
+  name: production-1
+spec:
+  description: This is a Remote Environment for connecting production system 1.
+  labels:
+    region: us
+    kind: production
 ```
-helm install --name {remote-environment-name} --set deployment.args.sourceType=commerce --set global.isLocalEnv=true --set service.externalapi.nodePort=32001 --namespace kyma-integration ./resources/remote-environments
+
+Run the following command:
+
+``` bash
+kubectl apply -f ./re-production-1.yaml
 ```
 
-You can override the following parameters:
+### How to check if your remote environment was successfully created.
 
-- **sourceEnvironment** is the Event source Environment name.
-- **sourceType** is the Event source type.
-- **sourceNamespace** is the organization that publishes the Event.
+The new Remote Environment appears on the **Remote Environments** list with the `Serving` status`.
 
-Follow the **Set up a Remote Environment on Minikube** getting started guide to learn more about installing and setting up a Remote Environment on
-a local Kyma installation.
+## Delete a Remote Environment
 
-## Install a Remote Environment on a cluster Kyma deployment
+You can remove a Remote Environment from Kyma using either the Console UI or kubectl.
 
-To add a new Remote Environment to the cluster, run this command:
 
+### Using Console:
+
+- Go to the Kyma console UI.
+- Select **Administration**.
+- Select the **Remote Environments** from the **Integration** section.
+- Choose the Remote Environment you want to delete.
+- Click **Delete**.
+
+![Delete RE](./assets/delete-re.png)
+ 
+
+### Using kubectl
+
+Delete the Remote Environment using the following command:
+
+```bash
+kubectl delete re name-of-remote-environment
 ```
-helm install --name {remote-environment-name} --set deployment.args.sourceType=commerce --set global.isLocalEnv=false --set global.domainName={domain-name} --namespace kyma-integration ./resources/remote-environments
+
+## Update a Remote Environment
+
+You can update a Remote Environment using either the Console UI or kubectl.
+
+>**NOTE:** You cannot change the name of a Remote Environment.
+
+### Using Console:
+
+- Go to the Kyma Console UI.
+- Select **Administration**.
+- Select the **Remote Environments** from the **Integration** section.
+- Choose the Remote Environment to which you want to update.
+- Change the description and labels.
+- Click **Save**.
+
+### Using kubectl
+
+Update the `re-production-1.yaml` file
+
+``` yaml
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: RemoteEnvironment
+metadata:
+  name: production-1
+spec:
+  description: This is a new description.
+  labels:
+    region: new-region
+    kind: production
 ```
 
-The **global.domainName** is mandatory. Example values can look like:
+Run the following command:
+
+``` bash
+kubectl apply -f ./re-production-1.yaml
 ```
-wormhole.cluster.kyma.cx
-nightly.cluster.kyma.cx
-```
 
-You can override the following parameters:
-
-- **sourceEnvironment** is the Event source Environment name.
-- **sourceType** is the Event source type.
-- **sourceNamespace** is the organization that publishes the Event.
-
-## Work with Helm
-
-Helm provides the following commands:
-- `helm list` lists existing Helm releases
-- `helm test [release-name]` tests a release
-- `helm get [release-name]` shows the contents of `.yaml` files that make up the release
-- `helm status [release-name]` shows the status of a named release
-- `helm delete [release-name]` deletes a release from Kubernetes
-
-The full list of the Helm commands is available in the [Helm documentation](https://docs.helm.sh/helm/).
-You can also use the `helm --help` command.
-
-## Use kubectl
-
-To check if everything runs correctly, use the `kubectl get pods -n kyma-integration` or `kubectl get services -n kyma-integration` command.  

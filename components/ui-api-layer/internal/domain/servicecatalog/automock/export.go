@@ -1,63 +1,88 @@
 package automock
 
-// Broker
+// ClusterServiceBroker
 
-func NewBrokerGetter() *brokerGetter {
-	return new(brokerGetter)
+func NewClusterServiceBrokerService() *clusterServiceBrokerSvc {
+	return new(clusterServiceBrokerSvc)
 }
 
-func NewBrokerListGetter() *brokerListGetter {
-	return new(brokerListGetter)
+func NewGQLClusterServiceBrokerConverter() *gqlClusterServiceBrokerConverter {
+	return new(gqlClusterServiceBrokerConverter)
 }
 
-func NewBrokerLister() *brokerLister {
-	return new(brokerLister)
+// ServiceBroker
+func NewServiceBrokerService() *serviceBrokerSvc {
+	return new(serviceBrokerSvc)
 }
 
-func NewGQLBrokerConverter() *gqlBrokerConverter {
-	return new(gqlBrokerConverter)
+func NewGQLServiceBrokerConverter() *gqlServiceBrokerConverter {
+	return new(gqlServiceBrokerConverter)
 }
 
-// Class
+// ServiceClass
 
-func NewClassGetter() *classGetter {
-	return new(classGetter)
+func NewInstanceListerByServiceClass() *instanceListerByServiceClass {
+	return new(instanceListerByServiceClass)
 }
 
-func NewClassInstanceLister() *classInstanceLister {
-	return new(classInstanceLister)
+func NewServiceClassListGetter() *serviceClassListGetter {
+	return new(serviceClassListGetter)
 }
 
-func NewClassListGetter() *classListGetter {
-	return new(classListGetter)
+func NewGQLServiceClassConverter() *gqlServiceClassConverter {
+	return new(gqlServiceClassConverter)
 }
 
-func NewGQLClassConverter() *gqlClassConverter {
-	return new(gqlClassConverter)
+func NewServiceClassGetter() *serviceClassGetter {
+	return new(serviceClassGetter)
 }
 
-// Plan
+// ClusterServiceClass
 
-func NewPlanGetter() *planGetter {
-	return new(planGetter)
+func NewInstanceListerByClusterServiceClass() *instanceListerByClusterServiceClass {
+	return new(instanceListerByClusterServiceClass)
 }
 
-func NewPlanLister() *planLister {
-	return new(planLister)
+func NewClusterServiceClassListGetter() *clusterServiceClassListGetter {
+	return new(clusterServiceClassListGetter)
 }
 
-func NewGQLPlanConverter() *gqlPlanConverter {
-	return new(gqlPlanConverter)
+func NewGQLClusterServiceClassConverter() *gqlClusterServiceClassConverter {
+	return new(gqlClusterServiceClassConverter)
+}
+
+// ServicePlan
+
+func NewServicePlanGetter() *servicePlanGetter {
+	return new(servicePlanGetter)
+}
+
+func NewServicePlanLister() *servicePlanLister {
+	return new(servicePlanLister)
+}
+
+func NewGQLServicePlanConverter() *gqlServicePlanConverter {
+	return new(gqlServicePlanConverter)
+}
+
+// ClusterServicePlan
+
+func NewClusterServicePlanGetter() *clusterServicePlanGetter {
+	return new(clusterServicePlanGetter)
+}
+
+func NewClusterServicePlanLister() *clusterServicePlanLister {
+	return new(clusterServicePlanLister)
+}
+
+func NewGQLClusterServicePlanConverter() *gqlClusterServicePlanConverter {
+	return new(gqlClusterServicePlanConverter)
 }
 
 // Service Instance
 
-func NewInstanceGetter() *instanceGetter {
-	return new(instanceGetter)
-}
-
-func NewInstanceLister() *instanceLister {
-	return new(instanceLister)
+func NewServiceInstanceLister() *serviceInstanceLister {
+	return new(serviceInstanceLister)
 }
 
 // Service Binding
@@ -80,4 +105,10 @@ func NewStatusBindingUsageExtractor() *statusBindingUsageExtractor {
 
 func NewUsageKindServices() *usageKindServices {
 	return new(usageKindServices)
+}
+
+// Bindable Resources
+
+func NewBindableResourcesLister() *bindableResourceLister {
+	return new(bindableResourceLister)
 }

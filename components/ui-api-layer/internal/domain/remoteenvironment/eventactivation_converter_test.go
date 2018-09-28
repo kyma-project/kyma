@@ -3,7 +3,7 @@ package remoteenvironment
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
@@ -19,11 +19,7 @@ func TestEventActivationConverter_ToGQL(t *testing.T) {
 		assert.Equal(t, &gqlschema.EventActivation{
 			Name:        "name",
 			DisplayName: "test",
-			Source: gqlschema.EventActivationSource{
-				Type:        "nope",
-				Namespace:   "nms",
-				Environment: "env",
-			},
+			SourceID:    "picco-bello",
 		}, result)
 	})
 
@@ -142,11 +138,7 @@ func fixEventActivation() *v1alpha1.EventActivation {
 	return &v1alpha1.EventActivation{
 		Spec: v1alpha1.EventActivationSpec{
 			DisplayName: "test",
-			Source: v1alpha1.Source{
-				Environment: "env",
-				Namespace:   "nms",
-				Type:        "nope",
-			},
+			SourceID:    "picco-bello",
 		},
 		ObjectMeta: v1.ObjectMeta{
 			Name: "name",

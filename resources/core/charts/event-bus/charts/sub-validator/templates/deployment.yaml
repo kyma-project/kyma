@@ -30,7 +30,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-sub-validator-eas-controller
 rules:
-- apiGroups: ["remoteenvironment.kyma.cx"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["eventactivations"]
   verbs: ["get", "watch", "list"]
 ---
@@ -69,7 +69,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/event-bus-sub-validator:{{ .Values.global.eventBusVersion }}"
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}event-bus-sub-validator:{{ .Values.global.event_bus.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --resyncPeriod={{ .Values.global.subValidator.resyncPeriod }}

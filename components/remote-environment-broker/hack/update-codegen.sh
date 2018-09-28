@@ -10,5 +10,5 @@ REB_ROOT_PKG="github.com/kyma-project/kyma/components/remote-environment-broker/
 
 ./hack/generate-groups.sh all \
   ${REB_ROOT_PKG}/client ${REB_ROOT_PKG}/apis \
-  remoteenvironment:v1alpha1 \
+  applicationconnector:v1alpha1 \
   --go-header-file ${SCRIPT_ROOT}/hack/boilerplate.go.txt

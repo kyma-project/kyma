@@ -5,6 +5,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/kyma-project/kyma/tools/stability-checker/internal/summary"
+
 	"github.com/kyma-project/kyma/tools/stability-checker/internal"
 	"github.com/pkg/errors"
 )
@@ -44,8 +46,10 @@ func NewTestRenderer() (*TestRenderer, error) {
 type RenderTestSummaryInput struct {
 	TestResultWindowTime time.Duration
 	TotalTestsCnt        int
-	FailedTests          []internal.TestStatus
+	FailedExecutions     []internal.ExecutionStatus
 	TestRunnerInfo       TestRunnerInfo
+	TestStats            []summary.SpecificTestStats
+	ShowTestStats        bool
 }
 
 // TestRunnerInfo describes test runner in kubernetes system

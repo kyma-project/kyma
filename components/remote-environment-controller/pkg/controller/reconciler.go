@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	remoteenvironmentv1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -40,7 +40,7 @@ func NewReconciler(mgrClient ManagerClient, helmClient kymahelm.HelmClient, over
 }
 
 func (r *remoteEnvironmentReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	instance := &remoteenvironmentv1alpha1.RemoteEnvironment{}
+	instance := &v1alpha1.RemoteEnvironment{}
 
 	err := r.mgrClient.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
@@ -73,7 +73,7 @@ func (r *remoteEnvironmentReconciler) Reconcile(request reconcile.Request) (reco
 func (r *remoteEnvironmentReconciler) installNewREChart(name string) {
 	_, err := r.helmClient.InstallReleaseFromChart(reChartDirectory, r.namespace, name, r.overrides)
 	if err != nil {
-		log.Error("Error while installing release for %s RE: %s", name, err.Error())
+		log.Errorf("Error while installing release for %s RE: %s", name, err.Error())
 	} else {
 		log.Infof("New Helm chart for %s Remote Environment installed", name)
 	}

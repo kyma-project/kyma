@@ -57,7 +57,7 @@ type Error struct {
 	Details  []ErrorDetail `json:"details"`
 }
 
-// TODO Add propper comments
+// TODO Add proper comments
 func ErrorResponseInternalServer() (response *Error) {
 	apiError := Error{
 		Status:   http.StatusInternalServerError,
@@ -105,20 +105,9 @@ func ErrorResponseEmptyRequest() (response *Error) {
 	}
 	return &apiError
 }
-func ErrorResponseMissingFieldSource() (response *Error) {
-	return createMissingFieldError(FieldSource)
-}
 
-func ErrorResponseMissingFieldSourceType() (response *Error) {
-	return createMissingFieldError(FieldSourceType)
-}
-
-func ErrorResponseMissingFieldSourceNamespace() (response *Error) {
-	return createMissingFieldError(FieldSourceNamespace)
-}
-
-func ErrorResponseMissingFieldSourceEnvironment() (response *Error) {
-	return createMissingFieldError(FieldSourceEnvironment)
+func ErrorResponseMissingFieldSourceId() (response *Error) {
+	return createMissingFieldError(FieldSourceId)
 }
 
 func ErrorResponseMissingFieldData() (response *Error) {
@@ -135,18 +124,6 @@ func ErrorResponseMissingFieldEventTypeVersion() (response *Error) {
 
 func ErrorResponseMissingFieldEventTime() (response *Error) {
 	return createMissingFieldError(FieldEventTime)
-}
-
-func ErrorResponseWrongSourceEnvironment() (response *Error) {
-	return createInvalidFieldError(FieldSourceEnvironment)
-}
-
-func ErrorResponseWrongSourceNamespace() (response *Error) {
-	return createInvalidFieldError(FieldSourceNamespace)
-}
-
-func ErrorResponseWrongSourceType() (response *Error) {
-	return createInvalidFieldError(FieldSourceType)
 }
 
 func ErrorResponseWrongEventType() (response *Error) {

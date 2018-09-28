@@ -1,0 +1,91 @@
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name:  {{ template "fullname" . }}-oklog
+  labels:
+{{ include "labels.standard" . | indent 4 }}
+    component: oklog
+spec:
+  serviceName:  {{ template "fullname" . }}-oklog
+  replicas: {{ .Values.oklog.replicas }}
+  selector:
+    matchLabels:
+      app:  {{ template "name" . }}
+  template:
+    metadata:
+      name:  {{ template "name" . }}
+      labels:
+{{ include "labels.standard" . | indent 8 }}        
+        component: oklog
+    spec:
+      {{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+      {{- end }}
+      volumes:
+        - name: oklog-configmap
+          configMap:
+            name:  {{ template "fullname" . }}-oklog
+      containers:
+        - name: oklog
+          image: {{ .Values.oklog.image.repository }}:{{ .Values.oklog.image.tag }}
+          imagePullPolicy: {{ .Values.oklog.image.pullPolicy }}
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          command:
+            - /bin/sh
+            - /go/bin/start.sh
+          volumeMounts:
+{{- if .Values.persistence.enabled }}
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+{{- end }}
+            - name: oklog-configmap
+              mountPath: /go/bin/start.sh
+              subPath: start.sh
+          ports:
+            - name: api
+              containerPort: 7650
+            - name: ingest-fast
+              containerPort: 7651
+            - name: ingest-durable
+              containerPort: 7652
+            - name: ingest-bulk
+              containerPort: 7653
+            - name: cluster
+              containerPort: 7659
+          resources:
+{{ toYaml .Values.oklog.resources | indent 12}}
+{{- if  .Values.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        component: oklog
+{{ include "labels.standard" . | indent 8 }}
+    spec:
+      accessModes:
+        - {{ .Values.persistence.accessMode | quote }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size | quote }}
+{{- if .Values.persistence.storageClass}}
+{{- if (eq "-" .Values.persistence.storageClass) }}
+      storageClassName: ""
+{{- else }}
+      storageClassName: "{{ .Values.persistence.storageClass }}"
+{{- end -}}
+{{- end -}}
+{{- end -}}

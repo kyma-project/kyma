@@ -51,7 +51,7 @@ func main() {
 	// one. This reduces memory footprint and number of connections to the server.
 	informerFactory := externalversions.NewSharedInformerFactory(reClient, informerResyncPeriod)
 
-	v1alpha1Interface := informerFactory.Remoteenvironment().V1alpha1()
+	v1alpha1Interface := informerFactory.Applicationconnector().V1alpha1()
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
@@ -60,8 +60,8 @@ func main() {
 
 	/* protection controller */
 	protectionController := NewProtectionController(v1alpha1Interface.RemoteEnvironments(),
-		reClient.RemoteenvironmentV1alpha1().EnvironmentMappings("default"),
-		reClient.RemoteenvironmentV1alpha1().RemoteEnvironments(), log)
+		reClient.ApplicationconnectorV1alpha1().EnvironmentMappings("default"),
+		reClient.ApplicationconnectorV1alpha1().RemoteEnvironments(), log)
 	protectionController.Run(1, stopCh)
 
 	informerFactory.Start(stopCh)

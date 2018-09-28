@@ -4,8 +4,8 @@ package fake
 
 import (
 	clientset "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
-	remoteenvironmentv1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
-	fakeremoteenvironmentv1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1/fake"
+	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	fakeapplicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -54,12 +54,12 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// RemoteenvironmentV1alpha1 retrieves the RemoteenvironmentV1alpha1Client
-func (c *Clientset) RemoteenvironmentV1alpha1() remoteenvironmentv1alpha1.RemoteenvironmentV1alpha1Interface {
-	return &fakeremoteenvironmentv1alpha1.FakeRemoteenvironmentV1alpha1{Fake: &c.Fake}
+// ApplicationconnectorV1alpha1 retrieves the ApplicationconnectorV1alpha1Client
+func (c *Clientset) ApplicationconnectorV1alpha1() applicationconnectorv1alpha1.ApplicationconnectorV1alpha1Interface {
+	return &fakeapplicationconnectorv1alpha1.FakeApplicationconnectorV1alpha1{Fake: &c.Fake}
 }
 
-// Remoteenvironment retrieves the RemoteenvironmentV1alpha1Client
-func (c *Clientset) Remoteenvironment() remoteenvironmentv1alpha1.RemoteenvironmentV1alpha1Interface {
-	return &fakeremoteenvironmentv1alpha1.FakeRemoteenvironmentV1alpha1{Fake: &c.Fake}
+// Applicationconnector retrieves the ApplicationconnectorV1alpha1Client
+func (c *Clientset) Applicationconnector() applicationconnectorv1alpha1.ApplicationconnectorV1alpha1Interface {
+	return &fakeapplicationconnectorv1alpha1.FakeApplicationconnectorV1alpha1{Fake: &c.Fake}
 }

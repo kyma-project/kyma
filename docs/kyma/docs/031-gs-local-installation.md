@@ -45,6 +45,7 @@ Follow these steps to "always trust" the Kyma certificate on Mac:
 
 ## Install Kyma on Minikube
 
+You can install Kyma with all core subcomponents or only with the selected ones. This section describes how to install all core subcomponents. To learn how to install only the specific ones, see the **Install subcomponents** document for details.
 
 > **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube.
 

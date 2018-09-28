@@ -3,7 +3,7 @@ package gqlschema
 type RemoteEnvironment struct {
 	Name                  string
 	Description           string
-	Source                RemoteEnvironmentSource
+	Labels                JSON
 	Services              []RemoteEnvironmentService
 	enabledInEnvironments []string
 }
