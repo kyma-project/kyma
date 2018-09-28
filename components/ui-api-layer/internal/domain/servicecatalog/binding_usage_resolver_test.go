@@ -20,6 +20,23 @@ import (
 )
 
 func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testing.T) {
+	t.Run("Success with empty name", func(t *testing.T) {
+		svc := automock.NewServiceBindingUsageOperations()
+		bindingUsage := fixServiceBindingUsageResource()
+		bindingUsage.Namespace = ""
+		bindingUsage.Name = ""
+		svc.On("Create", "test-ns", bindingUsage).Return(fixServiceBindingUsageResource(), nil).Once()
+		defer svc.AssertExpectations(t)
+		resolver := servicecatalog.NewServiceBindingUsageResolver(svc, nil)
+
+		input := fixCreateServiceBindingUsageInput()
+		input.Name = nil
+		result, err := resolver.CreateServiceBindingUsageMutation(nil, input)
+
+		require.NoError(t, err)
+		assert.Equal(t, fixServiceBindingUsage(), result)
+	})
+
 	t.Run("Success", func(t *testing.T) {
 		svc := automock.NewServiceBindingUsageOperations()
 		bindingUsage := fixServiceBindingUsageResource()
@@ -28,7 +45,8 @@ func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testin
 		defer svc.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceBindingUsageResolver(svc, nil)
 
-		result, err := resolver.CreateServiceBindingUsageMutation(nil, fixCreateServiceBindingUsageInput())
+		input := fixCreateServiceBindingUsageInput()
+		result, err := resolver.CreateServiceBindingUsageMutation(nil, input)
 
 		require.NoError(t, err)
 		assert.Equal(t, fixServiceBindingUsage(), result)
@@ -186,7 +204,7 @@ func TestServiceBindingUsageResolver_ServiceBindingUsagesOfInstanceQuery(t *test
 
 func fixServiceBindingUsage() *gqlschema.ServiceBindingUsage {
 	return &gqlschema.ServiceBindingUsage{
-		Name:        "bu-name",
+		Name:        "sbu-name",
 		Environment: "test-ns",
 		UsedBy: gqlschema.LocalObjectReference{
 			Kind: "Deployment",
@@ -201,7 +219,7 @@ func fixServiceBindingUsage() *gqlschema.ServiceBindingUsage {
 
 func fixCreateServiceBindingUsageInput() *gqlschema.CreateServiceBindingUsageInput {
 	return &gqlschema.CreateServiceBindingUsageInput{
-		Name:        "bu-name",
+		Name:        ptr("sbu-name"),
 		Environment: "test-ns",
 		ServiceBindingRef: gqlschema.ServiceBindingRefInput{
 			Name: "binding-name",
@@ -220,7 +238,7 @@ func fixServiceBindingUsageResource() *api.ServiceBindingUsage {
 			APIVersion: "servicecatalog.kyma.cx/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "bu-name",
+			Name:      "sbu-name",
 			Namespace: "test-ns",
 		},
 		Spec: api.ServiceBindingUsageSpec{
