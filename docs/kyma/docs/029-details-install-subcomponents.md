@@ -44,3 +44,13 @@ data:
 ```
 
 >**NOTE:** Some subcomponents can require additional configuration to work properly.
+
+## Specify components versions
+
+Versions of the Kyma components are specified in `values.yaml` file in charts. Each component version is described by two properties: `version` and `dir`. The first defines actual docker image tag. The second describes directory under which the tagged image is pushed follwed by a `/` or this value can be empty.
+
+Possible values of `dir` property:
+- `pr/` - contains images built from Pull Request
+- `develop/` - contains images built from master branch
+- `rc/` - contains images built for pre-release
+- `` - (empty) contains images build for releas
