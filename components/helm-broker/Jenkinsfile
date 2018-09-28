@@ -44,12 +44,10 @@ podTemplate(label: label) {
                         stage("build image $application") {
                             dir(env.APP_FOLDER){
                                 sh "cp ./broker deploy/broker/helm-broker"
-                                sh "cp ./reposerver deploy/reposerver/reposerver"
                                 sh "cp ./indexbuilder deploy/tools/indexbuilder"
                                 sh "cp ./targz deploy/tools/targz"
 
                                 sh "docker build -t ${dockerPushRoot}helm-broker:latest deploy/broker --label version=${dockerImageTag} --label component=${application}"
-                                sh "docker build -t ${dockerPushRoot}helm-broker-reposerver:latest deploy/reposerver --label version=${dockerImageTag} --label component=${application}"
                                 sh "docker build -t ${dockerPushRoot}helm-broker-tools:latest deploy/tools --label version=${dockerImageTag} --label component=${application}"
                             }
                         }
@@ -58,15 +56,11 @@ podTemplate(label: label) {
                             sh "docker tag ${dockerPushRoot}helm-broker:latest ${dockerPushRoot}helm-broker:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}helm-broker:${dockerImageTag}"
 
-                            sh "docker tag ${dockerPushRoot}helm-broker-reposerver:latest ${dockerPushRoot}helm-broker-reposerver:${dockerImageTag}"
-                            sh "docker push ${dockerPushRoot}helm-broker-reposerver:${dockerImageTag}"
-
                             sh "docker tag ${dockerPushRoot}helm-broker-tools:latest ${dockerPushRoot}helm-broker-tools:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}helm-broker-tools:${dockerImageTag}"
 
                             if (params.GIT_BRANCH == 'master') {
                                 sh "docker push ${dockerPushRoot}helm-broker:latest"
-                                sh "docker push ${dockerPushRoot}helm-broker-reposerver:latest"
                                 sh "docker push ${dockerPushRoot}helm-broker-tools:latest"
                             }
 
