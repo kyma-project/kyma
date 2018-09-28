@@ -112,22 +112,25 @@ try {
         }
     }
 
-    // release components
-    stage('build projects') {
-        parallel jobs
-    }
+    // TODO uncomment build and test stages after testing
+    // // build components
+    // stage('build projects') {
+    //     parallel jobs
+    // }
 
-    stage('launch Kyma integration') {
-        build job: 'kyma/integration',
-            wait: true,
-            parameters: [
-                string(name:'GIT_REVISION', value: "$commitID"),
-                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-                string(name:'APP_VERSION', value: "$appVersion"),
-                string(name:'COMP_VERSIONS', value: "${versionsYaml()}") // YAML string
-            ]
-    }
+    // // test the release
+    // stage('launch Kyma integration') {
+    //     build job: 'kyma/integration',
+    //         wait: true,
+    //         parameters: [
+    //             string(name:'GIT_REVISION', value: "$commitID"),
+    //             string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+    //             string(name:'APP_VERSION', value: "$appVersion"),
+    //             string(name:'COMP_VERSIONS', value: "${versionsYaml()}") // YAML string
+    //         ]
+    // }
 
+    // publish release artifacts
     podTemplate(label: label) {
         node(label) {
             timestamps {
@@ -137,7 +140,6 @@ try {
                     }
 
                     stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
-                        def slurper = new JsonSlurperClassic()
                         def zip = "${appVersion}.tar.gz"
                         
                         // create release zip
@@ -149,7 +151,7 @@ try {
                             // TODO add changelog as "body"
                             def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"Release ${appVersion}\",\"draft\": false,\"prerelease\": ${isRelease ? 'false' : 'true'}}'"
                             def json = sh (script: "curl --data ${data} -H \"Authorization: token $token\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
-                            def releaseID = slurper.parseText(json).id
+                            def releaseID = getGithubReleaseID(json)
 
                             // upload zip file
                             sh "curl --data-binary @$zip -H \"Authorization: token $token\" -H \"Content-Type: application/zip\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${zip}"
@@ -204,6 +206,16 @@ def configureBuilds(commitID) {
         dockerPushRoot = "rc/"
         appVersion = "${(params.RELEASE_BRANCH =~ /([0-9]+\.[0-9]+)$/)[0][1]}-rc" // release branch number + '-rc' suffix (e.g. 1.0-rc)
     }   
+}
+
+/**
+ * Obtain the github release ID from its JSON data.
+ * More info: https://developer.github.com/v3/repos/releases 
+ */
+@NonCPS
+def getGithubReleaseID(releaseJson) {
+    def slurper = new JsonSlurperClassic()
+    return slurper.parseText(releaseJson).id
 }
 
 /**

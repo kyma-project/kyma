@@ -36,14 +36,27 @@ func (c *serviceBindingConverter) ToGQL(in *api.ServiceBinding) *gqlschema.Servi
 	}
 }
 
-func (c *serviceBindingConverter) ToGQLs(in []*api.ServiceBinding) []gqlschema.ServiceBinding {
-	var result []gqlschema.ServiceBinding
+func (c *serviceBindingConverter) ToGQLs(in []*api.ServiceBinding) gqlschema.ServiceBindings {
+	var result gqlschema.ServiceBindings
 	for _, item := range in {
 		converted := c.ToGQL(item)
 		if converted != nil {
-			result = append(result, *converted)
+			c.addStat(converted.Status.Type, &result.Stats)
+			result.ServiceBindings = append(result.ServiceBindings, *converted)
 		}
 	}
-
 	return result
+}
+
+func (*serviceBindingConverter) addStat(statusType gqlschema.ServiceBindingStatusType, stats *gqlschema.ServiceBindingsStats) {
+	switch statusType {
+	case gqlschema.ServiceBindingStatusTypeReady:
+		stats.Ready += 1
+	case gqlschema.ServiceBindingStatusTypeFailed:
+		stats.Failed += 1
+	case gqlschema.ServiceBindingStatusTypePending:
+		stats.Pending += 1
+	case gqlschema.ServiceBindingStatusTypeUnknown:
+		stats.Unknown += 1
+	}
 }

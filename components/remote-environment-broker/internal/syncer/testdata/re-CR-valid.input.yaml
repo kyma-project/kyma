@@ -1,4 +1,4 @@
-apiVersion: remoteenvironment.kyma.cx/v1alpha1
+apiVersion: applicationconnector.kyma-project.io
 kind: RemoteEnvironment
 metadata:
   name: ec-prod

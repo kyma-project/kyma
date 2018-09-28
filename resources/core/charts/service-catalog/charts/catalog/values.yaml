@@ -74,12 +74,12 @@ apiserver:
         ## etcd-client-ca.crt - SSL Certificate Authority file used to secure etcd communication
         ## etcd-client.crt - SSL certification file used to secure etcd communication.
         ## etcd-client.key - SSL key file used to secure etcd communication.
-        clientCertSecretName: core-service-catalog-etcd-etcd-client-tls
+        clientCertSecretName: core-catalog-etcd-stateful-etcd-client-tls
       # Whether to embed an etcd container in the apiserver pod
       # THIS IS INADEQUATE FOR PRODUCTION USE!
       useEmbedded: false
       # etcd URL(s); override this if NOT using embedded etcd
-      servers: https://core-service-catalog-etcd-client.kyma-system.svc.cluster.local:2379
+      servers: https://core-catalog-etcd-stateful-client.kyma-system.svc.cluster.local:2379
       # Below parameters are used only when useEmbedded property is set to `true`
       # etcd image to use
       image: quay.io/coreos/etcd:latest

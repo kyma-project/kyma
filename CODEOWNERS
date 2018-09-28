@@ -13,8 +13,8 @@
 # The `installation` PowerShell scripts
 /installation/**/*.ps1 @crabtree @venturasr
 
-# The `release` directory
-/release/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek
+# The `kyma-installer` directory
+/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek
 
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @piotrmsc @PK85

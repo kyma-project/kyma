@@ -352,7 +352,7 @@ func (r *serviceInstanceResolver) Bindable(ctx context.Context, obj *gqlschema.S
 	return r.sc.ServiceInstanceBindableField(ctx, obj)
 }
 
-func (r *serviceInstanceResolver) ServiceBindings(ctx context.Context, obj *gqlschema.ServiceInstance) ([]gqlschema.ServiceBinding, error) {
+func (r *serviceInstanceResolver) ServiceBindings(ctx context.Context, obj *gqlschema.ServiceInstance) (gqlschema.ServiceBindings, error) {
 	return r.sc.ServiceBindingsToInstanceQuery(ctx, obj.Name, obj.Environment)
 }
 

@@ -1,4 +1,3 @@
 name: ui-api
 description: GraphQL API for Kyma UIs
-version: 0.1.1
-appVersion: 63f6725d
+version: 0.1.2
