@@ -73,6 +73,10 @@ type CreateServiceBindingUsageInput struct {
 	Parameters        *ServiceBindingUsageParametersInput `json:"parameters"`
 }
 
+type DeleteRemoteEnvironmentOutput struct {
+	Name string `json:"name"`
+}
+
 type DeleteServiceBindingOutput struct {
 	Name        string `json:"name"`
 	Environment string `json:"environment"`
@@ -185,6 +189,12 @@ type RemoteEnvironmentEntry struct {
 	Type        string  `json:"type"`
 	GatewayURL  *string `json:"gatewayUrl"`
 	AccessLabel *string `json:"accessLabel"`
+}
+
+type RemoteEnvironmentMutationOutput struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Labels      JSON   `json:"labels"`
 }
 
 type RemoteEnvironmentService struct {

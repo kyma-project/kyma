@@ -123,6 +123,10 @@ type ComplexityRoot struct {
 		Environment         func(childComplexity int) int
 	}
 
+	DeleteRemoteEnvironmentOutput struct {
+		Name func(childComplexity int) int
+	}
+
 	DeleteServiceBindingOutput struct {
 		Name        func(childComplexity int) int
 		Environment func(childComplexity int) int
@@ -231,6 +235,9 @@ type ComplexityRoot struct {
 		DeleteServiceBinding      func(childComplexity int, serviceBindingName string, environment string) int
 		CreateServiceBindingUsage func(childComplexity int, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
 		DeleteServiceBindingUsage func(childComplexity int, serviceBindingUsageName string, environment string) int
+		CreateRemoteEnvironment   func(childComplexity int, name string, description *string, labels *JSON) int
+		UpdateRemoteEnvironment   func(childComplexity int, name string, description *string, labels *JSON) int
+		DeleteRemoteEnvironment   func(childComplexity int, name string) int
 		EnableRemoteEnvironment   func(childComplexity int, remoteEnvironment string, environment string) int
 		DisableRemoteEnvironment  func(childComplexity int, remoteEnvironment string, environment string) int
 		CreateIdppreset           func(childComplexity int, name string, issuer string, jwksUri string) int
@@ -283,6 +290,12 @@ type ComplexityRoot struct {
 		Type        func(childComplexity int) int
 		GatewayUrl  func(childComplexity int) int
 		AccessLabel func(childComplexity int) int
+	}
+
+	RemoteEnvironmentMutationOutput struct {
+		Name        func(childComplexity int) int
+		Description func(childComplexity int) int
+		Labels      func(childComplexity int) int
 	}
 
 	RemoteEnvironmentService struct {
@@ -530,6 +543,9 @@ type MutationResolver interface {
 	DeleteServiceBinding(ctx context.Context, serviceBindingName string, environment string) (*DeleteServiceBindingOutput, error)
 	CreateServiceBindingUsage(ctx context.Context, createServiceBindingUsageInput *CreateServiceBindingUsageInput) (*ServiceBindingUsage, error)
 	DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, environment string) (*DeleteServiceBindingUsageOutput, error)
+	CreateRemoteEnvironment(ctx context.Context, name string, description *string, labels *JSON) (RemoteEnvironmentMutationOutput, error)
+	UpdateRemoteEnvironment(ctx context.Context, name string, description *string, labels *JSON) (RemoteEnvironmentMutationOutput, error)
+	DeleteRemoteEnvironment(ctx context.Context, name string) (DeleteRemoteEnvironmentOutput, error)
 	EnableRemoteEnvironment(ctx context.Context, remoteEnvironment string, environment string) (*EnvironmentMapping, error)
 	DisableRemoteEnvironment(ctx context.Context, remoteEnvironment string, environment string) (*EnvironmentMapping, error)
 	CreateIDPPreset(ctx context.Context, name string, issuer string, jwksUri string) (*IDPPreset, error)
@@ -756,6 +772,107 @@ func field_Mutation_deleteServiceBindingUsage_args(rawArgs map[string]interface{
 		}
 	}
 	args["environment"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_createRemoteEnvironment_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["description"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["description"] = arg1
+	var arg2 *JSON
+	if tmp, ok := rawArgs["labels"]; ok {
+		var err error
+		var ptr1 JSON
+		if tmp != nil {
+			err = (&ptr1).UnmarshalGQL(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["labels"] = arg2
+	return args, nil
+
+}
+
+func field_Mutation_updateRemoteEnvironment_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["description"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["description"] = arg1
+	var arg2 *JSON
+	if tmp, ok := rawArgs["labels"]; ok {
+		var err error
+		var ptr1 JSON
+		if tmp != nil {
+			err = (&ptr1).UnmarshalGQL(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["labels"] = arg2
+	return args, nil
+
+}
+
+func field_Mutation_deleteRemoteEnvironment_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
 	return args, nil
 
 }
@@ -2127,6 +2244,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CreateServiceBindingOutput.Environment(childComplexity), true
 
+	case "DeleteRemoteEnvironmentOutput.name":
+		if e.complexity.DeleteRemoteEnvironmentOutput.Name == nil {
+			break
+		}
+
+		return e.complexity.DeleteRemoteEnvironmentOutput.Name(childComplexity), true
+
 	case "DeleteServiceBindingOutput.name":
 		if e.complexity.DeleteServiceBindingOutput.Name == nil {
 			break
@@ -2569,6 +2693,42 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteServiceBindingUsage(childComplexity, args["serviceBindingUsageName"].(string), args["environment"].(string)), true
+
+	case "Mutation.createRemoteEnvironment":
+		if e.complexity.Mutation.CreateRemoteEnvironment == nil {
+			break
+		}
+
+		args, err := field_Mutation_createRemoteEnvironment_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateRemoteEnvironment(childComplexity, args["name"].(string), args["description"].(*string), args["labels"].(*JSON)), true
+
+	case "Mutation.updateRemoteEnvironment":
+		if e.complexity.Mutation.UpdateRemoteEnvironment == nil {
+			break
+		}
+
+		args, err := field_Mutation_updateRemoteEnvironment_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateRemoteEnvironment(childComplexity, args["name"].(string), args["description"].(*string), args["labels"].(*JSON)), true
+
+	case "Mutation.deleteRemoteEnvironment":
+		if e.complexity.Mutation.DeleteRemoteEnvironment == nil {
+			break
+		}
+
+		args, err := field_Mutation_deleteRemoteEnvironment_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteRemoteEnvironment(childComplexity, args["name"].(string)), true
 
 	case "Mutation.enableRemoteEnvironment":
 		if e.complexity.Mutation.EnableRemoteEnvironment == nil {
@@ -3040,6 +3200,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.RemoteEnvironmentEntry.AccessLabel(childComplexity), true
+
+	case "RemoteEnvironmentMutationOutput.name":
+		if e.complexity.RemoteEnvironmentMutationOutput.Name == nil {
+			break
+		}
+
+		return e.complexity.RemoteEnvironmentMutationOutput.Name(childComplexity), true
+
+	case "RemoteEnvironmentMutationOutput.description":
+		if e.complexity.RemoteEnvironmentMutationOutput.Description == nil {
+			break
+		}
+
+		return e.complexity.RemoteEnvironmentMutationOutput.Description(childComplexity), true
+
+	case "RemoteEnvironmentMutationOutput.labels":
+		if e.complexity.RemoteEnvironmentMutationOutput.Labels == nil {
+			break
+		}
+
+		return e.complexity.RemoteEnvironmentMutationOutput.Labels(childComplexity), true
 
 	case "RemoteEnvironmentService.id":
 		if e.complexity.RemoteEnvironmentService.Id == nil {
@@ -5626,6 +5807,58 @@ func (ec *executionContext) _CreateServiceBindingOutput_environment(ctx context.
 	return graphql.MarshalString(res)
 }
 
+var deleteRemoteEnvironmentOutputImplementors = []string{"DeleteRemoteEnvironmentOutput"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _DeleteRemoteEnvironmentOutput(ctx context.Context, sel ast.SelectionSet, obj *DeleteRemoteEnvironmentOutput) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, deleteRemoteEnvironmentOutputImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeleteRemoteEnvironmentOutput")
+		case "name":
+			out.Values[i] = ec._DeleteRemoteEnvironmentOutput_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _DeleteRemoteEnvironmentOutput_name(ctx context.Context, field graphql.CollectedField, obj *DeleteRemoteEnvironmentOutput) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "DeleteRemoteEnvironmentOutput",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
 var deleteServiceBindingOutputImplementors = []string{"DeleteServiceBindingOutput"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -7660,6 +7893,21 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_createServiceBindingUsage(ctx, field)
 		case "deleteServiceBindingUsage":
 			out.Values[i] = ec._Mutation_deleteServiceBindingUsage(ctx, field)
+		case "createRemoteEnvironment":
+			out.Values[i] = ec._Mutation_createRemoteEnvironment(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "updateRemoteEnvironment":
+			out.Values[i] = ec._Mutation_updateRemoteEnvironment(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "deleteRemoteEnvironment":
+			out.Values[i] = ec._Mutation_deleteRemoteEnvironment(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "enableRemoteEnvironment":
 			out.Values[i] = ec._Mutation_enableRemoteEnvironment(ctx, field)
 		case "disableRemoteEnvironment":
@@ -7857,6 +8105,93 @@ func (ec *executionContext) _Mutation_deleteServiceBindingUsage(ctx context.Cont
 	}
 
 	return ec._DeleteServiceBindingUsageOutput(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_createRemoteEnvironment(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_createRemoteEnvironment_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Mutation().CreateRemoteEnvironment(ctx, args["name"].(string), args["description"].(*string), args["labels"].(*JSON))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(RemoteEnvironmentMutationOutput)
+	rctx.Result = res
+
+	return ec._RemoteEnvironmentMutationOutput(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_updateRemoteEnvironment(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_updateRemoteEnvironment_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Mutation().UpdateRemoteEnvironment(ctx, args["name"].(string), args["description"].(*string), args["labels"].(*JSON))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(RemoteEnvironmentMutationOutput)
+	rctx.Result = res
+
+	return ec._RemoteEnvironmentMutationOutput(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_deleteRemoteEnvironment(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_deleteRemoteEnvironment_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
+		return ec.resolvers.Mutation().DeleteRemoteEnvironment(ctx, args["name"].(string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(DeleteRemoteEnvironmentOutput)
+	rctx.Result = res
+
+	return ec._DeleteRemoteEnvironmentOutput(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
@@ -10094,6 +10429,112 @@ func (ec *executionContext) _RemoteEnvironmentEntry_accessLabel(ctx context.Cont
 		return graphql.Null
 	}
 	return graphql.MarshalString(*res)
+}
+
+var remoteEnvironmentMutationOutputImplementors = []string{"RemoteEnvironmentMutationOutput"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _RemoteEnvironmentMutationOutput(ctx context.Context, sel ast.SelectionSet, obj *RemoteEnvironmentMutationOutput) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, remoteEnvironmentMutationOutputImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RemoteEnvironmentMutationOutput")
+		case "name":
+			out.Values[i] = ec._RemoteEnvironmentMutationOutput_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "description":
+			out.Values[i] = ec._RemoteEnvironmentMutationOutput_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "labels":
+			out.Values[i] = ec._RemoteEnvironmentMutationOutput_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _RemoteEnvironmentMutationOutput_name(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironmentMutationOutput) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "RemoteEnvironmentMutationOutput",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _RemoteEnvironmentMutationOutput_description(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironmentMutationOutput) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "RemoteEnvironmentMutationOutput",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Description, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _RemoteEnvironmentMutationOutput_labels(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironmentMutationOutput) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "RemoteEnvironmentMutationOutput",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	return res
 }
 
 var remoteEnvironmentServiceImplementors = []string{"RemoteEnvironmentService"}
@@ -16701,6 +17142,16 @@ enum RemoteEnvironmentStatus {
     GATEWAY_NOT_CONFIGURED
 }
 
+type RemoteEnvironmentMutationOutput {
+    name: String!
+    description: String!
+    labels: JSON!
+}
+
+type DeleteRemoteEnvironmentOutput {
+    name: String!
+}
+
 type EventActivationEvent {
     eventType: String!
     version: String!
@@ -16839,6 +17290,10 @@ type Mutation {
     deleteServiceBinding(serviceBindingName: String!, environment: String!): DeleteServiceBindingOutput
     createServiceBindingUsage(createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage
     deleteServiceBindingUsage(serviceBindingUsageName: String!, environment: String!): DeleteServiceBindingUsageOutput
+
+    createRemoteEnvironment(name: String!, description: String, labels: JSON): RemoteEnvironmentMutationOutput!
+    updateRemoteEnvironment(name: String!, description: String, labels: JSON): RemoteEnvironmentMutationOutput!
+    deleteRemoteEnvironment(name: String!): DeleteRemoteEnvironmentOutput!
 
     enableRemoteEnvironment(remoteEnvironment: String!, environment: String!): EnvironmentMapping
     disableRemoteEnvironment(remoteEnvironment: String!, environment: String!): EnvironmentMapping

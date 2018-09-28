@@ -14,6 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/iosafety"
 	"github.com/pkg/errors"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
@@ -23,7 +24,8 @@ const (
 	remoteMappingNameIndex = "mapping-name"
 	// This regex comes from the k8s resource name validation and has been checked against traversal attack
 	// https://github.com/kubernetes/kubernetes/blob/v1.10.1/staging/src/k8s.io/apimachinery/pkg/util/validation/validation.go#L126
-	reNameRegex = `^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`
+	reNameRegex      = `^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`
+	maxUpdateRetries = 5
 )
 
 // remoteEnvironmentService provides listing environments along with remote environments.
@@ -65,6 +67,47 @@ func newRemoteEnvironmentService(client remoteenvironmentv1alpha1.Applicationcon
 		},
 		reNameRegex: regex,
 	}, nil
+}
+
+func (svc *remoteEnvironmentService) Create(name string, description string, labels map[string]interface{}) (*v1alpha1.RemoteEnvironment, error) {
+	return svc.client.RemoteEnvironments().Create(&v1alpha1.RemoteEnvironment{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "RemoteEnvironment",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+		Spec: v1alpha1.RemoteEnvironmentSpec{
+			Labels:      svc.convertJsonToLabels(labels),
+			Description: description,
+			Services:    []v1alpha1.Service{},
+		},
+	})
+}
+
+func (svc *remoteEnvironmentService) Update(name string, description string, labels map[string]interface{}) (*v1alpha1.RemoteEnvironment, error) {
+	for i := 0; i < maxUpdateRetries; i++ {
+		re, err := svc.Find(name)
+		if err != nil {
+			return nil, errors.Wrapf(err, "while getting RemoteEnvironment [%s]", name)
+		}
+		re.Spec.Description = description
+		re.Spec.Labels = svc.convertJsonToLabels(labels)
+
+		updated, err := svc.client.RemoteEnvironments().Update(re)
+		if err == nil {
+			return updated, nil
+		}
+		if !apiErrors.IsConflict(err) {
+			return nil, errors.Wrapf(err, "while updating RemoteEnvironment [%s]", name)
+		}
+	}
+	return nil, errors.Errorf("couldn't update RemoteEnvironment [%s], after %d retries", name, maxUpdateRetries)
+}
+
+func (svc *remoteEnvironmentService) Delete(name string) error {
+	return svc.client.RemoteEnvironments().Delete(name, &metav1.DeleteOptions{})
 }
 
 func (svc *remoteEnvironmentService) ListNamespacesFor(reName string) ([]string, error) {
@@ -198,6 +241,14 @@ func (svc *remoteEnvironmentService) GetConnectionURL(remoteEnvironment string) 
 	}
 
 	return connectorURL, nil
+}
+
+func (svc *remoteEnvironmentService) convertJsonToLabels(labels map[string]interface{}) map[string]string {
+	result := make(map[string]string)
+	for key, value := range labels {
+		result[key] = fmt.Sprintf("%v", value)
+	}
+	return result
 }
 
 func (svc *remoteEnvironmentService) extractConnectionURL(body io.ReadCloser) (string, error) {

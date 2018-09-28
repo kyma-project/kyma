@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"errors"
+
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions"
@@ -15,7 +17,11 @@ import (
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	k8sTesting "k8s.io/client-go/testing"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -241,6 +247,138 @@ func TestGetConnectionURLFailure(t *testing.T) {
 		assert.Empty(t, gotURL)
 		assert.EqualError(t, err, `while extracting connection URL from body: while decoding json: invalid character 's' looking for beginning of value`)
 	})
+}
+
+func TestRemoteEnvironmentService_Create(t *testing.T) {
+	// GIVEN
+	client := fake.NewSimpleClientset()
+	fixName := "fix-name"
+	fixDesc := "desc"
+	labels := map[string]interface{}{
+		"fix": "lab",
+	}
+	expectedLabels := map[string]string{
+		"fix": "lab",
+	}
+
+	svc, err := remoteenvironment.NewRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), remoteenvironment.Config{}, newDummyInformer(), nil, nil)
+	require.NoError(t, err)
+
+	// WHEN
+	re, err := svc.Create(fixName, fixDesc, labels)
+	require.NoError(t, err)
+
+	// THEN
+	assert.Equal(t, re.Name, fixName)
+	assert.Equal(t, re.Spec.Description, fixDesc)
+	assert.Equal(t, re.Spec.Labels, expectedLabels)
+}
+
+func TestRemoteEnvironmentService_Delete(t *testing.T) {
+	// GIVEN
+	fixName := "fix-name"
+	client := fake.NewSimpleClientset(fixRemoteEnvironmentCR(fixName))
+
+	svc, err := remoteenvironment.NewRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), remoteenvironment.Config{}, newDummyInformer(), nil, nil)
+	require.NoError(t, err)
+
+	// WHEN
+	err = svc.Delete(fixName)
+	require.NoError(t, err)
+
+	// THEN
+	_, err = client.ApplicationconnectorV1alpha1().RemoteEnvironments().Get(fixName, v1.GetOptions{})
+	assert.Error(t, err)
+}
+
+func TestRemoteEnvironmentService_Update(t *testing.T) {
+	// GIVEN
+	fixName := "fix-name"
+	fixDesc := "desc"
+	fixLabels := map[string]interface{}{
+		"fix": "lab",
+	}
+	expectedLabels := map[string]string{
+		"fix": "lab",
+	}
+	client := fake.NewSimpleClientset(fixRemoteEnvironmentCR(fixName))
+	informerFactory := externalversions.NewSharedInformerFactory(client, time.Second)
+	informer := informerFactory.Applicationconnector().V1alpha1().RemoteEnvironments().Informer()
+
+	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+
+	svc, err := remoteenvironment.NewRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), remoteenvironment.Config{}, newDummyInformer(), nil, informer)
+	require.NoError(t, err)
+
+	// WHEN
+	re, err := svc.Update(fixName, fixDesc, fixLabels)
+	require.NoError(t, err)
+
+	// THEN
+	assert.Equal(t, expectedLabels, re.Spec.Labels)
+	assert.Equal(t, fixDesc, re.Spec.Description)
+}
+
+func TestRemoteEnvironmentService_Update_ErrorInRetryLoop(t *testing.T) {
+	// GIVEN
+	fixName := "fix-name"
+	fixDesc := "desc"
+	fixLabels := map[string]interface{}{
+		"fix": "lab",
+	}
+	client := fake.NewSimpleClientset(fixRemoteEnvironmentCR(fixName))
+	client.PrependReactor("update", "remoteenvironments", func(action k8sTesting.Action) (handled bool, ret runtime.Object, err error) {
+		return true, nil, errors.New("fix")
+	})
+	informerFactory := externalversions.NewSharedInformerFactory(client, time.Second)
+	informer := informerFactory.Applicationconnector().V1alpha1().RemoteEnvironments().Informer()
+
+	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+
+	svc, err := remoteenvironment.NewRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), remoteenvironment.Config{}, newDummyInformer(), nil, informer)
+	require.NoError(t, err)
+
+	// WHEN
+	_, err = svc.Update(fixName, fixDesc, fixLabels)
+
+	// THEN
+	assert.EqualError(t, err, fmt.Sprintf("while updating RemoteEnvironment [%s]: fix", fixName))
+}
+
+func TestRemoteEnvironmentService_Update_SuccessAfterRetry(t *testing.T) {
+	// GIVEN
+	fixName := "fix-name"
+	fixDesc := "desc"
+	fixLabels := map[string]interface{}{
+		"fix": "lab",
+	}
+	expectedLabels := map[string]string{
+		"fix": "lab",
+	}
+	client := fake.NewSimpleClientset(fixRemoteEnvironmentCR(fixName))
+	i := 0
+	client.PrependReactor("update", "remoteenvironments", func(action k8sTesting.Action) (handled bool, ret runtime.Object, err error) {
+		if i == 0 {
+			i++
+			return true, nil, apiErrors.NewConflict(schema.GroupResource{}, "", errors.New("fix"))
+		}
+		return false, fixRemoteEnvironmentCR(fixName), nil
+	})
+	informerFactory := externalversions.NewSharedInformerFactory(client, time.Second)
+	informer := informerFactory.Applicationconnector().V1alpha1().RemoteEnvironments().Informer()
+
+	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
+
+	svc, err := remoteenvironment.NewRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), remoteenvironment.Config{}, newDummyInformer(), nil, informer)
+	require.NoError(t, err)
+
+	// WHEN
+	re, err := svc.Update(fixName, fixDesc, fixLabels)
+	require.NoError(t, err)
+
+	// THEN
+	assert.Equal(t, expectedLabels, re.Spec.Labels)
+	assert.Equal(t, fixDesc, re.Spec.Description)
 }
 
 func newDummyInformer() cache.SharedIndexInformer {

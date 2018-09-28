@@ -434,6 +434,16 @@ enum RemoteEnvironmentStatus {
     GATEWAY_NOT_CONFIGURED
 }
 
+type RemoteEnvironmentMutationOutput {
+    name: String!
+    description: String!
+    labels: JSON!
+}
+
+type DeleteRemoteEnvironmentOutput {
+    name: String!
+}
+
 type EventActivationEvent {
     eventType: String!
     version: String!
@@ -572,6 +582,10 @@ type Mutation {
     deleteServiceBinding(serviceBindingName: String!, environment: String!): DeleteServiceBindingOutput
     createServiceBindingUsage(createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage
     deleteServiceBindingUsage(serviceBindingUsageName: String!, environment: String!): DeleteServiceBindingUsageOutput
+
+    createRemoteEnvironment(name: String!, description: String, labels: JSON): RemoteEnvironmentMutationOutput!
+    updateRemoteEnvironment(name: String!, description: String, labels: JSON): RemoteEnvironmentMutationOutput!
+    deleteRemoteEnvironment(name: String!): DeleteRemoteEnvironmentOutput!
 
     enableRemoteEnvironment(remoteEnvironment: String!, environment: String!): EnvironmentMapping
     disableRemoteEnvironment(remoteEnvironment: String!, environment: String!): EnvironmentMapping

@@ -20,6 +20,9 @@ type reSvc interface {
 	ListNamespacesFor(reName string) ([]string, error)
 	Find(name string) (*v1alpha1.RemoteEnvironment, error)
 	List(params pager.PagingParams) ([]*v1alpha1.RemoteEnvironment, error)
+	Create(name string, description string, labels map[string]interface{}) (*v1alpha1.RemoteEnvironment, error)
+	Update(name string, description string, labels map[string]interface{}) (*v1alpha1.RemoteEnvironment, error)
+	Delete(name string) error
 	Disable(namespace, name string) error
 	Enable(namespace, name string) (*v1alpha1.EnvironmentMapping, error)
 	GetConnectionURL(remoteEnvironment string) (string, error)
@@ -84,6 +87,45 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentsQuery(ctx context.Context,
 	}
 
 	return res, nil
+}
+
+type reSpec struct {
+	description string
+	labels      map[string]interface{}
+}
+
+func (r *remoteEnvironmentResolver) CreateRemoteEnvironment(ctx context.Context, name string, description *string, labels *gqlschema.JSON) (gqlschema.RemoteEnvironmentMutationOutput, error) {
+	spec := r.populateReSpec(description, labels)
+	_, err := r.reSvc.Create(name, spec.description, spec.labels)
+	if err != nil {
+		return gqlschema.RemoteEnvironmentMutationOutput{}, errors.Wrapf(err, "while creating RemoteEnvironment [%s]", name)
+	}
+	return gqlschema.RemoteEnvironmentMutationOutput{
+		Name:        name,
+		Labels:      spec.labels,
+		Description: spec.description,
+	}, nil
+}
+
+func (r *remoteEnvironmentResolver) DeleteRemoteEnvironment(ctx context.Context, name string) (gqlschema.DeleteRemoteEnvironmentOutput, error) {
+	err := r.reSvc.Delete(name)
+	if err != nil {
+		return gqlschema.DeleteRemoteEnvironmentOutput{}, errors.Wrapf(err, "while deleting RemoteEnvironment [%s]", name)
+	}
+	return gqlschema.DeleteRemoteEnvironmentOutput{Name: name}, nil
+}
+
+func (r *remoteEnvironmentResolver) UpdateRemoteEnvironment(ctx context.Context, name string, description *string, labels *gqlschema.JSON) (gqlschema.RemoteEnvironmentMutationOutput, error) {
+	spec := r.populateReSpec(description, labels)
+	_, err := r.reSvc.Update(name, spec.description, spec.labels)
+	if err != nil {
+		return gqlschema.RemoteEnvironmentMutationOutput{}, errors.Wrapf(err, "while updating RemoteEnvironment [%s]", name)
+	}
+	return gqlschema.RemoteEnvironmentMutationOutput{
+		Name:        name,
+		Labels:      spec.labels,
+		Description: spec.description,
+	}, nil
 }
 
 func (r *remoteEnvironmentResolver) ConnectorServiceQuery(ctx context.Context, remoteEnvironment string) (gqlschema.ConnectorService, error) {
@@ -158,4 +200,15 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentStatusField(ctx context.Con
 	default:
 		return gqlschema.RemoteEnvironmentStatus(""), gqlerror.NewInternal(gqlerror.WithDetails("unknown status"))
 	}
+}
+
+func (*remoteEnvironmentResolver) populateReSpec(description *string, labels *gqlschema.JSON) reSpec {
+	var spec reSpec
+	if description != nil {
+		spec.description = *description
+	}
+	if labels != nil {
+		spec.labels = *labels
+	}
+	return spec
 }
