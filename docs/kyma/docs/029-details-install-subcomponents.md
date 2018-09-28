@@ -54,3 +54,13 @@ Possible values of `dir` property:
 - `develop/` - contains images built from master branch
 - `rc/` - contains images built for pre-release
 - `` - (empty) contains images built for release
+
+To override subcomponents versions during Kyma startup, create `versions-overrides.env` file in `installation` directory. The example overrides Environments component setting its image version to `0.0.1` from `develop` directory
+
+
+Example:
+
+```
+global.environments.dir=develop/
+global.environments.version=0.0.1
+```
