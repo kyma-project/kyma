@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
@@ -129,22 +129,30 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	instanceRes, err := querySingleInstance(c, `
 		name
 		serviceBindings {
-			name
-			serviceInstanceName
-			environment
-			secret {
+		  	serviceBindings { 
 				name
+				serviceInstanceName
 				environment
-				data
+				secret {
+					name
+					environment
+					data
+				}
+				status {
+					type
+				}
 			}
-			status {
-				type
+			stats {
+				ready
+				failed
+				pending
+				unknown
 			}
 		}
 	`, instance)
-
 	assert.NoError(t, err)
-	assertBindingExistsAndEqual(t, binding, instanceRes.ServiceInstance.ServiceBindings)
+	assert.NotNil(t, instanceRes.ServiceInstance.ServiceBindings.Stats)
+	assertBindingExistsAndEqual(t, binding, instanceRes.ServiceInstance.ServiceBindings.ServiceBindings)
 
 	t.Log("Delete Binding")
 	deleteRes, err := deleteBinding(c, deleteBindingOutput)
