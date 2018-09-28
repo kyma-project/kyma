@@ -333,6 +333,7 @@ type ServicePlan struct {
 	Description                   string  `json:"description"`
 	RelatedServiceClassName       string  `json:"relatedServiceClassName"`
 	InstanceCreateParameterSchema *JSON   `json:"instanceCreateParameterSchema"`
+	BindingCreateParameterSchema  *JSON   `json:"bindingCreateParameterSchema"`
 }
 
 type UsageKind struct {

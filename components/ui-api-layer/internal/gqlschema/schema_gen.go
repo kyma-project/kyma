@@ -469,6 +469,7 @@ type ComplexityRoot struct {
 		Description                   func(childComplexity int) int
 		RelatedServiceClassName       func(childComplexity int) int
 		InstanceCreateParameterSchema func(childComplexity int) int
+		BindingCreateParameterSchema  func(childComplexity int) int
 	}
 
 	Subscription struct {
@@ -3772,6 +3773,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ServicePlan.InstanceCreateParameterSchema(childComplexity), true
+
+	case "ServicePlan.bindingCreateParameterSchema":
+		if e.complexity.ServicePlan.BindingCreateParameterSchema == nil {
+			break
+		}
+
+		return e.complexity.ServicePlan.BindingCreateParameterSchema(childComplexity), true
 
 	case "Subscription.serviceInstanceEvent":
 		if e.complexity.Subscription.ServiceInstanceEvent == nil {
@@ -13690,6 +13698,8 @@ func (ec *executionContext) _ServicePlan(ctx context.Context, sel ast.SelectionS
 			}
 		case "instanceCreateParameterSchema":
 			out.Values[i] = ec._ServicePlan_instanceCreateParameterSchema(ctx, field, obj)
+		case "bindingCreateParameterSchema":
+			out.Values[i] = ec._ServicePlan_bindingCreateParameterSchema(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13844,6 +13854,29 @@ func (ec *executionContext) _ServicePlan_instanceCreateParameterSchema(ctx conte
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.InstanceCreateParameterSchema, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*JSON)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServicePlan_bindingCreateParameterSchema(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServicePlan",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.BindingCreateParameterSchema, nil
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -16222,6 +16255,7 @@ type ServicePlan {
     description: String!
     relatedServiceClassName: String!
     instanceCreateParameterSchema: JSON
+    bindingCreateParameterSchema: JSON
 }
 
 type ClusterServicePlan {

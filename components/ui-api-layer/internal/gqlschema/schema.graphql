@@ -146,6 +146,7 @@ type ServicePlan {
     description: String!
     relatedServiceClassName: String!
     instanceCreateParameterSchema: JSON
+    bindingCreateParameterSchema: JSON
 }
 
 type ClusterServicePlan {

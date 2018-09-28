@@ -48,6 +48,9 @@ func TestServicePlanConverter_ToGQL(t *testing.T) {
 					ServiceInstanceCreateParameterSchema: &runtime.RawExtension{
 						Raw: encodedParameterSchemaBytes,
 					},
+					ServiceBindingCreateParameterSchema: &runtime.RawExtension{
+						Raw: encodedParameterSchemaBytes,
+					},
 				},
 				ServiceClassRef: v1beta1.LocalObjectReference{
 					Name: "serviceClassRef",
@@ -65,6 +68,7 @@ func TestServicePlanConverter_ToGQL(t *testing.T) {
 			DisplayName:                   &displayName,
 			ExternalName:                  "ExampleExternalName",
 			InstanceCreateParameterSchema: parameterSchemaJSON,
+			BindingCreateParameterSchema:  parameterSchemaJSON,
 		}
 
 		result, err := converter.ToGQL(&clusterServicePlan)
@@ -154,6 +158,9 @@ func fixServicePlan(t require.TestingT) *v1beta1.ServicePlan {
 				ExternalMetadata: &runtime.RawExtension{Raw: metadataBytes},
 				ExternalName:     "ExampleExternalName",
 				ServiceInstanceCreateParameterSchema: &runtime.RawExtension{
+					Raw: encodedParameterSchemaBytes,
+				},
+				ServiceBindingCreateParameterSchema: &runtime.RawExtension{
 					Raw: encodedParameterSchemaBytes,
 				},
 			},
