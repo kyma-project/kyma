@@ -10,7 +10,7 @@ Go to the [Kyma project website](https://kyma-project.io/) to learn more about t
 
 ## Installation
 
-Install Kyma [locally](docs/kyma/docs/031-gs-local-installation.md) and on a [cluster](docs/kyma/docs/032-gs-cluster-installation.md).
+Install Kyma [locally](https://kyma-project.io/docs/latest/root/kyma#getting-started-local-kyma-installation) and on a [cluster](https://kyma-project.io/docs/latest/root/kyma#getting-started-cluster-kyma-installation).
 
 ## Usage
 
@@ -19,7 +19,7 @@ Kyma comes with the ready-to-use code snippets that you can use to test the exte
 ## Development
 
 Develop on your remote repository forked from the original repository in Go.
-See the example that uses the [`ui-api-layer`](components/ui-api-layer) project located in the `components` directory in the `kyma` repository but applies to any Go project. This set of instructions uses the recommended [`git workflow`](https://github.com/kyma-project/community/blob/master/git-workflow.md) and the general [contribution flow](https://github.com/kyma-project/community/blob/master/CONTRIBUTING.md#contribute-code-or-content). Read also the [`CONTRIBUTING.md`] document that includes the contributing rules specific for this repository.
+See the example that uses the [`ui-api-layer`](./components/ui-api-layer) project located in the `components` directory in the `kyma` repository but applies to any Go project. This set of instructions uses the recommended [`git workflow`](https://github.com/kyma-project/community/blob/master/git-workflow.md) and the general [contribution flow](https://github.com/kyma-project/community/blob/master/CONTRIBUTING.md#contribute-code-or-content). Read also the [`CONTRIBUTING.md`] document that includes the contributing rules specific for this repository.
 
 Follow these steps:
 
@@ -51,9 +51,9 @@ Every project runs differently. Follow instructions in the main `README.md` docu
 5. Create a branch and start to develop.
 
 Do not forget about creating unit and acceptance tests if needed. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. For the details concerning the acceptance tests, go to the corresponding directory inside the `tests` directory.
-Find the information on how to run changes on the cluster without a Docker image in the [Develop a service locally without using Docker](docs/kyma/docs/035-gs-local-develop-no-docker.md) document.
+Find the information on how to run changes on the cluster without a Docker image in the [Develop a service locally without using Docker](https://kyma-project.io/docs/latest/root/kyma#getting-started-develop-a-service-locally-without-using-docker) document.
 
->**NOTE:** For more details about testing, go to the [Testing Kyma](docs/kyma/docs/013-details-testing.md) document.
+>**NOTE:** For more details about testing, go to the [Testing Kyma](https://kyma-project.io/docs/latest/root/kyma#details-testing-kyma) document.
 
 6. Test your changes.
 
