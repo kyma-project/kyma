@@ -24,7 +24,7 @@ These new components include:
 
 The implementation process involves multiple components and will follow these steps:
 1. Integration of Knative `Serving` and `Build` components as optional Kyma modules.
-2. Enabling other parts like docker registry, blob storage, and build template (the order is not defined yet).
+2. Enabling other parts like Docker registry, blob storage, and build template (the order is not defined yet).
 3. Creation of a new, forked lambda UI, adjusted to Knative requirements.
 4. Removal of Kubeless when the integration completes successfully and no Kyma components use it anymore.
 
