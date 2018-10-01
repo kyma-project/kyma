@@ -100,13 +100,15 @@ func NewController(
 	return c
 }
 
-func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
+func (c *Controller) Run(workers int, stopCh <-chan struct{}) error {
 
 	log.Info("Starting the main controller...")
 
-	defer func() {
-		c.queue.ShutDown()
-	}()
+	defer c.queue.ShutDown()
+
+	if ok := cache.WaitForCacheSync(stopCh, c.apisSynced); !ok {
+		return fmt.Errorf("failed to wait for caches to sync")
+	}
 
 	for i := 0; i < workers; i++ {
 		// start workers
@@ -115,6 +117,7 @@ func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
 
 	// wait until we receive a stop signal
 	<-stopCh
+	return nil
 }
 
 func (c *Controller) worker() {
