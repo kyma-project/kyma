@@ -43,9 +43,3 @@ cat ${TMP_CR}
 rm -rf ${TMP_CR}
 
 echo "---"
-
-#TODO should be fixed with https://github.com/kyma-project/kyma/issues/959
-kubectl create cm versions --from-env-file "${VERSIONS_ENV_PATH}" -n kyma-installer --dry-run -o yaml
-echo "  labels:"
-echo "    installer: overrides"
-echo "---"
