@@ -29,4 +29,7 @@ else {
 if ($CR_PATH -ne "") {
     $cmd = "kubectl.exe apply -f ${CR_PATH}"
     Invoke-Expression -Command $cmd
+
+    $cmd = "kubectl.exe label installation/kyma-installation action=install"
+    Invoke-Expression -Command $cmd
 }
