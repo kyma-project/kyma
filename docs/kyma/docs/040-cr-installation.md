@@ -12,7 +12,7 @@ kubectl get crd installations.installer.kyma-project.io -o yaml
 
 ## Sample Custom Resource
 
-This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma.
+This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma. In this examples all components except `remote-environments` will be installed.
 
 ```
 apiVersion: "installer.kyma-project.io/v1alpha1"
@@ -26,6 +26,18 @@ metadata:
 spec:
   version: "1.0.0"
   url: "https://sample.url.com/kyma_release.tar.gz"
+  components: 
+    - name: "cluster-essentials"
+      namespace: "kyma-system"
+    - name: "istio"
+      namespace: "istio-system"
+    - name: "prometheus-operator"
+      namespace: "kyma-system"
+    - name: "provision-bundles"
+    - name: "dex"
+      namespace: "kyma-system"
+    - name: "core"
+      namespace: "kyma-system"
 ```
 
 This table lists all the possible parameters of a given resource together with their descriptions:
@@ -37,23 +49,7 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.finalizers** | **NO** | Protects the CR from deletion. Read [this](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#finalizers) Kubernetes document to learn more about finalizers. |
 | **spec.version** | **NO** | When manually installing Kyma on a cluster, specify any valid [SemVer](https://semver.org/) notation string. |
 | **spec.url** | **YES** | Specifies the location of the Kyma sources `tar.gz` package. For example, for the `master` branch of Kyma, the address is `https://github.com/kyma-project/kyma/archive/master.tar.gz` |
-
-## Install selected components only
-
-This tool installs components specified in `Installation` CR. See the [installer-cr.yaml.tpl](../../../installation/resources/installer-cr.yaml.tpl) file for more details. 
-
-To enable installation of a component, specify its name and Namespace. If you want the release name to be different from the component's name, provide the release parameter.
-
-Example:
-
-```
-spec:
-    ...
-    components:
-    ...
-    - name: "remote-environments"
-      namespace: "kyma-integration"
-      release: "hmc-default"
-```
-
-In the example, the `remote-environments` component is installed in the `kyma-integration` Namespace, using `hmc-default` as the release name. The **name** and **namespace** fields are mandatory. The name of the component is also the name of the component subdirectory in the `resources` directory. The Installer assumes that the component subdirectory is a valid Helm chart.
+| **spec.components** | **YES** | List of Helm charts components to `install` or `update` |
+| **spec.components.name** | **YES** | The name of the component is also the name of the component subdirectory in the `resources` directory. |
+| **spec.components.namespace** | **YES** | Namespace of the component in which it will be installed or updated. |
+| **spec.components.release** | **NO** | The name of release in case it should differ from component name. |
