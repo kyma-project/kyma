@@ -47,6 +47,9 @@ The API can be registered together with an OAuth credentials which are stored in
 
 The detailed description can be found here: [Metadata Service](TBD)
 
+### Event service
+
+Event Service is responsible for publishing events in Kyma. It is a connecting the external system with Kyma Eventbus.
 
 ### Proxy service
 
