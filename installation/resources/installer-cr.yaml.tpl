@@ -14,6 +14,8 @@ spec:
       namespace: "kyma-system"
     - name: "istio"
       namespace: "istio-system"
+    - name: "istio-kyma-patch"
+      namespace: "istio-system"
     - name: "prometheus-operator"
       namespace: "kyma-system"
     - name: "provision-bundles"
