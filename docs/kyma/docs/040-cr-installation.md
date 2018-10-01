@@ -12,7 +12,7 @@ kubectl get crd installations.installer.kyma-project.io -o yaml
 
 ## Sample Custom Resource
 
-This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma. The  **name** and **namespace**  fields in the `components` array define which components you install and Namespaces in which you install them. This example shows that you install all components except for `remote-environments`. If you want the release name to be different from the component's name, provide the release parameter.
+This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma. The  **name** and **namespace**  fields in the `components` array define which components you install and Namespaces in which you install them. This example shows that you install the `hmc-default` release of the `remote-environments` component in the `kyma-integration` Namespace. 
 
 ```
 apiVersion: "installer.kyma-project.io/v1alpha1"
@@ -27,17 +27,9 @@ spec:
   version: "1.0.0"
   url: "https://sample.url.com/kyma_release.tar.gz"
   components: 
-    - name: "cluster-essentials"
-      namespace: "kyma-system"
-    - name: "istio"
-      namespace: "istio-system"
-    - name: "prometheus-operator"
-      namespace: "kyma-system"
-    - name: "provision-bundles"
-    - name: "dex"
-      namespace: "kyma-system"
-    - name: "core"
-      namespace: "kyma-system"
+    - name: "remote-environments"
+      namespace: "kyma-integration"
+      release: "hmc-default"
 ```
 
 ## Custom resource parameters
