@@ -47,9 +47,13 @@ type ServiceInstance struct {
 	CreationTimestamp    int
 	Labels               []string
 	Status               ServiceInstanceStatus
-	ServiceBindings      []ServiceBinding
+	ServiceBindings      ServiceBindings
 	ServiceBindingUsages []ServiceBindingUsage
 	Bindable             bool
+}
+
+type ServiceBindings struct {
+	ServiceBindings []ServiceBinding
 }
 
 type ServiceInstanceStatus struct {
@@ -336,15 +340,23 @@ func instanceDetailsFields() string {
 			activated
 		}
 		serviceBindings {
-			name
-			serviceInstanceName
-			environment
-			secret {
+			serviceBindings {
 				name
+				serviceInstanceName
 				environment
-				data
+				secret {
+					name
+					environment
+					data
+				}
 			}
-		}
+			stats {
+				ready
+				failed
+				pending
+				unknown
+			}
+        }
 		serviceBindingUsages {
 			name
 			environment

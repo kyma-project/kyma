@@ -1,3 +1,6 @@
+test:
+  image:
+    name: test-logging
 
 logspout:
   resources:

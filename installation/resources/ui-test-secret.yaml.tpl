@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ui-test-overrides
+  name: ui-test-overrides-to-delete
   namespace: kyma-installer
   labels:
     installer: overrides

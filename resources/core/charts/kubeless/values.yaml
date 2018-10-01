@@ -1,3 +1,7 @@
+test:
+  image:
+    name: kubeless-test-client
+
 controller:
   deployment:
     replicaCount: 1

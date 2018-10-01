@@ -20,7 +20,7 @@ import (
 func TestBindingServiceCreate(t *testing.T) {
 	// GIVEN
 	fakeClient := fake.NewSimpleClientset()
-	sut := servicecatalog.NewServiceBindingService(fakeClient.ServicecatalogV1beta1(), fixBindingInformer(fakeClient))
+	sut := servicecatalog.NewServiceBindingService(fakeClient.ServicecatalogV1beta1(), fixBindingInformer(fakeClient), "sb-generated-name")
 	// WHEN
 	actualBinding, err := sut.Create("production", fixServiceBindingToRedis())
 	// THEN
@@ -30,10 +30,26 @@ func TestBindingServiceCreate(t *testing.T) {
 	assert.Equal(t, bindingFromClientSet, actualBinding)
 }
 
+func TestBindingServiceCreateWithGeneratedName(t *testing.T) {
+	// GIVEN
+	fakeClient := fake.NewSimpleClientset()
+	sut := servicecatalog.NewServiceBindingService(fakeClient.ServicecatalogV1beta1(), fixBindingInformer(fakeClient), "sb-generated-name")
+	sb := fixServiceBindingToRedis()
+	sb.Name = ""
+
+	// WHEN
+	actualBinding, err := sut.Create("production", sb)
+	// THEN
+	require.NoError(t, err)
+	bindingFromClientSet, err := fakeClient.ServicecatalogV1beta1().ServiceBindings("production").Get("sb-generated-name", v1.GetOptions{})
+	require.NoError(t, err)
+	assert.Equal(t, bindingFromClientSet, actualBinding)
+}
+
 func TestBindingServiceDelete(t *testing.T) {
 	// GIVEN
 	fakeClient := fake.NewSimpleClientset(fixServiceBindingToRedis())
-	sut := servicecatalog.NewServiceBindingService(fakeClient.ServicecatalogV1beta1(), fixBindingInformer(fakeClient))
+	sut := servicecatalog.NewServiceBindingService(fakeClient.ServicecatalogV1beta1(), fixBindingInformer(fakeClient), "")
 	// WHEN
 	err := sut.Delete("production", "redis-binding")
 	// THEN
@@ -47,7 +63,7 @@ func TestBindingServiceFind(t *testing.T) {
 	// GIVEN
 	client := fake.NewSimpleClientset(fixServiceBindingToRedis())
 	informer := fixBindingInformer(client)
-	sut := servicecatalog.NewServiceBindingService(client.ServicecatalogV1beta1(), informer)
+	sut := servicecatalog.NewServiceBindingService(client.ServicecatalogV1beta1(), informer, "")
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 	// WHEN
 	actual, err := sut.Find("production", "redis-binding")
@@ -60,7 +76,7 @@ func TestBindingServiceListForServiceInstance(t *testing.T) {
 	// GIVEN
 	client := fake.NewSimpleClientset(fixServiceBindingToRedis(), fixServiceBindingToSql())
 	informer := fixBindingInformer(client)
-	sut := servicecatalog.NewServiceBindingService(client.ServicecatalogV1beta1(), informer)
+	sut := servicecatalog.NewServiceBindingService(client.ServicecatalogV1beta1(), informer, "")
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 	// WHEN
 	actualBindings, err := sut.ListForServiceInstance("production", "redis")
