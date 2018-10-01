@@ -51,7 +51,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/event-bus-push:{{ .Values.global.eventBusVersion }}"
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}event-bus-push:{{ .Values.global.event_bus.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --client_id=$(POD_NAME)

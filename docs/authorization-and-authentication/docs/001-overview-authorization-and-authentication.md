@@ -1,6 +1,5 @@
 ---
 title: Overview
-type: Overview
 ---
 
 The security model in Kyma uses the Service Mesh component to enforce authorization through [Kubernetes Role Based Authentication](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) (RBAC) in the cluster. The identity federation is managed through [Dex](https://github.com/coreos/dex), which is an open-source, OpenID Connect identity provider.

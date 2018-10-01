@@ -5,7 +5,6 @@ package versioned
 import (
 	glog "github.com/golang/glog"
 	installerv1alpha1 "github.com/kyma-project/kyma/components/installer/pkg/client/clientset/versioned/typed/installer/v1alpha1"
-	releasev1alpha1 "github.com/kyma-project/kyma/components/installer/pkg/client/clientset/versioned/typed/release/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
@@ -16,9 +15,6 @@ type Interface interface {
 	InstallerV1alpha1() installerv1alpha1.InstallerV1alpha1Interface
 	// Deprecated: please explicitly pick a version if possible.
 	Installer() installerv1alpha1.InstallerV1alpha1Interface
-	ReleaseV1alpha1() releasev1alpha1.ReleaseV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Release() releasev1alpha1.ReleaseV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -26,7 +22,6 @@ type Interface interface {
 type Clientset struct {
 	*discovery.DiscoveryClient
 	installerV1alpha1 *installerv1alpha1.InstallerV1alpha1Client
-	releaseV1alpha1   *releasev1alpha1.ReleaseV1alpha1Client
 }
 
 // InstallerV1alpha1 retrieves the InstallerV1alpha1Client
@@ -38,17 +33,6 @@ func (c *Clientset) InstallerV1alpha1() installerv1alpha1.InstallerV1alpha1Inter
 // Please explicitly pick a version.
 func (c *Clientset) Installer() installerv1alpha1.InstallerV1alpha1Interface {
 	return c.installerV1alpha1
-}
-
-// ReleaseV1alpha1 retrieves the ReleaseV1alpha1Client
-func (c *Clientset) ReleaseV1alpha1() releasev1alpha1.ReleaseV1alpha1Interface {
-	return c.releaseV1alpha1
-}
-
-// Deprecated: Release retrieves the default version of ReleaseClient.
-// Please explicitly pick a version.
-func (c *Clientset) Release() releasev1alpha1.ReleaseV1alpha1Interface {
-	return c.releaseV1alpha1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -71,10 +55,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	if err != nil {
 		return nil, err
 	}
-	cs.releaseV1alpha1, err = releasev1alpha1.NewForConfig(&configShallowCopy)
-	if err != nil {
-		return nil, err
-	}
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
@@ -89,7 +69,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
 	cs.installerV1alpha1 = installerv1alpha1.NewForConfigOrDie(c)
-	cs.releaseV1alpha1 = releasev1alpha1.NewForConfigOrDie(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(c)
 	return &cs
@@ -99,7 +78,6 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
 	cs.installerV1alpha1 = installerv1alpha1.New(c)
-	cs.releaseV1alpha1 = releasev1alpha1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

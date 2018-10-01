@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
-	versioned "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
+	versioned "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 )
 
 //go:generate mockery -name=ProvisionChecker -output=automock -outpkg=automock -case=underscore
@@ -23,7 +23,7 @@ type CanProvisionOutput struct {
 }
 
 // New creates new aggregated checker
-func New(reFinder remoteEnvironmentFinder, reInterface versioned.RemoteenvironmentV1alpha1Interface, iFind instanceFinder) *AggregatedChecker {
+func New(reFinder remoteEnvironmentFinder, reInterface versioned.ApplicationconnectorV1alpha1Interface, iFind instanceFinder) *AggregatedChecker {
 	return &AggregatedChecker{
 		mappingExistsProvisionChecker: NewMappingExistsProvisionChecker(reFinder, reInterface),
 		uniquenessProvisionChecker:    NewUniquenessProvisionChecker(iFind),

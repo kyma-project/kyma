@@ -3,7 +3,7 @@ package broker
 import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,12 +17,7 @@ func fixOperationID() internal.OperationID {
 
 func fixRe() *internal.RemoteEnvironment {
 	return &internal.RemoteEnvironment{
-		Name: "ec-prod",
-		Source: internal.Source{
-			Namespace:   "ec-prod-ns-1",
-			Type:        "ec",
-			Environment: "ec-env",
-		},
+		Name: fixReName(),
 		Services: []internal.Service{
 			{
 				ID:          internal.RemoteServiceID(fixServiceID()),
@@ -53,11 +48,7 @@ func fixEventActivation() *v1alpha1.EventActivation {
 		},
 		Spec: v1alpha1.EventActivationSpec{
 			DisplayName: "Orders",
-			Source: v1alpha1.Source{
-				Namespace:   "ec-prod-ns-1",
-				Type:        "ec",
-				Environment: "ec-env",
-			},
+			SourceID:    string(fixReName()),
 		},
 	}
 }
@@ -134,6 +125,9 @@ func fixServiceInstanceUID() types.UID {
 	return types.UID("service-instance-uid-abcd-000")
 }
 
+func fixReName() internal.RemoteEnvironmentName {
+	return "ec-prod"
+}
 func FixServiceInstance() *v1beta1.ServiceInstance {
 	return &v1beta1.ServiceInstance{
 		ObjectMeta: metav1.ObjectMeta{

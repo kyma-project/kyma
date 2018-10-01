@@ -6,8 +6,6 @@ import (
 	clientset "github.com/kyma-project/kyma/components/installer/pkg/client/clientset/versioned"
 	installerv1alpha1 "github.com/kyma-project/kyma/components/installer/pkg/client/clientset/versioned/typed/installer/v1alpha1"
 	fakeinstallerv1alpha1 "github.com/kyma-project/kyma/components/installer/pkg/client/clientset/versioned/typed/installer/v1alpha1/fake"
-	releasev1alpha1 "github.com/kyma-project/kyma/components/installer/pkg/client/clientset/versioned/typed/release/v1alpha1"
-	fakereleasev1alpha1 "github.com/kyma-project/kyma/components/installer/pkg/client/clientset/versioned/typed/release/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -64,14 +62,4 @@ func (c *Clientset) InstallerV1alpha1() installerv1alpha1.InstallerV1alpha1Inter
 // Installer retrieves the InstallerV1alpha1Client
 func (c *Clientset) Installer() installerv1alpha1.InstallerV1alpha1Interface {
 	return &fakeinstallerv1alpha1.FakeInstallerV1alpha1{Fake: &c.Fake}
-}
-
-// ReleaseV1alpha1 retrieves the ReleaseV1alpha1Client
-func (c *Clientset) ReleaseV1alpha1() releasev1alpha1.ReleaseV1alpha1Interface {
-	return &fakereleasev1alpha1.FakeReleaseV1alpha1{Fake: &c.Fake}
-}
-
-// Release retrieves the ReleaseV1alpha1Client
-func (c *Clientset) Release() releasev1alpha1.ReleaseV1alpha1Interface {
-	return &fakereleasev1alpha1.FakeReleaseV1alpha1{Fake: &c.Fake}
 }

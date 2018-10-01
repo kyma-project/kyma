@@ -2,10 +2,9 @@ package syncer_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
-
-	"fmt"
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/syncer"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/syncer/automock"

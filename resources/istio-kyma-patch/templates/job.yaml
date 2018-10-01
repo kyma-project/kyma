@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: istio-kyma-patch
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: istio-kyma-patch
+    spec:
+      serviceAccountName: istio-kyma-patch
+      restartPolicy: OnFailure
+      containers:
+      - name: istio-kyma-patch
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.istio_kyma_patch.dir }}istio-kyma-patch:{{ .Values.global.istio_kyma_patch.version }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+        env:
+        - name: CONFIG_DIR
+          value: /etc/config
+        - name: REQUIRED_ISTIO_VERSION
+          value: 1.0.2
+      volumes:
+      - name: config-volume
+        configMap:
+          name: istio-kyma-patch-config

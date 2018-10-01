@@ -1,4 +1,4 @@
-apiVersion: remoteenvironment.kyma.cx/v1alpha1
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: EnvironmentMapping
 metadata:
   # Instance of the EnvrionmentMapping enables

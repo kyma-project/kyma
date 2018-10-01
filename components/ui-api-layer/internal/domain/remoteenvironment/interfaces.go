@@ -1,7 +1,7 @@
 package remoteenvironment
 
 import (
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
 )
 

@@ -44,6 +44,12 @@ data:
       redirectURIs:
       - 'https://grafana.{{ .Values.global.domainName }}/login/generic_oauth'
       secret: apie4eeX6hiC9ainieli
+    - id: {{ .Values.oidc.jaegerClientId }}
+      name: {{ .Values.oidc.jaegerClientName }}
+      redirectURIs:
+      - 'http://jaeger.{{ .Values.global.domainName }}:3000/oauth/callback'
+      - 'https://jaeger.{{ .Values.global.domainName }}/oauth/callback'
+      secret: oiEWUWOIEwedfgg
 
     enablePasswordDB: true
     staticPasswords:

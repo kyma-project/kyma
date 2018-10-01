@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	v1alpha1 "github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
-	release_v1alpha1 "github.com/kyma-project/kyma/components/installer/pkg/apis/release/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -40,10 +39,6 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 	// Group=installer.kyma-project.io, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("installations"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Installer().V1alpha1().Installations().Informer()}, nil
-
-		// Group=release.kyma-project.io, Version=v1alpha1
-	case release_v1alpha1.SchemeGroupVersion.WithResource("releases"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Release().V1alpha1().Releases().Informer()}, nil
 
 	}
 

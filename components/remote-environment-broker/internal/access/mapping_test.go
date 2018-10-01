@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/fake"
 	informers "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions"
 	"github.com/stretchr/testify/assert"
@@ -44,7 +44,7 @@ func TestEnvironmentMappingService_IsRemoteEnvironmentEnabled(t *testing.T) {
 			cs := fake.NewSimpleClientset(tc.givenMappings...)
 			informerFactory := informers.NewSharedInformerFactory(cs, time.Hour)
 
-			svc := NewEnvironmentMappingService(informerFactory.Remoteenvironment().V1alpha1().EnvironmentMappings().Lister())
+			svc := NewEnvironmentMappingService(informerFactory.Applicationconnector().V1alpha1().EnvironmentMappings().Lister())
 
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 			defer cancel()

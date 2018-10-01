@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/scheme"
 	"github.com/pkg/errors"
@@ -55,7 +55,7 @@ func main() {
 	broadcaster.StartRecordingToSink(&typedV1.EventSinkImpl{Interface: clientset.CoreV1().Events(metav1.NamespaceDefault)})
 	eventRecorder := broadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: "Remote-Environment-Broker"})
 
-	re, err := reClient.RemoteenvironmentV1alpha1().RemoteEnvironments().Get("ec-prod", metav1.GetOptions{})
+	re, err := reClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Get("ec-prod", metav1.GetOptions{})
 	if err != nil {
 		panic(errors.Wrap(err, "on getting remote environment"))
 	}
@@ -66,7 +66,7 @@ func main() {
 		Message: "Message contains additional information",
 		Reason:  "OneWordCamelCase",
 	})
-	_, err = reClient.RemoteenvironmentV1alpha1().RemoteEnvironments().UpdateStatus(re)
+	_, err = reClient.ApplicationconnectorV1alpha1().RemoteEnvironments().UpdateStatus(re)
 	if err != nil {
 		panic(errors.Wrap(err, "while updating status"))
 	}

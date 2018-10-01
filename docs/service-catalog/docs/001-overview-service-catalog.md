@@ -1,6 +1,5 @@
 ---
 title: Overview
-type: Overview
 ---
 
 The Service Catalog is a grouping of reusable, integrated services from all Service Brokers registered in Kyma. Its purpose is to provide an easy way for Kyma users to access services that the Service Brokers manage and use them in their applications.

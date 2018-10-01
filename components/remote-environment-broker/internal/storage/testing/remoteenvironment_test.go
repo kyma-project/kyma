@@ -188,11 +188,6 @@ func (ts *reTestSuite) generateFixtures() {
 		re := &internal.RemoteEnvironment{
 			Name:        internal.RemoteEnvironmentName(ft.name),
 			Description: ft.desc,
-			Source: internal.Source{
-				Environment: "env",
-				Namespace:   "ns",
-				Type:        "type",
-			},
 			Services: []internal.Service{
 				{
 					ID:          internal.RemoteServiceID(ft.id),

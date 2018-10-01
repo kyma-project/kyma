@@ -51,7 +51,7 @@ spec:
           - containerPort: {{ .Values.deployment.args.proxyPort }}
             name: proxy-port
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
-            name: ext-api-port
+            name: http-api-port
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -77,7 +77,7 @@ spec:
     spec:
       containers:
       - name: {{ .Release.Name }}-event-service
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.eventService.deployment.image.name }}:{{ .Values.eventService.deployment.image.tag }}"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service.dir }}event-service:{{ .Values.global.event_service.version }}"
         imagePullPolicy: {{ .Values.eventService.deployment.image.pullPolicy }}
         args:
         - "/eventservice"
@@ -85,9 +85,7 @@ spec:
         - "--eventsTargetURL={{ .Values.eventService.deployment.args.eventsTargetURL }}"
         - "--requestTimeout={{ .Values.eventService.deployment.args.requestTimeout }}"
         - "--requestLogging={{ .Values.eventService.deployment.args.requestLogging }}"
-        - "--sourceNamespace={{ .Values.eventService.deployment.args.sourceNamespace }}"
-        - "--sourceType={{ .Values.eventService.deployment.args.sourceType }}"
-        - "--sourceEnvironment={{ .Values.eventService.deployment.args.sourceEnvironment }}"
+        - "--sourceId={{ .Release.Name }}"
         readinessProbe:
           httpGet:
             path: /v1/health

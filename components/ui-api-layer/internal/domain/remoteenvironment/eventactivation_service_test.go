@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
@@ -52,11 +52,7 @@ func fixEventActivation(environment, name string) *v1alpha1.EventActivation {
 			Namespace: environment,
 		},
 		Spec: v1alpha1.EventActivationSpec{
-			Source: v1alpha1.Source{
-				Environment: environment,
-				Namespace:   "com.sap.test",
-				Type:        "taaa",
-			},
+			SourceID:    "picco-bello",
 			DisplayName: "aha!",
 		},
 	}
@@ -65,5 +61,5 @@ func fixEventActivation(environment, name string) *v1alpha1.EventActivation {
 func fixEventActivationInformer(objects ...runtime.Object) cache.SharedIndexInformer {
 	client := fake.NewSimpleClientset(objects...)
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	return informerFactory.Remoteenvironment().V1alpha1().EventActivations().Informer()
+	return informerFactory.Applicationconnector().V1alpha1().EventActivations().Informer()
 }

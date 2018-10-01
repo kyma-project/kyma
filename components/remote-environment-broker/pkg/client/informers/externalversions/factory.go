@@ -8,8 +8,8 @@ import (
 	time "time"
 
 	versioned "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
+	applicationconnector "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions/applicationconnector"
 	internalinterfaces "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions/internalinterfaces"
-	remoteenvironment "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions/remoteenvironment"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -107,9 +107,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Remoteenvironment() remoteenvironment.Interface
+	Applicationconnector() applicationconnector.Interface
 }
 
-func (f *sharedInformerFactory) Remoteenvironment() remoteenvironment.Interface {
-	return remoteenvironment.New(f, f.namespace, f.tweakListOptions)
+func (f *sharedInformerFactory) Applicationconnector() applicationconnector.Interface {
+	return applicationconnector.New(f, f.namespace, f.tweakListOptions)
 }

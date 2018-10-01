@@ -1,25 +1,20 @@
 #!/usr/bin/env groovy
 def label = "kyma-${UUID.randomUUID().toString()}"
 def application = 'istio-webhook'
-def isMaster = params.GIT_BRANCH == 'master'
-
-def dockerPushRoot = isMaster
-    ? "${env.DOCKER_REGISTRY}"
-    : "${env.DOCKER_REGISTRY}snapshot/"
-
-def dockerImageTag = isMaster
-    ? params.APP_VERSION
-    : params.GIT_BRANCH
+def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
+def dockerImageTag = params.APP_VERSION
 
 echo """
 ********************************
 Job started with the following parameters:
 DOCKER_REGISTRY=${env.DOCKER_REGISTRY}
+PUSH_DIR=${params.PUSH_DIR}
 DOCKER_CREDENTIALS=${env.DOCKER_CREDENTIALS}
 GIT_REVISION=${params.GIT_REVISION}
 GIT_BRANCH=${params.GIT_BRANCH}
 APP_VERSION=${params.APP_VERSION}
 APP_FOLDER=${env.APP_FOLDER}
+FULL_BUILD=${params.FULL_BUILD}
 ********************************
 """
 
@@ -51,7 +46,7 @@ podTemplate(label: label) {
                         stage("push image $application") {
                             sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
-                            if (isMaster) {
+                            if (params.GIT_BRANCH == 'master') {
                                 sh "docker push ${dockerPushRoot}${application}:latest"
                             }
                         }
@@ -65,12 +60,4 @@ podTemplate(label: label) {
             emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
         }
     }
-}
-
-def execute(command, envs = []) {
-    def buildpack = 'golang-buildpack:0.0.8'
-    def repositoryName = 'kyma'
-    def envText = envs=='' ? '' : "--env $envs"
-    workDir = pwd()
-    sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/$repositoryName/ -w /go/src/github.com/kyma-project/$repositoryName/$env.APP_FOLDER $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
 }

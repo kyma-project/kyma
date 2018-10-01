@@ -11,7 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/syncer"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/syncer/automock"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/platform/logger/spy"
@@ -28,7 +28,7 @@ func TestControllerRunSuccess(t *testing.T) {
 	client := fake.NewSimpleClientset(&reCR)
 
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	serviceCatalogSharedInformers := informerFactory.Remoteenvironment().V1alpha1()
+	serviceCatalogSharedInformers := informerFactory.Applicationconnector().V1alpha1()
 	reInformer := serviceCatalogSharedInformers.RemoteEnvironments()
 
 	expectations := &sync.WaitGroup{}
