@@ -19,3 +19,4 @@ spec:
       - name: TILLER_HOST
         value: {{ .Values.controller.args.tillerUrl }}
   restartPolicy: Never
+{{ end }}
