@@ -46,10 +46,10 @@ spec:
         ports:
         - containerPort: {{ .Values.containerPort}}
         volumeMounts:
-          - name: {{ .Values.configmapName}}
-            mountPath: /etc/{{ .Values.configmapName}}/
+          - name: apiserver-proxy-tls-cert
+            mountPath: /etc/apiserver-proxy-tls-cert/
       volumes:
-        - name: {{ .Values.configmapName}}
-          configMap:
-            name: {{ .Values.configmapName}}
+        - name: apiserver-proxy-tls-cert
+          secret:
+            name: apiserver-proxy-tls-cert
             
