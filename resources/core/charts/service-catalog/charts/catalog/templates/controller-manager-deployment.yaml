@@ -12,6 +12,8 @@ spec:
   selector:
     matchLabels:
       app: {{ template "fullname" . }}-controller-manager
+  # Strategy overwrites the default service-catalog strategy because of using helm '--wait' flag.
+  # As a result, Tiller waits for the readiness of all of the components, and then evaluates the readiness.
   strategy:
     type: RollingUpdate
     rollingUpdate:
