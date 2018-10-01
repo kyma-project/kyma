@@ -3,10 +3,20 @@
 set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+REQUIRED_ISTIO_VERSION=1.0.2
 
 if [[ -z ${CONFIG_DIR} ]]; then
     CONFIG_DIR=${DIR}
 fi
+
+function require_istio_version() {
+    local version
+    version=$(kubectl -n istio-system get deployment istio-pilot -o jsonpath='{.spec.template.spec.containers[0].image}' | awk -F: '{print $2}')
+    if [[ "$version" != ${REQUIRED_ISTIO_VERSION} ]]; then
+        echo "Istio must be in version: $REQUIRED_ISTIO_VERSION!"
+        exit 1
+    fi
+}
 
 function require_istio_system() {
     kubectl get namespace istio-system
@@ -77,6 +87,7 @@ function check_requirements() {
 }
 
 require_istio_system
+require_istio_version
 check_requirements
 configure_sidecar_injector
 run_all_patches
