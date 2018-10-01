@@ -17,13 +17,7 @@ if [[ ! $# -eq 2 ]] ; then
     usage
 fi
 
-VERSIONS_ENV_PATH="$1"
-INSTALLER_CONFIG_PATH="$2"
-
-if [ ! -f ${VERSIONS_ENV_PATH} ]; then
-    echo "${VERSIONS_ENV_PATH} not found"
-    usage
-fi
+INSTALLER_CONFIG_PATH="$1"
 
 if [ ! -f ${INSTALLER_CONFIG_PATH} ]; then
     echo "${INSTALLER_CONFIG_PATH} not found"
