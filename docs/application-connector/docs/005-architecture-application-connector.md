@@ -19,14 +19,6 @@ The Application Connector consists of the following components:
 ![Architecture Diagram](assets/001-application-connector.png)
 
 
-### Nginx Ingress Controller
-
-The Nginx Ingress Controller controller exposes the Application Connector to the outside world. 
-It handles the routing to the other components and secures communication using the client certificates.
-
-The detailed description can be found here: [Nginx Ingress Controller](./006-architecture-ingress-gateway.md)
-
-
 ### Connector Service
 
 The Connector Service is handling the exchange of the client certificates for a given Remote Environment and also returns the Metadata service and Event service endpoints.
