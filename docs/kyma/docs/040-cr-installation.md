@@ -12,7 +12,7 @@ kubectl get crd installations.installer.kyma-project.io -o yaml
 
 ## Sample Custom Resource
 
-This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma. In this examples all components except `remote-environments` will be installed.
+This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma. The  **name** and **namespace**  fields in the `components` array define which components you install and Namespaces in which you install them. This example shows that you install all components except for `remote-environments`. If you want the release name to be different from the component's name, provide the release parameter.
 
 ```
 apiVersion: "installer.kyma-project.io/v1alpha1"
@@ -45,11 +45,11 @@ This table lists all the possible parameters of a given resource together with t
 | Field   |      Mandatory?      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** | **YES** | Specifies the name of the CR. |
-| **metadata.labels.action** | **YES** | Defines the behavior of the Kyma installer. Available options are `install`, `update` and `uninstall`. |
+| **metadata.labels.action** | **YES** | Defines the behavior of the Kyma installer. Available options are `install`, `update`, and `uninstall`. |
 | **metadata.finalizers** | **NO** | Protects the CR from deletion. Read [this](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#finalizers) Kubernetes document to learn more about finalizers. |
 | **spec.version** | **NO** | When manually installing Kyma on a cluster, specify any valid [SemVer](https://semver.org/) notation string. |
 | **spec.url** | **YES** | Specifies the location of the Kyma sources `tar.gz` package. For example, for the `master` branch of Kyma, the address is `https://github.com/kyma-project/kyma/archive/master.tar.gz` |
-| **spec.components** | **YES** | List of Helm charts components to `install` or `update` |
-| **spec.components.name** | **YES** | The name of the component is also the name of the component subdirectory in the `resources` directory. |
-| **spec.components.namespace** | **YES** | Namespace of the component in which it will be installed or updated. |
-| **spec.components.release** | **NO** | The name of Helm release in case it should differ from component name. |
+| **spec.components** | **YES** | Lists which components of Helm chart components to `install` or `update`. |
+| **spec.components.name** | **YES** | Specifies the name of the component which is the same as the name of the component subdirectory in the `resources` directory. |
+| **spec.components.namespace** | **YES** | Defines the Namespace in which you want the Installer to `install`, or `update` the component. |
+| **spec.components.release** | **NO** | Provides the name of the Helm release in case it should differ from the component name. |
