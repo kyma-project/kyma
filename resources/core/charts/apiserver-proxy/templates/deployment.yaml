@@ -42,7 +42,7 @@ spec:
         - "--v=10"
         - "--oidc-issuer=https://dex.{{ .Values.global.domainName }}"
         - "--oidc-clientID=kyma-client"
-        - "--oidc-ca-file=/etc/{{ .Values.configmapName}}/ca.crt"
+        - "--oidc-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt"
         ports:
         - containerPort: {{ .Values.containerPort}}
         volumeMounts:

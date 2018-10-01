@@ -1,5 +1,5 @@
 tls:
-  secretName: "istio-ingress-certs"
+  secretName: "istio-ingressgateway-cert"
 
 configmapName: oidc-ca
 containerPort: 8444  
