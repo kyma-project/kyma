@@ -7,11 +7,11 @@ metadata:
 spec:
   containers:
   - name: count
-    image: ubuntu:14.04
+    image: alpine:3.8
     resources:
       requests:
-        memory: 96Mi
+        memory: 2Mi
       limits:
-        memory: 200Mi
+        memory: 10Mi
     args: [bash, -c, 
            'for ((i = 0; i <10; i++)); do echo "$i: oklogTest-$(date)"; sleep 2; done']
