@@ -3,9 +3,8 @@
 set -o errexit
 
 usage () {
-    echo 'Provide correct input arguments'
-    echo "First argument: path to versions.env file"
-    echo "Second argument: path to installer-config file, cluster or local"
+    echo "Provide correct input argument"
+    echo "First argument: path to installer-config file, cluster or local"
     exit 1
 }
 
