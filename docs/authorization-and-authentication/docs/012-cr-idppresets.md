@@ -3,7 +3,7 @@ title: Identity Provider Presets
 type: Custom Resource
 ---
 
-The `idppresets.authentication.kyma-project.io` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format that represents presets of Identity Provider configuration used in securing API through console UI. Presets are a convenient way to configure authentication section in API Custom Resource.
+The `idppresets.authentication.kyma-project.io` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format that represents presets of the Identity Provider configuration used to secure API through the Console UI. Presets are a convenient way to configure the **authentication** section in the API Custom Resource.
 
 To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
@@ -13,7 +13,7 @@ kubectl get crd idppresets.authentication.kyma-project.io -o yaml
 
 ## Sample Custom Resource
 
-This is a sample CR used to create a IDP Preset:
+This is a sample CR used to create an IDPPreset:
 
 ```yaml
 apiVersion: authentication.kyma-project.io/v1alpha1
@@ -26,17 +26,17 @@ spec:
     name: "sample-idppreset"
 ```
 
-## Properties of Custom Resource
+## Custom resource parameters
 
-This table analyses the elements of the CR and the information it contains:
+This table lists all the possible parameters of a given resource together with their descriptions:
 
 | Field   |      Mandatory?      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
-| **spec.issuer** | **YES** | Specifies the issuer of the JWT tokens used to access the services |
-| **spec.jwksUri** | **YES** | Specifies URL of the OpenID Provider’s public key set to validate signature of the JWT token. |
+| **spec.issuer** | **YES** | Specifies the issuer of the JWT tokens used to access the services. |
+| **spec.jwksUri** | **YES** | Specifies the URL of the OpenID Provider’s public key set to validate the signature of the JWT token. |
 | **spec.name** | **YES** | Specifies the name of the preset. |
 
-## Usage in UI
+## Usage in the UI
 
-There are two functionalities related to IDPPresets in the Console UI: management of presets and utilising them. You can create and delete IDP Presets by going to `Administration` tab and then to `IDP Presets`. Ultilising was slightly described in the introduction. Issuer and jwksURI are some of the API CR specification fields. However, in most cases that values are reused many times. IDPPresets usage is a solution to reuse them in a convinient way, enabling user to choose proper preset from the dropdown menu instead of entering them manually every time the user exposes a secured API.
+There are two functionalities related to IDPPresets in the Console UI: Presets management and utilization. To create and delete IDPPresets, go to the **Administration** tab and then to **IDP Presets**. Ultilising was slightly described in the introduction. **issuer** and **jwksUri** are some of the API CR specification fields. In most cases, these values are reused many times. IDPPresets usage is a solution to reuse them in a convinient way, which enables the user to choose a proper preset from the dropdown menu instead of entering them manually every time the user exposes a secured API.
