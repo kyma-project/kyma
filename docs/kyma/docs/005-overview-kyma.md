@@ -19,10 +19,10 @@ The nearest plan for Kyma and Knative cooperation is to replace Kubeless with th
 
 These new components include:
 - a custom build template that provides the function interface available in Kubeless
-- a custom docker registry to store the build artifacts
+- a custom Docker registry to store the build artifacts
 - a storage solution to store the function code (a Git repository or a blob storage like Minio or S3)
 
-The implementation process involves multiple components and and will follow these steps:
+The implementation process involves multiple components and will follow these steps:
 1. Integration of Knative `Serving` and `Build` components as optional Kyma modules.
 2. Enabling other parts like docker registry, blob storage, and build template (the order is not defined yet).
 3. Creation of a new, forked lambda UI, adjusted to Knative requirements.
