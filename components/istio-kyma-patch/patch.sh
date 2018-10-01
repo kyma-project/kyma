@@ -3,7 +3,11 @@
 set -e
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-REQUIRED_ISTIO_VERSION=1.0.2
+
+if [[ -z ${REQUIRED_ISTIO_VERSION} ]]; then
+    echo "Please set REQUIRED_ISTIO_VERSION variable!"
+    exit 1
+fi
 
 if [[ -z ${CONFIG_DIR} ]]; then
     CONFIG_DIR=${DIR}
