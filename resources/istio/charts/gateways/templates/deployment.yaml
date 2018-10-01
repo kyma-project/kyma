@@ -34,20 +34,9 @@ spec:
           image: "{{ $.Values.global.hub }}/proxyv2:{{ $.Values.global.tag }}"
           imagePullPolicy: {{ $.Values.global.imagePullPolicy }}
           ports:
-        {{- if $spec.ingress }}
-          - containerPort: 80
-        {{- if $.Values.global.isLocalEnv }}
-            hostPort: 80
-        {{- end }}
-          - containerPort: 443
-        {{- if $.Values.global.isLocalEnv }}
-            hostPort: 443
-        {{- end }}
-        {{- else }}
-        {{- range $key, $val := $spec.ports }}
-          - containerPort: {{ $val.port }}
-        {{- end }}
-        {{- end }}
+            {{- range $key, $val := $spec.ports }}
+            - containerPort: {{ $val.port }}
+            {{- end }}
           args:
           - proxy
           - router
@@ -64,7 +53,11 @@ spec:
           - --serviceCluster
           - {{ $key }}
           - --zipkinAddress
-          - zipkin.kyma-system:9411
+        {{- if $.Values.global.istioNamespace }}
+          - zipkin.{{ $.Values.global.istioNamespace }}:9411
+        {{- else }}
+          - zipkin:9411
+        {{- end }}
         {{- if $.Values.global.proxy.envoyStatsd.enabled }}
           - --statsdUdpAddress
           - {{ $.Values.global.proxy.envoyStatsd.host }}:{{ $.Values.global.proxy.envoyStatsd.port }}
@@ -75,12 +68,20 @@ spec:
           - --controlPlaneAuthPolicy
           - MUTUAL_TLS
           - --discoveryAddress
-          - istio-pilot.istio-system:15005
+          {{- if $.Values.global.istioNamespace }}
+          - istio-pilot.{{ $.Values.global.istioNamespace }}:15005
+          {{- else }}
+          - istio-pilot:15005
+          {{- end }}
         {{- else }}
           - --controlPlaneAuthPolicy
           - NONE
           - --discoveryAddress
-          - istio-pilot.istio-system:8080
+          {{- if $.Values.global.istioNamespace }}
+          - istio-pilot.{{ $.Values.global.istioNamespace }}:8080
+          {{- else }}
+          - istio-pilot:8080
+          {{- end }}
         {{- end }}
           resources:
 {{- if $spec.resources }}

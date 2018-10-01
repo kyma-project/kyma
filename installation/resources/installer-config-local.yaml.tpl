@@ -49,6 +49,7 @@ data:
   global.alertTools.credentials.slack.channel: ""
   global.alertTools.credentials.victorOps.routingkey: ""
   global.alertTools.credentials.victorOps.apikey: ""
+  global.proxy.includeIPRanges: "10.0.0.1/8"
   gateways.istio-ingressgateway.service.externalPublicIp: ""
   gateways.istio-ingressgateway.type: "NodePort"
   nginx-ingress.controller.service.loadBalancerIP: ""
