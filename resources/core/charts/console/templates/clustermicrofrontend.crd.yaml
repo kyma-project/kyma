@@ -21,6 +21,8 @@ spec:
           type: object
           required:
             - "appName"
+            - "placement"
+            - "viewBaseUrl"
             - "navigationNodes"
           properties:
             appName:

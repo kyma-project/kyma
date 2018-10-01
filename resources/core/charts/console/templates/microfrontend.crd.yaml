@@ -19,6 +19,11 @@ spec:
       properties:
         spec:
           type: object
+          required:
+          - "appName"
+          - "placement"
+          - "viewBaseUrl"
+          - "navigationNodes"
           properties:
             appName:
               type: string
@@ -29,7 +34,7 @@ spec:
               pattern: "[a-zA-Z0-9]+"
             placement:
               type: string
-              pattern: "^(environment|cluster)$"
+              pattern: "^(environment)$"
             category:
               type: string
             viewBaseUrl:
