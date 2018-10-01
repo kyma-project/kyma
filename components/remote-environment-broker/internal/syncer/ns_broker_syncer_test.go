@@ -9,6 +9,7 @@ import (
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/nsbroker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -27,7 +28,7 @@ func TestServiceBrokerSync_Success(t *testing.T) {
 	err := nsBrokerSync.Sync(fixLabelSelector(), maxSyncRetries)
 
 	// then
-	sb, err := client.Servicecatalog().ServiceBrokers("test").Get("fix-a", v1.GetOptions{})
+	sb, err := client.Servicecatalog().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
 	require.NoError(t, err)
 
 	assert.Equal(t, int64(1), sb.Spec.RelistRequests)
@@ -53,7 +54,7 @@ func TestServiceBrokerSync_SuccessAfterRetry(t *testing.T) {
 	resultErr := nsBrokerSync.Sync(fixLabelSelector(), maxSyncRetries)
 
 	// then
-	sb, err := client.Servicecatalog().ServiceBrokers("test").Get("fix-a", v1.GetOptions{})
+	sb, err := client.Servicecatalog().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
 	require.NoError(t, err)
 
 	assert.Equal(t, int64(1), sb.Spec.RelistRequests)
@@ -97,7 +98,7 @@ func TestServiceBrokerSync_ConflictError(t *testing.T) {
 	err := nsBrokerSync.Sync(fixLabelSelector(), maxSyncRetries)
 
 	// then
-	assert.EqualError(t, err, "1 error occurred:\n\n* could not sync ServiceBroker \"fix-a\" [namespace: test], after 5 tries")
+	assert.EqualError(t, err, "1 error occurred:\n\n* could not sync ServiceBroker \"remote-env-broker\" [namespace: test], after 5 tries")
 }
 
 func TestServiceBrokerSync_UpdateError(t *testing.T) {
@@ -128,10 +129,69 @@ func TestServiceBrokerSync_GetError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestServiceBrokerSync_SyncBroker_Success(t *testing.T) {
+	// given
+	client := fake.NewSimpleClientset(fixServiceBroker())
+
+	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+
+	// when
+	err := nsBrokerSync.SyncBroker("test")
+
+	// then
+	sb, err := client.Servicecatalog().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
+	require.NoError(t, err)
+
+	assert.Equal(t, int64(1), sb.Spec.RelistRequests)
+	assert.NoError(t, err)
+}
+
+func TestServiceBrokerSync_SyncBroker_GetError(t *testing.T) {
+	// given
+	client := fake.NewSimpleClientset(fixServiceBroker())
+	client.PrependReactor("get", "servicebrokers", failingReactor(fixError()))
+
+	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+
+	// when
+	err := nsBrokerSync.SyncBroker("test")
+
+	// then
+	assert.Error(t, err)
+}
+
+func TestServiceBrokerSync_SyncBroker_UpdateError(t *testing.T) {
+	// given
+	client := fake.NewSimpleClientset(fixServiceBroker())
+	client.PrependReactor("update", "servicebrokers", failingReactor(fixError()))
+
+	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+
+	// when
+	err := nsBrokerSync.SyncBroker("test")
+
+	// then
+	assert.Error(t, err)
+}
+
+func TestServiceBrokerSync_SyncBroker_ConflictError(t *testing.T) {
+	// given
+	client := fake.NewSimpleClientset(fixServiceBroker())
+	client.PrependReactor("update", "servicebrokers", failingReactor(apiErrors.NewConflict(schema.GroupResource{}, "", fixError())))
+
+	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
+
+	// when
+	err := nsBrokerSync.SyncBroker("test")
+
+	// then
+	assert.EqualError(t, err, "could not sync service broker (remote-env-broker) after 5 retries")
+}
+
 func fixServiceBroker() *v1beta1.ServiceBroker {
 	return &v1beta1.ServiceBroker{
 		ObjectMeta: v1.ObjectMeta{
-			Name:      "fix-a",
+			Name:      nsbroker.NamespacedBrokerName,
 			Namespace: "test",
 			Labels: map[string]string{
 				"app": "label",

@@ -1,61 +1,64 @@
-[
 {
-  "name":        "ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
-  "id":          "ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
-  "description": "All OCC APIs",
-  "metadata": {
-    "displayName":         "Promotions",
-    "longDescription":     "Promotions APIs",
-    "providerDisplayName": "HakunaMatata",
-
-    "bindingLabels": {
-      "access-label-1" : "true"
-    },
-    "remoteEnvironmentServiceId": "ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
-    "source": {
-      "environment": "production",
-      "type": "commerce",
-      "namespace": "com.hakuna.matata"
-    }
-  },
-  "tags": ["occ", "promotions"],
-
-  "plans":[
+  "services": [
     {
-      "name": "default",
-      "id": "global unique GUID",
-      "description": "Default plan",
+      "id": "ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
+      "name": "promotions-ac031e8c",
+      "description": "Short desc for Promotions APIs",
+      "tags": [
+        "occ",
+        "promotions"
+      ],
+      "bindable": true,
+      "plans": [
+        {
+          "id": "ac031e8c-9aa4-4cb7-8999-0d358726ffaa-plan",
+          "name": "default",
+          "description": "Default plan",
+          "metadata": {
+            "displayName": "Default"
+          }
+        }
+      ],
       "metadata": {
-        "displayName": "Default"
+        "bindingLabels": {
+          "access-label-1": "true"
+        },
+        "displayName": "Promotions",
+        "labels": {
+          "connected-app": "ec-prod"
+        },
+        "longDescription": "Long description for Promotions APIs",
+        "providerDisplayName": "HakunaMatata",
+        "remoteEnvironmentServiceId": "ac031e8c-9aa4-4cb7-8999-0d358726ffaa"
+      }
+    },
+    {
+      "id": "48ab05bf-9aa4-4cb7-8999-0d3587265ac3",
+      "name": "orders-48ab05bf",
+      "description": "Short desc for Orders API",
+      "bindable": true,
+      "plans": [
+        {
+          "id": "48ab05bf-9aa4-4cb7-8999-0d3587265ac3-plan",
+          "name": "default",
+          "description": "Default plan",
+          "metadata": {
+            "displayName": "Default"
+          }
+        }
+      ],
+      "metadata": {
+        "bindingLabels": {
+          "access-label-2": "true"
+        },
+        "displayName": "Orders",
+        "labels": {
+          "connected-app": "ec-prod"
+        },
+        "longDescription": "Long description for Orders API",
+        "providerDisplayName": "HakunaMatata",
+        "remoteEnvironmentServiceId": "48ab05bf-9aa4-4cb7-8999-0d3587265ac3"
       }
     }
   ]
-},
-  {
-    "name":        "48ab05bf-9aa4-4cb7-8999-0d3587265ac3",
-    "id":          "48ab05bf-9aa4-4cb7-8999-0d3587265ac3",
-    "description": "Orders API",
-    "metadata": {
-      "displayName":         "Orders",
-      "longDescription":     "Orders API",
-      "providerDisplayName": "HakunaMatata",
-
-      "bindingLabels": {
-        "access-label-1" : "true"
-      },
-      "remoteEnvironmentServiceId": "48ab05bf-9aa4-4cb7-8999-0d3587265ac3"
-    },
-    "tags": [],
-
-    "plans":[
-      {
-        "name": "default",
-        "id": "global unique GUID",
-        "description": "Default plan",
-        "metadata": {
-          "displayName": "Default"
-        }
-      }
-    ]
-  }
-]
+}

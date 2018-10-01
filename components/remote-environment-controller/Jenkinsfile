@@ -1,25 +1,20 @@
 #!/usr/bin/env groovy
 def label = "kyma-${UUID.randomUUID().toString()}"
 def application = 'remote-environment-controller'
-def isMaster = params.GIT_BRANCH == 'master'
-
-def dockerPushRoot = isMaster
-    ? "${env.DOCKER_REGISTRY}"
-    : "${env.DOCKER_REGISTRY}snapshot/"
-
-def dockerImageTag = isMaster
-    ? params.APP_VERSION
-    : params.GIT_BRANCH
+def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
+def dockerImageTag = params.APP_VERSION
 
 echo """
 ********************************
 Job started with the following parameters:
 DOCKER_REGISTRY=${env.DOCKER_REGISTRY}
+PUSH_DIR=${params.PUSH_DIR}
 DOCKER_CREDENTIALS=${env.DOCKER_CREDENTIALS}
 GIT_REVISION=${params.GIT_REVISION}
 GIT_BRANCH=${params.GIT_BRANCH}
 APP_VERSION=${params.APP_VERSION}
 APP_FOLDER=${env.APP_FOLDER}
+FULL_BUILD=${params.FULL_BUILD}
 ********************************
 """
 
@@ -60,25 +55,16 @@ podTemplate(label: label) {
                             execute("go test ./...")
                         }
 
-                        if (isMaster) {
-                            stage("IP scan $application (Sourceclear)"){
-                                withCredentials([string(credentialsId: 'SRCCLR_API_TOKEN', variable: 'SRCCLR_API_TOKEN')]) {
-                                    execute("make scan","SRCCLR_API_TOKEN=$SRCCLR_API_TOKEN")
-                                }
-                            }
-                        }
-
                         stage("build image $application") {
                             dir(env.APP_FOLDER){
                             sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
                             }
                         }
 
-
                         stage("push image $application") {
                             sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
-                            if (isMaster) {
+                            if (params.GIT_BRANCH == 'master') {
                                 sh "docker push ${dockerPushRoot}${application}:latest"
                             }
                         }

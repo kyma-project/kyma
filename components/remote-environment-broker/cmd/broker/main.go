@@ -82,13 +82,13 @@ func main() {
 	reClient, err := versioned.NewForConfig(k8sConfig)
 	fatalOnError(err)
 	reInformerFactory := externalversions.NewSharedInformerFactory(reClient, informerResyncPeriod)
-	reInformersGroup := reInformerFactory.Remoteenvironment().V1alpha1()
+	reInformersGroup := reInformerFactory.Applicationconnector().V1alpha1()
 
 	// internal services
 	nsBrokerSyncer := syncer.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1())
 	relistRequester := syncer.NewRelistRequester(scSDK, nsBrokerSyncer, cfg.ClusterScopedBrokerName, cfg.BrokerRelistDurationWindow, cfg.ClusterScopedBrokerEnabled, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, log)
 	siFacade := broker.NewServiceInstanceFacade(scInformersGroup.ServiceInstances().Informer())
-	accessChecker := access.New(sFact.RemoteEnvironment(), reClient.RemoteenvironmentV1alpha1(), sFact.Instance())
+	accessChecker := access.New(sFact.RemoteEnvironment(), reClient.ApplicationconnectorV1alpha1(), sFact.Instance())
 
 	reSyncCtrl := syncer.New(reInformersGroup.RemoteEnvironments(), sFact.RemoteEnvironment(), sFact.RemoteEnvironment(), relistRequester, log)
 
@@ -97,11 +97,11 @@ func main() {
 
 	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), brokerMode, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, int32(cfg.Port), log)
 
-	mappingCtrl := mapping.New(!cfg.ClusterScopedBrokerEnabled, reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), nsBrokerFacade, log)
+	mappingCtrl := mapping.New(!cfg.ClusterScopedBrokerEnabled, reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), nsBrokerFacade, nsBrokerSyncer, log)
 
 	// create broker
 	srv := broker.New(sFact.RemoteEnvironment(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
-		reClient.RemoteenvironmentV1alpha1(), siFacade, reInformersGroup.EnvironmentMappings().Lister(), brokerMode, log)
+		reClient.ApplicationconnectorV1alpha1(), siFacade, reInformersGroup.EnvironmentMappings().Lister(), brokerMode, log)
 
 	// setup graceful shutdown signals
 	ctx, cancelFunc := context.WithCancel(context.Background())

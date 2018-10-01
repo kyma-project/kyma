@@ -26,3 +26,14 @@ Download the gzipped chart from:
 As another option, you can run the following:
 
 ```helm install https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz```
+
+## Development
+Use the following helpers for the local development:
+- `./local_minikube_build.sh` which builds the Stability Checker Docker image on a Minikube registry.
+- `./local/provision_volume.sh` which provisions a PersistentVolumeClaim (PVC) with testing scripts.
+- `./local/charts/dummy` chart which contains simple and fast tests. To install it, execute the following command:
+```
+    helm install ./dummy --name dummy --namespace=kyma-system
+```
+- `./local_helm_install.sh` which installs the Stability Checker Helm chart with predefined values. 
+The testing script points to the `testing-dummy.sh` which is a simplified version of `testing-kyma.sh`. The`dummy` chart is used in the `testing-dummy.sh` to speed up testing.

@@ -17,19 +17,25 @@ var (
 )
 
 type Service struct {
-	ID          string `json:"id"`
-	Provider    string `json:"provider"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID               string            `json:"id"`
+	Provider         string            `json:"provider"`
+	Name             string            `json:"name"`
+	Description      string            `json:"description"`
+	ShortDescription string            `json:"shortDescription,omitempty"`
+	Identifier       string            `json:"identifier,omitempty"`
+	Labels           map[string]string `json:"labels,omitempty"`
 }
 
 type ServiceDetails struct {
-	Provider      string         `json:"provider"`
-	Name          string         `json:"name"`
-	Description   string         `json:"description"`
-	Api           *API           `json:"api,omitempty"`
-	Events        *Events        `json:"events,omitempty"`
-	Documentation *Documentation `json:"documentation,omitempty"`
+	Provider         string            `json:"provider"`
+	Name             string            `json:"name"`
+	Description      string            `json:"description"`
+	ShortDescription string            `json:"shortDescription,omitempty"`
+	Identifier       string            `json:"identifier,omitempty"`
+	Labels           map[string]string `json:"labels,omitempty"`
+	Api              *API              `json:"api,omitempty"`
+	Events           *Events           `json:"events,omitempty"`
+	Documentation    *Documentation    `json:"documentation,omitempty"`
 }
 
 type PostServiceResponse struct {

@@ -14,26 +14,21 @@ type RemoteServiceID string
 type RemoteEnvironment struct {
 	Name        RemoteEnvironmentName
 	Description string
-	Source      Source
 	Services    []Service
 	AccessLabel string
-}
-
-// Source defines attributes, which identifies remote environments.
-type Source struct {
-	Environment string
-	Type        string
-	Namespace   string
 }
 
 // Service represents service defined in the remote environment which is mapped to service class in the service catalog.
 type Service struct {
 	ID                  RemoteServiceID
+	Name                string
 	DisplayName         string
+	Description         string
 	LongDescription     string
 	ProviderDisplayName string
 
-	Tags []string
+	Tags   []string
+	Labels map[string]string
 
 	//TODO(entry-simplification): this is an accepted simplification until
 	// explicit support of many APIEntry and EventEntry

@@ -121,7 +121,7 @@ func unpack(data interface{}, into interface{}) error {
 	d, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		Result:      into,
 		TagName:     "json",
-		ErrorUnused: true,
+		ErrorUnused: false,
 		ZeroFields:  true,
 	})
 	if err != nil {

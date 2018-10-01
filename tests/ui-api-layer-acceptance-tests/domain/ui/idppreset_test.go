@@ -8,6 +8,7 @@ import (
 	"time"
 
 	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
@@ -41,6 +42,10 @@ type idpPresetDeleteMutationResponse struct {
 }
 
 func TestIDPPresetQueriesAndMutations(t *testing.T) {
+	if dex.IsSCIEnabled() {
+		t.Skip("SCI Enabled")
+	}
+
 	c, err := graphql.New()
 	require.NoError(t, err)
 

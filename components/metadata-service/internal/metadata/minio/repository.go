@@ -77,7 +77,7 @@ func (r *repository) Get(bucketName string, objectName string) ([]byte, apperror
 func (r *repository) Remove(bucketName string, objectName string) apperrors.AppError {
 	err := r.minioClient.RemoveObject(bucketName, objectName)
 	if err != nil {
-		return apperrors.Internal("failed to remove object %s", objectName, err)
+		return apperrors.Internal("failed to remove object %s: %s", objectName, err)
 	}
 
 	return nil
@@ -88,7 +88,7 @@ func (r *repository) getObject(bucketName string, objectName string) (*minio.Obj
 
 	object, err := r.minioClient.GetObjectWithContext(contextWithTimeout, bucketName, objectName, minio.GetObjectOptions{})
 	if err != nil {
-		return nil, apperrors.Internal("failed to get object %s: ", objectName, err), cancel
+		return nil, apperrors.Internal("failed to get object %s: %s", objectName, err), cancel
 	}
 
 	return object, nil, cancel

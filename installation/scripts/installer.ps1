@@ -8,16 +8,10 @@ $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 $cmd = "kubectl apply -f ${CURRENT_DIR}\..\resources\default-sa-rbac-role.yaml"
 Invoke-Expression -Command $cmd
 
-$cmd = "kubectl apply -f ${CURRENT_DIR}\..\resources\limit-range-installer.yaml"
-Invoke-Expression -Command $cmd
-
-$cmd = "kubectl apply -f ${CURRENT_DIR}\..\resources\resource-quotas-installer.yaml"
-Invoke-Expression -Command $cmd
-
 $cmd = "${CURRENT_DIR}\install-tiller.ps1"
 Invoke-Expression -Command $cmd
 
-$cmd = "kubectl.exe apply -f ${CURRENT_DIR}\..\resources\installer.yaml -n kyma-installer"
+$cmd = "kubectl.exe apply -f ${CURRENT_DIR}\..\resources\installer.yaml"
 Invoke-Expression -Command $cmd
 
 $cmd = "${CURRENT_DIR}\is-ready.ps1 -ns kube-system -label k8s-app -value kube-dns"

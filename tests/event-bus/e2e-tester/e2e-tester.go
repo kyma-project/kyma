@@ -29,9 +29,7 @@ const (
 	testerName          = "test-core-event-bus-tester"
 	subscriptionName    = "test-sub"
 	eventActivationName = "test-ea"
-	srcNamespace        = "local.kyma.commerce"
-	srcType             = "commerce"
-	srcEnv              = "test"
+	srcId               = "test.local.kyma.commerce"
 
 	SUCCESS = 0
 	FAIL    = 1
@@ -104,15 +102,8 @@ func main() {
 		log.Printf("Error in creating subscription client: %v\n", err)
 		shutdown(FAIL)
 	}
-	if _, err = subClient.EventingV1alpha1().Subscriptions(*namespace).Create(util.NewSubscription(
-		subscriptionName,
-		*namespace,
-		*subscriberEventEndpointURL,
-		eventType,
-		"v1",
-		srcEnv,
-		srcNamespace,
-		srcType)); err != nil {
+	_, err = subClient.EventingV1alpha1().Subscriptions(*namespace).Create(util.NewSubscription(subscriptionName, *namespace, *subscriberEventEndpointURL, eventType, "v1", srcId))
+	if err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
 			log.Printf("Error in creating subscription: %v\n", err)
 			shutdown(FAIL)
@@ -189,7 +180,7 @@ func shutdown(code int) {
 	}
 	if eaClient != nil {
 		log.Printf("Delete test event activation: %v\n", eventActivationName)
-		if err := eaClient.RemoteenvironmentV1alpha1().EventActivations(*namespace).Delete(eventActivationName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+		if err := eaClient.ApplicationconnectorV1alpha1().EventActivations(*namespace).Delete(eventActivationName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 			log.Printf("Warning: Delete Event Activation falied: %v", err)
 		}
 	}
@@ -215,9 +206,7 @@ func shutdown(code int) {
 
 func publishTestEvent(publishEventURL string) (*api.PublishResponse, error) {
 	payload := fmt.Sprintf(
-		`{"source": {"source-namespace": "%s","source-type": "%s","source-environment": "%s"},
-	"event-type": "%s","event-type-version": "v1","event-time": "2018-11-02T22:08:41+00:00","data": "test-event-1"}`,
-		srcNamespace, srcType, srcEnv, eventType)
+		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":"test-event-1"}`, srcId, eventType)
 	log.Printf("event to be published: %v\n", payload)
 	res, err := http.Post(publishEventURL, "application/json", strings.NewReader(payload))
 	if err != nil {
@@ -359,12 +348,8 @@ func createEventActivation(namespace *string, noOfRetries int) bool {
 	var eventActivationOK bool
 	var err error
 	for i := 0; i < noOfRetries; i++ {
-		if _, err = eaClient.RemoteenvironmentV1alpha1().EventActivations(*namespace).Create(util.NewEventActivation(
-			eventActivationName,
-			*namespace,
-			srcEnv,
-			srcNamespace,
-			srcType)); err == nil {
+		_, err = eaClient.ApplicationconnectorV1alpha1().EventActivations(*namespace).Create(util.NewEventActivation(eventActivationName, *namespace, srcId))
+		if err == nil {
 			eventActivationOK = true
 			break
 		}

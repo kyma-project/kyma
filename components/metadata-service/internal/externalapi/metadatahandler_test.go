@@ -36,9 +36,12 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 
 		// given
 		serviceDetails := ServiceDetails{
-			Name:        "service name",
-			Provider:    "service provider",
-			Description: "service description",
+			Name:             "service name",
+			Provider:         "service provider",
+			Description:      "service description",
+			ShortDescription: "service short description",
+			Identifier:       "service identifier",
+			Labels:           &map[string]string{"showcase": "true"},
 			Api: &API{
 				TargetUrl: "http://service.com",
 				Credentials: &Credentials{
@@ -62,9 +65,12 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		}
 
 		serviceDefinition := &metadata.ServiceDefinition{
-			Name:        "service name",
-			Provider:    "service provider",
-			Description: "service description",
+			Name:             "service name",
+			Provider:         "service provider",
+			Description:      "service description",
+			ShortDescription: "service short description",
+			Identifier:       "service identifier",
+			Labels:           &map[string]string{"showcase": "true"},
 			Api: &serviceapi.API{
 				TargetUrl: "http://service.com",
 				Credentials: &serviceapi.Credentials{
@@ -107,7 +113,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var postResponse CreateServiceResponse
-		json.Unmarshal(responseBody, &postResponse)
+		err = json.Unmarshal(responseBody, &postResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, "1", postResponse.ID)
@@ -160,7 +166,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var postResponse CreateServiceResponse
-		json.Unmarshal(responseBody, &postResponse)
+		err = json.Unmarshal(responseBody, &postResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, "1", postResponse.ID)
@@ -196,7 +202,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var errorResponse httperrors.ErrorResponse
-		json.Unmarshal(responseBody, &errorResponse)
+		err = json.Unmarshal(responseBody, &errorResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, errorResponse.Code)
@@ -242,7 +248,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var errorResponse httperrors.ErrorResponse
-		json.Unmarshal(responseBody, &errorResponse)
+		err = json.Unmarshal(responseBody, &errorResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
@@ -293,7 +299,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		require.NoError(t, err)
 
 		var serviceDetails ServiceDetails
-		json.Unmarshal(responseBody, &serviceDetails)
+		err = json.Unmarshal(responseBody, &serviceDetails)
 
 		require.NoError(t, err)
 		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
@@ -353,7 +359,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		require.NoError(t, err)
 
 		var serviceDetails ServiceDetails
-		json.Unmarshal(responseBody, &serviceDetails)
+		err = json.Unmarshal(responseBody, &serviceDetails)
 
 		require.NoError(t, err)
 		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
@@ -400,7 +406,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		require.NoError(t, err)
 
 		var serviceDetails ServiceDetails
-		json.Unmarshal(responseBody, &serviceDetails)
+		err = json.Unmarshal(responseBody, &serviceDetails)
 
 		require.NoError(t, err)
 		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
@@ -434,7 +440,6 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		metadataHandler.GetService(rr, req)
 
 		// then
-		require.NoError(t, err)
 		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "654321")
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
@@ -465,7 +470,7 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		require.NoError(t, err)
 
 		var services []Service
-		json.Unmarshal(responseBody, &services)
+		err = json.Unmarshal(responseBody, &services)
 
 		require.NoError(t, err)
 		serviceDefinitionService.AssertExpectations(t)
@@ -498,7 +503,7 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		require.NoError(t, err)
 
 		var services []Service
-		json.Unmarshal(responseBody, &services)
+		err = json.Unmarshal(responseBody, &services)
 
 		require.NoError(t, err)
 		serviceDefinitionService.AssertExpectations(t)
@@ -527,7 +532,7 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		require.NoError(t, err)
 
 		var errorResponse httperrors.ErrorResponse
-		json.Unmarshal(responseBody, &errorResponse)
+		err = json.Unmarshal(responseBody, &errorResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
@@ -590,7 +595,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", serviceDefinition).Return(nil)
+		serviceDefinitionService.On("Update", "re", "1234", serviceDefinition).Return(*serviceDefinition, nil)
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
 
@@ -611,8 +616,9 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var serviceDetailsResponse ServiceDetails
-		json.Unmarshal(responseBody, &serviceDetailsResponse)
+		err = json.Unmarshal(responseBody, &serviceDetailsResponse)
 
+		require.NoError(t, err)
 		assert.Equal(t, "service name", serviceDetailsResponse.Name)
 		assert.Equal(t, "service provider", serviceDetailsResponse.Provider)
 		assert.Equal(t, "service description", serviceDetailsResponse.Description)
@@ -659,7 +665,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var errorResponse httperrors.ErrorResponse
-		json.Unmarshal(responseBody, &errorResponse)
+		err = json.Unmarshal(responseBody, &errorResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, errorResponse.Code)
@@ -679,7 +685,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", mock.Anything).Return(apperrors.Internal(""))
+		serviceDefinitionService.On("Update", "re", "1234", mock.Anything).Return(metadata.ServiceDefinition{}, apperrors.Internal(""))
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
 
@@ -700,11 +706,57 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		require.NoError(t, err)
 
 		var errorResponse httperrors.ErrorResponse
-		json.Unmarshal(responseBody, &errorResponse)
+		err = json.Unmarshal(responseBody, &errorResponse)
 
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
+	})
+
+	t.Run("should return 404 when service not found", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "service name",
+			Provider:    "service provider",
+			Description: "service description",
+		}
+
+		serviceDefinition := &metadata.ServiceDefinition{
+			Name:        "service name",
+			Provider:    "service provider",
+			Description: "service description",
+		}
+
+		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+			return nil
+		})
+
+		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
+		serviceDefinitionService.On("Update", "re", "654321", serviceDefinition).Return(metadata.ServiceDefinition{}, apperrors.NotFound(""))
+
+		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
+
+		serviceDetailsData, err := json.Marshal(serviceDetails)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodPut, "/re/v1/metadata/services/1234", bytes.NewReader(serviceDetailsData))
+		require.NoError(t, err)
+
+		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "654321"})
+		rr := httptest.NewRecorder()
+
+		// when
+		metadataHandler.UpdateService(rr, req)
+
+		// then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var serviceDetailsResponse ServiceDetails
+		err = json.Unmarshal(responseBody, &serviceDetailsResponse)
+
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
 }
 

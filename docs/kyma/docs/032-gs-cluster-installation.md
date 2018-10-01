@@ -41,6 +41,8 @@ Configure the Kubernetes API Server following this template:
 
 ## Installation
 
+You can install Kyma with all core subcomponents or only with the selected ones. This section describes how to install all core subcomponents. To learn how to install only the specific ones, see the **Install subcomponents** document for details.
+
 1. Create the `kyma-installer` Namespace.
 
 Run the following command:
@@ -139,7 +141,6 @@ If the cluster provider doesn't allow to pre-allocate IP addresses, the cluster 
 - Find `istio-ingressgateway` in the `istio-system` Namespace. This entry specifies the IP address for the Kyma Ingress. Create a DNS entry `*.kyma.example.com` that points to this IP address.
 
 - Find `core-nginx-ingress-controller` in the `kyma-system` Namespace. This entry specifies the IP address for the Remote Environments Ingress. Create a DNS entry `gateway.kyma.example.com` that points to this address.
-
 
 ## Troubleshooting
 

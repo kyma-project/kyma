@@ -3,7 +3,7 @@ $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 $CONFIG_TPL_PATH = "${CURRENT_DIR}\..\resources\installer-config-local.yaml.tpl"
 $CONFIG_OUTPUT_PATH = (New-TemporaryFile).FullName
 
-$VERSIONS_FILE_PATH = "${CURRENT_DIR}\..\versions.env"
+$VERSIONS_FILE_PATH = "${CURRENT_DIR}\..\versions-overrides.env"
 
 Copy-Item -Path $CONFIG_TPL_PATH -Destination $CONFIG_OUTPUT_PATH
 
@@ -22,13 +22,6 @@ Invoke-Expression -Command $cmd
 Write-Output "Configuring sub-components ..."
 
 $cmd = "${CURRENT_DIR}\configure-components.ps1"
-Invoke-Expression -Command $cmd
-
-##########
-
-Write-Output "Determining versions of components"
-
-$cmd = "${CURRENT_DIR}\fetch-components-versions.ps1"
 Invoke-Expression -Command $cmd
 
 ##########

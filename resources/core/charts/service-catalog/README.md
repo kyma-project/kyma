@@ -19,7 +19,7 @@ In Kyma, the Service Catalog consists of the following sub-charts:
 - `catalog-service-api` - A GraphQL service which exposes the details about the Kubernetes resources, such as environments, service instances, or deployments. The chart also enables you to create the resources.
 - `catalog-service-ui` - An interface which consumes the `catalog-service-api` to display the resources' details to end-users, and list the packages to subscribe to.
 - `catalog-ui` - An application with the Service Catalog page view for the Kyma Console. The view enables to list services and provision their instances in the Service Catalog.
-- `etcd` - A store for data.
+- `etcd-stateful` - A store for data.
 - `service-instances-ui` - An interface which consumes the `catalog-service-api` to display the service instances' details.
 
 ## Details

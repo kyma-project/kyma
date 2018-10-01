@@ -47,7 +47,7 @@ func TestProvisionAsync(t *testing.T) {
 			name: "cannot provision",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: false, Reason: "very important reason"},
 			expectedOpState:                internal.OperationStateFailed,
-			expectedOpDesc:                 "Forbidden provisioning instance [inst-123] for remote environment [id: service-id] in namespace: [example-namesapce]. Reason: [very important reason]",
+			expectedOpDesc:                 "Forbidden provisioning instance [inst-123] for remote environment [name: ec-prod, id: service-id] in namespace: [example-namesapce]. Reason: [very important reason]",
 			expectedEventActivationCreated: false,
 			expectedInstanceState:          internal.InstanceStateFailed,
 		},
@@ -120,7 +120,7 @@ func TestProvisionAsync(t *testing.T) {
 				mockAccessChecker,
 				mockReFinder,
 				mockServiceInstanceGetter,
-				clientset.RemoteenvironmentV1alpha1(),
+				clientset.ApplicationconnectorV1alpha1(),
 				mockInstanceStorage,
 				mockOperationIDProvider, spy.NewLogDummy())
 
@@ -248,7 +248,7 @@ func TestProvisionErrorOnCreatingEventActivation(t *testing.T) {
 		mockAccessChecker,
 		mockReFinder,
 		mockServiceInstanceGetter,
-		clientset.RemoteenvironmentV1alpha1(),
+		clientset.ApplicationconnectorV1alpha1(),
 		mockInstanceStorage,
 		mockOperationIDProvider, spy.NewLogDummy())
 
@@ -327,7 +327,7 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 		mockAccessChecker,
 		mockReFinder,
 		mockServiceInstanceGetter,
-		clientset.RemoteenvironmentV1alpha1(),
+		clientset.ApplicationconnectorV1alpha1(),
 		mockInstanceStorage,
 		mockOperationIDProvider, spy.NewLogDummy())
 

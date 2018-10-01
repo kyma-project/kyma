@@ -10,9 +10,9 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/kubernetes/pkg/controller"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
-	v1alpha12 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
-	informers "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	v1alpha12 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	informers "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 )
 

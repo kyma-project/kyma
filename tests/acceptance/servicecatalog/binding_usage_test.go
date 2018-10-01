@@ -13,9 +13,9 @@ import (
 	bucClient "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
 	bucInterface "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 
-	reTypes "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	reTypes "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	reClient "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
-	reInterface "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
+	reInterface "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 
 	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog/wait"
 	"github.com/stretchr/testify/require"
@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	timeoutPerStep = 30 * time.Second
+	timeoutPerStep = time.Minute
 	baseEnvName    = "GATEWAY_URL"
 )
 
@@ -145,7 +145,7 @@ func (ts *TestSuite) enableRemoteEnvironmentInTestNamespace() {
 	reCli, err := reClient.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
 
-	emCli := reCli.RemoteenvironmentV1alpha1().EnvironmentMappings(ts.namespace)
+	emCli := reCli.ApplicationconnectorV1alpha1().EnvironmentMappings(ts.namespace)
 	_, err = emCli.Create(ts.fixEnvironmentMapping())
 	require.NoError(ts.t, err)
 }
@@ -154,14 +154,14 @@ func (ts *TestSuite) remoteEnvironmentClient() reInterface.RemoteEnvironmentInte
 	client, err := reClient.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
 
-	return client.RemoteenvironmentV1alpha1().RemoteEnvironments()
+	return client.ApplicationconnectorV1alpha1().RemoteEnvironments()
 }
 
 func (ts *TestSuite) fixEnvironmentMapping() *reTypes.EnvironmentMapping {
 	return &reTypes.EnvironmentMapping{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "EnvironmentMapping",
-			APIVersion: "remoteenvironment.kyma.cx/v1alpha1",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: ts.remoteEnvironmentName,
@@ -173,25 +173,24 @@ func (ts *TestSuite) fixRemoteEnvironment() *reTypes.RemoteEnvironment {
 	return &reTypes.RemoteEnvironment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "RemoteEnvironment",
-			APIVersion: "remoteenvironment.kyma.cx/v1alpha1",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: ts.remoteEnvironmentName,
 		},
 		Spec: reTypes.RemoteEnvironmentSpec{
-			Source: reTypes.Source{
-				Namespace:   "local.kyma.commerce",
-				Type:        "commerce",
-				Environment: "production",
-			},
 			AccessLabel: "re-access-label",
 			Description: "Remote Environment used by acceptance test",
 			Services: []reTypes.Service{
 				{
-					ID:                  ts.reSvcNameA,
+					ID:   ts.reSvcNameA,
+					Name: ts.reSvcNameA,
+					Labels: map[string]string{
+						"connected-app": ts.remoteEnvironmentName,
+					},
 					ProviderDisplayName: "SAP Hybris",
 					DisplayName:         "Some testable RE service",
-					LongDescription:     "Remote Environment Service Class used by remote-environment acceptance test",
+					Description:         "Remote Environment Service Class used by remote-environment acceptance test",
 					Tags:                []string{},
 					Entries: []reTypes.Entry{
 						{
@@ -202,10 +201,14 @@ func (ts *TestSuite) fixRemoteEnvironment() *reTypes.RemoteEnvironment {
 					},
 				},
 				{
-					ID:                  ts.reSvcNameB,
+					ID:   ts.reSvcNameB,
+					Name: ts.reSvcNameB,
+					Labels: map[string]string{
+						"connected-app": ts.remoteEnvironmentName,
+					},
 					ProviderDisplayName: "SAP Hybris",
 					DisplayName:         "Some testable RE service",
-					LongDescription:     "Remote Environment Service Class used by remote-environment acceptance test",
+					Description:         "Remote Environment Service Class used by remote-environment acceptance test",
 					Tags:                []string{},
 					Entries: []reTypes.Entry{
 						{
@@ -273,7 +276,7 @@ func (ts *TestSuite) createAndWaitForServiceBinding(bindingName, instanceName st
 	})
 	require.NoError(ts.t, err)
 
-	wait.AtMost(ts.t, func() error {
+	wait.ForFuncAtMost(ts.t, func() error {
 		b, err := bindingClient.Get(bindingName, metav1.GetOptions{})
 		if err != nil {
 			return err
@@ -371,7 +374,7 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 	})
 	require.NoError(ts.t, err)
 
-	wait.AtMost(ts.t, func() error {
+	wait.ForFuncAtMost(ts.t, func() error {
 		si, err := siClient.Get(instanceName, metav1.GetOptions{})
 		if err != nil {
 			return err
@@ -396,8 +399,8 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 
 // ServiceClass helpers
 func (ts *TestSuite) waitForREServiceClasses(timeout time.Duration) {
-	wait.AtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
-	wait.AtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
+	wait.ForFuncAtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
+	wait.ForFuncAtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
 }
 
 func (ts *TestSuite) serviceClassIsAvailableA() func() error {
@@ -507,7 +510,7 @@ func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.De
 func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, timeout time.Duration) {
 	req := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs?name=%s&value=%s", ts.namespace, envName, envValue)
 
-	wait.AtMost(ts.t, func() error {
+	wait.ForFuncAtMost(ts.t, func() error {
 		resp, err := http.Get(req)
 		if err != nil {
 			return err

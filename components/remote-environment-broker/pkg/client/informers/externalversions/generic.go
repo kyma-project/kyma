@@ -5,7 +5,7 @@ package externalversions
 import (
 	"fmt"
 
-	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -36,13 +36,13 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=remoteenvironment.kyma.cx, Version=v1alpha1
+	// Group=applicationconnector.kyma-project.io, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("environmentmappings"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Remoteenvironment().V1alpha1().EnvironmentMappings().Informer()}, nil
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Applicationconnector().V1alpha1().EnvironmentMappings().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("eventactivations"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Remoteenvironment().V1alpha1().EventActivations().Informer()}, nil
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Applicationconnector().V1alpha1().EventActivations().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("remoteenvironments"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Remoteenvironment().V1alpha1().RemoteEnvironments().Informer()}, nil
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Applicationconnector().V1alpha1().RemoteEnvironments().Informer()}, nil
 
 	}
 

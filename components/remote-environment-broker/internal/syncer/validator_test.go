@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -65,6 +65,12 @@ func TestReCRValidatorValidateFailure(t *testing.T) {
 				}
 			},
 			expErrMsg: []string{"Service with id \"ac031e8c-9aa4-4cb7-8999-0d358726ffaa\" is invalid. Only one element with type Event is allowed but found 2"},
+		},
+		"Labels filed does not contains required entries": {
+			fixModifier: func(re *v1alpha1.RemoteEnvironment) {
+				re.Spec.Services[0].Labels = map[string]string{}
+			},
+			expErrMsg: []string{"Service with id \"ac031e8c-9aa4-4cb7-8999-0d358726ffaa\" is invalid. Labels field does not contains connected-app entry"},
 		},
 		"multiple validation errors": {
 			fixModifier: func(re *v1alpha1.RemoteEnvironment) {

@@ -1,7 +1,7 @@
 package remoteenvironment
 
 import (
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 )
 
@@ -29,27 +29,36 @@ func (c *remoteEnvironmentConverter) ToGQL(in *v1alpha1.RemoteEnvironment) gqlsc
 
 	dto := gqlschema.RemoteEnvironment{
 		Name:        in.Name,
+		Labels:      c.toJSONLabels(in.Spec.Labels),
 		Description: in.Spec.Description,
-		Source: gqlschema.RemoteEnvironmentSource{
-			Type:        in.Spec.Source.Type,
-			Namespace:   in.Spec.Source.Namespace,
-			Environment: in.Spec.Source.Environment,
-		},
-		Services: reServices,
+		Services:    reServices,
 	}
 
 	return dto
 }
 
-func (mapper *remoteEnvironmentConverter) mapEntriesCRToDTO(entries []v1alpha1.Entry) []gqlschema.RemoteEnvironmentEntry {
+func (c *remoteEnvironmentConverter) toJSONLabels(labels map[string]string) gqlschema.JSON {
+	if len(labels) == 0 {
+		return nil
+	}
+
+	jLabels := make(gqlschema.JSON, len(labels))
+	for k, v := range labels {
+		jLabels[k] = v
+	}
+
+	return jLabels
+}
+
+func (c *remoteEnvironmentConverter) mapEntriesCRToDTO(entries []v1alpha1.Entry) []gqlschema.RemoteEnvironmentEntry {
 	dtos := make([]gqlschema.RemoteEnvironmentEntry, 0, len(entries))
 	for _, entry := range entries {
 		switch entry.Type {
 		case "API":
 			dtos = append(dtos, gqlschema.RemoteEnvironmentEntry{
 				Type:        entry.Type,
-				AccessLabel: mapper.ptrString(entry.AccessLabel),
-				GatewayURL:  mapper.ptrString(entry.GatewayUrl),
+				AccessLabel: c.ptrString(entry.AccessLabel),
+				GatewayURL:  c.ptrString(entry.GatewayUrl),
 			})
 		case "Events":
 			dtos = append(dtos, gqlschema.RemoteEnvironmentEntry{

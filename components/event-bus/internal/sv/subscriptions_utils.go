@@ -6,25 +6,23 @@ import (
 
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
 	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
-	eaApis "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/remoteenvironment.kyma.cx/v1alpha1"
+	eaApis "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma.cx/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // find all the subscriptions having the same "namespace" as the "ea" namespace and the same "Source"
 func getSubscriptionsForEventActivation(subClient *subscriptionClientSet.Clientset, eaObj *eaApis.EventActivation) ([]*subApis.Subscription, error) {
 	eaNamespace := eaObj.GetNamespace()
-	eaSource := eaObj.EventActivationSpec.Source
+	eaSourceID := eaObj.EventActivationSpec.SourceID
 
-	subscrList, err := subClient.EventingV1alpha1().Subscriptions(eaNamespace).List(metav1.ListOptions{}) // TODO query on eaSource??
+	subscrList, err := subClient.EventingV1alpha1().Subscriptions(eaNamespace).List(metav1.ListOptions{}) // TODO query on eaSourceID??
 	if err != nil {
 		log.Printf("Error: List Subscriptions call failed for event activatsion:\n    %v;\n    Error:%v\n", eaObj, err)
 		return nil, err
 	}
 	var subs []*subApis.Subscription
 	for _, s := range subscrList.Items {
-		if eaSource.Environment == s.Source.SourceEnvironment &&
-			eaSource.Namespace == s.Source.SourceNamespace &&
-			eaSource.Type == s.Source.SourceType {
+		if eaSourceID == s.SourceID {
 			subs = append(subs, &s)
 		}
 	}

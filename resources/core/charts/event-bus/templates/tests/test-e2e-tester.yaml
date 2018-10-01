@@ -38,7 +38,7 @@ metadata:
   labels:
     helm-chart-test: "true"  
 rules:
-- apiGroups: ["remoteenvironment.kyma.cx"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["eventactivations"]
   verbs: ["create", "get", "watch", "list", "delete"]
 ---
@@ -94,13 +94,13 @@ metadata:
     helm-chart-test: "true"
   annotations:
 #    sidecar.istio.io/inject: "true"   # needed if the tester could run with side cars
-    helm.sh/hook: test-success  
+    helm.sh/hook: test-success
 spec:
   serviceAccount: {{ .Values.e2eTests.nameTester }}
   containers:
-  - image: "{{ .Values.global.containerRegistry.path }}/event-bus-e2e-tester:{{ .Values.global.eventBusVersion }}"
+  - image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-tester:{{ .Values.global.event_bus_tests.version }}"
     imagePullPolicy: IfNotPresent
     name: {{ .Values.e2eTests.nameTester }}
     args:
-      - -subscriber-image={{ .Values.global.containerRegistry.path }}/event-bus-e2e-subscriber:{{ .Values.global.eventBusVersion }}
+      - -subscriber-image={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-subscriber:{{ .Values.global.event_bus_tests.version }}
   restartPolicy: Never

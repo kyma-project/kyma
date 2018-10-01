@@ -10,11 +10,17 @@ Monorepo root orchestrator: This Jenkinsfile runs the Jenkinsfiles of all subpro
         - revision
         - branch
         - current app version
+        - docker registry directory to push images based on branch
         - all component versions
 
 */
 def label = "kyma-${UUID.randomUUID().toString()}"
-appVersion = "0.3." + env.BUILD_NUMBER
+def registry = 'eu.gcr.io/kyma-project'
+def acsImageName = 'acs-installer:0.0.4'
+prRegex = /^PR-([0-9]+)$/ // PR format: PR-66
+isMaster = env.BRANCH_NAME == 'master'
+appVersion = ''
+dockerPushRoot = ''
 
 /*
     Projects that are built when changed, consisting of pairs [project path, produced docker image]. Projects producing multiple Docker images only need to provide one of them.
@@ -25,10 +31,12 @@ appVersion = "0.3." + env.BUILD_NUMBER
 projects = [
     "docs": "kyma-docs",
     "components/api-controller": "api-controller",
+    "components/apiserver-proxy": "apiserver-proxy",
     "components/binding-usage-controller": "binding-usage-controller",
     "components/configurations-generator": "configurations-generator",
     "components/environments": "environments",
     "components/istio-webhook": "istio-webhook",
+    "components/istio-kyma-patch": "istio-kyma-patch",
     "components/helm-broker": "helm-broker",
     "components/remote-environment-broker": "remote-environment-broker",
     "components/remote-environment-controller": "remote-environment-controller",
@@ -54,6 +62,7 @@ projects = [
     "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
     "tests/connector-service-tests": "connector-service-tests",
     "tests/metadata-service-tests": "metadata-service-tests",
+    "tests/remote-environment-controller-tests": "remote-environment-controller-tests",
     "tests/event-bus": "event-bus-e2e-tester",
     "governance": null
 ]
@@ -88,16 +97,10 @@ podTemplate(label: label) {
                         checkout scm
                         // use HEAD of branch as revision, Jenkins does a merge to master commit before starting this script, which will not be available on the jobs triggered below
                         commitID = sh (script: "git rev-parse origin/${env.BRANCH_NAME}", returnStdout: true).trim()
+                        configureBuilds(commitID)
                         changes = changedProjects()
 
-                        if (env.BRANCH_NAME == "master") {
-                            // integration runs on any change on master
-                            runIntegration = changes.size() > 0
-                        } else {
-                            // TODO remove PR integration skip when installer overrides are ready
-                            // integration only runs on changes to installation resources on PRs
-                            runIntegration = changes.intersect(additionalProjects).size() > 0
-                        }
+                        runIntegration = changes.size() > 0
                         if (changes.size() == 1 && changes[0] == "governance") {
                             runIntegration = false
                         }
@@ -114,7 +117,9 @@ podTemplate(label: label) {
                                             parameters: [
                                                 string(name:'GIT_REVISION', value: "$commitID"),
                                                 string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
-                                                string(name:'APP_VERSION', value: "$appVersion")
+                                                string(name:'APP_VERSION', value: "$appVersion"),
+                                                string(name:'PUSH_DIR', value: "$dockerPushRoot"),
+                                                booleanParam(name:'FULL_BUILD', value: isMaster)
                                             ]
                             }
                         }
@@ -139,7 +144,7 @@ if (runIntegration) {
         for (int i = 0; i < changedProjects.size(); i++) {
             // only projects that have an associated docker image have a version to deploy
             if (projects["${changedProjects[i]}"] != null) {
-                versions["${changedProjects[i]}"] = env.BRANCH_NAME == "master" ? appVersion : env.BRANCH_NAME
+                versions["${changedProjects[i]}"] = "$appVersion"
             }
         }
 
@@ -177,11 +182,75 @@ if (runIntegration) {
                 string(name:'COMP_VERSIONS', value: "$versions") // YAML string
             ]
     }
+
+    podTemplate(label: label) {
+        node(label) {
+            try {
+                timestamps {
+                    ansiColor('xterm') {
+                        stage("setup") {
+                            checkout scm
+                        }
+
+                        stage("Upload versions file to azure") {
+                            writeFile file: "installation/versions-overrides.env", text: "$versions"
+
+                            def file = ''
+                            if (isMaster) {
+                                file = 'latest.env'
+                            } else {
+                                file = "pr/${env.BRANCH_NAME}.env"
+                            }
+
+                            withCredentials([
+                                string(credentialsId: 'azure-broker-tenant-id', variable: 'AZBR_TENANT_ID'),
+                                string(credentialsId: 'azure-broker-subscription-id', variable: 'AZBR_SUBSCRIPTION_ID'),
+                                usernamePassword(credentialsId: 'azure-broker-spn', passwordVariable: 'AZBR_CLIENT_SECRET', usernameVariable: 'AZBR_CLIENT_ID')
+                                ]) {
+                                    def dockerEnv = "-e AZBR_CLIENT_SECRET -e AZBR_CLIENT_ID -e AZBR_TENANT_ID -e AZBR_SUBSCRIPTION_ID \
+                                    -e 'KYMA_VERSIONS_FILE_NAME=${file}'"
+                                    def dockerOpts = "--rm --volume ${pwd()}/installation:/installation"
+                                    def dockerEntry = "--entrypoint /installation/scripts/upload-versions.sh"
+
+                                    sh "docker run $dockerOpts $dockerEnv $dockerEntry $registry/$acsImageName"
+                            }
+                        }
+                    }
+                }
+            }  catch (ex) {
+                echo "Got exception: ${ex}"
+                currentBuild.result = "FAILURE"
+                def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${env.BRANCH_NAME}. See details: ${env.BUILD_URL}"
+                emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+            }
+        }
+    }
 }
 
 
 
 /* -------- Helper Functions -------- */
+
+/** Configure the parameters for the components to build:
+ * - master: push root: "develop/" / image tag: APP_VERSION
+ * - PR: push root: "pr/" / image tag: BRANCH NAME
+ */
+@NonCPS
+def configureBuilds(commitID) {
+    switch(env.BRANCH_NAME) {
+        case "master": // master development builds
+            dockerPushRoot = "develop/"
+            appVersion = commitID.substring(0,8)
+            break
+        case ~prRegex: // PR changeset builds
+            dockerPushRoot = "pr/"
+            appVersion = env.BRANCH_NAME
+            break
+        default:
+            error("Branch ${env.BRANCH_NAME} not supported in this pipeline.")
+            break
+    }
+}
 
 /**
  * Provides a list with the projects that have changes within the given projects list.
@@ -260,9 +329,10 @@ def commitHashForBuild(build) {
  * More info: https://docs.docker.com/registry/spec/manifest-v2-1/
  */
 String projectVersion(project) {
+    def img = projects[project]
+    
     try {
-        def img = projects[project]
-        def json = "https://eu.gcr.io/v2/kyma-project/${img}/manifests/latest".toURL().getText(requestProperties: [Accept: 'application/vnd.docker.distribution.manifest.v1+prettyjws'])
+        def json = "https://eu.gcr.io/v2/kyma-project/develop/${img}/manifests/latest".toURL().getText(requestProperties: [Accept: 'application/vnd.docker.distribution.manifest.v1+prettyjws'])
         def slurper = new JsonSlurperClassic()
         def doc = slurper.parseText(json)
         doc = slurper.parseText(doc.history[0].v1Compatibility)
@@ -280,40 +350,75 @@ String projectVersion(project) {
 @NonCPS
 def versionsYaml(versions) {
     def overrides = 
-"""global:
-  kyma:
-    versions:
-      docs: ${versions['docs']}
-      api-controller: ${versions['components/api-controller']}
-      binding-usage-controller: ${versions['components/binding-usage-controller']}
-      configurations-generator: ${versions['components/configurations-generator']}
-      environments: ${versions['components/environments']}
-      istio-webhook: ${versions['components/istio-webhook']}
-      helm-broker: ${versions['components/helm-broker']}
-      remote-environment-broker: ${versions['components/remote-environment-broker']}
-      remote-environment-controller: ${versions['components/remote-environment-controller']}
-      metadata-service: ${versions['components/metadata-service']}
-      gateway: ${versions['components/gateway']}
-      installer: ${versions['components/installer']}
-      connector-service: ${versions['components/connector-service']}
-      ui-api-layer: ${versions['components/ui-api-layer']}
-      event-bus: ${versions['components/event-bus']}
-      alpine-net: ${versions['tools/alpine-net']}
-      watch-pods: ${versions['tools/watch-pods']}
-      stability-checker: ${versions['tools/stability-checker']}
-      etcd-backup: ${versions['tools/etcd-backup']}
-      test-logging-monitoring: ${versions['tests/test-logging-monitoring']}
-      acceptance-tests: ${versions['tests/acceptance']}
-      ui-api-layer-acceptance-tests: ${versions['tests/ui-api-layer-acceptance-tests']}
-      gateway-tests: ${versions['tests/gateway-tests']}
-      test-environments: ${versions['tests/test-environments']}
-      kubeless-test-client: ${versions['tests/kubeless-test-client']}
-      api-controller-acceptance-tests: ${versions['tests/api-controller-acceptance-tests']}
-      connector-service-tests: ${versions['tests/connector-service-tests']}
-      metadata-service-tests: ${versions['tests/metadata-service-tests']}
-      event-bus-tests: ${versions['tests/event-bus']}
-      test-logging: ${versions['tests/logging']}
-
+"""
+global.docs.version=${versions['docs']}
+global.docs.dir=${versions['docs'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.apiserver_proxy.version=${versions['components/apiserver-proxy']}
+global.apiserver_proxy.dir=${versions['components/apiserver-proxy'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.api_controller.version=${versions['components/api-controller']}
+global.api_controller.dir=${versions['components/api-controller'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.binding_usage_controller.version=${versions['components/binding-usage-controller']}
+global.binding_usage_controller.dir=${versions['components/binding-usage-controller'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.configurations_generator.version=${versions['components/configurations-generator']}
+global.configurations_generator.dir=${versions['components/configurations-generator'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.environments.version=${versions['components/environments']}
+global.environments.dir=${versions['components/environments'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.istio_webhook.version=${versions['components/istio-webhook']}
+global.istio_webhook.dir=${versions['components/istio-webhook'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.istio_kyma_patch.version=${versions['components/istio-kyma-patch']}
+global.istio_kyma_patch.dir=${versions['components/istio-kyma-patch'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.helm_broker.version=${versions['components/helm-broker']}
+global.helm_broker.dir=${versions['components/helm-broker'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.remote_environment_broker.version=${versions['components/remote-environment-broker']}
+global.remote_environment_broker.dir=${versions['components/remote-environment-broker'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.metadata_service.version=${versions['components/metadata-service']}
+global.metadata_service.dir=${versions['components/metadata-service'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.gateway.version=${versions['components/gateway']}
+global.gateway.dir=${versions['components/gateway'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.installer.version=${versions['components/installer']}
+global.installer.dir=${versions['components/installer'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.connector_service.version=${versions['components/connector-service']}
+global.connector_service.dir=${versions['components/connector-service'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.ui_api_layer.version=${versions['components/ui-api-layer']}
+global.ui_api_layer.dir=${versions['components/ui-api-layer'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.event_bus.version=${versions['components/event-bus']}
+global.event_bus.dir=${versions['components/event-bus'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.event_service.version=${versions['components/event-service']}
+global.event_service.dir=${versions['components/event-service'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.alpine_net.version=${versions['tools/alpine-net']}
+global.alpine_net.dir=${versions['tools/alpine-net'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.watch_pods.version=${versions['tools/watch-pods']}
+global.watch_pods.dir=${versions['tools/watch-pods'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.stability_checker.version=${versions['tools/stability-checker']}
+global.stability_checker.dir=${versions['tools/stability-checker'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.etcd_backup.version=${versions['tools/etcd-backup']}
+global.etcd_backup.dir=${versions['tools/etcd-backup'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.etcd_tls_setup.version=${versions['tools/etcd-tls-setup']}
+global.etcd_tls_setup.dir=${versions['tools/etcd-tls-setup'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.test_logging_monitoring.version=${versions['tests/test-logging-monitoring']}
+global.test_logging_monitoring.dir=${versions['tests/test-logging-monitoring'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.acceptance_tests.version=${versions['tests/acceptance']}
+global.acceptance_tests.dir=${versions['tests/acceptance'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.ui_api_layer_acceptance_tests.version=${versions['tests/ui-api-layer-acceptance-tests']}
+global.ui_api_layer_acceptance_tests.dir=${versions['tests/ui-api-layer-acceptance-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.gateway_tests.version=${versions['tests/gateway-tests']}
+global.gateway_tests.dir=${versions['tests/gateway-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.test_environments.version=${versions['tests/test-environments']}
+global.test_environments.dir=${versions['tests/test-environments'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.kubeless_test_client.version=${versions['tests/kubeless-test-client']}
+global.kubeless_test_client.dir=${versions['tests/kubeless-test-client'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.api_controller_acceptance_tests.version=${versions['tests/api-controller-acceptance-tests']}
+global.api_controller_acceptance_tests.dir=${versions['tests/api-controller-acceptance-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.connector_service_tests.version=${versions['tests/connector-service-tests']}
+global.connector_service_tests.dir=${versions['tests/connector-service-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.metadata_service_tests.version=${versions['tests/metadata-service-tests']}
+global.metadata_service_tests.dir=${versions['tests/metadata-service-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.remote_environment_controller_tests.version=${versions['tests/remote-environment-controller-tests']}
+global.remote_environment_controller_tests.dir=${versions['tests/remote-environment-controller-tests'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.event_bus_tests.version=${versions['tests/event-bus']}
+global.event_bus_tests.dir=${versions['tests/event-bus'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.test_logging.version=${versions['tests/logging']}
+global.test_logging.dir=${versions['tests/logging'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 """
 
     return "$overrides"

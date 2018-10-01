@@ -14,25 +14,25 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "5.0.0-beta2"
+      "version": "5.2.2"
     },
     {
       "type": "panel",
       "id": "graph",
       "name": "Graph",
-      "version": ""
+      "version": "5.0.0"
     },
     {
       "type": "datasource",
       "id": "prometheus",
       "name": "Prometheus",
-      "version": "1.0.0"
+      "version": "5.0.0"
     },
     {
       "type": "panel",
       "id": "text",
       "name": "Text",
-      "version": ""
+      "version": "5.0.0"
     }
   ],
   "annotations": {
@@ -52,7 +52,7 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "iteration": 1520470122238,
+  "iteration": 1535646398209,
   "links": [],
   "panels": [
     {
@@ -108,7 +108,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(process_virtual_memory_bytes{job=~\"mixer-.*\"}) by (job)",
+          "expr": "sum(process_virtual_memory_bytes{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 2,
@@ -116,14 +116,14 @@
           "refId": "I"
         },
         {
-          "expr": "sum(process_resident_memory_bytes{job=~\"mixer-.*\"}) by (job)",
+          "expr": "sum(process_resident_memory_bytes{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Resident Memory ({{ job }})",
           "refId": "H"
         },
         {
-          "expr": "sum(go_memstats_heap_sys_bytes{job=~\"mixer-.*\"}) by (job)",
+          "expr": "sum(go_memstats_heap_sys_bytes{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "hide": true,
           "intervalFactor": 2,
@@ -131,7 +131,7 @@
           "refId": "A"
         },
         {
-          "expr": "sum(go_memstats_heap_alloc_bytes{job=~\"mixer-.*\"}) by (job)",
+          "expr": "sum(go_memstats_heap_alloc_bytes{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "hide": true,
           "intervalFactor": 2,
@@ -139,14 +139,14 @@
           "refId": "D"
         },
         {
-          "expr": "sum(go_memstats_alloc_bytes{job=~\"mixer-.*\"}) by (job)",
+          "expr": "sum(go_memstats_alloc_bytes{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Alloc ({{ job }})",
           "refId": "F"
         },
         {
-          "expr": "sum(go_memstats_heap_inuse_bytes{job=~\"mixer-.*\"}) by (job)",
+          "expr": "sum(go_memstats_heap_inuse_bytes{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -154,7 +154,7 @@
           "refId": "E"
         },
         {
-          "expr": "sum(go_memstats_stack_inuse_bytes{job=~\"mixer-.*\"}) by (job)",
+          "expr": "sum(go_memstats_stack_inuse_bytes{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Stack in-use ({{ job }})",
@@ -211,7 +211,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -250,7 +254,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(label_replace(container_cpu_usage_seconds_total{container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*|istio-policy-.*\"}, \"service\", \"$1\" , \"pod_name\", \"(istio-telemetry|istio-policy)-.*\")) by (service)",
+          "expr": "label_replace(sum(rate(container_cpu_usage_seconds_total{container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*|istio-policy-.*\"}[1m])) by (pod_name), \"service\", \"$1\" , \"pod_name\", \"(istio-telemetry|istio-policy)-.*\")",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -258,7 +262,7 @@
           "refId": "A"
         },
         {
-          "expr": "sum(label_replace(container_cpu_usage_seconds_total{container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*|istio-policy-.*\"}, \"service\", \"$1\" , \"pod_name\", \"(istio-telemetry|istio-policy)-.*\")) by (container_name, service)",
+          "expr": "label_replace(sum(rate(container_cpu_usage_seconds_total{container_name=~\"mixer|istio-proxy\", pod_name=~\"istio-telemetry-.*|istio-policy-.*\"}[1m])) by (container_name, pod_name), \"service\", \"$1\" , \"pod_name\", \"(istio-telemetry|istio-policy)-.*\")",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -266,7 +270,7 @@
           "refId": "B"
         },
         {
-          "expr": "sum(irate(process_cpu_seconds_total{job=~\"mixer-.*\"}[1m])) by (job)",
+          "expr": "sum(irate(process_cpu_seconds_total{job=~\"istio-telemetry|istio-policy\"}[1m])) by (job)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -308,7 +312,11 @@
           "min": null,
           "show": true
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -347,7 +355,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(process_open_fds{job=~\"mixer-.*\"}) by (job)",
+          "expr": "sum(process_open_fds{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "hide": true,
           "instant": false,
@@ -399,7 +407,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -438,7 +450,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(go_goroutines{job=~\"mixer-.*\"}) by (job)",
+          "expr": "sum(go_goroutines{job=~\"istio-telemetry|istio-policy\"}) by (job)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "Number of Goroutines ({{ job }})",
@@ -479,7 +491,11 @@
           "min": null,
           "show": true
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "content": "<center><h2>Mixer Overview</h2></center>",
@@ -534,21 +550,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(envoy_cluster_mixer_check_server_upstream_rq_total[1m])",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "envoy (Check)",
-          "refId": "A"
-        },
-        {
-          "expr": "rate(envoy_cluster_mixer_report_server_upstream_rq_total[1m])",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "envoy (Report)",
-          "refId": "D"
-        },
-        {
-          "expr": "sum(rate(grpc_server_handled_total[1m]))",
+          "expr": "sum(rate(grpc_io_server_completed_rpcs[1m]))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -556,10 +558,10 @@
           "refId": "B"
         },
         {
-          "expr": "rate(grpc_server_handled_total[1m])",
+          "expr": "sum(rate(grpc_io_server_completed_rpcs[1m])) by (grpc_server_method)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "mixer ({{ grpc_method }})",
+          "legendFormat": "mixer ({{ grpc_server_method }})",
           "refId": "C"
         }
       ],
@@ -597,7 +599,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -641,38 +647,24 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "envoy_cluster_mixer_check_server_upstream_rq_time",
+          "expr": "histogram_quantile(0.5, sum(rate(grpc_io_server_server_latency_bucket{}[1m])) by (grpc_server_method, le))",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ quantile }} (envoy Check)",
-          "refId": "A"
-        },
-        {
-          "expr": "envoy_cluster_mixer_report_server_upstream_rq_time",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "{{ quantile }} (envoy Report)",
-          "refId": "E"
-        },
-        {
-          "expr": "histogram_quantile(0.5, sum(rate(grpc_server_handling_seconds_bucket{}[1m])) by (grpc_method, le)) * 1000",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "{{ grpc_method }} 0.5",
+          "legendFormat": "{{ grpc_server_method }} 0.5",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.9, sum(rate(grpc_server_handling_seconds_bucket{}[1m])) by (grpc_method, le)) * 1000",
+          "expr": "histogram_quantile(0.9, sum(rate(grpc_io_server_server_latency_bucket{}[1m])) by (grpc_server_method, le))",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ grpc_method }} 0.9",
+          "legendFormat": "{{ grpc_server_method }} 0.9",
           "refId": "C"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(grpc_server_handling_seconds_bucket{}[1m])) by (grpc_method, le)) * 1000",
+          "expr": "histogram_quantile(0.99, sum(rate(grpc_io_server_server_latency_bucket{}[1m])) by (grpc_server_method, le))",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{ grpc_method }} 0.99",
+          "legendFormat": "{{ grpc_server_method }} 0.99",
           "refId": "D"
         }
       ],
@@ -710,7 +702,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -748,20 +744,6 @@
       "stack": false,
       "steppedLine": false,
       "targets": [
-        {
-          "expr": "rate(envoy_cluster_mixer_check_server_upstream_rq_5xx[1m])",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "Envoy Check",
-          "refId": "A"
-        },
-        {
-          "expr": "rate(envoy_cluster_mixer_report_server_upstream_rq_5xx[1m])",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "Envoy Report",
-          "refId": "C"
-        },
         {
           "expr": "sum(rate(grpc_server_handled_total{grpc_code=~\"Unknown|Unimplemented|Internal|DataLoss\"}[1m])) by (grpc_method)",
           "format": "time_series",
@@ -804,7 +786,11 @@
           "min": null,
           "show": true
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -842,20 +828,6 @@
       "stack": false,
       "steppedLine": false,
       "targets": [
-        {
-          "expr": "irate(envoy_cluster_mixer_check_server_upstream_rq_4xx[1m])",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "Envoy Check",
-          "refId": "A"
-        },
-        {
-          "expr": "irate(envoy_cluster_mixer_report_server_upstream_rq_4xx[1m])",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "Envoy Report",
-          "refId": "C"
-        },
         {
           "expr": "sum(irate(grpc_server_handled_total{grpc_code!=\"OK\",grpc_service=~\".*Mixer\"}[1m])) by (grpc_method)",
           "format": "time_series",
@@ -898,414 +870,11 @@
           "min": null,
           "show": true
         }
-      ]
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 7,
-        "w": 6,
-        "x": 0,
-        "y": 19
-      },
-      "id": 10,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "envoy_cluster_mixer_check_server_upstream_cx_active",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "Active  (mixer_check_server)",
-          "refId": "B"
-        },
-        {
-          "expr": "envoy_cluster_mixer_report_server_upstream_cx_active",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "Active  (mixer_report_server)",
-          "refId": "A"
-        }
       ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Connections",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ]
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 7,
-        "w": 6,
-        "x": 6,
-        "y": 19
-      },
-      "id": 1,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "envoy_cluster_mixer_check_server_membership_healthy",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 2,
-          "legendFormat": "Healthy (mixer_check_server)",
-          "refId": "A"
-        },
-        {
-          "expr": "envoy_cluster_mixer_check_server_membership_total",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 2,
-          "legendFormat": "Total (mixer_check_server)",
-          "refId": "B"
-        },
-        {
-          "expr": "envoy_cluster_mixer_report_server_membership_healthy",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 2,
-          "legendFormat": "Healthy (mixer_report_server)",
-          "refId": "C"
-        },
-        {
-          "expr": "envoy_cluster_mixer_report_server_membership_total",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 2,
-          "legendFormat": "Total (mixer_report_server)",
-          "refId": "D"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Cluster Membership",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ]
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 7,
-        "w": 6,
-        "x": 12,
-        "y": 19
-      },
-      "id": 35,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "rate(envoy_cluster_mixer_check_server_outlier_detection_ejections_enforced_total[1m])",
-          "format": "time_series",
-          "instant": false,
-          "intervalFactor": 2,
-          "legendFormat": "Total Ejections (mixer_check_server)",
-          "refId": "A"
-        },
-        {
-          "expr": "rate(envoy_cluster_mixer_check_server_outlier_detection_ejections_overflow[1m])",
-          "format": "time_series",
-          "instant": false,
-          "intervalFactor": 2,
-          "legendFormat": "Overflow Ejections (mixer_check_server)",
-          "refId": "B"
-        },
-        {
-          "expr": "envoy_cluster_mixer_check_server_outlier_detection_ejections_active",
-          "format": "time_series",
-          "instant": false,
-          "intervalFactor": 2,
-          "legendFormat": "Active Ejections (mixer_check_server)",
-          "refId": "C"
-        },
-        {
-          "expr": "rate(envoy_cluster_mixer_report_server_outlier_detection_ejections_enforced_total[1m])",
-          "format": "time_series",
-          "instant": false,
-          "intervalFactor": 2,
-          "legendFormat": "Total Ejections (mixer_report_server)",
-          "refId": "D"
-        },
-        {
-          "expr": "rate(envoy_cluster_mixer_report_server_outlier_detection_ejections_overflow[1m])",
-          "format": "time_series",
-          "instant": false,
-          "intervalFactor": 2,
-          "legendFormat": "Overflow Ejections (mixer_report_server)",
-          "refId": "E"
-        },
-        {
-          "expr": "envoy_cluster_mixer_report_server_outlier_detection_ejections_active",
-          "format": "time_series",
-          "instant": false,
-          "intervalFactor": 2,
-          "legendFormat": "Active Ejections (mixer_report_server)",
-          "refId": "F"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Outliers",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ]
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fill": 1,
-      "gridPos": {
-        "h": 7,
-        "w": 6,
-        "x": 18,
-        "y": 19
-      },
-      "id": 36,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "irate(envoy_cluster_mixer_check_server_upstream_rq_retry[1m])",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "Total (mixer_check_server)",
-          "refId": "A"
-        },
-        {
-          "expr": "irate(envoy_cluster_mixer_check_server_upstream_rq_retry_success[1m])",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "Success  (mixer_check_server)",
-          "refId": "B"
-        },
-        {
-          "expr": "irate(envoy_cluster_mixer_check_server_upstream_rq_retry_overflow[1m])",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "Overflow  (mixer_check_server)",
-          "refId": "C"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Client Retries",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ]
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "content": "<center><h2>Adapters and Config</h2></center>",
@@ -1313,7 +882,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 19
       },
       "id": 28,
       "links": [],
@@ -1333,7 +902,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 29
+        "y": 22
       },
       "id": 13,
       "legend": {
@@ -1359,7 +928,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(irate(mixer_runtime_dispatch_count{adapter=~\"$adapter\"}[1m])) by (adapter)",
+          "expr": "sum(irate(mixer_runtime_dispatches_total{adapter=~\"$adapter\"}[1m])) by (adapter)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ adapter }}",
@@ -1400,7 +969,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -1413,7 +986,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 29
+        "y": 22
       },
       "id": 14,
       "legend": {
@@ -1439,21 +1012,21 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.5, sum(irate(mixer_runtime_dispatch_duration_bucket{adapter=~\"$adapter\"}[1m])) by (adapter, le))",
+          "expr": "histogram_quantile(0.5, sum(irate(mixer_runtime_dispatch_duration_seconds_bucket{adapter=~\"$adapter\"}[1m])) by (adapter, le))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ adapter }} - p50",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.9, sum(irate(mixer_runtime_dispatch_duration_bucket{adapter=~\"$adapter\"}[1m])) by (adapter, le))",
+          "expr": "histogram_quantile(0.9, sum(irate(mixer_runtime_dispatch_duration_seconds_bucket{adapter=~\"$adapter\"}[1m])) by (adapter, le))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ adapter }} - p90 ",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(irate(mixer_runtime_dispatch_duration_bucket{adapter=~\"$adapter\"}[1m])) by (adapter, le))",
+          "expr": "histogram_quantile(0.99, sum(irate(mixer_runtime_dispatch_duration_seconds_bucket{adapter=~\"$adapter\"}[1m])) by (adapter, le))",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ adapter }} - p99",
@@ -1494,7 +1067,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -1507,7 +1084,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 36
+        "y": 29
       },
       "id": 60,
       "legend": {
@@ -1595,7 +1172,11 @@
           "min": null,
           "show": true
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -1608,7 +1189,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 36
+        "y": 29
       },
       "id": 56,
       "legend": {
@@ -1675,7 +1256,11 @@
           "min": null,
           "show": true
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -1688,7 +1273,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 36
+        "y": 29
       },
       "id": 54,
       "legend": {
@@ -1755,7 +1340,11 @@
           "min": null,
           "show": true
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -1768,7 +1357,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 36
+        "y": 29
       },
       "id": 58,
       "legend": {
@@ -1836,7 +1425,11 @@
           "min": null,
           "show": true
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "content": "<center><h2>Individual Adapters</h2></center>",
@@ -1844,7 +1437,7 @@
         "h": 3,
         "w": 24,
         "x": 0,
-        "y": 43
+        "y": 36
       },
       "id": 23,
       "links": [],
@@ -1859,7 +1452,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 46
+        "y": 39
       },
       "id": 46,
       "panels": [],
@@ -1878,7 +1471,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 47
+        "y": 40
       },
       "id": 17,
       "legend": {
@@ -1904,7 +1497,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(irate(mixer_runtime_dispatch_count{adapter=\"$adapter\"}[1m]),\"handler\", \"$1 ($3)\", \"handler\", \"(.*)\\\\.(.*)\\\\.(.*)\")",
+          "expr": "label_replace(irate(mixer_runtime_dispatches_total{adapter=\"$adapter\"}[1m]),\"handler\", \"$1 ($3)\", \"handler\", \"(.*)\\\\.(.*)\\\\.(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "{{ handler }} (error: {{  error }})",
@@ -1945,7 +1538,11 @@
           "min": null,
           "show": false
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     },
     {
       "aliasColors": {},
@@ -1958,7 +1555,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 47
+        "y": 40
       },
       "id": 18,
       "legend": {
@@ -1984,21 +1581,21 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "label_replace(histogram_quantile(0.5, sum(rate(mixer_runtime_dispatch_duration_bucket{adapter=\"$adapter\"}[1m])) by (handler, error, le)),  \"handler_short\", \"$1 ($3)\", \"handler\", \"(.*)\\\\.(.*)\\\\.(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.5, sum(rate(mixer_runtime_dispatch_duration_seconds_bucket{adapter=\"$adapter\"}[1m])) by (handler, error, le)),  \"handler_short\", \"$1 ($3)\", \"handler\", \"(.*)\\\\.(.*)\\\\.(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "p50 - {{ handler_short }} (error: {{ error }})",
           "refId": "A"
         },
         {
-          "expr": "label_replace(histogram_quantile(0.9, sum(irate(mixer_runtime_dispatch_duration_bucket{adapter=\"$adapter\"}[1m])) by (handler, error, le)),  \"handler_short\", \"$1 ($3)\", \"handler\", \"(.*)\\\\.(.*)\\\\.(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.9, sum(irate(mixer_runtime_dispatch_duration_seconds_bucket{adapter=\"$adapter\"}[1m])) by (handler, error, le)),  \"handler_short\", \"$1 ($3)\", \"handler\", \"(.*)\\\\.(.*)\\\\.(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "p90 - {{ handler_short }} (error: {{ error }})",
           "refId": "D"
         },
         {
-          "expr": "label_replace(histogram_quantile(0.99, sum(irate(mixer_runtime_dispatch_duration_bucket{adapter=\"$adapter\"}[1m])) by (handler, error, le)),  \"handler_short\", \"$1 ($3)\", \"handler\", \"(.*)\\\\.(.*)\\\\.(.*)\")",
+          "expr": "label_replace(histogram_quantile(0.99, sum(irate(mixer_runtime_dispatch_duration_seconds_bucket{adapter=\"$adapter\"}[1m])) by (handler, error, le)),  \"handler_short\", \"$1 ($3)\", \"handler\", \"(.*)\\\\.(.*)\\\\.(.*)\")",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "p99 - {{ handler_short }} (error: {{ error }})",
@@ -2039,7 +1636,11 @@
           "min": null,
           "show": true
         }
-      ]
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "refresh": "5s",
@@ -2101,6 +1702,6 @@
   },
   "timezone": "",
   "title": "Mixer Dashboard",
-  "uid": "2",
-  "version": 9
+  "uid": "21",
+  "version": 21
 }

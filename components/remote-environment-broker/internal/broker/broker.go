@@ -5,14 +5,13 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/access"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mode"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/remoteenvironment/v1alpha1"
-	listers "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/remoteenvironment/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	listers "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/platform/idprovider"
 	"github.com/sirupsen/logrus"
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore
-//go:generate mockery -name=accessChecker -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=reFinder -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=instanceGetter -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=serviceInstanceGetter -output=automock -outpkg=automock -case=underscore
@@ -101,7 +100,7 @@ func New(remoteEnvironmentFinder reFinder,
 	instStorage instanceStorage,
 	opStorage operationStorage,
 	accessChecker access.ProvisionChecker,
-	reClient v1alpha1.RemoteenvironmentV1alpha1Interface,
+	reClient v1alpha1.ApplicationconnectorV1alpha1Interface,
 	serviceInstanceGetter serviceInstanceGetter,
 	emLister listers.EnvironmentMappingLister,
 	brokerMode *mode.BrokerService,

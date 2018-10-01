@@ -6,7 +6,7 @@ containerRegistry:
   path: eu.gcr.io/kyma-project
 
 image:
-  tag: 0.2.37
+  tag: 9d76a79d
   # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 
@@ -20,6 +20,11 @@ slackClientChannelId: "need-to-be-provided"
 slackClientToken: "123-need-to-be-provided"
 testThrottle: "5m"
 testResultWindowTime: "6h"
+
+stats:
+  enabled: false
+  failingTestRegexp: "TBD"
+  successfulTestRegexp: "TBD"
 
 service:
   type: NodePort

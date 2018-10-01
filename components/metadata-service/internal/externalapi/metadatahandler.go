@@ -105,14 +105,14 @@ func (mh *metadataHandler) UpdateService(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	apperr = mh.ServiceDefinitionService.Update(vars["remoteEnvironment"], vars["serviceId"], &serviceDefinition)
+	svc, apperr := mh.ServiceDefinitionService.Update(vars["remoteEnvironment"], vars["serviceId"], &serviceDefinition)
 	if apperr != nil {
 		contextLogger.Errorf("Error updating service: %s.", apperr.Error())
 		handleErrors(w, apperr)
 		return
 	}
 
-	responseBody, apperr := serviceDefinitionToServiceDetails(serviceDefinition)
+	responseBody, apperr := serviceDefinitionToServiceDetails(svc)
 	if apperr != nil {
 		contextLogger.Errorf("Error updating service: %s.", apperr.Error())
 		handleErrors(w, apperr)

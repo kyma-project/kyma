@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/content-to-json-generator:0.0.1
+FROM eu.gcr.io/kyma-project/content-to-json-generator:0.0.2
 
 ARG CONTENT_SRC_DIR
 COPY ${CONTENT_SRC_DIR} /app/documentation
@@ -12,6 +12,6 @@ ENV APP_OUT_PATH /out
 
 RUN npm start
 
-FROM eu.gcr.io/kyma-project/resources-uploader:0.0.1
+FROM eu.gcr.io/kyma-project/resources-uploader:0.0.2
 COPY --from=0 /app/documentation/out /app/data
 CMD "/app/main"

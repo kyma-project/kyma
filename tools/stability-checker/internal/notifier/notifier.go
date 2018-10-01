@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kyma-project/kyma/tools/stability-checker/internal/summary"
+
 	"github.com/kyma-project/kyma/tools/stability-checker/internal"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -22,8 +24,10 @@ type SlackNotifier struct {
 	log                  logrus.FieldLogger
 	slack                slackClient
 	testRenderer         testRenderer
+	summarizer           summarizer
 	testRunnerPodName    string
 	testRunnerNamespace  string
+	showTestStats        bool
 }
 
 type (
@@ -33,16 +37,21 @@ type (
 	testRenderer interface {
 		RenderTestSummary(in RenderTestSummaryInput) (string, string, string, error)
 	}
+	summarizer interface {
+		GetTestSummaryForExecutions(testIDs []string) ([]summary.SpecificTestStats, error)
+	}
 )
 
 // New returns new instance of SlackNotifier
 func New(
 	slack slackClient,
 	testRenderer testRenderer,
+	summarizer summarizer,
 	cfgMapClient configMapClient,
 	cfgMapName string,
 	resultWindowTime time.Duration,
 	testRunnerPodName, testRunnerNamespace string,
+	showTestStats bool,
 	log logrus.FieldLogger) *SlackNotifier {
 
 	return &SlackNotifier{
@@ -52,8 +61,10 @@ func New(
 		testResultWindowTime: resultWindowTime,
 		slack:                slack,
 		testRenderer:         testRenderer,
+		summarizer:           summarizer,
 		testRunnerPodName:    testRunnerPodName,
 		testRunnerNamespace:  testRunnerNamespace,
+		showTestStats:        showTestStats,
 	}
 }
 
@@ -70,17 +81,32 @@ func (s *SlackNotifier) Run(ctx context.Context) {
 			continue
 		}
 
-		testsResults := s.processTestsResults(cfg)
-		failedTests := s.filterFailingTests(testsResults)
+		execResults := s.getTestExecutionFromTimeWindow(cfg)
+		failedTests := s.filterFailingTests(execResults)
+
+		var testStats []summary.SpecificTestStats
+		if s.showTestStats {
+			execIDs := make([]string, 0)
+			for _, res := range execResults {
+				execIDs = append(execIDs, res.ID)
+			}
+			testStats, err = s.summarizer.GetTestSummaryForExecutions(execIDs)
+			if err != nil {
+				s.log.Errorf("Cannot get test summary for execution IDs [%v], got error: %v", execIDs, err)
+				continue
+			}
+		}
 
 		header, body, footer, err := s.testRenderer.RenderTestSummary(RenderTestSummaryInput{
-			FailedTests:          failedTests,
-			TotalTestsCnt:        len(testsResults),
+			FailedExecutions:     failedTests,
+			TotalTestsCnt:        len(execResults),
 			TestResultWindowTime: s.testResultWindowTime,
 			TestRunnerInfo: TestRunnerInfo{
 				PodName:   s.testRunnerPodName,
 				Namespace: s.testRunnerNamespace,
 			},
+			ShowTestStats: s.showTestStats,
+			TestStats:     testStats,
 		})
 		if err != nil {
 			s.log.Errorf("Cannot render test summary, got error: %v", err)
@@ -89,20 +115,22 @@ func (s *SlackNotifier) Run(ctx context.Context) {
 
 		if err := s.slack.Send(header, body, footer, color(failedTests)); err != nil {
 			s.log.Errorf("Cannot send test summary, got error: %v", err)
+		} else {
+			s.log.Info("Sent slack notification successfully")
 		}
 	}
 }
 
-func (s *SlackNotifier) processTestsResults(cfgMap *v1.ConfigMap) []internal.TestStatus {
+func (s *SlackNotifier) getTestExecutionFromTimeWindow(cfgMap *v1.ConfigMap) []internal.ExecutionStatus {
 	var (
 		lastSendTime = time.Now().Add(-s.testResultWindowTime)
-		tests        []internal.TestStatus
+		executions   []internal.ExecutionStatus
 	)
 
 	for k, v := range cfgMap.Data {
 		testTime, err := s.parseToTime(k)
 		if err != nil {
-			s.log.Errorf("Cannot get test time, got error: %s", err)
+			s.log.Errorf("Cannot get test execution time, got error: %s", err)
 			continue
 		}
 
@@ -110,16 +138,16 @@ func (s *SlackNotifier) processTestsResults(cfgMap *v1.ConfigMap) []internal.Tes
 			continue
 		}
 
-		var test internal.TestStatus
-		if err := json.Unmarshal([]byte(v), &test); err != nil {
-			s.log.Errorf("Cannot unmarshal test results for entry with key %s, got error: %v", k, err)
+		var exec internal.ExecutionStatus
+		if err := json.Unmarshal([]byte(v), &exec); err != nil {
+			s.log.Errorf("Cannot unmarshal execution results for entry with key %s, got error: %v", k, err)
 			continue
 		}
 
-		tests = append(tests, test)
+		executions = append(executions, exec)
 	}
 
-	return tests
+	return executions
 }
 
 func (s *SlackNotifier) parseToTime(timestamp string) (time.Time, error) {
@@ -143,7 +171,7 @@ func (s *SlackNotifier) delay(ctx context.Context) bool {
 
 	return false
 }
-func (s *SlackNotifier) filterFailingTests(testStatuses []internal.TestStatus) (failed []internal.TestStatus) {
+func (s *SlackNotifier) filterFailingTests(testStatuses []internal.ExecutionStatus) (failed []internal.ExecutionStatus) {
 	for _, test := range testStatuses {
 		if !test.Pass {
 			failed = append(failed, test)
@@ -152,7 +180,7 @@ func (s *SlackNotifier) filterFailingTests(testStatuses []internal.TestStatus) (
 	return
 }
 
-func color(failed []internal.TestStatus) string {
+func color(failed []internal.ExecutionStatus) string {
 	var (
 		red   = "#d92626"
 		green = "#36a64f"

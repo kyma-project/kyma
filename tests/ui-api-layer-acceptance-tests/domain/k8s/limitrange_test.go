@@ -7,6 +7,7 @@ import (
 
 	"time"
 
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
@@ -23,6 +24,10 @@ const (
 )
 
 func TestLimitRangeQuery(t *testing.T) {
+	if dex.IsSCIEnabled() {
+		t.Skip("SCI Enabled")
+	}
+
 	c, err := graphql.New()
 	require.NoError(t, err)
 

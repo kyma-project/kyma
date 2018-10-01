@@ -1,6 +1,5 @@
 ---
 title: Overview
-type: Overview
 ---
 
 The Application Connector is a proprietary Kyma implementation that allows you to connect with external solutions. The Application Connector consists of four

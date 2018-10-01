@@ -20,11 +20,9 @@ The Event-Service has the following parameters:
 - **requestTimeout** - A time-out for requests sent through the Event-Service. It is provided in seconds. The default time-out is `1`.
 - **requestLogging** - A flag for logging incoming requests. The default value is `false`.
 
-The parameters for the Event API correspond to the fields in the [Remote Environment](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/014-details-remote-environment.md):
+The parameters for the Event API correspond to the fields in the [Remote Environment](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/040-cr-remote-evironment.md):
 
-- **sourceEnvironment** - The name of the Event source environment.
-- **sourceType** - The type of the Event source.
-- **sourceNamespace** - The organization that publishes the Event.
+- **sourceId** - The identifier of the Events' source.
 
 ### Unit tests
 

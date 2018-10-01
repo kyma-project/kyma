@@ -30,6 +30,4 @@ You can adjust these parameters:
 - **skipVerify** - The flag to skip the verification of certificates for the proxy targets. The default value is `false`.
 
 Additionally, you can adjust the parameters used in the communication with the Event Service:
-- **sourceEnvironment** - The Event source environment name.
-- **sourceType** - The Event source type.
-- **sourceNamespace** - The organization that publishes the Event.
+- **sourceId** - The Remote Environment name is used as the source id.
