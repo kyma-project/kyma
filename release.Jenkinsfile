@@ -143,7 +143,7 @@ try {
                         def zip = "${appVersion}.tar.gz"
                         
                         // create release zip
-                        writeFile file: "installation/versions.env", text: "${versionsYaml()}"
+                        writeFile file: "installation/versions-overrides.env", text: "${versionsYaml()}"
                         sh "tar -czf ${zip} ./installation ./resources"
 
                         // create release on github
@@ -155,8 +155,8 @@ try {
 
                             // upload zip file
                             sh "curl --data-binary @$zip -H \"Authorization: token $token\" -H \"Content-Type: application/zip\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${zip}"
-                            // upload versions env file
-                            sh "curl --data-binary @installation/versions.env -H \"Authorization: token $token\" -H \"Content-Type: text/plain\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${appVersion}.env"
+                            // upload versions-overrides env file
+                            sh "curl --data-binary @installation/versions-overrides.env -H \"Authorization: token $token\" -H \"Content-Type: text/plain\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${appVersion}.env"
                         }
                     }
 

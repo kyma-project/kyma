@@ -193,7 +193,7 @@ if (runIntegration) {
                         }
 
                         stage("Upload versions file to azure") {
-                            writeFile file: "installation/versions.env", text: "$versions"
+                            writeFile file: "installation/versions-overrides.env", text: "$versions"
 
                             def file = ''
                             if (isMaster) {
