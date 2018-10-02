@@ -88,9 +88,9 @@ properties([
     disableConcurrentBuilds()
 ])
 
-podTemplate(label: label) {
-    node(label) {
-        try {
+try {
+    podTemplate(label: label) {
+        node(label) {
             timestamps {
                 ansiColor('xterm') {
                     stage("setup") {
@@ -126,66 +126,59 @@ podTemplate(label: label) {
                     }
                 }
             }
-        } catch (ex) {
-            echo "Got exception: ${ex}"
-            currentBuild.result = "FAILURE"
-            def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${env.BRANCH_NAME}. See details: ${env.BUILD_URL}"
-            emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
         }
     }
-}
 
-// gather all component versions to pass to integration
-if (runIntegration) {
-    stage('collect versions') {
-        versions = [:]
-        
-        changedProjects = jobs.keySet()
-        for (int i = 0; i < changedProjects.size(); i++) {
-            // only projects that have an associated docker image have a version to deploy
-            if (projects["${changedProjects[i]}"] != null) {
-                versions["${changedProjects[i]}"] = "$appVersion"
+    // gather all component versions to pass to integration
+    if (runIntegration) {
+        stage('collect versions') {
+            versions = [:]
+            
+            changedProjects = jobs.keySet()
+            for (int i = 0; i < changedProjects.size(); i++) {
+                // only projects that have an associated docker image have a version to deploy
+                if (projects["${changedProjects[i]}"] != null) {
+                    versions["${changedProjects[i]}"] = "$appVersion"
+                }
             }
-        }
 
-        unchangedProjects = projects.keySet() - changedProjects
-        for (int i = 0; i < unchangedProjects.size(); i++) {
-            // only projects that have an associated docker image have a version to deploy
-            if (projects["${unchangedProjects[i]}"] != null) {
-                versions["${unchangedProjects[i]}"] = projectVersion("${unchangedProjects[i]}")
+            unchangedProjects = projects.keySet() - changedProjects
+            for (int i = 0; i < unchangedProjects.size(); i++) {
+                // only projects that have an associated docker image have a version to deploy
+                if (projects["${unchangedProjects[i]}"] != null) {
+                    versions["${unchangedProjects[i]}"] = projectVersion("${unchangedProjects[i]}")
+                }
             }
+
+            // convert versions to JSON string to pass on
+            versions = versionsYaml(versions)
+            echo """
+        Component versions:
+        $versions
+        """
+        }
+    }
+
+    // trigger jobs for projects that have changes, in parallel
+    stage('build projects') {
+        parallel jobs
+    }
+
+    // trigger Kyma integration when changes are made to installation charts/code or resources
+    if (runIntegration) {
+        stage('launch Kyma integration') {
+            build job: 'kyma/integration',
+                wait: true,
+                parameters: [
+                    string(name:'GIT_REVISION', value: "$commitID"),
+                    string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
+                    string(name:'APP_VERSION', value: "$appVersion"),
+                    string(name:'COMP_VERSIONS', value: "$versions") // YAML string
+                ]
         }
 
-        // convert versions to JSON string to pass on
-        versions = versionsYaml(versions)
-        echo """
-    Component versions:
-    $versions
-    """
-    }
-}
-
-// trigger jobs for projects that have changes, in parallel
-stage('build projects') {
-    parallel jobs
-}
-
-// trigger Kyma integration when changes are made to installation charts/code or resources
-if (runIntegration) {
-    stage('launch Kyma integration') {
-        build job: 'kyma/integration',
-            wait: true,
-            parameters: [
-                string(name:'GIT_REVISION', value: "$commitID"),
-                string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
-                string(name:'APP_VERSION', value: "$appVersion"),
-                string(name:'COMP_VERSIONS', value: "$versions") // YAML string
-            ]
-    }
-
-    podTemplate(label: label) {
-        node(label) {
-            try {
+        podTemplate(label: label) {
+            node(label) {
                 timestamps {
                     ansiColor('xterm') {
                         stage("setup") {
@@ -217,17 +210,15 @@ if (runIntegration) {
                         }
                     }
                 }
-            }  catch (ex) {
-                echo "Got exception: ${ex}"
-                currentBuild.result = "FAILURE"
-                def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${env.BRANCH_NAME}. See details: ${env.BUILD_URL}"
-                emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
             }
         }
     }
+}  catch (ex) {
+    echo "Got exception: ${ex}"
+    currentBuild.result = "FAILURE"
+    def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${env.BRANCH_NAME}. See details: ${env.BUILD_URL}"
+    emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
 }
-
-
 
 /* -------- Helper Functions -------- */
 
