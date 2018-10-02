@@ -43,7 +43,7 @@ func NewAccessServiceManager(serviceInterface ServiceInterface, config AccessSer
 func (m *accessServiceManager) Create(remoteEnvironment, serviceId, serviceName string) apperrors.AppError {
 	_, err := m.create(remoteEnvironment, serviceId, serviceName)
 	if err != nil {
-		return apperrors.Internal("failed to create service, %s", err)
+		return apperrors.Internal("accessServiceManager: creating service failed, %s", err)
 	}
 	return nil
 }
@@ -54,7 +54,7 @@ func (m *accessServiceManager) Upsert(remoteEnvironment, serviceId, serviceName 
 		if k8serrors.IsAlreadyExists(err) {
 			return nil
 		}
-		return apperrors.Internal("failed to upsert service, %s", err)
+		return apperrors.Internal("accessServiceManager: upserting service failed, %s", err)
 	}
 	return nil
 }
@@ -63,7 +63,7 @@ func (m *accessServiceManager) Delete(serviceName string) apperrors.AppError {
 	err := m.serviceInterface.Delete(serviceName, &metav1.DeleteOptions{})
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {
-			return apperrors.Internal("failed to delete service: %s", err)
+			return apperrors.Internal("accessServiceManager: deleting service failed, %s", err)
 		}
 	}
 	return nil

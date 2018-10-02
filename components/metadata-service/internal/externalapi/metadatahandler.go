@@ -33,14 +33,14 @@ func (mh *metadataHandler) CreateService(w http.ResponseWriter, r *http.Request)
 
 	serviceDefinition, apperr := mh.prepareServiceDefinition(r.Body)
 	if apperr != nil {
-		contextLogger.Errorf("new service: preparing failed, %s", apperr.Error())
+		contextLogger.Errorf("metadataHandler: preparing new service failed, %s", apperr.Error())
 		handleErrors(w, apperr)
 		return
 	}
 
 	serviceId, apperr := mh.ServiceDefinitionService.Create(mux.Vars(r)["remoteEnvironment"], &serviceDefinition)
 	if apperr != nil {
-		contextLogger.Errorf("new service: creating failed %s", apperr.Error())
+		contextLogger.Errorf("metadataHandler: creating new service failed, %s", apperr.Error())
 		handleErrors(w, apperr)
 		return
 	}
