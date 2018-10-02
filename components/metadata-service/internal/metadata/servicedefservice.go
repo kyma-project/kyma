@@ -71,24 +71,24 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 	if apiDefined(serviceDef) {
 		serviceAPI, err := sds.serviceAPIService.New(remoteEnvironment, id, serviceDef.Api)
 		if err != nil {
-			return "", apperrors.Internal("serviceDefinitionService: adding new API failed, %s", err)
+			return "", apperrors.Internal("service definition service: adding new API failed, %s", err)
 		}
 		service.API = serviceAPI
 
 		serviceDef.Api.Spec, err = modifyAPISpec(serviceDef.Api.Spec, serviceAPI.GatewayURL)
 		if err != nil {
-			return "", apperrors.Internal("serviceDefinitionService: modifying API spec failed, %s", err)
+			return "", apperrors.Internal("service definition service: modifying API spec failed, %s", err)
 		}
 	}
 
 	err := sds.insertSpecs(id, serviceDef.Documentation, serviceDef.Api, serviceDef.Events)
 	if err != nil {
-		return "", apperrors.Internal("serviceDefinitionService: inserting specs failed, %s", err)
+		return "", apperrors.Internal("service definition service: inserting specs failed, %s", err)
 	}
 
 	err = sds.remoteEnvironmentRepository.Create(remoteEnvironment, *service)
 	if err != nil {
-		return "", apperrors.Internal("serviceDefinitionService: creating service in Remote Environment failed, %s", err)
+		return "", apperrors.Internal("service definition service: creating service in Remote Environment failed, %s", err)
 	}
 
 	serviceDef.ID = id
@@ -100,9 +100,9 @@ func (sds *serviceDefinitionService) GetByID(remoteEnvironment, id string) (Serv
 	service, err := sds.remoteEnvironmentRepository.Get(remoteEnvironment, id)
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {
-			return ServiceDefinition{}, apperrors.NotFound("serviceDefinitionService: service with ID %s not found", id)
+			return ServiceDefinition{}, apperrors.NotFound("service definition service: service with ID %s not found", id)
 		}
-		return ServiceDefinition{}, apperrors.Internal("serviceDefinitionService: reading service with ID %s failed, %s", id, err)
+		return ServiceDefinition{}, apperrors.Internal("service definition service: reading service with ID %s failed, %s", id, err)
 	}
 
 	return sds.readService(remoteEnvironment, service)
@@ -112,7 +112,7 @@ func (sds *serviceDefinitionService) GetByID(remoteEnvironment, id string) (Serv
 func (sds *serviceDefinitionService) GetAll(remoteEnvironment string) ([]ServiceDefinition, apperrors.AppError) {
 	services, err := sds.remoteEnvironmentRepository.GetAll(remoteEnvironment)
 	if err != nil {
-		return nil, apperrors.Internal("serviceDefinitionService: reading all services from Remote Environment failed, %s", err)
+		return nil, apperrors.Internal("service definition service: reading all services from Remote Environment failed, %s", err)
 	}
 
 	res := make([]ServiceDefinition, 0)
@@ -128,9 +128,9 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 	existingSvc, err := sds.GetByID(remoteEnvironment, id)
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {
-			return ServiceDefinition{}, apperrors.NotFound("serviceDefinitionService: updating %s service failed, %s", id, err.Error())
+			return ServiceDefinition{}, apperrors.NotFound("service definition service: updating %s service failed, %s", id, err.Error())
 		}
-		return ServiceDefinition{}, apperrors.Internal("serviceDefinitionService: updating %s service failed, %s", id, err.Error())
+		return ServiceDefinition{}, apperrors.Internal("service definition service: updating %s service failed, %s", id, err.Error())
 	}
 
 	service := initService(serviceDef, id, existingSvc.Identifier, remoteEnvironment)
@@ -138,28 +138,28 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 	if !apiDefined(serviceDef) {
 		err = sds.serviceAPIService.Delete(remoteEnvironment, id)
 		if err != nil {
-			return ServiceDefinition{}, apperrors.Internal("serviceDefinitionService: updating %s service failed, deleting API failed, %s", id, err.Error())
+			return ServiceDefinition{}, apperrors.Internal("service definition service: updating %s service failed, deleting API failed, %s", id, err.Error())
 		}
 	} else {
 		service.API, err = sds.serviceAPIService.Update(remoteEnvironment, id, serviceDef.Api)
 		if err != nil {
-			return ServiceDefinition{}, apperrors.Internal("serviceDefinitionService: updating %s service failed, updating API failed, %s", id, err.Error())
+			return ServiceDefinition{}, apperrors.Internal("service definition service: updating %s service failed, updating API failed, %s", id, err.Error())
 		}
 
 		serviceDef.Api.Spec, err = modifyAPISpec(serviceDef.Api.Spec, service.API.GatewayURL)
 		if err != nil {
-			return ServiceDefinition{}, apperrors.Internal("serviceDefinitionService: updating %s service failed, modifying API spec failed, %s", id, err.Error())
+			return ServiceDefinition{}, apperrors.Internal("service definition service: updating %s service failed, modifying API spec failed, %s", id, err.Error())
 		}
 	}
 
 	err = sds.insertSpecs(id, serviceDef.Documentation, serviceDef.Api, serviceDef.Events)
 	if err != nil {
-		return ServiceDefinition{}, apperrors.Internal("serviceDefinitionService: updating %s service failed, inserting specification to Minio failed, %s", id, err.Error())
+		return ServiceDefinition{}, apperrors.Internal("service definition service: updating %s service failed, inserting specification to Minio failed, %s", id, err.Error())
 	}
 
 	err = sds.remoteEnvironmentRepository.Update(remoteEnvironment, *service)
 	if err != nil {
-		return ServiceDefinition{}, apperrors.Internal("serviceDefinitionService: updating %s service failed, updating service in Remote Environment repository failed, %s", id, err.Error())
+		return ServiceDefinition{}, apperrors.Internal("service definition service: updating %s service failed, updating service in Remote Environment repository failed, %s", id, err.Error())
 	}
 
 	serviceDef.ID = id
@@ -170,17 +170,17 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 func (sds *serviceDefinitionService) Delete(remoteEnvironment, id string) apperrors.AppError {
 	err := sds.serviceAPIService.Delete(remoteEnvironment, id)
 	if err != nil {
-		return apperrors.Internal("serviceDefinitionService: deleting service failed, %s", err)
+		return apperrors.Internal("service definition service: deleting service failed, %s", err)
 	}
 
 	err = sds.remoteEnvironmentRepository.Delete(remoteEnvironment, id)
 	if err != nil {
-		return apperrors.Internal("serviceDefinitionService: deleting service from Remote Environment repository failed, %s", err)
+		return apperrors.Internal("service definition service: deleting service from Remote Environment repository failed, %s", err)
 	}
 
 	err = sds.minioService.Remove(id)
 	if err != nil {
-		return apperrors.Internal("serviceDefinitionService: deleting service data from Minio failed, %s", err)
+		return apperrors.Internal("service definition service: deleting service data from Minio failed, %s", err)
 	}
 
 	return nil
@@ -191,18 +191,18 @@ func (sds *serviceDefinitionService) GetAPI(remoteEnvironment, serviceId string)
 	service, err := sds.remoteEnvironmentRepository.Get(remoteEnvironment, serviceId)
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {
-			return nil, apperrors.NotFound("serviceDefinitionService: service with ID %s not found", serviceId)
+			return nil, apperrors.NotFound("service definition service: service with ID %s not found", serviceId)
 		}
-		return nil, apperrors.Internal("serviceDefinitionService: reading %s service failed, %s", serviceId, err)
+		return nil, apperrors.Internal("service definition service: reading %s service failed, %s", serviceId, err)
 	}
 
 	if service.API == nil {
-		return nil, apperrors.WrongInput("serviceDefinitionService: service with ID %s has no API", service.ID)
+		return nil, apperrors.WrongInput("service definition service: service with ID %s has no API", service.ID)
 	}
 
 	api, err := sds.serviceAPIService.Read(remoteEnvironment, service.API)
 	if err != nil {
-		return nil, apperrors.Internal("serviceDefinitionService: reading API for %s service failed, %s", serviceId, err)
+		return nil, apperrors.Internal("service definition service: reading API for %s service failed, %s", serviceId, err)
 	}
 	return api, nil
 }
@@ -253,7 +253,7 @@ func (sds *serviceDefinitionService) ensureUniqueIdentifier(identifier, remoteEn
 
 	for _, service := range services {
 		if service.Identifier == identifier {
-			return apperrors.AlreadyExists("serviceDefinitionService: service with Identifier %s already exists", identifier)
+			return apperrors.AlreadyExists("service definition service: service with Identifier %s already exists", identifier)
 		}
 	}
 
@@ -265,13 +265,13 @@ func (sds *serviceDefinitionService) readService(remoteEnvironment string, servi
 
 	documentation, apiSpec, eventsSpec, err := sds.minioService.Get(service.ID)
 	if err != nil {
-		return ServiceDefinition{}, apperrors.Internal("serviceDefinitionService: reading specs failed, %s", err)
+		return ServiceDefinition{}, apperrors.Internal("service definition service: reading specs failed, %s", err)
 	}
 
 	if service.API != nil {
 		api, err := sds.serviceAPIService.Read(remoteEnvironment, service.API)
 		if err != nil {
-			return ServiceDefinition{}, apperrors.Internal("serviceDefinitionService: reading API failed, %s", err)
+			return ServiceDefinition{}, apperrors.Internal("service definition service: reading API failed, %s", err)
 		}
 		serviceDef.Api = api
 
