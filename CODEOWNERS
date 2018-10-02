@@ -71,7 +71,7 @@
 /resources/core/charts/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
 # The `minio` subchart
-/resources/core/charts/minio/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
+/resources/core/charts/minio/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
 
 # The `event-bus` subchart
 /resources/core/charts/event-bus/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
