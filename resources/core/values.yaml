@@ -59,7 +59,7 @@ global:
     version: 6e0a7fe2
   ui_api_layer:
     dir: develop/
-    version: d174b6b2
+    version: 6bb5bb22
   ui_api_layer_acceptance_tests:
     dir: develop/
     version: 6e0a7fe2
