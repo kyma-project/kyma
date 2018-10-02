@@ -58,15 +58,21 @@ func TestTopicsConverter_ExtractSection(t *testing.T) {
 	t.Run("Topics with internal false", func(t *testing.T) {
 
 		expectedResult := []gqlschema.Section{
-			{TopicType: "test1", Titles: []gqlschema.Title{
-				{Name: "test1", Titles: []gqlschema.Title{
+			{
+				TopicType: "test1",
+				Name:      "test1",
+				Titles: []gqlschema.Title{
 					{Name: "Test1", Anchor: "test1"},
 					{Name: "Test2", Anchor: "test2"},
 					{Name: "Test3", Anchor: "test3"},
-				}, Anchor: "test1"},
-			}},
-			{TopicType: "test2", Titles: []gqlschema.Title{
-				{Name: "Alone1", Anchor: "alone1"}},
+				}, Anchor: "test1",
+			},
+			{
+				TopicType: "test2",
+				Name:      "test2",
+				Anchor:    "test2",
+				Titles: []gqlschema.Title{
+					{Name: "Alone1", Anchor: "alone1"}},
 			},
 		}
 
@@ -84,36 +90,28 @@ func TestTopicsConverter_ExtractSection(t *testing.T) {
 		expectedResultInternalFalse := []gqlschema.Section{
 			{
 				TopicType: "internalTest1",
+				Name:      "internalTest1",
 				Titles: []gqlschema.Title{
-					{
-						Name: "internalTest1",
-						Titles: []gqlschema.Title{
-							{Name: "Test1", Anchor: "test1"},
-							{Name: "Test2", Anchor: "test2"},
-							{Name: "Test3", Anchor: "test3"},
-							{Name: "Test4", Anchor: "test4"},
-						},
-						Anchor: "internaltest1",
-					},
+					{Name: "Test1", Anchor: "test1"},
+					{Name: "Test2", Anchor: "test2"},
+					{Name: "Test3", Anchor: "test3"},
+					{Name: "Test4", Anchor: "test4"},
 				},
+				Anchor: "internaltest1",
 			},
 		}
 
 		expectedResultInternalTrue := []gqlschema.Section{
 			{
 				TopicType: "internalTest1",
+				Name:      "internalTest1",
+				Anchor:    "internaltest1",
 				Titles: []gqlschema.Title{
 					{
-						Name:   "internalTest1",
-						Anchor: "internaltest1",
-						Titles: []gqlschema.Title{
-							{
-								Name: "Test3", Anchor: "test3"},
-							{
-								Name:   "Test4",
-								Anchor: "test4",
-							},
-						},
+						Name: "Test3", Anchor: "test3"},
+					{
+						Name:   "Test4",
+						Anchor: "test4",
 					},
 				},
 			},
