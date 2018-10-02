@@ -92,6 +92,8 @@ data:
   gateways.istio-ingressgateway.type: "NodePort"
 
   pilot.resources.limits.memory: 512Mi
+  pilot.resources.limits.cpu: 100m
   pilot.resources.requests.memory: 256Mi
+  pilot.resources.requests.cpu: 100m
   mixer.resources.limits.memory: 256Mi
   mixer.resources.requests.memory: 128Mi
