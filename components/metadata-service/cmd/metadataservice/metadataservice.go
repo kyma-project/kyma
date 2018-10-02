@@ -56,12 +56,12 @@ func main() {
 	)
 
 	if err != nil {
-		log.Errorf("Unable to initialize: '%s'", err.Error())
+		log.Errorf("Metadata Service: unable to initialize, %s", err.Error())
 	}
 
 	middlewares, err := monitoring.SetupMonitoringMiddleware()
 	if err != nil {
-		log.Errorf("Error while setting up monitoring: %s", err.Error())
+		log.Errorf("monitoring: error while setting up, %s", err.Error())
 	}
 
 	externalHandler := newExternalHandler(serviceDefinitionService, middlewares)
@@ -108,22 +108,22 @@ func newExternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 func newServiceDefinitionService(minioURL, namespace string, proxyPort int, nameResolver k8sconsts.NameResolver) (metadata.ServiceDefinitionService, apperrors.AppError) {
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
-		return nil, apperrors.Internal("failed to read k8s in-cluster configuration, %s", err)
+		return nil, apperrors.Internal("k8s in-cluster configuration: failed to read, %s", err)
 	}
 
 	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
-		return nil, apperrors.Internal("failed to create k8s core client, %s", err)
+		return nil, apperrors.Internal("k8s core client: failed to create, %s", err)
 	}
 
 	accessKeyId, secretAccessKey, err := readMinioAccessConfiguration()
 	if err != nil {
-		return nil, apperrors.Internal("failed to read minio configuration, %s", err.Error())
+		return nil, apperrors.Internal("minio configuration: failed to read, %s", err.Error())
 	}
 
 	minioRepository, err := minio.NewMinioRepository(minioURL, accessKeyId, secretAccessKey)
 	if err != nil {
-		return nil, apperrors.Internal("failed to create minio repository, %s", err.Error())
+		return nil, apperrors.Internal("minio repository: failed to create, %s", err.Error())
 	}
 
 	minioService := minio.NewService(minioRepository)
@@ -153,7 +153,7 @@ func newServiceDefinitionService(minioURL, namespace string, proxyPort int, name
 func newRemoteEnvironmentRepository(config *restclient.Config) (remoteenv.ServiceRepository, apperrors.AppError) {
 	remoteEnvironmentClientset, err := versioned.NewForConfig(config)
 	if err != nil {
-		return nil, apperrors.Internal("failed to create k8s remote environment client, %s", err)
+		return nil, apperrors.Internal("k8s remote environment client: failed to create, %s", err)
 	}
 
 	rei := remoteEnvironmentClientset.ApplicationconnectorV1alpha1().RemoteEnvironments()
@@ -180,7 +180,7 @@ func newSecretsRepository(coreClientset *kubernetes.Clientset, namespace string)
 func newIstioService(config *restclient.Config, namespace string) (istio.Service, apperrors.AppError) {
 	ic, err := istioclient.NewForConfig(config)
 	if err != nil {
-		return nil, apperrors.Internal("failed to create client for istio, %s", err)
+		return nil, apperrors.Internal("client for istio: failed to create, %s", err)
 	}
 
 	repository := istio.NewRepository(
@@ -198,11 +198,11 @@ func readMinioAccessConfiguration() (string, string, apperrors.AppError) {
 	secretAccessKey, foundSecret := os.LookupEnv(MinioSecretAccessKey)
 
 	if !foundId && !foundSecret {
-		return "", "", apperrors.Internal("%s and %s environment variables not set", MinioAccessKeyIdEnv, MinioSecretAccessKey)
+		return "", "", apperrors.Internal("%s and %s environment variables: could not find", MinioAccessKeyIdEnv, MinioSecretAccessKey)
 	} else if !foundId {
-		return "", "", apperrors.Internal("%s environment variable not set", MinioAccessKeyIdEnv)
+		return "", "", apperrors.Internal("%s environment variable: could not find", MinioAccessKeyIdEnv)
 	} else if !foundSecret {
-		return "", "", apperrors.Internal("%s environment variable not set", MinioSecretAccessKey)
+		return "", "", apperrors.Internal("%s environment variable: could not find", MinioSecretAccessKey)
 	}
 
 	return accessKeyId, secretAccessKey, nil
