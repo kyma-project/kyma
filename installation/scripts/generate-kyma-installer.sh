@@ -12,7 +12,7 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 KYMA_PATH="${CURRENT_DIR}/../.."
 INSTALLER_YAML_PATH="${KYMA_PATH}/installation/resources/installer.yaml"
 
-if [[ ! $# -eq 2 ]] ; then
+if [[ ! $# -eq 1 ]] ; then
     usage
 fi
 
