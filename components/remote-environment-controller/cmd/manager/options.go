@@ -6,12 +6,12 @@ import (
 )
 
 type options struct {
-	appName    string
-	domainName string
-	namespace  string
-	tillerUrl  string
-	gatewayImage string
-	eventServiceImage string
+	appName                string
+	domainName             string
+	namespace              string
+	tillerUrl              string
+	gatewayImage           string
+	eventServiceImage      string
 	eventServiceTestsImage string
 }
 
@@ -28,18 +28,18 @@ func parseArgs() *options {
 	flag.Parse()
 
 	return &options{
-		appName:    *appName,
-		domainName: *domainName,
-		namespace:  *namespace,
-		tillerUrl:  *tillerUrl,
-		gatewayImage: *gatewayImage,
-		eventServiceImage: *eventServiceImage,
+		appName:                *appName,
+		domainName:             *domainName,
+		namespace:              *namespace,
+		tillerUrl:              *tillerUrl,
+		gatewayImage:           *gatewayImage,
+		eventServiceImage:      *eventServiceImage,
 		eventServiceTestsImage: *eventServiceTestsImage,
 	}
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s --tillerUrl=%s " +
+	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s --tillerUrl=%s "+
 		"--gatewayImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s",
 		o.appName, o.domainName, o.namespace, o.tillerUrl,
 		o.gatewayImage, o.eventServiceImage, o.eventServiceTestsImage)

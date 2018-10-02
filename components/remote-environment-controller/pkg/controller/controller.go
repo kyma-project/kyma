@@ -18,9 +18,9 @@ const (
 )
 
 type OverridesData struct {
-	DomainName string
-	GatewayImage string
-	EventServiceImage string
+	DomainName             string
+	GatewayImage           string
+	EventServiceImage      string
 	EventServiceTestsImage string
 }
 

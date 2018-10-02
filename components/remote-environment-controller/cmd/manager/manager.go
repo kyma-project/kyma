@@ -41,9 +41,9 @@ func main() {
 	log.Printf("Setting up controller.")
 
 	overridesData := controller.OverridesData{
-		DomainName: options.domainName,
-		GatewayImage: options.gatewayImage,
-		EventServiceImage: options.eventServiceImage,
+		DomainName:             options.domainName,
+		GatewayImage:           options.gatewayImage,
+		EventServiceImage:      options.eventServiceImage,
 		EventServiceTestsImage: options.eventServiceTestsImage,
 	}
 
