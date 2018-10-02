@@ -42,14 +42,14 @@ spec:
         - "--v=10"
         - "--oidc-issuer=https://dex.{{ .Values.global.domainName }}"
         - "--oidc-clientID=kyma-client"
-        - "--oidc-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt"
+        - "--oidc-ca-file=/etc/tls-ingress-cert/tls.crt"
         ports:
         - containerPort: {{ .Values.containerPort}}
         volumeMounts:
-          - name: apiserver-proxy-tls-cert
-            mountPath: /etc/apiserver-proxy-tls-cert/
+          - name: tls-ingress-cert
+            mountPath: /etc/tls-ingress-cert/
       volumes:
-        - name: apiserver-proxy-tls-cert
+        - name: tls-ingress-cert
           secret:
-            name: apiserver-proxy-tls-cert
+            secretName: tls-ingress-cert
             

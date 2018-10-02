@@ -4,6 +4,6 @@ data:
   "tls.key": {{ .Values.global.tlsKey }}
 kind: Secret
 metadata:
-  name: kube-config-cert
+  name: tls-ingress-cert
   namespace: kyma-system
 type: kubernetes.io/tls

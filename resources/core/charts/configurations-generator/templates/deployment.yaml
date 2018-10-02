@@ -23,16 +23,16 @@ spec:
           "/app",
           "-kube-config-custer-name={{ .Values.kubeConfig.clusterName }}",
           "-kube-config-url=https://apiserver.{{ .Values.global.domainName }}",
-          "-kube-config-ca-file=/etc/kube-config-cert/tls.crt"
+          "-kube-config-ca-file=/etc/tls-ingress-cert/tls.crt"
         ]
         ports:
           - name: http
             containerPort: 8000
         volumeMounts:
-        - name: kube-config-cert
-          mountPath: "/etc/kube-config-cert"
+        - name: tls-ingress-cert
+          mountPath: "/etc/tls-ingress-cert"
           readOnly: true
       volumes:
-      - name: kube-config-cert
+      - name: tls-ingress-cert
         secret:
-          secretName: kube-config-cert
+          secretName: tls-ingress-cert
