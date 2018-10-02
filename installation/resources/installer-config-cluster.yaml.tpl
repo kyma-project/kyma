@@ -83,3 +83,17 @@ metadata:
 data:
   deployment.args.sourceType: marketing
   service.externalapi.nodePort: "32000"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-resources-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: istio
+data:
+  pilot.resources.limits.memory: 2Gi
+  pilot.resources.requests.memory: 512Mi
+  mixer.resources.limits.memory: 512Mi
+  mixer.resources.requests.memory: 128Mi
