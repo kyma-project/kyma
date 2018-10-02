@@ -16,7 +16,6 @@ func TestIDPPresetConverter_ToGQL(t *testing.T) {
 				Name: "name",
 			},
 			Spec: v1alpha1.IDPPresetSpec{
-				Name:    "name",
 				Issuer:  "issuer",
 				JwksUri: "jwksURI",
 			},

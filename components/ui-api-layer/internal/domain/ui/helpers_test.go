@@ -12,7 +12,6 @@ func fixIDPPreset() *v1alpha1.IDPPreset {
 			Name: "fixIDPPreset",
 		},
 		Spec: v1alpha1.IDPPresetSpec{
-			Name:    "fixIDPPreset",
 			JwksUri: "uri",
 			Issuer:  "issuer",
 		},

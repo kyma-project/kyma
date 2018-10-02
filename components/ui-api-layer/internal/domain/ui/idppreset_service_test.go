@@ -40,7 +40,6 @@ func TestIDPPreset(t *testing.T) {
 		require.NotNil(t, idp)
 		assert.Equal(t, idp.Name, fixName)
 		assert.Equal(t, idp.Kind, "IDPPreset")
-		assert.Equal(t, idp.Spec.Name, fixName)
 		assert.Equal(t, idp.Spec.Issuer, fixIssuer)
 		assert.Equal(t, idp.Spec.JwksUri, fixJwksURI)
 	})

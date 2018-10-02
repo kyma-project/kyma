@@ -20,13 +20,9 @@ spec:
         spec:
           type: object
           required:
-          - "name"
           - "issuer"
           - "jwksUri"
           properties:
-            name:
-              type: string
-              minLength: 1
             issuer:
               type: string
               minLength: 1

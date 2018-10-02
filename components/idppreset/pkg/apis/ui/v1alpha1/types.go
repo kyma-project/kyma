@@ -21,7 +21,6 @@ func (rem *IDPPreset) GetObjectKind() schema.ObjectKind {
 }
 
 type IDPPresetSpec struct {
-	Name    string `json:"name"`
 	Issuer  string `json:"issuer"`
 	JwksUri string `json:"jwksUri"`
 }

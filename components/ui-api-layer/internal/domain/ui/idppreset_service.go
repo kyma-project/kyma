@@ -34,7 +34,6 @@ func (svc *idpPresetService) Create(name string, issuer string, jwksURI string) 
 			Name: name,
 		},
 		Spec: v1alpha1.IDPPresetSpec{
-			Name:    name,
 			Issuer:  issuer,
 			JwksUri: jwksURI,
 		},
