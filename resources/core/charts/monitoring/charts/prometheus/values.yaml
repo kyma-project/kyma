@@ -128,6 +128,13 @@ resources:
   limits:
     memory: 2Gi
 
+isLocalEnv:
+  resources:
+    requests:
+      memory: 200Mi
+    limits:
+      memory: 512Mi
+
 ## How long to retain metrics
 ## Reduced to 6h from 24h as to limit Prometheus use a max of 800 Mb memory in nightly azure cluster
 retention: 6h
