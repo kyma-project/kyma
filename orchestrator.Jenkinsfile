@@ -177,41 +177,41 @@ try {
                 ]
         }
 
-        podTemplate(label: label) {
-            node(label) {
-                timestamps {
-                    ansiColor('xterm') {
-                        stage("setup") {
-                            checkout scm
-                        }
+        // podTemplate(label: label) {
+        //     node(label) {
+        //         timestamps {
+        //             ansiColor('xterm') {
+        //                 stage("setup") {
+        //                     checkout scm
+        //                 }
 
-                        stage("Upload versions file to azure") {
-                            writeFile file: "installation/versions-overrides.env", text: "$versions"
+        //                 stage("Upload versions file to azure") {
+        //                     writeFile file: "installation/versions-overrides.env", text: "$versions"
 
-                            def file = ''
-                            if (isMaster) {
-                                file = 'latest.env'
-                            } else {
-                                file = "pr/${env.BRANCH_NAME}.env"
-                            }
+        //                     def file = ''
+        //                     if (isMaster) {
+        //                         file = 'latest.env'
+        //                     } else {
+        //                         file = "pr/${env.BRANCH_NAME}.env"
+        //                     }
 
-                            withCredentials([
-                                string(credentialsId: 'azure-broker-tenant-id', variable: 'AZBR_TENANT_ID'),
-                                string(credentialsId: 'azure-broker-subscription-id', variable: 'AZBR_SUBSCRIPTION_ID'),
-                                usernamePassword(credentialsId: 'azure-broker-spn', passwordVariable: 'AZBR_CLIENT_SECRET', usernameVariable: 'AZBR_CLIENT_ID')
-                                ]) {
-                                    def dockerEnv = "-e AZBR_CLIENT_SECRET -e AZBR_CLIENT_ID -e AZBR_TENANT_ID -e AZBR_SUBSCRIPTION_ID \
-                                    -e 'KYMA_VERSIONS_FILE_NAME=${file}'"
-                                    def dockerOpts = "--rm --volume ${pwd()}/installation:/installation"
-                                    def dockerEntry = "--entrypoint /installation/scripts/upload-versions.sh"
+        //                     withCredentials([
+        //                         string(credentialsId: 'azure-broker-tenant-id', variable: 'AZBR_TENANT_ID'),
+        //                         string(credentialsId: 'azure-broker-subscription-id', variable: 'AZBR_SUBSCRIPTION_ID'),
+        //                         usernamePassword(credentialsId: 'azure-broker-spn', passwordVariable: 'AZBR_CLIENT_SECRET', usernameVariable: 'AZBR_CLIENT_ID')
+        //                         ]) {
+        //                             def dockerEnv = "-e AZBR_CLIENT_SECRET -e AZBR_CLIENT_ID -e AZBR_TENANT_ID -e AZBR_SUBSCRIPTION_ID \
+        //                             -e 'KYMA_VERSIONS_FILE_NAME=${file}'"
+        //                             def dockerOpts = "--rm --volume ${pwd()}/installation:/installation"
+        //                             def dockerEntry = "--entrypoint /installation/scripts/upload-versions.sh"
 
-                                    sh "docker run $dockerOpts $dockerEnv $dockerEntry $registry/$acsImageName"
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //                             sh "docker run $dockerOpts $dockerEnv $dockerEntry $registry/$acsImageName"
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     }
 }  catch (ex) {
     echo "Got exception: ${ex}"
