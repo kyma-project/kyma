@@ -14,6 +14,8 @@ kubectl get crd installations.installer.kyma-project.io -o yaml
 
 This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma. The  **name** and **namespace**  fields in the `components` array define which components you install and Namespaces in which you install them. This example shows that you install the `hmc-default` release of the `remote-environments` component in the `kyma-integration` Namespace. 
 
+>**NOTE:** See the `installer-cr.yaml.tpl` file in the `/installation/resources` directory for the complete list of Kyma components.
+
 ```
 apiVersion: "installer.kyma-project.io/v1alpha1"
 kind: Installation
