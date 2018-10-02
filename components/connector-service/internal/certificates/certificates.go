@@ -13,7 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
 
-const Certificate_Validity_Days = 90
+const CertificateValidityDays = 365
 
 type CertificateUtility interface {
 	LoadCert(encodedData []byte) (crt *x509.Certificate, appError apperrors.AppError)
@@ -170,7 +170,7 @@ func prepareCRTTemplate(csr *x509.CertificateRequest, caCrt *x509.Certificate) x
 		Issuer:       caCrt.Subject,
 		Subject:      csr.Subject,
 		NotBefore:    time.Now(),
-		NotAfter:     time.Now().Add(Certificate_Validity_Days * 24 * time.Hour),
+		NotAfter:     time.Now().Add(CertificateValidityDays * 24 * time.Hour),
 		KeyUsage:     x509.KeyUsageDigitalSignature,
 		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 	}
