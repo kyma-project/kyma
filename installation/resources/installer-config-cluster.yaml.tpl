@@ -52,10 +52,7 @@ data:
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   configurations-generator.kubeConfig.clusterName: "__DOMAIN__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
-  gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
-  gateways.istio-ingressgateway.type: "LoadBalancer"
   service-catalog.etcd-stateful.replicaCount: "3"
-  global.proxy.includeIPRanges: "10.244.0.0/16,10.240.0.0/16"
   minio.accessKey: "admin"
   minio.secretKey: "topSecretKey"
   acceptanceTest.remoteEnvironment.disabled: "true"
@@ -87,12 +84,17 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: istio-resources-overrides
+  name: istio-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
     component: istio
 data:
+  global.proxy.includeIPRanges: "10.244.0.0/16,10.240.0.0/16"
+
+  gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
+  gateways.istio-ingressgateway.type: "LoadBalancer"
+
   pilot.resources.limits.memory: 2Gi
   pilot.resources.requests.memory: 512Mi
   mixer.resources.limits.memory: 512Mi
