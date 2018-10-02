@@ -28,13 +28,13 @@ func (cm *codeMiddleware) Handle(next http.Handler) http.Handler {
 
 		route := mux.CurrentRoute(r)
 		if route == nil {
-			logrus.Warnf("No route matched '%s' for request tracking", r.RequestURI)
+			logrus.Warnf("code middleware: no route matched '%s' for request tracking", r.RequestURI)
 			return
 		}
 
 		template, err := route.GetPathTemplate()
 		if err != nil {
-			logrus.Errorf("Failed to get path template: %s", err.Error())
+			logrus.Errorf("code middleware: getting path template failed, %s", err.Error())
 		} else {
 			statusLabel := strconv.FormatInt(int64(writerWrapper.statusCode), 10)
 			cm.metricsCollector.AddObservation(1, template, statusLabel, r.Method)

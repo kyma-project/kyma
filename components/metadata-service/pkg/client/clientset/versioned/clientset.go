@@ -58,7 +58,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
-		glog.Errorf("failed to create the DiscoveryClient: %v", err)
+		glog.Errorf("config: creating the DiscoveryClient failed, %v", err)
 		return nil, err
 	}
 	return &cs, nil

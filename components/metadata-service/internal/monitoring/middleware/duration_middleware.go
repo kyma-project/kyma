@@ -24,12 +24,12 @@ func (dm *durationMiddleware) Handle(next http.Handler) http.Handler {
 
 		route := mux.CurrentRoute(r)
 		if route == nil {
-			logrus.Warnf("No route matched '%s' for request tracking", r.RequestURI)
+			logrus.Warnf("duration middleware: no route matched '%s' for request tracking", r.RequestURI)
 		}
 
 		template, err := route.GetPathTemplate()
 		if err != nil {
-			logrus.Errorf("Failed to get path template: %s", err.Error())
+			logrus.Errorf("duration middleware: getting path template failed, %s", err.Error())
 		} else {
 			dm.metricsCollector.AddObservation(time.Since(startedAt).Seconds(), template, r.Method)
 		}
