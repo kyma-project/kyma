@@ -103,7 +103,7 @@ kubectl logs -n kyma-installer [kyma-installer-pod] -f
 or
 ```
 kubectl get pods --all-namespaces -w
-
+```
 
 ## Configure DNS for LB
 
@@ -119,3 +119,5 @@ gcloud dns --project=$PROJECT record-sets transaction add $EXTERNAL_PUBLIC_IP --
 gcloud dns --project=$PROJECT record-sets transaction add $REMOTE_ENV_IP --name=\gateway.$DOMAIN. --ttl=60 --type=A --zone=kymaga-zone
 
 gcloud dns --project=$PROJECT record-sets transaction execute --zone=kymaga-zone
+
+```
