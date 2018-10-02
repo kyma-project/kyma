@@ -112,23 +112,22 @@ try {
         }
     }
 
-    // TODO uncomment build and test stages after testing
-    // // build components
-    // stage('build projects') {
-    //     parallel jobs
-    // }
+    // build components
+    stage('build projects') {
+        parallel jobs
+    }
 
-    // // test the release
-    // stage('launch Kyma integration') {
-    //     build job: 'kyma/integration',
-    //         wait: true,
-    //         parameters: [
-    //             string(name:'GIT_REVISION', value: "$commitID"),
-    //             string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-    //             string(name:'APP_VERSION', value: "$appVersion"),
-    //             string(name:'COMP_VERSIONS', value: "${versionsYaml()}") // YAML string
-    //         ]
-    // }
+    // test the release
+    stage('launch Kyma integration') {
+        build job: 'kyma/integration',
+            wait: true,
+            parameters: [
+                string(name:'GIT_REVISION', value: "$commitID"),
+                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+                string(name:'APP_VERSION', value: "$appVersion"),
+                string(name:'COMP_VERSIONS', value: "${versionsYaml()}") // YAML string
+            ]
+    }
 
     // publish release artifacts
     podTemplate(label: label) {
