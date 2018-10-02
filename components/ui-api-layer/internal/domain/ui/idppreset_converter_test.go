@@ -27,7 +27,6 @@ func TestIDPPresetConverter_ToGQL(t *testing.T) {
 		dto := converter.ToGQL(&fix)
 
 		// then
-		assert.Equal(t, dto.Name, fix.Spec.Name)
 		assert.Equal(t, dto.Issuer, fix.Spec.Issuer)
 		assert.Equal(t, dto.JwksURI, fix.Spec.JwksUri)
 	})
