@@ -61,7 +61,7 @@ func main() {
 
 	middlewares, err := monitoring.SetupMonitoringMiddleware()
 	if err != nil {
-		log.Errorf("monitoring: error while setting up, %s", err.Error())
+		log.Errorf("monitoring: setup failed, %s", err.Error())
 	}
 
 	externalHandler := newExternalHandler(serviceDefinitionService, middlewares)
@@ -118,12 +118,12 @@ func newServiceDefinitionService(minioURL, namespace string, proxyPort int, name
 
 	accessKeyId, secretAccessKey, err := readMinioAccessConfiguration()
 	if err != nil {
-		return nil, apperrors.Internal("minio configuration: failed to read, %s", err.Error())
+		return nil, apperrors.Internal("Minio configuration: failed to read, %s", err.Error())
 	}
 
 	minioRepository, err := minio.NewMinioRepository(minioURL, accessKeyId, secretAccessKey)
 	if err != nil {
-		return nil, apperrors.Internal("minio repository: failed to create, %s", err.Error())
+		return nil, apperrors.Internal("Minio repository: failed to create, %s", err.Error())
 	}
 
 	minioService := minio.NewService(minioRepository)
@@ -180,7 +180,7 @@ func newSecretsRepository(coreClientset *kubernetes.Clientset, namespace string)
 func newIstioService(config *restclient.Config, namespace string) (istio.Service, apperrors.AppError) {
 	ic, err := istioclient.NewForConfig(config)
 	if err != nil {
-		return nil, apperrors.Internal("client for istio: failed to create, %s", err)
+		return nil, apperrors.Internal("Istio client: failed to create, %s", err)
 	}
 
 	repository := istio.NewRepository(
@@ -198,11 +198,11 @@ func readMinioAccessConfiguration() (string, string, apperrors.AppError) {
 	secretAccessKey, foundSecret := os.LookupEnv(MinioSecretAccessKey)
 
 	if !foundId && !foundSecret {
-		return "", "", apperrors.Internal("%s and %s environment variables: could not find", MinioAccessKeyIdEnv, MinioSecretAccessKey)
+		return "", "", apperrors.Internal("%s and %s environment variables: not found", MinioAccessKeyIdEnv, MinioSecretAccessKey)
 	} else if !foundId {
-		return "", "", apperrors.Internal("%s environment variable: could not find", MinioAccessKeyIdEnv)
+		return "", "", apperrors.Internal("%s environment variable: not found", MinioAccessKeyIdEnv)
 	} else if !foundSecret {
-		return "", "", apperrors.Internal("%s environment variable: could not find", MinioSecretAccessKey)
+		return "", "", apperrors.Internal("%s environment variable: not found", MinioSecretAccessKey)
 	}
 
 	return accessKeyId, secretAccessKey, nil
