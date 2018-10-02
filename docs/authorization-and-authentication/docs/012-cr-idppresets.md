@@ -39,4 +39,4 @@ This table lists all the possible parameters of a given resource together with t
 
 ## Usage in the UI
 
-**issuer** and **jwksUri** are some of the API CR specification fields. In most cases, these values are reused many times. IDPPresets usage is a solution to reuse them in a convinient way, which enables the user to choose a proper preset from the dropdown menu instead of entering them manually every time the user exposes a secured API. Apart from consuming the IDPPresets, you can also manage them in the Console UI. To create and delete IDPPresets, go to the **Administration** tab and then to **IDP Presets**.
+**issuer** and **jwksUri** are some of the API CR specification fields. In most cases, these values are reused many times. IDPPresets usage is a solution to reuse them in a convenient way. It allows you to choose a proper preset from the dropdown menu instead of entering them manually every time the user exposes a secured API. Apart from consuming the IDPPresets, you can also manage them in the Console UI. To create and delete IDPPresets, go to the **Administration** tab and then to **IDP Presets**.
