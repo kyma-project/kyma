@@ -17,7 +17,7 @@ To execute the backup process, you must set the following values in the [core][c
 
 | Property name              | Description |
 |---------------------------------------------------|---|
-| **global.etcdBackup.enabled**                       | If set to true, the [etcd-operator][etcd-operator-chart] chart and the Service Catalog [sub-chart][sc-backup-sub-chart] installs the CronJob which executes periodically the [Etcd Backup][etcd-backup-app] application. The etcd-operator also creates the [Secret][abs-creds] with the **storage-account** and **storage-key** keys. For more information on how to configure the backup CronJob, see the [Etcd Backup][etcd-backup-app-readme] documentation. |
+| **global.etcdBackup.enabled**                       | If set to `true`, the [etcd-operator][etcd-operator-chart] chart and the Service Catalog [sub-chart][sc-backup-sub-chart] installs the CronJob which executes periodically the [Etcd Backup][etcd-backup-app] application. The etcd-operator also creates the [Secret][abs-creds] with the **storage-account** and **storage-key** keys. For more information on how to configure the backup CronJob, see the [Etcd Backup][etcd-backup-app-readme] documentation. |
 | **global.etcdBackup.containerName**                 | The ABS container to store the backup. |
 | **etcd-operator.backupOperator.abs.storageAccount** | The name of the storage account for the Azure Blob Storage (ABS). It stores the value for the **storage-account** Secret key. |
 | **etcd-operator.backupOperator.abs.storageKey**     | The key value of the storage account for the ABS. It stores the value for the **storage-key** Secret key. |
