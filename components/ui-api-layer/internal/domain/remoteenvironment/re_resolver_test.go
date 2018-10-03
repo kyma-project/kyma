@@ -3,8 +3,9 @@ package remoteenvironment_test
 import (
 	"context"
 	"testing"
-
 	"time"
+
+	"fmt"
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions"
@@ -17,6 +18,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -123,6 +125,17 @@ func TestRemoteEnvironmentResolver_CreateRemoteEnvironment(t *testing.T) {
 	}
 }
 
+func TestRemoteEnvironmentResolver_CreateRemoteEnvironment_Error(t *testing.T) {
+	fixName := "fix-name"
+	reSvc := automock.NewReSvc()
+	reSvc.On("Create", fixName, "", gqlschema.JSON(nil)).Return(nil, errors.New("fix"))
+
+	resolver := remoteenvironment.NewRemoteEnvironmentResolver(reSvc, nil)
+	_, err := resolver.CreateRemoteEnvironment(context.Background(), fixName, nil, nil)
+
+	assert.EqualError(t, err, fmt.Sprintf("internal error [name: \"%s\"]", fixName))
+}
+
 func TestRemoteEnvironmentResolver_DeleteRemoteEnvironment(t *testing.T) {
 	// GIVEN
 	fixName := "fix-name"
@@ -133,14 +146,25 @@ func TestRemoteEnvironmentResolver_DeleteRemoteEnvironment(t *testing.T) {
 	resolver := remoteenvironment.NewRemoteEnvironmentResolver(svc, nil)
 
 	// WHEN
-	name, err := resolver.DeleteRemoteEnvironment(context.Background(), fixName)
+	out, err := resolver.DeleteRemoteEnvironment(context.Background(), fixName)
 	require.NoError(t, err)
 
 	// THEN
-	assert.Equal(t, gqlschema.DeleteRemoteEnvironmentOutput{Name: fixName}, name)
+	assert.Equal(t, fixName, out.Name)
 
 	_, err = client.ApplicationconnectorV1alpha1().RemoteEnvironments().Get(fixName, v1.GetOptions{})
-	assert.Error(t, err)
+	assert.True(t, apiErrors.IsNotFound(err))
+}
+
+func TestRemoteEnvironmentResolver_DeleteRemoteEnvironment_Error(t *testing.T) {
+	fixName := "fix-name"
+	reSvc := automock.NewReSvc()
+	reSvc.On("Delete", fixName).Return(errors.New("fix"))
+
+	resolver := remoteenvironment.NewRemoteEnvironmentResolver(reSvc, nil)
+	_, err := resolver.DeleteRemoteEnvironment(context.Background(), fixName)
+
+	assert.EqualError(t, err, fmt.Sprintf("internal error [name: \"%s\"]", fixName))
 }
 
 func TestRemoteEnvironmentResolver_UpdateRemoteEnvironment(t *testing.T) {
@@ -198,6 +222,17 @@ func TestRemoteEnvironmentResolver_UpdateRemoteEnvironment(t *testing.T) {
 			assert.Equal(t, tc.expectedLabels, out.Labels)
 		})
 	}
+}
+
+func TestRemoteEnvironmentResolver_UpdateRemoteEnvironment_Error(t *testing.T) {
+	fixName := "fix-name"
+	reSvc := automock.NewReSvc()
+	reSvc.On("Update", fixName, "", gqlschema.JSON(nil)).Return(nil, errors.New("fix"))
+
+	resolver := remoteenvironment.NewRemoteEnvironmentResolver(reSvc, nil)
+	_, err := resolver.UpdateRemoteEnvironment(context.Background(), fixName, nil, nil)
+
+	assert.EqualError(t, err, fmt.Sprintf("internal error [name: \"%s\"]", fixName))
 }
 
 func TestConnectorServiceQuerySuccess(t *testing.T) {

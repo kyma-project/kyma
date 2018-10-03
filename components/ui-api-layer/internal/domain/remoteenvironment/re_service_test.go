@@ -1,18 +1,18 @@
 package remoteenvironment_test
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
-	"errors"
-
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/stretchr/testify/assert"
@@ -266,9 +266,9 @@ func TestRemoteEnvironmentService_Create(t *testing.T) {
 
 	// WHEN
 	re, err := svc.Create(fixName, fixDesc, labels)
-	require.NoError(t, err)
 
 	// THEN
+	require.NoError(t, err)
 	assert.Equal(t, re.Name, fixName)
 	assert.Equal(t, re.Spec.Description, fixDesc)
 	assert.Equal(t, re.Spec.Labels, expectedLabels)
@@ -284,11 +284,11 @@ func TestRemoteEnvironmentService_Delete(t *testing.T) {
 
 	// WHEN
 	err = svc.Delete(fixName)
-	require.NoError(t, err)
 
 	// THEN
+	require.NoError(t, err)
 	_, err = client.ApplicationconnectorV1alpha1().RemoteEnvironments().Get(fixName, v1.GetOptions{})
-	assert.Error(t, err)
+	assert.True(t, apiErrors.IsNotFound(err))
 }
 
 func TestRemoteEnvironmentService_Update(t *testing.T) {
@@ -312,9 +312,9 @@ func TestRemoteEnvironmentService_Update(t *testing.T) {
 
 	// WHEN
 	re, err := svc.Update(fixName, fixDesc, fixLabels)
-	require.NoError(t, err)
 
 	// THEN
+	require.NoError(t, err)
 	assert.Equal(t, expectedLabels, re.Spec.Labels)
 	assert.Equal(t, fixDesc, re.Spec.Description)
 }
@@ -342,7 +342,7 @@ func TestRemoteEnvironmentService_Update_ErrorInRetryLoop(t *testing.T) {
 	_, err = svc.Update(fixName, fixDesc, fixLabels)
 
 	// THEN
-	assert.EqualError(t, err, fmt.Sprintf("while updating RemoteEnvironment [%s]: fix", fixName))
+	assert.EqualError(t, err, fmt.Sprintf("while updating %s [%s]: fix", pretty.RemoteEnvironment, fixName))
 }
 
 func TestRemoteEnvironmentService_Update_SuccessAfterRetry(t *testing.T) {
@@ -374,9 +374,9 @@ func TestRemoteEnvironmentService_Update_SuccessAfterRetry(t *testing.T) {
 
 	// WHEN
 	re, err := svc.Update(fixName, fixDesc, fixLabels)
-	require.NoError(t, err)
 
 	// THEN
+	require.NoError(t, err)
 	assert.Equal(t, expectedLabels, re.Spec.Labels)
 	assert.Equal(t, fixDesc, re.Spec.Description)
 }

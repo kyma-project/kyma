@@ -11,6 +11,8 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	remoteenvironmentv1alpha1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	reMappinglister "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/pretty"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/iosafety"
 	"github.com/pkg/errors"
@@ -69,7 +71,7 @@ func newRemoteEnvironmentService(client remoteenvironmentv1alpha1.Applicationcon
 	}, nil
 }
 
-func (svc *remoteEnvironmentService) Create(name string, description string, labels map[string]interface{}) (*v1alpha1.RemoteEnvironment, error) {
+func (svc *remoteEnvironmentService) Create(name string, description string, labels gqlschema.JSON) (*v1alpha1.RemoteEnvironment, error) {
 	return svc.client.RemoteEnvironments().Create(&v1alpha1.RemoteEnvironment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "RemoteEnvironment",
@@ -86,24 +88,28 @@ func (svc *remoteEnvironmentService) Create(name string, description string, lab
 	})
 }
 
-func (svc *remoteEnvironmentService) Update(name string, description string, labels map[string]interface{}) (*v1alpha1.RemoteEnvironment, error) {
+func (svc *remoteEnvironmentService) Update(name string, description string, labels gqlschema.JSON) (*v1alpha1.RemoteEnvironment, error) {
+	var lastErr error
 	for i := 0; i < maxUpdateRetries; i++ {
 		re, err := svc.Find(name)
 		if err != nil {
-			return nil, errors.Wrapf(err, "while getting RemoteEnvironment [%s]", name)
+			return nil, errors.Wrapf(err, "while getting %s [%s]", pretty.RemoteEnvironment, name)
 		}
 		re.Spec.Description = description
 		re.Spec.Labels = svc.convertJsonToLabels(labels)
 
 		updated, err := svc.client.RemoteEnvironments().Update(re)
-		if err == nil {
+		switch {
+		case err == nil:
 			return updated, nil
-		}
-		if !apiErrors.IsConflict(err) {
-			return nil, errors.Wrapf(err, "while updating RemoteEnvironment [%s]", name)
+		case apiErrors.IsConflict(err):
+			lastErr = err
+			continue
+		default:
+			return nil, errors.Wrapf(err, "while updating %s [%s]", pretty.RemoteEnvironment, name)
 		}
 	}
-	return nil, errors.Errorf("couldn't update RemoteEnvironment [%s], after %d retries", name, maxUpdateRetries)
+	return nil, errors.Wrapf(lastErr, "couldn't update %s [%s], after %d retries", pretty.RemoteEnvironment, name, maxUpdateRetries)
 }
 
 func (svc *remoteEnvironmentService) Delete(name string) error {
@@ -243,10 +249,12 @@ func (svc *remoteEnvironmentService) GetConnectionURL(remoteEnvironment string) 
 	return connectorURL, nil
 }
 
-func (svc *remoteEnvironmentService) convertJsonToLabels(labels map[string]interface{}) map[string]string {
+func (svc *remoteEnvironmentService) convertJsonToLabels(labels gqlschema.JSON) map[string]string {
 	result := make(map[string]string)
 	for key, value := range labels {
-		result[key] = fmt.Sprintf("%v", value)
+		if val, ok := value.(string); ok {
+			result[key] = fmt.Sprintf("%v", val)
+		}
 	}
 	return result
 }
