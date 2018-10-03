@@ -33,6 +33,7 @@ dockerPushRoot = ''
 projects = [
     "docs",
     "components/api-controller",
+    "components/apiserver-proxy",
     "components/binding-usage-controller",
     "components/configurations-generator",
     "components/environments",
@@ -226,6 +227,8 @@ def versionsYaml() {
 """
 global.docs.version=${appVersion}
 global.docs.dir=${dockerPushRoot}
+global.apiserver_proxy.version=${appVersion}
+global.apiserver_proxy.dir=${dockerPushRoot}
 global.api_controller.version=${appVersion}
 global.api_controller.dir=${dockerPushRoot}
 global.binding_usage_controller.version=${appVersion}
