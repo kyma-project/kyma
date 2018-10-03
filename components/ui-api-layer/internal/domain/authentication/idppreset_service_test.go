@@ -1,14 +1,14 @@
-package ui_test
+package authentication_test
 
 import (
 	"fmt"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/ui/v1alpha1"
+	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
 	"github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/idppreset/pkg/client/informers/externalversions"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +30,7 @@ func TestIDPPreset(t *testing.T) {
 		)
 
 		fakeClient := fake.NewSimpleClientset()
-		svc := ui.NewIDPPresetService(fakeClient.UiV1alpha1(), nil)
+		svc := authentication.NewIDPPresetService(fakeClient.AuthenticationV1alpha1(), nil)
 
 		// when
 		idp, err := svc.Create(fixName, fixIssuer, fixJwksURI)
@@ -52,11 +52,11 @@ func TestIDPPreset(t *testing.T) {
 		)
 
 		fakeClient := fake.NewSimpleClientset(fixIDPPresetObj)
-		svc := ui.NewIDPPresetService(fakeClient.UiV1alpha1(), nil)
+		svc := authentication.NewIDPPresetService(fakeClient.AuthenticationV1alpha1(), nil)
 
 		// when
 		errFromDelete := svc.Delete(fixName)
-		_, err := fakeClient.UiV1alpha1().IDPPresets().Get(fixName, v1.GetOptions{})
+		_, err := fakeClient.AuthenticationV1alpha1().IDPPresets().Get(fixName, v1.GetOptions{})
 
 		// then
 		require.NoError(t, errFromDelete)
@@ -76,7 +76,7 @@ func TestIDPPreset(t *testing.T) {
 			return true, nil, errorMsg
 		}
 		fakeClient.PrependReactor("delete", "idppresets", failingReaction)
-		svc := ui.NewIDPPresetService(fakeClient.UiV1alpha1(), nil)
+		svc := authentication.NewIDPPresetService(fakeClient.AuthenticationV1alpha1(), nil)
 
 		// when
 		err := svc.Delete(fixName)
@@ -96,7 +96,7 @@ func TestIDPPreset(t *testing.T) {
 
 		fakeClient := fake.NewSimpleClientset(fixIDPPresetObj)
 		informer := fixIDPPresetInformer(fakeClient)
-		svc := ui.NewIDPPresetService(nil, informer)
+		svc := authentication.NewIDPPresetService(nil, informer)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 		// when
@@ -116,7 +116,7 @@ func TestIDPPreset(t *testing.T) {
 
 		fakeClient := fake.NewSimpleClientset()
 		informer := fixIDPPresetInformer(fakeClient)
-		svc := ui.NewIDPPresetService(nil, informer)
+		svc := authentication.NewIDPPresetService(nil, informer)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 		// when
@@ -133,7 +133,7 @@ func TestIDPPreset(t *testing.T) {
 
 		fakeClient := fake.NewSimpleClientset(fixIDPPresetObj)
 		informer := fixIDPPresetInformer(fakeClient)
-		svc := ui.NewIDPPresetService(nil, informer)
+		svc := authentication.NewIDPPresetService(nil, informer)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 		// when
@@ -152,7 +152,7 @@ func TestIDPPreset(t *testing.T) {
 
 		fakeClient := fake.NewSimpleClientset()
 		informer := fixIDPPresetInformer(fakeClient)
-		svc := ui.NewIDPPresetService(nil, informer)
+		svc := authentication.NewIDPPresetService(nil, informer)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 		// when
@@ -166,7 +166,7 @@ func TestIDPPreset(t *testing.T) {
 
 func fixIDPPresetInformer(fakeClient *fake.Clientset) cache.SharedIndexInformer {
 	informerFactory := externalversions.NewSharedInformerFactory(fakeClient, 0)
-	informer := informerFactory.Ui().V1alpha1().IDPPresets().Informer()
+	informer := informerFactory.Authentication().V1alpha1().IDPPresets().Informer()
 
 	return informer
 }

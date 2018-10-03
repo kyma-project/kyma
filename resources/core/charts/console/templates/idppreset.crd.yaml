@@ -1,9 +1,9 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: "idppresets.ui.kyma.cx"
+  name: "idppresets.authentication.kyma-project.io"
 spec:
-  group: ui.kyma.cx
+  group: authentication.kyma-project.io
   version: v1alpha1
   scope: Cluster
   names:

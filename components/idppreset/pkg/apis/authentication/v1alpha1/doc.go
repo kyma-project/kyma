@@ -1,5 +1,5 @@
 // +k8s:deepcopy-gen=package,register
 
-// +groupName=ui.kyma.cx
+// +groupName=authentication.kyma-project.io
 
 package v1alpha1
