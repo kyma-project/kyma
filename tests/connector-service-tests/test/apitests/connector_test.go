@@ -29,7 +29,7 @@ func TestConnector(t *testing.T) {
 
 	t.Run("should create client certificate", func(t *testing.T) {
 		// when
-		crtResponse, infoResponse := createClientCertificate(t, client, clientKey)
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
 
 		//then
 		require.NotEmpty(t, crtResponse.Crt)
@@ -45,7 +45,7 @@ func TestConnector(t *testing.T) {
 
 	t.Run("should create two certificates in a chain", func(t *testing.T) {
 		// when
-		crtResponse, _ := createClientCertificate(t, client, clientKey)
+		crtResponse, _ := createCertificateChain(t, client, clientKey)
 
 		//then
 		require.NotEmpty(t, crtResponse.Crt)
@@ -59,7 +59,7 @@ func TestConnector(t *testing.T) {
 
 	t.Run("client cert should be signed by server cert", func(t *testing.T) {
 		//when
-		crtResponse, _ := createClientCertificate(t, client, clientKey)
+		crtResponse, _ := createCertificateChain(t, client, clientKey)
 
 		//then
 		require.NotEmpty(t, crtResponse.Crt)
@@ -93,7 +93,7 @@ func TestConnector(t *testing.T) {
 		csrBase64 := testkit.EncodeBase64(csr)
 
 		// when
-		_, err := client.CreateClientCert(t, csrBase64, infoResponse.CertUrl)
+		_, err := client.CreateCertChain(t, csrBase64, infoResponse.CertUrl)
 
 		// then
 		require.NotNil(t, err)
@@ -176,7 +176,7 @@ func TestConnector(t *testing.T) {
 		require.Equal(t, "rsa2048", infoResponse.Certificate.KeyAlgorithm)
 
 		// when
-		_, err := client.CreateClientCert(t, "csr", wrongUrl)
+		_, err := client.CreateCertChain(t, "csr", wrongUrl)
 
 		// then
 		require.NotNil(t, err)
@@ -202,7 +202,7 @@ func TestConnector(t *testing.T) {
 		require.Equal(t, "rsa2048", infoResponse.Certificate.KeyAlgorithm)
 
 		// when
-		_, err := client.CreateClientCert(t, "wrong-csr", infoResponse.CertUrl)
+		_, err := client.CreateCertChain(t, "wrong-csr", infoResponse.CertUrl)
 
 		// then
 		require.NotNil(t, err)
@@ -272,10 +272,7 @@ func TestCertificateValidation(t *testing.T) {
 
 	t.Run("should access remote environment", func(t *testing.T) {
 		// given
-		crtResponse, _ := createClientCertificate(t, client, clientKey)
-		require.NotEmpty(t, crtResponse.Crt)
-		pemBytes, _ := testkit.CrtResponseSinglePemBlock(t, crtResponse)
-		tlsClient := createTLSClient(pemBytes, clientKey)
+		tlsClient := createTLSClientWithCert(t, client, clientKey)
 
 		// when
 		response, err := tlsClient.Get(fmt.Sprintf(gatewayUrlFormat, remoteEnvName))
@@ -287,10 +284,7 @@ func TestCertificateValidation(t *testing.T) {
 
 	t.Run("should receive 403 when accessing RE with invalid CN", func(t *testing.T) {
 		// given
-		crtResponse, _ := createClientCertificate(t, client, clientKey)
-		require.NotEmpty(t, crtResponse.Crt)
-		pemBytes, _ := testkit.CrtResponseSinglePemBlock(t, crtResponse)
-		tlsClient := createTLSClient(pemBytes, clientKey)
+		tlsClient := createTLSClientWithCert(t, client, clientKey)
 
 		// when
 		response, err := tlsClient.Get(fmt.Sprintf(gatewayUrlFormat, forbiddenRemoteEnvName))
@@ -301,7 +295,7 @@ func TestCertificateValidation(t *testing.T) {
 	})
 }
 
-func createClientCertificate(t *testing.T, connectorClient testkit.ConnectorClient, key *rsa.PrivateKey) (*testkit.CrtResponse, *testkit.InfoResponse) {
+func createCertificateChain(t *testing.T, connectorClient testkit.ConnectorClient, key *rsa.PrivateKey) (*testkit.CrtResponse, *testkit.InfoResponse) {
 	// when
 	tokenResponse := connectorClient.CreateToken(t)
 
@@ -322,7 +316,7 @@ func createClientCertificate(t *testing.T, connectorClient testkit.ConnectorClie
 	csrBase64 := testkit.EncodeBase64(csr)
 
 	// when
-	crtResponse, errorResponse := connectorClient.CreateClientCert(t, csrBase64, infoResponse.CertUrl)
+	crtResponse, errorResponse := connectorClient.CreateCertChain(t, csrBase64, infoResponse.CertUrl)
 
 	// then
 	require.Nil(t, errorResponse)
@@ -330,9 +324,13 @@ func createClientCertificate(t *testing.T, connectorClient testkit.ConnectorClie
 	return crtResponse, infoResponse
 }
 
-func createTLSClient(certificate []byte, key *rsa.PrivateKey) *http.Client {
+func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, key *rsa.PrivateKey) *http.Client {
+	crtResponse, _ := createCertificateChain(t, client, key)
+	require.NotEmpty(t, crtResponse.Crt)
+	clientCertBytes, _ := testkit.CrtResponseToPemBytes(t, crtResponse)
+
 	tlsCert := tls.Certificate{
-		Certificate: [][]byte{certificate},
+		Certificate: [][]byte{clientCertBytes},
 		PrivateKey:  key,
 	}
 

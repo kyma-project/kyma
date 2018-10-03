@@ -53,34 +53,27 @@ func CreateCsr(t *testing.T, certInfo CertInfo, keys *rsa.PrivateKey) []byte {
 	return csr
 }
 
-// CrtResponseSinglePemBlock Decodes single pem block from CrtResponse
-func CrtResponseSinglePemBlock(t *testing.T, certResponse *CrtResponse) (pemBlockBytes []byte, rest []byte) {
+// CrtResponseToPemBytes decodes certificates chain from CrtResponse and return pemBlock's bytes for client cert and ca cert
+func CrtResponseToPemBytes(t *testing.T, certResponse *CrtResponse) ([]byte, []byte) {
 	crtBytes := decodeCertResponse(certResponse, t)
 
-	pemBlock, rest := pem.Decode(crtBytes)
-	require.NotNil(t, pemBlock)
+	clientCrtPem, rest := pem.Decode(crtBytes)
+	require.NotNil(t, clientCrtPem)
+	require.NotEmpty(t, rest)
 
-	return pemBlock.Bytes, rest
-}
+	caCrtPem, _ := pem.Decode(rest)
+	require.NotNil(t, caCrtPem)
 
-// CrtResponseToPemBytes decodes certificates chain from CrtResponse and return pemBlocks
-func CrtResponseToPemBytes(t *testing.T, certResponse *CrtResponse) []byte {
-
-	pemBlock, rest := CrtResponseSinglePemBlock(t, certResponse)
-
-	require.NotEqual(t, 0, len(rest))
-	pemBlock2, _ := pem.Decode(rest)
-
-	pemBlocks := append(pemBlock, pemBlock2.Bytes...)
-
-	return pemBlocks
+	return clientCrtPem.Bytes, caCrtPem.Bytes
 }
 
 // DecodeAndParseCert decodes base64 encoded certificates chain and parses it
 func DecodeAndParseCert(t *testing.T, crtResponse *CrtResponse) []*x509.Certificate {
-	certBytes := CrtResponseToPemBytes(t, crtResponse)
+	clientCertBytes, caCrtBytes := CrtResponseToPemBytes(t, crtResponse)
 
-	certificate, err := x509.ParseCertificates(certBytes)
+	certChainBytes := append(clientCertBytes, caCrtBytes...)
+
+	certificate, err := x509.ParseCertificates(certChainBytes)
 	require.NoError(t, err)
 
 	return certificate
