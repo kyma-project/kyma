@@ -18,6 +18,8 @@ struct_tag: json
 models:
   JSON:
     model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.JSON"
+  Labels:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Labels"
   Timestamp:
     model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Timestamp"
   ServiceInstance:

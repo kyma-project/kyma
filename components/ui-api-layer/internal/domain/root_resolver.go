@@ -174,11 +174,11 @@ func (r *mutationResolver) DeleteIDPPreset(ctx context.Context, name string) (*g
 	return r.idpPreset.DeleteIDPPresetMutation(ctx, name)
 }
 
-func (r *mutationResolver) CreateRemoteEnvironment(ctx context.Context, name string, description *string, labels *gqlschema.JSON) (gqlschema.RemoteEnvironmentMutationOutput, error) {
+func (r *mutationResolver) CreateRemoteEnvironment(ctx context.Context, name string, description *string, labels *gqlschema.Labels) (gqlschema.RemoteEnvironmentMutationOutput, error) {
 	return r.re.CreateRemoteEnvironment(ctx, name, description, labels)
 }
 
-func (r *mutationResolver) UpdateRemoteEnvironment(ctx context.Context, name string, description *string, labels *gqlschema.JSON) (gqlschema.RemoteEnvironmentMutationOutput, error) {
+func (r *mutationResolver) UpdateRemoteEnvironment(ctx context.Context, name string, description *string, labels *gqlschema.Labels) (gqlschema.RemoteEnvironmentMutationOutput, error) {
 	return r.re.UpdateRemoteEnvironment(ctx, name, description, labels)
 }
 

@@ -254,10 +254,7 @@ func TestRemoteEnvironmentService_Create(t *testing.T) {
 	client := fake.NewSimpleClientset()
 	fixName := "fix-name"
 	fixDesc := "desc"
-	labels := map[string]interface{}{
-		"fix": "lab",
-	}
-	expectedLabels := map[string]string{
+	fixLabels := map[string]string{
 		"fix": "lab",
 	}
 
@@ -265,13 +262,13 @@ func TestRemoteEnvironmentService_Create(t *testing.T) {
 	require.NoError(t, err)
 
 	// WHEN
-	re, err := svc.Create(fixName, fixDesc, labels)
+	re, err := svc.Create(fixName, fixDesc, fixLabels)
 
 	// THEN
 	require.NoError(t, err)
 	assert.Equal(t, re.Name, fixName)
 	assert.Equal(t, re.Spec.Description, fixDesc)
-	assert.Equal(t, re.Spec.Labels, expectedLabels)
+	assert.Equal(t, re.Spec.Labels, fixLabels)
 }
 
 func TestRemoteEnvironmentService_Delete(t *testing.T) {
@@ -295,10 +292,7 @@ func TestRemoteEnvironmentService_Update(t *testing.T) {
 	// GIVEN
 	fixName := "fix-name"
 	fixDesc := "desc"
-	fixLabels := map[string]interface{}{
-		"fix": "lab",
-	}
-	expectedLabels := map[string]string{
+	fixLabels := map[string]string{
 		"fix": "lab",
 	}
 	client := fake.NewSimpleClientset(fixRemoteEnvironmentCR(fixName))
@@ -315,7 +309,7 @@ func TestRemoteEnvironmentService_Update(t *testing.T) {
 
 	// THEN
 	require.NoError(t, err)
-	assert.Equal(t, expectedLabels, re.Spec.Labels)
+	assert.Equal(t, fixLabels, re.Spec.Labels)
 	assert.Equal(t, fixDesc, re.Spec.Description)
 }
 
@@ -323,7 +317,7 @@ func TestRemoteEnvironmentService_Update_ErrorInRetryLoop(t *testing.T) {
 	// GIVEN
 	fixName := "fix-name"
 	fixDesc := "desc"
-	fixLabels := map[string]interface{}{
+	fixLabels := map[string]string{
 		"fix": "lab",
 	}
 	client := fake.NewSimpleClientset(fixRemoteEnvironmentCR(fixName))
@@ -349,16 +343,13 @@ func TestRemoteEnvironmentService_Update_SuccessAfterRetry(t *testing.T) {
 	// GIVEN
 	fixName := "fix-name"
 	fixDesc := "desc"
-	fixLabels := map[string]interface{}{
-		"fix": "lab",
-	}
-	expectedLabels := map[string]string{
+	fixLabels := map[string]string{
 		"fix": "lab",
 	}
 	client := fake.NewSimpleClientset(fixRemoteEnvironmentCR(fixName))
 	i := 0
 	client.PrependReactor("update", "remoteenvironments", func(action k8sTesting.Action) (handled bool, ret runtime.Object, err error) {
-		if i == 0 {
+		if i < 3 {
 			i++
 			return true, nil, apiErrors.NewConflict(schema.GroupResource{}, "", errors.New("fix"))
 		}
@@ -377,7 +368,7 @@ func TestRemoteEnvironmentService_Update_SuccessAfterRetry(t *testing.T) {
 
 	// THEN
 	require.NoError(t, err)
-	assert.Equal(t, expectedLabels, re.Spec.Labels)
+	assert.Equal(t, fixLabels, re.Spec.Labels)
 	assert.Equal(t, fixDesc, re.Spec.Description)
 }
 

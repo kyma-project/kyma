@@ -71,7 +71,7 @@ func newRemoteEnvironmentService(client remoteenvironmentv1alpha1.Applicationcon
 	}, nil
 }
 
-func (svc *remoteEnvironmentService) Create(name string, description string, labels gqlschema.JSON) (*v1alpha1.RemoteEnvironment, error) {
+func (svc *remoteEnvironmentService) Create(name string, description string, labels gqlschema.Labels) (*v1alpha1.RemoteEnvironment, error) {
 	return svc.client.RemoteEnvironments().Create(&v1alpha1.RemoteEnvironment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "RemoteEnvironment",
@@ -81,14 +81,14 @@ func (svc *remoteEnvironmentService) Create(name string, description string, lab
 			Name: name,
 		},
 		Spec: v1alpha1.RemoteEnvironmentSpec{
-			Labels:      svc.convertJsonToLabels(labels),
+			Labels:      labels,
 			Description: description,
 			Services:    []v1alpha1.Service{},
 		},
 	})
 }
 
-func (svc *remoteEnvironmentService) Update(name string, description string, labels gqlschema.JSON) (*v1alpha1.RemoteEnvironment, error) {
+func (svc *remoteEnvironmentService) Update(name string, description string, labels gqlschema.Labels) (*v1alpha1.RemoteEnvironment, error) {
 	var lastErr error
 	for i := 0; i < maxUpdateRetries; i++ {
 		re, err := svc.Find(name)
@@ -96,7 +96,7 @@ func (svc *remoteEnvironmentService) Update(name string, description string, lab
 			return nil, errors.Wrapf(err, "while getting %s [%s]", pretty.RemoteEnvironment, name)
 		}
 		re.Spec.Description = description
-		re.Spec.Labels = svc.convertJsonToLabels(labels)
+		re.Spec.Labels = labels
 
 		updated, err := svc.client.RemoteEnvironments().Update(re)
 		switch {
@@ -247,16 +247,6 @@ func (svc *remoteEnvironmentService) GetConnectionURL(remoteEnvironment string) 
 	}
 
 	return connectorURL, nil
-}
-
-func (svc *remoteEnvironmentService) convertJsonToLabels(labels gqlschema.JSON) map[string]string {
-	result := make(map[string]string)
-	for key, value := range labels {
-		if val, ok := value.(string); ok {
-			result[key] = fmt.Sprintf("%v", val)
-		}
-	}
-	return result
 }
 
 func (svc *remoteEnvironmentService) extractConnectionURL(body io.ReadCloser) (string, error) {

@@ -235,8 +235,8 @@ type ComplexityRoot struct {
 		DeleteServiceBinding      func(childComplexity int, serviceBindingName string, environment string) int
 		CreateServiceBindingUsage func(childComplexity int, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
 		DeleteServiceBindingUsage func(childComplexity int, serviceBindingUsageName string, environment string) int
-		CreateRemoteEnvironment   func(childComplexity int, name string, description *string, labels *JSON) int
-		UpdateRemoteEnvironment   func(childComplexity int, name string, description *string, labels *JSON) int
+		CreateRemoteEnvironment   func(childComplexity int, name string, description *string, labels *Labels) int
+		UpdateRemoteEnvironment   func(childComplexity int, name string, description *string, labels *Labels) int
 		DeleteRemoteEnvironment   func(childComplexity int, name string) int
 		EnableRemoteEnvironment   func(childComplexity int, remoteEnvironment string, environment string) int
 		DisableRemoteEnvironment  func(childComplexity int, remoteEnvironment string, environment string) int
@@ -543,8 +543,8 @@ type MutationResolver interface {
 	DeleteServiceBinding(ctx context.Context, serviceBindingName string, environment string) (*DeleteServiceBindingOutput, error)
 	CreateServiceBindingUsage(ctx context.Context, createServiceBindingUsageInput *CreateServiceBindingUsageInput) (*ServiceBindingUsage, error)
 	DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, environment string) (*DeleteServiceBindingUsageOutput, error)
-	CreateRemoteEnvironment(ctx context.Context, name string, description *string, labels *JSON) (RemoteEnvironmentMutationOutput, error)
-	UpdateRemoteEnvironment(ctx context.Context, name string, description *string, labels *JSON) (RemoteEnvironmentMutationOutput, error)
+	CreateRemoteEnvironment(ctx context.Context, name string, description *string, labels *Labels) (RemoteEnvironmentMutationOutput, error)
+	UpdateRemoteEnvironment(ctx context.Context, name string, description *string, labels *Labels) (RemoteEnvironmentMutationOutput, error)
 	DeleteRemoteEnvironment(ctx context.Context, name string) (DeleteRemoteEnvironmentOutput, error)
 	EnableRemoteEnvironment(ctx context.Context, remoteEnvironment string, environment string) (*EnvironmentMapping, error)
 	DisableRemoteEnvironment(ctx context.Context, remoteEnvironment string, environment string) (*EnvironmentMapping, error)
@@ -801,10 +801,10 @@ func field_Mutation_createRemoteEnvironment_args(rawArgs map[string]interface{})
 		}
 	}
 	args["description"] = arg1
-	var arg2 *JSON
+	var arg2 *Labels
 	if tmp, ok := rawArgs["labels"]; ok {
 		var err error
-		var ptr1 JSON
+		var ptr1 Labels
 		if tmp != nil {
 			err = (&ptr1).UnmarshalGQL(tmp)
 			arg2 = &ptr1
@@ -844,10 +844,10 @@ func field_Mutation_updateRemoteEnvironment_args(rawArgs map[string]interface{})
 		}
 	}
 	args["description"] = arg1
-	var arg2 *JSON
+	var arg2 *Labels
 	if tmp, ok := rawArgs["labels"]; ok {
 		var err error
-		var ptr1 JSON
+		var ptr1 Labels
 		if tmp != nil {
 			err = (&ptr1).UnmarshalGQL(tmp)
 			arg2 = &ptr1
@@ -2704,7 +2704,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateRemoteEnvironment(childComplexity, args["name"].(string), args["description"].(*string), args["labels"].(*JSON)), true
+		return e.complexity.Mutation.CreateRemoteEnvironment(childComplexity, args["name"].(string), args["description"].(*string), args["labels"].(*Labels)), true
 
 	case "Mutation.updateRemoteEnvironment":
 		if e.complexity.Mutation.UpdateRemoteEnvironment == nil {
@@ -2716,7 +2716,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateRemoteEnvironment(childComplexity, args["name"].(string), args["description"].(*string), args["labels"].(*JSON)), true
+		return e.complexity.Mutation.UpdateRemoteEnvironment(childComplexity, args["name"].(string), args["description"].(*string), args["labels"].(*Labels)), true
 
 	case "Mutation.deleteRemoteEnvironment":
 		if e.complexity.Mutation.DeleteRemoteEnvironment == nil {
@@ -4800,7 +4800,7 @@ func (ec *executionContext) _ClusterServiceBroker_labels(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.(JSON)
+	res := resTmp.(Labels)
 	rctx.Result = res
 	return res
 }
@@ -6188,7 +6188,7 @@ func (ec *executionContext) _Deployment_labels(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(JSON)
+	res := resTmp.(Labels)
 	rctx.Result = res
 	return res
 }
@@ -7403,7 +7403,7 @@ func (ec *executionContext) _Function_labels(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(JSON)
+	res := resTmp.(Labels)
 	rctx.Result = res
 	return res
 }
@@ -8122,7 +8122,7 @@ func (ec *executionContext) _Mutation_createRemoteEnvironment(ctx context.Contex
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.Mutation().CreateRemoteEnvironment(ctx, args["name"].(string), args["description"].(*string), args["labels"].(*JSON))
+		return ec.resolvers.Mutation().CreateRemoteEnvironment(ctx, args["name"].(string), args["description"].(*string), args["labels"].(*Labels))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -8151,7 +8151,7 @@ func (ec *executionContext) _Mutation_updateRemoteEnvironment(ctx context.Contex
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.Mutation().UpdateRemoteEnvironment(ctx, args["name"].(string), args["description"].(*string), args["labels"].(*JSON))
+		return ec.resolvers.Mutation().UpdateRemoteEnvironment(ctx, args["name"].(string), args["description"].(*string), args["labels"].(*Labels))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -10216,7 +10216,7 @@ func (ec *executionContext) _RemoteEnvironment_labels(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(JSON)
+	res := resTmp.(Labels)
 	rctx.Result = res
 	return res
 }
@@ -10532,7 +10532,7 @@ func (ec *executionContext) _RemoteEnvironmentMutationOutput_labels(ctx context.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(JSON)
+	res := resTmp.(Labels)
 	rctx.Result = res
 	return res
 }
@@ -12742,7 +12742,7 @@ func (ec *executionContext) _ServiceBroker_labels(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(JSON)
+	res := resTmp.(Labels)
 	rctx.Result = res
 	return res
 }
@@ -16710,6 +16710,8 @@ var parsedSchema = gqlparser.MustLoadSchema(
 
 scalar JSON
 
+scalar Labels
+
 scalar Timestamp
 
 # Content
@@ -16874,7 +16876,7 @@ type ServiceBroker {
     status: ServiceBrokerStatus!
     creationTimestamp: Timestamp!
     url: String!
-    labels: JSON!
+    labels: Labels!
 }
 
 type ClusterServiceBroker {
@@ -16882,7 +16884,7 @@ type ClusterServiceBroker {
     status: ServiceBrokerStatus!
     creationTimestamp: Timestamp!
     url: String!
-    labels: JSON!
+    labels: Labels!
 }
 
 type ServiceBrokerStatus {
@@ -17068,7 +17070,7 @@ type Deployment {
     environment: String!
     creationTimestamp: Timestamp!
     status: DeploymentStatus!
-    labels: JSON!
+    labels: Labels!
     containers: [Container!]!
     boundServiceInstanceNames: [String!]!
 }
@@ -17106,7 +17108,7 @@ type Environment {
 type RemoteEnvironment {
     name: String!
     description: String!
-    labels: JSON!
+    labels: Labels!
     services: [RemoteEnvironmentService!]!
     enabledInEnvironments: [String!]!
     status: RemoteEnvironmentStatus!
@@ -17145,7 +17147,7 @@ enum RemoteEnvironmentStatus {
 type RemoteEnvironmentMutationOutput {
     name: String!
     description: String!
-    labels: JSON!
+    labels: Labels!
 }
 
 type DeleteRemoteEnvironmentOutput {
@@ -17198,7 +17200,7 @@ type Function {
     name: String!
     trigger: String!
     creationTimestamp: Timestamp!
-    labels: JSON!
+    labels: Labels!
     environment: String!
 }
 
@@ -17291,8 +17293,8 @@ type Mutation {
     createServiceBindingUsage(createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage
     deleteServiceBindingUsage(serviceBindingUsageName: String!, environment: String!): DeleteServiceBindingUsageOutput
 
-    createRemoteEnvironment(name: String!, description: String, labels: JSON): RemoteEnvironmentMutationOutput!
-    updateRemoteEnvironment(name: String!, description: String, labels: JSON): RemoteEnvironmentMutationOutput!
+    createRemoteEnvironment(name: String!, description: String, labels: Labels): RemoteEnvironmentMutationOutput!
+    updateRemoteEnvironment(name: String!, description: String, labels: Labels): RemoteEnvironmentMutationOutput!
     deleteRemoteEnvironment(name: String!): DeleteRemoteEnvironmentOutput!
 
     enableRemoteEnvironment(remoteEnvironment: String!, environment: String!): EnvironmentMapping

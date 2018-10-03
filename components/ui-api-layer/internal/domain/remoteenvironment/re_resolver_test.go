@@ -2,23 +2,18 @@ package remoteenvironment_test
 
 import (
 	"context"
-	"testing"
-	"time"
-
 	"fmt"
+	"testing"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions"
+	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/gateway"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
-	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -78,18 +73,18 @@ func TestRemoteEnvironmentResolver_CreateRemoteEnvironment(t *testing.T) {
 	// GIVEN
 	for tn, tc := range map[string]struct {
 		givenDesc      *string
-		givenLabels    *gqlschema.JSON
+		givenLabels    *gqlschema.Labels
 		expectedDesc   string
-		expectedLabels gqlschema.JSON
+		expectedLabels gqlschema.Labels
 	}{
 		"nothing provided": {},
 		"fully parametrized": {
 			givenDesc: ptrStr("desc"),
-			givenLabels: &gqlschema.JSON{
+			givenLabels: &gqlschema.Labels{
 				"lol": "test",
 			},
 			expectedDesc: "desc",
-			expectedLabels: gqlschema.JSON{
+			expectedLabels: gqlschema.Labels{
 				"lol": "test",
 			},
 		},
@@ -98,26 +93,35 @@ func TestRemoteEnvironmentResolver_CreateRemoteEnvironment(t *testing.T) {
 			expectedDesc: "desc",
 		},
 		"only labels provided": {
-			givenLabels: &gqlschema.JSON{
+			givenLabels: &gqlschema.Labels{
 				"lol": "test",
 			},
-			expectedLabels: gqlschema.JSON{
+			expectedLabels: gqlschema.Labels{
 				"lol": "test",
 			},
 		},
 	} {
 		t.Run(tn, func(t *testing.T) {
 			fixName := "fix-name"
-			client := fake.NewSimpleClientset()
-			svc, err := remoteenvironment.NewRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), remoteenvironment.Config{}, newDummyInformer(), nil, nil)
-			require.NoError(t, err)
-			resolver := remoteenvironment.NewRemoteEnvironmentResolver(svc, nil)
+			reSvc := automock.NewReSvc()
+			defer reSvc.AssertExpectations(t)
+			reSvc.On("Create", fixName, tc.expectedDesc, tc.expectedLabels).Return(&v1alpha1.RemoteEnvironment{
+				ObjectMeta: v1.ObjectMeta{
+					Name: fixName,
+				},
+				Spec: v1alpha1.RemoteEnvironmentSpec{
+					Description: tc.expectedDesc,
+					Labels:      tc.expectedLabels,
+				},
+			}, nil)
+
+			resolver := remoteenvironment.NewRemoteEnvironmentResolver(reSvc, nil)
 
 			// WHEN
 			out, err := resolver.CreateRemoteEnvironment(context.Background(), fixName, tc.givenDesc, tc.givenLabels)
-			require.NoError(t, err)
 
 			// THEN
+			require.NoError(t, err)
 			assert.Equal(t, fixName, out.Name)
 			assert.Equal(t, tc.expectedDesc, out.Description)
 			assert.Equal(t, tc.expectedLabels, out.Labels)
@@ -126,75 +130,74 @@ func TestRemoteEnvironmentResolver_CreateRemoteEnvironment(t *testing.T) {
 }
 
 func TestRemoteEnvironmentResolver_CreateRemoteEnvironment_Error(t *testing.T) {
+	// GIVEN
 	fixName := "fix-name"
 	reSvc := automock.NewReSvc()
-	reSvc.On("Create", fixName, "", gqlschema.JSON(nil)).Return(nil, errors.New("fix"))
+	reSvc.On("Create", fixName, "", gqlschema.Labels(nil)).Return(nil, errors.New("fix"))
 
+	// WHEN
 	resolver := remoteenvironment.NewRemoteEnvironmentResolver(reSvc, nil)
 	_, err := resolver.CreateRemoteEnvironment(context.Background(), fixName, nil, nil)
 
+	// THEN
 	assert.EqualError(t, err, fmt.Sprintf("internal error [name: \"%s\"]", fixName))
 }
 
 func TestRemoteEnvironmentResolver_DeleteRemoteEnvironment(t *testing.T) {
 	// GIVEN
-	fixName := "fix-name"
-	client := fake.NewSimpleClientset(fixRemoteEnvironmentCR(fixName))
-	svc, err := remoteenvironment.NewRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), remoteenvironment.Config{}, newDummyInformer(), nil, nil)
-	require.NoError(t, err)
+	fixName := "fix"
+	reSvc := automock.NewReSvc()
+	defer reSvc.AssertExpectations(t)
+	reSvc.On("Delete", fixName).Return(nil)
 
-	resolver := remoteenvironment.NewRemoteEnvironmentResolver(svc, nil)
+	resolver := remoteenvironment.NewRemoteEnvironmentResolver(reSvc, nil)
 
 	// WHEN
 	out, err := resolver.DeleteRemoteEnvironment(context.Background(), fixName)
-	require.NoError(t, err)
 
 	// THEN
+	require.NoError(t, err)
 	assert.Equal(t, fixName, out.Name)
-
-	_, err = client.ApplicationconnectorV1alpha1().RemoteEnvironments().Get(fixName, v1.GetOptions{})
-	assert.True(t, apiErrors.IsNotFound(err))
 }
 
 func TestRemoteEnvironmentResolver_DeleteRemoteEnvironment_Error(t *testing.T) {
+	// GIVEN
 	fixName := "fix-name"
 	reSvc := automock.NewReSvc()
+	defer reSvc.AssertExpectations(t)
 	reSvc.On("Delete", fixName).Return(errors.New("fix"))
 
 	resolver := remoteenvironment.NewRemoteEnvironmentResolver(reSvc, nil)
+
+	// WHEN
 	_, err := resolver.DeleteRemoteEnvironment(context.Background(), fixName)
 
+	// THEN
 	assert.EqualError(t, err, fmt.Sprintf("internal error [name: \"%s\"]", fixName))
 }
 
 func TestRemoteEnvironmentResolver_UpdateRemoteEnvironment(t *testing.T) {
 	// GIVEN
 	fixName := "fix-name"
-	client := fake.NewSimpleClientset(fixRemoteEnvironmentCR(fixName))
-	informerFactory := externalversions.NewSharedInformerFactory(client, time.Second)
-	informer := informerFactory.Applicationconnector().V1alpha1().RemoteEnvironments().Informer()
+	reSvc := automock.NewReSvc()
+	defer reSvc.AssertExpectations(t)
 
-	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
-
-	svc, err := remoteenvironment.NewRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), remoteenvironment.Config{}, newDummyInformer(), nil, informer)
-	require.NoError(t, err)
-
-	resolver := remoteenvironment.NewRemoteEnvironmentResolver(svc, nil)
+	resolver := remoteenvironment.NewRemoteEnvironmentResolver(reSvc, nil)
 
 	for tn, tc := range map[string]struct {
 		givenDesc      *string
-		givenLabels    *gqlschema.JSON
+		givenLabels    *gqlschema.Labels
 		expectedDesc   string
-		expectedLabels gqlschema.JSON
+		expectedLabels gqlschema.Labels
 	}{
 		"nothing provided": {},
 		"fully parametrized": {
 			givenDesc: ptrStr("desc"),
-			givenLabels: &gqlschema.JSON{
+			givenLabels: &gqlschema.Labels{
 				"lol": "test",
 			},
 			expectedDesc: "desc",
-			expectedLabels: gqlschema.JSON{
+			expectedLabels: gqlschema.Labels{
 				"lol": "test",
 			},
 		},
@@ -203,20 +206,30 @@ func TestRemoteEnvironmentResolver_UpdateRemoteEnvironment(t *testing.T) {
 			expectedDesc: "desc",
 		},
 		"only labels provided": {
-			givenLabels: &gqlschema.JSON{
+			givenLabels: &gqlschema.Labels{
 				"lol": "test",
 			},
-			expectedLabels: gqlschema.JSON{
+			expectedLabels: gqlschema.Labels{
 				"lol": "test",
 			},
 		},
 	} {
 		t.Run(tn, func(t *testing.T) {
+			reSvc.On("Update", fixName, tc.expectedDesc, tc.expectedLabels).Return(&v1alpha1.RemoteEnvironment{
+				ObjectMeta: v1.ObjectMeta{
+					Name: fixName,
+				},
+				Spec: v1alpha1.RemoteEnvironmentSpec{
+					Description: tc.expectedDesc,
+					Labels:      tc.expectedLabels,
+				},
+			}, nil)
+
 			// WHEN
 			out, err := resolver.UpdateRemoteEnvironment(context.Background(), fixName, tc.givenDesc, tc.givenLabels)
-			require.NoError(t, err)
 
 			// THEN
+			require.NoError(t, err)
 			assert.Equal(t, fixName, out.Name)
 			assert.Equal(t, tc.expectedDesc, out.Description)
 			assert.Equal(t, tc.expectedLabels, out.Labels)
@@ -227,7 +240,8 @@ func TestRemoteEnvironmentResolver_UpdateRemoteEnvironment(t *testing.T) {
 func TestRemoteEnvironmentResolver_UpdateRemoteEnvironment_Error(t *testing.T) {
 	fixName := "fix-name"
 	reSvc := automock.NewReSvc()
-	reSvc.On("Update", fixName, "", gqlschema.JSON(nil)).Return(nil, errors.New("fix"))
+	defer reSvc.AssertExpectations(t)
+	reSvc.On("Update", fixName, "", gqlschema.Labels(nil)).Return(nil, errors.New("fix"))
 
 	resolver := remoteenvironment.NewRemoteEnvironmentResolver(reSvc, nil)
 	_, err := resolver.UpdateRemoteEnvironment(context.Background(), fixName, nil, nil)

@@ -13,11 +13,11 @@ type reSvc struct {
 }
 
 // Create provides a mock function with given fields: name, description, labels
-func (_m *reSvc) Create(name string, description string, labels gqlschema.JSON) (*v1alpha1.RemoteEnvironment, error) {
+func (_m *reSvc) Create(name string, description string, labels gqlschema.Labels) (*v1alpha1.RemoteEnvironment, error) {
 	ret := _m.Called(name, description, labels)
 
 	var r0 *v1alpha1.RemoteEnvironment
-	if rf, ok := ret.Get(0).(func(string, string, gqlschema.JSON) *v1alpha1.RemoteEnvironment); ok {
+	if rf, ok := ret.Get(0).(func(string, string, gqlschema.Labels) *v1alpha1.RemoteEnvironment); ok {
 		r0 = rf(name, description, labels)
 	} else {
 		if ret.Get(0) != nil {
@@ -26,7 +26,7 @@ func (_m *reSvc) Create(name string, description string, labels gqlschema.JSON) 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, gqlschema.JSON) error); ok {
+	if rf, ok := ret.Get(1).(func(string, string, gqlschema.Labels) error); ok {
 		r1 = rf(name, description, labels)
 	} else {
 		r1 = ret.Error(1)
@@ -200,11 +200,11 @@ func (_m *reSvc) ListNamespacesFor(reName string) ([]string, error) {
 }
 
 // Update provides a mock function with given fields: name, description, labels
-func (_m *reSvc) Update(name string, description string, labels gqlschema.JSON) (*v1alpha1.RemoteEnvironment, error) {
+func (_m *reSvc) Update(name string, description string, labels gqlschema.Labels) (*v1alpha1.RemoteEnvironment, error) {
 	ret := _m.Called(name, description, labels)
 
 	var r0 *v1alpha1.RemoteEnvironment
-	if rf, ok := ret.Get(0).(func(string, string, gqlschema.JSON) *v1alpha1.RemoteEnvironment); ok {
+	if rf, ok := ret.Get(0).(func(string, string, gqlschema.Labels) *v1alpha1.RemoteEnvironment); ok {
 		r0 = rf(name, description, labels)
 	} else {
 		if ret.Get(0) != nil {
@@ -213,7 +213,7 @@ func (_m *reSvc) Update(name string, description string, labels gqlschema.JSON) 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, gqlschema.JSON) error); ok {
+	if rf, ok := ret.Get(1).(func(string, string, gqlschema.Labels) error); ok {
 		r1 = rf(name, description, labels)
 	} else {
 		r1 = ret.Error(1)

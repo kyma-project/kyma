@@ -20,8 +20,8 @@ type reSvc interface {
 	ListNamespacesFor(reName string) ([]string, error)
 	Find(name string) (*v1alpha1.RemoteEnvironment, error)
 	List(params pager.PagingParams) ([]*v1alpha1.RemoteEnvironment, error)
-	Update(name string, description string, labels gqlschema.JSON) (*v1alpha1.RemoteEnvironment, error)
-	Create(name string, description string, labels gqlschema.JSON) (*v1alpha1.RemoteEnvironment, error)
+	Update(name string, description string, labels gqlschema.Labels) (*v1alpha1.RemoteEnvironment, error)
+	Create(name string, description string, labels gqlschema.Labels) (*v1alpha1.RemoteEnvironment, error)
 	Delete(name string) error
 	Disable(namespace, name string) error
 	Enable(namespace, name string) (*v1alpha1.EnvironmentMapping, error)
@@ -89,7 +89,7 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentsQuery(ctx context.Context,
 	return res, nil
 }
 
-func (r *remoteEnvironmentResolver) CreateRemoteEnvironment(ctx context.Context, name string, description *string, qglLabels *gqlschema.JSON) (gqlschema.RemoteEnvironmentMutationOutput, error) {
+func (r *remoteEnvironmentResolver) CreateRemoteEnvironment(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.RemoteEnvironmentMutationOutput, error) {
 	desc, labels := r.returnWithDefaults(description, qglLabels)
 	_, err := r.reSvc.Create(name, desc, labels)
 	if err != nil {
@@ -112,7 +112,7 @@ func (r *remoteEnvironmentResolver) DeleteRemoteEnvironment(ctx context.Context,
 	return gqlschema.DeleteRemoteEnvironmentOutput{Name: name}, nil
 }
 
-func (r *remoteEnvironmentResolver) UpdateRemoteEnvironment(ctx context.Context, name string, description *string, qglLabels *gqlschema.JSON) (gqlschema.RemoteEnvironmentMutationOutput, error) {
+func (r *remoteEnvironmentResolver) UpdateRemoteEnvironment(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.RemoteEnvironmentMutationOutput, error) {
 	desc, labels := r.returnWithDefaults(description, qglLabels)
 	_, err := r.reSvc.Update(name, desc, labels)
 	if err != nil {
@@ -200,7 +200,7 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentStatusField(ctx context.Con
 	}
 }
 
-func (r *remoteEnvironmentResolver) returnWithDefaults(description *string, gqlLabels *gqlschema.JSON) (desc string, labels gqlschema.JSON) {
+func (r *remoteEnvironmentResolver) returnWithDefaults(description *string, gqlLabels *gqlschema.Labels) (desc string, labels gqlschema.Labels) {
 	if description != nil {
 		desc = *description
 	}

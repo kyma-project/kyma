@@ -33,7 +33,7 @@ type ClusterServiceBroker struct {
 	Status            ServiceBrokerStatus `json:"status"`
 	CreationTimestamp time.Time           `json:"creationTimestamp"`
 	URL               string              `json:"url"`
-	Labels            JSON                `json:"labels"`
+	Labels            Labels              `json:"labels"`
 }
 
 type ClusterServiceBrokerEvent struct {
@@ -92,7 +92,7 @@ type Deployment struct {
 	Environment               string           `json:"environment"`
 	CreationTimestamp         time.Time        `json:"creationTimestamp"`
 	Status                    DeploymentStatus `json:"status"`
-	Labels                    JSON             `json:"labels"`
+	Labels                    Labels           `json:"labels"`
 	Containers                []Container      `json:"containers"`
 	BoundServiceInstanceNames []string         `json:"boundServiceInstanceNames"`
 }
@@ -148,7 +148,7 @@ type Function struct {
 	Name              string    `json:"name"`
 	Trigger           string    `json:"trigger"`
 	CreationTimestamp time.Time `json:"creationTimestamp"`
-	Labels            JSON      `json:"labels"`
+	Labels            Labels    `json:"labels"`
 	Environment       string    `json:"environment"`
 }
 
@@ -194,7 +194,7 @@ type RemoteEnvironmentEntry struct {
 type RemoteEnvironmentMutationOutput struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	Labels      JSON   `json:"labels"`
+	Labels      Labels `json:"labels"`
 }
 
 type RemoteEnvironmentService struct {
@@ -291,7 +291,7 @@ type ServiceBroker struct {
 	Status            ServiceBrokerStatus `json:"status"`
 	CreationTimestamp time.Time           `json:"creationTimestamp"`
 	URL               string              `json:"url"`
-	Labels            JSON                `json:"labels"`
+	Labels            Labels              `json:"labels"`
 }
 
 type ServiceBrokerEvent struct {
