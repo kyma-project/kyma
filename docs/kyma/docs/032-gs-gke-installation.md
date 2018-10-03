@@ -15,7 +15,8 @@ You can skip this step if you want to install image created from unmodified sour
 3. Push image to docker hub:
     ```
     docker tag kyma-installer:latest [YOUR_DOCKER_LOGIN]/kyma-installer:latest
-
+    docker push [YOUR_DOCKER_LOGIN]/kyma-installer:latest
+    ```
 
 ## DNS setup
 
@@ -67,12 +68,15 @@ export TLS_KEY=$(cat ./letsencrypt/live/$DOMAIN/privkey.pem | base64)
 
 1. Set environment variables for your Google project identifier (you have to change it) and set some cluster name (you can keep demo name).
     ```
-    export CLUSTER_NAME=demo2
+    export CLUSTER_NAME=demo
     export PROJECT=sap-hybris-sf-playground
     ```
 2. Create cluster in europe-west1 region.
     ```
-    gcloud beta container --project "$PROJECT" clusters create "$CLUSTER_NAME" --zone "europe-west1-b" --cluster-version "1.10.7-gke.2" --machine-type "n1-standard-2" 
+    gcloud beta container --project "$PROJECT" clusters \
+    create "$CLUSTER_NAME" --zone "europe-west1-b" \
+    --cluster-version "1.10.7-gke.2" --machine-type "n1-standard-2" \
+    --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard 
     ```
 
 ## Prepare kyma installation.yaml
