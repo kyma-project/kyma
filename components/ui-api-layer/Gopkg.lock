@@ -188,7 +188,7 @@
   version = "v0.1.28"
 
 [[projects]]
-  name = "github.com/kyma-project/kyma"
+  name = "github.com/authentication-project/authentication"
   packages = [
     "components/api-controller/pkg/apis/gateway.kyma.cx/meta/v1",
     "components/api-controller/pkg/apis/gateway.kyma.cx/v1alpha2",
