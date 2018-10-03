@@ -10,6 +10,6 @@ The diagram and steps describe the Service Catalog workflow and the roles of spe
 
 2. Inside the cluster, each ClusterServiceBroker exposes services that are ClusterServiceClasses in their different variations called ClusterServicePlans. Similarly, the ServiceBroker registered in a given Environment exposes ServiceClasses and ServicePlans only in this specific Environment.
 
-3. In the Console UI or CLI, the Kyma user lists all exposed cluster-wide and Environment-specific services and requests to create their instances in the Environment.
+3. In the Console UI or CLI, the Kyma user lists all exposed cluster-wide and Environment-specific services and requests to create their instances in the Environment (ServiceInstances).
 
 4. The Kyma user creates bindings to the ServiceInstances to allow the given applications to access the provisioned services.
