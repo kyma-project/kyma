@@ -25,44 +25,31 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   api_controller:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 0.4.1
   api_controller_acceptance_tests:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 0.4.1
   apiserver_proxy:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 0.4.1
   docs:
-    dir: develop/
-    version: 8f0a3611
+    version: 0.4.1
   environments:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 0.4.1
   event_bus:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 0.4.1
   event_bus_tests:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 0.4.1
   event_service:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 0.4.1
   kubeless_test_client:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 0.4.1
   test_logging:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 0.4.1
   test_logging_monitoring:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 0.4.1
   ui_api_layer:
-    dir: develop/
-    version: 6bb5bb22
+    version: 0.4.1
   ui_api_layer_acceptance_tests:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 0.4.1
   
 
 test:
