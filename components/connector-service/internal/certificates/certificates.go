@@ -16,11 +16,11 @@ import (
 const CertificateValidityDays = 365
 
 type CertificateUtility interface {
-	LoadCert(encodedData []byte) (crt *x509.Certificate, appError apperrors.AppError)
-	LoadKey(encodedData []byte) (key *rsa.PrivateKey, appError apperrors.AppError)
-	LoadCSR(encodedData string) (csr *x509.CertificateRequest, appError apperrors.AppError)
+	LoadCert(encodedData []byte) (*x509.Certificate, apperrors.AppError)
+	LoadKey(encodedData []byte) (*rsa.PrivateKey, apperrors.AppError)
+	LoadCSR(encodedData string) (*x509.CertificateRequest, apperrors.AppError)
 	CheckCSRValues(csr *x509.CertificateRequest, subject CSRSubject) apperrors.AppError
-	CreateCrtChain(caCrt *x509.Certificate, csr *x509.CertificateRequest, key *rsa.PrivateKey) (crtBase64 string, appError apperrors.AppError)
+	CreateCrtChain(caCrt *x509.Certificate, csr *x509.CertificateRequest, key *rsa.PrivateKey) (string, apperrors.AppError)
 }
 
 type certificateUtility struct {
@@ -39,7 +39,7 @@ func NewCertificateUtility() CertificateUtility {
 	return &certificateUtility{}
 }
 
-func decodeStringFromBase64(bytes string) (decodedData []byte, appError apperrors.AppError) {
+func decodeStringFromBase64(bytes string) ([]byte, apperrors.AppError) {
 	data, err := base64.StdEncoding.DecodeString(bytes)
 	if err != nil {
 		return nil, apperrors.BadRequest("There was an error while parsing the base64 content. An incorrect value was provided.")
@@ -48,7 +48,7 @@ func decodeStringFromBase64(bytes string) (decodedData []byte, appError apperror
 	return data, nil
 }
 
-func (cu *certificateUtility) LoadCert(encodedData []byte) (crt *x509.Certificate, appError apperrors.AppError) {
+func (cu *certificateUtility) LoadCert(encodedData []byte) (*x509.Certificate, apperrors.AppError) {
 
 	pemBlock, _ := pem.Decode(encodedData)
 	if pemBlock == nil {
@@ -63,7 +63,7 @@ func (cu *certificateUtility) LoadCert(encodedData []byte) (crt *x509.Certificat
 	return caCRT, nil
 }
 
-func (cu *certificateUtility) LoadKey(encodedData []byte) (key *rsa.PrivateKey, appError apperrors.AppError) {
+func (cu *certificateUtility) LoadKey(encodedData []byte) (*rsa.PrivateKey, apperrors.AppError) {
 
 	pemBlock, _ := pem.Decode(encodedData)
 	if pemBlock == nil {
@@ -78,7 +78,7 @@ func (cu *certificateUtility) LoadKey(encodedData []byte) (key *rsa.PrivateKey, 
 	return caPrivateKey.(*rsa.PrivateKey), nil
 }
 
-func (cu *certificateUtility) LoadCSR(encodedData string) (csr *x509.CertificateRequest, appError apperrors.AppError) {
+func (cu *certificateUtility) LoadCSR(encodedData string) (*x509.CertificateRequest, apperrors.AppError) {
 	decodedData, appErr := decodeStringFromBase64(encodedData)
 	if appErr != nil {
 		return nil, appErr
@@ -140,7 +140,7 @@ func (cu *certificateUtility) CheckCSRValues(csr *x509.CertificateRequest, subje
 }
 
 func (cu *certificateUtility) CreateCrtChain(caCrt *x509.Certificate, csr *x509.CertificateRequest, key *rsa.PrivateKey) (
-	crtBase64 string, appError apperrors.AppError) {
+	string, apperrors.AppError) {
 
 	clientCRTTemplate := prepareCRTTemplate(csr, caCrt)
 
@@ -154,7 +154,7 @@ func (cu *certificateUtility) CreateCrtChain(caCrt *x509.Certificate, csr *x509.
 	return certChain, nil
 }
 
-func encodeStringBase64(bytes []byte) (data string) {
+func encodeStringBase64(bytes []byte) (string) {
 	return base64.StdEncoding.EncodeToString(bytes)
 }
 
