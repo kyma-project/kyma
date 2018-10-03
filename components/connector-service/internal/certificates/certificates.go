@@ -142,7 +142,7 @@ func (cu *certificateUtility) CheckCSRValues(csr *x509.CertificateRequest, subje
 func (cu *certificateUtility) CreateCrtChain(caCrt *x509.Certificate, csr *x509.CertificateRequest, key *rsa.PrivateKey) (
 	string, apperrors.AppError) {
 
-	clientCRTTemplate := prepareCRTTemplate(csr, caCrt)
+	clientCRTTemplate := prepareCRTTemplate(csr)
 
 	clientCrtRaw, err := x509.CreateCertificate(rand.Reader, &clientCRTTemplate, caCrt, csr.PublicKey, key)
 	if err != nil {
@@ -154,20 +154,15 @@ func (cu *certificateUtility) CreateCrtChain(caCrt *x509.Certificate, csr *x509.
 	return certChain, nil
 }
 
-func encodeStringBase64(bytes []byte) (string) {
+func encodeStringBase64(bytes []byte) string {
 	return base64.StdEncoding.EncodeToString(bytes)
 }
 
-func prepareCRTTemplate(csr *x509.CertificateRequest, caCrt *x509.Certificate) x509.Certificate {
+func prepareCRTTemplate(csr *x509.CertificateRequest) x509.Certificate {
 	return x509.Certificate{
-		Signature:          csr.Signature,
 		SignatureAlgorithm: csr.SignatureAlgorithm,
 
-		PublicKeyAlgorithm: csr.PublicKeyAlgorithm,
-		PublicKey:          csr.PublicKey,
-
 		SerialNumber: big.NewInt(2),
-		Issuer:       caCrt.Subject,
 		Subject:      csr.Subject,
 		NotBefore:    time.Now(),
 		NotAfter:     time.Now().Add(CertificateValidityDays * 24 * time.Hour),

@@ -522,60 +522,59 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 func TestCertificateUtility_CreateCrtChain(t *testing.T) {
 
 	t.Run("should create certificate chain", func(t *testing.T) {
+		// given
 		certificateUtility := NewCertificateUtility()
-
 		caCrt, csr, key := prepareCrtAndKey(certificateUtility)
 
-		crtBase64, err := certificateUtility.CreateCrtChain(caCrt, csr, key)
+		// when
+		crtBase64, apperr := certificateUtility.CreateCrtChain(caCrt, csr, key)
+
+		//then
+		require.NoError(t, apperr)
+
+		decodedCrt, err := decodeCrtChain(crtBase64)
 		require.NoError(t, err)
 
-		rawCrt, decodeErr := base64.StdEncoding.DecodeString(crtBase64)
-		require.NoError(t, decodeErr)
+		expectedCrt, err := rawCrtTox509Certificates([]byte(CrtChain))
+		require.NoError(t, err)
 
-		decodedCrt, singleCertErr := rawCrtTox509Certificates(rawCrt)
-		require.NoError(t, singleCertErr)
+		clientCrtSubject := decodedCrt[0].Subject
+		expectedClientCrtSubject := expectedCrt[0].Subject
 
-		expectedRawCrt, singleCertErr := rawCrtTox509Certificates([]byte(CrtChain))
-		require.NoError(t, singleCertErr)
-
-		clientCrtSubject := expectedRawCrt[0].Subject
-		expectedSubject := decodedCrt[0].Subject
-
-		assert.Equal(t, clientCrtSubject, expectedSubject)
+		assert.Equal(t, clientCrtSubject, expectedClientCrtSubject)
+		assert.Equal(t, expectedCrt[1], decodedCrt[1])
 	})
 
 	t.Run("certificate validity days should equal 365", func(t *testing.T) {
 		// given
 		certificateUtility := NewCertificateUtility()
-
 		caCrt, csr, key := prepareCrtAndKey(certificateUtility)
 
-		crtBase64, err := certificateUtility.CreateCrtChain(caCrt, csr, key)
+		// when
+		crtBase64, apperr := certificateUtility.CreateCrtChain(caCrt, csr, key)
+
+		// then
+		require.NoError(t, apperr)
+
+		decodedCrt, err := decodeCrtChain(crtBase64)
 		require.NoError(t, err)
-
-		rawCrt, decodeErr := base64.StdEncoding.DecodeString(crtBase64)
-		require.NoError(t, decodeErr)
-
-		decodedCrt, singleCertErr := rawCrtTox509Certificates(rawCrt)
-		require.NoError(t, singleCertErr)
-
 
 		expectedvValidityTime := calculateValidityTime(decodedCrt[0])
 		assert.Equal(t, CertificateValidityDays, expectedvValidityTime)
 	})
 
 	t.Run("should return two certificates in chain", func(t *testing.T) {
+		// given
 		certificateUtility := NewCertificateUtility()
-
 		caCrt, csr, key := prepareCrtAndKey(certificateUtility)
 
+		// when
 		crtBase64, err := certificateUtility.CreateCrtChain(caCrt, csr, key)
+
+		// then
 		require.NoError(t, err)
 
-		rawCrt, decodeErr := base64.StdEncoding.DecodeString(crtBase64)
-		require.NoError(t, decodeErr)
-
-		decodedCrt, singleCertErr := rawCrtTox509Certificates(rawCrt)
+		decodedCrt, singleCertErr := decodeCrtChain(crtBase64)
 		require.NoError(t, singleCertErr)
 
 		assert.Equal(t, 2, len(decodedCrt))
@@ -598,6 +597,7 @@ func TestCertificateUtility_CreateCrtChain(t *testing.T) {
 		assert.Equal(t, "", crtBase64)
 	})
 }
+
 func calculateValidityTime(certificate *x509.Certificate) int {
 	expirationDate := certificate.NotAfter
 	fmt.Print(expirationDate.String())
@@ -619,11 +619,11 @@ func prepareCrtAndKey(certificateUtility CertificateUtility) (*x509.Certificate,
 	return caCrt, csr, key
 }
 
-func rawCrtTox509Certificates(rawCrt []byte) (certificates []*x509.Certificate, err error) {
+func rawCrtTox509Certificates(rawCrt []byte) ([]*x509.Certificate, error) {
 	pemBlock, rest := pem.Decode(rawCrt)
 
 	if len(rest) == 0 {
-		return nil, err
+		return nil, x509.CertificateInvalidError{}
 	}
 
 	pemBlock2, _ := pem.Decode(rest)
@@ -632,4 +632,13 @@ func rawCrtTox509Certificates(rawCrt []byte) (certificates []*x509.Certificate, 
 
 	decodedCrt, _ := x509.ParseCertificates(pemBlocks)
 	return decodedCrt, nil
+}
+
+func decodeCrtChain(base64CrtChain string) ([]*x509.Certificate, error) {
+	rawCrt, err := base64.StdEncoding.DecodeString(base64CrtChain)
+	if err != nil {
+		return nil, err
+	}
+
+	return rawCrtTox509Certificates(rawCrt)
 }
