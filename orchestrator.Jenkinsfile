@@ -36,7 +36,6 @@ projects = [
     "components/configurations-generator": "configurations-generator",
     "components/environments": "environments",
     "components/istio-webhook": "istio-webhook",
-    "components/istio-kyma-patch": "istio-kyma-patch",
     "components/helm-broker": "helm-broker",
     "components/remote-environment-broker": "remote-environment-broker",
     "components/remote-environment-controller": "remote-environment-controller",
@@ -356,8 +355,6 @@ global.environments.version=${versions['components/environments']}
 global.environments.dir=${versions['components/environments'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.istio_webhook.version=${versions['components/istio-webhook']}
 global.istio_webhook.dir=${versions['components/istio-webhook'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
-global.istio_kyma_patch.version=${versions['components/istio-kyma-patch']}
-global.istio_kyma_patch.dir=${versions['components/istio-kyma-patch'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.helm_broker.version=${versions['components/helm-broker']}
 global.helm_broker.dir=${versions['components/helm-broker'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.remote_environment_broker.version=${versions['components/remote-environment-broker']}
