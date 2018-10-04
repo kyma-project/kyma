@@ -1,0 +1,13 @@
+mergeable:
+  pull_requests:
+    title:
+      must_exclude:
+        regex: 'wip'
+        message: 'This PR is work in progress.'
+    description:
+      no_empty:
+        enabled: true
+    label:
+      must_include:
+        regex: '^area\/'
+        message: 'PR must belong to an area. Areas are labels prefixed with "area/"'
