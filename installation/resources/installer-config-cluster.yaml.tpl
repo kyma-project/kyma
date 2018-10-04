@@ -60,6 +60,7 @@ data:
   minio.secretKey: "topSecretKey"
   acceptanceTest.remoteEnvironment.disabled: "true"
   mixer.resources.limits.memory: 1Gi
+  security.enabled: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
