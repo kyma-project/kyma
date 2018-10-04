@@ -8,27 +8,36 @@ type: Getting Started
 
 ## DNS setup
 
-1. Get some domain and delegate it to google. You can get a free domain from freenom.com site. I reserved kyma.ga domain.
+In this step you delegate management of your domain to Google Cloud DNS. If you don't have any domain you can get one for free from freenom.com site. For this guide uses kyma.ga domain, and demo.kyma.ga subdomain for kyma cluster.
 
-2. Export the project name
+1. Export the domain name, project name and DNS zone name. The values are used in commands below.
 
     ```
+    export DOMAIN=demo.kyma.ga
+    export DNS_NAME=kyma.ga.
     export PROJECT=<YOUR_GOOGLE_PROJECT>
+    export DNS_ZONE=kyma-zone
     ```
 
-3. Create DNS managed zone in your google project. You can create if from console.cloud.google.com. Navigate to Network Services, Cloud DNS and select Create Zone. Command line version:    
+2. Create DNS managed zone in your google project. You can create if from console.cloud.google.com. Navigate to Network Services, Cloud DNS and select Create Zone. Command line version:    
     
     ```
-    gcloud dns --project=$PROJECT managed-zones create kymaga-zone --description= --dns-name=kyma.ga.
+    gcloud dns --project=$PROJECT managed-zones create $DNS_ZONE --description= --dns-name=$DNS_NAME
     ```
     
-4. Delegate your domain to google name servers. List of nameservers you can get from zone details. In my case:
+3. Delegate your domain to google name servers. List of nameservers you can get from zone details. In my case:
     - ns-cloud-b1.googledomains.com.
     - ns-cloud-b2.googledomains.com.
     - ns-cloud-b3.googledomains.com.
     - ns-cloud-b4.googledomains.com.
 
-At freenom.com you can do that going to Services -> Main Domains - > Manage domain. Then select management tools -> Nameservers and enter values retrieved from Google.
+    At freenom.com you can do that going to Services -> Main Domains - > Manage domain. Then select management tools -> Nameservers and enter values retrieved from Google.
+
+4. Ensure that your domain is managed by Google name servers:
+    ```
+    host -t ns $DNS_NAME
+    ```
+    In the result you should see the list of name servers from previous step.
 
 ## Get TLS certificate
 
@@ -43,8 +52,6 @@ At freenom.com you can do that going to Services -> Main Domains - > Manage doma
         --member serviceAccount:dnsmanager@$PROJECT.iam.gserviceaccount.com --role roles/dns.admin
     
     gcloud iam service-accounts keys create ./letsencrypt/key.json --iam-account dnsmanager@$PROJECT.iam.gserviceaccount.com
-    
-    export DOMAIN=demo.kyma.ga
     
     sudo docker run -it --name certbot --rm \
         -v "$(pwd)/letsencrypt:/etc/letsencrypt" \
@@ -175,12 +182,12 @@ export EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgat
 
 export REMOTE_ENV_IP=$(kubectl get service -n kyma-system core-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
-gcloud dns --project=$PROJECT record-sets transaction start --zone=kymaga-zone
+gcloud dns --project=$PROJECT record-sets transaction start --zone=$DNS_ZONE
 
-gcloud dns --project=$PROJECT record-sets transaction add $EXTERNAL_PUBLIC_IP --name=\*.$DOMAIN. --ttl=60 --type=A --zone=kymaga-zone
+gcloud dns --project=$PROJECT record-sets transaction add $EXTERNAL_PUBLIC_IP --name=\*.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
 
-gcloud dns --project=$PROJECT record-sets transaction add $REMOTE_ENV_IP --name=\gateway.$DOMAIN. --ttl=60 --type=A --zone=kymaga-zone
+gcloud dns --project=$PROJECT record-sets transaction add $REMOTE_ENV_IP --name=\gateway.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
 
-gcloud dns --project=$PROJECT record-sets transaction execute --zone=kymaga-zone
+gcloud dns --project=$PROJECT record-sets transaction execute --zone=$DNS_ZONE
 
 ```
