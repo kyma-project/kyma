@@ -7,7 +7,7 @@ import (
 )
 
 // SchemeGroupVersion is group version used to register these objects
-var SchemeGroupVersion = schema.GroupVersion{Group: "ui.kyma.cx", Version: "v1alpha1"}
+var SchemeGroupVersion = schema.GroupVersion{Group: "authentication.kyma-project.io", Version: "v1alpha1"}
 
 // Resource takes an unqualified resource and returns a Group qualified GroupResource
 func Resource(resource string) schema.GroupResource {

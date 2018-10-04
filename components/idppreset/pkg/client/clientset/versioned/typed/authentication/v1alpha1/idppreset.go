@@ -3,7 +3,7 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/apis/ui/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
 	scheme "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -36,7 +36,7 @@ type iDPPresets struct {
 }
 
 // newIDPPresets returns a IDPPresets
-func newIDPPresets(c *UiV1alpha1Client) *iDPPresets {
+func newIDPPresets(c *AuthenticationV1alpha1Client) *iDPPresets {
 	return &iDPPresets{
 		client: c.RESTClient(),
 	}

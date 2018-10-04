@@ -5,7 +5,7 @@ package externalversions
 import (
 	"fmt"
 
-	v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/apis/ui/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -36,9 +36,9 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=ui.kyma.cx, Version=v1alpha1
+	// Group=authentication.kyma-project.io, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("idppresets"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Ui().V1alpha1().IDPPresets().Informer()}, nil
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Authentication().V1alpha1().IDPPresets().Informer()}, nil
 
 	}
 

@@ -5,10 +5,10 @@ package v1alpha1
 import (
 	time "time"
 
-	ui_v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/apis/ui/v1alpha1"
+	authentication_v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
 	versioned "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/kyma-project/kyma/components/idppreset/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/client/listers/ui/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/client/listers/authentication/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -44,16 +44,16 @@ func NewFilteredIDPPresetInformer(client versioned.Interface, resyncPeriod time.
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.UiV1alpha1().IDPPresets().List(options)
+				return client.AuthenticationV1alpha1().IDPPresets().List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.UiV1alpha1().IDPPresets().Watch(options)
+				return client.AuthenticationV1alpha1().IDPPresets().Watch(options)
 			},
 		},
-		&ui_v1alpha1.IDPPreset{},
+		&authentication_v1alpha1.IDPPreset{},
 		resyncPeriod,
 		indexers,
 	)
@@ -64,7 +64,7 @@ func (f *iDPPresetInformer) defaultInformer(client versioned.Interface, resyncPe
 }
 
 func (f *iDPPresetInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&ui_v1alpha1.IDPPreset{}, f.defaultInformer)
+	return f.factory.InformerFor(&authentication_v1alpha1.IDPPreset{}, f.defaultInformer)
 }
 
 func (f *iDPPresetInformer) Lister() v1alpha1.IDPPresetLister {
