@@ -14,6 +14,8 @@ type Title {
 }
 
 type Section {
+    name: String!
+    anchor: String!
     titles: [Title!]!
     topicType: String!
 }

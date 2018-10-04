@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: kyma-default
+spec:
+  hard:
+    # The sum of all pod memory requests must not exceed this value.
+    requests.memory: 2Gi
+
+    # The sum of all pod memory limit must not exceed this value.
+    limits.memory: 4Gi
