@@ -58,7 +58,7 @@ spec:
                 - /usr/local/bin/galley
                 - probe
                 - --probe-path=/health
-                - --interval=10s
+                - --interval=5s
             initialDelaySeconds: 5
             periodSeconds: 5
           readinessProbe:
@@ -67,7 +67,7 @@ spec:
                 - /usr/local/bin/galley
                 - probe
                 - --probe-path=/health
-                - --interval=10s
+                - --interval=5s
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:

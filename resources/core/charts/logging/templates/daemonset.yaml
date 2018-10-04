@@ -17,7 +17,11 @@ spec:
       hostPID: true
       containers:
       - resources:
+          {{ if not .Values.global.isLocalEnv }}
 {{ toYaml .Values.logspout.resources | indent 12}}
+          {{- else }}
+{{ toYaml .Values.isLocalEnv.resources | indent 12 }}
+          {{ end }}
         securityContext:
           privileged: true
         env:

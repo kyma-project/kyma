@@ -43,7 +43,11 @@ spec:
   replicas: {{ .Values.replicaCount }}
   logLevel:  {{ .Values.logLevel }}
   resources:
+{{ if not .Values.global.isLocalEnv }}
 {{ toYaml .Values.resources | indent 4 }}
+{{- else }}
+{{ toYaml .Values.isLocalEnv.resources | indent 4 }}
+{{ end }}
   retention: "{{ .Values.retention }}"
 {{- if .Values.routePrefix }}
   routePrefix: "{{ .Values.routePrefix }}"
