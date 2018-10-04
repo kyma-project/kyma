@@ -11,7 +11,8 @@ This document describes how to configure the Installer with override values for 
 
 The Installer is a Kubernetes Operator that uses Helm to install Kyma components.
 Helm provides an *overrides* feature to customize the installation of charts, such as to configure environment-specific values.
-When using Installer for Kyma installation, users can't interact with Helm directly (installation is not an interactive process).
+When using Installer for Kyma installation, users can't interact with Helm directly. The installation is not an interactive process.
+
 To customize Kyma installation, Installer exposes a generic mechanism for configuring Helm overrides called **user-defined** overrides.
 
 
