@@ -53,7 +53,7 @@ global:
     version: 6e0a7fe2
   test_environments:
     dir: develop/
-    version: 84359277
+    version: '84359277'
   test_logging:
     dir: develop/
     version: 6e0a7fe2
