@@ -30,6 +30,10 @@ global:
     version: 0.4.2
   apiserver_proxy:
     version: 0.4.2
+  connector_service:
+    version: 0.4.2
+  connector_service_tests:
+    version: 0.4.2
   docs:
     version: 0.4.2
   environments:
@@ -39,6 +43,10 @@ global:
   event_bus_tests:
     version: 0.4.2
   event_service:
+    version: 0.4.2
+  gateway:
+    version: 0.4.2
+  gateway_tests:
     version: 0.4.2
   kubeless_test_client:
     version: 0.4.2
@@ -50,9 +58,9 @@ global:
     version: 0.4.2
   remote_environment_controller_tests:
     version: 0.4.2
-  test_environments:
-    version: 0.4.2
   remote_environment_broker:
+    version: 0.4.2
+  test_environments:
     version: 0.4.2
   test_logging:
     version: 0.4.2

@@ -1,7 +1,5 @@
 controller:
   image:
-    name: develop/remote-environment-controller
-    tag: cc559ab5
     pullPolicy: IfNotPresent
   args:
     appName: remote-environment-controller
@@ -10,5 +8,4 @@ controller:
 tests:
   enabled: false
   image:
-    name: develop/remote-environment-controller-tests
-    tag: 345add9f
+    pullPolicy: IfNotPresent

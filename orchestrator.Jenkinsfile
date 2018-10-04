@@ -359,6 +359,8 @@ global.helm_broker.version=${versions['components/helm-broker']}
 global.helm_broker.dir=${versions['components/helm-broker'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.remote_environment_broker.version=${versions['components/remote-environment-broker']}
 global.remote_environment_broker.dir=${versions['components/remote-environment-broker'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.remote_environment_controller.version=${versions['components/remote-environment-controller']}
+global.remote_environment_controller.dir=${versions['components/remote-environment-controller'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.metadata_service.version=${versions['components/metadata-service']}
 global.metadata_service.dir=${versions['components/metadata-service'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.gateway.version=${versions['components/gateway']}

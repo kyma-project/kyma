@@ -3,13 +3,13 @@ global:
     path: eu.gcr.io/kyma-project
   event_service:
     version: 0.4.2
+  gateway:
+    version: 0.4.2
   gateway_tests:
     version: 0.4.2
 
 deployment:
   image:
-    name: develop/gateway
-    tag: c8e79413
     pullPolicy: IfNotPresent
   args:
     proxyPort: &proxyPort 8080
