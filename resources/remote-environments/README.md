@@ -7,6 +7,6 @@ Read the [Application Connector documentation](../../docs/application-connector/
 
 ## Details
 
-This directory contains the default Remote Environments Helm chart that creates new Remote Environments. 
+This directory contains the Helm chart that creates the two default Remote Environments. 
 Additional resources necessary for the proper operation of a RE are installed by the Remote Environment Controller.
 A single RE allows to connect a single external solution to Kyma.
