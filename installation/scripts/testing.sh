@@ -108,7 +108,7 @@ function checkTestPodLabel() {
 function cleanupHelmTestPods() {
     local namespace=$1
 
-    log "\nCleaning up helm test pods" nc bold
+    log "\nCleaning up helm test pods in namespace ${namespace}" nc bold
     kubectl delete pod -n ${namespace} -l helm-chart-test=true
     deleteErr=$?
     if [ ${deleteErr} -ne 0 ]
@@ -177,7 +177,25 @@ function printImagesWithLatestTag(){
     return 0
 }
 
+echo "-------------------------------"
+echo "- Ensure test Pods are deleted "
+echo "-------------------------------"
 
+cleanupHelmTestPods kyma-system
+cleanupCoreErr=$?
+
+cleanupHelmTestPods istio-system
+cleanupIstioErr=$?
+
+cleanupHelmTestPods kyma-integration
+cleanupGatewayErr=$?
+
+if [ ${cleanupGatewayErr} -ne 0 ] || [ ${cleanupIstioErr} -ne 0 ]  || [ ${cleanupCoreErr} -ne 0 ]
+then
+    exit 1
+else
+    exit 0
+fi
 
 echo "----------------------------"
 echo "- Testing Kyma..."
