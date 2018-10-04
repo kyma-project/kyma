@@ -48,4 +48,4 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.components** | **YES** | Lists which components of Helm chart components to `install` or `update`. |
 | **spec.components.name** | **YES** | Specifies the name of the component which is the same as the name of the component subdirectory in the `resources` directory. |
 | **spec.components.namespace** | **YES** | Defines the Namespace in which you want the Installer to `install`, or `update` the component. |
-| **spec.components.release** | **NO** | Provides the name of the Helm release in case it should differ from the component name. |
+| **spec.components.release** | **NO** | Provides the name of the Helm release. The default parameter is the component name. |
