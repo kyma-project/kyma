@@ -22,6 +22,11 @@ spec:
           - name: etcd-backup
             image: "{{ .Values.global.containerRegistry.path }}/etcd-backup:{{ .Values.backupApp.image.tag }}"
             imagePullPolicy: "{{ .Values.backupApp.image.pullPolicy }}"
+            resources:
+              limits:
+                memory: 64Mi
+              requests:
+                memory: 16Mi
             env:
             - name: APP_WORKING_NAMESPACE
               valueFrom:

@@ -18,9 +18,9 @@ data:
       - name: istio-init
         resources:
           limits:
-            memory: 96Mi
-          requests:
             memory: 32Mi
+          requests:
+            memory: 16Mi
 {{- if contains "/" .Values.global.proxy_init.image }}
         image: "{{ .Values.global.proxy_init.image }}"
 {{- else }}
