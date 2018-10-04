@@ -13,7 +13,7 @@ This document includes an overview of resources that the Kyma Service Catalog pr
 
 * **ClusterServicePlan** is a variation of a ClusterServiceClass that offers different levels of quality, configuration options, and the cost of a given service. Contrary to the ClusterServiceClass, which is purely descriptive, the ClusterServicePlan provides technical information to the ClusterServiceBroker on this part of the service that the ClusterServiceBroker can expose.
 
-* **ServiceBroker** is a Remote Environment Broker registered in a given Environment where it exposes ServiceClasses and ServicePlans that are available only in that Environment.
+* **ServiceBroker** is any Service Broker registered in a given Environment where it exposes ServiceClasses and ServicePlans that are available only in that Environment.
 
 * **ServiceClass**  is an Environment-wide representation of a ClusterServiceClass. Similarly to the ClusterServiceClass, it is synonymous with a service in the Service Catalog.
 
