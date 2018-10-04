@@ -1,6 +1,6 @@
 // +build acceptance
 
-package ui
+package authentication
 
 import (
 	"fmt"
@@ -129,7 +129,7 @@ func createIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedRes
 
 func waitForIDPPresetCreation(name string, client *idpClientset.Clientset) error {
 	return waiter.WaitAtMost(func() (bool, error) {
-		_, err := client.UiV1alpha1().IDPPresets().Get(name, metav1.GetOptions{})
+		_, err := client.AuthenticationV1alpha1().IDPPresets().Get(name, metav1.GetOptions{})
 
 		if err != nil {
 			return false, err
@@ -203,7 +203,7 @@ func deleteIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedRes
 
 func waitForIDPPresetDeletion(name string, client *idpClientset.Clientset) error {
 	return waiter.WaitAtMost(func() (bool, error) {
-		_, err := client.UiV1alpha1().IDPPresets().Get(name, metav1.GetOptions{})
+		_, err := client.AuthenticationV1alpha1().IDPPresets().Get(name, metav1.GetOptions{})
 
 		if errors.IsNotFound(err) {
 			return true, nil
