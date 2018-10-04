@@ -1,6 +1,6 @@
 # Default values for Service Catalog
 # service-catalog image to use
-image: eu.gcr.io/kyma-project/service-catalog:0.1.32-memory-leak-fix
+image: quay.io/kubernetes-service-catalog/service-catalog:v0.1.34
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
 # "Never", and "Always"
 imagePullPolicy: Always
