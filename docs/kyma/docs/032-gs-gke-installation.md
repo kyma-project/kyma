@@ -71,6 +71,7 @@ In this step you delegate management of your domain to Google Cloud DNS. If you 
     export TLS_KEY=$(cat ./letsencrypt/live/$DOMAIN/privkey.pem | base64)
     ```
 
+
 ## Prepare GKE cluster
 
 
@@ -106,7 +107,7 @@ In this step you delegate management of your domain to Google Cloud DNS. If you 
     Ensure that `TLS_CERT`, `TLS_KEY` and `DOMAIN` env variables have proper values and execute:
 
     ```
-    cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" |sed -e "s/__.*__//g" >my-kyma.yaml
+    cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g"|sed -e "s/__.*__//g"  >my-kyma.yaml
     ```
 
     As a result, you get the my-kyma.yaml file which you can deploy on the GKE cluster.
@@ -131,7 +132,7 @@ In this step you delegate management of your domain to Google Cloud DNS. If you 
 4. Prepare deployment file:
 
     ```
-    cat installation/resources/installer.yaml <(echo "---") installation/resources/installer-config-cluster.yaml.tpl  <(echo "---") installation/resources/installer-cr.yaml.tpl | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" |sed -e "s/__.*__//g" >my-kyma.yaml
+    cat installation/resources/installer.yaml <(echo "---") installation/resources/installer-config-cluster.yaml.tpl  <(echo "---") installation/resources/installer-cr.yaml.tpl | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
     As a result, you get the my-kyma.yaml file which you can deploy on the GKE cluster.
@@ -191,3 +192,35 @@ gcloud dns --project=$PROJECT record-sets transaction add $REMOTE_ENV_IP --name=
 gcloud dns --project=$PROJECT record-sets transaction execute --zone=$DNS_ZONE
 
 ```
+
+## Configuration of server side certificate for Application Connector (optional step)
+
+If you want to increase security of Application Connector, new certificates must be applied.
+Otherwise the default one will be used.
+
+
+1. Prepare the server side certificate for Application Connector
+
+    Generate a new certificates using:
+    
+    ```
+    openssl req -new -newkey rsa:4096 -nodes -keyout ca.key -out ca.csr -subj "/C=PL/ST=N/L=GLIWICE/O=SAP Hybris/OU=Kyma/CN=wormhole.kyma.cx"
+    
+    openssl x509 -req -sha256 -days 365 -in ca.csr -signkey ca.key -out ca.pem
+    ```
+    
+2. Export certificate and key to environment variables:
+    
+    ```
+    export AC_CRT=$(cat ./ca.pem | base64 | base64)
+    export AC_KEY=$(cat ./ca.key | base64 | base64)
+    
+    ```
+    
+    The certificate and key must be encoded base64 twice.
+    
+3. Prepare installation file with the following command:
+
+    ```
+    cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__REMOTE_ENV_CA__/$AC_CRT/g" | sed -e "s/__REMOTE_ENV_CA_KEY__/$AC_KEY/g" |sed -e "s/__.*__//g"  >my-kyma.yaml
+    ```
