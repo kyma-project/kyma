@@ -64,7 +64,7 @@ To override this value, for example to "2Gi", proceed as follows:
 
 Once the installation starts, the Installer generates overrides based on the map entries. The system uses the value of "2Gi" instead of the default "1Gi" from the chart `values.yaml` file.
 
-For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and value. Don't forget to label the Secret with `installer:overrides`. Remember that values in Secrets must be base64-encoded. (TODO: same key and value, but base64...)
+For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and a base64-encoded value. Be sure to label the Secret with `installer:overrides`.
 
 
 #### Sub-chart overrides
