@@ -1,13 +1,7 @@
 ---
 title: Metadata Service
-type: Details
+type: API
 ---
-
-## Overview
-
-Metadata Service is responsible for registering APIs and events exposed by an external system.         
-
-# API
 
 Metadata Service exposes an API built around the concept of service describing external system capabilities.    
 Service contains the following:
@@ -24,27 +18,21 @@ It is possible to register many services for particular Remote Environment. The 
 Metadata Service API is described [here](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/assets/metadataapi.yaml).
 For a complete information on registering services, please see Managing Registered Services with Metadata API Guide.
 
+You can acquire the API specification of the Metadata Service for a given version using the following command:
+```
+curl https://gateway.{CLUSTER_NAME}.kyma.cx/{RE_NAME}/v1/metadata/api.yaml
+```
 
-## Implementation Details
+To access the Metadata Service's API specification locally, provide the NodePort of the `core-nginx-ingress-controller`.
 
-### Data storage
+To get the NodePort, run this command:
 
-Service's data is stored in:
-- [Remote Environment CRD](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/040-cr-remote-evironment.md)
-- [Minio](https://minio.io/)
-- Kubernetes secrets
+```
+kubectl -n kyma-system get svc core-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
+```
 
-Remote Environment CRD contains registered APIs and OAuth server urls.
+To access the specification, run:
 
-Minio storage contains:
-- API specification
-- Events catalog
-- Documentation
-
-### Kubernetes APIs usage
-
-Metadata Service interacts with Kubernetes APIs to perform the following tasks:
-- Modifying Remote Environment CRD instance
-- Creating secrets containing client id and client secret used to access OAuth secured APIs
-- Creating service used to access Proxy Service from lambda or service deployed on Kyma  
-
+```
+curl https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/metadata/api.yaml
+```

@@ -1,47 +1,28 @@
 ---
-title: Managing services in Metadata API
+title: Register and manage services
 type: Getting Started
 ---
 
-The process of connecting your external system to Kyma consists of two steps:
-- Obtaining the certificate
-- Registering services
-
-In this section we will focus on the second step, the information on how to
-obtain proper certificate are available in previous section of this Getting
-Started doc.
+This guide shows you how to register and manage the services of your external solution in Kyma.
 
 ## Prerequisites
 
-The only prerequisite to follow this guide is to have a valid certificate signed
-by Kyma's Certificate Authority
+- Valid certificate signed by the Kyma Certificate Authority.
 
-Gateway Service and Event Service are exposed via `core-nginx-ingress-controller`
-and thus you need to use it's port in requests, you can obtain it via:
-
+- Set the `NODE_PORT` environment variable to the `core-nginx-ingress-controller` of the Gateway Service and the Event Service. Run:
 ```
 export NODE_PORT=`kubectl -n kyma-system get svc core-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'`
 ```
 
-After executing this command it will be available in NODE_PORT environment variable.
+## Register a service
 
-## Registering a service
-
-At this point your Remote Environment has no registered services, you can check
-that by making following call to Metadata Service:
-```
-curl https://gateway.kyma.local:$NODE_PORT/{REMOTE_ENVIRONMENT_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-```
-
-In order to register a service you will need to prepare a body for the request
-describing your service, you can check details in [Metadata Service API reference](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/assets/metadataapi.yaml)
-or use this example:
+To register a service, follow this template to prepare the request body:
 ```
 {
   "provider": "example-provider",
   "name": "example-name",
-  "description": "this is long description of your service",
-  "shortDescription": "very brief description",
+  "description": "This is the long description of your service",
+  "shortDescription": "Short description",
   "labels": {
     "example": "true"
   },
@@ -55,9 +36,9 @@ or use this example:
       "info": {
         "title": "PetStore Events",
         "version": "1.0.0",
-        "description": "Description of all the EC events\n"
+        "description": "Description of all the events"
       },
-      "baseTopic": "stage.com.sap.hybris.commerce",
+      "baseTopic": "stage.com.some.company.system",
       "topics": {
         "petCreated.v1": {
           "subscribe": {
@@ -73,7 +54,7 @@ or use this example:
                   ],
                   "example": {
                     "id": "4caad296-e0c5-491e-98ac-0ed118f9474e",
-                    "category": "mamal",
+                    "category": "mammal",
                     "name": "doggie"
                   },
                   "properties": {
@@ -117,36 +98,31 @@ or use this example:
 }
 ```
 
-Then, just make the following call:
+Include the request body you prepared in this call:
 ```
-curl -X POST -d '{YOUR_JSON_BODY}' https://gateway.kyma.local:$NODE_PORT/ec-default/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.kyma.local:$NODE_PORT/ec-default/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
-And the response should look like:
+A successful response returns the ID of the registered service:
 ```
 {"id":"{YOUR_SERVICE_ID}"}
 ```
 
-You can always check the details of registered service by making a request:
+To check the details of a registered service, send this request:
 ```
 curl https://gateway.kyma.local:$NODE_PORT/ec-default/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
-## Updating a service
+## Update a service
 
-In order to make an update to the existing service you need to prepare a new body
-with desired values and make the following request:
+To update an existing service, prepare a new request body using the template from the following step and send it in this request:
 ```
-curl -X PUT -d '{YOUR_NEW_JSON_BODY}' https://gateway.kyma.local:$NODE_PORT/ec-default/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl -X PUT -d '{YOUR_NEW_REQUEST_BODY}' https://gateway.kyma.local:$NODE_PORT/ec-default/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
-## Deleting a service
+## Delete a service
 
-To delete a service simply make a DELETE call to the following endpoint:
+To delete a service, send this call:
 ```
 curl -X DELETE https://gateway.kyma.local:$NODE_PORT/ec-default/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
-
-Having your service registered in Metadata Service allows you to send events
-and consume it's API from within Kyma. The guides on how to do so are available
-in latter sections of our Getting Started guide.

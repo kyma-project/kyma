@@ -2,30 +2,20 @@
 title: Overview
 ---
 
-The Application Connector is a part of the Kyma project which simplifies integration of various systems with Kyma.
+The Application Connector (AC) is a proprietary Kyma implementation that allows you to connect with external solutions. No matter if you want to integrate an on-premise or a cloud system, the integration process doesn't change, which allows to avoid any configuration and network-related problems.
 
-No matter if you want to integrate an on-premise or a cloud system, the Application Connector ensures that integration works in the same way and developers are not distracted by the configuration or networking issues.
+The external solution you connect to Kyma using the AC is represented as a Remote Environment (RE). There is always a one-to-one relationship between a connected solution and a Kyma RE, which helps to ensure the highest level of security and separation. This means that you must create five separate REs in your Kyma cluster to connect five different external solutions and use their APIs and Event catalogs in Kyma.
 
-The Application Connector ensures that a connected system communicates with Kyma securely using the client certificate which can be acquired from the Connector service. A client certificate ensures that each connected system is separated.
+The AC brings the following functionality to Kyma:
 
-The Application Connector provides a possibility to communicate with services and lambdas deployed in Kyma in an asynchronous matter using events. A system can send an event which triggers a subscribed service or lambda. Developers can benefit from the built-in monitoring and tracing which allow troubleshooting of the event delivery.
+- Manages the lifecycle of REs.
+- Establishes a secure connection and generates the client certificate used by the connected external solution.
+- Registers the APIs and the Event catalogs of the connected external solution.
+- Delivers the Events from the connected external solution to the Kyma Event Bus.
+- Proxies calls sent from Kyma to external APIs registered by the connected external solution.
+- Allows to map a RE to a Kyma Environment and use its registered APIs and Event catalogs in the context of that Environment.
+- Integrates the registered APIs and Event catalogs with the Kyma Service Catalog.
 
-The Application Connector integrates a connected system with a Service Catalog. All APIs and all Events which are available in the system can be registered using the Metadata service. The registration process integrates all components into the Service Catalog. Developers can browser documentation of the registered APIs and Event Catalog and can control the access to it. [Better description required]
+All of the AC components scale independently, which allows to adjust it to fit the needs of the implementation built using Kyma.
 
-The Application Connector Proxy service is tunneling requests to the system's API. Developers don't need to take care of the endpoint configuration. The Proxy service is also able to automate the security token handling. The API can be registered together with client credentials, and OAuth token will be acquired and cached automatically.
-
-All components of the Application Connector can be scaled independently to adjust to the need of the solution which is being built on the top of the Kyma.
-
-
-## Functionality
-
-The Application Connector brings the following functionality to Kyma:
-
-- Manage the lifecycle of the Remote Environment which is representing the connected system.
-- Establishing secured connection and generation of the client certificate used by the system which is connecting to Kyma.
-- Register of the external system APIs and Event catalogs.
-- Deliver of events from the external system to Kyma Eventbus.
-- Proxing calls from the Kyma to external APIs registered by connected systems.
-- Mapping the Remote Environment to Kyma Environment in which registered APIs and Event catalogs will be used.
-- Integrate the registered APIs and Event catalogs with Kyma Service Catalog.
-
+>**NOTE:** To learn more about the Environments in Kyma, read the **Environments** document in the **Kyma** documentation topic.

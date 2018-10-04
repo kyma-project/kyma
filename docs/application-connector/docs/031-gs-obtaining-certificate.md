@@ -1,58 +1,37 @@
 ---
-title: Obtaining the Certificate
+title: Get the client certificate
 type: Getting Started
 ---
 
-After you have created Remote Environment within Kyma it's time to connect your
-external system, this process consists of two steps:
-- Obtaining the certificate
-- Registering services
+After you create a Remote Environment (RE) in Kyma, it's time to connect it with an external solution, which allows to consume external APIs and Event catalogs of this solution. To accomplish this you must get the client certificate for the external solution and register its services.
 
-In this Getting Started section we will focus on the first step.
-
-Metadata Service (a component responsible for managing registered services)
-is secured with mutual TLS authentication and thus - the client needs a proper
-certificate in order to be able to consume it's API.
+This guide shows you how to get the client certificate.
 
 ## Prerequisites
 
-During this scenario you will need to create a proper CSR (Certificate Signing
-Request), keys and certificates, to fulfil security standards we highly recommend
-you to use the
-[OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html)
-to do so.
+- You need a private RSA key for your external solution. If your solution doesn't have one, generate it using this command:
+  ```
+  openssl genrsa -out generated.key 4096
+  ```
 
-First of all you will need a private RSA key, if your external service does not already
-have one you can create it by using following command:
+- [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which fulfil high security standards.
 
-`openssl genrsa -out generated.key 4096`
+## Get the configuration URL with a token
 
-After you've got your key you can proceed to the next step.
+Get the configuration URL with a token which allows you to get Kyma CSR configuration and URLs in Kyma required to connect your external solution to a created Remote Environment.
+Follow this steps to get it using the CLI:
 
-## Retrieving token
-
->**NOTE:** In this step we are beginning so-called 'one click integration', you can check the whole flow with all the details described in Connector Service tab in Architecture doc.
-
-You can get the required token in two ways, first one makes the use of Kyma
-console UI:
-- From home page navigate to **Administration**
-- In **Integration** section select **Remote Environments**
-- Choose the Remote Environment that you want to connect your external system to
-- Click **Connect Remote Environment**
-- Copy the token by clicking **Copy to clipboard**
-
-The second way enables you to fetch the token with the use of `kubectl port-forward`:
-- First, you need to expose Connector Service outside of Kubernetes:
+- Expose the Connector Service outside of Kubernetes using `kubectl port-forward`:
   ```
   kubectl -n=kyma-integration port-forward svc/connector-service-internal-api 8080:8080
   ```
 
-- You should now be able to make a POST request to the following endpoint
+- Make a POST request to the `tokens` endpoint:
   ```
   curl -X POST http://localhost:8080/v1/remoteenvironments/{remote-environment-name}/tokens
   ```
 
-  This call should yield response of following structure:
+A successful call returns the following response:
   ```
   {
     "url":"{CONFIGURATION_URL_WITH_TOKEN}",
@@ -60,52 +39,58 @@ The second way enables you to fetch the token with the use of `kubectl port-forw
   }
   ```
 
->**NOTE:** This token that is valid for a single CSR information call. If you need to get the configuration details once again, just follow above steps to fetch a new token.
+Alternatively, use the UI:
 
-## Fetching CSR information from Kyma
+  - Go to the Kyma console UI.
+  - Select **Administration**.
+  - Select the **Remote Environments** from the **Integration** section.
+  - Choose the Remote Environment to which you want to connect the external solution.
+  - Click **Connect Remote Environment**.
+  - Copy the token by clicking **Copy to clipboard**.
 
-You can now use provided link to fetch information about the Kyma URLs and CSR
-configuration that you need to provide, to do so - make the following request:
+## Get the CSR information and configuration details from Kyma
+
+Use the link you got in the previous step to fetch the CSR information and configuration details required to connect your external solution. Run:
+
 ```
 curl {CONFIGURATION_URL_WITH_TOKEN}
 ```
+>**NOTE:** The URL you call in this step contains a token that is valid for a single call. If you need to get the configuration details once again, generate a new configuration URL with a valid token and call it again. You get a code `403` error if you call the same configuration URL more than once.
 
-The response should look like:
+A successful call returns the following response:
 ```
 {
     "csrUrl": "{CSR_SIGNING_URL_WITH_TOKEN}",
     "api":{
         "metadataUrl":      "https://gateway.{CLUSTER_NAME}.kyma.cluster.cx/{REMOTE-ENVIRONMENT-NAME}/v1/metadata/services",
         "eventsUrl":        "https://gateway.{CLUSTER_NAME}.kyma.cluster.cx/{REMOTE-ENVIRONMENT-NAME}/v1/events",
-        "certificatesUrl":  "https://connector-service.{CLUSTER_NAME}.kyma.cluster.cx/v1/remoteenvironments/{remote-environment-name}",
+        "certificatesUrl":  "https://connector-service.{CLUSTER_NAME}.kyma.cluster.cx/v1/remoteenvironments/{RE_NAME}",
     },
     "certificate":{
-        "subject":"OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={REMOTE-ENVIRONMENT-NAME}",
+        "subject":"OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={RE_NAME}",
         "extensions": "",
         "key-algorithm": "rsa2048",
     }
 }
 ```
 
-## Generating CSR and sending it to Kyma
+## Generate a CSR and send it to Kyma
 
-You can now generate CSR with values provided by Connector Service:
+Generate a CSR using the values obtained in the previous step:
 ```
-openssl req -new -out generated.csr -key generated.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN={REMOTE-ENVIRONMENT-NAME}"
+openssl req -new -out generated.csr -key generated.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN={RE_NAME}"
 ```
 
-After the CSR is created, encode it with Base64 and then send it to Kyma:
+After the CSR is created, encode it with Base64. Send the encoded CSR to Kyma. Run:
 ```
 curl -H "Content-Type: application/json" -d '{"csr":"{BASE64_ENCODED_CSR_HERE}"}' {CSR_SIGNING_URL_WITH_TOKEN}
 ```
 
-In the response there is a valid certificate signed by Kyma's Certificate Authority:
+The response contains a valid client certificate signed by the Kyma Certificate Authority:
 ```
 {
     "crt":"BASE64_ENCODED_CRT"
 }
 ```
 
-After you've received your certificate you can start registering your services in
-Metadata Service API, you will find details on this topic in the next section of
-this Getting Started doc.
+After you receive the certificate, register the services of your external solution using the Metadata API.

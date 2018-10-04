@@ -3,79 +3,57 @@ title: Application Connector components
 type: Architecture
 ---
 
-The Application Connector consists of the following components:
-
-* **Nginx Ingress Controller**
-* **Connector Service** 
-* **Metadata Service**
-* **Event Service**
-* **Proxy Service**
-* **Remote Environments**
-* **Minio bucket**
-* **Kubernetes Secrets**
-* **Kubernetes Services**
-
-
 ![Architecture Diagram](assets/001-application-connector.png)
 
+## Remote Environment
 
-### Connector Service
+A Remote Environment (RE) represents an external solution connected to Kyma. It handles the security and integration with other components, such as the Service Catalog or the Event Bus.
+Using the components of the Application Connector, the RE creates a coherent identity for a connected external solution and ensures its separation.
+All REs are created through the RemoteEnvironment Custom Resource, which also stores all of the relevant metadata. You can map a RE to many Kyma Environments and use the APIs and the Event Catalogs of the connected external solution within their context.
 
-The Connector Service is handling the exchange of the client certificates for a given Remote Environment and also returns the Metadata service and Event service endpoints.
-The Connector Service is signing each client certificate with use of server side certificate which is stored in Kubernetes secrets.
+## Remote Environment controller
 
-The detailed description can be found here: [Connector Service](TBD)
+The controller listens for creating or deleting the RemoteEnvironment Custom Resources and acts accordingly, either provisioning or de-provisioning an instance of Proxy Service and Event Service for every Custom Resource.         
 
+>**NOTE:** Every RemoteEnvironment Custom Resource is constitutes a RE to which you can connect an external solution.
 
-### Metadata Service
+## Connector Service
 
-The Metadata Service stores all registered APIs and Event Catalog which are exposed by the connected system.
-The APIs and Event catalogs metadata are stored in Remote Environment Custom Resource and the documentation is stored in Minio bucket.
+The Connector Service:
+- Handles the exchange of client certificates for a given RE.
+- Provides the Metadata Service and Event Service endpoints.
+- Signs client certificates using the server side certificate stored in Kubernetes Secrets.
 
-The Kubernetes services are created for each registered API and a new Service classes in Service Catalog is registered.
-Therefore, the services and Lambda function within Kyma can access the external API using the Service Catalog binding and the Proxy service.
- 
-The API can be registered together with an OAuth credentials which are stored in Kubernetes secrets.
+## Metadata Service
 
-The detailed description can be found here: [Metadata Service](TBD)
+The Metadata Service stores all registered APIs and Event Catalog exposed by a connected external solution. The APIs and Event catalogs metadata are stored in RemoteEnvironment Custom Resource.
+The system creates a new Kubernetes service for each registered API. Additionally, a new Service Classes is registered in the Service Catalog.
 
-### Event service
+>**NOTE:** Using the Metadata Service, you can register an API along with its OAuth credentials. The credentials are stored in a Kubernetes Secret.
 
-Event Service is responsible for publishing events in Kyma. It is a connecting the external system with Kyma Eventbus.
+## Nginx Ingress Controller
 
-### Proxy service
+The Nginx Ingress Controller exposes the Application Connector by assigning a public IP address and a DNS name to it.
+The DNS name of the Ingress is cluster-dependant and follows the `gateway.{cluster-dns}` format, for example `gateway.servicemanager.cluster.kyma.cx`.
+You can access every exposed Remote Environment through its Gateway by using the assigned path. For example, to reach the Gateway for the `ec-default` Remote Environment, use this URL: `gateway.servicemanager.cluster.kyma.cx/ec-default`. The Nginx Ingress Controller secures the endpoint with certificate validation. Each call must include a valid client certificate which is Remote Environment-specific.
 
-The Proxy service is sending events to the Kyma Eventbus. The main purpose of the service to enrich the events with additional metadata indicating the source of the event.
-That allows routing the events to Lambda functions and Services based on Remote Environment from which they are coming.
+## Proxy Service
 
-The detailed description can be found here: [Proxy Service](TBD)
+The Proxy Service is an intermediary component between a lambda function or a service and an external API registered with the Metadata Service. It acts as a proxy and can acquire OAuth tokens.
 
+## Event Service
 
-### Remote Environments
+The Event Service sends events to the Kyma Event Bus and enriches the events with metadata that indicates the source of the Event.
+This allows to route the events to Lambda functions and Services based on their source Remote Environment.
 
-Remote Environment represents the external system which is connected to Kyma.
+## Minio bucket
 
-The Remote Environment is handling aspects of the security and integration with other Kyma components, like Service Catalog and Event bus.
+The Minio bucket stores the documentation of the connected external solution's registered APIs and Event catalogs.
 
-The Remote Environment is creating a coherent entity from underlying Application Connector's components for a connected system and ensures a separation between different environments.
+## Kubernetes Secret
 
-All Remote Environments are stored using Kubernetes Custom Resource Definition (CRD). You can find more details here [Remote Environment CRD](040-remote-environment-custom-resource.md)
+The Kubernetes Secret is a Kubernetes object which stores sensitive data, such as the OAuth credentials.
 
-The Remote Environment can be mapped to many Kyma Environments using the [Environment Mapping CRD](041-cr-environment-mapping.md).
+## Kubernetes Services
 
-
-
-
-### Minio bucket
-
-Minio bucket is the storag for documentation of the registered APIs and Event catalogs.
-
-### Kubernetes Secret
-
-Kubernetes Secret is a Kubernetes Object which stores sensitive data, like OAuth credentials
-
-### Kubernetes Services
-
-Kubernetes services are used for managing an access to the external API over the Proxy service from the Lambda functions and services deployed in Kyma.
-
-
+Kubernetes services are used to manage the access from the Lambda functions and services deployed in Kyma to the external APIs over the Proxy Service.

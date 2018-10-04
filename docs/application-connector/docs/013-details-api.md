@@ -28,12 +28,3 @@ To access the specification, run:
 ```
 curl https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/metadata/api.yaml
 ```
-
-You can acquire the API specification for a given version directly from the Connector Service:
-```
-curl https://connector-service.{CLUSTER_NAME}.kyma.cx/v1/api.yaml
-```
-You can also access it locally:
-```
-curl https://connector-service.kyma.local/v1/api.yaml
-```
