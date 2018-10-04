@@ -63,6 +63,7 @@ projects = [
     "tests/api-controller-acceptance-tests",
     "tests/connector-service-tests",
     "tests/metadata-service-tests",
+    "tests/remote-environment-controller-tests",
     "tests/event-bus",
     "governance",
 ]
@@ -243,6 +244,8 @@ global.helm_broker.version=${appVersion}
 global.helm_broker.dir=${dockerPushRoot}
 global.remote_environment_broker.version=${appVersion}
 global.remote_environment_broker.dir=${dockerPushRoot}
+global.remote_environment_controller.version=${appVersion}
+global.remote_environment_controller.dir=${dockerPushRoot}
 global.metadata_service.version=${appVersion}
 global.metadata_service.dir=${dockerPushRoot}
 global.gateway.version=${appVersion}
@@ -285,6 +288,8 @@ global.connector_service_tests.version=${appVersion}
 global.connector_service_tests.dir=${dockerPushRoot}
 global.metadata_service_tests.version=${appVersion}
 global.metadata_service_tests.dir=${dockerPushRoot}
+global.remote-environment-controller-tests.version=${appVersion}
+global.remote-environment-controller-tests.dir=${dockerPushRoot}
 global.event_bus_tests.version=${appVersion}
 global.event_bus_tests.dir=${dockerPushRoot}
 global.test_logging.version=${appVersion}
