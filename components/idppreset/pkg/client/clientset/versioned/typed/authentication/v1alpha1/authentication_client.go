@@ -3,28 +3,28 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/apis/ui/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
 	"github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/scheme"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )
 
-type UiV1alpha1Interface interface {
+type AuthenticationV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	IDPPresetsGetter
 }
 
-// UiV1alpha1Client is used to interact with features provided by the ui.kyma.cx group.
-type UiV1alpha1Client struct {
+// AuthenticationV1alpha1Client is used to interact with features provided by the authentication.kyma-project.io group.
+type AuthenticationV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *UiV1alpha1Client) IDPPresets() IDPPresetInterface {
+func (c *AuthenticationV1alpha1Client) IDPPresets() IDPPresetInterface {
 	return newIDPPresets(c)
 }
 
-// NewForConfig creates a new UiV1alpha1Client for the given config.
-func NewForConfig(c *rest.Config) (*UiV1alpha1Client, error) {
+// NewForConfig creates a new AuthenticationV1alpha1Client for the given config.
+func NewForConfig(c *rest.Config) (*AuthenticationV1alpha1Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
@@ -33,12 +33,12 @@ func NewForConfig(c *rest.Config) (*UiV1alpha1Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &UiV1alpha1Client{client}, nil
+	return &AuthenticationV1alpha1Client{client}, nil
 }
 
-// NewForConfigOrDie creates a new UiV1alpha1Client for the given config and
+// NewForConfigOrDie creates a new AuthenticationV1alpha1Client for the given config and
 // panics if there is an error in the config.
-func NewForConfigOrDie(c *rest.Config) *UiV1alpha1Client {
+func NewForConfigOrDie(c *rest.Config) *AuthenticationV1alpha1Client {
 	client, err := NewForConfig(c)
 	if err != nil {
 		panic(err)
@@ -46,9 +46,9 @@ func NewForConfigOrDie(c *rest.Config) *UiV1alpha1Client {
 	return client
 }
 
-// New creates a new UiV1alpha1Client for the given RESTClient.
-func New(c rest.Interface) *UiV1alpha1Client {
-	return &UiV1alpha1Client{c}
+// New creates a new AuthenticationV1alpha1Client for the given RESTClient.
+func New(c rest.Interface) *AuthenticationV1alpha1Client {
+	return &AuthenticationV1alpha1Client{c}
 }
 
 func setConfigDefaults(config *rest.Config) error {
@@ -66,7 +66,7 @@ func setConfigDefaults(config *rest.Config) error {
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *UiV1alpha1Client) RESTClient() rest.Interface {
+func (c *AuthenticationV1alpha1Client) RESTClient() rest.Interface {
 	if c == nil {
 		return nil
 	}
