@@ -26,7 +26,22 @@ metadata:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 
-| Parameter   |      Mandatory?      |  Description |
+| Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR and the Remote Environment. |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the Remote Environment is enabled. |
+
+## Related resources and components
+
+These are the resources related to this CR:
+
+| Custom resource   |   Description |
+|:----------:|:------|
+| RemoteEnvironment |  Uses this CR to expose RemoteEnvironment's services in a given Environment. |
+
+These components use this CR:
+
+| Component   |   Description |
+|:----------:|:------|
+| Remote Environment Broker |  Uses this CR to enable the provisioning of the ServiceClasses from the given RemoteEnvironment. |
+| ui-api-layer | Exposes the given CR to the Console UI. |

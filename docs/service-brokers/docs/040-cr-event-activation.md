@@ -29,9 +29,26 @@ spec:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 
-| Parameter   |      Mandatory?      |  Description |
+| Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR and the ID of the Remote Environment service. This field is also used to fetch Event schemas from the Minio storage.  |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is created. |
 | **spec.displayName** |    **YES**   | Specifies a human-readable name of the Remote Environment service. |
 | **spec.sourceId** |    **YES**   | Used to construct a Publish-Subscribe (Pub/Sub) topic name where the Events are send and from where the Events are consumed. |
+
+## Related resources and components
+
+These are the resources related to this CR:
+
+| Custom resource   |   Description |
+|:----------:|:------|
+| RemoteEnvironment |  Describes a service from which the user receives Events. |
+| Subscription | Contains information on to how create an infrastructure for consuming Events. Works only if the EventActivation is enabled.  |
+
+These components use this CR:
+
+| Component   |   Description |
+|:----------:|:------|
+| Remote Environment Broker |  Uses this CR to enable receiving Events from a given service. |
+| Event Bus | Uses this CR to control the consumption of an Event.  |
+| ui-api-layer |  Exposes the given CR to the Console UI. |

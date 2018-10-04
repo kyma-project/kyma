@@ -49,7 +49,7 @@ spec:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 
-| Parameter   |      Mandatory?      |  Description |
+| Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **spec.source** |    **NO**   | Identifies the Remote Environment in the cluster. |
