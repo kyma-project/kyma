@@ -4,14 +4,15 @@ global:
   event_service:
     version: 6e0a7fe2
     dir: develop/
+  gateway:
+    version: 6e0a7fe2
+    dir: develop/
   gateway_tests:
     version: 6e0a7fe2
     dir: develop/
 
 deployment:
   image:
-    name: develop/gateway
-    tag: c8e79413
     pullPolicy: IfNotPresent
   args:
     proxyPort: &proxyPort 8080

@@ -71,7 +71,7 @@
 /resources/core/charts/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
 # The `minio` subchart
-/resources/core/charts/minio/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
+/resources/core/charts/minio/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
 
 # The `event-bus` subchart
 /resources/core/charts/event-bus/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
@@ -101,7 +101,7 @@
 /resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
 # The `templates` chart
-/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
+/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
 
 # The `messaging` subdirectory
 /resources/examples/lambda-messages/ @pbochynski @PK85
@@ -114,9 +114,6 @@
 
 # The `istio` subdirectory
 /resources/istio/ @piotrmsc @kubadz @sjanota
-
-# The `istio-kyma-patch` subdirectory
-/resources/istio-kyma-patch/ @piotrmsc @kubadz @sjanota
 
 # The `jaeger` charts
 /resources/core/charts/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
@@ -148,9 +145,6 @@
 
 # Istio Extensions Component
 /components/istio-webhook/ @piotrmsc
-
-# Istio Extensions Component
-/components/istio-kyma-patch/ @piotrmsc @sjanota @kubadz
 
 # Remote environment controller Component
 /components/remote-environment-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel

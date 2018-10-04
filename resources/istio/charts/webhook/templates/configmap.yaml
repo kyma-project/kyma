@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-webhook
+data:  
+  plugin.lua: |
+{{ .Files.Get "scripts/plugin.lua" | indent 4  }}

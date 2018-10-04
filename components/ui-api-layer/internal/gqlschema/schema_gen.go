@@ -322,6 +322,8 @@ type ComplexityRoot struct {
 	}
 
 	Section struct {
+		Name      func(childComplexity int) int
+		Anchor    func(childComplexity int) int
 		Titles    func(childComplexity int) int
 		TopicType func(childComplexity int) int
 	}
@@ -3162,6 +3164,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Secret.Data(childComplexity), true
+
+	case "Section.name":
+		if e.complexity.Section.Name == nil {
+			break
+		}
+
+		return e.complexity.Section.Name(childComplexity), true
+
+	case "Section.anchor":
+		if e.complexity.Section.Anchor == nil {
+			break
+		}
+
+		return e.complexity.Section.Anchor(childComplexity), true
 
 	case "Section.titles":
 		if e.complexity.Section.Titles == nil {
@@ -10781,6 +10797,16 @@ func (ec *executionContext) _Section(ctx context.Context, sel ast.SelectionSet, 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Section")
+		case "name":
+			out.Values[i] = ec._Section_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "anchor":
+			out.Values[i] = ec._Section_anchor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "titles":
 			out.Values[i] = ec._Section_titles(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -10800,6 +10826,50 @@ func (ec *executionContext) _Section(ctx context.Context, sel ast.SelectionSet, 
 		return graphql.Null
 	}
 	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Section_name(ctx context.Context, field graphql.CollectedField, obj *Section) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "Section",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Section_anchor(ctx context.Context, field graphql.CollectedField, obj *Section) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "Section",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Anchor, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
@@ -16147,6 +16217,8 @@ type Title {
 }
 
 type Section {
+    name: String!
+    anchor: String!
     titles: [Title!]!
     topicType: String!
 }

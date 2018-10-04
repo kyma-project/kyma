@@ -33,6 +33,7 @@ dockerPushRoot = ''
 projects = [
     "docs",
     "components/api-controller",
+    "components/apiserver-proxy",
     "components/binding-usage-controller",
     "components/configurations-generator",
     "components/environments",
@@ -62,6 +63,7 @@ projects = [
     "tests/api-controller-acceptance-tests",
     "tests/connector-service-tests",
     "tests/metadata-service-tests",
+    "tests/remote-environment-controller-tests",
     "tests/event-bus",
     "governance",
 ]
@@ -112,23 +114,22 @@ try {
         }
     }
 
-    // TODO uncomment build and test stages after testing
-    // // build components
-    // stage('build projects') {
-    //     parallel jobs
-    // }
+    // build components
+    stage('build projects') {
+        parallel jobs
+    }
 
-    // // test the release
-    // stage('launch Kyma integration') {
-    //     build job: 'kyma/integration',
-    //         wait: true,
-    //         parameters: [
-    //             string(name:'GIT_REVISION', value: "$commitID"),
-    //             string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-    //             string(name:'APP_VERSION', value: "$appVersion"),
-    //             string(name:'COMP_VERSIONS', value: "${versionsYaml()}") // YAML string
-    //         ]
-    // }
+    // test the release
+    stage('launch Kyma integration') {
+        build job: 'kyma/integration',
+            wait: true,
+            parameters: [
+                string(name:'GIT_REVISION', value: "$commitID"),
+                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+                string(name:'APP_VERSION', value: "$appVersion"),
+                string(name:'COMP_VERSIONS', value: "${versionsYaml()}") // YAML string
+            ]
+    }
 
     // publish release artifacts
     podTemplate(label: label) {
@@ -227,6 +228,8 @@ def versionsYaml() {
 """
 global.docs.version=${appVersion}
 global.docs.dir=${dockerPushRoot}
+global.apiserver_proxy.version=${appVersion}
+global.apiserver_proxy.dir=${dockerPushRoot}
 global.api_controller.version=${appVersion}
 global.api_controller.dir=${dockerPushRoot}
 global.binding_usage_controller.version=${appVersion}
@@ -241,6 +244,8 @@ global.helm_broker.version=${appVersion}
 global.helm_broker.dir=${dockerPushRoot}
 global.remote_environment_broker.version=${appVersion}
 global.remote_environment_broker.dir=${dockerPushRoot}
+global.remote_environment_controller.version=${appVersion}
+global.remote_environment_controller.dir=${dockerPushRoot}
 global.metadata_service.version=${appVersion}
 global.metadata_service.dir=${dockerPushRoot}
 global.gateway.version=${appVersion}
@@ -283,6 +288,8 @@ global.connector_service_tests.version=${appVersion}
 global.connector_service_tests.dir=${dockerPushRoot}
 global.metadata_service_tests.version=${appVersion}
 global.metadata_service_tests.dir=${dockerPushRoot}
+global.remote-environment-controller-tests.version=${appVersion}
+global.remote-environment-controller-tests.dir=${dockerPushRoot}
 global.event_bus_tests.version=${appVersion}
 global.event_bus_tests.dir=${dockerPushRoot}
 global.test_logging.version=${appVersion}

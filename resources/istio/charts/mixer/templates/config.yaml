@@ -28,7 +28,7 @@ spec:
     request.scheme:
       valueType: STRING
     request.total_size:
-          valueType: INT64
+      valueType: INT64
     request.size:
       valueType: INT64
     request.time:
@@ -42,7 +42,7 @@ spec:
     response.headers:
       valueType: STRING_MAP
     response.total_size:
-          valueType: INT64
+      valueType: INT64
     response.size:
       valueType: INT64
     response.time:

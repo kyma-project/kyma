@@ -17,7 +17,6 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
-        traffic.sidecar.istio.io/includeInboundPorts: "{{ .Values.deployment.args.proxyPort }}"
         traffic.sidecar.istio.io/includeInboundPorts: "{{ .Values.deployment.args.externalAPIPort }}"
       labels:
         app: {{ .Chart.Name }}
@@ -25,7 +24,7 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag }}"
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.metadata_service.dir }}metadata-service:{{ .Values.global.metadata_service.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/metadataservice"
@@ -47,8 +46,6 @@ spec:
                 name: {{ .Values.minioUserSecretName }}
                 key: secretkey
         ports:
-          - containerPort: {{ .Values.deployment.args.proxyPort }}
-            name: proxy-port
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
           - containerPort: 9090
