@@ -6,7 +6,7 @@ The diagram and steps describe the Service Catalog workflow and the roles of spe
 
 ![Service Catalog flow](assets/service-catalog-flow.svg)
 
-1. The Kyma installation results in the registration of the default Service Brokers in the Kyma cluster. The Kyma administrator can manually register other ClusterServiceBrokers in the Kyma cluster. The Kyma user can also register a Remote Environment Broker (ServiceBroker) in a given Environment.
+1. The Kyma installation results in the registration of the default Service Brokers in the Kyma cluster. The Kyma administrator can manually register other ClusterServiceBrokers in the Kyma cluster. The Kyma user can also register a Service Broker (ServiceBroker) in a given Environment.
 
 2. Inside the cluster, each ClusterServiceBroker exposes services that are ClusterServiceClasses in their different variations called ClusterServicePlans. Similarly, the ServiceBroker registered in a given Environment exposes ServiceClasses and ServicePlans only in this specific Environment.
 
