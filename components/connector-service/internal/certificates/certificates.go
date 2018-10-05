@@ -13,14 +13,14 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
 
-const Certificate_Validity_Days = 90
+const CertificateValidityDays = 365
 
 type CertificateUtility interface {
-	LoadCert(encodedData []byte) (crt *x509.Certificate, appError apperrors.AppError)
-	LoadKey(encodedData []byte) (key *rsa.PrivateKey, appError apperrors.AppError)
-	LoadCSR(encodedData string) (csr *x509.CertificateRequest, appError apperrors.AppError)
+	LoadCert(encodedData []byte) (*x509.Certificate, apperrors.AppError)
+	LoadKey(encodedData []byte) (*rsa.PrivateKey, apperrors.AppError)
+	LoadCSR(encodedData string) (*x509.CertificateRequest, apperrors.AppError)
 	CheckCSRValues(csr *x509.CertificateRequest, subject CSRSubject) apperrors.AppError
-	SignWithCA(caCrt *x509.Certificate, csr *x509.CertificateRequest, key *rsa.PrivateKey) (crtBase64 string, appError apperrors.AppError)
+	CreateCrtChain(caCrt *x509.Certificate, csr *x509.CertificateRequest, key *rsa.PrivateKey) (string, apperrors.AppError)
 }
 
 type certificateUtility struct {
@@ -39,17 +39,7 @@ func NewCertificateUtility() CertificateUtility {
 	return &certificateUtility{}
 }
 
-func (cu *certificateUtility) decodeBytesFromBase64(bytes []byte) (decodedData []byte, appError apperrors.AppError) {
-	data := make([]byte, base64.StdEncoding.DecodedLen(len(bytes)))
-	_, err := base64.StdEncoding.Decode(data, bytes)
-	if err != nil {
-		return nil, apperrors.Internal("There was an error while parsing the base64 content. An incorrect value was provided.")
-	}
-
-	return data, nil
-}
-
-func (cu *certificateUtility) decodeStringFromBase64(bytes string) (decodedData []byte, appError apperrors.AppError) {
+func decodeStringFromBase64(bytes string) ([]byte, apperrors.AppError) {
 	data, err := base64.StdEncoding.DecodeString(bytes)
 	if err != nil {
 		return nil, apperrors.BadRequest("There was an error while parsing the base64 content. An incorrect value was provided.")
@@ -58,11 +48,7 @@ func (cu *certificateUtility) decodeStringFromBase64(bytes string) (decodedData 
 	return data, nil
 }
 
-func (cu *certificateUtility) encodeStringBase64(bytes []byte) (data string) {
-	return base64.StdEncoding.EncodeToString(bytes)
-}
-
-func (cu *certificateUtility) LoadCert(encodedData []byte) (crt *x509.Certificate, appError apperrors.AppError) {
+func (cu *certificateUtility) LoadCert(encodedData []byte) (*x509.Certificate, apperrors.AppError) {
 
 	pemBlock, _ := pem.Decode(encodedData)
 	if pemBlock == nil {
@@ -77,7 +63,7 @@ func (cu *certificateUtility) LoadCert(encodedData []byte) (crt *x509.Certificat
 	return caCRT, nil
 }
 
-func (cu *certificateUtility) LoadKey(encodedData []byte) (key *rsa.PrivateKey, appError apperrors.AppError) {
+func (cu *certificateUtility) LoadKey(encodedData []byte) (*rsa.PrivateKey, apperrors.AppError) {
 
 	pemBlock, _ := pem.Decode(encodedData)
 	if pemBlock == nil {
@@ -92,8 +78,8 @@ func (cu *certificateUtility) LoadKey(encodedData []byte) (key *rsa.PrivateKey, 
 	return caPrivateKey.(*rsa.PrivateKey), nil
 }
 
-func (cu *certificateUtility) LoadCSR(encodedData string) (csr *x509.CertificateRequest, appError apperrors.AppError) {
-	decodedData, appErr := cu.decodeStringFromBase64(encodedData)
+func (cu *certificateUtility) LoadCSR(encodedData string) (*x509.CertificateRequest, apperrors.AppError) {
+	decodedData, appErr := decodeStringFromBase64(encodedData)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -153,33 +139,47 @@ func (cu *certificateUtility) CheckCSRValues(csr *x509.CertificateRequest, subje
 	return nil
 }
 
-func (cu *certificateUtility) SignWithCA(caCrt *x509.Certificate, csr *x509.CertificateRequest, key *rsa.PrivateKey) (
-	crtBase64 string, appError apperrors.AppError) {
+func (cu *certificateUtility) CreateCrtChain(caCrt *x509.Certificate, csr *x509.CertificateRequest, key *rsa.PrivateKey) (
+	string, apperrors.AppError) {
 
-	clientCRTTemplate := x509.Certificate{
-		Signature:          csr.Signature,
-		SignatureAlgorithm: csr.SignatureAlgorithm,
-
-		PublicKeyAlgorithm: csr.PublicKeyAlgorithm,
-		PublicKey:          csr.PublicKey,
-
-		SerialNumber: big.NewInt(2),
-		Issuer:       caCrt.Subject,
-		Subject:      csr.Subject,
-		NotBefore:    time.Now(),
-		NotAfter:     time.Now().Add(Certificate_Validity_Days * 24 * time.Hour),
-		KeyUsage:     x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
-	}
+	clientCRTTemplate := prepareCRTTemplate(csr)
 
 	clientCrtRaw, err := x509.CreateCertificate(rand.Reader, &clientCRTTemplate, caCrt, csr.PublicKey, key)
 	if err != nil {
 		return "", apperrors.Internal("Error while creating certificate: %s", err)
 	}
 
-	clientCrt := &bytes.Buffer{}
+	certChain := createBase64EncodedCertChain(clientCrtRaw, caCrt.Raw)
 
-	pem.Encode(clientCrt, &pem.Block{Type: "CERTIFICATE", Bytes: clientCrtRaw})
+	return certChain, nil
+}
 
-	return cu.encodeStringBase64(clientCrt.Bytes()), nil
+func encodeStringBase64(bytes []byte) string {
+	return base64.StdEncoding.EncodeToString(bytes)
+}
+
+func prepareCRTTemplate(csr *x509.CertificateRequest) x509.Certificate {
+	return x509.Certificate{
+		SignatureAlgorithm: csr.SignatureAlgorithm,
+
+		SerialNumber: big.NewInt(2),
+		Subject:      csr.Subject,
+		NotBefore:    time.Now(),
+		NotAfter:     time.Now().Add(CertificateValidityDays * 24 * time.Hour),
+		KeyUsage:     x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
+	}
+}
+
+func createBase64EncodedCertChain(clientCrtRaw, caCrtRaw []byte) string {
+	clientCrt := addCertificateHeaderAndFooter(clientCrtRaw)
+	caCrt := addCertificateHeaderAndFooter(caCrtRaw)
+	certChain := append(clientCrt.Bytes(), caCrt.Bytes()...)
+	return encodeStringBase64(certChain)
+}
+
+func addCertificateHeaderAndFooter(crtRaw []byte) *bytes.Buffer {
+	crt := &bytes.Buffer{}
+	pem.Encode(crt, &pem.Block{Type: "CERTIFICATE", Bytes: crtRaw})
+	return crt
 }

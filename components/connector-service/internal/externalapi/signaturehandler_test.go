@@ -78,7 +78,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 			Province:           province,
 		}
 		certUtils.On("CheckCSRValues", csr, subjectValues).Return(nil)
-		certUtils.On("SignWithCA", caCrt, csr, caKey).Return(crtBase64, nil)
+		certUtils.On("CreateCrtChain", caCrt, csr, caKey).Return(crtBase64, nil)
 
 		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
 
