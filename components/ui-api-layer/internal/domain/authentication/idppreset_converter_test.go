@@ -1,9 +1,9 @@
-package ui
+package authentication
 
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/ui/v1alpha1"
+	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -16,7 +16,6 @@ func TestIDPPresetConverter_ToGQL(t *testing.T) {
 				Name: "name",
 			},
 			Spec: v1alpha1.IDPPresetSpec{
-				Name:    "name",
 				Issuer:  "issuer",
 				JwksUri: "jwksURI",
 			},
@@ -28,7 +27,6 @@ func TestIDPPresetConverter_ToGQL(t *testing.T) {
 		dto := converter.ToGQL(&fix)
 
 		// then
-		assert.Equal(t, dto.Name, fix.Spec.Name)
 		assert.Equal(t, dto.Issuer, fix.Spec.Issuer)
 		assert.Equal(t, dto.JwksURI, fix.Spec.JwksUri)
 	})

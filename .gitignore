@@ -64,3 +64,6 @@ installation/resources/cluster-certificate-secret.yaml
 installation/resources/ui-test-secret.yaml
 installation/components.env
 installation/versions-overrides.env
+
+# Changelog temporary directory
+.changelog/

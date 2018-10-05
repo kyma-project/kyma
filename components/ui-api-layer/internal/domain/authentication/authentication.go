@@ -1,4 +1,4 @@
-package ui
+package authentication
 
 import (
 	"time"
@@ -22,9 +22,9 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Resolver
 	}
 
 	informerFactory := externalversions.NewSharedInformerFactory(client, informerResyncPeriod)
-	idpPresetGroup := informerFactory.Ui().V1alpha1()
+	idpPresetGroup := informerFactory.Authentication().V1alpha1()
 
-	svc := newIDPPresetService(client.UiV1alpha1(), idpPresetGroup.IDPPresets().Informer())
+	svc := newIDPPresetService(client.AuthenticationV1alpha1(), idpPresetGroup.IDPPresets().Informer())
 
 	return &Resolver{
 		idpPresetResolver: newIDPPresetResolver(svc),

@@ -221,6 +221,9 @@
 # The etcd-tls-setup directory
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek
 
+# The changelog-generator directory
+/tools/changelog-generator/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
+
 # kubeless-test-client tests
 /tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
