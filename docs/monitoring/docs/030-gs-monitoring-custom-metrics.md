@@ -1,5 +1,5 @@
 ---
-title: Expose Custom Metrics in Kyma
+title: Expose custom metrics in Kyma
 type: Getting Started
 ---
 

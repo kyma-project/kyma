@@ -2,18 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
-  digest = "1:e307126636dff23d73e1aa30f6cb117ce76f493548c62ff0e7633f903c9172aa"
-  name = "github.com/afex/hystrix-go"
-  packages = [
-    "hystrix",
-    "hystrix/metric_collector",
-    "hystrix/rolling",
-  ]
-  pruneopts = "UT"
-  revision = "fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a"
-
-[[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -39,22 +27,6 @@
   pruneopts = "UT"
   revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
   version = "v1.0.0"
-
-[[projects]]
-  digest = "1:bf8236bc8148398b954c1b68f6fc0f352c5fbe59e0e98c635d3640c561ea2f84"
-  name = "github.com/gojektech/heimdall"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "f19a05cb7eebd406539137b5ddc0c49c1fb4815c"
-  version = "v3.0.1"
-
-[[projects]]
-  digest = "1:4f9da36d750deeff2ed82b44b15245337d1a2f1bf8a671c80f97059d7ce8517d"
-  name = "github.com/gojektech/valkyrie"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "6aee720afcdffc337029305c126e0079491063f0"
-  version = "v1.0"
 
 [[projects]]
   branch = "master"
@@ -137,14 +109,6 @@
   pruneopts = "UT"
   revision = "1df9eeb2bb81f327b96228865c5687bc2194af3f"
   version = "1.0.0"
-
-[[projects]]
-  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
-  name = "github.com/pkg/errors"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -391,7 +355,6 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/gojektech/heimdall",
     "github.com/kyma-project/kyma/components/metadata-service/pkg/apis/istio/v1alpha2",
     "github.com/kyma-project/kyma/components/metadata-service/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",

@@ -36,7 +36,6 @@ projects = [
     "components/configurations-generator": "configurations-generator",
     "components/environments": "environments",
     "components/istio-webhook": "istio-webhook",
-    "components/istio-kyma-patch": "istio-kyma-patch",
     "components/helm-broker": "helm-broker",
     "components/remote-environment-broker": "remote-environment-broker",
     "components/remote-environment-controller": "remote-environment-controller",
@@ -88,9 +87,9 @@ properties([
     disableConcurrentBuilds()
 ])
 
-podTemplate(label: label) {
-    node(label) {
-        try {
+try {
+    podTemplate(label: label) {
+        node(label) {
             timestamps {
                 ansiColor('xterm') {
                     stage("setup") {
@@ -126,108 +125,99 @@ podTemplate(label: label) {
                     }
                 }
             }
-        } catch (ex) {
-            echo "Got exception: ${ex}"
-            currentBuild.result = "FAILURE"
-            def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${env.BRANCH_NAME}. See details: ${env.BUILD_URL}"
-            emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
         }
     }
-}
 
-// gather all component versions to pass to integration
-if (runIntegration) {
-    stage('collect versions') {
-        versions = [:]
-        
-        changedProjects = jobs.keySet()
-        for (int i = 0; i < changedProjects.size(); i++) {
-            // only projects that have an associated docker image have a version to deploy
-            if (projects["${changedProjects[i]}"] != null) {
-                versions["${changedProjects[i]}"] = "$appVersion"
-            }
-        }
-
-        unchangedProjects = projects.keySet() - changedProjects
-        for (int i = 0; i < unchangedProjects.size(); i++) {
-            // only projects that have an associated docker image have a version to deploy
-            if (projects["${unchangedProjects[i]}"] != null) {
-                versions["${unchangedProjects[i]}"] = projectVersion("${unchangedProjects[i]}")
-            }
-        }
-
-        // convert versions to JSON string to pass on
-        versions = versionsYaml(versions)
-        echo """
-    Component versions:
-    $versions
-    """
-    }
-}
-
-// trigger jobs for projects that have changes, in parallel
-stage('build projects') {
-    parallel jobs
-}
-
-// trigger Kyma integration when changes are made to installation charts/code or resources
-if (runIntegration) {
-    stage('launch Kyma integration') {
-        build job: 'kyma/integration',
-            wait: true,
-            parameters: [
-                string(name:'GIT_REVISION', value: "$commitID"),
-                string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
-                string(name:'APP_VERSION', value: "$appVersion"),
-                string(name:'COMP_VERSIONS', value: "$versions") // YAML string
-            ]
-    }
-
-    podTemplate(label: label) {
-        node(label) {
-            try {
-                timestamps {
-                    ansiColor('xterm') {
-                        stage("setup") {
-                            checkout scm
-                        }
-
-                        stage("Upload versions file to azure") {
-                            writeFile file: "installation/versions-overrides.env", text: "$versions"
-
-                            def file = ''
-                            if (isMaster) {
-                                file = 'latest.env'
-                            } else {
-                                file = "pr/${env.BRANCH_NAME}.env"
-                            }
-
-                            withCredentials([
-                                string(credentialsId: 'azure-broker-tenant-id', variable: 'AZBR_TENANT_ID'),
-                                string(credentialsId: 'azure-broker-subscription-id', variable: 'AZBR_SUBSCRIPTION_ID'),
-                                usernamePassword(credentialsId: 'azure-broker-spn', passwordVariable: 'AZBR_CLIENT_SECRET', usernameVariable: 'AZBR_CLIENT_ID')
-                                ]) {
-                                    def dockerEnv = "-e AZBR_CLIENT_SECRET -e AZBR_CLIENT_ID -e AZBR_TENANT_ID -e AZBR_SUBSCRIPTION_ID \
-                                    -e 'KYMA_VERSIONS_FILE_NAME=${file}'"
-                                    def dockerOpts = "--rm --volume ${pwd()}/installation:/installation"
-                                    def dockerEntry = "--entrypoint /installation/scripts/upload-versions.sh"
-
-                                    sh "docker run $dockerOpts $dockerEnv $dockerEntry $registry/$acsImageName"
-                            }
-                        }
-                    }
+    // gather all component versions to pass to integration
+    if (runIntegration) {
+        stage('collect versions') {
+            versions = [:]
+            
+            changedProjects = jobs.keySet()
+            for (int i = 0; i < changedProjects.size(); i++) {
+                // only projects that have an associated docker image have a version to deploy
+                if (projects["${changedProjects[i]}"] != null) {
+                    versions["${changedProjects[i]}"] = "$appVersion"
                 }
-            }  catch (ex) {
-                echo "Got exception: ${ex}"
-                currentBuild.result = "FAILURE"
-                def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${env.BRANCH_NAME}. See details: ${env.BUILD_URL}"
-                emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
             }
+
+            unchangedProjects = projects.keySet() - changedProjects
+            for (int i = 0; i < unchangedProjects.size(); i++) {
+                // only projects that have an associated docker image have a version to deploy
+                if (projects["${unchangedProjects[i]}"] != null) {
+                    versions["${unchangedProjects[i]}"] = projectVersion("${unchangedProjects[i]}")
+                }
+            }
+
+            // convert versions to JSON string to pass on
+            versions = versionsYaml(versions)
+            echo """
+        Component versions:
+        $versions
+        """
         }
     }
+
+    // trigger jobs for projects that have changes, in parallel
+    stage('build projects') {
+        parallel jobs
+    }
+
+    // trigger Kyma integration when changes are made to installation charts/code or resources
+    if (runIntegration) {
+        stage('launch Kyma integration') {
+            build job: 'kyma/integration',
+                wait: true,
+                parameters: [
+                    string(name:'GIT_REVISION', value: "$commitID"),
+                    string(name:'GIT_BRANCH', value: "${env.BRANCH_NAME}"),
+                    string(name:'APP_VERSION', value: "$appVersion"),
+                    string(name:'COMP_VERSIONS', value: "$versions") // YAML string
+                ]
+        }
+
+        // podTemplate(label: label) {
+        //     node(label) {
+        //         timestamps {
+        //             ansiColor('xterm') {
+        //                 stage("setup") {
+        //                     checkout scm
+        //                 }
+
+        //                 stage("Upload versions file to azure") {
+        //                     writeFile file: "installation/versions-overrides.env", text: "$versions"
+
+        //                     def file = ''
+        //                     if (isMaster) {
+        //                         file = 'latest.env'
+        //                     } else {
+        //                         file = "pr/${env.BRANCH_NAME}.env"
+        //                     }
+
+        //                     withCredentials([
+        //                         string(credentialsId: 'azure-broker-tenant-id', variable: 'AZBR_TENANT_ID'),
+        //                         string(credentialsId: 'azure-broker-subscription-id', variable: 'AZBR_SUBSCRIPTION_ID'),
+        //                         usernamePassword(credentialsId: 'azure-broker-spn', passwordVariable: 'AZBR_CLIENT_SECRET', usernameVariable: 'AZBR_CLIENT_ID')
+        //                         ]) {
+        //                             def dockerEnv = "-e AZBR_CLIENT_SECRET -e AZBR_CLIENT_ID -e AZBR_TENANT_ID -e AZBR_SUBSCRIPTION_ID \
+        //                             -e 'KYMA_VERSIONS_FILE_NAME=${file}'"
+        //                             def dockerOpts = "--rm --volume ${pwd()}/installation:/installation"
+        //                             def dockerEntry = "--entrypoint /installation/scripts/upload-versions.sh"
+
+        //                             sh "docker run $dockerOpts $dockerEnv $dockerEntry $registry/$acsImageName"
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+    }
+}  catch (ex) {
+    echo "Got exception: ${ex}"
+    currentBuild.result = "FAILURE"
+    def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${env.BRANCH_NAME}. See details: ${env.BUILD_URL}"
+    emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
 }
-
-
 
 /* -------- Helper Functions -------- */
 
@@ -365,12 +355,12 @@ global.environments.version=${versions['components/environments']}
 global.environments.dir=${versions['components/environments'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.istio_webhook.version=${versions['components/istio-webhook']}
 global.istio_webhook.dir=${versions['components/istio-webhook'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
-global.istio_kyma_patch.version=${versions['components/istio-kyma-patch']}
-global.istio_kyma_patch.dir=${versions['components/istio-kyma-patch'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.helm_broker.version=${versions['components/helm-broker']}
 global.helm_broker.dir=${versions['components/helm-broker'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.remote_environment_broker.version=${versions['components/remote-environment-broker']}
 global.remote_environment_broker.dir=${versions['components/remote-environment-broker'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
+global.remote_environment_controller.version=${versions['components/remote-environment-controller']}
+global.remote_environment_controller.dir=${versions['components/remote-environment-controller'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.metadata_service.version=${versions['components/metadata-service']}
 global.metadata_service.dir=${versions['components/metadata-service'] == env.BRANCH_NAME ? 'pr/' : 'develop/'}
 global.gateway.version=${versions['components/gateway']}

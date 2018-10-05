@@ -4,7 +4,7 @@ package versioned
 
 import (
 	glog "github.com/golang/glog"
-	uiv1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/typed/ui/v1alpha1"
+	authenticationv1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
@@ -12,27 +12,27 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	UiV1alpha1() uiv1alpha1.UiV1alpha1Interface
+	AuthenticationV1alpha1() authenticationv1alpha1.AuthenticationV1alpha1Interface
 	// Deprecated: please explicitly pick a version if possible.
-	Ui() uiv1alpha1.UiV1alpha1Interface
+	Authentication() authenticationv1alpha1.AuthenticationV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	uiV1alpha1 *uiv1alpha1.UiV1alpha1Client
+	authenticationV1alpha1 *authenticationv1alpha1.AuthenticationV1alpha1Client
 }
 
-// UiV1alpha1 retrieves the UiV1alpha1Client
-func (c *Clientset) UiV1alpha1() uiv1alpha1.UiV1alpha1Interface {
-	return c.uiV1alpha1
+// AuthenticationV1alpha1 retrieves the AuthenticationV1alpha1Client
+func (c *Clientset) AuthenticationV1alpha1() authenticationv1alpha1.AuthenticationV1alpha1Interface {
+	return c.authenticationV1alpha1
 }
 
-// Deprecated: Ui retrieves the default version of UiClient.
+// Deprecated: Authentication retrieves the default version of AuthenticationClient.
 // Please explicitly pick a version.
-func (c *Clientset) Ui() uiv1alpha1.UiV1alpha1Interface {
-	return c.uiV1alpha1
+func (c *Clientset) Authentication() authenticationv1alpha1.AuthenticationV1alpha1Interface {
+	return c.authenticationV1alpha1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -51,7 +51,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	}
 	var cs Clientset
 	var err error
-	cs.uiV1alpha1, err = uiv1alpha1.NewForConfig(&configShallowCopy)
+	cs.authenticationV1alpha1, err = authenticationv1alpha1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 // panics if there is an error in the config.
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
-	cs.uiV1alpha1 = uiv1alpha1.NewForConfigOrDie(c)
+	cs.authenticationV1alpha1 = authenticationv1alpha1.NewForConfigOrDie(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(c)
 	return &cs
@@ -77,7 +77,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.uiV1alpha1 = uiv1alpha1.New(c)
+	cs.authenticationV1alpha1 = authenticationv1alpha1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

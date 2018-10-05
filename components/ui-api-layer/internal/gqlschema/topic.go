@@ -7,6 +7,8 @@ type TopicEntry struct {
 }
 
 type Section struct {
+	Name      string
+	Anchor    string
 	TopicType string
 	Titles    []Title
 }
