@@ -12,7 +12,9 @@ kubectl get crd installations.installer.kyma-project.io -o yaml
 
 ## Sample Custom Resource
 
-This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma.
+This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma. The  **name** and **namespace**  fields in the `components` array define which components you install and Namespaces in which you install them. This example shows that you install the `hmc-default` release of the `remote-environments` component in the `kyma-integration` Namespace. 
+
+>**NOTE:** See the `installer-cr.yaml.tpl` file in the `/installation/resources` directory for the complete list of Kyma components.
 
 ```
 apiVersion: "installer.kyma-project.io/v1alpha1"
@@ -26,14 +28,38 @@ metadata:
 spec:
   version: "1.0.0"
   url: "https://sample.url.com/kyma_release.tar.gz"
+  components: 
+    - name: "cluster-essentials"
+      namespace: "kyma-system"
+    - name: "istio"
+      namespace: "istio-system"
+    - name: "prometheus-operator"
+      namespace: "kyma-system"
+    - name: "provision-bundles"
+    - name: "dex"
+      namespace: "kyma-system"
+    - name: "core"
+      namespace: "kyma-system"
+    - name: "remote-environments"
+      namespace: "kyma-integration"
+      release: "ec-default"
+    - name: "remote-environments"
+      namespace: "kyma-integration"
+      release: "hmc-default"
 ```
+
+## Custom resource parameters
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 | Field   |      Mandatory?      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** | **YES** | Specifies the name of the CR. |
-| **metadata.labels.action** | **YES** | Defines the behavior of the Kyma installer. Available options are `install` and `uninstall`. |
+| **metadata.labels.action** | **YES** | Defines the behavior of the Kyma installer. Available options are `install`, `update`, and `uninstall`. |
 | **metadata.finalizers** | **NO** | Protects the CR from deletion. Read [this](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#finalizers) Kubernetes document to learn more about finalizers. |
 | **spec.version** | **NO** | When manually installing Kyma on a cluster, specify any valid [SemVer](https://semver.org/) notation string. |
 | **spec.url** | **YES** | Specifies the location of the Kyma sources `tar.gz` package. For example, for the `master` branch of Kyma, the address is `https://github.com/kyma-project/kyma/archive/master.tar.gz` |
+| **spec.components** | **YES** | Lists which components of Helm chart components to `install` or `update`. |
+| **spec.components.name** | **YES** | Specifies the name of the component which is the same as the name of the component subdirectory in the `resources` directory. |
+| **spec.components.namespace** | **YES** | Defines the Namespace in which you want the Installer to `install`, or `update` the component. |
+| **spec.components.release** | **NO** | Provides the name of the Helm release. The default parameter is the component name. |
