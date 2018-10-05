@@ -39,5 +39,5 @@ func formatErrorResponse(httpCode int, errorMessage string, detailedErrorRespons
 }
 
 func isInternalError(httpCode int) bool {
-	return httpCode >= 500
+	return httpCode == http.StatusInternalServerError
 }
