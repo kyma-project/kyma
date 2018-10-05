@@ -54,7 +54,6 @@ data:
   cluster-users.users.adminGroup: ""
   pilot.resources.limits.memory: 256Mi
   pilot.resources.requests.memory: 128Mi
-  security.enabled: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -91,6 +90,8 @@ metadata:
 data:
   global.proxy.includeIPRanges: "10.0.0.1/8"
 
+  security.enabled: "true"
+
   gateways.istio-ingressgateway.service.externalPublicIp: ""
   gateways.istio-ingressgateway.type: "NodePort"
 
@@ -98,5 +99,6 @@ data:
   pilot.resources.limits.cpu: 100m
   pilot.resources.requests.memory: 256Mi
   pilot.resources.requests.cpu: 100m
+
   mixer.resources.limits.memory: 256Mi
   mixer.resources.requests.memory: 128Mi

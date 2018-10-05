@@ -56,8 +56,6 @@ data:
   minio.accessKey: "admin"
   minio.secretKey: "topSecretKey"
   acceptanceTest.remoteEnvironment.disabled: "true"
-  mixer.resources.limits.memory: 1Gi
-  security.enabled: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -94,10 +92,13 @@ metadata:
 data:
   global.proxy.includeIPRanges: "10.0.0.1/8"
 
+  security.enabled: "true"
+
   gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   gateways.istio-ingressgateway.type: "LoadBalancer"
 
   pilot.resources.limits.memory: 2Gi
   pilot.resources.requests.memory: 512Mi
-  mixer.resources.limits.memory: 512Mi
-  mixer.resources.requests.memory: 128Mi
+
+  mixer.resources.limits.memory: 1Gi
+  mixer.resources.requests.memory: 256Mi
