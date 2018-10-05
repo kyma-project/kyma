@@ -14,7 +14,6 @@ const (
 	gatewayRoleFormat        = "%s-gateway-role"
 	gatewayRoleBindingFormat = "%s-gateway-rolebinding"
 	gatewayApiFormat         = "%s-gateway-external-api"
-	gatewayEchoFormat        = "%s-gateway-echo"
 
 	eventServiceNameFormat = "%s-event-service"
 	eventServiceApiFormat  = "%s-gateway-external-api"
@@ -97,16 +96,11 @@ func (checker *k8sChecker) checkRoleBinding(t *testing.T, errCheckFunc func(*tes
 
 func (checker *k8sChecker) checkServices(t *testing.T, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
 	gatewayApiName := fmt.Sprintf(gatewayApiFormat, checker.remoteEnvName)
-	gatewayEchoName := fmt.Sprintf(gatewayEchoFormat, checker.remoteEnvName)
 	eventsApiName := fmt.Sprintf(eventServiceApiFormat, checker.remoteEnvName)
 
 	gatewayApiSvc, err := checker.client.GetService(gatewayApiName, v1.GetOptions{})
 	errCheckFunc(t, err)
 	resourceCheckFunc(t, gatewayApiSvc)
-
-	gatewayEchoSvc, err := checker.client.GetService(gatewayEchoName, v1.GetOptions{})
-	errCheckFunc(t, err)
-	resourceCheckFunc(t, gatewayEchoSvc)
 
 	eventsSvc, err := checker.client.GetService(eventsApiName, v1.GetOptions{})
 	errCheckFunc(t, err)

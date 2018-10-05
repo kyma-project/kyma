@@ -26,9 +26,6 @@ deployment:
 service:
   externalapi:
     port: *externalAPIPort
-  echo:
-    serviceType: ClusterIP
-    port: *proxyPort
 
 ingress:
   enabled: true
