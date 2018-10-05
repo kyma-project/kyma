@@ -103,7 +103,7 @@ func replaceService(id string, re *v1alpha1.RemoteEnvironment, service v1alpha1.
 
 func ensureServiceExists(id string, re *v1alpha1.RemoteEnvironment) apperrors.AppError {
 	if !serviceExists(id, re) {
-		message := fmt.Sprintf("Remote Environment: exitting of service with ID %s failed", id)
+		message := fmt.Sprintf("Remote Environment: service with ID %s does not exist", id)
 
 		return apperrors.NotFound(message)
 	}
