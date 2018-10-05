@@ -1,6 +1,5 @@
 replicaCount: 1
 image:
-  tag: 0.3.233
   pullPolicy: IfNotPresent
 service:
   type: NodePort

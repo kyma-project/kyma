@@ -28,13 +28,13 @@ spec:
 
       initContainers:
       - name: "init-{{ .Chart.Name }}"
-        image: "{{ .Values.global.containerRegistry.path }}/alpine-net:{{ .Values.initImage.tag }}"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.alpine_net.dir }}alpine-net:{{ .Values.global.alpine_net.version }}"
         imagePullPolicy: {{ .Values.initImage.pullPolicy }}
         command: ['sh', '-c', 'until $(curl --output /dev/null --silent --fail http://core-helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379/health); do echo waiting for etcd service; sleep 2; done;']
 
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.global.containerRegistry.path }}/helm-broker:{{ .Values.image.tag }}"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
           - name: APP_TMP_DIR
@@ -115,7 +115,7 @@ spec:
       serviceAccountName: {{ template "fullname" . }}
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.global.containerRegistry.path }}/helm-broker-reposerver:{{ .Values.image.tag }}"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker-reposerver:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
 
         volumeMounts:
