@@ -41,7 +41,7 @@ All REs are created through the RemoteEnvironment Custom Resource, which also st
 
 The controller listens for creating or deleting the RemoteEnvironment Custom Resources and acts accordingly, either provisioning or de-provisioning an instance of Proxy Service and Event Service for every Custom Resource.         
 
->**NOTE:** Every RemoteEnvironment Custom Resource constitutes a single RE to which you can connect an external solution.
+>**NOTE:** Every RemoteEnvironment Custom Resource corresponds to a single RE to which you can connect an external solution.
 
 ## Proxy Service
 

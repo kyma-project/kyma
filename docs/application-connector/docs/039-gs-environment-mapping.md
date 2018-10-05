@@ -1,5 +1,5 @@
 ---
-title: Activate a RemoteEnvironment using EnvironmentMapping
+title: Bind a Remote Environment to an Environment
 type: Getting Started
 ---
 
