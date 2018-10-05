@@ -33,7 +33,7 @@ This allows to route the events to Lambda functions and Services based on their 
 
 ## Remote Environment
 
-A Remote Environment (RE) represents an external solution connected to Kyma. It handles the security and integration with other components, such as the Service Catalog or the Event Bus.
+A Remote Environment (RE) represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or the Event Bus.
 Using the components of the Application Connector, the RE creates a coherent identity for a connected external solution and ensures its separation.
 All REs are created through the RemoteEnvironment Custom Resource, which also stores all of the relevant metadata. You can map a RE to many Kyma Environments and use the APIs and the Event Catalogs of the connected external solution within their context.
 
@@ -41,7 +41,7 @@ All REs are created through the RemoteEnvironment Custom Resource, which also st
 
 The controller listens for creating or deleting the RemoteEnvironment Custom Resources and acts accordingly, either provisioning or de-provisioning an instance of Proxy Service and Event Service for every Custom Resource.         
 
->**NOTE:** Every RemoteEnvironment Custom Resource is constitutes a RE to which you can connect an external solution.
+>**NOTE:** Every RemoteEnvironment Custom Resource constitutes a single RE to which you can connect an external solution.
 
 ## Proxy Service
 

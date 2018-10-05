@@ -7,12 +7,7 @@ This guide shows you how to register and manage the services of your external so
 
 ## Prerequisites
 
-- Valid certificate signed by the Kyma Certificate Authority.
-
-- Set the `NODE_PORT` environment variable to the `core-nginx-ingress-controller` of the Gateway Service and the Event Service. Run:
-```
-export NODE_PORT=`kubectl -n kyma-system get svc core-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'`
-```
+Valid certificate signed by the Kyma Certificate Authority.
 
 ## Register a service
 

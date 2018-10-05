@@ -3,70 +3,45 @@ title: Activate a RemoteEnvironment using EnvironmentMapping
 type: Getting Started
 ---
 
-This Getting Started guide shows you how to bind Remote Environments to Environment in the command line. For the Custom Resource Definition, see the `environment-mapping.crd.yaml` file under the `/resources/cluster-essentials/templates/` directory.
-An instance of the EnvironmentMapping enables the RemoteEnvironment with the same name in a given Namespace. In this example, the EnvironmentMapping enables the `ec-prod` remote environment in the `production` Namespace:
-
-```yaml
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: EnvironmentMapping
-metadata:
-  name: ec-prod
-  namespace: production
-```
+This guide shows you how to bind a Remote Environment (RE) to an Environment in Kyma. To execute the binding, create an EnvironmentMapping Custom Resource in the cluster. Follow the instructions to bind your Remote Environment to the `production` Environment.
 
 ## Prerequisites
 
-You need to have RE created.
+To complete this guide, your Kyma cluster must have at least one Remote Environment created.
 
-## Details
+## Steps
 
-Follow these steps to complete the Getting Started guide:
 
 1. List all RemoteEnvironments enabled in the `production` Environment:
-    ```bash
-    > kubectl get em -n production
-    
-    No resources found.
-    ```
+  ```
+  kubectl get em -n production
+  ```
 
-2. Enable this RemoteEnvironment in the `production` Environment:
+2. Create an EnvironmentMapping Custom Resource (CR) for your environment and save it to a `mapping-prod.yaml` file. Follow this template:
+  ```
+  apiVersion: applicationconnector.kyma-project.io/v1alpha1
+  kind: EnvironmentMapping
+  metadata:
+    name: {NAME_OF_RE_TO_BIND}
+    namespace: production
+  ```
 
-    Create a file mapping-prod.yaml:
-    
-    ```yaml
-    apiVersion: applicationconnector.kyma-project.io/v1alpha1
-    kind: EnvironmentMapping
-    metadata:
-      name: ec-prod
-      namespace: production
-    ```
-    
-    and apply it:
-    
-    ```bash
-    > kubectl apply -f mapping-prod.yaml
-    
-    environmentmapping "ec-prod" created
-    ```
-      
-3. List all RemoteEnvironments enabled in the `production` Environment again:
-    
-    ```bash
-    > kubectl get em -n production
-    NAME      AGE
-    ec-prod   40s
-    ```
-    
-4. Unbind RE from `production` Environment:
-    
-    ```bash
-    > kubectl delete em ec-prod -n production
-    ```
-    
-5. List all environments where `ec-prod` is enabled
-    
-    ```bash
-    > kubectl get em --all-namespaces -o jsonpath='{range .items[?(@.metadata.name=="ec-prod")]}{@.metadata.namespace}{"\n"}{end}'
-    production
-    ```
+3. Create the CR in the cluster:  
+  ```
+  kubectl apply -f mapping-prod.yaml
+  ```
 
+4. Get the list of all REs bound to the `production` Environment and look for your RE. Run:
+  ```
+  kubectl get em -n production
+  ```
+
+5. Try to unbind your RE from the `production` Environment. Run:
+  ```
+  kubectl delete em {NAME_OF_YOUR_RE} -n production
+  ```
+
+6. Check if the operation is successful. List all Environments to which your RE is bound:
+  ```
+  kubectl get em --all-namespaces -o jsonpath='{range .items[?(@.metadata.name=="{NAME_OF_YOUR_RE}")]}{@.metadata.namespace}{"\n"}{end}'
+  ```
