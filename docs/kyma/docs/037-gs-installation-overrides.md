@@ -114,7 +114,7 @@ Notice that the user-provided override key now contains two parts:
 Once the installation starts, the Installer generates overrides based on the map entries. The system uses the value of "90" instead of the default value of "60" from the `values.yaml` chart file.
 
 
-### Global overrides
+## Global overrides
 
 There are several important parameters usually shared across the charts.
 Helm convention to provide these requires the use of the `global` override key.
