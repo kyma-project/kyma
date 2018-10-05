@@ -6,7 +6,7 @@ global:
   hub: docker.io/istio
 
   # Default tag for Istio images.
-  tag: 1.0.1
+  tag: 1.0.2
 
   # Gateway used for legacy k8s Ingress resources. By default it is
   # using 'istio:ingress', to match 0.8 config. It requires that
@@ -32,6 +32,10 @@ global:
       # limits:
       #   cpu: 100m
       #   memory: 128Mi
+
+    # Controls number of Proxy worker threads.
+    # If set to 0 (default), then start worker thread for each CPU thread/core.
+    concurrency: 0
 
     # Configures the access log for each sidecar. Setting it to an empty string will
     # disable access log for sidecar.
@@ -388,6 +392,7 @@ pilot:
 # security configuration
 #
 security:
+  enabled: true
   replicaCount: 1
   image: citadel
   selfSigned: true # indicate if self-signed CA is used.
@@ -404,6 +409,8 @@ grafana:
   enabled: false
   replicaCount: 1
   image: grafana
+  persist: false
+  storageClassName: ""
   security:
     enabled: false
     adminUser: admin

@@ -23,7 +23,7 @@ spec:
         - name: CONFIG_DIR
           value: /etc/config
         - name: REQUIRED_ISTIO_VERSION
-          value: 1.0.1
+          value: 1.0.2
       volumes:
       - name: config-volume
         configMap:
