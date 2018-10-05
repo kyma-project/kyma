@@ -10,7 +10,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: {{ template "fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.global.namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
