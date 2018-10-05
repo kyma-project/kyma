@@ -18,12 +18,12 @@ It is possible to register many services for particular Remote Environment. The 
 Metadata Service API is described [here](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/assets/metadataapi.yaml).
 For a complete information on registering services, please see Managing Registered Services with Metadata API Guide.
 
-You can acquire the API specification of the Metadata Service for a given version using the following command:
+You can get the API specification of the Metadata Service for a given version using the following command:
 ```
 curl https://gateway.{CLUSTER_NAME}.kyma.cx/{RE_NAME}/v1/metadata/api.yaml
 ```
 
-To access the Metadata Service's API specification locally, provide the NodePort of the `core-nginx-ingress-controller`.
+To access the API specification of the Metadata Service locally, provide the NodePort of the `core-nginx-ingress-controller`.
 
 To get the NodePort, run this command:
 

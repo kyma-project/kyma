@@ -20,3 +20,11 @@ You can disable the SSL certificate verification in the communication between Ky
   - Edit the Deployment in Vim. Select `i` to start editing.
   - Find the **skipVerify** parameter and change its value to `true`.
   - Select `esc`, type `:wq`, and select `enter` to write and quit.
+
+* Install a new Remote Environment with the certificate verification disabled
+
+  Disable the certification by adding the `--skipVerify=true` flag to the `helm install` command. This is an example of a command that installs a new Remote Environment with SSL certificate verification disabled:
+
+  ```
+  helm install --name {remote-environment-name} --set deployment.args.sourceType=commerce --set global.isLocalEnv=false --set global.domainName={domain-name} --namespace kyma-integration ./remote-environments --skipVerify=true  
+  ```
