@@ -93,8 +93,9 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("Create", "re", serviceDefinition).Return("1", nil)
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
 
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
@@ -146,8 +147,9 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("Create", "re", serviceDefinition).Return("1", nil)
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
 
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
@@ -182,8 +184,9 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			return apperrors.WrongInput("failed")
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
 
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
@@ -228,8 +231,9 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("Create", "re", mock.AnythingOfType("*metadata.ServiceDefinition")).Return(
 			"", apperrors.Internal(""))
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
 
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
@@ -282,8 +286,9 @@ func TestMetadataHandler_GetService(t *testing.T) {
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("GetByID", "re", "123456").Return(serviceDefinition, nil)
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
 		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/123456", nil)
 		require.NoError(t, err)
@@ -342,8 +347,9 @@ func TestMetadataHandler_GetService(t *testing.T) {
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("GetByID", "re", "123456").Return(serviceDefinition, nil)
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
 		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/123456", nil)
 		require.NoError(t, err)
@@ -389,8 +395,9 @@ func TestMetadataHandler_GetService(t *testing.T) {
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("GetByID", "re", "123456").Return(serviceDefinition, nil)
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
 		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/123456", nil)
 		require.NoError(t, err)
@@ -427,8 +434,9 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			metadata.ServiceDefinition{},
 			apperrors.NotFound("Service with ID %d not found", 654321),
 		)
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
 		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/654321", nil)
 		require.NoError(t, err)
@@ -454,8 +462,9 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 			Provider:    "service provider",
 			Description: "service description",
 		}}, nil)
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
 		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services", nil)
 		require.NoError(t, err)
@@ -486,8 +495,9 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		var empty []metadata.ServiceDefinition
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("GetAll", "re").Return(empty, nil)
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
 		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services", nil)
 		require.NoError(t, err)
@@ -515,8 +525,9 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		// given
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("GetAll", "re").Return(nil, apperrors.Internal(""))
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
 		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services", nil)
 		require.NoError(t, err)
@@ -596,8 +607,9 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("Update", "re", "1234", serviceDefinition).Return(*serviceDefinition, nil)
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
 
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
@@ -645,8 +657,9 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return apperrors.WrongInput("failed")
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
 
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
@@ -686,8 +699,9 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("Update", "re", "1234", mock.Anything).Return(metadata.ServiceDefinition{}, apperrors.Internal(""))
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
 
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
@@ -733,8 +747,9 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("Update", "re", "654321", serviceDefinition).Return(metadata.ServiceDefinition{}, apperrors.NotFound(""))
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
 
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
@@ -765,8 +780,9 @@ func TestMetadataHandler_DeleteService(t *testing.T) {
 		// given
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("Delete", "re", "1234").Return(nil)
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
 		req, err := http.NewRequest(http.MethodDelete, "/re/v1/metadata/services/1234", nil)
 		require.NoError(t, err)
@@ -785,8 +801,9 @@ func TestMetadataHandler_DeleteService(t *testing.T) {
 		// given
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("Delete", "re", "1234").Return(apperrors.Internal("error"))
+		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService)
+		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
 		req, err := http.NewRequest(http.MethodDelete, "/re/v1/metadata/services/1234", nil)
 		require.NoError(t, err)

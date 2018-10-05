@@ -18,12 +18,14 @@ import (
 type metadataHandler struct {
 	validator                ServiceDetailsValidator
 	ServiceDefinitionService metadata.ServiceDefinitionService
+	detailedErrorResponse    bool
 }
 
-func NewMetadataHandler(validator ServiceDetailsValidator, serviceDefinitionService metadata.ServiceDefinitionService) MetadataHandler {
+func NewMetadataHandler(validator ServiceDetailsValidator, serviceDefinitionService metadata.ServiceDefinitionService, detailedErrorResponse bool) MetadataHandler {
 	return &metadataHandler{
 		validator:                validator,
 		ServiceDefinitionService: serviceDefinitionService,
+		detailedErrorResponse:    detailedErrorResponse,
 	}
 }
 
@@ -34,14 +36,14 @@ func (mh *metadataHandler) CreateService(w http.ResponseWriter, r *http.Request)
 	serviceDefinition, apperr := mh.prepareServiceDefinition(r.Body)
 	if apperr != nil {
 		contextLogger.Errorf("metadata handler: preparing new service failed, %s", apperr.Error())
-		handleErrors(w, apperr)
+		mh.handleErrors(w, apperr)
 		return
 	}
 
 	serviceId, apperr := mh.ServiceDefinitionService.Create(mux.Vars(r)["remoteEnvironment"], &serviceDefinition)
 	if apperr != nil {
 		contextLogger.Errorf("metadata handler: creating new service failed, %s", apperr.Error())
-		handleErrors(w, apperr)
+		mh.handleErrors(w, apperr)
 		return
 	}
 
@@ -58,14 +60,14 @@ func (mh *metadataHandler) GetService(w http.ResponseWriter, r *http.Request) {
 	service, apperr := mh.ServiceDefinitionService.GetByID(mux.Vars(r)["remoteEnvironment"], mux.Vars(r)["serviceId"])
 	if apperr != nil {
 		contextLogger.Errorf("metadata handler: getting service by ID failed, %s", apperr.Error())
-		handleErrors(w, apperr)
+		mh.handleErrors(w, apperr)
 		return
 	}
 
 	responseBody, apperr := serviceDefinitionToServiceDetails(service)
 	if apperr != nil {
 		contextLogger.Errorf("metadata handler: getting service failed, %s", apperr.Error())
-		handleErrors(w, apperr)
+		mh.handleErrors(w, apperr)
 		return
 	}
 
@@ -80,7 +82,7 @@ func (mh *metadataHandler) GetServices(w http.ResponseWriter, r *http.Request) {
 	services, apperr := mh.ServiceDefinitionService.GetAll(mux.Vars(r)["remoteEnvironment"])
 	if apperr != nil {
 		contextLogger.Errorf("metadata handler: getting all services failed, %s", apperr.Error())
-		handleErrors(w, apperr)
+		mh.handleErrors(w, apperr)
 		return
 	}
 
@@ -101,21 +103,21 @@ func (mh *metadataHandler) UpdateService(w http.ResponseWriter, r *http.Request)
 	serviceDefinition, apperr := mh.prepareServiceDefinition(r.Body)
 	if apperr != nil {
 		contextLogger.Errorf("metadata handler: updating service failed, %s", apperr.Error())
-		handleErrors(w, apperr)
+		mh.handleErrors(w, apperr)
 		return
 	}
 
 	svc, apperr := mh.ServiceDefinitionService.Update(vars["remoteEnvironment"], vars["serviceId"], &serviceDefinition)
 	if apperr != nil {
 		contextLogger.Errorf("metadata handler: updating service failed, %s", apperr.Error())
-		handleErrors(w, apperr)
+		mh.handleErrors(w, apperr)
 		return
 	}
 
 	responseBody, apperr := serviceDefinitionToServiceDetails(svc)
 	if apperr != nil {
 		contextLogger.Errorf("metadata handler: updating service failed, %s", apperr.Error())
-		handleErrors(w, apperr)
+		mh.handleErrors(w, apperr)
 		return
 	}
 
@@ -132,7 +134,7 @@ func (mh *metadataHandler) DeleteService(w http.ResponseWriter, r *http.Request)
 	apperr := mh.ServiceDefinitionService.Delete(vars["remoteEnvironment"], vars["serviceId"])
 	if apperr != nil {
 		contextLogger.Errorf("metadata handler: deleting service failed, %s", apperr.Error())
-		handleErrors(w, apperr)
+		mh.handleErrors(w, apperr)
 		return
 	}
 
@@ -161,8 +163,8 @@ func (mh *metadataHandler) prepareServiceDefinition(body io.ReadCloser) (metadat
 	return serviceDetailsToServiceDefinition(serviceDetails)
 }
 
-func handleErrors(w http.ResponseWriter, apperr apperrors.AppError) {
-	statusCode, responseBody := httperrors.AppErrorToResponse(apperr)
+func (mh *metadataHandler) handleErrors(w http.ResponseWriter, apperr apperrors.AppError) {
+	statusCode, responseBody := httperrors.AppErrorToResponse(apperr, mh.detailedErrorResponse)
 
 	respond(w, statusCode)
 	json.NewEncoder(w).Encode(responseBody)

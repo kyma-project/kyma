@@ -64,7 +64,7 @@ func main() {
 		log.Errorf("monitoring: setup failed, %s", err.Error())
 	}
 
-	externalHandler := newExternalHandler(serviceDefinitionService, middlewares)
+	externalHandler := newExternalHandler(serviceDefinitionService, middlewares, options.detailedErrorResponse)
 
 	if options.requestLogging {
 		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
@@ -93,11 +93,11 @@ func main() {
 	wg.Wait()
 }
 
-func newExternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, middlewares []mux.MiddlewareFunc) http.Handler {
+func newExternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, middlewares []mux.MiddlewareFunc, detailedErrorResponse bool) http.Handler {
 	var metadataHandler externalapi.MetadataHandler
 
 	if serviceDefinitionService != nil {
-		metadataHandler = externalapi.NewMetadataHandler(externalapi.NewServiceDetailsValidator(), serviceDefinitionService)
+		metadataHandler = externalapi.NewMetadataHandler(externalapi.NewServiceDetailsValidator(), serviceDefinitionService, detailedErrorResponse)
 	} else {
 		metadataHandler = externalapi.NewInvalidStateMetadataHandler("Service is not initialized properly.")
 	}
