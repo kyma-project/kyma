@@ -59,7 +59,7 @@ func ContextLoggerWithId(r *http.Request) *log.Entry {
 func DumpRequestToLog(r *http.Request, logger *log.Entry) {
 	b, err := httputil.DumpRequest(r, false)
 	if err != nil {
-		logger.Errorf("request: failed to log")
+		logger.Errorf("Request: failed to log")
 		return
 	}
 	logger.Infof("%s", b)

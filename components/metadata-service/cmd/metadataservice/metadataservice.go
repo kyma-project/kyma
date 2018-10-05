@@ -61,7 +61,7 @@ func main() {
 
 	middlewares, err := monitoring.SetupMonitoringMiddleware()
 	if err != nil {
-		log.Errorf("monitoring: setup failed, %s", err.Error())
+		log.Errorf("Metadata Service: middleware monitoring setup failed, %s", err.Error())
 	}
 
 	externalHandler := newExternalHandler(serviceDefinitionService, middlewares, options.detailedErrorResponse)
