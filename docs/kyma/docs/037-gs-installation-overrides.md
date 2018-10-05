@@ -25,7 +25,7 @@ The Installer constructs a single override by inspecting the ConfigMap or Secret
 Installer merges all overrides recursively into a single YAML stream and passes it to Helm during the Kyma installation/upgrade operation.
 
 
-### Common vs component overides
+## Common vs component overides
 
 The Installer looks for available overrides each time a component installation or update operation is due.
 Overrides for the component are composed from two sets: **common** overrides and **component-specific** overrides.
@@ -35,10 +35,9 @@ Kyma uses common overrides for the installation of all components. ConfigMaps an
 Kyma uses component-specific overrides only for the installation of specific components. ConfigMaps and Secrets marked with both `installer:overrides` and `component: <name>` Labels, where `<name>` is the component name, contain the definition. Component-specific overrides have precedence over Common ones in case of conflicting entries.
 
 
-### Examples
+## Overrides Examples
 
-
-#### Top-level charts overrides
+### Top-level charts overrides
 
 Overrides for top-level charts are straightforward. Just use the template value from the chart (without leading ".Values." prefix) as the entry key in the ConfigMap or Secret.
 
@@ -67,9 +66,7 @@ Once the installation starts, the Installer generates overrides based on the map
 For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and a base64-encoded value. Be sure to label the Secret with `installer:overrides`.
 
 
-#### Sub-chart overrides
-
-
+### Sub-chart overrides
 
 Overrides for sub-charts follow the same convention as top-level charts. However, overrides require additional information about sub-chart location.
 
@@ -117,13 +114,21 @@ Notice that the user-provided override key now contains two parts:
 Once the installation starts, the Installer generates overrides based on the map entries. The system uses the value of "90" instead of the default value of "60" from the `values.yaml` chart file.
 
 
-#### Global overrides
+### Global overrides
 
 There are several important parameters usually shared across the charts.
 Helm convention to provide these requires the use of the `global` override key.
 For example, to define the `global.domain` override, just use "global.domain" as the name of the key in ConfigMap or Secret for the Installer.
 
 Once the installation starts, the Installer merges all of the map entries and collects all of the global entries under the `global` top-level key to use for installation.
+
+
+## Values and types
+
+Installer generally recognizes all override values as strings. It internally renders overrides to Helm as a YAML stream with only string values.
+
+There is one exception to this rule with respect to handling booleans:
+The system converts "true" or "false" strings that it encounters to a corresponding boolean value (true/false).
 
 
 ## Merging and conflicting entries
@@ -175,11 +180,3 @@ Or (due to non-deterministic merge order):
 a:
   b: "second"
 ```
-
-
-## Values and types
-
-Installer generally recognizes all override values as strings. It internally renders overrides to Helm as a YAML stream with only string values.
-
-There is one exception to this rule with respect to handling booleans:
-The system converts "true" or "false" strings that it encounters to a corresponding boolean value (true/false).
