@@ -26,8 +26,6 @@ func errorCodeToHttpStatus(code int) int {
 		return http.StatusConflict
 	case apperrors.CodeWrongInput:
 		return http.StatusBadRequest
-	case apperrors.CodeUpstreamServerCallFailed:
-		return http.StatusBadGateway
 	default:
 		return http.StatusInternalServerError
 	}
@@ -41,9 +39,5 @@ func formatErrorResponse(httpCode int, errorMessage string, detailedErrorRespons
 }
 
 func isInternalError(httpCode int) bool {
-	const internalStatusesBase = 500
-	if httpCode % internalStatusesBase < 100 {
-		return true
-	}
-	return false
+	return httpCode >= 500
 }

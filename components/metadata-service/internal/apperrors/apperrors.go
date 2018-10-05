@@ -7,7 +7,6 @@ const (
 	CodeNotFound                 = 2
 	CodeAlreadyExists            = 3
 	CodeWrongInput               = 4
-	CodeUpstreamServerCallFailed = 5
 )
 
 type AppError interface {
@@ -38,10 +37,6 @@ func AlreadyExists(format string, a ...interface{}) AppError {
 
 func WrongInput(format string, a ...interface{}) AppError {
 	return errorf(CodeWrongInput, format, a...)
-}
-
-func UpstreamServerCallFailed(format string, a ...interface{}) AppError {
-	return errorf(CodeUpstreamServerCallFailed, format, a...)
 }
 
 func (ae appError) Code() int {
