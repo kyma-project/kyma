@@ -145,6 +145,12 @@ global:
       cpu: 100m
       memory: 128Mi
 
+  resourceQuota:
+    requests:
+      memory: 2Gi
+    limits:
+      memory: 4Gi
+
   # Not recommended for user to configure this. Hyperkube image to use when creating custom resources
   hyperkube:
     hub: quay.io/coreos

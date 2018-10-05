@@ -5,7 +5,7 @@ metadata:
 spec:
   hard:
     # The sum of all pod memory requests must not exceed this value.
-    requests.memory: 2Gi
+    requests.memory: {{ .Values.global.resourceQuota.requests.memory }}
 
     # The sum of all pod memory limit must not exceed this value.
-    limits.memory: 6Gi
+    limits.memory: {{ .Values.global.resourceQuota.limits.memory }}
