@@ -3,7 +3,7 @@ title: Provisioning and binding
 type: Details
 ---
 
-Provisioning a service means creating an instance of a service. When you consume a specific ClusterServiceClass or a ServiceClass, and the system provisions a ServiceInstance, you need credentials for this service. To obtain credentials, create a ServiceBinding resource using the API of the Service Catalog. One instance can have numerous bindings to use in the Deployment or Function. When you raise a binding request, the system returns the credentials in the form of a Secret. The system creates a Secret in a given Environment.
+Provisioning a service means creating an instance of a service. When you consume a specific ClusterServiceClass or a ServiceClass, and the system provisions a ServiceInstance, you need credentials for this service. To obtain credentials, create a ServiceBinding resource using the API of the Service Catalog. One instance can have numerous bindings to use in the application. When you raise a binding request, the system returns the credentials in the form of a Secret. The system creates a Secret in a given Environment.
 
 > **NOTE:** The security in Kyma relies on the Kubernetes concept of a [Namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/). Kyma Environment is a security boundary. If the Secret exists in the Environment, the administrator can inject it to any Deployment. The Service Broker cannot prevent other applications from consuming a created Secret. Therefore, to ensure a stronger level of isolation and security, use a dedicated Environment and request separate bindings for each Deployment.
 

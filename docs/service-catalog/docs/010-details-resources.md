@@ -21,10 +21,10 @@ This document includes an overview of resources that the Kyma Service Catalog pr
 
 * **ServiceInstance** is a provisioned instance of a ClusterServiceClass to use in one or more cluster applications.
 
-* **ServiceBinding** is a link between a ServiceInstance and an application that cluster users create to obtain access credentials for their applications.
+* **ServiceBinding** is a link between a ServiceInstance and an application that cluster users create to request credentials or configuration details for a given ServiceInstance.
 
-* **Secret** is a basic resource to transfer logins and passwords to the Deployment. The service binding process leads to the creation of a Secret.
+* **Secret** is a basic resource to transfer credentials or configuration details that the application uses to consume a ServiceInstance. The service binding process leads to the creation of a Secret.
 
 * **ServiceBindingUsage** is a Kyma custom resource that allows the ServiceBindingUsage controller to inject Secrets into a given application.
 
-* **UsageKind** is a Kyma custom resource that allows you to bind a ServiceInstance to any resource.
+* **UsageKind** is a Kyma custom resource that defines which resources can be bound with the ServiceBinding and how to bind them..
