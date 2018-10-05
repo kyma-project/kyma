@@ -92,7 +92,7 @@ metadata:
     installer: overrides
     component: istio
 data:
-  global.proxy.includeIPRanges: "10.244.0.0/16,10.240.0.0/16"
+  global.proxy.includeIPRanges: "10.0.0.1/8"
 
   gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   gateways.istio-ingressgateway.type: "LoadBalancer"
