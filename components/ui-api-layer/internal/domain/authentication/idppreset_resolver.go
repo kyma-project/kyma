@@ -1,11 +1,11 @@
-package ui
+package authentication
 
 import (
 	"context"
 
 	"github.com/golang/glog"
-	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/ui/v1alpha1"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui/pretty"
+	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/authentication/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
