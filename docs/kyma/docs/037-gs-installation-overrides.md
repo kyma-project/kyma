@@ -10,7 +10,7 @@ This document describes how to configure the Installer with override values for 
 ## Overview
 
 The Installer is a Kubernetes Operator that uses Helm to install Kyma components.
-Helm provides an *overrides* feature to customize the installation of charts, such as to configure environment-specific values.
+Helm provides an overrides feature to customize the installation of charts, such as to configure environment-specific values.
 When using Installer for Kyma installation, users can't interact with Helm directly. The installation is not an interactive process.
 
 To customize the Kyma installation, the Installer exposes a generic mechanism to configure Helm overrides called **user-defined** overrides.
@@ -142,7 +142,7 @@ It is important to avoid overrides having the same keys for final values.
 
 ### Example of non-conflicting merge:
 
-Two overrides with a common *key prefix* ("a.b"):
+Two overrides with a common key prefix ("a.b"):
 
 ```
 "a.b.c": "first"
@@ -160,7 +160,7 @@ a:
 
 ### Example of conflicting merge:
 
-Two overrides with *the same* key ("a.b"):
+Two overrides with the same key ("a.b"):
 
 ```
 "a.b": "first"
