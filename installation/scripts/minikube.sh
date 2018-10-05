@@ -7,6 +7,7 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 MINIKUBE_DOMAIN=""
 MINIKUBE_VERSION=0.28.2
 KUBERNETES_VERSION=1.10.0
+KUBECTL_CLI_VERSION=1.10
 VM_DRIVER="hyperkit"
 
 source $CURRENT_DIR/utils.sh
@@ -101,6 +102,18 @@ function checkMinikubeVersion() {
     fi
 }
 
+function checkKubectlVersion() {
+    local clientVersion=$(kubectl version --short | grep "Client" | awk '{print $3}')
+    local clientVersionMinor=$(echo $clientVersion | awk -F'[(.)]' '{print $2}')
+    local kubectlCliVersionMinor=$(echo $KUBECTL_CLI_VERSION | awk -F'[(.)]' '{print $2}')
+    local versionDifference=$(( clientVersionMinor - kubectlCliVersionMinor ))
+
+    if [[ $versionDifference -ne 1 ]] && [[ $versionDifference -ne 0 ]] && [[ $versionDifference -ne -1 ]]; then
+        echo "Your kubectl is in ${clientVersion}. v${KUBECTL_CLI_VERSION} is supported version of kubectl. Install supported version!"
+        exit -1
+    fi
+}
+
 function addDevDomainsToEtcHosts() {
     local hostnames=$1
     local minikubeIP=$(minikube ip)
@@ -164,6 +177,8 @@ function start() {
     -b=localkube
 
     waitForMinikubeToBeUp
+
+    checkKubectlVersion
 
     # Adding domains to /etc/hosts files
     addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} ui-api.${MINIKUBE_DOMAIN} minio.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN}  configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN}"
