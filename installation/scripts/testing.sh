@@ -44,9 +44,9 @@ function printLogsFromFailedHelmTests() {
 
 function printLogsFromPod() {
     local namespace=$1 pod=$2
-
-    log "Fetching logs from '${pod}'" nc bold
-    result=$(kubectl logs -n ${namespace} ${pod})
+    local tailLimit=2000 bytesLimit=500000
+    log "Fetching logs from '${pod}' with options tailLimit=${tailLimit} and bytesLimit=${bytesLimit}" nc bold
+    result=$(kubectl logs --tail=${tailLimit} --limit-bytes=${bytesLimit} -n ${namespace} ${pod})
     if [ "${#result}" -eq 0 ]; then
         log "FAILED" red
         return 1
@@ -193,8 +193,6 @@ cleanupGatewayErr=$?
 if [ ${cleanupGatewayErr} -ne 0 ] || [ ${cleanupIstioErr} -ne 0 ]  || [ ${cleanupCoreErr} -ne 0 ]
 then
     exit 1
-else
-    exit 0
 fi
 
 echo "----------------------------"
