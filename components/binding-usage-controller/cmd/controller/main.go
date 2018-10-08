@@ -48,7 +48,7 @@ func main() {
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	fatalOnError(err)
 
-	// k8s informers config
+	// k8s Clientset
 	k8sCli, err := k8sClientset.NewForConfig(k8sConfig)
 	fatalOnError(err)
 
