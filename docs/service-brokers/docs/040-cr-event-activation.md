@@ -43,7 +43,7 @@ These are the resources related to this CR:
 | Custom resource   |   Description |
 |:----------:|:------|
 | RemoteEnvironment |  Describes a service from which the user receives Events. |
-| Subscription | Contains information on to how create an infrastructure for consuming Events. Works only if the EventActivation is enabled.  |
+| Subscription | Contains information on how to create an infrastructure for consuming Events. Works only if the EventActivation is enabled.  |
 
 These components use this CR:
 

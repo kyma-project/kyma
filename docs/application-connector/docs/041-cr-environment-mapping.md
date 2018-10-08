@@ -43,5 +43,5 @@ These components use this CR:
 
 | Component   |   Description |
 |:----------:|:------|
-| Remote Environment Broker |  Uses this CR to enable the provisioning of the ServiceClasses in a given Environment. |
-| ui-api-layer | Uses this CR to filter enabled RemoteEnvironments. It also allows to create or delete EnvironmentMappings. |
+| Remote Environment Broker |  Uses this CR to enable the provisioning of ServiceClasses in a given Environment. |
+| ui-api-layer | Uses this CR to filter enabled RemoteEnvironments. It also allows you to create or delete EnvironmentMappings. |
