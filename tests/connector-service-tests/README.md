@@ -1,4 +1,4 @@
-# Connector service acceptance tests
+# Connector Service Acceptance Tests
 
 ## Overview
 

@@ -1,5 +1,7 @@
 # Installer
 
+## Overview
+
 Installer is a tool for installing all Kyma components.
 The project is based on the Kubernetes operator pattern. It tracks changes of the `Installation` type instance of the custom resource. It also installs, uninstalls, and updates Kyma accordingly.
 
@@ -127,6 +129,5 @@ $ ../../installation/scripts/manage-component.sh azure-broker true
 
 ## Static overrides for cluster installations
 
-You can define cluster-specific overrides for each root chart. In the cluster deployment scenario, the installer reads the `cluster.yaml` file in each root chart and appends its content to the overrides applied during the 
+You can define cluster-specific overrides for each root chart. In the cluster deployment scenario, the installer reads the `cluster.yaml` file in each root chart and appends its content to the overrides applied during the
 Helm installation.
-
