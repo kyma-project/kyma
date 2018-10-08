@@ -15,7 +15,7 @@ Additionally, download these tools:
 
 - [Minikube](https://github.com/kubernetes/minikube) 0.28.2
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.10.0
-- [Helm](https://github.com/kubernetes/helm) 2.8.2
+- [Helm](https://github.com/kubernetes/helm) 2.10.0
 - [jq](https://stedolan.github.io/jq/)
 
 Virtualization:

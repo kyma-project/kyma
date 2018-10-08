@@ -115,7 +115,7 @@ spec:
 
 High level Kyma components, such as **core**, come as Helm charts. These charts are installed as part of a single Helm release. To provide ordering for these core components, the Helm client runs with the `--wait` flag. As a result, Tiller waits for the readiness of all of the components, and then evaluates the readiness.
 
-For `Deployments`, set the strategy to `RollingUpdate` and set the `MaxUnavailable` value to a number lower than the number of replicas. This setting is necessary, as readiness in Helm v2.8.2 is fulfilled if the number of replicas in ready state is not lower than the expected number of replicas:
+For `Deployments`, set the strategy to `RollingUpdate` and set the `MaxUnavailable` value to a number lower than the number of replicas. This setting is necessary, as readiness in Helm v2.10.0 is fulfilled if the number of replicas in ready state is not lower than the expected number of replicas:
 
 ```
 ReadyReplicas >= TotalReplicas - MaxUnavailable
@@ -137,13 +137,13 @@ The Tiller server performs the chart installation process. This is the order of 
 
 ## Notes
 
-All notes are based on Helm v2.7.2 implementation and are subject to change in feature releases.
+All notes are based on Helm v2.10.0 implementation and are subject to change in feature releases.
 
 * Regardless of how complex a chart is, and regardless of the number of sub-charts it references or consists of, it's always evaluated as one. This means that each Helm release is compiled into a single Kubernetes manifest file when applied on API server.
 
 * Hooks are parsed in the same order as manifest files and returned as a single, global list for the entire chart. For each hook the weight is calculated as a part of this sort.
 
-* Manifests are sorted by `Kind`. You can find the list and the order of the resources on the Kubernetes [Tiller](https://github.com/kubernetes/helm/blob/v2.8.2/pkg/tiller/kind_sorter.go#L29) website.
+* Manifests are sorted by `Kind`. You can find the list and the order of the resources on the Kubernetes [Tiller](https://github.com/kubernetes/helm/blob/v2.10.0/pkg/tiller/kind_sorter.go#L29) website.
 
 ## Glossary
 
