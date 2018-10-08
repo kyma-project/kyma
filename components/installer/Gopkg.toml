@@ -59,3 +59,7 @@ required = ["k8s.io/code-generator/cmd/client-gen"]
 [[override]]
   name = "github.com/docker/distribution"
   revision = "edc3ab29cdff8694dd6feb85cfeb4b5f1b38ed9c"
+
+[prune]
+  go-tests = true
+  unused-packages = true

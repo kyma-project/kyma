@@ -12,6 +12,10 @@ required = ["k8s.io/code-generator/cmd/client-gen"]
   name = "k8s.io/client-go"
   version = "kubernetes-1.10.1"
 
-  [[constraint]]
+[[constraint]]
   name = "github.com/satori/go.uuid"
   version = "1.2.0"
+
+[prune]
+  go-tests = true
+  unused-packages = true

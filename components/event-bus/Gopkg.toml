@@ -43,3 +43,7 @@ required = ["k8s.io/code-generator/cmd/client-gen"]
 [[override]]
   branch = "master"
   name = "github.com/apache/thrift"
+
+[prune]
+  go-tests = true
+  unused-packages = true
