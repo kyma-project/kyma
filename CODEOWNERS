@@ -22,6 +22,9 @@
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel
 
+# The `values.yaml` file for `core` chart
+/resources/core/values.yaml @kyma-project/developers
+
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @sjanota
 
