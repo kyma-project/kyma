@@ -103,13 +103,17 @@ function checkMinikubeVersion() {
 }
 
 function checkKubectlVersion() {
-    local clientVersion=$(kubectl version --short | grep "Client" | awk '{print $3}')
-    local clientVersionMinor=$(echo $clientVersion | awk -F'[(.)]' '{print $2}')
-    local kubectlCliVersionMinor=$(echo $KUBECTL_CLI_VERSION | awk -F'[(.)]' '{print $2}')
-    local versionDifference=$(( clientVersionMinor - kubectlCliVersionMinor ))
+    local clientVersionMajor=$(kubectl version --client --short | grep -o -m1 '[0-9]\+' | sed -n '1p')
+    local clientVersionMinor=$(kubectl version --client --short | grep -o -m1 '[0-9]\+' | sed -n '2p')
+    local minorVersionDifference=$(( clientVersionMinor - $(echo $KUBECTL_CLI_VERSION | cut -d"." -f2) ))
 
-    if [[ $versionDifference -ne 1 ]] && [[ $versionDifference -ne 0 ]] && [[ $versionDifference -ne -1 ]]; then
-        echo "Your kubectl is in ${clientVersion}. v${KUBECTL_CLI_VERSION} is supported version of kubectl. Install supported version!"
+    if [[ $clientVersionMajor -ne $(echo $KUBECTL_CLI_VERSION | cut -d"." -f1) ]]; then
+        echo "Your kubectl version is ${clientVersionMajor}.${clientVersionMinor}. ${KUBECTL_CLI_VERSION}.* is supported version of kubectl. Install supported version!"
+        exit -1
+    fi
+
+    if [[ $minorVersionDifference -gt 1 ]] || [[ $minorVersionDifference -lt -1 ]]; then
+        echo "Your kubectl version is ${clientVersionMajor}.${clientVersionMinor}. v${KUBECTL_CLI_VERSION}.* is supported version of kubectl. Install supported version!"
         exit -1
     fi
 }
@@ -155,6 +159,8 @@ function increaseFsInotifyMaxUserInstances() {
 function start() {
     checkMinikubeVersion
 
+    checkKubectlVersion
+
     checkIfMinikubeIsInitialized
 
     initializeMinikubeConfig
@@ -177,8 +183,6 @@ function start() {
     -b=localkube
 
     waitForMinikubeToBeUp
-
-    checkKubectlVersion
 
     # Adding domains to /etc/hosts files
     addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} ui-api.${MINIKUBE_DOMAIN} minio.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN}  configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN}"
