@@ -49,6 +49,6 @@ These components use this CR:
 
 | Component   |   Description |
 |:----------:|:------|
-| Remote Environment Broker |  Uses this CR to enable receiving Events from a given service. |
+| Remote Environment Broker |  Uses this CR to enable the user to receive Events from a given service. |
 | Event Bus | Uses this CR to control the consumption of an Event.  |
 | ui-api-layer |  Exposes the given CR to the Console UI. |
