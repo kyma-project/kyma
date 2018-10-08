@@ -7,7 +7,7 @@ For testing, the Kyma components use the Helm test concept. Place your test unde
 
 ## Add a new test
 
-The system bases tests on the Helm broker concept with one modification: adding a Pod label. Before you create a test, see the official [Chart Tests](https://github.com/kubernetes/helm/blob/release-2.7/docs/chart_tests.md) documentation. Then, add the `"helm-chart-test": "true"` label to your Pod template.
+The system bases tests on the Helm broker concept with one modification: adding a Pod label. Before you create a test, see the official [Chart Tests](https://github.com/kubernetes/helm/blob/release-2.10/docs/chart_tests.md) documentation. Then, add the `"helm-chart-test": "true"` label to your Pod template.
 
 See the following example of a test prepared for Dex:
 

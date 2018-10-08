@@ -30,8 +30,9 @@ func TestBindableResourcesResolver_ListBindableResources(t *testing.T) {
 func fixBindableResourcesOutputItems() []gqlschema.BindableResourcesOutputItem {
 	return []gqlschema.BindableResourcesOutputItem{
 		{
-			Kind:      "deployment",
-			Resources: []gqlschema.UsageKindResource{},
+			Kind:        "deployment",
+			DisplayName: "Deployments",
+			Resources:   []gqlschema.UsageKindResource{},
 		},
 	}
 }
