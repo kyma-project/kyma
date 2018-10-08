@@ -41,6 +41,8 @@ spec:
           - "-a"
           - {{ .Release.Namespace }}
 {{- end }}
+          - "--webhookEndpoint"
+          - "http://istio-webhook:5000"
 {{- if not .Values.sidecar }}
           - --secureGrpcAddr
           - ":15011"
@@ -148,7 +150,7 @@ spec:
           name: istio
       - name: istio-certs
         secret:
+          optional: true
           secretName: istio.istio-pilot-service-account
-          optional: true   
       affinity:
       {{- include "nodeaffinity" . | indent 6 }}

@@ -29,10 +29,9 @@ func (steps InstallationSteps) uninstallReleases() error {
 	for _, releaseName := range releasesToBeDeleted {
 		log.Println("Uninstalling release", releaseName)
 		uninstallReleaseResponse, uninstallError := steps.helmClient.DeleteRelease(releaseName)
-		if steps.errorHandlers.CheckError("Uninstall Error: ", uninstallError) {
-			return uninstallError
+		if !steps.errorHandlers.CheckError("Uninstall Error: ", uninstallError) {
+			steps.helmClient.PrintRelease(uninstallReleaseResponse.Release)
 		}
-		steps.helmClient.PrintRelease(uninstallReleaseResponse.Release)
 	}
 
 	log.Println("All releases have been successfully uninstalled!")

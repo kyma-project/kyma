@@ -10,7 +10,7 @@ metadata:
 spec:
   containers:
     - name: {{ .Chart.Name }}-tests
-      image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.tests.image.name }}:{{ .Values.tests.image.tag }}"
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connector_service_tests.dir }}connector-service-tests:{{ .Values.global.connector_service_tests.version }}
       imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
       env:
       - name: INTERNAL_API_URL

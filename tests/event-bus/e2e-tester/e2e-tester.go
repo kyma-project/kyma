@@ -372,6 +372,7 @@ func checkSubscriberStatus(noOfRetries int) bool {
 			time.Sleep(time.Duration(i) * time.Second)
 		} else if !checkStatusCode(res, http.StatusOK) {
 			log.Printf("Subscriber Server Status request returns: %v; Retrying (%d/%d)\n", res, i, noOfRetries)
+			time.Sleep(time.Duration(i) * time.Second)
 		} else {
 			subscriberOK = true
 			break

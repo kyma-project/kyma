@@ -20,7 +20,7 @@ spec:
           serviceAccountName: {{ template "etcd-fullname" . }}-backup
           containers:
           - name: etcd-backup
-            image: "{{ .Values.global.containerRegistry.path }}/etcd-backup:{{ .Values.backupApp.image.tag }}"
+            image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.etcd_backup.dir }}etcd-backup:{{ .Values.global.etcd_backup.version }}"
             imagePullPolicy: "{{ .Values.backupApp.image.pullPolicy }}"
             env:
             - name: APP_WORKING_NAMESPACE

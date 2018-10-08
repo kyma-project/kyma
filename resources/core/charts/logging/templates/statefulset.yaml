@@ -67,7 +67,11 @@ spec:
             - name: cluster
               containerPort: 7659
           resources:
+          {{ if not .Values.global.isLocalEnv }}
 {{ toYaml .Values.oklog.resources | indent 12}}
+          {{- else }}
+{{ toYaml .Values.isLocalEnv.resources | indent 12 }}
+          {{ end }}
 {{- if  .Values.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:
@@ -80,7 +84,11 @@ spec:
         - {{ .Values.persistence.accessMode | quote }}
       resources:
         requests:
+          {{- if .Values.global.isLocalEnv }}
+          storage: {{ .Values.isLocalEnv.persistence.size | quote }}
+          {{- else }}
           storage: {{ .Values.persistence.size | quote }}
+          {{- end }}
 {{- if .Values.persistence.storageClass}}
 {{- if (eq "-" .Values.persistence.storageClass) }}
       storageClassName: ""

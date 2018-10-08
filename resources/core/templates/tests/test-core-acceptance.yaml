@@ -10,7 +10,7 @@ spec:
   serviceAccountName:  test-{{ template "fullname" . }}-acceptance
   containers:
     - name: test-{{ template "fullname" . }}-acceptance
-      image: {{ .Values.global.containerRegistry.path }}/develop/acceptance-tests:{{ .Values.test.acceptance.core.imageTag }}
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}acceptance-tests:{{ .Values.global.acceptance_tests.version }}
       env:
       - name: HELM_BROKER_URL
         value: http://{{.Release.Name }}-helm-broker.{{ .Release.Namespace }}.svc.cluster.local
@@ -23,7 +23,7 @@ spec:
       - name: INGRESSGATEWAY_FQDN
         value: istio-ingressgateway.istio-system.svc.cluster.local
       - name: STUBS_DOCKER_IMAGE
-        value: {{ .Values.global.containerRegistry.path }}/develop/acceptance-tests:{{ .Values.test.acceptance.core.imageTag }}
+        value: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}acceptance-tests:{{ .Values.global.acceptance_tests.version }}
       - name: REMOTE_ENVIRONMENT_UNLINKING_TIMEOUT
         value: {{ .Values.test.acceptance.core.remoteEnvironment.unlinkingTimeout | quote }}
       - name: REMOTE_ENVIRONMENT_LINKING_TIMEOUT

@@ -46,7 +46,7 @@ spec:
   serviceAccountName: test-{{ template "fullname" . }}
   containers:
   - name: test-{{ template "fullname" . }}
-    image: {{ .Values.global.containerRegistry.path }}/test-environments:0.1.0
+    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_environments.dir }}test-environments:{{ .Values.global.test_environments.version }}
     env:
       - name: EXPECTED_LIMIT_RANGE_MEMORY_DEFAULT_REQUEST
         value: "{{ .Values.limitRanges.defaultRequest }}"

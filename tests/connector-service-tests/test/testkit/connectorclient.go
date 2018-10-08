@@ -13,7 +13,7 @@ import (
 type ConnectorClient interface {
 	CreateToken(t *testing.T) TokenResponse
 	GetInfo(t *testing.T, url string) (*InfoResponse, *Error)
-	CreateClientCert(t *testing.T, csr, url string) (*CrtResponse, *Error)
+	CreateCertChain(t *testing.T, csr, url string) (*CrtResponse, *Error)
 }
 
 type connectorClient struct {
@@ -77,7 +77,7 @@ func (cc connectorClient) GetInfo(t *testing.T, url string) (*InfoResponse, *Err
 	return infoResponse, nil
 }
 
-func (cc connectorClient) CreateClientCert(t *testing.T, csr, url string) (*CrtResponse, *Error) {
+func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtResponse, *Error) {
 	body, err := json.Marshal(CsrRequest{Csr: csr})
 	require.NoError(t, err)
 

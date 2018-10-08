@@ -99,7 +99,7 @@ func (sh *signatureHandler) signCSR(secretName string, csr *x509.CertificateRequ
 		return "", appErr
 	}
 
-	signedCrt, appErr := sh.certUtil.SignWithCA(caCrt, csr, caKey)
+	signedCrt, appErr := sh.certUtil.CreateCrtChain(caCrt, csr, caKey)
 	if appErr != nil {
 		return "", appErr
 	}

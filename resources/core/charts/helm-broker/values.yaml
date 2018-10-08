@@ -1,10 +1,7 @@
 initImage:
-  tag: 0.2.32
   # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 image:
-  tag: 0.3.330
-  # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 service:
   type: NodePort

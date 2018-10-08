@@ -5,12 +5,12 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/apicontroller"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/kubeless"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/rest"
@@ -23,7 +23,7 @@ type RootResolver struct {
 	re        *remoteenvironment.Resolver
 	content   *content.Resolver
 	ac        *apicontroller.Resolver
-	idpPreset *ui.Resolver
+	idpPreset *authentication.Resolver
 }
 
 func New(restConfig *rest.Config, contentCfg content.Config, reCfg remoteenvironment.Config, informerResyncPeriod time.Duration) (*RootResolver, error) {
@@ -57,7 +57,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, reCfg remoteenviron
 		return nil, errors.Wrap(err, "while initializing API controller resolver")
 	}
 
-	idpPresetResolver, err := ui.New(restConfig, informerResyncPeriod)
+	idpPresetResolver, err := authentication.New(restConfig, informerResyncPeriod)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing idpPreset resolver")
 	}
