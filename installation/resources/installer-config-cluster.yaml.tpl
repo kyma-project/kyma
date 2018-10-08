@@ -59,8 +59,6 @@ data:
   minio.accessKey: "admin"
   minio.secretKey: "topSecretKey"
   acceptanceTest.remoteEnvironment.disabled: "true"
-  mixer.resources.limits.memory: 1Gi
-  security.enabled: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -85,3 +83,16 @@ metadata:
 data:
   deployment.args.sourceType: marketing
   service.externalapi.nodePort: "32000"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: istio
+data:
+  mixer.resources.limits.memory: 1Gi
+  security.enabled: "true"
+  global.resourceQuota.limits.memory: 6Gi
