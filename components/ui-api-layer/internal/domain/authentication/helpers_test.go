@@ -1,7 +1,7 @@
-package ui_test
+package authentication_test
 
 import (
-	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/ui/v1alpha1"
+	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -12,7 +12,6 @@ func fixIDPPreset() *v1alpha1.IDPPreset {
 			Name: "fixIDPPreset",
 		},
 		Spec: v1alpha1.IDPPresetSpec{
-			Name:    "fixIDPPreset",
 			JwksUri: "uri",
 			Issuer:  "issuer",
 		},
@@ -25,7 +24,6 @@ func fixIDPPresets() []*v1alpha1.IDPPreset {
 
 func fixIDPPresetGQL() gqlschema.IDPPreset {
 	return gqlschema.IDPPreset{
-		Name:    "fixIDPPreset",
 		JwksURI: "uri",
 		Issuer:  "issuer",
 	}

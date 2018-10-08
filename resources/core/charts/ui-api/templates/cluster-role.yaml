@@ -32,6 +32,6 @@ rules:
   - apiGroups: ["gateway.kyma.cx"]
     resources: ["apis"]
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["ui.kyma.cx"]
+  - apiGroups: ["authentication.kyma-project.io"]
     resources: ["idppresets"]
     verbs: ["get", "list", "watch", "create", "delete"]

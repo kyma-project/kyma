@@ -130,22 +130,3 @@ $ ../../installation/scripts/manage-component.sh azure-broker true
 You can define cluster-specific overrides for each root chart. In the cluster deployment scenario, the installer reads the `cluster.yaml` file in each root chart and appends its content to the overrides applied during the 
 Helm installation.
 
-## Install selected components only
-
-This tool installs components specified in `Installation` CR. See the [installer-cr.yaml.tpl](../../installation/resources/installer-cr.yaml.tpl) file for more details. 
-
-To enable installation of a component, specify its name and Namespace. If you want the release name to be different from the component's name, provide the release parameter.
-
-Example:
-
-```
-spec:
-    ...
-    components:
-    ...
-    - name: "remote-environments"
-      namespace: "kyma-integration"
-      release: "hmc-default"
-```
-
-In the example, the `remote-environments` component is installed in the `kyma-integration` Namespace, using `hmc-default` as the release name. The **name** and **namespace** fields are mandatory. The name of the component is also the name of the component subdirectory in the `resources` directory. The Installer assumes that the component subdirectory is a valid Helm chart.

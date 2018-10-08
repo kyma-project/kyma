@@ -1,10 +1,10 @@
-package ui
+package authentication
 
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/ui/v1alpha1"
-	idppresetv1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/typed/ui/v1alpha1"
+	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
+	idppresetv1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/tools/cache"
 
@@ -13,11 +13,11 @@ import (
 )
 
 type idpPresetService struct {
-	client            idppresetv1alpha1.UiV1alpha1Interface
+	client            idppresetv1alpha1.AuthenticationV1alpha1Interface
 	idpPresetInformer cache.SharedIndexInformer
 }
 
-func newIDPPresetService(client idppresetv1alpha1.UiV1alpha1Interface, reInformer cache.SharedIndexInformer) *idpPresetService {
+func newIDPPresetService(client idppresetv1alpha1.AuthenticationV1alpha1Interface, reInformer cache.SharedIndexInformer) *idpPresetService {
 	return &idpPresetService{
 		idpPresetInformer: reInformer,
 		client:            client,
@@ -27,14 +27,13 @@ func newIDPPresetService(client idppresetv1alpha1.UiV1alpha1Interface, reInforme
 func (svc *idpPresetService) Create(name string, issuer string, jwksURI string) (*v1alpha1.IDPPreset, error) {
 	idpPreset := v1alpha1.IDPPreset{
 		TypeMeta: v1.TypeMeta{
-			APIVersion: "ui.kyma.cx/v1alpha1",
+			APIVersion: "authentication.kyma-project.io/v1alpha1",
 			Kind:       "IDPPreset",
 		},
 		ObjectMeta: v1.ObjectMeta{
 			Name: name,
 		},
 		Spec: v1alpha1.IDPPresetSpec{
-			Name:    name,
 			Issuer:  issuer,
 			JwksUri: jwksURI,
 		},

@@ -1,7 +1,7 @@
-package ui
+package authentication
 
 import (
-	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/ui/v1alpha1"
+	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 )
 

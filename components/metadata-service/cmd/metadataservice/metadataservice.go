@@ -134,7 +134,7 @@ func newServiceDefinitionService(minioURL, namespace string, proxyPort int, name
 	}
 
 	istioService, apperror := newIstioService(k8sConfig, namespace)
-	if err != nil {
+	if apperror != nil {
 		return nil, apperror
 	}
 
