@@ -27,7 +27,7 @@ fi
 ##
 # GO BUILD
 ##
-binaries=("broker" "indexbuilder" "reposerver" "targz")
+binaries=("broker" "indexbuilder" "targz")
 buildEnv=""
 if [ "$1" == "$CI_FLAG" ]; then
 	# build binary statically
