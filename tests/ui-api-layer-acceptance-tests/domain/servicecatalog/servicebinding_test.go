@@ -88,7 +88,7 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	instanceName := "binding-test-instance"
-	instance := instance(instanceName)
+	instance := instanceFromClusterServiceClass(instanceName)
 
 	bindingName := "test-binding"
 	binding := binding(bindingName, instanceName)
@@ -100,7 +100,7 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	defer subscription.Close()
 
 	t.Log("Create Instance")
-	_, err = createInstance(c, "name", instance)
+	_, err = createInstance(c, "name", instance, true)
 	require.NoError(t, err)
 
 	waitForInstanceReady(instance.Name, instance.Environment, svcatCli)
