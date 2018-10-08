@@ -27,3 +27,7 @@ required = ["k8s.io/code-generator/cmd/client-gen"]
 [[constraint]]
   name = "github.com/satori/go.uuid"
   version = "1.2.0"
+
+[prune]
+  go-tests = true
+  unused-packages = true
