@@ -129,7 +129,7 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	instanceRes, err := querySingleInstance(c, `
 		name
 		serviceBindings {
-			serviceBindings {
+			items {
 				name
 				serviceInstanceName
 				environment
@@ -142,11 +142,19 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 					type
 				}
 			}
+			stats {	
+				ready
+				failed
+				pending
+				unknown
+			}
 		}
 	`, instance)
 
 	assert.NoError(t, err)
-	assertBindingExistsAndEqual(t, binding, instanceRes.ServiceInstance.ServiceBindings.ServiceBindings)
+	assertBindingExistsAndEqual(t, binding, instanceRes.ServiceInstance.ServiceBindings.Items)
+	stats := instanceRes.ServiceInstance.ServiceBindings.Stats
+	assert.Equal(t, 1, stats.Ready+stats.Pending)
 
 	t.Log("Delete Binding")
 	deleteRes, err := deleteBinding(c, deleteBindingOutput)

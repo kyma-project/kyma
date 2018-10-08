@@ -53,7 +53,15 @@ type ServiceInstance struct {
 }
 
 type ServiceBindings struct {
-	ServiceBindings []ServiceBinding
+	Items []ServiceBinding
+	Stats ServiceBindingStats
+}
+
+type ServiceBindingStats struct {
+	Ready   int
+	Failed  int
+	Pending int
+	Unknown int
 }
 
 type ServiceInstanceStatus struct {
@@ -340,7 +348,7 @@ func instanceDetailsFields() string {
 			activated
 		}
 		serviceBindings {
-			serviceBindings {
+			items {
 				name
 				serviceInstanceName
 				environment
@@ -382,6 +390,8 @@ func checkInstance(t *testing.T, expected, actual ServiceInstance) {
 	assert.Equal(t, expected.Environment, actual.Environment)
 	assert.Equal(t, expected.ClusterServicePlan.Name, actual.ClusterServicePlan.Name)
 	assert.Equal(t, expected.ClusterServiceClass.Name, actual.ClusterServiceClass.Name)
+	assert.Equal(t, expected.Labels, actual.Labels)
+	assert.Equal(t, expected.Bindable, actual.Bindable)
 }
 
 func assertInstanceExistsAndEqual(t *testing.T, expectedElement ServiceInstance, arr []ServiceInstance) {
@@ -416,6 +426,7 @@ func instance(name string) ServiceInstance {
 			Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
 			ExternalName: "user-provided-service",
 		},
+		Bindable: true,
 	}
 }
 
