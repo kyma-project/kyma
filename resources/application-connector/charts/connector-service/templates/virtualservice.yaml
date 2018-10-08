@@ -12,7 +12,7 @@ spec:
   hosts:
   - connector-service.{{ .Values.global.domainName }}
   gateways:
-  - {{ .Values.global.istio.gateway.name }}.{{ .Release.Namespace }}.svc.cluster.local
+  - {{ .Values.global.istio.gateway.name }}.kyma-system.svc.cluster.local
   http:
   - match:
     - uri:

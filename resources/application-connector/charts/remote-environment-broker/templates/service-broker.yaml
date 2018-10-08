@@ -1,4 +1,3 @@
-{{- if .Release.IsUpgrade -}}
 {{- if .Values.clusterScopedBrokerEnabled }}
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ClusterServiceBroker
@@ -11,6 +10,5 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  url: http://{{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
-{{- end -}}
+  url: http://{{ template "fullname" . }}.{{ .Values.global.namespace }}.svc.cluster.local
 {{- end -}}
