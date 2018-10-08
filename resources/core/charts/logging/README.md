@@ -1,14 +1,4 @@
-
-```
-  _                       _             
- | |                     (_)            
- | |     ___   __ _  __ _ _ _ __   __ _ 
- | |    / _ \ / _` |/ _` | | '_ \ / _` |
- | |___| (_) | (_| | (_| | | | | | (_| |
- |______\___/ \__, |\__, |_|_| |_|\__, |
-               __/ | __/ |         __/ |
-              |___/ |___/         |___/ 
-```
+# Logging
 
 ## Overview
 This document explains how Kyma installs `OK Log` and `Logspout` in the `kyma-system` Namespace, and how to use it to check logs in Kyma.

@@ -1,14 +1,6 @@
-```
- _____                                         
- |  __ \                                        
- | |__) |___  ___  ___  _   _ _ __ ___ ___  ___
- |  _  // _ \/ __|/ _ \| | | | '__/ __/ _ \/ __|
- | | \ \  __/\__ \ (_) | |_| | | | (_|  __/\__ \
- |_|  \_\___||___/\___/ \__,_|_|  \___\___||___/
+# Resources                                                                                  
 
-```                                                                                  
-
-## Overview 
+## Overview
 
 Resources are all components in Kyma that are available for local and cluster installation. You can find more details about each component in the corresponding README.md files.
 

@@ -1,15 +1,7 @@
-```
-  ______               _     ____            
- |  ____|             | |   |  _ \           
- | |____   _____ _ __ | |_  | |_) |_   _ ___
- |  __\ \ / / _ \ '_ \| __| |  _ <| | | / __|
- | |___\ V /  __/ | | | |_  | |_) | |_| \__ \
- |______\_/ \___|_| |_|\__| |____/ \__,_|___/
-```
+# Event Bus
 
 ## Overview
 The Event Bus enables Kyma to integrate with various other external solutions. The integration uses the `publish-subscribe` messaging pattern that allows Kyma to receive business Events from different solutions, enrich the events, and trigger business flows using lambdas or services defined in Kyma. See the [Event Bus documentation](https://github.com/kyma-project/kyma/tree/master/docs/event-bus/docs).
-
 
 ## Docker Images
 Currently, Event Bus makes the following three Docker images available to the `kyma core` Helm chart:
