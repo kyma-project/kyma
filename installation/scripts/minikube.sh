@@ -103,8 +103,8 @@ function checkMinikubeVersion() {
 }
 
 function checkKubectlVersion() {
-    local clientVersionMajor=$(kubectl version --client --short | grep -o -m1 '[0-9]\+' | sed -n '1p')
-    local clientVersionMinor=$(kubectl version --client --short | grep -o -m1 '[0-9]\+' | sed -n '2p')
+    local clientVersionMajor=$(kubectl version --client --short | grep -o '[0-9]\+' | sed -n '1p')
+    local clientVersionMinor=$(kubectl version --client --short | grep -o '[0-9]\+' | sed -n '2p')
     local minorVersionDifference=$(( clientVersionMinor - $(echo $KUBECTL_CLI_VERSION | cut -d"." -f2) ))
 
     if [[ $clientVersionMajor -ne $(echo $KUBECTL_CLI_VERSION | cut -d"." -f1) ]]; then
