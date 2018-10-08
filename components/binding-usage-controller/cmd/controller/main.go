@@ -18,7 +18,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/informers"
 	k8sClientset "k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -49,10 +48,9 @@ func main() {
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	fatalOnError(err)
 
-	// k8s informers
+	// k8s informers config
 	k8sCli, err := k8sClientset.NewForConfig(k8sConfig)
 	fatalOnError(err)
-	k8sInformersFactory := informers.NewSharedInformerFactory(k8sCli, informerResyncPeriod)
 
 	// ServiceBindingUsage informers
 	bindingUsageCli, err := bindingUsageClientset.NewForConfig(k8sConfig)
@@ -112,7 +110,6 @@ func main() {
 
 	// TODO consider to extract here the cache sync logic from controller
 	// and use WaitForCacheSync() method defined on factories
-	k8sInformersFactory.Start(stopCh)
 	bindingUsageInformerFactory.Start(stopCh)
 	serviceCatalogInformerFactory.Start(stopCh)
 
