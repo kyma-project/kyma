@@ -96,9 +96,6 @@ global:
   remote_environment_broker:
     dir: develop/
     version: 8f0a3611
-  stability_checker:
-    dir: develop/
-    version: ed568f0f
   test_logging:
     dir: develop/
     version: 6e0a7fe2
