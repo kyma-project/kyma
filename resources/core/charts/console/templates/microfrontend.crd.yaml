@@ -21,7 +21,6 @@ spec:
           type: object
           required:
           - "appName"
-          - "placement"
           - "viewBaseUrl"
           - "navigationNodes"
           properties:
@@ -32,9 +31,6 @@ spec:
             version:
               type: string
               pattern: "[a-zA-Z0-9]+"
-            placement:
-              type: string
-              pattern: "^(environment)$"
             category:
               type: string
             viewBaseUrl:
