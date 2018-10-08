@@ -66,7 +66,7 @@ projects = [
     "tests/metadata-service-tests",
     "tests/remote-environment-controller-tests",
     "tests/event-bus",
-    "governance",
+    //"governance",
 ]
 
 /*
