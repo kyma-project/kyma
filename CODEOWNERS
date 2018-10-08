@@ -5,7 +5,7 @@
 # For more details, read the following article on GitHub: https://help.github.com/articles/about-codeowners/.
 
 # These are the default owners for the whole content of the `kyma` repository. The default owners are automatically added as reviewers when you open a pull request, unless different owners are specified in the file.
-* @derberg @pbochynski @PK85 @a-thaler
+* @derberg @pbochynski @PK85 @a-thaler @lszymik
 
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek
@@ -71,7 +71,7 @@
 /resources/core/charts/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
 # The `minio` subchart
-/resources/core/charts/minio/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
+/resources/core/charts/minio/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
 
 # The `event-bus` subchart
 /resources/core/charts/event-bus/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
@@ -101,7 +101,7 @@
 /resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
 
 # The `templates` chart
-/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @pkosiec @mjasinski5 @derberg @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
+/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
 
 # The `messaging` subdirectory
 /resources/examples/lambda-messages/ @pbochynski @PK85
@@ -114,9 +114,6 @@
 
 # The `istio` subdirectory
 /resources/istio/ @piotrmsc @kubadz @sjanota
-
-# The `istio-kyma-patch` subdirectory
-/resources/istio-kyma-patch/ @piotrmsc @kubadz @sjanota
 
 # The `jaeger` charts
 /resources/core/charts/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
@@ -148,9 +145,6 @@
 
 # Istio Extensions Component
 /components/istio-webhook/ @piotrmsc
-
-# Istio Extensions Component
-/components/istio-kyma-patch/ @piotrmsc @sjanota @kubadz
 
 # Remote environment controller Component
 /components/remote-environment-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel
@@ -227,6 +221,9 @@
 # The etcd-tls-setup directory
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek
 
+# The changelog-generator directory
+/tools/changelog-generator/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
+
 # kubeless-test-client tests
 /tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
@@ -234,10 +231,10 @@
 /tests/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
 # All .md files
-*.md @kazydek @klaudiagrz @tomekpapiernik @dpolitesap
+*.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc
 
 # All files and subdirectories in /docs
-/docs/ @kazydek @klaudiagrz @tomekpapiernik @dpolitesap
+/docs/ @kazydek @klaudiagrz @tomekpapiernik @bszwarc
 
 # Config file for MILV - milv.config.yaml
 milv.config.yaml @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu

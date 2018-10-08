@@ -28,7 +28,7 @@ spec:
 
       containers:
       - name: reb
-        image: "{{ .Values.global.containerRegistry.path }}/develop/remote-environment-broker:{{ .Values.image.tag }}"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.remote_environment_broker.dir }}remote-environment-broker:{{ .Values.global.remote_environment_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
           - name: APP_PORT

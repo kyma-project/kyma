@@ -29,7 +29,9 @@ podTemplate(label: label) {
                             stage("checkout kyma") {
                                 dir("kyma") {
                                     checkout scm
-                                    writeFile file: "installation/versions-overrides.env", text: "${params.COMP_VERSIONS}"
+                                    if ("${params.COMP_VERSIONS}" != "") {
+                                        writeFile file: "installation/versions-overrides.env", text: "${params.COMP_VERSIONS}"
+                                    }
                                 }
                             }
 

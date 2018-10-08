@@ -23,8 +23,9 @@ type AuthenticationPolicy struct {
 }
 
 type BindableResourcesOutputItem struct {
-	Kind      string              `json:"kind"`
-	Resources []UsageKindResource `json:"resources"`
+	Kind        string              `json:"kind"`
+	DisplayName string              `json:"displayName"`
+	Resources   []UsageKindResource `json:"resources"`
 }
 
 type ClusterServiceBroker struct {
@@ -263,8 +264,8 @@ type ServiceBindingUsageStatus struct {
 }
 
 type ServiceBindings struct {
-	ServiceBindings []ServiceBinding     `json:"serviceBindings"`
-	Stats           ServiceBindingsStats `json:"stats"`
+	Items []ServiceBinding     `json:"items"`
+	Stats ServiceBindingsStats `json:"stats"`
 }
 
 type ServiceBindingsStats struct {

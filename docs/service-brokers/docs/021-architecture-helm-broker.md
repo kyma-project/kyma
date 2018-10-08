@@ -8,7 +8,7 @@ The Helm Broker workflow starts with the registration process, during which the 
 ### Registration process
 
 The registration process in the case of the Helm Broker consists of the following steps:
-1. The Helm Broker fetches yBundles from the Kyma bundles directory, or from the remote HTTP server.
+1. The Helm Broker fetches yBundles from the remote HTTP server.
 2. The Helm Broker registers yBundles as ServiceClasses in the Service Catalog.
 
 ![Helm Broker registration](assets/010-helm-registration.png)

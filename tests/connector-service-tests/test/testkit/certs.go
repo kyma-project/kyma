@@ -53,22 +53,27 @@ func CreateCsr(t *testing.T, certInfo CertInfo, keys *rsa.PrivateKey) []byte {
 	return csr
 }
 
-// CrtResponseToPemBytes decodes certificate form CrtResponse and return pemBlock.Bytes
-func CrtResponseToPemBytes(t *testing.T, certResponse *CrtResponse) []byte {
-	crtBytes, err := base64.StdEncoding.DecodeString(certResponse.Crt)
-	require.NoError(t, err)
+// CrtResponseToPemBytes decodes certificates chain from CrtResponse and return pemBlock's bytes for client cert and ca cert
+func CrtResponseToPemBytes(t *testing.T, certResponse *CrtResponse) ([]byte, []byte) {
+	crtBytes := decodeCertResponse(certResponse, t)
 
-	pemBlock, _ := pem.Decode(crtBytes)
-	require.NotNil(t, pemBlock)
+	clientCrtPem, rest := pem.Decode(crtBytes)
+	require.NotNil(t, clientCrtPem)
+	require.NotEmpty(t, rest)
 
-	return pemBlock.Bytes
+	caCrtPem, _ := pem.Decode(rest)
+	require.NotNil(t, caCrtPem)
+
+	return clientCrtPem.Bytes, caCrtPem.Bytes
 }
 
-// DecodeAndParseCert decodes base64 encoded certificate and parses it
-func DecodeAndParseCert(t *testing.T, crtResponse *CrtResponse) *x509.Certificate {
-	certBytes := CrtResponseToPemBytes(t, crtResponse)
+// DecodeAndParseCert decodes base64 encoded certificates chain and parses it
+func DecodeAndParseCert(t *testing.T, crtResponse *CrtResponse) []*x509.Certificate {
+	clientCertBytes, caCrtBytes := CrtResponseToPemBytes(t, crtResponse)
 
-	certificate, err := x509.ParseCertificate(certBytes)
+	certChainBytes := append(clientCertBytes, caCrtBytes...)
+
+	certificate, err := x509.ParseCertificates(certChainBytes)
 	require.NoError(t, err)
 
 	return certificate
@@ -87,8 +92,24 @@ func CheckIfSubjectEquals(t *testing.T, expectedSubject string, certificate *x50
 	require.Equal(t, []string{subjectInfo["ST"]}, actualSubject.Province)
 }
 
+// CheckIfCertIsSigned verifies that client certificate is signed by server certificate
+func CheckIfCertIsSigned(t *testing.T, certificates []*x509.Certificate) {
+	clientCrt := certificates[0]
+	serverCrt := certificates[1]
+
+	err := clientCrt.CheckSignatureFrom(serverCrt)
+
+	require.NoError(t, err)
+}
+
 func EncodeBase64(src []byte) string {
 	return base64.StdEncoding.EncodeToString(src)
+}
+
+func decodeCertResponse(certResponse *CrtResponse, t *testing.T) []byte {
+	crtBytes, err := base64.StdEncoding.DecodeString(certResponse.Crt)
+	require.NoError(t, err)
+	return crtBytes
 }
 
 func extractSubject(subject string) map[string]string {

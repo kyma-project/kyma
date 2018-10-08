@@ -7,6 +7,7 @@ import (
 	"github.com/kyma-project/kyma/tests/metadata-service-tests/test/testkit"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 )
 
 const (
@@ -32,7 +33,6 @@ func TestApiMetadata(t *testing.T) {
 		t.Run("should register service (with API, Events catalog, Documentation)", func(t *testing.T) {
 			// when
 			initialServiceDefinition := prepareServiceDetails("service-identifier", map[string]string{})
-			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, "service-identifier")
 
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
@@ -44,6 +44,7 @@ func TestApiMetadata(t *testing.T) {
 			// when
 			statusCode, receivedServiceDefinition, err := metadataServiceClient.GetService(t, postResponseData.ID)
 			require.NoError(t, err)
+			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, receivedServiceDefinition.Identifier)
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
@@ -61,7 +62,7 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "test service", postedService.Name)
 			require.Equal(t, "service provider", postedService.Provider)
 			require.Equal(t, "service description", postedService.Description)
-			require.Equal(t, "service-identifier", postedService.Identifier)
+			require.True(t, strings.HasPrefix(postedService.Identifier, "service-identifier"))
 			require.Equal(t, map[string]string{connectedApp: "dummy-re"}, postedService.Labels)
 
 			// clean up
@@ -74,7 +75,6 @@ func TestApiMetadata(t *testing.T) {
 		t.Run("should register service (overriding connected-app label)", func(t *testing.T) {
 			// when
 			initialServiceDefinition := prepareServiceDetails("service-identifier-2", map[string]string{"connected-app": "different-re"})
-			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, "service-identifier-2")
 
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
@@ -86,6 +86,7 @@ func TestApiMetadata(t *testing.T) {
 			// when
 			statusCode, receivedServiceDefinition, err := metadataServiceClient.GetService(t, postResponseData.ID)
 			require.NoError(t, err)
+			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, receivedServiceDefinition.Identifier)
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
@@ -103,7 +104,7 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "test service", postedService.Name)
 			require.Equal(t, "service provider", postedService.Provider)
 			require.Equal(t, "service description", postedService.Description)
-			require.Equal(t, "service-identifier-2", postedService.Identifier)
+			require.True(t, strings.HasPrefix(postedService.Identifier, "service-identifier-2"))
 			require.Equal(t, map[string]string{connectedApp: "dummy-re"}, postedService.Labels)
 
 			// clean up
@@ -149,8 +150,6 @@ func TestApiMetadata(t *testing.T) {
 				},
 			}
 
-			expectedServiceDefinition := getExpectedDefinition(updatedServiceDefinition, expectedLabels, "service-identifier-3")
-
 			// when
 			statusCode, err := metadataServiceClient.UpdateService(t, postResponseData.ID, updatedServiceDefinition)
 			require.NoError(t, err)
@@ -161,6 +160,7 @@ func TestApiMetadata(t *testing.T) {
 			// when
 			statusCode, receivedServiceDefinition, err := metadataServiceClient.GetService(t, postResponseData.ID)
 			require.NoError(t, err)
+			expectedServiceDefinition := getExpectedDefinition(updatedServiceDefinition, expectedLabels, receivedServiceDefinition.Identifier)
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
@@ -258,7 +258,6 @@ func TestApiMetadata(t *testing.T) {
 		t.Run("should get service (with API, Events catalog, Documentation) - setup", func(t *testing.T) {
 			// given
 			initialServiceDefinition := prepareServiceDetails("service-identifier-5", map[string]string{})
-			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, "service-identifier-5")
 
 			postStatusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
@@ -266,6 +265,8 @@ func TestApiMetadata(t *testing.T) {
 
 			// when
 			statusCode, receivedServiceDefinition, err := metadataServiceClient.GetService(t, postResponseData.ID)
+			require.NoError(t, err)
+			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, receivedServiceDefinition.Identifier)
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)

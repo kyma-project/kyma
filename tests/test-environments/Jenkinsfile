@@ -44,14 +44,6 @@ podTemplate(label: label) {
                             execute("make validate")
                         }
 
-                        if (params.FULL_BUILD) {
-                            stage("IP scan $application (Sourceclear)"){
-                                withCredentials([string(credentialsId: 'SRCCLR_API_TOKEN', variable: 'SRCCLR_API_TOKEN')]) {
-                                    execute("make scan","SRCCLR_API_TOKEN=$SRCCLR_API_TOKEN")
-                                }
-                            }
-                        }
-
                         stage("build image $application") {
                             dir(env.APP_FOLDER){
                                 sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
@@ -78,7 +70,7 @@ podTemplate(label: label) {
 }
 
 def execute(command, envs = []) {
-    def buildpack = 'golang-buildpack:0.0.8'
+    def buildpack = 'golang-buildpack:0.0.9'
     def repositoryName = 'kyma'
     def envText = envs=='' ? '' : "--env $envs"
     workDir = pwd()

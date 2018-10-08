@@ -11,8 +11,8 @@ metadata:
 spec:
   containers:
     - name: {{ .Chart.Name }}-tests
-      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.tests.image.name }}:{{ .Values.tests.image.tag }}
-      imagePullPolicy: IfNotPresent
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.remote_environment_controller_tests.dir }}remote-environment-controller-tests:{{ .Values.global.remote_environment_controller_tests.version }}
+      imagePullPolicy: {{ .Values.tests.pullPolicy }}
       env:
       - name: NAMESPACE
         value: {{ .Values.global.namespace }}

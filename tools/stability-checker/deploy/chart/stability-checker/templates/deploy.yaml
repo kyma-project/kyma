@@ -33,7 +33,7 @@ spec:
 
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.containerRegistry.path }}/develop/stability-checker:{{ .Values.image.tag }}"
+        image: "{{ .Values.containerRegistry.path }}/{{ .Values.global.stability_checker.dir }}stability-checker:{{ .Values.global.stability_checker.version }}"
 
         ports:
         - containerPort: {{ .Values.service.internalPort }}

@@ -11,11 +11,17 @@ import (
 
 const (
 	overridesTemplate = `global:
-  domainName: {{ .DomainName }}`
+  domainName: {{ .DomainName }}
+  gatewayImage: {{ .GatewayImage }}
+  eventServiceImage: {{ .EventServiceImage }}
+  eventServiceTestsImage: {{ .EventServiceTestsImage }}`
 )
 
 type OverridesData struct {
-	DomainName string
+	DomainName             string
+	GatewayImage           string
+	EventServiceImage      string
+	EventServiceTestsImage string
 }
 
 func InitRemoteEnvironmentController(mgr manager.Manager, overridesData OverridesData, namespace string, appName string, tillerUrl string) error {

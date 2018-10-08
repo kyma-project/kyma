@@ -55,6 +55,7 @@ if [ $CR_PATH ]; then
     if [ -f $CR_PATH ]; then
         echo "Applying CR for installer from path $CR_PATH"
         kubectl apply -f $CR_PATH
+        kubectl label installation/kyma-installation action=install
     else
         echo "CR file not found in path $CR_PATH"
     fi

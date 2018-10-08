@@ -62,8 +62,9 @@ type ComplexityRoot struct {
 	}
 
 	BindableResourcesOutputItem struct {
-		Kind      func(childComplexity int) int
-		Resources func(childComplexity int) int
+		Kind        func(childComplexity int) int
+		DisplayName func(childComplexity int) int
+		Resources   func(childComplexity int) int
 	}
 
 	ClusterServiceBroker struct {
@@ -322,6 +323,8 @@ type ComplexityRoot struct {
 	}
 
 	Section struct {
+		Name      func(childComplexity int) int
+		Anchor    func(childComplexity int) int
 		Titles    func(childComplexity int) int
 		TopicType func(childComplexity int) int
 	}
@@ -337,6 +340,7 @@ type ComplexityRoot struct {
 		Environment         func(childComplexity int) int
 		Secret              func(childComplexity int) int
 		Status              func(childComplexity int) int
+		Parameters          func(childComplexity int) int
 	}
 
 	ServiceBindingEvent struct {
@@ -375,8 +379,8 @@ type ComplexityRoot struct {
 	}
 
 	ServiceBindings struct {
-		ServiceBindings func(childComplexity int) int
-		Stats           func(childComplexity int) int
+		Items func(childComplexity int) int
+		Stats func(childComplexity int) int
 	}
 
 	ServiceBindingsStats struct {
@@ -1864,6 +1868,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.BindableResourcesOutputItem.Kind(childComplexity), true
 
+	case "BindableResourcesOutputItem.displayName":
+		if e.complexity.BindableResourcesOutputItem.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.BindableResourcesOutputItem.DisplayName(childComplexity), true
+
 	case "BindableResourcesOutputItem.resources":
 		if e.complexity.BindableResourcesOutputItem.Resources == nil {
 			break
@@ -3163,6 +3174,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Secret.Data(childComplexity), true
 
+	case "Section.name":
+		if e.complexity.Section.Name == nil {
+			break
+		}
+
+		return e.complexity.Section.Name(childComplexity), true
+
+	case "Section.anchor":
+		if e.complexity.Section.Anchor == nil {
+			break
+		}
+
+		return e.complexity.Section.Anchor(childComplexity), true
+
 	case "Section.titles":
 		if e.complexity.Section.Titles == nil {
 			break
@@ -3225,6 +3250,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ServiceBinding.Status(childComplexity), true
+
+	case "ServiceBinding.parameters":
+		if e.complexity.ServiceBinding.Parameters == nil {
+			break
+		}
+
+		return e.complexity.ServiceBinding.Parameters(childComplexity), true
 
 	case "ServiceBindingEvent.type":
 		if e.complexity.ServiceBindingEvent.Type == nil {
@@ -3345,12 +3377,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceBindingUsageStatus.Message(childComplexity), true
 
-	case "ServiceBindings.serviceBindings":
-		if e.complexity.ServiceBindings.ServiceBindings == nil {
+	case "ServiceBindings.items":
+		if e.complexity.ServiceBindings.Items == nil {
 			break
 		}
 
-		return e.complexity.ServiceBindings.ServiceBindings(childComplexity), true
+		return e.complexity.ServiceBindings.Items(childComplexity), true
 
 	case "ServiceBindings.stats":
 		if e.complexity.ServiceBindings.Stats == nil {
@@ -4311,6 +4343,11 @@ func (ec *executionContext) _BindableResourcesOutputItem(ctx context.Context, se
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "displayName":
+			out.Values[i] = ec._BindableResourcesOutputItem_displayName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "resources":
 			out.Values[i] = ec._BindableResourcesOutputItem_resources(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4337,6 +4374,28 @@ func (ec *executionContext) _BindableResourcesOutputItem_kind(ctx context.Contex
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.Kind, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _BindableResourcesOutputItem_displayName(ctx context.Context, field graphql.CollectedField, obj *BindableResourcesOutputItem) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "BindableResourcesOutputItem",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.DisplayName, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -10781,6 +10840,16 @@ func (ec *executionContext) _Section(ctx context.Context, sel ast.SelectionSet, 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Section")
+		case "name":
+			out.Values[i] = ec._Section_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "anchor":
+			out.Values[i] = ec._Section_anchor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "titles":
 			out.Values[i] = ec._Section_titles(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -10800,6 +10869,50 @@ func (ec *executionContext) _Section(ctx context.Context, sel ast.SelectionSet, 
 		return graphql.Null
 	}
 	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Section_name(ctx context.Context, field graphql.CollectedField, obj *Section) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "Section",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Section_anchor(ctx context.Context, field graphql.CollectedField, obj *Section) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "Section",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Anchor, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
@@ -10999,6 +11112,8 @@ func (ec *executionContext) _ServiceBinding(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "parameters":
+			out.Values[i] = ec._ServiceBinding_parameters(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11121,6 +11236,25 @@ func (ec *executionContext) _ServiceBinding_status(ctx context.Context, field gr
 	rctx.Result = res
 
 	return ec._ServiceBindingStatus(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceBinding_parameters(ctx context.Context, field graphql.CollectedField, obj *ServiceBinding) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceBinding",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Parameters, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	return res
 }
 
 var serviceBindingEventImplementors = []string{"ServiceBindingEvent"}
@@ -11752,8 +11886,8 @@ func (ec *executionContext) _ServiceBindings(ctx context.Context, sel ast.Select
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ServiceBindings")
-		case "serviceBindings":
-			out.Values[i] = ec._ServiceBindings_serviceBindings(ctx, field, obj)
+		case "items":
+			out.Values[i] = ec._ServiceBindings_items(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -11774,7 +11908,7 @@ func (ec *executionContext) _ServiceBindings(ctx context.Context, sel ast.Select
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceBindings_serviceBindings(ctx context.Context, field graphql.CollectedField, obj *ServiceBindings) graphql.Marshaler {
+func (ec *executionContext) _ServiceBindings_items(ctx context.Context, field graphql.CollectedField, obj *ServiceBindings) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindings",
 		Args:   nil,
@@ -11782,7 +11916,7 @@ func (ec *executionContext) _ServiceBindings_serviceBindings(ctx context.Context
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
-		return obj.ServiceBindings, nil
+		return obj.Items, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -16147,6 +16281,8 @@ type Title {
 }
 
 type Section {
+    name: String!
+    anchor: String!
     titles: [Title!]!
     topicType: String!
 }
@@ -16315,7 +16451,7 @@ type ServiceBrokerStatus {
 }
 
 type ServiceBindings {
-    serviceBindings: [ServiceBinding!]!
+    items: [ServiceBinding!]!
     stats: ServiceBindingsStats!
 }
 
@@ -16332,6 +16468,7 @@ type ServiceBinding {
     environment: String!
     secret: Secret
     status: ServiceBindingStatus!
+    parameters: JSON
 }
 
 type ServiceBindingStatus {
@@ -16592,6 +16729,7 @@ type UsageKindResource {
 
 type BindableResourcesOutputItem {
     kind: String!
+    displayName: String!
     resources: [UsageKindResource!]!
 }
 
@@ -16663,6 +16801,7 @@ type Query {
     usageKinds(first: Int, offset: Int): [UsageKind!]!
 
     # The query returns all instances of the resources specified by the usageKind parameter in the given environment. The result contains the resources which do not have the metadata.ownerReference.
+    # DEPRECATED - will be changed by bindable resources query.
     usageKindResources(usageKind: String!, environment: String!): [UsageKindResource!]!
 
     # The query returns all instance of the resources which could be bound (proper UsageKind exists).

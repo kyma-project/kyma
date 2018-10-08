@@ -20,7 +20,7 @@ spec:
       serviceAccountName: {{ template "fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/binding-usage-controller:{{ .Values.image.tag }}"
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.binding_usage_controller.dir }}binding-usage-controller:{{ .Values.global.binding_usage_controller.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: APP_LOGGER_LEVEL
