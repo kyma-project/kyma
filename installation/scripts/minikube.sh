@@ -7,7 +7,7 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 MINIKUBE_DOMAIN=""
 MINIKUBE_VERSION=0.28.2
 KUBERNETES_VERSION=1.10.0
-KUBECTL_CLI_VERSION=1.10
+KUBECTL_CLI_VERSION=1.10.0
 VM_DRIVER="hyperkit"
 
 source $CURRENT_DIR/utils.sh
@@ -103,15 +103,12 @@ function checkMinikubeVersion() {
 }
 
 function checkKubectlVersion() {
-    local currentClientVersionMajor=$(kubectl version --client --short | grep -o '[0-9]\+' | sed -n '1p')
-    local currentClientVersionMinor=$(kubectl version --client --short | grep -o '[0-9]\+' | sed -n '2p')
-    local desiredClientVersionMajor=$(echo $KUBECTL_CLI_VERSION | cut -d"." -f1)
-    local desiredClientVersionMinor=$(echo $KUBECTL_CLI_VERSION | cut -d"." -f2)
-    local minorVersionDifference=$(( currentClientVersionMinor - desiredClientVersionMinor ))
+    local version=$(kubectl version --client --short | awk '{print $3}')
+    local versionMajor=$(echo $KUBECTL_CLI_VERSION | cut -d"." -f1)
+    local versionMinor=$(echo $KUBECTL_CLI_VERSION | cut -d"." -f2)
 
-    if [[ $minorVersionDifference -gt 1 ]] || [[ $minorVersionDifference -lt -1 ]] || [[ $currentClientVersionMajor -ne $desiredClientVersionMajor ]]; then
-        echo "Your kubectl version is $(kubectl version --client --short | awk '{print $3}'). v${KUBECTL_CLI_VERSION}.* is supported version of kubectl. Install supported version!"
-        exit -1
+    if [[ "$version" != *"$KUBECTL_CLI_VERSION"* ]]; then
+        echo "Your kubectl version is $version. Supported versions of kubectl are from ${versionMajor}.$(( $versionMinor - 1 )).* to ${versionMajor}.$(( $versionMinor + 1 )).*"
     fi
 }
 
