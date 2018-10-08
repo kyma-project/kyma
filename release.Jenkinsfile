@@ -127,8 +127,7 @@ try {
             parameters: [
                 string(name:'GIT_REVISION', value: "$commitID"),
                 string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-                string(name:'APP_VERSION', value: "$appVersion"),
-                string(name:'COMP_VERSIONS', value: "${versionsYaml()}") // YAML string
+                string(name:'APP_VERSION', value: "$appVersion")
             ]
     }
 
@@ -144,8 +143,7 @@ try {
                     stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
                         def zip = "${appVersion}.tar.gz"
                         
-                        // create release zip
-                        writeFile file: "installation/versions-overrides.env", text: "${versionsYaml()}"
+                        // create release zip                        
                         sh "tar -czf ${zip} ./installation ./resources"
 
                         // create release on github
@@ -175,29 +173,7 @@ try {
                             echo "Response: ${json}"
                             def releaseID = getGithubReleaseID(json)
                             // upload zip file
-                            sh "curl --data-binary @$zip -H \"Authorization: token $token\" -H \"Content-Type: application/zip\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${zip}"
-                            // upload versions-overrides env file
-                            sh "curl --data-binary @installation/versions-overrides.env -H \"Authorization: token $token\" -H \"Content-Type: text/plain\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${appVersion}.env"
-                        }
-                    }
-
-                    stage("Upload versions file to azure") {
-                        def file = ''
-                        if (isRelease) {
-                            file = '${appVersion}.env'
-                        } else {
-                            file = "rc/${appVersion}.env"
-                        }
-                            withCredentials([
-                            string(credentialsId: 'azure-broker-tenant-id', variable: 'AZBR_TENANT_ID'),
-                            string(credentialsId: 'azure-broker-subscription-id', variable: 'AZBR_SUBSCRIPTION_ID'),
-                            usernamePassword(credentialsId: 'azure-broker-spn', passwordVariable: 'AZBR_CLIENT_SECRET', usernameVariable: 'AZBR_CLIENT_ID')
-                            ]) {
-                                def dockerEnv = "-e AZBR_CLIENT_SECRET -e AZBR_CLIENT_ID -e AZBR_TENANT_ID -e AZBR_SUBSCRIPTION_ID \
-                                -e 'KYMA_VERSIONS_FILE_NAME=${file}'"
-                                def dockerOpts = "--rm --volume ${pwd()}/installation:/installation"
-                                def dockerEntry = "--entrypoint /installation/scripts/upload-versions.sh"
-                                    sh "docker run $dockerOpts $dockerEnv $dockerEntry $registry/$acsImageName"
+                            sh "curl --data-binary @$zip -H \"Authorization: token $token\" -H \"Content-Type: application/zip\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${zip}"                          
                         }
                     }
                 }
@@ -237,86 +213,6 @@ def configureBuilds() {
 def getGithubReleaseID(releaseJson) {
     def slurper = new JsonSlurperClassic()
     return slurper.parseText(releaseJson).id
-}
-
-/**
- * Provides the component versions as YAML; To be passed to the kyma installer in various jobs.
- */
-@NonCPS
-def versionsYaml() {
-    def overrides = 
-"""
-global.docs.version=${appVersion}
-global.docs.dir=${dockerPushRoot}
-global.apiserver_proxy.version=${appVersion}
-global.apiserver_proxy.dir=${dockerPushRoot}
-global.api_controller.version=${appVersion}
-global.api_controller.dir=${dockerPushRoot}
-global.binding_usage_controller.version=${appVersion}
-global.binding_usage_controller.dir=${dockerPushRoot}
-global.configurations_generator.version=${appVersion}
-global.configurations_generator.dir=${dockerPushRoot}
-global.environments.version=${appVersion}
-global.environments.dir=${dockerPushRoot}
-global.istio_webhook.version=${appVersion}
-global.istio_webhook.dir=${dockerPushRoot}
-global.helm_broker.version=${appVersion}
-global.helm_broker.dir=${dockerPushRoot}
-global.remote_environment_broker.version=${appVersion}
-global.remote_environment_broker.dir=${dockerPushRoot}
-global.remote_environment_controller.version=${appVersion}
-global.remote_environment_controller.dir=${dockerPushRoot}
-global.metadata_service.version=${appVersion}
-global.metadata_service.dir=${dockerPushRoot}
-global.gateway.version=${appVersion}
-global.gateway.dir=${dockerPushRoot}
-global.installer.version=${appVersion}
-global.installer.dir=${dockerPushRoot}
-global.connector_service.version=${appVersion}
-global.connector_service.dir=${dockerPushRoot}
-global.ui_api_layer.version=${appVersion}
-global.ui_api_layer.dir=${dockerPushRoot}
-global.event_bus.version=${appVersion}
-global.event_bus.dir=${dockerPushRoot}
-global.event_service.version=${appVersion}
-global.event_service.dir=${dockerPushRoot}
-global.alpine_net.version=${appVersion}
-global.alpine_net.dir=${dockerPushRoot}
-global.watch_pods.version=${appVersion}
-global.watch_pods.dir=${dockerPushRoot}
-global.stability_checker.version=${appVersion}
-global.stability_checker.dir=${dockerPushRoot}
-global.etcd_backup.version=${appVersion}
-global.etcd_backup.dir=${dockerPushRoot}
-global.etcd_tls_setup.version=${appVersion}
-global.etcd_tls_setup.dir=${dockerPushRoot}
-global.test_logging_monitoring.version=${appVersion}
-global.test_logging_monitoring.dir=${dockerPushRoot}
-global.acceptance_tests.version=${appVersion}
-global.acceptance_tests.dir=${dockerPushRoot}
-global.ui_api_layer_acceptance_tests.version=${appVersion}
-global.ui_api_layer_acceptance_tests.dir=${dockerPushRoot}
-global.gateway_tests.version=${appVersion}
-global.gateway_tests.dir=${dockerPushRoot}
-global.test_environments.version=${appVersion}
-global.test_environments.dir=${dockerPushRoot}
-global.kubeless_test_client.version=${appVersion}
-global.kubeless_test_client.dir=${dockerPushRoot}
-global.api_controller_acceptance_tests.version=${appVersion}
-global.api_controller_acceptance_tests.dir=${dockerPushRoot}
-global.connector_service_tests.version=${appVersion}
-global.connector_service_tests.dir=${dockerPushRoot}
-global.metadata_service_tests.version=${appVersion}
-global.metadata_service_tests.dir=${dockerPushRoot}
-global.remote-environment-controller-tests.version=${appVersion}
-global.remote-environment-controller-tests.dir=${dockerPushRoot}
-global.event_bus_tests.version=${appVersion}
-global.event_bus_tests.dir=${dockerPushRoot}
-global.test_logging.version=${appVersion}
-global.test_logging.dir=${dockerPushRoot}
-"""
-
-    return "$overrides"
 }
 
 def changelogGenerator(command, envs = []) {

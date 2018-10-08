@@ -60,12 +60,17 @@ loadBalancerService:
     service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
 
 
-## Persist data to a persitent volume
+## Persist data to a persistent volume
 persistence:
   enabled: true
   accessMode: ReadWriteOnce
-  size: 5Gi
+  size: 200Gi
   mountPath: /data
+
+# Local installation config 
+isLocalEnv:
+  persistence:
+    size: 5Gi
 
 nodeSelector: {}
 tolerations: []
