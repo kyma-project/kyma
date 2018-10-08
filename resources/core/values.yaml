@@ -122,9 +122,10 @@ test:
         linkingTimeout: 4m
         unlinkingTimeout: 4m
     ui:
+      # tests uses chromium that require more memory
       requests:
-        memory: "1Gi"
-        cpu: "300m"
+        memory: 300Mi
+        cpu: 200m
       limits:
-        memory: "1Gi"
-        cpu: "300m"
+        memory: 500Mi
+        cpu: 300m
