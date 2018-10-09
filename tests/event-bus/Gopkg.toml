@@ -1,5 +1,3 @@
-required = ["k8s.io/code-generator/cmd/client-gen"]
-
 [[constraint]]
   name = "github.com/kyma-project/kyma"
   branch = "master"
