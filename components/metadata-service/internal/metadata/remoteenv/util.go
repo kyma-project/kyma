@@ -29,7 +29,7 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 			} else if entry.Type == specEventsType {
 				events = true
 			} else {
-				message := fmt.Sprintf("Remote Environment Service definition: incorrect type of entry %s", entry.Type)
+				message := fmt.Sprintf("Entry %s in Remote Environment Service definition has incorrect type. Type %s needed", entry.Type, specEventsType)
 				log.Error(message)
 				return Service{}, apperrors.Internal(message)
 			}
@@ -103,7 +103,7 @@ func replaceService(id string, re *v1alpha1.RemoteEnvironment, service v1alpha1.
 
 func ensureServiceExists(id string, re *v1alpha1.RemoteEnvironment) apperrors.AppError {
 	if !serviceExists(id, re) {
-		message := fmt.Sprintf("Remote Environment: service with ID %s does not exist", id)
+		message := fmt.Sprintf("Service with ID %s does not exist", id)
 
 		return apperrors.NotFound(message)
 	}
@@ -113,7 +113,7 @@ func ensureServiceExists(id string, re *v1alpha1.RemoteEnvironment) apperrors.Ap
 
 func ensureServiceNotExists(id string, re *v1alpha1.RemoteEnvironment) apperrors.AppError {
 	if serviceExists(id, re) {
-		message := fmt.Sprintf("Remote Environment: service with ID %s already exists", id)
+		message := fmt.Sprintf("Service with ID %s already exists", id)
 
 		return apperrors.AlreadyExists(message)
 	}
