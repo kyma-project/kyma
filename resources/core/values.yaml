@@ -17,8 +17,6 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
-    tls:
-      secretName: istio-ingress-certs  
     gateway: 
       name: kyma-gateway      
   etcdBackup:
