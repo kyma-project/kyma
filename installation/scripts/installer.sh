@@ -41,10 +41,6 @@ kubectl apply -f ${CURRENT_DIR}/../resources/installer.yaml
 
 ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
 
-if [ $LOCAL ]; then
-    bash ${CURRENT_DIR}/copy-resources.sh
-fi
-
 if [ $CR_PATH ]; then
 
     case $CR_PATH in
