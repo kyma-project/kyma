@@ -146,7 +146,7 @@ func (repo *repository) UpsertRule(remoteEnvironment, serviceId, name string) ap
 func (repo *repository) DeleteDenier(name string) apperrors.AppError {
 	err := repo.denierInterface.Delete(name, nil)
 	if err != nil && !k8serrors.IsNotFound(err) {
-		return apperrors.Internal("repository: deleting %s denier failed, %s", name, err.Error())
+		return apperrors.Internal("Deleting %s denier failed, %s", name, err.Error())
 	}
 	return nil
 }
