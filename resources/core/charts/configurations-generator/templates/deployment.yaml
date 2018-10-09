@@ -21,7 +21,7 @@ spec:
         name: {{ template "name" . }}
         command: [
           "/app",
-          "-kube-config-custer-name={{ .Values.kubeConfig.clusterName }}",
+          "-kube-config-cluster-name={{ .Values.global.domainName }}",
           "-kube-config-url=https://apiserver.{{ .Values.global.domainName }}",
           "-kube-config-ca={{ .Values.global.tlsCrt }}"
         ]

@@ -52,7 +52,6 @@ data:
   gateways.istio-ingressgateway.service.externalPublicIp: ""
   gateways.istio-ingressgateway.type: "NodePort"
   nginx-ingress.controller.service.loadBalancerIP: ""
-  configurations-generator.kubeConfig.clusterName: "kyma.local"
   cluster-users.users.adminGroup: ""
   pilot.resources.limits.memory: 256Mi
   pilot.resources.requests.memory: 128Mi

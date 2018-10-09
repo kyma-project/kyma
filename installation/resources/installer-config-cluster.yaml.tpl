@@ -50,7 +50,6 @@ data:
   global.alertTools.credentials.victorOps.routingkey: "__VICTOR_OPS_ROUTING_KEY_VALUE__"
   global.alertTools.credentials.victorOps.apikey: "__VICTOR_OPS_API_KEY_VALUE__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
-  configurations-generator.kubeConfig.clusterName: "__DOMAIN__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
   gateways.istio-ingressgateway.service.externalPublicIp: "__EXTERNAL_PUBLIC_IP__"
   gateways.istio-ingressgateway.type: "LoadBalancer"
