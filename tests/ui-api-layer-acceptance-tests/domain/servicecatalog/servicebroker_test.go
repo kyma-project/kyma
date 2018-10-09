@@ -13,29 +13,30 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type ClusterServiceBroker struct {
+type ServiceBroker struct {
 	Name              string
+	Environment       string
 	CreationTimestamp int
 	Url               string
 	Labels            map[string]interface{}
-	Status            ClusterServiceBrokerStatus
+	Status            ServiceBrokerStatus
 }
 
-type ClusterServiceBrokerStatus struct {
+type ServiceBrokerStatus struct {
 	Ready   bool
 	Reason  string
 	Message string
 }
 
-type clusterServiceBrokersQueryResponse struct {
-	ClusterServiceBrokers []ClusterServiceBroker
+type serviceBrokersQueryResponse struct {
+	ServiceBrokers []ServiceBroker
 }
 
-type clusterServiceBrokerQueryResponse struct {
-	ClusterServiceBroker ClusterServiceBroker
+type serviceBrokerQueryResponse struct {
+	ServiceBroker ServiceBroker
 }
 
-func TestClusterServiceBrokerQueries(t *testing.T) {
+func TestServiceBrokerQueries(t *testing.T) {
 	if dex.IsSCIEnabled() {
 		t.Skip("SCI Enabled")
 	}
@@ -43,60 +44,67 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
-	expectedResource := clusterBroker()
+	expectedResource := broker()
 	resourceDetailsQuery := `
 		name
+		environment
 		creationTimestamp
-    	status {
+		status {
 			ready
-    		reason
-    		message
+			reason
+			message
 		}
-    	url
-    	labels
+		url
+		labels
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {
 		query := fmt.Sprintf(`
-			query {
-				clusterServiceBrokers {
+			query ($environment: String!) {
+				serviceBrokers(environment: $environment) {
 					%s
 				}
 			}	
 		`, resourceDetailsQuery)
+		req := graphql.NewRequest(query)
+		req.SetVar("environment", expectedResource.Environment)
 
-		var res clusterServiceBrokersQueryResponse
-		err = c.DoQuery(query, &res)
+		var res serviceBrokersQueryResponse
+		err = c.Do(req, &res)
 
 		require.NoError(t, err)
-		assertClusterBrokerExistsAndEqual(t, res.ClusterServiceBrokers, expectedResource)
+		assertBrokerExistsAndEqual(t, res.ServiceBrokers, expectedResource)
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
 		query := fmt.Sprintf(`
-			query ($name: String!) {
-				clusterServiceBroker(name: $name) {
+			query ($name: String!, $environment: String!) {
+				serviceBroker(name: $name, environment: $environment) {
 					%s
 				}
 			}
 		`, resourceDetailsQuery)
 		req := graphql.NewRequest(query)
 		req.SetVar("name", expectedResource.Name)
+		req.SetVar("environment", expectedResource.Environment)
 
-		var res clusterServiceBrokerQueryResponse
+		var res serviceBrokerQueryResponse
 		err = c.Do(req, &res)
 
 		require.NoError(t, err)
-		checkClusterBroker(t, expectedResource, res.ClusterServiceBroker)
+		checkBroker(t, expectedResource, res.ServiceBroker)
 	})
 }
 
-func checkClusterBroker(t *testing.T, expected, actual ClusterServiceBroker) {
+func checkBroker(t *testing.T, expected, actual ServiceBroker) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
 	// Url
 	assert.Contains(t, actual.Url, expected.Name)
+
+	// Environment
+	assert.Equal(t, expected.Environment, actual.Environment)
 
 	// Status
 	assert.Equal(t, expected.Status.Ready, actual.Status.Ready)
@@ -104,11 +112,11 @@ func checkClusterBroker(t *testing.T, expected, actual ClusterServiceBroker) {
 	assert.NotEmpty(t, actual.Status.Reason)
 }
 
-func assertClusterBrokerExistsAndEqual(t *testing.T, arr []ClusterServiceBroker, expectedElement ClusterServiceBroker) {
+func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedElement ServiceBroker) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
-				checkClusterBroker(t, expectedElement, v)
+				checkBroker(t, expectedElement, v)
 				return true
 			}
 		}
@@ -117,10 +125,11 @@ func assertClusterBrokerExistsAndEqual(t *testing.T, arr []ClusterServiceBroker,
 	}, "Resource does not exist")
 }
 
-func clusterBroker() ClusterServiceBroker {
-	return ClusterServiceBroker{
-		Name: tester.ClusterBrokerReleaseName,
-		Status: ClusterServiceBrokerStatus{
+func broker() ServiceBroker {
+	return ServiceBroker{
+		Name:        tester.BrokerReleaseName,
+		Environment: tester.DefaultNamespace,
+		Status: ServiceBrokerStatus{
 			Ready: true,
 		},
 	}

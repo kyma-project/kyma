@@ -70,12 +70,12 @@ func TestUsageKind(t *testing.T) {
 	require.NoError(t, err)
 
 	defer func() {
-		t.Log("Deleting namespace...")
-		err = client.Namespaces().Delete(usageKindNamespace, &metav1.DeleteOptions{})
-		assert.NoError(t, err)
-
 		t.Log("Deleting UsageKind...")
 		err = bucClient.ServicecatalogV1alpha1().UsageKinds().Delete(usageKindName, &metav1.DeleteOptions{})
+		assert.NoError(t, err)
+
+		t.Log("Deleting namespace...")
+		err = client.Namespaces().Delete(usageKindNamespace, &metav1.DeleteOptions{})
 		assert.NoError(t, err)
 	}()
 

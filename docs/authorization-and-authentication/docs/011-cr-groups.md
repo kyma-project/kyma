@@ -27,7 +27,7 @@ spec:
 This table analyses the elements of the sample CR and the information it contains:
 
 
-| Field   |      Mandatory?      |  Description |
+| Field   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **spec.name** | **YES** | Specifies the name of the group. |
