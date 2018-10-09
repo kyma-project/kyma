@@ -1,8 +1,8 @@
 # Stability Checker
 
 ## Overview
-Purpose of the Stability Checker is to check if cluster is stable. To ensure that, Stability Checker is installed in the cluster and execute testing script in a loop. 
-Notifications with test executions summary are send on a Slack channel.
+Purpose of the Stability Checker is to check if a cluster is stable. To ensure that, Stability Checker is installed in the cluster and execute testing script in a loop. 
+Notifications with test executions summary are sent on a Slack channel.
 
 ## Installation
 
@@ -11,8 +11,8 @@ You can install the Stability Checker on the Kyma cluster as a helm chart. Find 
 ```
 export KUBECONFIG="/path/to/kubeconfig"
 ```
-1. Provision volume with testing script, which then will be used by the Stability Checker. For that purpose you can use 
-script `local/provision_volume.sh`. Script copies all files placed in `local/input' directory to PV.
+1. Provision volume with a testing script, which then will be used by the Stability Checker. For that purpose, you can use 
+script `local/provision_volume.sh`. The script copies all files placed in `local/input` directory to PV.
 
 2. Install stability checker as a helm chart and provide proper configuration:
 
@@ -32,18 +32,18 @@ Below you can find configuration options:
 containerRegistry.path |eu.gcr.io/kyma-project| Address of Docker registry where Stability Checker image can be found.
 image.tag |8b5d53d3| Tag of Stability Checker docker image.
 image.pullPolicy |IfNotPresent| K8s image pull policy.
-storage.claimName | Name of PVC which is attached to Stability Checker pod. Volume is visible in the pod under "/data" path. 
-pathToTestingScript |/data/input/testing.sh| Full path to testing script. Because script is delivered inside PV, it has to start with "/data".
+storage.claimName |stability-test-scripts-pvc| Name of PVC which is attached to Stability Checker pod. Volume is visible in the pod under `/data` path. 
+pathToTestingScript |/data/input/testing.sh| Full path to the testing script. Because script is delivered inside PV, it has to start with `/data`.
 slackClientWebhookUrl |need-to-be-provided| Slack client webhook URL.
 slackClientChannelId |need-to-be-provided| Slack channel ID, starts with `#`.
 slackClientToken |123-need-to-be-provided| Slack client token.
-testThrottle | 5m | Period between test executions. Purpose of this time is to give K8s time to clean up all resources after previous test.
+testThrottle | 5m | Period between test executions. Purpose of this parameter is to give K8s time to clean up all resources after the previous test execution.
 testResultWindowTime | 6h | Notifications will be sent after this time and contains test executions summary for this period. 
-stats.enabled | false | If true, output from test executions is analyzed to find statistics for every test. 
-Detailed information about how many times every test failed and succeeded will be enclosed to the slack notification. 
-Detecting test result is done by regular expressions defined in `stats.failingTestRegexp` and `stats.successfulTestRegexp`
-stats.failingTestRegexp |TBD| Regular expression which indicate that test has failed. Has to contain one capturing group which identifies test name.
-stats.successfulTestRegexp |TBD|  Regular expression which indicate that test has passed. Has to contain one capturing group which identifies test name.
+stats.enabled | false | If true, an output from test executions is analyzed to find statistics for every test. \
+Detailed information about how many times every test failed and succeeded will be enclosed to the slack notification. \
+Detecting test result is done by regular expressions defined in `stats.failingTestRegexp` and `stats.successfulTestRegexp` \
+stats.failingTestRegexp |TBD| Regular expression which indicates that test has failed. Has to contain one capturing group which identifies test name.
+stats.successfulTestRegexp |TBD|  Regular expression which indicates that the test has passed. Has to contain one capturing group which identifies test name.
 service.type |NodePort| Stability Checker service type
 service.externalPort |80| Stability Checker service external port
 service.internalPort |8080| Stability Checker service internal port
@@ -55,7 +55,7 @@ Following values can be specified for chart:
 Use the following helpers for the local development:
 - `./local_minikube_build.sh` which builds the Stability Checker Docker image on a  Minikube registry.
 - `./local/provision_volume.sh` which provisions a PersistentVolumeClaim (PVC) with testing scripts.
-- `./local/charts/dummy` chart which contains simple and fast tests. To install it, execute the following command:
+- `./local/charts/dummy` the chart which contains simple and fast tests. To install it, execute the following command:
 ```
     helm install ./dummy --name dummy --namespace=kyma-system
 ```
