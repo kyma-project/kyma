@@ -1,4 +1,4 @@
-package ybundle
+package bundle
 
 import (
 	"fmt"
@@ -37,8 +37,8 @@ func (p *HTTPRepository) IndexReader() (r io.Reader, closer func(), err error) {
 }
 
 // BundleReader calls repository for a specific bundle and returns means to read bundle content.
-func (p *HTTPRepository) BundleReader(name BundleName, version BundleVersion) (r io.Reader, closer func(), err error) {
-	bundleFileName := func(n BundleName, v BundleVersion) string {
+func (p *HTTPRepository) BundleReader(name Name, version Version) (r io.Reader, closer func(), err error) {
+	bundleFileName := func(n Name, v Version) string {
 		return fmt.Sprintf("%s-%s.tgz", n, v)
 	}
 

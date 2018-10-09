@@ -1,4 +1,4 @@
-package ybind
+package bind
 
 import (
 	"fmt"

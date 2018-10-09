@@ -1,4 +1,4 @@
-package ybundle
+package bundle
 
 import (
 	"io"
@@ -13,20 +13,20 @@ import (
 )
 
 type (
-	// BundleName represents name of the Bundle
-	BundleName string
-	// BundleVersion represents version of the Bundle
-	BundleVersion string
+	// Name represents name of the Bundle
+	Name string
+	// Version represents version of the Bundle
+	Version string
 )
 
 type indexDTO struct {
-	Entries map[BundleName][]entryDTO `yaml:"entries"`
+	Entries map[Name][]entryDTO `yaml:"entries"`
 }
 
 type entryDTO struct {
-	Name        BundleName    `yaml:"name"`
-	Description string        `yaml:"description"`
-	Version     BundleVersion `yaml:"version"`
+	Name        Name    `yaml:"name"`
+	Description string  `yaml:"description"`
+	Version     Version `yaml:"version"`
 }
 
 // Populator is responsible for populating bundles and charts into storage.
@@ -57,31 +57,46 @@ func (b *Populator) Init() error {
 		return err
 	}
 
+	loaded := 0
+	failed := 0
 	for entryName, versions := range idx.Entries {
 		for _, v := range versions {
-			bundleReader, bundleCloser, err := b.repo.BundleReader(entryName, v.Version)
+			err := b.loadBundle(entryName, v.Version)
 			if err != nil {
-				return errors.Wrapf(err, "while reading bundle archive for name [%s] and version [%v]", entryName, v.Version)
+				failed = failed + 1
+				b.log.Warnf("Could not load bundle: %s", err.Error())
+			} else {
+				loaded = loaded + 1
 			}
-			defer bundleCloser()
-
-			bundle, charts, err := b.bundleLoader.Load(bundleReader)
-			if err != nil {
-				return errors.Wrapf(err, "while loading bundle and charts for bundle [%s] and version [%s]", entryName, v.Version)
-			}
-
-			for _, ch := range charts {
-				if _, err := b.chartInterface.Upsert(ch); err != nil {
-					return errors.Wrapf(err, "while storing chart [%s] for bundle [%s] with version [%s]", ch.String(), entryName, v.Version)
-				}
-			}
-
-			if _, err := b.bundleInterface.Upsert(bundle); err != nil {
-				return errors.Wrapf(err, "while storing bundle [%s] with version [%s]", entryName, v.Version)
-			}
-			b.log.Infof("Bundle with name [%s] and version [%s] successfully stored", entryName, v.Version)
 		}
 	}
+	b.log.Infof("Loading bundles completed. Successfully loaded %d bundles, failed %d bundles.", loaded, failed)
+	return nil
+}
+
+func (b *Populator) loadBundle(entryName Name, version Version) error {
+	bundleReader, bundleCloser, err := b.repo.BundleReader(entryName, version)
+	if err != nil {
+		return errors.Wrapf(err, "while reading bundle archive for name [%s] and version [%v]", entryName, version)
+	}
+	defer bundleCloser()
+
+	bundle, charts, err := b.bundleLoader.Load(bundleReader)
+	if err != nil {
+		return errors.Wrapf(err, "while loading bundle and charts for bundle [%s] and version [%s]", entryName, version)
+	}
+
+	for _, ch := range charts {
+		if _, err := b.chartInterface.Upsert(ch); err != nil {
+			return errors.Wrapf(err, "while storing chart [%s] for bundle [%s] with version [%s]", ch.String(), entryName, version)
+		}
+	}
+
+	if _, err := b.bundleInterface.Upsert(bundle); err != nil {
+		return errors.Wrapf(err, "while storing bundle [%s] with version [%s]", entryName, version)
+	}
+	b.log.Infof("Bundle with name [%s] and version [%s] successfully stored", entryName, version)
+
 	return nil
 }
 
@@ -107,7 +122,7 @@ func (b *Populator) getIndex() (*indexDTO, error) {
 //go:generate mockery -name=repository -output=automock -outpkg=automock -case=underscore
 type repository interface {
 	IndexReader() (r io.Reader, closer func(), err error)
-	BundleReader(name BundleName, version BundleVersion) (r io.Reader, closer func(), err error)
+	BundleReader(name Name, version Version) (r io.Reader, closer func(), err error)
 }
 
 //go:generate mockery -name=bundleUpserter -output=automock -outpkg=automock -case=underscore

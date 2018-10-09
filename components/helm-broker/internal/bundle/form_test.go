@@ -1,4 +1,4 @@
-package ybundle
+package bundle
 
 import (
 	"testing"

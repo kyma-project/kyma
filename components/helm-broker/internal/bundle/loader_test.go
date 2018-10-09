@@ -1,4 +1,4 @@
-package ybundle_test
+package bundle_test
 
 import (
 	"io/ioutil"
@@ -11,7 +11,7 @@ import (
 
 	"k8s.io/helm/pkg/chartutil"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger/spy"
 )
 
@@ -40,7 +40,7 @@ func TestLoaderLoadSuccess(t *testing.T) {
 				return name, err
 			}
 
-			bundleLoader := ybundle.NewLoader(fixBaseDir, spy.NewLogDummy())
+			bundleLoader := bundle.NewLoader(fixBaseDir, spy.NewLogDummy())
 			bundleLoader.SetCreateTmpDir(createTmpDirFake)
 
 			expChart, err := chartutil.Load("testdata/bundle-redis-0.0.1.golden/chart/redis")
@@ -107,7 +107,7 @@ func TestLoaderLoadFailure(t *testing.T) {
 	} {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			bundleLoader := ybundle.NewLoader("", spy.NewLogDummy())
+			bundleLoader := bundle.NewLoader("", spy.NewLogDummy())
 
 			fd, err := os.Open(tc.tgzPath)
 			require.NoError(t, err)
