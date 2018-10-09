@@ -18,6 +18,7 @@ spec:
         sidecar.istio.io/inject: "true"
       labels:
         app: {{ template "name" . }}
+        tlsSecret: ingress-tls-cert
     spec:
       serviceAccountName: kube-rbac-proxy
       {{ if .Values.global.isLocalEnv }}
@@ -42,14 +43,14 @@ spec:
         - "--v=10"
         - "--oidc-issuer=https://dex.{{ .Values.global.domainName }}"
         - "--oidc-clientID=kyma-client"
-        - "--oidc-ca-file=/etc/tls-ingress-cert/tls.crt"
+        - "--oidc-ca-file=/etc/ingress-tls-cert/tls.crt"
         ports:
         - containerPort: {{ .Values.containerPort}}
         volumeMounts:
-          - name: tls-ingress-cert
-            mountPath: /etc/tls-ingress-cert/
+          - name: ingress-tls-cert
+            mountPath: /etc/ingress-tls-cert/
       volumes:
-        - name: tls-ingress-cert
+        - name: ingress-tls-cert
           secret:
-            secretName: tls-ingress-cert
+            secretName: ingress-tls-cert
             
