@@ -21,12 +21,12 @@ func NewServiceDetailsValidator() ServiceDetailsValidator {
 	return ServiceDetailsValidatorFunc(func(details ServiceDetails) apperrors.AppError {
 		_, err := govalidator.ValidateStruct(details)
 		if err != nil {
-			return apperrors.WrongInput("service definition: incorrect structure, %s", err.Error())
+			return apperrors.WrongInput("Incorrect structure of service definition, %s", err.Error())
 		}
 
 		if details.Api == nil && details.Events == nil {
 			return apperrors.WrongInput(
-				"service definition: 'api' or 'events' or both attributes not provided")
+				"At least one of service definition attributes: 'api', 'events' have to be provided")
 		}
 
 		apperr := validateApiSpec(details.Api)
