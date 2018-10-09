@@ -39,9 +39,7 @@ slackClientChannelId |need-to-be-provided| Slack channel ID, starts with `#`.
 slackClientToken |123-need-to-be-provided| Slack client token.
 testThrottle | 5m | Period between test executions. Purpose of this parameter is to give K8s time to clean up all resources after the previous test execution.
 testResultWindowTime | 6h | Notifications will be sent after this time and contains test executions summary for this period. 
-stats.enabled | false | If true, an output from test executions is analyzed to find statistics for every test. \
-Detailed information about how many times every test failed and succeeded will be enclosed to the slack notification. \
-Detecting test result is done by regular expressions defined in `stats.failingTestRegexp` and `stats.successfulTestRegexp` \
+stats.enabled | false | If true, an output from test executions is analyzed to find statistics for every test. Detailed information about how many times every test failed and succeeded will be enclosed to the slack notification. Detecting test result is done by regular expressions defined in `stats.failingTestRegexp` and `stats.successfulTestRegexp`.
 stats.failingTestRegexp |TBD| Regular expression which indicates that test has failed. Has to contain one capturing group which identifies test name.
 stats.successfulTestRegexp |TBD|  Regular expression which indicates that the test has passed. Has to contain one capturing group which identifies test name.
 service.type |NodePort| Stability Checker service type
