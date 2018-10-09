@@ -119,7 +119,7 @@ func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinit
 	if serviceDefinition.Documentation != nil {
 		err := json.Unmarshal(serviceDefinition.Documentation, &serviceDetails.Documentation)
 		if err != nil {
-			return serviceDetails, apperrors.Internal("documentation: failed to unmarshal, %s", err)
+			return serviceDetails, apperrors.Internal("Failed to unmarshal documentation, %s", err.Error())
 		}
 
 	}
@@ -167,7 +167,7 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (metadata.
 	if serviceDetails.Documentation != nil {
 		marshalled, err := json.Marshal(&serviceDetails.Documentation)
 		if err != nil {
-			return serviceDefinition, apperrors.WrongInput("documentation: failed to marshal, %s", err)
+			return serviceDefinition, apperrors.WrongInput("Failed to marshal documentation, %s", err.Error())
 		}
 		serviceDefinition.Documentation = marshalled
 	}
