@@ -47,7 +47,7 @@ func validateApiSpec(api *API) apperrors.AppError {
 	if api != nil && api.Spec != nil {
 		err := validateSpec(api.Spec)
 		if err != nil {
-			return apperrors.WrongInput("api.Spec: not a proper json object")
+			return apperrors.WrongInput("api.Spec is not a proper json object, %s", err.Error())
 		}
 	}
 
@@ -58,7 +58,7 @@ func validateEventsSpec(events *Events) apperrors.AppError {
 	if events != nil && events.Spec != nil {
 		err := validateSpec(events.Spec)
 		if err != nil {
-			return apperrors.WrongInput("events.Spec: not a proper json object")
+			return apperrors.WrongInput("events.Spec is not a proper json object, %s", err.Error())
 		}
 	}
 
