@@ -16,6 +16,7 @@ import (
 const (
 	// publish request
 	testSourceID                = "test-source-id"
+	testSourceIDInHeader        = "test-source-id-in-header"
 	testEventType               = "test-event-type"
 	testEventTypeVersion        = "v1"
 	testEventTypeVersionInvalid = "#"
@@ -23,6 +24,7 @@ const (
 	testEventTimeInvalid        = "2012-11-01T22"
 	testEventID                 = "4ea567cf-812b-49d9-a4b2-cb5ddf464094"
 	testEventIDInvalid          = "4ea567cf"
+	testSourceIdInvalid         = "invalid/sourceId"
 	testData                    = "{'key':'value'}"
 	testDataEmpty               = ""
 
@@ -63,10 +65,6 @@ func buildTestPublishRequest(sourceID, eventType, eventTypeVersion, eventID, eve
 		SourceID:         sourceID,
 	}
 	return publishRequest
-}
-
-func buildDefaultTestPublishRequest() api.PublishRequest {
-	return buildTestPublishRequest(testSourceID, testEventType, testEventTypeVersion, testEventID, testEventTime, testData)
 }
 
 func buildDefaultTestSubjectAndPayload() (string, string) {
@@ -112,7 +110,7 @@ func buildDefaultTestBadPayload() string {
 	return payload
 }
 
-func buildDefaultTestPayloadWithoutSource() string {
+func buildDefaultTestPayloadWithoutSourceId() string {
 	builder := new(eventBuilder).
 		build(eventTypeFormat, testEventType).
 		build(eventTypeVersionFormat, testEventTypeVersion).
@@ -185,6 +183,30 @@ func encodeSubject(r api.PublishRequest) string {
 
 func performPublishRequest(t *testing.T, publishURL string, payload string) ([]byte, int) {
 	res, err := http.Post(publishURL+"/v1/events", "application/json", strings.NewReader(payload))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return body, res.StatusCode
+}
+
+func performPublishRequestWithHeaders(t *testing.T, publishURL string, payload string, headers map[string]string) ([]byte, int) {
+	req, err := http.NewRequest("POST", publishURL+"/v1/events", strings.NewReader(payload))
+
+	req.Header.Set("Content-Type", "application/json")
+
+	for header, value := range headers {
+		req.Header.Set(header, value)
+	}
+
+	res, err := http.DefaultClient.Do(req)
 
 	if err != nil {
 		t.Fatal(err)

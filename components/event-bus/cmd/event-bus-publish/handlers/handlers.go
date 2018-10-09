@@ -90,6 +90,11 @@ func handlePublishRequest(w http.ResponseWriter, r *http.Request, publisher *con
 		return
 	}
 	publishRequest, err := parseRequest(body)
+
+	if len(publishRequest.SourceID) == 0 {
+		setSourceIdFromHeader(publishRequest, &r.Header)
+	}
+
 	if err != nil {
 		log.Printf("PublishHandler :: handlePublishRequest :: Error while parsing request :: Error: %v", err)
 		publish.SendJSONError(w, api.ErrorResponseBadPayload())
@@ -148,6 +153,15 @@ func parseRequest(b []byte) (*api.PublishRequest, error) {
 	var publishRequest api.PublishRequest
 	err := json.Unmarshal(b, &publishRequest)
 	return &publishRequest, err
+}
+
+func setSourceIdFromHeader(publishRequest *api.PublishRequest, header *http.Header) {
+	sourceId := header.Get(api.HeaderSourceId)
+	if len(sourceId) != 0 {
+		log.Println("Setting source id from header")
+		publishRequest.SourceID = sourceId
+		publishRequest.SourceIdFromHeader = true
+	}
 }
 
 func publishEvent(r *api.PublishRequest, body string, publisher *controllers.Publisher) (*api.PublishResponse, error) {
