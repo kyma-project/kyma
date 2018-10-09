@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 def label = "kyma-${UUID.randomUUID().toString()}"
-def application = 'gateway'
+def application = 'proxy-service'
 def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
 def dockerImageTag = params.APP_VERSION
 
@@ -45,7 +45,7 @@ podTemplate(label: label) {
                         }
 
                         stage("build $application") {
-                            execute("CGO_ENABLED=0 go build ./cmd/gateway")
+                            execute("CGO_ENABLED=0 go build ./cmd/proxy-service")
                         }
 
                         stage("test $application") {

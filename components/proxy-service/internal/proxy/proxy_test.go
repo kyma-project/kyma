@@ -417,7 +417,7 @@ func TestInvalidStateHandler(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		handler := NewInvalidStateHandler("Gateway id not initialized properly")
+		handler := NewInvalidStateHandler("Proxy Service id not initialized properly")
 
 		// when
 		handler.ServeHTTP(rr, req)

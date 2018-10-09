@@ -29,7 +29,7 @@ func main() {
 	}
 	log.SetFormatter(formatter)
 
-	log.Info("Starting gateway.")
+	log.Info("Starting Proxy Service.")
 
 	options := parseArgs()
 	log.Infof("Options: %s", options)
@@ -91,7 +91,7 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 
 		return proxy.New(nameResolver, serviceDefinitionService, oauthClient, httpProxyCache, skipVerify, proxyTimeout)
 	}
-	return proxy.NewInvalidStateHandler("Gateway is not initialized properly")
+	return proxy.NewInvalidStateHandler("Proxy Service is not initialized properly")
 }
 
 func newServiceDefinitionService(namespace string, remoteEnvironment string) (metadata.ServiceDefinitionService, apperrors.AppError) {
