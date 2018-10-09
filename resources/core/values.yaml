@@ -98,7 +98,7 @@ global:
     version: 8f0a3611
   test_logging:
     dir: develop/
-    version: 6e0a7fe2
+    version: 293e4a23
   test_logging_monitoring:
     dir: develop/
     version: 6e0a7fe2
