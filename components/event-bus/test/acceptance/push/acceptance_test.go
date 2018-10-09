@@ -253,7 +253,7 @@ func Test_pushRequestShouldNotIncludeKymaTopicHeader(t *testing.T) {
 		log.Printf("%v", respObj)
 
 		var ok bool
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 20; i++ {
 			time.Sleep(1 * time.Second)
 			res, err := http.Get(subscriberServerV1.URL + util.SubServer1ResultsPath)
 			assert.Nil(t, err)
