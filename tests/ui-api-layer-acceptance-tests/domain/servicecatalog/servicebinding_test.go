@@ -154,7 +154,7 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	assert.NoError(t, err)
 	assertBindingExistsAndEqual(t, binding, instanceRes.ServiceInstance.ServiceBindings.Items)
 	stats := instanceRes.ServiceInstance.ServiceBindings.Stats
-	assert.Equal(t, 1, stats.Ready+stats.Pending)
+	assert.Equal(t, 1, stats.Ready+stats.Pending+stats.Failed+stats.Unknown, instanceRes.ServiceInstance.ServiceBindings)
 
 	t.Log("Delete Binding")
 	deleteRes, err := deleteBinding(c, deleteBindingOutput)
