@@ -52,8 +52,6 @@ data:
   nginx-ingress.controller.service.loadBalancerIP: ""
   configurations-generator.kubeConfig.clusterName: "kyma.local"
   cluster-users.users.adminGroup: ""
-  pilot.resources.limits.memory: 256Mi
-  pilot.resources.requests.memory: 128Mi
 ---
 apiVersion: v1
 kind: ConfigMap
