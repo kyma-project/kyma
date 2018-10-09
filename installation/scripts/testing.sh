@@ -213,19 +213,13 @@ istioTestErr=$?
 checkAndCleanupTest istio-system
 testCheckIstio=$?
 
-echo "- Testing Remote Environments"
-helm test ec-default
-ecTestErr=$?
-helm test hmc-default
-hmcTestErr=$?
-
 checkAndCleanupTest kyma-integration
 testCheckGateway=$?
 
 printImagesWithLatestTag
 latestTagsErr=$?
 
-if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${hmcTestErr} -ne 0 ]
+if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ]
 then
     exit 1
 else
