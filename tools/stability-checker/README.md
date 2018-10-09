@@ -1,7 +1,7 @@
 # Stability Checker
 
 ## Overview
-Purpose of the stability checker is to ensure that cluster is stable. To ensure that, we execute in a loop testing script. 
+Purpose of the Stability Checker is to ensure that cluster is stable. To ensure that, we execute in a loop testing script. 
 The Stability Checker runs the testing script in a loop  and reports the results on a Slack channel.
 
 ## Installation
@@ -37,20 +37,20 @@ helm install deploy/chart/stability-checker \
 Following values can be specified for chart:
 
  | Name | Default value | Description |
- --------------------------------------
+ |------|---------------|-------------|
 containerRegistry.path |eu.gcr.io/kyma-project| Address of Docker registry where for Stability Checker image
 image.tag |8b5d53d3| Tag of Stability Checker docker image
 image.pullPolicy |IfNotPresent| K8s image pull policy
 storage.claimName | Name of PVC which is attached to Stability Checker pod. Volume is mounted to "/data" |
-pathToTestingScript |"/data/input/testing.sh"| Full path to testing script. It has to 
-slackClientWebhookUrl ||
-slackClientChannelId ||
-slackClientToken ||
-testThrottle | 5m |
-testResultWindowTime | 6h |
-stats.enabled | false |
-stats.failingTestRegexp ||
-stats.successfulTestRegexp ||
+pathToTestingScript |/data/input/testing.sh| Full path to testing script. It has to 
+slackClientWebhookUrl |need-to-be-provided| Slack client webhook URL
+slackClientChannelId |need-to-be-provided| Slack channel ID, should start with `#`
+slackClientToken |123-need-to-be-provided| Slack client token.
+testThrottle | 5m | Period between test executions. 
+testResultWindowTime | 6h | Notifications will be sent after this time and contains test execution summary from this period. 
+stats.enabled | false | If gather statistics from test executions for every single test and then sent this information in notification. 
+stats.failingTestRegexp |TBD| Regular expression which indicate that test has failed. Has to contain one capturing group which identifies test name.
+stats.successfulTestRegexp |TBD|  Regular expression which indicate that test has passed. Has to contain one capturing group which identifies test name.
 service.type |NodePort|
 service.externalPort |80|
 service.internalPort |8080|
@@ -76,7 +76,7 @@ As another option, you can run the following:
 
 ## Development
 Use the following helpers for the local development:
-- `./local_minikube_build.sh` which builds the Stability Checker Docker image on a Minikube registry.
+- `./local_minikube_build.sh` which builds the Stability Checker Docker image on a  Minikube registry.
 - `./local/provision_volume.sh` which provisions a PersistentVolumeClaim (PVC) with testing scripts.
 - `./local/charts/dummy` chart which contains simple and fast tests. To install it, execute the following command:
 ```
