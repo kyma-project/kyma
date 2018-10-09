@@ -1,14 +1,61 @@
 # Stability Checker
 
 ## Overview
-
-The Stability Checker runs the `testing-kyma.sh` script in a loop, and reports the results on a Slack channel.
+Purpose of the stability checker is to ensure that cluster is stable. To ensure that, we execute in a loop testing script. 
+The Stability Checker runs the testing script in a loop  and reports the results on a Slack channel.
 
 ## Installation
 
-You can install the Stability Checker on the Kyma cluster as a chart. Find the chart definition in the `deploy/chart` directory.
+You can install the Stability Checker on the Kyma cluster as a helm chart. Find the chart definition in the `deploy/chart` directory.
+1. Configure kubectl and helm to point your cluster:
+```
+export KUBECONFIG="/path/to/kubeconfig"
+```
+1. Provision volume with testing script, which then will be used by the Stability Checker. For that purpose you can use 
+script `local/provision_volume.sh`. Script copies all files placed in `local/input' directory.
+
+2. Install stability checker with following command:
+
+```
+export KUBECONFIG=""
+helm install deploy/chart/stability-checker \
+  --set slackClientWebhookUrl="TBD" \
+  --set slackClientChannelId="TBD" \
+  --set slackClientToken="TBD" \
+  --set testThrottle="1m" \
+  --set testResultWindowTime="10m" \
+  --set stats.enabled="true" \
+  --set stats.failingTestRegexp="FAILED: ([0-9A-Za-z_-]+)" \
+  --set stats.successfulTestRegexp="PASSED: ([0-9A-Za-z_-]+)" \
+  --set pathToTestingScript="/data/input/testing-dummy.sh" \
+  --namespace="kyma-system" \
+  --name="stability-checker"
+
+```
 
 > **NOTE:** You must install the chart after running the core tests, to avoid running the same tests in parallel.
+Following values can be specified for chart:
+
+ | Name | Default value | Description |
+ --------------------------------------
+containerRegistry.path |eu.gcr.io/kyma-project| Address of Docker registry where for Stability Checker image
+image.tag |8b5d53d3| Tag of Stability Checker docker image
+image.pullPolicy |IfNotPresent| K8s image pull policy
+storage.claimName | Name of PVC which is attached to Stability Checker pod. Volume is mounted to "/data" |
+pathToTestingScript |"/data/input/testing.sh"| Full path to testing script. It has to 
+slackClientWebhookUrl ||
+slackClientChannelId ||
+slackClientToken ||
+testThrottle | 5m |
+testResultWindowTime | 6h |
+stats.enabled | false |
+stats.failingTestRegexp ||
+stats.successfulTestRegexp ||
+service.type |NodePort|
+service.externalPort |80|
+service.internalPort |8080|
+
+
 
 ## Usage
 
