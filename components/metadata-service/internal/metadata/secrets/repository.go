@@ -51,9 +51,9 @@ func (r *repository) Get(remoteEnvironment, name string) (clientId string, clien
 	secret, err := r.secretsManager.Get(name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			return "", "", apperrors.NotFound("repository: secret %s not found", name)
+			return "", "", apperrors.NotFound("Secret %s not found", name)
 		}
-		return "", "", apperrors.Internal("repository: getting %s secret failed, %s", name, err)
+		return "", "", apperrors.Internal("Getting %s secret failed, %s", name, err.Error())
 	}
 
 	return string(secret.Data[ClientIDKey]), string(secret.Data[ClientSecretKey]), nil
@@ -62,7 +62,7 @@ func (r *repository) Get(remoteEnvironment, name string) (clientId string, clien
 func (r *repository) Delete(name string) apperrors.AppError {
 	err := r.secretsManager.Delete(name, &metav1.DeleteOptions{})
 	if err != nil && !k8serrors.IsNotFound(err) {
-		return apperrors.Internal("repository: deleting %s secret failed, %s", name, err)
+		return apperrors.Internal("Deleting %s secret failed, %s", name, err.Error())
 	}
 	return nil
 }
@@ -75,7 +75,7 @@ func (r *repository) Upsert(remoteEnvironment, name, clientID, clientSecret, ser
 		if k8serrors.IsNotFound(err) {
 			return r.create(remoteEnvironment, secret, name)
 		}
-		return apperrors.Internal("repository: updating %s secret failed, %s", name, err)
+		return apperrors.Internal("Updating %s secret failed, %s", name, err.Error())
 	}
 	return nil
 }
@@ -84,9 +84,9 @@ func (r *repository) create(remoteEnvironment string, secret *v1.Secret, name st
 	_, err := r.secretsManager.Create(secret)
 	if err != nil {
 		if k8serrors.IsAlreadyExists(err) {
-			return apperrors.AlreadyExists("repository: secret %s already exists", name)
+			return apperrors.AlreadyExists("Secret %s already exists", name)
 		}
-		return apperrors.Internal("repository: creating %s secret failed, %s", name, err)
+		return apperrors.Internal("Creating %s secret failed, %s", name, err.Error())
 	}
 	return nil
 }
