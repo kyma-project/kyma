@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	reChartDirectory   = "remote-environments"
-	updateRetriesCount = 5
+	reChartDirectory = "remote-environments"
 )
 
 type ManagerClient interface {
