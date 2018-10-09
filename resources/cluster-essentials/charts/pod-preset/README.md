@@ -1,12 +1,4 @@
-```
-  _____          _    _____                    _   
- |  __ \        | |  |  __ \                  | |  
- | |__) |__   __| |  | |__) | __ ___  ___  ___| |_ 
- |  ___/ _ \ / _` |  |  ___/ '__/ _ \/ __|/ _ \ __|
- | |  | (_) | (_| |  | |   | | |  __/\__ \  __/ |_ 
- |_|   \___/ \__,_|  |_|   |_|  \___||___/\___|\__|
-                                               
-```
+# Pod Preset
 
 ## Overview
 
@@ -18,7 +10,7 @@ Using a PodPreset, you do not have to provide all information for every Pod.
 This Helm chart installs the admission controller extracted from the main Kubernetes repository. Find the source code [here](https://github.com/jpeeler/podpreset-crd).
 This Helm chart is required because the managed cluster does not enable the core Kubernetes admission controller for PodPreset since it is in the alpha state.
 
-This chart also provides the controller-manager which is responsible for restarting the Deployments whenever the PodPreset changes. 
+This chart also provides the controller-manager which is responsible for restarting the Deployments whenever the PodPreset changes.
 This functionality is not present in the main Kubernetes implementation and by default is disabled in this Helm chart. If you want to enable the controller-manager, set the **controller.enabled** parameter to `true` in the [values.yaml](./values.yaml) file.
 
 ### Images

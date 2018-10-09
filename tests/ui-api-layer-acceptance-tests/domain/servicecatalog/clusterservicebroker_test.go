@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
 	"github.com/stretchr/testify/assert"
@@ -17,20 +18,20 @@ type ClusterServiceBroker struct {
 	CreationTimestamp int
 	Url               string
 	Labels            map[string]interface{}
-	Status            ServiceBrokerStatus
+	Status            ClusterServiceBrokerStatus
 }
 
-type ServiceBrokerStatus struct {
+type ClusterServiceBrokerStatus struct {
 	Ready   bool
 	Reason  string
 	Message string
 }
 
-type brokersQueryResponse struct {
+type clusterServiceBrokersQueryResponse struct {
 	ClusterServiceBrokers []ClusterServiceBroker
 }
 
-type brokerQueryResponse struct {
+type clusterServiceBrokerQueryResponse struct {
 	ClusterServiceBroker ClusterServiceBroker
 }
 
@@ -42,7 +43,7 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
-	expectedResource := broker()
+	expectedResource := clusterBroker()
 	resourceDetailsQuery := `
 		name
 		creationTimestamp
@@ -64,16 +65,16 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 			}	
 		`, resourceDetailsQuery)
 
-		var res brokersQueryResponse
+		var res clusterServiceBrokersQueryResponse
 		err = c.DoQuery(query, &res)
 
 		require.NoError(t, err)
-		assertBrokerExistsAndEqual(t, res.ClusterServiceBrokers, expectedResource)
+		assertClusterBrokerExistsAndEqual(t, res.ClusterServiceBrokers, expectedResource)
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
 		query := fmt.Sprintf(`
-			query($name: String!) {
+			query ($name: String!) {
 				clusterServiceBroker(name: $name) {
 					%s
 				}
@@ -82,16 +83,19 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 		req := graphql.NewRequest(query)
 		req.SetVar("name", expectedResource.Name)
 
-		var res brokerQueryResponse
+		var res clusterServiceBrokerQueryResponse
 		err = c.Do(req, &res)
 
 		require.NoError(t, err)
-		checkBroker(t, expectedResource, res.ClusterServiceBroker)
+		checkClusterBroker(t, expectedResource, res.ClusterServiceBroker)
 	})
 }
 
-func checkBroker(t *testing.T, expected, actual ClusterServiceBroker) {
+func checkClusterBroker(t *testing.T, expected, actual ClusterServiceBroker) {
+	// Name
 	assert.Equal(t, expected.Name, actual.Name)
+
+	// Url
 	assert.Contains(t, actual.Url, expected.Name)
 
 	// Status
@@ -100,11 +104,11 @@ func checkBroker(t *testing.T, expected, actual ClusterServiceBroker) {
 	assert.NotEmpty(t, actual.Status.Reason)
 }
 
-func assertBrokerExistsAndEqual(t *testing.T, arr []ClusterServiceBroker, expectedElement ClusterServiceBroker) {
+func assertClusterBrokerExistsAndEqual(t *testing.T, arr []ClusterServiceBroker, expectedElement ClusterServiceBroker) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
-				checkBroker(t, expectedElement, v)
+				checkClusterBroker(t, expectedElement, v)
 				return true
 			}
 		}
@@ -113,10 +117,10 @@ func assertBrokerExistsAndEqual(t *testing.T, arr []ClusterServiceBroker, expect
 	}, "Resource does not exist")
 }
 
-func broker() ClusterServiceBroker {
+func clusterBroker() ClusterServiceBroker {
 	return ClusterServiceBroker{
-		Name: "ups-broker",
-		Status: ServiceBrokerStatus{
+		Name: tester.ClusterBrokerReleaseName,
+		Status: ClusterServiceBrokerStatus{
 			Ready: true,
 		},
 	}

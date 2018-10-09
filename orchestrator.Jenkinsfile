@@ -107,7 +107,11 @@ try {
                             runIntegration = changes.intersect(additionalProjects).size() > 0
                         }
 
-                        if (changes.size() == 1 && changes[0] == "governance") {
+                        if (changes.size() == 1 && (changes[0] == "governance" || changes[0] == "docs")){
+                            runIntegration = false
+                        }
+
+                        if (changes.size() == 2 && changes.contains("governance") && changes.contains("docs")) {
                             runIntegration = false
                         }
                     }

@@ -55,8 +55,3 @@ spec:
     args:
     - "-c"
     - "./test-logging"
-    resources:
-      requests:
-        memory: 96Mi
-      limits:
-        memory: 200Mi

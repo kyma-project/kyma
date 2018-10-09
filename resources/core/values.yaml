@@ -1,4 +1,4 @@
-dex:      
+dex:
   tls:
     createSecret: false
 
@@ -18,7 +18,7 @@ global:
     path: eu.gcr.io/kyma-project
   istio:
     gateway: 
-      name: kyma-gateway      
+      name: kyma-gateway
   etcdBackup:
     enabled: false
     secretName: etcd-backup-abs-credentials
@@ -39,16 +39,16 @@ global:
     version: 6e0a7fe2
   binding_usage_controller:
     dir: develop/
-    version: 6e0a7fe2
+    version: 83692fd8
   connector_service:
     dir: develop/
-    version: 345add9f
+    version: 4ea83ddd
   connector_service_tests:
     dir: develop/
-    version: 6e0a7fe2
+    version: 4ea83ddd
   docs:
     dir: develop/
-    version: 8f0a3611
+    version: 43d564ee
   environments:
     dir: develop/
     version: 6e0a7fe2
@@ -84,32 +84,28 @@ global:
     version: d9e91df2
   remote_environment_controller:
     dir: develop/
-    version: d9e91df2
+    version: 4ea83ddd
   remote_environment_controller_tests:
     dir: develop/
-    version: 6e0a7fe2
+    version: 4ea83ddd
   test_environments:
     dir: develop/
     version: '84359277'
   remote_environment_broker:
     dir: develop/
     version: 8f0a3611
-  stability_checker:
-    dir: develop/
-    version: ed568f0f
   test_logging:
     dir: develop/
-    version: 6e0a7fe2
+    version: 293e4a23
   test_logging_monitoring:
     dir: develop/
     version: 6e0a7fe2
   ui_api_layer:
     dir: develop/
-    version: 4ea83ddd
+    version: 8b5d53d3
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: 4ea83ddd
-  
+    version: 63f27f76
 
 test:
   auth:
@@ -118,14 +114,15 @@ test:
   acceptance:
     core:
       # environments used in remote-environment acceptance test
-      remoteEnvironment: 
+      remoteEnvironment:
         disabled: "false"
         linkingTimeout: 4m
         unlinkingTimeout: 4m
     ui:
+      # tests uses chromium that require more memory
       requests:
-        memory: "1Gi"
-        cpu: "300m"
+        memory: 300Mi
+        cpu: 200m
       limits:
-        memory: "1Gi"
-        cpu: "300m"
+        memory: 500Mi
+        cpu: 300m

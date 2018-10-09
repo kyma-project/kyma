@@ -1,14 +1,4 @@
-```
-   ____                            _              
-  / ___|___  _ __  _ __   ___  ___| |_ ___  _ __  
- | |   / _ \| '_ \| '_ \ / _ \/ __| __/ _ \| '__|
- | |__| (_) | | | | | | |  __/ (__| || (_) | |    
-  \____\___/|_| |_|_| |_|\___|\___|\__\___/|_|    
- / ___|  ___ _ ____   _(_) ___ ___                
- \___ \ / _ \ '__\ \ / / |/ __/ _ \               
-  ___) |  __/ |   \ V /| | (_|  __/               
- |____/ \___|_|    \_/ |_|\___\___|                                                                       
-```
+# Connector Service
 
 ## Overview
 The Connector Service is responsible for generating and sending back client certificates based on Certificate Signing Request (CSR).
