@@ -15,7 +15,7 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 		for _, entry := range service.Entries {
 			if entry.Type == specAPIType {
 				api = &ServiceAPI{
-					GatewayURL:            entry.GatewayUrl,
+					AccessServiceURL:      entry.GatewayUrl,
 					AccessLabel:           entry.AccessLabel,
 					TargetUrl:             entry.TargetUrl,
 					OauthUrl:              entry.OauthUrl,

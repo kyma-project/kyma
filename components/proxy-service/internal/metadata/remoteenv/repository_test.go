@@ -35,7 +35,7 @@ func TestGetServices(t *testing.T) {
 		assert.Equal(t, service.DisplayName, "Orders API")
 		assert.Equal(t, service.LongDescription, "This is Orders API")
 		assert.Equal(t, service.API, &remoteenv.ServiceAPI{
-			GatewayURL:            "https://orders-gateway.production.svc.cluster.local/",
+			AccessServiceURL:      "http://re-ec-default-4862c1fb-a047-4add-94e3-c4ff594b3514.kyma-integration.svc.cluster.local",
 			AccessLabel:           "access-label-1",
 			TargetUrl:             "https://192.168.1.2",
 			OauthUrl:              "https://192.168.1.3/token",
@@ -66,7 +66,7 @@ func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
 
 	reService1Entry := v1alpha1.Entry{
 		Type:                  "API",
-		GatewayUrl:            "https://orders-gateway.production.svc.cluster.local/",
+		GatewayUrl:            "http://re-ec-default-4862c1fb-a047-4add-94e3-c4ff594b3514.kyma-integration.svc.cluster.local",
 		AccessLabel:           "access-label-1",
 		TargetUrl:             "https://192.168.1.2",
 		OauthUrl:              "https://192.168.1.3/token",
@@ -83,7 +83,7 @@ func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
 
 	reService2Entry := v1alpha1.Entry{
 		Type:                  "API",
-		GatewayUrl:            "https://products-gateway.production.svc.cluster.local/",
+		GatewayUrl:            "http://re-ec-default-f8c614e1-867e-4887-9f6c-334ca2603251.kyma-integration.svc.cluster.local",
 		AccessLabel:           "access-label-2",
 		TargetUrl:             "https://192.168.1.3",
 		OauthUrl:              "https://192.168.1.4/token",

@@ -7,7 +7,6 @@ import (
 
 const (
 	resourceNamePrefixFormat = "re-%s-"
-	gatewayUrlFormat         = "http://%s.%s.svc.cluster.local"
 
 	maxResourceNameLength = 63 // Kubernetes limit for services
 	uuidLength            = 36 // UUID has 36 characters
@@ -17,8 +16,6 @@ const (
 type NameResolver interface {
 	// GetResourceName returns resource name with given ID
 	GetResourceName(id string) string
-	// GetGatewayUrl return gateway url with given ID
-	GetGatewayUrl(id string) string
 	// ExtractServiceId extracts service ID from given host
 	ExtractServiceId(host string) string
 }
@@ -39,11 +36,6 @@ func NewNameResolver(remoteEnvironment, namespace string) NameResolver {
 // GetResourceName returns resource name with given ID
 func (resolver nameResolver) GetResourceName(id string) string {
 	return resolver.resourceNamePrefix + id
-}
-
-// GetGatewayUrl return gateway url with given ID
-func (resolver nameResolver) GetGatewayUrl(id string) string {
-	return fmt.Sprintf(gatewayUrlFormat, resolver.GetResourceName(id), resolver.namespace)
 }
 
 // ExtractServiceId extracts service ID from given host

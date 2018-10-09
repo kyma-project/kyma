@@ -28,7 +28,7 @@ type repository struct {
 
 // ServiceAPI stores information needed to call an API
 type ServiceAPI struct {
-	GatewayURL            string
+	AccessServiceURL      string
 	AccessLabel           string
 	TargetUrl             string
 	OauthUrl              string
