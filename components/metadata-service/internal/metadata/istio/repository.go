@@ -81,7 +81,7 @@ func (repo *repository) CreateDenier(remoteEnvironment, serviceId, name string) 
 
 	_, err := repo.denierInterface.Create(denier)
 	if err != nil {
-		return apperrors.Internal("repository: creating %s denier failed, %s", name, err)
+		return apperrors.Internal("Creating %s denier failed, %s", name, err.Error())
 	}
 
 	return nil
@@ -93,7 +93,7 @@ func (repo *repository) CreateCheckNothing(remoteEnvironment, serviceId, name st
 
 	_, err := repo.checknothingInterface.Create(checkNothing)
 	if err != nil {
-		return apperrors.Internal("repository: creating %s checknothing failed, %s", name, err)
+		return apperrors.Internal("Creating %s checknothing failed, %s", name, err.Error())
 	}
 	return nil
 }
@@ -104,7 +104,7 @@ func (repo *repository) CreateRule(remoteEnvironment, serviceId, name string) ap
 
 	_, err := repo.ruleInterface.Create(rule)
 	if err != nil {
-		return apperrors.Internal("repository: creating %s rule failed, %s", name, err)
+		return apperrors.Internal("Creating %s rule failed, %s", name, err.Error())
 	}
 	return nil
 }
@@ -115,7 +115,7 @@ func (repo *repository) UpsertDenier(remoteEnvironment, serviceId, name string) 
 
 	_, err := repo.denierInterface.Create(denier)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return apperrors.Internal("repository: updating %s denier failed, %s", name, err)
+		return apperrors.Internal("Updating %s denier failed, %s", name, err.Error())
 	}
 	return nil
 }
@@ -126,7 +126,7 @@ func (repo *repository) UpsertCheckNothing(remoteEnvironment, serviceId, name st
 
 	_, err := repo.checknothingInterface.Create(checkNothing)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return apperrors.Internal("repository: updating %s checknothing failed, %s", name, err)
+		return apperrors.Internal("Updating %s checknothing failed, %s", name, err.Error())
 	}
 	return nil
 }
@@ -137,7 +137,7 @@ func (repo *repository) UpsertRule(remoteEnvironment, serviceId, name string) ap
 
 	_, err := repo.ruleInterface.Create(rule)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return apperrors.Internal("repository: updating %s rule failed, %s", name, err)
+		return apperrors.Internal("Updating %s rule failed, %s", name, err.Error())
 	}
 	return nil
 }
@@ -146,7 +146,7 @@ func (repo *repository) UpsertRule(remoteEnvironment, serviceId, name string) ap
 func (repo *repository) DeleteDenier(name string) apperrors.AppError {
 	err := repo.denierInterface.Delete(name, nil)
 	if err != nil && !k8serrors.IsNotFound(err) {
-		return apperrors.Internal("repository: deleting %s denier failed, %s", name, err)
+		return apperrors.Internal("repository: deleting %s denier failed, %s", name, err.Error())
 	}
 	return nil
 }
@@ -155,7 +155,7 @@ func (repo *repository) DeleteDenier(name string) apperrors.AppError {
 func (repo *repository) DeleteCheckNothing(name string) apperrors.AppError {
 	err := repo.checknothingInterface.Delete(name, nil)
 	if err != nil && !k8serrors.IsNotFound(err) {
-		return apperrors.Internal("repository: deleting %s checknothing failed, %s", name, err)
+		return apperrors.Internal("Deleting %s checknothing failed, %s", name, err.Error())
 	}
 	return nil
 }
@@ -164,7 +164,7 @@ func (repo *repository) DeleteCheckNothing(name string) apperrors.AppError {
 func (repo *repository) DeleteRule(name string) apperrors.AppError {
 	err := repo.ruleInterface.Delete(name, nil)
 	if err != nil && !k8serrors.IsNotFound(err) {
-		return apperrors.Internal("repository: deleting %s rule failed, %s", name, err)
+		return apperrors.Internal("Deleting %s rule failed, %s", name, err.Error())
 	}
 	return nil
 }
