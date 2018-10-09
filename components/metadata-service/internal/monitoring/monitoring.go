@@ -17,12 +17,12 @@ func SetupMonitoringMiddleware() ([]mux.MiddlewareFunc, apperrors.AppError) {
 
 	codeMiddleware, err := newCodeMiddleware("metadata_service_endpoints_responses")
 	if err != nil {
-		return nil, apperrors.Internal("monitoring middleware: setup code middleware failed, %s", err.Error())
+		return nil, apperrors.Internal("Setup code middleware failed, %s", err.Error())
 	}
 
 	durationMiddleware, err := newDurationMiddleware("metadata_service_endpoints_duration")
 	if err != nil {
-		return nil, apperrors.Internal("monitoring middleware: setup duration middleware failed, %s", err.Error())
+		return nil, apperrors.Internal("Setup duration middleware failed, %s", err.Error())
 	}
 
 	return []mux.MiddlewareFunc{codeMiddleware.Handle, durationMiddleware.Handle}, nil
@@ -36,7 +36,7 @@ func newCodeMiddleware(name string) (middleware.Middleware, apperrors.AppError) 
 
 	metricsCollector, err := collector.NewCounterCollector(opts, []string{"endpoint", "status", "method"})
 	if err != nil {
-		return nil, apperrors.Internal("metrics collector: setup response code metrics collector failed, %s", err.Error())
+		return nil, apperrors.Internal("Setup response code metrics collector failed, %s", err.Error())
 	}
 
 	return middleware.NewCodeMiddleware(metricsCollector), nil
@@ -51,7 +51,7 @@ func newDurationMiddleware(name string) (middleware.Middleware, apperrors.AppErr
 
 	metricsCollector, err := collector.NewSummaryCollector(opts, []string{"endpoint", "method"})
 	if err != nil {
-		return nil, apperrors.Internal("metrics collector: setup response duration metrics collector failed, %s", err.Error())
+		return nil, apperrors.Internal("Setup response duration metrics collector failed, %s", err.Error())
 	}
 
 	return middleware.NewDurationMiddleware(metricsCollector), nil
