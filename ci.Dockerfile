@@ -45,17 +45,21 @@ RUN chmod +x  /tmp/linux-amd64/helm && sudo mv /tmp/linux-amd64/helm /usr/local/
 # Copying into the container all the necessary files like scripts and resources definition
 RUN mkdir /kyma
 
-COPY . /kyma
+COPY /installation /kyma/installation
+COPY /resources /kyma/resources
+COPY /kyma-installer /kyma/kyma-installer
 
 ENV IGNORE_TEST_FAIL="true"
 ENV RUN_TESTS="true"
 
 RUN echo 'alias kc="kubectl"' >> ~/.bashrc
 
+WORKDIR /kyma
+
 # minikube and docker start must be done on starting container to make it work
-ENTRYPOINT /kyma/installation/scripts/docker-start.sh \
-    && /kyma/installation/cmd/run.sh --vm-driver none \
-    && /kyma/installation/scripts/is-installed.sh \
-    && /kyma/installation/scripts/watch-pods.sh \
-    && (($RUN_TESTS && /kyma/installation/scripts/testing.sh) || $IGNORE_TEST_FAIL) \
+ENTRYPOINT installation/scripts/docker-start.sh \
+    && installation/cmd/run.sh --vm-driver none \
+    && installation/scripts/is-installed.sh \
+    && installation/scripts/watch-pods.sh \
+    && (($RUN_TESTS && installation/scripts/testing.sh) || $IGNORE_TEST_FAIL) \
     && exec bash

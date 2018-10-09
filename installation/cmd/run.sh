@@ -43,7 +43,7 @@ if [[ ! ${SKIP_MINIKUBE_START} ]]; then
     bash ${CURRENT_DIR}/../scripts/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}"
 fi
 
-bash $CURRENT_DIR/../scripts/build-kyma-installer.sh
+bash $CURRENT_DIR/../scripts/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
 
 bash $CURRENT_DIR/../scripts/generate-local-config.sh
 
