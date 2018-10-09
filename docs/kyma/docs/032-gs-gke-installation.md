@@ -23,7 +23,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
     export DOMAIN={YOUR_SUBDOMAIN}
     export DNS_NAME={YOUR_DOMAIN}.
     export PROJECT={YOUR_GOOGLE_PROJECT}
-    export DNS_ZONE=kyma-zone
+    export DNS_ZONE={YOUR_DNS_ZONE}
     ```
 
 2. Create a DNS-managed zone in your Google project. Run:
@@ -227,8 +227,6 @@ Follow this steps to configure a new, more secure certificate suitable for produ
     export AC_KEY=$(cat ./ca.key | base64 | base64)
 
     ```
-
->**NOTE:** You must apply double base64 encoding to the certificate to ensure production-grade security.
 
 3. Prepare installation file with the following command:
 
