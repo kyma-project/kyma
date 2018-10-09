@@ -29,22 +29,17 @@ Below you can find configuration options:
 
  | Name | Default value | Description |
  |------|---------------|-------------|
-containerRegistry.path |eu.gcr.io/kyma-project| Address of Docker registry where Stability Checker image can be found.
-image.tag |8b5d53d3| Tag of Stability Checker docker image.
-image.pullPolicy |IfNotPresent| K8s image pull policy.
 storage.claimName |stability-test-scripts-pvc| Name of PVC which is attached to Stability Checker pod. Volume is visible in the pod under `/data` path. 
 pathToTestingScript |/data/input/testing.sh| Full path to the testing script. Because script is delivered inside PV, it has to start with `/data`.
-slackClientWebhookUrl |need-to-be-provided| Slack client webhook URL.
-slackClientChannelId |need-to-be-provided| Slack channel ID, starts with `#`.
-slackClientToken |123-need-to-be-provided| Slack client token.
+slackClientWebhookUrl |-| Slack client webhook URL.
+slackClientChannelId |-| Slack channel ID, starts with `#`.
+slackClientToken |-| Slack client token.
 testThrottle | 5m | Period between test executions. Purpose of this parameter is to give K8s time to clean up all resources after the previous test execution.
 testResultWindowTime | 6h | Notifications will be sent after this time and contains test executions summary for this period. 
-stats.enabled | false | If true, an output from test executions is analyzed to find statistics for every test. Detailed information about how many times every test failed and succeeded will be enclosed to the slack notification. Detecting test result is done by regular expressions defined in `stats.failingTestRegexp` and `stats.successfulTestRegexp`.
-stats.failingTestRegexp |TBD| Regular expression which indicates that test has failed. Has to contain one capturing group which identifies test name.
-stats.successfulTestRegexp |TBD|  Regular expression which indicates that the test has passed. Has to contain one capturing group which identifies test name.
-service.type |NodePort| Stability Checker service type
-service.externalPort |80| Stability Checker service external port
-service.internalPort |8080| Stability Checker service internal port
+stats.enabled | false | If true, an output from test executions is analyzed to find statistics for every specific test. Detailed information about how many times every test failed and succeeded will be enclosed to the slack notification. Detecting test result is done by regular expressions defined in `stats.failingTestRegexp` and `stats.successfulTestRegexp`.
+stats.failingTestRegexp |-| Regular expression which indicates that test has failed. Has to contain one capturing group which identifies test name.
+stats.successfulTestRegexp |-|  Regular expression which indicates that the test has passed. Has to contain one capturing group which identifies test name.
+
 
 > **NOTE:** You must install the chart after running the core tests, to avoid running the same tests in parallel.
 Following values can be specified for chart:
