@@ -1,6 +1,6 @@
 ---
 title: Connector Service
-type: Details
+type: Architecture
 ---
 
 The Connector Service generates client certificates which secure the communication between Kyma and the connected external solutions.        
@@ -8,7 +8,7 @@ The Connector Service generates client certificates which secure the communicati
 Generating a new client certificate is the first step in the process of configuring a Remote Environment (RE). Kyma stores the root certificate and serves as the Certificate Authority when you configure a new RE. When you generate a new client certificate, the Connector Service returns it along with the root certificate to allow validation.  
 
 This diagram illustrates the client certificate generation flow in details:
-![Client certificate generation operation flow](assets/002-automatic-configuration.png)
+![Client certificate generation operation flow](assets/002-automatic-configuration.svg)
 
 1. The administrator requests for a token using the CLI or the UI and receives a link with the token, which is valid for a limited period of time.
 2. The administrator passes the token to the external system, which requests for information regarding the Kyma installation. In the response, it receives the following information:

@@ -7,12 +7,12 @@ This guide shows you how to bind a Remote Environment (RE) to an Environment in 
 
 ## Prerequisites
 
-To complete this guide, your Kyma cluster must have at least one Remote Environment created.
+To complete this guide, your cluster must have at least one Remote Environment created.
 
 ## Steps
 
 
-1. List all RemoteEnvironments enabled in the `production` Environment:
+1. List all Remote Environments bound to the `production` Environment:
   ```
   kubectl get em -n production
   ```
@@ -31,17 +31,7 @@ To complete this guide, your Kyma cluster must have at least one Remote Environm
   kubectl apply -f mapping-prod.yaml
   ```
 
-4. Get the list of all REs bound to the `production` Environment and look for your RE. Run:
-  ```
-  kubectl get em -n production
-  ```
-
-5. Try to unbind your RE from the `production` Environment. Run:
-  ```
-  kubectl delete em {NAME_OF_YOUR_RE} -n production
-  ```
-
-6. Check if the operation is successful. List all Environments to which your RE is bound:
+4. Check if the operation is successful. List all Environments to which your RE is bound:
   ```
   kubectl get em --all-namespaces -o jsonpath='{range .items[?(@.metadata.name=="{NAME_OF_YOUR_RE}")]}{@.metadata.namespace}{"\n"}{end}'
   ```

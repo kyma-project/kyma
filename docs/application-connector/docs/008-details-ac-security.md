@@ -1,5 +1,5 @@
 ---
-title: Application Connector security
+title: Security
 type: Details
 ---
 
@@ -13,12 +13,12 @@ You can disable the SSL certificate verification in the communication between Ky
 
 >**NOTE:** By default, the SSL certificate verification is enabled when sending data and requests to every Remote Environment.
 
-* Disable SSL certificate verification for communication between Kyma and an existing Remote Environment
+Follow these steps to disable SSL certificate verification for communication between Kyma and an existing Remote Environment:
 
-  - Edit the `ec-default-gateway` Deployment in the `kyma-integration` Namespace. Run:
+  1. Edit the `ec-default-gateway` Deployment in the `kyma-integration` Namespace. Run:
     ```
     kubectl -n kyma-integration edit deployment ec-default-gateway
     ```
-  - Edit the Deployment in Vim. Select `i` to start editing.
-  - Find the **skipVerify** parameter and change its value to `true`.
-  - Select `esc`, type `:wq`, and select `enter` to write and quit.
+  2. Edit the Deployment in Vim. Select `i` to start editing.
+  3. Find the **skipVerify** parameter and change its value to `true`.
+  4. Select `esc`, type `:wq`, and select `enter` to write and quit.

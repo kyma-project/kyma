@@ -20,7 +20,7 @@ For a complete information on registering services, please see Managing Register
 
 You can get the API specification of the Metadata Service for a given version using the following command:
 ```
-curl https://gateway.{CLUSTER_NAME}.kyma.cx/{RE_NAME}/v1/metadata/api.yaml
+curl https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/metadata/api.yaml
 ```
 
 To access the API specification of the Metadata Service locally, provide the NodePort of the `core-nginx-ingress-controller`.

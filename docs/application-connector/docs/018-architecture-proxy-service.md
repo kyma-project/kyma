@@ -1,6 +1,6 @@
 ---
 title: Proxy Service
-type: Details
+type: Architecture
 ---
 
 The Proxy Service sends the requests from Lambda functions and services in Kyma to external APIs registered with the Metadata Service. The Proxy Service works in conjunction with the Access Service, which exposes the Proxy Service.
@@ -9,7 +9,7 @@ The Proxy Service sends the requests from Lambda functions and services in Kyma 
 
 The following diagram illustrates how the Proxy Service interacts with other components and external APIs secured with OAuth.
 
-![Proxy Service Diagram](assets/003-architecture-proxy-service.png)
+![Proxy Service Diagram](assets/003-architecture-proxy-service.svg)
 
 1. A Lambda function calls the Access Service. The name of every Access Service follows this format: `re-{remote-environment-name}-gateway-{service-id}`
 2. The Access Service exposes the Proxy Service.

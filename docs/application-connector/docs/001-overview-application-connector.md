@@ -1,13 +1,12 @@
 ---
 title: Overview
-type: Overview
 ---
 
 The Application Connector (AC) is a proprietary Kyma implementation that allows you to connect with external solutions. No matter if you want to integrate an on-premise or a cloud system, the integration process doesn't change, which allows to avoid any configuration and network-related problems.
 
-The external solution you connect to Kyma using the AC is represented as a Remote Environment (RE). There is always a one-to-one relationship between a connected solution and a Kyma RE, which helps to ensure the highest level of security and separation. This means that you must create five separate REs in your Kyma cluster to connect five different external solutions and use their APIs and Event catalogs in Kyma.
+The external solution you connect to Kyma using the AC is represented as a Remote Environment (RE). There is always a one-to-one relationship between a connected solution and a Kyma RE, which helps to ensure the highest level of security and separation. This means that you must create five separate REs in your cluster to connect five different external solutions and use their APIs and Event catalogs in Kyma.
 
-The AC brings the following functionality to Kyma:
+The AC gives you the following:
 
 - Manages the lifecycle of REs.
 - Establishes a secure connection and generates the client certificate used by the connected external solution.
