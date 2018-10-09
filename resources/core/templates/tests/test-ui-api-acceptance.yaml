@@ -24,6 +24,9 @@ spec:
           value: "{{ .Values.test.auth.password }}"
         - name: DEX_CONFIGURATION_FILE
           value: /etc/dex/cfg/config.yaml
+      resources:
+        limits:
+          memory: 128Mi
       volumeMounts:
         - name: dex-config
           mountPath: /etc/dex/cfg
