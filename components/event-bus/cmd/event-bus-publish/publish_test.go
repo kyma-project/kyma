@@ -63,7 +63,8 @@ func TestPublishWithSourceIdInHeader(t *testing.T) {
 		msg = m
 	})
 	responseBody, statusCode := performPublishRequestWithHeaders(t, publishServer.URL, requestPayload, map[string]string{api.HeaderSourceId: testSourceID})
-	verifyPublish(t, statusCode, sub, responseBody, requestPayload)
+
+	verifyPublish(t, statusCode, sub, responseBody, buildDefaultTestPayload())
 }
 
 func TestPublishWithSourceIdInPayloadAndHeaderAndPayloadOneIsGivenPrecedence(t *testing.T) {

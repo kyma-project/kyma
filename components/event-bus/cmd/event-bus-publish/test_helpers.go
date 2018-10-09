@@ -198,7 +198,7 @@ func performPublishRequest(t *testing.T, publishURL string, payload string) ([]b
 }
 
 func performPublishRequestWithHeaders(t *testing.T, publishURL string, payload string, headers map[string]string) ([]byte, int) {
-	req, err := http.NewRequest("POST", publishURL+"/v1/events", strings.NewReader(payload))
+	req, _ := http.NewRequest("POST", publishURL+"/v1/events", strings.NewReader(payload))
 
 	req.Header.Set("Content-Type", "application/json")
 
@@ -233,11 +233,13 @@ func verifyReceivedMsg(t *testing.T, a string, b []byte) {
 		t.Error(err)
 	}
 	assert.Equal(t, aReq.EventID, bReq.EventID)
+	assert.Equal(t, aReq.SourceID, bReq.SourceID)
 }
 
 func assertExpectedError(t *testing.T, body []byte, actualStatusCode int, expectedStatusCode int, errorField interface{}, errorType interface{}) {
 	var responseError api.Error
 	err := json.Unmarshal(body, &responseError)
+	assert.Equal(t, actualStatusCode, expectedStatusCode)
 	assert.Nil(t, err)
 	if errorType != nil {
 		assert.Equal(t, errorType, responseError.Type)

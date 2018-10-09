@@ -91,16 +91,17 @@ func handlePublishRequest(w http.ResponseWriter, r *http.Request, publisher *con
 	}
 	publishRequest, err := parseRequest(body)
 
-	if len(publishRequest.SourceID) == 0 {
-		setSourceIdFromHeader(publishRequest, &r.Header)
-	}
-
 	if err != nil {
 		log.Printf("PublishHandler :: handlePublishRequest :: Error while parsing request :: Error: %v", err)
 		publish.SendJSONError(w, api.ErrorResponseBadPayload())
 		trace.TagSpanAsError(publishSpan, "error while parsing request", err.Error())
 		return
 	}
+
+	if len(publishRequest.SourceID) == 0 {
+		setSourceIdFromHeader(publishRequest, &r.Header)
+	}
+
 	errResponse := api.ValidatePublish(publishRequest)
 	if errResponse != nil {
 		log.Printf("PublishHandler :: handlePublishRequest :: Request validation failed. :: Error: %v", *errResponse)
