@@ -14,7 +14,7 @@ func NewCounterCollector(opts prometheus.CounterOpts, labels []string) (Collecto
 
 	err := prometheus.Register(vector)
 	if err != nil {
-		return nil, apperrors.Internal("counter collector: registering %s counter collector failed, %s", opts.Name, err.Error())
+		return nil, apperrors.Internal("Registering %s counter collector failed, %s", opts.Name, err.Error())
 	}
 
 	return &counterCollector{vector: vector}, nil
