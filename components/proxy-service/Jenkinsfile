@@ -45,7 +45,7 @@ podTemplate(label: label) {
                         }
 
                         stage("build $application") {
-                            execute("CGO_ENABLED=0 go build ./cmd/proxy-service")
+                            execute("CGO_ENABLED=0 go build ./cmd/proxyservice")
                         }
 
                         stage("test $application") {
