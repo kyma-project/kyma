@@ -3,7 +3,6 @@ package testkit
 import (
 	"fmt"
 	v1apps "k8s.io/api/apps/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
 	"time"
@@ -113,7 +112,7 @@ func (checker *k8sChecker) getDeletedDeployment(name string, options v1.GetOptio
 
 	for i := 0; i < checker.retryCount; i++ {
 		deployment, err = checker.client.GetDeployment(name, v1.GetOptions{})
-		if err != nil && k8serrors.IsNotFound(err) {
+		if err != nil {
 			break
 		}
 		time.Sleep(checker.retryWaitTime)

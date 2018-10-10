@@ -20,6 +20,7 @@ type K8sResourcesClient interface {
 	GetRoleBinding(name string, options v1.GetOptions) (*v1rbac.RoleBinding, error)
 	CreateDummyRemoteEnvironment(name string) (*v1alpha1.RemoteEnvironment, error)
 	DeleteRemoteEnvironment(name string, options *v1.DeleteOptions) error
+	GetRemoteEnvironment(name string, options v1.GetOptions)(*v1alpha1.RemoteEnvironment, error)
 }
 
 type k8sResourcesClient struct {
@@ -89,4 +90,8 @@ func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string) (*v1alpha
 
 func (c *k8sResourcesClient) DeleteRemoteEnvironment(name string, options *v1.DeleteOptions) error {
 	return c.remoteEnvironmentClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Delete(name, options)
+}
+
+func (c *k8sResourcesClient) GetRemoteEnvironment(name string, options v1.GetOptions)(*v1alpha1.RemoteEnvironment, error) {
+	return c.remoteEnvironmentClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Get(name, options)
 }

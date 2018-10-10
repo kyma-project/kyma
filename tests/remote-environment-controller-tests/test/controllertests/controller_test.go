@@ -47,6 +47,15 @@ func TestRemoteEnvironmentCreation(t *testing.T) {
 			k8sResourcesChecker.CheckK8sResources(t, true, requireNoError, requireNotEmpty)
 		})
 
+		t.Run("Access label should be set to RE name", func(t *testing.T) {
+			// when
+			receivedRE, err := k8sResourcesClient.GetRemoteEnvironment(testRe.Name, v1.GetOptions{})
+
+			// then
+			require.NoError(t, err)
+			require.Equal(t, receivedRE.Name, receivedRE.Spec.AccessLabel)
+		})
+
 		// when
 		err = k8sResourcesClient.DeleteRemoteEnvironment(testReName, &v1.DeleteOptions{})
 
