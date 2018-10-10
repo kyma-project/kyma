@@ -10,7 +10,7 @@ Go to the [Kyma project website](https://kyma-project.io/) to learn more about t
 
 ## Installation
 
-Install Kyma [locally](https://kyma-project.io/docs/latest/root/kyma#getting-started-local-kyma-installation) and on a [cluster](https://kyma-project.io/docs/latest/root/kyma#getting-started-cluster-kyma-installation).
+Install Kyma [locally](https://kyma-project.io/docs/latest/root/kyma#getting-started-local-kyma-installation) and on a [cluster](https://kyma-project.io/docs/latest/root/kyma#getting-started-install-kyma-on-a-gke-cluster).
 
 ## Usage
 
