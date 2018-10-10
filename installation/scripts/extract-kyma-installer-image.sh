@@ -3,8 +3,8 @@
 set -o errexit
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-KYMA_PATH="${CURRENT_DIR}/../.."
-INSTALLER_YAML_PATH="${KYMA_PATH}/installation/resources/installer.yaml"
+ROOT_DIR="${CURRENT_DIR}/../.."
+INSTALLER_YAML_PATH="${ROOT_DIR}/installation/resources/installer.yaml"
 
 if [ -f $INSTALLER_YAML_PATH ]; then
     VERSION=$(grep "image: " $INSTALLER_YAML_PATH | cut -d":" -f2-) 
