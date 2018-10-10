@@ -18,7 +18,7 @@ func TestFunctionConverter_ToGQL(t *testing.T) {
 
 		expected := &gqlschema.Function{
 			Name:              "test",
-			Labels:            gqlschema.JSON{"test": "ok", "ok": "test"},
+			Labels:            gqlschema.Labels{"test": "ok", "ok": "test"},
 			CreationTimestamp: zeroTimeStamp,
 			Trigger:           "nope",
 			Environment:       "env",

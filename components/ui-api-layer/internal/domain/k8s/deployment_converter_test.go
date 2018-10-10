@@ -22,7 +22,7 @@ func TestDeploymentConverter_ToGQL(t *testing.T) {
 			Name:              "name",
 			CreationTimestamp: zeroTimeStamp,
 			Environment:       "namespace",
-			Labels:            gqlschema.JSON{"test": "ok", "ok": "test"},
+			Labels:            gqlschema.Labels{"test": "ok", "ok": "test"},
 			Status: gqlschema.DeploymentStatus{
 				Replicas:          1,
 				AvailableReplicas: 1,
