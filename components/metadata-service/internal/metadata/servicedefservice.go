@@ -77,7 +77,7 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 
 		serviceDef.Api.Spec, err = modifyAPISpec(serviceDef.Api.Spec, serviceAPI.GatewayURL)
 		if err != nil {
-			return "", apperrors.Internal("Mdifying API spec failed, %s", err.Error())
+			return "", apperrors.Internal("Modifying API spec failed, %s", err.Error())
 		}
 	}
 
@@ -128,7 +128,7 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 	existingSvc, err := sds.GetByID(remoteEnvironment, id)
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {
-			return ServiceDefinition{}, apperrors.NotFound("Updating %s service failed. %s", id, err.Error())
+			return ServiceDefinition{}, apperrors.NotFound("Updating %s service failed, %s", id, err.Error())
 		}
 		return ServiceDefinition{}, apperrors.Internal("Updating %s service failed, %s", id, err.Error())
 	}

@@ -10,11 +10,10 @@ import (
 func TestHttpErrors_AppErrorToResponse(t *testing.T) {
 	t.Run("should print short internal error", func(t *testing.T) {
 		//given
-		error := apperrors.Internal("some internal error occured")
-		detailedErrorResponse := false
+		err := apperrors.Internal("some internal error occured")
 
 		//when
-		status, body := AppErrorToResponse(error, detailedErrorResponse)
+		status, body := AppErrorToResponse(err, false)
 
 		//then
 		assert.Equal(t, http.StatusInternalServerError, status)
@@ -24,11 +23,10 @@ func TestHttpErrors_AppErrorToResponse(t *testing.T) {
 	t.Run("should print detailed internal error", func(t *testing.T) {
 		//given
 		message := "detailed internal error message"
-		error := apperrors.Internal(message)
-		detailedErrorResponse := true
+		err := apperrors.Internal(message)
 
 		//when
-		status, body := AppErrorToResponse(error, detailedErrorResponse)
+		status, body := AppErrorToResponse(err, true)
 
 		//then
 		assert.Equal(t, http.StatusInternalServerError, status)
@@ -38,11 +36,10 @@ func TestHttpErrors_AppErrorToResponse(t *testing.T) {
 	t.Run("should print normal not found error", func(t *testing.T) {
 		//given
 		message := "normal non internal error message"
-		error := apperrors.NotFound(message)
-		detailedErrorResponse := false
+		err := apperrors.NotFound(message)
 
 		//when
-		status, body := AppErrorToResponse(error, detailedErrorResponse)
+		status, body := AppErrorToResponse(err, false)
 
 		//then
 		assert.Equal(t, http.StatusNotFound, status)
@@ -52,11 +49,10 @@ func TestHttpErrors_AppErrorToResponse(t *testing.T) {
 	t.Run("should print normal code already exists error", func(t *testing.T) {
 		//given
 		message := "normal non internal error message"
-		error := apperrors.AlreadyExists(message)
-		detailedErrorResponse := false
+		err := apperrors.AlreadyExists(message)
 
 		//when
-		status, body := AppErrorToResponse(error, detailedErrorResponse)
+		status, body := AppErrorToResponse(err, false)
 
 		//then
 		assert.Equal(t, http.StatusConflict, status)
@@ -66,11 +62,10 @@ func TestHttpErrors_AppErrorToResponse(t *testing.T) {
 	t.Run("should print normal bad request error", func(t *testing.T) {
 		//given
 		message := "normal non internal error message"
-		error := apperrors.WrongInput(message)
-		detailedErrorResponse := false
+		err := apperrors.WrongInput(message)
 
 		//when
-		status, body := AppErrorToResponse(error, detailedErrorResponse)
+		status, body := AppErrorToResponse(err, false)
 
 		//then
 		assert.Equal(t, http.StatusBadRequest, status)

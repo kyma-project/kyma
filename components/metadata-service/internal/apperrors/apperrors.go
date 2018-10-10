@@ -3,10 +3,10 @@ package apperrors
 import "fmt"
 
 const (
-	CodeInternal                 = 1
-	CodeNotFound                 = 2
-	CodeAlreadyExists            = 3
-	CodeWrongInput               = 4
+	CodeInternal      = 1
+	CodeNotFound      = 2
+	CodeAlreadyExists = 3
+	CodeWrongInput    = 4
 )
 
 type AppError interface {
