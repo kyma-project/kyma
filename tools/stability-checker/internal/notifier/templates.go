@@ -6,7 +6,7 @@ const (
 	{{- if .FailedExecutions }}
 	*Summary:* {{ .TotalTestsCnt }} test executions and {{ len .FailedExecutions }} of them failed :sad-frog:
 	{{- if .ShowTestStats -}}
- 	  {{"\n"}}Showing tests statistics:
+ 	  {{"\n"}}Statistics for failed test executions:”
       {{- range .TestStats -}}
         {{"\n"}}Name: {{.Name}}, successes: {{.Successes}}, failures: {{.Failures}}
 	  {{- else }}
