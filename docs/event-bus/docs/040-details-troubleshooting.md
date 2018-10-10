@@ -21,6 +21,21 @@ document introduces several ways to troubleshoot such problems.
  If these general guidelines do not help, go to the next section of this
  document.
 
+## Search by tags
+It is possible to search the traces using tags. Tags are “key-value” pairs configured for each service.
+
+The full list of tags for a service can be seen from the details of that service's span.
+
+e.g. Here are the spans for the `publish-service`.
+* `event-type`
+* `event-type-ver`
+* `event-id`
+* `source-id`
+
+To search, one can either use 
+* single tag `event-type="order.created"` or 
+* multiple tags `event-type="order.created" event-type-ver="v1"`
+
 ## Troubleshooting using Kyma Tracing
 
 Tracing allows you to troubleshoot different problems that you might encounter
