@@ -49,6 +49,7 @@ COPY /installation /kyma/installation
 COPY /resources /kyma/resources
 COPY /kyma-installer /kyma/kyma-installer
 
+RUN echo test_ms
 RUN ls -la /kyma/kyma-installer
 
 ENV IGNORE_TEST_FAIL="true"
