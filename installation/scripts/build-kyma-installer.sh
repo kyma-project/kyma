@@ -5,7 +5,7 @@ set -o errexit
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR=${CURRENT_DIR}/../../
 IMAGE_NAME="$(${CURRENT_DIR}/extract-kyma-installer-image.sh)"
-INSTALLER_VERSION='9da43968'
+BUILD_ARG=""
 
 echo "
 ################################################################################
@@ -25,7 +25,7 @@ do
             shift # past value
             ;;
         --installer-version)
-            INSTALLER_VERSION="$2"
+            BUILD_ARG="--build-arg INSTALLER_VERSION=$2"
             shift
             shift
             ;;
@@ -43,6 +43,6 @@ if [[ "$VM_DRIVER" != "none" ]]; then
     eval $(minikube docker-env --shell bash)
 fi
 
-docker build -t "${IMAGE_NAME}" --build-arg INSTALLER_VERSION="${INSTALLER_VERSION}" -f ./kyma-installer/kyma.Dockerfile .
+docker build -t ${IMAGE_NAME} ${BUILD_ARG} -f ./kyma-installer/kyma.Dockerfile .
 
 popd 
