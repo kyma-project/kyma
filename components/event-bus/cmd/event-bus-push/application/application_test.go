@@ -58,6 +58,10 @@ func stopNats(stanServer *server.StanServer) {
 func TestMain(m *testing.M) {
 
 	stanServer, err := startNats()
+	log.Printf("StanServer %v, error : %v \n", stanServer, err)
+	if err != nil {
+		panic(err)
+	}
 
 	publishOpts := publish.DefaultOptions()
 	println(publishOpts)
@@ -82,24 +86,21 @@ func TestMain(m *testing.M) {
 
 	pushServer = httptest.NewServer(util.Logger(pushApplication.ServerMux))
 
-	if err != nil {
-		panic(err)
-	} else {
-		retCode := m.Run()
+	retCode := m.Run()
 
-		publishServer.Close()
-		publishApplication.Stop()
+	publishServer.Close()
+	publishApplication.Stop()
 
-		pushServer.Close()
-		pushApplication.Stop()
+	pushServer.Close()
+	pushApplication.Stop()
 
-		stopNats(stanServer)
+	stopNats(stanServer)
 
-		subscriberServerV1.Close()
-		subscriberServerV2.Close()
+	subscriberServerV1.Close()
+	subscriberServerV2.Close()
 
-		os.Exit(retCode)
-	}
+	os.Exit(retCode)
+
 }
 
 func Test_Publish_Status(t *testing.T) {
