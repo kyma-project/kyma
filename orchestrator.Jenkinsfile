@@ -46,6 +46,7 @@ projects = [
     "components/ui-api-layer": "ui-api-layer",
     "components/event-bus": "event-bus-publish",
     "components/event-service": "event-service",
+    "components/proxy-service": "proxy-service",
     "tools/alpine-net": "alpine-net",
     "tools/watch-pods": "watch-pods",
     "tools/stability-checker": "stability-checker",
