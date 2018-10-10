@@ -31,7 +31,7 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 
 		expected := gqlschema.Function{
 			Name:   "test",
-			Labels: gqlschema.JSON{},
+			Labels: gqlschema.Labels(nil),
 		}
 
 		svc := automock.NewFunctionLister()

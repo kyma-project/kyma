@@ -16,6 +16,7 @@ import (
 const (
 	// publish request
 	testSourceID                = "test-source-id"
+	testSourceIDInHeader        = "test-source-id-in-header"
 	testEventType               = "test-event-type"
 	testEventTypeVersion        = "v1"
 	testEventTypeVersionInvalid = "#"
@@ -23,6 +24,7 @@ const (
 	testEventTimeInvalid        = "2012-11-01T22"
 	testEventID                 = "4ea567cf-812b-49d9-a4b2-cb5ddf464094"
 	testEventIDInvalid          = "4ea567cf"
+	testSourceIdInvalid         = "invalid/sourceId"
 	testData                    = "{'key':'value'}"
 	testDataEmpty               = ""
 
@@ -63,10 +65,6 @@ func buildTestPublishRequest(sourceID, eventType, eventTypeVersion, eventID, eve
 		SourceID:         sourceID,
 	}
 	return publishRequest
-}
-
-func buildDefaultTestPublishRequest() api.PublishRequest {
-	return buildTestPublishRequest(testSourceID, testEventType, testEventTypeVersion, testEventID, testEventTime, testData)
 }
 
 func buildDefaultTestSubjectAndPayload() (string, string) {
@@ -112,7 +110,7 @@ func buildDefaultTestBadPayload() string {
 	return payload
 }
 
-func buildDefaultTestPayloadWithoutSource() string {
+func buildDefaultTestPayloadWithoutSourceId() string {
 	builder := new(eventBuilder).
 		build(eventTypeFormat, testEventType).
 		build(eventTypeVersionFormat, testEventTypeVersion).
@@ -199,6 +197,30 @@ func performPublishRequest(t *testing.T, publishURL string, payload string) ([]b
 	return body, res.StatusCode
 }
 
+func performPublishRequestWithHeaders(t *testing.T, publishURL string, payload string, headers map[string]string) ([]byte, int) {
+	req, _ := http.NewRequest("POST", publishURL+"/v1/events", strings.NewReader(payload))
+
+	req.Header.Set("Content-Type", "application/json")
+
+	for header, value := range headers {
+		req.Header.Set(header, value)
+	}
+
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return body, res.StatusCode
+}
+
 func verifyReceivedMsg(t *testing.T, a string, b []byte) {
 	var bReq api.PublishRequest
 	err := json.Unmarshal(b, &bReq)
@@ -211,11 +233,13 @@ func verifyReceivedMsg(t *testing.T, a string, b []byte) {
 		t.Error(err)
 	}
 	assert.Equal(t, aReq.EventID, bReq.EventID)
+	assert.Equal(t, aReq.SourceID, bReq.SourceID)
 }
 
 func assertExpectedError(t *testing.T, body []byte, actualStatusCode int, expectedStatusCode int, errorField interface{}, errorType interface{}) {
 	var responseError api.Error
 	err := json.Unmarshal(body, &responseError)
+	assert.Equal(t, actualStatusCode, expectedStatusCode)
 	assert.Nil(t, err)
 	if errorType != nil {
 		assert.Equal(t, errorType, responseError.Type)

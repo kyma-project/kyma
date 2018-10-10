@@ -15,13 +15,16 @@ const (
 	a missing field when a value is expected.
 	*/
 	ErrorTypeMissingField = "missing_field"
+
+	ErrorTypeMissingFieldOrHeader = "missing_field/missing_header"
 	/*ErrorTypeInvalidField Sub-level error type of `ErrorTypeValidationViolation` representaing that the requested body
 	payload for the POST or PUT operation violates the validation constraints.
 	This denotes specifically that there is:
 	- A type incompatibility, such as a field modeled to be an integer, but a non-numeric expression was found instead.
 	- A range under or over flow validation violation cause.
 	*/
-	ErrorTypeInvalidField = "invalid_field"
+	ErrorTypeInvalidField  = "invalid_field"
+	ErrorTypeInvalidHeader = "invalid_header"
 	// ErrorTypeInternalServerError Some unexpected internal error occurred while processing the request.
 	ErrorTypeInternalServerError = "internal_server_error"
 	// ErrorMessageInternalServerError represents the error message for `ErrorTypeInternalServerError`
@@ -38,6 +41,8 @@ const (
 	ErrorMessageMissingField = "We need all required fields complete to keep you moving."
 	// ErrorMessageInvalidField represents the error message for `ErrorTypeInvalidField`
 	ErrorMessageInvalidField = "We need all your entries to be correct to keep you moving."
+
+	ErrorMessageMissingSourceId = "Either provide 'Source-Id' header or specify 'source-id' in the json payload"
 )
 
 // ErrorDetail represents error cause
@@ -107,7 +112,16 @@ func ErrorResponseEmptyRequest() (response *Error) {
 }
 
 func ErrorResponseMissingFieldSourceId() (response *Error) {
-	return createMissingFieldError(FieldSourceId)
+	apiErrorDetail := ErrorDetail{
+		Field:    FieldSourceId + "/" + HeaderSourceId,
+		Type:     ErrorTypeMissingFieldOrHeader,
+		Message:  ErrorMessageMissingSourceId,
+		MoreInfo: "",
+	}
+	details := []ErrorDetail{apiErrorDetail}
+	apiError := Error{Status: http.StatusBadRequest, Type: ErrorTypeValidationViolation, Message: ErrorMessageMissingSourceId, MoreInfo: "", Details: details}
+
+	return &apiError
 }
 
 func ErrorResponseMissingFieldData() (response *Error) {
@@ -142,6 +156,13 @@ func ErrorResponseWrongEventId() (response *Error) {
 	return createInvalidFieldError(FieldEventId)
 }
 
+func ErrorResponseWrongSourceId(sourceIdFromHeader bool) (response *Error) {
+	if sourceIdFromHeader {
+		return createInvalidFieldErrorWithType(HeaderSourceId, ErrorTypeInvalidHeader)
+	}
+	return createInvalidFieldError(FieldSourceId)
+}
+
 func createMissingFieldError(field interface{}) (response *Error) {
 	apiErrorDetail := ErrorDetail{
 		Field:    field.(string),
@@ -155,9 +176,13 @@ func createMissingFieldError(field interface{}) (response *Error) {
 }
 
 func createInvalidFieldError(field interface{}) (response *Error) {
+	return createInvalidFieldErrorWithType(field, ErrorTypeInvalidField)
+}
+
+func createInvalidFieldErrorWithType(field interface{}, errorType string) (response *Error) {
 	apiErrorDetail := ErrorDetail{
 		Field:    field.(string),
-		Type:     ErrorTypeInvalidField,
+		Type:     errorType,
 		Message:  ErrorMessageInvalidField,
 		MoreInfo: "",
 	}
