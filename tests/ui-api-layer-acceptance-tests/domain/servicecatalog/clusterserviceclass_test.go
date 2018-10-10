@@ -40,11 +40,11 @@ type ClusterServiceClass struct {
 	content             map[string]interface{}
 }
 
-type classesQueryResponse struct {
+type clusterServiceClassesQueryResponse struct {
 	ClusterServiceClasses []ClusterServiceClass
 }
 
-type classQueryResponse struct {
+type clusterServiceClassQueryResponse struct {
 	ClusterServiceClass ClusterServiceClass
 }
 
@@ -56,7 +56,7 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
-	expectedResource := class()
+	expectedResource := clusterServiceClass()
 	resourceDetailsQuery := `
 		name
 		externalName
@@ -89,16 +89,16 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 			}	
 		`, resourceDetailsQuery)
 
-		var res classesQueryResponse
+		var res clusterServiceClassesQueryResponse
 		err = c.DoQuery(query, &res)
 
 		require.NoError(t, err)
-		assertClassExistsAndEqual(t, res.ClusterServiceClasses, expectedResource)
+		assertClusterClassExistsAndEqual(t, res.ClusterServiceClasses, expectedResource)
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
 		query := fmt.Sprintf(`
-			query($name: String!) {
+			query ($name: String!) {
 				clusterServiceClass(name: $name) {
 					%s
 				}
@@ -107,35 +107,42 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 		req := graphql.NewRequest(query)
 		req.SetVar("name", expectedResource.Name)
 
-		var res classQueryResponse
+		var res clusterServiceClassQueryResponse
 		err = c.Do(req, &res)
 
 		require.NoError(t, err)
-		checkClass(t, expectedResource, res.ClusterServiceClass)
+		checkClusterClass(t, expectedResource, res.ClusterServiceClass)
 	})
-
 }
 
-func checkClass(t *testing.T, expected, actual ClusterServiceClass) {
+func checkClusterClass(t *testing.T, expected, actual ClusterServiceClass) {
+	// Name
 	assert.Equal(t, expected.Name, actual.Name)
+
+	// ExternalName
 	assert.Equal(t, expected.ExternalName, actual.ExternalName)
 
 	// Plans
 	require.NotEmpty(t, actual.Plans)
-	assertPlanExistsAndEqual(t, actual.Plans, expected.Plans[0])
+	assertClusterPlanExistsAndEqual(t, actual.Plans, expected.Plans[0])
 }
 
-func checkPlan(t *testing.T, expected, actual ClusterServicePlan) {
+func checkClusterPlan(t *testing.T, expected, actual ClusterServicePlan) {
+	// Name
 	assert.Equal(t, expected.Name, actual.Name)
+
+	// ExternalName
 	assert.Equal(t, expected.ExternalName, actual.ExternalName)
+
+	// RelatedClusterServiceClassName
 	assert.Equal(t, expected.RelatedClusterServiceClassName, actual.RelatedClusterServiceClassName)
 }
 
-func assertClassExistsAndEqual(t *testing.T, arr []ClusterServiceClass, expectedElement ClusterServiceClass) {
+func assertClusterClassExistsAndEqual(t *testing.T, arr []ClusterServiceClass, expectedElement ClusterServiceClass) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
-				checkClass(t, expectedElement, v)
+				checkClusterClass(t, expectedElement, v)
 				return true
 			}
 		}
@@ -144,11 +151,11 @@ func assertClassExistsAndEqual(t *testing.T, arr []ClusterServiceClass, expected
 	}, "Resource does not exist")
 }
 
-func assertPlanExistsAndEqual(t *testing.T, arr []ClusterServicePlan, expectedElement ClusterServicePlan) {
+func assertClusterPlanExistsAndEqual(t *testing.T, arr []ClusterServicePlan, expectedElement ClusterServicePlan) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
-				checkPlan(t, expectedElement, v)
+				checkClusterPlan(t, expectedElement, v)
 				return true
 			}
 		}
@@ -157,7 +164,7 @@ func assertPlanExistsAndEqual(t *testing.T, arr []ClusterServicePlan, expectedEl
 	}, "Resource does not exist")
 }
 
-func class() ClusterServiceClass {
+func clusterServiceClass() ClusterServiceClass {
 	return ClusterServiceClass{
 		Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
 		ExternalName: "user-provided-service",

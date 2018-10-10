@@ -26,7 +26,7 @@ scripts/manage-component.sh azure-broker false
 
 ## Install subcomponents on a cluster
 
-Install subcomponents on a cluster based on Helm conditions described in the `requirements.yaml` file. Read more about the fields in the `requirements.yaml` file [here](https://github.com/helm/helm/blob/master/docs/charts.md#tags-and-condition-fields-in-requirementsyaml).
+Install subcomponents on a cluster based on Helm conditions described in the `requirements.yaml` file. Read more about the fields in the `requirements.yaml` file [here](https://github.com/helm/helm/blob/release-2.10/docs/charts.md#tags-and-condition-fields-in-requirementsyaml).
 
 To specify whether to install a given core subcomponent, provide override values before you trigger the installation.
 

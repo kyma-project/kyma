@@ -6,4 +6,5 @@ type ServiceBinding struct {
 	Environment         string
 	SecretName          string
 	Status              ServiceBindingStatus
+	Parameters          JSON
 }

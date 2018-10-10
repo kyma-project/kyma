@@ -6,6 +6,7 @@ containerRegistry:
   path: eu.gcr.io/kyma-project
 
 image:
+  tag: 8b5d53d3
   # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 

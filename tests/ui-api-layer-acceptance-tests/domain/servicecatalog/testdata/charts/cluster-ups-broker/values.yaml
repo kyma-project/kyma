@@ -1,0 +1,13 @@
+# Default values for User-Provided Service Broker
+# Image to use
+image: quay.io/kubernetes-service-catalog/user-broker:v0.1.20
+# ImagePullPolicy; valid values are "IfNotPresent", "Never", and "Always"
+imagePullPolicy: Always
+# Whether the broker should also log to stderr instead of to files only
+alsoLogToStdErr: true
+# Certificate details to use for TLS. Leave blank to not use TLS
+tls:
+  # base-64 encoded PEM data for the TLS certificate
+  cert:
+  # base-64 encoded PEM data for the private key matching the certificate
+  key:

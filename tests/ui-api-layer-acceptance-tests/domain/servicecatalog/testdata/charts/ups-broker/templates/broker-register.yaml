@@ -1,5 +1,5 @@
 apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ClusterServiceBroker
+kind: ServiceBroker
 metadata:
   name: {{ .Release.Name }}
 spec:
