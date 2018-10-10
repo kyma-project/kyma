@@ -86,7 +86,7 @@ global:
     version: d9e91df2
   remote_environment_controller:
     dir: develop/
-    version: 4ea83ddd
+    version: b93a91c9
   remote_environment_controller_tests:
     dir: develop/
     version: 4ea83ddd
