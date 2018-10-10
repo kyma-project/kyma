@@ -50,8 +50,12 @@ podTemplate(label: label) {
                             + "./...")
                         }
 
-                        stage("build and test - event-bus-publish") {
-                            execute("/cmd/event-bus-publish", "make clean build")
+                        stage("test - event-bus") {
+                            execute("/", "make test")
+                        }
+
+                        stage("build - event-bus-publish") {
+                            execute("/cmd/event-bus-publish", "make clean compile")
                         }
 
                         stage("build image - event-bus-publish") {
@@ -60,8 +64,8 @@ podTemplate(label: label) {
                             }
                         }
 
-                        stage("build and test - event-bus-push") {
-                            execute("/cmd/event-bus-push", "make clean build")
+                        stage("build - event-bus-push") {
+                            execute("/cmd/event-bus-push", "make clean compile")
                         }
 
                         stage("build image - event-bus-push") {
@@ -70,8 +74,8 @@ podTemplate(label: label) {
                             }
                         }
 
-                        stage("build and test - event-bus-sub-validator") {
-                            execute("/cmd/event-bus-sv", "make clean build")
+                        stage("build - event-bus-sub-validator") {
+                            execute("/cmd/event-bus-sv", "make clean compile")
                         }
 
                         stage("build image - event-bus-sub-validator") {
