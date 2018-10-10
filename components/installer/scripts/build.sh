@@ -22,11 +22,6 @@ echo "Running go build"
 export GOOS=linux && go build -o installer ${ROOT_DIR}/cmd/operator/main.go
 
 echo "Building docker image"
-rm -rf kyma
-mkdir kyma
-cp -r ${KYMA_PATH}/resources kyma
-cp -r ${KYMA_PATH}/installation kyma
-
 eval $(minikube docker-env --shell bash)
 docker build -t ${IMAGE_NAME} -f deploy/installer/Dockerfile .
 
