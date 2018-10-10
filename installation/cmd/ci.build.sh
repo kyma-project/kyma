@@ -15,6 +15,10 @@ HELM_VERSION=2.10.0
 
 pushd $ROOT_DIR
 
+echo test_ms
+ls -la kyma-installer
+
+
 docker build -t ${FINAL_IMAGE} \
     -f ${DOCKERFILE} \
     --build-arg KUBECTL_CLI_VERSION=${KUBECTL_CLI_VERSION} \
