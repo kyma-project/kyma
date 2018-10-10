@@ -75,14 +75,12 @@ This table lists all the possible parameters of a given resource together with t
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
-| **spec.source** |    **NO**   | Identifies the Remote Environment in the cluster. |
-| **spec.description** |    **NO**   | Describes the connected Remote Environment.  |
 | **spec.accessLabel** |    **NO**   | Labels the RE when an EnvironmentMapping is created. |
 | **spec.labels** |    **NO**   | Defines the labels of the RE. |
 | **spec.services** |    **NO**   | Contains all services that the Remote Environment provides. |
-| **spec.services.id** |    **YES**   | Identifies the service that the Remote Environment provides. |
-| **spec.services.identifier** |    **NO**   | Provides an additional identifier of the ServiceClass. |
-| **spec.services.name** |    **NO**   | Represents a unique name of the service used by the Service Catalog. |
+| **spec.services.id** |    **YES**   | Identifies the service that the Remote Environment provides. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
+| **spec.services.identifier** |    **NO**   | Provides an additional identifier of the ServiceClass. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
+| **spec.services.name** |    **NO**   | Represents a unique name of the service used by the Service Catalog. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
 | **spec.services.displayName** |    **YES**   | Specifies a human-readable name of the Remote Environment service. Parameter provider by the Metadata Service, do not edit. |
 | **spec.services.description** |    **NO**   | Provides a short, human-readable description of the service offered by the RE. Parameter provider by the Metadata Service, do not edit. |
 | **spec.services.longDescription** |    **NO**   | Provides a longer, human-readable description of the service offered by the RE. Parameter provider by the Metadata Service, do not edit. |
@@ -92,7 +90,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.services.entries** |    **YES**   | Contains the information about the APIs and Events that the service offered by the RE provides. Parameter provider by the Metadata Service, do not edit. |
 | **spec.services.entries.type** |    **YES**   | Specify the entry type: API or Event. Parameter provider by the Metadata Service, do not edit. |
 | **spec.services.entries.gatewayUrl** |    **NO**   | Specifies the URL of the Application Connector. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.entries.accessLabel** |    **NO**   | Specifies the label used in Istio rules in the Application Connector. This field is required for the API entry type. |
+| **spec.services.entries.accessLabel** |    **NO**   | Specifies the label used in Istio rules in the Application Connector. This field is required for the API entry type. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
 | **spec.services.entries.targetUrl** |    **NO**   | Specifies the URL to a given API. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
 | **spec.services.entries.oauthUrl** |    **NO**   | Specifies the URL used to authorize with a given API. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
 | **spec.services.entries.credentialsSecretName** |    **NO**   | Specifies the name of the Secret which allows you to a call to a given API. This field is required if the **spec.services.entries.oauthUrl** is specified. Parameter provider by the Metadata Service, do not edit. |
