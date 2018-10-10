@@ -66,8 +66,6 @@ data:
 
   delete: |
     deployment prometheus
-    clusterrole prometheus-istio
-    clusterrolebinding prometheus-istio
     configmap prometheus
     service prometheus
     serviceaccount prometheus
