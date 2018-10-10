@@ -3,7 +3,7 @@ title: Application Connector components
 type: Architecture
 ---
 
-![Architecture Diagram](assets/001-application-connector.png)
+![Architecture Diagram](assets/001-application-connector.svg)
 
 
 ## Nginx Ingress Controller
