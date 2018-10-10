@@ -41,11 +41,17 @@ func deleteNamespace(namespace string) {
 	for {
 		select {
 		case <-timeout:
+			cmd := exec.Command("kubectl", "get", "ns", namespace, "-o yaml")
+			stdoutStderr, err := cmd.CombinedOutput()
+			log.Printf("Check for finalizers in namespace, %s, to be deleted Output: %s\n Error: %v\n ", namespace, string(stdoutStderr), err)
 			log.Fatal("Timed out waiting for namespace ", namespace, " to be deleted\n")
 		case <-tick:
 			cmd := exec.Command("kubectl", "delete", "ns", namespace, "--grace-period=0", "--force")
 			stdoutStderr, err := cmd.CombinedOutput()
 
+			if err != nil {
+				log.Printf("Error waiting for namespace, %s, to be deleted\n Output: %s", namespace, string(stdoutStderr))
+			}
 			if err != nil && strings.Contains(string(stdoutStderr), "NotFound") {
 				return
 			}
