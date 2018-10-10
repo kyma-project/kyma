@@ -99,23 +99,14 @@ func (l Loader) loadDir(path string) (*internal.Bundle, []*chart.Chart, error) {
 }
 
 func (l Loader) loadChartFromDir(baseDir string) (*chart.Chart, error) {
-	cDir := filepath.Join(baseDir, bundleChartDirName)
-	files, err := ioutil.ReadDir(cDir)
-	switch {
-	case err == nil:
-	case os.IsNotExist(err):
-		return nil, errors.New("bundle does not contains \"chart\" directory")
-	default:
-		return nil, errors.Wrapf(err, "while reading directory %s", cDir)
-	}
-
-	if len(files) != 1 || !files[0].IsDir() {
-		return nil, fmt.Errorf("%q directory MUST contain one folder", bundleChartDirName)
-	}
-
 	// In current version we have only one chart per bundle
 	// in future version we will have some loop over each plan to load all charts
-	c, err := l.loadChart(filepath.Join(cDir, files[0].Name()))
+	chartPath, err := l.discoverPathToHelmChart(baseDir)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while discovering the name of the Helm Chart under the %q bundle directory", bundleChartDirName)
+	}
+
+	c, err := l.loadChart(chartPath)
 	switch {
 	case err == nil:
 	case os.IsNotExist(err):
@@ -125,6 +116,51 @@ func (l Loader) loadChartFromDir(baseDir string) (*chart.Chart, error) {
 	}
 
 	return c, nil
+}
+
+// discoverPathToHelmChart returns the full path to the Helm Chart directory from `bundleChartDirName` folder
+//
+// - if more that one directory is found then error is returned
+// - if additional files are found under the `bundleChartDirName` directory then
+//   they are ignored but logged as warning to improve transparency.
+func (l Loader) discoverPathToHelmChart(baseDir string) (string, error) {
+	cDir := filepath.Join(baseDir, bundleChartDirName)
+	rawFiles, err := ioutil.ReadDir(cDir)
+	switch {
+	case err == nil:
+	case os.IsNotExist(err):
+		return "", errors.Errorf("bundle does not contains %q directory", bundleChartDirName)
+	default:
+		return "", errors.Wrapf(err, "while reading directory %s", cDir)
+	}
+
+	directories, files := splitForDirectoriesAndFiles(rawFiles)
+	if len(directories) == 0 {
+		return "", fmt.Errorf("%q directory SHOULD contain one Helm Chart folder but it's empty", bundleChartDirName)
+	}
+
+	if len(directories) > 1 {
+		return "", fmt.Errorf("%q directory MUST contain only one Helm Chart folder but found multiple directories: [%s]", bundleChartDirName, strings.Join(directories, ", "))
+	}
+
+	if len(files) != 0 { // ignoring by design
+		l.log.Warningf("Found files: [%s] in %q bundle directory. All are ignored.", strings.Join(files, ", "), bundleChartDirName)
+	}
+
+	chartFullPath := filepath.Join(cDir, directories[0])
+	return chartFullPath, nil
+}
+
+func splitForDirectoriesAndFiles(rawFiles []os.FileInfo) (dirs []string, files []string) {
+	for _, f := range rawFiles {
+		if f.IsDir() {
+			dirs = append(dirs, f.Name())
+		} else {
+			files = append(files, f.Name())
+		}
+	}
+
+	return dirs, files
 }
 
 func (l Loader) createFormFromBundleDir(baseDir string) (*form, error) {
