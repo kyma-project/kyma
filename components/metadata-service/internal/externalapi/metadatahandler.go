@@ -35,7 +35,7 @@ func (mh *metadataHandler) CreateService(w http.ResponseWriter, r *http.Request)
 
 	serviceDefinition, apperr := mh.prepareServiceDefinition(r.Body)
 	if apperr != nil {
-		contextLogger.Errorf("Preparing new service failed, %s", apperr.Error())
+		contextLogger.Errorf("Creating new service failed, %s", apperr.Error())
 		mh.handleErrors(w, apperr)
 		return
 	}
