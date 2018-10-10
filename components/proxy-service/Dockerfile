@@ -14,6 +14,6 @@ RUN apk update && apk add curl ngrep
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
-COPY --from=builder /go/src/github.com/kyma-project/kyma/components/proxyservice .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/components/proxy-service .
 
 CMD ["/proxyservice"]
