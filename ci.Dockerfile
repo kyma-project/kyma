@@ -45,7 +45,9 @@ RUN chmod +x  /tmp/linux-amd64/helm && sudo mv /tmp/linux-amd64/helm /usr/local/
 # Copying into the container all the necessary files like scripts and resources definition
 RUN mkdir /kyma
 
-COPY . /kyma
+COPY /installation /kyma/installation
+COPY /resources /kyma/resources
+COPY /kyma-installer /kyma/kyma-installer
 
 ENV IGNORE_TEST_FAIL="true"
 ENV RUN_TESTS="true"
