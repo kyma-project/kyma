@@ -104,18 +104,18 @@ function checkMinikubeVersion() {
 
 function checkKubectlVersion() {
     local currentVersion=$(kubectl version --client --short | awk '{print $3}')
-    local currentVersionMajor=$(echo $currentVersion | grep -o '[0-9]\+' | sed -n '1p')
-    local currentVersionMinor=$(echo $currentVersion | grep -o '[0-9]\+' | sed -n '2p')
-    local versionMajor=$(echo $KUBECTL_CLI_VERSION | cut -d"." -f1)
-    local versionMinor=$(echo $KUBECTL_CLI_VERSION | cut -d"." -f2)
+    local currentVersionMajor=$(echo ${currentVersion} | grep -o '[0-9]\+' | sed -n '1p')
+    local currentVersionMinor=$(echo ${currentVersion} | grep -o '[0-9]\+' | sed -n '2p')
+    local versionMajor=$(echo ${KUBECTL_CLI_VERSION} | cut -d"." -f1)
+    local versionMinor=$(echo ${KUBECTL_CLI_VERSION} | cut -d"." -f2)
     local versionMinorDifference=$(( versionMinor - currentVersionMinor ))
 
-    if [[ $versionMinorDifference -gt 1 ]] || [[ $versionMinorDifference -lt -1 ]]; then
-        echo "Your kubectl version is $currentVersion. Supported versions of kubectl are from ${versionMajor}.$(( $versionMinor - 1 )).* to ${versionMajor}.$(( $versionMinor + 1 )).*"        
+    if [[ ${versionMinorDifference} -gt 1 ]] || [[ ${versionMinorDifference} -lt -1 ]]; then
+        echo "Your kubectl version is ${currentVersion}. Supported versions of kubectl are from ${versionMajor}.$(( ${versionMinor} - 1 )).* to ${versionMajor}.$(( ${versionMinor} + 1 )).*"
     fi
 
-    if [[ $versionMajor -ne $currentVersionMajor ]]; then
-        echo "Your kubectl version is $currentVersion. Supported versions of kubectl are from ${versionMajor}.$(( $versionMinor - 1 )).* to ${versionMajor}.$(( $versionMinor + 1 )).*"        
+    if [[ ${versionMajor} -ne ${currentVersionMajor} ]]; then
+        echo "Your kubectl version is ${currentVersion}. Supported versions of kubectl are from ${versionMajor}.$(( ${versionMinor} - 1 )).* to ${versionMajor}.$(( ${versionMinor} + 1 )).*"
     fi
 }
 
