@@ -93,9 +93,8 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("Create", "re", serviceDefinition).Return("1", nil)
-		detailedErrorResponse := false
 
-		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
+		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, false)
 
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
