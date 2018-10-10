@@ -40,7 +40,6 @@ projects = [
     "components/remote-environment-broker": "remote-environment-broker",
     "components/remote-environment-controller": "remote-environment-controller",
     "components/metadata-service": "metadata-service",
-    "components/gateway": "gateway",
     "components/installer": "installer",
     "components/connector-service": "connector-service",
     "components/ui-api-layer": "ui-api-layer",
