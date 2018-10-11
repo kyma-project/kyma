@@ -104,10 +104,10 @@ global:
     version: 6e0a7fe2
   ui_api_layer:
     dir: develop/
-    version: 8b5d53d3
+    version: b58068ee
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: 7ef8becb
+    version: b58068ee
 
 test:
   auth:
