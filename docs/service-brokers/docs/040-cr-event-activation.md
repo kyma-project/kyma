@@ -29,7 +29,7 @@ spec:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 
-| Parameter   |      Mandatory      |  Description |
+| Parameter   |      Mandatory?      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR and the ID of the Remote Environment service. This field is also used to fetch Event schemas from the Minio storage.  |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is created. |
@@ -51,4 +51,5 @@ These components use this CR:
 |:----------:|:------|
 | Remote Environment Broker |  Uses this CR to enable the user to receive Events from a given service. |
 | Event Bus | Uses this CR to control the consumption of an Event.  |
+| Serverless | Lambda UI sends a GraphQL query to ui-api-layer to list EventActivations. |
 | ui-api-layer |  Exposes the given CR to the Console UI. |
