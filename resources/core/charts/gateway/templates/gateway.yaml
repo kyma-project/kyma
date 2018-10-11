@@ -17,3 +17,11 @@ spec:
       privateKey: /etc/istio/ingressgateway-certs/tls.key
     hosts:
     - "*.{{.Values.global.domainName}}"
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    tls:
+      httpsRedirect: true # automatic 301 redirect from http to https
+    hosts:
+    - "console.{{.Values.global.domainName}}"
