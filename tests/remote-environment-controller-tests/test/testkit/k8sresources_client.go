@@ -18,7 +18,7 @@ type K8sResourcesClient interface {
 	GetIngress(name string, options v1.GetOptions) (*v1extensions.Ingress, error)
 	GetRole(name string, options v1.GetOptions) (*v1rbac.Role, error)
 	GetRoleBinding(name string, options v1.GetOptions) (*v1rbac.RoleBinding, error)
-	CreateDummyRemoteEnvironment(name string) (*v1alpha1.RemoteEnvironment, error)
+	CreateDummyRemoteEnvironment(name string, accessLabel string) (*v1alpha1.RemoteEnvironment, error)
 	DeleteRemoteEnvironment(name string, options *v1.DeleteOptions) error
 	GetRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error)
 }
@@ -76,12 +76,13 @@ func (c *k8sResourcesClient) GetService(name string, options v1.GetOptions) (*v1
 	return c.coreClient.CoreV1().Services(c.namespace).Get(name, options)
 }
 
-func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string) (*v1alpha1.RemoteEnvironment, error) {
+func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, accessLabel string) (*v1alpha1.RemoteEnvironment, error) {
 	dummyRe := &v1alpha1.RemoteEnvironment{
 		TypeMeta:   v1.TypeMeta{Kind: "RemoteEnvironment", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: name, Namespace: c.namespace},
 		Spec: v1alpha1.RemoteEnvironmentSpec{
 			Services: []v1alpha1.Service{},
+			AccessLabel: accessLabel,
 		},
 	}
 
