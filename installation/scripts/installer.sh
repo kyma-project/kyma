@@ -3,6 +3,7 @@
 set -o errexit
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+LOCAL=0
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
