@@ -46,12 +46,10 @@ type (
 func New(
 	slack slackClient,
 	testRenderer testRenderer,
-	summarizer summarizer,
 	cfgMapClient configMapClient,
 	cfgMapName string,
 	resultWindowTime time.Duration,
 	testRunnerPodName, testRunnerNamespace string,
-	showTestStats bool,
 	log logrus.FieldLogger) *SlackNotifier {
 
 	return &SlackNotifier{
@@ -61,10 +59,9 @@ func New(
 		testResultWindowTime: resultWindowTime,
 		slack:                slack,
 		testRenderer:         testRenderer,
-		summarizer:           summarizer,
 		testRunnerPodName:    testRunnerPodName,
 		testRunnerNamespace:  testRunnerNamespace,
-		showTestStats:        showTestStats,
+		showTestStats:        false,
 	}
 }
 
@@ -178,6 +175,12 @@ func (s *SlackNotifier) filterFailingTests(testStatuses []internal.ExecutionStat
 		}
 	}
 	return
+}
+
+// WithSummarizer enables summarizer functionality for Slack Notifier
+func (s *SlackNotifier) WithSummarizer(summarizer *summary.Service) {
+	s.showTestStats = true
+	s.summarizer = summarizer
 }
 
 func color(failed []internal.ExecutionStatus) string {

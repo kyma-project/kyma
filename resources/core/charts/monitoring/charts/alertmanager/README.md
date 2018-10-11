@@ -1,4 +1,4 @@
-### Alertmanager
+# Alertmanager
 
 This chart contains a part of the configuration related to the Alertmanager.
 

@@ -180,6 +180,14 @@ components:
           type: 'string'
         description:
           type: 'string'
+        shortDescription:
+          type: 'string'
+        identifier:
+          type: 'string'
+        labels:
+          type: 'object'
+          additionalProperties:
+            type: 'string'
         api:
           $ref: '#/components/schemas/Api'
         events:
@@ -202,6 +210,12 @@ components:
           type: 'string'
         description:
           type: 'string'
+        identifier:
+          type: 'string'
+        labels:
+          type: 'object'
+          additionalProperties:
+            type: 'string'
     Api:
       type: 'object'
       properties:
@@ -219,7 +233,7 @@ components:
       type: 'object'
       properties:
         spec:
-          description: 'AsynApi file v1: https://github.com/asyncapi/asyncapi/blob/develop/schema/asyncapi.json'
+          description: 'AsyncApi file v1: https://github.com/asyncapi/asyncapi/blob/develop/schema/asyncapi.json'
           type: 'object'
     Documentation:
       type: 'object'

@@ -84,10 +84,11 @@ affinity: {}
 ##
 resources:
   requests:
-    memory: 256Mi
-    cpu: 250m
+    memory: 32Mi
+    cpu: 10m
   limits:
-    memory: 512Mi
+    memory: 64Mi
+    cpu: 100m
 
 
 ## Create a bucket after minio install

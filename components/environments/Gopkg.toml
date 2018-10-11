@@ -17,3 +17,7 @@ required = [
 [[override]]
   name = "k8s.io/apimachinery"
   version = "kubernetes-1.10.1"
+
+[prune]
+  go-tests = true
+  unused-packages = true

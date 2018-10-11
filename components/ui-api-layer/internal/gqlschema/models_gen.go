@@ -23,8 +23,9 @@ type AuthenticationPolicy struct {
 }
 
 type BindableResourcesOutputItem struct {
-	Kind      string              `json:"kind"`
-	Resources []UsageKindResource `json:"resources"`
+	Kind        string              `json:"kind"`
+	DisplayName string              `json:"displayName"`
+	Resources   []UsageKindResource `json:"resources"`
 }
 
 type ClusterServiceBroker struct {
@@ -32,7 +33,7 @@ type ClusterServiceBroker struct {
 	Status            ServiceBrokerStatus `json:"status"`
 	CreationTimestamp time.Time           `json:"creationTimestamp"`
 	URL               string              `json:"url"`
-	Labels            JSON                `json:"labels"`
+	Labels            Labels              `json:"labels"`
 }
 
 type ClusterServiceBrokerEvent struct {
@@ -65,11 +66,15 @@ type CreateServiceBindingOutput struct {
 }
 
 type CreateServiceBindingUsageInput struct {
-	Name              string                              `json:"name"`
+	Name              *string                             `json:"name"`
 	Environment       string                              `json:"environment"`
 	ServiceBindingRef ServiceBindingRefInput              `json:"serviceBindingRef"`
 	UsedBy            LocalObjectReferenceInput           `json:"usedBy"`
 	Parameters        *ServiceBindingUsageParametersInput `json:"parameters"`
+}
+
+type DeleteRemoteEnvironmentOutput struct {
+	Name string `json:"name"`
 }
 
 type DeleteServiceBindingOutput struct {
@@ -87,7 +92,7 @@ type Deployment struct {
 	Environment               string           `json:"environment"`
 	CreationTimestamp         time.Time        `json:"creationTimestamp"`
 	Status                    DeploymentStatus `json:"status"`
-	Labels                    JSON             `json:"labels"`
+	Labels                    Labels           `json:"labels"`
 	Containers                []Container      `json:"containers"`
 	BoundServiceInstanceNames []string         `json:"boundServiceInstanceNames"`
 }
@@ -143,7 +148,7 @@ type Function struct {
 	Name              string    `json:"name"`
 	Trigger           string    `json:"trigger"`
 	CreationTimestamp time.Time `json:"creationTimestamp"`
-	Labels            JSON      `json:"labels"`
+	Labels            Labels    `json:"labels"`
 	Environment       string    `json:"environment"`
 }
 
@@ -184,6 +189,12 @@ type RemoteEnvironmentEntry struct {
 	Type        string  `json:"type"`
 	GatewayURL  *string `json:"gatewayUrl"`
 	AccessLabel *string `json:"accessLabel"`
+}
+
+type RemoteEnvironmentMutationOutput struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Labels      Labels `json:"labels"`
 }
 
 type RemoteEnvironmentService struct {
@@ -263,8 +274,8 @@ type ServiceBindingUsageStatus struct {
 }
 
 type ServiceBindings struct {
-	ServiceBindings []ServiceBinding     `json:"serviceBindings"`
-	Stats           ServiceBindingsStats `json:"stats"`
+	Items []ServiceBinding     `json:"items"`
+	Stats ServiceBindingsStats `json:"stats"`
 }
 
 type ServiceBindingsStats struct {
@@ -280,7 +291,7 @@ type ServiceBroker struct {
 	Status            ServiceBrokerStatus `json:"status"`
 	CreationTimestamp time.Time           `json:"creationTimestamp"`
 	URL               string              `json:"url"`
-	Labels            JSON                `json:"labels"`
+	Labels            Labels              `json:"labels"`
 }
 
 type ServiceBrokerEvent struct {
@@ -333,6 +344,7 @@ type ServicePlan struct {
 	Description                   string  `json:"description"`
 	RelatedServiceClassName       string  `json:"relatedServiceClassName"`
 	InstanceCreateParameterSchema *JSON   `json:"instanceCreateParameterSchema"`
+	BindingCreateParameterSchema  *JSON   `json:"bindingCreateParameterSchema"`
 }
 
 type UsageKind struct {

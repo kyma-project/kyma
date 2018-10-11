@@ -88,7 +88,7 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	instanceName := "binding-test-instance"
-	instance := instance(instanceName)
+	instance := instanceFromClusterServiceClass(instanceName)
 
 	bindingName := "test-binding"
 	binding := binding(bindingName, instanceName)
@@ -100,7 +100,7 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	defer subscription.Close()
 
 	t.Log("Create Instance")
-	_, err = createInstance(c, "name", instance)
+	_, err = createInstance(c, "name", instance, true)
 	require.NoError(t, err)
 
 	waitForInstanceReady(instance.Name, instance.Environment, svcatCli)
@@ -129,22 +129,32 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	instanceRes, err := querySingleInstance(c, `
 		name
 		serviceBindings {
-			name
-			serviceInstanceName
-			environment
-			secret {
+			items {
 				name
+				serviceInstanceName
 				environment
-				data
+				secret {
+					name
+					environment
+					data
+				}
+				status {
+					type
+				}
 			}
-			status {
-				type
+			stats {	
+				ready
+				failed
+				pending
+				unknown
 			}
 		}
 	`, instance)
 
 	assert.NoError(t, err)
-	assertBindingExistsAndEqual(t, binding, instanceRes.ServiceInstance.ServiceBindings)
+	assertBindingExistsAndEqual(t, binding, instanceRes.ServiceInstance.ServiceBindings.Items)
+	stats := instanceRes.ServiceInstance.ServiceBindings.Stats
+	assert.Equal(t, 1, stats.Ready+stats.Pending+stats.Failed+stats.Unknown, instanceRes.ServiceInstance.ServiceBindings)
 
 	t.Log("Delete Binding")
 	deleteRes, err := deleteBinding(c, deleteBindingOutput)

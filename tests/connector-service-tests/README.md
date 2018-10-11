@@ -1,4 +1,4 @@
-# Connector service acceptance tests
+# Connector Service Acceptance Tests
 
 ## Overview
 
@@ -35,7 +35,6 @@ PASSED: test-ec-default-acceptance
 $ kubectl get po --show-all
 NAME                                  READY     STATUS      RESTARTS   AGE
 ec-default-gateway-5dffff49f-drr7n    2/2       Running     0          1h
-echo-service-745c674944-r67zj         1/1       Running     0          1h
 hmc-default-gateway-669965894-5wwv8   2/2       Running     0          3h
 test-ec-default-acceptance            0/1       Completed   0          7m # <<<<<< this one
 ```

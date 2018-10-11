@@ -8,8 +8,8 @@ import (
 	time "time"
 
 	versioned "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
+	authentication "github.com/kyma-project/kyma/components/idppreset/pkg/client/informers/externalversions/authentication"
 	internalinterfaces "github.com/kyma-project/kyma/components/idppreset/pkg/client/informers/externalversions/internalinterfaces"
-	ui "github.com/kyma-project/kyma/components/idppreset/pkg/client/informers/externalversions/ui"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -107,9 +107,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Ui() ui.Interface
+	Authentication() authentication.Interface
 }
 
-func (f *sharedInformerFactory) Ui() ui.Interface {
-	return ui.New(f, f.namespace, f.tweakListOptions)
+func (f *sharedInformerFactory) Authentication() authentication.Interface {
+	return authentication.New(f, f.namespace, f.tweakListOptions)
 }

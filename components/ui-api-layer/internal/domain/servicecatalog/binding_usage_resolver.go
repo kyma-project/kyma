@@ -40,13 +40,13 @@ func (r *serviceBindingUsageResolver) CreateServiceBindingUsageMutation(ctx cont
 	bu, err := r.operations.Create(input.Environment, inBindingUsage)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s from input [%v]", pretty.ServiceBindingUsage, input))
-		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(input.Name), gqlerror.WithEnvironment(input.Environment))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(*input.Name), gqlerror.WithEnvironment(input.Environment))
 	}
 
 	out, err := r.converter.ToGQL(bu)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceBindingUsage))
-		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(input.Name), gqlerror.WithEnvironment(input.Environment))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(*input.Name), gqlerror.WithEnvironment(input.Environment))
 	}
 
 	return out, nil

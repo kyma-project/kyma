@@ -219,20 +219,20 @@ components:
       type: 'object'
       properties:
         spec:
-          description: 'AsynApi file v1: https://github.com/asyncapi/asyncapi/blob/develop/schema/asyncapi.json'
+          description: 'AsyncApi file v1: https://github.com/asyncapi/asyncapi/blob/develop/schema/asyncapi.json'
           type: 'object'
     Documentation:
       type: 'object'
       properties:
-        displayName: 
+        displayName:
           type: 'string'
-        description: 
+        description:
           type: 'string'
         type:
           type: 'string'
         tags:
           type: 'array'
-          items: 
+          items:
             type: 'string'
         docs:
           type: 'array'

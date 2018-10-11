@@ -52,8 +52,12 @@ required = [
   version = "v0.4.0"
 
 [[constraint]]
+  name = "github.com/moby/moby"
+  version = "v1.13.1"
+
+[[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "c98f6e13a1beca119c634814c423df90d3aa8ad7"
+  revision = "19bd8876363a9b27c68344898a3c0220fbf03c11"
 
 [[override]]
   name = "k8s.io/api"

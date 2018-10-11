@@ -31,7 +31,7 @@ type formMeta struct {
 }
 
 func (m *formMeta) Validate() error {
-	messages := []string{}
+	var messages []string
 
 	if m.ID == "" {
 		messages = append(messages, "missing ID field")
@@ -56,7 +56,7 @@ func (m *formMeta) Validate() error {
 	return nil
 }
 func (f *form) Validate() error {
-	messages := []string{}
+	var messages []string
 
 	if f.Meta == nil {
 		messages = append(messages, fmt.Sprintf("missing metadata information about bundle. Please check if bundle contains %q file", bundleMetaName))
@@ -201,7 +201,7 @@ type formPlanMeta struct {
 }
 
 func (f *formPlanMeta) Validate() error {
-	messages := []string{}
+	var messages []string
 	if f.ID == "" {
 		messages = append(messages, "missing ID field")
 	}

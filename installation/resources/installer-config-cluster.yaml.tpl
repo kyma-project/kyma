@@ -22,6 +22,18 @@ data:
   global.tlsKey: "__TLS_KEY__"
 ---
 apiVersion: v1
+kind: Secret
+metadata:
+  name: ui-test-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+type: Opaque
+data:
+  test.auth.username: "__UI_TEST_USER__"
+  test.auth.password: "__UI_TEST_PASSWORD__"
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: installation-config-overrides
@@ -40,13 +52,23 @@ data:
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   configurations-generator.kubeConfig.clusterName: "__DOMAIN__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
-  gateways.istio-ingressgateway.service.externalPublicIp: "__EXTERNAL_PUBLIC_IP__"
-  gateways.istio-ingressgateway.type: "LoadBalancer"
   service-catalog.etcd-stateful.replicaCount: "3"
-  sidecar-injector.includeIPRanges: "10.244.0.0/16,10.240.0.0/16"
   minio.accessKey: "admin"
   minio.secretKey: "topSecretKey"
   acceptanceTest.remoteEnvironment.disabled: "true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: core-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: core
+data:
+  console.cluster.headerLogoUrl: "assets/logo.svg"
+  console.cluster.headerTitle: ""
+  console.cluster.faviconUrl: "favicon.ico"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -71,3 +93,25 @@ metadata:
 data:
   deployment.args.sourceType: marketing
   service.externalapi.nodePort: "32000"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: istio
+data:
+  global.proxy.includeIPRanges: "10.0.0.1/8"
+
+  security.enabled: "true"
+
+  gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
+  gateways.istio-ingressgateway.type: "LoadBalancer"
+
+  pilot.resources.limits.memory: 2Gi
+  pilot.resources.requests.memory: 512Mi
+
+  mixer.resources.limits.memory: 1Gi
+  mixer.resources.requests.memory: 256Mi

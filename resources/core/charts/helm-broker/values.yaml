@@ -1,29 +1,17 @@
 initImage:
-  tag: 0.2.32
   # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 image:
-  tag: 0.3.330
-  # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 service:
   type: NodePort
   externalPort: 80
   internalPort: 8080
 
-embeddedRepository:
-  # Defines, if embedded bundle repository should be provisioned.
-  # To provision, specify this value to true
-  provision: true
-  # Defines service for embedded repository
-  service:
-    type: NodePort
-    externalPort: 80
-    internalPort: 8080
 
 config:
   repository:
-    baseURL: "http://core-helm-broker-reposerver"
+    baseURL: "https://kyma-project.github.io/bundles/stable/"
   storage:
     - driver: etcd
       provide:
@@ -45,6 +33,3 @@ etcd:
   # but currently there is no way to pass to the etcd subchart a parent Release.Name, see https://github.com/kubernetes/helm/issues/2506
   # so to make it more verbose I've added nameOverride and now the release name will be "core-helm-broker-etcd"
   nameOverride: "helm-broker-etcd"
-
-bundlesStorage:
-  claimName: "helm-broker-bundles-storage"

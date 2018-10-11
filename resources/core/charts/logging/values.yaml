@@ -1,3 +1,6 @@
+test:
+  image:
+    name: test-logging
 
 logspout:
   resources:
@@ -40,6 +43,13 @@ oklog:
     limits:
       memory: 1Gi
 
+isLocalEnv:
+  resources:
+    requests:
+      cpu: 125m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
 
 # Enable to add load balanced service.
 # Example annotation will create AWS internal LoadBalancer.
@@ -50,12 +60,17 @@ loadBalancerService:
     service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
 
 
-## Persist data to a persitent volume
+## Persist data to a persistent volume
 persistence:
   enabled: true
   accessMode: ReadWriteOnce
-  size: 5Gi
+  size: 200Gi
   mountPath: /data
+
+# Local installation config 
+isLocalEnv:
+  persistence:
+    size: 5Gi
 
 nodeSelector: {}
 tolerations: []

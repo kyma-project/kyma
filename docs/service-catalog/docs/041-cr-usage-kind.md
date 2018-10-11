@@ -32,7 +32,7 @@ spec:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 
-| Parameter   |      Mandatory?      |  Description |
+| Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **spec.displayName** |    **YES**   | Specifies a human-readable name of the UsageKind. |
@@ -41,3 +41,19 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.resource.kind** |    **YES**   | Specifies the kind of the resource. |
 | **spec.resource.version** |    **YES**   | Specifies the version of the resource. |
 | **spec.labelsPath** |    **YES**   | Specifies a path to the key that contains labels which are later injected into Pods. |
+
+
+## Related resources and components
+
+These are the resources related to this CR:
+
+| Custom resource   |   Description |
+|:----------:|:------|
+| ServiceBindingUsage |  Contains the reference to the UsageKind. |
+
+These components use this CR:
+
+| Component   |   Description |
+|:----------:|:------|
+| Binding Usage Controller |  Uses the UsageKind **spec.resource** and **spec.labelsPath** parameters to find a resource and a path to which it should inject Secrets. |
+| UI API Layer |  Exposes the given CR to the Console UI. |

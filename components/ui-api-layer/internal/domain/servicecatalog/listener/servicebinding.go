@@ -6,11 +6,12 @@ import (
 	"github.com/golang/glog"
 	api "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/pkg/errors"
 )
 
 //go:generate mockery -name=gqlBindingConverter -output=automock -outpkg=automock -case=underscore
 type gqlBindingConverter interface {
-	ToGQL(in *api.ServiceBinding) *gqlschema.ServiceBinding
+	ToGQL(in *api.ServiceBinding) (*gqlschema.ServiceBinding, error)
 }
 
 type Binding struct {
@@ -47,14 +48,20 @@ func (l *Binding) onEvent(eventType gqlschema.SubscriptionEventType, object inte
 	}
 
 	if l.filter(binding) {
-		l.notify(eventType, binding)
+		err := l.notify(eventType, binding)
+		if err != nil {
+			glog.Error(errors.Wrapf(err, "while notifying on `%s` event", eventType))
+		}
 	}
 }
 
-func (l *Binding) notify(eventType gqlschema.SubscriptionEventType, binding *api.ServiceBinding) {
-	gqlBinding := l.converter.ToGQL(binding)
+func (l *Binding) notify(eventType gqlschema.SubscriptionEventType, binding *api.ServiceBinding) error {
+	gqlBinding, err := l.converter.ToGQL(binding)
+	if err != nil {
+		return errors.Wrapf(err, "while converting service binding [%s]", binding.Name)
+	}
 	if gqlBinding == nil {
-		return
+		return nil
 	}
 
 	event := gqlschema.ServiceBindingEvent{
@@ -63,4 +70,5 @@ func (l *Binding) notify(eventType gqlschema.SubscriptionEventType, binding *api
 	}
 
 	l.channel <- event
+	return nil
 }

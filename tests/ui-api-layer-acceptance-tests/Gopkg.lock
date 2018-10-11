@@ -124,19 +124,20 @@
   version = "v0.1.20"
 
 [[projects]]
-  branch = "master"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
+    "components/binding-usage-controller/pkg/apis/settings/v1alpha1",
     "components/binding-usage-controller/pkg/client/clientset/versioned",
     "components/binding-usage-controller/pkg/client/clientset/versioned/scheme",
     "components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
-    "components/idppreset/pkg/apis/ui/v1alpha1",
+    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
+    "components/idppreset/pkg/apis/authentication/v1alpha1",
     "components/idppreset/pkg/client/clientset/versioned",
     "components/idppreset/pkg/client/clientset/versioned/scheme",
-    "components/idppreset/pkg/client/clientset/versioned/typed/ui/v1alpha1"
+    "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1"
   ]
-  revision = "25fae354c9c7196da5b192f61595fc4cb2ea9844"
+  revision = "01af467a7485d695790da907f60d0e617ad65120"
 
 [[projects]]
   name = "github.com/machinebox/graphql"
@@ -436,6 +437,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "027c318e71742080d13af00758407009f619f93dac69a5a736748fc9ce96897d"
+  inputs-digest = "a4d7e21308428aebb1e0ff55bc5303585bedbab8beac5747cd4057e857cab80d"
   solver-name = "gps-cdcl"
   solver-version = 1

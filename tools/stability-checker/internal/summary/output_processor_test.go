@@ -10,25 +10,27 @@ import (
 
 func TestProcessorHappyPath(t *testing.T) {
 	// GIVEN
+	expOutput := []summary.SpecificTestStats{
+		{Name: "test-core-core-acceptance", Successes: 1},
+		{Name: "test-core-event-bus-tester", Failures: 1},
+		{Name: "test-core-environments", Failures: 1},
+		{Name: "test-core-kubeless", Failures: 1},
+		{Name: "test-core-logging", Failures: 1},
+	}
+
 	sut, err := summary.NewOutputProcessor(fixFailureRegexp(), fixSuccessRegexp())
 	require.NoError(t, err)
+
 	// WHEN
 	results, err := sut.Process(exampleTestOutput)
+
 	// THEN
 	require.NoError(t, err)
-	assert.Len(t, results, 3)
-	assert.Equal(t, results["test-core-environments"], summary.SpecificTestStats{
-		Name:      "test-core-environments",
-		Successes: 1,
-	})
-	assert.Equal(t, results["test-core-core-acceptance"], summary.SpecificTestStats{
-		Name:      "test-core-core-acceptance",
-		Successes: 1,
-	})
-	assert.Equal(t, results["test-core-kubeless"], summary.SpecificTestStats{
-		Name:     "test-core-kubeless",
-		Failures: 1,
-	})
+	assert.Len(t, results, len(expOutput))
+
+	for _, exp := range expOutput {
+		assert.Equal(t, exp, results[exp.Name])
+	}
 }
 
 func TestProcessorOnEmptyInput(t *testing.T) {
@@ -56,62 +58,49 @@ func TestNewOutputProcessorReturnErrorsOnWrongRegexp(t *testing.T) {
 }
 
 func fixSuccessRegexp() string {
-	return "PASSED: ([0-9A-Za-z_-]+)"
+	return "Test of '([0-9A-Za-z_-]+)' was successful"
 }
 
 func fixFailureRegexp() string {
-	return "FAILED: ([0-9A-Za-z_-]+)"
+	return "'([0-9A-Za-z_-]+)' (?:has Failed status?|failed due to too long Running status?|failed due to too long Pending status?|failed with Unknown status?)"
 }
 
 var exampleTestOutput = []byte(`
-[7m[2018-09-20T03:39:22.417Z] Output for test id "3ef87a0c-ad44-4e28-9d07-ba343bc5aa56"[0m
- ----------------------------
+----------------------------
 - Testing Kyma...
 ----------------------------
 - Testing Core components...
+RUNNING: test-core-logging
+ERROR: pods \"test-core-logging\" already exists
+RUNNING: test-core-event-bus-tester
+ERROR: pods \"test-core-event-bus-tester\" already exists
+RUNNING: test-core-kubeless
+ERROR: pods \"test-core-kubeless\" already exists
 RUNNING: test-core-environments
-PASSED: test-core-environments
+ERROR: pods \"test-core-environments\" already exists
 RUNNING: test-core-core-acceptance
 PASSED: test-core-core-acceptance
-RUNNING: test-core-kubeless
-FAILED: test-core-kubeless, run kubectl logs test-core-kubeless --namespace kyma-system for more info
-Error: 1 test(s) failed
-[0m[1mAll test pods should be terminated. Checking...[0m
-[32m[1mOK[0m
-[0m[1mTesting 'connector-service-tests'[0m
-Test of 'connector-service-tests' was successful
+Error: 10 test(s) failed
+\u001b[0m\u001b[1mAll test pods should be terminated. Checking...\u001b[0m
+\u001b[32m\u001b[1mOK\u001b[0m
+\u001b[0m\u001b[1mTesting 'test-core-core-acceptance'\u001b[0m
+Test of 'test-core-core-acceptance' was successful
 Logs are not displayed after success
-[0m[1mEnd of testing 'connector-service-tests'
-...
-[0m[1mTesting 'test-core-kubeless'[0m
-[31m'test-core-kubeless' has Failed status[0m
-[0m[1mFetching logs from 'test-core-kubeless'[0m
-2018/09/20 03:35:42 Cleaning up
-2018/09/20 03:35:50 Starting test
-2018/09/20 03:35:50 Domain Name is: nightly.cluster.kyma.cx
-2018/09/20 03:35:51 Deploying test-hello function
-2018/09/20 03:35:51 Deploying svc-instance
-2018/09/20 03:35:51 Deploying test-event function
-2018/09/20 03:35:59 [test-event] Pod: test-event-6cb44dc97-j7hk5: and SBU ID is:
-2018/09/20 03:35:59 Publishing event to function test-event
-2018/09/20 03:36:00 [test-hello] Pod: test-hello-9dcb8c4c9-xx9nv: and SBU ID is:
-2018/09/20 03:36:00 Verifying correct function output for test-hello
-2018/09/20 03:36:00 [test-hello] Ingress controller address: '10.0.238.26'
-2018/09/20 03:36:00 Unable to publish event:
-[0m[1mEnd of testing 'test-core-kubeless'
-[0m
-[0m[1mTesting 'test-core-monitoring'[0m
-Test of 'test-core-monitoring' was successful
-Logs are not displayed after success
-[0m[1mEnd of testing 'test-core-monitoring'
-[0m
-[0m[1mTest pods should be marked with label 'helm-chart-test=true'. Checking...[0m
-Error from server (NotFound): pods "sample-app-depl-ceusqpqe-66c79b8fdc-f7zqc" not found
-[32m[1mOK[0m
-[0m[1m
-Cleaning up helm test pods[0m
-pod "connector-service-tests" deleted
-pod "test-api-controller-acceptance" deleted
-...
-[0m
+\u001b[0m\u001b[1mEnd of testing 'test-core-core-acceptance'
+\u001b[0m
+\u001b[0m\u001b[1mTesting 'test-core-environments'\u001b[0m
+\u001b[31m'test-core-environments' failed with Unknown status\u001b[0m
+\u001b[0m\u001b[1mEnd of testing 'test-core-environments'
+\u001b[0m
+\u001b[0m\u001b[1mTesting 'test-core-event-bus-tester'\u001b[0m
+\u001b[31m'test-core-event-bus-tester' failed due to too long Pending status\u001b[0m
+\u001b[0m\u001b[1mEnd of testing 'test-core-event-bus-tester'
+\u001b[0m
+\u001b[0m\u001b[1mTesting 'test-core-kubeless'\u001b[0m
+\u001b[31m'test-core-kubeless' failed due to too long Running status\u001b[0m
+\u001b[0m\u001b[1mEnd of testing 'test-core-kubeless'
+\u001b[0m
+\u001b[0m\u001b[1mTesting 'test-core-logging'\u001b[0m
+\u001b[31m'test-core-logging' has Failed status\u001b[0m
+\u001b[0m\u001b[1mFetching logs from 'test-core-logging'\u001b[0m
 `)

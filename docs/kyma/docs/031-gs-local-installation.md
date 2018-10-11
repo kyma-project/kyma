@@ -3,28 +3,25 @@ title: Local Kyma installation
 type: Getting Started
 ---
 
-This Getting Started guide shows developers how to quickly deploy Kyma locally on a Mac, Linux, or Windows. Kyma installs locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma locally and verify the deployment, as well as the troubleshooting tips.
+This Getting Started guide shows developers how to quickly deploy Kyma locally on a Mac or Linux. Kyma installs locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma locally and verify the deployment, as well as the troubleshooting tips.
 
 ## Prerequisites
 
-To run Kyma locally, clone this Git repository to your machine and checkout the `latest` tag. After you clone the repository, run this command:
-```
-git checkout latest
-```
+To run Kyma locally, clone this Git repository to your machine and checkout the latest release.
+
 Additionally, download these tools:
 
 - [Minikube](https://github.com/kubernetes/minikube) 0.28.2
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.10.0
-- [Helm](https://github.com/kubernetes/helm) 2.8.2
+- [Helm](https://github.com/kubernetes/helm) 2.10.0
 - [jq](https://stedolan.github.io/jq/)
 
 Virtualization:
 
 - [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - Mac only
-- [VirtualBox](https://www.virtualbox.org/) - Linux or Windows
-- [Hyper-V](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v) - Windows
+- [VirtualBox](https://www.virtualbox.org/) - Linux only
 
-> **NOTE:** To work with Kyma, use only the provided installation and deinstallation scripts. Kyma does not work on a basic Minikube cluster that you can start using the `minikube start` command or stop with the `minikube stop` command. If you don't need Kyma on Minikube anymore, remove the cluster with the `minikube delete` command.
+> **NOTE:** To work with Kyma, use only the provided scripts and commands. Kyma does not work on a basic Minikube cluster that you can start using the `minikube start` command or stop with the `minikube stop` command. If you don't need Kyma on Minikube anymore, remove the cluster with the `minikube delete` command.
 
 ## Set up certificates
 
@@ -54,15 +51,34 @@ You can install Kyma with all core subcomponents or only with the selected ones.
   cd installation
   ```
 
-2. Depending on your operating system, run `run.sh` for Mac and Linux or `run.ps1` for Windows
-  ```
-  cmd/run.sh
-  ```
-
-The `run.sh` script does not show the progress of the Kyma installation, which allows you to perform other tasks in the terminal window. However, to see the status of the Kyma installation, run this script after you set up the cluster and the installer:
-
+2. Use the following command to run Kubernetes locally using Minikube:
 ```
-scripts/is-installed.sh
+$ ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
+```
+
+3. Kyma installation requires increased permissions granted by the **cluster-admin** role. To bind the role to the default **ServiceAccount**, run the following command:
+```
+$ kubectl apply -f ./resources/default-sa-rbac-role.yaml
+```
+
+4. Wait until the `kube-dns` Pod is ready. Run this script to setup Tiller:
+```
+$ ./scripts/install-tiller.sh
+```
+
+5. Configure the Kyma installation using the local configuration file:
+```
+$ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/0.4.1/kyma-config-local.yaml
+```
+
+6. To trigger the installation process, label the `kyma-installation` custom resource: 
+```
+$ kubectl label installation/kyma-installation action=install
+```
+
+7. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
+```
+$ ./scripts/is-installed.sh
 ```
 
 Read the **Reinstall Kyma** document to learn how to reinstall Kyma without deleting the cluster from Minikube.

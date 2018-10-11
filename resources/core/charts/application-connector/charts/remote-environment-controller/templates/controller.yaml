@@ -1,4 +1,3 @@
-{{ if .Values.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -27,7 +26,11 @@ spec:
         - "--domainName={{ .Values.global.domainName }}"
         - "--namespace={{ .Values.global.namespace }}"
         - "--tillerUrl={{ .Values.controller.args.tillerUrl }}"
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.controller.image.name }}:{{ .Values.controller.image.tag }}"
+        - "--gatewayImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.gateway.dir }}gateway:{{ .Values.global.gateway.version }}"
+        - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service.dir }}event-service:{{ .Values.global.event_service.version }}"
+        - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.gateway_tests.dir }}gateway-acceptance-tests:{{ .Values.global.gateway_tests.version }}"
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.remote_environment_controller.dir }}remote-environment-controller:{{ .Values.global.remote_environment_controller.version }}
+        imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
         resources:
           limits:
             cpu: 100m
@@ -36,4 +39,3 @@ spec:
             cpu: 100m
             memory: 20Mi
       terminationGracePeriodSeconds: 10
-{{ end }}

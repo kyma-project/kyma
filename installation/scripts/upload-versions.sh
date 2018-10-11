@@ -10,7 +10,7 @@ delete_if_exists () {
     fi
 }
 
-KYMA_VERSIONS_SOURCE_FILE="/installation/versions.env"
+KYMA_VERSIONS_SOURCE_FILE="/installation/versions-overrides.env"
 
 CONTAINER="kyma-versions"
 STORAGE_ACCOUNT_NAME="kymainstaller"

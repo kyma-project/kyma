@@ -21,8 +21,9 @@ import (
 )
 
 const (
-	instanceReadyTimeout    = time.Second * 45
-	instanceDeletionTimeout = time.Second * 15
+	instanceReadyTimeout             = time.Second * 45
+	instanceDeletionTimeout          = time.Second * 15
+	serviceInstanceStatusTypeRunning = "RUNNING"
 )
 
 type ServiceInstanceEvent struct {
@@ -44,12 +45,26 @@ type ServiceInstance struct {
 	PlanSpec             map[string]interface{}
 	ClusterServicePlan   ClusterServicePlan
 	ClusterServiceClass  ClusterServiceClass
+	ServicePlan          ServicePlan
+	ServiceClass         ServiceClass
 	CreationTimestamp    int
 	Labels               []string
 	Status               ServiceInstanceStatus
-	ServiceBindings      []ServiceBinding
+	ServiceBindings      ServiceBindings
 	ServiceBindingUsages []ServiceBindingUsage
 	Bindable             bool
+}
+
+type ServiceBindings struct {
+	Items []ServiceBinding
+	Stats ServiceBindingStats
+}
+
+type ServiceBindingStats struct {
+	Ready   int
+	Failed  int
+	Pending int
+	Unknown int
 }
 
 type ServiceInstanceStatus struct {
@@ -85,76 +100,109 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	svcatCli, _, err := k8s.NewServiceCatalogClientWithConfig()
 	require.NoError(t, err)
 
-	expectedResource := instance("test-instance")
+	expectedResourceFromClusterServiceClass := instanceFromClusterServiceClass("cluster-test-instance")
+	expectedResourceFromServiceClass := instanceFromServiceClass("test-instance")
 	resourceDetailsQuery := instanceDetailsFields()
 
-	t.Log("Subscribe instances")
-	subscription := subscribeInstance(c, instanceEventDetailsFields(), expectedResource.Environment)
+	t.Log(fmt.Sprintf("Subscribe instance created by %s", tester.ClusterServiceBroker))
+	subscription := subscribeInstance(c, instanceEventDetailsFields(), expectedResourceFromClusterServiceClass.Environment)
 	defer subscription.Close()
 
-	t.Log("Create instance")
-	createRes, err := createInstance(c, resourceDetailsQuery, expectedResource)
+	t.Log(fmt.Sprintf("Create instance from %s", tester.ClusterServiceBroker))
+	createRes, err := createInstance(c, resourceDetailsQuery, expectedResourceFromClusterServiceClass, true)
 
 	require.NoError(t, err)
-	checkInstance(t, expectedResource, createRes.CreateServiceInstance)
+	checkInstanceFromClusterServiceClass(t, expectedResourceFromClusterServiceClass, createRes.CreateServiceInstance)
 
-	t.Log("Check subscription event")
-	expectedEvent := instanceEvent("ADD", expectedResource)
+	t.Log(fmt.Sprintf("Check subscription event of instance created by %s", tester.ClusterServiceBroker))
+	expectedEvent := instanceEvent("ADD", expectedResourceFromClusterServiceClass)
 	event, err := readInstanceEvent(subscription)
 	assert.NoError(t, err)
 	checkInstanceEvent(t, expectedEvent, event)
 
-	t.Log("Wait For Instance Ready")
-	err = waitForInstanceReady(expectedResource.Name, expectedResource.Environment, svcatCli)
+	t.Log(("Wait for instance Ready created by %s"), tester.ClusterServiceBroker)
+	err = waitForInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Environment, svcatCli)
 	assert.NoError(t, err)
 
-	t.Log("Query Single Resource")
-	res, err := querySingleInstance(c, resourceDetailsQuery, expectedResource)
+	t.Log(fmt.Sprintf("Create instance from %s", tester.ServiceBroker))
+	createRes, err = createInstance(c, resourceDetailsQuery, expectedResourceFromServiceClass, false)
+
+	require.NoError(t, err)
+	checkInstanceFromServiceClass(t, expectedResourceFromServiceClass, createRes.CreateServiceInstance)
+
+	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ServiceBroker))
+	err = waitForInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Environment, svcatCli)
+	assert.NoError(t, err)
+
+	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", tester.ClusterServiceBroker))
+	res, err := querySingleInstance(c, resourceDetailsQuery, expectedResourceFromClusterServiceClass)
 
 	assert.NoError(t, err)
-	checkInstance(t, expectedResource, res.ServiceInstance)
+	checkInstanceFromClusterServiceClass(t, expectedResourceFromClusterServiceClass, res.ServiceInstance)
+
+	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", tester.ServiceBroker))
+	res, err = querySingleInstance(c, resourceDetailsQuery, expectedResourceFromServiceClass)
+
+	assert.NoError(t, err)
+	checkInstanceFromServiceClass(t, expectedResourceFromServiceClass, res.ServiceInstance)
 
 	t.Log("Query Multiple Resources")
-	multipleRes, err := queryMultipleInstances(c, resourceDetailsQuery, expectedResource)
+	multipleRes, err := queryMultipleInstances(c, resourceDetailsQuery, tester.DefaultNamespace)
 
 	assert.NoError(t, err)
-	assertInstanceExistsAndEqual(t, expectedResource, multipleRes.ServiceInstances)
+	assertInstanceFromClusterServiceClassExistsAndEqual(t, expectedResourceFromClusterServiceClass, multipleRes.ServiceInstances)
+	assertInstanceFromServiceClassExistsAndEqual(t, expectedResourceFromServiceClass, multipleRes.ServiceInstances)
 
-	// We must again wait for RUNNING status of instance, because sometimes Kubernetess change status from RUNNING to PROVISIONING at the first query - Query Single Resource
-	t.Log("Wait For Instance Ready")
-	err = waitForInstanceReady(expectedResource.Name, expectedResource.Environment, svcatCli)
+	// We must again wait for RUNNING status of created instances, because sometimes Kubernetess change status from RUNNING to PROVISIONING at the first queries - Query Single Resource
+	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ClusterServiceBroker))
+	err = waitForInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Environment, svcatCli)
+	assert.NoError(t, err)
+
+	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ServiceBroker))
+	err = waitForInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Environment, svcatCli)
 	assert.NoError(t, err)
 
 	t.Log("Query Multiple Resources With Status")
-	multipleResWithStatus, err := queryMultipleInstancesWithStatus(c, resourceDetailsQuery, expectedResource)
+	multipleResWithStatus, err := queryMultipleInstancesWithStatus(c, resourceDetailsQuery, tester.DefaultNamespace)
 
 	assert.NoError(t, err)
-	assertInstanceExistsAndEqual(t, expectedResource, multipleResWithStatus.ServiceInstances)
+	assertInstanceFromClusterServiceClassExistsAndEqual(t, expectedResourceFromClusterServiceClass, multipleResWithStatus.ServiceInstances)
+	assertInstanceFromServiceClassExistsAndEqual(t, expectedResourceFromServiceClass, multipleRes.ServiceInstances)
 
-	t.Log("Delete instance")
-	deleteRes, err := deleteInstance(c, resourceDetailsQuery, expectedResource)
+	t.Log(fmt.Sprintf("Delete instance created by %s", tester.ClusterServiceBroker))
+	deleteRes, err := deleteInstance(c, resourceDetailsQuery, expectedResourceFromClusterServiceClass)
 
 	assert.NoError(t, err)
-	checkInstance(t, expectedResource, deleteRes.DeleteServiceInstance)
+	checkInstanceFromClusterServiceClass(t, expectedResourceFromClusterServiceClass, deleteRes.DeleteServiceInstance)
 
-	t.Log("Wait For Instance Deletion")
-	err = waitForInstanceDeletion(expectedResource.Name, expectedResource.Environment, svcatCli)
+	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", tester.ClusterServiceBroker))
+	err = waitForInstanceDeletion(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Environment, svcatCli)
+	assert.NoError(t, err)
+
+	t.Log(fmt.Sprintf("Delete instance created by %s", tester.ServiceBroker))
+	deleteRes, err = deleteInstance(c, resourceDetailsQuery, expectedResourceFromServiceClass)
+
+	assert.NoError(t, err)
+	checkInstanceFromServiceClass(t, expectedResourceFromServiceClass, deleteRes.DeleteServiceInstance)
+
+	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", tester.ServiceBroker))
+	err = waitForInstanceDeletion(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Environment, svcatCli)
 	assert.NoError(t, err)
 }
 
-func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource ServiceInstance) (instanceCreateMutationResponse, error) {
+func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource ServiceInstance, clusterWide bool) (instanceCreateMutationResponse, error) {
 	query := fmt.Sprintf(`
 			mutation ($name: String!, $environment: String!, $externalPlanName: String!, $externalServiceClassName: String!, $labels: [String!]!, $parameterSchema: JSON) {
-				createServiceInstance(params:{
+				createServiceInstance(params: {
     				name: $name,
     				environment: $environment,
 					classRef: {
 						externalName: $externalServiceClassName,
-						clusterWide: true,
+						clusterWide: %v,
 					},
 					planRef: {
 						externalName: $externalPlanName,
-						clusterWide: true,
+						clusterWide: %v,
 					},
     				labels: $labels,
 					parameterSchema: $parameterSchema
@@ -162,12 +210,17 @@ func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 					%s
 				}
 			}
-		`, resourceDetailsQuery)
+		`, clusterWide, clusterWide, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("name", expectedResource.Name)
 	req.SetVar("environment", expectedResource.Environment)
-	req.SetVar("externalPlanName", expectedResource.ClusterServicePlan.ExternalName)
-	req.SetVar("externalServiceClassName", expectedResource.ClusterServiceClass.ExternalName)
+	if clusterWide {
+		req.SetVar("externalPlanName", expectedResource.ClusterServicePlan.ExternalName)
+		req.SetVar("externalServiceClassName", expectedResource.ClusterServiceClass.ExternalName)
+	} else {
+		req.SetVar("externalPlanName", expectedResource.ServicePlan.ExternalName)
+		req.SetVar("externalServiceClassName", expectedResource.ServiceClass.ExternalName)
+	}
 	req.SetVar("labels", expectedResource.Labels)
 	req.SetVar("parameterSchema", expectedResource.PlanSpec)
 
@@ -200,7 +253,7 @@ func querySingleInstance(c *graphql.Client, resourceDetailsQuery string, expecte
 	return res, err
 }
 
-func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery string, expectedResource ServiceInstance) (instancesQueryResponse, error) {
+func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery, environment string) (instancesQueryResponse, error) {
 	query := fmt.Sprintf(`
 			query ($environment: String!) {
 				serviceInstances(environment: $environment) {
@@ -209,7 +262,7 @@ func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery string, expe
 			}	
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
-	req.SetVar("environment", expectedResource.Environment)
+	req.SetVar("environment", environment)
 
 	var res instancesQueryResponse
 	err := c.Do(req, &res)
@@ -217,7 +270,7 @@ func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery string, expe
 	return res, err
 }
 
-func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery string, expectedResource ServiceInstance) (instancesQueryResponse, error) {
+func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery, environment string) (instancesQueryResponse, error) {
 	query := fmt.Sprintf(`
 			query ($environment: String!, $status: InstanceStatusType) {
 				serviceInstances(environment: $environment, status: $status) {
@@ -226,8 +279,8 @@ func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery st
 			}	
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
-	req.SetVar("environment", expectedResource.Environment)
-	req.SetVar("status", "RUNNING")
+	req.SetVar("environment", environment)
+	req.SetVar("status", serviceInstanceStatusTypeRunning)
 
 	var res instancesQueryResponse
 	err := c.Do(req, &res)
@@ -320,9 +373,11 @@ func instanceDetailsFields() string {
 			description
 			relatedServiceClassName
 			instanceCreateParameterSchema
+			bindingCreateParameterSchema
 		}
 		 serviceClass {
 			name
+			environment
 			externalName
 			displayName
 			creationTimestamp
@@ -336,15 +391,23 @@ func instanceDetailsFields() string {
 			activated
 		}
 		serviceBindings {
-			name
-			serviceInstanceName
-			environment
-			secret {
+			items {
 				name
+				serviceInstanceName
 				environment
-				data
+				secret {
+					name
+					environment
+					data
+				}
 			}
-		}
+			stats {
+				ready
+				failed
+				pending
+				unknown
+			}
+        }
 		serviceBindingUsages {
 			name
 			environment
@@ -365,18 +428,44 @@ func instanceEventDetailsFields() string {
     `, instanceDetailsFields())
 }
 
-func checkInstance(t *testing.T, expected, actual ServiceInstance) {
+func checkInstanceFromClusterServiceClass(t *testing.T, expected, actual ServiceInstance) {
+	// Name
 	assert.Equal(t, expected.Name, actual.Name)
+
+	// Environment
 	assert.Equal(t, expected.Environment, actual.Environment)
+
+	// ClusterServicePlan.Name
 	assert.Equal(t, expected.ClusterServicePlan.Name, actual.ClusterServicePlan.Name)
+
+	// ClusterServiceClass.Name
 	assert.Equal(t, expected.ClusterServiceClass.Name, actual.ClusterServiceClass.Name)
+	assert.Equal(t, expected.Labels, actual.Labels)
+	assert.Equal(t, expected.Bindable, actual.Bindable)
 }
 
-func assertInstanceExistsAndEqual(t *testing.T, expectedElement ServiceInstance, arr []ServiceInstance) {
+func checkInstanceFromServiceClass(t *testing.T, expected, actual ServiceInstance) {
+	// Name
+	assert.Equal(t, expected.Name, actual.Name)
+
+	// Environment
+	assert.Equal(t, expected.Environment, actual.Environment)
+
+	// ServicePlan.Name
+	assert.Equal(t, expected.ServicePlan.Name, actual.ServicePlan.Name)
+
+	// ServiceClass.Name
+	assert.Equal(t, expected.ServiceClass.Name, actual.ServiceClass.Name)
+
+	// ServiceClass.Environment
+	assert.Equal(t, expected.ServiceClass.Environment, actual.ServiceClass.Environment)
+}
+
+func assertInstanceFromClusterServiceClassExistsAndEqual(t *testing.T, expectedElement ServiceInstance, arr []ServiceInstance) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
-				checkInstance(t, expectedElement, v)
+				checkInstanceFromClusterServiceClass(t, expectedElement, v)
 				return true
 			}
 		}
@@ -385,7 +474,20 @@ func assertInstanceExistsAndEqual(t *testing.T, expectedElement ServiceInstance,
 	}, "Resource does not exist")
 }
 
-func instance(name string) ServiceInstance {
+func assertInstanceFromServiceClassExistsAndEqual(t *testing.T, expectedElement ServiceInstance, arr []ServiceInstance) {
+	assert.Condition(t, func() (success bool) {
+		for _, v := range arr {
+			if v.Name == expectedElement.Name {
+				checkInstanceFromServiceClass(t, expectedElement, v)
+				return true
+			}
+		}
+
+		return false
+	}, "Resource does not exist")
+}
+
+func instanceFromClusterServiceClass(name string) ServiceInstance {
 	return ServiceInstance{
 		Name:        name,
 		Environment: tester.DefaultNamespace,
@@ -404,6 +506,37 @@ func instance(name string) ServiceInstance {
 			Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
 			ExternalName: "user-provided-service",
 		},
+		Status: ServiceInstanceStatus{
+			Type: serviceInstanceStatusTypeRunning,
+		},
+		Bindable: true,
+	}
+}
+
+func instanceFromServiceClass(name string) ServiceInstance {
+	return ServiceInstance{
+		Name:        name,
+		Environment: tester.DefaultNamespace,
+		Labels:      []string{"test", "test2"},
+		PlanSpec: map[string]interface{}{
+			"first": "1",
+			"second": map[string]interface{}{
+				"value": "2",
+			},
+		},
+		ServicePlan: ServicePlan{
+			Name:         "86064792-7ea2-467b-af93-ac9694d96d52",
+			ExternalName: "default",
+		},
+		ServiceClass: ServiceClass{
+			Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
+			ExternalName: "user-provided-service",
+			Environment:  tester.DefaultNamespace,
+		},
+		Status: ServiceInstanceStatus{
+			Type: serviceInstanceStatusTypeRunning,
+		},
+		Bindable: true,
 	}
 }
 

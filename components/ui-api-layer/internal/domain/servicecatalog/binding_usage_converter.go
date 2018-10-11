@@ -7,6 +7,7 @@ import (
 	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/status"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/name"
 )
 
 //go:generate mockery -name=statusBindingUsageExtractor -output=automock -outpkg=automock -case=underscore
@@ -77,7 +78,7 @@ func (c *bindingUsageConverter) InputToK8s(in *gqlschema.CreateServiceBindingUsa
 			APIVersion: api.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: in.Name,
+			Name: name.EmptyIfNil(in.Name),
 		},
 		Spec: api.ServiceBindingUsageSpec{
 			ServiceBindingRef: api.LocalReferenceByName{

@@ -2,8 +2,6 @@ apiVersion: "installer.kyma-project.io/v1alpha1"
 kind: Installation
 metadata:
   name: kyma-installation
-  labels:
-    action: install
   finalizers:
     - finalizer.installer.kyma-project.io
 spec:
@@ -14,9 +12,10 @@ spec:
       namespace: "kyma-system"
     - name: "istio"
       namespace: "istio-system"
+    - name: "istio-kyma-patch"
+      namespace: "istio-system"
     - name: "prometheus-operator"
       namespace: "kyma-system"
-    - name: "provision-bundles"
     - name: "dex"
       namespace: "kyma-system"
     - name: "core"

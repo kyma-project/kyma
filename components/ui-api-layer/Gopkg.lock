@@ -34,6 +34,12 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/docker/docker"
+  packages = ["pkg/random"]
+  revision = "092cba3727bb9b4a2f0e922cd6c0f93ea270e363"
+  version = "v1.13.1"
+
+[[projects]]
   branch = "master"
   name = "github.com/dustin/go-humanize"
   packages = ["."]
@@ -213,17 +219,17 @@
     "components/binding-usage-controller/pkg/client/informers/externalversions/settings/v1alpha1",
     "components/binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1",
     "components/binding-usage-controller/pkg/client/listers/settings/v1alpha1",
-    "components/idppreset/pkg/apis/ui/v1alpha1",
+    "components/idppreset/pkg/apis/authentication/v1alpha1",
     "components/idppreset/pkg/client/clientset/versioned",
     "components/idppreset/pkg/client/clientset/versioned/fake",
     "components/idppreset/pkg/client/clientset/versioned/scheme",
-    "components/idppreset/pkg/client/clientset/versioned/typed/ui/v1alpha1",
-    "components/idppreset/pkg/client/clientset/versioned/typed/ui/v1alpha1/fake",
+    "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1",
+    "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1/fake",
     "components/idppreset/pkg/client/informers/externalversions",
+    "components/idppreset/pkg/client/informers/externalversions/authentication",
+    "components/idppreset/pkg/client/informers/externalversions/authentication/v1alpha1",
     "components/idppreset/pkg/client/informers/externalversions/internalinterfaces",
-    "components/idppreset/pkg/client/informers/externalversions/ui",
-    "components/idppreset/pkg/client/informers/externalversions/ui/v1alpha1",
-    "components/idppreset/pkg/client/listers/ui/v1alpha1",
+    "components/idppreset/pkg/client/listers/authentication/v1alpha1",
     "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
     "components/remote-environment-broker/pkg/client/clientset/versioned",
     "components/remote-environment-broker/pkg/client/clientset/versioned/fake",
@@ -236,7 +242,7 @@
     "components/remote-environment-broker/pkg/client/informers/externalversions/internalinterfaces",
     "components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
   ]
-  revision = "c98f6e13a1beca119c634814c423df90d3aa8ad7"
+  revision = "19bd8876363a9b27c68344898a3c0220fbf03c11"
 
 [[projects]]
   name = "github.com/magiconair/properties"
@@ -263,6 +269,12 @@
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
   revision = "3864e76763d94a6df2f9960b16a20a33da9f9a66"
+
+[[projects]]
+  name = "github.com/moby/moby"
+  packages = ["pkg/namesgenerator"]
+  revision = "092cba3727bb9b4a2f0e922cd6c0f93ea270e363"
+  version = "v1.13.1"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -699,6 +711,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "282dcda7eb48242ccdb492108a9ab387372f7926331261b2973c3c4019616cd3"
+  inputs-digest = "f08a892a4bcb4d8dad7345cf024819c836327e19f003e5b1c9c9f90e4f43d0dc"
   solver-name = "gps-cdcl"
   solver-version = 1

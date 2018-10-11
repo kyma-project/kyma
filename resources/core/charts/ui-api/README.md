@@ -1,16 +1,9 @@
-```
- _   _ ___      _    ____ ___ 
-| | | |_ _|    / \  |  _ \_ _|
-| | | || |    / _ \ | |_) | | 
-| |_| || |   / ___ \|  __/| | 
- \___/|___| /_/   \_\_|  |___|
- 
-```
+# UI API
 
 ## Security
 
-Security in GraphQL is based on Istio Authentication Policies, Istio Role-Based Access Control (RBAC) used for authorization, 
-and a custom Envoy filter. 
+Security in GraphQL is based on Istio Authentication Policies, Istio Role-Based Access Control (RBAC) used for authorization,
+and a custom Envoy filter.
 
 ### Authentication
 
@@ -19,7 +12,7 @@ The Authentication Policy is defined in [this](./templates/authentication.yaml) 
 
 ### Custom Envoy filter
 
-The Envoy filter extracts security-related attributes from GraphQL queries. These attributes are added to the request as additional 
+The Envoy filter extracts security-related attributes from GraphQL queries. These attributes are added to the request as additional
  headers and are sent to the target service. These are the additional request headers:
 
 - **kyma-graphql-parsed** - this header is set if the filter parsed the query.
@@ -27,7 +20,7 @@ The Envoy filter extracts security-related attributes from GraphQL queries. Thes
 - **kyma-graphql-resources** - this header contains the names of the queried resources. The names are comma-separated
   and sorted in alphabetical order. The list is enclosed with curly braces.
 
-The Envoy filter is registered in the pilot's discovery container as a webhook. The source code of the Envoy filter, in the form of a LUA script, is located in [this](../../../istio/charts/webhook/) directory.
+The Envoy filter is registered in the pilot's discovery container as a webhook. The source code of the Envoy filter, in the form of a LUA script, is located in [this](../../../istio-kyma-patch/scripts) directory.
 
 ### Authorization
 
@@ -35,7 +28,7 @@ Authorization relies on Istio Role-Based Access Control (RBAC).
 RBAC in Istio is based on these concepts:
 
 - **Authorization Request Context** defines the attributes that are extracted from the request and sent to the
-  RBAC Engine, which is implemented as Istio Policy/Mixer adapter. Headers set by the custom Envoy filter 
+  RBAC Engine, which is implemented as Istio Policy/Mixer adapter. Headers set by the custom Envoy filter
   are sent to the RBAC Engine. This enables to define constraints on queries in a Service Role.
   The Authorization Request Context is defined in [this](./templates/authorization.yaml) file.
 
@@ -50,13 +43,13 @@ RBAC in Istio is based on these concepts:
   - **metadata.namespace** is the Kyma installation Namespace (by default: `kyma-system`).
 
   - **rules.services** is the fully-qualified address of the Core UI API service (by default: `["core-ui-api.kyma-system.svc.cluster.local"]`).
-  
+
   - **spec.rules[0].paths** is the GraphQL path (by default: `/graphql`).
-  
+
   - **spec.rules[0].methods** indicates the secured HTTP methods. As a minimum you must secure the `POST` method.
-  
+
   - **spec.rules[0].constraints** indicates the constraints:
-  
+
      - **kymaGraphQlResources** - The value should contain the names of the queried resources. List the resources in alphabetical order.
        Enclose the list in curly brackets. Value extracted from the **kyma-graphql-resources** header.
 
@@ -132,7 +125,7 @@ query GetApis {
   apis(environment: "default") {
     name
   }
-} 
+}
 ```
 
 To secure query by queried resources, use the `kymaGraphQlResources` constraint as follows:

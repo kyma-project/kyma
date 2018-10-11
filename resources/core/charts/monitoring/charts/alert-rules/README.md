@@ -1,4 +1,4 @@
-# alert-rules
+# Alert Rules
 
 ## Overview
 

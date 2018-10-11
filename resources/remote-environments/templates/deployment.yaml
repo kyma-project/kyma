@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: {{ .Release.Name }}-gateway
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag }}"
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.gateway.dir }}gateway:{{ .Values.global.gateway.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/gateway"

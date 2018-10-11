@@ -4,8 +4,8 @@ package fake
 
 import (
 	clientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
-	uiv1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/typed/ui/v1alpha1"
-	fakeuiv1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/typed/ui/v1alpha1/fake"
+	authenticationv1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1"
+	fakeauthenticationv1alpha1 "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -54,12 +54,12 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// UiV1alpha1 retrieves the UiV1alpha1Client
-func (c *Clientset) UiV1alpha1() uiv1alpha1.UiV1alpha1Interface {
-	return &fakeuiv1alpha1.FakeUiV1alpha1{Fake: &c.Fake}
+// AuthenticationV1alpha1 retrieves the AuthenticationV1alpha1Client
+func (c *Clientset) AuthenticationV1alpha1() authenticationv1alpha1.AuthenticationV1alpha1Interface {
+	return &fakeauthenticationv1alpha1.FakeAuthenticationV1alpha1{Fake: &c.Fake}
 }
 
-// Ui retrieves the UiV1alpha1Client
-func (c *Clientset) Ui() uiv1alpha1.UiV1alpha1Interface {
-	return &fakeuiv1alpha1.FakeUiV1alpha1{Fake: &c.Fake}
+// Authentication retrieves the AuthenticationV1alpha1Client
+func (c *Clientset) Authentication() authenticationv1alpha1.AuthenticationV1alpha1Interface {
+	return &fakeauthenticationv1alpha1.FakeAuthenticationV1alpha1{Fake: &c.Fake}
 }

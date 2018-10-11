@@ -46,6 +46,6 @@ spec:
   serviceAccount: test-{{ template "fullname" . }}
   containers:
   - name: test-{{ template "fullname" . }}
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.test.image.name }}:{{ .Values.test.image.tag }}
+    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_logging_monitoring.dir }}{{ .Values.test.image.name }}:{{ .Values.global.test_logging_monitoring.version }}
     imagePullPolicy: IfNotPresent
   restartPolicy: Never
