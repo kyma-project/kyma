@@ -49,14 +49,9 @@ data:
   global.alertTools.credentials.slack.channel: ""
   global.alertTools.credentials.victorOps.routingkey: ""
   global.alertTools.credentials.victorOps.apikey: ""
-  gateways.istio-ingressgateway.service.externalPublicIp: ""
-  gateways.istio-ingressgateway.type: "NodePort"
   nginx-ingress.controller.service.loadBalancerIP: ""
   configurations-generator.kubeConfig.clusterName: "kyma.local"
   cluster-users.users.adminGroup: ""
-  pilot.resources.limits.memory: 256Mi
-  pilot.resources.requests.memory: 128Mi
-  security.enabled: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -81,3 +76,27 @@ metadata:
 data:
   deployment.args.sourceType: marketing
   service.externalapi.nodePort: "32000"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: istio
+data:
+  global.proxy.includeIPRanges: "10.0.0.1/8"
+
+  security.enabled: "true"
+
+  gateways.istio-ingressgateway.service.externalPublicIp: ""
+  gateways.istio-ingressgateway.type: "NodePort"
+
+  pilot.resources.limits.memory: 1024Mi
+  pilot.resources.limits.cpu: 100m
+  pilot.resources.requests.memory: 256Mi
+  pilot.resources.requests.cpu: 100m
+
+  mixer.resources.limits.memory: 256Mi
+  mixer.resources.requests.memory: 128Mi
