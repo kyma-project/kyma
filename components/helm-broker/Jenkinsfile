@@ -78,7 +78,7 @@ podTemplate(label: label) {
 }
 
 def execute(command, envs = '') {
-    def buildpack = 'golang-buildpack:0.0.8'
+    def buildpack = 'golang-buildpack:0.0.9'
     def envText = envs=='' ? '' : "--env $envs"
     workDir = pwd()
     sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/kyma/ -w /go/src/github.com/kyma-project/kyma/$env.APP_FOLDER $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"

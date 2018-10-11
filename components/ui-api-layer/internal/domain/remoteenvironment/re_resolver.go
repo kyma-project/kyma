@@ -20,6 +20,9 @@ type reSvc interface {
 	ListNamespacesFor(reName string) ([]string, error)
 	Find(name string) (*v1alpha1.RemoteEnvironment, error)
 	List(params pager.PagingParams) ([]*v1alpha1.RemoteEnvironment, error)
+	Update(name string, description string, labels gqlschema.Labels) (*v1alpha1.RemoteEnvironment, error)
+	Create(name string, description string, labels gqlschema.Labels) (*v1alpha1.RemoteEnvironment, error)
+	Delete(name string) error
 	Disable(namespace, name string) error
 	Enable(namespace, name string) (*v1alpha1.EnvironmentMapping, error)
 	GetConnectionURL(remoteEnvironment string) (string, error)
@@ -84,6 +87,43 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentsQuery(ctx context.Context,
 	}
 
 	return res, nil
+}
+
+func (r *remoteEnvironmentResolver) CreateRemoteEnvironment(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.RemoteEnvironmentMutationOutput, error) {
+	desc, labels := r.returnWithDefaults(description, qglLabels)
+	_, err := r.reSvc.Create(name, desc, labels)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.RemoteEnvironment, name))
+		return gqlschema.RemoteEnvironmentMutationOutput{}, gqlerror.New(err, pretty.RemoteEnvironment, gqlerror.WithName(name))
+	}
+	return gqlschema.RemoteEnvironmentMutationOutput{
+		Name:        name,
+		Labels:      labels,
+		Description: desc,
+	}, nil
+}
+
+func (r *remoteEnvironmentResolver) DeleteRemoteEnvironment(ctx context.Context, name string) (gqlschema.DeleteRemoteEnvironmentOutput, error) {
+	err := r.reSvc.Delete(name)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while deleting %s `%s`", pretty.RemoteEnvironment, name))
+		return gqlschema.DeleteRemoteEnvironmentOutput{}, gqlerror.New(err, pretty.RemoteEnvironment, gqlerror.WithName(name))
+	}
+	return gqlschema.DeleteRemoteEnvironmentOutput{Name: name}, nil
+}
+
+func (r *remoteEnvironmentResolver) UpdateRemoteEnvironment(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.RemoteEnvironmentMutationOutput, error) {
+	desc, labels := r.returnWithDefaults(description, qglLabels)
+	_, err := r.reSvc.Update(name, desc, labels)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while updating %s `%s`", pretty.RemoteEnvironment, name))
+		return gqlschema.RemoteEnvironmentMutationOutput{}, gqlerror.New(err, pretty.RemoteEnvironment, gqlerror.WithName(name))
+	}
+	return gqlschema.RemoteEnvironmentMutationOutput{
+		Name:        name,
+		Labels:      labels,
+		Description: desc,
+	}, nil
 }
 
 func (r *remoteEnvironmentResolver) ConnectorServiceQuery(ctx context.Context, remoteEnvironment string) (gqlschema.ConnectorService, error) {
@@ -158,4 +198,15 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentStatusField(ctx context.Con
 	default:
 		return gqlschema.RemoteEnvironmentStatus(""), gqlerror.NewInternal(gqlerror.WithDetails("unknown status"))
 	}
+}
+
+func (r *remoteEnvironmentResolver) returnWithDefaults(description *string, gqlLabels *gqlschema.Labels) (desc string, labels gqlschema.Labels) {
+	if description != nil {
+		desc = *description
+	}
+	if gqlLabels != nil {
+		labels = *gqlLabels
+	}
+
+	return desc, labels
 }

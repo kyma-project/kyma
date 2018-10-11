@@ -49,7 +49,7 @@ isLocalEnv:
       cpu: 125m
       memory: 128Mi
     limits:
-      memory: 256Mi
+      memory: 512Mi
 
 # Enable to add load balanced service.
 # Example annotation will create AWS internal LoadBalancer.
