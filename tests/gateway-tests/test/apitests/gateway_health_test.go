@@ -17,7 +17,7 @@ func TestGatewayHealth(t *testing.T) {
 
 		t.Run("should be healthy", func(t *testing.T) {
 			// given
-			url := config.GatewayUrl + "/v1/health"
+			url := config.EventServiceUrl + "/v1/health"
 
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
