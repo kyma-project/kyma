@@ -95,7 +95,7 @@ To register a service, follow this template to prepare the request body:
 
 Include the request body you prepared in this call:
 ```
-curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.{CLUSTER_NAME}/{RE_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
 On a local deployment run:
@@ -111,7 +111,7 @@ A successful response returns the ID of the registered service:
 
 To check the details of a registered service, send this request:
 ```
-curl https://gateway.{CLUSTER_NAME}/{RE_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
 On a local deployment run:

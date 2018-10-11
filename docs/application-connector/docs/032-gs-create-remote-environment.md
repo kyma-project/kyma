@@ -3,7 +3,7 @@ title: Create a new Remote Environment
 type: Getting Started
 ---
 
-The Remote Environment Controller provisions and de-provisions the necessary deployments for the created Remote Environment (RE). The controller creates all Remote Environments in the `kyma-integration` Namespace.
+The Remote Environment Controller provisions and de-provisions the necessary deployments for the created Remote Environment (RE). The controller creates all Remote Environment Custom Resources in the `kyma-integration` Namespace.
 
 >**NOTE:** A Remote Environment represents a single connected external solution.
 

@@ -23,7 +23,7 @@ Follow this steps to get it using the CLI:
 
 - Make a POST request to the `tokens` endpoint:
   ```
-  curl -X POST http://localhost:8080/v1/remoteenvironments/{remote-environment-name}/tokens
+  curl -X POST http://localhost:8080/v1/remoteenvironments/{RE_NAME}/tokens
   ```
 
 A successful call returns the following response:
@@ -48,9 +48,9 @@ A successful call returns the following response:
 {
     "csrUrl": "{CSR_SIGNING_URL_WITH_TOKEN}",
     "api":{
-        "metadataUrl":      "https://gateway.{CLUSTER_NAME}/{REMOTE-ENVIRONMENT-NAME}/v1/metadata/services",
-        "eventsUrl":        "https://gateway.{CLUSTER_NAME}/{REMOTE-ENVIRONMENT-NAME}/v1/events",
-        "certificatesUrl":  "https://connector-service.{CLUSTER_NAME}/v1/remoteenvironments/{RE_NAME}",
+        "metadataUrl":      "https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/metadata/services",
+        "eventsUrl":        "https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/events",
+        "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/remoteenvironments/{RE_NAME}",
     },
     "certificate":{
         "subject":"OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={RE_NAME}",
@@ -84,8 +84,9 @@ openssl base64 -in generated.csr
 ```
 
 Send the encoded CSR to Kyma. Run:
+
 ```
-curl -H "Content-Type: application/json" -d '{"csr":"{BASE64_ENCODED_CSR_HERE}"}' {CSR_SIGNING_URL_WITH_TOKEN}
+curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' https://connector-service.{CLUSTER_DOMAIN}/v1/remoteenvironments/{RE_NAME}/client-certs?token=example-token-456
 ```
 
 The response contains a valid client certificate signed by the Kyma Certificate Authority:
