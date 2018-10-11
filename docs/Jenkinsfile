@@ -14,7 +14,7 @@ def azure_redis_cache = "azure-redis-cache"
 def azure_sql = "azure-sql"
 def azure_classes_docs_dir = "$service_brokers/azure-broker-service-classes"
 def api_gateway = "api-gateway"
-def authorization_and_authentication = "authorization-and-authentication"
+def security = "security"
 def logging = "logging"
 def label = "kyma-${UUID.randomUUID().toString()}"
 

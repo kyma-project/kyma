@@ -24,7 +24,7 @@ spec:
       id: tracing
     - displayName: API Gateway
       id: api-gateway
-    - displayName: Authorization and Authentication
-      id: authorization-and-authentication
+    - displayName: Security
+      id: security
     - displayName: Logging
       id: logging
