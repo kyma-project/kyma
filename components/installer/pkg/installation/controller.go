@@ -26,7 +26,6 @@ import (
 	informers "github.com/kyma-project/kyma/components/installer/pkg/client/informers/externalversions"
 	listers "github.com/kyma-project/kyma/components/installer/pkg/client/listers/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/installer/pkg/conditionmanager"
-	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 	"github.com/kyma-project/kyma/components/installer/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 
@@ -186,7 +185,7 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 
-		err = c.kymaSteps.InstallKyma(installationData, overrideProvider, consts.InstallAction)
+		err = c.kymaSteps.InstallKyma(installationData, overrideProvider)
 		if err != nil {
 			c.conditionManager.InstallError()
 
@@ -221,7 +220,7 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 
-		err = c.kymaSteps.InstallKyma(installationData, overrideProvider, consts.UpgradeAction)
+		err = c.kymaSteps.InstallKyma(installationData, overrideProvider)
 		if err != nil {
 			c.conditionManager.UpdateError()
 
