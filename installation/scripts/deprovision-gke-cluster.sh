@@ -9,7 +9,6 @@
 # - CLUSTER_NAME - name for the new cluster
 # - GCLOUD_COMPUTE_ZONE - zone in which the new cluster will be deprovisioned
 #
-#
 # REQUIREMENTS:
 # - gcloud
 # - gunzip
