@@ -40,11 +40,11 @@ type Loader struct {
 	tmpDir       string
 	loadChart    func(name string) (*chart.Chart, error)
 	createTmpDir func(dir, prefix string) (name string, err error)
-	log          *logrus.Entry
+	log          logrus.FieldLogger
 }
 
 // NewLoader returns new instance of Loader.
-func NewLoader(tmpDir string, log *logrus.Entry) *Loader {
+func NewLoader(tmpDir string, log logrus.FieldLogger) *Loader {
 	return &Loader{
 		tmpDir:       tmpDir,
 		loadChart:    chartutil.Load,
