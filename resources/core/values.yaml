@@ -42,6 +42,18 @@ global:
     version: 0.4.2
   kubeless_test_client:
     version: 0.4.2
+  metadata_service:
+    version: 0.4.2
+  metadata_service_tests:
+    version: 0.4.2
+  remote_environment_controller:
+    version: 0.4.2
+  remote_environment_controller_tests:
+    version: 0.4.2
+  test_environments:
+    version: 0.4.2
+  remote_environment_broker:
+    version: 0.4.2
   test_logging:
     version: 0.4.2
   test_logging_monitoring:
