@@ -3,7 +3,6 @@
 set -o errexit
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-LOCAL=0
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -38,7 +37,7 @@ kubectl apply -f ${CURRENT_DIR}/../resources/default-sa-rbac-role.yaml
 
 bash ${CURRENT_DIR}/install-tiller.sh
 
-if [ $LOCAL -eq 1 ]; then
+if [ $LOCAL ]; then
     kubectl apply -f ${CURRENT_DIR}/../resources/installer-local.yaml
 else
     kubectl apply -f ${CURRENT_DIR}/../resources/installer.yaml
