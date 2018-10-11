@@ -44,7 +44,7 @@ global:
     version: 83692fd8
   configurations_generator:
     dir: pr/
-    version: PR-1193
+    version: PR-1225
   connector_service:
     dir: develop/
     version: 4ea83ddd
