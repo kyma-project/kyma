@@ -233,6 +233,9 @@
 # The changelog-generator directory
 /tools/changelog-generator/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
 
+# The static-users-generator directory
+/tools/static-users-generator/ @piotrmsc @sjanota @kubadz 
+
 # kubeless-test-client tests
 /tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
