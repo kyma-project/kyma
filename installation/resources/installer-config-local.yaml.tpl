@@ -56,6 +56,19 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: core-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: core
+data:
+  console.cluster.headerLogoUrl: "assets/logo.svg"
+  console.cluster.headerTitle: ""
+  console.cluster.faviconUrl: "favicon.ico"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: ec-default-overrides
   namespace: kyma-installer
   labels:
@@ -64,7 +77,7 @@ metadata:
 data:
   deployment.args.sourceType: commerce
   service.externalapi.nodePort: "32001"
----
+---  
 apiVersion: v1
 kind: ConfigMap
 metadata:
