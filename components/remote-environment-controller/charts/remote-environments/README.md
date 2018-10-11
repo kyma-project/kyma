@@ -7,4 +7,4 @@ Read the [Application Connector documentation](../../../../docs/application-conn
 
 ## Details
 
-This directory contains the Remote Environment Helm chart that creates a new RE. Additionally, the chart installs tall components required to access Application Connector services in the context of the created RE. 
+This directory contains the Remote Environment Helm chart that installs all components required to access Application Connector's services in the context of the created RE. 
