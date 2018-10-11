@@ -4,7 +4,7 @@
 replicaCount: 1 # more than 1 replica is not currently supported
 image:
   repository: nats-streaming
-  tag: 0.9.2
+  tag: 0.11.0
   pullPolicy: IfNotPresent
 persistence:
   # If persistence.enabled is false, the MEMORY store will be used, otherwise the FILE store will be used

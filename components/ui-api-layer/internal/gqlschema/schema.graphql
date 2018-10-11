@@ -2,6 +2,8 @@
 
 scalar JSON
 
+scalar Labels
+
 scalar Timestamp
 
 # Content
@@ -166,7 +168,7 @@ type ServiceBroker {
     status: ServiceBrokerStatus!
     creationTimestamp: Timestamp!
     url: String!
-    labels: JSON!
+    labels: Labels!
 }
 
 type ClusterServiceBroker {
@@ -174,7 +176,7 @@ type ClusterServiceBroker {
     status: ServiceBrokerStatus!
     creationTimestamp: Timestamp!
     url: String!
-    labels: JSON!
+    labels: Labels!
 }
 
 type ServiceBrokerStatus {
@@ -360,7 +362,7 @@ type Deployment {
     environment: String!
     creationTimestamp: Timestamp!
     status: DeploymentStatus!
-    labels: JSON!
+    labels: Labels!
     containers: [Container!]!
     boundServiceInstanceNames: [String!]!
 }
@@ -398,7 +400,7 @@ type Environment {
 type RemoteEnvironment {
     name: String!
     description: String!
-    labels: JSON!
+    labels: Labels!
     services: [RemoteEnvironmentService!]!
     enabledInEnvironments: [String!]!
     status: RemoteEnvironmentStatus!
@@ -432,6 +434,16 @@ enum RemoteEnvironmentStatus {
     SERVING
     NOT_SERVING
     GATEWAY_NOT_CONFIGURED
+}
+
+type RemoteEnvironmentMutationOutput {
+    name: String!
+    description: String!
+    labels: Labels!
+}
+
+type DeleteRemoteEnvironmentOutput {
+    name: String!
 }
 
 type EventActivationEvent {
@@ -480,7 +492,7 @@ type Function {
     name: String!
     trigger: String!
     creationTimestamp: Timestamp!
-    labels: JSON!
+    labels: Labels!
     environment: String!
 }
 
@@ -572,6 +584,10 @@ type Mutation {
     deleteServiceBinding(serviceBindingName: String!, environment: String!): DeleteServiceBindingOutput
     createServiceBindingUsage(createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage
     deleteServiceBindingUsage(serviceBindingUsageName: String!, environment: String!): DeleteServiceBindingUsageOutput
+
+    createRemoteEnvironment(name: String!, description: String, labels: Labels): RemoteEnvironmentMutationOutput!
+    updateRemoteEnvironment(name: String!, description: String, labels: Labels): RemoteEnvironmentMutationOutput!
+    deleteRemoteEnvironment(name: String!): DeleteRemoteEnvironmentOutput!
 
     enableRemoteEnvironment(remoteEnvironment: String!, environment: String!): EnvironmentMapping
     disableRemoteEnvironment(remoteEnvironment: String!, environment: String!): EnvironmentMapping

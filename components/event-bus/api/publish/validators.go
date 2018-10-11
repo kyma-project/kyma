@@ -6,12 +6,13 @@ import (
 )
 
 var (
-	isValidID1     = regexp.MustCompile(AllowedIdChars).MatchString
 	isValidEventID = regexp.MustCompile(AllowedEventIDChars).MatchString
 
 	// fully-qualified topic name components
 	isValidEventType        = regexp.MustCompile(AllowedEventTypeChars).MatchString
 	isValidEventTypeVersion = regexp.MustCompile(AllowedEventTypeVersionChars).MatchString
+
+	isValidSourceId = regexp.MustCompile(AllowedSourceIdChars).MatchString
 )
 
 //ValidatePublish validates a publish POST request
@@ -35,6 +36,9 @@ func ValidatePublish(r *PublishRequest) *Error {
 	}
 
 	// validate the fully-qualified topic name components
+	if !isValidSourceId(r.SourceID){
+		return ErrorResponseWrongSourceId(r.SourceIdFromHeader)
+	}
 	if !isValidEventType(r.EventType) {
 		return ErrorResponseWrongEventType()
 	}
