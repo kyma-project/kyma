@@ -55,6 +55,7 @@ projects = [
     "tools/stability-checker",
     "tools/etcd-backup",
     "tools/etcd-tls-setup",
+    "tools/static-users-generator",
     "tests/test-logging-monitoring",
     "tests/logging",
     "tests/acceptance",
