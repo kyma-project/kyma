@@ -75,4 +75,4 @@ These components use this CR:
 | Component   |   Description |
 |:----------:|:------|
 | Binding Usage Controller |  Reacts to every action of creating, updating, or deleting ServiceBindingUsages in all Namespaces, and uses ServiceBindingUsage data to inject binding. |
-| ui-api-layer |  Exposes the given CR to the Console UI. It also allows you to create and delete a ServiceBindingUsage. |
+| UI API Layer |  Exposes the given CR to the Console UI. It also allows you to create and delete a ServiceBindingUsage. |
