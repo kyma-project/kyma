@@ -1,20 +1,22 @@
 # Stability Checker
 
 ## Overview
-Purpose of the Stability Checker is to check if a cluster is stable. To ensure that, Stability Checker is installed in the cluster and execute testing script in a loop. 
-Notifications with test executions summary are sent on a Slack channel.
+The purpose of the Stability Checker is to check if a cluster is stable. 
+To ensure the cluster's stability, install the Stability Checker in the cluster. 
+It runs a testing script in a loop and sends notifications with the test executions summary on a Slack channel.
 
 ## Installation
-
-You can install the Stability Checker on the Kyma cluster as a helm chart. Find the chart definition in the `deploy/chart` directory.
+Install the Stability Checker on the Kyma cluster as a Helm chart. Find the chart definition in the `deploy/chart` directory.
 1. Configure kubectl and helm to point your cluster by specifying **KUBECONFIG** environment variable. 
 ```
-export KUBECONFIG="/path/to/kubeconfig"
+export KUBECONFIG="/{path to kubeconfig}"
 ```
-1. Provision volume with a testing script, which then will be used by the Stability Checker. For that purpose, you can use 
-script `local/provision_volume.sh`. The script copies all files placed in `local/input` directory to PV.
 
-2. Install stability checker as a helm chart and provide proper configuration:
+> **NOTE:** Ensure that kubeconfig allows you to update cluster state by installing helm charts. 
+2. Provision volume with a testing script, which then will be used by the Stability Checker. You can use 
+`local/provision_volume.sh` script. The script copies all files placed in `local/input` directory to PV.
+
+3. Install the Stability Checker as a Helm chart and provide the proper configuration:
 
 ```
 helm install deploy/chart/stability-checker \
@@ -29,20 +31,19 @@ Below you can find configuration options:
 
  | Name | Default value | Description |
  |------|---------------|-------------|
-storage.claimName |stability-test-scripts-pvc| Name of PVC which is attached to Stability Checker pod. Volume is visible in the pod under `/data` path. 
-pathToTestingScript |/data/input/testing.sh| Full path to the testing script. Because script is delivered inside PV, it has to start with `/data`.
-slackClientWebhookUrl |-| Slack client webhook URL.
-slackClientChannelId |-| Slack channel ID, starts with `#`.
-slackClientToken |-| Slack client token.
-testThrottle | 5m | Period between test executions. Purpose of this parameter is to give K8s time to clean up all resources after the previous test execution.
-testResultWindowTime | 6h | Notifications will be sent after this time and contains test executions summary for this period. 
-stats.enabled | false | If true, an output from test executions is analyzed to find statistics for every specific test. Detailed information about how many times every test failed and succeeded will be enclosed to the slack notification. Detecting test result is done by regular expressions defined in `stats.failingTestRegexp` and `stats.successfulTestRegexp`.
-stats.failingTestRegexp |-| Regular expression which indicates that test has failed. Has to contain one capturing group which identifies test name.
-stats.successfulTestRegexp |-|  Regular expression which indicates that the test has passed. Has to contain one capturing group which identifies test name.
+**storage.claimName** |`stability-test-scripts-pvc`| Name of the Persistent Volume Claim (PVC) which is attached to the Stability Checker Pod. The volume is visible in the Pod under the `/data` path. 
+**pathToTestingScript** |`/data/input/testing-kyma.sh`| Full path to the testing script. As the script is delivered inside the PVC, the path must start with `/data`.
+**slackClientWebhookUrl** |-| Slack client webhook URL. For details, see the configuration of integrated applications in the Slack Workspace. 
+**slackClientChannelId** |-| Slack channel ID which starts with `#`.
+**slackClientToken** |-| Slack client token. For details, see the configuration of integrated applications in the Slack Workspace. 
+**testThrottle** | `5m`| Period between test executions. The purpose of this parameter is to give Kubernetes some time to clean up all resources after the previous test execution.
+**testResultWindowTime** | `6h` | Time period after which the Stability Checker sends notifications. Notifications contain a test executions summary for this period. 
+**stats.enabled** | `false` | If set to `true`, an output from test executions is analyzed to find statistics for every specific test. Detailed information about the number of times every test failed and succeeded is enclosed to the Slack notification. Regular expressions defined in **stats.failingTestRegexp** and **stats.successfulTestRegexp** detect test results. You can configure these two parameters only if **stats.enabled** is set to `true`. 
+**stats.failingTestRegexp** |-| Regular expression which indicates that the test has failed. It must contain one capturing group which identifies the test name.
+**stats.successfulTestRegexp** |-|  Regular expression which indicates that the test has passed. It must contain one capturing group which identifies the test name.
 
 
 > **NOTE:** You must install the chart after running the core tests, to avoid running the same tests in parallel.
-Following values can be specified for chart:
 
 ## Development
 Use the following helpers for the local development:
