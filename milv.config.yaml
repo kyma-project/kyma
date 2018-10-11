@@ -18,3 +18,6 @@ files:
   - path: "./kyma/docs/authorization-and-authentication/docs/004-details-kubecofig-generator.md"
     config:
       white-list-external: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
+  - path: "./kyma/docs/application-connector/docs/012-details-consume-services.md"
+    config:
+      white-list-external: ["https://www.orders.com/v1/orders"]
