@@ -1,9 +1,9 @@
 ---
-title: Register and manage services
+title: Register a service
 type: Getting Started
 ---
 
-This guide shows you how to register and manage the services of your external solution in Kyma.
+This guide shows you how to register a service of your external solution in Kyma.
 
 ## Prerequisites
 
@@ -95,8 +95,14 @@ To register a service, follow this template to prepare the request body:
 
 Include the request body you prepared in this call:
 ```
-curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.kyma.local:$NODE_PORT/ec-default/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.{CLUSTER_NAME}/{RE_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
+
+On a local deployment run:
+```
+curl -X POST -d '{YOUR_REQUEST_BODY}' https://gateway.kyma.local:$NODE_PORT/{RE_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+```
+
 
 A successful response returns the ID of the registered service:
 ```
@@ -105,19 +111,10 @@ A successful response returns the ID of the registered service:
 
 To check the details of a registered service, send this request:
 ```
-curl https://gateway.kyma.local:$NODE_PORT/ec-default/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl https://gateway.{CLUSTER_NAME}/{RE_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
-## Update a service
-
-To update an existing service, prepare a new request body using the template from the following step and send it in this request:
+On a local deployment run:
 ```
-curl -X PUT -d '{YOUR_NEW_REQUEST_BODY}' https://gateway.kyma.local:$NODE_PORT/ec-default/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-```
-
-## Delete a service
-
-To delete a service, send this call:
-```
-curl -X DELETE https://gateway.kyma.local:$NODE_PORT/ec-default/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl https://gateway.{kyma.local:$NODE_PORT}/{RE_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```

@@ -11,7 +11,6 @@ To complete this guide, your cluster must have at least one Remote Environment c
 
 ## Steps
 
-
 1. List all Remote Environments bound to the `production` Environment:
   ```
   kubectl get em -n production

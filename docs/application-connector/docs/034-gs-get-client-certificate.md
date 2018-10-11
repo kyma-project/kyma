@@ -9,11 +9,6 @@ This guide shows you how to get the client certificate.
 
 ## Prerequisites
 
-- You need a private RSA key for your external solution. If your solution doesn't have one, generate it using this command:
-  ```
-  openssl genrsa -out generated.key 4096
-  ```
-
 - [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which fulfil high security standards.
 
 ## Get the configuration URL with a token
@@ -39,15 +34,6 @@ A successful call returns the following response:
   }
   ```
 
-Alternatively, use the UI:
-
-  - Go to the Kyma console UI.
-  - Select **Administration**.
-  - Select the **Remote Environments** from the **Integration** section.
-  - Choose the Remote Environment to which you want to connect the external solution.
-  - Click **Connect Remote Environment**.
-  - Copy the token by clicking **Copy to clipboard**.
-
 ## Get the CSR information and configuration details from Kyma
 
 Use the link you got in the previous step to fetch the CSR information and configuration details required to connect your external solution. Run:
@@ -62,9 +48,9 @@ A successful call returns the following response:
 {
     "csrUrl": "{CSR_SIGNING_URL_WITH_TOKEN}",
     "api":{
-        "metadataUrl":      "https://gateway.{CLUSTER_NAME}.kyma.cluster.cx/{REMOTE-ENVIRONMENT-NAME}/v1/metadata/services",
-        "eventsUrl":        "https://gateway.{CLUSTER_NAME}.kyma.cluster.cx/{REMOTE-ENVIRONMENT-NAME}/v1/events",
-        "certificatesUrl":  "https://connector-service.{CLUSTER_NAME}.kyma.cluster.cx/v1/remoteenvironments/{RE_NAME}",
+        "metadataUrl":      "https://gateway.{CLUSTER_NAME}/{REMOTE-ENVIRONMENT-NAME}/v1/metadata/services",
+        "eventsUrl":        "https://gateway.{CLUSTER_NAME}/{REMOTE-ENVIRONMENT-NAME}/v1/events",
+        "certificatesUrl":  "https://connector-service.{CLUSTER_NAME}/v1/remoteenvironments/{RE_NAME}",
     },
     "certificate":{
         "subject":"OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={RE_NAME}",
@@ -92,10 +78,12 @@ When you connect an external solution to a local Kyma deployment, you must set t
 
 Generate a CSR using the values obtained in the previous step:
 ```
-openssl req -new -out generated.csr -key generated.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN={RE_NAME}"
+openssl genrsa -out generated.key 2048
+openssl req -new -sha256 -out generated.csr -key generated.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN={RE_NAME}"
+openssl base64 -in generated.csr
 ```
 
-After the CSR is created, encode it with Base64. Send the encoded CSR to Kyma. Run:
+Send the encoded CSR to Kyma. Run:
 ```
 curl -H "Content-Type: application/json" -d '{"csr":"{BASE64_ENCODED_CSR_HERE}"}' {CSR_SIGNING_URL_WITH_TOKEN}
 ```
@@ -107,4 +95,4 @@ The response contains a valid client certificate signed by the Kyma Certificate 
 }
 ```
 
-After you receive the certificate, register the services of your external solution using the Metadata API.
+After you receive the certificate, decode it and use it in your application. Register the services of your external solution through the Metadata Service.
