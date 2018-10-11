@@ -17,54 +17,12 @@ This is a sample resource that registers the `re-prod` Remote Environment which 
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: RemoteEnvironment
 metadata:
-  clusterName: ""
-  creationTimestamp: 2018-09-25T12:24:41Z
-  generation: 1
-  labels:
-    app: ec-default-gateway
-    heritage: Tiller-gateway
-    release: ec-default-gateway
-  name: ec-default
-  namespace: ""
-  resourceVersion: "58761"
-  selfLink: /apis/applicationconnector.kyma-project.io/v1alpha1/remoteenvironments/ec-default
-  uid: fa2d9272-c0bd-11e8-ad1b-000d3a2fa0d4
+  name: system_prod
 spec:
-  accessLabel: echo-access-label
-  description: This Remote Environment corresponds to the connected remote system.
-  labels: null
-  services:
-  - description: Events v1
-    displayName: Events v1
-    entries:
-    - credentialsSecretName: ""
-      gatewayUrl: ""
-      oauthUrl: ""
-      targetUrl: ""
-      type: Events
-    id: 40d3f17a-b376-4b02-8755-f24ceb76b27a
-    identifier: ec-all-events
-    labels:
-      connected-app: ec-default
-    longDescription: Events
-    name: ec-events-v1-bbd7f
-    providerDisplayName: Provider
-  - description: Commerce Webservices
-    displayName: Commerce Webservices
-    entries:
-    - accessLabel: re-ec-default-58cc45cd-b9ca-4c53-8019-0296774b7aa1
-      credentialsSecretName: re-ec-default-58cc45cd-b9ca-4c53-8019-0296774b7aa1
-      gatewayUrl: http://re-ec-default-58cc45cd-b9ca-4c53-8019-0296774b7aa1.kyma-integration.svc.cluster.local
-      oauthUrl: https://oauth/token
-      targetUrl: https://rest/v2
-      type: API
-    id: 58cc45cd-b9ca-4c53-8019-0296774b7aa1
-    identifier: commercewebservices
-    labels:
-      connected-app: ec-default
-    longDescription: RealLife E-Commerce Webservices v2
-    name: rlife-e-commerce-webservices-v2-a4508
-    providerDisplayName: Provider
+  description: This is the system_production Remote Environment.
+  labels:
+    region: us
+    kind: production
 ```
 
 ## Custom resource parameters
@@ -75,22 +33,5 @@ This table lists all the possible parameters of a given resource together with t
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
-| **spec.accessLabel** |    **NO**   | Labels the RE when an EnvironmentMapping is created. |
+| **spec.description** |    **NO**   | Provides a short, human-readable description of the RE. |
 | **spec.labels** |    **NO**   | Defines the labels of the RE. |
-| **spec.services** |    **NO**   | Contains all services that the Remote Environment provides. |
-| **spec.services.id** |    **YES**   | Identifies the service that the Remote Environment provides. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.identifier** |    **NO**   | Provides an additional identifier of the ServiceClass. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.name** |    **NO**   | Represents a unique name of the service used by the Service Catalog. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.displayName** |    **YES**   | Specifies a human-readable name of the Remote Environment service. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.description** |    **NO**   | Provides a short, human-readable description of the service offered by the RE. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.longDescription** |    **NO**   | Provides a longer, human-readable description of the service offered by the RE. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.providerDisplayName** |    **YES**   | Specifies a human-readable name of the Remote Environment service provider. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.tags** |    **NO**   | Specifies additional tags used for better documentation of the available APIs. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.labels** |    **NO**   | Specifies additional labels for the service offered by the RE. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.entries** |    **YES**   | Contains the information about the APIs and Events that the service offered by the RE provides. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.entries.type** |    **YES**   | Specify the entry type: API or Event. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.entries.gatewayUrl** |    **NO**   | Specifies the URL of the Application Connector. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.entries.accessLabel** |    **NO**   | Specifies the label used in Istio rules in the Application Connector. This field is required for the API entry type. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.entries.targetUrl** |    **NO**   | Specifies the URL to a given API. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.entries.oauthUrl** |    **NO**   | Specifies the URL used to authorize with a given API. This field is required for the API entry type. Parameter provider by the Metadata Service, do not edit. |
-| **spec.services.entries.credentialsSecretName** |    **NO**   | Specifies the name of the Secret which allows you to a call to a given API. This field is required if the **spec.services.entries.oauthUrl** is specified. Parameter provider by the Metadata Service, do not edit. |
