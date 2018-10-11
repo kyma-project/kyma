@@ -23,7 +23,7 @@ Prometheus uses the a label selector **spec.ruleSelector** to identify those Con
 
 To define a new alert rule in Kyma, create a ConfigMap labelled with `role: alert-rules` as well as the name of the Prometheus object as `prometheus: {{ .Release.Name }}`.
 
-Kyma provides the file [unhealthy-pods-configmap.yaml](templates/unhealthy-pods-configmap.yaml) which serves as a reference to define Rules as configmaps.
+Kyma provides the file [alert-rules-configmap.yaml](templates/alert-rules-configmap.yaml) which serves as a reference to define Rules as configmaps.
 
 ```yaml
 apiVersion: v1
