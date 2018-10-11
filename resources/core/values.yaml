@@ -42,6 +42,9 @@ global:
   binding_usage_controller:
     dir: develop/
     version: 83692fd8
+  configurations_generator:
+    dir: pr/
+    version: PR-1193
   connector_service:
     dir: develop/
     version: 4ea83ddd

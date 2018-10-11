@@ -17,7 +17,7 @@ spec:
         sidecar.istio.io/inject: "true"
     spec:
       containers:
-      - image: {{ .Values.global.containerRegistry.path }}/{{ .Chart.Name }}:{{ .Chart.Version }}
+      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.configurations_generator.dir }}configurations-generator:{{ .Values.global.configurations_generator.version }}
         name: {{ template "name" . }}
         command: [
           "/app",
