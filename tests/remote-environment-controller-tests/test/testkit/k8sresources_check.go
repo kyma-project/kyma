@@ -2,12 +2,12 @@ package testkit
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/require"
 	v1apps "k8s.io/api/apps/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
 	"time"
-	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -26,33 +26,33 @@ type K8sChecker interface {
 
 func NewK8sCheckerForCreatedResources(client K8sResourcesClient, retryCount int, retryWaitTime time.Duration) K8sChecker {
 	return &k8sChecker{
-		client:        client,
-		retryCount:    retryCount,
-		retryWaitTime: retryWaitTime,
-		resourcesShouldExist:true,
-		errCheckFunc:requireNoError,
-		resourceCheckFunc:requireNotEmpty,
+		client:               client,
+		retryCount:           retryCount,
+		retryWaitTime:        retryWaitTime,
+		resourcesShouldExist: true,
+		errCheckFunc:         requireNoError,
+		resourceCheckFunc:    requireNotEmpty,
 	}
 }
 
 func NewK8sCheckerForDeletedResources(client K8sResourcesClient, retryCount int, retryWaitTime time.Duration) K8sChecker {
 	return &k8sChecker{
-		client:        client,
-		retryCount:    retryCount,
-		retryWaitTime: retryWaitTime,
-		resourcesShouldExist:false,
-		errCheckFunc:requireError,
-		resourceCheckFunc:requireEmpty,
+		client:               client,
+		retryCount:           retryCount,
+		retryWaitTime:        retryWaitTime,
+		resourcesShouldExist: false,
+		errCheckFunc:         requireError,
+		resourceCheckFunc:    requireEmpty,
 	}
 }
 
 type k8sChecker struct {
-	client        K8sResourcesClient
-	retryCount    int
-	retryWaitTime time.Duration
+	client               K8sResourcesClient
+	retryCount           int
+	retryWaitTime        time.Duration
 	resourcesShouldExist bool
-	errCheckFunc  func(*testing.T, error)
-	resourceCheckFunc func(*testing.T, interface{})
+	errCheckFunc         func(*testing.T, error)
+	resourceCheckFunc    func(*testing.T, interface{})
 }
 
 func (checker *k8sChecker) CheckK8sResources(t *testing.T, reName string) {

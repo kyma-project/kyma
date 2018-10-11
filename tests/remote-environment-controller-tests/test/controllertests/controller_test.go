@@ -94,7 +94,7 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 	testReName := "test-delete-re"
 	testRe, err := k8sResourcesClient.CreateDummyRemoteEnvironment(testReName, testReName)
 	require.NoError(t, err)
-	time.Sleep(2*initialWaitTimeSeconds)
+	time.Sleep(2 * initialWaitTimeSeconds)
 
 	t.Run("should delete RE helm chart when RE is deleted", func(t *testing.T) {
 		// when
@@ -115,7 +115,7 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 	})
 }
 
-func releaseAndResourcesShouldExist(t *testing.T, helmClient testkit.HelmClient, k8sChecker testkit.K8sChecker, reName string){
+func releaseAndResourcesShouldExist(t *testing.T, helmClient testkit.HelmClient, k8sChecker testkit.K8sChecker, reName string) {
 	// when
 	exists, err := helmClient.ExistWhenShould(reName)
 

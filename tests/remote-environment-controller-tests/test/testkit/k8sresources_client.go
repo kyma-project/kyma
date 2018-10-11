@@ -81,7 +81,7 @@ func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, accessLab
 		TypeMeta:   v1.TypeMeta{Kind: "RemoteEnvironment", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: name, Namespace: c.namespace},
 		Spec: v1alpha1.RemoteEnvironmentSpec{
-			Services: []v1alpha1.Service{},
+			Services:    []v1alpha1.Service{},
 			AccessLabel: accessLabel,
 		},
 	}
