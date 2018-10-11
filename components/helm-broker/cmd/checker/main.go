@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/ybundle"
 	"github.com/sirupsen/logrus"
 )
@@ -20,23 +19,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	loader := ybundle.NewLoader(dir, logger.WithField("service", "bundle checker"))
+	loader := ybundle.NewLoader(dir, logger)
 
 	if len(os.Args) < 2 {
 		fmt.Println("Provide path to a bundle")
-		return
-	}
-
-	bundle, _, err := loader.LoadDir(os.Args[1])
-	if err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
-	printBundleInfo(bundle)
-}
+	bundleName := os.Args[1]
 
-func printBundleInfo(b *internal.Bundle) {
-	fmt.Printf("Bundle name: %s\n", b.Name)
-	fmt.Printf("Version: %s\n", b.Version.String())
-	fmt.Printf("Description: %s\n", b.Description)
+	fmt.Printf("==> Checking %s\n", bundleName)
+	_, _, err = loader.LoadDir(bundleName)
+	if err != nil {
+		fmt.Printf("[ERROR] %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Print("Check OK")
 }
