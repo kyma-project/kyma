@@ -4,7 +4,7 @@ set -o errexit
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR="${CURRENT_DIR}/../.."
-INSTALLER_YAML_PATH="${ROOT_DIR}/installation/resources/installer.yaml"
+INSTALLER_YAML_PATH="${ROOT_DIR}/installation/resources/installer-local.yaml"
 
 if [ -f $INSTALLER_YAML_PATH ]; then
     VERSION=$(grep "image: " $INSTALLER_YAML_PATH | cut -d":" -f2-) 
