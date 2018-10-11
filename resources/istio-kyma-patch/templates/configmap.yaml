@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-kyma-patch-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: istio-kyma-patch
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  istio-egressgateway.deployment.patch.json: |
+    [
+      {
+        "op": "replace",
+        "path": "/spec/template/spec/containers/0/args/15",
+        "value": "zipkin.kyma-system:9411"
+      }
+    ]
+
+  istio-ingressgateway.deployment.patch.json: |
+    [
+      {
+        "op": "replace",
+        "path": "/spec/template/spec/containers/0/args/15",
+        "value": "zipkin.kyma-system:9411"
+      }
+      {{ if .Values.global.isLocalEnv }}
+      ,{
+        "op": "add",
+        "path": "/spec/template/spec/containers/0/ports/0/hostPort",
+        "value": 80
+      },{
+        "op": "add",
+        "path": "/spec/template/spec/containers/0/ports/1/hostPort",
+        "value": 443
+      }
+      {{ end }}
+    ]
+
+  istio-pilot.deployment.patch.json: |
+    [
+      {
+        "op": "add",
+        "path": "/spec/template/spec/containers/0/args",
+        "value": ["discovery", "--webhookEndpoint", "http://istio-webhook:5000"]
+      }
+    ]
+
+  istio-policy.deployment.patch.json: |
+    [
+      {
+        "op": "replace",
+        "path": "/spec/template/spec/containers/0/args/4",
+        "value": "--trace_zipkin_url=http://zipkin.kyma-system:9411/api/v1/spans"
+      }
+    ]
+
+  istio-telemetry.deployment.patch.json: |
+    [
+      {
+        "op": "replace",
+        "path": "/spec/template/spec/containers/0/args/4",
+        "value": "--trace_zipkin_url=http://zipkin.kyma-system:9411/api/v1/spans"
+      }
+    ]
+
+
+  delete: |
+    deployment prometheus
+    configmap prometheus
+    service prometheus
+    serviceaccount prometheus
+
+    deployment servicegraph
+    service servicegraph
+
+    deployment grafana
+    configmap grafana
+    policy grafana-ports-mtls-disabled
+    pvc istio-grafana-pvc
+    secret grafana
+    service grafana
+
+    deployment istio-tracing
+    service zipkin
+    service tracing
+    service jaeger-query
+    service jaeger-agent
+    service jaeger-collector
+
+  required-crds: |
+    policies.authentication.istio.io

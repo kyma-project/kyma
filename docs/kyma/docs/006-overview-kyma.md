@@ -9,7 +9,7 @@ Read, learn, and try on your own to:
 - [Install Kyma locally](https://kyma-project.io/docs/latest/root/kyma#getting-started-local-kyma-installation)
 - [Install Kyma on a cluster](https://kyma-project.io/docs/latest/root/kyma#getting-started-cluster-kyma-installation)
 - [Deploy a sample service locally](https://kyma-project.io/docs/latest/root/kyma#getting-started-sample-service-deployment-on-local)
-- [Deploy a service on a cluster](https://kyma-project.io/docs/latest/root/kyma#getting-started-sample-service-deployment-on-a-cluster)
+- [Deploy a service on a cluster](https://kyma-project.io/docs/latest/root/kyma#getting-started-install-kyma-on-a-gke-cluster)
 - [Develop a service locally without using Docker](https://kyma-project.io/docs/latest/root/kyma#getting-started-develop-a-service-locally-without-using-docker)
 - [Publish a service Docker image and deploy it to Kyma](https://kyma-project.io/docs/latest/root/kyma#getting-started-publish-a-service-docker-image-and-deploy-it-to-kyma)
 - [Set up an external system on the local Kyma installation](https://kyma-project.io/docs/latest/components/application-connector#getting-started-set-up-a-remote-environment-on-local-kyma-installation)

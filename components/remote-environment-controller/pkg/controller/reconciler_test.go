@@ -42,7 +42,9 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		helmClient.On("ListReleases").Return(listReleaseResponse, nil)
 		helmClient.On("InstallReleaseFromChart", reChartDirectory, releasesNamespace, reName, "").Return(nil, nil)
 
-		reReconciler := NewReconciler(managerClient, helmClient, "", releasesNamespace)
+		reClient := &mocks.RemoteEnvironmentClient{}
+
+		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -56,6 +58,45 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
 		helmClient.AssertExpectations(t)
+	})
+
+	t.Run("should set access-label when new RE is created", func(t *testing.T) {
+		// given
+		namespacedName := types.NamespacedName{
+			Name: reName,
+		}
+
+		listReleaseResponse := &rls.ListReleasesResponse{
+			Releases: []*release.Release{},
+		}
+
+		managerClient := &mocks.ManagerClient{}
+		managerClient.On(
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			Run(setupREWithoutAccessLabel).Return(nil)
+
+		helmClient := &helmmocks.HelmClient{}
+		helmClient.On("ListReleases").Return(listReleaseResponse, nil)
+		helmClient.On("InstallReleaseFromChart", reChartDirectory, releasesNamespace, reName, "").Return(nil, nil)
+
+		reClient := &mocks.RemoteEnvironmentClient{}
+		reClient.On("Update", mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(nil, nil)
+
+		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
+
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
+
+		// when
+		result, err := reReconciler.Reconcile(request)
+
+		// then
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		managerClient.AssertExpectations(t)
+		helmClient.AssertExpectations(t)
+		reClient.AssertExpectations(t)
 	})
 
 	t.Run("should delete chart when RE is deleted", func(t *testing.T) {
@@ -76,7 +117,9 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("DeleteRelease", reName).Return(uninstallResponse, nil)
 
-		reReconciler := NewReconciler(managerClient, helmClient, "", releasesNamespace)
+		reClient := &mocks.RemoteEnvironmentClient{}
+
+		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -113,7 +156,9 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases").Return(listReleaseResponse, nil)
 
-		reReconciler := NewReconciler(managerClient, helmClient, "", releasesNamespace)
+		reClient := &mocks.RemoteEnvironmentClient{}
+
+		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -129,6 +174,47 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		helmClient.AssertExpectations(t)
 	})
 
+	t.Run("should correct access-label if updated with wrong value", func(t *testing.T) {
+		// given
+		namespacedName := types.NamespacedName{
+			Name: reName,
+		}
+
+		listReleaseResponse := &rls.ListReleasesResponse{
+			Count: 1,
+			Releases: []*release.Release{
+				{Name: reName},
+			},
+		}
+
+		managerClient := &mocks.ManagerClient{}
+		managerClient.On(
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			Run(setupREWithWrongAccessLabel).Return(nil)
+
+		helmClient := &helmmocks.HelmClient{}
+		helmClient.On("ListReleases").Return(listReleaseResponse, nil)
+
+		reClient := &mocks.RemoteEnvironmentClient{}
+		reClient.On("Update", mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(nil, nil)
+
+		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
+
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
+
+		// when
+		result, err := reReconciler.Reconcile(request)
+
+		// then
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		managerClient.AssertExpectations(t)
+		helmClient.AssertExpectations(t)
+		reClient.AssertExpectations(t)
+	})
+
 	t.Run("should return error if error while Getting instance different than NotFound", func(t *testing.T) {
 		// given
 		namespacedName := types.NamespacedName{
@@ -142,7 +228,9 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 
 		helmClient := &helmmocks.HelmClient{}
 
-		reReconciler := NewReconciler(managerClient, helmClient, "", releasesNamespace)
+		reClient := &mocks.RemoteEnvironmentClient{}
+
+		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -172,7 +260,9 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("ListReleases").Return(nil, errors.NewBadRequest("error"))
 
-		reReconciler := NewReconciler(managerClient, helmClient, "", releasesNamespace)
+		reClient := &mocks.RemoteEnvironmentClient{}
+
+		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -189,7 +279,23 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 	})
 }
 
-func setupREInstance(args mock.Arguments) {
+func getREFromArgs(args mock.Arguments) *v1alpha1.RemoteEnvironment {
 	reInstance := args.Get(2).(*v1alpha1.RemoteEnvironment)
 	reInstance.Name = reName
+	return reInstance
+}
+
+func setupREInstance(args mock.Arguments) {
+	reInstance := getREFromArgs(args)
+	reInstance.Spec.AccessLabel = reName
+}
+
+func setupREWithoutAccessLabel(args mock.Arguments) {
+	reInstance := getREFromArgs(args)
+	reInstance.Spec.AccessLabel = ""
+}
+
+func setupREWithWrongAccessLabel(args mock.Arguments) {
+	reInstance := getREFromArgs(args)
+	reInstance.Spec.AccessLabel = ""
 }

@@ -5,7 +5,6 @@ import (
 
 	actionmanager "github.com/kyma-project/kyma/components/installer/pkg/actionmanager"
 	"github.com/kyma-project/kyma/components/installer/pkg/config"
-	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 	internalerrors "github.com/kyma-project/kyma/components/installer/pkg/errors"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymainstallation"
@@ -52,7 +51,7 @@ func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientse
 }
 
 //InstallKyma .
-func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData, action string) error {
+func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 
 	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
 	if downloadKymaErr != nil {
@@ -70,29 +69,13 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 		stepName := "Processing component " + component.GetReleaseName()
 		steps.statusManager.InProgress(stepName)
 
-		if component.Name == "provision-bundles" { // Legacy support for bash provision-bundles script - to be deleted later
-			if action == consts.InstallAction {
-				err := steps.ProvisionBundles(installationData)
-				if steps.errorHandlers.CheckError("Step error: ", err) {
-					steps.statusManager.Error(stepName)
-					return err
-				}
-			} else {
-				err := steps.UpdateBundles(installationData)
-				if steps.errorHandlers.CheckError("Step installation error: ", err) {
-					steps.statusManager.Error(stepName)
-					return err
-				}
-			}
-		} else {
-			step := stepsFactory.NewStep(component)
-			steps.PrintStep(stepName)
+		step := stepsFactory.NewStep(component)
+		steps.PrintStep(stepName)
 
-			installErr := step.Run()
-			if steps.errorHandlers.CheckError("Step error: ", installErr) {
-				steps.statusManager.Error(stepName)
-				return installErr
-			}
+		installErr := step.Run()
+		if steps.errorHandlers.CheckError("Step error: ", installErr) {
+			steps.statusManager.Error(stepName)
+			return installErr
 		}
 
 		log.Println(stepName + "...DONE")

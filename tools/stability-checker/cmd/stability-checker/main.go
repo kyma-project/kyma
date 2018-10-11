@@ -9,10 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/kyma-project/kyma/tools/stability-checker/internal/summary"
-
 	"github.com/kyma-project/kyma/tools/stability-checker/internal/notifier"
 	"github.com/kyma-project/kyma/tools/stability-checker/internal/runner"
+	"github.com/kyma-project/kyma/tools/stability-checker/internal/summary"
 	"github.com/kyma-project/kyma/tools/stability-checker/platform/logger"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -80,11 +79,17 @@ func main() {
 
 	logFetcher, err := podlogger.NewPodLogFetcher(cfg.WorkingNamespace, cfg.PodName)
 	fatalOnError(err)
-	outputProcessor, err := summary.NewOutputProcessor(cfg.Stats.FailingTestRegexp, cfg.Stats.SuccessfulTestRegexp)
-	fatalOnError(err)
-	summarizer := summary.NewService(logFetcher, outputProcessor)
 
-	sNotifier := notifier.New(slackClient, testRenderer, summarizer, cfgMapClient, cfg.TestConfigMapName, cfg.TestResultWindowTime, cfg.PodName, cfg.WorkingNamespace, cfg.Stats.Enabled, log)
+	sNotifier := notifier.New(slackClient, testRenderer, cfgMapClient, cfg.TestConfigMapName, cfg.TestResultWindowTime, cfg.PodName, cfg.WorkingNamespace, log)
+
+	if cfg.Stats.Enabled {
+		outputProcessor, err := summary.NewOutputProcessor(cfg.Stats.FailingTestRegexp, cfg.Stats.SuccessfulTestRegexp)
+		fatalOnError(err)
+		summarizer := summary.NewService(logFetcher, outputProcessor)
+
+		sNotifier.WithSummarizer(summarizer)
+	}
+
 	go sNotifier.Run(ctx)
 
 	// Test runner

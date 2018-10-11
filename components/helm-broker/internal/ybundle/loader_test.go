@@ -18,40 +18,53 @@ import (
 // TestLoaderLoad processes given test case bundle and compares it to the
 // corresponding files from ./testdata/bundle-redis-0.0.1.golden dir
 func TestLoaderLoadSuccess(t *testing.T) {
-	// given
-	fixBaseDir := "../../tmp"
-	var fixDirName string
-	createTmpDirFake := func(dir, prefix string) (string, error) {
-		assert.Equal(t, fixBaseDir, dir)
+	for tn, tc := range map[string]struct {
+		tgzPath string
+	}{
+		"additional files in chart directory should be ignored": {
+			tgzPath: "./testdata/bundle-ignore-file-in-chart-dir.input.tgz",
+		},
+		"simple": {
+			tgzPath: "testdata/bundle-redis-0.0.1.input.tgz",
+		},
+	} {
+		t.Run(tn, func(t *testing.T) {
+			// given
+			fixBaseDir := "../../tmp"
+			var fixDirName string
+			createTmpDirFake := func(dir, prefix string) (string, error) {
+				assert.Equal(t, fixBaseDir, dir)
 
-		name, err := ioutil.TempDir(dir, prefix)
-		fixDirName = name
-		return name, err
+				name, err := ioutil.TempDir(dir, prefix)
+				fixDirName = name
+				return name, err
+			}
+
+			bundleLoader := ybundle.NewLoader(fixBaseDir, spy.NewLogDummy())
+			bundleLoader.SetCreateTmpDir(createTmpDirFake)
+
+			expChart, err := chartutil.Load("testdata/bundle-redis-0.0.1.golden/chart/redis")
+			require.NoError(t, err)
+
+			fd, err := os.Open(tc.tgzPath)
+			require.NoError(t, err)
+			defer fd.Close()
+
+			// when
+			yb, c, err := bundleLoader.Load(fd)
+
+			// then
+			require.NoError(t, err)
+
+			require.Len(t, c, 1)
+			assert.Equal(t, expChart, c[0])
+
+			require.NotNil(t, yb)
+			assert.Equal(t, fixtureBundle(t, "./testdata/bundle-redis-0.0.1.golden/"), *yb)
+
+			assertDirNotExits(t, filepath.Join("../tmp/", fixDirName))
+		})
 	}
-
-	bundleLoader := ybundle.NewLoader(fixBaseDir, spy.NewLogDummy())
-	bundleLoader.SetCreateTmpDir(createTmpDirFake)
-
-	expChart, err := chartutil.Load("testdata/bundle-redis-0.0.1.golden/chart/redis")
-	require.NoError(t, err)
-
-	fd, err := os.Open("testdata/bundle-redis-0.0.1.input.tgz")
-	require.NoError(t, err)
-	defer fd.Close()
-
-	// when
-	yb, c, err := bundleLoader.Load(fd)
-
-	// then
-	require.NoError(t, err)
-
-	require.Len(t, c, 1)
-	assert.Equal(t, expChart, c[0])
-
-	require.NotNil(t, yb)
-	assert.Equal(t, fixtureBundle(t, "./testdata/bundle-redis-0.0.1.golden/"), *yb)
-
-	assertDirNotExits(t, filepath.Join("../tmp/", fixDirName))
 }
 
 func TestLoaderLoadFailure(t *testing.T) {
@@ -65,15 +78,15 @@ func TestLoaderLoadFailure(t *testing.T) {
 		},
 		"missing chart directory": {
 			tgzPath: "./testdata/bundle-missing-chart-dir.input.tgz",
-			errMsg:  "while loading chart: bundle does not contains \"chart\" directory",
+			errMsg:  "while loading chart: while discovering the name of the Helm Chart under the \"chart\" bundle directory: bundle does not contains \"chart\" directory",
 		},
-		"multiple charts in chart directory": {
+		"multiple folders in chart directory": {
 			tgzPath: "./testdata/bundle-multiple-charts-in-chart-dir.input.tgz",
-			errMsg:  "while loading chart: \"chart\" directory MUST contain one folder",
+			errMsg:  "while loading chart: while discovering the name of the Helm Chart under the \"chart\" bundle directory: \"chart\" directory MUST contain only one Helm Chart folder but found multiple directories: [redis, redis-v2]",
 		},
 		"missing chart in chart directory": {
 			tgzPath: "./testdata/bundle-no-chart-in-chart-dir.input.tgz",
-			errMsg:  "while loading chart: \"chart\" directory MUST contain one folder",
+			errMsg:  "while loading chart: while discovering the name of the Helm Chart under the \"chart\" bundle directory: \"chart\" directory SHOULD contain one Helm Chart folder but it's empty",
 		},
 		"missing meta.yaml file for micro plan": {
 			tgzPath: "./testdata/bundle-missing-plan-meta-file.input.tgz",

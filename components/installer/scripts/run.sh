@@ -38,7 +38,8 @@ if [[ ! ${SKIP_MINIKUBE_START} ]]; then
     bash ${KYMA_PATH}/installation/scripts/minikube.sh --domain "kyma.local"
 fi
 
-bash ${CURRENT_DIR}/build.sh ${KYMA_PATH}
+bash ${CURRENT_DIR}/build.sh
+bash ${KYMA_PATH}/installation/scripts/build-kyma-installer.sh --installer-version "dev"
 bash ${KYMA_PATH}/installation/scripts/generate-local-config.sh
 
 if [[ -z ${CR_PATH} ]]; then
