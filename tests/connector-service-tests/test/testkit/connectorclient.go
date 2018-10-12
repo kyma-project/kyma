@@ -24,7 +24,9 @@ type connectorClient struct {
 	httpClient     *http.Client
 }
 
-func NewConnectorClient(remoteEnv, internalAPIUrl, externalAPIUrl string, client *http.Client) ConnectorClient {
+func NewConnectorClient(remoteEnv, internalAPIUrl, externalAPIUrl string, skipVerify bool) ConnectorClient {
+	client := NewHttpClient(skipVerify)
+
 	return connectorClient{
 		remoteEnv:      remoteEnv,
 		internalAPIUrl: internalAPIUrl,

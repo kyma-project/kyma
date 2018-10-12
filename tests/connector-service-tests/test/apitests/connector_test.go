@@ -23,7 +23,7 @@ func TestConnector(t *testing.T) {
 
 	remoteEnvName := "ec-default"
 
-	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl, testkit.NewHttpClient(config.SkipSslVerify))
+	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
 
 	clientKey := testkit.CreateKey(t)
 
@@ -267,7 +267,7 @@ func TestCertificateValidation(t *testing.T) {
 	remoteEnvName := "ec-default"
 	forbiddenRemoteEnvName := "hmc-default"
 
-	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl, testkit.NewHttpClient(config.SkipSslVerify))
+	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
 
 	clientKey := testkit.CreateKey(t)
 	tlsClient := createTLSClientWithCert(t, client, clientKey, config.SkipSslVerify)
