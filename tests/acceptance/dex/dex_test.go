@@ -127,7 +127,13 @@ func TestSpec(t *testing.T) {
 
 		tokenParts := strings.Split(idToken, ".")
 
-		tokenPayloadEncoded := tokenParts[1] + "="
+		tokenPayloadEncoded := tokenParts[1]
+
+		if len(tokenPayloadEncoded)%3 == 1 {
+			tokenPayloadEncoded += "=="
+		} else if len(tokenPayloadEncoded)%3 == 2 {
+			tokenPayloadEncoded += "="
+		}
 
 		tokenPayloadDecoded, err := base64.StdEncoding.DecodeString(tokenPayloadEncoded)
 		if err != nil {
