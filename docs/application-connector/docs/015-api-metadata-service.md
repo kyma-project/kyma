@@ -3,9 +3,6 @@ title: Metadata Service
 type: API
 ---
 
-See [this file](assets/metadataapi.yaml) for the Metadata Service API specification.
-
-
 You can get the API specification of the Metadata Service for a given version of the service using this command:
 ```
 curl https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/metadata/api.yaml
