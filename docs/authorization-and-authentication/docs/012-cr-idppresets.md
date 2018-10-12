@@ -23,7 +23,6 @@ metadata:
 spec:
     issuer: https://example.com
     jwksUri: https://example.com/keys
-    name: "sample-idppreset"
 ```
 
 ## Custom resource parameters
@@ -35,7 +34,6 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **spec.issuer** | **YES** | Specifies the issuer of the JWT tokens used to access the services. |
 | **spec.jwksUri** | **YES** | Specifies the URL of the OpenID Provider’s public key set to validate the signature of the JWT token. |
-| **spec.name** | **YES** | Specifies the name of the preset. |
 
 ## Usage in the UI
 
