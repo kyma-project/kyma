@@ -59,10 +59,10 @@ global:
     version: 6e0a7fe2
   event_bus:
     dir: develop/
-    version: d7494645
+    version: 6eacb013
   event_bus_tests:
     dir: develop/
-    version: 6e0a7fe2
+    version: 1daa11b7
   event_service:
     dir: develop/
     version: 6e0a7fe2
