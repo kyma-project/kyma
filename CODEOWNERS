@@ -144,7 +144,7 @@
 /components/installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
 
 # Configurations Generator Component
-/components/configurations-generator/ @piotrmsc
+/components/configurations-generator/ @piotrmsc @kubadz @sjanota
 
 # Environments controller Component
 /components/environments/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
