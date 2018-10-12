@@ -27,31 +27,47 @@ func deployK8s(yamlFile string) {
 }
 
 func deleteK8s(yamlFile string) {
-	cmd := exec.Command("kubectl", "delete", "-f", yamlFile)
+	cmd := exec.Command("kubectl", "delete", "-f", yamlFile, "--grace-period=0", "--force", "--ignore-not-found")
 	stdoutStderr, err := cmd.CombinedOutput()
 	output := string(stdoutStderr)
-	if err != nil && !strings.Contains(output, "NotFound") {
+	if err != nil {
 		log.Fatal("Unable to delete:\n", output)
 	}
+}
+
+func printContentsOfNamespace(namespace string) {
+	getResourcesCmd := exec.Command("kubectl", "-n", namespace, "get", "all,serviceinstance,servicebinding,servicebindingusage,function,subscription,api,eventactivation")
+	stdoutStderr, err := getResourcesCmd.CombinedOutput()
+	output := string(stdoutStderr)
+	if err != nil {
+		log.Fatal("Unable to get all,serviceinstance,servicebinding,servicebindingusage,function,subscription,api,eventactivation:\n", output)
+	}
+	log.Printf("Current contents of the ns:%s is:\n %v", namespace, output)
 }
 
 func deleteNamespace(namespace string) {
 	timeout := time.After(6 * time.Minute)
 	tick := time.Tick(1 * time.Second)
+
+	deleteCmd := exec.Command("kubectl", "delete", "ns", namespace, "--grace-period=0", "--force", "--ignore-not-found")
+	stdoutStderr, err := deleteCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while deleting namespace: %s, to be deleted\n Output:\n%s", namespace, string(stdoutStderr))
+	}
 	for {
+		cmd := exec.Command("kubectl", "get", "ns", namespace, "-oyaml")
 		select {
 		case <-timeout:
-			cmd := exec.Command("kubectl", "get", "ns", namespace, "-o yaml")
 			stdoutStderr, err := cmd.CombinedOutput()
-			log.Printf("Check for finalizers in namespace, %s, to be deleted Output: %s\n Error: %v\n ", namespace, string(stdoutStderr), err)
-			log.Fatal("Timed out waiting for namespace ", namespace, " to be deleted\n")
-		case <-tick:
-			cmd := exec.Command("kubectl", "delete", "ns", namespace, "--grace-period=0", "--force")
-			stdoutStderr, err := cmd.CombinedOutput()
-
 			if err != nil {
-				log.Printf("Error waiting for namespace, %s, to be deleted\n Output: %s", namespace, string(stdoutStderr))
+				log.Fatal("Unable to get ns:\n", string(stdoutStderr))
 			}
+			log.Printf("Current state of the ns:%s is:\n %v", namespace, string(stdoutStderr))
+
+			printContentsOfNamespace(namespace)
+			log.Fatal("Timed out waiting for namespace: ", namespace, " to be deleted\n")
+		case <-tick:
+			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil && strings.Contains(string(stdoutStderr), "NotFound") {
 				return
 			}
@@ -231,6 +247,12 @@ func deleteFun(namespace, name string) {
 		log.Fatal("Unable to delete function ", name, ":\n", output)
 	}
 
+	cmd = exec.Command("kubectl", "-n", namespace, "delete", "pod", "-l", "function="+name, "--grace-period=0", "--force")
+	stdoutStderr, err = cmd.CombinedOutput()
+	if err == nil && !strings.Contains(string(stdoutStderr), "No resources found") && !strings.Contains(string(stdoutStderr), "warning: Immediate deletion does not wait for confirmation that the running resource has been terminated") {
+		log.Fatal("Unable to delete function pod:\n", string(stdoutStderr))
+	}
+
 	timeout := time.After(2 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 	for {
@@ -238,7 +260,7 @@ func deleteFun(namespace, name string) {
 		case <-timeout:
 			log.Fatal("Timed out waiting for ", name, " pod to be deleted\n")
 		case <-tick:
-			cmd = exec.Command("kubectl", "-n", namespace, "delete", "pod", "-l", "function="+name)
+			cmd = exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name)
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err == nil && strings.Contains(string(stdoutStderr), "No resources found") {
 				return
