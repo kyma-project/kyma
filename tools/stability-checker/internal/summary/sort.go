@@ -1,6 +1,6 @@
 package summary
 
-// ByMostFailures provides order of SpecificTestStats where most failed tests are placed on the begging of the slice
+// ByMostFailures provides order of SpecificTestStats where most failed tests are placed at the begging of the slice
 type ByMostFailures []SpecificTestStats
 
 // Len is part of sort.Interface.
