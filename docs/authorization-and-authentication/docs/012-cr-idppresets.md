@@ -29,7 +29,7 @@ spec:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-| Field   |      Mandatory?      |  Description |
+| Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **spec.issuer** | **YES** | Specifies the issuer of the JWT tokens used to access the services. |
@@ -38,3 +38,12 @@ This table lists all the possible parameters of a given resource together with t
 ## Usage in the UI
 
 **issuer** and **jwksUri** are some of the API CR specification fields. In most cases, these values are reused many times. IDPPresets usage is a solution to reuse them in a convenient way. It allows you to choose a proper preset from the dropdown menu instead of entering them manually every time you expose a secured API. Apart from consuming the IDPPresets, you can also manage them in the Console UI. To create and delete IDPPresets, go to the **Administration** tab and then to **IDP Presets**.
+
+## Related resources and components
+
+These components use this CR:
+
+| Name   |   Description |
+|:----------:|:------|
+| IDP Preset |  Generates go client thanks to which it is possible to manage (create/delete/get) IDP Preset resources from other components and tests. |
+| UI API Layer |  Enables IDP Preset to be managed with GraphQL API. |
