@@ -10,3 +10,4 @@
 bin/
 docker/
 vendor/
+/unit-tests.xml

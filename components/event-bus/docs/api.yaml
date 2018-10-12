@@ -1,7 +1,10 @@
 openapi: 3.0.0
 info:
   version: 1.0.0
-  title: Events API
+  title: Kyma Events API
+tags:
+- name: Kyma events
+  description: API to publish events from services inside Kyma
 paths:
   /v1/events:
     post:
@@ -9,6 +12,16 @@ paths:
       operationId: publishEvent
       tags:
         - publish
+      parameters:
+        - in: header
+          name: Source-Id
+          description: Identifier for the origin of the event. Either specify this or provide 'source-id' in the json payload.
+          schema:
+            type: string
+            pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
+            example:
+              - "stage.commerce.kyma.local"
+          required: false
       requestBody:
         description: The event to be published
         required: true
@@ -53,8 +66,12 @@ components:
       type: object
       description: A Publish request
       properties:
-        source:
-          $ref: '#/components/schemas/EventSource'
+        source-id:
+          description: Identifier for the origin of the event. Either specify this or provide 'Source-Id' header value.
+          type: string
+          pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
+          example:
+            - "stage.commerce.kyma.local"
         event-type:
           description: Type of the event.
           type: string
@@ -83,7 +100,6 @@ components:
         data:
           $ref: '#/components/schemas/AnyValue'
       required:
-        - source
         - event-type
         - event-type-version
         - event-time
@@ -102,41 +118,6 @@ components:
     AnyValue:
       nullable: false
       description: Can be any value but null.
-    EventSource:
-      description: This describes the software instance that emits the event at runtime (i.e. the producer).
-      type: object
-      properties:
-        source-namespace:
-          description: Identifier that uniquely identifies the organization publishing the event.
-          type: string
-          format: hostname
-          pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
-          example:
-            - "kafka.apache.org"
-            - "com.microsoft.azure"
-            - "local.kyma.commerce"
-        source-type:
-          description: Type of the event source, within the namespace context.
-          type: string
-          format: hostname
-          pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
-          example:
-            - "s3"
-            - "commerce"
-            - "marketing"
-        source-environment:
-          description: Environment of the event source.
-          type: string
-          format: hostname
-          pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
-          example:
-            - "my.s3.bucket"
-            - "stage"
-            - "production"
-      required:
-        - source-namespace
-        - source-type
-        - source-environment
     APIError:
       type: object
       description: API Error response body
