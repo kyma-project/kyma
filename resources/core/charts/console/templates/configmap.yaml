@@ -17,6 +17,7 @@ data:
       orgName: '{{ js .Values.cluster.orgName }}',
       headerLogoUrl: '{{ js .Values.cluster.headerLogoUrl }}',
       headerTitle: '{{ js .Values.cluster.headerTitle }}',
+      faviconUrl: '{{ js .Values.cluster.faviconUrl }}',
       gateway_kyma_cx_api_version: 'v1alpha2'
     };
     
