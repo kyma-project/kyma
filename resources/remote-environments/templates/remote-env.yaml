@@ -3,9 +3,9 @@ kind: RemoteEnvironment
 metadata:
   name: {{ .Release.Name }}
   labels:
-    app: {{ .Release.Name }}-gateway
-    release: {{ .Release.Name }}-gateway
-    heritage: {{ .Release.Service }}-gateway
+    app: {{ .Release.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   sourceId: {{ .Release.Name }}
   description: "This Remote Environment corresponds to the connected remote solution."
