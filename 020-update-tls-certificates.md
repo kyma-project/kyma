@@ -3,25 +3,25 @@ title: Update TLS certificate
 type: Details
 ---
 
-Once in a while it is necessary to change server TLS certificates, usually because they got expired. Follow the 
-instruction to Update TLS certificates in Kyma. 
+The TLS certificate is a vital security element. This document describes how to update the TLS certificate in Kyma.
+
+>**NOTE:** This procedure can interrupt the communication between your cluster and the outside world for a limited 
+period of time.
 
 ## Prerequisites
  * New TLS certificates
- * Admin access to kyma 
+ * Kyma administrator access 
 
-**This procedure may cause short interruption in access to Kyma from outside the cluster.**
+## Steps
 
-## Update certificates
-
-1. Export certificates. Replace `/path/to/...` with paths to your certificates. 
+1. Export the new TLS certificate and key as environment variables. Run:
 
     ```bash
-    export KYMA_TLS_CERT=$(cat /path/to/cert.pem)
-    export KYMA_TLS_KEY=$(cat /path/to/key.pem)
+    export KYMA_TLS_CERT=$(cat {NEW_CERT_PATH})
+    export KYMA_TLS_KEY=$(cat {NEW_KEY_PATH})
     ```
 
-2. Update istio ingressgateway certificate.
+2. Update the Ingress Gateway certificate. Run:
 
     ```bash
     cat <<EOF | kubectl create -f -
@@ -36,7 +36,7 @@ instruction to Update TLS certificates in Kyma.
     EOF
     ```
  
-3. Update kyma-system certificate.
+3. Update the `kyma-system` Namespace certificate:
 
     ```bash
     cat <<EOF | kubectl apply -f -
@@ -51,7 +51,7 @@ instruction to Update TLS certificates in Kyma.
     EOF
     ```
     
-4. Update kyma-integration certificate.
+4. Update the `kyma-integration` Namespace certificate:
 
     ```bash
     cat <<EOF | kubectl create -f -
@@ -66,19 +66,19 @@ instruction to Update TLS certificates in Kyma.
     EOF
     ```
 
-5. Restart istio-ingressgateway pod to pick up new certificate. 
+5. Restart the Ingress Gateway Pod to apply the new certificate:
 
     ```bash
     kubectl delete pod -l app=istio-ingressgateway -n istio-system
     ```
     
-6. Restart pods in kyma-system pod to pick up new certificate. 
+6. Restart the Pods in the `kyma-system` Namespace to apply the new certificate:
 
     ```bash
     kubectl delete pod -l tlsSecret=ingress-tls-cert -n kyma-system
     ```
     
-7. Restart pods in kyma-integration pod to pick up new certificate. 
+7. Restart the Pods in the `kyma-integration` Namespace to apply the new certificate:
 
     ```bash
     kubectl delete pod -l tlsSecret=ingress-tls-cert -n kyma-integration
