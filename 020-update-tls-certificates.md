@@ -26,7 +26,8 @@ period of time.
     ```bash
     cat <<EOF | kubectl create -f -
     apiVersion: v1
-    kind: kubernetes.io/tls
+    kind: Secret
+    type: kubernetes.io/tls
     metadata:
         name: istio-ingressgateway-certs
         namespace: istio-system
