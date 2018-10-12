@@ -41,22 +41,7 @@ func (i *Installation) ShouldUninstall() bool {
 }
 
 func (i *Installation) canUninstall() bool {
-	return (i.Status.State == StateInstalled || i.Status.State == StateUpdated || i.Status.State == StateError)
-}
-
-// ShouldUpdate returns true when user requested update action
-func (i *Installation) ShouldUpdate() bool {
-	action := i.ObjectMeta.Labels["action"]
-
-	if i.Status.State == StateEmpty {
-		return false
-	}
-
-	return action == ActionUpdate && i.canUpdate()
-}
-
-func (i *Installation) canUpdate() bool {
-	return (i.Status.State == StateInstalled || i.Status.State == StateUpdated)
+	return (i.Status.State == StateInstalled || i.Status.State == StateError)
 }
 
 func (i *Installation) hasCondition(condition InstallationConditionType) bool {
@@ -121,9 +106,6 @@ const (
 	// StateInstalled means installation of kyma is done
 	StateInstalled StateEnum = "Installed"
 
-	// StateUpdated means installation of kyma is updated
-	StateUpdated StateEnum = "Updated"
-
 	// StateUninstalled means installation is removed without errors
 	StateUninstalled StateEnum = "Uninstalled"
 
@@ -159,9 +141,6 @@ const (
 
 	// ActionInstall .
 	ActionInstall string = "install"
-
-	// ActionUpdate .
-	ActionUpdate string = "update"
 
 	// ActionUninstall .
 	ActionUninstall = "uninstall"
