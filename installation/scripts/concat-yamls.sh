@@ -4,38 +4,44 @@ set -o errexit
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 COMBO_FILE=$(mktemp ${CURRENT_DIR}/../../temp.XXXXXX)
+TMP_FILE=$(mktemp ${CURRENT_DIR}/../../temp.XXXXXX)
+
+sedPattern () {
+
+    case `uname -s` in
+        Darwin)
+            sed -i '' $1 $2
+            ;;
+        *)
+            sed -i $1 $2
+            ;;
+    esac
+}
 
 for file in "$@"
 do
     if [[ ! -f ${file} ]]; then
-        echo "File ${file} is not a file. Terminating script."
-        rm "${COMBO_FILE}"
-        exit 1
+        echo "File ${file} not found"
+        continue
     fi
 
-    FIRST_LINE_OF_YAML=$(head -n 1 "${file}")
-    if [[ $FIRST_LINE_OF_YAML == "---" ]]; then
-        cat ${file} | sed '1d' >> ${COMBO_FILE}
-    else
-        cat ${file} >> ${COMBO_FILE}
+    cat ${file} > ${TMP_FILE}
+    sedPattern '/^\s*$/d' ${TMP_FILE}
+
+    FIRST_LINE=$(head -n 1 "${TMP_FILE}")
+    if [[ $FIRST_LINE == "---" ]]; then
+        sedPattern '1d' ${TMP_FILE}
     fi
 
-    LAST_LINE_OF_COMBO=$(tail -n 1 "${COMBO_FILE}")
-    if [[ $LAST_LINE_OF_COMBO != "---" ]]; then
-        printf '\n---' >> ${COMBO_FILE}
+    LAST_LINE=$(tail -n 1 "${TMP_FILE}")
+    if [[ $LAST_LINE != "---" ]]; then
+        echo '---' >> ${TMP_FILE}
     fi
-    printf '\n' >> ${COMBO_FILE}
+
+    cat ${TMP_FILE} >> ${COMBO_FILE}
     
 done
 
-case `uname -s` in
-    Darwin)
-        sed -i '' '/^\s*$/d' ${COMBO_FILE}
-        ;;
-    *)
-        sed -i '/^\s*$/d' ${COMBO_FILE}
-        ;;
-esac
-
 cat "${COMBO_FILE}"
 rm "${COMBO_FILE}"
+rm "${TMP_FILE}"
