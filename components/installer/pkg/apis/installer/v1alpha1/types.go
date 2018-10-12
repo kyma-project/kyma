@@ -26,7 +26,7 @@ func (i *Installation) ShouldInstall() bool {
 }
 
 func (i *Installation) canInstall() bool {
-	return (i.Status.State == StateEmpty || i.Status.State == StateUninstalled)
+	return (i.Status.State == StateEmpty || i.Status.State == StateUninstalled || i.Status.State == StateInstalled)
 }
 
 // ShouldUninstall returns true when user requested uninstall action
@@ -120,12 +120,6 @@ const (
 
 	// ConditionInstalling .
 	ConditionInstalling InstallationConditionType = "Installing"
-
-	// ConditionUpdated .
-	ConditionUpdated InstallationConditionType = "Updated"
-
-	// ConditionUpdating .
-	ConditionUpdating InstallationConditionType = "Updating"
 
 	// ConditionUninstalled .
 	ConditionUninstalled InstallationConditionType = "Uninstalled"

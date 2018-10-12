@@ -54,7 +54,6 @@ func (cm *impl) InstallSuccess() error {
 	cm.setCondition(installation, installationv1alpha1.CondtitionInstalled, v1.ConditionTrue)
 	cm.setCondition(installation, installationv1alpha1.ConditionInstalling, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionInProgress, v1.ConditionFalse)
-	cm.setCondition(installation, installationv1alpha1.ConditionUpdated, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionUninstalled, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionError, v1.ConditionFalse)
 
@@ -109,8 +108,6 @@ func (cm *impl) UninstallSuccess() error {
 		return err
 	}
 
-	cm.setCondition(installation, installationv1alpha1.ConditionUpdated, v1.ConditionFalse)
-	cm.setCondition(installation, installationv1alpha1.ConditionUpdating, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionUninstalling, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionUninstalled, v1.ConditionTrue)
 	cm.setCondition(installation, installationv1alpha1.CondtitionInstalled, v1.ConditionFalse)
