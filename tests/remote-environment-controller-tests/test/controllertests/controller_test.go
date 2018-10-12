@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	initialWaitTimeSeconds = 10 * time.Second
-	retryWaitTimeSeconds   = 5 * time.Second
-	retryCount             = 6
+	initialWaitTimeSeconds      = 10 * time.Second
+	beforeDeleteWaitTimeSeconds = 20 * time.Second
+	retryWaitTimeSeconds        = 5 * time.Second
+	retryCount                  = 6
 )
 
 func TestRemoteEnvironmentCreation(t *testing.T) {
@@ -94,7 +95,7 @@ func TestRemoteEnvironmentRemoval(t *testing.T) {
 	testReName := "test-delete-re"
 	testRe, err := k8sResourcesClient.CreateDummyRemoteEnvironment(testReName, testReName)
 	require.NoError(t, err)
-	time.Sleep(2 * initialWaitTimeSeconds)
+	time.Sleep(beforeDeleteWaitTimeSeconds)
 
 	t.Run("should delete RE helm chart when RE is deleted", func(t *testing.T) {
 		// when
