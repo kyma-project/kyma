@@ -26,9 +26,9 @@ period of time.
     ```bash
     cat <<EOF | kubectl create -f -
     apiVersion: v1
-    kind: Secret
+    kind: kubernetes.io/tls
     metadata:
-        name: istio-ingressgateway-cert
+        name: istio-ingressgateway-certs
         namespace: istio-system
     data:
         tls.crt: $(echo "${KYMA_TLS_CERT}" | base64)
