@@ -2,9 +2,6 @@
 
 set -o errexit
 
-CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CRTPL_PATH="$CURRENT_DIR/../resources/installer-cr.yaml.tpl"
-
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
@@ -26,6 +23,11 @@ do
             shift
             shift
             ;;
+        --crtpl_path)
+            CRTPL_PATH="$2"
+            shift
+            shift
+            ;;
         *)    # unknown option
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
@@ -33,6 +35,9 @@ do
     esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
+
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CRTPL_PATH=${CRTPL_PATH:-"$CURRENT_DIR/../resources/installer-cr.yaml.tpl"}
 
 cp $CRTPL_PATH $OUTPUT
 
