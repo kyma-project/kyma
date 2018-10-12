@@ -35,7 +35,7 @@ func TestRenderTemplates(t *testing.T) {
 					Successes: 2,
 				},
 				{
-					Name:      "test-bardzo-dluga-nazwa",
+					Name:      "test-very-long-name",
 					Failures:  0,
 					Successes: 55,
 				},
