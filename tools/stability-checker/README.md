@@ -9,7 +9,7 @@ It runs a testing script in a loop and sends notifications with the test executi
 Install the Stability Checker on the Kyma cluster as a Helm chart. Find the chart definition in the `deploy/chart` directory.
 1. Configure kubectl and helm to point to your cluster by specifying the **KUBECONFIG** environment variable. 
 ```
-export KUBECONFIG="/{path to kubeconfig}"
+export KUBECONFIG="{path to kubeconfig}"
 ```
 
 > **NOTE:** Ensure that the kubeconfig allows you to update the cluster state by installing Helm charts. 
