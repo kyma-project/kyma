@@ -8,8 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
-
 func TestSortByMostFailures(t *testing.T) {
 	// GIVEN
 	sut := summary.ByMostFailures(fixTestStatsList())

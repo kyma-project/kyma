@@ -8,7 +8,7 @@ const (
 	{{- if .ShowTestStats -}}
  	  {{"\n"}}Statistics for failed test executions:”
       {{- range .TestStats -}}
-        {{"\n"}}Name: {{printf "%50s" .Name }}, successes: {{ printf "%3d" .Successes}}, failures: {{printf "%3d" .Failures}
+        {{"\n   "}} {{printf "%03d" .Failures}} failures of {{ .Name }}
 	  {{- else }}
 		No test statistics
 	  {{- end }}
