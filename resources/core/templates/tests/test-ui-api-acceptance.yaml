@@ -19,9 +19,15 @@ spec:
         - name: DOMAIN
           value: "{{ .Values.global.domainName }}"
         - name: USERNAME
-          value: "{{ .Values.test.auth.username }}"
+          valueFrom:
+            secretKeyRef:
+              name: admin-user
+              key: email
         - name: PASSWORD
-          value: "{{ .Values.test.auth.password }}"
+          valueFrom:
+            secretKeyRef:
+              name: admin-user
+              key: password
         - name: DEX_CONFIGURATION_FILE
           value: /etc/dex/cfg/config.yaml
       resources:
