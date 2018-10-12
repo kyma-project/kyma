@@ -33,9 +33,9 @@ The configuration options are as follows:
  |------|---------------|-------------|
 **storage.claimName** |`stability-test-scripts-pvc`| Name of the Persistent Volume Claim (PVC) which is attached to the Stability Checker Pod. The volume is visible in the Pod under the `/data` path. 
 **pathToTestingScript** |`/data/input/testing-kyma.sh`| Full path to the testing script. As the script is delivered inside the PVC, the path must start with `/data`.
-**slackClientWebhookUrl** |-| Slack client webhook URL. For details, see the configuration of integrated applications in the Slack Workspace. 
+**slackClientWebhookUrl** |-| Slack client webhook URL. For details, click **Customize Slack** in your Slack Workspace, choose the **Configure apps** button and  proceed with the configuration of the `Jenkins CI` application.
 **slackClientChannelId** |-| Slack channel ID which starts with `#`.
-**slackClientToken** |-| Slack client token. For details, see the configuration of integrated applications in the Slack Workspace. 
+**slackClientToken** |-| Slack client token. For details, click **Customize Slack** in your Slack Workspace, choose the **Configure apps** button and  proceed with the configuration of the `Jenkins CI` application.
 **testThrottle** | `5m`| Period between test executions. The purpose of this parameter is to give Kubernetes some time to clean up all resources after the previous test execution.
 **testResultWindowTime** | `6h` | Time period after which the Stability Checker sends notifications. Notifications contain a test executions summary for this period. 
 **stats.enabled** | `false` | If set to `true`, an output from test executions is analyzed to find statistics for every specific test. Detailed information about the number of times every test failed and succeeded is enclosed to the Slack notification. Regular expressions defined in **stats.failingTestRegexp** and **stats.successfulTestRegexp** detect test results. You can configure these two parameters only if **stats.enabled** is set to `true`. 
