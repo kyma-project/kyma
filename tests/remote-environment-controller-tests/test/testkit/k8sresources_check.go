@@ -64,23 +64,23 @@ func (checker *k8sChecker) CheckK8sResources(t *testing.T, reName string) {
 }
 
 func (checker *k8sChecker) checkDeployments(t *testing.T, reName string) {
-	gatewayName := fmt.Sprintf(proxyServiceNameFormat, reName)
+	proxyServiceName := fmt.Sprintf(proxyServiceNameFormat, reName)
 	eventServiceName := fmt.Sprintf(eventServiceNameFormat, reName)
 
-	var gatewayDeploy, eventsDeploy *v1apps.Deployment
-	var gatewayErr, eventsErr error
+	var proxyServiceDeploy, eventsDeploy *v1apps.Deployment
+	var proxyServiceErr, eventsErr error
 
 	if checker.resourcesShouldExist {
-		gatewayDeploy, gatewayErr = checker.client.GetDeployment(gatewayName, v1.GetOptions{})
+		proxyServiceDeploy, proxyServiceErr = checker.client.GetDeployment(proxyServiceName, v1.GetOptions{})
 		eventsDeploy, eventsErr = checker.client.GetDeployment(eventServiceName, v1.GetOptions{})
 	} else {
 		// Deleting deployments is slow (all the pods needs to be deleted) so that we need to retry checks
-		gatewayDeploy, gatewayErr = checker.getDeletedDeployment(gatewayName, v1.GetOptions{})
+		proxyServiceDeploy, proxyServiceErr = checker.getDeletedDeployment(proxyServiceName, v1.GetOptions{})
 		eventsDeploy, eventsErr = checker.getDeletedDeployment(eventServiceName, v1.GetOptions{})
 	}
 
-	checker.errCheckFunc(t, gatewayErr)
-	checker.resourceCheckFunc(t, gatewayDeploy)
+	checker.errCheckFunc(t, proxyServiceErr)
+	checker.resourceCheckFunc(t, proxyServiceDeploy)
 
 	checker.errCheckFunc(t, eventsErr)
 	checker.resourceCheckFunc(t, eventsDeploy)
