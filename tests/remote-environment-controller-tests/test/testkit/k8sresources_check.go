@@ -2,6 +2,7 @@ package testkit
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/require"
 	v1apps "k8s.io/api/apps/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,91 +21,106 @@ const (
 )
 
 type K8sChecker interface {
-	CheckK8sResources(t *testing.T, resourcesShouldExist bool, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{}))
+	CheckK8sResources(t *testing.T, reName string)
 }
 
-func NewK8sResourceChecker(reName string, client K8sResourcesClient, retryCount int, retryWaitTime time.Duration) K8sChecker {
+func NewK8sCheckerForCreatedResources(client K8sResourcesClient, retryCount int, retryWaitTime time.Duration) K8sChecker {
 	return &k8sChecker{
-		remoteEnvName: reName,
-		client:        client,
-		retryCount:    retryCount,
-		retryWaitTime: retryWaitTime,
+		client:               client,
+		retryCount:           retryCount,
+		retryWaitTime:        retryWaitTime,
+		resourcesShouldExist: true,
+		errCheckFunc:         requireNoError,
+		resourceCheckFunc:    requireNotEmpty,
+	}
+}
+
+func NewK8sCheckerForDeletedResources(client K8sResourcesClient, retryCount int, retryWaitTime time.Duration) K8sChecker {
+	return &k8sChecker{
+		client:               client,
+		retryCount:           retryCount,
+		retryWaitTime:        retryWaitTime,
+		resourcesShouldExist: false,
+		errCheckFunc:         requireError,
+		resourceCheckFunc:    requireEmpty,
 	}
 }
 
 type k8sChecker struct {
-	remoteEnvName string
-	client        K8sResourcesClient
-	retryCount    int
-	retryWaitTime time.Duration
+	client               K8sResourcesClient
+	retryCount           int
+	retryWaitTime        time.Duration
+	resourcesShouldExist bool
+	errCheckFunc         func(*testing.T, error)
+	resourceCheckFunc    func(*testing.T, interface{})
 }
 
-func (checker *k8sChecker) CheckK8sResources(t *testing.T, resourcesShouldExist bool, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
-	checker.checkDeployments(t, resourcesShouldExist, errCheckFunc, resourceCheckFunc)
-	checker.checkIngress(t, errCheckFunc, resourceCheckFunc)
-	checker.checkRole(t, errCheckFunc, resourceCheckFunc)
-	checker.checkRoleBinding(t, errCheckFunc, resourceCheckFunc)
-	checker.checkServices(t, errCheckFunc, resourceCheckFunc)
+func (checker *k8sChecker) CheckK8sResources(t *testing.T, reName string) {
+	checker.checkDeployments(t, reName)
+	checker.checkIngress(t, reName)
+	checker.checkRole(t, reName)
+	checker.checkRoleBinding(t, reName)
+	checker.checkServices(t, reName)
 }
 
-func (checker *k8sChecker) checkDeployments(t *testing.T, resourcesShouldExist bool, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
-	proxyServiceName := fmt.Sprintf(proxyServiceNameFormat, checker.remoteEnvName)
-	eventServiceName := fmt.Sprintf(eventServiceNameFormat, checker.remoteEnvName)
+func (checker *k8sChecker) checkDeployments(t *testing.T, reName string) {
+	gatewayName := fmt.Sprintf(proxyServiceNameFormat, reName)
+	eventServiceName := fmt.Sprintf(eventServiceNameFormat, reName)
 
-	var proxyServiceDeploy, eventsDeploy *v1apps.Deployment
-	var proxyServiceErr, eventsErr error
+	var gatewayDeploy, eventsDeploy *v1apps.Deployment
+	var gatewayErr, eventsErr error
 
-	if resourcesShouldExist {
-		proxyServiceDeploy, proxyServiceErr = checker.client.GetDeployment(proxyServiceName, v1.GetOptions{})
+	if checker.resourcesShouldExist {
+		gatewayDeploy, gatewayErr = checker.client.GetDeployment(gatewayName, v1.GetOptions{})
 		eventsDeploy, eventsErr = checker.client.GetDeployment(eventServiceName, v1.GetOptions{})
 	} else {
 		// Deleting deployments is slow (all the pods needs to be deleted) so that we need to retry checks
-		proxyServiceDeploy, proxyServiceErr = checker.getDeletedDeployment(proxyServiceName, v1.GetOptions{})
+		gatewayDeploy, gatewayErr = checker.getDeletedDeployment(gatewayName, v1.GetOptions{})
 		eventsDeploy, eventsErr = checker.getDeletedDeployment(eventServiceName, v1.GetOptions{})
 	}
 
-	errCheckFunc(t, proxyServiceErr)
-	resourceCheckFunc(t, proxyServiceDeploy)
+	checker.errCheckFunc(t, gatewayErr)
+	checker.resourceCheckFunc(t, gatewayDeploy)
 
-	errCheckFunc(t, eventsErr)
-	resourceCheckFunc(t, eventsDeploy)
+	checker.errCheckFunc(t, eventsErr)
+	checker.resourceCheckFunc(t, eventsDeploy)
 }
 
-func (checker *k8sChecker) checkIngress(t *testing.T, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
-	ingressName := fmt.Sprintf(proxyServiceNameFormat, checker.remoteEnvName)
+func (checker *k8sChecker) checkIngress(t *testing.T, reName string) {
+	ingressName := fmt.Sprintf(proxyServiceNameFormat, reName)
 
 	ingress, err := checker.client.GetIngress(ingressName, v1.GetOptions{})
-	errCheckFunc(t, err)
-	resourceCheckFunc(t, ingress)
+	checker.errCheckFunc(t, err)
+	checker.resourceCheckFunc(t, ingress)
 }
 
-func (checker *k8sChecker) checkRole(t *testing.T, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
-	roleName := fmt.Sprintf(proxyServiceRoleFormat, checker.remoteEnvName)
+func (checker *k8sChecker) checkRole(t *testing.T, reName string) {
+	roleName := fmt.Sprintf(proxyServiceRoleFormat, reName)
 
 	role, err := checker.client.GetRole(roleName, v1.GetOptions{})
-	errCheckFunc(t, err)
-	resourceCheckFunc(t, role)
+	checker.errCheckFunc(t, err)
+	checker.resourceCheckFunc(t, role)
 }
 
-func (checker *k8sChecker) checkRoleBinding(t *testing.T, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
-	roleBindingName := fmt.Sprintf(proxyServiceRoleBindingFormat, checker.remoteEnvName)
+func (checker *k8sChecker) checkRoleBinding(t *testing.T, reName string) {
+	roleBindingName := fmt.Sprintf(proxyServiceRoleBindingFormat, reName)
 
 	role, err := checker.client.GetRoleBinding(roleBindingName, v1.GetOptions{})
-	errCheckFunc(t, err)
-	resourceCheckFunc(t, role)
+	checker.errCheckFunc(t, err)
+	checker.resourceCheckFunc(t, role)
 }
 
-func (checker *k8sChecker) checkServices(t *testing.T, errCheckFunc func(*testing.T, error), resourceCheckFunc func(*testing.T, interface{})) {
-	proxyApiName := fmt.Sprintf(proxyServiceApiFormat, checker.remoteEnvName)
-	eventsApiName := fmt.Sprintf(eventServiceApiFormat, checker.remoteEnvName)
+func (checker *k8sChecker) checkServices(t *testing.T, reName string) {
+	gatewayApiName := fmt.Sprintf(proxyServiceApiFormat, reName)
+	eventsApiName := fmt.Sprintf(eventServiceApiFormat, reName)
 
-	proxyApiSvc, err := checker.client.GetService(proxyApiName, v1.GetOptions{})
-	errCheckFunc(t, err)
-	resourceCheckFunc(t, proxyApiSvc)
+	gatewayApiSvc, err := checker.client.GetService(gatewayApiName, v1.GetOptions{})
+	checker.errCheckFunc(t, err)
+	checker.resourceCheckFunc(t, gatewayApiSvc)
 
 	eventsSvc, err := checker.client.GetService(eventsApiName, v1.GetOptions{})
-	errCheckFunc(t, err)
-	resourceCheckFunc(t, eventsSvc)
+	checker.errCheckFunc(t, err)
+	checker.resourceCheckFunc(t, eventsSvc)
 }
 
 func (checker *k8sChecker) getDeletedDeployment(name string, options v1.GetOptions) (*v1apps.Deployment, error) {
@@ -120,4 +136,21 @@ func (checker *k8sChecker) getDeletedDeployment(name string, options v1.GetOptio
 	}
 
 	return deployment, err
+}
+
+func requireError(t *testing.T, err error) {
+	require.Error(t, err)
+	require.True(t, k8serrors.IsNotFound(err))
+}
+
+func requireNoError(t *testing.T, err error) {
+	require.NoError(t, err)
+}
+
+func requireNotEmpty(t *testing.T, obj interface{}) {
+	require.NotEmpty(t, obj)
+}
+
+func requireEmpty(t *testing.T, obj interface{}) {
+	require.Empty(t, obj)
 }
