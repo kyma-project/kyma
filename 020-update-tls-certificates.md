@@ -43,6 +43,7 @@ period of time.
     cat <<EOF | kubectl apply -f -
     apiVersion: v1
     kind: Secret
+    type: kubernetes.io/tls
     metadata:
         name: ingress-tls-cert
         namespace: kyma-system
@@ -58,6 +59,7 @@ period of time.
     cat <<EOF | kubectl create -f -
     apiVersion: v1
     kind: Secret
+    type: kubernetes.io/tls
     metadata:
         name: ingress-tls-cert
         namespace: kyma-integration
