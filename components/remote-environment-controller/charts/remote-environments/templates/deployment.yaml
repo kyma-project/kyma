@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: {{ .Release.Name }}-proxy-service
-        image: {{ .Values.global.ProxyServiceImage }}
+        image: {{ .Values.global.proxyServiceImage }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/proxyservice"
