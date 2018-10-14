@@ -1,6 +1,6 @@
 //+build integration
 
-package ybind_test
+package bind_test
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	yhelm "github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/platform/logger/spy"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybind"
 	"k8s.io/helm/pkg/chartutil"
 )
 
@@ -19,7 +19,7 @@ import (
 // kubectl port-forward <tiller_pod> 44134:44134 -n kube-system
 func ExampleNewRenderer() {
 	const releaseName = "example-renderer-test"
-	bindTmplRenderer := ybind.NewRenderer()
+	bindTmplRenderer := bind.NewRenderer()
 
 	// loadChart
 	ch, err := chartutil.Load("testdata/repository/redis-0.0.3/chart/redis")

@@ -1,4 +1,4 @@
-package ybundle_test
+package bundle_test
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 )
 
 func TestHTTPRepository_IndexReader(t *testing.T) {
@@ -24,7 +24,7 @@ func TestHTTPRepository_IndexReader(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	rep := ybundle.NewHTTPRepository(ybundle.RepositoryConfig{BaseURL: ts.URL})
+	rep := bundle.NewHTTPRepository(bundle.RepositoryConfig{BaseURL: ts.URL})
 
 	// WHEN:
 	r, clo, err := rep.IndexReader()
@@ -41,8 +41,8 @@ func TestHTTPRepository_IndexReader(t *testing.T) {
 
 func TestHTTPRepository_BundleReader(t *testing.T) {
 	const (
-		expBundleName ybundle.BundleName    = "bundle_name"
-		expBundleVer  ybundle.BundleVersion = "1.2.3"
+		expBundleName bundle.Name    = "bundle_name"
+		expBundleVer  bundle.Version = "1.2.3"
 	)
 	expContentGen := func() string { return "expected content - bundle" }
 
@@ -53,7 +53,7 @@ func TestHTTPRepository_BundleReader(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	rep := ybundle.NewHTTPRepository(ybundle.RepositoryConfig{BaseURL: ts.URL})
+	rep := bundle.NewHTTPRepository(bundle.RepositoryConfig{BaseURL: ts.URL})
 
 	r, clo, err := rep.BundleReader(expBundleName, expBundleVer)
 	require.NoError(t, err)
