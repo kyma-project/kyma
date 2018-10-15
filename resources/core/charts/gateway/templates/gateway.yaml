@@ -25,3 +25,4 @@ spec:
       httpsRedirect: true # automatic 301 redirect from http to https
     hosts:
     - "console.{{.Values.global.domainName}}"
+    - "grafana.{{.Values.global.domainName}}"
