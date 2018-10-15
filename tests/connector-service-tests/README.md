@@ -2,13 +2,13 @@
 
 ## Overview
 
-This project contains the acceptance tests for Kyma Connector Service.
+This project contains the acceptance tests for the Kyma Connector Service.
 
 ## Prerequisites
 
-The Connector Service Acceptance Tests requires Go 1.8 or higher.
+The project requires Go 1.8 or higher.
 
-## Build
+## Installation
 
 To install the Metadata Service components, follow these steps:
 
@@ -18,20 +18,17 @@ To install the Metadata Service components, follow these steps:
 
 ## Usage
 
-### Environment parameters
+Set the environment parameters:
 
-* **INTERNAL_API_URL**  - The URL of Connector Service internal API 
-* **EXTERNAL_API_URL** - The URL of Connector Service external API 
-* **GATEWAY_URL** - The URL of Remote Environment Gateway API
-* **SKIP_SSL_VERIFY** - A flag for skipping SSL certificate validation
+| Name | Required | Default | Description | Possible values |
+|------|----------|---------|-------------|-----------------|
+| **INTERNAL_API_URL** | Yes | - | The URL of Connector Service internal API | `http://localhost:8080` | 
+| **EXTERNAL_API_URL** | Yes | - | The URL of Connector Service external API | `https://connector-service.kyma.local` |
+| **GATEWAY_URL** | Yes | - |  The URL of Remote Environment Gateway API | `https://gateway.kyma.local:30218` |
+| **SKIP_SSL_VERIFY** | No | `false` | A flag for skipping SSL certificate validation | `true` |
 
-### Running
-
-1. Provide all required environment parameters
-2. Execute tests
+Run this command to execute tests:
     
     ```bash
     go test ./...
     ```
-
-
