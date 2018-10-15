@@ -86,8 +86,8 @@ global:
     dir: develop/
     version: d9e91df2
   remote_environment_controller:
-    dir: pr/
-    version: PR-1240
+    dir: develop/
+    version: baba5013
   remote_environment_controller_tests:
     dir: develop/
     version: f649732b
