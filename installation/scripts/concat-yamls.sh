@@ -2,8 +2,6 @@
 
 set -o errexit
 
-CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
 for file in "$@"
 do
 
@@ -11,7 +9,7 @@ do
 
     if [[ ! -f "${file}" ]]; then
         echo "File ${file} not found"
-        continue
+        exit 1
     fi
 
     TMP=$(cat "${file}" | sed '/^\s*$/d')
@@ -23,7 +21,7 @@ do
 
     echo "${TMP}"
 
-    LAST_LINE=$(tail -n1 <<<"${TMP}")
+    LAST_LINE=$(tail -n1 <<< "${TMP}")
     if [[ "$LAST_LINE" != "---" ]]; then
         echo '---'
     fi
