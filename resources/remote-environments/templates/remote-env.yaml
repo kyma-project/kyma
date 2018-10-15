@@ -9,4 +9,4 @@ metadata:
 spec:
   sourceId: {{ .Release.Name }}
   description: "This Remote Environment corresponds to the connected remote solution."
-  accessLabel: "echo-access-label"
+  accessLabel: {{ .Release.Name }}
