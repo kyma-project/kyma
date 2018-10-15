@@ -38,12 +38,15 @@ spec:
               type: string
             viewBaseUrl:
               type: string
+              pattern: '^(https?)://.+$'
             navigationNodes:
               type: array
               items:
                 type: object
                 required:
                 - "label"
+                - "navigationPath"
+                - "viewUrl"
                 properties:
                   label:
                     type: string
