@@ -1,10 +1,10 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
   labels:
-    app: {{ template "name" . }}
+    app: {{ .Chart.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
@@ -12,7 +12,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ template "fullname" . }}
+      app: {{ .Chart.Name }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -20,12 +20,12 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ template "fullname" . }}
+        app: {{ .Chart.Name }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
     spec:
-      serviceAccountName: {{ template "fullname" . }}
+      serviceAccountName: {{ .Chart.Name }}
 
       containers:
       - name: reb
@@ -41,7 +41,7 @@ spec:
           - name: APP_UNIQUE_SELECTOR_LABEL_KEY
             value: app
           - name: APP_UNIQUE_SELECTOR_LABEL_VALUE
-            value: {{ template "fullname" . }}
+            value: {{ .Chart.Name }}
           - name: APP_NAMESPACE
             valueFrom:
               fieldRef:

@@ -4,7 +4,7 @@ metadata:
   name: re-broker-config-map
   namespace: {{ .Values.global.namespace }}
   labels:
-    app: {{ template "fullname" . }}
+    app: {{ .Chart.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
 {{ if .Values.config }}
 data:

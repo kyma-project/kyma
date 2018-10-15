@@ -2,10 +2,10 @@
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ClusterServiceBroker
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
   labels:
-    app: {{ template "name" . }}
+    app: {{ .Chart.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
