@@ -8,9 +8,9 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/ghodss/yaml"
 	"github.com/imdario/mergo"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybundle"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
 	"github.com/mcuadros/go-defaults"
 	"github.com/pkg/errors"
@@ -31,7 +31,7 @@ type Config struct {
 	TmpDir     string
 	Port       int              `default:"8080"`
 	Storage    []storage.Config `valid:"required"`
-	Repository ybundle.RepositoryConfig
+	Repository bundle.RepositoryConfig
 	Helm       helm.Config `valid:"required"`
 }
 

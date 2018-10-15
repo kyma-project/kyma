@@ -33,6 +33,7 @@ The Metadata Service has the following parameters:
 - **namespace** - Namespace where Metadata Service is deployed. The default Namespace is `kyma-system`.
 - **requestTimeout** - A time-out for requests sent through the Metadata Service. It is provided in seconds. The default time-out is `1`.
 - **requestLogging** - A flag for logging incoming requests. The default value is `false`.
+- **detailedErrorResponse** - A flag for showing detailed internal error messages in response bodies. The default value is `false` and all internal server error messages are shortened to `Internal error`, while all other error messages are shown as usual.
 
 ### Sample calls
 

@@ -1,11 +1,11 @@
-package ybind_test
+package bind_test
 
 import (
 	"fmt"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybind"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/renstrom/dedent"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -80,11 +80,11 @@ func TestResolvePolicyNo1(t *testing.T) {
 				configMap  = ts.configMap(namespace, "all-cfg-map-test-redis", tc.given.configData)
 				secret     = ts.secret(namespace, "all-secret-test-redis", tc.given.secretData)
 				fakeClient = fake.NewSimpleClientset(&configMap, &secret)
-				resolver   = ybind.NewResolver(fakeClient.CoreV1())
+				resolver   = bind.NewResolver(fakeClient.CoreV1())
 			)
 
 			// when
-			out, err := resolver.Resolve(ybind.RenderedBindYAML(tc.given.bindYAML), internal.Namespace(namespace))
+			out, err := resolver.Resolve(bind.RenderedBindYAML(tc.given.bindYAML), internal.Namespace(namespace))
 
 			// then
 			require.NoError(t, err)
@@ -108,10 +108,10 @@ func TestResolvePolicyNo2(t *testing.T) {
           value: duplicated-value
         - name: ` + keyNo1 + `
           value: duplicated-value`)
-	resolver := ybind.NewResolver(nil)
+	resolver := bind.NewResolver(nil)
 
 	// when
-	out, err := resolver.Resolve(ybind.RenderedBindYAML(bindYAML), internal.Namespace(namespace))
+	out, err := resolver.Resolve(bind.RenderedBindYAML(bindYAML), internal.Namespace(namespace))
 
 	// then
 	assert.EqualError(t, err, fmt.Sprintf("conflict: found credentials with the same name %q", keyNo1))
@@ -148,11 +148,11 @@ func TestResolvePolicyNo3(t *testing.T) {
 		configMap  = ts.configMap(namespace, "all-cfg-map-test-redis", configData)
 		secret     = ts.secret(namespace, "all-secret-test-redis", secretData)
 		fakeClient = fake.NewSimpleClientset(&configMap, &secret)
-		resolver   = ybind.NewResolver(fakeClient.CoreV1())
+		resolver   = bind.NewResolver(fakeClient.CoreV1())
 	)
 
 	// when
-	out, err := resolver.Resolve(ybind.RenderedBindYAML(bindYAML), internal.Namespace(namespace))
+	out, err := resolver.Resolve(bind.RenderedBindYAML(bindYAML), internal.Namespace(namespace))
 
 	// then
 	require.NoError(t, err)
