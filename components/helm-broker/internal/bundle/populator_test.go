@@ -1,4 +1,4 @@
-package ybundle_test
+package bundle_test
 
 import (
 	"errors"
@@ -8,11 +8,12 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybundle"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybundle/automock"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle/automock"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger/spy"
 )
 
@@ -31,17 +32,16 @@ func TestPopulatorInitHappyPath(t *testing.T) {
 
 	logSink := spy.NewLogSink()
 
-	populator := ybundle.NewPopulator(ts.mockRepository, ts.mockLoader, ts.mockBundleUpserter, ts.mockChartUpserter, logSink.Logger)
+	populator := bundle.NewPopulator(ts.mockRepository, ts.mockLoader, ts.mockBundleUpserter, ts.mockChartUpserter, logSink.Logger)
 	// WHEN
 	err := populator.Init()
 	// THEN
 	assert.NoError(t, err)
 
 	logSink.AssertLogged(t, logrus.InfoLevel, "Bundle with name [meme] and version [0.10.0] successfully stored")
-
 }
 
-func TestPopulatorErrorOnGetIndexFile(t *testing.T) {
+func TestPopulatorOnGetIndexFileError(t *testing.T) {
 	// GIVEN
 	ts := newTestSuite()
 	defer ts.AssertExpectationsOnMock(t)
@@ -50,7 +50,7 @@ func TestPopulatorErrorOnGetIndexFile(t *testing.T) {
 
 	logSink := spy.NewLogSink()
 
-	populator := ybundle.NewPopulator(ts.mockRepository, ts.mockLoader, ts.mockBundleUpserter, ts.mockChartUpserter, logSink.Logger)
+	populator := bundle.NewPopulator(ts.mockRepository, ts.mockLoader, ts.mockBundleUpserter, ts.mockChartUpserter, logSink.Logger)
 	// WHEN
 	err := populator.Init()
 	// THEN
@@ -58,46 +58,55 @@ func TestPopulatorErrorOnGetIndexFile(t *testing.T) {
 	assert.Empty(t, logSink.DumpAll())
 }
 
-func TestPopulatorErrorOnGetBundleArchive(t *testing.T) {
-	// GIVEN
-	ts := newTestSuite()
-	defer ts.AssertExpectationsOnMock(t)
-
-	ts.mockRepository.ExpectOnIndexReader(fixIndexContent())
-	ts.mockRepository.ExpectErrorOnBundleReader(fixError())
-
-	logSink := spy.NewLogSink()
-
-	populator := ybundle.NewPopulator(ts.mockRepository, ts.mockLoader, ts.mockBundleUpserter, ts.mockChartUpserter, logSink.Logger)
-	// WHEN
-	err := populator.Init()
-	// THEN
-	assert.EqualError(t, err, fmt.Sprintf("while reading bundle archive for name [meme] and version [0.10.0]: %v", fixError()))
-	assert.Empty(t, logSink.DumpAll())
-}
-
-func TestPopulatorErrorOnLoading(t *testing.T) {
+func TestPopulatorOnGetBundleArchiveError(t *testing.T) {
 	// GIVEN
 	ts := newTestSuite()
 	defer ts.AssertExpectationsOnMock(t)
 
 	fixBundleReader := strings.NewReader(fixBundleContent())
 
-	ts.mockRepository.ExpectOnIndexReader(fixIndexContent())
-	ts.mockRepository.ExpectOnBundleReader(fixBundleName(), fixBundleVersion(), fixBundleReader)
-	ts.mockLoader.ExpectErrorOnLoad(fixError())
+	ts.mockRepository.ExpectOnIndexReader(fixIndexContent2Entries())
+	ts.mockRepository.ExpectErrorOnBundleReader(fixBundleName(), fixBundleVersion(), fixError())
+	ts.mockRepository.ExpectOnBundleReader("quote", fixBundleVersion(), fixBundleReader)
+	ts.mockLoader.ExpectOnLoad(fixBundleReader, fixBundle(), fixCharts())
+	ts.mockBundleUpserter.ExpectOnUpsert(fixBundle())
+	ts.mockChartUpserter.ExpectOnUpsert(fixChart())
 
 	logSink := spy.NewLogSink()
 
-	populator := ybundle.NewPopulator(ts.mockRepository, ts.mockLoader, ts.mockBundleUpserter, ts.mockChartUpserter, logSink.Logger)
+	populator := bundle.NewPopulator(ts.mockRepository, ts.mockLoader, ts.mockBundleUpserter, ts.mockChartUpserter, logSink.Logger)
 	// WHEN
 	err := populator.Init()
 	// THEN
-	assert.EqualError(t, err, fmt.Sprintf("while loading bundle and charts for bundle [meme] and version [0.10.0]: %v", fixError()))
-	assert.Empty(t, logSink.DumpAll())
+	require.NoError(t, err)
 }
 
-func TestPopulatorErrorOnUpsertingChart(t *testing.T) {
+func TestPopulatorOnLoadingError(t *testing.T) {
+	// GIVEN
+	ts := newTestSuite()
+	defer ts.AssertExpectationsOnMock(t)
+
+	fixBundleReader := strings.NewReader(fixBundleContent())
+
+	ts.mockRepository.ExpectOnIndexReader(fixIndexContent2Entries())
+	ts.mockRepository.ExpectOnBundleReader("quote", fixBundleVersion(), fixBundleReader)
+	ts.mockRepository.ExpectOnBundleReader(fixBundleName(), fixBundleVersion(), fixBundleReader)
+	ts.mockLoader.ExpectErrorOnLoad(fixBundleReader, fixError())
+	ts.mockLoader.ExpectOnLoad(fixBundleReader, fixBundle(), fixCharts())
+	ts.mockBundleUpserter.ExpectOnUpsert(fixBundle())
+	ts.mockChartUpserter.ExpectOnUpsert(fixChart())
+
+	logSink := spy.NewLogSink()
+
+	populator := bundle.NewPopulator(ts.mockRepository, ts.mockLoader, ts.mockBundleUpserter, ts.mockChartUpserter, logSink.Logger)
+	// WHEN
+	err := populator.Init()
+
+	// THEN
+	require.NoError(t, err)
+}
+
+func TestPopulatorOnUpsertingChartError(t *testing.T) {
 	// GIVEN
 	ts := newTestSuite()
 	defer ts.AssertExpectationsOnMock(t)
@@ -107,19 +116,18 @@ func TestPopulatorErrorOnUpsertingChart(t *testing.T) {
 	ts.mockRepository.ExpectOnIndexReader(fixIndexContent())
 	ts.mockRepository.ExpectOnBundleReader(fixBundleName(), fixBundleVersion(), fixBundleReader)
 	ts.mockLoader.ExpectOnLoad(fixBundleReader, fixBundle(), fixCharts())
-	ts.mockChartUpserter.ExpectErrorOnUpsert(fixError())
+	ts.mockChartUpserter.ExpectErrorOnUpsert(fixChart(), fixError())
 
 	logSink := spy.NewLogSink()
 
-	populator := ybundle.NewPopulator(ts.mockRepository, ts.mockLoader, ts.mockBundleUpserter, ts.mockChartUpserter, logSink.Logger)
+	populator := bundle.NewPopulator(ts.mockRepository, ts.mockLoader, ts.mockBundleUpserter, ts.mockChartUpserter, logSink.Logger)
 	// WHEN
 	err := populator.Init()
 	// THEN
-	assert.EqualError(t, err, fmt.Sprintf("while storing chart [values:<raw:\"value\" > ] for bundle [meme] with version [0.10.0]: %v", fixError()))
-	assert.Empty(t, logSink.DumpAll())
+	require.NoError(t, err)
 }
 
-func TestPopulatorErrorOnUpsertingBundle(t *testing.T) {
+func TestPopulatorOnUpsertingBundleError(t *testing.T) {
 	// GIVEN
 	ts := newTestSuite()
 	defer ts.AssertExpectationsOnMock(t)
@@ -130,27 +138,26 @@ func TestPopulatorErrorOnUpsertingBundle(t *testing.T) {
 	ts.mockRepository.ExpectOnBundleReader(fixBundleName(), fixBundleVersion(), fixBundleReader)
 	ts.mockLoader.ExpectOnLoad(fixBundleReader, fixBundle(), fixCharts())
 	ts.mockChartUpserter.ExpectOnUpsert(fixChart())
-	ts.mockBundleUpserter.ExpectErrorOnUpsert(fixError())
+	ts.mockBundleUpserter.ExpectErrorOnUpsert(fixBundle(), fixError())
 
 	logSink := spy.NewLogSink()
 
-	populator := ybundle.NewPopulator(ts.mockRepository, ts.mockLoader, ts.mockBundleUpserter, ts.mockChartUpserter, logSink.Logger)
+	populator := bundle.NewPopulator(ts.mockRepository, ts.mockLoader, ts.mockBundleUpserter, ts.mockChartUpserter, logSink.Logger)
 	// WHEN
 	err := populator.Init()
 	// THEN
-	assert.EqualError(t, err, fmt.Sprintf("while storing bundle [meme] with version [0.10.0]: %v", fixError()))
-	assert.Empty(t, logSink.DumpAll())
+	require.NoError(t, err)
 }
 
 func fixError() error {
 	return errors.New("some error")
 }
 
-func fixBundleName() ybundle.BundleName {
+func fixBundleName() bundle.Name {
 	return "meme"
 }
 
-func fixBundleVersion() ybundle.BundleVersion {
+func fixBundleVersion() bundle.Version {
 	return "0.10.0"
 }
 
@@ -178,6 +185,23 @@ func fixIndexContent() string {
 	return `
 apiVersion: v1
 entries:
+  meme:
+    - name: meme
+      created: 2016-10-06T16:23:20.499814565-06:00
+      description: Meme service
+      version: 0.10.0
+`
+}
+
+func fixIndexContent2Entries() string {
+	return `
+apiVersion: v1
+entries:
+  quote:
+    - name: quote
+      created: 2016-10-06T16:23:20.499814565-06:00
+      description: Quote service
+      version: 0.10.0
   meme:
     - name: meme
       created: 2016-10-06T16:23:20.499814565-06:00

@@ -50,7 +50,6 @@ data:
   global.alertTools.credentials.victorOps.routingkey: ""
   global.alertTools.credentials.victorOps.apikey: ""
   nginx-ingress.controller.service.loadBalancerIP: ""
-  configurations-generator.kubeConfig.clusterName: "kyma.local"
   cluster-users.users.adminGroup: ""
 ---
 apiVersion: v1

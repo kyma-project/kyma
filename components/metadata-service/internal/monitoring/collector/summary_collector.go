@@ -14,7 +14,7 @@ func NewSummaryCollector(opts prometheus.SummaryOpts, labels []string) (Collecto
 
 	err := prometheus.Register(vector)
 	if err != nil {
-		return nil, apperrors.Internal("Failed to register a summary collector: %s: %s", opts.Name, err.Error())
+		return nil, apperrors.Internal("Registering %s summary collector failed, %s", opts.Name, err.Error())
 	}
 
 	return &summaryCollector{vector: vector}, nil

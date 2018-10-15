@@ -15,7 +15,7 @@ import (
 func main() {
 
 	port := flag.Int("port", 8000, "Application port")
-	clusterNameArg := flag.String("kube-config-custer-name", "", "Name of the Kubernetes cluster")
+	clusterNameArg := flag.String("kube-config-cluster-name", "", "Name of the Kubernetes cluster")
 	urlArg := flag.String("kube-config-url", "", "URL of the Kubernetes Apiserver")
 	caArg := flag.String("kube-config-ca", "", "Certificate Authority of the Kubernetes cluster")
 	caFileArg := flag.String("kube-config-ca-file", "", "File with Certificate Authority of the Kubernetes cluster")

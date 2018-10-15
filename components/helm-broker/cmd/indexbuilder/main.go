@@ -11,7 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
 		l.Panicln(errors.Wrap(err, "while listing source dir"))
 	}
 
-	var loader *ybundle.Loader
+	var loader *bundle.Loader
 	yLog := l.WithField("service", "bundle checker")
 
 	removeTempDir := func(path string) {
@@ -49,7 +49,7 @@ func main() {
 		}
 		defer removeTempDir(tmpDir)
 
-		loader = ybundle.NewLoader(tmpDir, yLog)
+		loader = bundle.NewLoader(tmpDir, yLog)
 		b, _, err := loader.LoadDir(fullPath)
 		if err != nil {
 			l.Panicln(errors.Wrap(err, "while loading bundle"))

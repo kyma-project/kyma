@@ -1,4 +1,4 @@
-package ybind
+package bind
 
 func NewRendererWithDeps(renderEngine chartGoTemplateRenderer, toRenderValuesCaps toRenderValuesCaps) *Renderer {
 	return &Renderer{
