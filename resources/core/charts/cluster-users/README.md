@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `cluster-users` sub-chart uses role-based access control (RBAC) to define roles and accesses in Kyma. Kyma does not have a user base, but it has an admin defined as **admin@kyma.cx**. The admin's password is generated and can be obtained (see section "Obtain an admin password") from the secret named `admin-user` in the namespace of Dex release. Additionally, admin roles are bound to group of users named **kyma-admins**.
+The `cluster-users` sub-chart uses role-based access control (RBAC) to define roles and accesses in Kyma. Kyma does not have a user base, but it has an admin defined as **admin@kyma.cx**. The admin's password is generated and can be obtained from the secret named `admin-user` in the namespace of Dex release. Additionally, admin roles are bound to group of users named **kyma-admins**.
 
 ## Details
 
@@ -29,13 +29,3 @@ For a newly created or existing role in the [`rbac-roles.yaml`](templates/rbac-r
 ### API groups
 
 One of the parameters that you set when defining the role is the `apiGroup`. The `apiGroup` attribute defines the Kubernetes APIs that the user has access to. When you define a new API group on the cluster, add the group to the user's role in the [`rbac-roles.yaml`](templates/rbac-roles.yaml) file to give the user access to the API group. Control the access by limiting it to specific API resources and methods.
-
-### Obtain an admin password
-
-To obtain an admin password you can execute following command:
-
-``` bash
-kubectl get secret admin-user -n <namespace containing dex installation> -o jsonpath="{.data.password}"
-```
-
-The result will be encoded with base64 so you need to decode it. You can use online decoders or tool built into the system.
