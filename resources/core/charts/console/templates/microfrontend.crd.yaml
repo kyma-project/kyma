@@ -20,7 +20,6 @@ spec:
         spec:
           type: object
           required:
-          - "viewBaseUrl"
           - "navigationNodes"
           properties:
             appName:
@@ -42,7 +41,6 @@ spec:
                 required:
                 - "label"
                 - "navigationPath"
-                - "viewUrl"
                 properties:
                   label:
                     type: string
