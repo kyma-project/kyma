@@ -24,7 +24,7 @@ period of time.
 2. Update the Ingress Gateway certificate. Run:
 
     ```bash
-    cat <<EOF | kubectl create -f -
+    cat <<EOF | kubectl apply -f -
     apiVersion: v1
     kind: Secret
     type: kubernetes.io/tls
@@ -56,7 +56,7 @@ period of time.
 4. Update the `kyma-integration` Namespace certificate:
 
     ```bash
-    cat <<EOF | kubectl create -f -
+    cat <<EOF | kubectl apply -f -
     apiVersion: v1
     kind: Secret
     type: kubernetes.io/tls
