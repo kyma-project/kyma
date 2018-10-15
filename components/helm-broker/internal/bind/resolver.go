@@ -1,4 +1,4 @@
-package ybind
+package bind
 
 import (
 	"bytes"
@@ -37,7 +37,7 @@ type ResolveOutput struct {
 // 2.  When you duplicate a key in `credential` section then error will be returned
 // 3.  Values defined by `credentialFrom` section will be overridden by values from `credential` section if keys will be duplicated
 func (r *Resolver) Resolve(bindYAML RenderedBindYAML, ns internal.Namespace) (*ResolveOutput, error) {
-	var bind BindYAML
+	var bind YAML
 	if err := yaml.Unmarshal(bindYAML, &bind); err != nil {
 		return nil, errors.Wrap(err, "while unmarshaling bind yaml")
 	}

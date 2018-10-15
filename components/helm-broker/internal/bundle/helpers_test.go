@@ -1,4 +1,4 @@
-package ybundle_test
+package bundle_test
 
 import (
 	"fmt"

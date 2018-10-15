@@ -1,6 +1,6 @@
 //+build integration
 
-package ybind_test
+package bind_test
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"sort"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybind"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -95,7 +95,7 @@ func ExampleNewResolver() {
 
 	fatalOnErr(err)
 
-	resolver := ybind.NewResolver(clientset.CoreV1())
+	resolver := bind.NewResolver(clientset.CoreV1())
 	out, err := resolver.Resolve(fixBindYAML(), internal.Namespace(nsSpec.Name))
 	fatalOnErr(err)
 

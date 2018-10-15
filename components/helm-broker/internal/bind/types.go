@@ -1,7 +1,7 @@
-package ybind
+package bind
 
-// BindYAML represents a yBundle plan bind.yaml structure
-type BindYAML struct {
+// YAML represents a bundle plan bind.yaml structure
+type YAML struct {
 	Credential     []CredentialVar        `json:"credential"`
 	CredentialFrom []CredentialFromSource `json:"credentialFrom"`
 }
