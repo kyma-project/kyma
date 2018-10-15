@@ -41,13 +41,9 @@ do
 
   PASSWORD=$(echo -n ${PASSWORD} | base64 -d)
 
-  HASH=$(htpasswd -bnBC 10 "" ${PASSWORD} | tr -d ':\n')
+  HASH=$(htpasswd -bnBC 12 "" ${PASSWORD} | tr -d ':\n')
 
-  echo "email: ${EMAIL}"
-  echo "username: ${USERNAME}"
-  echo "password: ${PASSWORD}"
-  echo "password encrypted: ${HASH}"
-  echo ""
+  echo "successfully created user: ${USERNAME}"
 
   NUM=$(( NUM + 1 ))
 
