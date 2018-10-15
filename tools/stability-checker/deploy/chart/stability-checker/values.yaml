@@ -14,7 +14,7 @@ image:
 storage:
   claimName: "stability-test-scripts-pvc"
 
-pathToTestingScript: "/data/input/testing-kyma.sh"
+pathToTestingScript: "/data/input/testing.sh"
 slackClientWebhookUrl: "need-to-be-provided"
 slackClientChannelId: "need-to-be-provided"
 slackClientToken: "123-need-to-be-provided"
