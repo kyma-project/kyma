@@ -11,6 +11,8 @@ import (
 )
 
 const (
+	ingressNameFormat        = "%s-remote-environment"
+
 	proxyServiceNameFormat        = "%s-proxy-service"
 	proxyServiceRoleFormat        = "%s-proxy-service-role"
 	proxyServiceRoleBindingFormat = "%s-proxy-service-rolebinding"
@@ -87,7 +89,7 @@ func (checker *k8sChecker) checkDeployments(t *testing.T, reName string) {
 }
 
 func (checker *k8sChecker) checkIngress(t *testing.T, reName string) {
-	ingressName := fmt.Sprintf(proxyServiceNameFormat, reName)
+	ingressName := fmt.Sprintf(ingressNameFormat, reName)
 
 	ingress, err := checker.client.GetIngress(ingressName, v1.GetOptions{})
 	checker.errCheckFunc(t, err)
