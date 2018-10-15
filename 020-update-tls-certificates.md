@@ -43,13 +43,12 @@ period of time.
     cat <<EOF | kubectl apply -f -
     apiVersion: v1
     kind: Secret
-    type: kubernetes.io/tls
+    type: Opaque
     metadata:
         name: ingress-tls-cert
         namespace: kyma-system
     data:
         tls.crt: $(echo "${KYMA_TLS_CERT}" | base64)
-        tls.key: $(echo "${KYMA_TLS_KEY}" | base64)
     EOF
     ```
     
@@ -59,13 +58,12 @@ period of time.
     cat <<EOF | kubectl apply -f -
     apiVersion: v1
     kind: Secret
-    type: kubernetes.io/tls
+    type: Opaque
     metadata:
         name: ingress-tls-cert
         namespace: kyma-integration
     data:
         tls.crt: $(echo "${KYMA_TLS_CERT}" | base64)
-        tls.key: $(echo "${KYMA_TLS_KEY}" | base64)
     EOF
     ```
 
