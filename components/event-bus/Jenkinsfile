@@ -50,8 +50,20 @@ podTemplate(label: label) {
                             + "./...")
                         }
 
-                        stage("build and test - event-bus-publish") {
-                            execute("/cmd/event-bus-publish", "make clean build")
+                        stage("build - event-bus-publish") {
+                            execute("/cmd/event-bus-publish", "make clean compile")
+                        }
+
+                        stage("build - event-bus-push") {
+                            execute("/cmd/event-bus-push", "make clean compile")
+                        }
+
+                        stage("build - event-bus-sub-validator") {
+                            execute("/cmd/event-bus-sv", "make clean compile")
+                        }
+
+                        stage("test - event-bus") {
+                            execute("/", "make test")
                         }
 
                         stage("build image - event-bus-publish") {
@@ -60,18 +72,10 @@ podTemplate(label: label) {
                             }
                         }
 
-                        stage("build and test - event-bus-push") {
-                            execute("/cmd/event-bus-push", "make clean build")
-                        }
-
                         stage("build image - event-bus-push") {
                             dir(env.APP_FOLDER + '/cmd/event-bus-push') {
                                 sh "./dockerBuild.sh event-bus-push ${dockerImageTag} ${application}"
                             }
-                        }
-
-                        stage("build and test - event-bus-sub-validator") {
-                            execute("/cmd/event-bus-sv", "make clean build")
                         }
 
                         stage("build image - event-bus-sub-validator") {
@@ -131,7 +135,7 @@ podTemplate(label: label) {
 }
 
 def execute(workPath, command, envs = '') {
-    def buildpack = 'golang-buildpack:0.0.8'
+    def buildpack = 'golang-buildpack:0.0.9'
     def repositoryName = 'kyma'
     def envText = envs=='' ? '' : "--env $envs"
     workDir = pwd()

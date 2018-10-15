@@ -3,6 +3,7 @@ package notifier
 import (
 	"context"
 	"encoding/json"
+	"sort"
 	"strconv"
 	"time"
 
@@ -46,12 +47,10 @@ type (
 func New(
 	slack slackClient,
 	testRenderer testRenderer,
-	summarizer summarizer,
 	cfgMapClient configMapClient,
 	cfgMapName string,
 	resultWindowTime time.Duration,
 	testRunnerPodName, testRunnerNamespace string,
-	showTestStats bool,
 	log logrus.FieldLogger) *SlackNotifier {
 
 	return &SlackNotifier{
@@ -61,10 +60,9 @@ func New(
 		testResultWindowTime: resultWindowTime,
 		slack:                slack,
 		testRenderer:         testRenderer,
-		summarizer:           summarizer,
 		testRunnerPodName:    testRunnerPodName,
 		testRunnerNamespace:  testRunnerNamespace,
-		showTestStats:        showTestStats,
+		showTestStats:        false,
 	}
 }
 
@@ -95,6 +93,7 @@ func (s *SlackNotifier) Run(ctx context.Context) {
 				s.log.Errorf("Cannot get test summary for execution IDs [%v], got error: %v", execIDs, err)
 				continue
 			}
+			sort.Sort(summary.ByMostFailures(testStats))
 		}
 
 		header, body, footer, err := s.testRenderer.RenderTestSummary(RenderTestSummaryInput{
@@ -178,6 +177,12 @@ func (s *SlackNotifier) filterFailingTests(testStatuses []internal.ExecutionStat
 		}
 	}
 	return
+}
+
+// WithSummarizer enables summarizer functionality for Slack Notifier
+func (s *SlackNotifier) WithSummarizer(summarizer *summary.Service) {
+	s.showTestStats = true
+	s.summarizer = summarizer
 }
 
 func color(failed []internal.ExecutionStatus) string {

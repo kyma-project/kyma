@@ -1,5 +1,5 @@
 ---
-title: Binding yBundles
+title: Binding bundles
 type: Configuration
 ---
 

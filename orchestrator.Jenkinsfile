@@ -36,6 +36,7 @@ projects = [
     "components/configurations-generator": "configurations-generator",
     "components/environments": "environments",
     "components/istio-webhook": "istio-webhook",
+    "components/istio-kyma-patch": "istio-kyma-patch",
     "components/helm-broker": "helm-broker",
     "components/remote-environment-broker": "remote-environment-broker",
     "components/remote-environment-controller": "remote-environment-controller",
@@ -107,7 +108,11 @@ try {
                             runIntegration = changes.intersect(additionalProjects).size() > 0
                         }
 
-                        if (changes.size() == 1 && changes[0] == "governance") {
+                        if (changes.size() == 1 && (changes[0] == "governance" || changes[0] == "docs")){
+                            runIntegration = false
+                        }
+
+                        if (changes.size() == 2 && changes.contains("governance") && changes.contains("docs")) {
                             runIntegration = false
                         }
                     }

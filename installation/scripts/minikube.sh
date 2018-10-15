@@ -7,6 +7,7 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 MINIKUBE_DOMAIN=""
 MINIKUBE_VERSION=0.28.2
 KUBERNETES_VERSION=1.10.0
+KUBECTL_CLI_VERSION=1.10.0
 VM_DRIVER="hyperkit"
 
 source $CURRENT_DIR/utils.sh
@@ -101,6 +102,23 @@ function checkMinikubeVersion() {
     fi
 }
 
+function checkKubectlVersion() {
+    local currentVersion=$(kubectl version --client --short | awk '{print $3}')
+    local currentVersionMajor=$(echo ${currentVersion} | grep -o '[0-9]\+' | sed -n '1p')
+    local currentVersionMinor=$(echo ${currentVersion} | grep -o '[0-9]\+' | sed -n '2p')
+    local versionMajor=$(echo ${KUBECTL_CLI_VERSION} | cut -d"." -f1)
+    local versionMinor=$(echo ${KUBECTL_CLI_VERSION} | cut -d"." -f2)
+    local versionMinorDifference=$(( versionMinor - currentVersionMinor ))
+
+    if [[ ${versionMinorDifference} -gt 1 ]] || [[ ${versionMinorDifference} -lt -1 ]]; then
+        echo "Your kubectl version is ${currentVersion}. Supported versions of kubectl are from ${versionMajor}.$(( ${versionMinor} - 1 )).* to ${versionMajor}.$(( ${versionMinor} + 1 )).*"
+    fi
+
+    if [[ ${versionMajor} -ne ${currentVersionMajor} ]]; then
+        echo "Your kubectl version is ${currentVersion}. Supported versions of kubectl are from ${versionMajor}.$(( ${versionMinor} - 1 )).* to ${versionMajor}.$(( ${versionMinor} + 1 )).*"
+    fi
+}
+
 function addDevDomainsToEtcHosts() {
     local hostnames=$1
     local minikubeIP=$(minikube ip)
@@ -141,6 +159,8 @@ function increaseFsInotifyMaxUserInstances() {
 
 function start() {
     checkMinikubeVersion
+
+    checkKubectlVersion
 
     checkIfMinikubeIsInitialized
 

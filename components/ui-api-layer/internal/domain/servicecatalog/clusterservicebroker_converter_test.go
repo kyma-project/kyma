@@ -22,14 +22,10 @@ func TestClusterServiceBrokerConverter_ToGQL(t *testing.T) {
 
 		item := fixClusterServiceBroker()
 
-		labelsJSON := new(gqlschema.JSON)
-		err := labelsJSON.UnmarshalGQL(converter.mapStringMapToJson(labels))
-		require.Nil(t, err)
-
 		expected := gqlschema.ClusterServiceBroker{
 			Name:              "exampleName",
 			CreationTimestamp: zeroTimeStamp,
-			Labels:            *labelsJSON,
+			Labels:            labels,
 			URL:               "ExampleURL",
 			Status: gqlschema.ServiceBrokerStatus{
 				Ready:   true,

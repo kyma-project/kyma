@@ -4,7 +4,6 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/status"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
-	"github.com/pkg/errors"
 )
 
 type serviceBrokerConverter struct {
@@ -19,19 +18,12 @@ func (c *serviceBrokerConverter) ToGQL(item *v1beta1.ServiceBroker) (*gqlschema.
 	conditions := item.Status.Conditions
 	returnStatus := c.extractor.Status(conditions)
 
-	labels := new(gqlschema.JSON)
-	err := labels.UnmarshalGQL(c.mapStringMapToJson(item.Labels))
-
-	if err != nil {
-		return nil, errors.Wrap(err, "While unmarshalling labels")
-	}
-
 	broker := gqlschema.ServiceBroker{
 		Name:              item.Name,
 		Environment:       item.Namespace,
 		Status:            returnStatus,
 		CreationTimestamp: item.CreationTimestamp.Time,
-		Labels:            *labels,
+		Labels:            item.Labels,
 		URL:               item.Spec.URL,
 	}
 
@@ -51,13 +43,4 @@ func (c *serviceBrokerConverter) ToGQLs(in []*v1beta1.ServiceBroker) ([]gqlschem
 		}
 	}
 	return result, nil
-}
-
-func (c *serviceBrokerConverter) mapStringMapToJson(labels map[string]string) map[string]interface{} {
-	result := make(map[string]interface{})
-	for k, v := range labels {
-		result[k] = v
-	}
-
-	return result
 }

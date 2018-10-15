@@ -9,24 +9,25 @@ const ( //TODO Check how to access struct tags
 	FieldSourceId         = "source-id"
 	FieldTraceContext     = "trace-context"
 
-	//AllowedIDChars
-	AllowedIdChars      = `^[a-zA-Z0-9_\-]+$`
 	AllowedEventIDChars = `^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$`
 
 	// fully-qualified topic name components
 	AllowedSourceIdChars         = `^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$`
 	AllowedEventTypeChars        = `^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$`
 	AllowedEventTypeVersionChars = `^[a-zA-Z0-9]+$`
+
+	HeaderSourceId = "Source-Id"
 )
 
 // PublishRequest represents a publish request
 type PublishRequest struct {
-	SourceID         string   `json:"source-id"`
-	EventType        string   `json:"event-type"`
-	EventTypeVersion string   `json:"event-type-version"`
-	EventID          string   `json:"event-id"`
-	EventTime        string   `json:"event-time"`
-	Data             AnyValue `json:"data"`
+	SourceID           string   `json:"source-id"`
+	EventType          string   `json:"event-type"`
+	EventTypeVersion   string   `json:"event-type-version"`
+	EventID            string   `json:"event-id"`
+	EventTime          string   `json:"event-time"`
+	Data               AnyValue `json:"data"`
+	SourceIdFromHeader bool
 }
 
 // AnyValue implements the service definition of AnyValue

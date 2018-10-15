@@ -1,8 +1,0 @@
-apiVersion: v1
-name: istio-webhook
-version: 0.8.0
-description: Helm chart for istio-webhook deployment
-keywords:
-  - istio
-  - webhook
-

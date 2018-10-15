@@ -1,4 +1,5 @@
-## Test logging and monitoring
+# Test logging and monitoring
 
-Acceptance test for Prometheus and Grafana in Kyma.
+## Overview
 
+This project includes acceptance test for Prometheus and Grafana in Kyma.

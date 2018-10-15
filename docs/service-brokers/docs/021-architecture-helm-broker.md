@@ -13,7 +13,7 @@ The registration process in the case of the Helm Broker consists of the followin
 
 ![Helm Broker registration](assets/010-helm-registration.png)
 
-### yBundles provisioning and binding
+### Bundles provisioning and binding
 
 After the registration, the process of yBundle provisioning and binding takes place. It consists of the following steps:
 

@@ -39,6 +39,7 @@ projects = [
     "components/configurations-generator",
     "components/environments",
     "components/istio-webhook",
+    "components/istio-kyma-patch",
     "components/helm-broker",
     "components/remote-environment-broker",
     "components/remote-environment-controller",
@@ -65,8 +66,7 @@ projects = [
     "tests/connector-service-tests",
     "tests/metadata-service-tests",
     "tests/remote-environment-controller-tests",
-    "tests/event-bus",
-    "governance",
+    "tests/event-bus"
 ]
 
 /*

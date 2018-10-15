@@ -27,7 +27,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		expected := gqlschema.Deployment{
 			Name:        "test",
 			Environment: environment,
-			Labels: gqlschema.JSON{
+			Labels: gqlschema.Labels{
 				"function": "",
 			},
 		}
@@ -51,7 +51,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		expected := gqlschema.Deployment{
 			Name:        "test",
 			Environment: environment,
-			Labels: gqlschema.JSON{
+			Labels: gqlschema.Labels{
 				"deployment": "",
 			},
 		}
@@ -75,7 +75,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		expected := gqlschema.Deployment{
 			Name:        "test",
 			Environment: environment,
-			Labels: gqlschema.JSON{
+			Labels: gqlschema.Labels{
 				"function": "",
 			},
 		}
@@ -150,7 +150,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		deployment := &gqlschema.Deployment{
 			Name:        "test",
 			Environment: environment,
-			Labels:      gqlschema.JSON{},
+			Labels:      gqlschema.Labels{},
 		}
 
 		usage := &v1alpha1.ServiceBindingUsage{
@@ -186,7 +186,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		deployment := &gqlschema.Deployment{
 			Name:        "test",
 			Environment: environment,
-			Labels: gqlschema.JSON{
+			Labels: gqlschema.Labels{
 				"function": "",
 			},
 		}
@@ -224,7 +224,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		deployment := &gqlschema.Deployment{
 			Name:        "test",
 			Environment: environment,
-			Labels: gqlschema.JSON{
+			Labels: gqlschema.Labels{
 				"function": "",
 			},
 		}
@@ -242,7 +242,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		deployment := &gqlschema.Deployment{
 			Name:        "test",
 			Environment: environment,
-			Labels: gqlschema.JSON{
+			Labels: gqlschema.Labels{
 				"function": "",
 			},
 		}
@@ -278,7 +278,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		deployment := &gqlschema.Deployment{
 			Name:        "test",
 			Environment: environment,
-			Labels: gqlschema.JSON{
+			Labels: gqlschema.Labels{
 				"function": "",
 			},
 		}
@@ -297,7 +297,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		deployment := &gqlschema.Deployment{
 			Name:        "test",
 			Environment: environment,
-			Labels: gqlschema.JSON{
+			Labels: gqlschema.Labels{
 				"function": "",
 			},
 		}

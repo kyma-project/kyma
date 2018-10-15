@@ -7,18 +7,21 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/config"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybind"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybundle"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
+
+const maxPopulatorRetries = 10
 
 func main() {
 	verbose := flag.Bool("verbose", false, "specify if log verbosely loading configuration")
@@ -39,23 +42,30 @@ func main() {
 
 	log := logger.New(&cfg.Logger)
 
-	ybLoader := ybundle.NewLoader(cfg.TmpDir, log)
+	ybLoader := bundle.NewLoader(cfg.TmpDir, log)
 
 	storageConfig := storage.ConfigList(cfg.Storage)
 	sFact, err := storage.NewFactory(&storageConfig)
 	fatalOnError(err)
 
-	cachePop := ybundle.NewPopulator(
-		ybundle.NewHTTPRepository(cfg.Repository),
+	cachePop := bundle.NewPopulator(
+		bundle.NewHTTPRepository(cfg.Repository),
 		ybLoader, sFact.Bundle(), sFact.Chart(), log,
 	)
-	err = cachePop.Init()
+	for i := 0; i < maxPopulatorRetries; i++ {
+		err = cachePop.Init()
+		if err == nil {
+			break
+		}
+		log.Errorf("(%d/%d) Could not load bundles from the repository %s: %s", i, maxPopulatorRetries, cfg.Repository.BaseURL, err.Error())
+		time.Sleep(4 * time.Second)
+	}
 	fatalOnError(err)
 
 	helmClient := helm.NewClient(cfg.Helm, log)
 
 	srv := broker.New(sFact.Bundle(), sFact.Chart(), sFact.InstanceOperation(), sFact.Instance(), sFact.InstanceBindData(),
-		ybind.NewRenderer(), ybind.NewResolver(clientset.CoreV1()), helmClient, log)
+		bind.NewRenderer(), bind.NewResolver(clientset.CoreV1()), helmClient, log)
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 	cancelOnInterrupt(ctx, cancelFunc)

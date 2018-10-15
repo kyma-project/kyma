@@ -11,9 +11,10 @@ func Test_ValidatePublish_MissingSourceId(t *testing.T) {
 	publishRequest := buildTestPublishRequest()
 	publishRequest.SourceID = ""
 	err := ValidatePublish(&publishRequest)
-	assert.NotEqual(t, len(err.Details), 0)
+	assert.Equal(t, len(err.Details), 1)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
-	assert.Equal(t, FieldSourceId, err.Details[0].Field)
+	assert.Equal(t, ErrorMessageMissingSourceId, err.Message)
+	assert.Equal(t, ErrorTypeMissingFieldOrHeader, err.Details[0].Type)
 }
 
 func Test_ValidatePublish_MissingEventType(t *testing.T) {
@@ -95,6 +96,28 @@ func Test_ValidatePublish_InvalidEventID(t *testing.T) {
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
 	assert.Equal(t, FieldEventId, err.Details[0].Field)
+}
+
+func Test_ValidatePublish_InvalidSourceId_In_Payload(t *testing.T) {
+	publishRequest := buildTestPublishRequest()
+	publishRequest.SourceIdFromHeader = false
+	publishRequest.SourceID = "invalid/sourceId"
+	err := ValidatePublish(&publishRequest)
+	assert.NotEqual(t, len(err.Details), 0)
+	assert.Equal(t, http.StatusBadRequest, err.Status)
+	assert.Equal(t, FieldSourceId, err.Details[0].Field)
+	assert.Equal(t, ErrorTypeInvalidField, err.Details[0].Type)
+}
+
+func Test_ValidatePublish_InvalidSourceId_In_Header(t *testing.T) {
+	publishRequest := buildTestPublishRequest()
+	publishRequest.SourceIdFromHeader = true
+	publishRequest.SourceID = "invalid/sourceId"
+	err := ValidatePublish(&publishRequest)
+	assert.NotEqual(t, len(err.Details), 0)
+	assert.Equal(t, http.StatusBadRequest, err.Status)
+	assert.Equal(t, HeaderSourceId, err.Details[0].Field)
+	assert.Equal(t, ErrorTypeInvalidHeader, err.Details[0].Type)
 }
 
 func Test_ValidatePublish_Success(t *testing.T) {

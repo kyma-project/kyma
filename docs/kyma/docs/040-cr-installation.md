@@ -52,7 +52,7 @@ spec:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-| Field   |      Mandatory?      |  Description |
+| Field   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** | **YES** | Specifies the name of the CR. |
 | **metadata.labels.action** | **YES** | Defines the behavior of the Kyma installer. Available options are `install`, `update`, and `uninstall`. |
