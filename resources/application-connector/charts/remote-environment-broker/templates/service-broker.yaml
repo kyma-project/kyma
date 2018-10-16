@@ -10,5 +10,5 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  url: http://{{ template "fullname" . }}.{{ .Values.global.namespace }}.svc.cluster.local
+  url: http://{{ .Chart.Name }}.{{ .Values.global.namespace }}.svc.cluster.local
 {{- end -}}
