@@ -129,11 +129,8 @@ func TestSpec(t *testing.T) {
 
 		tokenPayloadEncoded := tokenParts[1]
 
-		if len(tokenPayloadEncoded)%3 == 1 {
-			tokenPayloadEncoded += "=="
-		} else if len(tokenPayloadEncoded)%3 == 2 {
-			tokenPayloadEncoded += "="
-		}
+		missingTokenBytes := (3 - len(tokenPayloadEncoded)%3) % 3
+		tokenPayloadEncoded += strings.Repeat("=", missingTokenBytes)
 
 		tokenPayloadDecoded, err := base64.StdEncoding.DecodeString(tokenPayloadEncoded)
 		if err != nil {
