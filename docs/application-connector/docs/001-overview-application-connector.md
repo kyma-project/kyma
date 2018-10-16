@@ -18,4 +18,4 @@ The AC gives you this functionality:
 
 All of the AC components scale independently, which allows to adjust it to fit the needs of the implementation built using Kyma.
 
->**NOTE:** To learn more about the concept Environments in Kyma, read the **Environments** document in the **Kyma** documentation topic.
+>**NOTE:** To learn more about the concept of Environments in Kyma, read the **Environments** document in the **Kyma** documentation topic.
