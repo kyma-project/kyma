@@ -25,7 +25,7 @@ The navigation order of the documentation page is based on the [Manifest](manife
 
 Follow these basic rules when you add a new document to the official Kyma documentation:
 
-1. Get familiar with our [Content Strategy](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/content-strategy.md) to learn about the Kyma's official approach to content development.
-2. Follow our [Contribution Guide](https://github.com/kyma-project/community/blob/master/CONTRIBUTING.md) for the general contribution rules and process.
-3. Make use of our [templates](https://github.com/kyma-project/community/tree/master/guidelines/templates) to structure your documents properly.
-4. Be compliant with our writing [guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to contribute high-quality and standardized content.
+1. Get familiar with the [Content Strategy](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/content-strategy.md) to learn about the Kyma's official approach to content development.
+2. Follow the [Contribution Guide](https://github.com/kyma-project/community/blob/master/CONTRIBUTING.md) for the general contribution rules and process.
+3. Make use of the [templates](https://github.com/kyma-project/community/tree/master/guidelines/templates) to structure your documents properly.
+4. Be compliant with the writing [guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to contribute high-quality and standardized content.
