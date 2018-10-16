@@ -168,7 +168,8 @@ func TestOverrides(t *testing.T) {
 			So(test2Overrides["key6"], ShouldEqual, "val2_3")
 		})
 
-		Convey("Should handle two components with the same name", func() {
+		Convey("Should join two inputs for the same component", func() {
+
 			c1 := component{
 				name:      "test",
 				overrides: makeTestMap("key1:val1_1", "key2:val1_2", "key3:val1_3"),
@@ -192,7 +193,7 @@ func TestOverrides(t *testing.T) {
 			So(testOverrides["key5"], ShouldEqual, "val2_3") //from c2
 		})
 
-		Convey("Should handle mulitple components", func() {
+		Convey("Should join multiple inputs for multiple components", func() {
 			c1 := component{
 				name:      "test1",
 				overrides: makeTestMap("key1:val1_1", "key2:val1_2", "key3:val1_3"),
