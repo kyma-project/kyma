@@ -3,6 +3,9 @@
 set -o errexit
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+RESOURCES_DIR="${CURRENT_DIR}/../resources"
+INSTALLER="${RESOURCES_DIR}/installer.yaml"
+INSTALLER_CONFIG=""
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -33,17 +36,15 @@ echo "
 ################################################################################
 "
 
-kubectl apply -f ${CURRENT_DIR}/../resources/default-sa-rbac-role.yaml
+kubectl apply -f ${RESOURCES_DIR}/default-sa-rbac-role.yaml
 
+bash ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
 bash ${CURRENT_DIR}/install-tiller.sh
 
 if [ $LOCAL ]; then
-    kubectl apply -f ${CURRENT_DIR}/../resources/installer-local.yaml
-else
-    kubectl apply -f ${CURRENT_DIR}/../resources/installer.yaml
+    INSTALLER="${RESOURCES_DIR}/installer-local.yaml"
+    INSTALLER_CONFIG="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
 fi
-
-${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
 
 if [ $CR_PATH ]; then
 
@@ -52,12 +53,15 @@ if [ $CR_PATH ]; then
     *) CR_PATH="$(pwd)/$CR_PATH";;
     esac
 
-    if [ -f $CR_PATH ]; then
-        echo "Applying CR for installer from path $CR_PATH"
-        kubectl apply -f $CR_PATH
-        kubectl label installation/kyma-installation action=install
-    else
+    if [ ! -f $CR_PATH ]; then
         echo "CR file not found in path $CR_PATH"
+        exit 1
     fi
 
 fi
+
+echo -e "\nApplying installation combo yaml"
+bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} | kubectl apply -f -
+
+echo -e "\nTriggering installation"
+kubectl label installation/kyma-installation action=install
