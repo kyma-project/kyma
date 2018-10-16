@@ -12,9 +12,9 @@ This section describes the resource names to use in the kubectl command line, th
 
 Event Bus operations use the following resources:
 
-| Singular name  | Plural name  |
-| -------------------- |-------------------|
-| subscription      | subscriptions |
+| Singular name        | Plural name         |
+| -------------------- | ------------------- |
+| subscription         | subscriptions       |
 
 ### Syntax
 
@@ -45,10 +45,7 @@ The following examples show how to create new Subscriptions, list them, and obta
      include_subscription_name_header: true
      event_type: order_created
      event_type_version: v1
-     source:
-       source_namespace: com.github
-       source_type: commerce
-       source_environment: stage
+     source_id: stage.commerce.kyma.local
 EOF
 ```
 
