@@ -210,12 +210,6 @@ func failingReactor(retErr error) k8s_testing.ReactionFunc {
 	}
 }
 
-func passingReactor(sb *v1beta1.ServiceBroker) k8s_testing.ReactionFunc {
-	return func(action k8s_testing.Action) (handled bool, ret runtime.Object, err error) {
-		return true, sb, nil
-	}
-}
-
 func fixError() error {
 	return errors.New("some error")
 }

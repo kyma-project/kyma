@@ -11,12 +11,10 @@ import (
 
 	scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	catalogInformers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
-	"github.com/kubernetes-incubator/service-catalog/pkg/svcat/service-catalog"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/access"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/config"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mapping"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mode"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/nsbroker"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/storage/populator"
@@ -59,18 +57,12 @@ func main() {
 	// ServiceCatalog
 	scClientSet, err := scCs.NewForConfig(k8sConfig)
 	fatalOnError(err)
-	scSDK := &servicecatalog.SDK{ServiceCatalogClient: scClientSet}
 
 	scInformerFactory := catalogInformers.NewSharedInformerFactory(scClientSet, informerResyncPeriod)
 	scInformersGroup := scInformerFactory.Servicecatalog().V1beta1()
 
 	// instance populator
-	var instancePopulator doer
-	if cfg.ClusterScopedBrokerEnabled {
-		instancePopulator = populator.NewInstancesFromClusterBroker(scClientSet, sFact.Instance(), &populator.Converter{}, cfg.ClusterScopedBrokerName)
-	} else {
-		instancePopulator = populator.NewInstancesFromNsBrokers(scClientSet, sFact.Instance(), &populator.Converter{})
-	}
+	instancePopulator := populator.NewInstances(scClientSet, sFact.Instance(), &populator.Converter{})
 	popCtx, popCancelFunc := context.WithTimeout(context.Background(), time.Minute)
 	defer popCancelFunc()
 	log.Info("Instance storage population...")
@@ -86,22 +78,22 @@ func main() {
 
 	// internal services
 	nsBrokerSyncer := syncer.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1())
-	relistRequester := syncer.NewRelistRequester(scSDK, nsBrokerSyncer, cfg.ClusterScopedBrokerName, cfg.BrokerRelistDurationWindow, cfg.ClusterScopedBrokerEnabled, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, log)
+	relistRequester := syncer.NewRelistRequester(nsBrokerSyncer, cfg.BrokerRelistDurationWindow, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, log)
 	siFacade := broker.NewServiceInstanceFacade(scInformersGroup.ServiceInstances().Informer())
 	accessChecker := access.New(sFact.RemoteEnvironment(), reClient.ApplicationconnectorV1alpha1(), sFact.Instance())
 
 	reSyncCtrl := syncer.New(reInformersGroup.RemoteEnvironments(), sFact.RemoteEnvironment(), sFact.RemoteEnvironment(), relistRequester, log)
 
-	brokerMode, err := mode.NewBrokerService(cfg)
+	brokerService, err := broker.NewNsBrokerService()
 	fatalOnError(err)
 
-	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), brokerMode, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, int32(cfg.Port), log)
+	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), brokerService, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, int32(cfg.Port), log)
 
-	mappingCtrl := mapping.New(!cfg.ClusterScopedBrokerEnabled, reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), nsBrokerFacade, nsBrokerSyncer, log)
+	mappingCtrl := mapping.New(reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), nsBrokerFacade, nsBrokerSyncer, log)
 
 	// create broker
 	srv := broker.New(sFact.RemoteEnvironment(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
-		reClient.ApplicationconnectorV1alpha1(), siFacade, reInformersGroup.EnvironmentMappings().Lister(), brokerMode, log)
+		reClient.ApplicationconnectorV1alpha1(), siFacade, reInformersGroup.EnvironmentMappings().Lister(), brokerService, log)
 
 	// setup graceful shutdown signals
 	ctx, cancelFunc := context.WithCancel(context.Background())
@@ -147,8 +139,4 @@ func cancelOnInterrupt(ctx context.Context, ch chan<- struct{}, cancel context.C
 			cancel()
 		}
 	}()
-}
-
-type doer interface {
-	Do(ctx context.Context) error
 }

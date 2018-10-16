@@ -13,37 +13,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func TestOSBContextForClusterScopedBroker(t *testing.T) {
-	// GIVEN
-	mockBrokerModeService := &automock.BrokerModeService{}
-	defer mockBrokerModeService.AssertExpectations(t)
-
-	mockBrokerModeService.On("IsClusterScoped").Return(true)
-	sut := NewOsbContextMiddleware(mockBrokerModeService, spy.NewLogDummy())
-
-	req := httptest.NewRequest(http.MethodGet, "https://core-reb.kyma-system.svc.cluster.local/v2/catalog", nil)
-	rw := httptest.NewRecorder()
-	nextCalled := false
-	// WHEN
-	sut.ServeHTTP(rw, req, func(nextRw http.ResponseWriter, nextReq *http.Request) {
-		nextCalled = true
-		osbCtx, ex := osbContextFromContext(nextReq.Context())
-		// THEN
-		assert.True(t, ex)
-		assert.True(t, osbCtx.ClusterScopedBroker)
-		assert.Empty(t, osbCtx.BrokerNamespace)
-	})
-	// THEN
-	assert.True(t, nextCalled)
-}
-
 func TestOSBContextForNsScopedBroker(t *testing.T) {
 	// GIVEN
-	mockBrokerService := &automock.BrokerModeService{}
+	mockBrokerService := &automock.BrokerService{}
 	defer mockBrokerService.AssertExpectations(t)
 	url := "http://reb-ns-for-stage.kyma-system.svc.cluster.local/v2/catalog"
-
-	mockBrokerService.On("IsClusterScoped").Return(false)
 
 	mockBrokerService.On("GetNsFromBrokerURL", "reb-ns-for-stage.kyma-system.svc.cluster.local").Return("stage", nil)
 
@@ -58,7 +32,6 @@ func TestOSBContextForNsScopedBroker(t *testing.T) {
 		osbCtx, ex := osbContextFromContext(nextReq.Context())
 		// THEN
 		assert.True(t, ex)
-		assert.False(t, osbCtx.ClusterScopedBroker)
 		assert.Equal(t, "stage", osbCtx.BrokerNamespace)
 	})
 	// THEN
@@ -68,10 +41,9 @@ func TestOSBContextForNsScopedBroker(t *testing.T) {
 
 func TestOsbContextReturnsErrorWhenCannotExtractNamespace(t *testing.T) {
 	// GIVEN
-	mockBrokerService := &automock.BrokerModeService{}
+	mockBrokerService := &automock.BrokerService{}
 	defer mockBrokerService.AssertExpectations(t)
 
-	mockBrokerService.On("IsClusterScoped").Return(false)
 	mockBrokerService.On("GetNsFromBrokerURL", mock.Anything).Return("", errors.New("some error"))
 	logSink := spy.NewLogSink()
 	sut := NewOsbContextMiddleware(mockBrokerService, logSink.Logger)
