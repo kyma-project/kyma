@@ -18,6 +18,7 @@ data:
       headerLogoUrl: '{{ js .Values.cluster.headerLogoUrl }}',
       headerTitle: '{{ js .Values.cluster.headerTitle }}',
       faviconUrl: '{{ js .Values.cluster.faviconUrl }}',
-      gateway_kyma_cx_api_version: 'v1alpha2'
+      gateway_kyma_cx_api_version: 'v1alpha2',
+      k8sApiServerUrl_ui: 'https://apiserver.{{ js .Values.global.domainName }}/apis/ui.kyma-project.io/v1alpha1/'
     };
     

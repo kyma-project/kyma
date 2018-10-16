@@ -31,7 +31,7 @@ metadata:
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
-- apiGroups: ["", "api.kyma.cx", "apps", "authentication.kyma-project.io", "extensions", "gateway.kyma.cx", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma.cx", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma.cx", "ui.kyma.cx"]
+- apiGroups: ["", "api.kyma.cx", "apps", "authentication.kyma-project.io", "extensions", "gateway.kyma.cx", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma.cx", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma.cx", "ui.kyma.cx", "ui.kyma-project.io"]
   resources: ["*"]
   verbs: ["get, list"]
 - nonResourceURLs: [ "*"] #give access to all non resource urls
@@ -77,7 +77,7 @@ metadata:
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
-- apiGroups: ["", "api.kyma.cx", "apps", "authentication.kyma-project.io", "extensions", "gateway.kyma.cx", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma.cx", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma.cx", "ui.kyma.cx", "batch", "extensions", "autoscaling"]
+- apiGroups: ["", "api.kyma.cx", "apps", "authentication.kyma-project.io", "extensions", "gateway.kyma.cx", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma.cx", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma.cx", "ui.kyma.cx", ui.kyma-project.io", "batch", "extensions", "autoscaling"]
   resources: ["*"]
   verbs: ["*"]
 - apiGroups: ["apiextensions.k8s.io"]
