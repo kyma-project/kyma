@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: {{ .Chart.Name }}-tests
+  namespace: {{ .Values.global.namespace }}
   annotations:
     "helm.sh/hook": test-success
   labels:
@@ -20,7 +21,7 @@ spec:
     - name: GATEWAY_URL
       value: https://gateway.{{ .Values.global.domainName }}
     - name: SKIP_SSL_VERIFY
-      value: {{ .Values.global.isLocalEnv }}
+      value: "{{ .Values.global.isLocalEnv }}"
 
   restartPolicy: Never
-  {{ end }}
+{{ end }}
