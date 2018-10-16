@@ -245,7 +245,7 @@ func makeTestMap(entries ...string) inputMap {
 	for _, s := range entries {
 		entry := strings.Split(s, ":")
 		if len(entry) != 2 {
-			panic("Invalid input - expected single colon, got: " + s)
+			panic("Invalid input - expected two string values separated by a colon, got: " + s)
 		}
 		res[entry[0]] = entry[1]
 	}
