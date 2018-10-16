@@ -61,6 +61,9 @@
 # The `etcd-operator` subchart
 /resources/core/charts/etcd-operator/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001
 
+# The 'gateway' subchart
+/resources/core/charts/gateway/ @piotrmsc @kubadz @sjanota
+
 # The `helm-broker` subchart
 /resources/core/charts/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
 

@@ -160,12 +160,11 @@ function checkAndCleanupTest() {
     fi
 }
 
-function printImagesWithLatestTag(){
+function printImagesWithLatestTag() {
 
-    # We ignore the alpine image as this is required by istio-sidecar
     local images=$(kubectl get pods --all-namespaces -o jsonpath="{..image}" |\
     tr -s '[[:space:]]' '\n' |\
-    grep ":latest" | grep -v "alpine:latest")
+    grep ":latest")
 
     log "Images with tag latest are not allowed. Checking..." nc bold
     if [ ${#images} -ne 0 ]; then
