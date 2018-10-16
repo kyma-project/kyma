@@ -10,7 +10,7 @@ import (
 
 	"io/ioutil"
 
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 
 	"github.com/kyma-project/kyma/tests/connector-service-tests/test/testkit"
 	"github.com/stretchr/testify/require"
@@ -23,7 +23,7 @@ func TestConnector(t *testing.T) {
 
 	remoteEnvName := "ec-default"
 
-	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl)
+	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
 
 	clientKey := testkit.CreateKey(t)
 
@@ -219,9 +219,11 @@ func TestApiSpec(t *testing.T) {
 	config, err := testkit.ReadConfig()
 	require.NoError(t, err)
 
+	hc := testkit.NewHttpClient(config.SkipSslVerify)
+
 	t.Run("should receive api spec", func(t *testing.T) {
 		// when
-		response, err := http.Get(config.ExternalAPIUrl + apiSpecPath)
+		response, err := hc.Get(config.ExternalAPIUrl + apiSpecPath)
 
 		// then
 		require.NoError(t, err)
@@ -240,15 +242,13 @@ func TestApiSpec(t *testing.T) {
 
 	t.Run("should receive 301 when accessing base path", func(t *testing.T) {
 		// given
-		client := &http.Client{
-			CheckRedirect: func(req *http.Request, via []*http.Request) error {
-				require.Equal(t, apiSpecPath, req.URL.Path)
-				return http.ErrUseLastResponse
-			},
+		hc.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+			require.Equal(t, apiSpecPath, req.URL.Path)
+			return http.ErrUseLastResponse
 		}
 
 		// when
-		response, err := client.Get(config.ExternalAPIUrl + "/v1")
+		response, err := hc.Get(config.ExternalAPIUrl + "/v1")
 
 		// then
 		require.NoError(t, err)
@@ -263,17 +263,16 @@ func TestCertificateValidation(t *testing.T) {
 
 	gatewayUrlFormat := config.GatewayUrl + "/%s/v1/metadata/services"
 
+	// TODO There will be no ec-default and hmc-default in future
 	remoteEnvName := "ec-default"
 	forbiddenRemoteEnvName := "hmc-default"
 
-	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl)
+	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
 
 	clientKey := testkit.CreateKey(t)
+	tlsClient := createTLSClientWithCert(t, client, clientKey, config.SkipSslVerify)
 
 	t.Run("should access remote environment", func(t *testing.T) {
-		// given
-		tlsClient := createTLSClientWithCert(t, client, clientKey)
-
 		// when
 		response, err := tlsClient.Get(fmt.Sprintf(gatewayUrlFormat, remoteEnvName))
 
@@ -283,9 +282,6 @@ func TestCertificateValidation(t *testing.T) {
 	})
 
 	t.Run("should receive 403 when accessing RE with invalid CN", func(t *testing.T) {
-		// given
-		tlsClient := createTLSClientWithCert(t, client, clientKey)
-
 		// when
 		response, err := tlsClient.Get(fmt.Sprintf(gatewayUrlFormat, forbiddenRemoteEnvName))
 
@@ -324,7 +320,7 @@ func createCertificateChain(t *testing.T, connectorClient testkit.ConnectorClien
 	return crtResponse, infoResponse
 }
 
-func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, key *rsa.PrivateKey) *http.Client {
+func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, key *rsa.PrivateKey, skipVerify bool) *http.Client {
 	crtResponse, _ := createCertificateChain(t, client, key)
 	require.NotEmpty(t, crtResponse.Crt)
 	clientCertBytes, _ := testkit.CrtResponseToPemBytes(t, crtResponse)
@@ -335,8 +331,9 @@ func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, key *
 	}
 
 	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{tlsCert},
-		ClientAuth:   tls.RequireAndVerifyClientCert,
+		Certificates:       []tls.Certificate{tlsCert},
+		ClientAuth:         tls.RequireAndVerifyClientCert,
+		InsecureSkipVerify: skipVerify,
 	}
 
 	transport := &http.Transport{

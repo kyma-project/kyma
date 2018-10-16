@@ -213,24 +213,6 @@ func (c *Controller) syncHandler(key string) error {
 		if err != nil {
 			return err
 		}
-	} else if installation.ShouldUpdate() {
-
-		err = c.conditionManager.UpdateStart()
-		if err != nil {
-			return err
-		}
-
-		err = c.kymaSteps.InstallKyma(installationData, overrideProvider)
-		if err != nil {
-			c.conditionManager.UpdateError()
-
-			return err
-		}
-
-		err = c.conditionManager.UpdateSuccess()
-		if err != nil {
-			return err
-		}
 	}
 
 	c.recorder.Event(installation, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)

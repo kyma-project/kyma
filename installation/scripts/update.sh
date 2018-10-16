@@ -37,4 +37,4 @@ if [ $LOCAL -eq 1 ]; then
     bash $CURRENT_DIR/copy-resources.sh
 fi
 
-kubectl label installation/${CR_NAME} action=update --overwrite
+kubectl label installation/${CR_NAME} action=install --overwrite
