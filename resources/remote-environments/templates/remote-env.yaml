@@ -3,10 +3,10 @@ kind: RemoteEnvironment
 metadata:
   name: {{ .Release.Name }}
   labels:
-    app: {{ .Release.Name }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app: {{ .Release.Name }}-gateway
+    release: {{ .Release.Name }}-gateway
+    heritage: {{ .Release.Service }}-gateway
 spec:
   sourceId: {{ .Release.Name }}
   description: "This Remote Environment corresponds to the connected remote solution."
-  accessLabel: {{ .Release.Name }}
+  accessLabel: "echo-access-label"
