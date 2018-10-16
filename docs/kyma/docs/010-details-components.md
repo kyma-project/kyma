@@ -35,7 +35,7 @@ and uses the [NATS](https://nats.io/) messaging system that monitors business ev
 
 ## Monitoring
 
-Kyma comes bundled with tools that give you the most accurate and up-to-date monitoring data.  [Prometheus](https://prometheus.io/) open source monitoring and alerting toolkit provides this data, which is consumed by different add-ons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts.
+Kyma comes bundled with tools that give you the most accurate and up-to-date monitoring data. [Prometheus](https://prometheus.io/) open source monitoring and alerting toolkit provides this data, which is consumed by different add-ons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts.
 
 ## Tracing
 
@@ -43,4 +43,4 @@ The tracing in Kyma uses the [Jaeger](https://github.com/jaegertracing) distribu
 
 ## Logging
 
-Logging in Kyma uses [Logspout](https://github.com/gliderlabs/logspout) and [OK Log](https://github.com/oklog/oklog). Use a plaintext or a regular expression to fetch logs from pods using the OK Log UI.
+Logging in Kyma uses [Logspout](https://github.com/gliderlabs/logspout) and [OK Log](https://github.com/oklog/oklog). Use a plaintext or a regular expression to fetch logs from Pods using the OK Log UI.
