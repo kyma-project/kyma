@@ -9,7 +9,7 @@ metadata:
 spec:
   sourceId: {{ .Values.remoteEnvs.ecDefault }}
   description: "This Remote Environment corresponds to the connected remote solution."
-  accessLabel: "echo-access-label"
+  accessLabel: {{ .Values.remoteEnvs.ecDefault }}
 ---
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: RemoteEnvironment
@@ -22,4 +22,4 @@ metadata:
 spec:
   sourceId: {{ .Values.remoteEnvs.hmcDefault }}
   description: "This Remote Environment corresponds to the connected remote solution."
-  accessLabel: "echo-access-label"
+  accessLabel: {{ .Values.remoteEnvs.hmcDefault }}
