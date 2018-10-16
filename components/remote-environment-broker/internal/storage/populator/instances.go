@@ -15,16 +15,16 @@ import (
 	"k8s.io/api/core/v1"
 )
 
-// InstancesFromNsBrokers provides method for populating Instance Storage
-type InstancesFromNsBrokers struct {
+// Instances provides method for populating Instance Storage
+type Instances struct {
 	inserter    instanceInserter
 	converter   instanceConverter
 	scClientSet clientset.Interface
 }
 
-// NewInstancesFromNsBrokers returns InstancesFromNsBrokers object
-func NewInstancesFromNsBrokers(scClientSet clientset.Interface, inserter instanceInserter, converter instanceConverter) *InstancesFromNsBrokers {
-	return &InstancesFromNsBrokers{
+// NewInstances returns Instances object
+func NewInstances(scClientSet clientset.Interface, inserter instanceInserter, converter instanceConverter) *Instances {
+	return &Instances{
 		scClientSet: scClientSet,
 		inserter:    inserter,
 		converter:   converter,
@@ -32,7 +32,7 @@ func NewInstancesFromNsBrokers(scClientSet clientset.Interface, inserter instanc
 }
 
 // Do populates Instance Storage
-func (p *InstancesFromNsBrokers) Do(ctx context.Context) error {
+func (p *Instances) Do(ctx context.Context) error {
 	siInformer := scv1beta.NewServiceInstanceInformer(p.scClientSet, v1.NamespaceAll, informerResyncPeriod, nil)
 	scInformer := scv1beta.NewServiceClassInformer(p.scClientSet, v1.NamespaceAll, informerResyncPeriod, nil)
 

@@ -1,17 +1,15 @@
-package mode_test
+package broker
 
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/config"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mode"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBrokerModeGetNsFromURL(t *testing.T) {
 	// GIVEN
-	sut, err := mode.NewBrokerService(&config.Config{ClusterScopedBrokerEnabled: false})
+	sut, err := NewNsBrokerService()
 	require.NoError(t, err)
 	// WHEN
 	actNs, err := sut.GetNsFromBrokerURL("http://reb-ns-for-stage.kyma-system.svc.cluster.local/v2/catalog")
@@ -23,7 +21,7 @@ func TestBrokerModeGetNsFromURL(t *testing.T) {
 
 func TestBrokerModeErrorOnGetNsFromURL(t *testing.T) {
 	// GIVEN
-	sut, err := mode.NewBrokerService(&config.Config{ClusterScopedBrokerEnabled: false})
+	sut, err := NewNsBrokerService()
 	require.NoError(t, err)
 	// WHEN
 	_, err = sut.GetNsFromBrokerURL("https://core-reb.kyma-system.svc.cluster.local/v2/catalog")

@@ -57,31 +57,29 @@ type nsBrokerSyncer interface {
 
 // Controller populates local storage with all EnvironmentMapping custom resources created in k8s cluster.
 type Controller struct {
-	manageNsBrokers bool
-	queue           workqueue.RateLimitingInterface
-	emInformer      cache.SharedIndexInformer
-	nsInformer      cache.SharedIndexInformer
-	nsPatcher       nsPatcher
-	reGetter        reGetter
-	nsBrokerFacade  nsBrokerFacade
-	nsBrokerSyncer  nsBrokerSyncer
-	mappingSvc      mappingLister
-	log             logrus.FieldLogger
+	queue          workqueue.RateLimitingInterface
+	emInformer     cache.SharedIndexInformer
+	nsInformer     cache.SharedIndexInformer
+	nsPatcher      nsPatcher
+	reGetter       reGetter
+	nsBrokerFacade nsBrokerFacade
+	nsBrokerSyncer nsBrokerSyncer
+	mappingSvc     mappingLister
+	log            logrus.FieldLogger
 }
 
 // New creates new environment mapping controller
-func New(manageNsBrokers bool, emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, reGetter reGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger) *Controller {
+func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, reGetter reGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger) *Controller {
 	c := &Controller{
-		manageNsBrokers: manageNsBrokers,
-		log:             log.WithField("service", "labeler:controller"),
-		emInformer:      emInformer,
-		nsInformer:      nsInformer,
-		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		nsPatcher:       nsPatcher,
-		reGetter:        reGetter,
-		nsBrokerFacade:  nsBrokerFacade,
-		nsBrokerSyncer:  nsBrokerSyncer,
-		mappingSvc:      newMappingService(emInformer),
+		log:            log.WithField("service", "labeler:controller"),
+		emInformer:     emInformer,
+		nsInformer:     nsInformer,
+		queue:          workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		nsPatcher:      nsPatcher,
+		reGetter:       reGetter,
+		nsBrokerFacade: nsBrokerFacade,
+		nsBrokerSyncer: nsBrokerSyncer,
+		mappingSvc:     newMappingService(emInformer),
 	}
 
 	// EventHandler reacts every time when we add, update or delete EnvironmentMapping
@@ -202,27 +200,16 @@ func (c *Controller) processItem(key string) error {
 		if err = c.ensureNsNotLabelled(reNs); err != nil {
 			return err
 		}
-		if c.manageNsBrokers {
-			if err := c.ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace); err != nil {
-				return err
-			}
-		}
-		return nil
+		return c.ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace)
 	}
-	if err := c.ensureNsLabelled(name, reNs); err != nil {
+	if err = c.ensureNsLabelled(name, reNs); err != nil {
 		return err
 	}
-	if c.manageNsBrokers {
-		envMapping, ok := emObj.(*v1alpha1.EnvironmentMapping)
-		if !ok {
-			return fmt.Errorf("cannot cast received object to v1alpha1.EnvironmentMapping type, type was [%T]", emObj)
-		}
-		if err := c.ensureNsBrokerRegisteredAndSynced(envMapping); err != nil {
-			return err
-		}
+	envMapping, ok := emObj.(*v1alpha1.EnvironmentMapping)
+	if !ok {
+		return fmt.Errorf("cannot cast received object to v1alpha1.EnvironmentMapping type, type was [%T]", emObj)
 	}
-
-	return nil
+	return c.ensureNsBrokerRegisteredAndSynced(envMapping)
 }
 
 func (c *Controller) getNamespace(namespace string) (*corev1.Namespace, error) {
