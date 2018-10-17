@@ -1,4 +1,4 @@
-package ybind_test
+package bind_test
 
 import (
 	"errors"
@@ -7,8 +7,8 @@ import (
 
 	google_protobuf "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybind"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybind/automock"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bind/automock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -32,7 +32,7 @@ func TestRenderSuccess(t *testing.T) {
 		Return(fixRenderOutFiles, nil)
 
 	toRenderFake := toRenderValuesFake{t}.WithInputAssertion(fixChart(), fixResp)
-	renderer := ybind.NewRendererWithDeps(engineRenderMock, toRenderFake)
+	renderer := bind.NewRendererWithDeps(engineRenderMock, toRenderFake)
 
 	// when
 	out, err := renderer.Render(tplToRender, fixResp)
@@ -79,7 +79,7 @@ func TestRenderFailureOnInputParamValidation(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 			// given
 			tplToRender := internal.BundlePlanBindTemplate("template-body-to-render")
-			renderer := ybind.NewRendererWithDeps(nil, nil)
+			renderer := bind.NewRendererWithDeps(nil, nil)
 
 			// when
 			out, err := renderer.Render(tplToRender, tc.givenResp)
@@ -98,7 +98,7 @@ func TestRenderFailureOnCreatingToRenderValues(t *testing.T) {
 	tplToRender := internal.BundlePlanBindTemplate("template-body-to-render")
 
 	toRenderFake := toRenderValuesFake{t}.WithForcedError(fixErr)
-	renderer := ybind.NewRendererWithDeps(nil, toRenderFake)
+	renderer := bind.NewRendererWithDeps(nil, toRenderFake)
 
 	// when
 	out, err := renderer.Render(tplToRender, fixResp)
@@ -121,7 +121,7 @@ func TestRenderFailureOnEngineRender(t *testing.T) {
 	engineRenderMock.On("Render", mock.MatchedBy(chartWithTpl(t, tplToRender)), fixChartutilValues()).
 		Return(nil, fixErr)
 
-	renderer := ybind.NewRendererWithDeps(engineRenderMock, toRenderFake)
+	renderer := bind.NewRendererWithDeps(engineRenderMock, toRenderFake)
 
 	// when
 	out, err := renderer.Render(tplToRender, fixResp)
@@ -142,7 +142,7 @@ func TestRenderFailureOnExtractingResolveBindFile(t *testing.T) {
 		Return(map[string]string{}, nil)
 
 	toRenderFake := toRenderValuesFake{t}.WithInputAssertion(fixChart(), fixResp)
-	renderer := ybind.NewRendererWithDeps(engineRenderMock, toRenderFake)
+	renderer := bind.NewRendererWithDeps(engineRenderMock, toRenderFake)
 
 	// when
 	out, err := renderer.Render(tplToRender, fixResp)

@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/platform/logger/spy"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybundle"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -27,7 +27,7 @@ func TestArchiveBundles(t *testing.T) {
 	// THEN
 	require.NoError(t, err)
 
-	loader := ybundle.NewLoader(loaderTempDir, spy.NewLogDummy())
+	loader := bundle.NewLoader(loaderTempDir, spy.NewLogDummy())
 
 	quote, err := os.Open(filepath.Join(outputDir, "quote-1.0.1.tgz"))
 	assert.NoError(t, err)

@@ -6,7 +6,7 @@ containerRegistry:
   path: eu.gcr.io/kyma-project
 
 image:
-  tag: 4a0904b3
+  tag: b4384a6e
   # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 
@@ -14,7 +14,7 @@ image:
 storage:
   claimName: "stability-test-scripts-pvc"
 
-pathToTestingScript: "/data/input/testing-kyma.sh"
+pathToTestingScript: "/data/input/testing.sh"
 slackClientWebhookUrl: "need-to-be-provided"
 slackClientChannelId: "need-to-be-provided"
 slackClientToken: "123-need-to-be-provided"
