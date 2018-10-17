@@ -171,7 +171,7 @@ function start() {
     fi
 
     minikube start \
-    --memory 10240 \
+    --memory 8192 \
     --cpus 4 \
     --extra-config=apiserver.Authorization.Mode=RBAC \
     --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList=".*" \
