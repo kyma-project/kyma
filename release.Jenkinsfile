@@ -97,7 +97,7 @@ try {
                         for (int i=0; i < projects.size(); i++) {
                             def index = i
                             jobs["${projects[index]}"] = { ->
-                                    build job: "kyma/"+projects[index],
+                                    build job: "kyma/"+projects[index]+"-release",
                                             wait: true,
                                             parameters: [
                                                 string(name:'GIT_REVISION', value: "$commitID"),
@@ -121,7 +121,7 @@ try {
 
     // test the release
     stage('launch Kyma integration') {
-        build job: 'kyma/integration',
+        build job: 'kyma/integration-release',
             wait: true,
             parameters: [
                 string(name:'GIT_REVISION', value: "$commitID"),
@@ -132,58 +132,58 @@ try {
     }
 
     // publish release artifacts
-    podTemplate(label: label) {
-        node(label) {
-            timestamps {
-                ansiColor('xterm') {
-                    stage("setup") {
-                        checkout scm
-                    }
+    // podTemplate(label: label) {
+    //     node(label) {
+    //         timestamps {
+    //             ansiColor('xterm') {
+    //                 stage("setup") {
+    //                     checkout scm
+    //                 }
 
-                    stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
-                        def zip = "${appVersion}.tar.gz"
+    //                 stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
+    //                     def zip = "${appVersion}.tar.gz"
                         
-                        // create release zip
-                        writeFile file: "installation/versions-overrides.env", text: "${versionsYaml()}"
-                        sh "tar -czf ${zip} ./installation ./resources"
+    //                     // create release zip
+    //                     writeFile file: "installation/versions-overrides.env", text: "${versionsYaml()}"
+    //                     sh "tar -czf ${zip} ./installation ./resources"
 
-                        // create release on github
-                        withCredentials([string(credentialsId: 'public-github-token', variable: 'token')]) {
-                            // TODO add changelog as "body"
-                            def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"Release ${appVersion}\",\"draft\": false,\"prerelease\": ${isRelease ? 'false' : 'true'}}'"
-                            def json = sh (script: "curl --data ${data} -H \"Authorization: token $token\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
-                            def releaseID = getGithubReleaseID(json)
+    //                     // create release on github
+    //                     withCredentials([string(credentialsId: 'public-github-token', variable: 'token')]) {
+    //                         // TODO add changelog as "body"
+    //                         def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"Release ${appVersion}\",\"draft\": false,\"prerelease\": ${isRelease ? 'false' : 'true'}}'"
+    //                         def json = sh (script: "curl --data ${data} -H \"Authorization: token $token\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
+    //                         def releaseID = getGithubReleaseID(json)
 
-                            // upload zip file
-                            sh "curl --data-binary @$zip -H \"Authorization: token $token\" -H \"Content-Type: application/zip\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${zip}"
-                            // upload versions-overrides env file
-                            sh "curl --data-binary @installation/versions-overrides.env -H \"Authorization: token $token\" -H \"Content-Type: text/plain\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${appVersion}.env"
-                        }
-                    }
+    //                         // upload zip file
+    //                         sh "curl --data-binary @$zip -H \"Authorization: token $token\" -H \"Content-Type: application/zip\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${zip}"
+    //                         // upload versions-overrides env file
+    //                         sh "curl --data-binary @installation/versions-overrides.env -H \"Authorization: token $token\" -H \"Content-Type: text/plain\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${appVersion}.env"
+    //                     }
+    //                 }
 
-                    stage("Upload versions file to azure") {
-                        def file = ''
-                        if (isRelease) {
-                            file = '${appVersion}.env'
-                        } else {
-                            file = "rc/${appVersion}.env"
-                        }
-                            withCredentials([
-                            string(credentialsId: 'azure-broker-tenant-id', variable: 'AZBR_TENANT_ID'),
-                            string(credentialsId: 'azure-broker-subscription-id', variable: 'AZBR_SUBSCRIPTION_ID'),
-                            usernamePassword(credentialsId: 'azure-broker-spn', passwordVariable: 'AZBR_CLIENT_SECRET', usernameVariable: 'AZBR_CLIENT_ID')
-                            ]) {
-                                def dockerEnv = "-e AZBR_CLIENT_SECRET -e AZBR_CLIENT_ID -e AZBR_TENANT_ID -e AZBR_SUBSCRIPTION_ID \
-                                -e 'KYMA_VERSIONS_FILE_NAME=${file}'"
-                                def dockerOpts = "--rm --volume ${pwd()}/installation:/installation"
-                                def dockerEntry = "--entrypoint /installation/scripts/upload-versions.sh"
-                                    sh "docker run $dockerOpts $dockerEnv $dockerEntry $registry/$acsImageName"
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //                 stage("Upload versions file to azure") {
+    //                     def file = ''
+    //                     if (isRelease) {
+    //                         file = '${appVersion}.env'
+    //                     } else {
+    //                         file = "rc/${appVersion}.env"
+    //                     }
+    //                         withCredentials([
+    //                         string(credentialsId: 'azure-broker-tenant-id', variable: 'AZBR_TENANT_ID'),
+    //                         string(credentialsId: 'azure-broker-subscription-id', variable: 'AZBR_SUBSCRIPTION_ID'),
+    //                         usernamePassword(credentialsId: 'azure-broker-spn', passwordVariable: 'AZBR_CLIENT_SECRET', usernameVariable: 'AZBR_CLIENT_ID')
+    //                         ]) {
+    //                             def dockerEnv = "-e AZBR_CLIENT_SECRET -e AZBR_CLIENT_ID -e AZBR_TENANT_ID -e AZBR_SUBSCRIPTION_ID \
+    //                             -e 'KYMA_VERSIONS_FILE_NAME=${file}'"
+    //                             def dockerOpts = "--rm --volume ${pwd()}/installation:/installation"
+    //                             def dockerEntry = "--entrypoint /installation/scripts/upload-versions.sh"
+    //                                 sh "docker run $dockerOpts $dockerEnv $dockerEntry $registry/$acsImageName"
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 } catch (ex) {
     echo "Got exception: ${ex}"
     currentBuild.result = "FAILURE"
