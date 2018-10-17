@@ -38,7 +38,7 @@ type TestSuite struct {
 	accessLabel               string
 
 	serviceInstance    *catalog.ServiceInstance
-	serviceClass       *catalog.ClusterServiceClass
+	serviceClass       *catalog.ServiceClass
 	testerBindingUsage *bindingusage.ServiceBindingUsage
 
 	t *testing.T
@@ -86,7 +86,7 @@ func (ts *TestSuite) WaitForServiceClassWithTimeout(timeout time.Duration) {
 	require.NoError(ts.t, err)
 	for {
 		// if error occurs, try again
-		ts.serviceClass, err = clientSet.ServicecatalogV1beta1().ClusterServiceClasses().Get(ts.osbServiceId, metav1.GetOptions{})
+		ts.serviceClass, err = clientSet.ServicecatalogV1beta1().ServiceClasses(ts.namespace).Get(ts.osbServiceId, metav1.GetOptions{})
 		if err == nil {
 			return
 		}
@@ -114,8 +114,8 @@ func (ts *TestSuite) ProvisionServiceInstance(timeout time.Duration) {
 		},
 		Spec: catalog.ServiceInstanceSpec{
 			PlanReference: catalog.PlanReference{
-				ClusterServiceClassExternalName: ts.serviceClass.Spec.ExternalName,
-				ClusterServicePlanExternalName:  "default",
+				ServiceClassExternalName: ts.serviceClass.Spec.ExternalName,
+				ServicePlanExternalName:  "default",
 			},
 		},
 	})
@@ -128,6 +128,7 @@ func (ts *TestSuite) ProvisionServiceInstance(timeout time.Duration) {
 		if err == nil {
 			for _, cnd := range si.Status.Conditions {
 				if cnd.Type == catalog.ServiceInstanceConditionReady && cnd.Status == catalog.ConditionTrue {
+					ts.t.Log("Service instance is ready")
 					return
 				}
 			}
@@ -143,7 +144,6 @@ func (ts *TestSuite) ProvisionServiceInstance(timeout time.Duration) {
 				require.Fail(ts.t, "timeout while waiting for service instance to be ready")
 			}
 		default:
-			ts.t.Log("waiting for service instance to be ready")
 			time.Sleep(time.Second)
 		}
 	}
@@ -172,6 +172,7 @@ func (ts *TestSuite) Bind(timeout time.Duration) {
 		if err == nil {
 			for _, cnd := range b.Status.Conditions {
 				if cnd.Type == catalog.ServiceBindingConditionReady && cnd.Status == catalog.ConditionTrue {
+					ts.t.Log("Service binding is ready")
 					return
 				}
 			}

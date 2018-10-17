@@ -1,0 +1,70 @@
+image:
+  repository: gcr.io/heptio-images/ark
+  tag: v0.9.7
+  pullPolicy: IfNotPresent
+
+# A docker image with kubectl installed
+kubectl:
+  image:
+    repository: eu.gcr.io/kyma-project/etcd-tls-setup
+    tag: 0.3.367
+    pullPolicy: IfNotPresent
+
+# Only kube2iam: change the AWS_ACCOUNT_ID and HEPTIO_ARK_ROLE_NAME
+podAnnotations: {}
+#  iam.amazonaws.com/role: arn:aws:iam::<AWS_ACCOUNT_ID>:role/<HEPTIO_ARK_ROLE_NAME>
+
+rbac:
+  create: true
+
+serviceAccount:
+  hook:
+    create: true
+    name:
+  server:
+    create: true
+    name:
+
+tolerations: []
+
+nodeSelector: {}
+
+## Parameters for the ' default' Config resource
+## See https://heptio.github.io/ark/v0.9.0/config-definition
+configuration:
+  persistentVolumeProvider: 
+    name: 
+    config:
+      region:
+      apiTimeout:
+
+  backupStorageProvider:
+    name: gcp
+    bucket: # required, if unset the deployment will be set to 0 replicas
+    config: {}
+    #  region:
+    #  s3ForcePathStyle:
+    #  s3Url:
+    #  kmsKeyId:
+
+  backupSyncPeriod: 60m
+  gcSyncPeriod: 60m
+  scheduleSyncPeriod: 1m
+  resourcePriorities: []
+  restoreOnlyMode: false
+
+# Credentials for different cloud providers
+credentials:
+  useSecret: true
+  secretContents: {}
+    ## For Azure please set:
+    # AZURE_SUBSCRIPTION_ID:
+    # AZURE_TENANT_ID:
+    # AZURE_RESOURCE_GROUP:
+    # AZURE_CLIENT_ID:
+    # AZURE_CLIENT_SECRET:
+    # AZURE_STORAGE_ACCOUNT_ID:
+    # AZURE_STORAGE_KEY:
+    ###
+    ## For GCP/GKE please set:
+    # cloud:
