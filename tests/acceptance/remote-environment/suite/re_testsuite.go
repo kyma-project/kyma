@@ -128,6 +128,7 @@ func (ts *TestSuite) ProvisionServiceInstance(timeout time.Duration) {
 		if err == nil {
 			for _, cnd := range si.Status.Conditions {
 				if cnd.Type == catalog.ServiceInstanceConditionReady && cnd.Status == catalog.ConditionTrue {
+					ts.t.Log("Service instance is ready")
 					return
 				}
 			}
@@ -143,7 +144,6 @@ func (ts *TestSuite) ProvisionServiceInstance(timeout time.Duration) {
 				require.Fail(ts.t, "timeout while waiting for service instance to be ready")
 			}
 		default:
-			ts.t.Log("waiting for service instance to be ready")
 			time.Sleep(time.Second)
 		}
 	}
@@ -172,6 +172,7 @@ func (ts *TestSuite) Bind(timeout time.Duration) {
 		if err == nil {
 			for _, cnd := range b.Status.Conditions {
 				if cnd.Type == catalog.ServiceBindingConditionReady && cnd.Status == catalog.ConditionTrue {
+					ts.t.Log("Service binding is ready")
 					return
 				}
 			}
