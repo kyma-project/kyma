@@ -59,7 +59,7 @@ The script creates secret out of provided values and enables `azure-broker` sub-
 
 ## Create installer custom resource
 
-`installation/scripts/create-cr.sh scripts prepares `installer` custom resource from `installation/resources/installer-cr.yaml.tpl` template. In local installation scenario default `installer` custom resource will be used. `kyma-installer` already contains local `kyma` resources budled thus `url` is ignored by `installer` component. 
+`installation/scripts/create-cr.sh` script prepares `installer` custom resource from `installation/resources/installer-cr.yaml.tpl` template. In local installation scenario default `installer` custom resource will be used. `kyma-installer` already contains local `kyma` resources budled thus `url` is ignored by `installer` component. 
 
 >**NOTE:** For `installer` custom resource details refer to the `docs/kyma/docs/040-cr-installation.md` file.
 
