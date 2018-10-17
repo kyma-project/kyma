@@ -2,11 +2,11 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_service:
-    version: 0.4.2
+    version: 0.4.3
   gateway:
-    version: 0.4.2
+    version: 0.4.3
   gateway_tests:
-    version: 0.4.2
+    version: 0.4.3
 
 deployment:
   image:
