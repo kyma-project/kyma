@@ -51,4 +51,15 @@ data:
     gcSyncPeriod: {{ .gcSyncPeriod }}
     scheduleSyncPeriod: {{ .scheduleSyncPeriod }}
     restoreOnlyMode: {{ .restoreOnlyMode }}
+    resourcePriorities:
+    - namespaces
+    - persistentvolumes
+    - persistentvolumeclaims
+    - secrets
+    - configmaps
+    - serviceaccounts
+    - limitranges
+    - podpresets # added in compare to default priorities
+    - pods
+    - replicaset
 {{- end }}
