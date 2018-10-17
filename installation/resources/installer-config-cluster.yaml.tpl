@@ -58,6 +58,7 @@ data:
   sidecar-injector.includeIPRanges: "10.244.0.0/16,10.240.0.0/16"
   minio.accessKey: "admin"
   minio.secretKey: "topSecretKey"
+  minio.resources.limits.memory: 128Mi
   acceptanceTest.remoteEnvironment.disabled: "true"
   mixer.resources.limits.memory: 1Gi
   security.enabled: "true"
