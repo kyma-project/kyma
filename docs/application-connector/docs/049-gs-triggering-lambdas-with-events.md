@@ -1,0 +1,200 @@
+---
+title: Trigger lambda with events
+type: Getting Started
+---
+
+This guide shows how to create a simple lambda and trigger it with an event.
+
+## Prerequisites
+
+- Remote Environment created and binded to the `production` Environment.
+- Client certificates for the RE generated
+
+
+## Steps
+
+1. Register a service with the following specyfication to the desierd Remote Envoronment:
+```
+{
+  "name": "my-service",
+  "provider": "myCompany",
+  "Identifier": "identifier",
+  "description": "This is some service",
+  "events": {
+    "spec": {
+      "asyncapi": "1.0.0",
+      "info": {
+        "title": "Example Events",
+        "version": "1.0.0",
+        "description": "Description of all the example events"
+      },
+      "baseTopic": "example.events.com",
+      "topics": {
+        "exampleEvent.v1": {
+          "subscribe": {
+            "summary": "Example event",
+            "payload": {
+              "type": "object",
+              "properties": {
+                "myObject": {
+                  "type": "object",
+                  "required": [
+                    "id"
+                  ],
+                  "example": {
+                    "id": "4caad296-e0c5-491e-98ac-0ed118f9474e"
+                  },
+                  "properties": {
+                    "id": {
+                      "title": "Id",
+                      "description": "Resource identifier",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+Save the received service id, as it is used in the later steps.
+
+2. Next you need to create the Service Instance. To achive this you need the `externalName` of the Cluster Service Class.
+To get the `externalName` run:
+```
+kubectl get clusterserviceclass {SERVICE_ID}  -o jsonpath='{.spec.externalName}'
+```
+
+Use it to create the Service Instance
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  name: my-service-instance-name
+  namespace: production
+spec:
+  clusterServiceClassExternalName: {EXTERNAL_NAME}
+EOF
+```
+
+3. Use `kubectl` to register the lambda in the namespace to which the RE is bounded.
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: kubeless.io/v1beta1
+kind: Function
+metadata:
+  name: my-lambda
+  namespace: production
+spec:
+  deployment:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ""
+            resources: {}
+  deps: |-
+    {
+        "name": "example-1",
+        "version": "0.0.1",
+        "dependencies": {
+          "request": "^2.85.0"
+        }
+    }
+  function: |-
+    const request = require('request');
+
+    module.exports = { main: function (event, context) {
+        return new Promise((resolve, reject) => {
+            const url = \`http://httpbin.org/uuid\`;
+            const options = {
+                url: url,
+            };
+              
+            sendReq(url, resolve, reject)
+        })
+    } }
+
+    function sendReq(url, resolve, reject) {
+        request.get(url, { json: true }, (error, response, body) => {
+            if(error){
+                resolve(error);
+            }
+            console.log("Response acquired succesfully! Uuid: " + response.body.uuid);
+            resolve(response);
+        })
+    }
+  function-content-type: text
+  handler: handler.main
+  horizontalPodAutoscaler:
+    spec:
+      maxReplicas: 0
+  runtime: nodejs8
+  service:
+    ports:
+    - name: http-function-port
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      created-by: kubeless
+      function: my-lambda
+  timeout: ""
+  topic: exampleEvent
+EOF
+```
+Our lambda will send a request to http://httpbin.org/uuid and if the call is succesful it will log `Response acquired succesfully! Uuid: {RECEIVED_UUID}`
+
+4. To trigger the lambda with event you need to create the `Subscribtion`
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: eventing.kyma.cx/v1alpha1
+kind: Subscription
+metadata:
+  labels:
+    Function: my-lambda
+  name: lambda-my-lambda-exampleevent-v1
+  namespace: production
+spec:
+  endpoint: http://my-lambda.production:8080/
+  event_type: exampleEvent
+  event_type_version: v1
+  include_subscription_name_header: true
+  max_inflight: 400
+  push_request_timeout_ms: 2000
+  source_id: {RE_NAME}
+EOF
+```
+
+5. After deploying all the resources use `curl` to send the event:
+```
+curl -X POST https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+'{
+    "event-type": "exampleEvent",
+    "event-type-version": "v1",
+    "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    "event-time": "2018-10-16T15:00:00Z",
+    "data": "some data"
+}'
+```
+On a local deployment run:
+```
+curl -X POST https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+'{
+    "event-type": "exampleEvent",
+    "event-type-version": "v1",
+    "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    "event-time": "2018-10-16T15:00:00Z",
+    "data": "some data"
+}'
+```
+
+6. Check lambda logs to verify that the lambda was triggered:
+```
+kubectl -n production logs "$(kcp get po -l function=my-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-lambda | grep "Response acquired succesfully! Uuid: "
+```
