@@ -7,5 +7,6 @@ keywords:
   - logging
   - oklog
   - logspout
+  - alerting
   - kyma
 appVersion: 0.3.2

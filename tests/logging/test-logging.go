@@ -97,7 +97,7 @@ func testPodsAreReady() {
 }
 
 func testOKLogUI() {
-	resp, err := http.Get("http://core-logging-oklog-0.core-logging-oklog:7650/ui/")
+	resp, err := http.Get("http://logging-oklog-0.logging-oklog:7650/ui/")
 
 	if err != nil {
 		log.Fatalf("Test Check OKLogUI Failed: error is: %v and response is: %v", err, resp)
@@ -131,7 +131,7 @@ func getLogSpoutPods() []string {
 func testLogSpout() {
 	timeout := time.After(10 * time.Minute)
 	tick := time.Tick(1 * time.Second)
-	var testDataRegex = regexp.MustCompile(`(?m)core-logging-oklog\.kyma-system:7651*`)
+	var testDataRegex = regexp.MustCompile(`(?m)logging-oklog\.kyma-system:7651*`)
 	pods := getLogSpoutPods()
 	log.Println("LogSpout pods are: ", pods)
 	for {
@@ -202,9 +202,9 @@ func testLogs() {
 		Timeout: 45 * time.Second,
 	}
 
-	res, err := c.Get("http://core-logging-oklog-0.core-logging-oklog:7650/store/stream?q=oklogTest-")
+	res, err := c.Get("http://logging-oklog-0.logging-oklog:7650/store/stream?q=oklogTest-")
 	if err != nil {
-		log.Fatalf("Error in HTTP GET to http://core-logging-oklog-0.core-logging-oklog:7650/store/stream?q=oklogTest-: %v\n", err)
+		log.Fatalf("Error in HTTP GET to http://logging-oklog-0.logging-oklog:7650/store/stream?q=oklogTest-: %v\n", err)
 	}
 	defer res.Body.Close()
 	var testDataRegex = regexp.MustCompile(`(?m)oklogTest-*`)
