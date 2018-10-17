@@ -5,16 +5,17 @@ type: Getting Started
 
 This guide shows how to create a simple lambda and trigger it with an event.
 
+
 ## Prerequisites
 
-- Remote Environment created and binded to the `production` Environment.
-- Client certificates for the RE generated
+- Remote Environment created and bound to the `production` Environment.
+- Client certificates for the RE generated.
 
 
 ## Steps
 
 1. Register a service with the following specyfication to the desierd Remote Envoronment:
-```
+```json
 {
   "name": "my-service",
   "provider": "myCompany",
@@ -150,7 +151,7 @@ EOF
 ```
 Our lambda will send a request to http://httpbin.org/uuid and if the call is succesful it will log `Response acquired succesfully! Uuid: {RECEIVED_UUID}`
 
-4. To trigger the lambda with event you need to create the `Subscribtion`
+4. To trigger the lambda with an event you need to create the Subscribtion
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: eventing.kyma.cx/v1alpha1
@@ -194,7 +195,7 @@ curl -X POST https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/events -k --cer
 }'
 ```
 
-6. Check lambda logs to verify that the lambda was triggered:
+6. Check lambda logs to verify that it was triggered:
 ```
 kubectl -n production logs "$(kcp get po -l function=my-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-lambda | grep "Response acquired succesfully! Uuid: "
 ```
