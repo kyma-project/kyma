@@ -97,8 +97,7 @@ spec:
             if(error){
                 resolve(error);
             }
-            console.log("Response acquired succesfully! Uuid: " + response.body.uuid);
-            resolve(response);
+            resolve(response.body);
         })
     }
   function-content-type: text
@@ -158,37 +157,28 @@ spec:
 EOF
 ```
 
-5. To expose lambda outside the cluster create a Virtual Service:
+5. To expose lambda outside the cluster create a Api resource:
 ```
 cat <<EOF | kubectl apply -f -
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
+apiVersion: gateway.kyma.cx/v1alpha2
+kind: Api
 metadata:
   labels:
-    apiName: my-lambda
-    apiNamespace: production
+    function: my-lambda
   name: my-lambda
   namespace: production
 spec:
-  gateways:
-  - kyma-gateway.kyma-system.svc.cluster.local
-  hosts:
-  - my-lambda-production.{CLUSTER_DOMAIN}
-  http:
-  - match:
-    - uri:
-        regex: /.*
-    route:
-    - destination:
-        host: my-lambda.production.svc.cluster.local
-        port:
-          number: 8080
+  authentication: []
+  hostname: my-lambda-production.{CLUSTER_DOMAIN}
+  service:
+    name: my-lambda
+    port: 8080
 EOF
 ```
 
 6. To verify that everything was setup correctly you now can call the lambda through https:
 ```
-curl https://my-lambda.{CLUSTER_DOMAIN}/ -k
+curl https://my-lambda-production.{CLUSTER_DOMAIN}/ -k
 ```
 
 On Minikube one additional step is required.
