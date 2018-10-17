@@ -54,6 +54,7 @@ data:
   service-catalog.etcd-stateful.replicaCount: "3"
   minio.accessKey: "admin"
   minio.secretKey: "topSecretKey"
+  minio.resources.limits.memory: 128Mi
   acceptanceTest.remoteEnvironment.disabled: "true"
 ---
 apiVersion: v1
