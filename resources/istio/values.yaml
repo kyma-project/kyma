@@ -1,25 +1,30 @@
 # Common settings.
 global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+    imageTag: 0.1.0
+
+  isLocalEnv: false
   # Default hub for Istio images.
   # Releases are published to docker hub under 'istio' project.
   # Daily builds from prow are on gcr.io, and nightly builds from circle on docker.io/istionightly
   hub: docker.io/istio
 
   # Default tag for Istio images.
-  tag: 1.0.2
+  tag: 1.0.1
 
   # Gateway used for legacy k8s Ingress resources. By default it is
   # using 'istio:ingress', to match 0.8 config. It requires that
   # ingress.enabled is set to true. You can also set it
   # to ingressgateway, or any other gateway you define in the 'gateway'
   # section.
-  k8sIngressSelector: ingress
+  k8sIngressSelector: ingressgateway
 
   # k8sIngressHttps will add port 443 on the ingress and ingressgateway.
   # It REQUIRES that the certificates are installed  in the
   # expected secrets - enabling this option without certificates
   # will result in LDS rejection and the ingress will not work.
-  k8sIngressHttps: false
+  k8sIngressHttps: true
 
   proxy:
     image: proxyv2
@@ -28,14 +33,10 @@ global:
     resources:
       requests:
         cpu: 10m
-      #  memory: 128Mi
-      # limits:
-      #   cpu: 100m
-      #   memory: 128Mi
-
-    # Controls number of Proxy worker threads.
-    # If set to 0 (default), then start worker thread for each CPU thread/core.
-    concurrency: 0
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
 
     # Configures the access log for each sidecar. Setting it to an empty string will
     # disable access log for sidecar.
@@ -47,12 +48,13 @@ global:
     # If set, newly injected sidecars will have core dumps enabled.
     enableCoreDump: false
 
+
     # istio egress capture whitelist
     # https://istio.io/docs/tasks/traffic-management/egress.html#calling-external-services-directly
     # example: includeIPRanges: "172.30.0.0/16,172.20.0.0/16"
     # would only capture egress traffic on those two IP Ranges, all other outbound traffic would
     # be allowed by the sidecar
-    includeIPRanges: "*"
+    includeIPRanges: "10.0.0.1/8"
     excludeIPRanges: ""
 
     # istio ingress capture whitelist
@@ -64,7 +66,7 @@ global:
     excludeInboundPorts: ""
 
     # This controls the 'policy' in the sidecar injector.
-    autoInject: enabled
+    autoInject: disabled
 
     # Sets the destination Statsd in envoy (the value of the "--statsdUdpAddress" proxy argument
     # would be <host>:<port>).
@@ -138,10 +140,10 @@ global:
   defaultResources:
     requests:
       cpu: 10m
-    #   memory: 128Mi
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 
   # Not recommended for user to configure this. Hyperkube image to use when creating custom resources
   hyperkube:
@@ -177,7 +179,7 @@ ingress:
     ports:
     - port: 80
       name: http
-      nodePort: 32000
+#      nodePort: 32000
     - port: 443
       name: https
     selector:
@@ -194,6 +196,8 @@ gateways:
   enabled: true
 
   istio-ingressgateway:
+    service: {}
+    ingress: true
     enabled: true
     labels:
       app: istio-ingressgateway
@@ -210,6 +214,7 @@ gateways:
       #  memory: 256Mi
     cpu:
       targetAverageUtilization: 80
+
     loadBalancerIP: ""
     serviceAnnotations: {}
     type: LoadBalancer #change to NodePort, ClusterIP or LoadBalancer if need be
@@ -252,6 +257,7 @@ gateways:
       mountPath: /etc/istio/ingressgateway-ca-certs
 
   istio-egressgateway:
+    service: {}
     enabled: true
     labels:
       app: istio-egressgateway
@@ -280,6 +286,7 @@ gateways:
   # for mesh expansion. It exposes the mtls ports for Pilot,CA as well
   # as non-mtls ports to support upgrades and gradual transition.
   istio-ilbgateway:
+    service: {}
     enabled: false
     labels:
       app: istio-ilbgateway
@@ -295,7 +302,7 @@ gateways:
       #  cpu: 1800m
       #  memory: 256Mi
     cpu:
-      targetAverageUtilization: 80      
+      targetAverageUtilization: 80
     loadBalancerIP: ""
     serviceAnnotations:
       cloud.google.com/load-balancer-type: "internal"
@@ -320,6 +327,7 @@ gateways:
     - name: ilbgateway-ca-certs
       secretName: istio-ilbgateway-ca-certs
       mountPath: /etc/istio/ilbgateway-ca-certs
+
 
 #
 # sidecar-injector webhook configuration
@@ -366,6 +374,13 @@ mixer:
     hub: docker.io/prom
     tag: v0.6.0
 
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      memory: 128Mi
+
 #
 # pilot configuration
 #
@@ -379,9 +394,11 @@ pilot:
   traceSampling: 100.0
   # Resources for a small pilot install
   resources:
-    requests:
+    limits:
       cpu: 500m
-      memory: 2048Mi
+      memory: 2Gi
+    requests:
+      memory: 512Mi
   env:
     PILOT_PUSH_THROTTLE_COUNT: 100
     GODEBUG: gctrace=2
@@ -392,7 +409,6 @@ pilot:
 # security configuration
 #
 security:
-  enabled: true
   replicaCount: 1
   image: citadel
   selfSigned: true # indicate if self-signed CA is used.
@@ -409,8 +425,6 @@ grafana:
   enabled: false
   replicaCount: 1
   image: grafana
-  persist: false
-  storageClassName: ""
   security:
     enabled: false
     adminUser: admin
@@ -423,7 +437,7 @@ grafana:
     internalPort: 3000
 
 prometheus:
-  enabled: true
+  enabled: false
   replicaCount: 1
   hub: docker.io/prom
   tag: v2.3.1
@@ -460,7 +474,7 @@ servicegraph:
   # prometheus addres
   prometheusAddr: http://prometheus:9090
 
-tracing:
+zipkin:
   enabled: false
   provider: jaeger
   jaeger:
