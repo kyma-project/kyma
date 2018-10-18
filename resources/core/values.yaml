@@ -116,6 +116,7 @@ test:
   acceptance:
     core:
       # environments used in remote-environment acceptance test
+      rebNamespace: kyma-integration
       remoteEnvironment:
         disabled: "false"
         linkingTimeout: 4m
