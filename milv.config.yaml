@@ -6,8 +6,6 @@ files:
   - path: "./kyma/.github/ISSUE_TEMPLATE/security-vulnerability.md"
     config:
       white-list-internal: ["{CVSS"]
-  - path: "./kyma/.github/ISSUE_TEMPLATE/security-vulnerability.md"
-    config:
       white-list-external: ["https://www.first.org/cvss/calculator/3.0#CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:L/A:N"]
   - path: "./kyma/tools/stability-checker/README.md"
     config:
