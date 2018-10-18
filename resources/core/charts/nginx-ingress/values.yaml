@@ -136,10 +136,16 @@ controller:
   minAvailable: 1
 
   resources:
-    limits:
-      memory: 256Mi
-    requests:
-      memory: 128Mi
+    cluster:
+      limits:
+        memory: 512Mi
+      requests:
+        memory: 128Mi
+    local:
+      limits:
+        memory: 256Mi
+      requests:
+        memory: 128Mi
 
   autoscaling:
     enabled: false

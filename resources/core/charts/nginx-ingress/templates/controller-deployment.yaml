@@ -159,7 +159,12 @@ spec:
 {{ toYaml .Values.controller.extraVolumeMounts | indent 12}}
 {{- end }}
           resources:
-{{ toYaml .Values.controller.resources | indent 12 }}
+{{- if .Values.global.isLocalEnv }} # modified original chart to enable different memory limits for cluster and Minikube
+{{ toYaml .Values.controller.resources.local | indent 12 }}
+{{- end }}
+{{- if not .Values.global.isLocalEnv }}
+{{ toYaml .Values.controller.resources.cluster | indent 12 }}
+{{- end }}
 {{- if .Values.controller.extraContainers }}
 {{ toYaml .Values.controller.extraContainers | indent 8}}
 {{- end }}
