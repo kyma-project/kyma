@@ -89,9 +89,9 @@ test:
   acceptance:
     core:
       # environments used in remote-environment acceptance test
-      rebNamespace: kyma-integration
       remoteEnvironment:
         disabled: "false"
+        brokerNamespace: kyma-integration
         linkingTimeout: 4m
         unlinkingTimeout: 4m
     ui:
