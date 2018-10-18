@@ -20,6 +20,7 @@ spec:
         command:
         - kubectl
         - label
+        - --overwrite
         - ns
         - {{ .Release.Namespace }}
         - istio-injection=enabled
