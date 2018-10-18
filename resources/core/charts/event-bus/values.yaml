@@ -14,6 +14,8 @@ global:
     resources:
       limits:
         memory: "32M"
+    channel:
+      maxInactivity: "48h"
   publish:
     maxRequests: 16
     resources:
