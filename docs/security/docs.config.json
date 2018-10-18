@@ -1,0 +1,8 @@
+{
+  "spec":{
+    "id":"security",
+    "displayName":"Security",
+    "description":"Security in Kyma",
+    "type":"Components"
+  }
+}

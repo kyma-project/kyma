@@ -22,7 +22,4 @@ spec:
       namespace: "kyma-system"
     - name: "remote-environments"
       namespace: "kyma-integration"
-      release: "ec-default"
-    - name: "remote-environments"
-      namespace: "kyma-integration"
-      release: "hmc-default"
+      release: "default-remote-environments"

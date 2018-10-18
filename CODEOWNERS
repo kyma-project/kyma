@@ -77,7 +77,7 @@
 /resources/core/charts/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
 # The `minio` subchart
-/resources/core/charts/minio/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
+/resources/core/charts/minio/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The `event-bus` subchart
 /resources/core/charts/event-bus/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
@@ -92,22 +92,22 @@
 /resources/core/charts/service-catalog/charts/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
 
 # The `catalog-ui` subchart
-/resources/core/charts/service-catalog/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
+/resources/core/charts/service-catalog/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The `instances-ui` subchart
-/resources/core/charts/service-catalog/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
+/resources/core/charts/service-catalog/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The `docs` subchart
-/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
+/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The `ui-api` subchart
-/resources/core/charts/ui-api/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
+/resources/core/charts/ui-api/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
 
 # The `templates` chart
 /resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
 
 # The `templates` chart
-/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld @jasiu001
+/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld @jasiu001
 
 # The `messaging` subdirectory
 /resources/examples/lambda-messages/ @pbochynski @PK85
@@ -165,7 +165,7 @@
 /components/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
 
 # UI API Layer Component
-/components/ui-api-layer/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
+/components/ui-api-layer/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
 
 # IDPPreset Component
 /components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
@@ -206,7 +206,7 @@
 /tests/api-controller-acceptance-tests/ @piotrmsc
 
 # UI API Layer acceptance tests
-/tests/ui-api-layer-acceptance-tests/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
+/tests/ui-api-layer-acceptance-tests/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
 
 # Connector Service Tests
 /tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
@@ -234,7 +234,7 @@
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001
 
 # The changelog-generator directory
-/tools/changelog-generator/ @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
+/tools/changelog-generator/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # kubeless-test-client tests
 /tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
@@ -249,7 +249,7 @@
 /docs/ @kazydek @klaudiagrz @tomekpapiernik @bszwarc
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
+milv.config.yaml @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # Orchestrator file
 orchestrator.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh
@@ -261,4 +261,4 @@ release.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh
 Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh
 
 # Governance file
-governance.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh @akucharska @michal-hudy @pkosiec @mjasinski5 @magicmatatjahu
+governance.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
