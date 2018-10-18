@@ -37,10 +37,6 @@ spec:
             value: /etc/config/re-broker/config.yaml
           - name: APP_BROKER_RELIST_DURATION_WINDOW
             value: {{ .Values.brokerRelistDurationWindow }}
-          - name: APP_CLUSTER_SCOPED_BROKER_NAME
-            value: {{ template "fullname" . }}
-          - name: APP_CLUSTER_SCOPED_BROKER_ENABLED
-            value: "{{ .Values.clusterScopedBrokerEnabled }}"
           - name: APP_UNIQUE_SELECTOR_LABEL_KEY
             value: app
           - name: APP_UNIQUE_SELECTOR_LABEL_VALUE
