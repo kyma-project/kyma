@@ -26,7 +26,12 @@ func (i *Installation) ShouldInstall() bool {
 }
 
 func (i *Installation) canInstall() bool {
-	return (i.Status.State == StateEmpty || i.Status.State == StateUninstalled || i.Status.State == StateInstalled)
+	//TODO: Now this function always returns true. Remove.
+	return (i.Status.State == StateEmpty ||
+		i.Status.State == StateUninstalled ||
+		i.Status.State == StateInstalled ||
+		i.Status.State == StateError ||
+		i.Status.State == StateInProgress)
 }
 
 // ShouldUninstall returns true when user requested uninstall action
