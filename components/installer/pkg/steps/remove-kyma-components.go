@@ -78,12 +78,17 @@ func getReleasesToBeDeleted(releasesRes *rls.ListReleasesResponse, installationD
 			componentsPresentInCR = append(componentsPresentInCR, component.GetReleaseName())
 		}
 
-		for _, installedRelease := range installedReleases {
-			if !stringSliceContainsString(componentsPresentInCR, installedRelease) {
-				releasesToBeDeleted = append(releasesToBeDeleted, installedRelease)
+		for _, release := range installedReleases {
+			if !stringSliceContainsString(componentsPresentInCR, release) {
+				releasesToBeDeleted = append(releasesToBeDeleted, release)
 			}
 		}
 	}
+
+	if len(releasesToBeDeleted) == 0 {
+		releasesToBeDeleted = installedReleases
+	}
+
 	return releasesToBeDeleted
 }
 
