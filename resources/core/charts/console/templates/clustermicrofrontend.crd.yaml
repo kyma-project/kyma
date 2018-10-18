@@ -1,9 +1,9 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: "clustermicrofrontends.ui.kyma.cx"
+  name: "clustermicrofrontends.ui.kyma-project.io"
 spec:
-  group: ui.kyma.cx
+  group: ui.kyma-project.io
   version: v1alpha1
   scope: Cluster
   names:
@@ -19,8 +19,9 @@ spec:
       properties:
         spec:
           type: object
-          required: 
-          - "navigation"
+          required:
+            - "placement"
+            - "navigationNodes"
           properties:
             appName:
               type: string
@@ -29,20 +30,27 @@ spec:
             version:
               type: string
               pattern: "[a-zA-Z0-9]+"
-            location: 
+            placement:
               type: string
-              pattern: '^https://.+$'
-              maxLength: 512
-            navigation:
-              type: object
-              required: 
-              - "category"
-              properties:
-                category:
-                  type: string
-                location: 
-                  type: string
-                order:
-                  type: integer
-                  minimum: 1
-                  maximum: 100
+              pattern: "^(environment|cluster)$"
+            category:
+              type: string
+            viewBaseUrl:
+              type: string
+              pattern: '^(https?)://.+$'
+            navigationNodes:
+              type: array
+              items:
+                type: object
+                required:
+                - "label"
+                - "navigationPath"
+                properties:
+                  label:
+                    type: string
+                  navigationPath:
+                    type: string
+                  viewUrl:
+                    type: string
+                  showInNavigation:
+                    type: boolean
