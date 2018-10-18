@@ -96,9 +96,6 @@ global:
   test_environments:
     dir: develop/
     version: '84359277'
-  remote_environment_broker:
-    dir: develop/
-    version: 1423f8ce
   test_logging:
     dir: develop/
     version: 293e4a23
