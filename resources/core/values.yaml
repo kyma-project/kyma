@@ -77,10 +77,10 @@ global:
     version: 6e0a7fe2
   ui_api_layer:
     dir: develop/
-    version: b58068ee
+    version: e0f2a383
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: b58068ee
+    version: e0f2a383
 
 test:
   auth:
