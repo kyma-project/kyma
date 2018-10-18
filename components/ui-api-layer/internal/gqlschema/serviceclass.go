@@ -15,4 +15,5 @@ type ServiceClass struct {
 	SupportURL          *string   `json:"supportUrl"`
 	ProviderDisplayName *string   `json:"providerDisplayName"`
 	Tags                []string  `json:"tags"`
+	Labels              Labels    `json:"labels"`
 }

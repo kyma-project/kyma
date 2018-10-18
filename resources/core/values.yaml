@@ -26,7 +26,7 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: 6e0a7fe2
+    version: 1423f8ce
   alpine_net:
     dir: develop/
     version: ed568f0f
@@ -80,7 +80,7 @@ global:
     version: 6e0a7fe2
   kubeless_test_client:
     dir: develop/
-    version: 6e0a7fe2
+    version: 2408daf3
   metadata_service:
     dir: develop/
     version: 78e1f9e0
@@ -98,7 +98,7 @@ global:
     version: '84359277'
   remote_environment_broker:
     dir: develop/
-    version: 8f0a3611
+    version: 1423f8ce
   test_logging:
     dir: develop/
     version: 293e4a23
