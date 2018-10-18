@@ -3,6 +3,10 @@ black-list: ["/vendor/"]
 timeout: 60
 request-repeats: 5
 files:
+  - path: "./kyma/.github/ISSUE_TEMPLATE/security-vulnerability.md"
+    config:
+      white-list-internal: ["{CVSS"]
+      white-list-external: ["https://www.first.org/cvss/calculator/3.0#CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:L/A:N"]
   - path: "./kyma/tools/stability-checker/README.md"
     config:
       white-list-external: ["https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz"]
