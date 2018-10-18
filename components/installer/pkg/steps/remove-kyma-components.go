@@ -2,14 +2,17 @@ package steps
 
 import (
 	"log"
+
+	"github.com/kyma-project/kyma/components/installer/pkg/config"
+	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 //RemoveKymaComponents .
-func (steps InstallationSteps) RemoveKymaComponents() {
+func (steps InstallationSteps) RemoveKymaComponents(installationData *config.InstallationData) {
 
 	log.Println("Removing Kyma resources...")
 
-	if err := steps.uninstallReleases(); err != nil {
+	if err := steps.uninstallReleases(installationData); err != nil {
 		log.Println("Error. Some releases may have not been removed.")
 		return
 	}
@@ -22,9 +25,15 @@ func (steps InstallationSteps) RemoveKymaComponents() {
 	log.Println("All Kyma resources have been successfully removed")
 }
 
-func (steps InstallationSteps) uninstallReleases() error {
+func (steps InstallationSteps) uninstallReleases(installationData *config.InstallationData) error {
 	log.Println("Uninstalling releases...")
-	releasesToBeDeleted := []string{"ec-default", "hmc-default", "dex", "core", "prometheus-operator", "istio", "cluster-essentials"}
+
+	releasesRes, err := steps.helmClient.ListReleases()
+	if err != nil {
+		return err
+	}
+
+	releasesToBeDeleted := getReleasesToBeDeleted(releasesRes, installationData)
 
 	for _, releaseName := range releasesToBeDeleted {
 		log.Println("Uninstalling release", releaseName)
@@ -53,4 +62,36 @@ func (steps InstallationSteps) removeNamespaces() error {
 	}
 	log.Println("All namespaces have been successfully removed!")
 	return nil
+}
+
+func getReleasesToBeDeleted(releasesRes *rls.ListReleasesResponse, installationData *config.InstallationData) []string {
+	installedReleases := []string{}
+	componentsPresentInCR := []string{}
+	releasesToBeDeleted := []string{}
+
+	if releasesRes != nil {
+		for _, release := range releasesRes.Releases {
+			installedReleases = append(installedReleases, release.Name)
+		}
+
+		for _, component := range installationData.Components {
+			componentsPresentInCR = append(componentsPresentInCR, component.GetReleaseName())
+		}
+
+		for _, installedRelease := range installedReleases {
+			if !stringSliceContainsString(componentsPresentInCR, installedRelease) {
+				releasesToBeDeleted = append(releasesToBeDeleted, installedRelease)
+			}
+		}
+	}
+	return releasesToBeDeleted
+}
+
+func stringSliceContainsString(slice []string, str string) bool {
+	for _, strInSlice := range slice {
+		if str == strInSlice {
+			return true
+		}
+	}
+	return false
 }
