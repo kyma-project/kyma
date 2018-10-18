@@ -62,9 +62,9 @@ This guide shows how to create a simple lambda and trigger it with an event.
   }
 }
 ```
-Save the received service id, as it is used in the later steps.
+Save the received service id, as it is used in later steps.
 
-2. Next you need to create the Service Instance. To achive this you need the `externalName` of the Cluster Service Class.
+2. Next you need to create the Service Instance. To achive this you need an `externalName` of the Cluster Service Class.
 To get the `externalName` run:
 ```
 kubectl get clusterserviceclass {SERVICE_ID}  -o jsonpath='{.spec.externalName}'
@@ -149,7 +149,7 @@ spec:
   topic: exampleEvent
 EOF
 ```
-Our lambda will send a request to http://httpbin.org/uuid and if the call is succesful it will log `Response acquired succesfully! Uuid: {RECEIVED_UUID}`
+Our lambda will send a request to http://httpbin.org/uuid and if the call was succesful it will log `Response acquired succesfully! Uuid: {RECEIVED_UUID}`
 
 4. To trigger the lambda with an event you need to create the Subscribtion
 ```
@@ -172,7 +172,7 @@ spec:
 EOF
 ```
 
-5. After deploying all the resources use `curl` to send the event:
+5. After deploying all of the resources use `curl` to send the event:
 ```
 curl -X POST https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
 '{
@@ -198,4 +198,8 @@ curl -X POST https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/events -k --cer
 6. Check lambda logs to verify that it was triggered:
 ```
 kubectl -n production logs "$(kcp get po -l function=my-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-lambda | grep "Response acquired succesfully! Uuid: "
+```
+You should see the message like the one belowe, for every event you have sent:
+```
+Response acquired succesfully! Uuid: {RECEIVED_UUID}
 ```
