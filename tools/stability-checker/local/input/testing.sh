@@ -204,7 +204,7 @@ printImagesWithLatestTag
 latestTagsErr=$?
 
 if  [ ${coreTestErr} -ne 0 ] || [ ${testCheckKymaCore} -ne 0 ] || [ ${istioTestErr} -ne 0 ] ||
-    [ ${testCheckIstio} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${gatewayTestErr} -ne 0 ] ||
+    [ ${testCheckIstio} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${hmcTestErr} -ne 0 ] ||
     [ ${testCheckGateway} -ne 0 ] || [ ${latestTagsErr} -ne 0 ]
 
 then
