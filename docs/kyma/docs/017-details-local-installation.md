@@ -31,7 +31,7 @@ Purpose of `installation/scripts/minikube.sh` is to configure and start Minikube
 
 >**NOTE:** For the complete list of parameters passed to `minikube start` command, refer to the `installation/scripts/minikube.sh` script.
 
-Once Minikube is up and running, the script adds develop domains to /ets/hosts.
+Once Minikube is up and running, the script adds local installation entries to /etc/hosts.
 
 ## Build Kyma-Installer
 
