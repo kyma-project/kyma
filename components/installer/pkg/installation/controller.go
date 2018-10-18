@@ -55,6 +55,7 @@ type Controller struct {
 	conditionManager   conditionmanager.Interface
 	finalizerManager   *finalizer.Manager
 	internalClientset  *internalClientset.Clientset
+	installBackoff     *backOffController
 }
 
 // NewController .
@@ -70,6 +71,23 @@ func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kube
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeClientset.CoreV1().Events("")})
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "kymaInstaller"})
 
+	//backOffIntervals := []int{0, 10, 20, 40, 60, 120, 180, 300}
+	backOffIntervals := []uint{0, 1, 2, 4, 6, 12, 18, 30}
+	backOffStepFunc := func(count, max, delay int, msg ...string) {
+
+		if count > max {
+			log.Printf("##############################################################################")
+			log.Printf("#### Retries does not seem to work. Looks like manual action is required. ####")
+			log.Printf("##############################################################################")
+		}
+
+		if count > 0 {
+			log.Printf("%s Warning: Retry number %d (sleeping for %d[s]).\n", msg[0], count, delay)
+		}
+	}
+
+	installBackOff, _ := newBackOff(backOffIntervals, backOffStepFunc)
+
 	c := &Controller{
 		kubeClientset:      kubeClientset,
 		installationLister: installationInformer.Lister(),
@@ -81,6 +99,7 @@ func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kube
 		conditionManager:   conditionManager,
 		finalizerManager:   finalizerManager,
 		internalClientset:  internalClientset,
+		installBackoff:     installBackOff,
 	}
 
 	installationInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -94,24 +113,23 @@ func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kube
 }
 
 // Run .
-func (c *Controller) Run(workers int, stopCh <-chan struct{}) {
+func (c *Controller) Run(stopCh <-chan struct{}) {
 
 	defer func() {
-
 		log.Println("Shutting down controller...")
 		c.queue.ShutDown()
 	}()
 
-	for i := 0; i < workers; i++ {
-		// start workers
-		go wait.Until(c.worker, time.Second, stopCh)
-	}
+	// start single worker: We expect only one CR instance and only single operation is allowed at a time.
+	go wait.Until(c.worker, time.Second, stopCh)
 
 	// wait until we receive a stop signal
 	<-stopCh
 }
 
 func (c *Controller) worker() {
+
+	log.Println("worker() invoked!")
 
 	// process until we're told to stop
 	for c.processNextWorkItem() {
@@ -120,15 +138,17 @@ func (c *Controller) worker() {
 
 func (c *Controller) processNextWorkItem() bool {
 
+	log.Println("processNextWorkItem() invoked!")
 	key, quit := c.queue.Get()
+	log.Println("Queue len: ", c.queue.Len())
 	if quit {
-
 		return false
 	}
 
 	defer c.queue.Done(key)
 
 	err := c.syncHandler(key.(string))
+
 	c.handleErr(err, key)
 	return true
 }
@@ -136,7 +156,7 @@ func (c *Controller) processNextWorkItem() bool {
 func (c *Controller) syncHandler(key string) error {
 
 	namespace, name, err := cache.SplitMetaNamespaceKey(key)
-	if err != nil {
+	if c.errorHandlers.CheckError("Error while parsing metadata", err) {
 		return err
 	}
 
@@ -148,6 +168,7 @@ func (c *Controller) syncHandler(key string) error {
 			return nil
 		}
 
+		c.errorHandlers.LogError("Error while listing installation CRDs", err)
 		return err
 	}
 
@@ -173,29 +194,33 @@ func (c *Controller) syncHandler(key string) error {
 		return err
 	}
 
-	overrideProvider, overridesErr := overrides.New(c.kubeClientset)
-	if overridesErr != nil {
-		return overridesErr
-	}
-
 	if installation.ShouldInstall() {
 
+		c.installBackoff.step()
+
+		overrideProvider, overridesErr := overrides.New(c.kubeClientset)
+		if c.errorHandlers.CheckError("Error while building overrides: ", overridesErr) {
+			return overridesErr
+		}
+
 		err = c.conditionManager.InstallStart()
-		if err != nil {
+		if c.errorHandlers.CheckError("Error starting install/update: ", err) {
 			return err
 		}
 
 		err = c.kymaSteps.InstallKyma(installationData, overrideProvider)
-		if err != nil {
+		if c.errorHandlers.CheckError("Error during install/update: ", err) {
 			c.conditionManager.InstallError()
-
 			return err
 		}
+
+		c.installBackoff.reset()
 
 		err = c.conditionManager.InstallSuccess()
-		if err != nil {
+		if c.errorHandlers.CheckError("Error finishing install/update: ", err) {
 			return err
 		}
+
 	} else if installation.ShouldUninstall() {
 		err = c.conditionManager.UninstallStart()
 		if err != nil {
@@ -213,9 +238,12 @@ func (c *Controller) syncHandler(key string) error {
 		if err != nil {
 			return err
 		}
+	} else {
+		c.installBackoff.reset()
 	}
 
 	c.recorder.Event(installation, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+
 	return nil
 }
 
