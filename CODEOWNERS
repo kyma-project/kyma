@@ -43,6 +43,9 @@
 # The `configurations-generator` subchart
 /resources/core/charts/configurations-generator @piotrmsc @kubadz
 
+# The `application-connector` chart
+/resources/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+
 # The `connector-service` subchart
 /resources/application-connector/charts/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
 
