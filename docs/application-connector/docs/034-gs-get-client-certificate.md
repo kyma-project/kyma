@@ -68,10 +68,10 @@ When you connect an external solution to a local Kyma deployment, you must set t
   ```
 - Set it for the Gateway Service and the Event Service using these calls:
   ```
-  curl https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/metadata/services --cert generated.crt --key generated.key -k
+  curl https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
   ```
   ```
-  curl https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/events --cert generated.crt --key generated.key -k
+  curl https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/events --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
   ```
 
 ## Generate a CSR and send it to Kyma
