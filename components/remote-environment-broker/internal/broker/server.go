@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mode"
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -52,7 +51,7 @@ type Server struct {
 	lastOpGetter  lastOpGetter
 	logger        *logrus.Entry
 	addr          string
-	brokerMode    *mode.BrokerService
+	brokerService *NsBrokerService
 }
 
 // Addr returns address server is listening on.
@@ -124,7 +123,7 @@ func (srv *Server) createHandler() http.Handler {
 		fmt.Fprint(w, "OK")
 	}).Methods("GET")
 
-	osbContextMiddleware := NewOsbContextMiddleware(srv.brokerMode, srv.logger)
+	osbContextMiddleware := NewOsbContextMiddleware(srv.brokerService, srv.logger)
 	reqAsyncMiddleware := &RequireAsyncMiddleware{}
 	// sync operations
 
@@ -453,8 +452,7 @@ func writeErrorResponse(w http.ResponseWriter, code int, errorMsg, desc string) 
 type osbContext struct {
 	APIVersion          string
 	OriginatingIdentity string
-	BrokerNamespace     string // empty if broker is registered as a ClusterServiceBroker
-	ClusterScopedBroker bool
+	BrokerNamespace     string
 }
 
 func httpBodyToDTO(r *http.Request, object interface{}) error {

@@ -32,7 +32,7 @@ The configuration options are as follows:
  | Name | Default value | Description |
  |------|---------------|-------------|
 **storage.claimName** |`stability-test-scripts-pvc`| Name of the Persistent Volume Claim (PVC) which is attached to the Stability Checker Pod. The volume is visible in the Pod under the `/data` path. 
-**pathToTestingScript** |`/data/input/testing-kyma.sh`| Full path to the testing script. As the script is delivered inside the PVC, the path must start with `/data`.
+**pathToTestingScript** |`/data/input/testing.sh`| Full path to the testing script. As the script is delivered inside the PVC, the path must start with `/data`.
 **slackClientWebhookUrl** |-| Slack client webhook URL. For details, click **Customize Slack** in your Slack Workspace, choose the **Configure apps** button and  proceed with the configuration of the `Jenkins CI` application.
 **slackClientChannelId** |-| Slack channel ID which starts with `#`.
 **slackClientToken** |-| Slack client token. For details, click **Customize Slack** in your Slack Workspace, choose the **Configure apps** button and  proceed with the configuration of the `Jenkins CI` application.

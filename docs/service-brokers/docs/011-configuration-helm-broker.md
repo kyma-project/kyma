@@ -33,12 +33,33 @@ Follow these steps to change the configuration and make the Helm Broker fetch bu
 
     - A `{bundle_name}-{bundle_version}.tgz` file for each bundle version defined in the `index.yaml` file. The `.tgz` file is an archive of your bundle's directory.
 
-2. In the `values.yaml` provide your server's URL in the **config.repository.baseURL** attribute:
+2. In the `values.yaml` provide your server's URL in the **repository.baseURL** attribute:
 
   ```yaml
-  config:
     repository:
       baseURL: "http://custom.bundles-repository"
   ```
 
 3. Install Kyma on Minikube. See the **Local Kyma installation** document to learn how.
+
+### Configure repository URL in the runtime
+
+Follow these steps to change the repository URL:
+
+1. Configure Helm Broker:
+
+ ```bash
+ kubectl set env -n kyma-system deployment/core-helm-broker -e APP_REPOSITORY_BASE_URL="http://custom.bundles-repository/"
+ ```
+ 
+2. Wait for the Helm Broker to run using the following command:
+
+ ```bash
+ kubectl get pod -n kyma-system -l app=core-helm-broker
+ ```
+
+3. Trigger the Service Catalog synchronization:
+
+ ```bash
+ svcat sync broker core-helm-broker
+ ```

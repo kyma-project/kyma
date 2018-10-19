@@ -37,7 +37,7 @@ func TestControllerRunSuccess(t *testing.T) {
 	fixNS := fixNamespace(fixNSName)
 
 	expectations := &sync.WaitGroup{}
-	expectations.Add(2)
+	expectations.Add(4)
 	fulfillExpectation := func(mock.Arguments) {
 		expectations.Done()
 	}
@@ -61,12 +61,19 @@ func TestControllerRunSuccess(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	svc := mapping.New(false, emInformer, nsInformer, nsClientMock, reGetterMock, nil, nil, spy.NewLogDummy())
+	brokerFacade := &automock.NsBrokerFacade{}
+	defer brokerFacade.AssertExpectations(t)
+	brokerFacade.On("Exist", fixNSName).Return(false, nil).
+		Run(fulfillExpectation)
+	brokerFacade.On("Create", fixNSName).Return(nil).
+		Run(fulfillExpectation)
 
+	svc := mapping.New(emInformer, nsInformer, nsClientMock, reGetterMock, brokerFacade, nil, spy.NewLogDummy())
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 	awaitInformerStartAtMost(t, time.Second, nsInformer)
 
 	ctx, close := context.WithCancel(context.Background())
+
 	// when
 	go svc.Run(ctx.Done())
 
@@ -82,23 +89,17 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 	fixEM := fixEnvironmentMappingCR(fixREName, fixNSName)
 	fixNS := fixNamespaceWithAccessLabel(fixNSName)
 	fixExpectedNS := fixNamespace(fixNSName)
-
 	emInformer := newEmInformerFromFakeClientset(fixEM)
 	nsClientMock := &automock.NsPatcher{}
 	defer nsClientMock.AssertExpectations(t)
-
 	deletedLabelNS := `{"metadata":{"labels":null}}`
 	nsClientMock.On("Patch", fixNSName, types.StrategicMergePatchType, []byte(deletedLabelNS)).
 		Return(fixExpectedNS, nil).
 		Once()
-
-	svc := mapping.New(false, emInformer, nil, nsClientMock, nil, nil, nil, spy.NewLogDummy())
-
+	svc := mapping.New(emInformer, nil, nsClientMock, nil, nil, nil, spy.NewLogDummy())
 	awaitInformerStartAtMost(t, time.Second, emInformer)
-
 	// when
 	err := svc.DeleteAccessLabelFromNamespace(fixNS)
-
 	// then
 	assert.NoError(t, err)
 }
@@ -132,7 +133,7 @@ func TestControllerRunFailure(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	svc := mapping.New(false, emInformer, nil, nsClientMock, reGetter, nil, nil, spy.NewLogDummy())
+	svc := mapping.New(emInformer, nil, nsClientMock, reGetter, nil, nil, spy.NewLogDummy())
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 
@@ -238,7 +239,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
 			defer nsBrokerSyncer.AssertExpectations(t)
 
-			svc := mapping.New(true, emInformer, nsInformer, nsClientMock, reGetterMock, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy())
+			svc := mapping.New(emInformer, nsInformer, nsClientMock, reGetterMock, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy())
 
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixREName))
 			if tc.errorMsg == "" {
@@ -384,7 +385,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
 			defer nsBrokerSyncer.AssertExpectations(t)
 
-			svc := mapping.New(true, emInformer, nsInformer, nsClientMock, nil, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy()).
+			svc := mapping.New(emInformer, nsInformer, nsClientMock, nil, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy()).
 				WithMappingLister(mappingSvc)
 			// WHEN
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixREName))
@@ -462,6 +463,7 @@ func fixNamespace(fixNSName string) *corev1.Namespace {
 		},
 	}
 }
+
 func fixNamespaceWithAccessLabel(fixNSName string) *corev1.Namespace {
 	return &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{

@@ -8,10 +8,10 @@ service:
   externalPort: 80
   internalPort: 8080
 
+repository:
+  baseURL: "https://kyma-project.github.io/bundles/stable/"
 
 config:
-  repository:
-    baseURL: "https://kyma-project.github.io/bundles/stable/"
   storage:
     - driver: etcd
       provide:

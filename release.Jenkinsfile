@@ -98,7 +98,7 @@ try {
                         for (int i=0; i < projects.size(); i++) {
                             def index = i
                             jobs["${projects[index]}"] = { ->
-                                    build job: "kyma/"+projects[index],
+                                    build job: "kyma/"+projects[index]+"-release",
                                             wait: true,
                                             parameters: [
                                                 string(name:'GIT_REVISION', value: "$commitID"),
@@ -122,7 +122,7 @@ try {
 
     // test the release
     stage('launch Kyma integration') {
-        build job: 'kyma/integration',
+        build job: 'kyma/integration-release',
             wait: true,
             parameters: [
                 string(name:'GIT_REVISION', value: "$commitID"),

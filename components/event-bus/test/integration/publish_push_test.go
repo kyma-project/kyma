@@ -20,6 +20,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/generated/push/informers/externalversions/eventing.kyma.cx/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/kyma-project/kyma/components/event-bus/internal/publish"
+	"github.com/kyma-project/kyma/components/event-bus/internal/push/actors"
 	"github.com/kyma-project/kyma/components/event-bus/internal/push/opts"
 	"github.com/kyma-project/kyma/components/event-bus/test/util"
 	"github.com/nats-io/nats-streaming-server/server"
@@ -41,10 +42,12 @@ const (
 )
 
 var (
-	publishServer      *httptest.Server
-	pushServer         *httptest.Server
-	subscriberServerV1 *httptest.Server
-	subscriberServerV2 *httptest.Server
+	publishServer            *httptest.Server
+	pushServer               *httptest.Server
+	subscriberServerV1       *httptest.Server
+	subscriberServerV2       *httptest.Server
+	subscriptionsSupervisor1 *actors.SubscriptionsSupervisor
+	subscriptionsSupervisor2 *actors.SubscriptionsSupervisor
 )
 
 func startNats() (*server.StanServer, error) {
@@ -74,12 +77,12 @@ func TestMain(m *testing.M) {
 	pushOpts := opts.DefaultOptions
 	pushOpts.NatsStreamingClusterID = clusterID
 	pushApplication := pushapp.NewPushApplication(&pushOpts, newFakeInformer())
-	subscriptionsSupervisor1 := pushApplication.SubscriptionsSupervisor
+	subscriptionsSupervisor1 = pushApplication.SubscriptionsSupervisor
 	subscription1 := util.NewSubscription("test-sub", metav1.NamespaceDefault, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion,
 		sourceIDV1)
 	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, common.DefaultRequestProvider)
 
-	subscriptionsSupervisor2 := pushApplication.SubscriptionsSupervisor
+	subscriptionsSupervisor2 = pushApplication.SubscriptionsSupervisor
 	subscription2 := util.NewSubscription("test-sub", metav1.NamespaceDefault, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion,
 		sourceIDV2)
 	subscriptionsSupervisor2.StartSubscriptionReq(subscription2, common.DefaultRequestProvider)
@@ -230,12 +233,7 @@ func Test_pushRequestShouldNotIncludeKymaTopicHeader(t *testing.T) {
 		pushRequest, err = http.NewRequest(method, url, body)
 		return pushRequest, err
 	})
-	pushOpts := opts.DefaultOptions
-	pushOpts.ClientID = "event-bus-push-test"
-	pushOpts.NatsStreamingClusterID = clusterID
-	pushApplication := pushapp.NewPushApplication(&pushOpts, newFakeInformer())
 
-	subscriptionsSupervisor1 := pushApplication.SubscriptionsSupervisor
 	subscription1 := util.NewSubscription("test-sub-1", metav1.NamespaceDefault, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion,
 		sourceIDV1)
 	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, requestProvider)
@@ -271,6 +269,7 @@ func Test_pushRequestShouldNotIncludeKymaTopicHeader(t *testing.T) {
 		}
 		assert.True(t, ok)
 	}
+
 	if pushRequest == nil {
 		t.Fatal("push request should not be nil")
 	}
@@ -278,4 +277,59 @@ func Test_pushRequestShouldNotIncludeKymaTopicHeader(t *testing.T) {
 	if header := pushRequest.Header.Get(headerKymaTopic); len(header) > 0 {
 		t.Fatalf("request to endpoint should not include the header %s", headerKymaTopic)
 	}
+}
+
+func Test_sameSubjectSubscribersInDifferentNamespacesShouldReceiveEventsOfThatSubject(t *testing.T) {
+	// create two subscriptions with the same name in two different namespaces to the same subject
+	name := "test-subscription"
+	subscription1 := util.NewSubscription(name, "namespace-1", subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1)
+	subscription2 := util.NewSubscription(name, "namespace-2", subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion, sourceIDV1)
+
+	// handle the two subscriptions
+	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, common.DefaultRequestProvider)
+	subscriptionsSupervisor2.StartSubscriptionReq(subscription2, common.DefaultRequestProvider)
+
+	// publish one event
+	payload := makePayload(sourceIDV1, eventType, eventTypeVersion, eventDataV1)
+	publishEvent(t, payload)
+
+	// verify that both subscribers received the event
+	verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, eventDataV1)
+	verifyEndpointReceivedEvent(t, subscriberServerV2.URL+util.SubServer2ResultsPath, eventDataV1)
+}
+
+func publishEvent(t *testing.T, payload string) {
+	res, err := http.Post(publishServer.URL+"/v1/events", "application/json", strings.NewReader(payload))
+	checkIfError(err, t)
+	verifyStatusCode(res, 200, t)
+	log.Print(res)
+
+	respObj := &api.PublishResponse{}
+	body, err := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
+
+	err = json.Unmarshal(body, &respObj)
+	assert.NotNil(t, respObj.EventID)
+	assert.NotEmpty(t, respObj.EventID)
+	log.Printf("%v", respObj)
+}
+
+func verifyEndpointReceivedEvent(t *testing.T, endpoint, data string) {
+	var ok bool
+	for i := 0; i < 20; i++ {
+		time.Sleep(1 * time.Second)
+		res, err := http.Get(endpoint)
+		assert.Nil(t, err)
+		body, err := ioutil.ReadAll(res.Body)
+		var resp string
+		json.Unmarshal(body, &resp)
+		res.Body.Close()
+		if len(resp) == 0 {
+			continue
+		}
+		assert.Equal(t, data, resp)
+		ok = true
+		break
+	}
+	assert.True(t, ok)
 }

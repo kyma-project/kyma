@@ -88,7 +88,7 @@ func createOnPodUpdateFunc(clusterState *tester.ClusterState) func(p *v1.Pod) {
 	return func(p *v1.Pod) {
 		for _, c := range p.Status.ContainerStatuses {
 			clusterState.UpdateState(tester.Container{Ns: p.Namespace, PodName: p.Name, ContainerName: c.Name}, tester.StateUpdate{
-				Ready:      c.Ready,
+				Ready:      c.Ready || p.Status.Phase == v1.PodSucceeded,
 				RestartCnt: c.RestartCount,
 			})
 		}
