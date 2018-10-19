@@ -35,7 +35,7 @@ Save the received service id, as it is used in the later steps.
 2. Next you need to create the Service Instance. To achieve this you need the `externalName` of the Service Class.
 To get the `externalName` run:
 ```
-kubectl get serviceclass {SERVICE_ID} -o jsonpath='{.spec.externalName}'
+kubectl -n production get serviceclass {SERVICE_ID} -o jsonpath='{.spec.externalName}'
 ```
 
 Use it to create the Service Instance
