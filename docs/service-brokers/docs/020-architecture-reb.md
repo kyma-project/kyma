@@ -3,15 +3,14 @@ title: The Remote Environment Broker architecture
 type: Architecture
 ---
 
-The Remote Environment Broker (REB) workflow starts with the registration process, during which a remote environment (RE) is registered on the Kyma cluster.
+The Remote Environment Broker (REB) workflow starts with the registration process, during which a RemoteEnvironment (RE) is registered on the Kyma cluster.
 
-### Remote environment registration process
 
-The registration process of the remote environment consists of the following steps:
+1. Kyma administrator registers the RemoteEnvironment's APIs and Events definitions to the Kyma cluster through the Application Connector which creates a RemoteEnvironment custom resource inside the cluster.
+2. The Remote Environment Broker observes all the RemoteEnvironments in the cluster. Whenever the user creates an EnvironmentMapping with the same name as the RemoteEnvironment in a given Namespace, a `remote-env-broker` Service Broker appears inside this Namespace.
+3. The Service Catalog asks the `remote-env-broker` about the services provided by the given RemoteEnvironment and creates ServiceClasses inside a given Namespace.
+4. The user can provision ServiceInstances from the ServiceClasses in a given Namespace.
 
-1. Kyma administrator registers the remote environment's APIs and Events definitions to the Kyma cluster through the Application Connector which creates a remote environment custom resource inside the cluster.
-2. The Remote Environment Broker observes and registers all the remote environment custom resources.
-3. Whenever services (APIs and/or Events) appear in a given remote environment, the REB registers them as ServiceClasses in the Service Catalog.
 
 ![REB registration](assets/001-REB-registration.png)
 
