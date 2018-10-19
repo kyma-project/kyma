@@ -14,7 +14,7 @@ This guide shows how to create a simple lambda and trigger it with an event.
 
 ## Steps
 
-1. Register a service with the following specyfication to the desierd Remote Envoronment:
+1. Register a service with the following specification to the desierd Remote Envoronment:
 ```json
 {
   "name": "my-service",
