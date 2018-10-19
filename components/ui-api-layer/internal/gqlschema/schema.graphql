@@ -116,6 +116,7 @@ type ServiceClass {
     supportUrl: String
     providerDisplayName: String
     tags: [String!]!
+    labels: Labels!
     plans: [ServicePlan!]!
     activated: Boolean!
     apiSpec: JSON
@@ -135,6 +136,7 @@ type ClusterServiceClass {
     supportUrl: String
     providerDisplayName: String
     tags: [String!]!
+    labels: Labels!
     plans: [ClusterServicePlan!]!
     activated: Boolean!
     apiSpec: JSON

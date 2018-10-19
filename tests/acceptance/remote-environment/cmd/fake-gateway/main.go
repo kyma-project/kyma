@@ -25,11 +25,7 @@ type httpHandler struct {
 }
 
 func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "remote environment gateway, name: %s\n", r.URL.Path[1:])
-	fmt.Fprintln(w, "- server: req headers")
-	for k, v := range r.Header {
-		fmt.Fprintf(w, "-- %s => %s\n", k, v)
-	}
+	fmt.Fprintf(w, "remote environment gateway, request URL: \"%s\" request headers: %v\n", r.URL, r.Header)
 }
 
 func main() {

@@ -14,8 +14,8 @@ spec:
       env:
       - name: HELM_BROKER_URL
         value: http://{{.Release.Name }}-helm-broker.{{ .Release.Namespace }}.svc.cluster.local
-      - name: REMOTE_ENVIRONMENT_BROKER_URL
-        value: http://{{.Release.Name }}-remote-environment-broker.{{ .Release.Namespace }}.svc.cluster.local
+      - name: RELEASE_NAMESPACE
+        value: {{ .Values.test.acceptance.core.remoteEnvironment.brokerNamespace }}
       - name: KYMA_DOMAIN
         value: {{ .Values.global.domainName }}
       - name: IS_LOCAL_ENV

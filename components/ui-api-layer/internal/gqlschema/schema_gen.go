@@ -92,6 +92,7 @@ type ComplexityRoot struct {
 		SupportUrl          func(childComplexity int) int
 		ProviderDisplayName func(childComplexity int) int
 		Tags                func(childComplexity int) int
+		Labels              func(childComplexity int) int
 		Plans               func(childComplexity int) int
 		Activated           func(childComplexity int) int
 		ApiSpec             func(childComplexity int) int
@@ -436,6 +437,7 @@ type ComplexityRoot struct {
 		SupportUrl          func(childComplexity int) int
 		ProviderDisplayName func(childComplexity int) int
 		Tags                func(childComplexity int) int
+		Labels              func(childComplexity int) int
 		Plans               func(childComplexity int) int
 		Activated           func(childComplexity int) int
 		ApiSpec             func(childComplexity int) int
@@ -2125,6 +2127,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ClusterServiceClass.Tags(childComplexity), true
 
+	case "ClusterServiceClass.labels":
+		if e.complexity.ClusterServiceClass.Labels == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.Labels(childComplexity), true
+
 	case "ClusterServiceClass.plans":
 		if e.complexity.ClusterServiceClass.Plans == nil {
 			break
@@ -3761,6 +3770,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceClass.Tags(childComplexity), true
 
+	case "ServiceClass.labels":
+		if e.complexity.ServiceClass.Labels == nil {
+			break
+		}
+
+		return e.complexity.ServiceClass.Labels(childComplexity), true
+
 	case "ServiceClass.plans":
 		if e.complexity.ServiceClass.Plans == nil {
 			break
@@ -4937,6 +4953,11 @@ func (ec *executionContext) _ClusterServiceClass(ctx context.Context, sel ast.Se
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "labels":
+			out.Values[i] = ec._ClusterServiceClass_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "plans":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -5239,6 +5260,28 @@ func (ec *executionContext) _ClusterServiceClass_tags(ctx context.Context, field
 	}
 
 	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_labels(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Labels)
+	rctx.Result = res
+	return res
 }
 
 // nolint: vetshadow
@@ -12990,6 +13033,11 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "labels":
+			out.Values[i] = ec._ServiceClass_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "plans":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -13314,6 +13362,28 @@ func (ec *executionContext) _ServiceClass_tags(ctx context.Context, field graphq
 	}
 
 	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceClass_labels(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Labels)
+	rctx.Result = res
+	return res
 }
 
 // nolint: vetshadow
@@ -16824,6 +16894,7 @@ type ServiceClass {
     supportUrl: String
     providerDisplayName: String
     tags: [String!]!
+    labels: Labels!
     plans: [ServicePlan!]!
     activated: Boolean!
     apiSpec: JSON
@@ -16843,6 +16914,7 @@ type ClusterServiceClass {
     supportUrl: String
     providerDisplayName: String
     tags: [String!]!
+    labels: Labels!
     plans: [ClusterServicePlan!]!
     activated: Boolean!
     apiSpec: JSON

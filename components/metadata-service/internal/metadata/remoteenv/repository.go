@@ -89,7 +89,7 @@ func (r *repository) Create(remoteEnvironment string, service Service) apperrors
 
 	_, e := r.reManager.Update(re)
 	if e != nil {
-		return apperrors.Internal(fmt.Sprintf("failed to create service: %s", e.Error()))
+		return apperrors.Internal(fmt.Sprintf("Creating service failed, %s", e.Error()))
 	}
 
 	return nil
@@ -146,7 +146,7 @@ func (r *repository) Update(remoteEnvironment string, service Service) apperrors
 
 	_, e := r.reManager.Update(re)
 	if e != nil {
-		return apperrors.Internal(fmt.Sprintf("failed to update service: %s", e.Error()))
+		return apperrors.Internal(fmt.Sprintf("Updating service failed, %s", e.Error()))
 	}
 
 	return nil
@@ -167,7 +167,7 @@ func (r *repository) Delete(remoteEnvironment, id string) apperrors.AppError {
 
 	_, e := r.reManager.Update(re)
 	if e != nil {
-		return apperrors.Internal(fmt.Sprintf("failed to delete service: %s", e.Error()))
+		return apperrors.Internal(fmt.Sprintf("Deleting service failed, %s", e.Error()))
 	}
 
 	return nil
@@ -177,11 +177,11 @@ func (r *repository) getRemoteEnvironment(remoteEnvironment string) (*v1alpha1.R
 	re, err := r.reManager.Get(remoteEnvironment, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			message := fmt.Sprintf("Remote environment: %s not found.", remoteEnvironment)
+			message := fmt.Sprintf("Remote Environment %s not found", remoteEnvironment)
 			return nil, apperrors.Internal(message)
 		}
 
-		message := fmt.Sprintf("failed to get remote environment '%s' : %s", remoteEnvironment, err.Error())
+		message := fmt.Sprintf("Getting Remote Environment %s failed, %s", remoteEnvironment, err.Error())
 		return nil, apperrors.Internal(message)
 	}
 

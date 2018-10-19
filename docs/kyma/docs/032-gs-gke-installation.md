@@ -105,7 +105,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
     ```
     gcloud beta container --project "$PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.10.7-gke.2" --machine-type "n1-standard-2" \
+    --cluster-version "1.10.7-gke.6" --machine-type "n1-standard-2" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
     ```
 
@@ -150,7 +150,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 4. Prepare the deployment file:
 
     ```
-    cat installation/resources/installer.yaml <(echo "---") installation/resources/installer-config-cluster.yaml.tpl  <(echo "---") installation/resources/installer-cr.yaml.tpl | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    cat installation/resources/installer.yaml <(echo -e "\n---") installation/resources/installer-config-cluster.yaml.tpl  <(echo -e "\n---") installation/resources/installer-cr-cluster.yaml.tpl | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
 5. The output of this operation is the `my_kyma.yaml` file. Modify it to fetch the proper image with the changes you made ([YOUR_DOCKER_LOGIN]/kyma-installer:latest). Use the modified file to deploy Kyma on your GKE cluster.

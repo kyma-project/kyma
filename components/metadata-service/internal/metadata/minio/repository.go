@@ -39,7 +39,7 @@ type repository struct {
 func NewMinioRepository(endpoint string, accessKeyID string, secretAccessKey string) (Repository, apperrors.AppError) {
 	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, secureTraffic)
 	if err != nil {
-		return nil, apperrors.Internal("error while creating Minio client: %s", err)
+		return nil, apperrors.Internal("Failed creating Minio client, %s", err)
 	}
 
 	return &repository{minioClient: minioClient, timeout: timeoutDuration, bucketLocation: bucketLocation}, nil
@@ -53,7 +53,7 @@ func (r *repository) Put(bucketName string, objectName string, resource []byte) 
 
 	_, appErr := r.minioClient.PutObjectWithContext(contextWithTimeout, bucketName, objectName, reader, reader.Size(), minio.PutObjectOptions{})
 	if appErr != nil {
-		return apperrors.Internal("error while uploading file to Minio: %s", appErr)
+		return apperrors.Internal("Uploading file to Minio failed, %s", appErr.Error())
 	}
 
 	return nil
@@ -77,7 +77,7 @@ func (r *repository) Get(bucketName string, objectName string) ([]byte, apperror
 func (r *repository) Remove(bucketName string, objectName string) apperrors.AppError {
 	err := r.minioClient.RemoveObject(bucketName, objectName)
 	if err != nil {
-		return apperrors.Internal("failed to remove object %s: %s", objectName, err)
+		return apperrors.Internal("Removing %s object failed, %s", objectName, err.Error())
 	}
 
 	return nil
@@ -88,7 +88,7 @@ func (r *repository) getObject(bucketName string, objectName string) (*minio.Obj
 
 	object, err := r.minioClient.GetObjectWithContext(contextWithTimeout, bucketName, objectName, minio.GetObjectOptions{})
 	if err != nil {
-		return nil, apperrors.Internal("failed to get object %s: %s", objectName, err), cancel
+		return nil, apperrors.Internal("Getting %s object failed, %s", objectName, err.Error()), cancel
 	}
 
 	return object, nil, cancel
@@ -104,7 +104,7 @@ func readBytes(reader io.Reader) ([]byte, apperrors.AppError) {
 			return nil, nil
 		}
 
-		return nil, apperrors.Internal("error while reading object bytes: %s", err)
+		return nil, apperrors.Internal("Reading bytes failed, %s", err.Error())
 	}
 
 	return buffer.Bytes(), nil

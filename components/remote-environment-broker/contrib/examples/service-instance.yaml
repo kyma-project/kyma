@@ -5,8 +5,8 @@ metadata:
   namespace: production
 spec:
   # References one of the previously returned services
-  clusterServiceClassExternalName: promotions-ac031e8c
-  clusterServicePlanExternalName: default
+  serviceClassExternalName: promotions-ac031e8c
+  servicePlanExternalName: default
   parameters:
   #####
   # Additional parameters can be added here,
