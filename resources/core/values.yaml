@@ -47,7 +47,7 @@ global:
     version: 4a23580f
   docs:
     dir: develop/
-    version: 43d564ee
+    version: 5c147f8e
   environments:
     dir: develop/
     version: 6e0a7fe2
