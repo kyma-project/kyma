@@ -194,9 +194,8 @@ testCheckIstio=$?
 echo "- Testing Remote Environments"
 helm test ec-default
 ecTestErr=$?
-
 helm test hmc-default
-gatewayTestErr=$?
+hmcTestErr=$?
 
 checkAndCleanupTest kyma-integration
 testCheckGateway=$?
@@ -205,7 +204,7 @@ printImagesWithLatestTag
 latestTagsErr=$?
 
 if  [ ${coreTestErr} -ne 0 ] || [ ${testCheckKymaCore} -ne 0 ] || [ ${istioTestErr} -ne 0 ] ||
-    [ ${testCheckIstio} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${gatewayTestErr} -ne 0 ] ||
+    [ ${testCheckIstio} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${hmcTestErr} -ne 0 ] ||
     [ ${testCheckGateway} -ne 0 ] || [ ${latestTagsErr} -ne 0 ]
 
 then
