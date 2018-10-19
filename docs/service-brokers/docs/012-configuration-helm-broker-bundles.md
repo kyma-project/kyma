@@ -13,7 +13,7 @@ To create your own bundle, you must create a directory with the following struct
 
 ```
 sample-bundle/
-  ├── meta.yaml                             # A file which contains the metadata information about this yBundle
+  ├── meta.yaml                             # A file which contains the metadata information about this bundle
   ├── chart/                                # A directory which contains a Helm chart that installs your Kubernetes resources
   │    └── <chart-name>/                    # A Helm chart directory
   │         └── ....                        # Helm chart files
@@ -21,8 +21,8 @@ sample-bundle/
        ├── example-enterprise               # A directory of files for a specific plan
        │   ├── meta.yaml                    # A file which contains the metadata information about this plan
        │   ├── bind.yaml                    # A file which contains information about the values that the Helm Broker returns when it receives the bind request
-       │   ├── create-instance-schema.json  # The JSON Schema definitions for creating a service instance
-       │   └── values.yaml                  # The default configuration values in this plan for a chart defined in chart directory
+       │   ├── create-instance-schema.json  # The JSON Schema definitions for creating a ServiceInstance
+       │   └── values.yaml                  # The default configuration values in this plan for a chart defined in the `chart` directory
        └── ....
 ```
 
