@@ -1,32 +1,32 @@
 package integration
 
 import (
-	"io"
+	"context"
+	publishapp "github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish/application"
+	pushapp "github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-push/application"
+	"github.com/kyma-project/kyma/components/event-bus/internal/publish"
+	"github.com/kyma-project/kyma/components/event-bus/internal/push/opts"
+	"github.com/kyma-project/kyma/components/event-bus/test/util"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
-	publishapp "github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish/application"
-	pushapp "github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-push/application"
-	"github.com/kyma-project/kyma/components/event-bus/internal/common"
-	"github.com/kyma-project/kyma/components/event-bus/internal/publish"
-	"github.com/kyma-project/kyma/components/event-bus/internal/push/actors"
-	"github.com/kyma-project/kyma/components/event-bus/internal/push/opts"
-	"github.com/kyma-project/kyma/components/event-bus/test/util"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 )
 
 var (
-	publishServer            *httptest.Server
-	pushServer               *httptest.Server
-	subscriberServerV1       *httptest.Server
-	subscriberServerV2       *httptest.Server
-	subscriptionsSupervisor1 *actors.SubscriptionsSupervisor
-	subscriptionsSupervisor2 *actors.SubscriptionsSupervisor
+	publishServer      *httptest.Server
+	pushServer         *httptest.Server
+	subscriberServerV1 *httptest.Server
+	subscriberServerV2 *httptest.Server
 )
 
+const waitForSubscriptionToStart = 3 * time.Second
+
 func TestMain(m *testing.M) {
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
 
 	stanServer, err := startNats()
 	log.Printf("StanServer %v, error : %v \n", stanServer, err)
@@ -43,17 +43,9 @@ func TestMain(m *testing.M) {
 	subscriberServerV2 = util.NewSubscriberServerV2()
 
 	pushOpts := opts.DefaultOptions
+	pushOpts.CheckEventsActivation = true
 	pushOpts.NatsStreamingClusterID = clusterID
-	pushApplication := pushapp.NewPushApplication(&pushOpts, newFakeInformer2())
-	subscriptionsSupervisor1 = pushApplication.SubscriptionsSupervisor
-	subscription1 := util.NewSubscription("test-sub", metav1.NamespaceDefault, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion,
-		sourceIDV1)
-	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, common.DefaultRequestProvider)
-
-	subscriptionsSupervisor2 = pushApplication.SubscriptionsSupervisor
-	subscription2 := util.NewSubscription("test-sub", metav1.NamespaceDefault, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion,
-		sourceIDV2)
-	subscriptionsSupervisor2.StartSubscriptionReq(subscription2, common.DefaultRequestProvider)
+	pushApplication := pushapp.NewPushApplication(&pushOpts, newFakeInformer(ctx))
 
 	pushServer = httptest.NewServer(util.Logger(pushApplication.ServerMux))
 
@@ -96,61 +88,85 @@ func Test_Subscriber_Status(t *testing.T) {
 }
 
 func Test_Publish_Push_Request(t *testing.T) {
-	{
-		payloadV1 := makePayload(sourceIDV1, eventType, eventTypeVersion, eventDataV1)
-		publishEvent(t, publishServer.URL, payloadV1)
-		verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, eventDataV1)
-	}
+	verifyPublishPushFlow("Test_Publish_Push_Request_1", "sub-1", "namespace-1", t)
 
-	{
-		payloadV2 := makePayload(sourceIDV2, eventType, eventTypeVersion, eventDataV2)
-		publishEvent(t, publishServer.URL, payloadV2)
-		verifyEndpointReceivedEvent(t, subscriberServerV2.URL+util.SubServer2ResultsPath, eventDataV2)
-
-	}
-}
-
-func Test_pushRequestShouldNotIncludeKymaTopicHeader(t *testing.T) {
-	var pushRequest *http.Request
-	requestProvider := common.RequestProvider(func(method, url string, body io.Reader) (*http.Request, error) {
-		var err error
-		pushRequest, err = http.NewRequest(method, url, body)
-		return pushRequest, err
-	})
-
-	subscription1 := util.NewSubscription("test-sub-1", metav1.NamespaceDefault, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion,
-		sourceIDV1)
-	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, requestProvider)
-
-	payloadV1 := makePayload(sourceIDV1, eventType, eventTypeVersion, eventDataV1)
-	publishEvent(t, publishServer.URL, payloadV1)
-
-	verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, eventDataV1)
-
-	if pushRequest == nil {
-		t.Fatal("push request should not be nil")
-	}
-
-	if header := pushRequest.Header.Get(headerKymaTopic); len(header) > 0 {
-		t.Fatalf("request to endpoint should not include the header %s", headerKymaTopic)
-	}
+	verifyPublishPushFlow("Test_Publish_Push_Request_2", "sub-2", "namespace-1", t)
 }
 
 func Test_sameSubjectSubscribersInDifferentNamespacesShouldReceiveEventsOfThatSubject(t *testing.T) {
 	// create two subscriptions with the same name in two different namespaces to the same subject
 	name := "test-subscription"
-	subscription1 := util.NewSubscription(name, "namespace-1", subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1)
-	subscription2 := util.NewSubscription(name, "namespace-2", subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion, sourceIDV1)
+	ns1 := "namespace-1"
+	ns2 := "namespace-2"
+	eventData := "Test_sameSubjectSubscribersInDifferentNamespacesShouldReceiveEventsOfThatSubject"
 
-	// handle the two subscriptions
-	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, common.DefaultRequestProvider)
-	subscriptionsSupervisor2.StartSubscriptionReq(subscription2, common.DefaultRequestProvider)
+	doCreateSub(name, ns1, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+
+	doCreateSub(name, ns2, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+
+	time.Sleep(waitForSubscriptionToStart)
 
 	// publish one event
-	payload := makePayload(sourceIDV1, eventType, eventTypeVersion, eventDataV1)
+	payload := makePayload(sourceIDV1, eventType, eventTypeVersion, eventData)
 	publishEvent(t, publishServer.URL, payload)
 
 	// verify that both subscribers received the event
-	verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, eventDataV1)
-	verifyEndpointReceivedEvent(t, subscriberServerV2.URL+util.SubServer2ResultsPath, eventDataV1)
+	verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, eventData)
+	verifyEndpointReceivedEvent(t, subscriberServerV2.URL+util.SubServer2ResultsPath, eventData)
+
+	doDeleteSub(name, ns1, t)
+	doDeleteSub(name, ns2, t)
+}
+
+func Test_UpdateSubscriptionURL(t *testing.T) {
+	name := "test-update"
+	ns := "namespace-1"
+
+	preUpdateEvent := "test-pre-update"
+	doCreateSub(name, ns, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+	time.Sleep(waitForSubscriptionToStart)
+
+	publishEvent(t, publishServer.URL, makePayload(sourceIDV1, eventType, eventTypeVersion, preUpdateEvent))
+	verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, preUpdateEvent)
+
+	doUpdate(name, ns, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+	time.Sleep(waitForSubscriptionToStart)
+
+	postUpdateEvent := "test-post-update"
+	publishEvent(t, publishServer.URL, makePayload(sourceIDV1, eventType, eventTypeVersion, postUpdateEvent))
+	verifyEndpointReceivedEvent(t, subscriberServerV2.URL+util.SubServer2ResultsPath, postUpdateEvent)
+
+	doDeleteSub(name, ns, t)
+
+}
+
+func verifyPublishPushFlow(eventData string, subscriptionName string, namespace string, t *testing.T) {
+	payloadV1 := makePayload(sourceIDV1, eventType, eventTypeVersion, eventData)
+
+	doCreateSub(subscriptionName, namespace, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+
+	time.Sleep(waitForSubscriptionToStart)
+
+	publishEvent(t, publishServer.URL, payloadV1)
+	verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, eventData)
+
+	doDeleteSub(subscriptionName, namespace, t)
+
+}
+
+func doCreateSub(subscriptionName string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
+	sourceID string, t *testing.T) {
+	_, err := createNewSubscription(subscriptionName, namespace, subscriberEventEndpointURL, eventType, eventTypeVersion, sourceID)
+	checkIfError(err, t)
+}
+
+func doDeleteSub(subscriptionName string, namespace string, t *testing.T) {
+	err := deleteSubscription(subscriptionName, namespace)
+	checkIfError(err, t)
+}
+
+func doUpdate(subscriptionName string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
+	sourceID string, t *testing.T) {
+	_, err := updateSubscription(subscriptionName, namespace, subscriberEventEndpointURL, eventType, eventTypeVersion, sourceID)
+	checkIfError(err, t)
 }
