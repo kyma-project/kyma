@@ -32,8 +32,8 @@ period of time.
         name: istio-ingressgateway-certs
         namespace: istio-system
     data:
-        tls.crt: $(echo "${KYMA_TLS_CERT}" | base64)
-        tls.key: $(echo "${KYMA_TLS_KEY}" | base64)
+        tls.crt: $(echo "$KYMA_TLS_CERT" | base64)
+        tls.key: $(echo "$KYMA_TLS_KEY" | base64)
     EOF
     ```
  
@@ -48,7 +48,7 @@ period of time.
         name: ingress-tls-cert
         namespace: kyma-system
     data:
-        tls.crt: $(echo "${KYMA_TLS_CERT}" | base64)
+        tls.crt: $(echo "$KYMA_TLS_CERT" | base64)
     EOF
     ```
     
@@ -63,7 +63,7 @@ period of time.
         name: ingress-tls-cert
         namespace: kyma-integration
     data:
-        tls.crt: $(echo "${KYMA_TLS_CERT}" | base64)
+        tls.crt: $(echo "$KYMA_TLS_CERT" | base64)
     EOF
     ```
 
