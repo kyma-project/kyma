@@ -19,9 +19,6 @@ The Event-Service has the following parameters:
 - **eventsTargetURL** - A URL to which you proxy the incoming Events. The default URL is `http://localhost:9000`.
 - **requestTimeout** - A time-out for requests sent through the Event-Service. It is provided in seconds. The default time-out is `1`.
 - **requestLogging** - A flag for logging incoming requests. The default value is `false`.
-
-The parameters for the Event API correspond to the fields in the [Remote Environment](../../docs/application-connector/docs/044-cr-environment.md):
-
 - **sourceId** - The identifier of the Events' source.
 
 ### Unit tests
