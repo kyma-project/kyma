@@ -1,8 +1,0 @@
-{
-  "spec":{
-    "id":"authorization-and-authentication",
-    "displayName":"Authorization and Authentication",
-    "description":"Authorization and authentication in Kyma",
-    "type":"Components"
-  }
-}

@@ -19,8 +19,8 @@ metadata:
   name: promotions-service
   namespace: mordor
 spec:
-  clusterServiceClassExternalName: promotions
-  clusterServicePlanExternalName: default
+  serviceClassExternalName: promotions
+  servicePlanExternalName: default
   parameters:
     #####
     # Additional parameters can be added here,
@@ -36,8 +36,8 @@ metadata:
   name: redis-instance
   namespace: mordor
 spec:
-  clusterServiceClassExternalName: redis
-  clusterServicePlanExternalName: micro
+  serviceClassExternalName: redis
+  servicePlanExternalName: micro
   parameters:
     #####
     # Additional parameters can be added here,
