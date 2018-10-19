@@ -14,7 +14,7 @@ This guide shows how to create a simple lambda and trigger it with an event.
 
 ## Steps
 
-1. Register a service with the following specification to the desierd Remote Envoronment:
+1. Register a service with the following specification to the desired Remote Environment:
 ```json
 {
   "name": "my-service",
@@ -126,7 +126,7 @@ spec:
             if(error){
                 resolve(error);
             }
-            console.log("Response acquired succesfully! Uuid: " + response.body.uuid);
+            console.log("Response acquired successfully! Uuid: " + response.body.uuid);
             resolve(response);
         })
     }
@@ -149,9 +149,9 @@ spec:
   topic: exampleEvent
 EOF
 ```
-Our lambda will send a request to http://httpbin.org/uuid and if the call was succesful it will log `Response acquired succesfully! Uuid: {RECEIVED_UUID}`
+Our lambda will send a request to http://httpbin.org/uuid and if the call was successful it will log `Response acquired succesfully! Uuid: {RECEIVED_UUID}`
 
-4. To trigger the lambda with an event you need to create the Subscribtion
+4. To trigger the lambda with an event you need to create the Subscription
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: eventing.kyma.cx/v1alpha1
@@ -197,9 +197,9 @@ curl -X POST https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/events -k --cer
 
 6. Check lambda logs to verify that it was triggered:
 ```
-kubectl -n production logs "$(kcp get po -l function=my-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-lambda | grep "Response acquired succesfully! Uuid: "
+kubectl -n production logs "$(kcp get po -l function=my-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-lambda | grep "Response acquired successfully! Uuid: "
 ```
-You should see the message like the one belowe, for every event you have sent:
+You should see the message like the one below, for every event you have sent:
 ```
-Response acquired succesfully! Uuid: {RECEIVED_UUID}
+Response acquired successfully! Uuid: {RECEIVED_UUID}
 ```

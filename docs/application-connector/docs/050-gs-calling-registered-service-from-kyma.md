@@ -14,7 +14,7 @@ This guide shows how to call the registered service from within Kyma using a sim
 
 ## Steps
 
-1. Register a service with the following specyfication to the desierd Remote Envoronment:
+1. Register a service with the following specification to the desired Remote Environment:
 ```json
 {
   "name": "my-service",
@@ -32,7 +32,7 @@ This guide shows how to call the registered service from within Kyma using a sim
 Our service will call http://httpbin.org.
 Save the received service id, as it is used in the later steps.
 
-2. Next you need to create the Service Instance. To achive this you need the `externalName` of the Cluster Service Class.
+2. Next you need to create the Service Instance. To achieve this you need the `externalName` of the Cluster Service Class.
 To get the `externalName` run:
 ```
 kubectl get clusterserviceclass {SERVICE_ID} -o jsonpath='{.spec.externalName}'
