@@ -7,11 +7,12 @@ metadata:
 spec:
   version: "__VERSION__"
   url: "__URL__"
-  components: 
+  components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
     - name: "istio"
       namespace: "istio-system"
+    - name: "knative-build-serve"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
     - name: "prometheus-operator"
@@ -25,3 +26,4 @@ spec:
     - name: "remote-environments"
       namespace: "kyma-integration"
       release: "default-remote-environments"
+    
