@@ -3,13 +3,13 @@ title: Trigger lambda with events
 type: Getting Started
 ---
 
-This guide shows how to create a simple lambda and trigger it with an event.
+This guide shows how to create a simple lambda function and trigger it with an event.
 
 
 ## Prerequisites
 
-- Remote Environment created and bound to the `production` Environment.
-- Client certificates for the RE generated.
+- A Remote Environment (RE) bound to the `production` Environment
+- Client certificates generated for the connected RE.
 
 
 ## Steps
@@ -64,10 +64,10 @@ This guide shows how to create a simple lambda and trigger it with an event.
 ```
 Save the received service id, as it is used in later steps.
 
-2. Next you need to create the Service Instance. To achive this you need an `externalName` of the Cluster Service Class.
+2. Next you need to create the Service Instance. To achieve this you need an `externalName` of the Service Class.
 To get the `externalName` run:
 ```
-kubectl get clusterserviceclass {SERVICE_ID}  -o jsonpath='{.spec.externalName}'
+kubectl get serviceclass {SERVICE_ID}  -o jsonpath='{.spec.externalName}'
 ```
 
 Use it to create the Service Instance
@@ -79,11 +79,11 @@ metadata:
   name: my-service-instance-name
   namespace: production
 spec:
-  clusterServiceClassExternalName: {EXTERNAL_NAME}
+  serviceClassExternalName: {EXTERNAL_NAME}
 EOF
 ```
 
-3. Use `kubectl` to register the lambda in the namespace to which the RE is bounded.
+3. Register the lambda function in the Environment to which the RE is bound.
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: kubeless.io/v1beta1
@@ -151,7 +151,7 @@ EOF
 ```
 Our lambda will send a request to http://httpbin.org/uuid and if the call was successful it will log `Response acquired succesfully! Uuid: {RECEIVED_UUID}`
 
-4. To trigger the lambda with an event you need to create the Subscription
+4. Create a Subscription to allow events to trigger the lambda function.
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: eventing.kyma.cx/v1alpha1
@@ -172,34 +172,31 @@ spec:
 EOF
 ```
 
-5. After deploying all of the resources use `curl` to send the event:
-```
-curl -X POST https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
-'{
-    "event-type": "exampleEvent",
-    "event-type-version": "v1",
-    "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-    "event-time": "2018-10-16T15:00:00Z",
-    "data": "some data"
-}'
-```
-On a local deployment run:
-```
-curl -X POST https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
-'{
-    "event-type": "exampleEvent",
-    "event-type-version": "v1",
-    "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-    "event-time": "2018-10-16T15:00:00Z",
-    "data": "some data"
-}'
-```
+5. Send an event to trigger the created lambda.
+  - On cluster:
+    ```
+    curl -X POST https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+    '{
+        "event-type": "exampleEvent",
+        "event-type-version": "v1",
+        "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        "event-time": "2018-10-16T15:00:00Z",
+        "data": "some data"
+    }'
+    ```
+  - On a local deployment:
+    ```
+    curl -X POST https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+    '{
+        "event-type": "exampleEvent",
+        "event-type-version": "v1",
+        "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        "event-time": "2018-10-16T15:00:00Z",
+        "data": "some data"
+    }'
+    ```
 
-6. Check lambda logs to verify that it was triggered:
+6. Check the logs of the lambda function to check if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`. Run this command:
 ```
 kubectl -n production logs "$(kcp get po -l function=my-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-lambda | grep "Response acquired successfully! Uuid: "
-```
-You should see the message like the one below, for every event you have sent:
-```
-Response acquired successfully! Uuid: {RECEIVED_UUID}
 ```

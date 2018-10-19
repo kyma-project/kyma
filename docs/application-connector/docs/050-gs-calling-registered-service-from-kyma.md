@@ -8,8 +8,8 @@ This guide shows how to call the registered service from within Kyma using a sim
 
 ## Prerequisites
 
-- Remote Environment created and bound to the `production` Environment.
-- Client certificates for the RE generated.
+- A Remote Environment (RE) bound to the `production` Environment
+- Client certificates generated for the connected RE.
 
 
 ## Steps
@@ -32,10 +32,10 @@ This guide shows how to call the registered service from within Kyma using a sim
 Our service will call http://httpbin.org.
 Save the received service id, as it is used in the later steps.
 
-2. Next you need to create the Service Instance. To achieve this you need the `externalName` of the Cluster Service Class.
+2. Next you need to create the Service Instance. To achieve this you need the `externalName` of the Service Class.
 To get the `externalName` run:
 ```
-kubectl get clusterserviceclass {SERVICE_ID} -o jsonpath='{.spec.externalName}'
+kubectl get serviceclass {SERVICE_ID} -o jsonpath='{.spec.externalName}'
 ```
 
 Use it to create the Service Instance
@@ -47,7 +47,7 @@ metadata:
   name: my-service-instance-name
   namespace: production
 spec:
-  clusterServiceClassExternalName: {EXTERNAL_NAME}
+  serviceClassExternalName: {EXTERNAL_NAME}
 EOF
 ```
 
