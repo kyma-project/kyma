@@ -8,7 +8,7 @@ The Connector Service exposes two separate APIs:
 - An internal API available in the Kyma cluster used to initiate certificate generation.
 - An external API exposed through Ingress used to finalize certificate generation.
 
-Find the specification of both of these APIs [here](assets/connectorapi.yaml).
+Find the specification of both of these APIs [here](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/assets/connectorapi.yaml).
 
 Alternatively, get the API specification directly from the Connector Service:
 ```

@@ -12,7 +12,6 @@ import (
 type StatusManager interface {
 	InProgress(description string) error
 	InstallDone(url, kymaVersion string) error
-	UpdateDone(url, kymaVersion string) error
 	UninstallDone() error
 	Error(description string) error
 }
@@ -48,12 +47,6 @@ func (sm *statusManager) InProgress(description string) error {
 //InstallDone .
 func (sm *statusManager) InstallDone(url, kymaVersion string) error {
 	instStatus := getStatus(installationv1alpha1.StateInstalled, "Kyma installed", url, kymaVersion)
-	return sm.update(instStatus)
-}
-
-//UpdateDone .
-func (sm *statusManager) UpdateDone(url, kymaVersion string) error {
-	instStatus := getStatus(installationv1alpha1.StateUpdated, "Kyma updated", url, kymaVersion)
 	return sm.update(instStatus)
 }
 

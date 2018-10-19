@@ -16,10 +16,6 @@ type Interface interface {
 	InstallSuccess() error
 	InstallError() error
 
-	UpdateStart() error
-	UpdateSuccess() error
-	UpdateError() error
-
 	UninstallStart() error
 	UninstallSuccess() error
 	UninstallError() error
@@ -58,7 +54,6 @@ func (cm *impl) InstallSuccess() error {
 	cm.setCondition(installation, installationv1alpha1.CondtitionInstalled, v1.ConditionTrue)
 	cm.setCondition(installation, installationv1alpha1.ConditionInstalling, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionInProgress, v1.ConditionFalse)
-	cm.setCondition(installation, installationv1alpha1.ConditionUpdated, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionUninstalled, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionError, v1.ConditionFalse)
 
@@ -78,62 +73,6 @@ func (cm *impl) InstallError() error {
 
 	cm.setCondition(installation, installationv1alpha1.CondtitionInstalled, v1.ConditionUnknown)
 	cm.setCondition(installation, installationv1alpha1.ConditionInstalling, v1.ConditionFalse)
-	cm.setCondition(installation, installationv1alpha1.ConditionInProgress, v1.ConditionFalse)
-	cm.setCondition(installation, installationv1alpha1.ConditionError, v1.ConditionTrue)
-
-	err = cm.update(installation)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (cm *impl) UpdateStart() error {
-	installation, err := cm.getInstallation()
-	if err != nil {
-		return err
-	}
-
-	cm.setCondition(installation, installationv1alpha1.ConditionUpdating, v1.ConditionTrue)
-	cm.setCondition(installation, installationv1alpha1.ConditionInProgress, v1.ConditionTrue)
-	cm.setCondition(installation, installationv1alpha1.ConditionError, v1.ConditionFalse)
-
-	err = cm.update(installation)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (cm *impl) UpdateSuccess() error {
-	installation, err := cm.getInstallation()
-	if err != nil {
-		return err
-	}
-
-	cm.setCondition(installation, installationv1alpha1.ConditionUpdated, v1.ConditionTrue)
-	cm.setCondition(installation, installationv1alpha1.ConditionUpdating, v1.ConditionFalse)
-	cm.setCondition(installation, installationv1alpha1.ConditionInProgress, v1.ConditionFalse)
-	cm.setCondition(installation, installationv1alpha1.ConditionError, v1.ConditionFalse)
-
-	err = cm.update(installation)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (cm *impl) UpdateError() error {
-	installation, err := cm.getInstallation()
-	if err != nil {
-		return err
-	}
-
-	cm.setCondition(installation, installationv1alpha1.ConditionUpdated, v1.ConditionFalse)
-	cm.setCondition(installation, installationv1alpha1.ConditionUpdating, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionInProgress, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionError, v1.ConditionTrue)
 
@@ -169,8 +108,6 @@ func (cm *impl) UninstallSuccess() error {
 		return err
 	}
 
-	cm.setCondition(installation, installationv1alpha1.ConditionUpdated, v1.ConditionFalse)
-	cm.setCondition(installation, installationv1alpha1.ConditionUpdating, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionUninstalling, v1.ConditionFalse)
 	cm.setCondition(installation, installationv1alpha1.ConditionUninstalled, v1.ConditionTrue)
 	cm.setCondition(installation, installationv1alpha1.CondtitionInstalled, v1.ConditionFalse)

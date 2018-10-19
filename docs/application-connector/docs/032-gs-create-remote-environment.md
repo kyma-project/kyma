@@ -3,7 +3,7 @@ title: Create a new Remote Environment
 type: Getting Started
 ---
 
-The Remote Environment Controller provisions and de-provisions the necessary deployments for the created Remote Environment (RE).
+The Remote Environment Controller provisions and de-provisions the necessary deployments for every created Remote Environment (RE).
 
 >**NOTE:** A Remote Environment represents a single connected external solution.
 

@@ -18,20 +18,8 @@ func (c *Converter) MapServiceInstance(in *v1beta1.ServiceInstance) *internal.In
 		state = internal.InstanceStateFailed
 	}
 
-	var planID internal.ServicePlanID
-	var serviceID internal.ServiceID
-
-	if in.Spec.ClusterServicePlanRef != nil {
-		planID = internal.ServicePlanID(in.Spec.ClusterServicePlanRef.Name)
-	} else {
-		planID = internal.ServicePlanID(in.Spec.ServicePlanRef.Name)
-	}
-
-	if in.Spec.ClusterServiceClassRef != nil {
-		serviceID = internal.ServiceID(in.Spec.ClusterServiceClassRef.Name)
-	} else {
-		serviceID = internal.ServiceID(in.Spec.ServiceClassRef.Name)
-	}
+	planID := internal.ServicePlanID(in.Spec.ServicePlanRef.Name)
+	serviceID := internal.ServiceID(in.Spec.ServiceClassRef.Name)
 
 	return &internal.Instance{
 		ID:            internal.InstanceID(in.Spec.ExternalID),

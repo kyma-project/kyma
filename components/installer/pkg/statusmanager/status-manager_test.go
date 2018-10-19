@@ -209,46 +209,6 @@ func TestStatusManager(t *testing.T) {
 			So(kymaInst.Status.URL, ShouldEqual, testURL)
 			So(kymaInst.Status.KymaVersion, ShouldEqual, testVersion)
 		})
-
-		Convey("should update state, description, url and kyma version after update", func() {
-			oldState := installationv1alpha1.StateInstalled
-			oldDescription := "installing kyma"
-			oldURL := "installedURL"
-			oldVersion := "0.0.1"
-
-			testState := installationv1alpha1.StateUpdated
-			testDescription := "Kyma updated"
-			testURL := "fakeURL"
-			testVersion := "0.0.2"
-
-			testInst := &installationv1alpha1.Installation{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      consts.InstResource,
-					Namespace: consts.InstNamespace,
-				},
-				Spec: installationv1alpha1.InstallationSpec{
-					URL:         testURL,
-					KymaVersion: testVersion,
-				},
-				Status: installationv1alpha1.InstallationStatus{
-					State:       oldState,
-					Description: oldDescription,
-					URL:         oldURL,
-					KymaVersion: oldVersion,
-				},
-			}
-			testStatusManager := getTestSetup(testInst)
-
-			err := testStatusManager.UpdateDone(testURL, testVersion)
-
-			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
-
-			So(err, ShouldBeNil)
-			So(kymaInst.Status.State, ShouldEqual, testState)
-			So(kymaInst.Status.Description, ShouldEqual, testDescription)
-			So(kymaInst.Status.URL, ShouldEqual, testURL)
-			So(kymaInst.Status.KymaVersion, ShouldEqual, testVersion)
-		})
 	})
 }
 

@@ -160,6 +160,21 @@ function checkAndCleanupTest() {
     fi
 }
 
+function printImagesWithLatestTag() {
+
+    local images=$(kubectl get pods --all-namespaces -o jsonpath="{..image}" |\
+    tr -s '[[:space:]]' '\n' |\
+    grep ":latest")
+
+    log "Images with tag latest are not allowed. Checking..." nc bold
+    if [ ${#images} -ne 0 ]; then
+        log "${images}" red
+        log "FAILED" red
+        return 1
+    fi
+    log "OK" green bold
+    return 0
+}
 
 echo "-------------------------------"
 echo "- Ensure test Pods are deleted "
@@ -207,7 +222,10 @@ hmcTestErr=$?
 checkAndCleanupTest kyma-integration
 testCheckGateway=$?
 
-if [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${hmcTestErr} -ne 0 ]
+printImagesWithLatestTag
+latestTagsErr=$?
+
+if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${hmcTestErr} -ne 0 ]
 then
     exit 1
 else

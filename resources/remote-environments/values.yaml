@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
@@ -48,3 +49,8 @@ eventService:
   service:
     externalapi:
       port: *eventServiceExternalAPIPort
+
+remoteEnvs:
+  ecDefault: ec-default
+  hmcDefault: hmc-default
+
