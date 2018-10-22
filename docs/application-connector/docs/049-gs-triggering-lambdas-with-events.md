@@ -63,7 +63,6 @@ This guide shows how to create a simple lambda function and trigger it with an e
   }
 }
 ```
-Save the received service id, as it is used in later steps.
 
 2. Get the `externalName` of the Service Class of the registered service.
 ```
@@ -83,7 +82,7 @@ spec:
 EOF
 ```
 
-4. Create a sample lambda function which sends a request to http://httpbin.org/uuid. A successful response logs a `Response acquired successfully! Uuid: {RECEIVED_UUID}` message. To create and register the lambda function in the `production` Environment, run:
+4. Create a sample lambda function which sends a request to `http://httpbin.org/uuid`. A successful response logs a `Response acquired successfully! Uuid: {RECEIVED_UUID}` message. To create and register the lambda function in the `production` Environment, run:
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: kubeless.io/v1beta1
@@ -149,7 +148,6 @@ spec:
   topic: exampleEvent
 EOF
 ```
-Our lambda will send a request to http://httpbin.org/uuid and if the call was successful it will log `Response acquired succesfully! Uuid: {RECEIVED_UUID}`
 
 5. Create a Subscription to allow events to trigger the lambda function.
 ```
@@ -173,7 +171,7 @@ EOF
 ```
 
 6. Send an event to trigger the created lambda.
-  - On cluster:
+  - On a cluster:
     ```
     curl -X POST https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
     '{
@@ -196,7 +194,7 @@ EOF
     }'
     ```
 
-7. Check the logs of the lambda function to check if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`. Run this command:
+7. Check the logs of the lambda function to see if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`. Run this command:
 ```
 kubectl -n production logs "$(kubectl -n production get po -l function=my-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-lambda | grep "Response acquired successfully! Uuid: "
 ```
