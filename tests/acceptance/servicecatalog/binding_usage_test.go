@@ -2,6 +2,7 @@ package servicecatalog_test
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"net/http"
 	"testing"
 	"time"
@@ -22,6 +23,7 @@ import (
 	"github.com/vrischmann/envconfig"
 	appsTypes "k8s.io/api/apps/v1beta1"
 	k8sCoreTypes "k8s.io/api/core/v1"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -54,10 +56,14 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	ts.waitForREServiceClasses(time.Second * 90)
 
 	ts.createAndWaitForServiceInstanceA(timeoutPerStep)
+	defer ts.deleteServiceInstanceA(timeoutPerStep)
 	ts.createAndWaitForServiceInstanceB(timeoutPerStep)
+	defer ts.deleteServiceInstanceB(timeoutPerStep)
 
 	ts.createAndWaitForServiceBindingA(timeoutPerStep)
+	defer ts.deleteServiceBindingA(timeoutPerStep)
 	ts.createAndWaitForServiceBindingB(timeoutPerStep)
+	defer ts.deleteServiceBindingB(timeoutPerStep)
 
 	ts.createTesterDeploymentAndService()
 
@@ -258,6 +264,35 @@ func (ts *TestSuite) createAndWaitForServiceBindingB(timeout time.Duration) {
 	ts.createAndWaitForServiceBinding(ts.bindingNameB, ts.serviceInstanceNameB, timeout)
 }
 
+func (ts *TestSuite) deleteServiceBindingA(timeout time.Duration) {
+	ts.deleteServiceBinding(ts.bindingNameA, timeout)
+}
+
+func (ts *TestSuite) deleteServiceBindingB(timeout time.Duration) {
+	ts.deleteServiceBinding(ts.bindingNameB, timeout)
+}
+
+func (ts *TestSuite) deleteServiceBinding(bindingName string, timeout time.Duration) {
+	clientSet, err := scClient.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+	siClient := clientSet.ServicecatalogV1beta1().ServiceBindings(ts.namespace)
+
+	err = siClient.Delete(bindingName, &metav1.DeleteOptions{})
+	require.NoError(ts.t, err)
+
+	wait.ForFuncAtMost(ts.t, func() error {
+		_, err := siClient.Get(bindingName, metav1.GetOptions{})
+		switch {
+		case err == nil:
+			return fmt.Errorf("ServiceBiding %q still exists", bindingName)
+		case apiErrors.IsNotFound(err):
+			return nil
+		default:
+			return errors.Wrap(err, "while getting ServiceBiding")
+		}
+	}, timeout)
+}
+
 func (ts *TestSuite) createAndWaitForServiceBinding(bindingName, instanceName string, timeout time.Duration) {
 	scCli, err := scClient.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
@@ -354,6 +389,35 @@ func (ts *TestSuite) createAndWaitForServiceInstanceA(timeout time.Duration) {
 
 func (ts *TestSuite) createAndWaitForServiceInstanceB(timeout time.Duration) {
 	ts.createAndWaitForServiceInstance(ts.serviceInstanceNameB, ts.classExternalNameB, timeout)
+}
+
+func (ts *TestSuite) deleteServiceInstanceA(timeout time.Duration) {
+	ts.deleteServiceInstance(ts.serviceInstanceNameA, timeout)
+}
+
+func (ts *TestSuite) deleteServiceInstanceB(timeout time.Duration) {
+	ts.deleteServiceInstance(ts.serviceInstanceNameB, timeout)
+}
+
+func (ts *TestSuite) deleteServiceInstance(instanceName string, timeout time.Duration) {
+	clientSet, err := scClient.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+	siClient := clientSet.ServicecatalogV1beta1().ServiceInstances(ts.namespace)
+
+	err = siClient.Delete(instanceName, &metav1.DeleteOptions{})
+	require.NoError(ts.t, err)
+
+	wait.ForFuncAtMost(ts.t, func() error {
+		_, err := siClient.Get(instanceName, metav1.GetOptions{})
+		switch {
+		case err == nil:
+			return fmt.Errorf("ServiceInstance %q still exists", instanceName)
+		case apiErrors.IsNotFound(err):
+			return nil
+		default:
+			return errors.Wrap(err, "while getting ServiceInstance")
+		}
+	}, timeout)
 }
 
 func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternalName string, timeout time.Duration) {
