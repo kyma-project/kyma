@@ -254,10 +254,16 @@ func (c *ServiceBindingUsageController) syncServiceBindingUsage(key string) erro
 
 	if err := c.reconcileServiceBindingUsageAdd(bindingUsage); err != nil {
 		condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, err.Reason, err.Message)
-		if err := c.updateStatus(bindingUsage, *condition); err != nil {
-			return errors.Wrapf(err, "while updating sbu status with condition %+v", condition)
+		if updateErr := c.updateStatus(bindingUsage, *condition); updateErr != nil {
+			return errors.Wrapf(updateErr, "while updating sbu status with condition %+v", condition)
 		}
 		return errors.Wrapf(err, "while processing %s", pretty.ServiceBindingUsageName(bindingUsage))
+	}
+
+	// retrieves the latest ServiceBindingUsage info from apiserver
+	bindingUsage, err = c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
+	if err != nil {
+		return errors.Wrapf(err, "while getting ServiceBindingUsage %s", name)
 	}
 
 	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionTrue, "", "")
@@ -326,6 +332,29 @@ func (c *ServiceBindingUsageController) reconcileServiceBindingUsageAdd(newUsage
 			sbuStatus.EnsureLabelsAppliedErrorReason,
 			errors.Wrapf(err, "while ensuring proper labels on kind %s", newUsage.Spec.UsedBy.Kind),
 		)
+	}
+
+	if err := c.addOwnerReference(newUsage, svcBinding); err != nil {
+		return newProcessServiceBindingError(
+			sbuStatus.AddOwnerReferenceErrorReason,
+			errors.Wrapf(err, "while adding OwnerReference to %s", pretty.ServiceBindingUsageName(newUsage)),
+		)
+	}
+
+	return nil
+}
+
+func (c *ServiceBindingUsageController) addOwnerReference(newUsage *sbuTypes.ServiceBindingUsage, binding *scTypes.ServiceBinding) error {
+	newUsage.OwnerReferences = []metaV1.OwnerReference{
+		{
+			APIVersion: "servicecatalog.k8s.io/v1beta1",
+			Kind:       "ServiceBinding",
+			Name:       binding.Name,
+			UID:        binding.UID,
+		},
+	}
+	if _, err := c.bindingUsageClient.ServiceBindingUsages(newUsage.Namespace).Update(newUsage); err != nil {
+		return errors.Wrapf(err, "while updating %s", pretty.ServiceBindingUsageName(newUsage))
 	}
 
 	return nil

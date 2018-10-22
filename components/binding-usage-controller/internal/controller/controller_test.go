@@ -41,8 +41,15 @@ func TestControllerRunAddSuccess(t *testing.T) {
 	fixPP := tc.fixPodPreset(fixSBU)
 
 	expSBU := fixSBU.DeepCopy()
+	expSBU.OwnerReferences = append(expSBU.OwnerReferences, metaV1.OwnerReference{
+		APIVersion: "servicecatalog.k8s.io/v1beta1",
+		Kind:       "ServiceBinding",
+		Name:       "redis-client",
+	})
+
+	expSBUReady := expSBU.DeepCopy()
 	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionTrue, "", "")
-	expSBU.Status.Conditions = []sbuTypes.ServiceBindingUsageCondition{*condition}
+	expSBUReady.Status.Conditions = []sbuTypes.ServiceBindingUsageCondition{*condition}
 
 	usageCli := sbuFake.NewSimpleClientset(fixSBU)
 	scCli := scFake.NewSimpleClientset(fixSB)
@@ -109,8 +116,9 @@ func TestControllerRunAddSuccess(t *testing.T) {
 	awaitForChanAtMost(t, asyncOpDone, 5*time.Second) // update event processed
 
 	performedActions := filterOutInformerActions(usageCli.Actions())
-	require.Len(t, performedActions, 1)
+	require.Len(t, performedActions, 2)
 	checkAction(t, updateUsageAction(expSBU), performedActions[0])
+	checkAction(t, updateUsageAction(expSBUReady), performedActions[1])
 
 	assert.Empty(t, logErrSink.DumpAll())
 }
@@ -174,12 +182,76 @@ func TestControllerRunAddFailOnFetchingLabels(t *testing.T) {
 
 	// then
 	awaitForChanAtMost(t, asyncOpDone, 5*time.Second) // add event processed
-	awaitForChanAtMost(t, asyncOpDone, 5*time.Second) // update event processed
 
 	performedActions := filterOutInformerActions(usageCli.Actions())
 	require.Len(t, performedActions, 1)
 	checkAction(t, updateUsageAction(expSBU), performedActions[0])
 
+	logSink.AssertLogged(t, logrus.ErrorLevel, fixErr.Error())
+}
+
+func TestControllerRunAddFailOnOwnerReferenceAdd(t *testing.T) {
+	// given
+	tc := newCtrlTestCase()
+	defer tc.AssertExpectation(t)
+
+	fixTimeNow := metaV1.Now()
+	sbuStatus.TimeNowFn = func() metaV1.Time {
+		return fixTimeNow
+	}
+
+	fixSBU := tc.fixDeploymentServiceBindingUsage()
+	fixSB := tc.fixReadyServiceBinding(fixSBU)
+	fixPP := tc.fixPodPreset(fixSBU)
+	fixErr := errors.New("while adding OwnerReference")
+
+	usageCli := sbuFake.NewSimpleClientset(fixSBU)
+	scCli := scFake.NewSimpleClientset(fixSB)
+
+	usageInformersFactory := bindingUsageInformers.NewSharedInformerFactory(usageCli, 0)
+	scInformerFactory := scInformers.NewSharedInformerFactory(scCli, 0)
+
+	tc.podPresetModifierMock.ExpectOnUpsertPodPreset(fixPP)
+	tc.kindsSupervisorsMock.ExpectOnGet("deployment", tc.deploySupervisorMock)
+	tc.labelsFetcherMock.ExpectOnFetch(fixSB, map[string]string{"access-label-123": "true"})
+	tc.sbuSpecStorageMock.ExpectOnGet(fixSBU.Namespace, fixSBU.Name, nil, false)
+	tc.sbuSpecStorageMock.ExpectOnUpsert(fixSBU, false)
+	tc.sbuSpecStorageMock.ExpectOnUpsert(fixSBU, true)
+	tc.deploySupervisorMock.ExpectOnEnsureLabelsCreated(fixSBU.Namespace, fixSBU.Spec.UsedBy.Name, fixSBU.Name, map[string]string{
+		"use-uid-123":      "",
+		"access-label-123": "true",
+	})
+	usageCli.PrependReactor("update", "servicebindingusages", failingReactor)
+
+	asyncOpDone := make(chan struct{})
+	hookAsyncOp := func() {
+		asyncOpDone <- struct{}{}
+	}
+
+	logSink := spy.NewLogSink()
+
+	ctr := controller.NewServiceBindingUsage(
+		tc.sbuSpecStorageMock,
+		usageCli.ServicecatalogV1alpha1(),
+		usageInformersFactory.Servicecatalog().V1alpha1().ServiceBindingUsages(),
+		scInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
+		tc.kindsSupervisorsMock,
+		tc.podPresetModifierMock, tc.labelsFetcherMock,
+		logSink.Logger).
+		WithTestHookOnAsyncOpDone(hookAsyncOp).
+		WithoutRetries()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	scInformerFactory.Start(ctx.Done())
+	usageInformersFactory.Start(ctx.Done())
+
+	// when
+	go ctr.Run(ctx.Done())
+
+	// then
+	awaitForChanAtMost(t, asyncOpDone, 5*time.Second)
 	logSink.AssertLogged(t, logrus.ErrorLevel, fixErr.Error())
 }
 
