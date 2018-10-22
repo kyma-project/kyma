@@ -71,8 +71,7 @@ func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kube
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeClientset.CoreV1().Events("")})
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "kymaInstaller"})
 
-	//backOffIntervals := []int{0, 10, 20, 40, 60, 120, 180, 300}
-	backOffIntervals := []uint{0, 1, 2, 4, 6, 12, 18, 30}
+	backOffIntervals := []int{0, 10, 20, 40, 60}
 	backOffStepFunc := func(count, max, delay int, msg ...string) {
 
 		if count > max {
@@ -137,7 +136,6 @@ func (c *Controller) worker() {
 func (c *Controller) processNextWorkItem() bool {
 
 	key, quit := c.queue.Get()
-	log.Println("Queue len: ", c.queue.Len())
 	if quit {
 		return false
 	}
