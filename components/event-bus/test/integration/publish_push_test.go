@@ -100,9 +100,9 @@ func Test_sameSubjectSubscribersInDifferentNamespacesShouldReceiveEventsOfThatSu
 	ns2 := "namespace-2"
 	eventData := "Test_sameSubjectSubscribersInDifferentNamespacesShouldReceiveEventsOfThatSubject"
 
-	doCreateSub(name, ns1, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+	triggerCreateSub(name, ns1, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
 
-	doCreateSub(name, ns2, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+	triggerCreateSub(name, ns2, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
 
 	time.Sleep(waitForSubscriptionToStart)
 
@@ -114,8 +114,8 @@ func Test_sameSubjectSubscribersInDifferentNamespacesShouldReceiveEventsOfThatSu
 	verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, eventData)
 	verifyEndpointReceivedEvent(t, subscriberServerV2.URL+util.SubServer2ResultsPath, eventData)
 
-	doDeleteSub(name, ns1, t)
-	doDeleteSub(name, ns2, t)
+	triggerDeleteSub(name, ns1, t)
+	triggerDeleteSub(name, ns2, t)
 }
 
 func Test_UpdateSubscriptionURL(t *testing.T) {
@@ -123,49 +123,49 @@ func Test_UpdateSubscriptionURL(t *testing.T) {
 	ns := "namespace-1"
 
 	preUpdateEvent := "test-pre-update"
-	doCreateSub(name, ns, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+	triggerCreateSub(name, ns, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
 	time.Sleep(waitForSubscriptionToStart)
 
 	publishEvent(t, publishServer.URL, makePayload(sourceIDV1, eventType, eventTypeVersion, preUpdateEvent))
 	verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, preUpdateEvent)
 
-	doUpdate(name, ns, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+	triggerUpdateSub(name, ns, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
 	time.Sleep(waitForSubscriptionToStart)
 
 	postUpdateEvent := "test-post-update"
 	publishEvent(t, publishServer.URL, makePayload(sourceIDV1, eventType, eventTypeVersion, postUpdateEvent))
 	verifyEndpointReceivedEvent(t, subscriberServerV2.URL+util.SubServer2ResultsPath, postUpdateEvent)
 
-	doDeleteSub(name, ns, t)
+	triggerDeleteSub(name, ns, t)
 
 }
 
 func verifyPublishPushFlow(eventData string, subscriptionName string, namespace string, t *testing.T) {
 	payloadV1 := makePayload(sourceIDV1, eventType, eventTypeVersion, eventData)
 
-	doCreateSub(subscriptionName, namespace, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+	triggerCreateSub(subscriptionName, namespace, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
 
 	time.Sleep(waitForSubscriptionToStart)
 
 	publishEvent(t, publishServer.URL, payloadV1)
 	verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, eventData)
 
-	doDeleteSub(subscriptionName, namespace, t)
+	triggerDeleteSub(subscriptionName, namespace, t)
 
 }
 
-func doCreateSub(subscriptionName string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
+func triggerCreateSub(subscriptionName string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
 	sourceID string, t *testing.T) {
 	_, err := createNewSubscription(subscriptionName, namespace, subscriberEventEndpointURL, eventType, eventTypeVersion, sourceID)
 	checkIfError(err, t)
 }
 
-func doDeleteSub(subscriptionName string, namespace string, t *testing.T) {
+func triggerDeleteSub(subscriptionName string, namespace string, t *testing.T) {
 	err := deleteSubscription(subscriptionName, namespace)
 	checkIfError(err, t)
 }
 
-func doUpdate(subscriptionName string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
+func triggerUpdateSub(subscriptionName string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
 	sourceID string, t *testing.T) {
 	_, err := updateSubscription(subscriptionName, namespace, subscriberEventEndpointURL, eventType, eventTypeVersion, sourceID)
 	checkIfError(err, t)
