@@ -3,6 +3,8 @@ kind: Gateway
 metadata:
   name: {{ .Values.global.istio.gateway.name }}
   namespace: {{.Release.Namespace }}
+  annotations:
+    "helm.sh/hook": "pre-install"  
 spec:
   selector:
     istio: ingressgateway # use istio default ingress gateway
