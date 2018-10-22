@@ -6,6 +6,7 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCES_DIR="${CURRENT_DIR}/../resources"
 INSTALLER="${RESOURCES_DIR}/installer.yaml"
 INSTALLER_CONFIG=""
+KNATIVE_CONFIG=""
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -15,6 +16,10 @@ do
     case ${key} in
         --local)
             LOCAL=1
+            shift
+            ;;
+        --knative)
+            KNATIVE=1
             shift
             ;;
         --cr)
@@ -46,6 +51,11 @@ if [ $LOCAL ]; then
     INSTALLER_CONFIG="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
 fi
 
+if [ $KNATIVE ]
+then
+    KNATIVE_CONFIG="${RESOURCES_DIR}/installer-config-knative.yaml.tpl"
+fi
+
 if [ $CR_PATH ]; then
 
     case $CR_PATH in
@@ -61,7 +71,7 @@ if [ $CR_PATH ]; then
 fi
 
 echo -e "\nApplying installation combo yaml"
-bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} | kubectl apply -f -
+bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${KNATIVE_CONFIG} ${CR_PATH} | kubectl apply -f -
 
 echo -e "\nTriggering installation"
 kubectl label installation/kyma-installation action=install
