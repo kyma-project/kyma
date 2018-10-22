@@ -198,5 +198,5 @@ EOF
 
 7. Check the logs of the lambda function to check if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`. Run this command:
 ```
-kubectl -n production logs "$(kcp get po -l function=my-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-lambda | grep "Response acquired successfully! Uuid: "
+kubectl -n production logs "$(kubectl -n production get po -l function=my-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-lambda | grep "Response acquired successfully! Uuid: "
 ```
