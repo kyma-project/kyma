@@ -38,7 +38,10 @@ Follow these steps to "always trust" the Kyma certificate on Mac:
   sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain certs/workspace/raw/server.crt
   ```
 
->**NOTE:** "Always trusting" the certificate does not work with Mozilla Firefox.
+>**NOTE:**
+- "Always trusting" the certificate does not work with Mozilla Firefox.
+- To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read the **Access Application Connector on local Kyma** in the **Application Connector** topic to learn more.
+
 
 ## Install Kyma on Minikube
 
@@ -71,7 +74,7 @@ $ ./scripts/install-tiller.sh
 $ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/0.4.1/kyma-config-local.yaml
 ```
 
-6. To trigger the installation process, label the `kyma-installation` custom resource: 
+6. To trigger the installation process, label the `kyma-installation` custom resource:
 ```
 $ kubectl label installation/kyma-installation action=install
 ```
