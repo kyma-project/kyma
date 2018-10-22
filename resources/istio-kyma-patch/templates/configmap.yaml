@@ -16,26 +16,6 @@ data:
       }
     ]
 
-  istio-ingressgateway.deployment.patch.json: |
-    [
-      {
-        "op": "replace",
-        "path": "/spec/template/spec/containers/0/args/15",
-        "value": "zipkin.kyma-system:9411"
-      }
-      {{ if .Values.global.isLocalEnv }}
-      ,{
-        "op": "add",
-        "path": "/spec/template/spec/containers/0/ports/0/hostPort",
-        "value": 80
-      },{
-        "op": "add",
-        "path": "/spec/template/spec/containers/0/ports/1/hostPort",
-        "value": 443
-      }
-      {{ end }}
-    ]
-
   istio-pilot.deployment.patch.json: |
     [
       {
@@ -63,6 +43,25 @@ data:
       }
     ]
 
+  istio-ingressgateway.deployment.patch.json: |
+    [
+      {
+        "op": "replace",
+        "path": "/spec/template/spec/containers/0/args/15",
+        "value": "zipkin.kyma-system:9411"
+      }
+      {{ if .Values.global.isLocalEnv }}
+      ,{
+        "op": "add",
+        "path": "/spec/template/spec/containers/0/ports/0/hostPort",
+        "value": 80
+      },{
+        "op": "add",
+        "path": "/spec/template/spec/containers/0/ports/1/hostPort",
+        "value": 443
+      }
+      {{ end }}
+    ]
 
   delete: |
     deployment prometheus
