@@ -82,7 +82,7 @@ func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kube
 		}
 
 		if count > 0 {
-			log.Printf("%s Warning: Retry number %d (sleeping for %d[s]).\n", msg[0], count, delay)
+			log.Printf("Warning: Retry number %d (sleeping for %d[s]).\n", count, delay)
 		}
 	}
 
@@ -129,8 +129,6 @@ func (c *Controller) Run(stopCh <-chan struct{}) {
 
 func (c *Controller) worker() {
 
-	log.Println("worker() invoked!")
-
 	// process until we're told to stop
 	for c.processNextWorkItem() {
 	}
@@ -138,7 +136,6 @@ func (c *Controller) worker() {
 
 func (c *Controller) processNextWorkItem() bool {
 
-	log.Println("processNextWorkItem() invoked!")
 	key, quit := c.queue.Get()
 	log.Println("Queue len: ", c.queue.Len())
 	if quit {
@@ -239,6 +236,7 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 	} else {
+		//Neither install nor uninstall, action unknown.
 		c.installBackoff.reset()
 	}
 
