@@ -57,7 +57,7 @@ func (r reader) readComponentOverrides() ([]component, error) {
 	for _, sec := range secrets {
 		comp := component{
 			name:      sec.Labels["component"],
-			overrides: toStringStringMap(sec.Data),
+			overrides: toInputMap(sec.Data),
 		}
 		components = append(components, comp)
 	}
@@ -84,7 +84,7 @@ func (r reader) readCommonOverrides() ([]inputMap, error) {
 	}
 
 	for _, sec := range secrets {
-		res = append(res, toStringStringMap(sec.Data))
+		res = append(res, toInputMap(sec.Data))
 	}
 
 	return res, nil
@@ -112,7 +112,7 @@ func concatLabels(labels ...string) string {
 	return strings.Join(labels, ", ")
 }
 
-func toStringStringMap(input map[string][]byte) inputMap {
+func toInputMap(input map[string][]byte) inputMap {
 	var output = make(inputMap)
 	for key, value := range input {
 		output[key] = string(value)
