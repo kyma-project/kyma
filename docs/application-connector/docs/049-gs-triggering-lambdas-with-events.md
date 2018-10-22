@@ -1,5 +1,5 @@
 ---
-title: Trigger lambda with events
+title: Trigger a lambda with events
 type: Getting Started
 ---
 
@@ -14,7 +14,8 @@ This guide shows how to create a simple lambda function and trigger it with an e
 
 ## Steps
 
-1. Register a service with the following specification to the desired Remote Environment:
+1. Register a service with the following specification to the desired Remote Environment.
+>**NOTE:** To learn how to register a service, see the **Register a service** Getting Started Guide.
 ```json
 {
   "name": "my-service",
@@ -64,13 +65,12 @@ This guide shows how to create a simple lambda function and trigger it with an e
 ```
 Save the received service id, as it is used in later steps.
 
-2. Next you need to create the Service Instance. To achieve this you need an `externalName` of the Service Class.
-To get the `externalName` run:
+2. Get the `externalName` of the Service Class of the registered service.
 ```
 kubectl -n production get serviceclass {SERVICE_ID}  -o jsonpath='{.spec.externalName}'
 ```
 
-Use it to create the Service Instance
+3. Create a Service Instance for the registered service.
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: servicecatalog.k8s.io/v1beta1
@@ -83,7 +83,7 @@ spec:
 EOF
 ```
 
-3. Register the lambda function in the Environment to which the RE is bound.
+4. Create a sample lambda function which sends a request to http://httpbin.org/uuid. A successful response logs a `Response acquired successfully! Uuid: {RECEIVED_UUID}` message. To create and register the lambda function in the `production` Environment, run:
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: kubeless.io/v1beta1
@@ -151,7 +151,7 @@ EOF
 ```
 Our lambda will send a request to http://httpbin.org/uuid and if the call was successful it will log `Response acquired succesfully! Uuid: {RECEIVED_UUID}`
 
-4. Create a Subscription to allow events to trigger the lambda function.
+5. Create a Subscription to allow events to trigger the lambda function.
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: eventing.kyma.cx/v1alpha1
@@ -172,7 +172,7 @@ spec:
 EOF
 ```
 
-5. Send an event to trigger the created lambda.
+6. Send an event to trigger the created lambda.
   - On cluster:
     ```
     curl -X POST https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
@@ -196,7 +196,7 @@ EOF
     }'
     ```
 
-6. Check the logs of the lambda function to check if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`. Run this command:
+7. Check the logs of the lambda function to check if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`. Run this command:
 ```
 kubectl -n production logs "$(kcp get po -l function=my-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-lambda | grep "Response acquired successfully! Uuid: "
 ```
