@@ -3,45 +3,70 @@ title: Local installation
 type: Details
 ---
 
-For better understanding of complex installation process, this guide describes it step by step.
+Simple as it may seem, the Kyma installation is a complex and dynamic process. This document extends the “031-gs-local-installation.md” guide with a detailed breakdown of the alternative installation method, i.e. the “run.sh” script.
 
-## Start local installation
+> **NOTE:** the ‘run.sh’ script should be used exclusively for development purposes.
 
-To fire local installation run following command:
+To start the local installation, run the following command:
 ```
 ./installation/cmd/run.sh
 ```
 
-This script sets up default parameters, starts Minikube, builds Kyma-Installer, generates local configuration, creates `installer` Custom Resource and sets up Installer. Subsequent sections provide a detailed description of each step.
-
-### Installation parameters
+This script sets up default parameters, starts Minikube, builds Kyma-Installer, generates local configuration, creates the `installation` Custom Resource and sets up Installer. Subsequent sections provide a detailed description of each step.
 
 You can execute the `installation/cmd/run.sh` script with the following parameters:
 
-- `--skip-minikube-start` - it skips execution of the `installation/scripts/minikube.sh` script. See the "Start Minikube" section for more details.
-- `--vm-driver` -  either `virtualbox` or `hiperkit` depending on your operating system
+- `--skip-minikube-start` which skips execution of the `installation/scripts/minikube.sh` script. See the **Start Minikube** section for more details
+- `--vm-driver` points to either `virtualbox` or `hiperkit` depending on your operating system
 
-## Start Minikube
+The following snippet lies in the heart of the “run.sh” script:
+
+```
+if [[ ! ${SKIP_MINIKUBE_START} ]]; then
+    bash ${CURRENT_DIR}/../scripts/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}"
+fi
+
+bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
+
+bash ${CURRENT_DIR}/../scripts/generate-local-config.sh
+
+if [ -z "$CR_PATH" ]; then
+
+    TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
+    CR_PATH="${TMPDIR}/installer-cr-local.yaml"
+
+    bash ${CURRENT_DIR}/../scripts/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}"
+    bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}"
+
+    rm -rf $TMPDIR
+else
+    bash ${CURRENT_DIR}/../scripts/installer.sh --cr "${CR_PATH}"
+fi
+```
+
+The subsequent paragraphs describe respective sub-scripts triggered during the installation process.
+
+## The minikube.sh script
 
 > **NOTE:** To work with Kyma, use only the provided scripts and commands. Kyma does not work on a basic Minikube cluster that you can start using the `minikube start` command or stop with the `minikube stop` command. If you don't need Kyma on Minikube anymore, remove the cluster with the `minikube delete` command.
 
-Purpose of `installation/scripts/minikube.sh` is to configure and start Minikube. The script also checks if your development environment is cofigured to handle Kyma installation. This includes checking Minikube and Kubectl versions. In case Minikube is already initialized you will be prompted to agree to remove previous Minikube cluster. Script exits if you don't want to restart your cluster.
+Purpose of `installation/scripts/minikube.sh` is to configure and start Minikube. The script also checks if your development environment is cofigured to handle Kyma installation. This includes checking Minikube and Kubectl versions. If Minikube is already initialized, the system prompts you to agree to remove the previous Minikube cluster. The script exits if you don't want to restart your cluster.
 
->**NOTE:** Minikube is configured to disable default nginx ingress controller.
+Minikube is configured to disable default nginx ingress controller.
 
->**NOTE:** For the complete list of parameters passed to `minikube start` command, refer to the `installation/scripts/minikube.sh` script.
+>**NOTE:** For the complete list of parameters passed to the `minikube start` command, refer to the `installation/scripts/minikube.sh` script.
 
-Once Minikube is up and running, the script adds local installation entries to /etc/hosts.
+Once Minikube is up and running, the script adds local installation entries to `/etc/hosts`.
 
-## Build Kyma-Installer
+## The build-kyma-installer.sh script
 
-Installer is application based on a [Kubernetes operator](https://coreos.com/operators/). Its purpose is to install Helm charts defined in the Installer Custom Resource. Kyma-Installer is a Docker image that bundles Installer binary with Kyma charts. 
+Installer is application based on a [Kubernetes operator](https://coreos.com/operators/). Its purpose is to install Helm charts defined in the `installation` Custom Resource. Kyma-Installer is a Docker image that bundles Installer binary with Kyma charts. 
 
-`installation/scripts/build-kyma-installer.sh` script extracts Kyma-Installer image name from the `installer.yaml` deployment file and uses it to build a Docker image inside Minikube. This image will contain local Kyma sources from `resources` folder. 
+The `installation/scripts/build-kyma-installer.sh` script extracts Kyma-Installer image name from the `installer.yaml` deployment file and uses it to build a Docker image inside Minikube. This image contains local Kyma sources from `resources` folder. 
 
->**NOTE:** For Kyma-Installer Docker image details refer to the `kyma-installer/kyma.Dockerfile` file.
+>**NOTE:** For Kyma-Installer Docker image details, refer to the `kyma-installer/kyma.Dockerfile` file.
 
-## Generate local configuration for Azure-Broker
+## The generate-local-config.sh script
 
 The Azure-Broker sub-component is a part of the `core` deployment that provisions managed services in the Microsoft Azure cloud. To enable Azure-Broker, export the following environment variables:
  - AZURE_BROKER_SUBSCRIPTION_ID
@@ -51,18 +76,18 @@ The Azure-Broker sub-component is a part of the `core` deployment that provision
 
 >**NOTE:** As the Azure credentials are converted to a Kubernetes Secret, make sure the exported values are base64-encoded.
 
-## Create installer custom resource
+## The create-cr.sh script
 
-`installation/scripts/create-cr.sh` script prepares Installer Custom Resource from `installation/resources/installer-cr.yaml.tpl` template. In local installation scenario default Installer Custom Resource will be used. `kyma-installer` already contains local Kyma resources bundled, thus `url` is ignored by Installer component. 
+The `installation/scripts/create-cr.sh` script prepares the `installation` Custom Resource from the `installation/resources/installer-cr.yaml.tpl` template. The local installation scenario uses the default `installation` Custom Resource. Kyma-Installer already contains local Kyma resources bundled, thus `url` is ignored by the Installer component. 
 
->**NOTE:** For Installer Custom Resource details refer to the `docs/kyma/docs/040-cr-installation.md` file.
+>**NOTE:** For the `installation` Custom Resource details, refer to the `docs/kyma/docs/040-cr-installation.md` file.
 
-## Kyma-Installer deployment
+## The installer.sh script
 
-The `installation/scripts/installer.sh` script creates the default RBAC Role, installs [Tiller] (https://docs.helm.sh/), and deploys the Kyma-Installer component.
+The `installation/scripts/installer.sh` script creates the default RBAC Role, installs [Tiller](https://docs.helm.sh/), and deploys the Kyma-Installer component.
 
->**NOTE:** For Kyma-Installer deployment details refer to the `installation/resources/installer.yaml` file.
+>**NOTE:** For Kyma-Installer deployment details, refer to the `installation/resources/installer.yaml` file.
 
-The script applies the Installer Custom Resource and marks it with the `action=install` Label, which triggers the Kyma installation.
+The script applies the `installation` Custom Resource and marks it with the `action=install` label, which triggers the Kyma installation.
 
->**NOTE:** Kyma installation runs in background. Execute `./installation/scripts/is-installed.sh` to follow the installation process.
+>**NOTE:** Kyma installation runs in the background. Execute `./installation/scripts/is-installed.sh` to follow the installation process.
