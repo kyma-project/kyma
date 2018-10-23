@@ -5,6 +5,7 @@ import "time"
 const (
 	DefaultNamespace           = "ui-api-acceptance"
 	DefaultSubscriptionTimeout = 5 * time.Second
+	UPSBrokerImage 			   = "quay.io/kubernetes-service-catalog/user-broker:latest"
 	ClusterServiceBroker       = "ClusterServiceBroker"
 	ServiceBroker              = "ServiceBroker"
 	ClusterBrokerReleaseName   = "cluster-ups-broker"
