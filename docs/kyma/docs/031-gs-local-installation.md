@@ -42,7 +42,7 @@ Follow these steps to "always trust" the Kyma certificate on Mac:
 
 ## Install Kyma on Minikube
 
-You can install Kyma with all core subcomponents or only with the selected ones. This section describes how to install all core subcomponents. To learn how to install only the specific ones, see the **Install subcomponents** document for details.
+You can install Kyma with all core subcomponents or only with the selected ones. This section describes how to install Kyma from the latest release, with all core subcomponents. To learn how to install only the specific ones, see the **Install subcomponents** document for details.
 
 > **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube.
 
@@ -66,9 +66,10 @@ $ kubectl apply -f ./resources/default-sa-rbac-role.yaml
 $ ./scripts/install-tiller.sh
 ```
 
-5. Configure the Kyma installation using the local configuration file:
+5. Configure the Kyma installation using the local configuration file from the latest release:
 ```
-$ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/0.4.1/kyma-config-local.yaml
+$ LATEST=$(curl https://github.com/kyma-project/kyma/releases/latest -I|grep Location:| rev | cut -d'/' -f1 | rev|tr -d '\r')
+$ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/${LATEST}/kyma-config-local.yaml
 ```
 
 6. To trigger the installation process, label the `kyma-installation` custom resource: 
