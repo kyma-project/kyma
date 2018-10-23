@@ -223,7 +223,7 @@
   version = "1.1.5"
 
 [[projects]]
-  digest = "1:6de3e15e3db624ed0bb0308cccd1c2ba4f08d86177760b6b362a55b8fc4f347b"
+  digest = "1:2373c8ae7a786f9bfa6e48d873a83f2a8bbe1c1e429e75975dd100efef178f24"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
@@ -232,7 +232,7 @@
     "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "7400291c88b0dde7d2b674f02a40efc5eb1934e5"
+  revision = "45705375b85f9218c139b6339063388f54953dcc"
 
 [[projects]]
   digest = "1:24608ad934c247c3903eeaccb58ab7d6360a9bccafe1a6393756d0820f9950f9"
@@ -997,6 +997,7 @@
     "github.com/stretchr/testify/mock",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "k8s.io/apimachinery/pkg/api/errors",
+    "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/types",

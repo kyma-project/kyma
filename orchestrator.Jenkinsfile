@@ -79,7 +79,7 @@ jobs = [:]
 
 /*
     If true, Kyma integration will run at the end.
-    NOTE: This is set automaticlly based on the changes detected.
+    NOTE: This is set automatically based on the changes detected.
 */
 runIntegration = false
 

@@ -44,16 +44,16 @@
 /resources/core/charts/configurations-generator @piotrmsc @kubadz
 
 # The `connector-service` subchart
-/resources/application-connector/charts/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+/resources/application-connector/charts/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `metadata-service` subchart
-/resources/application-connector/charts/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+/resources/application-connector/charts/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# The `remote-environments-controller` subchart
-/resources/application-connector/charts/remote-environments-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+# The `remote-environment-controller` subchart
+/resources/application-connector/charts/remote-environment-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `nginx-ingress` subchart
-/resources/application-connector/charts/nginx-ingress/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+/resources/application-connector/charts/nginx-ingress/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `console` subchart
 /resources/core/charts/console/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
@@ -140,7 +140,7 @@
 /resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
 # The `remote environment` chart
-/resources/remote-environments/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+/resources/remote-environments/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Components
 #API server proxy Component
@@ -180,16 +180,16 @@
 /components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
 
 # Connector Service Component
-/components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+/components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Metadata Service Component
-/components/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+/components/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Remote Environment Controller Component
-/components/remote-environment-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+/components/remote-environment-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Proxy Service Component
-/components/proxy-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+/components/proxy-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Event Bus Component
 /components/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
@@ -218,13 +218,13 @@
 /tests/ui-api-layer-acceptance-tests/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
 
 # Connector Service Tests
-/tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+/tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Metadata Service Tests
-/tests/metadata-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+/tests/metadata-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Remote Environment Controller Tests
-/tests/remote-environment-controller-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie
+/tests/remote-environment-controller-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Tools
 # Stability Checker Component
