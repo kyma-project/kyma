@@ -77,13 +77,8 @@ global:
     dir: develop/
     version: e0f2a383
   ui_api_layer_acceptance_tests:
-<<<<<<< HEAD
     dir: pr/
     version: PR-1235
-=======
-    dir: develop/
-    version: e0f2a383
->>>>>>> master
 
 test:
   acceptance:
