@@ -54,9 +54,9 @@ func main() {
 	kymaClientSet := kyma.NewForConfigOrDie(kubeConfig)
 
 	internalInformerFactory := kymaInformers.NewSharedInformerFactory(kymaClientSet, time.Second*30)
-	go internalInformerFactory.Start(stop)
 
 	v1alpha2Controller := v1alpha2.NewController(kymaClientSet, istioNetworkingV1Interface, serviceV1Interface, authenticationV2Interface, internalInformerFactory, domainName)
+	internalInformerFactory.Start(stop)
 	err := v1alpha2Controller.Run(2, stop)
 	if err != nil {
 		log.Fatal("Unable to run controller: %v", err)
