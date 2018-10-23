@@ -13,7 +13,7 @@ used are stored in the resources/istio directory. The installation is customized
 changes:
   - Sets a memory limit for every sidecar
   - Modifies Istio components to use Zipkin in the `kyma-system` Namespace, instead of the default `istio-system`
-  - A webhook is added to the Istio Pilot
+  - Adds a webhook to the Istio Pilot
   - A TLS certificate is created for the Ingress Gateway
   - All resources related to the `prometheus`, `tracing`, `grafana`, and `servicegraph`charts  are deleted
 
