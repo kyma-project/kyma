@@ -51,7 +51,7 @@ func TestNameResolver(t *testing.T) {
 		for _, testCase := range testCases {
 			resolver := NewNameResolver("namespace")
 
-			result := resolver.GetMetadataUrl(testCase.remotEnv, testCase.id)
+			result := resolver.GetGatewayUrl(testCase.remotEnv, testCase.id)
 
 			assert.Equal(t, testCase.metadataUrl, result)
 		}
