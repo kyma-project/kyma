@@ -35,7 +35,7 @@ func TestGetServices(t *testing.T) {
 		assert.Equal(t, service.DisplayName, "Orders API")
 		assert.Equal(t, service.LongDescription, "This is Orders API")
 		assert.Equal(t, service.API, &remoteenv.ServiceAPI{
-			AccessServiceURL:      "http://re-ec-default-4862c1fb-a047-4add-94e3-c4ff594b3514.kyma-integration.svc.cluster.local",
+			GatewayURL:            "http://re-ec-default-4862c1fb-a047-4add-94e3-c4ff594b3514.kyma-integration.svc.cluster.local",
 			AccessLabel:           "access-label-1",
 			TargetUrl:             "https://192.168.1.2",
 			OauthUrl:              "https://192.168.1.3/token",
