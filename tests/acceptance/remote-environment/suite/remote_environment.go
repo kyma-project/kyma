@@ -28,8 +28,8 @@ func (ts *TestSuite) createRemoteEnvironmentResources() {
 func (ts *TestSuite) deleteRemoteEnvironment() {
 	client, err := versioned.NewForConfig(ts.config)
 	require.NoError(ts.t, err)
-
 	rei := client.ApplicationconnectorV1alpha1().RemoteEnvironments()
+
 	err = rei.Delete(ts.remoteEnvironmentName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 }

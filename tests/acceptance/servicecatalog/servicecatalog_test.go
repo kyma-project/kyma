@@ -9,7 +9,7 @@ import (
 	corev1 "github.com/kubernetes/client-go/kubernetes/typed/core/v1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog/wait"
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/pkg/errors"
 	"github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
@@ -32,7 +32,7 @@ func TestServiceCatalogContainsClusterServiceClasses(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			// given
 			var brokerServices []v2.Service
-			wait.ForFuncAtMost(t, func() error {
+			repeat.FuncAtMost(t, func() error {
 				brokerServices, err := getCatalogForBroker(brokerURL)
 				if err != nil {
 					return errors.Wrap(err, "while getting catalog")
@@ -88,7 +88,7 @@ func TestServiceCatalogContainsREBServiceClasses(t *testing.T) {
 	require.NoError(t, err)
 
 	// then
-	wait.ForFuncAtMost(t, func() error {
+	repeat.FuncAtMost(t, func() error {
 		brokerServices, err = getCatalogForBroker(broker.buildURL(releaseNS))
 		if err != nil {
 			return errors.Wrap(err, "while getting catalog")
