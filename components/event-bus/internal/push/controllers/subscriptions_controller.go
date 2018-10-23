@@ -67,10 +67,8 @@ func (controller *SubscriptionsController) Stop() {
 
 func (controller *SubscriptionsController) startInformerWithoutEventActivationCheck() {
 	controller.informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: getAddFnWithoutEventActivationCheck(controller.supervisor),
-		UpdateFunc: func(oldObj, newObj interface{}) {
-			//log.Print("Updated")
-		},
+		AddFunc:    getAddFnWithoutEventActivationCheck(controller.supervisor),
+		UpdateFunc: getUpdateFnWithoutEventActivationCheck(controller.supervisor),
 		DeleteFunc: controller.getDeleteFn(),
 	})
 
