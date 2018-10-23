@@ -6,6 +6,6 @@ controller:
     tillerUrl: tiller-deploy.kube-system.svc.cluster.local:44134
 
 tests:
-  enabled: true
+  enabled: false
   image:
     pullPolicy: IfNotPresent
