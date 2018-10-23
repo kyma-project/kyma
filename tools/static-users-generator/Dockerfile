@@ -1,4 +1,4 @@
-FROM alpine:3.8:1
+FROM alpine:3.8
 
 ENV KUBE_VERSION="v1.11.3"
 
