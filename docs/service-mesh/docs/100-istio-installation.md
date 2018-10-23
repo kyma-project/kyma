@@ -3,41 +3,33 @@ title: Istio installation
 type: Details
 ---
 
-Istio is a foundation Kyma is built upon. It is required for almost every functionality Kyma provides and it needs to 
-contain some changes in original charts in order to run Kyma.
+Being a core component, Istio installs by default with every Kyma deployment. The installation consists of two steps:
 
-## Installation
+1. Istio installs using the official, raw charts from the currently supported release. The charts that are currently 
+used are stored in the resources/istio directory. The installation is customized by enabling security in Istio.
+    >**NOTE:** Every installation of Istio for Kyma must have security enabled.
 
-By default Istio is installed during Kyma installation. The process is split into two parts:
-1. Installation of official istio charts. Charts are vendored within Kyma repository under `resources/istio`. 
-2. Patch of Istio to make it suitable for Kyma. 
+2. A custom Istio Patch is applied to further customize the Istio installation. A Kubernetes job introduces these 
+changes:
+  - A memory limit is set for every sidecar
+  - Istio components use Zipkin in the `kyma-system` Namespace, instead of the default `istio-system`
+  - A webhook is added to the Istio Pilot
+  - A TLS certificate is created for the Ingress Gateway
+  - All resources related to the `prometheus`, `tracing`, `grafana`, and `servicegraph`charts  are deleted
 
 During installation raw official charts from currently supported Istio release are installed on cluster. The only 
 customization done at this point of installation is enabling security in Istio. This is prerequisite to run Kyma and 
 every Istio installation for Kyma needs to have security enabled.
- 
-Second stage, patch is done by kubernetes job which introduces following changes into Istio:
-* Every sidecar have memory limits set
-* Istio components uses Zipkin in `kyma-system` Namespace, instead of `istio-system`
-* Webhook is added to pilot 
-* TLS certificate for Ingress Gateway are created
-* All resources from charts `prometheus`, `tracing`, `grafana` and `servicegraph` are deleted
 
 You can find more details about those changes in component `istio-kyma-patch`.
 
-## Using your own Istio
+## Use an existing Istio installation with Kyma
 
-It is possible to install Kyma with Istio already installed. If you have running kubernetes with istio on it you can 
-add Kyma to the cluster.
+You can use an existing installation of Istio running on Kubernetes with Kyma. The custom Istio patch is applied to such 
+an installation.
 
->**NOTE:** Bear in mind, that patch will always be applied and will change existing Istio installation as described 
-above.
+>**NOTE:** You cannot skip applying the Istio patch in the Kyma installation process.
 
-To install Kyma without installing istio you need to modify Installation CR. You will find it in the installation 
-configuration file which you should create as first step of installation on any cloud provider. Refer to instructions 
-specific for your cloud provider to find more details about creation of the 
-installation configuration file.
-
-Installation configuration file contains list of components to install in property `spec.components`. One of entries
-is named `istio`. To disable Istio installation along with Kyma you need to remove that entry completely. To find more
-information about structure of Installation CR visit **Kyma** > **Custom Resource** > **Installation**
+To allow such an implementation, you must install Kyma without Istio. To achieve this, modify the Installation custom 
+resource used to trigger the Kyma installer. Read the Installation document in the Custom Resource section of the Kyma 
+topic for more details.
