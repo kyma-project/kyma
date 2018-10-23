@@ -9,7 +9,7 @@ As a core component, Istio installs with every Kyma deployment by default. The i
 used are stored in the `resources/istio` directory. The installation is customized by enabling security in Istio.
     >**NOTE:** Every installation of Istio for Kyma must have security enabled.
 
-2. A custom Istio Patch is applied to further customize the Istio installation. A Kubernetes job introduces these 
+2. A custom Istio patch is applied to further customize the Istio installation. A Kubernetes job introduces these 
 changes:
   - Sets a memory limit for every sidecar
   - Modifies Istio components to use Zipkin in the `kyma-system` Namespace, instead of the default `istio-system`
