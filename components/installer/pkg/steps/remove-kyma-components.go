@@ -8,18 +8,6 @@ import (
 
 //RemoveKymaComponents .
 func (steps InstallationSteps) RemoveKymaComponents(installationData *config.InstallationData) {
-
-	log.Println("Removing Kyma resources...")
-
-	if err := steps.uninstallReleases(installationData); err != nil {
-		log.Println("Error. Some releases may have not been removed.")
-		return
-	}
-
-	log.Println("All Kyma resources have been successfully removed")
-}
-
-func (steps InstallationSteps) uninstallReleases(installationData *config.InstallationData) error {
 	log.Println("Uninstalling releases...")
 
 	for _, component := range installationData.Components {
@@ -31,6 +19,5 @@ func (steps InstallationSteps) uninstallReleases(installationData *config.Instal
 		}
 	}
 
-	log.Println("All releases have been successfully uninstalled!")
-	return nil
+	log.Println("Uninstall finished")
 }
