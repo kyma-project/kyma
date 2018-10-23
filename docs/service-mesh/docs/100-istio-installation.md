@@ -21,7 +21,7 @@ During installation raw official charts from currently supported Istio release a
 customization done at this point of installation is enabling security in Istio. This is prerequisite to run Kyma and 
 every Istio installation for Kyma needs to have security enabled.
 
-You can find more details about those changes in component `istio-kyma-patch`.
+To learn more about the custom Istio patch applied in Kyma, see the `components/istio-kyma-patch/` directory. 
 
 ## Use an existing Istio installation with Kyma
 
