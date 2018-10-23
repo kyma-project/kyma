@@ -41,7 +41,7 @@ func (i *Installation) ShouldUninstall() bool {
 }
 
 func (i *Installation) canUninstall() bool {
-	return (i.Status.State == StateInstalled || i.Status.State == StateError)
+	return (i.Status.State == StateInstalled || i.Status.State == StateError || i.Status.State == StateUninstalled)
 }
 
 func (i *Installation) hasCondition(condition InstallationConditionType) bool {
