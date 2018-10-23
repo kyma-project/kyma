@@ -15,7 +15,7 @@ changes:
   - Modifies Istio components to use Zipkin in the `kyma-system` Namespace, instead of the default `istio-system`
   - Adds a webhook to the Istio Pilot
   - Creates a TLS certificate for the Ingress Gateway
-  - All resources related to the `prometheus`, `tracing`, `grafana`, and `servicegraph`charts  are deleted
+  - Deletes all resources related to the `prometheus`, `tracing`, `grafana`, and `servicegraph`charts
 
 During installation raw official charts from currently supported Istio release are installed on cluster. The only 
 customization done at this point of installation is enabling security in Istio. This is prerequisite to run Kyma and 
