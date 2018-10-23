@@ -1,13 +1,4 @@
-```
-       _                            
-      | |                           
-      | | __ _  ___  __ _  ___ _ __
-  _   | |/ _` |/ _ \/ _` |/ _ \ '__|
- | |__| | (_| |  __/ (_| |  __/ |   
-  \____/ \__,_|\___|\__, |\___|_|   
-                     __/ |          
-                    |___/           
-```
+# Jaeger
 
 ## Overview
 [Jaeger](http://jaeger.readthedocs.io/en/latest/) is a monitoring and tracing tool for microservices-based distributed systems.

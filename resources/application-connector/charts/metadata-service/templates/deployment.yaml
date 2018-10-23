@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+        traffic.sidecar.istio.io/includeInboundPorts: "{{ .Values.deployment.args.externalAPIPort }}"
+      labels:
+        app: {{ .Chart.Name }}
+        release: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.metadata_service.dir }}metadata-service:{{ .Values.global.metadata_service.version }}
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        args:
+          - "/metadataservice"
+          - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
+          - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
+          - "--minioURL={{ .Values.deployment.args.minioURL }}"
+          - "--namespace={{ .Values.global.namespace }}"
+          - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
+          - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
+        env:
+          - name: MINIO_ACCESSKEYID
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.minioUserSecretName }}
+                key: accesskey
+          - name: MINIO_ACCESSKEYSECRET
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.minioUserSecretName }}
+                key: secretkey
+        ports:
+          - containerPort: {{ .Values.deployment.args.externalAPIPort }}
+            name: http-api-port
+          - containerPort: 9090
+            name: metrics-port

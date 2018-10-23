@@ -1,11 +1,4 @@
-```
-  ______               _     ____            
- |  ____|             | |   |  _ \           
- | |____   _____ _ __ | |_  | |_) |_   _ ___
- |  __\ \ / / _ \ '_ \| __| |  _ <| | | / __|
- | |___\ V /  __/ | | | |_  | |_) | |_| \__ \
- |______\_/ \___|_| |_|\__| |____/ \__,_|___/
-```
+# Event Bus
 
 ## Prerequisites
 
@@ -27,6 +20,7 @@ Configure these options for each business requirement:
 | | `global.persistence.size` | The size of the storage volume. |
 | | `global.persistence.maxAge`| The maximum period of time for storing an event (`0` for unlimited). |
 | |`global.natsStreaming.resources`| Refer to Kubernetes resource requests and limits for details. |
+| |`global.natsStreaming.channel.maxInactivity`| The maximum inactivity period (without any new Event or subscription) after which a channel can be garbage collected (`0` for unlimited). |
 | **publish** |
 | |`global.publish.maxRequests`| The maximum number of concurrent events to publish. |
 | |`global.publish.resources`| Refer to Kubernetes resource requests and limits for details. |

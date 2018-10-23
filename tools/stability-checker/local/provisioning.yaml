@@ -22,7 +22,7 @@ metadata:
 spec:
   containers:
     - name: provisioner
-      image: alpine:3.6
+      image: alpine:3.8
       imagePullPolicy: "IfNotPresent"
       volumeMounts:
       - mountPath: /home

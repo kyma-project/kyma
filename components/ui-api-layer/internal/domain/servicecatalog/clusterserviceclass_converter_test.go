@@ -19,13 +19,20 @@ func TestClusterServiceClassConverter_ToGQL(t *testing.T) {
 	var zeroTimeStamp time.Time
 	t.Run("All properties are given", func(t *testing.T) {
 		converter := clusterServiceClassConverter{}
-		maps := map[string]string{
+
+		labels := gqlschema.Labels{
+			"connected-app": "exampleConnectedApp",
+			"local":         "true",
+			"showcase":      "false",
+		}
+		maps := map[string]interface{}{
 			"displayName":         "exampleDisplayName",
 			"providerDisplayName": "exampleProviderName",
 			"imageUrl":            "exampleImageURL",
 			"documentationUrl":    "exampleDocumentationURL",
 			"longDescription":     "exampleLongDescription",
 			"supportUrl":          "exampleSupportURL",
+			"labels":              labels,
 		}
 
 		byteMaps, err := json.Marshal(maps)
@@ -64,6 +71,7 @@ func TestClusterServiceClassConverter_ToGQL(t *testing.T) {
 			SupportURL:          &supportURL,
 			CreationTimestamp:   zeroTimeStamp,
 			Tags:                []string{"tag1", "tag2"},
+			Labels:              labels,
 		}
 
 		result, err := converter.ToGQL(&item)
@@ -156,13 +164,20 @@ func TestClusterServiceClassConverter_ToGQLs(t *testing.T) {
 
 func fixClusterServiceClass(t require.TestingT) *v1beta1.ClusterServiceClass {
 	var mockTimeStamp metav1.Time
-	maps := map[string]string{
+
+	labels := gqlschema.Labels{
+		"connected-app": "exampleConnectedApp",
+		"local":         "true",
+		"showcase":      "false",
+	}
+	maps := map[string]interface{}{
 		"displayName":         "exampleDisplayName",
 		"providerDisplayName": "exampleProviderName",
 		"imageUrl":            "exampleImageURL",
 		"documentationUrl":    "exampleDocumentationURL",
 		"longDescription":     "exampleLongDescription",
 		"supportUrl":          "exampleSupportURL",
+		"labels":              labels,
 	}
 
 	byteMaps, err := json.Marshal(maps)

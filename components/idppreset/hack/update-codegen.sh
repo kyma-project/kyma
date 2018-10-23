@@ -10,5 +10,5 @@ REB_ROOT_PKG="github.com/kyma-project/kyma/components/idppreset/pkg"
 
 ./hack/generate-groups.sh all \
   ${REB_ROOT_PKG}/client ${REB_ROOT_PKG}/apis \
-  ui:v1alpha1 \
+  authentication:v1alpha1 \
   --go-header-file ${SCRIPT_ROOT}/hack/boilerplate.go.txt

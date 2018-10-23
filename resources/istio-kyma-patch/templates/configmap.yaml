@@ -66,20 +66,26 @@ data:
 
   delete: |
     deployment prometheus
-    deployment istio-tracing
+    configmap prometheus
+    service prometheus
+    serviceaccount prometheus
+
     deployment servicegraph
+    service servicegraph
+
     deployment grafana
-    job istio-grafana-post-install
+    configmap grafana
+    policy grafana-ports-mtls-disabled
+    pvc istio-grafana-pvc
+    secret grafana
     service grafana
+
+    deployment istio-tracing
+    service zipkin
+    service tracing
+    service jaeger-query
     service jaeger-agent
     service jaeger-collector
-    service jaeger-query
-    service prometheus
-    service servicegraph
-    service tracing
-    service zipkin
-    serviceaccount istio-grafana-post-install-account
-    serviceaccount prometheus
 
   required-crds: |
     policies.authentication.istio.io

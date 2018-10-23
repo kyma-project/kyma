@@ -3,20 +3,11 @@ title: Configure Helm Broker
 type: Configuration
 ---
 
-The Helm Broker fetches bundle definitions from an HTTP server defined in the `values.yaml` file. The **config.repository.baseURL** attribute defines the HTTP server URL. By default, the Helm Broker contains an embedded HTTP server which serves bundles from the Kyma `bundles` directory.
-
-
-### Configuring the Helm Broker on the embedded HTTP server
-
-By default, the Helm Broker contains an embedded HTTP server which serves bundles from the `bundles` directory. Deploying Kyma automatically populates the bundles.
-
-To add a yBundle to the Helm Broker, place your yBundle directory in the `bundles` folder.
-> **NOTE:** The name of the yBundle directory in the `bundles` folder must follow this pattern: \{bundle_name}\-\{bundle_version}\.
-
+The Helm Broker fetches bundle definitions from an HTTP server defined in the `values.yaml` file. The **config.repository.baseURL** attribute defines the HTTP server URL.
 
 ### Configuring the Helm Broker externally
 
-Follow these steps to change the configuration and make the Helm Broker fetch bundles from a remote HTTP server:
+Follow these steps to change the configuration and make the Helm Broker fetch bundles from a custom HTTP server:
 
 1. Create a remote bundles repository. Your remote bundle repository must include the following resources:
     - An `index.yaml` file which defines available bundles.
@@ -42,17 +33,33 @@ Follow these steps to change the configuration and make the Helm Broker fetch bu
 
     - A `{bundle_name}-{bundle_version}.tgz` file for each bundle version defined in the `index.yaml` file. The `.tgz` file is an archive of your bundle's directory.
 
-2. In the `values.yaml` located in the `/resources/core/charts/helm-broker/` directory, set the **embeddedRepository.provision** attribute to `false` to disable the embedded server. Provide your server's URL in the **config.repository.baseURL** attribute:
+2. In the `values.yaml` provide your server's URL in the **repository.baseURL** attribute:
 
   ```yaml
-embeddedRepository:
-  # Defines whether to provision the embedded bundle repository.
-  # To provision, specify this value to true
-  provision: true
-
-  config:
     repository:
       baseURL: "http://custom.bundles-repository"
   ```
 
 3. Install Kyma on Minikube. See the **Local Kyma installation** document to learn how.
+
+### Configure repository URL in the runtime
+
+Follow these steps to change the repository URL:
+
+1. Configure Helm Broker:
+
+ ```bash
+ kubectl set env -n kyma-system deployment/core-helm-broker -e APP_REPOSITORY_BASE_URL="http://custom.bundles-repository/"
+ ```
+ 
+2. Wait for the Helm Broker to run using the following command:
+
+ ```bash
+ kubectl get pod -n kyma-system -l app=core-helm-broker
+ ```
+
+3. Trigger the Service Catalog synchronization:
+
+ ```bash
+ svcat sync broker core-helm-broker
+ ```

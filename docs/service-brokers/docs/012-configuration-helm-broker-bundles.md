@@ -1,5 +1,5 @@
 ---
-title: How to create a yBundle
+title: How to create a bundle
 type: Configuration
 ---
 
@@ -9,11 +9,11 @@ type: Configuration
 [plan-objects]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object "OSB Spec Plan Objects"
 
 
-To create your own yBundle, you must create a directory with the following structure:
+To create your own bundle, you must create a directory with the following structure:
 
 ```
-sample-ybundle/
-  ├── meta.yaml                             # A file which contains the metadata information about this yBundle
+sample-bundle/
+  ├── meta.yaml                             # A file which contains the metadata information about this bundle
   ├── chart/                                # A directory which contains a Helm chart that installs your Kubernetes resources
   │    └── <chart-name>/                    # A Helm chart directory
   │         └── ....                        # Helm chart files
@@ -21,22 +21,22 @@ sample-ybundle/
        ├── example-enterprise               # A directory of files for a specific plan
        │   ├── meta.yaml                    # A file which contains the metadata information about this plan
        │   ├── bind.yaml                    # A file which contains information about the values that the Helm Broker returns when it receives the bind request
-       │   ├── create-instance-schema.json  # The JSON Schema definitions for creating a service instance
-       │   └── values.yaml                  # The default configuration values in this plan for a chart defined in chart directory
+       │   ├── create-instance-schema.json  # The JSON Schema definitions for creating a ServiceInstance
+       │   └── values.yaml                  # The default configuration values in this plan for a chart defined in the `chart` directory
        └── ....
 ```
 
-> **NOTE:** All the file names in the yBundle directory are case-sensitive.
+> **NOTE:** All the file names in the bundle directory are case-sensitive.
 
 
-### The yBundle meta.yaml file
+### The bundle meta.yaml file
 
-The `meta.yaml` file is mandatory as it contains information about the yBundle. Set the following fields to create service objects which comply with the [Open Service Broker API][service-objects].
+The `meta.yaml` file is mandatory as it contains information about the bundle. Set the following fields to create service objects which comply with the [Open Service Broker API][service-objects].
 
 |      Field Name     | Required |                                                                  Description                                                                           |
 |:-------------------:|:--------:|:------------------------------------------------------------------------------------------------------------------------------------------------------:|
-|         **name**        |   true   |                           The yBundle name. It has the same restrictions as defined in the [Open Service Broker API][service-objects].                           |
-|       **version**       |   true   | The yBundle version. It is a broker service identifier. It has the same restrictions as defined in the [Open Service Broker API][service-objects]. |
+|         **name**        |   true   |                           The bundle name. It has the same restrictions as defined in the [Open Service Broker API][service-objects].                           |
+|       **version**       |   true   | The bundle version. It is a broker service identifier. It has the same restrictions as defined in the [Open Service Broker API][service-objects]. |
 |          **id**         |   true   |            A broker service identifier. It has the same restrictions as defined in the [Open Service Broker API][service-objects].           |
 |     **description**     |   true   |                  A short description of the service. It has the same restrictions as defined in the [Open Service Broker API][service-objects].                  |
 |         **tags**        |   false  |                                    The keywords describing the provided service, separated by commas.                                                          |
@@ -63,7 +63,7 @@ A directory for a specific plan must contain the `meta.yaml` file. Other files, 
 
 #### The meta.yaml file
 
-The `meta.yaml` file contains information about a yBundle plan. Set the following fields to create the plan objects, which comply with the [Open Service Broker API][plan-objects].
+The `meta.yaml` file contains information about a bundle plan. Set the following fields to create the plan objects, which comply with the [Open Service Broker API][plan-objects].
 
 |  Field Name | Required |                                             Description                                                    |
 |:-----------:|:--------:|:----------------------------------------------------------------------------------------------------------:|
@@ -77,7 +77,7 @@ The `meta.yaml` file contains information about a yBundle plan. Set the followin
 
 The `bind.yaml` file contains the information required for the [binding action][bind] in a specific plan.
 If you defined in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file.
-For more information about the content of the `bind.yaml` file, see the **Binding yBundles** document.
+For more information about the content of the `bind.yaml` file, see the **Binding bundles** document.
 
 #### The values.yaml file
 

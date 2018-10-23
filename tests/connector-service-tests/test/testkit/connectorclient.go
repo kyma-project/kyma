@@ -2,6 +2,7 @@ package testkit
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"net/http"
 	"net/http/httputil"
@@ -13,21 +14,33 @@ import (
 type ConnectorClient interface {
 	CreateToken(t *testing.T) TokenResponse
 	GetInfo(t *testing.T, url string) (*InfoResponse, *Error)
-	CreateClientCert(t *testing.T, csr, url string) (*CrtResponse, *Error)
+	CreateCertChain(t *testing.T, csr, url string) (*CrtResponse, *Error)
 }
 
 type connectorClient struct {
 	remoteEnv      string
 	internalAPIUrl string
 	externalAPIUrl string
+	httpClient     *http.Client
 }
 
-func NewConnectorClient(remoteEnv, internalAPIUrl, externalAPIUrl string) ConnectorClient {
+func NewConnectorClient(remoteEnv, internalAPIUrl, externalAPIUrl string, skipVerify bool) ConnectorClient {
+	client := NewHttpClient(skipVerify)
+
 	return connectorClient{
 		remoteEnv:      remoteEnv,
 		internalAPIUrl: internalAPIUrl,
 		externalAPIUrl: externalAPIUrl,
+		httpClient:     client,
 	}
+}
+
+func NewHttpClient(skipVerify bool) *http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
+	}
+	client := &http.Client{Transport: tr}
+	return client
 }
 
 func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
@@ -36,7 +49,7 @@ func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
 	request, err := http.NewRequest(http.MethodPost, url, nil)
 	require.NoError(t, err)
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
 	if response.StatusCode != http.StatusCreated {
 		logResponse(t, response)
@@ -56,7 +69,7 @@ func (cc connectorClient) GetInfo(t *testing.T, url string) (*InfoResponse, *Err
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	require.NoError(t, err)
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
 	if response.StatusCode != http.StatusOK {
 		logResponse(t, response)
@@ -77,7 +90,7 @@ func (cc connectorClient) GetInfo(t *testing.T, url string) (*InfoResponse, *Err
 	return infoResponse, nil
 }
 
-func (cc connectorClient) CreateClientCert(t *testing.T, csr, url string) (*CrtResponse, *Error) {
+func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtResponse, *Error) {
 	body, err := json.Marshal(CsrRequest{Csr: csr})
 	require.NoError(t, err)
 
@@ -86,7 +99,7 @@ func (cc connectorClient) CreateClientCert(t *testing.T, csr, url string) (*CrtR
 
 	request.Header.Add("Content-Type", "application/json")
 
-	response, err := http.DefaultClient.Do(request)
+	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
 	if response.StatusCode != http.StatusCreated {
 		logResponse(t, response)

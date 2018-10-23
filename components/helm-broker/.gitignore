@@ -100,7 +100,6 @@ fabric.properties
 *.iml
 
 /targz
-/reposerver
 /indexbuilder
 /broker
 /vendor

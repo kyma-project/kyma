@@ -203,8 +203,7 @@
     "pkg/client/informers_generated/externalversions/settings/v1alpha1",
     "pkg/client/listers_generated/servicecatalog/v1beta1",
     "pkg/client/listers_generated/settings/v1alpha1",
-    "pkg/filter",
-    "pkg/svcat/service-catalog"
+    "pkg/filter"
   ]
   revision = "0aaf02aba556b945a357fce4e82f62122d158f2a"
   version = "v0.1.28"
@@ -707,6 +706,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b87842e909af129441b286b7f4b4a58bdbfe8b02091406c266dc524b4f9afc8e"
+  inputs-digest = "5bd7eaa4002eaa45cab00266c616e77be240a7b7aa167b57f834daf5420d6284"
   solver-name = "gps-cdcl"
   solver-version = 1

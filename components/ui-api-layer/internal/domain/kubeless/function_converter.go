@@ -12,16 +12,11 @@ func (c *functionConverter) ToGQL(in *v1beta1.Function) *gqlschema.Function {
 		return nil
 	}
 
-	labels := make(gqlschema.JSON)
-	for k, v := range in.Labels {
-		labels[k] = v
-	}
-
 	return &gqlschema.Function{
 		Name:              in.Name,
 		Trigger:           in.Spec.Type,
 		CreationTimestamp: in.CreationTimestamp.Time,
-		Labels:            labels,
+		Labels:            in.Labels,
 		Environment:       in.Namespace,
 	}
 }

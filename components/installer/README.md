@@ -1,5 +1,7 @@
 # Installer
 
+## Overview
+
 Installer is a tool for installing all Kyma components.
 The project is based on the Kubernetes operator pattern. It tracks changes of the `Installation` type instance of the custom resource. It also installs, uninstalls, and updates Kyma accordingly.
 
@@ -68,7 +70,7 @@ kubectl edit installation/{CR_NAME}
 ```
 Change the `url` property in **spec** to `{URL TO KYMA TAR GZ}`. Trigger the update by overriding the **action** label in CR:
 ```
-kubectl label installation/{CR_NAME} action=update --overwrite
+kubectl label installation/{CR_NAME} action=install --overwrite
 ```
 
 ### Update the local Kyma installation
@@ -127,25 +129,5 @@ $ ../../installation/scripts/manage-component.sh azure-broker true
 
 ## Static overrides for cluster installations
 
-You can define cluster-specific overrides for each root chart. In the cluster deployment scenario, the installer reads the `cluster.yaml` file in each root chart and appends its content to the overrides applied during the 
+You can define cluster-specific overrides for each root chart. In the cluster deployment scenario, the installer reads the `cluster.yaml` file in each root chart and appends its content to the overrides applied during the
 Helm installation.
-
-## Install selected components only
-
-This tool installs components specified in `Installation` CR. See the [installer-cr.yaml.tpl](../../installation/resources/installer-cr.yaml.tpl) file for more details. 
-
-To enable installation of a component, specify its name and Namespace. If you want the release name to be different from the component's name, provide the release parameter.
-
-Example:
-
-```
-spec:
-    ...
-    components:
-    ...
-    - name: "remote-environments"
-      namespace: "kyma-integration"
-      release: "hmc-default"
-```
-
-In the example, the `remote-environments` component is installed in the `kyma-integration` Namespace, using `hmc-default` as the release name. The **name** and **namespace** fields are mandatory. The name of the component is also the name of the component subdirectory in the `resources` directory. The Installer assumes that the component subdirectory is a valid Helm chart.

@@ -1,12 +1,5 @@
-global:
-  containerRegistry:
-    path: eu.gcr.io/kyma-project
-    imageTag: 0.1.0
-
 deployment:
   image:
-    name: develop/gateway
-    tag: c8e79413
     pullPolicy: IfNotPresent
   args:
     proxyPort: &proxyPort 8080
@@ -20,19 +13,14 @@ deployment:
 service:
   externalapi:
     port: *externalAPIPort
-  echo:
-    serviceType: ClusterIP
-    port: *proxyPort
 
 ingress:
   enabled: true
   authSecret: kyma-integration/nginx-auth-ca
-  tlsSecret: nginx-ingress-cert
+  tlsSecret: ingress-tls-cert
 
 acceptanceTest:
   image:
-    name: gateway-acceptance-tests
-    tag: 0.2.19
     pullPolicy: IfNotPresent
 
 eventService:

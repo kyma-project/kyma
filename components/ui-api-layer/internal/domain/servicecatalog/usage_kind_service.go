@@ -63,8 +63,9 @@ func (svc *usageKindService) ListResources(environment string) ([]gqlschema.Bind
 		}
 
 		results = append(results, gqlschema.BindableResourcesOutputItem{
-			Kind:      uk.Name,
-			Resources: ukResources,
+			Kind:        uk.Name,
+			DisplayName: uk.Spec.DisplayName,
+			Resources:   ukResources,
 		})
 	}
 	return results, nil

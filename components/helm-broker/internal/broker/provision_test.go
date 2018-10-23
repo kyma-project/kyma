@@ -13,9 +13,9 @@ import (
 	rls "k8s.io/helm/pkg/proto/hapi/services"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker/automock"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybind"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger/spy"
 )
 
@@ -99,7 +99,7 @@ func TestProvisionServiceProvisionSuccessAsyncInstall(t *testing.T) {
 	releaseResp := &rls.InstallReleaseResponse{}
 	hiMock.On("Install", &expChart, internal.ChartValues(map[string]interface{}{}), ts.Exp.ReleaseName, ts.Exp.Namespace).Return(releaseResp, nil).Once()
 
-	renderedYAML := ybind.RenderedBindYAML(`rendered-template`)
+	renderedYAML := bind.RenderedBindYAML(`rendered-template`)
 	rendererMock := &automock.BindTemplateRenderer{}
 	defer rendererMock.AssertExpectations(t)
 	rendererMock.On("Render", ts.Exp.BundlePlan.BindTemplate, releaseResp).Return(renderedYAML, nil)
@@ -109,7 +109,7 @@ func TestProvisionServiceProvisionSuccessAsyncInstall(t *testing.T) {
 	}
 	resolverMock := &automock.BindTemplateResolver{}
 	defer resolverMock.AssertExpectations(t)
-	resolverMock.On("Resolve", renderedYAML, ts.Exp.Namespace).Return(&ybind.ResolveOutput{
+	resolverMock.On("Resolve", renderedYAML, ts.Exp.Namespace).Return(&bind.ResolveOutput{
 		Credentials: expCreds,
 	}, nil)
 

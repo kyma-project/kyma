@@ -4,9 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vrischmann/envconfig"
-
 	"github.com/kyma-project/kyma/tests/acceptance/remote-environment/suite"
+	"github.com/vrischmann/envconfig"
 )
 
 // Config contains all configurations for Remote Environment Acceptance tests
@@ -39,7 +38,7 @@ func TestRemoteEnvironmentAPIAccess(t *testing.T) {
 
 	t.Logf("Waiting for service class")
 	// timeout must be greater than service broker relist duration
-	ts.WaitForServiceClassWithTimeout(time.Minute)
+	ts.WaitForServiceClassWithTimeout(time.Second * 90)
 
 	t.Logf("Provisioning service instance")
 	ts.ProvisionServiceInstance(10 * time.Second)

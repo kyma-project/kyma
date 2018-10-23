@@ -13,7 +13,7 @@ metadata:
     app: {{ template "name" . }}
 rules:
   - apiGroups: ["servicecatalog.k8s.io"]
-    resources: ["clusterservicebrokers", "serviceinstances", "servicebindings"]
+    resources: ["clusterservicebrokers", "servicebrokers", "serviceinstances", "servicebindings"]
     verbs: ["create", "get", "delete"]
     nonResourceURLs: []
   - apiGroups: ["servicecatalog.kyma.cx"]
@@ -29,7 +29,7 @@ rules:
   - apiGroups: [""]
     resources: ["limitranges", "resourcequotas"]
     verbs: ["create", "get"]
-  - apiGroups: ["ui.kyma.cx"]
+  - apiGroups: ["authentication.kyma-project.io"]
     resources: ["idppresets"]
     verbs: ["get"]
 

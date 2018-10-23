@@ -4,11 +4,14 @@ metadata:
   name: istio-kyma-patch
 rules:
 - apiGroups: [""]
-  resources: ["services", "serviceaccounts", "secrets", "configmaps", "pods"]
+  resources: ["services", "serviceaccounts", "secrets", "configmaps", "pods", "persistentvolumeclaims"]
   verbs: ["*"]
 - apiGroups: ["extensions"]
   resources: ["deployments", "replicasets"]
   verbs: ["*"]
 - apiGroups: ["batch"]
   resources: ["jobs"]
+  verbs: ["*"]
+- apiGroups: ["authentication.istio.io"]
+  resources: ["policies"]
   verbs: ["*"]

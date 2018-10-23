@@ -35,7 +35,7 @@ func (ts *TestSuite) createKubernetesResources() {
 	require.NoError(ts.t, err)
 
 	nsClient := clientset.CoreV1().Namespaces()
-	_, err = nsClient.Create(fixNamespace(ts.namespace))
+	_, err = nsClient.Create(fixEnvironment(ts.namespace))
 	require.NoError(ts.t, err)
 
 	deploymentClient := clientset.AppsV1beta1().Deployments(ts.namespace)
@@ -240,11 +240,19 @@ func (ts *TestSuite) podLogs(clientset *kubernetes.Clientset, pod *apiv1.Pod, co
 	return fmt.Sprintf("Logs from pod %s (created at %v):\n%s", pod.Name, pod.CreationTimestamp.Format("15:04:05"), string(logs))
 }
 
-func fixNamespace(name string) *apiv1.Namespace {
+func fixEnvironment(name string) *apiv1.Namespace {
 	return &apiv1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
 			Labels: map[string]string{"env": "true", "istio-injection": "enabled"},
+		},
+	}
+}
+
+func fixNamespace(name string) *apiv1.Namespace {
+	return &apiv1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
 		},
 	}
 }

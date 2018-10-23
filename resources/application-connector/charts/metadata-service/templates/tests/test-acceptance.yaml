@@ -1,0 +1,22 @@
+{{ if not .Values.global.isLocalEnv }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Chart.Name }}-tests
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+    "helm-chart-test": "true"
+spec:
+  containers:
+    - name: {{ .Chart.Name }}-tests
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.metadata_service_tests.dir }}metadata-service-tests:{{ .Values.global.metadata_service_tests.version }}
+      imagePullPolicy: IfNotPresent
+      env:
+      - name: METADATA_URL
+        value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local:8081
+      - name: NAMESPACE
+        value: {{ .Values.global.namespace }}
+  restartPolicy: Never
+{{ end }}

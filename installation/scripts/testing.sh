@@ -44,9 +44,9 @@ function printLogsFromFailedHelmTests() {
 
 function printLogsFromPod() {
     local namespace=$1 pod=$2
-
-    log "Fetching logs from '${pod}'" nc bold
-    result=$(kubectl logs -n ${namespace} ${pod})
+    local tailLimit=2000 bytesLimit=500000
+    log "Fetching logs from '${pod}' with options tailLimit=${tailLimit} and bytesLimit=${bytesLimit}" nc bold
+    result=$(kubectl logs --tail=${tailLimit} --limit-bytes=${bytesLimit} -n ${namespace} ${pod})
     if [ "${#result}" -eq 0 ]; then
         log "FAILED" red
         return 1
@@ -108,7 +108,7 @@ function checkTestPodLabel() {
 function cleanupHelmTestPods() {
     local namespace=$1
 
-    log "\nCleaning up helm test pods" nc bold
+    log "\nCleaning up helm test pods in namespace ${namespace}" nc bold
     kubectl delete pod -n ${namespace} -l helm-chart-test=true
     deleteErr=$?
     if [ ${deleteErr} -ne 0 ]
@@ -160,12 +160,11 @@ function checkAndCleanupTest() {
     fi
 }
 
-function printImagesWithLatestTag(){
+function printImagesWithLatestTag() {
 
-    # We ignore the alpine image as this is required by istio-sidecar
     local images=$(kubectl get pods --all-namespaces -o jsonpath="{..image}" |\
     tr -s '[[:space:]]' '\n' |\
-    grep ":latest" | grep -v "alpine:latest")
+    grep ":latest")
 
     log "Images with tag latest are not allowed. Checking..." nc bold
     if [ ${#images} -ne 0 ]; then
@@ -177,7 +176,23 @@ function printImagesWithLatestTag(){
     return 0
 }
 
+echo "-------------------------------"
+echo "- Ensure test Pods are deleted "
+echo "-------------------------------"
 
+cleanupHelmTestPods kyma-system
+cleanupCoreErr=$?
+
+cleanupHelmTestPods istio-system
+cleanupIstioErr=$?
+
+cleanupHelmTestPods kyma-integration
+cleanupGatewayErr=$?
+
+if [ ${cleanupGatewayErr} -ne 0 ] || [ ${cleanupIstioErr} -ne 0 ]  || [ ${cleanupCoreErr} -ne 0 ]
+then
+    exit 1
+fi
 
 echo "----------------------------"
 echo "- Testing Kyma..."
@@ -198,6 +213,10 @@ istioTestErr=$?
 checkAndCleanupTest istio-system
 testCheckIstio=$?
 
+echo "- Testing Application Connector"
+helm test application-connector
+acTestErr=$?
+
 echo "- Testing Remote Environments"
 helm test ec-default
 ecTestErr=$?
@@ -210,7 +229,7 @@ testCheckGateway=$?
 printImagesWithLatestTag
 latestTagsErr=$?
 
-if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${hmcTestErr} -ne 0 ]
+if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${hmcTestErr} -ne 0 ] || [ ${acTestErr} -ne 0 ]
 then
     exit 1
 else

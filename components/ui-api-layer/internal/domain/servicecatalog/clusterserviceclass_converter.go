@@ -30,6 +30,9 @@ func (c *clusterServiceClassConverter) ToGQL(in *v1beta1.ClusterServiceClass) (*
 	displayName := resource.ToStringPtr(externalMetadata["displayName"])
 	longDescription := resource.ToStringPtr(externalMetadata["longDescription"])
 
+	var labels gqlschema.Labels
+	labels.UnmarshalGQL(externalMetadata["labels"])
+
 	class := gqlschema.ClusterServiceClass{
 		Name:                in.Name,
 		ExternalName:        in.Spec.ExternalName,
@@ -42,6 +45,7 @@ func (c *clusterServiceClassConverter) ToGQL(in *v1beta1.ClusterServiceClass) (*
 		SupportURL:          supportURL,
 		CreationTimestamp:   in.CreationTimestamp.Time,
 		Tags:                in.Spec.Tags,
+		Labels:              labels,
 	}
 
 	return &class, nil

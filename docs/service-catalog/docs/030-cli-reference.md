@@ -14,13 +14,17 @@ Service Catalog operations use the following resources:
 
 | Singular name      | Plural name         |
 | ------------------ |---------------------|
+|clusterservicebroker|clusterservicebrokers|
 |clusterserviceclass |clusterserviceclasses|
 |clusterserviceplan  |clusterserviceplans  |
-|clusterservicebroker|clusterservicebrokers|
-|serviceinstance     |serviceinstances     |
+|secret              |secrets              |
 |servicebinding      |servicebindings      |
 |servicebindingusage |servicebindingusages |
-|secret              |secrets              |
+|servicebroker       |servicebrokers       |
+|serviceclass        |serviceclasses       |
+|serviceinstance     |serviceinstances     |
+|serviceplan         |serviceplans         |
+
 
 ### Syntax
 

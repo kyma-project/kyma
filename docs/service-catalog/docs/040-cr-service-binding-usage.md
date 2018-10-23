@@ -41,13 +41,13 @@ status:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 
-| Parameter   |      Mandatory?      |  Description |
+| Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is created. |
 | **spec.serviceBindingRef.name** |    **YES**   | Specifies the name of the ServiceBinding. |
 | **spec.usedBy** |    **YES**   | Specifies the application into which the Secret is injected. |
-| **spec.usedBy.kind** |    **YES**   | Specifies the name of the [UsageKind](041-cr-usage-kind.md). |
+| **spec.usedBy.kind** |    **YES**   | Specifies the name of the UsageKind custom resource. |
 | **spec.usedBy.name** |    **YES**   | Specifies the name of the application. |
 | **spec.parameters.envPrefix** |    **NO**   | Defines the prefix of environment variables environment variables that the ServiceBindingUsage injects. The prefixing is disabled by default. |
 | **spec.parameters.envPrefix.name** |    **YES**   | Specifies the name of the prefix. This field is mandatory if **envPrefix** is specified.  |
@@ -58,3 +58,21 @@ This table lists all the possible parameters of a given resource together with t
 | **status.conditions.type** |    **NO**   | Defines the type of the condition. The value of this field is always `Ready`. |
 | **message** |    **NO**   | Describes in a human-readable way why the ServiceBinding injection has failed. |
 | **reason** |    **NO**   | Specifies a unique, one-word, CamelCase reason for the condition's last transition. |
+
+
+## Related resources and components
+
+These are the resources related to this CR:
+
+| Custom resource   |   Description |
+|:----------:|:------|
+| UsageKind |  Provides information where to inject Secrets. |
+| [ServiceBinding](https://kubernetes.io/docs/concepts/extend-kubernetes/service-catalog/#api-resources) |  Provides Secrets to inject.  |
+
+
+These components use this CR:
+
+| Component   |   Description |
+|:----------:|:------|
+| Binding Usage Controller |  Reacts to every action of creating, updating, or deleting ServiceBindingUsages in all Namespaces, and uses ServiceBindingUsage data to inject binding. |
+| UI API Layer |  Exposes the given CR to the Console UI. It also allows you to create and delete a ServiceBindingUsage. |

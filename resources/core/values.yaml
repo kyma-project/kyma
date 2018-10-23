@@ -1,4 +1,4 @@
-dex:      
+dex:
   tls:
     createSecret: false
 
@@ -17,13 +17,17 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
-    tls:
-      secretName: istio-ingress-certs  
     gateway: 
-      name: kyma-gateway      
+      name: kyma-gateway
   etcdBackup:
     enabled: false
     secretName: etcd-backup-abs-credentials
+  acceptance_tests:
+    dir: develop/
+    version: 9af5c6b4
+  alpine_net:
+    dir: develop/
+    version: ed568f0f
   api_controller:
     dir: develop/
     version: 6e0a7fe2
@@ -33,31 +37,48 @@ global:
   apiserver_proxy:
     dir: develop/
     version: 6e0a7fe2
+  binding_usage_controller:
+    dir: develop/
+    version: 83692fd8
+  configurations_generator:
+    dir: develop/
+    version: 4a23580f
   docs:
     dir: develop/
-    version: 8f0a3611
+    version: 5c147f8e
   environments:
+    dir: develop/
+    version: 6e0a7fe2
+  etcd_backup:
     dir: develop/
     version: 6e0a7fe2
   event_bus:
     dir: develop/
-    version: 6e0a7fe2
+    version: 2408daf3
   event_bus_tests:
     dir: develop/
-    version: 6e0a7fe2
-  event_service:
+    version: 1daa11b7
+  helm_broker:
     dir: develop/
-    version: 6e0a7fe2
+    version: 4d048ded
   kubeless_test_client:
+    dir: develop/
+    version: 2408daf3
+  test_environments:
+    dir: develop/
+    version: '84359277'
+  test_logging:
+    dir: develop/
+    version: 293e4a23
+  test_logging_monitoring:
     dir: develop/
     version: 6e0a7fe2
   ui_api_layer:
     dir: develop/
-    version: d174b6b2
+    version: e0f2a383
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: 6e0a7fe2
-  
+    version: e0f2a383
 
 test:
   auth:
@@ -65,16 +86,17 @@ test:
     password: nimda123
   acceptance:
     core:
-      imageTag: "748c2f57"
       # environments used in remote-environment acceptance test
-      remoteEnvironment: 
+      remoteEnvironment:
         disabled: "false"
+        brokerNamespace: kyma-integration
         linkingTimeout: 4m
         unlinkingTimeout: 4m
     ui:
+      # tests uses chromium that require more memory
       requests:
-        memory: "1Gi"
-        cpu: "300m"
+        memory: 300Mi
+        cpu: 200m
       limits:
-        memory: "1Gi"
-        cpu: "300m"
+        memory: 500Mi
+        cpu: 300m
