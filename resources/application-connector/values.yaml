@@ -35,8 +35,8 @@ global:
     dir: develop/
     version: b93a91c9
   remote_environment_controller_tests:
-    dir: develop/
-    version: f649732b
+    dir: pr/
+    version: PR-1396
   remote_environment_broker:
     dir: develop/
     version: 1423f8ce
