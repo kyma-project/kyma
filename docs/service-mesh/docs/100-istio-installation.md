@@ -3,7 +3,7 @@ title: Istio installation
 type: Details
 ---
 
-Being a core component, Istio installs by default with every Kyma deployment. The installation consists of two steps:
+As a core component, Istio installs with every Kyma deployment by default. The installation consists of two steps:
 
 1. Istio installs using the official, raw charts from the currently supported release. The charts that are currently 
 used are stored in the resources/istio directory. The installation is customized by enabling security in Istio.
