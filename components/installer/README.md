@@ -70,7 +70,7 @@ kubectl edit installation/{CR_NAME}
 ```
 Change the `url` property in **spec** to `{URL TO KYMA TAR GZ}`. Trigger the update by overriding the **action** label in CR:
 ```
-kubectl label installation/{CR_NAME} action=update --overwrite
+kubectl label installation/{CR_NAME} action=install --overwrite
 ```
 
 ### Update the local Kyma installation

@@ -4,7 +4,6 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/access"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/mode"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	listers "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/platform/idprovider"
@@ -103,7 +102,7 @@ func New(remoteEnvironmentFinder reFinder,
 	reClient v1alpha1.ApplicationconnectorV1alpha1Interface,
 	serviceInstanceGetter serviceInstanceGetter,
 	emLister listers.EnvironmentMappingLister,
-	brokerMode *mode.BrokerService,
+	brokerService *NsBrokerService,
 	log *logrus.Entry) *Server {
 
 	idpRaw := idprovider.New()
@@ -115,10 +114,7 @@ func New(remoteEnvironmentFinder reFinder,
 		return internal.OperationID(idRaw), nil
 	}
 
-	var enabledChecker reEnabledChecker = clusterScopedReEnabledChecker{}
-	if !brokerMode.IsClusterScoped() {
-		enabledChecker = access.NewEnvironmentMappingService(emLister)
-	}
+	enabledChecker := access.NewEnvironmentMappingService(emLister)
 
 	stateService := &instanceStateService{operationCollectionGetter: opStorage}
 	return &Server{
@@ -135,15 +131,7 @@ func New(remoteEnvironmentFinder reFinder,
 		lastOpGetter: &getLastOperationService{
 			getter: opStorage,
 		},
-		brokerMode: brokerMode,
-		logger:     log.WithField("service", "broker:server"),
+		brokerService: brokerService,
+		logger:        log.WithField("service", "broker:server"),
 	}
-}
-
-type clusterScopedReEnabledChecker struct {
-}
-
-func (clusterScopedReEnabledChecker) IsRemoteEnvironmentEnabled(namespace, name string) (bool, error) {
-	// all RE are enabled for cluster scoped broker
-	return true, nil
 }

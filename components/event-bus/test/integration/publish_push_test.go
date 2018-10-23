@@ -1,43 +1,18 @@
-package publish_push_test
+package integration
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"io/ioutil"
+	"context"
+	publishapp "github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish/application"
+	pushapp "github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-push/application"
+	"github.com/kyma-project/kyma/components/event-bus/internal/publish"
+	"github.com/kyma-project/kyma/components/event-bus/internal/push/opts"
+	"github.com/kyma-project/kyma/components/event-bus/test/util"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strings"
 	"testing"
 	"time"
-
-	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
-	publishapp "github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish/application"
-	pushapp "github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-push/application"
-	"github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/event-bus/generated/push/informers/externalversions/eventing.kyma.cx/v1alpha1"
-	"github.com/kyma-project/kyma/components/event-bus/internal/common"
-	"github.com/kyma-project/kyma/components/event-bus/internal/publish"
-	"github.com/kyma-project/kyma/components/event-bus/internal/push/opts"
-	"github.com/kyma-project/kyma/components/event-bus/test/util"
-	"github.com/nats-io/nats-streaming-server/server"
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/tools/cache"
-)
-
-const (
-	clusterID               = "kyma-nats-streaming"
-	eventType               = "test-publish-push-success"
-	eventTypeVersion        = "v1"
-	sourceIDV1              = "test.local.kyma.commerce.ec"
-	eventDataV1             = "test-event-1"
-	sourceIDV2              = "test.local.kyma.commerce.ec"
-	eventDataV2             = "test-event-2"
-	publishServerStatusPath = "/v1/status/ready"
-	headerKymaTopic         = "kyma-topic"
 )
 
 var (
@@ -47,15 +22,11 @@ var (
 	subscriberServerV2 *httptest.Server
 )
 
-func startNats() (*server.StanServer, error) {
-	return server.RunServer(clusterID)
-}
-
-func stopNats(stanServer *server.StanServer) {
-	stanServer.Shutdown()
-}
+const waitForSubscriptionToStart = 3 * time.Second
 
 func TestMain(m *testing.M) {
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
 
 	stanServer, err := startNats()
 	log.Printf("StanServer %v, error : %v \n", stanServer, err)
@@ -72,17 +43,9 @@ func TestMain(m *testing.M) {
 	subscriberServerV2 = util.NewSubscriberServerV2()
 
 	pushOpts := opts.DefaultOptions
+	pushOpts.CheckEventsActivation = true
 	pushOpts.NatsStreamingClusterID = clusterID
-	pushApplication := pushapp.NewPushApplication(&pushOpts, newFakeInformer())
-	subscriptionsSupervisor1 := pushApplication.SubscriptionsSupervisor
-	subscription1 := util.NewSubscription("test-sub", metav1.NamespaceDefault, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion,
-		sourceIDV1)
-	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, common.DefaultRequestProvider)
-
-	subscriptionsSupervisor2 := pushApplication.SubscriptionsSupervisor
-	subscription2 := util.NewSubscription("test-sub", metav1.NamespaceDefault, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion,
-		sourceIDV2)
-	subscriptionsSupervisor2.StartSubscriptionReq(subscription2, common.DefaultRequestProvider)
+	pushApplication := pushapp.NewPushApplication(&pushOpts, newFakeInformer(ctx))
 
 	pushServer = httptest.NewServer(util.Logger(pushApplication.ServerMux))
 
@@ -124,158 +87,86 @@ func Test_Subscriber_Status(t *testing.T) {
 	verifyStatusCode(res2, http.StatusOK, t)
 }
 
-func makePayload(sourceID, eventType, eventTypeVersion, eventData string) string {
-	return fmt.Sprintf(`{"source-id": "%s", "event-type": "%s","event-type-version": "%s","event-time": "2018-11-02T22:08:41+00:00","data": "%s"}`,
-		sourceID, eventType, eventTypeVersion, eventData)
-}
-
 func Test_Publish_Push_Request(t *testing.T) {
-	{
-		payloadV1 := makePayload(sourceIDV1, eventType, eventTypeVersion, eventDataV1)
-		res, err := http.Post(publishServer.URL+"/v1/events", "application/json", strings.NewReader(payloadV1))
-		checkIfError(err, t)
-		verifyStatusCode(res, 200, t)
-		log.Print(res)
-		respObj := &api.PublishResponse{}
-		body, err := ioutil.ReadAll(res.Body)
-		defer res.Body.Close()
-		err = json.Unmarshal(body, &respObj)
-		assert.NotNil(t, respObj.EventID)
-		assert.NotEmpty(t, respObj.EventID)
-		log.Printf("%v", respObj)
+	verifyPublishPushFlow("Test_Publish_Push_Request_1", "sub-1", "namespace-1", t)
 
-		var ok bool
-		for i := 0; i < 10; i++ {
-			time.Sleep(1 * time.Second)
-			res, err := http.Get(subscriberServerV1.URL + util.SubServer1ResultsPath)
-			assert.Nil(t, err)
-			body, err := ioutil.ReadAll(res.Body)
-			var resp string
-			json.Unmarshal(body, &resp)
-			res.Body.Close()
-			if len(resp) == 0 {
-				continue
-			}
-			assert.Equal(t, eventDataV1, resp)
-			ok = true
-			break
-		}
-		assert.True(t, ok)
-	}
-
-	{
-		payloadV2 := makePayload(sourceIDV2, eventType, eventTypeVersion, eventDataV2)
-		res, err := http.Post(publishServer.URL+"/v1/events", "application/json", strings.NewReader(payloadV2))
-		checkIfError(err, t)
-		verifyStatusCode(res, 200, t)
-		log.Print(res)
-		respObj := &api.PublishResponse{}
-		body, err := ioutil.ReadAll(res.Body)
-		defer res.Body.Close()
-		err = json.Unmarshal(body, &respObj)
-		assert.NotNil(t, respObj.EventID)
-		assert.NotEmpty(t, respObj.EventID)
-		log.Printf("%v", respObj)
-
-		var ok bool
-		for i := 0; i < 10; i++ {
-			time.Sleep(1 * time.Second)
-			res, err := http.Get(subscriberServerV2.URL + util.SubServer2ResultsPath)
-			assert.Nil(t, err)
-			body, err := ioutil.ReadAll(res.Body)
-			var resp string
-			json.Unmarshal(body, &resp)
-			res.Body.Close()
-			if len(resp) == 0 {
-				continue
-			}
-			assert.Equal(t, eventDataV2, resp)
-			ok = true
-			break
-		}
-		assert.True(t, ok)
-	}
+	verifyPublishPushFlow("Test_Publish_Push_Request_2", "sub-2", "namespace-1", t)
 }
 
-func newFakeInformer() cache.SharedIndexInformer {
-	sub := util.NewSubscription(
-		"test-sub",
-		metav1.NamespaceDefault,
-		subscriberServerV1.URL+util.SubServer1EventsPath,
-		eventType,
-		eventTypeVersion,
-		sourceIDV1)
-	clientSet := fake.NewSimpleClientset(sub)
-	informer := v1alpha1.NewSubscriptionInformer(clientSet, metav1.NamespaceAll, 0, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
-	informer.GetIndexer().Add(sub)
-	return informer
+func Test_sameSubjectSubscribersInDifferentNamespacesShouldReceiveEventsOfThatSubject(t *testing.T) {
+	// create two subscriptions with the same name in two different namespaces to the same subject
+	name := "test-subscription"
+	ns1 := "namespace-1"
+	ns2 := "namespace-2"
+	eventData := "Test_sameSubjectSubscribersInDifferentNamespacesShouldReceiveEventsOfThatSubject"
+
+	triggerCreateSub(name, ns1, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+
+	triggerCreateSub(name, ns2, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+
+	time.Sleep(waitForSubscriptionToStart)
+
+	// publish one event
+	payload := makePayload(sourceIDV1, eventType, eventTypeVersion, eventData)
+	publishEvent(t, publishServer.URL, payload)
+
+	// verify that both subscribers received the event
+	verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, eventData)
+	verifyEndpointReceivedEvent(t, subscriberServerV2.URL+util.SubServer2ResultsPath, eventData)
+
+	triggerDeleteSub(name, ns1, t)
+	triggerDeleteSub(name, ns2, t)
 }
 
-func verifyStatusCode(res *http.Response, expectedStatusCode int, t *testing.T) {
-	if res.StatusCode != expectedStatusCode {
-		t.Errorf("Status code is wrong, have: %d, want: %d", res.StatusCode, expectedStatusCode)
-	}
+func Test_UpdateSubscriptionURL(t *testing.T) {
+	name := "test-update"
+	ns := "namespace-1"
+
+	preUpdateEvent := "test-pre-update"
+	triggerCreateSub(name, ns, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+	time.Sleep(waitForSubscriptionToStart)
+
+	publishEvent(t, publishServer.URL, makePayload(sourceIDV1, eventType, eventTypeVersion, preUpdateEvent))
+	verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, preUpdateEvent)
+
+	triggerUpdateSub(name, ns, subscriberServerV2.URL+util.SubServer2EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+	time.Sleep(waitForSubscriptionToStart)
+
+	postUpdateEvent := "test-post-update"
+	publishEvent(t, publishServer.URL, makePayload(sourceIDV1, eventType, eventTypeVersion, postUpdateEvent))
+	verifyEndpointReceivedEvent(t, subscriberServerV2.URL+util.SubServer2ResultsPath, postUpdateEvent)
+
+	triggerDeleteSub(name, ns, t)
+
 }
 
-func checkIfError(err error, t *testing.T) {
-	if err != nil {
-		t.Fatal(err)
-	}
+func verifyPublishPushFlow(eventData string, subscriptionName string, namespace string, t *testing.T) {
+	payloadV1 := makePayload(sourceIDV1, eventType, eventTypeVersion, eventData)
+
+	triggerCreateSub(subscriptionName, namespace, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion, sourceIDV1, t)
+
+	time.Sleep(waitForSubscriptionToStart)
+
+	publishEvent(t, publishServer.URL, payloadV1)
+	verifyEndpointReceivedEvent(t, subscriberServerV1.URL+util.SubServer1ResultsPath, eventData)
+
+	triggerDeleteSub(subscriptionName, namespace, t)
+
 }
 
-func Test_pushRequestShouldNotIncludeKymaTopicHeader(t *testing.T) {
-	var pushRequest *http.Request
-	requestProvider := common.RequestProvider(func(method, url string, body io.Reader) (*http.Request, error) {
-		var err error
-		pushRequest, err = http.NewRequest(method, url, body)
-		return pushRequest, err
-	})
-	pushOpts := opts.DefaultOptions
-	pushOpts.ClientID = "event-bus-push-test"
-	pushOpts.NatsStreamingClusterID = clusterID
-	pushApplication := pushapp.NewPushApplication(&pushOpts, newFakeInformer())
+func triggerCreateSub(subscriptionName string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
+	sourceID string, t *testing.T) {
+	_, err := createNewSubscription(subscriptionName, namespace, subscriberEventEndpointURL, eventType, eventTypeVersion, sourceID)
+	checkIfError(err, t)
+}
 
-	subscriptionsSupervisor1 := pushApplication.SubscriptionsSupervisor
-	subscription1 := util.NewSubscription("test-sub-1", metav1.NamespaceDefault, subscriberServerV1.URL+util.SubServer1EventsPath, eventType, eventTypeVersion,
-		sourceIDV1)
-	subscriptionsSupervisor1.StartSubscriptionReq(subscription1, requestProvider)
-	{
-		payloadV1 := makePayload(sourceIDV1, eventType, eventTypeVersion, eventDataV1)
-		res, err := http.Post(publishServer.URL+"/v1/events", "application/json", strings.NewReader(payloadV1))
-		checkIfError(err, t)
-		verifyStatusCode(res, 200, t)
-		log.Print(res)
-		respObj := &api.PublishResponse{}
-		body, err := ioutil.ReadAll(res.Body)
-		defer res.Body.Close()
-		err = json.Unmarshal(body, &respObj)
-		assert.NotNil(t, respObj.EventID)
-		assert.NotEmpty(t, respObj.EventID)
-		log.Printf("%v", respObj)
+func triggerDeleteSub(subscriptionName string, namespace string, t *testing.T) {
+	err := deleteSubscription(subscriptionName, namespace)
+	checkIfError(err, t)
+}
 
-		var ok bool
-		for i := 0; i < 20; i++ {
-			time.Sleep(1 * time.Second)
-			res, err := http.Get(subscriberServerV1.URL + util.SubServer1ResultsPath)
-			assert.Nil(t, err)
-			body, err := ioutil.ReadAll(res.Body)
-			var resp string
-			json.Unmarshal(body, &resp)
-			res.Body.Close()
-			if len(resp) == 0 {
-				continue
-			}
-			assert.Equal(t, eventDataV1, resp)
-			ok = true
-			break
-		}
-		assert.True(t, ok)
-	}
-	if pushRequest == nil {
-		t.Fatal("push request should not be nil")
-	}
-
-	if header := pushRequest.Header.Get(headerKymaTopic); len(header) > 0 {
-		t.Fatalf("request to endpoint should not include the header %s", headerKymaTopic)
-	}
+func triggerUpdateSub(subscriptionName string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
+	sourceID string, t *testing.T) {
+	_, err := updateSubscription(subscriptionName, namespace, subscriberEventEndpointURL, eventType, eventTypeVersion, sourceID)
+	checkIfError(err, t)
 }

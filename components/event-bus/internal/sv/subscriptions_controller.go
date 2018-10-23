@@ -64,10 +64,10 @@ func createSubscriptionsInformer() cache.SharedIndexInformer {
 	informer := subv1alpha1.NewSubscriptionInformer(subClient, metav1.NamespaceAll, opts.GetOptions().ResyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			log.Printf("Subscription custom resource created:\n    %v\n", obj)
+			log.Printf("Subscription custom resource created:\n    %+v\n", obj)
 			subObj, ok := obj.(*subApis.Subscription)
 			if !ok {
-				log.Printf("Error: Not a Subscription object:\n    %v\n", obj)
+				log.Printf("Error: Not a Subscription object:\n    %+v\n", obj)
 				return
 			}
 			if checkEventActivationForSubscription(eaClient, subObj) {
@@ -78,11 +78,21 @@ func createSubscriptionsInformer() cache.SharedIndexInformer {
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			if oldObj != newObj {
-				log.Printf("Subscription custom resource updated, old:\n    %v\n    new: %v\n", oldObj, newObj)
+				subObj, ok := newObj.(*subApis.Subscription)
+				if !ok {
+					log.Printf("Error: Not a Subscription object:\n    %+v\n", newObj)
+					return
+				}
+				if checkEventActivationForSubscription(eaClient, subObj) {
+					activateSubscriptions(subClient, subObj.GetNamespace(), []*subApis.Subscription{subObj})
+				} else {
+					deactivateSubscriptions(subClient, subObj.GetNamespace(), []*subApis.Subscription{subObj})
+				}
+				log.Printf("Subscription custom resource updated, old:\n    %+v\n    new: %+v\n", oldObj, newObj)
 			}
 		},
 		DeleteFunc: func(obj interface{}) {
-			log.Printf("Subscription custom resource deleted:\n    %v\n", obj)
+			log.Printf("Subscription custom resource deleted:\n    %+v\n", obj)
 		},
 	})
 	return informer

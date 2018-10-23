@@ -30,6 +30,9 @@ func (c *serviceClassConverter) ToGQL(in *v1beta1.ServiceClass) (*gqlschema.Serv
 	displayName := resource.ToStringPtr(externalMetadata["displayName"])
 	longDescription := resource.ToStringPtr(externalMetadata["longDescription"])
 
+	var labels gqlschema.Labels
+	labels.UnmarshalGQL(externalMetadata["labels"])
+
 	class := gqlschema.ServiceClass{
 		Name:                in.Name,
 		Environment:         in.Namespace,
@@ -43,6 +46,7 @@ func (c *serviceClassConverter) ToGQL(in *v1beta1.ServiceClass) (*gqlschema.Serv
 		SupportURL:          supportURL,
 		CreationTimestamp:   in.CreationTimestamp.Time,
 		Tags:                in.Spec.Tags,
+		Labels:              labels,
 	}
 
 	return &class, nil

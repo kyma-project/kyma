@@ -6,12 +6,13 @@ import (
 )
 
 type options struct {
-	externalAPIPort int
-	proxyPort       int
-	minioURL        string
-	namespace       string
-	requestTimeout  int
-	requestLogging  bool
+	externalAPIPort       int
+	proxyPort             int
+	minioURL              string
+	namespace             string
+	requestTimeout        int
+	requestLogging        bool
+	detailedErrorResponse bool
 }
 
 func parseArgs() *options {
@@ -21,22 +22,24 @@ func parseArgs() *options {
 	namespace := flag.String("namespace", "kyma-system", "Namespace used by Gateway")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
+	detailedErrorResponse := flag.Bool("detailedErrorResponse", false, "Flag for showing full internal error response messages.")
 
 	flag.Parse()
 
 	return &options{
-		externalAPIPort: *externalAPIPort,
-		proxyPort:       *proxyPort,
-		minioURL:        *minioURL,
-		namespace:       *namespace,
-		requestTimeout:  *requestTimeout,
-		requestLogging:  *requestLogging,
+		externalAPIPort:       *externalAPIPort,
+		proxyPort:             *proxyPort,
+		minioURL:              *minioURL,
+		namespace:             *namespace,
+		requestTimeout:        *requestTimeout,
+		requestLogging:        *requestLogging,
+		detailedErrorResponse: *detailedErrorResponse,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --minioURL=%s"+
-		"--namespace=%s --requestTimeout=%d  --requestLogging=%t",
+		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --detailedErrorResponse=%t",
 		o.externalAPIPort, o.proxyPort, o.minioURL,
-		o.namespace, o.requestTimeout, o.requestLogging)
+		o.namespace, o.requestTimeout, o.requestLogging, o.detailedErrorResponse)
 }

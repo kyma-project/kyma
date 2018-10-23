@@ -26,37 +26,18 @@ func (i *Installation) ShouldInstall() bool {
 }
 
 func (i *Installation) canInstall() bool {
-	return (i.Status.State == StateEmpty || i.Status.State == StateUninstalled)
+	return (i.Status.State == StateEmpty || i.Status.State == StateUninstalled || i.Status.State == StateInstalled)
 }
 
 // ShouldUninstall returns true when user requested uninstall action
 func (i *Installation) ShouldUninstall() bool {
 	action := i.ObjectMeta.Labels["action"]
 
-	if i.Status.State == "" {
-		return false
-	}
-
 	return action == ActionUninstall && i.canUninstall()
 }
 
 func (i *Installation) canUninstall() bool {
-	return (i.Status.State == StateInstalled || i.Status.State == StateUpdated || i.Status.State == StateError)
-}
-
-// ShouldUpdate returns true when user requested update action
-func (i *Installation) ShouldUpdate() bool {
-	action := i.ObjectMeta.Labels["action"]
-
-	if i.Status.State == StateEmpty {
-		return false
-	}
-
-	return action == ActionUpdate && i.canUpdate()
-}
-
-func (i *Installation) canUpdate() bool {
-	return (i.Status.State == StateInstalled || i.Status.State == StateUpdated)
+	return (i.Status.State != StateInProgress && i.Status.State != StateEmpty)
 }
 
 func (i *Installation) hasCondition(condition InstallationConditionType) bool {
@@ -121,9 +102,6 @@ const (
 	// StateInstalled means installation of kyma is done
 	StateInstalled StateEnum = "Installed"
 
-	// StateUpdated means installation of kyma is updated
-	StateUpdated StateEnum = "Updated"
-
 	// StateUninstalled means installation is removed without errors
 	StateUninstalled StateEnum = "Uninstalled"
 
@@ -139,12 +117,6 @@ const (
 	// ConditionInstalling .
 	ConditionInstalling InstallationConditionType = "Installing"
 
-	// ConditionUpdated .
-	ConditionUpdated InstallationConditionType = "Updated"
-
-	// ConditionUpdating .
-	ConditionUpdating InstallationConditionType = "Updating"
-
 	// ConditionUninstalled .
 	ConditionUninstalled InstallationConditionType = "Uninstalled"
 
@@ -159,9 +131,6 @@ const (
 
 	// ActionInstall .
 	ActionInstall string = "install"
-
-	// ActionUpdate .
-	ActionUpdate string = "update"
 
 	// ActionUninstall .
 	ActionUninstall = "uninstall"

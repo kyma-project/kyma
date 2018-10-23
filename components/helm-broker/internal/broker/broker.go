@@ -8,8 +8,8 @@ import (
 	rls "k8s.io/helm/pkg/proto/hapi/services"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/platform/idprovider"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybind"
 )
 
 // be aware that after regenerating mocks, manual steps are required
@@ -129,11 +129,11 @@ type (
 	}
 
 	bindTemplateRenderer interface {
-		Render(bindTemplate internal.BundlePlanBindTemplate, resp *rls.InstallReleaseResponse) (ybind.RenderedBindYAML, error)
+		Render(bindTemplate internal.BundlePlanBindTemplate, resp *rls.InstallReleaseResponse) (bind.RenderedBindYAML, error)
 	}
 
 	bindTemplateResolver interface {
-		Resolve(bindYAML ybind.RenderedBindYAML, ns internal.Namespace) (*ybind.ResolveOutput, error)
+		Resolve(bindYAML bind.RenderedBindYAML, ns internal.Namespace) (*bind.ResolveOutput, error)
 	}
 )
 

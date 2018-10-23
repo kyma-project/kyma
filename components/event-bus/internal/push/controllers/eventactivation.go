@@ -13,37 +13,29 @@ func getUpdateFnWithEventActivationCheck(supervisor actors.SubscriptionsSupervis
 		if oldObj == newObj {
 			return
 		}
-
-		_, oldSubOk := oldObj.(*subApis.Subscription)
-		newSub, newSubOK := newObj.(*subApis.Subscription)
-
-		if !oldSubOk || !newSubOK {
-			log.Printf("unknown object type either updated %+v or original +%v", newObj, oldObj)
-			return
-		}
-
-		if newSub.HasCondition(subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionFalse}) {
-			log.Printf("Stop NATS Subscription %+v", newSub)
-			supervisor.StopSubscriptionReq(newSub)
-		}
-
-		if newSub.HasCondition(subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}) {
-			log.Printf("Start NATS Subscription %+v", newSub)
-			supervisor.StartSubscriptionReq(newSub, common.DefaultRequestProvider)
+		if oldSub, newSub, ok := checkSubscriptions(oldObj, newObj); ok {
+			if newSub.HasCondition(subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionFalse}) {
+				log.Printf("Stop NATS Subscription %+v", newSub)
+				supervisor.StopSubscriptionReq(newSub)
+			} else {
+				log.Printf("Stop old NATS Subscription %+v", oldSub)
+				supervisor.StopSubscriptionReq(oldSub)
+			}
+			if newSub.HasCondition(subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}) {
+				log.Printf("Start NATS Subscription %+v", newSub)
+				supervisor.StartSubscriptionReq(newSub, common.DefaultRequestProvider)
+			}
 		}
 	}
 }
 
 func getAddFnWithEventActivationCheck(supervisor actors.SubscriptionsSupervisorInterface) func(obj interface{}) {
 	return func(obj interface{}) {
-		subscription, ok := obj.(*subApis.Subscription)
-		if !ok {
-			log.Printf("unknown object type added %+v", obj)
-			return
-		}
-		if subscription.HasCondition(subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}) {
-			log.Printf("Subscription custom resource created %v", obj)
-			supervisor.StartSubscriptionReq(subscription, common.DefaultRequestProvider)
+		if subscription, ok := checkSubscription(obj); ok {
+			if subscription.HasCondition(subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue}) {
+				log.Printf("Subscription custom resource created %v", obj)
+				supervisor.StartSubscriptionReq(subscription, common.DefaultRequestProvider)
+			}
 		}
 	}
 }

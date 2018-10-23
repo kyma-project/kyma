@@ -44,4 +44,4 @@ cat >> "${FILE_PATH}" <<EOL
 ${COMPONENT_NAME}.enabled=${ENABLED}
 EOL
 
-echo "Component ${COMPONENT_NAME} is now ${STATUS}!"
+echo "${COMPONENT_NAME} is now ${STATUS}!"

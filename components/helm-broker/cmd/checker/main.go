@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/sirupsen/logrus"
 )
 
@@ -19,7 +19,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	loader := ybundle.NewLoader(dir, logger)
+	loader := bundle.NewLoader(dir, logger)
 
 	if len(os.Args) < 2 {
 		fmt.Println("Provide path to a bundle")

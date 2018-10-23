@@ -101,7 +101,7 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 func (steps *InstallationSteps) UninstallKyma(installationData *config.InstallationData) error {
 	err := steps.DeprovisionAzureResources(DefaultDeprovisionConfig(), installationData.Context)
 	steps.errorHandlers.LogError("An error during deprovisioning: ", err)
-	steps.RemoveKymaComponents()
+	steps.RemoveKymaComponents(installationData)
 
 	err = steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
 	if steps.errorHandlers.CheckError("Error on removing label: ", err) {

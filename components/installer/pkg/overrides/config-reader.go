@@ -22,12 +22,17 @@ type reader struct {
 	client *kubernetes.Clientset
 }
 
+//Input overrides data (from ConfigMaps/Secrets)
+type inputMap map[string]string
+
 type component struct {
 	name      string
-	overrides map[string]string
+	overrides inputMap
 }
 
-func (r reader) getComponents() ([]component, error) {
+// Returns overrides for components
+// Returned slice may contain several components with the same name!
+func (r reader) readComponentOverrides() ([]component, error) {
 
 	var components = []component{}
 
@@ -52,7 +57,7 @@ func (r reader) getComponents() ([]component, error) {
 	for _, sec := range secrets {
 		comp := component{
 			name:      sec.Labels["component"],
-			overrides: toStringStringMap(sec.Data),
+			overrides: toInputMap(sec.Data),
 		}
 		components = append(components, comp)
 	}
@@ -60,9 +65,9 @@ func (r reader) getComponents() ([]component, error) {
 	return components, nil
 }
 
-func (r reader) getCommonConfig() (map[string]string, error) {
+func (r reader) readCommonOverrides() ([]inputMap, error) {
 
-	var combined = make(map[string]string)
+	res := []inputMap{}
 
 	configmaps, err := r.getLabeledConfigMaps(commonListOpts)
 	if err != nil {
@@ -75,18 +80,14 @@ func (r reader) getCommonConfig() (map[string]string, error) {
 	}
 
 	for _, cMap := range configmaps {
-		for key, val := range cMap.Data {
-			combined[key] = val
-		}
+		res = append(res, cMap.Data)
 	}
 
 	for _, sec := range secrets {
-		for key, val := range sec.Data {
-			combined[key] = string(val)
-		}
+		res = append(res, toInputMap(sec.Data))
 	}
 
-	return combined, nil
+	return res, nil
 }
 
 func (r reader) getLabeledConfigMaps(opts metav1.ListOptions) ([]core.ConfigMap, error) {
@@ -111,8 +112,8 @@ func concatLabels(labels ...string) string {
 	return strings.Join(labels, ", ")
 }
 
-func toStringStringMap(input map[string][]byte) map[string]string {
-	var output = make(map[string]string)
+func toInputMap(input map[string][]byte) inputMap {
+	var output = make(inputMap)
 	for key, value := range input {
 		output[key] = string(value)
 	}
