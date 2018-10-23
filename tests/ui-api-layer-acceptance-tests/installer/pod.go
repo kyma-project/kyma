@@ -1,7 +1,6 @@
 package installer
 
 import (
-	"k8s.io/api/core/v1"
 	corev1 "k8s.io/api/core/v1"
 	corev1Type "k8s.io/client-go/kubernetes/typed/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,17 +14,18 @@ const (
 	UPSBrokerImage = "quay.io/kubernetes-service-catalog/user-broker:latest"
 )
 
-func CreatePod(k8sClient *corev1Type.CoreV1Client, namespace, name string) (*v1.Pod, error) {
-	return k8sClient.Pods(namespace).Create(upsBrokerPod(name))
+func CreatePod(k8sClient *corev1Type.CoreV1Client, namespace, name string) error {
+	_, err := k8sClient.Pods(namespace).Create(upsBrokerPod(name))
+	return err
 }
 
 func DeletePod(k8sClient *corev1Type.CoreV1Client, namespace, name string) error {
 	return k8sClient.Pods(namespace).Delete(name, nil)
 }
 
-func WaitForPodRunning(k8sClient *corev1Type.CoreV1Client, pod *v1.Pod) error {
+func WaitForPodRunning(k8sClient *corev1Type.CoreV1Client, namespace, name string) error {
 	return waiter.WaitAtMost(func() (bool, error) {
-		pod, err := k8sClient.Pods(pod.Namespace).Get(pod.Name, metav1.GetOptions{})
+		pod, err := k8sClient.Pods(namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			return false, err
 		}
