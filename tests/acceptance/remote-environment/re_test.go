@@ -33,7 +33,7 @@ func TestRemoteEnvironmentAPIAccess(t *testing.T) {
 	ts := suite.NewTestSuite(t, cfg.DockerImage, "acceptance-test")
 	ts.Setup()
 	if !cfg.KeepTestResources {
-		defer ts.TearDown()
+		defer ts.TearDown(90 * time.Second)
 	}
 
 	t.Logf("Waiting for service class")

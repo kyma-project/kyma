@@ -9,14 +9,16 @@ import (
 
 	catalog "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	bindingusage "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
-
-	bindingusage "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 )
 
 type TestSuite struct {
@@ -27,6 +29,7 @@ type TestSuite struct {
 	remoteEnvironmentName string
 	dockerImage           string
 
+	scCli  v1beta1.ServicecatalogV1beta1Interface
 	config *restclient.Config
 
 	osbServiceId              string
@@ -48,6 +51,9 @@ func NewTestSuite(t *testing.T, image, namespace string) *TestSuite {
 	config, err := restclient.InClusterConfig()
 	require.NoError(t, err)
 
+	scClientset, err := clientset.NewForConfig(config)
+	require.NoError(t, err)
+
 	id := rand.String(4)
 	gwSvcName := fmt.Sprintf("acc-test-gw-%s", id)
 
@@ -57,6 +63,7 @@ func NewTestSuite(t *testing.T, image, namespace string) *TestSuite {
 		dockerImage:           image,
 		remoteEnvironmentName: fmt.Sprintf("acc-test-re-%s", id),
 
+		scCli:  scClientset.ServicecatalogV1beta1(),
 		config: config,
 
 		appSvcDeploymentName:      fmt.Sprintf("acc-test-app-%s", id),
@@ -81,13 +88,13 @@ func (ts *TestSuite) Setup() {
 }
 
 func (ts *TestSuite) WaitForServiceClassWithTimeout(timeout time.Duration) {
-	clientSet, err := clientset.NewForConfig(ts.config)
 	done := time.After(timeout)
-	require.NoError(ts.t, err)
+
 	for {
 		// if error occurs, try again
-		ts.serviceClass, err = clientSet.ServicecatalogV1beta1().ServiceClasses(ts.namespace).Get(ts.osbServiceId, metav1.GetOptions{})
+		sc, err := ts.scCli.ServiceClasses(ts.namespace).Get(ts.osbServiceId, metav1.GetOptions{})
 		if err == nil {
+			ts.serviceClass = sc
 			return
 		}
 
@@ -105,9 +112,9 @@ func (ts *TestSuite) WaitForServiceClassWithTimeout(timeout time.Duration) {
 }
 
 func (ts *TestSuite) ProvisionServiceInstance(timeout time.Duration) {
-	clientSet, err := clientset.NewForConfig(ts.config)
-	require.NoError(ts.t, err)
-	siClient := clientSet.ServicecatalogV1beta1().ServiceInstances(ts.namespace)
+	var err error
+	siClient := ts.scCli.ServiceInstances(ts.namespace)
+
 	ts.serviceInstance, err = siClient.Create(&catalog.ServiceInstance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fmt.Sprintf("acc-test-remote-env-%s", ts.TestID),
@@ -150,9 +157,7 @@ func (ts *TestSuite) ProvisionServiceInstance(timeout time.Duration) {
 }
 
 func (ts *TestSuite) Bind(timeout time.Duration) {
-	clientSet, err := clientset.NewForConfig(ts.config)
-	require.NoError(ts.t, err)
-	bindingClient := clientSet.ServicecatalogV1beta1().ServiceBindings(ts.namespace)
+	bindingClient := ts.scCli.ServiceBindings(ts.namespace)
 	binding, err := bindingClient.Create(&catalog.ServiceBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: ts.bindingName,
@@ -194,9 +199,52 @@ func (ts *TestSuite) Bind(timeout time.Duration) {
 
 }
 
-func (ts *TestSuite) TearDown() {
-	defer ts.deleteNamespace()
-	defer ts.deleteRemoteEnvironment()
+func (ts *TestSuite) TearDown(timeoutPerStep time.Duration) {
+	ts.ensureServiceBindingIsDeleted(timeoutPerStep)
+
+	ts.ensureServiceInstanceIsDeleted(timeoutPerStep)
+
+	ts.deleteRemoteEnvironment()
+
+	ts.ensureNamespaceIsDeleted(timeoutPerStep)
+}
+
+func (ts *TestSuite) ensureServiceBindingIsDeleted(timeout time.Duration) {
+	siClient := ts.scCli.ServiceBindings(ts.namespace)
+
+	err := siClient.Delete(ts.bindingName, &metav1.DeleteOptions{})
+	require.NoError(ts.t, err)
+
+	repeat.FuncAtMost(ts.t, func() error {
+		_, err := siClient.Get(ts.bindingName, metav1.GetOptions{})
+		switch {
+		case err == nil:
+			return fmt.Errorf("ServiceBinding %q still exists", ts.bindingName)
+		case apierrors.IsNotFound(err):
+			return nil
+		default:
+			return errors.Wrap(err, "while getting ServiceBinding")
+		}
+	}, timeout)
+}
+
+func (ts *TestSuite) ensureServiceInstanceIsDeleted(timeout time.Duration) {
+	siClient := ts.scCli.ServiceInstances(ts.serviceInstance.Namespace)
+
+	err := siClient.Delete(ts.serviceInstance.Name, &metav1.DeleteOptions{})
+	require.NoError(ts.t, err)
+
+	repeat.FuncAtMost(ts.t, func() error {
+		_, err := siClient.Get(ts.serviceInstance.Name, metav1.GetOptions{})
+		switch {
+		case err == nil:
+			return fmt.Errorf("ServiceInstance %q still exists", ts.serviceInstance.Name)
+		case apierrors.IsNotFound(err):
+			return nil
+		default:
+			return errors.Wrap(err, "while getting ServiceInstance")
+		}
+	}, timeout)
 }
 
 func (ts *TestSuite) executeCall(url string) (*http.Response, error) {
