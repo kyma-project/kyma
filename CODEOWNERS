@@ -49,8 +49,8 @@
 # The `metadata-service` subchart
 /resources/application-connector/charts/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# The `remote-environments-controller` subchart
-/resources/application-connector/charts/remote-environments-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+# The `remote-environment-controller` subchart
+/resources/application-connector/charts/remote-environment-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `nginx-ingress` subchart
 /resources/application-connector/charts/nginx-ingress/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
