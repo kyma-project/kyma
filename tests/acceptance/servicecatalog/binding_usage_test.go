@@ -18,7 +18,7 @@ import (
 	reClient "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	reInterface "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 
-	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog/wait"
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/stretchr/testify/require"
 	"github.com/vrischmann/envconfig"
 	appsTypes "k8s.io/api/apps/v1beta1"
@@ -280,7 +280,7 @@ func (ts *TestSuite) deleteServiceBinding(bindingName string, timeout time.Durat
 	err = siClient.Delete(bindingName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		_, err := siClient.Get(bindingName, metav1.GetOptions{})
 		switch {
 		case err == nil:
@@ -311,7 +311,7 @@ func (ts *TestSuite) createAndWaitForServiceBinding(bindingName, instanceName st
 	})
 	require.NoError(ts.t, err)
 
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		b, err := bindingClient.Get(bindingName, metav1.GetOptions{})
 		if err != nil {
 			return err
@@ -407,7 +407,7 @@ func (ts *TestSuite) deleteServiceInstance(instanceName string, timeout time.Dur
 	err = siClient.Delete(instanceName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		_, err := siClient.Get(instanceName, metav1.GetOptions{})
 		switch {
 		case err == nil:
@@ -438,7 +438,7 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 	})
 	require.NoError(ts.t, err)
 
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		si, err := siClient.Get(instanceName, metav1.GetOptions{})
 		if err != nil {
 			return err
@@ -463,8 +463,8 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 
 // ServiceClass helpers
 func (ts *TestSuite) waitForREServiceClasses(timeout time.Duration) {
-	wait.ForFuncAtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
-	wait.ForFuncAtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
+	repeat.FuncAtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
+	repeat.FuncAtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
 }
 
 func (ts *TestSuite) serviceClassIsAvailableA() func() error {
@@ -574,7 +574,7 @@ func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.De
 func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, timeout time.Duration) {
 	req := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs?name=%s&value=%s", ts.namespace, envName, envValue)
 
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		resp, err := http.Get(req)
 		if err != nil {
 			return err

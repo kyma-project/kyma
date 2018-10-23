@@ -11,7 +11,7 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	bindingusage "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog/wait"
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -215,7 +215,7 @@ func (ts *TestSuite) ensureServiceBindingIsDeleted(timeout time.Duration) {
 	err := siClient.Delete(ts.bindingName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		_, err := siClient.Get(ts.bindingName, metav1.GetOptions{})
 		switch {
 		case err == nil:
@@ -234,7 +234,7 @@ func (ts *TestSuite) ensureServiceInstanceIsDeleted(timeout time.Duration) {
 	err := siClient.Delete(ts.serviceInstance.Name, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		_, err := siClient.Get(ts.serviceInstance.Name, metav1.GetOptions{})
 		switch {
 		case err == nil:

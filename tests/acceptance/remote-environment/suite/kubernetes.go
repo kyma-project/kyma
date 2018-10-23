@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog/wait"
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	appsv1beta1 "k8s.io/api/apps/v1beta1"
@@ -129,7 +129,7 @@ func (ts *TestSuite) ensureNamespaceIsDeleted(timeout time.Duration) {
 		}
 	}
 
-	wait.ForFuncAtMost(ts.t, waitForNsTermination, timeout)
+	repeat.FuncAtMost(ts.t, waitForNsTermination, timeout)
 }
 
 func (ts *TestSuite) deleteNamespace() {
