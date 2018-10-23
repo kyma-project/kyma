@@ -71,13 +71,13 @@ func NewController(kubeClientset *kubernetes.Clientset, kubeInformerFactory kube
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeClientset.CoreV1().Events("")})
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "kymaInstaller"})
 
-	backOffIntervals := []int{0, 10, 20, 40, 60}
+	backOffIntervals := []uint{0, 10, 20, 40, 60}
 	backOffStepFunc := func(count, max, delay int, msg ...string) {
 
 		if count > max {
-			log.Printf("##############################################################################")
-			log.Printf("#### Retries does not seem to work. Looks like manual action is required. ####")
-			log.Printf("##############################################################################")
+			log.Printf("######################################################################")
+			log.Printf("#### Retries does not seem to work. Manual action is recommended. ####")
+			log.Printf("######################################################################")
 		}
 
 		if count > 0 {
