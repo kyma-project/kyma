@@ -51,7 +51,8 @@ receivers:
     send_resolved: true
     api_url: {{ .Values.global.alertTools.credentials.slack.apiurl | quote }}
     icon_emoji: ":ghost:"
-    title: '{{ .Values.global.domainName }}{{`{{range $i, $alert := .Alerts }}`}}[{{`{{$alert.Status | toUpper}}`}}{{`{{ if eq $alert.Status "firing" }}`}}:{{`{{ $n }}`}}{{`{{end}}`}}]{{`{{ .Annotations.summary }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
+    title: '{{ template "__subject" . }} ({{ .Values.global.domainName }})'
+    title_link: 'https://console.{{ .Values.global.domainName }}'
     text: '{{`{{ range .Alerts }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.description }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
 {{- end }}
 {{- end }}
