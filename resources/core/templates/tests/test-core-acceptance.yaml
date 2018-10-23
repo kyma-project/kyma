@@ -42,4 +42,6 @@ spec:
         value: "false"
       - name: REMOTE_ENVIRONMENT_DISABLED
         value: {{ .Values.test.acceptance.core.remoteEnvironment.disabled | quote }}
+      - name: TEAR_DOWN_TIMEOUT_PER_STEP
+        value: {{ .Values.test.acceptance.core.remoteEnvironment.tearDownTimeoutPerStep | quote }}
   restartPolicy: Never

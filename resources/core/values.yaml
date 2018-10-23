@@ -24,7 +24,7 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: 014de52c
+    version: 3d71d245
   alpine_net:
     dir: develop/
     version: ed568f0f
@@ -86,6 +86,9 @@ test:
         brokerNamespace: kyma-integration
         linkingTimeout: 4m
         unlinkingTimeout: 4m
+        # Currently Pods with istio sidecar they have a long termination time, because of that we need to have
+        # such log timeout for teardown (waiting until namespace will be terminated)
+        tearDownTimeoutPerStep: 3m
     ui:
       # tests uses chromium that require more memory
       requests:
