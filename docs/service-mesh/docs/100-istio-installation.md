@@ -6,7 +6,7 @@ type: Details
 As a core component, Istio installs with every Kyma deployment by default. The installation consists of two steps:
 
 1. Istio installs using the official, raw charts from the currently supported release. The charts that are currently 
-used are stored in the resources/istio directory. The installation is customized by enabling security in Istio.
+used are stored in the `resources/istio` directory. The installation is customized by enabling security in Istio.
     >**NOTE:** Every installation of Istio for Kyma must have security enabled.
 
 2. A custom Istio Patch is applied to further customize the Istio installation. A Kubernetes job introduces these 
