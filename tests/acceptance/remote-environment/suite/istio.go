@@ -41,7 +41,7 @@ metadata:
   name: {{.Service}}
   namespace: {{.Namespace}}
 spec:
-  match: (destination.service == "{{.Service}}.{{.Namespace}}.svc.cluster.local") && (source.labels["{{.AccessLabel}}"] != "true")
+  match: (destination.service.host == "{{.Service}}.{{.Namespace}}.svc.cluster.local") && (source.labels["{{.AccessLabel}}"] != "true")
   actions:
   - handler: gw.denier
     instances:
