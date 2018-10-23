@@ -14,7 +14,7 @@ changes:
   - Sets a memory limit for every sidecar
   - Modifies Istio components to use Zipkin in the `kyma-system` Namespace, instead of the default `istio-system`
   - Adds a webhook to the Istio Pilot
-  - A TLS certificate is created for the Ingress Gateway
+  - Creates a TLS certificate for the Ingress Gateway
   - All resources related to the `prometheus`, `tracing`, `grafana`, and `servicegraph`charts  are deleted
 
 During installation raw official charts from currently supported Istio release are installed on cluster. The only 
