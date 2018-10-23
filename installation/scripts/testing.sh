@@ -213,6 +213,10 @@ istioTestErr=$?
 checkAndCleanupTest istio-system
 testCheckIstio=$?
 
+echo "- Testing Application Connector"
+helm test application-connector
+acTestErr=$?
+
 echo "- Testing Remote Environments"
 helm test ec-default
 ecTestErr=$?
@@ -225,7 +229,7 @@ testCheckGateway=$?
 printImagesWithLatestTag
 latestTagsErr=$?
 
-if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${hmcTestErr} -ne 0 ]
+if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${hmcTestErr} -ne 0 ] || [ ${acTestErr} -ne 0 ]
 then
     exit 1
 else

@@ -60,19 +60,22 @@ func New(client *kubernetes.Clientset) (OverrideData, error) {
 		return nil, err
 	}
 
-	commonsMap, err := commonOverrides(r)
+	commonOverridesData, err := r.readCommonOverrides()
 	if err != nil {
 		return nil, err
 	}
 
+	commonOverrides := UnflattenToMap(joinOverridesMap(commonOverridesData...))
 	commonOverridesMap := Map{}
 	MergeMaps(commonOverridesMap, versionsMap)
-	MergeMaps(commonOverridesMap, commonsMap)
+	MergeMaps(commonOverridesMap, commonOverrides)
 
-	componentsMap, err := componentOverrides(r)
+	componentsOverridesData, err := r.readComponentOverrides()
 	if err != nil {
 		return nil, err
 	}
+
+	componentsMap := unflattenComponentOverrides(joinComponentOverrides(componentsOverridesData...))
 
 	res := Provider{
 		common:     commonOverridesMap,
@@ -97,37 +100,62 @@ func versionOverrides() (Map, error) {
 	return ToMap(versionsFileData.String())
 }
 
-//commonOverrides reads overrides common to all components
-func commonOverrides(r *reader) (Map, error) {
-	common, err := r.getCommonConfig()
-	if err != nil {
-		return nil, err
+//joinOverridesMap joins overrides from multiple input maps.
+//Maps are joined in order given by input slice, using "last wins" strategy.
+func joinOverridesMap(inputMaps ...inputMap) inputMap {
+
+	combined := make(inputMap)
+
+	if inputMaps == nil {
+		return combined
 	}
 
-	if common == nil {
-		return Map{}, nil
+	for _, im := range inputMaps {
+		for key, val := range im {
+			//No error if key's already there, "last wins"
+			combined[key] = val
+		}
 	}
 
-	return UnflattenToMap(common), nil
+	return combined
 }
 
-//componentOverrides reads overrides specific for components.
-//Returns a map where a key is component name and value is a Map of overrides for the component.
-func componentOverrides(r *reader) (map[string]Map, error) {
+//joinComponentOverrides joins overrides for components. Useful when multiple input data objects for a single component exist.
+//Accepts component slice where overrides for the same component may occur several times.
+//Returns a map of input data for components overrides: key is component name, value contains joined overrides for the component.
+func joinComponentOverrides(components ...component) map[string]inputMap {
 
-	components, err := r.getComponents()
-	if err != nil {
-		return nil, err
-	}
+	res := make(map[string]inputMap)
 
-	res := map[string]Map{}
 	if components == nil {
-		return res, nil
+		return res
 	}
 
 	for _, c := range components {
-		res[c.name] = UnflattenToMap(c.overrides)
+		if res[c.name] != nil {
+			m1 := res[c.name]
+			m2 := c.overrides
+			res[c.name] = joinOverridesMap(m1, m2)
+		} else {
+			res[c.name] = c.overrides
+		}
 	}
 
-	return res, nil
+	return res
+}
+
+//Helper func that unflattens values from input map.
+func unflattenComponentOverrides(inputDataMap map[string]inputMap) map[string]Map {
+
+	res := make(map[string]Map)
+
+	if inputDataMap == nil {
+		return res
+	}
+
+	for key, val := range inputDataMap {
+		res[key] = UnflattenToMap(val)
+	}
+
+	return res
 }

@@ -3,19 +3,30 @@ package controllers
 import (
 	"log"
 
-	subscriptionApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/kyma-project/kyma/components/event-bus/internal/push/actors"
 )
 
 func getAddFnWithoutEventActivationCheck(supervisor actors.SubscriptionsSupervisorInterface) func(obj interface{}) {
 	return func(obj interface{}) {
-		subscription, ok := obj.(*subscriptionApis.Subscription)
-		if ok {
+		if subscription, ok := checkSubscription(obj); ok {
 			log.Printf("Added Subscription %+v", subscription)
 			supervisor.StartSubscriptionReq(subscription, common.DefaultRequestProvider)
-		} else {
-			log.Printf("unknown object type added %+v", obj)
+		}
+	}
+}
+
+func getUpdateFnWithoutEventActivationCheck(supervisor actors.SubscriptionsSupervisorInterface) func(oldObj, newObj interface{}) {
+	return func(oldObj, newObj interface{}) {
+		if oldObj == newObj {
+			return
+		}
+		if oldSub, newSub, ok := checkSubscriptions(oldObj, newObj); ok {
+			log.Printf("Stop old NATS Subscription %+v", oldSub)
+			supervisor.StopSubscriptionReq(oldSub)
+
+			log.Printf("Start new NATS Subscription %+v", newSub)
+			supervisor.StartSubscriptionReq(newSub, common.DefaultRequestProvider)
 		}
 	}
 }
