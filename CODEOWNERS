@@ -38,10 +38,10 @@
 /resources/core/charts/azure-broker/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
 
 # The `cluster-users` subchart
-/resources/core/charts/cluster-users/ @piotrmsc
+/resources/core/charts/cluster-users/ @piotrmsc @kubadz @sjanota
 
 # The `configurations-generator` subchart
-/resources/core/charts/configurations-generator @piotrmsc @kubadz
+/resources/core/charts/configurations-generator @piotrmsc @kubadz @sjanota
 
 # The `connector-service` subchart
 /resources/application-connector/charts/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -59,7 +59,7 @@
 /resources/core/charts/console/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
 
 # The `dex` subchart
-/resources/core/charts/dex/ @piotrmsc @kubadz
+/resources/core/charts/dex/ @piotrmsc @kubadz @sjanota
 
 # The `istio-rbac` subchart
 /resources/core/charts/istio-rbac/ @piotrmsc @kubadz @sjanota
@@ -147,7 +147,7 @@
 /components/apiserver-proxy/ @piotrmsc @kubadz @sjanota
 
 # Api controller Component
-/components/api-controller/ @piotrmsc @kubadz
+/components/api-controller/ @piotrmsc @kubadz @sjanota
 
 # Binding usage controller Component
 /components/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
@@ -162,7 +162,7 @@
 /components/environments/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
 
 # Istio Extensions Component
-/components/istio-webhook/ @piotrmsc
+/components/istio-webhook/ @piotrmsc @sjanota @kubadz
 
 # Istio Extensions Component
 /components/istio-kyma-patch/ @piotrmsc @sjanota @kubadz
@@ -200,7 +200,7 @@
 # Tests
 # acceptance tests
 /tests/acceptance/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85 @jasiu001
-/tests/acceptance/dex @pssap @piotrmsc
+/tests/acceptance/dex @sjanota @piotrmsc @kubadz
 
 # test-environments
 /tests/test-environemnts/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
@@ -212,7 +212,7 @@
 /tests/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
 # api-controller acceptance tests
-/tests/api-controller-acceptance-tests/ @piotrmsc
+/tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @sjanota
 
 # UI API Layer acceptance tests
 /tests/ui-api-layer-acceptance-tests/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
