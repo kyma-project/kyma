@@ -3,24 +3,17 @@ title: The Remote Environment Broker architecture
 type: Architecture
 ---
 
-The Remote Environment Broker (REB) workflow starts with the registration process, during which a RemoteEnvironment (RE) is registered on the Kyma cluster.
+The Remote Environment Broker (REB) workflow consists of the following steps:
 
-
-1. Kyma administrator registers the RemoteEnvironment's APIs and Events definitions to the Kyma cluster through the Application Connector which creates a RemoteEnvironment custom resource inside the cluster.
-2. The Remote Environment Broker observes all the RemoteEnvironments in the cluster. Whenever the user creates an EnvironmentMapping with the same name as the RemoteEnvironment in a given Namespace, a `remote-env-broker` Service Broker appears inside this Namespace.
+1. The Remote Environment Broker watches all RemoteEnvironment custom resources and Namespaces in the cluster.
+2. The user creates an EnvironmentMapping custom resource in a given Namespace. Together with the EnvironmentMapping, a `remote-env-broker` Service Broker (SB) appears.
+3. The `remote-env-broker` Service Broker (SB) activates services provided by a given RemoteEnvironment.
 3. The Service Catalog asks the `remote-env-broker` about the services provided by the given RemoteEnvironment and creates ServiceClasses inside a given Namespace.
 4. The user can provision ServiceInstances from the ServiceClasses in a given Namespace.
 
+![REB architecture](assets/001-REB-architecture.png)
 
-![REB registration](assets/001-REB-registration.png)
-
-### Enable the provisioning process
-
-After the registration, trigger the provisioning of a given ServiceClass by creating a ServiceInstance. Before you create a ServiceInstance of a given ServiceClass, you must create the EnvironmentMapping. The EnvironmentMapping enables the remote environment offering in a given Environment. Creating a ServiceInstance without the EnvironmentMapping ends with failure. For more details about the EnvironmentMapping, see the **Examples** document.
-
-![REB envmapping](assets/002-REB-envmapping.png)
-
-Provisioning and binding work differently for API, Event, and both the API and Event ServiceClass. Because of that, these operations are described in separate sections. In relation to the nature of remote environment ServiceClasses, you can provision them just once in a given Environment.
+When this process is complete, you can provision and bind your services.
 
 ### Provisioning and binding for an API ServiceClass
 
