@@ -5,13 +5,13 @@ type: Architecture
 
 The Remote Environment Broker (REB) workflow consists of the following steps:
 
-1. The Remote Environment Broker watches all RemoteEnvironment custom resources and Namespaces in the cluster.
-2. The user creates an EnvironmentMapping custom resource in a given Namespace. Together with the EnvironmentMapping, a `remote-env-broker` Service Broker (SB) appears.
-3. The `remote-env-broker` Service Broker (SB) activates services provided by a given RemoteEnvironment.
+1. The Remote Environment Broker watches for RemoteEnvironment (RE) custom resources in the cluster and EnvironmentMappings (EM) in all Environments.
+2. The user creates an EnvironmentMapping custom resource in a given Environment. Together with the EnvironmentMapping, a `remote-env-broker` Service Broker (SB) appears. one SB per namespace even if EM more
+3. The `remote-env-broker` Service Broker (SB) exposes services provided by a given RemoteEnvironment.
 3. The Service Catalog asks the `remote-env-broker` about the services provided by the given RemoteEnvironment and creates ServiceClasses inside a given Namespace.
 4. The user can provision ServiceInstances from the ServiceClasses in a given Namespace.
 
-![REB architecture](assets/001-REB-architecture.png)
+![REB architecture](assets/001-REB-architecture.svg)
 
 When this process is complete, you can provision and bind your services.
 
