@@ -17,10 +17,6 @@ changes:
   - Creates a TLS certificate for the Ingress Gateway
   - Deletes all resources related to the `prometheus`, `tracing`, `grafana`, and `servicegraph`charts
 
-During installation raw official charts from currently supported Istio release are installed on cluster. The only 
-customization done at this point of installation is enabling security in Istio. This is prerequisite to run Kyma and 
-every Istio installation for Kyma needs to have security enabled.
-
 To learn more about the custom Istio patch applied in Kyma, see the `components/istio-kyma-patch/` directory. 
 
 ## Use an existing Istio installation with Kyma
