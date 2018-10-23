@@ -23,20 +23,19 @@ podTemplate(label: label) {
                             checkout scm
                         }
 
+
                         stage("validate internal links") {
                             validateLinks('--ignore-external', repositoryName)
                         }
 
-                        if (!isMaster) {
+                        if (isMaster) {
+                            stage("validate external links") {
+                                validateLinks('--ignore-internal', repositoryName)
+                            }
+                        } else {
                             stage("validate external links in changed markdown files") {
                                 def changes = changedMarkdownFiles(repositoryName).join(" ")
                                 validateLinks("--ignore-internal ${changes}", repositoryName)
-                            }
-                        }
-
-                        if(isMaster || params.TRIGGER_FULL_VALIDATION) {
-                            stage("validate external links") {
-                                validateLinks('--ignore-internal', repositoryName)
                             }
                         }
                     }
@@ -47,7 +46,7 @@ podTemplate(label: label) {
             currentBuild.result = "FAILURE"
             def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${params.GIT_BRANCH}. See details: ${env.BUILD_URL}"
             emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
-            
+
             if(isMaster) {
                 sendSlackNotification(":hankey-fire:Governance validation failed on `${repositoryName}` repository!\nSee details: ${env.BUILD_URL}console")
             }
