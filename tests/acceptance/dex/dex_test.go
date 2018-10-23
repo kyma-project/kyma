@@ -24,8 +24,8 @@ const (
 	domainEnvName                         = "KYMA_DOMAIN"
 	isLocalEnvEnvName                     = "IS_LOCAL_ENV"
 	clientId                              = "kyma-client"
-	username                              = "admin@kyma.cx"
-	password                              = "nimda123"
+	usernameEnvName                       = "DEX_USER_EMAIL"
+	passwordEnvName                       = "DEX_USER_PASSWORD"
 )
 
 func TestSpec(t *testing.T) {
@@ -64,6 +64,16 @@ func TestSpec(t *testing.T) {
 	domain, envFound := os.LookupEnv(domainEnvName)
 	if !envFound {
 		t.Fatal(domainEnvName + " env variable not set")
+	}
+
+	username, envFound := os.LookupEnv(usernameEnvName)
+	if !envFound {
+		t.Fatal(usernameEnvName + " env variable not set")
+	}
+
+	password, envFound := os.LookupEnv(passwordEnvName)
+	if !envFound {
+		t.Fatal(passwordEnvName + " env variable not set")
 	}
 
 	tr := &http.Transport{
@@ -117,7 +127,10 @@ func TestSpec(t *testing.T) {
 
 		tokenParts := strings.Split(idToken, ".")
 
-		tokenPayloadEncoded := tokenParts[1] + "="
+		tokenPayloadEncoded := tokenParts[1]
+
+		missingTokenBytes := (3 - len(tokenPayloadEncoded)%3) % 3
+		tokenPayloadEncoded += strings.Repeat("=", missingTokenBytes)
 
 		tokenPayloadDecoded, err := base64.StdEncoding.DecodeString(tokenPayloadEncoded)
 		if err != nil {
