@@ -27,5 +27,5 @@ an installation.
 >**NOTE:** You cannot skip applying the Istio patch in the Kyma installation process.
 
 To allow such an implementation, you must install Kyma without Istio. To achieve this, modify the Installation custom 
-resource used to trigger the Kyma installer. Read the **Installation** CR document in the **Kyma** 
+resource (CR) used to trigger the Kyma installer. Read the **Installation** CR document in the **Kyma** 
 topic for more details.
