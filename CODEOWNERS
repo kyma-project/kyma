@@ -251,6 +251,9 @@
 # Event Bus Tests
 /tests/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
+# Event Service Tests
+/tests/gateway-tests/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+
 # All .md files
 *.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc
 
