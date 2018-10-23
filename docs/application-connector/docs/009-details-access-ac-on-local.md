@@ -1,5 +1,5 @@
 ---
-title: Access Application Connector on local Kyma deployment
+title: Access the Application Connector on a local Kyma deployment
 type: Details
 ---
 
