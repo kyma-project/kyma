@@ -51,9 +51,13 @@ func deleteNamespace(namespace string) {
 
 	deleteCmd := exec.Command("kubectl", "delete", "ns", namespace, "--grace-period=0", "--force", "--ignore-not-found")
 	stdoutStderr, err := deleteCmd.CombinedOutput()
-	if err != nil {
+
+	if err != nil && !strings.Contains(string(stdoutStderr), "No resources found") && !strings.Contains(string(stdoutStderr), "Error from server (Conflict): Operation cannot be fulfilled on namespaces") {
 		log.Fatalf("Error while deleting namespace: %s, to be deleted\n Output:\n%s", namespace, string(stdoutStderr))
 	}
+
+	log.Printf("Current state of the ns:%s is:\n %v", namespace, string(stdoutStderr))
+
 	for {
 		cmd := exec.Command("kubectl", "get", "ns", namespace, "-oyaml")
 		select {
@@ -249,7 +253,7 @@ func deleteFun(namespace, name string) {
 
 	cmd = exec.Command("kubectl", "-n", namespace, "delete", "pod", "-l", "function="+name, "--grace-period=0", "--force")
 	stdoutStderr, err = cmd.CombinedOutput()
-	if err == nil && !strings.Contains(string(stdoutStderr), "No resources found") && !strings.Contains(string(stdoutStderr), "warning: Immediate deletion does not wait for confirmation that the running resource has been terminated") {
+	if err != nil && !strings.Contains(string(stdoutStderr), "No resources found") && !strings.Contains(string(stdoutStderr), "warning: Immediate deletion does not wait for confirmation that the running resource has been terminated") {
 		log.Fatal("Unable to delete function pod:\n", string(stdoutStderr))
 	}
 
@@ -428,7 +432,7 @@ func ensureSvcInstanceIsDeployed(namespace, svcInstance string) {
 			cmd := exec.Command("kubectl", "-n", namespace, "get", "serviceinstance", svcInstance, "-o=jsonpath={.items[*]}{.status.conditions[*].reason}")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Fatalf("Error fetching service instance %v: %v", svcInstance, err)
+				log.Printf("Error fetching service instance %v: %v", svcInstance, string(stdoutStderr))
 			}
 			if string(stdoutStderr) == "ProvisionedSuccessfully" {
 				return
