@@ -33,15 +33,11 @@ func (i *Installation) canInstall() bool {
 func (i *Installation) ShouldUninstall() bool {
 	action := i.ObjectMeta.Labels["action"]
 
-	if i.Status.State == "" {
-		return false
-	}
-
 	return action == ActionUninstall && i.canUninstall()
 }
 
 func (i *Installation) canUninstall() bool {
-	return (i.Status.State == StateInstalled || i.Status.State == StateError)
+	return (i.Status.State != StateInProgress && i.Status.State != StateEmpty)
 }
 
 func (i *Installation) hasCondition(condition InstallationConditionType) bool {
