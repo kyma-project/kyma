@@ -17,9 +17,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
-    tls:
-      secretName: istio-ingress-certs
-    gateway:
+    gateway: 
       name: kyma-gateway
   etcdBackup:
     enabled: false
@@ -47,7 +45,7 @@ global:
     version: 4a23580f
   docs:
     dir: develop/
-    version: 43d564ee
+    version: 5c147f8e
   environments:
     dir: develop/
     version: 6e0a7fe2
@@ -77,10 +75,10 @@ global:
     version: 6e0a7fe2
   ui_api_layer:
     dir: develop/
-    version: b58068ee
+    version: e0f2a383
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: b58068ee
+    version: e0f2a383
 
 test:
   auth:
