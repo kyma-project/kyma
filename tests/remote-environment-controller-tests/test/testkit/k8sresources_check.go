@@ -129,7 +129,7 @@ func (checker *k8sChecker) getDeletedDeployment(name string, options v1.GetOptio
 
 	for i := 0; i < checker.retryCount; i++ {
 		deployment, err = checker.client.GetDeployment(name, v1.GetOptions{})
-		if err != nil && k8serrors.IsNotFound(err) {
+		if err != nil {
 			break
 		}
 		time.Sleep(checker.retryWaitTime)
