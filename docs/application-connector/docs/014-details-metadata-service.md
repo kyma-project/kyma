@@ -10,7 +10,6 @@ The Metadata Service stores the data of all registered services in:
 - Minio bucket, which stores the API specification, Event catalog and documentation.
 - Kubernetes secrets, which stores sensitive data, such as OAuth credentials.
 
-
 ## Kubernetes APIs interaction
 
 The Metadata Service interacts with Kubernetes APIs to perform these tasks:

@@ -16,7 +16,7 @@ To complete this guide, your cluster must have at least one Remote Environment c
   kubectl get em -n production
   ```
 
-2. Bind a RE to an Environment. Run this command to create  EnvironmentMapping Custom Resource (CR) and apply it to the cluster:
+2. Bind a RE to an Environment. Run this command to create an EnvironmentMapping Custom Resource and apply it to the cluster:
 
   ```
   cat <<EOF | kubectl apply -f -

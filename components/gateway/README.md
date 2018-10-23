@@ -40,7 +40,7 @@ The Gateway has the following parameters:
 - **proxyTimeout** - A time-out for request send through Gateway proxy in seconds. The default is `10`.
 - **proxyCacheTTL** - Time to live of Remote API information stored in proxy cache. The value is provided in seconds and the default is `120`.
 
-The parameters for the Event API correspond to the fields in the [Remote Environment](https://github.com/kyma-project/kyma/blob/master/docs/application-connector/docs/044-remote-evironment-custom-resource.md):
+The parameters for the Event API correspond to the fields in the [Remote Environment](../../docs/application-connector/docs/044-cr-environment.md):
 
 - **sourceEnvironment** - The name of the Event source environment.
 - **sourceType** - The type of the Event source.

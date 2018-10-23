@@ -78,7 +78,7 @@ func (sas defaultService) New(remoteEnvironment, id string, api *API) (*remoteen
 
 	err := sas.accessServiceManager.Create(remoteEnvironment, id, resourceName)
 	if err != nil {
-		return nil, apperrors.Internal("failed to create access service, %s", err)
+		return nil, apperrors.Internal("Creating access service failed, %s", err.Error())
 	}
 
 	serviceAPI.AccessLabel = resourceName
@@ -86,7 +86,7 @@ func (sas defaultService) New(remoteEnvironment, id string, api *API) (*remoteen
 	if sas.oauthCredentialsProvided(api.Credentials) {
 		err := sas.secretsRepository.Create(remoteEnvironment, resourceName, api.Credentials.Oauth.ClientID, api.Credentials.Oauth.ClientSecret, id)
 		if err != nil {
-			return nil, apperrors.Internal("failed to create credentials secret, %s", err)
+			return nil, apperrors.Internal("Creating credentials secret failed, %s", err.Error())
 		}
 		serviceAPI.OauthUrl = api.Credentials.Oauth.URL
 		serviceAPI.CredentialsSecretName = resourceName
@@ -94,7 +94,7 @@ func (sas defaultService) New(remoteEnvironment, id string, api *API) (*remoteen
 
 	err = sas.istioService.Create(remoteEnvironment, id, resourceName)
 	if err != nil {
-		return nil, apperrors.Internal("failed to create istio resources, %s", err)
+		return nil, apperrors.Internal("Creating Istio resources failed, %s", err.Error())
 	}
 
 	return serviceAPI, nil
@@ -114,7 +114,7 @@ func (sas defaultService) Read(remoteEnvironment string, remoteenvAPI *remoteenv
 
 		clientId, clientSecret, err := sas.secretsRepository.Get(remoteEnvironment, remoteenvAPI.CredentialsSecretName)
 		if err != nil {
-			return nil, apperrors.Internal("failed to read oauth credentials from %s secret, %s",
+			return nil, apperrors.Internal("Reading oauth credentials from %s secret failed, %s",
 				remoteenvAPI.CredentialsSecretName, err.Error())
 		}
 		api.Credentials.Oauth.ClientID = clientId
@@ -129,17 +129,17 @@ func (sas defaultService) Delete(remoteEnvironment, id string) apperrors.AppErro
 
 	err := sas.accessServiceManager.Delete(resourceName)
 	if err != nil {
-		return apperrors.Internal("failed to delete access service, %s", err)
+		return apperrors.Internal("Deleting access service failed, %s", err.Error())
 	}
 
 	err = sas.secretsRepository.Delete(resourceName)
 	if err != nil {
-		return apperrors.Internal("failed to delete credentials secret, %s", err)
+		return apperrors.Internal("Deleting credentials secret failed, %s", err.Error())
 	}
 
 	err = sas.istioService.Delete(resourceName)
 	if err != nil {
-		return apperrors.Internal("failed to delete istio resources, %s", err)
+		return apperrors.Internal("Deleting Istio resources failed, %s", err.Error())
 	}
 
 	return nil
@@ -155,7 +155,7 @@ func (sas defaultService) Update(remoteEnvironment, id string, api *API) (*remot
 
 	err := sas.accessServiceManager.Upsert(remoteEnvironment, id, resourceName)
 	if err != nil {
-		return nil, apperrors.Internal("failed to create access service, %s", err)
+		return nil, apperrors.Internal("Creating access service failed, %s", err.Error())
 	}
 
 	serviceAPI.AccessLabel = resourceName
@@ -163,20 +163,20 @@ func (sas defaultService) Update(remoteEnvironment, id string, api *API) (*remot
 	if sas.oauthCredentialsProvided(api.Credentials) {
 		err = sas.secretsRepository.Upsert(remoteEnvironment, resourceName, api.Credentials.Oauth.ClientID, api.Credentials.Oauth.ClientSecret, id)
 		if err != nil {
-			return nil, apperrors.Internal("failed to update credentials secret, %s", err)
+			return nil, apperrors.Internal("Updating credentials secret failed, %s", err.Error())
 		}
 		serviceAPI.OauthUrl = api.Credentials.Oauth.URL
 		serviceAPI.CredentialsSecretName = resourceName
 	} else {
 		err := sas.secretsRepository.Delete(resourceName)
 		if err != nil {
-			return nil, apperrors.Internal("failed to delete credentials secret, %s", err)
+			return nil, apperrors.Internal("Deleting credentials secret failed, %s", err.Error())
 		}
 	}
 
 	err = sas.istioService.Upsert(remoteEnvironment, id, resourceName)
 	if err != nil {
-		return nil, apperrors.Internal("failed to update istio resources, %s", err)
+		return nil, apperrors.Internal("Updating Istio resources failed, %s", err.Error())
 	}
 
 	return serviceAPI, nil

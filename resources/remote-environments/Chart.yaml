@@ -1,4 +1,4 @@
 apiVersion: v1
-description: Remote Environment helm chart for Kubernetes
-name: gateway
+description: Default Remote Environments helm chart for Kubernetes
+name: default-remote-environmetns
 version: 0.0.1

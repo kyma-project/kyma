@@ -30,7 +30,7 @@ service:
 ingress:
   enabled: true
   authSecret: kyma-integration/nginx-auth-ca
-  tlsSecret: nginx-ingress-cert
+  tlsSecret: ingress-tls-cert
 
 acceptanceTest:
   image:
@@ -48,3 +48,8 @@ eventService:
   service:
     externalapi:
       port: *eventServiceExternalAPIPort
+
+remoteEnvs:
+  ecDefault: ec-default
+  hmcDefault: hmc-default
+

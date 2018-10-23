@@ -49,9 +49,9 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	ts.createRemoteEnvironment()
 	defer ts.deleteRemoteEnvironment()
 
-	ts.waitForREServiceClasses(timeoutPerStep)
-
 	ts.enableRemoteEnvironmentInTestNamespace()
+
+	ts.waitForREServiceClasses(time.Second * 90)
 
 	ts.createAndWaitForServiceInstanceA(timeoutPerStep)
 	ts.createAndWaitForServiceInstanceB(timeoutPerStep)
@@ -367,8 +367,8 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 		},
 		Spec: scTypes.ServiceInstanceSpec{
 			PlanReference: scTypes.PlanReference{
-				ClusterServiceClassExternalName: classExternalName,
-				ClusterServicePlanExternalName:  "default",
+				ServiceClassExternalName: classExternalName,
+				ServicePlanExternalName:  "default",
 			},
 		},
 	})
@@ -408,7 +408,7 @@ func (ts *TestSuite) serviceClassIsAvailableA() func() error {
 	require.NoError(ts.t, err)
 
 	return func() error {
-		class, err := clientSet.ServicecatalogV1beta1().ClusterServiceClasses().Get(ts.reSvcNameA, metav1.GetOptions{})
+		class, err := clientSet.ServicecatalogV1beta1().ServiceClasses(ts.namespace).Get(ts.reSvcNameA, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
@@ -422,7 +422,7 @@ func (ts *TestSuite) serviceClassIsAvailableB() func() error {
 	require.NoError(ts.t, err)
 
 	return func() error {
-		class, err := clientSet.ServicecatalogV1beta1().ClusterServiceClasses().Get(ts.reSvcNameB, metav1.GetOptions{})
+		class, err := clientSet.ServicecatalogV1beta1().ServiceClasses(ts.namespace).Get(ts.reSvcNameB, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}

@@ -4,36 +4,39 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
 	"time"
 
 	catalog "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog/wait"
+	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
 
-func getCatalogForBroker(t *testing.T, url string) []osb.Service {
+func getCatalogForBroker(url string) ([]osb.Service, error) {
 	config := osb.DefaultClientConfiguration()
 	config.URL = url
 
 	client, err := osb.NewClient(config)
-	require.NoError(t, err)
-
+	if err != nil {
+		return nil, errors.Wrapf(err, "while creating osb client for broker with URL: %s", url)
+	}
 	response, err := client.GetCatalog()
-	require.NoError(t, err)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while getting catalog from broker with URL: %s", url)
+	}
 
-	return response.Services
+	return response.Services, nil
 }
 
-// awaitCatalogContainsServiceClasses asserts that service catalog contains all OSB services mapped to Cluster Service Class.
-func awaitCatalogContainsServiceClasses(t *testing.T, timeout time.Duration, services []osb.Service) {
-	timeoutCh := time.After(timeout)
-	for {
+// awaitCatalogContainsClusterServiceClasses asserts that service catalog contains all OSB services mapped to Cluster Service Class.
+func awaitCatalogContainsClusterServiceClasses(t *testing.T, timeout time.Duration, services []osb.Service) {
+	wait.ForFuncAtMost(t, func() error {
 		serviceMap := make(map[string]osb.Service)
 		for _, service := range services {
 			serviceMap[service.ID] = service
@@ -49,17 +52,35 @@ func awaitCatalogContainsServiceClasses(t *testing.T, timeout time.Duration, ser
 			}
 		}
 		if len(serviceMap) == 0 {
-			return
+			return nil
 		}
 
-		select {
-		case <-timeoutCh:
-			assert.Fail(t, fmt.Sprintf("Service Catalog must contains ClusterServiceClasses for every broker service. Missing: %s", serviceNames(serviceMap)))
-			return
-		default:
-			time.Sleep(2 * time.Second)
+		return fmt.Errorf("service catalog must contains ClusterServiceClasses for every broker service. Missing: %s", serviceNames(serviceMap))
+	}, timeout)
+}
+
+func awaitCatalogContainsServiceClasses(t *testing.T, namespace string, timeout time.Duration, services []osb.Service) {
+	wait.ForFuncAtMost(t, func() error {
+		serviceMap := make(map[string]osb.Service)
+		for _, service := range services {
+			serviceMap[service.ID] = service
 		}
-	}
+		// fetch service classes from service-catalog
+		serviceClasses := getServiceClasses(t, namespace).Items
+
+		// cluster service class name is equal to OSB service ID
+		for _, csc := range serviceClasses {
+			if svc, ok := serviceMap[csc.Name]; ok {
+				assert.Equal(t, svc.Name, csc.Spec.ExternalName, fmt.Sprintf("ServiceClass (ID: %s) must have the same name as OSB Service.", svc.ID))
+				delete(serviceMap, csc.Name)
+			}
+		}
+		if len(serviceMap) == 0 {
+			return nil
+		}
+
+		return fmt.Errorf("service catalog must contains ServiceClasses for every broker service. Missing: %s", serviceNames(serviceMap))
+	}, timeout)
 }
 
 func serviceNames(services map[string]osb.Service) string {
@@ -80,33 +101,26 @@ func getClusterServiceClasses(t *testing.T) *catalog.ClusterServiceClassList {
 	return res
 }
 
-func deleteClusterServiceClassesForRemoteEnvironment(t *testing.T, re *v1alpha1.RemoteEnvironment) {
+func getServiceClasses(t *testing.T, namespace string) *catalog.ServiceClassList {
 	cs, err := clientset.NewForConfig(kubeConfig(t))
 	require.NoError(t, err)
 
-	planClient := cs.ServicecatalogV1beta1().ClusterServicePlans()
-	plans, err := planClient.List(v1.ListOptions{})
+	res, err := cs.ServicecatalogV1beta1().ServiceClasses(namespace).List(v1.ListOptions{})
 	require.NoError(t, err)
 
-	// remove all plans related to Remote Environment services
-	for _, plan := range plans.Items {
-		for _, svc := range re.Spec.Services {
-			if plan.Spec.ClusterServiceClassRef.Name == svc.ID {
-				err := planClient.Delete(plan.Name, &v1.DeleteOptions{})
-				assert.NoError(t, err)
-			}
-		}
-	}
-
-	classClient := cs.ServicecatalogV1beta1().ClusterServiceClasses()
-	for _, svc := range re.Spec.Services {
-		err := classClient.Delete(svc.ID, &v1.DeleteOptions{})
-		assert.NoError(t, err)
-	}
+	return res
 }
 
 func kubeConfig(t *testing.T) *rest.Config {
 	cfg, err := rest.InClusterConfig()
 	require.NoError(t, err)
 	return cfg
+}
+
+func fixNamespace(name string) *corev1.Namespace {
+	return &corev1.Namespace{
+		ObjectMeta: v1.ObjectMeta{
+			Name: name,
+		},
+	}
 }

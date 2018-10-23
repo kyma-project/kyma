@@ -160,12 +160,11 @@ function checkAndCleanupTest() {
     fi
 }
 
-function printImagesWithLatestTag(){
+function printImagesWithLatestTag() {
 
-    # We ignore the alpine image as this is required by istio-sidecar
     local images=$(kubectl get pods --all-namespaces -o jsonpath="{..image}" |\
     tr -s '[[:space:]]' '\n' |\
-    grep ":latest" | grep -v "alpine:latest")
+    grep ":latest")
 
     log "Images with tag latest are not allowed. Checking..." nc bold
     if [ ${#images} -ne 0 ]; then
@@ -214,6 +213,10 @@ istioTestErr=$?
 checkAndCleanupTest istio-system
 testCheckIstio=$?
 
+echo "- Testing Application Connector"
+helm test application-connector
+acTestErr=$?
+
 echo "- Testing Remote Environments"
 helm test ec-default
 ecTestErr=$?
@@ -226,7 +229,7 @@ testCheckGateway=$?
 printImagesWithLatestTag
 latestTagsErr=$?
 
-if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${hmcTestErr} -ne 0 ]
+if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${hmcTestErr} -ne 0 ] || [ ${acTestErr} -ne 0 ]
 then
     exit 1
 else
