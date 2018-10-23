@@ -117,7 +117,7 @@ func TestRepository_Create(t *testing.T) {
 				},
 			},
 			Spec: &v1alpha2.RuleSpec{
-				Match: `(destination.service == "re-test-uuid1.testns.svc.cluster.local") && (source.labels["re-test-uuid1"] != "true")`,
+				Match: `(destination.service.host == "re-test-uuid1.testns.svc.cluster.local") && (source.labels["re-test-uuid1"] != "true")`,
 				Actions: []v1alpha2.RuleAction{{
 					Handler:   "re-test-uuid1.denier",
 					Instances: []string{"re-test-uuid1.checknothing"},
@@ -288,7 +288,7 @@ func TestRepository_Upsert(t *testing.T) {
 				},
 			},
 			Spec: &v1alpha2.RuleSpec{
-				Match: `(destination.service == "re-test-uuid1.testns.svc.cluster.local") && (source.labels["re-test-uuid1"] != "true")`,
+				Match: `(destination.service.host == "re-test-uuid1.testns.svc.cluster.local") && (source.labels["re-test-uuid1"] != "true")`,
 				Actions: []v1alpha2.RuleAction{{
 					Handler:   "re-test-uuid1.denier",
 					Instances: []string{"re-test-uuid1.checknothing"},
