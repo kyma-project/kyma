@@ -12,7 +12,7 @@ used are stored in the resources/istio directory. The installation is customized
 2. A custom Istio Patch is applied to further customize the Istio installation. A Kubernetes job introduces these 
 changes:
   - Sets a memory limit for every sidecar
-  - Istio components use Zipkin in the `kyma-system` Namespace, instead of the default `istio-system`
+  - Modifies Istio components to use Zipkin in the `kyma-system` Namespace, instead of the default `istio-system`
   - A webhook is added to the Istio Pilot
   - A TLS certificate is created for the Ingress Gateway
   - All resources related to the `prometheus`, `tracing`, `grafana`, and `servicegraph`charts  are deleted
