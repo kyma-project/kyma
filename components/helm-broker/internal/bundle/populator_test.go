@@ -54,7 +54,7 @@ func TestPopulatorOnGetIndexFileError(t *testing.T) {
 	// WHEN
 	err := populator.Init()
 	// THEN
-	assert.EqualError(t, err, fmt.Sprintf("while getting index.yaml: %v", fixError()))
+	assert.EqualError(t, err, fmt.Sprintf("while getting index file: %v", fixError()))
 	assert.Empty(t, logSink.DumpAll())
 }
 
