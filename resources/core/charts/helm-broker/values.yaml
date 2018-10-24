@@ -9,7 +9,7 @@ service:
   internalPort: 8080
 
 repository:
-  baseURL: "https://github.com/kyma-project/bundles/releases/download/0.1.0/"
+  URL: "https://github.com/kyma-project/bundles/releases/download/0.1.0/"
 
 config:
   storage:

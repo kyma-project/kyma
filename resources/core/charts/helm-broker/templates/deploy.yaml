@@ -45,8 +45,8 @@ spec:
             value: /etc/config/helm-broker/config.yaml
           - name: APP_HELM_TILLER_HOST
             value: "tiller-deploy.kube-system.svc.cluster.local:44134"
-          - name: APP_REPOSITORY_BASE_URL
-            value: {{ .Values.repository.baseURL }}
+          - name: APP_REPOSITORY_URL
+            value: {{ .Values.repository.URL }}
 
         volumeMounts:
         - mountPath: /tmp
