@@ -12,7 +12,7 @@ spec:
       image: {{ .Values.global.eventServiceTestsImage }}
       imagePullPolicy: {{ .Values.acceptanceTest.image.pullPolicy }}
       env:
-      - name: GATEWAY_URL
+      - name: EVENT_SERVICE_URL
         value: http://{{.Release.Name }}-event-service-external-api.{{ .Release.Namespace }}.svc.cluster.local:8081
       - name: NAMESPACE
         value: {{ .Release.Namespace }}

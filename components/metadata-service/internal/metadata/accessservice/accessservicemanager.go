@@ -10,7 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-const appNameLabelFormat = "%s-gateway"
+const appNameLabelFormat = "%s-proxy-service"
 
 // ServiceInterface has methods to work with Service resources.
 type ServiceInterface interface {
