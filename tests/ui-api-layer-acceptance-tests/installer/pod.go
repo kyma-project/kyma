@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	podReadyTimeout = time.Second * 30
+	podReadyTimeout = time.Second * 120
 	UPSBrokerImage = "quay.io/kubernetes-service-catalog/user-broker:latest"
 )
 

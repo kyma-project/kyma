@@ -15,41 +15,6 @@ import (
 	"os"
 )
 
-//func TestMain(m *testing.M) {
-//	if dex.IsSCIEnabled() {
-//		log.Println("Skipping configuration, because SCI is enabled")
-//		return
-//	}
-//	k8sClient, _, err := k8s.NewClientWithConfig()
-//	exitOnError(err, "while initializing K8S Client")
-//
-//	testClusterBrokerChartPath := fmt.Sprintf("testdata/charts/%s", tester.ClusterBrokerReleaseName)
-//	testBrokerChartPath := fmt.Sprintf("testdata/charts/%s", tester.BrokerReleaseName)
-//
-//	serviceCatalogTestPath := os.Getenv("TEST_SERVICE_CATALOG_DIR")
-//	if serviceCatalogTestPath != "" {
-//		testClusterBrokerChartPath = fmt.Sprintf("%s/%s", serviceCatalogTestPath, testClusterBrokerChartPath)
-//		testBrokerChartPath = fmt.Sprintf("%s/%s", serviceCatalogTestPath, testBrokerChartPath)
-//	}
-//
-//	clusterBrokerInstaller, err := brokerinstaller.New(testClusterBrokerChartPath, tester.ClusterBrokerReleaseName, tester.DefaultNamespace)
-//	exitOnError(err, fmt.Sprintf("while initializing installer of %s", tester.ClusterServiceBroker))
-//
-//	brokerInstaller, err := brokerinstaller.New(testBrokerChartPath, tester.BrokerReleaseName, tester.DefaultNamespace)
-//	exitOnError(err, fmt.Sprintf("while initializing installer of %s", tester.ServiceBroker))
-//
-//	err = setup(k8sClient, clusterBrokerInstaller, brokerInstaller)
-//	if err != nil {
-//		cleanup(k8sClient, clusterBrokerInstaller, brokerInstaller)
-//		exitOnError(err, "while setup")
-//	}
-//
-//	code := m.Run()
-//
-//	cleanup(k8sClient, clusterBrokerInstaller, brokerInstaller)
-//	os.Exit(code)
-//}
-
 func TestMain(m *testing.M) {
 	if dex.IsSCIEnabled() {
 		log.Println("Skipping configuration, because SCI is enabled")
@@ -85,32 +50,22 @@ func setup(k8sClient *corev1.CoreV1Client, svcatCli *clientset.Clientset, cluste
 		return errors.Wrap(err, "while creating namespace")
 	}
 
-	err = initPod(k8sClient, tester.DefaultNamespace, clusterBrokerInstaller.Name())
+	err = initPod(k8sClient, tester.DefaultNamespace, tester.ReleaseName)
 	if err != nil {
 		return err
 	}
 
-	err = initService(k8sClient, tester.DefaultNamespace, clusterBrokerInstaller.Name())
+	err = initService(k8sClient, tester.DefaultNamespace, tester.ReleaseName)
 	if err != nil {
 		return err
 	}
 
-	err = initPod(k8sClient, tester.DefaultNamespace, brokerInstaller.Name())
+	err = initBroker(clusterBrokerInstaller, svcatCli, tester.ReleaseName)
 	if err != nil {
 		return err
 	}
 
-	err = initService(k8sClient, tester.DefaultNamespace, brokerInstaller.Name())
-	if err != nil {
-		return err
-	}
-
-	err = initBroker(clusterBrokerInstaller, svcatCli, clusterBrokerInstaller.Name())
-	if err != nil {
-		return err
-	}
-
-	err = initBroker(brokerInstaller, svcatCli, brokerInstaller.Name())
+	err = initBroker(brokerInstaller, svcatCli, tester.ReleaseName)
 	if err != nil {
 		return err
 	}
@@ -121,7 +76,17 @@ func setup(k8sClient *corev1.CoreV1Client, svcatCli *clientset.Clientset, cluste
 func cleanup(k8sClient *corev1.CoreV1Client, svcatCli *clientset.Clientset, clusterBrokerInstaller, brokerInstaller *installer.BrokerInstaller) {
 	log.Println("Cleaning up...")
 
-	err := clusterBrokerInstaller.Uninstall(svcatCli)
+	err := installer.DeletePod(k8sClient, tester.DefaultNamespace, tester.ReleaseName)
+	if err != nil {
+		log.Print(errors.Wrap(err, "while deleting Pod"))
+	}
+
+	err = installer.DeleteService(k8sClient, tester.DefaultNamespace, tester.ReleaseName)
+	if err != nil {
+		log.Print(errors.Wrap(err, "while deleting Service"))
+	}
+
+	err = clusterBrokerInstaller.Uninstall(svcatCli)
 	if err != nil {
 		log.Print(errors.Wrapf(err, "while uninstalling %s", clusterBrokerInstaller.TypeOf()))
 	}
@@ -129,26 +94,6 @@ func cleanup(k8sClient *corev1.CoreV1Client, svcatCli *clientset.Clientset, clus
 	err = brokerInstaller.Uninstall(svcatCli)
 	if err != nil {
 		log.Print(errors.Wrapf(err, "while uninstalling %s", brokerInstaller.TypeOf()))
-	}
-
-	err = installer.DeletePod(k8sClient, tester.DefaultNamespace, clusterBrokerInstaller.Name())
-	if err != nil {
-		log.Print(errors.Wrap(err, "while deleting Pod"))
-	}
-
-	err = installer.DeleteService(k8sClient, tester.DefaultNamespace, clusterBrokerInstaller.Name())
-	if err != nil {
-		log.Print(errors.Wrap(err, "while deleting Service"))
-	}
-
-	err = installer.DeletePod(k8sClient, tester.DefaultNamespace, brokerInstaller.Name())
-	if err != nil {
-		log.Print(errors.Wrap(err, "while deleting Pod"))
-	}
-
-	err = installer.DeleteService(k8sClient, tester.DefaultNamespace, brokerInstaller.Name())
-	if err != nil {
-		log.Print(errors.Wrap(err, "while deleting Service"))
 	}
 
 	err = installer.DeleteNamespace(k8sClient, tester.DefaultNamespace)
