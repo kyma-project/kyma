@@ -57,7 +57,7 @@ func main() {
 		if err == nil {
 			break
 		}
-		log.Errorf("(%d/%d) Could not load bundles from the repository %s: %s", i, maxPopulatorRetries, cfg.Repository.BaseURL, err.Error())
+		log.Errorf("(%d/%d) Could not load bundles from the repository %s: %s", i, maxPopulatorRetries, cfg.Repository.BaseURL(), err.Error())
 		time.Sleep(4 * time.Second)
 	}
 	fatalOnError(err)
