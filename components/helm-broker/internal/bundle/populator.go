@@ -103,17 +103,17 @@ func (b *Populator) loadBundle(entryName Name, version Version) error {
 func (b *Populator) getIndex() (*indexDTO, error) {
 	idxReader, idxCloser, err := b.repo.IndexReader()
 	if err != nil {
-		return nil, errors.Wrap(err, "while getting yaml file")
+		return nil, errors.Wrap(err, "while getting index file")
 	}
 	defer idxCloser()
 
 	bytes, err := ioutil.ReadAll(idxReader)
 	if err != nil {
-		return nil, errors.Wrap(err, "while reading all yaml file")
+		return nil, errors.Wrap(err, "while reading all index file")
 	}
 	idx := indexDTO{}
 	if err = yaml.Unmarshal(bytes, &idx); err != nil {
-		return nil, errors.Wrap(err, "while unmarshaling yaml file")
+		return nil, errors.Wrap(err, "while unmarshaling index file")
 	}
 	return &idx, nil
 }

@@ -11,8 +11,8 @@ type RepositoryConfig struct {
 	BaseURL string `json:"baseUrl" valid:"required"`
 }
 
-// GetIndexFile return name of yaml file with configuration (if not exist return default name)
-func (cfg RepositoryConfig) GetIndexFile() string {
+// IndexFileName returns name of yaml file with configuration (if not exist return default name)
+func (cfg RepositoryConfig) IndexFileName() string {
 	if cfg.hasConfigFile() {
 		return path.Base(cfg.BaseURL)
 	}
@@ -20,10 +20,10 @@ func (cfg RepositoryConfig) GetIndexFile() string {
 	return "index.yaml"
 }
 
-// GetBaseURL return base url to bundles
+// GetBaseURL returns base url to bundles with trailing slash
 func (cfg RepositoryConfig) GetBaseURL() string {
 	if cfg.hasConfigFile() {
-		return strings.TrimRight(cfg.BaseURL, cfg.GetIndexFile())
+		return strings.TrimRight(cfg.BaseURL, cfg.IndexFileName())
 	}
 
 	return strings.TrimRight(cfg.BaseURL, "/") + "/"

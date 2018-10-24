@@ -12,7 +12,7 @@ import (
 // NewHTTPRepository creates new instance of HTTPRepository.
 func NewHTTPRepository(cfg RepositoryConfig) *HTTPRepository {
 	return &HTTPRepository{
-		IndexFile: cfg.GetIndexFile(),
+		IndexFile: cfg.IndexFileName(),
 		BaseURL:   cfg.GetBaseURL(),
 		Client:    http.DefaultClient,
 	}

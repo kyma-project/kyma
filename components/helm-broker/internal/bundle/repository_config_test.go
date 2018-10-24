@@ -8,32 +8,46 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 )
 
-func TestRepositoryConfig_GetIndexFile_defaultValue(t *testing.T) {
-	cfg := bundle.RepositoryConfig{BaseURL: "http://example.com/repository/stable/"}
+func TestRepositoryConfig(t *testing.T) {
+	tests := map[string]struct {
+		givenRepoURL string
 
-	assert.Equal(t, "index.yaml", cfg.GetIndexFile())
-}
+		expIndexName string
+		expBaseURL   string
+	}{
+		"index not provided in URL": {
+			givenRepoURL: "http://example.com/repository/stable/",
 
-func TestRepositoryConfig_GetIndexFile(t *testing.T) {
-	cfg := bundle.RepositoryConfig{BaseURL: "http://example.com/repository/stable/conf.yaml"}
+			expIndexName: "index.yaml",
+			expBaseURL:   "http://example.com/repository/stable/",
+		},
+		"custom index provided in URL": {
+			givenRepoURL: "http://example.com/repository/stable/conf.yaml",
 
-	assert.Equal(t, "conf.yaml", cfg.GetIndexFile())
-}
+			expIndexName: "conf.yaml",
+			expBaseURL:   "http://example.com/repository/stable/",
+		},
+		"index provided in URL same as default one": {
+			givenRepoURL: "http://example.com/repository/stable/index.yaml",
 
-func TestRepositoryConfig_GetBaseUrl(t *testing.T) {
-	cfg := bundle.RepositoryConfig{BaseURL: "http://example.com/repository/stable/index.yaml"}
+			expIndexName: "index.yaml",
+			expBaseURL:   "http://example.com/repository/stable/",
+		},
+		"trailing slash is always added for BaseURL": {
+			givenRepoURL: "http://example.com/repository/stable",
 
-	assert.Equal(t, "http://example.com/repository/stable/", cfg.GetBaseURL())
-}
+			expIndexName: "index.yaml",
+			expBaseURL:   "http://example.com/repository/stable/",
+		},
+	}
 
-func TestRepositoryConfig_GetBaseUrl_withoutYamlFile(t *testing.T) {
-	cfg := bundle.RepositoryConfig{BaseURL: "http://example.com/repository/stable/"}
+	for tn, tc := range tests {
+		t.Run(tn, func(t *testing.T) {
+			cfg := bundle.RepositoryConfig{BaseURL: tc.givenRepoURL}
 
-	assert.Equal(t, "http://example.com/repository/stable/", cfg.GetBaseURL())
-}
+			assert.Equal(t, tc.expBaseURL, cfg.GetBaseURL())
+			assert.Equal(t, tc.expIndexName, cfg.IndexFileName())
 
-func TestRepositoryConfig_GetBaseUrl_withIncompletePath(t *testing.T) {
-	cfg := bundle.RepositoryConfig{BaseURL: "http://example.com/repository/stable"}
-
-	assert.Equal(t, "http://example.com/repository/stable/", cfg.GetBaseURL())
+		})
+	}
 }
