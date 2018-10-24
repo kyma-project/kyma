@@ -10,6 +10,9 @@ metadata:
 data:
   config.yaml: |
     issuer: https://dex.{{ .Values.global.domainName }}
+    # extending it to 15days because apparently Istio does not handle ID token validation properly
+    expiry:
+      signingKeys: "360h"
     storage:
       type: kubernetes
       config:
