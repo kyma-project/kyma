@@ -126,18 +126,17 @@ class poller(object):
     def read_if_changed(self, modtime):
         if not os.path.isfile(self.filepath):
             print self.filepath, "not found"
-            return modtime
+            os._exit(os.EX_OSFILE)
 
         new_modtime = os.path.getmtime(self.filepath)
         if new_modtime == modtime:
             return modtime
-
+        
         with open(self.filepath, "rt") as fl:
             ls = fl.read()
             print "File updated"
             print ls
             self.cfg[SCRIPT] = ls
-
         return new_modtime
 
 
