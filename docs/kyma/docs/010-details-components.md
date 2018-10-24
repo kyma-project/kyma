@@ -17,7 +17,7 @@ The Service Mesh is an infrastructure layer that handles service-to-service comm
 
 ## Security
 
-Kyma security uses the Service Mesh that enforces RBAC (Role Based Access Control) in the cluster. [Dex](https://github.com/coreos/dex) handles the identity management and identity provider integration. It allows you to integrate any [OpenID Connect](https://openid.net/connect/) or SAML2-compliant identity provider with Kyma through the use of [connectors](https://github.com/coreos/dex#connectors). Additionally, Dex provides a static user store which gives you more flexibility when managing access to your cluster.   
+Kyma security enforces RBAC (Role Based Access Control) in the cluster. [Dex](https://github.com/coreos/dex) handles the identity management and identity provider integration. It allows you to integrate any [OpenID Connect](https://openid.net/connect/) or SAML2-compliant identity provider with Kyma through the use of [connectors](https://github.com/coreos/dex#connectors). Additionally, Dex provides a static user store which gives you more flexibility when managing access to your cluster.   
 
 ## Service Brokers
 
