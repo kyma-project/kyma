@@ -140,7 +140,7 @@
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @sjanota
 
 # The `jaeger` charts
-/resources/core/charts/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+/resources/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
 # The `prometheus-operator` chart
 /resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh

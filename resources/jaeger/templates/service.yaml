@@ -53,7 +53,6 @@ items:
       app: {{ template "jaeger.name" . }}
       release: {{ .Release.Name }}
       jaeger-infra: jaeger-pod
-    type: ClusterIP
 - apiVersion: v1
   kind: Service
   metadata:
