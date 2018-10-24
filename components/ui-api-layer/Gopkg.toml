@@ -45,7 +45,7 @@ required = [
 
 [[constraint]]
   name = "github.com/99designs/gqlgen"
-  version = "v0.5.1"
+  version = "v0.6.0"
 
 [[constraint]]
   name = "github.com/kubeless/kubeless"

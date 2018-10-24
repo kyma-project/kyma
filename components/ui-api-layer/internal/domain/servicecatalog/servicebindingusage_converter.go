@@ -2,12 +2,11 @@ package servicecatalog
 
 import (
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/status"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/name"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 //go:generate mockery -name=statusBindingUsageExtractor -output=automock -outpkg=automock -case=underscore
@@ -15,17 +14,17 @@ type statusBindingUsageExtractor interface {
 	Status(conditions []sbuTypes.ServiceBindingUsageCondition) gqlschema.ServiceBindingUsageStatus
 }
 
-type bindingUsageConverter struct {
+type serviceBindingUsageConverter struct {
 	extractor statusBindingUsageExtractor
 }
 
-func newBindingUsageConverter() bindingUsageConverter {
-	return bindingUsageConverter{
+func newBindingUsageConverter() serviceBindingUsageConverter {
+	return serviceBindingUsageConverter{
 		extractor: &status.BindingUsageExtractor{},
 	}
 }
 
-func (c *bindingUsageConverter) ToGQL(in *api.ServiceBindingUsage) (*gqlschema.ServiceBindingUsage, error) {
+func (c *serviceBindingUsageConverter) ToGQL(in *api.ServiceBindingUsage) (*gqlschema.ServiceBindingUsage, error) {
 	if in == nil {
 		return nil, nil
 	}
@@ -52,7 +51,7 @@ func (c *bindingUsageConverter) ToGQL(in *api.ServiceBindingUsage) (*gqlschema.S
 	return &gqlSBU, nil
 }
 
-func (c *bindingUsageConverter) ToGQLs(in []*api.ServiceBindingUsage) ([]gqlschema.ServiceBindingUsage, error) {
+func (c *serviceBindingUsageConverter) ToGQLs(in []*api.ServiceBindingUsage) ([]gqlschema.ServiceBindingUsage, error) {
 	var out []gqlschema.ServiceBindingUsage
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
@@ -67,7 +66,7 @@ func (c *bindingUsageConverter) ToGQLs(in []*api.ServiceBindingUsage) ([]gqlsche
 	return out, nil
 }
 
-func (c *bindingUsageConverter) InputToK8s(in *gqlschema.CreateServiceBindingUsageInput) (*api.ServiceBindingUsage, error) {
+func (c *serviceBindingUsageConverter) InputToK8s(in *gqlschema.CreateServiceBindingUsageInput) (*api.ServiceBindingUsage, error) {
 	if in == nil {
 		return nil, nil
 	}

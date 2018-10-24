@@ -143,7 +143,7 @@ func NewServiceBindingResolver(sbService serviceBindingOperations) *serviceBindi
 	return newServiceBindingResolver(sbService)
 }
 func NewServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, informer cache.SharedIndexInformer, sbName string) *serviceBindingService {
-	return newServiceBindingService(client, informer, func() string{
+	return newServiceBindingService(client, informer, func() string {
 		return sbName
 	})
 }
@@ -156,6 +156,6 @@ func NewServiceBindingUsageService(buInterface v1alpha1.ServicecatalogV1alpha1In
 	})
 }
 
-func NewServiceBindingUsageResolver(op serviceBindingUsageOperations, serviceBindingGetter serviceBindingGetter) *serviceBindingUsageResolver {
-	return newServiceBindingUsageResolver(op, serviceBindingGetter)
+func NewServiceBindingUsageResolver(op serviceBindingUsageOperations) *serviceBindingUsageResolver {
+	return newServiceBindingUsageResolver(op)
 }

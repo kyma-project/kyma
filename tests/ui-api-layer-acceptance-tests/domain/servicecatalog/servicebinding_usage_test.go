@@ -389,27 +389,26 @@ func (s *bindingUsageTestSuite) bindingUsageDetailsFields() string {
 
 func (s *bindingUsageTestSuite) subscribeBindingUsage() *graphql.Subscription {
 	query := fmt.Sprintf(`
-			subscription ($environment: String!, $instanceName: String!) {
-				serviceBindingUsageEventForServiceInstance(environment: $environment, serviceInstanceName: $instanceName) {
+			subscription ($environment: String!) {
+				serviceBindingUsageEvent(environment: $environment) {
 					%s
 				}
 			}
 		`, s.bindingUsageEventDetailsFields())
 	req := graphql.NewRequest(query)
 	req.SetVar("environment", s.givenBindingUsage.Environment)
-	req.SetVar("instanceName", s.givenInstance.Name)
 
 	return s.gqlCli.Subscribe(req)
 }
 
 func (s *bindingUsageTestSuite) readServiceBindingUsageEvent(sub *graphql.Subscription) (ServiceBindingUsageEvent, error) {
 	type Response struct {
-		ServiceBindingUsageEventForServiceInstance ServiceBindingUsageEvent
+		ServiceBindingUsageEvent ServiceBindingUsageEvent
 	}
 	var bindingEvent Response
 	err := sub.Next(&bindingEvent, tester.DefaultSubscriptionTimeout)
 
-	return bindingEvent.ServiceBindingUsageEventForServiceInstance, err
+	return bindingEvent.ServiceBindingUsageEvent, err
 }
 
 func (s *bindingUsageTestSuite) bindingUsageEventDetailsFields() string {
