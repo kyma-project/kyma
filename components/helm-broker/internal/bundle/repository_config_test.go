@@ -43,9 +43,9 @@ func TestRepositoryConfig(t *testing.T) {
 
 	for tn, tc := range tests {
 		t.Run(tn, func(t *testing.T) {
-			cfg := bundle.RepositoryConfig{BaseURL: tc.givenRepoURL}
+			cfg := bundle.RepositoryConfig{URL: tc.givenRepoURL}
 
-			assert.Equal(t, tc.expBaseURL, cfg.GetBaseURL())
+			assert.Equal(t, tc.expBaseURL, cfg.BaseURL())
 			assert.Equal(t, tc.expIndexName, cfg.IndexFileName())
 
 		})

@@ -13,7 +13,7 @@ import (
 func NewHTTPRepository(cfg RepositoryConfig) *HTTPRepository {
 	return &HTTPRepository{
 		IndexFile: cfg.IndexFileName(),
-		BaseURL:   cfg.GetBaseURL(),
+		BaseURL:   cfg.BaseURL(),
 		Client:    http.DefaultClient,
 	}
 }

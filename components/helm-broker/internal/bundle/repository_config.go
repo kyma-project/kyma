@@ -8,29 +8,29 @@ import (
 
 // RepositoryConfig provides configuration for HTTP Repository.
 type RepositoryConfig struct {
-	BaseURL string `json:"baseUrl" valid:"required"`
+	URL string `json:"URL" valid:"required"`
 }
 
 // IndexFileName returns name of yaml file with configuration (if not exist return default name)
 func (cfg RepositoryConfig) IndexFileName() string {
 	if cfg.hasConfigFile() {
-		return path.Base(cfg.BaseURL)
+		return path.Base(cfg.URL)
 	}
 
 	return "index.yaml"
 }
 
-// GetBaseURL returns base url to bundles with trailing slash
-func (cfg RepositoryConfig) GetBaseURL() string {
+// BaseURL returns base url to bundles with trailing slash
+func (cfg RepositoryConfig) BaseURL() string {
 	if cfg.hasConfigFile() {
-		return strings.TrimRight(cfg.BaseURL, cfg.IndexFileName())
+		return strings.TrimRight(cfg.URL, cfg.IndexFileName())
 	}
 
-	return strings.TrimRight(cfg.BaseURL, "/") + "/"
+	return strings.TrimRight(cfg.URL, "/") + "/"
 }
 
 func (cfg RepositoryConfig) hasConfigFile() bool {
-	extension := filepath.Ext(path.Base(cfg.BaseURL))
+	extension := filepath.Ext(path.Base(cfg.URL))
 
 	return extension == ".yaml"
 }
