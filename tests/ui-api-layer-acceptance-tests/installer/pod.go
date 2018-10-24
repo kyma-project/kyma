@@ -34,7 +34,7 @@ func WaitForPodRunning(k8sClient *corev1Type.CoreV1Client, namespace, name strin
 		case corev1.PodRunning:
 			return true, nil
 		case corev1.PodFailed, corev1.PodSucceeded:
-			return false, fmt.Errorf("while initializing Pod: %s", pod.Status.Message)
+			return false, fmt.Errorf("while initializing Pod: %v", pod.Status)
 		}
 
 		return false, nil

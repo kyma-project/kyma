@@ -91,7 +91,7 @@ func (t *BrokerInstaller) WaitForBrokerRunning(svcatCli *clientset.Clientset) er
 		}
 
 		log.Printf("%s %s still not ready. Waiting...\n", t.typeOf, t.name)
-		return false, fmt.Errorf("while installing %s: %s", t.typeOf, t.getFailedMessage(conditions))
+		return false, fmt.Errorf("while installing %s: %v", t.typeOf, conditions)
 	}, brokerReadyTimeout)
 }
 
@@ -102,20 +102,6 @@ func (t *BrokerInstaller) checkStatusOfBroker(conditions []v1beta1.ServiceBroker
 		}
 	}
 	return false
-}
-
-func (t *BrokerInstaller) getFailedMessage(conditions []v1beta1.ServiceBrokerCondition) string {
-	for _, v := range conditions {
-		if v.Type == "Failed" && v.Message != "" {
-			return v.Message
-		}
-	}
-	for _, v := range conditions {
-		if v.Type == "Ready" {
-			return v.Message
-		}
-	}
-	return ""
 }
 
 func upsClusterServiceBroker(name, url string) *v1beta1.ClusterServiceBroker {
