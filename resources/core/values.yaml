@@ -24,7 +24,7 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: 9af5c6b4
+    version: 014de52c
   alpine_net:
     dir: develop/
     version: ed568f0f
@@ -75,12 +75,9 @@ global:
     version: e0f2a383
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: e0f2a383
+    version: 014de52c
 
 test:
-  auth:
-    username: admin@kyma.cx
-    password: nimda123
   acceptance:
     core:
       # environments used in remote-environment acceptance test

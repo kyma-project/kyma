@@ -106,7 +106,11 @@ The command retrieves all Pods from all Namespaces, the status of the Pods, and 
 
 Access your local Kyma instance through [this](https://console.kyma.local/) link.
 
-* Click **Login with Email** and sign in with the `admin@kyma.cx` email address and the generic password from the `dex-config-map.yaml` file in the `/resources/dex/templates/` directory.
+* Click **Login with Email** and sign in with the `admin@kyma.cx` email address. Use the password contained in the  `admin-user` Secret located in the `kyma-system` Namespace. To get the password, run:
+
+``` bash
+kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D
+```
 
 * Click the **Environments** section and select an Environment from the drop-down menu to explore Kyma further.
 
