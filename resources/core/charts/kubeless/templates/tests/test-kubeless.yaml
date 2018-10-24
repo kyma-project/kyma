@@ -17,7 +17,7 @@ rules:
   resources: ["namespaces"]
   verbs: ["create", "delete", "get", "list", "patch"]
 - apiGroups: [""]
-  resources: ["services", "services/proxy", "configmaps", "pods/log"]
+  resources: ["services", "services/proxy", "configmaps", "pods/log", "replicationcontrollers"]
   verbs: ["get", "list"]
 - apiGroups: ["kubeless.io"]
   resources: ["functions"]
@@ -40,7 +40,15 @@ rules:
 - apiGroups: ["networking.istio.io"]
   resources: ["virtualservices"]
   verbs: ["get", "list"]
-
+- apiGroups: ["apps"]
+  resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
+  verbs: ["get", "list"]
+- apiGroups: ["batch"]
+  resources: ["cronjobs"]
+  verbs: ["get", "list"]
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["get", "list"]
 
 ---
 apiVersion: v1
