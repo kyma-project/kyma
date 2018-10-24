@@ -106,7 +106,7 @@ The command retrieves all Pods from all Namespaces, the status of the Pods, and 
 
 Access your local Kyma instance through [this](https://console.kyma.local/) link.
 
-* Click **Login with Email** and sign in with the `admin@kyma.cx` email address and the password from the secret named `admin-user` in kyma-system namespace. To obtain the password execute the following command:
+* Click **Login with Email** and sign in with the `admin@kyma.cx` email address. Use the password contained in the  `admin-user` Secret located in the `kyma-system` Namespace. To get the password, run:
 
 ``` bash
 kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D
