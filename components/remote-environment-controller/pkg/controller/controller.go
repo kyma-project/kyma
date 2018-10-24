@@ -14,14 +14,14 @@ import (
 const (
 	overridesTemplate = `global:
   domainName: {{ .DomainName }}
-  gatewayImage: {{ .GatewayImage }}
+  proxyServiceImage: {{ .ProxyServiceImage }}
   eventServiceImage: {{ .EventServiceImage }}
   eventServiceTestsImage: {{ .EventServiceTestsImage }}`
 )
 
 type OverridesData struct {
 	DomainName             string
-	GatewayImage           string
+	ProxyServiceImage      string
 	EventServiceImage      string
 	EventServiceTestsImage string
 }

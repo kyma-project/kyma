@@ -34,7 +34,7 @@ func TestGatewayEvents(t *testing.T) {
 	config, err := testkit.ReadConfig()
 	require.NoError(t, err)
 
-	t.Run("should send events thorough gateway", func(t *testing.T) {
+	t.Run("should send events via Event Service", func(t *testing.T) {
 		// given
 		publishRequest := PublishRequest{
 			EventType:        "order.created",
@@ -46,7 +46,7 @@ func TestGatewayEvents(t *testing.T) {
 		publishRequestEncoded, err := json.Marshal(publishRequest)
 		require.NoError(t, err)
 
-		url := config.GatewayUrl + "/" + remoteEnvironment + "/v1/events"
+		url := config.EventServiceUrl + "/" + remoteEnvironment + "/v1/events"
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(publishRequestEncoded))
 		require.NoError(t, err)

@@ -11,13 +11,15 @@ import (
 )
 
 const (
-	gatewayNameFormat        = "%s-gateway"
-	gatewayRoleFormat        = "%s-gateway-role"
-	gatewayRoleBindingFormat = "%s-gateway-rolebinding"
-	gatewayApiFormat         = "%s-gateway-external-api"
+	ingressNameFormat        = "%s-remote-environment"
+
+	proxyServiceNameFormat        = "%s-proxy-service"
+	proxyServiceRoleFormat        = "%s-proxy-service-role"
+	proxyServiceRoleBindingFormat = "%s-proxy-service-rolebinding"
+	proxyServiceApiFormat         = "%s-proxy-service-external-api"
 
 	eventServiceNameFormat = "%s-event-service"
-	eventServiceApiFormat  = "%s-gateway-external-api"
+	eventServiceApiFormat  = "%s-event-service-external-api"
 )
 
 type K8sChecker interface {
@@ -64,30 +66,30 @@ func (checker *k8sChecker) CheckK8sResources(t *testing.T, reName string) {
 }
 
 func (checker *k8sChecker) checkDeployments(t *testing.T, reName string) {
-	gatewayName := fmt.Sprintf(gatewayNameFormat, reName)
+	proxyServiceName := fmt.Sprintf(proxyServiceNameFormat, reName)
 	eventServiceName := fmt.Sprintf(eventServiceNameFormat, reName)
 
-	var gatewayDeploy, eventsDeploy *v1apps.Deployment
-	var gatewayErr, eventsErr error
+	var proxyServiceDeploy, eventsDeploy *v1apps.Deployment
+	var proxyServiceErr, eventsErr error
 
 	if checker.resourcesShouldExist {
-		gatewayDeploy, gatewayErr = checker.client.GetDeployment(gatewayName, v1.GetOptions{})
+		proxyServiceDeploy, proxyServiceErr = checker.client.GetDeployment(proxyServiceName, v1.GetOptions{})
 		eventsDeploy, eventsErr = checker.client.GetDeployment(eventServiceName, v1.GetOptions{})
 	} else {
 		// Deleting deployments is slow (all the pods needs to be deleted) so that we need to retry checks
-		gatewayDeploy, gatewayErr = checker.getDeletedDeployment(gatewayName, v1.GetOptions{})
+		proxyServiceDeploy, proxyServiceErr = checker.getDeletedDeployment(proxyServiceName, v1.GetOptions{})
 		eventsDeploy, eventsErr = checker.getDeletedDeployment(eventServiceName, v1.GetOptions{})
 	}
 
-	checker.errCheckFunc(t, gatewayErr)
-	checker.resourceCheckFunc(t, gatewayDeploy)
+	checker.errCheckFunc(t, proxyServiceErr)
+	checker.resourceCheckFunc(t, proxyServiceDeploy)
 
 	checker.errCheckFunc(t, eventsErr)
 	checker.resourceCheckFunc(t, eventsDeploy)
 }
 
 func (checker *k8sChecker) checkIngress(t *testing.T, reName string) {
-	ingressName := fmt.Sprintf(gatewayNameFormat, reName)
+	ingressName := fmt.Sprintf(ingressNameFormat, reName)
 
 	ingress, err := checker.client.GetIngress(ingressName, v1.GetOptions{})
 	checker.errCheckFunc(t, err)
@@ -95,7 +97,7 @@ func (checker *k8sChecker) checkIngress(t *testing.T, reName string) {
 }
 
 func (checker *k8sChecker) checkRole(t *testing.T, reName string) {
-	roleName := fmt.Sprintf(gatewayRoleFormat, reName)
+	roleName := fmt.Sprintf(proxyServiceRoleFormat, reName)
 
 	role, err := checker.client.GetRole(roleName, v1.GetOptions{})
 	checker.errCheckFunc(t, err)
@@ -103,7 +105,7 @@ func (checker *k8sChecker) checkRole(t *testing.T, reName string) {
 }
 
 func (checker *k8sChecker) checkRoleBinding(t *testing.T, reName string) {
-	roleBindingName := fmt.Sprintf(gatewayRoleBindingFormat, reName)
+	roleBindingName := fmt.Sprintf(proxyServiceRoleBindingFormat, reName)
 
 	role, err := checker.client.GetRoleBinding(roleBindingName, v1.GetOptions{})
 	checker.errCheckFunc(t, err)
@@ -111,7 +113,7 @@ func (checker *k8sChecker) checkRoleBinding(t *testing.T, reName string) {
 }
 
 func (checker *k8sChecker) checkServices(t *testing.T, reName string) {
-	gatewayApiName := fmt.Sprintf(gatewayApiFormat, reName)
+	gatewayApiName := fmt.Sprintf(proxyServiceApiFormat, reName)
 	eventsApiName := fmt.Sprintf(eventServiceApiFormat, reName)
 
 	gatewayApiSvc, err := checker.client.GetService(gatewayApiName, v1.GetOptions{})
