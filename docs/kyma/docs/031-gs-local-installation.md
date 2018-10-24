@@ -66,10 +66,9 @@ $ kubectl apply -f ./resources/default-sa-rbac-role.yaml
 $ ./scripts/install-tiller.sh
 ```
 
-5. Configure the Kyma installation using the local configuration file from the latest release:
+5. Configure the Kyma installation using the local configuration file from the 0.4.3 release:
 ```
-$ LATEST=$(curl https://github.com/kyma-project/kyma/releases/latest -I|grep Location:| rev | cut -d'/' -f1 | rev|tr -d '\r')
-$ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/${LATEST}/kyma-config-local.yaml
+$ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/0.4.3/kyma-config-local.yaml
 ```
 
 6. To trigger the installation process, label the `kyma-installation` custom resource: 

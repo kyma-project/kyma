@@ -52,7 +52,7 @@ The subsequent paragraphs describe respective sub-scripts triggered during the i
 
 The purpose of `installation/scripts/minikube.sh` is to configure and start Minikube. The script also checks if your development environment is cofigured to handle the Kyma installation. This includes checking Minikube and kubectl versions. If Minikube is already initialized, the system prompts you to agree to remove the previous Minikube cluster. The script exits if you don't want to restart your cluster.
 
-Minikube is configured to disable the default nginx ingress controller.
+Minikube is configured to disable the default Nginx Ingress Controller.
 
 >**NOTE:** For the complete list of parameters passed to the `minikube start` command, refer to the `installation/scripts/minikube.sh` script.
 
@@ -68,7 +68,7 @@ The `installation/scripts/build-kyma-installer.sh` script extracts Kyma-Installe
 
 ## The generate-local-config.sh script
 
-The `generate-local-config.sh` script configures optional sub-components. At the moment only Azure-Broker is optional sub-component of the `core` deployment. 
+The `generate-local-config.sh` script configures optional sub-components. At the moment only Azure-Broker is an optional sub-component of the `core` deployment. 
 
 The Azure-Broker sub-component is a part of the `core` deployment that provisions managed services in the Microsoft Azure cloud. To enable Azure-Broker, export the following environment variables:
  - AZURE_BROKER_SUBSCRIPTION_ID
@@ -76,7 +76,7 @@ The Azure-Broker sub-component is a part of the `core` deployment that provision
  - AZURE_BROKER_CLIENT_ID
  - AZURE_BROKER_CLIENT_SECRET
 
->**NOTE:** You need to exportabove environment variable before executing the `installation/cmd/run.sh` script. As the Azure credentials are converted to a Kubernetes Secret, make sure the exported values are base64-encoded.
+>**NOTE:** You need to export above environment variables before executing the `installation/cmd/run.sh` script. As the Azure credentials are converted to a Kubernetes Secret, make sure the exported values are base64-encoded.
 
 ## The create-cr.sh script
 
