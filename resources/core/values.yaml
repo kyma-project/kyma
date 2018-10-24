@@ -54,7 +54,7 @@ global:
     version: 6e0a7fe2
   event_bus:
     dir: develop/
-    version: 2408daf3
+    version: f9df7d26
   event_bus_tests:
     dir: develop/
     version: 1daa11b7
