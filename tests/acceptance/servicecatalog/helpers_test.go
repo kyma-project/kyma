@@ -8,7 +8,7 @@ import (
 
 	catalog "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog/wait"
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +36,7 @@ func getCatalogForBroker(url string) ([]osb.Service, error) {
 
 // awaitCatalogContainsClusterServiceClasses asserts that service catalog contains all OSB services mapped to Cluster Service Class.
 func awaitCatalogContainsClusterServiceClasses(t *testing.T, timeout time.Duration, services []osb.Service) {
-	wait.ForFuncAtMost(t, func() error {
+	repeat.FuncAtMost(t, func() error {
 		serviceMap := make(map[string]osb.Service)
 		for _, service := range services {
 			serviceMap[service.ID] = service
@@ -60,7 +60,7 @@ func awaitCatalogContainsClusterServiceClasses(t *testing.T, timeout time.Durati
 }
 
 func awaitCatalogContainsServiceClasses(t *testing.T, namespace string, timeout time.Duration, services []osb.Service) {
-	wait.ForFuncAtMost(t, func() error {
+	repeat.FuncAtMost(t, func() error {
 		serviceMap := make(map[string]osb.Service)
 		for _, service := range services {
 			serviceMap[service.ID] = service

@@ -7,13 +7,13 @@ spec:
   serviceAccountName: remoteenv-test
   containers:
   - name: acceptance-test
-    image: acceptance-tests-re:0.1
-    command: ["/go/bin/re.test"]
+    imagePullPolicy: Always
+    image: acceptance-tests-re:0.0.1
     env:
     - name: REMOTE_ENVIRONMENT_KEEP_RESOURCES
       value: "true"
     - name: STUBS_DOCKER_IMAGE
-      value: acceptance-tests-re:0.1
+      value: acceptance-tests-re:0.0.1
     - name: REMOTE_ENVIRONMENT_LINKING_TIMEOUT
       value: 2m
     - name: REMOTE_ENVIRONMENT_UNLINKING_TIMEOUT
