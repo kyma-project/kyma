@@ -1,4 +1,4 @@
-ARG INSTALLER_VERSION=e156f1ed
+ARG INSTALLER_VERSION=d55a2193
 
 FROM eu.gcr.io/kyma-project/develop/installer:$INSTALLER_VERSION
 

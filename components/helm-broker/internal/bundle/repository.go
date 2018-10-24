@@ -5,35 +5,31 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"github.com/pkg/errors"
 )
 
-// RepositoryConfig provides configuration for HTTP Repository.
-type RepositoryConfig struct {
-	BaseURL string `json:"baseUrl" valid:"required"`
-}
-
 // NewHTTPRepository creates new instance of HTTPRepository.
 func NewHTTPRepository(cfg RepositoryConfig) *HTTPRepository {
 	return &HTTPRepository{
-		BaseURL: cfg.BaseURL,
-		Client:  http.DefaultClient,
+		IndexFile: cfg.IndexFileName(),
+		BaseURL:   cfg.BaseURL(),
+		Client:    http.DefaultClient,
 	}
 }
 
 // HTTPRepository represents remote bundle repository which is accessed via HTTP.
 type HTTPRepository struct {
-	BaseURL string
-	Client  interface {
+	IndexFile string
+	BaseURL   string
+	Client    interface {
 		Do(req *http.Request) (*http.Response, error)
 	}
 }
 
 // IndexReader acquire repository index.
 func (p *HTTPRepository) IndexReader() (r io.Reader, closer func(), err error) {
-	return p.doGetCall("index.yaml")
+	return p.doGetCall(p.BaseURL + p.IndexFile)
 }
 
 // BundleReader calls repository for a specific bundle and returns means to read bundle content.
@@ -42,11 +38,11 @@ func (p *HTTPRepository) BundleReader(name Name, version Version) (r io.Reader, 
 		return fmt.Sprintf("%s-%s.tgz", n, v)
 	}
 
-	return p.doGetCall(bundleFileName(name, version))
+	return p.doGetCall(p.BaseURL + bundleFileName(name, version))
 }
 
-func (p *HTTPRepository) doGetCall(urlPart string) (r io.Reader, closer func(), err error) {
-	req, err := http.NewRequest(http.MethodGet, p.fullPath(urlPart), http.NoBody)
+func (p *HTTPRepository) doGetCall(url string) (r io.Reader, closer func(), err error) {
+	req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "while preparing request")
 	}
@@ -66,10 +62,4 @@ func (p *HTTPRepository) doGetCall(urlPart string) (r io.Reader, closer func(), 
 	}
 
 	return resp.Body, func() { resp.Body.Close() }, nil
-}
-
-func (p *HTTPRepository) fullPath(part string) string {
-	normalisedBaseURL := strings.TrimRight(p.BaseURL, "/")
-	urlParts := []string{normalisedBaseURL, part}
-	return strings.Join(urlParts, "/")
 }
