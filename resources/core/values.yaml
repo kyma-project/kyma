@@ -23,8 +23,8 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
-    dir: pr/
-    version: PR-1235
+    dir: develop/
+    version: 014de52c
   alpine_net:
     dir: develop/
     version: ed568f0f
@@ -77,8 +77,8 @@ global:
     dir: develop/
     version: e0f2a383
   ui_api_layer_acceptance_tests:
-    dir: pr/
-    version: PR-1235
+    dir: develop/
+    version: 014de52c
 
 test:
   acceptance:
