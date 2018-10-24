@@ -16,27 +16,27 @@ const (
 )
 
 type BrokerInstaller struct {
-	releaseName string
+	name string
 	namespace   string
 	typeOf 		string
 }
 
-func NewBroker(releaseName, namespace, typeOf string) *BrokerInstaller {
+func NewBroker(name, namespace, typeOf string) *BrokerInstaller {
 	return &BrokerInstaller{
-		releaseName: releaseName,
+		name: 			name,
 		namespace:   namespace,
 		typeOf: 	 typeOf,
 	}
 }
 
-func (t *BrokerInstaller) Install(svcatCli *clientset.Clientset) error {
-	url := "http://" + t.releaseName + "." + t.namespace + ".svc.cluster.local"
+func (t *BrokerInstaller) Install(svcatCli *clientset.Clientset, releaseName string) error {
+	url := "http://" + releaseName + "." + t.namespace + ".svc.cluster.local"
 
 	var err error
 	if t.typeOf == tester.ClusterServiceBroker {
-		_, err = svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Create(upsClusterServiceBroker(t.releaseName, url))
+		_, err = svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Create(upsClusterServiceBroker(t.name, url))
 	} else {
-		_, err = svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Create(upsServiceBroker(t.releaseName, url))
+		_, err = svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Create(upsServiceBroker(t.name, url))
 	}
 	return err
 }
@@ -44,15 +44,19 @@ func (t *BrokerInstaller) Install(svcatCli *clientset.Clientset) error {
 func (t *BrokerInstaller) Uninstall(svcatCli *clientset.Clientset) error {
 	var err error
 	if t.typeOf == tester.ClusterServiceBroker {
-		err = svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Delete(t.releaseName, nil)
+		err = svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Delete(t.name, nil)
 	} else {
-		err = svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Delete(t.releaseName, nil)
+		err = svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Delete(t.name, nil)
 	}
 	return err
 }
 
-func (t *BrokerInstaller) ReleaseName() string {
-	return t.releaseName
+func (t *BrokerInstaller) Name() string {
+	return t.name
+}
+
+func (t *BrokerInstaller) Namespace() string {
+	return t.namespace
 }
 
 func (t *BrokerInstaller) TypeOf() string {
@@ -64,7 +68,7 @@ func (t *BrokerInstaller) WaitForBrokerRunning(svcatCli *clientset.Clientset) er
 		var conditions []v1beta1.ServiceBrokerCondition
 
 		if t.typeOf == tester.ClusterServiceBroker {
-			broker, err := svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Get(t.releaseName, metav1.GetOptions{})
+			broker, err := svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Get(t.name, metav1.GetOptions{})
 
 			if err != nil || broker == nil {
 				return false, err
@@ -72,7 +76,7 @@ func (t *BrokerInstaller) WaitForBrokerRunning(svcatCli *clientset.Clientset) er
 
 			conditions = broker.Status.Conditions
 		} else {
-			broker, err := svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Get(t.releaseName, metav1.GetOptions{})
+			broker, err := svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Get(t.name, metav1.GetOptions{})
 
 			if err != nil || broker == nil {
 				return false, err
@@ -85,7 +89,7 @@ func (t *BrokerInstaller) WaitForBrokerRunning(svcatCli *clientset.Clientset) er
 			return true, nil
 		}
 
-		log.Printf("%s %s still not ready. Waiting...\n", t.typeOf, t.releaseName)
+		log.Printf("%s %s still not ready. Waiting...\n", t.typeOf, t.name)
 		return false, nil
 	}, brokerReadyTimeout)
 }

@@ -11,8 +11,8 @@ import (
 type envConfig struct {
 	Domain          string `envconfig:"default=kyma.local"`
 	GraphQLEndpoint string `envconfig:"optional,GRAPHQL_ENDPOINT"`
-	Username        string
-	Password        string
+	Username        string `envconfig:"default=admin@kyma.cx"`
+	Password        string `envconfig:"default=nimda123"`
 	IsLocalCluster  bool `envconfig:"default=true"`
 }
 

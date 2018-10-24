@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	endpointReadyTimeout = time.Second * 300
+	endpointReadyTimeout = time.Second * 30
 )
 
 func CreateService(k8sClient *corev1Type.CoreV1Client, namespace, name string) (*v1.Service, error) {
@@ -33,7 +33,7 @@ func WaitForEndpoint(k8sClient *corev1Type.CoreV1Client, namespace, name string)
 			return false, nil
 		}
 
-		return false, nil
+		return true, nil
 	}, endpointReadyTimeout)
 }
 
