@@ -26,7 +26,7 @@ spec:
         - containerPort: 5000
         args:
         - --script
-        - /istio-webhook/scripts/webhook.lua
+        - /istio-webhook/scripts/plugin.lua
         - --port
         - "5000"
         volumeMounts:
