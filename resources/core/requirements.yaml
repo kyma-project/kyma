@@ -29,5 +29,3 @@ dependencies:
     condition: ui-api.enabled
   - name: docs
     condition: docs.enabled
-  - name: logging
-    condition: logging.enabled

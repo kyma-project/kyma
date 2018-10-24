@@ -43,6 +43,7 @@ oklog:
     limits:
       memory: 1Gi
 
+# Local installation config
 isLocalEnv:
   resources:
     requests:
@@ -50,6 +51,8 @@ isLocalEnv:
       memory: 128Mi
     limits:
       memory: 512Mi
+  persistence:
+    size: 5Gi
 
 # Enable to add load balanced service.
 # Example annotation will create AWS internal LoadBalancer.
@@ -67,11 +70,13 @@ persistence:
   size: 200Gi
   mountPath: /data
 
-# Local installation config 
-isLocalEnv:
-  persistence:
-    size: 5Gi
-
 nodeSelector: {}
 tolerations: []
 affinity: {}
+
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  test_logging:
+    dir: develop/
+    version: 293e4a23

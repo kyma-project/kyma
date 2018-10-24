@@ -27,3 +27,5 @@ spec:
       release: "default-remote-environments"
     - name: "ark"
       namespace: "heptio-ark"
+    - name: "logging"
+      namespace: "kyma-system"

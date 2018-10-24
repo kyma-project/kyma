@@ -181,6 +181,10 @@ echo "- Testing Core components..."
 helm test core --timeout 600
 coreTestErr=$?
 
+echo "- Testing Logging components..."
+helm test logging
+loggingTestErr=$?
+
 checkAndCleanupTest kyma-system
 testCheckKymaCore=$?
 
@@ -205,7 +209,7 @@ latestTagsErr=$?
 
 if  [ ${coreTestErr} -ne 0 ] || [ ${testCheckKymaCore} -ne 0 ] || [ ${istioTestErr} -ne 0 ] ||
     [ ${testCheckIstio} -ne 0 ] || [ ${ecTestErr} -ne 0 ] || [ ${hmcTestErr} -ne 0 ] ||
-    [ ${testCheckGateway} -ne 0 ] || [ ${latestTagsErr} -ne 0 ]
+    [ ${testCheckGateway} -ne 0 ] || [ ${latestTagsErr} -ne 0 ] || [ ${loggingTestErr} -ne 0 ]
 
 then
     exit 1
