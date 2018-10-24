@@ -6,10 +6,10 @@ type: Architecture
 The Remote Environment Broker (REB) workflow consists of the following steps:
 
 1. The Remote Environment Broker watches for RemoteEnvironments (REs) in the cluster and EnvironmentMappings (EMs) in all Namespaces.
-2. The user creates an EnvironmentMapping custom resource in a given Environment. The EnvironmentMapping activates the services offered by a given RemoteEnvironment and has the same name as the RemoteEnvironment it corresponds to.
-3. The Remote Environment Broker creates a `remote-env-broker` Service Broker (SB) inside an Environment in which the EnvironmentMapping is created. This Service Broker contains data of all services provided by the RemoteEnvironments activated by EnvironmentMappings. There is always only one Service Broker per Environment, even if there are more EnvironmentMappings.
+2. The user creates an EnvironmentMapping custom resource in a given Environment. The EnvironmentMapping activates the services offered by a given RemoteEnvironment of the same name.
+3. The Remote Environment Broker creates a `remote-env-broker` Service Broker (SB) inside an Environment in which the EnvironmentMapping is created. This Service Broker contains data of all services provided by the activated RemoteEnvironments. There is always only one Service Broker per Environment, even if there are more EnvironmentMappings.
 4. The Service Catalog fetches services that the `remote-env-broker` Service Broker exposes.
-5. The Service Catalog creates ServiceClasses for each service received from the Service Broker.
+5. The Service Catalog creates ServiceClass for each service received from the Service Broker.
 
 ![REB architecture](assets/001-REB-architecture.svg)
 
@@ -35,7 +35,7 @@ This ServiceClass has a **bindable** flag set to `false` which means that after 
 2. Provision this ServiceClass by creating a ServiceInstance in the given Environment.
 3. During the provisioning process, the EventActivation resource is created together with the ServiceInstance. EventActivation allows you to create an Event Bus Subscription.
 4. A Subscription is a custom resource by which an Event Bus triggers the lambda for a particular type of Event in this step.
-5. The Remote Environment (RE2) sends an Event to the Application Connector.
+5. The RemoteEnvironment sends an Event to the Application Connector.
 6. The Application Connector sends an Event to the lambda through the Event Bus.
 
 
