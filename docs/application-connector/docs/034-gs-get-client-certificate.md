@@ -60,13 +60,13 @@ A successful call returns the following response:
 }
 ```
 
-When you connect an external solution to a local Kyma deployment, you must set the NodePort of the `application-connector-nginx-ingress-controller` for the Gateway Service and for the Event Service.
+When you connect an external solution to a local Kyma deployment, you must set the NodePort of the `application-connector-nginx-ingress-controller` for the Metadata Service and for the Event Service.
 
 - To get the NodePort, run:
   ```
   kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
   ```
-- Set it for the Gateway Service and the Event Service using these calls:
+- Set it for the Metadata Service and the Event Service using these calls:
   ```
   curl https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
   ```

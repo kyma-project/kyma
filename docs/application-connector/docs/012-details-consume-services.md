@@ -11,13 +11,13 @@ The Example API is registered in Kyma with the `targetUrl` pointing to `https://
 
 The Remote Environment Broker, which provides ServiceClasses to the Service Catalog, follows this naming convention for its objects:
 ```
-re-{remote-environment-name}-gateway-{service-id}
+re-{remote-environment-name}-{service-id}
 ```
 The `{service-id}` is the service identifier assigned in the process of registration. The `{remote-environment-name}` is the name of the Remote Environment created in Kyma. It represents an instance of the connected external solution that owns the registered service. Such identifier used by the Remote Environment Broker is referred to as the `name` of a ClusterServiceClass in the Service Catalog.
 
 This an example of a full ClusterServiceClass `name`:
 ```
-re-ec-default-gateway-01a702b8-e302-4e62-b678-8d361b627e49
+re-ec-default-01a702b8-e302-4e62-b678-8d361b627e49
 ```
 
 ## Service consumption
@@ -26,7 +26,7 @@ After you provision the Example API in the Environment of your choice using the 
 
 This is a sample URL for the Example API:
 ```
-re-ec-default-gateway-01a702b8-e302-4e62-b678-8d361b627e49.kyma-integration/orders
+re-ec-default-01a702b8-e302-4e62-b678-8d361b627e49.kyma-integration/orders
 ```
 
-When you call this URL, the Gateway Service proxies all requests to the `https://www.orders.com/v1/orders` address, which is the `targetUrl` registered for the Example API. You do not have to get an OAuth token and manually include it in the call as the Gateway service does it for you automatically.
+When you call this URL, the Proxy Service passes all requests to the `https://www.orders.com/v1/orders` address, which is the `targetUrl` registered for the Example API. You do not have to get an OAuth token and manually include it in the call as the Proxy Service does it for you automatically.
