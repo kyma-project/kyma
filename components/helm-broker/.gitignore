@@ -102,4 +102,5 @@ fabric.properties
 /targz
 /indexbuilder
 /broker
+/helm-broker
 /vendor

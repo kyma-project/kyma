@@ -10,11 +10,12 @@ import (
 
 // Config contains all configurations for Remote Environment Acceptance tests
 type Config struct {
-	DockerImage       string        `envconfig:"STUBS_DOCKER_IMAGE"`
-	LinkingTimeout    time.Duration `envconfig:"default=3m,REMOTE_ENVIRONMENT_LINKING_TIMEOUT"`
-	UnlinkingTimeout  time.Duration `envconfig:"default=3m,REMOTE_ENVIRONMENT_UNLINKING_TIMEOUT"`
-	KeepTestResources bool          `envconfig:"REMOTE_ENVIRONMENT_KEEP_RESOURCES"`
-	Disabled          bool          `envconfig:"REMOTE_ENVIRONMENT_DISABLED"`
+	DockerImage            string        `envconfig:"STUBS_DOCKER_IMAGE"`
+	LinkingTimeout         time.Duration `envconfig:"default=3m,REMOTE_ENVIRONMENT_LINKING_TIMEOUT"`
+	UnlinkingTimeout       time.Duration `envconfig:"default=3m,REMOTE_ENVIRONMENT_UNLINKING_TIMEOUT"`
+	KeepTestResources      bool          `envconfig:"REMOTE_ENVIRONMENT_KEEP_RESOURCES"`
+	Disabled               bool          `envconfig:"REMOTE_ENVIRONMENT_DISABLED"`
+	TearDownTimeoutPerStep time.Duration `envconfig:"default=2m,TEAR_DOWN_TIMEOUT_PER_STEP"`
 }
 
 func TestRemoteEnvironmentAPIAccess(t *testing.T) {
@@ -33,7 +34,7 @@ func TestRemoteEnvironmentAPIAccess(t *testing.T) {
 	ts := suite.NewTestSuite(t, cfg.DockerImage, "acceptance-test")
 	ts.Setup()
 	if !cfg.KeepTestResources {
-		defer ts.TearDown()
+		defer ts.TearDown(cfg.TearDownTimeoutPerStep)
 	}
 
 	t.Logf("Waiting for service class")

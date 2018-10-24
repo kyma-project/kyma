@@ -24,7 +24,7 @@ func TestHTTPRepository_IndexReader(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	rep := bundle.NewHTTPRepository(bundle.RepositoryConfig{BaseURL: ts.URL})
+	rep := bundle.NewHTTPRepository(bundle.RepositoryConfig{URL: ts.URL})
 
 	// WHEN:
 	r, clo, err := rep.IndexReader()
@@ -53,7 +53,7 @@ func TestHTTPRepository_BundleReader(t *testing.T) {
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
-	rep := bundle.NewHTTPRepository(bundle.RepositoryConfig{BaseURL: ts.URL})
+	rep := bundle.NewHTTPRepository(bundle.RepositoryConfig{URL: ts.URL})
 
 	r, clo, err := rep.BundleReader(expBundleName, expBundleVer)
 	require.NoError(t, err)

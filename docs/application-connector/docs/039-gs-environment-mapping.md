@@ -30,5 +30,5 @@ To complete this guide, your cluster must have at least one Remote Environment c
 
 3. Check if the operation is successful. List all Environments to which your RE is bound:
   ```
-  kubectl get em --all-namespaces -o jsonpath='{range .items[?(@.metadata.name=="{NAME_OF_YOUR_RE}")]}{@.metadata.namespace}{"\n"}{end}'
+  kubectl get em --all-namespaces -o jsonpath='{range .items[?(@.metadata.name=="{NAME_OF_YOUR_RE}")]}{@.metadata.namespace}{""}{end}'
   ```

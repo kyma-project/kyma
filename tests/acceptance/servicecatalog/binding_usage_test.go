@@ -2,6 +2,7 @@ package servicecatalog_test
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"net/http"
 	"testing"
 	"time"
@@ -17,11 +18,12 @@ import (
 	reClient "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	reInterface "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 
-	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog/wait"
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/stretchr/testify/require"
 	"github.com/vrischmann/envconfig"
 	appsTypes "k8s.io/api/apps/v1beta1"
 	k8sCoreTypes "k8s.io/api/core/v1"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -54,10 +56,14 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	ts.waitForREServiceClasses(time.Second * 90)
 
 	ts.createAndWaitForServiceInstanceA(timeoutPerStep)
+	defer ts.deleteServiceInstanceA(timeoutPerStep)
 	ts.createAndWaitForServiceInstanceB(timeoutPerStep)
+	defer ts.deleteServiceInstanceB(timeoutPerStep)
 
 	ts.createAndWaitForServiceBindingA(timeoutPerStep)
+	defer ts.deleteServiceBindingA(timeoutPerStep)
 	ts.createAndWaitForServiceBindingB(timeoutPerStep)
+	defer ts.deleteServiceBindingB(timeoutPerStep)
 
 	ts.createTesterDeploymentAndService()
 
@@ -258,6 +264,35 @@ func (ts *TestSuite) createAndWaitForServiceBindingB(timeout time.Duration) {
 	ts.createAndWaitForServiceBinding(ts.bindingNameB, ts.serviceInstanceNameB, timeout)
 }
 
+func (ts *TestSuite) deleteServiceBindingA(timeout time.Duration) {
+	ts.deleteServiceBinding(ts.bindingNameA, timeout)
+}
+
+func (ts *TestSuite) deleteServiceBindingB(timeout time.Duration) {
+	ts.deleteServiceBinding(ts.bindingNameB, timeout)
+}
+
+func (ts *TestSuite) deleteServiceBinding(bindingName string, timeout time.Duration) {
+	clientSet, err := scClient.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+	siClient := clientSet.ServicecatalogV1beta1().ServiceBindings(ts.namespace)
+
+	err = siClient.Delete(bindingName, &metav1.DeleteOptions{})
+	require.NoError(ts.t, err)
+
+	repeat.FuncAtMost(ts.t, func() error {
+		_, err := siClient.Get(bindingName, metav1.GetOptions{})
+		switch {
+		case err == nil:
+			return fmt.Errorf("ServiceBiding %q still exists", bindingName)
+		case apiErrors.IsNotFound(err):
+			return nil
+		default:
+			return errors.Wrap(err, "while getting ServiceBiding")
+		}
+	}, timeout)
+}
+
 func (ts *TestSuite) createAndWaitForServiceBinding(bindingName, instanceName string, timeout time.Duration) {
 	scCli, err := scClient.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
@@ -276,7 +311,7 @@ func (ts *TestSuite) createAndWaitForServiceBinding(bindingName, instanceName st
 	})
 	require.NoError(ts.t, err)
 
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		b, err := bindingClient.Get(bindingName, metav1.GetOptions{})
 		if err != nil {
 			return err
@@ -356,6 +391,35 @@ func (ts *TestSuite) createAndWaitForServiceInstanceB(timeout time.Duration) {
 	ts.createAndWaitForServiceInstance(ts.serviceInstanceNameB, ts.classExternalNameB, timeout)
 }
 
+func (ts *TestSuite) deleteServiceInstanceA(timeout time.Duration) {
+	ts.deleteServiceInstance(ts.serviceInstanceNameA, timeout)
+}
+
+func (ts *TestSuite) deleteServiceInstanceB(timeout time.Duration) {
+	ts.deleteServiceInstance(ts.serviceInstanceNameB, timeout)
+}
+
+func (ts *TestSuite) deleteServiceInstance(instanceName string, timeout time.Duration) {
+	clientSet, err := scClient.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+	siClient := clientSet.ServicecatalogV1beta1().ServiceInstances(ts.namespace)
+
+	err = siClient.Delete(instanceName, &metav1.DeleteOptions{})
+	require.NoError(ts.t, err)
+
+	repeat.FuncAtMost(ts.t, func() error {
+		_, err := siClient.Get(instanceName, metav1.GetOptions{})
+		switch {
+		case err == nil:
+			return fmt.Errorf("ServiceInstance %q still exists", instanceName)
+		case apiErrors.IsNotFound(err):
+			return nil
+		default:
+			return errors.Wrap(err, "while getting ServiceInstance")
+		}
+	}, timeout)
+}
+
 func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternalName string, timeout time.Duration) {
 	clientSet, err := scClient.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
@@ -374,7 +438,7 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 	})
 	require.NoError(ts.t, err)
 
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		si, err := siClient.Get(instanceName, metav1.GetOptions{})
 		if err != nil {
 			return err
@@ -399,8 +463,8 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 
 // ServiceClass helpers
 func (ts *TestSuite) waitForREServiceClasses(timeout time.Duration) {
-	wait.ForFuncAtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
-	wait.ForFuncAtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
+	repeat.FuncAtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
+	repeat.FuncAtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
 }
 
 func (ts *TestSuite) serviceClassIsAvailableA() func() error {
@@ -510,7 +574,7 @@ func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.De
 func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, timeout time.Duration) {
 	req := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs?name=%s&value=%s", ts.namespace, envName, envValue)
 
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		resp, err := http.Get(req)
 		if err != nil {
 			return err
