@@ -4,29 +4,49 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
-	"k8s.io/api/core/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1Type "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const (
-	podReadyTimeout = time.Second * 120
-	UPSBrokerImage  = "quay.io/kubernetes-service-catalog/user-broker:latest"
+	podReadyTimeout = time.Second * 60
 )
 
-func CreatePod(k8sClient *corev1Type.CoreV1Client, namespace, name string) (*v1.Pod, error) {
-	return k8sClient.Pods(namespace).Create(upsBrokerPod(name))
+type PodInstaller struct {
+	name      string
+	namespace string
 }
 
-func DeletePod(k8sClient *corev1Type.CoreV1Client, namespace, name string) error {
-	return k8sClient.Pods(namespace).Delete(name, nil)
+func NewPod(name, namespace string) *PodInstaller {
+	return &PodInstaller{
+		name:      name,
+		namespace: namespace,
+	}
 }
 
-func WaitForPodRunning(k8sClient *corev1Type.CoreV1Client, namespace, name string) error {
+func (t *PodInstaller) Create(k8sClient *corev1Type.CoreV1Client, pod *corev1.Pod) error {
+	_, err := k8sClient.Pods(t.namespace).Create(pod)
+	return err
+}
+
+func (t *PodInstaller) Delete(k8sClient *corev1Type.CoreV1Client) error {
+	return k8sClient.Pods(t.namespace).Delete(t.name, nil)
+}
+
+func (t *PodInstaller) Name() string {
+	return t.name
+}
+
+func (t *PodInstaller) Namespace() string {
+	return t.namespace
+}
+
+func (t *PodInstaller) WaitForPodRunning(k8sClient *corev1Type.CoreV1Client) error {
 	return waiter.WaitAtMost(func() (bool, error) {
-		pod, err := k8sClient.Pods(namespace).Get(name, metav1.GetOptions{})
+		pod, err := k8sClient.Pods(t.namespace).Get(t.name, metav1.GetOptions{})
 		if err != nil {
 			return false, err
 		}
@@ -35,14 +55,14 @@ func WaitForPodRunning(k8sClient *corev1Type.CoreV1Client, namespace, name strin
 		case corev1.PodRunning:
 			return true, nil
 		case corev1.PodFailed, corev1.PodSucceeded:
-			return false, fmt.Errorf("while initializing Pod: %v", pod.Status)
+			return false, fmt.Errorf("%v", pod.Status)
 		}
 
 		return false, nil
 	}, podReadyTimeout)
 }
 
-func upsBrokerPod(name string) *corev1.Pod {
+func UPSBrokerPod(name string) *corev1.Pod {
 	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -54,7 +74,7 @@ func upsBrokerPod(name string) *corev1.Pod {
 			Containers: []corev1.Container{
 				{
 					Name:  name,
-					Image: UPSBrokerImage,
+					Image: tester.UPSBrokerImage,
 					Args: []string{
 						"--port",
 						"8080",

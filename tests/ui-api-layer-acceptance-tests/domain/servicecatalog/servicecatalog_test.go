@@ -3,6 +3,7 @@
 package servicecatalog
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -16,56 +17,79 @@ import (
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
+type serviceCatalogInstallers struct {
+	k8sClient              *corev1.CoreV1Client
+	svcatCli               *clientset.Clientset
+	podInstaller           *installer.PodInstaller
+	serviceInstaller       *installer.ServiceInstaller
+	clusterBrokerInstaller *installer.ClusterBrokerInstaller
+	brokerInstaller        *installer.BrokerInstaller
+}
+
 func TestMain(m *testing.M) {
 	if dex.IsSCIEnabled() {
 		log.Println("Skipping configuration, because SCI is enabled")
 		return
 	}
+
 	k8sClient, _, err := k8s.NewClientWithConfig()
 	exitOnError(err, "while initializing K8S Client")
 
 	svcatCli, _, err := k8s.NewServiceCatalogClientWithConfig()
 	exitOnError(err, "while initializing service catalog client")
 
-	clusterBrokerInstaller := installer.NewBroker(tester.ClusterBrokerReleaseName, tester.DefaultNamespace, tester.ClusterServiceBroker)
-	brokerInstaller := installer.NewBroker(tester.BrokerReleaseName, tester.DefaultNamespace, tester.ServiceBroker)
+	podInstaller := installer.NewPod(tester.ReleaseName, tester.DefaultNamespace)
+	serviceInstaller := installer.NewService(tester.ReleaseName, tester.DefaultNamespace)
+	clusterBrokerInstaller := installer.NewClusterBroker(tester.ClusterBrokerReleaseName, tester.DefaultNamespace)
+	brokerInstaller := installer.NewBroker(tester.BrokerReleaseName, tester.DefaultNamespace)
 
-	err = setup(k8sClient, svcatCli, clusterBrokerInstaller, brokerInstaller)
+	scInstallers := serviceCatalogInstallers{
+		k8sClient:              k8sClient,
+		svcatCli:               svcatCli,
+		podInstaller:           podInstaller,
+		serviceInstaller:       serviceInstaller,
+		clusterBrokerInstaller: clusterBrokerInstaller,
+		brokerInstaller:        brokerInstaller,
+	}
+
+	err = setup(scInstallers)
 	if err != nil {
-		cleanup(k8sClient, svcatCli, clusterBrokerInstaller, brokerInstaller)
+		cleanup(scInstallers)
 		exitOnError(err, "while setup")
 	}
 
 	code := m.Run()
 
-	cleanup(k8sClient, svcatCli, clusterBrokerInstaller, brokerInstaller)
+	cleanup(scInstallers)
 	os.Exit(code)
 }
 
-func setup(k8sClient *corev1.CoreV1Client, svcatCli *clientset.Clientset, clusterBrokerInstaller, brokerInstaller *installer.BrokerInstaller) error {
+func setup(scInstallers serviceCatalogInstallers) error {
 	log.Println("Setting up tests...")
 
-	err := installer.CreateNamespace(k8sClient, tester.DefaultNamespace)
+	err := installer.CreateNamespace(scInstallers.k8sClient, tester.DefaultNamespace)
 	if err != nil {
 		return errors.Wrap(err, "while creating namespace")
 	}
 
-	err = initPod(k8sClient, tester.DefaultNamespace, tester.ReleaseName)
+	err = initPod(scInstallers.podInstaller, scInstallers.k8sClient)
 	if err != nil {
 		return err
 	}
 
-	err = initService(k8sClient, tester.DefaultNamespace, tester.ReleaseName)
+	err = initService(scInstallers.serviceInstaller, scInstallers.k8sClient)
 	if err != nil {
 		return err
 	}
 
-	err = initBroker(clusterBrokerInstaller, svcatCli, tester.ReleaseName)
+	url := fmt.Sprintf("http://%s.%s.svc.cluster.local", tester.ReleaseName, tester.DefaultNamespace)
+
+	err = initClusterBroker(scInstallers.clusterBrokerInstaller, scInstallers.svcatCli, url)
 	if err != nil {
 		return err
 	}
 
-	err = initBroker(brokerInstaller, svcatCli, tester.ReleaseName)
+	err = initBroker(scInstallers.brokerInstaller, scInstallers.svcatCli, url)
 	if err != nil {
 		return err
 	}
@@ -73,30 +97,30 @@ func setup(k8sClient *corev1.CoreV1Client, svcatCli *clientset.Clientset, cluste
 	return nil
 }
 
-func cleanup(k8sClient *corev1.CoreV1Client, svcatCli *clientset.Clientset, clusterBrokerInstaller, brokerInstaller *installer.BrokerInstaller) {
+func cleanup(scInstallers serviceCatalogInstallers) {
 	log.Println("Cleaning up...")
 
-	err := installer.DeletePod(k8sClient, tester.DefaultNamespace, tester.ReleaseName)
+	err := scInstallers.podInstaller.Delete(scInstallers.k8sClient)
 	if err != nil {
 		log.Print(errors.Wrap(err, "while deleting Pod"))
 	}
 
-	err = installer.DeleteService(k8sClient, tester.DefaultNamespace, tester.ReleaseName)
+	err = scInstallers.serviceInstaller.Delete(scInstallers.k8sClient)
 	if err != nil {
 		log.Print(errors.Wrap(err, "while deleting Service"))
 	}
 
-	err = clusterBrokerInstaller.Uninstall(svcatCli)
+	err = scInstallers.clusterBrokerInstaller.Uninstall(scInstallers.svcatCli)
 	if err != nil {
-		log.Print(errors.Wrapf(err, "while uninstalling %s", clusterBrokerInstaller.TypeOf()))
+		log.Print(errors.Wrapf(err, "while uninstalling %s", tester.ClusterServiceBroker))
 	}
 
-	err = brokerInstaller.Uninstall(svcatCli)
+	err = scInstallers.brokerInstaller.Uninstall(scInstallers.svcatCli)
 	if err != nil {
-		log.Print(errors.Wrapf(err, "while uninstalling %s", brokerInstaller.TypeOf()))
+		log.Print(errors.Wrapf(err, "while uninstalling %s", tester.ServiceBroker))
 	}
 
-	err = installer.DeleteNamespace(k8sClient, tester.DefaultNamespace)
+	err = installer.DeleteNamespace(scInstallers.k8sClient, tester.DefaultNamespace)
 	if err != nil {
 		log.Print(errors.Wrap(err, "while deleting namespace"))
 	}
@@ -108,26 +132,40 @@ func exitOnError(err error, context string) {
 	}
 }
 
-func initBroker(brokerInstaller *installer.BrokerInstaller, svcatCli *clientset.Clientset, releaseName string) error {
-	err := brokerInstaller.Install(svcatCli, releaseName)
+func initClusterBroker(clusterBrokerInstaller *installer.ClusterBrokerInstaller, svcatCli *clientset.Clientset, url string) error {
+	err := clusterBrokerInstaller.Install(svcatCli, installer.UPSClusterServiceBroker(clusterBrokerInstaller.Name(), url))
 	if err != nil {
-		return errors.Wrapf(err, "while installing %s", brokerInstaller.TypeOf())
+		return errors.Wrapf(err, "while installing %s", tester.ClusterServiceBroker)
 	}
 
-	err = brokerInstaller.WaitForBrokerRunning(svcatCli)
+	err = clusterBrokerInstaller.WaitForBrokerRunning(svcatCli)
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for %s registration", brokerInstaller.TypeOf())
+		return errors.Wrapf(err, "while waiting for %s registration", tester.ClusterServiceBroker)
 	}
 
 	return nil
 }
 
-func initPod(k8sClient *corev1.CoreV1Client, namespace, name string) error {
-	_, err := installer.CreatePod(k8sClient, namespace, name)
+func initBroker(brokerInstaller *installer.BrokerInstaller, svcatCli *clientset.Clientset, url string) error {
+	err := brokerInstaller.Install(svcatCli, installer.UPSServiceBroker(brokerInstaller.Name(), url))
+	if err != nil {
+		return errors.Wrapf(err, "while installing %s", tester.ServiceBroker)
+	}
+
+	err = brokerInstaller.WaitForBrokerRunning(svcatCli)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for %s registration", tester.ServiceBroker)
+	}
+
+	return nil
+}
+
+func initPod(podInstaller *installer.PodInstaller, k8sClient *corev1.CoreV1Client) error {
+	err := podInstaller.Create(k8sClient, installer.UPSBrokerPod(podInstaller.Name()))
 	if err != nil {
 		return errors.Wrapf(err, "while creating Pod")
 	}
-	err = installer.WaitForPodRunning(k8sClient, namespace, name)
+	err = podInstaller.WaitForPodRunning(k8sClient)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for Pod registration")
 	}
@@ -135,12 +173,12 @@ func initPod(k8sClient *corev1.CoreV1Client, namespace, name string) error {
 	return nil
 }
 
-func initService(k8sClient *corev1.CoreV1Client, namespace, name string) error {
-	_, err := installer.CreateService(k8sClient, namespace, name)
+func initService(serviceInstaller *installer.ServiceInstaller, k8sClient *corev1.CoreV1Client) error {
+	err := serviceInstaller.Create(k8sClient, installer.UPSBrokerService(serviceInstaller.Name()))
 	if err != nil {
 		return errors.Wrapf(err, "while creating Service")
 	}
-	err = installer.WaitForEndpoint(k8sClient, namespace, name)
+	err = serviceInstaller.WaitForEndpoint(k8sClient)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for Service registration")
 	}

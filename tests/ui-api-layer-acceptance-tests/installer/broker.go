@@ -4,12 +4,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
 )
 
@@ -20,37 +18,22 @@ const (
 type BrokerInstaller struct {
 	name      string
 	namespace string
-	typeOf    string
 }
 
-func NewBroker(name, namespace, typeOf string) *BrokerInstaller {
+func NewBroker(name, namespace string) *BrokerInstaller {
 	return &BrokerInstaller{
 		name:      name,
 		namespace: namespace,
-		typeOf:    typeOf,
 	}
 }
 
-func (t *BrokerInstaller) Install(svcatCli *clientset.Clientset, releaseName string) error {
-	url := "http://" + releaseName + "." + t.namespace + ".svc.cluster.local"
-
-	var err error
-	if t.typeOf == tester.ClusterServiceBroker {
-		_, err = svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Create(upsClusterServiceBroker(t.name, url))
-	} else {
-		_, err = svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Create(upsServiceBroker(t.name, url))
-	}
+func (t *BrokerInstaller) Install(svcatCli *clientset.Clientset, broker *v1beta1.ServiceBroker) error {
+	_, err := svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Create(broker)
 	return err
 }
 
 func (t *BrokerInstaller) Uninstall(svcatCli *clientset.Clientset) error {
-	var err error
-	if t.typeOf == tester.ClusterServiceBroker {
-		err = svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Delete(t.name, nil)
-	} else {
-		err = svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Delete(t.name, nil)
-	}
-	return err
+	return svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Delete(t.name, nil)
 }
 
 func (t *BrokerInstaller) Name() string {
@@ -61,64 +44,24 @@ func (t *BrokerInstaller) Namespace() string {
 	return t.namespace
 }
 
-func (t *BrokerInstaller) TypeOf() string {
-	return t.typeOf
-}
-
 func (t *BrokerInstaller) WaitForBrokerRunning(svcatCli *clientset.Clientset) error {
 	return waiter.WaitAtMost(func() (bool, error) {
-		var conditions []v1beta1.ServiceBrokerCondition
+		broker, err := svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Get(t.name, metav1.GetOptions{})
 
-		if t.typeOf == tester.ClusterServiceBroker {
-			broker, err := svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Get(t.name, metav1.GetOptions{})
-
-			if err != nil || broker == nil {
-				return false, err
+		if err != nil || broker == nil {
+			return false, err
+		}
+		for _, v := range broker.Status.Conditions {
+			if v.Type == "Ready" && v.Status == "True" {
+				return true, nil
 			}
-
-			conditions = broker.Status.Conditions
-		} else {
-			broker, err := svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Get(t.name, metav1.GetOptions{})
-
-			if err != nil || broker == nil {
-				return false, err
-			}
-
-			conditions = broker.Status.Conditions
 		}
 
-		if t.checkStatusOfBroker(conditions) {
-			return true, nil
-		}
-
-		log.Printf("%s %s still not ready. Waiting...\n", t.typeOf, t.name)
-		return false, fmt.Errorf("while installing %s: %v", t.typeOf, conditions)
+		return false, fmt.Errorf("%v", broker.Status.Conditions)
 	}, brokerReadyTimeout)
 }
 
-func (t *BrokerInstaller) checkStatusOfBroker(conditions []v1beta1.ServiceBrokerCondition) bool {
-	for _, v := range conditions {
-		if v.Type == "Ready" {
-			return v.Status == "True"
-		}
-	}
-	return false
-}
-
-func upsClusterServiceBroker(name, url string) *v1beta1.ClusterServiceBroker {
-	return &v1beta1.ClusterServiceBroker{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-		Spec: v1beta1.ClusterServiceBrokerSpec{
-			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
-				URL: url,
-			},
-		},
-	}
-}
-
-func upsServiceBroker(name, url string) *v1beta1.ServiceBroker {
+func UPSServiceBroker(name, url string) *v1beta1.ServiceBroker {
 	return &v1beta1.ServiceBroker{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,

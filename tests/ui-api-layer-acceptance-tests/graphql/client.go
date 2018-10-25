@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"log"
+
 	"github.com/golang/glog"
 	"github.com/machinebox/graphql"
 	"github.com/pkg/errors"
@@ -23,6 +25,7 @@ type Client struct {
 	token          string
 	endpoint       string
 	clusterContext func(ctx context.Context, network, addr string) (net.Conn, error)
+	logs           []string
 }
 
 func New() (*Client, error) {
@@ -39,14 +42,17 @@ func New() (*Client, error) {
 
 	httpClient := newAuthorizedClient(token, clusterContext)
 	gqlClient := graphql.NewClient(config.GraphQlEndpoint, graphql.WithHTTPClient(httpClient))
-	//gqlClient.Log = func(s string) { log.Println(s) }
 
-	return &Client{
+	client := &Client{
 		gqlClient:      gqlClient,
 		token:          token,
 		clusterContext: clusterContext,
 		endpoint:       config.GraphQlEndpoint,
-	}, nil
+		logs:           []string{},
+	}
+	client.gqlClient.Log = client.addLog
+
+	return client, nil
 }
 
 func (c *Client) DoQuery(q string, res interface{}) error {
@@ -58,7 +64,14 @@ func (c *Client) Do(req *Request, res interface{}) error {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	return c.gqlClient.Run(ctx, req.req, res)
+	c.clearLogs()
+	err := c.gqlClient.Run(ctx, req.req, res)
+	if err != nil {
+		for _, l := range c.logs {
+			log.Println(l)
+		}
+	}
+	return err
 }
 
 func (c *Client) Subscribe(req *Request) *Subscription {
@@ -90,6 +103,14 @@ func (c *Client) Subscribe(req *Request) *Subscription {
 	}
 
 	return newSubscription(connection)
+}
+
+func (c *Client) addLog(log string) {
+	c.logs = append(c.logs, log)
+}
+
+func (c *Client) clearLogs() {
+	c.logs = []string{}
 }
 
 func authenticate(config idProviderConfig, dialContext func(ctx context.Context, network, addr string) (net.Conn, error)) (string, error) {
