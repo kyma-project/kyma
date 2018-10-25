@@ -74,8 +74,8 @@ global:
     dir: develop/
     version: 60fd580b
   ui_api_layer_acceptance_tests:
-    dir: develop/
-    version: 014de52c
+    dir: pr/
+    version: PR-1434
 
 test:
   acceptance:
