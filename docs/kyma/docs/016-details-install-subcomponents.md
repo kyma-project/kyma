@@ -14,12 +14,12 @@ To specify whether to install a given core subcomponent on Minikube, use the `ma
 
 Example:
 
-To enable the `Azure Broker` subcomponent, run the following command:
+To enable the Azure Broker subcomponent, run the following command:
 ```
 scripts/manage-component.sh azure-broker true
 ```
 
-Alternatively, to disable the `Azure Broker` subcomponent, run this command:
+Alternatively, to disable the Azure Broker subcomponent, run this command:
 ```
 scripts/manage-component.sh azure-broker false
 ```
@@ -55,7 +55,7 @@ Possible values of the `dir` property:
 - `rc/` contains images built for a pre-release
 - `` (empty) contains images built for a release
 
-To override subcomponents versions during Kyma startup, create the `versions-overrides.env` file in the `installation` directory. 
+To override subcomponents versions during Kyma startup, create the `versions-overrides.env` file in the `installation` directory.
 
 The example overrides the `Environments` component and sets the image version to `0.0.1`, based on the version from the `develop` directory.
 
