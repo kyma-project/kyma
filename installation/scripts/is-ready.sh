@@ -24,20 +24,33 @@ do
     fi
 done
 
-#Checking if POD is ready to operate
-for POD in $(kubectl get pods -n "$1" -l "$2"="$3" -o jsonpath='{.items[*].metadata.name}')
+QUERY_PODS=true
+
+while [[ "$QUERY_PODS" == true ]]
 do
-  trap "exit" INT
-  while :
+  #Checking if POD is ready to operate
+  for POD in $(kubectl get pods -n "$1" -l "$2"="$3" -o jsonpath='{.items[*].metadata.name}')
   do
-    if [ "$(kubectl get pod "$POD" -n "$1" -o jsonpath='{.status.containerStatuses[0].ready}')" = "true" ]
-    then
-      echo "$POD is running..."
-      break
-    else
-      echo "$POD is not running -  waiting 5s..." $(kubectl get event -n "$1" -o go-template='{{range .items}}{{if eq .involvedObject.name "'$POD'"}}{{.message}}{{"\n"}}{{end}}{{end}}' | tail -1)
-      sleep 5
-    fi
+    QUERY_PODS=false
+    trap "exit" INT
+    while :
+    do
+      STATUS=$(kubectl get pod "$POD" -n "$1" -o jsonpath='{.status.containerStatuses[0].ready}' 2>&1)
+      if [ "$STATUS" = "true" ]
+      then
+        echo "$POD is running..."
+        break
+      elif [[ $STATUS == *NotFound* ]]
+      then
+        # The pod probably no longer exists and we need to query again
+        echo "$POD no longer exists..."
+        QUERY_PODS=true
+        break 2
+      else
+        echo "$POD is not running -  waiting 5s..." $(kubectl get event -n "$1" -o go-template='{{range .items}}{{if eq .involvedObject.name "'$POD'"}}{{.message}}{{"\n"}}{{end}}{{end}}' | tail -1)
+        sleep 5
+      fi
+    done
   done
 done
 

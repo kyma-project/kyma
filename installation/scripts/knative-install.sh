@@ -61,9 +61,25 @@ helm template -n istio --namespace istio-system \
  --set pilot.resources.requests.cpu=100m \
  --set mixer.resources.limits.memory=256Mi \
  --set mixer.resources.requests.memory=128Mi \
-  istio | kubectl apply -f -
+  istio > istio.yaml
 
-kubectl label namespace default istio-injection=enabled
+log "Pulling Istio images into minikube to overcome some waiting bugs.."
+
+eval $(minikube docker-env)
+
+for i in `grep "image:.*istio/" istio.yaml | awk '{print $2;}'|tr -d '"'`
+do
+    log "Pulling $i"
+    docker pull $i > /dev/null 2>&1 &
+done
+
+log "Waiting Istio images to be pulled"
+
+wait
+
+kubectl apply -f istio.yaml
+
+kubectl label namespace default istio-injection=enabled --overwrite
 
 log "Waiting for Istio to run..." yellow
 ${CURRENT_DIR}/is-ready.sh istio-system istio galley
