@@ -10,7 +10,7 @@ The Helm Broker fetches bundle definitions from an HTTP server defined in the `v
 Follow these steps to change the configuration and make the Helm Broker fetch bundles from a custom HTTP server:
 
 1. Create a remote bundles repository. Your remote bundle repository must include the following resources:
-    - An `yaml` file which defines available bundles, for example `bundles.yaml`.
+    - A `yaml` file which defines available bundles, for example `bundles.yaml`.
       This file must have the following structure:
 
       ```text
@@ -21,7 +21,7 @@ Follow these steps to change the configuration and make the Helm Broker fetch bu
             description: {bundle_description}
             version: {bundle_version}
       ```
-      This is an example of an `yaml` file for the Redis bundle:
+      This is an example of a `yaml` file for the Redis bundle:
       ```text
       apiVersion: v1
       entries:
