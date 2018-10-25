@@ -12,11 +12,11 @@ To start the local installation, run the following command:
 ./installation/cmd/run.sh
 ```
 
-This script sets up default parameters, starts Minikube, builds Kyma-Installer, generates local configuration, creates the Installation custom resource, and sets up Installer. Subsequent sections provide a detailed description of each step, in the order in which the `run.sh` script triggers them.
+This script sets up default parameters, starts Minikube, builds the Kyma-Installer, generates local configuration, creates the Installation custom resource, and sets up the Installer. Subsequent sections provide a detailed description of each step, in the order in which the `run.sh` script triggers them.
 
 You can execute the `installation/cmd/run.sh` script with the following parameters:
 
-- `--skip-minikube-start` which skips execution of the `installation/scripts/minikube.sh` script. See the **Start Minikube** section for more details.
+- `--skip-minikube-start` which skips the execution of the `installation/scripts/minikube.sh` script. See the **Start Minikube** section for more details.
 - `--vm-driver` which points to either `virtualbox` or `hiperkit`, depending on your operating system.
 
 The following snippet is the main element of the `run.sh` script:
@@ -44,7 +44,7 @@ else
 fi
 ```
 
-The subsequent paragraphs describe respective sub-scripts triggered during the installation process.
+The subsequent paragraphs describe respective subscripts triggered during the installation process.
 
 ## The minikube.sh script
 
@@ -60,7 +60,7 @@ Once Minikube is up and running, the script adds local installation entries to `
 
 ## The build-kyma-installer.sh script
 
-Installer is an application based on a [Kubernetes operator](https://coreos.com/operators/). Its purpose is to install Helm charts defined in the Installation custom resource. Kyma-Installer is a Docker image that bundles the Installer binary with Kyma charts.
+The Installer is an application based on a [Kubernetes operator](https://coreos.com/operators/). Its purpose is to install Helm charts defined in the Installation custom resource. The Kyma-Installer is a Docker image that bundles the Installer binary with Kyma charts.
 
 The `installation/scripts/build-kyma-installer.sh` script extracts the Kyma-Installer image name from the `installer.yaml` deployment file and uses it to build a Docker image inside Minikube. This image contains local Kyma sources from the `resources` folder.
 
@@ -68,9 +68,9 @@ The `installation/scripts/build-kyma-installer.sh` script extracts the Kyma-Inst
 
 ## The generate-local-config.sh script
 
-The `generate-local-config.sh` script configures optional sub-components. At the moment, only the Azure-Broker is an optional sub-component of the `core` deployment.
+The `generate-local-config.sh` script configures optional subcomponents. At the moment, only the Azure-Broker is an optional subcomponent of the `core` deployment.
 
-The Azure-Broker sub-component is a part of the `core` deployment that provisions managed services in the Microsoft Azure cloud. To enable the Azure-Broker, export the following environment variables:
+The Azure-Broker subcomponent is part of the `core` deployment that provisions managed services in the Microsoft Azure cloud. To enable the Azure-Broker, export the following environment variables:
  - AZURE_BROKER_SUBSCRIPTION_ID
  - AZURE_BROKER_TENANT_ID
  - AZURE_BROKER_CLIENT_ID
@@ -80,7 +80,7 @@ The Azure-Broker sub-component is a part of the `core` deployment that provision
 
 ## The create-cr.sh script
 
-The `installation/scripts/create-cr.sh` script prepares the Installation custom resource from the `installation/resources/installer-cr.yaml.tpl` template. The local installation scenario uses the default Installation custom resource. Kyma-Installer already contains local Kyma resources bundled, thus `url` is ignored by the Installer component.
+The `installation/scripts/create-cr.sh` script prepares the Installation custom resource from the `installation/resources/installer-cr.yaml.tpl` template. The local installation scenario uses the default Installation custom resource. The Kyma-Installer already contains local Kyma resources bundled, thus `url` is ignored by the Installer component.
 
 >**NOTE:** For the Installation custom resource details, refer to the **Installation** document.
 
@@ -92,4 +92,4 @@ The `installation/scripts/installer.sh` script creates the default RBAC role, in
 
 The script applies the Installation custom resource and marks it with the `action=install` label, which triggers the Kyma installation.
 
->**NOTE:** Kyma installation runs in the background. Execute the `./installation/scripts/is-installed.sh` script to follow the installation process.
+>**NOTE:** The Kyma installation runs in the background. Execute the `./installation/scripts/is-installed.sh` script to follow the installation process.
