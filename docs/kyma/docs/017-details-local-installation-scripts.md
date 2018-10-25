@@ -70,7 +70,7 @@ The `installation/scripts/build-kyma-installer.sh` script extracts the Kyma-Inst
 
 The `generate-local-config.sh` script configures optional subcomponents. At the moment, only the Azure Broker is an optional subcomponent of the `core` deployment.
 
-The Azure Broker subcomponent is part of the `core` deployment that provisions managed services in the Microsoft Azure cloud. To enable the Azure-Broker, export the following environment variables:
+The Azure Broker subcomponent is part of the `core` deployment that provisions managed services in the Microsoft Azure cloud. To enable the Azure Broker, export the following environment variables:
  - AZURE_BROKER_SUBSCRIPTION_ID
  - AZURE_BROKER_TENANT_ID
  - AZURE_BROKER_CLIENT_ID
