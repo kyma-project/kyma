@@ -17,7 +17,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
-    gateway: 
+    gateway:
       name: kyma-gateway
   etcdBackup:
     enabled: false
@@ -45,7 +45,7 @@ global:
     version: 4a23580f
   docs:
     dir: develop/
-    version: 5c147f8e
+    version: feae8ad9
   environments:
     dir: develop/
     version: 6e0a7fe2
