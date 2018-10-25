@@ -10,6 +10,9 @@ metadata:
 data:
   config.yaml: |
     issuer: https://dex.{{ .Values.global.domainName }}
+    # extending it to 15days because apparently Istio does not handle ID token validation properly
+    expiry:
+      signingKeys: "360h"
     storage:
       type: kubernetes
       config:
@@ -52,19 +55,4 @@ data:
       secret: oiEWUWOIEwedfgg
 
     enablePasswordDB: true
-    staticPasswords:
-    - email: "admin@kyma.cx"
-      # bcrypt hash of the string \"nimda123\"
-      hash: "$2a$10$j7pKw2qQUVuYXAVoLCel6eS8RLcpG8G3NduYRINMuRc8ox8iKZowS"
-      username: "admin"
-      userID: "18a8684b-db88-4b73-90a9-3cd1661f5463"
-    - email: "user1@kyma.cx"
-      # bcrypt hash of the string "nimda1"
-      hash: "$2a$10$Rr0PzZ9XOxu6lITrQx2PXuenz8Ww1Dzwwr9HIeivkQIGCrVIYIc7e"
-      username: "user1"
-      userID: "08a8684b-db88-4b73-90a9-1"
-    - email: "user2@kyma.cx"
-      # bcrypt hash of the string "nimda2"
-      hash: "$2a$10$LM4c6EkoOj6cvRrM8W3DkuE6S6bQvF6hQjLUl/9HUlUrPS88ZAWzq"
-      username: "user2"
-      userID: "08a8684b-db88-4b73-90a9-2"
+    #__STATIC_PASSWORDS__

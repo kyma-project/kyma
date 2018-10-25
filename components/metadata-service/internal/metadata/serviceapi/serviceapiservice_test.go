@@ -40,7 +40,7 @@ func TestNewService(t *testing.T) {
 
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
-		nameResolver.On("GetMetadataUrl", "re", "uuid-1").Return(gatewayUrl)
+		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", "re", "uuid-1", resourceName).Return(nil)
@@ -84,7 +84,7 @@ func TestNewService(t *testing.T) {
 
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
-		nameResolver.On("GetMetadataUrl", "re", "uuid-1").Return(gatewayUrl)
+		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", "re", "uuid-1", resourceName).Return(nil)
@@ -124,7 +124,7 @@ func TestNewService(t *testing.T) {
 
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
-		nameResolver.On("GetMetadataUrl", "re", "uuid-1").Return(gatewayUrl)
+		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", "re", "uuid-1", resourceName).Return(apperrors.Internal("some error"))
@@ -157,7 +157,7 @@ func TestNewService(t *testing.T) {
 
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
-		nameResolver.On("GetMetadataUrl", "re", "uuid-1").Return(gatewayUrl)
+		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", "re", "uuid-1", resourceName).Return(nil)
@@ -201,7 +201,7 @@ func TestNewService(t *testing.T) {
 
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
-		nameResolver.On("GetMetadataUrl", "re", "uuid-1").Return(gatewayUrl)
+		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", "re", "uuid-1", resourceName).Return(nil)
@@ -431,7 +431,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
-		nameResolver.On("GetMetadataUrl", "re", "uuid-1").Return(gatewayUrl)
+		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", "re", "uuid-1", resourceName).Return(nil)
@@ -477,7 +477,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
-		nameResolver.On("GetMetadataUrl", "re", "uuid-1").Return(gatewayUrl)
+		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", "re", "uuid-1", resourceName).Return(nil)
@@ -527,7 +527,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
-		nameResolver.On("GetMetadataUrl", "re", "uuid-1").Return(gatewayUrl)
+		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", "re", "uuid-1", resourceName).
@@ -563,7 +563,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
-		nameResolver.On("GetMetadataUrl", "re", "uuid-1").Return(gatewayUrl)
+		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", "re", "uuid-1", resourceName).Return(nil)
@@ -603,7 +603,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
-		nameResolver.On("GetMetadataUrl", "re", "uuid-1").Return(gatewayUrl)
+		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", "re", "uuid-1", resourceName).Return(nil)
@@ -642,7 +642,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
-		nameResolver.On("GetMetadataUrl", "re", "uuid-1").Return(gatewayUrl)
+		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", "re", "uuid-1", resourceName).Return(nil)

@@ -23,9 +23,15 @@ spec:
         - name: DOMAIN
           value: {{ .Values.global.domainName }}
         - name: LOGIN
-          value: {{ .Values.test.auth.username }}
+          valueFrom:
+            secretKeyRef:
+              name: admin-user
+              key: email
         - name: PASSWORD
-          value: {{ .Values.test.auth.password }}
+          valueFrom:
+            secretKeyRef:
+              name: admin-user
+              key: password
         - name: DEX_CONFIG
           value: /etc/dex/cfg/config.yaml
       volumeMounts:

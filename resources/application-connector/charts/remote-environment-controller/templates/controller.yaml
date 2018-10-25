@@ -26,7 +26,7 @@ spec:
         - "--domainName={{ .Values.global.domainName }}"
         - "--namespace={{ .Values.global.namespace }}"
         - "--tillerUrl={{ .Values.controller.args.tillerUrl }}"
-        - "--gatewayImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.gateway.dir }}gateway:{{ .Values.global.gateway.version }}"
+        - "--proxyServiceImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.proxy_service.dir }}proxy-service:{{ .Values.global.proxy_service.version }}"
         - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service.dir }}event-service:{{ .Values.global.event_service.version }}"
         - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.gateway_tests.dir }}gateway-acceptance-tests:{{ .Values.global.gateway_tests.version }}"
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.remote_environment_controller.dir }}remote-environment-controller:{{ .Values.global.remote_environment_controller.version }}

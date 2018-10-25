@@ -33,11 +33,22 @@ spec:
         volumeMounts:
         - name: config
           mountPath: /etc/dex/cfg
+
+      initContainers:
+      - name: dex-users-configurator
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.static_users_generator.dir }}static-users-generator:{{ .Values.global.static_users_generator.version }}
+        volumeMounts:
+        - name: config
+          mountPath: /config/dst
+        - name: config-tpl
+          mountPath: /config/src
         
       volumes:
-      - name: config
+      - name: config-tpl
         configMap:
           name: dex-config
           items:
           - key: config.yaml
             path: config.yaml
+      - name: config
+        emptyDir: {}

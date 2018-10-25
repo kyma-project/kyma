@@ -45,7 +45,7 @@ To access the Application Connector and connect an external solution to the loca
 
 ## Install Kyma on Minikube
 
-You can install Kyma with all core subcomponents or only with the selected ones. This section describes how to install all core subcomponents. To learn how to install only the specific ones, see the **Install subcomponents** document for details.
+You can install Kyma with all core subcomponents or only with the selected ones. This section describes how to install Kyma from the latest release, with all core subcomponents. To learn how to install only the specific ones, see the **Install subcomponents** document for details.
 
 > **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube.
 
@@ -69,9 +69,9 @@ $ kubectl apply -f ./resources/default-sa-rbac-role.yaml
 $ ./scripts/install-tiller.sh
 ```
 
-5. Configure the Kyma installation using the local configuration file:
+5. Configure the Kyma installation using the local configuration file from the 0.4.3 release:
 ```
-$ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/0.4.1/kyma-config-local.yaml
+$ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/0.4.3/kyma-config-local.yaml
 ```
 
 6. To trigger the installation process, label the `kyma-installation` custom resource:
@@ -106,7 +106,11 @@ The command retrieves all Pods from all Namespaces, the status of the Pods, and 
 
 Access your local Kyma instance through [this](https://console.kyma.local/) link.
 
-* Click **Login with Email** and sign in with the `admin@kyma.cx` email address and the generic password from the `dex-config-map.yaml` file in the `/resources/dex/templates/` directory.
+* Click **Login with Email** and sign in with the `admin@kyma.cx` email address. Use the password contained in the  `admin-user` Secret located in the `kyma-system` Namespace. To get the password, run:
+
+``` bash
+kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D
+```
 
 * Click the **Environments** section and select an Environment from the drop-down menu to explore Kyma further.
 

@@ -10,7 +10,7 @@ type options struct {
 	domainName             string
 	namespace              string
 	tillerUrl              string
-	gatewayImage           string
+	proxyServiceImage      string
 	eventServiceImage      string
 	eventServiceTestsImage string
 }
@@ -21,7 +21,7 @@ func parseArgs() *options {
 	namespace := flag.String("namespace", "kyma-integration", "Namespace in which the RE chart will be installed")
 	tillerUrl := flag.String("tillerUrl", "tiller-deploy.kube-system.svc.cluster.local:44134", "Tiller release server url")
 
-	gatewayImage := flag.String("gatewayImage", "", "The image of the Gateway to use")
+	proxyServiceImage := flag.String("proxyServiceImage", "", "The image of the Proxy Service to use")
 	eventServiceImage := flag.String("eventServiceImage", "", "The image of the Event Service to use")
 	eventServiceTestsImage := flag.String("eventServiceTestsImage", "", "The image of the Event Service Tests to use")
 
@@ -32,7 +32,7 @@ func parseArgs() *options {
 		domainName:             *domainName,
 		namespace:              *namespace,
 		tillerUrl:              *tillerUrl,
-		gatewayImage:           *gatewayImage,
+		proxyServiceImage:      *proxyServiceImage,
 		eventServiceImage:      *eventServiceImage,
 		eventServiceTestsImage: *eventServiceTestsImage,
 	}
@@ -40,7 +40,7 @@ func parseArgs() *options {
 
 func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s --tillerUrl=%s "+
-		"--gatewayImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s",
+		"--proxyServiceImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s",
 		o.appName, o.domainName, o.namespace, o.tillerUrl,
-		o.gatewayImage, o.eventServiceImage, o.eventServiceTestsImage)
+		o.proxyServiceImage, o.eventServiceImage, o.eventServiceTestsImage)
 }

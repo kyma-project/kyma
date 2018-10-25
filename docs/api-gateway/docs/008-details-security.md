@@ -3,7 +3,7 @@ title: Security
 type: Details
 ---
 
-When you expose a service in Kyma, you can secure it by specifying the **authentication** attribute in the Custom Resource (CR). To successfully secure the exposed service, you must specify all of these attributes in the CR:
+When you expose a service in Kyma, you can secure it by specifying the **authentication** attribute in the Custom Resource (CR). To successfully secure the exposed service, its Pods must have the Istio sidecar injection enabled. Additionally, you must specify all of these attributes in the CR:
   - **authentication.type**
   - **jwt.issuer**
   - **jwt.jwksUri**

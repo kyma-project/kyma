@@ -8,21 +8,21 @@ import (
 )
 
 const (
-	gatewayUrlEnvName        = "GATEWAY_URL"
+	eventServiceUrlEnvName   = "EVENT_SERVICE_URL"
 	namespaceEnvName         = "NAMESPACE"
 	remoteEnvironmentEnvName = "REMOTE_ENVIRONMENT"
 )
 
 type TestConfig struct {
-	GatewayUrl        string
+	EventServiceUrl   string
 	Namespace         string
 	RemoteEnvironment string
 }
 
 func ReadConfig() (TestConfig, error) {
-	gatewayUrl, found := os.LookupEnv(gatewayUrlEnvName)
+	eventServiceUrl, found := os.LookupEnv(eventServiceUrlEnvName)
 	if !found {
-		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", gatewayUrlEnvName))
+		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", eventServiceUrlEnvName))
 	}
 
 	namespace, found := os.LookupEnv(namespaceEnvName)
@@ -36,7 +36,7 @@ func ReadConfig() (TestConfig, error) {
 	}
 
 	config := TestConfig{
-		GatewayUrl:        gatewayUrl,
+		EventServiceUrl:   eventServiceUrl,
 		Namespace:         namespace,
 		RemoteEnvironment: remoteEnvironment,
 	}

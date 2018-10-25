@@ -42,7 +42,7 @@ func main() {
 
 	overridesData := controller.OverridesData{
 		DomainName:             options.domainName,
-		GatewayImage:           options.gatewayImage,
+		ProxyServiceImage:      options.proxyServiceImage,
 		EventServiceImage:      options.eventServiceImage,
 		EventServiceTestsImage: options.eventServiceTestsImage,
 	}
