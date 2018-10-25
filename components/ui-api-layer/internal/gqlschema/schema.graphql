@@ -162,6 +162,7 @@ type ClusterServicePlan {
     description: String!
     relatedClusterServiceClassName: String!
     instanceCreateParameterSchema: JSON
+    bindingCreateParameterSchema: JSON
 }
 
 type ServiceBroker {

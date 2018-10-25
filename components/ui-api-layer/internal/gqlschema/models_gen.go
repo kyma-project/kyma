@@ -48,6 +48,7 @@ type ClusterServicePlan struct {
 	Description                    string  `json:"description"`
 	RelatedClusterServiceClassName string  `json:"relatedClusterServiceClassName"`
 	InstanceCreateParameterSchema  *JSON   `json:"instanceCreateParameterSchema"`
+	BindingCreateParameterSchema   *JSON   `json:"bindingCreateParameterSchema"`
 }
 
 type ConnectorService struct {
