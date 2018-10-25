@@ -33,7 +33,6 @@ const (
 	minimalNumberOfCorrectResults                  = 5
 	retrySleep                                     = 2 * time.Second
 	domainNameEnv                                  = "DOMAIN_NAME"
-	apiSecurityEnabled                 ApiSecurity = true
 	apiSecurityDisabled                ApiSecurity = false
 )
 
@@ -83,157 +82,47 @@ func TestSpec(t *testing.T) {
 
 		Convey("create API with authentication disabled", func() {
 
-			t.Log("Create...")
-
 			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled, true)
 
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Create(api)
-
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
 			validateApiNotSecured(httpClient, lastApi.Spec.Hostname)
-
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
-
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-
-			time.Sleep(3 * time.Second)
-		})
-
-		Convey("update API with hostname without domain", func() {
-
-			t.Log("Update...")
-
-			api := *lastApi
-			api.Spec.Hostname = hostnameFor(testId, domainName, false)
-
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
-
-			So(err, ShouldBeNil)
-			So(lastApi, ShouldNotBeNil)
-			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-
-			validateApiNotSecured(httpClient, hostnameFor(lastApi.Spec.Hostname, domainName, true))
-
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
-
-			So(err, ShouldBeNil)
-			So(lastApi, ShouldNotBeNil)
-			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-			So(lastApi.Spec.AuthenticationEnabled, ShouldNotBeNil)
-
-			time.Sleep(3 * time.Second)
-		})
-
-		Convey("do not update API with wrong domain", func() {
-
-			t.Log("Update...")
-
-			api := apiFor(testId, domainName+".com", fixture.SampleAppService, apiSecurityDisabled, true)
-			api.ResourceVersion = lastApi.ResourceVersion
-
-			_, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(api)
-
-			So(err, ShouldNotBeNil)
-
-			time.Sleep(3 * time.Second)
-		})
-
-		Convey("update API with default jwt configuration to enable authentication", func() {
-
-			t.Log("Update...")
-
-			api := *lastApi
-			authEnabled := true
-			api.Spec.AuthenticationEnabled = &authEnabled
-			api.Spec.Hostname = hostnameFor(testId, domainName, true)
-
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
-
-			So(err, ShouldBeNil)
-			So(lastApi, ShouldNotBeNil)
-			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-
-			validateApiSecured(httpClient, lastApi)
-
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
-
-			So(err, ShouldBeNil)
-			So(lastApi, ShouldNotBeNil)
-			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-
-			time.Sleep(3 * time.Second)
-		})
-
-		Convey("update API to disable authentication", func() {
-
-			t.Log("Update...")
-
-			api := *lastApi
-			authEnabled := false
-			api.Spec.AuthenticationEnabled = &authEnabled
-
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
-
-			So(err, ShouldBeNil)
-			So(lastApi, ShouldNotBeNil)
-			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-
-			validateApiNotSecured(httpClient, lastApi.Spec.Hostname)
-
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
-
-			So(err, ShouldBeNil)
-			So(lastApi, ShouldNotBeNil)
-			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-
-			time.Sleep(3 * time.Second)
 		})
 
 		Convey("update API with custom jwt configuration", func() {
 
-			t.Log("Update...")
-
 			api := *lastApi
-
 			setCustomJwtAuthenticationConfig(&api)
 
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
-
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
 			validateApiSecured(httpClient, lastApi)
-
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
-
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-
-			time.Sleep(3 * time.Second)
 		})
 
 		Convey("delete API", func() {
 
-			t.Log("Delete...")
 			suiteFinished = true
-
 			checkPreconditions(lastApi, t)
-			err := kymaInterface.GatewayV1alpha2().Apis(namespace).Delete(lastApi.Name, &metav1.DeleteOptions{})
 
+			err := kymaInterface.GatewayV1alpha2().Apis(namespace).Delete(lastApi.Name, &metav1.DeleteOptions{})
 			So(err, ShouldBeNil)
 
 			_, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
-
 			So(err, ShouldNotBeNil)
-
-			time.Sleep(3 * time.Second)
 		})
 	})
 }
@@ -258,7 +147,7 @@ func apiFor(testId, domainName string, svc *apiv1.Service, secured ApiSecurity, 
 }
 
 func setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
-	// OTHER EXAMPLE OF POSSSIBLE VALUES:
+	// OTHER EXAMPLE OF POSSIBLE VALUES:
 	//issuer := "https://accounts.google.com"
 	//jwksUri := "https://www.googleapis.com/oauth2/v3/certs"
 
