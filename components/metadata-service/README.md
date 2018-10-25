@@ -37,11 +37,11 @@ The Metadata Service has the following parameters:
 
 ### Sample calls
 
-To access the Metadata Service on Minikube you need the NodePort of `core-nginx-ingress-controller`.
+To access the Metadata Service on Minikube you need the NodePort of `application-connector-nginx-ingress-controller`.
 To get the NodePort, run this command:
 
 ```
-kubectl -n kyma-system get svc core-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
+kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
 ```
 
 - Create a new service 
