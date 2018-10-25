@@ -22,6 +22,8 @@ const (
 	ApplyLabelsConflictErrorReason = "ApplyLabelsConflictError"
 	// EnsureLabelsAppliedErrorReason is added in a usage when we cannot add labels to the given resource, e.g. given resource does not exits
 	EnsureLabelsAppliedErrorReason = "EnsureLabelsAppliedError"
+	// AddOwnerReferenceErrorReason is added in a usage when we cannot add an OwnerReference to the given ServiceBinding
+	AddOwnerReferenceErrorReason = "AddOwnerReferenceError"
 
 	// -- Reasons which can occur during delete reconciliation of ServiceBindingUsage
 
