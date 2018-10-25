@@ -30,7 +30,7 @@ global:
     version: cb19afea
   metadata_service_tests:
     dir: develop/
-    version: d9e91df2
+    version: 16a332c1
   remote_environment_controller:
     dir: develop/
     version: cb19afea
