@@ -1,18 +1,19 @@
 package installer
 
 import (
-	"k8s.io/api/core/v1"
-	corev1 "k8s.io/api/core/v1"
-	corev1Type "k8s.io/client-go/kubernetes/typed/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
 	"fmt"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
+	"k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1Type "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const (
 	podReadyTimeout = time.Second * 120
-	UPSBrokerImage = "quay.io/kubernetes-service-catalog/user-broker:latest"
+	UPSBrokerImage  = "quay.io/kubernetes-service-catalog/user-broker:latest"
 )
 
 func CreatePod(k8sClient *corev1Type.CoreV1Client, namespace, name string) (*v1.Pod, error) {

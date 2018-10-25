@@ -15,7 +15,7 @@ func WaitAtMost(fn func() (bool, error), duration time.Duration) error {
 		ok, err := fn()
 		select {
 		case <-timeout:
-			return errors.Wrapf(err,"Waiting for resource failed in given timeout %f second(s)", duration.Seconds())
+			return errors.Wrapf(err, "Waiting for resource failed in given timeout %f second(s)", duration.Seconds())
 		case <-tick:
 			if err != nil {
 				log.Println(err)

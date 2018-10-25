@@ -12,7 +12,6 @@ import (
 	"github.com/golang/glog"
 	"github.com/machinebox/graphql"
 	"github.com/pkg/errors"
-	"log"
 )
 
 const (
@@ -40,7 +39,7 @@ func New() (*Client, error) {
 
 	httpClient := newAuthorizedClient(token, clusterContext)
 	gqlClient := graphql.NewClient(config.GraphQlEndpoint, graphql.WithHTTPClient(httpClient))
-	gqlClient.Log = func(s string) { log.Println(s) }
+	//gqlClient.Log = func(s string) { log.Println(s) }
 
 	return &Client{
 		gqlClient:      gqlClient,

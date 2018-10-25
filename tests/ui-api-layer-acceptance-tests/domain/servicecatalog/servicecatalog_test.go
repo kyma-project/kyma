@@ -4,15 +4,16 @@ package servicecatalog
 
 import (
 	"log"
+	"os"
+	"testing"
+
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/installer"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/installer"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
-	"testing"
-	"os"
 )
 
 func TestMain(m *testing.M) {
@@ -40,7 +41,6 @@ func TestMain(m *testing.M) {
 	cleanup(k8sClient, svcatCli, clusterBrokerInstaller, brokerInstaller)
 	os.Exit(code)
 }
-
 
 func setup(k8sClient *corev1.CoreV1Client, svcatCli *clientset.Clientset, clusterBrokerInstaller, brokerInstaller *installer.BrokerInstaller) error {
 	log.Println("Setting up tests...")

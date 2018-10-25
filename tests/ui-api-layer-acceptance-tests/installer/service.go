@@ -1,13 +1,14 @@
 package installer
 
 import (
+	"time"
+
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
 	"k8s.io/api/core/v1"
 	corev1 "k8s.io/api/core/v1"
-	corev1Type "k8s.io/client-go/kubernetes/typed/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
-	"time"
+	corev1Type "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const (

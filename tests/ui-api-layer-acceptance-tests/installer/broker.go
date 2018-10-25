@@ -3,13 +3,14 @@ package installer
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
+	"fmt"
 	"log"
 	"time"
-	"fmt"
+
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
 )
 
 const (
@@ -17,16 +18,16 @@ const (
 )
 
 type BrokerInstaller struct {
-	name string
-	namespace   string
-	typeOf 		string
+	name      string
+	namespace string
+	typeOf    string
 }
 
 func NewBroker(name, namespace, typeOf string) *BrokerInstaller {
 	return &BrokerInstaller{
-		name: 			name,
-		namespace:   namespace,
-		typeOf: 	 typeOf,
+		name:      name,
+		namespace: namespace,
+		typeOf:    typeOf,
 	}
 }
 
