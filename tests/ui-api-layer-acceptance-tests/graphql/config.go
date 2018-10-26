@@ -2,7 +2,6 @@ package graphql
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
@@ -17,9 +16,8 @@ type envConfig struct {
 }
 
 type config struct {
-	GraphQlEndpoint   string
-	LocalClusterHosts []string
-	IdProviderConfig  idProviderConfig
+	GraphQlEndpoint  string
+	IdProviderConfig idProviderConfig
 }
 
 type idProviderConfig struct {
@@ -51,15 +49,12 @@ func loadConfig() (config, error) {
 		return config{}, errors.Wrap(err, "while loading environment variables")
 	}
 
-	config := config{
-		LocalClusterHosts: make([]string, 0, 2),
-	}
+	config := config{}
 
 	graphQLEndpoint := env.GraphQLEndpoint
 	if graphQLEndpoint == "" {
 		graphQLEndpoint = fmt.Sprintf("https://ui-api.%s/graphql", env.Domain)
 	}
-
 	config.GraphQlEndpoint = graphQLEndpoint
 
 	config.IdProviderConfig = idProviderConfig{
@@ -79,18 +74,5 @@ func loadConfig() (config, error) {
 		},
 	}
 
-	if env.IsLocalCluster {
-		config.addLocalClusterHost(config.GraphQlEndpoint)
-		config.addLocalClusterHost(config.IdProviderConfig.DexConfig.BaseUrl)
-	}
-
 	return config, nil
-}
-
-func (c *config) addLocalClusterHost(host string) {
-	url := strings.TrimPrefix(host, "http://")
-	url = strings.TrimPrefix(host, "https://")
-	url = strings.Split(url, "/")[0]
-
-	c.LocalClusterHosts = append(c.LocalClusterHosts, url)
 }

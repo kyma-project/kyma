@@ -23,7 +23,7 @@ rules:
     resources: ["deployments"]
     verbs: ["create"]
   - apiGroups: [""]
-    resources: ["namespaces", "pods", "services"]
+    resources: ["namespaces"]
     verbs: ["create", "get", "delete"]
     nonResourceURLs: []
   - apiGroups: [""]
