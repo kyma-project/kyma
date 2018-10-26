@@ -408,6 +408,10 @@ func publishEvent(testID string) {
 	}
 }
 
+func printDebugLogsForEvents() {
+
+}
+
 func ensureCorrectLog(namespace, funName string, pattern *regexp.Regexp, match string, serviceBinding bool) {
 	timeout := time.After(2 * time.Minute)
 	tick := time.Tick(1 * time.Second)
@@ -431,6 +435,10 @@ func ensureCorrectLog(namespace, funName string, pattern *regexp.Regexp, match s
 		log.Printf("Checking logs for pods: %v", pod)
 		select {
 		case <-timeout:
+			log.Printf("[%s] Timeout printing debug logs")
+			if !serviceBinding {
+				printDebugLogsForEvents()
+			}
 			cmd := exec.Command("kubectl", "-n", namespace, "logs", pod, "-c", funName)
 			stdoutStderr, _ := cmd.CombinedOutput()
 			log.Fatal("Timed out getting the correct log for ", funName, ":\n", string(stdoutStderr))
