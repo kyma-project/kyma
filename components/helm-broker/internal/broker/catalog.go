@@ -20,7 +20,7 @@ type converter interface {
 }
 
 // TODO: switch from osb.CatalogResponse to CatalogSuccessResponseDTO
-func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*osb.CatalogResponse, error) {
+func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx OsbContext) (*osb.CatalogResponse, error) {
 	bundles, err := svc.finder.FindAll()
 	if err != nil {
 		return nil, errors.Wrap(err, "while finding all bundles")

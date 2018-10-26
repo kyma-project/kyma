@@ -322,6 +322,25 @@
   version = "1.1.2"
 
 [[projects]]
+  name = "github.com/kubernetes-incubator/service-catalog"
+  packages = [
+    "pkg/apis/servicecatalog",
+    "pkg/apis/servicecatalog/v1beta1",
+    "pkg/apis/settings",
+    "pkg/apis/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset",
+    "pkg/client/clientset_generated/clientset/fake",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1/fake",
+    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1/fake",
+    "pkg/filter"
+  ]
+  revision = "0aaf02aba556b945a357fce4e82f62122d158f2a"
+  version = "v0.1.28"
+
+[[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"
   packages = ["pbutil"]
   revision = "3247c84500bff8d9fb6d579d800f20b3e091582c"
@@ -807,6 +826,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cc0653fd6ecb4b6e739a06c268459476200bbfaa824d56c19c0caa34f2dfc79a"
+  inputs-digest = "d99f02ef52d8f38a409fc01a47b4812f2c2f367edce4c9ce27ef7aa95e1372ab"
   solver-name = "gps-cdcl"
   solver-version = 1
