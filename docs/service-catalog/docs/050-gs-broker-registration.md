@@ -76,4 +76,4 @@ If the broker is registered successfully, the output looks as follows:
 }
 ```
 
-After you successfully registered your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches the services from this broker and creates ServiceClasses or ClusterServiceClasses from them.
+After you successfully register your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches the services from this broker and creates ServiceClasses or ClusterServiceClasses from them.
