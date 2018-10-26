@@ -17,48 +17,44 @@ To register a new broker to the Service Catalog, you must have:
 
 ## Steps
 
-You can register your broker to the Service Catalog using three different method
-
-### Register your broker
-
 You can register your broker to the Service Catalog either by installing a Helm chart or by using kubectl commands. You can also register it directly using the Kyma Console.
 
- * **Register using Helm chart**
+### Register using Helm chart
 
- To register a broker to the Service Catalog using a Helm chart, go to the chart's directory and run this command:
+To register a broker to the Service Catalog using a Helm chart, go to the chart's directory and run this command:
 
- ```
- helm install {chart directory} --name {broker name} --namespace {namespace}
- ```
-  For example, run this command to install the chart with the `ups-broker` name in the `ups-broker` Namespace:
+```
+helm install {chart directory} --name {broker name} --namespace {namespace}
+```
+For example, run this command to install the chart with the `ups-broker` name in the `ups-broker` Namespace:
 
-  ```
-  helm install charts/ups-broker --name ups-broker --namespace ups-broker
-  ```
+```
+helm install charts/ups-broker --name ups-broker --namespace ups-broker
+```
 
-* **Register using kubectl**
+### Register using kubectl
 
-  Run these commands to register a broker using kubectl:
-  ```
-  kubectl apply -f {application filename} -n {namespace}
-  kubectl apply -f {service filename} -n {namespace}
-  kubectl apply -f {broker registration filename} -n {namespace}
-  ```
-  In case of the UPS Broker, the commands look as follows:
-  ```
-  kubectl apply -f broker-deployment.yaml -n qa
-  kubectl apply -f broker-service.yaml -n qa
-  kubectl apply -f broker-register.yaml -n qa
-  ```
-  >**NOTE:** In case of a ClusterServiceBroker, do not specify the Namespace and skip the `-n {namespace}` part of the command.
+Run these commands to register a broker using kubectl:
+```
+kubectl apply -f {application filename} -n {namespace}
+kubectl apply -f {service filename} -n {namespace}
+kubectl apply -f {broker registration filename} -n {namespace}
+```
+In case of the UPS Broker, the commands look as follows:
+```
+kubectl apply -f broker-deployment.yaml -n qa
+kubectl apply -f broker-service.yaml -n qa
+kubectl apply -f broker-register.yaml -n qa
+```
+>**NOTE:** In case of a ClusterServiceBroker, do not specify the Namespace and skip the `-n {namespace}` part of the command.
 
-* **Register using the Console**
+### Register using the Console
 
-  1. Go to the Kyma Console and choose the Environment.
-  2. Click the **Deploy new resource to the environment** button.
-  3. Select broker's `yaml` files and click **Upload**.
+1. Go to the Kyma Console and choose the Environment.
+2. Click the **Deploy new resource to the environment** button.
+3. Select broker's `yaml` files and click **Upload**.
 
-  >**NOTE:** This method applies only to ServiceBrokers. You cannot register ClusterServiceBrokers using the Kyma Console.
+>**NOTE:** This method applies only to ServiceBrokers. You cannot register ClusterServiceBrokers using the Kyma Console.
 
 ### Check the status
 
@@ -80,6 +76,4 @@ If the broker is registered successfully, the output looks as follows:
 }
 ```
 
-### Registered broker
-
-After you successfully registered your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches the services from this broker and create from them ServiceClasses/ClusterServiceClasses.
+After you successfully registered your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches the services from this broker and creates ServiceClasses or ClusterServiceClasses from them.
