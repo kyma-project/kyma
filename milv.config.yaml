@@ -22,3 +22,6 @@ files:
   - path: "./kyma/docs/security/docs/004-details-kubecofig-generator.md"
     config:
       white-list-external: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
+  - path: "./kyma/docs/service-brokers/docs/011-configuration-helm-broker.md"
+    config:
+      white-list-external: ["custom.bundles-repository"]
