@@ -265,6 +265,18 @@ func (c *Controller) tmplCreateResource(
 
 		log.Errorf("Error while creating %s for: %s/%s ver: %s. Root cause: %s", resourceName, api.Namespace, api.Name, api.ResourceVersion, createErr)
 
+		// if the error was caused by hostname being already occupied set appropriate error in the status
+		_, isHostnameNotAvailableError := createErr.(networking.HostnameNotAvailableError)
+		if isHostnameNotAvailableError {
+			statusSetter(&kymaMeta.GatewayResourceStatus{
+				Code:      kymaMeta.HostnameOccupied,
+				LastError: createErr.Error(),
+			})
+			// return HostnameOccupied - there will be no retries to update again
+			return kymaMeta.HostnameOccupied
+		}
+
+		// if there was different error: set error in the status
 		statusSetter(&kymaMeta.GatewayResourceStatus{
 			Code:      kymaMeta.Error,
 			LastError: createErr.Error(),
@@ -374,14 +386,20 @@ func (c *Controller) tmplUpdateResource(oldApi *kymaApi.Api, newApi *kymaApi.Api
 
 		// if the error was caused by hostname update keep previous resource in status but set LastError
 		_, isHostnameNotAvailableError := updateErr.(networking.HostnameNotAvailableError)
-		if isHostnameNotAvailableError && updatedResource != nil {
+		if isHostnameNotAvailableError {
+
+			resourceToStatus := kymaMeta.GatewayResource{}
+			if updatedResource != nil {
+				resourceToStatus = *updatedResource
+			}
+
 			statusSetter(&kymaMeta.GatewayResourceStatus{
-				Code:      kymaMeta.UpdateFailure,
+				Code:      kymaMeta.HostnameOccupied,
 				LastError: updateErr.Error(),
-				Resource:  *updatedResource,
+				Resource:  resourceToStatus,
 			})
-			// return UpdateFailure - there will be no retries to update again
-			return kymaMeta.UpdateFailure
+			// return HostnameOccupied - there will be no retries to update again
+			return kymaMeta.HostnameOccupied
 		}
 
 		// if there was different error: update previous status with the error
