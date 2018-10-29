@@ -186,7 +186,15 @@ func TestUpdateVirtualService(t *testing.T) {
 				t.Error("Error while updating VirtualService. Should not delete previous virtualservice.")
 			}
 		})
-		t.Run("should create the VirtualService if the hostname was changed to proper but VirtualService was not created earlier due to already occupied hostname", func(t *testing.T) {
+	})
+
+	t.Run("virtualService was not created due to already occupied hostname, so it should", func(t *testing.T) {
+		virtualServiceWithWantedHostname := toVirtualService(oldApi, testingGateway)
+		virtualServiceWithWantedHostname.Name = "fake-vsvc-with-wanted-hostname"
+		virtualServiceWithWantedHostname.Spec.Hosts = []string{"wanted-hostname"}
+		virtualServiceWithWantedHostname.UID = "09876" // UID must be different than the UID of previously created virtualservice
+
+		t.Run("create the new VirtualService with valid and not occupied hostname", func(t *testing.T) {
 			fakeClientset := fake.NewSimpleClientset()
 
 			oldWrongApi := Dto{}
@@ -202,7 +210,7 @@ func TestUpdateVirtualService(t *testing.T) {
 				t.Error("Error while updating VirtualService. Should create virtualservice.")
 			}
 		})
-		t.Run("should not create the VirtualService if the hostname was changed from inproper to another inproper and VirtualService was not created earlier", func(t *testing.T) {
+		t.Run("not create the VirtualService if the hostname is occupied", func(t *testing.T) {
 			fakeClientset := fake.NewSimpleClientset(virtualServiceWithWantedHostname)
 
 			oldWrongApi := Dto{}
