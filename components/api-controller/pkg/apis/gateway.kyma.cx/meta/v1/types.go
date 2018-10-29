@@ -17,7 +17,7 @@ const (
 	InProgress
 	Done
 	Error
-	UpdateFailure
+	HostnameOccupied
 )
 
 func (s StatusCode) IsEmpty() bool {
@@ -36,8 +36,8 @@ func (s StatusCode) IsError() bool {
 	return s == Error
 }
 
-func (s StatusCode) IsUpdateFailure() bool {
-	return s == UpdateFailure
+func (s StatusCode) IsHostnameOccupied() bool {
+	return s == HostnameOccupied
 }
 
 type GatewayResourceStatus struct {
@@ -66,8 +66,8 @@ func (s *GatewayResourceStatus) IsError() bool {
 	return s.Code.IsError()
 }
 
-func (s *GatewayResourceStatus) IsUpdateFailure() bool {
-	return s.Code.IsUpdateFailure()
+func (s *GatewayResourceStatus) IsHostnameOccupied() bool {
+	return s.Code.IsHostnameOccupied()
 }
 
 type GatewayResource struct {
