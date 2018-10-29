@@ -67,9 +67,22 @@ func (a *istioImpl) Create(dto *Dto) (*kymaMeta.GatewayResource, error) {
 func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, error) {
 
 	newVirtualService := toVirtualService(newDto, a.istioGateway)
-	oldVirtualService := toVirtualService(oldDto, a.istioGateway)
 
 	log.Infof("Trying to create or update virtual service: %+v", newVirtualService)
+
+	// If old VirtualService deosn't exists
+	if oldDto.Status.Resource.Name == "" {
+
+		createdResource, err := a.Create(newDto)
+		if err != nil && createdResource == nil {
+			return nil, err
+		}
+
+		log.Infof("Virtual service created: %v", createdResource)
+		return createdResource, nil
+	}
+
+	oldVirtualService := toVirtualService(oldDto, a.istioGateway)
 
 	if a.isEqual(oldVirtualService, newVirtualService) {
 
@@ -108,19 +121,19 @@ func (a *istioImpl) Delete(dto *Dto) error {
 		log.Infof("Delete skipped: no virtual service to delete for: %s/%s.", dto.MetaDto.Namespace, dto.MetaDto.Name)
 		return nil
 	}
-	return a.deleteByName(dto.MetaDto)
+	return a.deleteByName(dto.Status.Resource.Name, dto.MetaDto.Namespace)
 }
 
-func (a *istioImpl) deleteByName(meta meta.Dto) error {
+func (a *istioImpl) deleteByName(name, namespace string) error {
 
 	// if there is no virtual service to delete, just skip it
-	if meta.Name == "" {
+	if name == "" {
 		log.Infof("Delete skipped: no virtual service to delete.")
 		return nil
 	}
-	log.Infof("Deleting virtual service: %s/%s", meta.Namespace, meta.Name)
+	log.Infof("Deleting virtual service: %s/%s", namespace, name)
 
-	err := a.istioVirtualServiceInterface(meta.Namespace).Delete(meta.Name, &k8sMeta.DeleteOptions{})
+	err := a.istioVirtualServiceInterface(namespace).Delete(name, &k8sMeta.DeleteOptions{})
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
 			log.Infof("Delete skipped: no virtual service to delete was found.")
@@ -129,7 +142,7 @@ func (a *istioImpl) deleteByName(meta meta.Dto) error {
 		return commons.HandleError(err, "error while deleting virtual service")
 	}
 
-	log.Infof("Virtual service deleted: %s/%s", meta.Namespace, meta.Name)
+	log.Infof("Virtual service deleted: %s/%s", namespace, name)
 	return nil
 }
 

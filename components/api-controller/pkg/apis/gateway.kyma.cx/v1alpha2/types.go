@@ -66,8 +66,8 @@ func (s *ApiStatus) IsError() bool {
 	return s.VirtualServiceStatus.IsError() || s.AuthenticationStatus.IsError()
 }
 
-func (s *ApiStatus) IsUpdateFailure() bool {
-	return s.VirtualServiceStatus.IsUpdateFailure()
+func (s *ApiStatus) IsHostnameOccupied() bool {
+	return s.VirtualServiceStatus.IsHostnameOccupied()
 }
 
 func (s *ApiStatus) SetInProgress() {
