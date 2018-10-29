@@ -1,13 +1,13 @@
 ---
-title: Local Kyma installation
+title: Install Kyma locally from the release
 type: Installation
 ---
 
-This Getting Started guide shows developers how to quickly deploy Kyma locally on a Mac or Linux. Kyma installs locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma locally and verify the deployment, as well as the troubleshooting tips.
+This Installation guide shows developers how to quickly deploy Kyma locally on a Mac or Linux from the latest release. Kyma installs locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma locally and verify the deployment, as well as the troubleshooting tips.
 
 ## Prerequisites
 
-To run Kyma locally, clone this Git repository to your machine and checkout the latest release.
+To run Kyma locally, clone this Git repository to your machine and check out the latest release.
 
 Additionally, download these tools:
 
@@ -44,15 +44,11 @@ To access the Application Connector and connect an external solution to the loca
 
 ## Install Kyma on Minikube
 
-You can install Kyma either from the latest release or from the `master` branch. This section describes both scenarios.
-
-Additionally, you can choose to install it either with all core subcomponents or only with the selected ones. This section describes how to install Kyma with all core subcomponents. To learn how to install only the specific ones, see the **Install subcomponents** document for details.
+You can install Kyma either with all core subcomponents or only with the selected ones. This section describes how to install Kyma with all core subcomponents. To learn how to install only the specific ones, see the **Install subcomponents** document for details.
 
 > **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube.
 
-### Install Kyma from the latest release
-
-To install Kyma from the latest release, follow these steps:
+To install Kyma, follow these steps:
 
 1. Change the working directory to `installation`:
   ```
@@ -91,25 +87,6 @@ $ ./scripts/is-installed.sh
 
 Read the **Reinstall Kyma** document to learn how to reinstall Kyma without deleting the cluster from Minikube.
 To learn how to test Kyma, see the **Testing Kyma** document.
-
-### Install Kyma from the master branch
-
-> **NOTE:** Follow this scenario and use the `run.sh` script only for development purposes.
-
-To start the local installation, run the following command:
-
-```
-./installation/cmd/run.sh
-```
-
-This script sets up default parameters, starts Minikube, builds the Kyma-Installer, generates local configuration, creates the Installation custom resource, and sets up the Installer.
-
-You can execute the `installation/cmd/run.sh` script with the following parameters:
-
-- `--skip-minikube-start` which skips the execution of the `installation/scripts/minikube.sh` script.
-- `--vm-driver` which points to either `virtualbox` or `hiperkit`, depending on your operating system.
-
-See the **Local installation scripts** document for a detailed explanation of the `run.sh` script and the subscripts it triggers.
 
 ## Verify the deployment
 
