@@ -1,6 +1,6 @@
 ---
 title: Install Kyma on a GKE cluster
-type: Getting Started
+type: Installation
 ---
 
 This Getting Started guide shows developers how to quickly deploy Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster. Kyma installs on a cluster using a proprietary installer based on a Kubernetes operator.

@@ -3,21 +3,7 @@ title: Local installation scripts
 type: Details
 ---
 
-This document extends the **Local Kyma installation** guide with a detailed breakdown of the alternative installation method which is the `run.sh` script.
-
-> **NOTE:** Use the `run.sh` script only for development purposes.
-
-To start the local installation, run the following command:
-```
-./installation/cmd/run.sh
-```
-
-This script sets up default parameters, starts Minikube, builds the Kyma-Installer, generates local configuration, creates the Installation custom resource, and sets up the Installer. Subsequent sections provide a detailed description of each step, in the order in which the `run.sh` script triggers them.
-
-You can execute the `installation/cmd/run.sh` script with the following parameters:
-
-- `--skip-minikube-start` which skips the execution of the `installation/scripts/minikube.sh` script. See the **Start Minikube** section for more details.
-- `--vm-driver` which points to either `virtualbox` or `hiperkit`, depending on your operating system.
+This document extends the **Local Kyma installation** guide with a detailed breakdown of the alternative local installation method which is the `run.sh` script.
 
 The following snippet is the main element of the `run.sh` script:
 
@@ -43,8 +29,7 @@ else
     bash $CURRENT_DIR/../scripts/installer.sh --cr "$CR_PATH"
 fi
 ```
-
-The subsequent paragraphs describe respective subscripts triggered during the installation process.
+Subsequent sections provide details of all involved subscripts, in the order in which the `run.sh` script triggers them.
 
 ## The minikube.sh script
 
