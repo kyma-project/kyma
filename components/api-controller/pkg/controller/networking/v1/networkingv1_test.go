@@ -186,38 +186,40 @@ func TestUpdateVirtualService(t *testing.T) {
 				t.Error("Error while updating VirtualService. Should not delete previous virtualservice.")
 			}
 		})
-		t.Run("should create the VirtualService if the hostname was changed to proper but VirtualService was not created earlier due to already occupied hostname", func(t *testing.T) {
-			fakeClientset := fake.NewSimpleClientset()
+		t.Run("VirtualService was not created due to already occupied hostname, so test should", func(t *testing.T) {
+			t.Run("create the VirtualService if the hostname is proper", func(t *testing.T) {
+				fakeClientset := fake.NewSimpleClientset()
 
-			oldWrongApi := Dto{}
-			newApi := fakeDto()
+				oldWrongApi := Dto{}
+				newApi := fakeDto()
 
-			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
-			updatedResource, err := virtualServiceCtrl.Update(&oldWrongApi, newApi)
+				virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+				updatedResource, err := virtualServiceCtrl.Update(&oldWrongApi, newApi)
 
-			if err != nil {
-				t.Errorf("Error while updating VirtualService, but should not because hostname is not used by other virtualservice. Details : %s", err.Error())
-			}
-			if updatedResource == nil {
-				t.Error("Error while updating VirtualService. Should create virtualservice.")
-			}
-		})
-		t.Run("should not create the VirtualService if the hostname was changed from inproper to another inproper and VirtualService was not created earlier", func(t *testing.T) {
-			fakeClientset := fake.NewSimpleClientset(virtualServiceWithWantedHostname)
+				if err != nil {
+					t.Errorf("Error while updating VirtualService, but should not because hostname is not used by other virtualservice. Details : %s", err.Error())
+				}
+				if updatedResource == nil {
+					t.Error("Error while updating VirtualService. Should create virtualservice.")
+				}
+			})
+			t.Run("not create the VirtualService if the hostname is inproper", func(t *testing.T) {
+				fakeClientset := fake.NewSimpleClientset(virtualServiceWithWantedHostname)
 
-			oldWrongApi := Dto{}
-			newApi := fakeDto()
-			newApi.Hostname = "wanted-hostname"
+				oldWrongApi := Dto{}
+				newApi := fakeDto()
+				newApi.Hostname = "wanted-hostname"
 
-			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
-			updatedResource, err := virtualServiceCtrl.Update(&oldWrongApi, newApi)
+				virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+				updatedResource, err := virtualServiceCtrl.Update(&oldWrongApi, newApi)
 
-			if err == nil {
-				t.Errorf("Error did not occured while updating VirtualService, but should because hostname is used by other virtualservice.")
-			}
-			if updatedResource != nil {
-				t.Error("Error while updating VirtualService. Should not create a virtualservice.")
-			}
+				if err == nil {
+					t.Errorf("Error did not occured while updating VirtualService, but should because hostname is used by other virtualservice.")
+				}
+				if updatedResource != nil {
+					t.Error("Error while updating VirtualService. Should not create a virtualservice.")
+				}
+			})
 		})
 	})
 }
