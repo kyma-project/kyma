@@ -54,7 +54,7 @@ func TestCreateVirtualService(t *testing.T) {
 		dto := fakeDto()
 		virtualService := toVirtualService(dto, testingGateway)
 		// UID needs to be set manually for testing purposes. It is used to uniquely identify resource (virtualService).
-		// Normally it is assigned by kubernetes after resource is created, but fake clientset doesn't creates it.
+		// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
 		virtualService.UID = types.UID("12345")
 		fakeClientset := fake.NewSimpleClientset(virtualService)
 
@@ -76,7 +76,7 @@ func TestUpdateVirtualService(t *testing.T) {
 	oldApi := fakeDto()
 	virtualService := toVirtualService(oldApi, testingGateway)
 	// UID needs to be set manually for testing purposes. It is used to uniquely identify resource (virtualService).
-	// Normally it is assigned by kubernetes after resource is created, but fake clientset doesn't creates it.
+	// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
 	virtualService.UID = types.UID("12345")
 
 	t.Run("service assigned to virtualService has changed so virtualService will be updated", func(t *testing.T) {
@@ -85,6 +85,10 @@ func TestUpdateVirtualService(t *testing.T) {
 		newApi.ServiceName = "fake-service"
 
 		fakeClientset := fake.NewSimpleClientset(virtualService)
+
+		// Status of oldApi needs to be set manually for the test purposes
+		// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
+		oldApi.Status.Resource = *gatewayResourceFrom(virtualService)
 
 		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
 		updatedResource, err := virtualServiceCtrl.Update(oldApi, &newApi)
@@ -102,6 +106,10 @@ func TestUpdateVirtualService(t *testing.T) {
 
 		fakeClientset := fake.NewSimpleClientset(virtualService)
 
+		// Status of oldApi needs to be set manually for the test purposes
+		// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
+		oldApi.Status.Resource = *gatewayResourceFrom(virtualService)
+
 		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
 		_, err := virtualServiceCtrl.Update(oldApi, &newApi)
 
@@ -114,6 +122,10 @@ func TestUpdateVirtualService(t *testing.T) {
 		newApi := *oldApi
 
 		fakeClientset := fake.NewSimpleClientset(virtualService)
+
+		// Status of oldApi needs to be set manually for the test purposes
+		// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
+		oldApi.Status.Resource = *gatewayResourceFrom(virtualService)
 
 		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
 		updatedResource, err := virtualServiceCtrl.Update(oldApi, &newApi)
@@ -139,6 +151,10 @@ func TestUpdateVirtualService(t *testing.T) {
 			newApi := *oldApi
 			newApi.Hostname = "wanted-hostname"
 
+			// Status of oldApi needs to be set manually for the test purposes
+			// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
+			oldApi.Status.Resource = *gatewayResourceFrom(virtualService)
+
 			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
 			_, err := virtualServiceCtrl.Update(oldApi, &newApi)
 
@@ -155,6 +171,10 @@ func TestUpdateVirtualService(t *testing.T) {
 			newApi := *oldApi
 			newApi.Hostname = "wanted-hostname"
 
+			// Status of oldApi needs to be set manually for the test purposes
+			// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
+			oldApi.Status.Resource = *gatewayResourceFrom(virtualService)
+
 			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
 			updatedResource, err := virtualServiceCtrl.Update(oldApi, &newApi)
 
@@ -166,7 +186,39 @@ func TestUpdateVirtualService(t *testing.T) {
 				t.Error("Error while updating VirtualService. Should not delete previous virtualservice.")
 			}
 		})
+		t.Run("should create the VirtualService if the hostname was changed to proper but VirtualService was not created earlier due to already occupied hostname", func(t *testing.T) {
+			fakeClientset := fake.NewSimpleClientset()
 
+			oldWrongApi := Dto{}
+			newApi := fakeDto()
+
+			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+			updatedResource, err := virtualServiceCtrl.Update(&oldWrongApi, newApi)
+
+			if err != nil {
+				t.Errorf("Error while updating VirtualService, but should not because hostname is not used by other virtualservice. Details : %s", err.Error())
+			}
+			if updatedResource == nil {
+				t.Error("Error while updating VirtualService. Should create virtualservice.")
+			}
+		})
+		t.Run("should not create the VirtualService if the hostname was changed from inproper to another inproper and VirtualService was not created earlier", func(t *testing.T) {
+			fakeClientset := fake.NewSimpleClientset(virtualServiceWithWantedHostname)
+
+			oldWrongApi := Dto{}
+			newApi := fakeDto()
+			newApi.Hostname = "wanted-hostname"
+
+			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+			updatedResource, err := virtualServiceCtrl.Update(&oldWrongApi, newApi)
+
+			if err == nil {
+				t.Errorf("Error did not occured while updating VirtualService, but should because hostname is used by other virtualservice.")
+			}
+			if updatedResource != nil {
+				t.Error("Error while updating VirtualService. Should not create a virtualservice.")
+			}
+		})
 	})
 }
 
