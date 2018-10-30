@@ -31,6 +31,9 @@ func TestFormToModelSuccess(t *testing.T) {
 			LongDescription:     fixForm.Meta.LongDescription,
 			ProviderDisplayName: fixForm.Meta.ProviderDisplayName,
 			SupportURL:          fixForm.Meta.SupportURL,
+			Labels: internal.Labels{
+				"pico": "bello",
+			},
 		},
 		Tags:     []internal.BundleTag{"go", "golang"},
 		Bindable: fixForm.Meta.Bindable,
@@ -318,7 +321,7 @@ func fixValidForm() form {
 	myk := fixValidFormPlan("myk-plan-id-123")
 
 	return form{
-		Meta: &formMeta{
+		Meta: &FormMeta{
 			ID:                  "123-id-123",
 			Description:         "form-desc",
 			Name:                "form-name",
@@ -329,8 +332,11 @@ func fixValidForm() form {
 			ImageURL:            "http://image.url",
 			DocumentationURL:    "http://documentation.url",
 			DisplayName:         "Gopher Form",
-			Tags:                "go, golang",
-			Bindable:            true,
+			Labels: map[string]string{
+				"pico": "bello",
+			},
+			Tags:     "go, golang",
+			Bindable: true,
 		},
 		Plans: map[string]*formPlan{
 			micro.Meta.ID: &micro,
