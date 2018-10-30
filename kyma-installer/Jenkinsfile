@@ -4,7 +4,7 @@ def application = 'kyma-installer'
 def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
 def dockerImageTag = params.APP_VERSION
 def installerImageTag = null
-
+test
 echo """
 ********************************
 Job started with the following parameters:
