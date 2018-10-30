@@ -1,6 +1,6 @@
 ---
 title: Local installation scripts
-type: Details
+type: Installation
 ---
 
 This document extends the **Install Kyma locally from sources** guide with a detailed breakdown of the alternative local installation method which is the `run.sh` script.
