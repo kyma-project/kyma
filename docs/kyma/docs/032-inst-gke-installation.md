@@ -1,9 +1,9 @@
 ---
 title: Install Kyma on a GKE cluster
-type: Getting Started
+type: Installation
 ---
 
-This Getting Started guide shows developers how to quickly deploy Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster. Kyma installs on a cluster using a proprietary installer based on a Kubernetes operator.
+This Installation guide shows developers how to quickly deploy Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster. Kyma installs on a cluster using a proprietary installer based on a Kubernetes operator.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ This Getting Started guide shows developers how to quickly deploy Kyma on a [Goo
 
 Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
-1. Export the domain name, project name and DNS zone name as environment variables. Run the commands listed below:
+1. Export the domain name, project name, and DNS zone name as environment variables. Run the commands listed below:
 
     ```
     export DOMAIN={YOUR_SUBDOMAIN}
