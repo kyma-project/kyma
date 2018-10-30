@@ -11,7 +11,7 @@ echo "------------------------"
 
 docker build $CURRENT_DIR/.. -t connector-service
 
-kubectl -n kyma-integration patch statefulset connector-service --patch 'spec:
+kubectl -n kyma-integration patch deployment connector-service --patch 'spec:
   template:
     spec:
       containers:
