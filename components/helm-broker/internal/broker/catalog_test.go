@@ -74,24 +74,48 @@ func TestGetCatalogOnConversionError(t *testing.T) {
 }
 
 func TestBundleConversion(t *testing.T) {
-	// GIVEN
-	tc := newCatalogTC()
-	goldenPath := filepath.Join("testdata", t.Name()+".golden.json")
+	tests := map[string]struct {
+		fixSchemas map[internal.PlanSchemaType]internal.PlanSchema
 
-	conv := broker.NewConverter()
+		expGoldenName string
+	}{
+		"empty schemas": {
+			fixSchemas: nil,
 
-	// WHEN
-	convertedSvc, err := conv.Convert(tc.fixBundle())
+			expGoldenName: "TestBundleConversion-without-schemas.golden.json",
+		},
+		"schemas provided": {
+			fixSchemas: map[internal.PlanSchemaType]internal.PlanSchema{
+				internal.SchemaTypeProvision: fixProvisionSchema(),
+				internal.SchemaTypeUpdate:    fixUpdateSchema(),
+				internal.SchemaTypeBind:      fixBindSchema(),
+			},
 
-	// THEN
-	require.NoError(t, err)
+			expGoldenName: "TestBundleConversion-with-schemas.golden.json",
+		},
+	}
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			// GIVEN
+			tc := newCatalogTC()
+			goldenPath := filepath.Join("testdata", test.expGoldenName)
 
-	normalizedGotSvc := tc.marshal(t, convertedSvc)
+			conv := broker.NewConverter()
 
-	updateGoldenFileIfRequested(t, goldenPath, normalizedGotSvc)
+			// WHEN
+			convertedSvc, err := conv.Convert(tc.fixBundleWithSchemas(test.fixSchemas))
 
-	exp := tc.fixtureMarshaledOsbService(t, goldenPath)
-	assert.JSONEq(t, exp, string(normalizedGotSvc))
+			// THEN
+			require.NoError(t, err)
+
+			normalizedGotSvc := tc.marshal(t, convertedSvc)
+
+			updateGoldenFileIfRequested(t, goldenPath, normalizedGotSvc)
+
+			exp := tc.fixtureMarshaledOsbService(t, goldenPath)
+			assert.JSONEq(t, exp, string(normalizedGotSvc))
+		})
+	}
 }
 
 func TestBundleConversionOverridesLocalLabel(t *testing.T) {
@@ -134,6 +158,10 @@ func (tc catalogTestCase) fixBundles() []*internal.Bundle {
 }
 
 func (tc catalogTestCase) fixBundle() *internal.Bundle {
+	return tc.fixBundleWithSchemas(tc.fixPlanSchemas())
+}
+
+func (tc catalogTestCase) fixBundleWithSchemas(schemas map[internal.PlanSchemaType]internal.PlanSchema) *internal.Bundle {
 	return &internal.Bundle{
 		Name:        "bundleName",
 		ID:          "bundleID",
@@ -153,31 +181,29 @@ func (tc catalogTestCase) fixBundle() *internal.Bundle {
 		},
 		Tags: []internal.BundleTag{"awesome-tag"},
 		Plans: map[internal.BundlePlanID]internal.BundlePlan{
-			"planID1": {
-				ID:          "planID1",
-				Description: "plan1Description",
-				Name:        "plan1Name",
-				Schemas: map[internal.PlanSchemaType]internal.PlanSchema{
-					internal.SchemaTypeProvision: tc.fixProvisionSchema(),
-					internal.SchemaTypeUpdate:    tc.fixUpdateSchema(),
-					internal.SchemaTypeBind:      tc.fixBindSchema(),
-				},
+			"planID": {
+				ID:          "planID",
+				Description: "planDescription",
+				Name:        "planName",
 				Metadata: internal.BundlePlanMetadata{
 					DisplayName: "displayName-1",
 				},
 				Bindable: ptr.Bool(true),
-			},
-			"planID2": {
-				ID:          "planID2",
-				Description: "plan2Description",
-				Name:        "plan2Name",
-				Bindable:    ptr.Bool(true),
+				Schemas:  schemas,
 			},
 		},
 	}
 }
 
-func (tc catalogTestCase) fixProvisionSchema() internal.PlanSchema {
+func (tc catalogTestCase) fixPlanSchemas() map[internal.PlanSchemaType]internal.PlanSchema {
+	return map[internal.PlanSchemaType]internal.PlanSchema{
+		internal.SchemaTypeProvision: fixProvisionSchema(),
+		internal.SchemaTypeUpdate:    fixUpdateSchema(),
+		internal.SchemaTypeBind:      fixBindSchema(),
+	}
+}
+
+func fixProvisionSchema() internal.PlanSchema {
 	return internal.PlanSchema{
 		Type: &jsonschema.Type{
 			Version: "http://json-schema.org/draft-04/schema#",
@@ -187,7 +213,7 @@ func (tc catalogTestCase) fixProvisionSchema() internal.PlanSchema {
 	}
 }
 
-func (tc catalogTestCase) fixUpdateSchema() internal.PlanSchema {
+func fixUpdateSchema() internal.PlanSchema {
 	return internal.PlanSchema{
 		Type: &jsonschema.Type{
 			Version: "http://json-schema.org/draft-04/schema#",
@@ -197,7 +223,7 @@ func (tc catalogTestCase) fixUpdateSchema() internal.PlanSchema {
 	}
 }
 
-func (tc catalogTestCase) fixBindSchema() internal.PlanSchema {
+func fixBindSchema() internal.PlanSchema {
 	return internal.PlanSchema{
 		Type: &jsonschema.Type{
 			Version: "http://json-schema.org/draft-04/schema#",
