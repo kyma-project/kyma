@@ -1,6 +1,6 @@
 ---
 title: Install subcomponents
-type: Details
+type: Installation
 ---
 
 It is up to you to decide which subcomponents you install as part of the `core` release. By default, most of the core subcomponents are enabled. If you want to install only specific subcomponents, follow the steps that you need to perform before the local and cluster installation.
