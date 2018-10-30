@@ -16,6 +16,9 @@
 # The `kyma-installer` directory
 /kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek @jasiu001
 
+# The `prow` directory
+/prow/ @aszecowka @strekm @@suleymanakbas91 @crabtree @michal-hudy @pbochynski @derberg
+
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @piotrmsc @PK85
 
