@@ -11,26 +11,48 @@ import (
 )
 
 type form struct {
-	Meta  *formMeta
+	Meta  *FormMeta
 	Plans map[string]*formPlan
 }
 
-type formMeta struct {
-	ID                  string `yaml:"id"`
-	Name                string `yaml:"name"`
-	Version             string `yaml:"version"`
-	Description         string `yaml:"description"`
-	DisplayName         string `yaml:"displayName"`
-	Tags                string `yaml:"tags"`
-	ProviderDisplayName string `yaml:"providerDisplayName"`
-	LongDescription     string `yaml:"longDescription"`
-	DocumentationURL    string `yaml:"documentationURL"`
-	SupportURL          string `yaml:"supportURL"`
-	ImageURL            string `yaml:"imageURL"`
-	Bindable            bool   `yaml:"bindable"`
+// FormMeta describes the metdata information about the bundle.
+type FormMeta struct {
+	ID                  string            `yaml:"id"`
+	Name                string            `yaml:"name"`
+	Version             string            `yaml:"version"`
+	Description         string            `yaml:"description"`
+	DisplayName         string            `yaml:"displayName"`
+	Tags                string            `yaml:"tags"`
+	ProviderDisplayName string            `yaml:"providerDisplayName"`
+	LongDescription     string            `yaml:"longDescription"`
+	DocumentationURL    string            `yaml:"documentationURL"`
+	SupportURL          string            `yaml:"supportURL"`
+	ImageURL            string            `yaml:"imageURL"`
+	Bindable            bool              `yaml:"bindable"`
+	Labels              map[string]string `yaml:"labels"`
 }
 
-func (m *formMeta) Validate() error {
+// MapLabelsToModel maps the FormMeta.Labels to the model internal.Labels
+func (m *FormMeta) MapLabelsToModel() internal.Labels {
+	mapped := internal.Labels{}
+	for k, v := range m.Labels {
+		mapped[k] = v
+	}
+	return mapped
+}
+
+// MapTagsToModel maps the FormMeta.Tags to the model internal.BundleTag slice
+func (m *FormMeta) MapTagsToModel() []internal.BundleTag {
+	splittedTags := strings.Split(m.Tags, ",")
+	mapped := make([]internal.BundleTag, 0, len(splittedTags))
+	for i := range splittedTags {
+		mapped = append(mapped, internal.BundleTag(strings.TrimSpace(splittedTags[i])))
+	}
+	return mapped
+}
+
+// Validate checks the FormMeta if all required fields are set
+func (m *FormMeta) Validate() error {
 	var messages []string
 
 	if m.ID == "" {
@@ -110,20 +132,12 @@ func (f *form) ToModel(c *chart.Chart) (internal.Bundle, error) {
 			LongDescription:     f.Meta.LongDescription,
 			ProviderDisplayName: f.Meta.ProviderDisplayName,
 			SupportURL:          f.Meta.SupportURL,
+			Labels:              f.Meta.MapLabelsToModel(),
 		},
-		Tags:    f.mapTagToModel(),
+		Tags:    f.Meta.MapTagsToModel(),
 		Version: *ybVer,
 		Plans:   mappedPlans,
 	}, nil
-}
-
-func (f *form) mapTagToModel() []internal.BundleTag {
-	splittedTags := strings.Split(f.Meta.Tags, ",")
-	mapped := make([]internal.BundleTag, 0, len(splittedTags))
-	for i := range splittedTags {
-		mapped = append(mapped, internal.BundleTag(strings.TrimSpace(splittedTags[i])))
-	}
-	return mapped
 }
 
 type formPlan struct {

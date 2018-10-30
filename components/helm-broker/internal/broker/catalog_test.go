@@ -2,10 +2,15 @@ package broker_test
 
 import (
 	"context"
+	"encoding/json"
+	"flag"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"testing"
 
 	"github.com/Masterminds/semver"
+	"github.com/alecthomas/jsonschema"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker/automock"
@@ -15,6 +20,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+var update = flag.Bool("update", false, "update golden (.out) files")
 
 func TestGetCatalog(t *testing.T) {
 	// GIVEN
@@ -69,60 +76,40 @@ func TestGetCatalogOnConversionError(t *testing.T) {
 func TestBundleConversion(t *testing.T) {
 	// GIVEN
 	tc := newCatalogTC()
-	fixBundle := tc.fixBundle()
+	goldenPath := filepath.Join("testdata", t.Name()+".golden.json")
+
 	conv := broker.NewConverter()
+
 	// WHEN
-	s, err := conv.Convert(fixBundle)
+	convertedSvc, err := conv.Convert(tc.fixBundle())
+
 	// THEN
-	assert.NoError(t, err)
-	assert.Equal(t, "bundleID", s.ID)
-	assert.Equal(t, "bundleName", s.Name)
-	assert.Equal(t, "bundleDescription", s.Description)
-	assert.True(t, s.Bindable)
-	assert.Equal(t, map[string]interface{}{
-		"displayName":         fixBundle.Metadata.DisplayName,
-		"providerDisplayName": fixBundle.Metadata.ProviderDisplayName,
-		"longDescription":     fixBundle.Metadata.LongDescription,
-		"documentationUrl":    fixBundle.Metadata.DocumentationURL,
-		"supportUrl":          fixBundle.Metadata.SupportURL,
-		"imageUrl":            fixBundle.Metadata.ImageURL,
-	}, s.Metadata)
+	require.NoError(t, err)
 
-	require.Len(t, s.Plans, 2)
+	normalizedGotSvc := tc.marshal(t, convertedSvc)
 
-	var p1, p2 osb.Plan
-	if s.Plans[0].ID == "planID1" {
-		p1 = s.Plans[0]
-		p2 = s.Plans[1]
-	} else {
-		p2 = s.Plans[0]
-		p1 = s.Plans[1]
-	}
+	updateGoldenFileIfRequested(t, goldenPath, normalizedGotSvc)
 
-	assert.Equal(t, "planID1", p1.ID)
-	assert.Equal(t, "plan1Description", p1.Description)
-	assert.Equal(t, "plan1Name", p1.Name)
-	require.NotNil(t, p1.Bindable)
-	assert.True(t, *p1.Bindable)
-	assert.Equal(t, tc.fixProvisionSchema(), p1.ParameterSchemas.ServiceInstances.Create.Parameters)
-	assert.Equal(t, tc.fixUpdateSchema(), p1.ParameterSchemas.ServiceInstances.Update.Parameters)
-	assert.Equal(t, tc.fixBindSchema(), p1.ParameterSchemas.ServiceBindings.Create.Parameters)
-	assert.Equal(t, map[string]interface{}{
-		"displayName": fixBundle.Plans["planID1"].Metadata.DisplayName,
-	}, p1.Metadata)
+	exp := tc.fixtureMarshaledOsbService(t, goldenPath)
+	assert.JSONEq(t, exp, string(normalizedGotSvc))
+}
 
-	assert.Equal(t, "planID2", p2.ID)
-	assert.Equal(t, "plan2Description", p2.Description)
-	assert.Equal(t, "plan2Name", p2.Name)
-	require.NotNil(t, p2.Bindable)
-	assert.True(t, *p2.Bindable)
-	assert.Nil(t, p2.ParameterSchemas.ServiceInstances.Create.Parameters)
-	assert.Nil(t, p2.ParameterSchemas.ServiceInstances.Update.Parameters)
-	assert.Nil(t, p2.ParameterSchemas.ServiceBindings.Create.Parameters)
-	assert.Equal(t, map[string]interface{}{
-		"displayName": fixBundle.Plans["planID2"].Metadata.DisplayName,
-	}, p2.Metadata)
-	assert.Equal(t, []string{"awesome-tag"}, s.Tags)
+func TestBundleConversionOverridesLocalLabel(t *testing.T) {
+	// GIVEN
+	tc := newCatalogTC()
+	conv := broker.NewConverter()
+	fixBundle := tc.fixBundle()
+	fixBundle.Metadata.Labels["local"] = "false"
+
+	// WHEN
+	convertedSvc, err := conv.Convert(fixBundle)
+
+	// THEN
+	require.NoError(t, err)
+
+	gotLabels, ok := convertedSvc.Metadata["labels"].(internal.Labels)
+	require.True(t, ok, "cannot cast metadata labels to internal.Labels")
+	assert.Equal(t, "true", gotLabels["local"])
 }
 
 type catalogTestCase struct {
@@ -160,6 +147,9 @@ func (tc catalogTestCase) fixBundle() *internal.Bundle {
 			DocumentationURL:    "DocumentationURL",
 			SupportURL:          "SupportURL",
 			ImageURL:            "ImageURL",
+			Labels: internal.Labels{
+				"testing": "true",
+			},
 		},
 		Tags: []internal.BundleTag{"awesome-tag"},
 		Plans: map[internal.BundlePlanID]internal.BundlePlan{
@@ -188,15 +178,33 @@ func (tc catalogTestCase) fixBundle() *internal.Bundle {
 }
 
 func (tc catalogTestCase) fixProvisionSchema() internal.PlanSchema {
-	return internal.PlanSchema{}
+	return internal.PlanSchema{
+		Type: &jsonschema.Type{
+			Version: "http://json-schema.org/draft-04/schema#",
+			Type:    "string",
+			Title:   "ProvisionSchema",
+		},
+	}
 }
 
 func (tc catalogTestCase) fixUpdateSchema() internal.PlanSchema {
-	return internal.PlanSchema{}
+	return internal.PlanSchema{
+		Type: &jsonschema.Type{
+			Version: "http://json-schema.org/draft-04/schema#",
+			Type:    "string",
+			Title:   "UpdateSchema",
+		},
+	}
 }
 
 func (tc catalogTestCase) fixBindSchema() internal.PlanSchema {
-	return internal.PlanSchema{}
+	return internal.PlanSchema{
+		Type: &jsonschema.Type{
+			Version: "http://json-schema.org/draft-04/schema#",
+			Type:    "string",
+			Title:   "BindSchema",
+		},
+	}
 }
 
 func (tc catalogTestCase) fixService() osb.Service {
@@ -205,4 +213,28 @@ func (tc catalogTestCase) fixService() osb.Service {
 
 func (tc catalogTestCase) fixError() error {
 	return errors.New("some error")
+}
+
+func (tc catalogTestCase) marshal(t *testing.T, in interface{}) []byte {
+	t.Helper()
+	out, err := json.Marshal(in)
+	require.NoError(t, err)
+	return out
+}
+
+func (tc catalogTestCase) fixtureMarshaledOsbService(t *testing.T, testdataBasePath string) string {
+	t.Helper()
+	data, err := ioutil.ReadFile(testdataBasePath)
+	require.NoError(t, err, "failed reading .golden")
+
+	return string(data)
+}
+
+func updateGoldenFileIfRequested(t *testing.T, goldenPath string, obj []byte) {
+	t.Helper()
+	if *update {
+		t.Log("update golden file")
+		err := ioutil.WriteFile(goldenPath, obj, 0644)
+		require.NoError(t, err, "failed to update golden file")
+	}
 }

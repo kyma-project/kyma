@@ -138,6 +138,9 @@ type Bundle struct {
 	Bindable    bool
 }
 
+// Labels are key-value pairs which add metadata information for bundle.
+type Labels map[string]string
+
 // BundleMetadata holds bundle metadata as defined by OSB API.
 type BundleMetadata struct {
 	DisplayName         string
@@ -148,6 +151,7 @@ type BundleMetadata struct {
 	// ImageURL is graphical representation of the bundle.
 	// Currently SVG is required.
 	ImageURL string
+	Labels   Labels
 }
 
 // ToMap collect data from BundleMetadata to format compatible with YAML encoder.
@@ -159,8 +163,23 @@ func (b BundleMetadata) ToMap() map[string]interface{} {
 		DocumentationURL    string `structs:"documentationUrl"`
 		SupportURL          string `structs:"supportUrl"`
 		ImageURL            string `structs:"imageUrl"`
+		Labels              Labels `structs:"labels"`
 	}
 	return structs.Map(mapped(b))
+}
+
+// DeepCopy returns a new BundleMetadata object.
+func (b BundleMetadata) DeepCopy() BundleMetadata {
+	out := b
+	if b.Labels != nil {
+		out.Labels = make(Labels, len(b.Labels))
+		for k, v := range b.Labels {
+			out.Labels[k] = v
+		}
+
+	}
+
+	return out
 }
 
 // InstanceID is a service instance identifier.
