@@ -26,12 +26,19 @@ echo "------------------------"
 echo "Creating test pod"
 echo "------------------------"
 
+MINIKUBE_IP=$(minikube ip)
+
 cat <<EOF | kubectl -n kyma-integration apply -f -
 apiVersion: v1
 kind: Pod
 metadata:
   name: connector-service-tests
 spec:
+  hostAliases:
+  - ip: "$MINIKUBE_IP"
+    hostnames:
+    - "connector-service.kyma.local"
+    - "gateway.kyma.local"
   containers:
   - name: connector-service-tests
     image: connector-service-tests
