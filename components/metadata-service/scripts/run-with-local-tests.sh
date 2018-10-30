@@ -11,6 +11,11 @@ echo "------------------------"
 
 docker build $CURRENT_DIR/.. -t metadata-service
 
+echo ""
+echo "------------------------"
+echo "Updating deployment"
+echo "------------------------"
+
 kubectl -n kyma-integration patch deployment metadata-service --patch 'spec:
   template:
     spec:
@@ -18,6 +23,11 @@ kubectl -n kyma-integration patch deployment metadata-service --patch 'spec:
       - name: metadata-service
         image: metadata-service
         imagePullPolicy: Never'
+
+echo ""
+echo "------------------------"
+echo "Removing old pods"
+echo "------------------------"
 
 kubectl -n kyma-integration delete po -l app=metadata-service --now --wait=false
 

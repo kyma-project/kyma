@@ -19,6 +19,11 @@ echo "------------------------"
 
 docker build $CURRENT_DIR/.. -t remote-environment-controller-tests
 
+echo ""
+echo "------------------------"
+echo "Creating test pod"
+echo "------------------------"
+
 cat <<EOF | kubectl -n kyma-integration apply -f -
 apiVersion: v1
 kind: Pod
@@ -41,6 +46,8 @@ echo ""
 echo "------------------------"
 echo "Waiting 5 seconds for pod to start..."
 echo "------------------------"
+echo ""
+
 sleep 5
 
 kubectl -n kyma-integration logs remote-environment-controller-tests -f

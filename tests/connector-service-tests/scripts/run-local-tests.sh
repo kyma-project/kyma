@@ -21,6 +21,11 @@ docker build $CURRENT_DIR/.. -t connector-service-tests
 
 NODE_PORT=$(kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}')
 
+echo ""
+echo "------------------------"
+echo "Creating test pod"
+echo "------------------------"
+
 cat <<EOF | kubectl -n kyma-integration apply -f -
 apiVersion: v1
 kind: Pod
@@ -47,6 +52,8 @@ echo ""
 echo "------------------------"
 echo "Waiting 5 seconds for pod to start..."
 echo "------------------------"
+echo ""
+
 sleep 5
 
 kubectl -n kyma-integration logs connector-service-tests -f

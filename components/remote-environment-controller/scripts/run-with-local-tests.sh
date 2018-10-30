@@ -11,6 +11,11 @@ echo "------------------------"
 
 docker build $CURRENT_DIR/.. -t remote-environment-controller
 
+echo ""
+echo "------------------------"
+echo "Updating stateful set"
+echo "------------------------"
+
 kubectl -n kyma-integration patch statefulset remote-environment-controller --patch 'spec:
   template:
     spec:
@@ -18,6 +23,11 @@ kubectl -n kyma-integration patch statefulset remote-environment-controller --pa
       - name: remote-environment-controller
         image: remote-environment-controller
         imagePullPolicy: Never'
+
+echo ""
+echo "------------------------"
+echo "Removing old pods"
+echo "------------------------"
 
 kubectl -n kyma-integration delete po -l control-plane=remote-environment-controller --now --wait=false
 
