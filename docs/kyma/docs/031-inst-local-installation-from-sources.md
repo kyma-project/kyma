@@ -3,7 +3,7 @@ title: Install Kyma locally from sources
 type: Installation
 ---
 
-This Installation guide shows developers how to quickly deploy Kyma locally on a Mac or Linux from local sources. Follow it if you want to use Kyma for development purposes.
+This Installation guide shows developers how to quickly deploy Kyma on a Mac or Linux from local sources. Follow it if you want to use Kyma for development purposes.
 
 Kyma installs locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document describes only the installation part. For prerequisites, certificates setup, deployment validation, and troubleshooting steps, see the **Install Kyma locally from the release** document.
 
