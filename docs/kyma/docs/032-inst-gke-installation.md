@@ -17,7 +17,7 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Google
 
 Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
-1. Export the domain name, project name and DNS zone name as environment variables. Run the commands listed below:
+1. Export the domain name, project name, and DNS zone name as environment variables. Run the commands listed below:
 
     ```
     export DOMAIN={YOUR_SUBDOMAIN}
