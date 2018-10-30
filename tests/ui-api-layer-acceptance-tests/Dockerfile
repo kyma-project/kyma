@@ -14,6 +14,7 @@ COPY ./installer/ ${BASE_APP_DIR}/installer/
 COPY ./k8s/ ${BASE_APP_DIR}/k8s/
 COPY ./waiter/ ${BASE_APP_DIR}/waiter/
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
+COPY ./upsbroker/ ${BASE_APP_DIR}/upsbroker/
 COPY ./tester.go ${BASE_APP_DIR}/tester.go
 
 #

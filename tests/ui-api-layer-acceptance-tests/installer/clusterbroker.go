@@ -60,16 +60,3 @@ func (t *ClusterBrokerInstaller) WaitForBrokerRunning(svcatCli *clientset.Client
 		return false, fmt.Errorf("%v", broker.Status.Conditions)
 	}, clusterBrokerReadyTimeout)
 }
-
-func UPSClusterServiceBroker(name, url string) *v1beta1.ClusterServiceBroker {
-	return &v1beta1.ClusterServiceBroker{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-		Spec: v1beta1.ClusterServiceBrokerSpec{
-			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
-				URL: url,
-			},
-		},
-	}
-}

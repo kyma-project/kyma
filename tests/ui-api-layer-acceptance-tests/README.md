@@ -33,13 +33,13 @@ Run acceptance tests using the following command:
 - against standalone UI API Layer deployed on the local host:
   
   ```bash
-  KUBE_CONFIG=/Users/${USER}/.kube/config IS_LOCAL_CLUSTER=false GRAPHQL_ENDPOINT=http://localhost:3000/graphql USERNAME=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D) PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D) go test ./... -tags=acceptance
+  KUBE_CONFIG=/Users/${USER}/.kube/config GRAPHQL_ENDPOINT=http://localhost:3000/graphql USERNAME=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D) PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D) go test ./... -tags=acceptance
   ```
 
 - against the UI API Layer deployed on the cluster with custom domain:
   
   ```bash
-  KUBE_CONFIG=/Users/${USER}/.kube/config IS_LOCAL_CLUSTER=false DOMAIN=nightly.kyma.cx USERNAME=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D) PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D) go test ./... -tags=acceptance
+  KUBE_CONFIG=/Users/${USER}/.kube/config DOMAIN=nightly.kyma.cx USERNAME={username} PASSWORD={password} go test ./... -tags=acceptance
   ```
 
 ### Verify the code

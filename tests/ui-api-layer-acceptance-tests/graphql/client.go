@@ -36,12 +36,12 @@ func New() (*Client, error) {
 	}
 
 	httpClient := newAuthorizedClient(token)
-	gqlClient := graphql.NewClient(config.GraphQlEndpoint, graphql.WithHTTPClient(httpClient))
+	gqlClient := graphql.NewClient(config.GraphQLEndpoint, graphql.WithHTTPClient(httpClient))
 
 	client := &Client{
 		gqlClient: gqlClient,
 		token:     token,
-		endpoint:  config.GraphQlEndpoint,
+		endpoint:  config.GraphQLEndpoint,
 		logs:      []string{},
 	}
 	client.gqlClient.Log = client.addLog
@@ -62,7 +62,9 @@ func (c *Client) Do(req *Request, res interface{}) error {
 	err := c.gqlClient.Run(ctx, req.req, res)
 	if err != nil {
 		for _, l := range c.logs {
-			log.Println(l)
+			if l != "" {
+				log.Println(l)
+			}
 		}
 	}
 	return err

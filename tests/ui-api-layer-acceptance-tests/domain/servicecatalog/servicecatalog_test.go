@@ -13,6 +13,7 @@ import (
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/installer"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/upsbroker"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
@@ -133,7 +134,7 @@ func exitOnError(err error, context string) {
 }
 
 func initClusterBroker(clusterBrokerInstaller *installer.ClusterBrokerInstaller, svcatCli *clientset.Clientset, url string) error {
-	err := clusterBrokerInstaller.Install(svcatCli, installer.UPSClusterServiceBroker(clusterBrokerInstaller.Name(), url))
+	err := clusterBrokerInstaller.Install(svcatCli, upsbroker.UPSClusterServiceBroker(clusterBrokerInstaller.Name(), url))
 	if err != nil {
 		return errors.Wrapf(err, "while installing %s", tester.ClusterServiceBroker)
 	}
@@ -147,7 +148,7 @@ func initClusterBroker(clusterBrokerInstaller *installer.ClusterBrokerInstaller,
 }
 
 func initBroker(brokerInstaller *installer.BrokerInstaller, svcatCli *clientset.Clientset, url string) error {
-	err := brokerInstaller.Install(svcatCli, installer.UPSServiceBroker(brokerInstaller.Name(), url))
+	err := brokerInstaller.Install(svcatCli, upsbroker.UPSServiceBroker(brokerInstaller.Name(), url))
 	if err != nil {
 		return errors.Wrapf(err, "while installing %s", tester.ServiceBroker)
 	}
@@ -161,7 +162,7 @@ func initBroker(brokerInstaller *installer.BrokerInstaller, svcatCli *clientset.
 }
 
 func initPod(podInstaller *installer.PodInstaller, k8sClient *corev1.CoreV1Client) error {
-	err := podInstaller.Create(k8sClient, installer.UPSBrokerPod(podInstaller.Name()))
+	err := podInstaller.Create(k8sClient, upsbroker.UPSBrokerPod(podInstaller.Name()))
 	if err != nil {
 		return errors.Wrapf(err, "while creating Pod")
 	}
@@ -174,7 +175,7 @@ func initPod(podInstaller *installer.PodInstaller, k8sClient *corev1.CoreV1Clien
 }
 
 func initService(serviceInstaller *installer.ServiceInstaller, k8sClient *corev1.CoreV1Client) error {
-	err := serviceInstaller.Create(k8sClient, installer.UPSBrokerService(serviceInstaller.Name()))
+	err := serviceInstaller.Create(k8sClient, upsbroker.UPSBrokerService(serviceInstaller.Name()))
 	if err != nil {
 		return errors.Wrapf(err, "while creating Service")
 	}

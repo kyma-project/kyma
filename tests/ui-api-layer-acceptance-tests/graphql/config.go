@@ -12,11 +12,10 @@ type envConfig struct {
 	GraphQLEndpoint string `envconfig:"optional,GRAPHQL_ENDPOINT"`
 	Username        string
 	Password        string
-	IsLocalCluster  bool `envconfig:"default=true"`
 }
 
 type config struct {
-	GraphQlEndpoint  string
+	GraphQLEndpoint  string
 	IdProviderConfig idProviderConfig
 }
 
@@ -55,7 +54,7 @@ func loadConfig() (config, error) {
 	if graphQLEndpoint == "" {
 		graphQLEndpoint = fmt.Sprintf("https://ui-api.%s/graphql", env.Domain)
 	}
-	config.GraphQlEndpoint = graphQLEndpoint
+	config.GraphQLEndpoint = graphQLEndpoint
 
 	config.IdProviderConfig = idProviderConfig{
 		DexConfig: dexConfig{
