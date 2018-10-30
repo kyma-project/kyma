@@ -217,12 +217,6 @@ echo "- Testing Application Connector"
 helm test application-connector
 acTestErr=$?
 
-echo "- Testing Remote Environments"
-helm test ec-default
-ecTestErr=$?
-helm test hmc-default
-hmcTestErr=$?
-
 checkAndCleanupTest kyma-integration
 testCheckGateway=$?
 

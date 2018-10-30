@@ -4,12 +4,6 @@ Invoke-Expression -Command $cmd
 $cmd = "kubectl.exe delete ns kyma-installer"
 Invoke-Expression -Command $cmd
 
-$cmd = "helm.exe del --purge ec-default"
-Invoke-Expression -Command $cmd
-
-$cmd = "helm.exe del --purge hmc-default"
-Invoke-Expression -Command $cmd
-
 $cmd = "helm.exe del --purge dex"
 Invoke-Expression -Command $cmd
 
