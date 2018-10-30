@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/patrickmn/go-cache"
+	"net/http"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
 )
 
 const cleanupInterval = 60
@@ -27,8 +29,17 @@ type Credentials struct {
 }
 
 type Proxy struct {
-	Proxy       *httputil.ReverseProxy
-	Credentials *Credentials
+	Proxy                 *httputil.ReverseProxy
+	AuthorizationStrategy *AuthorizationStrategy
+	Credentials           *Credentials
+}
+
+type AuthorizationStrategy interface {
+	Setup(proxy *httputil.ReverseProxy, r *http.Request) apperrors.AppError
+}
+
+type RetryStrategy interface {
+	Do(r *http.Response) apperrors.AppError
 }
 
 type HTTPProxyCache interface {
