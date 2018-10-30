@@ -195,12 +195,6 @@ istioTestErr=$?
 checkAndCleanupTest istio-system
 testCheckIstio=$?
 
-echo "- Testing Remote Environments"
-helm test ec-default
-ecTestErr=$?
-helm test hmc-default
-hmcTestErr=$?
-
 checkAndCleanupTest kyma-integration
 testCheckGateway=$?
 
