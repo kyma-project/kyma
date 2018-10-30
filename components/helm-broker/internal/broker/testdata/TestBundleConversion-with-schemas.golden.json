@@ -8,9 +8,9 @@
   "bindable": true,
   "plans": [
     {
-      "id": "planID1",
-      "name": "plan1Name",
-      "description": "plan1Description",
+      "id": "planID",
+      "name": "planName",
+      "description": "planDescription",
       "bindable": true,
       "metadata": {
         "displayName": "displayName-1"
@@ -41,15 +41,6 @@
             }
           }
         }
-      }
-    },
-    {
-      "id": "planID2",
-      "name": "plan2Name",
-      "description": "plan2Description",
-      "bindable": true,
-      "metadata": {
-        "displayName": ""
       }
     }
   ],
