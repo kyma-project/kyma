@@ -60,7 +60,7 @@ global:
     version: 1daa11b7
   helm_broker:
     dir: develop/
-    version: b23c1636
+    version: 70ba3ce9
   kubeless_test_client:
     dir: develop/
     version: 73e18620
