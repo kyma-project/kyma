@@ -41,7 +41,7 @@ Follow these steps to change the configuration and make the Helm Broker fetch bu
   ```
   > **NOTE:** You can skip the `yaml` filename in the URL if the name of the file is `index.yaml`. In that case, your URL should be equal to `http://custom.bundles-repository/`.
 
-3. Install Kyma on Minikube. See the **Local Kyma installation** document to learn how.
+3. Install Kyma on Minikube. See the **Install Kyma locally from the release** document to learn how.
 
 ### Configure repository URL in the runtime
 
@@ -52,7 +52,7 @@ Follow these steps to change the repository URL:
  ```bash
  kubectl set env -n kyma-system deployment/core-helm-broker -e APP_REPOSITORY_URL="http://custom.bundles-repository/bundles.yaml"
  ```
- 
+
 2. Wait for the Helm Broker to run using the following command:
 
  ```bash
