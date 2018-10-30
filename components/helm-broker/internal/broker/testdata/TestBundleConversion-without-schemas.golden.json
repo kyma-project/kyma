@@ -1,0 +1,32 @@
+{
+  "id": "bundleID",
+  "name": "bundleName",
+  "description": "bundleDescription",
+  "tags": [
+    "awesome-tag"
+  ],
+  "bindable": true,
+  "plans": [
+    {
+      "id": "planID",
+      "name": "planName",
+      "description": "planDescription",
+      "bindable": true,
+      "metadata": {
+        "displayName": "displayName-1"
+      }
+    }
+  ],
+  "metadata": {
+    "displayName": "DisplayName",
+    "documentationUrl": "DocumentationURL",
+    "imageUrl": "ImageURL",
+    "labels": {
+      "local": "true",
+      "testing": "true"
+    },
+    "longDescription": "LongDescription",
+    "providerDisplayName": "ProviderDisplayName",
+    "supportUrl": "SupportURL"
+  }
+}
