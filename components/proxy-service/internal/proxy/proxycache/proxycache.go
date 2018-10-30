@@ -9,11 +9,26 @@ import (
 
 const cleanupInterval = 60
 
+type OauthCredentials struct {
+	AuthenticationUrl string
+	ClientId          string
+	ClientSecret      string
+}
+
+type BasicAuthCredentials struct {
+	UserName string
+	Password string
+}
+
+type Credentials struct {
+	Type  string
+	Oauth *OauthCredentials
+	Basic *BasicAuthCredentials
+}
+
 type Proxy struct {
-	Proxy        *httputil.ReverseProxy
-	OauthUrl     string
-	ClientId     string
-	ClientSecret string
+	Proxy       *httputil.ReverseProxy
+	Credentials *Credentials
 }
 
 type HTTPProxyCache interface {
@@ -43,7 +58,14 @@ func (p *httpProxyCache) Get(id string) (*Proxy, bool) {
 }
 
 func (p *httpProxyCache) Add(id, oauthUrl, clientId, clientSecret string, reverseProxy *httputil.ReverseProxy) *Proxy {
-	proxy := &Proxy{Proxy: reverseProxy, OauthUrl: oauthUrl, ClientId: clientId, ClientSecret: clientSecret}
+	credentials := &Credentials{
+		Oauth: &OauthCredentials{
+			ClientId:          clientId,
+			ClientSecret:      clientSecret,
+			AuthenticationUrl: oauthUrl,
+		},
+	}
+	proxy := &Proxy{Proxy: reverseProxy, Credentials: credentials}
 	p.proxyCache.Set(id, proxy, cache.DefaultExpiration)
 
 	return proxy

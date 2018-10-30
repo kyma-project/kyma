@@ -48,7 +48,7 @@ func (rr *requestRetrier) invalidateAndRetry() (*http.Response, error) {
 		return nil, appError
 	}
 
-	if cacheObj.OauthUrl == "" {
+	if cacheObj.Credentials != nil || cacheObj.Credentials.Oauth == nil {
 		return nil, nil
 	}
 

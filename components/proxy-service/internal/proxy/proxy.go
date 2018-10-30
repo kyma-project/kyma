@@ -105,8 +105,8 @@ func (p *proxy) createAndCacheProxy(id string) (*proxycache.Proxy, apperrors.App
 func (p *proxy) handleAuthHeaders(r *http.Request, cacheObj *proxycache.Proxy) (*http.Request, apperrors.AppError) {
 	kymaAuthorization := handleKymaAuthorization(r)
 
-	if !kymaAuthorization && cacheObj.OauthUrl != "" {
-		err := p.addCredentials(r, cacheObj.OauthUrl, cacheObj.ClientId, cacheObj.ClientSecret)
+	if !kymaAuthorization && cacheObj.Credentials != nil && cacheObj.Credentials.Oauth != nil {
+		err := p.addCredentials(r, cacheObj.Credentials.Oauth.AuthenticationUrl, cacheObj.Credentials.Oauth.ClientId, cacheObj.Credentials.Oauth.ClientSecret)
 		if err != nil {
 			return nil, err
 		}
@@ -131,8 +131,8 @@ func (p *proxy) addCredentials(r *http.Request, oauthUrl, clientId, clientSecret
 func (p *proxy) invalidateAndHandleAuthHeaders(r *http.Request, cacheObj *proxycache.Proxy) (*http.Request, apperrors.AppError) {
 	kymaAuthorization := handleKymaAuthorization(r)
 
-	if !kymaAuthorization && cacheObj.OauthUrl != "" {
-		err := p.invalidateAndAddCredentials(r, cacheObj.OauthUrl, cacheObj.ClientId, cacheObj.ClientSecret)
+	if !kymaAuthorization && cacheObj.Credentials.Oauth.AuthenticationUrl != "" {
+		err := p.invalidateAndAddCredentials(r, cacheObj.Credentials.Oauth.AuthenticationUrl, cacheObj.Credentials.Oauth.ClientId, cacheObj.Credentials.Oauth.ClientSecret)
 		if err != nil {
 			return nil, err
 		}

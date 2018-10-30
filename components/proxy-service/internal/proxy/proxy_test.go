@@ -45,10 +45,7 @@ func TestProxy(t *testing.T) {
 		httpCacheMock := &cacheMock.HTTPProxyCache{}
 		httpCacheMock.On("Get", "uuid-1").Return(
 			&proxycache.Proxy{
-				Proxy:        httputil.NewSingleHostReverseProxy(u),
-				ClientId:     "",
-				OauthUrl:     "",
-				ClientSecret: "",
+				Proxy: httputil.NewSingleHostReverseProxy(u),
 			}, true)
 
 		handler := New(nameResolver, nil, nil, httpCacheMock, true, proxyTimeout)
@@ -89,10 +86,14 @@ func TestProxy(t *testing.T) {
 		httpCacheMock := &cacheMock.HTTPProxyCache{}
 		httpCacheMock.On("Get", "uuid-1").Return(
 			&proxycache.Proxy{
-				Proxy:        httputil.NewSingleHostReverseProxy(u),
-				ClientId:     "clientId",
-				ClientSecret: "clientSecret",
-				OauthUrl:     "www.example.com/oauth",
+				Proxy: httputil.NewSingleHostReverseProxy(u),
+				Credentials: &proxycache.Credentials{
+					Oauth: &proxycache.OauthCredentials{
+						ClientId:          "clientId",
+						ClientSecret:      "clientSecret",
+						AuthenticationUrl: "www.example.com/oauth",
+					},
+				},
 			}, true)
 
 		handler := New(nameResolver, nil, oauthClientMock, httpCacheMock, true, proxyTimeout)
@@ -128,10 +129,14 @@ func TestProxy(t *testing.T) {
 		httpCacheMock := &cacheMock.HTTPProxyCache{}
 		httpCacheMock.On("Get", "uuid-1").Return(
 			&proxycache.Proxy{
-				Proxy:        httputil.NewSingleHostReverseProxy(u),
-				ClientId:     "clientId",
-				ClientSecret: "clientSecret",
-				OauthUrl:     "www.example.com/oauth",
+				Proxy: httputil.NewSingleHostReverseProxy(u),
+				Credentials: &proxycache.Credentials{
+					Oauth: &proxycache.OauthCredentials{
+						ClientId:          "clientId",
+						ClientSecret:      "clientSecret",
+						AuthenticationUrl: "www.example.com/oauth",
+					},
+				},
 			}, true)
 
 		handler := New(nameResolver, nil, nil, httpCacheMock, true, proxyTimeout)
@@ -172,10 +177,7 @@ func TestProxy(t *testing.T) {
 		httpCacheMock.On("Get", "uuid-1").Return(nil, false)
 		httpCacheMock.On("Add", "uuid-1", "", "", "", mock.AnythingOfType("*httputil.ReverseProxy")).Return(
 			&proxycache.Proxy{
-				Proxy:        httputil.NewSingleHostReverseProxy(u),
-				ClientId:     "",
-				OauthUrl:     "",
-				ClientSecret: "",
+				Proxy: httputil.NewSingleHostReverseProxy(u),
 			})
 
 		handler := New(nameResolver, serviceDefServiceMock, nil, httpCacheMock, true, proxyTimeout)
@@ -242,10 +244,14 @@ func TestProxy(t *testing.T) {
 			mock.AnythingOfType("*httputil.ReverseProxy"),
 		).Return(
 			&proxycache.Proxy{
-				Proxy:        httputil.NewSingleHostReverseProxy(u),
-				ClientId:     serviceDefinition.Api.Credentials.Oauth.ClientID,
-				OauthUrl:     serviceDefinition.Api.Credentials.Oauth.URL,
-				ClientSecret: serviceDefinition.Api.Credentials.Oauth.ClientSecret,
+				Proxy: httputil.NewSingleHostReverseProxy(u),
+				Credentials: &proxycache.Credentials{
+					Oauth: &proxycache.OauthCredentials{
+						ClientId:          serviceDefinition.Api.Credentials.Oauth.ClientID,
+						ClientSecret:      serviceDefinition.Api.Credentials.Oauth.ClientSecret,
+						AuthenticationUrl: serviceDefinition.Api.Credentials.Oauth.URL,
+					},
+				},
 			})
 
 		handler := New(nameResolver, serviceDefServiceMock, oauthClientMock, httpCacheMock, true, proxyTimeout)
@@ -334,10 +340,14 @@ func TestProxy(t *testing.T) {
 		httpCacheMock := &cacheMock.HTTPProxyCache{}
 		httpCacheMock.On("Get", "uuid-1").
 			Return(&proxycache.Proxy{
-				Proxy:        &httputil.ReverseProxy{},
-				OauthUrl:     serviceDefinition.Api.Credentials.Oauth.URL,
-				ClientId:     serviceDefinition.Api.Credentials.Oauth.ClientID,
-				ClientSecret: serviceDefinition.Api.Credentials.Oauth.ClientSecret,
+				Proxy: &httputil.ReverseProxy{},
+				Credentials: &proxycache.Credentials{
+					Oauth: &proxycache.OauthCredentials{
+						ClientId:          serviceDefinition.Api.Credentials.Oauth.ClientID,
+						ClientSecret:      serviceDefinition.Api.Credentials.Oauth.ClientSecret,
+						AuthenticationUrl: serviceDefinition.Api.Credentials.Oauth.URL,
+					},
+				},
 			}, true)
 
 		handler := New(nameResolver, serviceDefServiceMock, oauthClientMock, httpCacheMock, true, 10)
@@ -388,10 +398,7 @@ func TestProxy(t *testing.T) {
 		httpCacheMock.On("Get", "uuid-1").Return(nil, false)
 		httpCacheMock.On("Add", "uuid-1", "", "", "", mock.AnythingOfType("*httputil.ReverseProxy")).Return(
 			&proxycache.Proxy{
-				Proxy:        httputil.NewSingleHostReverseProxy(u),
-				ClientId:     "",
-				OauthUrl:     "",
-				ClientSecret: "",
+				Proxy: httputil.NewSingleHostReverseProxy(u),
 			})
 
 		handler := New(nameResolver, serviceDefServiceMock, nil, httpCacheMock, true, proxyTimeout)
