@@ -2,8 +2,8 @@ package kymahelm
 
 import (
 	"k8s.io/helm/pkg/helm"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 	"k8s.io/helm/pkg/proto/hapi/release"
+	rls "k8s.io/helm/pkg/proto/hapi/services"
 )
 
 type HelmClient interface {

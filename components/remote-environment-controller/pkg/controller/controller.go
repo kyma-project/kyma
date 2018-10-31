@@ -37,14 +37,14 @@ func InitRemoteEnvironmentController(mgr manager.Manager, overridesData Override
 		return err
 	}
 
-	helmClient := kymahelm.NewClient(tillerUrl)
+	releaseManager := kymahelm.NewReleaseManager(tillerUrl, overrides, namespace)
 
 	reClient, err := versioned.NewForConfig(k8sConfig)
 	if err != nil {
 		return err
 	}
 
-	reconciler := NewReconciler(mgr.GetClient(), helmClient, reClient.ApplicationconnectorV1alpha1().RemoteEnvironments(), overrides, namespace)
+	reconciler := NewReconciler(mgr.GetClient(), releaseManager, reClient.ApplicationconnectorV1alpha1().RemoteEnvironments())
 
 	return startRemoteEnvController(appName, mgr, reconciler)
 }

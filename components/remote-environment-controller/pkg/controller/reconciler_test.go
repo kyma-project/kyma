@@ -10,15 +10,16 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/helm/pkg/proto/hapi/release"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
+	//"k8s.io/helm/pkg/proto/hapi/release"
+	//rls "k8s.io/helm/pkg/proto/hapi/services"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"testing"
+	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
+
 )
 
 const (
 	reName            = "re-name"
-	releasesNamespace = "integration"
 )
 
 func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
@@ -29,22 +30,19 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			Name: reName,
 		}
 
-		listReleaseResponse := &rls.ListReleasesResponse{
-			Releases: []*release.Release{},
-		}
-
 		managerClient := &mocks.ManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREInstance).Return(nil)
 
-		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("ListReleases").Return(listReleaseResponse, nil)
-		helmClient.On("InstallReleaseFromChart", reChartDirectory, releasesNamespace, reName, "").Return(nil, nil)
+		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("CheckReleaseExistence", reName).Return(false, nil)
+		releaseManager.On("InstallNewREChart", reName).Return(hapi_4.Status_DEPLOYED, "Deployed", nil)
 
 		reClient := &mocks.RemoteEnvironmentClient{}
+		reClient.On("Update", mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(nil, nil)
 
-		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
+		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -57,7 +55,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
-		helmClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
 	})
 
 	t.Run("should set access-label when new RE is created", func(t *testing.T) {
@@ -66,23 +64,19 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			Name: reName,
 		}
 
-		listReleaseResponse := &rls.ListReleasesResponse{
-			Releases: []*release.Release{},
-		}
-
 		managerClient := &mocks.ManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREWithoutAccessLabel).Return(nil)
 
-		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("ListReleases").Return(listReleaseResponse, nil)
-		helmClient.On("InstallReleaseFromChart", reChartDirectory, releasesNamespace, reName, "").Return(nil, nil)
+		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("CheckReleaseExistence", reName).Return(false, nil)
+		releaseManager.On("InstallNewREChart", reName).Return(hapi_4.Status_DEPLOYED, "Deployed", nil)
 
 		reClient := &mocks.RemoteEnvironmentClient{}
 		reClient.On("Update", mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(nil, nil)
 
-		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
+		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -95,7 +89,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
-		helmClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
 		reClient.AssertExpectations(t)
 	})
 
@@ -105,21 +99,17 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			Name: reName,
 		}
 
-		uninstallResponse := &rls.UninstallReleaseResponse{
-			Info: "uninstalled",
-		}
-
 		managerClient := &mocks.ManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Return(errors.NewNotFound(schema.GroupResource{}, reName))
 
-		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("DeleteRelease", reName).Return(uninstallResponse, nil)
+		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("DeleteREChart", reName).Return(nil)
 
 		reClient := &mocks.RemoteEnvironmentClient{}
 
-		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
+		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -132,33 +122,35 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
-		helmClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
 	})
 
-	t.Run("should not take action if RE is updated", func(t *testing.T) {
+	t.Run("should update status if RE is updated", func(t *testing.T) {
 		// given
 		namespacedName := types.NamespacedName{
 			Name: reName,
 		}
-
-		listReleaseResponse := &rls.ListReleasesResponse{
-			Count: 1,
-			Releases: []*release.Release{
-				{Name: reName},
-			},
-		}
+		// TODO - use it in releasemanager tests
+		//listReleaseResponse := &rls.ListReleasesResponse{
+		//	Count: 1,
+		//	Releases: []*release.Release{
+		//		{Name: reName},
+		//	},
+		//}
 
 		managerClient := &mocks.ManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREInstance).Return(nil)
 
-		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("ListReleases").Return(listReleaseResponse, nil)
+		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("CheckReleaseExistence", reName).Return(true, nil)
+		releaseManager.On("CheckReleaseStatus", reName).Return(hapi_4.Status_DEPLOYED, "Installed", nil)
 
 		reClient := &mocks.RemoteEnvironmentClient{}
+		reClient.On("Update", mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(nil, nil)
 
-		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
+		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -171,7 +163,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
-		helmClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
 	})
 
 	t.Run("should correct access-label if updated with wrong value", func(t *testing.T) {
@@ -180,25 +172,19 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			Name: reName,
 		}
 
-		listReleaseResponse := &rls.ListReleasesResponse{
-			Count: 1,
-			Releases: []*release.Release{
-				{Name: reName},
-			},
-		}
-
 		managerClient := &mocks.ManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREWithWrongAccessLabel).Return(nil)
 
-		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("ListReleases").Return(listReleaseResponse, nil)
+		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("CheckReleaseExistence", reName).Return(true, nil)
+		releaseManager.On("CheckReleaseStatus", reName).Return(hapi_4.Status_DEPLOYED, "Installed", nil)
 
 		reClient := &mocks.RemoteEnvironmentClient{}
 		reClient.On("Update", mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(nil, nil)
 
-		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
+		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -211,7 +197,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
-		helmClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
 		reClient.AssertExpectations(t)
 	})
 
@@ -226,11 +212,11 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Return(errors.NewResourceExpired("error"))
 
-		helmClient := &helmmocks.HelmClient{}
+		releaseManager := &helmmocks.ReleaseManager{}
 
 		reClient := &mocks.RemoteEnvironmentClient{}
 
-		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
+		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -243,10 +229,10 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		assert.Error(t, err)
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
-		helmClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
 	})
 
-	t.Run("should return error when failed to list releases", func(t *testing.T) {
+	t.Run("should return error when failed to check releases existence", func(t *testing.T) {
 		// given
 		namespacedName := types.NamespacedName{
 			Name: reName,
@@ -257,12 +243,12 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREInstance).Return(nil)
 
-		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("ListReleases").Return(nil, errors.NewBadRequest("error"))
+		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("CheckReleaseExistence", reName).Return(false, errors.NewBadRequest("error"))
 
 		reClient := &mocks.RemoteEnvironmentClient{}
 
-		reReconciler := NewReconciler(managerClient, helmClient, reClient, "", releasesNamespace)
+		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -275,7 +261,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		assert.Error(t, err)
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
-		helmClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
 	})
 }
 
