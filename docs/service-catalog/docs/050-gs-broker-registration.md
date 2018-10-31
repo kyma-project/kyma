@@ -3,11 +3,10 @@ title: How to register a broker
 type: Getting Started
 ---
 
-This Getting Started guide shows how to register a new broker to the Service Catalog. The broker can be either a Namespace-scoped ServiceBroker or a cluster-wide ClusterServiceBroker. Follow the example of the [UPS Broker](https://github.com/kubernetes-incubator/service-catalog/tree/master/charts/ups-broker) to complete the guide.
+This Getting Started guide shows how to register a new broker in the Service Catalog. The broker can be either a Namespace-scoped ServiceBroker or a cluster-wide ClusterServiceBroker. Follow the instructions based on the [UPS Broker example](https://github.com/kubernetes-incubator/service-catalog/tree/master/charts/ups-broker) to complete the guide.
 
 ## Prerequisites
 
-To register a new broker to the Service Catalog, you must have:
 * [Service Catalog](https://github.com/kubernetes-incubator/service-catalog/releases) running in version `0.1.28` or higher
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl) or [helm](https://github.com/helm/helm#install) installed
 * broker's `yaml` files that specify:
@@ -15,15 +14,15 @@ To register a new broker to the Service Catalog, you must have:
   * Kubernetes service which enables the connection between a broker and an application
   * broker registration file in which the kind of a broker is specified
 
-> **NOTE:** In case of the exemplary UPS Broker, find the application and service files [here](https://github.com/kubernetes-incubator/service-catalog/tree/master/charts/ups-broker/templates). You can find the registration file under [this](https://github.com/kubernetes-incubator/service-catalog/blob/master/contrib/examples/walkthrough/ups-broker.yaml) location.
+> **NOTE:** In case of the sample UPS Broker, find the application and service files [here](https://github.com/kubernetes-incubator/service-catalog/tree/master/charts/ups-broker/templates). Use [this](https://github.com/kubernetes-incubator/service-catalog/blob/master/contrib/examples/walkthrough/ups-broker.yaml) registration file.
 
 ## Steps
 
-You can register your broker to the Service Catalog either by installing a Helm chart or by using kubectl commands. You can also register it directly using the Kyma Console.
+You can register your broker in the Service Catalog either by installing a Helm chart or by using kubectl commands. You can also register it directly using the Kyma Console.
 
 ### Register using Helm chart
 
-To register a broker to the Service Catalog using a Helm chart, go to the chart's directory and run this command:
+To register a broker in the Service Catalog using a Helm chart, go to the chart's directory and run this command:
 
 ```
 helm install {chart directory} --name {broker name} --namespace {namespace}
