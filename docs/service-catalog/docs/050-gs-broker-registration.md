@@ -3,17 +3,19 @@ title: How to register a broker
 type: Getting Started
 ---
 
-This Getting Started guide shows how to register a new broker to the Service Catalog. Follow the example of the [UPS Broker](https://github.com/kyma-project/kyma/tree/master/tests/ui-api-layer-acceptance-tests/domain/servicecatalog/testdata/charts/ups-broker) to complete the guide.
+This Getting Started guide shows how to register a new broker to the Service Catalog. The broker can be either a Namespace-scoped ServiceBroker or a cluster-wide ClusterServiceBroker. Follow the example of the [UPS Broker](https://github.com/kubernetes-incubator/service-catalog/tree/master/charts/ups-broker) to complete the guide.
 
 ## Prerequisites
 
 To register a new broker to the Service Catalog, you must have:
-* Service Catalog running in version `0.1.28` or higher
+* [Service Catalog](https://github.com/kubernetes-incubator/service-catalog/releases) running in version `0.1.28` or higher
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl) or [helm](https://github.com/helm/helm#install) installed
 * broker's `yaml` files that specify:
   * application which implements the [Open Service Broker API](https://www.openservicebrokerapi.org/)
-  * broker registration
   * Kubernetes service which enables the connection between a broker and an application
+  * broker registration file in which the kind of a broker is specified
+
+> **NOTE:** In case of the exemplary UPS Broker, find the application and service files [here](https://github.com/kubernetes-incubator/service-catalog/tree/master/charts/ups-broker/templates). You can find the registration file under [this](https://github.com/kubernetes-incubator/service-catalog/blob/master/contrib/examples/walkthrough/ups-broker.yaml) location.
 
 ## Steps
 
@@ -42,10 +44,11 @@ kubectl apply -f {broker registration filename} -n {namespace}
 ```
 In case of the UPS Broker, the commands look as follows:
 ```
-kubectl apply -f broker-deployment.yaml -n qa
-kubectl apply -f broker-service.yaml -n qa
-kubectl apply -f broker-register.yaml -n qa
+kubectl apply -f broker-deployment.yaml -n ups-broker
+kubectl apply -f broker-service.yaml -n ups-broker
+kubectl apply -f ups-broker.yaml -n ups-broker
 ```
+
 >**NOTE:** In case of a ClusterServiceBroker, do not specify the Namespace and skip the `-n {namespace}` part of the command.
 
 ### Register using the Console
