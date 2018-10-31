@@ -44,7 +44,8 @@ spec:
   {{- else }}
   - port: http-metrics
     interval: 30s
-  - port: cadvisor
+  - path: /metrics/cadvisor
+    port: http-metrics
     interval: 30s
     honorLabels: true
   {{- end }}
