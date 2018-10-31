@@ -16,7 +16,7 @@ import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/proxycache"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/tokencache"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/tokencache"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
@@ -87,9 +87,7 @@ func main() {
 func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, nameResolver k8sconsts.NameResolver,
 	httpProxyCache proxycache.HTTPProxyCache, tokenCache tokencache.TokenCache, skipVerify bool, proxyTimeout int) http.Handler {
 	if serviceDefinitionService != nil {
-		oauthClient := proxy.NewOauthClient(proxyTimeout, tokenCache)
-
-		return proxy.New(nameResolver, serviceDefinitionService, oauthClient, httpProxyCache, skipVerify, proxyTimeout)
+		return proxy.New(nameResolver, serviceDefinitionService, httpProxyCache, skipVerify, proxyTimeout)
 	}
 	return proxy.NewInvalidStateHandler("Proxy Service is not initialized properly")
 }

@@ -3,10 +3,9 @@ package proxycache
 import (
 	"net/http/httputil"
 	"time"
-
 	"github.com/patrickmn/go-cache"
-	"net/http"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	"net/http"
 )
 
 const cleanupInterval = 60
@@ -22,31 +21,35 @@ type BasicAuthCredentials struct {
 	Password string
 }
 
-type Credentials struct {
-	Type  string
-	Oauth *OauthCredentials
-	Basic *BasicAuthCredentials
-}
-
 type AuthorizationStrategy interface {
 	Setup(proxy *httputil.ReverseProxy, r *http.Request) apperrors.AppError
 	Reset()
 }
 
-type RetryStrategy interface {
-	Do(r *http.Response) apperrors.AppError
+type Credentials struct {
+	Oauth *OauthCredentials
+	Basic *BasicAuthCredentials
 }
-
 
 type Proxy struct {
 	Proxy                 *httputil.ReverseProxy
-	AuthorizationStrategy AuthorizationStrategy
 	Credentials           *Credentials
+	AuthorizationStrategy AuthorizationStrategy
 }
+
+type authorizationType int
+
+const (
+	None authorizationType = iota
+	Basic
+	OAuth
+	Unknown
+)
 
 type HTTPProxyCache interface {
 	Get(id string) (*Proxy, bool)
 	Add(id, oauthUrl, clientId, clientSecret string, proxy *httputil.ReverseProxy) *Proxy
+	PutWithCredentials(id string, credentials *Credentials, reverseProxy *httputil.ReverseProxy) *Proxy
 }
 
 type httpProxyCache struct {
@@ -83,3 +86,24 @@ func (p *httpProxyCache) Add(id, oauthUrl, clientId, clientSecret string, revers
 
 	return proxy
 }
+
+func (p *httpProxyCache) PutWithCredentials(id string, credentials *Credentials, reverseProxy *httputil.ReverseProxy) *Proxy {
+	proxy := &Proxy{Proxy: reverseProxy, Credentials: credentials}
+	p.proxyCache.Set(id, proxy, cache.DefaultExpiration)
+
+	return proxy
+}
+
+func credentialsType(credentials *Credentials) authorizationType{
+	if credentials == nil {
+		return None
+	} else if credentials.Basic != nil {
+		return Basic
+	} else if credentials.Oauth != nil {
+		return OAuth
+	} else {
+		return Unknown
+	}
+}
+
+

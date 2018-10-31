@@ -1,8 +1,19 @@
-package proxy
+/*
+ * [y] hybris Platform
+ *
+ * Copyright (c) 2000-2018 hybris AG
+ * All rights reserved.
+ *
+ * This software is the confidential and proprietary information of hybris
+ * ("Confidential Information"). You shall not disclose such Confidential
+ * Information and shall use it only in accordance with the terms of the
+ * license agreement you entered into with hybris.
+ */
+package oauth
 
 import (
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/tokencache/mocks"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/tokencache/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net/http"

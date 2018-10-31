@@ -49,3 +49,19 @@ func (_m *HTTPProxyCache) Get(id string) (*proxycache.Proxy, bool) {
 
 	return r0, r1
 }
+
+// PutWithCredentials provides a mock function with given fields: id, credentials, reverseProxy
+func (_m *HTTPProxyCache) PutWithCredentials(id string, credentials *proxycache.Credentials, reverseProxy *httputil.ReverseProxy) *proxycache.Proxy {
+	ret := _m.Called(id, credentials, reverseProxy)
+
+	var r0 *proxycache.Proxy
+	if rf, ok := ret.Get(0).(func(string, *proxycache.Credentials, *httputil.ReverseProxy) *proxycache.Proxy); ok {
+		r0 = rf(id, credentials, reverseProxy)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*proxycache.Proxy)
+		}
+	}
+
+	return r0
+}

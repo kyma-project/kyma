@@ -15,7 +15,6 @@ import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata"
 	metadataMock "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/mocks"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/mocks"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/proxycache"
 	cacheMock "github.com/kyma-project/kyma/components/proxy-service/internal/proxy/proxycache/mocks"
 	"github.com/stretchr/testify/assert"
@@ -48,7 +47,7 @@ func TestProxy(t *testing.T) {
 				Proxy: httputil.NewSingleHostReverseProxy(u),
 			}, true)
 
-		handler := New(nameResolver, nil, nil, httpCacheMock, true, proxyTimeout)
+		handler := New(nameResolver,nil, httpCacheMock, true, proxyTimeout)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -74,14 +73,6 @@ func TestProxy(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("ExtractServiceId", "uuid-1.cluster.local").Return("uuid-1")
 
-		oauthClientMock := &mocks.OAuthClient{}
-		oauthClientMock.On(
-			"GetToken",
-			"clientId",
-			"clientSecret",
-			"www.example.com/oauth",
-		).Return("Bearer access_token", nil)
-
 		u, _ := url.Parse(ts.URL)
 		httpCacheMock := &cacheMock.HTTPProxyCache{}
 		httpCacheMock.On("Get", "uuid-1").Return(
@@ -96,7 +87,7 @@ func TestProxy(t *testing.T) {
 				},
 			}, true)
 
-		handler := New(nameResolver, nil, oauthClientMock, httpCacheMock, true, proxyTimeout)
+		handler := New(nameResolver, nil, httpCacheMock, true, proxyTimeout)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -106,7 +97,6 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "test", rr.Body.String())
 
-		oauthClientMock.AssertExpectations(t)
 		httpCacheMock.AssertExpectations(t)
 	})
 
@@ -125,21 +115,7 @@ func TestProxy(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("ExtractServiceId", "uuid-1.cluster.local").Return("uuid-1")
 
-		u, _ := url.Parse(ts.URL)
-		httpCacheMock := &cacheMock.HTTPProxyCache{}
-		httpCacheMock.On("Get", "uuid-1").Return(
-			&proxycache.Proxy{
-				Proxy: httputil.NewSingleHostReverseProxy(u),
-				Credentials: &proxycache.Credentials{
-					Oauth: &proxycache.OauthCredentials{
-						ClientId:          "clientId",
-						ClientSecret:      "clientSecret",
-						AuthenticationUrl: "www.example.com/oauth",
-					},
-				},
-			}, true)
-
-		handler := New(nameResolver, nil, nil, httpCacheMock, true, proxyTimeout)
+		handler := New(nameResolver, nil, nil, true, proxyTimeout)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -148,8 +124,6 @@ func TestProxy(t *testing.T) {
 		// then
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "test", rr.Body.String())
-
-		httpCacheMock.AssertExpectations(t)
 	})
 
 	t.Run("should proxy on cache miss", func(t *testing.T) {
@@ -171,16 +145,8 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
 			TargetUrl: ts.URL,
 		}, nil)
-
-		u, _ := url.Parse(ts.URL)
-		httpCacheMock := &cacheMock.HTTPProxyCache{}
-		httpCacheMock.On("Get", "uuid-1").Return(nil, false)
-		httpCacheMock.On("Add", "uuid-1", "", "", "", mock.AnythingOfType("*httputil.ReverseProxy")).Return(
-			&proxycache.Proxy{
-				Proxy: httputil.NewSingleHostReverseProxy(u),
-			})
-
-		handler := New(nameResolver, serviceDefServiceMock, nil, httpCacheMock, true, proxyTimeout)
+		
+		handler := New(nameResolver, serviceDefServiceMock, nil, true, proxyTimeout)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -191,7 +157,6 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, "test", rr.Body.String())
 
 		serviceDefServiceMock.AssertExpectations(t)
-		httpCacheMock.AssertExpectations(t)
 	})
 
 	t.Run("should proxy on cache miss with prefetching oauth token ", func(t *testing.T) {
@@ -224,14 +189,6 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", serviceDefinition.ID).Return(serviceDefinition.Api, nil)
 
-		oauthClientMock := &mocks.OAuthClient{}
-		oauthClientMock.On(
-			"GetToken",
-			serviceDefinition.Api.Credentials.Oauth.ClientID,
-			serviceDefinition.Api.Credentials.Oauth.ClientSecret,
-			serviceDefinition.Api.Credentials.Oauth.URL,
-		).Return("Bearer access_token", nil)
-
 		u, _ := url.Parse(serviceDefinition.Api.TargetUrl)
 		httpCacheMock := &cacheMock.HTTPProxyCache{}
 		httpCacheMock.On("Get", "uuid-1").Return(nil, false)
@@ -254,7 +211,7 @@ func TestProxy(t *testing.T) {
 				},
 			})
 
-		handler := New(nameResolver, serviceDefServiceMock, oauthClientMock, httpCacheMock, true, proxyTimeout)
+		handler := New(nameResolver, serviceDefServiceMock, httpCacheMock, true, proxyTimeout)
 		rr := httptest.NewRecorder()
 
 		// when
@@ -265,7 +222,6 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, "test", rr.Body.String())
 
 		serviceDefServiceMock.AssertExpectations(t)
-		oauthClientMock.AssertExpectations(t)
 		httpCacheMock.AssertExpectations(t)
 	})
 
@@ -286,7 +242,7 @@ func TestProxy(t *testing.T) {
 		proxyCacheMock := &cacheMock.HTTPProxyCache{}
 		proxyCacheMock.On("Get", "uuid-1").Return(nil, false)
 
-		handler := New(nameResolver, serviceDefServiceMock, nil, proxyCacheMock, true, proxyTimeout)
+		handler := New(nameResolver, serviceDefServiceMock, proxyCacheMock, true, proxyTimeout)
 
 		// when
 		handler.ServeHTTP(rr, req)
@@ -329,14 +285,6 @@ func TestProxy(t *testing.T) {
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 
-		oauthClientMock := &mocks.OAuthClient{}
-		oauthClientMock.On(
-			"GetToken",
-			serviceDefinition.Api.Credentials.Oauth.ClientID,
-			serviceDefinition.Api.Credentials.Oauth.ClientSecret,
-			serviceDefinition.Api.Credentials.Oauth.URL,
-		).Return("", apperrors.UpstreamServerCallFailed("failed to get token"))
-
 		httpCacheMock := &cacheMock.HTTPProxyCache{}
 		httpCacheMock.On("Get", "uuid-1").
 			Return(&proxycache.Proxy{
@@ -350,7 +298,7 @@ func TestProxy(t *testing.T) {
 				},
 			}, true)
 
-		handler := New(nameResolver, serviceDefServiceMock, oauthClientMock, httpCacheMock, true, 10)
+		handler := New(nameResolver, serviceDefServiceMock, httpCacheMock, true, 10)
 
 		// when
 		handler.ServeHTTP(rr, req)
@@ -365,7 +313,6 @@ func TestProxy(t *testing.T) {
 
 		serviceDefServiceMock.AssertExpectations(t)
 		httpCacheMock.AssertExpectations(t)
-		oauthClientMock.AssertExpectations(t)
 	})
 
 	t.Run("should invalidate proxy and retry when 403 occurred", func(t *testing.T) {
@@ -401,7 +348,7 @@ func TestProxy(t *testing.T) {
 				Proxy: httputil.NewSingleHostReverseProxy(u),
 			})
 
-		handler := New(nameResolver, serviceDefServiceMock, nil, httpCacheMock, true, proxyTimeout)
+		handler := New(nameResolver, serviceDefServiceMock, httpCacheMock, true, proxyTimeout)
 		rr := httptest.NewRecorder()
 
 		// when

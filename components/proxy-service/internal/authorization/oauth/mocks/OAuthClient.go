@@ -55,3 +55,8 @@ func (_m *OAuthClient) InvalidateAndRetry(clientID string, clientSecret string, 
 
 	return r0, r1
 }
+
+// InvalidateTokenCache provides a mock function with given fields: clientID
+func (_m *OAuthClient) InvalidateTokenCache(clientID string) {
+	_m.Called(clientID)
+}

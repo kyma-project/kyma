@@ -1,4 +1,15 @@
-package proxy
+/*
+ * [y] hybris Platform
+ *
+ * Copyright (c) 2000-2018 hybris AG
+ * All rights reserved.
+ *
+ * This software is the confidential and proprietary information of hybris
+ * ("Confidential Information"). You shall not disclose such Confidential
+ * Information and shall use it only in accordance with the terms of the
+ * license agreement you entered into with hybris.
+ */
+package oauth
 
 import (
 	"context"
@@ -12,7 +23,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/tokencache"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/tokencache"
 )
 
 type oauthResponse struct {
@@ -25,6 +36,7 @@ type oauthResponse struct {
 type OAuthClient interface {
 	GetToken(clientID string, clientSecret string, authURL string) (string, apperrors.AppError)
 	InvalidateAndRetry(clientID string, clientSecret string, authURL string) (string, apperrors.AppError)
+	InvalidateTokenCache(clientID string)
 }
 
 type oauthClient struct {
@@ -66,6 +78,10 @@ func (oc *oauthClient) InvalidateAndRetry(clientID string, clientSecret string, 
 	oc.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
 	return "Bearer " + tokenResponse.AccessToken, nil
+}
+
+func (oc *oauthClient) InvalidateTokenCache(clientID string) {
+	oc.tokenCache.Remove(clientID)
 }
 
 func (oc *oauthClient) requestToken(clientID string, clientSecret string, authURL string) (*oauthResponse, apperrors.AppError) {

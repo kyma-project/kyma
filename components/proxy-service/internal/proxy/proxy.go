@@ -16,6 +16,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type OAuthClient interface {
+	GetToken(clientID string, clientSecret string, authURL string) (string, apperrors.AppError)
+	InvalidateAndRetry(clientID string, clientSecret string, authURL string) (string, apperrors.AppError)
+	InvalidateTokenCache(clientID string)
+}
+
 type proxy struct {
 	nameResolver      k8sconsts.NameResolver
 	serviceDefService metadata.ServiceDefinitionService
@@ -26,12 +32,10 @@ type proxy struct {
 }
 
 // New creates proxy for handling user's services calls
-func New(nameResolver k8sconsts.NameResolver, serviceDefService metadata.ServiceDefinitionService,
-	oauthClient OAuthClient, httpProxyCache proxycache.HTTPProxyCache, skipVerify bool, proxyTimeout int) http.Handler {
+func New(nameResolver k8sconsts.NameResolver, serviceDefService metadata.ServiceDefinitionService, httpProxyCache proxycache.HTTPProxyCache, skipVerify bool, proxyTimeout int) http.Handler {
 	return &proxy{
 		nameResolver:      nameResolver,
 		serviceDefService: serviceDefService,
-		oauthClient:       oauthClient,
 		httpProxyCache:    httpProxyCache,
 		skipVerify:        skipVerify,
 		proxyTimeout:      proxyTimeout,
@@ -152,7 +156,7 @@ func (p *proxy) invalidateAndAddCredentials(r *http.Request, oauthUrl, clientId,
 	log.Infof("OAuth token fetched. Adding Authorization header: %s", r.Header.Get("Authorization"))
 
 	return nil
-}
+}                                                                    
 
 func respondWithBody(w http.ResponseWriter, code int, body httperrors.ErrorResponse) {
 	w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
