@@ -37,7 +37,8 @@ func InitRemoteEnvironmentController(mgr manager.Manager, overridesData Override
 		return err
 	}
 
-	releaseManager := kymahelm.NewReleaseManager(tillerUrl, overrides, namespace)
+	helmClient := kymahelm.NewClient(tillerUrl)
+	releaseManager := kymahelm.NewReleaseManager(helmClient, overrides, namespace)
 
 	reClient, err := versioned.NewForConfig(k8sConfig)
 	if err != nil {

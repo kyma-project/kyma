@@ -10,8 +10,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	//"k8s.io/helm/pkg/proto/hapi/release"
-	//rls "k8s.io/helm/pkg/proto/hapi/services"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"testing"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
@@ -130,13 +128,6 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		namespacedName := types.NamespacedName{
 			Name: reName,
 		}
-		// TODO - use it in releasemanager tests
-		//listReleaseResponse := &rls.ListReleasesResponse{
-		//	Count: 1,
-		//	Releases: []*release.Release{
-		//		{Name: reName},
-		//	},
-		//}
 
 		managerClient := &mocks.ManagerClient{}
 		managerClient.On(

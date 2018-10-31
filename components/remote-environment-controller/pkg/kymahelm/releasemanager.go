@@ -23,9 +23,7 @@ type releaseManager struct {
 	namespace  string
 }
 
-func NewReleaseManager(tillerUrl string, overrides string, namespace string) ReleaseManager {
-	helmClient := NewClient(tillerUrl)
-
+func NewReleaseManager(helmClient HelmClient, overrides string, namespace string) ReleaseManager {
 	return &releaseManager{
 		helmClient: helmClient,
 		overrides:  overrides,
