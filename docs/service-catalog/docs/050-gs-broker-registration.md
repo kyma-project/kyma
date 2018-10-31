@@ -11,7 +11,7 @@ This Getting Started guide shows how to register a new broker in the Service Cat
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl) or [helm](https://github.com/helm/helm#install) installed
 * The `yaml` files for the broker that specify:
   * an application which implements the [Open Service Broker API](https://www.openservicebrokerapi.org/)
-  * Kubernetes service which enables the connection between a broker and an application
+  * a Kubernetes service which enables the connection between a broker and an application
   * broker registration file in which the kind of a broker is specified
 
 > **NOTE:** In case of the sample UPS Broker, find the application and service files [here](https://github.com/kubernetes-incubator/service-catalog/tree/master/charts/ups-broker/templates). Use [this](https://github.com/kubernetes-incubator/service-catalog/blob/master/contrib/examples/walkthrough/ups-broker.yaml) registration file.
