@@ -8,6 +8,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+	"time"
 )
 
 func main() {
@@ -26,7 +27,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	mgr, err := manager.New(cfg, manager.Options{})
+	syncPeriod := time.Second * time.Duration(options.syncPeriod)
+	mgrOpts := manager.Options{
+		SyncPeriod: &syncPeriod,
+	}
+
+	mgr, err := manager.New(cfg, mgrOpts)
 	if err != nil {
 		log.Fatal(err)
 	}

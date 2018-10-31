@@ -3,12 +3,14 @@ package kymahelm
 import (
 	"k8s.io/helm/pkg/helm"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
+	"k8s.io/helm/pkg/proto/hapi/release"
 )
 
 type HelmClient interface {
 	ListReleases() (*rls.ListReleasesResponse, error)
 	InstallReleaseFromChart(chartDir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error)
 	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
+	ReleaseStatus(rlsName string) (*rls.GetReleaseStatusResponse, error)
 }
 
 type helmClient struct {
@@ -22,7 +24,19 @@ func NewClient(host string) HelmClient {
 }
 
 func (hc *helmClient) ListReleases() (*rls.ListReleasesResponse, error) {
-	return hc.helm.ListReleases()
+	statuses := []release.Status_Code{
+		release.Status_DELETED,
+		release.Status_DELETING,
+		release.Status_DEPLOYED,
+		release.Status_FAILED,
+		release.Status_PENDING_INSTALL,
+		release.Status_PENDING_ROLLBACK,
+		release.Status_PENDING_UPGRADE,
+		release.Status_SUPERSEDED,
+		release.Status_UNKNOWN,
+	}
+
+	return hc.helm.ListReleases(helm.ReleaseListStatuses(statuses))
 }
 
 func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error) {
@@ -42,4 +56,8 @@ func (hc *helmClient) DeleteRelease(releaseName string) (*rls.UninstallReleaseRe
 		helm.DeletePurge(true),
 		helm.DeleteTimeout(3600),
 	)
+}
+
+func (hc *helmClient) ReleaseStatus(rlsName string) (*rls.GetReleaseStatusResponse, error) {
+	return hc.helm.ReleaseStatus(rlsName)
 }

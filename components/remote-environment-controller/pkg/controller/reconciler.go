@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 const (
@@ -52,52 +53,98 @@ func (r *remoteEnvironmentReconciler) Reconcile(request reconcile.Request) (reco
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Infof("Remote Environment %s deleted", request.Name)
-			r.deleteREChart(request.Name)
+			err = r.deleteREChart(request.Name)
+			if err != nil {
+				log.Errorf("Error while deleting release for %s RE: %s", request.Name, err.Error())
+				return reconcile.Result{}, err
+			}
+			log.Infof("Release %s successfully deleted", request.Name)
 			return reconcile.Result{}, nil
 		}
 		log.Errorf("Error getting %s Remote Environment: %s", request.Name, err.Error())
 		return reconcile.Result{}, err
 	}
 
-	err = r.ensureAccessLabel(instance)
-	if err != nil {
-		log.Errorf("Error while updating RE %s with access-label: %s", instance.Name, err.Error())
-		return reconcile.Result{}, err
-	}
+	r.ensureAccessLabel(instance)
 
-	releaseExist, err := r.checkReleaseExistence(request.Name)
+	releaseExist, err := r.checkReleaseExistence(instance.Name)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	if releaseExist {
-		// Handles cases: RE with chart exist on controller startup, RE is updated, full RE chart is installed
-		log.Infof("Helm chart for %s Remote Environment already exists", request.Name)
+	var status hapi_4.Status_Code
+	var description string
+
+	if !releaseExist {
+		status, description, err = r.installNewREChart(instance.Name)
+		if err != nil {
+			log.Errorf("Error installing release for %s RE", instance.Name)
+			return reconcile.Result{}, err
+		}
+		log.Info("Release for RE %s, installed successfully. Release status: %s", instance.Name, status)
 	} else {
-		r.installNewREChart(request.Name)
+		status, description, err = r.checkReleaseStatus(instance.Name)
+		if err != nil {
+			log.Errorf("Error checking release status for %s RE", instance.Name)
+			return reconcile.Result{}, err
+		}
+		log.Info("Release status for %s RE: %s", instance.Name, status)
+	}
+
+	err = r.updateREStatus(instance, status, description)
+	if err != nil {
+		log.Errorf("Error while updating status of %s Remote Environment", instance.Name)
+		return reconcile.Result{}, err
+	}
+
+	// TODO - consider updating with retries
+	_, err = r.reClient.Update(instance)
+	if err != nil {
+		log.Errorf("Error while updating RE %s", instance.Name, err.Error())
+		return reconcile.Result{}, err
 	}
 
 	return reconcile.Result{}, nil
 }
 
-// TODO: consider returning error to requeue the request
-// Note that reoccurring error may keep requeuing the same request
-func (r *remoteEnvironmentReconciler) installNewREChart(name string) {
-	_, err := r.helmClient.InstallReleaseFromChart(reChartDirectory, r.namespace, name, r.overrides)
+func (r *remoteEnvironmentReconciler) checkReleaseStatus(name string) (hapi_4.Status_Code, string, error) {
+	status, err := r.helmClient.ReleaseStatus(name)
 	if err != nil {
-		log.Errorf("Error while installing release for %s RE: %s", name, err.Error())
-	} else {
-		log.Infof("New Helm chart for %s Remote Environment installed", name)
+		return hapi_4.Status_UNKNOWN, "", err
 	}
+
+	return status.Info.Status.Code, status.Info.Description, nil
 }
 
-func (r *remoteEnvironmentReconciler) deleteREChart(name string) {
+func (r *remoteEnvironmentReconciler) updateREStatus(remoteEnv *v1alpha1.RemoteEnvironment, status hapi_4.Status_Code, description string) (error){
+	status, message, err := r.checkReleaseStatus(remoteEnv.Name)
+	if err != nil {
+		log.Errorf("Error while checking helm release status for RE %s", remoteEnv.Name)
+		return err
+	}
+
+	log.Infof("Status: %s, Message: %s", status, message)
+	// TODO - set Status and Conditions after updating the RE
+
+	return nil
+}
+
+func (r *remoteEnvironmentReconciler) installNewREChart(name string) (hapi_4.Status_Code, string, error) {
+	installResponse, err := r.helmClient.InstallReleaseFromChart(reChartDirectory, r.namespace, name, r.overrides)
+	if err != nil {
+		return hapi_4.Status_FAILED, "", err
+	}
+
+	return installResponse.Release.Info.Status.Code, installResponse.Release.Info.Description, nil
+}
+
+func (r *remoteEnvironmentReconciler) deleteREChart(name string) error {
 	_, err := r.helmClient.DeleteRelease(name)
 	if err != nil {
-		log.Errorf("Error while deleting release for %s RE: %s", name, err.Error())
-	} else {
-		log.Infof("Release %s successfully deleted", name)
+		return err
 	}
+
+	return nil
 }
 
 func (r *remoteEnvironmentReconciler) checkReleaseExistence(name string) (bool, error) {
@@ -117,7 +164,7 @@ func (r *remoteEnvironmentReconciler) checkReleaseExistence(name string) (bool, 
 	return false, nil
 }
 
-func (r *remoteEnvironmentReconciler) ensureAccessLabel(remoteEnv *v1alpha1.RemoteEnvironment) error {
+func (r *remoteEnvironmentReconciler) ensureAccessLabel(remoteEnv *v1alpha1.RemoteEnvironment) {
 	if remoteEnv.Spec.AccessLabel != remoteEnv.Name {
 		log.Infof("Invalid access-label, setting access-label to %s", remoteEnv.Name)
 
@@ -125,10 +172,5 @@ func (r *remoteEnvironmentReconciler) ensureAccessLabel(remoteEnv *v1alpha1.Remo
 		if remoteEnv.Spec.Services == nil {
 			remoteEnv.Spec.Services = []v1alpha1.Service{}
 		}
-
-		_, err := r.reClient.Update(remoteEnv)
-		return err
 	}
-
-	return nil
 }
