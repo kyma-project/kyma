@@ -40,10 +40,6 @@ data:
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
   service-catalog.etcd-stateful.replicaCount: "3"
-  minio.accessKey: "admin"
-  minio.secretKey: "topSecretKey"
-  minio.resources.limits.memory: 128Mi
-  minio.resources.limits.cpu: 250m
   acceptanceTest.remoteEnvironment.disabled: "true"
 ---
 apiVersion: v1
@@ -58,6 +54,10 @@ data:
   console.cluster.headerLogoUrl: "assets/logo.svg"
   console.cluster.headerTitle: ""
   console.cluster.faviconUrl: "favicon.ico"
+  minio.accessKey: "admin"
+  minio.secretKey: "topSecretKey"
+  minio.resources.limits.memory: 128Mi
+  minio.resources.limits.cpu: 250m
 ---
 apiVersion: v1
 kind: ConfigMap
