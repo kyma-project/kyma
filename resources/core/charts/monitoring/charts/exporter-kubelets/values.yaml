@@ -1,5 +1,5 @@
 # Set to false for GKE
-https: true
+https: false
 
 insecureSkipVerify: true
 
