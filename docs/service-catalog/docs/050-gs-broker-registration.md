@@ -49,8 +49,6 @@ kubectl apply -f broker-service.yaml -n ups-broker
 kubectl apply -f ups-broker.yaml -n ups-broker
 ```
 
->**NOTE:** In case of a ClusterServiceBroker, do not specify the Namespace and skip the `-n {namespace}` part of the command.
-
 ### Register using the Console
 
 1. Go to the Kyma Console and choose the Environment.
