@@ -19,4 +19,4 @@
 .project
 .idea/
 *.tmproj
-tests/kubeless-test-client
+charts/kubeless/templates/tests/
