@@ -72,10 +72,10 @@ global:
     version: 6e0a7fe2
   ui_api_layer:
     dir: develop/
-    version: 60fd580b
+    version: a84b8f6e
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: 84020ead
+    version: a84b8f6e
 
 test:
   acceptance:
