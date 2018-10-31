@@ -20,6 +20,6 @@ spec:
     - name: GATEWAY_URL
       value: https://gateway.{{ .Values.global.domainName }}
     - name: SKIP_SSL_VERIFY
-      value: {{ .Values.tests.skipSslVerify }}
+      value: "{{ .Values.tests.skipSslVerify }}"
 
   restartPolicy: Never
