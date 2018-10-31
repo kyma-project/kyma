@@ -266,6 +266,18 @@ func connectUsingK8sService(namespace, name string) {
 	return
 }
 
+func printDebugLogsForEvents() {
+	controllerNamespace := os.Getenv("KUBELESS_NAMESPACE")
+
+	eventsPodCmd := exec.Command("kubectl", "-n", controllerNamespace, "logs", "-l", "app=push", "-c", "push")
+
+	eventsPodStdErr, err := eventsPodCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching logs for core-push: %v\n", string(eventsPodStdErr))
+	}
+	log.Printf("Event logs from 'Push' podare:\n%s\n", string(eventsPodStdErr))
+}
+
 func deleteFun(namespace, name string) {
 	cmd := exec.Command("kubeless", "-n", namespace, "function", "delete", name)
 	stdoutStderr, err := cmd.CombinedOutput()
@@ -406,10 +418,6 @@ func publishEvent(testID string) {
 	if err != nil {
 		log.Fatal("Unable to publish event:\n", string(stdoutStderr))
 	}
-}
-
-func printDebugLogsForEvents() {
-
 }
 
 func ensureCorrectLog(namespace, funName string, pattern *regexp.Regexp, match string, serviceBinding bool) {
@@ -565,6 +573,7 @@ func main() {
 	go func() {
 		log.Println("Deploying test-event function")
 		deployFun("kubeless-test", "test-event", "nodejs6", "event.js", "event.handler")
+		time.Sleep(10 * time.Second) // Sometimes subsctiptions take long time. So lambda might not get the events
 		log.Println("Publishing event to function test-event")
 		publishEvent(testID)
 		log.Println("Verifying correct event processing for test-event")
