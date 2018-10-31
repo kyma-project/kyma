@@ -39,6 +39,7 @@ data:
   global.alertTools.credentials.victorOps.apikey: ""
   nginx-ingress.controller.service.loadBalancerIP: ""
   cluster-users.users.adminGroup: ""
+  connector-service.tests.skipSslVerify: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
