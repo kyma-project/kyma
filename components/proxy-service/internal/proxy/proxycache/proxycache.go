@@ -28,18 +28,20 @@ type Credentials struct {
 	Basic *BasicAuthCredentials
 }
 
-type Proxy struct {
-	Proxy                 *httputil.ReverseProxy
-	AuthorizationStrategy *AuthorizationStrategy
-	Credentials           *Credentials
-}
-
 type AuthorizationStrategy interface {
 	Setup(proxy *httputil.ReverseProxy, r *http.Request) apperrors.AppError
+	Reset()
 }
 
 type RetryStrategy interface {
 	Do(r *http.Response) apperrors.AppError
+}
+
+
+type Proxy struct {
+	Proxy                 *httputil.ReverseProxy
+	AuthorizationStrategy AuthorizationStrategy
+	Credentials           *Credentials
 }
 
 type HTTPProxyCache interface {
