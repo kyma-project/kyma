@@ -9,7 +9,7 @@ This Getting Started guide shows how to register a new broker in the Service Cat
 
 * [Service Catalog](https://github.com/kubernetes-incubator/service-catalog/releases) running in version `0.1.28` or higher
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl) or [helm](https://github.com/helm/helm#install) installed
-* broker's `yaml` files that specify:
+* The `yaml` files for the broker that specify:
   * application which implements the [Open Service Broker API](https://www.openservicebrokerapi.org/)
   * Kubernetes service which enables the connection between a broker and an application
   * broker registration file in which the kind of a broker is specified
