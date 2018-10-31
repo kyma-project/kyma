@@ -18,7 +18,7 @@ This Getting Started guide shows how to register a new broker in the Service Cat
 
 ## Steps
 
-You can register your broker in the Service Catalog either by installing a Helm chart or by using kubectl commands. You can also register it directly using the Kyma Console.
+You can register your broker in the Service Catalog either by installing a Helm chart or by using kubectl commands.
 
 ### Register using Helm chart
 
@@ -48,14 +48,6 @@ kubectl apply -f broker-service.yaml -n ups-broker
 kubectl apply -f ups-broker.yaml -n ups-broker
 ```
 
-### Register using the Console
-
-1. Go to the Kyma Console and choose the Environment.
-2. Click the **Deploy new resource to the environment** button.
-3. Select broker's `yaml` files and click **Upload**.
-
->**NOTE:** This method applies only to ServiceBrokers. You cannot register ClusterServiceBrokers using the Kyma Console.
-
 ### Check the status
 
 To check if your broker's registration is successful, run:
@@ -77,3 +69,14 @@ If the broker is registered successfully, the output looks as follows:
 ```
 
 After you successfully register your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches services from this broker and creates ServiceClasses or ClusterServiceClasses from them.
+
+To check the created ClusterServiceClasses, run this command:
+```
+kubectl get clusterserviceclasses
+```
+
+In case of ServiceClasses, the command looks as follows:
+
+```
+kubectl get serviceclasses -n {namespace}
+```
