@@ -51,7 +51,7 @@ kubectl apply -f ups-broker.yaml -n ups-broker
 ### Register using the Console
 
 1. Go to the Kyma Console and choose the Environment.
-2. Click the **Deploy new resource to the environment** button.
+2. Click **Deploy new resource to the environment**.
 3. Select broker's `yaml` files and click **Upload**.
 
 >**NOTE:** This method applies only to ServiceBrokers. You cannot register ClusterServiceBrokers using the Kyma Console.
