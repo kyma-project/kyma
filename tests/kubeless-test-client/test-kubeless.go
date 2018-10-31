@@ -179,16 +179,27 @@ func printLogsFunctionPodContainers(namespace, name string) {
 
 	functionContainerLog, _ := functionContainerLogCmd.CombinedOutput()
 	log.Printf("Logs from %s container in pod %s:\n%s\n", name, string(functionPodName), string(functionContainerLog))
+
+	envoyLogsCmd := exec.Command("kubectl", "-n", namespace, "log", "-l", string(functionPodName), "-c", "istio-proxy")
+
+	envoyLogsCmdStdErr, _ := envoyLogsCmd.CombinedOutput()
+	log.Printf("Envoy Logs are:\n%s\n", string(envoyLogsCmdStdErr))
 }
 
 func printDebugLogsAPIServiceFailed(namespace, name string) {
 	functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name)
-
 	functionPodsStdOutStdErr, err := functionPodsCmd.CombinedOutput()
 	if err != nil {
 		log.Fatalf("Error while fetching pods for function: %v\n", err)
 	}
 	log.Printf("Function pods status:\n%s\n", string(functionPodsStdOutStdErr))
+
+	functionSvcCmd := exec.Command("kubectl", "-n", namespace, "get", "svc", "-l", "function="+name)
+	functionSvcCmdStdOutStdErr, err := functionSvcCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching service for function: %v\n", err)
+	}
+	log.Printf("Function service status:\n%s\n", string(functionSvcCmdStdOutStdErr))
 
 	apiListCmd := exec.Command("kubectl", "-n", namespace, "get", "api", "-l", "function="+name)
 	apiListStdOutErr, err := apiListCmd.CombinedOutput()
@@ -212,7 +223,6 @@ func printDebugLogsAPIServiceFailed(namespace, name string) {
 		log.Fatalf("Error while fetching logs for API Controller: %v\n", string(apiControllerLogsCmdOutErr))
 	}
 	log.Printf("Logs from API Controller:\n%s\n", string(apiControllerLogsCmdOutErr))
-
 }
 
 func printDebugLogsSvcBindingUsageFailed(namespace, name string) {
@@ -241,6 +251,19 @@ func printDebugLogsSvcBindingUsageFailed(namespace, name string) {
 	}
 	log.Printf("Logs from bindingusagecontroller:\n%s\n", string(svcBindingUsageControllerLogsCmdOutErr))
 
+}
+
+func connectUsingK8sService(namespace, name string) {
+	log.Printf("[%v] Trying to curl using local kubernetes service", name)
+	url := "http://" + name + "." + namespace + ":8080"
+	cmd := exec.Command("curl", "-v", url)
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("[%v] Unable to curl to function using internal kubernetes service: %v", name, string(stdoutStderr))
+		return
+	}
+	log.Printf("[%v] Result of curl request is: %v", name, string(stdoutStderr))
+	return
 }
 
 func deleteFun(namespace, name string) {
@@ -312,7 +335,11 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 			select {
 			case <-timeout:
 				log.Printf("[%v] Timeout: Check if Virtual Service has been created", testName)
+
 				printDebugLogsAPIServiceFailed(namespace, testName)
+				connectUsingK8sService(namespace, testName)
+				printLogsFunctionPodContainers(namespace, testName)
+
 				cmd := exec.Command("kubectl", "-n", namespace, "get", "virtualservices.networking.istio.io", "-l", "apiName="+testName)
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
@@ -350,6 +377,13 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 					}
 					log.Printf("[%v] Name of the Failed Pod is: %v", testName, string(functionPodName))
 					log.Fatalf("[%v] Response is not equal to expected output: %v != %v", testName, string(bodyBytes), expectedOutput)
+				} else {
+					log.Printf("[%v] Tick: Response code is: %v", testName, resp.StatusCode)
+					bodyBytes, err := ioutil.ReadAll(resp.Body)
+					if err != nil {
+						log.Printf("[%v] Tick: Unable to get response: %v", testName, err)
+					}
+					log.Printf("[%v] Tick: Response body is: %v", testName, string(bodyBytes))
 				}
 			}
 		}
