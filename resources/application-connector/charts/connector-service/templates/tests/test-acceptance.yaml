@@ -1,4 +1,4 @@
-{{ if not .Values.global.isLocalEnv }}
+{{ if (eq .Values.global.isLocalEnv false) }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -21,7 +21,6 @@ spec:
     - name: GATEWAY_URL
       value: https://gateway.{{ .Values.global.domainName }}
     - name: SKIP_SSL_VERIFY
-      value: "{{ .Values.global.isLocalEnv }}"
-
+      value: true
   restartPolicy: Never
 {{ end }}
