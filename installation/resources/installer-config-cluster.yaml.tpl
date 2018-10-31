@@ -43,6 +43,7 @@ data:
   minio.accessKey: "admin"
   minio.secretKey: "topSecretKey"
   minio.resources.limits.memory: 128Mi
+  minio.resources.limits.cpu: 250m
   acceptanceTest.remoteEnvironment.disabled: "true"
 ---
 apiVersion: v1
