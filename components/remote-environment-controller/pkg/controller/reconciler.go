@@ -12,12 +12,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-const (
-	reChartDirectory = "remote-environments"
-)
-
-type ManagerClient interface {
+type RemoteEnvironmentManagerClient interface {
 	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
+	Update(ctx context.Context, obj runtime.Object) error
 }
 
 type RemoteEnvironmentClient interface {
@@ -29,36 +26,23 @@ type RemoteEnvironmentReconciler interface {
 }
 
 type remoteEnvironmentReconciler struct {
-	mgrClient      ManagerClient
+	reMgrClient    RemoteEnvironmentManagerClient
 	releaseManager kymahelm.ReleaseManager
-	reClient       RemoteEnvironmentClient
 }
 
-func NewReconciler(mgrClient ManagerClient, releaseManager kymahelm.ReleaseManager, reClient RemoteEnvironmentClient) RemoteEnvironmentReconciler {
+func NewReconciler(reMgrClient RemoteEnvironmentManagerClient, releaseManager kymahelm.ReleaseManager) RemoteEnvironmentReconciler {
 	return &remoteEnvironmentReconciler{
-		mgrClient: mgrClient,
+		reMgrClient:    reMgrClient,
 		releaseManager: releaseManager,
-		reClient:  reClient,
 	}
 }
 
 func (r *remoteEnvironmentReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	instance := &v1alpha1.RemoteEnvironment{}
 
-	err := r.mgrClient.Get(context.Background(), request.NamespacedName, instance)
+	err := r.reMgrClient.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Infof("Remote Environment %s deleted", request.Name)
-			err = r.releaseManager.DeleteREChart(request.Name)
-			if err != nil {
-				log.Errorf("Error while deleting release for %s RE: %s", request.Name, err.Error())
-				return reconcile.Result{}, err
-			}
-			log.Infof("Release %s successfully deleted", request.Name)
-			return reconcile.Result{}, nil
-		}
-		log.Errorf("Error getting %s Remote Environment: %s", request.Name, err.Error())
-		return reconcile.Result{}, err
+		return r.handleErrorWhileGettingInstance(err, request)
 	}
 
 	status, description, err := r.installOrGetStatus(instance)
@@ -66,22 +50,28 @@ func (r *remoteEnvironmentReconciler) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, err
 	}
 
-	r.ensureAccessLabel(instance)
-
-	err = r.updateREStatus(instance, status, description)
-	if err != nil {
-		log.Errorf("Error while updating status of %s Remote Environment", instance.Name)
-		return reconcile.Result{}, err
-	}
+	r.updateRemoteEnvInstance(instance, status, description)
 
 	// TODO - consider updating with retries
-	_, err = r.reClient.Update(instance)
+	err = r.reMgrClient.Update(context.Background(), instance)
 	if err != nil {
-		log.Errorf("Error while updating RE %s: %s", instance.Name, err.Error())
-		return reconcile.Result{}, err
+		return reconcile.Result{}, logAndError(err, "Error while updating RE %s: %s", instance.Name, err.Error())
 	}
 
 	return reconcile.Result{}, nil
+}
+
+func (r *remoteEnvironmentReconciler) handleErrorWhileGettingInstance(err error, request reconcile.Request) (reconcile.Result, error) {
+	if errors.IsNotFound(err) {
+		log.Infof("Remote Environment %s deleted", request.Name)
+		err = r.releaseManager.DeleteREChart(request.Name)
+		if err != nil {
+			return reconcile.Result{}, logAndError(err, "Error while deleting release for %s RE: %s", request.Name, err.Error())
+		}
+		log.Infof("Release %s successfully deleted", request.Name)
+		return reconcile.Result{}, nil
+	}
+	return reconcile.Result{}, logAndError(err, "Error getting %s Remote Environment: %s", request.Name, err.Error())
 }
 
 // Installs release if it does not exist or returns its status if it does
@@ -95,17 +85,16 @@ func (r *remoteEnvironmentReconciler) installOrGetStatus(remoteEnv *v1alpha1.Rem
 	var description string
 
 	if !releaseExist {
+		log.Infof("Installing release for %s Remote Environment", remoteEnv.Name)
 		status, description, err = r.releaseManager.InstallNewREChart(remoteEnv.Name)
 		if err != nil {
-			log.Errorf("Error installing release for %s RE", remoteEnv.Name)
-			return hapi_4.Status_FAILED, "", err
+			return hapi_4.Status_FAILED, "", logAndError(err, "Error installing release for %s RE", remoteEnv.Name)
 		}
 		log.Infof("Release for RE %s, installed successfully. Release status: %s", remoteEnv.Name, status)
 	} else {
 		status, description, err = r.releaseManager.CheckReleaseStatus(remoteEnv.Name)
 		if err != nil {
-			log.Errorf("Error checking release status for %s RE", remoteEnv.Name)
-			return hapi_4.Status_FAILED, "", err
+			return hapi_4.Status_FAILED, "", logAndError(err, "Error checking release status for %s RE", remoteEnv.Name)
 		}
 		log.Infof("Release status for %s RE: %s", remoteEnv.Name, status)
 	}
@@ -113,20 +102,32 @@ func (r *remoteEnvironmentReconciler) installOrGetStatus(remoteEnv *v1alpha1.Rem
 	return status, description, nil
 }
 
-func (r *remoteEnvironmentReconciler) updateREStatus(remoteEnv *v1alpha1.RemoteEnvironment, status hapi_4.Status_Code, description string) error {
-	log.Infof("Updating status. Status: %s, Message: %s", status, description)
-	// TODO - set Status and Conditions after updating the RE
+func (r *remoteEnvironmentReconciler) updateRemoteEnvInstance(remoteEnv *v1alpha1.RemoteEnvironment, status hapi_4.Status_Code, description string) {
+	r.ensureAccessLabel(remoteEnv)
+	r.updateREStatus(remoteEnv, status, description)
 
-	return nil
+	if remoteEnv.Spec.Services == nil {
+		remoteEnv.Spec.Services = []v1alpha1.Service{}
+	}
+}
+
+func (r *remoteEnvironmentReconciler) updateREStatus(remoteEnv *v1alpha1.RemoteEnvironment, status hapi_4.Status_Code, description string) {
+	installationStatus := v1alpha1.InstallationStatus{
+		Status:      status.String(),
+		Description: description,
+	}
+
+	remoteEnv.Status.InstallationStatus = installationStatus
 }
 
 func (r *remoteEnvironmentReconciler) ensureAccessLabel(remoteEnv *v1alpha1.RemoteEnvironment) {
 	if remoteEnv.Spec.AccessLabel != remoteEnv.Name {
 		log.Infof("Invalid access-label, setting access-label to %s", remoteEnv.Name)
-
 		remoteEnv.Spec.AccessLabel = remoteEnv.Name
-		if remoteEnv.Spec.Services == nil {
-			remoteEnv.Spec.Services = []v1alpha1.Service{}
-		}
 	}
+}
+
+func logAndError(err error, format string, arg ...interface{}) error {
+	log.Errorf(format, arg...)
+	return err
 }

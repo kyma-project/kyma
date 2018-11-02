@@ -10,14 +10,13 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"testing"
-	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
-
 )
 
 const (
-	reName            = "re-name"
+	reName = "re-name"
 )
 
 func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {

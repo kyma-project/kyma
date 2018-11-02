@@ -8,8 +8,6 @@ const (
 	reChartDirectory = "remote-environments"
 )
 
-// TODO - add unit tests
-
 type ReleaseManager interface {
 	InstallNewREChart(name string) (hapi_4.Status_Code, string, error)
 	DeleteREChart(name string) error

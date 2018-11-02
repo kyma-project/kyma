@@ -237,7 +237,8 @@ version = "v2.10.0"
 
 # TODO - change revision after merging PR
 [[constraint]]
-  name = "github.com/Szymongib/kyma"
+  name = "github.com/kyma-project/kyma"
+  source = "github.com/Szymongib/kyma"
   revision = "ce29e798b3483b84bf862df93b361c92a96a7066"
 
 # For dependency below: Refer to issue https://github.com/golang/dep/issues/1799

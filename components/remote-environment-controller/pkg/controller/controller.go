@@ -2,9 +2,7 @@ package controller
 
 import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm"
-	restclient "k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -32,20 +30,10 @@ func InitRemoteEnvironmentController(mgr manager.Manager, overridesData Override
 		return err
 	}
 
-	k8sConfig, err := restclient.InClusterConfig()
-	if err != nil {
-		return err
-	}
-
 	helmClient := kymahelm.NewClient(tillerUrl)
 	releaseManager := kymahelm.NewReleaseManager(helmClient, overrides, namespace)
 
-	reClient, err := versioned.NewForConfig(k8sConfig)
-	if err != nil {
-		return err
-	}
-
-	reconciler := NewReconciler(mgr.GetClient(), releaseManager, reClient.ApplicationconnectorV1alpha1().RemoteEnvironments())
+	reconciler := NewReconciler(mgr.GetClient(), releaseManager)
 
 	return startRemoteEnvController(appName, mgr, reconciler)
 }

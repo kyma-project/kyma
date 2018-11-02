@@ -31,4 +31,4 @@ echo "------------------------"
 
 kubectl -n kyma-integration delete po -l control-plane=remote-environment-controller --now --wait=false
 
-$CURRENT_DIR/../../../tests/remote-environment-controller-tests/scripts/run-local-tests.sh
+ # $CURRENT_DIR/../../../tests/remote-environment-controller-tests/scripts/run-local-tests.sh

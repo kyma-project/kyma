@@ -1,18 +1,17 @@
 package kymahelm
 
 import (
-	"testing"
-	"k8s.io/helm/pkg/proto/hapi/release"
-	"github.com/stretchr/testify/assert"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 	helmmocks "github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm/mocks"
 	"github.com/pkg/errors"
- hapi_release5 "k8s.io/helm/pkg/proto/hapi/release"
-
+	"github.com/stretchr/testify/assert"
+	"k8s.io/helm/pkg/proto/hapi/release"
+	hapi_release5 "k8s.io/helm/pkg/proto/hapi/release"
+	rls "k8s.io/helm/pkg/proto/hapi/services"
+	"testing"
 )
 
 const (
-	reName = "default-re"
+	reName    = "default-re"
 	namespace = "integration"
 )
 
@@ -24,9 +23,9 @@ func TestReleaseManager_InstallNewREChart(t *testing.T) {
 			Release: &hapi_release5.Release{
 				Info: &hapi_release5.Info{
 					Status: &hapi_release5.Status{
-						Code:hapi_release5.Status_DEPLOYED,
+						Code: hapi_release5.Status_DEPLOYED,
 					},
-					Description:"Installed",
+					Description: "Installed",
 				},
 			},
 		}
@@ -161,9 +160,9 @@ func TestReleaseManager_CheckReleaseStatus(t *testing.T) {
 		getResponse := &rls.GetReleaseStatusResponse{
 			Info: &hapi_release5.Info{
 				Status: &hapi_release5.Status{
-					Code:hapi_release5.Status_DEPLOYED,
+					Code: hapi_release5.Status_DEPLOYED,
 				},
-				Description:"Installed",
+				Description: "Installed",
 			},
 		}
 
@@ -185,7 +184,7 @@ func TestReleaseManager_CheckReleaseStatus(t *testing.T) {
 	t.Run("should return error when failed to get release status", func(t *testing.T) {
 		// given
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("ReleaseStatus",reName).Return(nil, errors.New("Error"))
+		helmClient.On("ReleaseStatus", reName).Return(nil, errors.New("Error"))
 
 		releaseManager := NewReleaseManager(helmClient, "overrides", namespace)
 
