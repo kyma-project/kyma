@@ -223,14 +223,10 @@
   version = "1.1.5"
 
 [[projects]]
-  digest = "1:a25845d3ba3050aa54d733fa3adbf9eb95a47edaccae39fb74f605ea6e5d5d9c"
+  branch = "add-status-to-re"
+  digest = "1:2cfc8f96c4205d60b1be8ccdd6941d9b6cf5f7ff3604f666faaf1a6ffdd7b130"
   name = "github.com/kyma-project/kyma"
-  packages = [
-    "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
-    "components/remote-environment-broker/pkg/client/clientset/versioned",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-  ]
+  packages = ["components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"]
   pruneopts = "NUT"
   revision = "ce29e798b3483b84bf862df93b361c92a96a7066"
   source = "github.com/Szymongib/kyma"
@@ -990,7 +986,6 @@
   input-imports = [
     "github.com/emicklei/go-restful",
     "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
@@ -1003,7 +998,6 @@
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
-    "k8s.io/client-go/rest",
     "k8s.io/code-generator/cmd/deepcopy-gen",
     "k8s.io/helm/pkg/helm",
     "k8s.io/helm/pkg/proto/hapi/release",

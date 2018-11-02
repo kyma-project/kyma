@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/util/retry"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -46,10 +47,7 @@ func (r *remoteEnvironmentReconciler) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, err
 	}
 
-	r.updateRemoteEnvDefinition(instance, status, description)
-
-	// TODO - consider updating with retries
-	err = r.reMgrClient.Update(context.Background(), instance)
+	err = r.updateRemoteEnv(instance, status, description)
 	if err != nil {
 		return reconcile.Result{}, logAndError(err, "Error while updating RE %s: %s", instance.Name, err.Error())
 	}
@@ -81,7 +79,7 @@ func (r *remoteEnvironmentReconciler) installOrGetStatus(remoteEnv *v1alpha1.Rem
 	var description string
 
 	if !releaseExist {
-		log.Infof("Installing release for %s Remote Environment", remoteEnv.Name)
+		log.Infof("Installing release for %s Remote Environment...", remoteEnv.Name)
 		status, description, err = r.releaseManager.InstallNewREChart(remoteEnv.Name)
 		if err != nil {
 			return hapi_4.Status_FAILED, "", logAndError(err, "Error installing release for %s RE", remoteEnv.Name)
@@ -98,13 +96,22 @@ func (r *remoteEnvironmentReconciler) installOrGetStatus(remoteEnv *v1alpha1.Rem
 	return status, description, nil
 }
 
-func (r *remoteEnvironmentReconciler) updateRemoteEnvDefinition(remoteEnv *v1alpha1.RemoteEnvironment, status hapi_4.Status_Code, description string) {
+func (r *remoteEnvironmentReconciler) updateRemoteEnv(remoteEnv *v1alpha1.RemoteEnvironment, status hapi_4.Status_Code, description string) error {
 	r.ensureAccessLabel(remoteEnv)
 	r.updateREStatus(remoteEnv, status, description)
 
 	if remoteEnv.Spec.Services == nil {
 		remoteEnv.Spec.Services = []v1alpha1.Service{}
 	}
+
+	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		return r.reMgrClient.Update(context.Background(), remoteEnv)
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *remoteEnvironmentReconciler) updateREStatus(remoteEnv *v1alpha1.RemoteEnvironment, status hapi_4.Status_Code, description string) {
