@@ -13,7 +13,7 @@ This Getting Started guide shows how to register a new broker in the Service Cat
 ## Steps
 
 1. Clone the [`service-catalog`](https://github.com/kubernetes-incubator/service-catalog) repository to your local machine:
-```console
+```
 git clone https://github.com/kubernetes-incubator/service-catalog.git
 ```
 
