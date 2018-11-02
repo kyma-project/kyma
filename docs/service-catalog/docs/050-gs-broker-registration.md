@@ -28,39 +28,22 @@ After you successfully register your ServiceBroker or ClusterServiceBroker, the 
 
 4. Check the status of the broker:
 ```
-kubectl get clusterservicebrokers ups-broker -o yaml
+kubectl get clusterservicebrokers ups-broker -o jsonpath="{.status.conditions}"
 ```
 >**NOTE:** In case of ServiceBrokers, run:
 >```
->kubectl get servicebrokers {name} -n {namespace} -o yaml
+>kubectl get servicebrokers {name} -n {namespace} -o jsonpath="{.status.conditions}"
 >```
 
   The output looks as follows:
 ```console
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ClusterServiceBroker
-metadata:
-  creationTimestamp: 2018-10-09T08:25:25Z
-  finalizers:
-  - kubernetes-incubator/service-catalog
-  generation: 1
-  name: ups-broker
-  resourceVersion: "10"
-  selfLink: /apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers/ups-broker
-  uid: deefbd1e-cb9c-11e8-8372-fade7e9a18e5
-spec:
-  relistBehavior: Duration
-  relistRequests: 0
-  url: http://ups-broker-ups-broker.ups-broker.svc.cluster.local
-status:
-  conditions:
-  - lastTransitionTime: 2018-10-09T08:25:25Z
-    message: Successfully fetched catalog entries from broker.
-    reason: FetchedCatalog
-    status: "True"
-    type: Ready
-  lastCatalogRetrievalTime: 2018-10-09T08:25:25Z
-  reconciledGeneration: 1
+{
+    "lastTransitionTime": "2018-10-26T12:03:32Z",
+    "message": "Successfully fetched catalog entries from broker.",
+    "reason": "FetchedCatalog",
+    "status": "True",
+    "type": "Ready"
+}
   ```
 
 5. View ClusterServiceClasses that this broker provides:
