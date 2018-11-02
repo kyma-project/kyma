@@ -27,7 +27,7 @@ To generate a `CHANGELOG.md` file for all released Kyma versions, follow these s
 1. Create a `CHANGELOG.md` file under the specified absolute path to the repository. Use this command:
 
 ```bash
-docker run --rm -v {absolutePathToRepository}:/repository -w /repository -e LATEST_VERSION={applicationVersion} -e GITHUB_AUTH={githubToken} -e SSH_FILE={sshFilePath} changelog-generator sh /app/generate-full-changelog.sh --configure-git
+docker run --rm -v {absolutePathToRepository}:/repository -w /repository -e LATEST_VERSION={applicationVersion} -e GITHUB_AUTH={githubToken} -e SSH_FILE={sshFilePath} -e CONFIG_FILE={configFilePath} -e SKIP_REMOVING_LATEST=true changelog-generator sh /app/generate-full-changelog.sh --configure-git
 ```
 
 Replace values in curly braces with proper details, where:
@@ -35,6 +35,9 @@ Replace values in curly braces with proper details, where:
 - `{applicationVersion}` is the currently released application version.
 - `{githubToken}` is the GitHub API token with the read-only access to the repository.
 - `{sshFilePath}` is the path to the SSH file used for Git to authenticate with the repository.
+- `{configFilePath}` is the path to file used by `lerna-changelog` to repository configuration
+
+Add `SKIP_REMOVING_LATEST=true` variable if you want skip removing 'latest' tag functionality.
 
 2. Commit and push the `CHANGELOG.md` file. Use this command:
 
@@ -53,14 +56,18 @@ Replace values in curly braces with proper details, where:
 To generate a changelog for a single release that contains merged pull requests for the latest Kyma version, run this command:
 
 ```bash
-docker run --rm -v /path/to/repository/:/repository -w /repository -e LATEST_VERSION={applicationVersion} -e GITHUB_AUTH={githubToken} -e SSH_FILE={sshFile} changelog-generator sh /app/generate-release-changelog.sh --configure-git
+docker run --rm -v /path/to/repository/:/repository -w /repository -e FROM_TAG={previousTag} -e LATEST_VERSION={applicationVersion} -e GITHUB_AUTH={githubToken} -e SSH_FILE={sshFile} -e CONFIG_FILE={configFilePath} changelog-generator sh /app/generate-release-changelog.sh --configure-git
 ```
 
 Replace values in curly braces with proper details, where:
 - `{absolutePathToRepository}` is the absolute path to the repository.
+- `{previousTag}` optionally, one tag before last. If provided changelog will be generated from `{previousTag}` to `{applicationVersion}`
 - `{applicationVersion}` is the currently released application version.
 - `{githubToken}` is the GitHub API token with the read-only access to the repository.
 - `{sshFilePath}` is the path to the SSH file used for Git to authenticate with the repository.
+- `{configFilePath}` is the path to file used by `lerna-changelog` to repository configuration
+
+Add `SKIP_REMOVING_LATEST=true` variable if you want skip removing 'latest' tag functionality.
 
 The script generates a new `./.changelog/release-changelog.md` file under the specified absolute path to the repository.
 
