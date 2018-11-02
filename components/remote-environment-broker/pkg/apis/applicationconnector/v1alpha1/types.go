@@ -31,7 +31,14 @@ type RemoteEnvironment struct {
 }
 
 type REStatus struct {
-	Conditions []ReCondition `json:"conditions"`
+	// Represents the status of Remote Environment release installation
+	InstallationStatus InstallationStatus `json:"installationStatus"`
+	Conditions         []ReCondition      `json:"conditions"`
+}
+
+type InstallationStatus struct {
+	Status      string `json:"status"`
+	Description string `json:"description"`
 }
 
 type ReCondition struct {
