@@ -36,7 +36,7 @@ kubectl get clusterservicebrokers ups-broker -o jsonpath="{.status.conditions}"
 >```
 
   The output looks as follows:
-```console
+```
 {
     "lastTransitionTime": "2018-10-26T12:03:32Z",
     "message": "Successfully fetched catalog entries from broker.",
