@@ -35,8 +35,9 @@ func TestServiceListNamespacesForRemoteEnvironmentSuccess(t *testing.T) {
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 	reSharedInformers := informerFactory.Applicationconnector().V1alpha1()
 	emInformer := reSharedInformers.EnvironmentMappings().Informer()
+	reInformer := reSharedInformers.RemoteEnvironments().Informer()
 
-	svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, emInformer, nil, nil)
+	svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, emInformer, nil, reInformer)
 	require.NoError(t, err)
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, emInformer)
@@ -171,7 +172,7 @@ func TestGetConnectionURLSuccess(t *testing.T) {
 		},
 	}
 
-	svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, config, newDummyInformer(), nil, nil)
+	svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, config, newDummyInformer(), nil, newDummyInformer())
 	require.NoError(t, err)
 	// when
 	gotURL, err := svc.GetConnectionURL("fixRemoteEnvironmentName")
@@ -190,7 +191,7 @@ func TestGetConnectionURLFailure(t *testing.T) {
 			},
 		}
 
-		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, cfg, newDummyInformer(), nil, nil)
+		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, cfg, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
 
 		// when
@@ -213,7 +214,7 @@ func TestGetConnectionURLFailure(t *testing.T) {
 			},
 		}
 
-		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, config, newDummyInformer(), nil, nil)
+		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, config, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
 
 		// when
@@ -236,7 +237,7 @@ func TestGetConnectionURLFailure(t *testing.T) {
 			},
 		}
 
-		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, cfg, newDummyInformer(), nil, nil)
+		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, cfg, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
 
 		// when
@@ -258,7 +259,7 @@ func TestRemoteEnvironmentService_Create(t *testing.T) {
 		"fix": "lab",
 	}
 
-	svc, err := remoteenvironment.NewRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), remoteenvironment.Config{}, newDummyInformer(), nil, nil)
+	svc, err := remoteenvironment.NewRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
 	require.NoError(t, err)
 
 	// WHEN
@@ -276,7 +277,7 @@ func TestRemoteEnvironmentService_Delete(t *testing.T) {
 	fixName := "fix-name"
 	client := fake.NewSimpleClientset(fixRemoteEnvironmentCR(fixName))
 
-	svc, err := remoteenvironment.NewRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), remoteenvironment.Config{}, newDummyInformer(), nil, nil)
+	svc, err := remoteenvironment.NewRemoteEnvironmentService(client.ApplicationconnectorV1alpha1(), remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
 	require.NoError(t, err)
 
 	// WHEN

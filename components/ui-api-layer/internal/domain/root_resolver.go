@@ -338,6 +338,10 @@ func (r *subscriptionResolver) ClusterServiceBrokerEvent(ctx context.Context) (<
 	return r.sc.ClusterServiceBrokerEventSubscription(ctx)
 }
 
+func (r *subscriptionResolver) RemoteEnvironmentEvent(ctx context.Context) (<-chan gqlschema.RemoteEnvironmentEvent, error) {
+	return r.re.RemoteEnvironmentEventSubscription(ctx)
+}
+
 // Service Instance
 
 type serviceInstanceResolver struct {
