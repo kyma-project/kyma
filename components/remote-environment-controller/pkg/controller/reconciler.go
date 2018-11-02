@@ -77,7 +77,7 @@ func (r *remoteEnvironmentReconciler) Reconcile(request reconcile.Request) (reco
 	// TODO - consider updating with retries
 	_, err = r.reClient.Update(instance)
 	if err != nil {
-		log.Errorf("Error while updating RE %s", instance.Name, err.Error())
+		log.Errorf("Error while updating RE %s: %s", instance.Name, err.Error())
 		return reconcile.Result{}, err
 	}
 
@@ -100,14 +100,14 @@ func (r *remoteEnvironmentReconciler) installOrGetStatus(remoteEnv *v1alpha1.Rem
 			log.Errorf("Error installing release for %s RE", remoteEnv.Name)
 			return hapi_4.Status_FAILED, "", err
 		}
-		log.Info("Release for RE %s, installed successfully. Release status: %s", remoteEnv.Name, status)
+		log.Infof("Release for RE %s, installed successfully. Release status: %s", remoteEnv.Name, status)
 	} else {
 		status, description, err = r.releaseManager.CheckReleaseStatus(remoteEnv.Name)
 		if err != nil {
 			log.Errorf("Error checking release status for %s RE", remoteEnv.Name)
 			return hapi_4.Status_FAILED, "", err
 		}
-		log.Info("Release status for %s RE: %s", remoteEnv.Name, status)
+		log.Infof("Release status for %s RE: %s", remoteEnv.Name, status)
 	}
 
 	return status, description, nil
