@@ -20,8 +20,8 @@ const (
 )
 
 type reChecker struct {
-	t *testing.T
-	expectedStatus hapi_4.Status_Code
+	t                   *testing.T
+	expectedStatus      hapi_4.Status_Code
 	expectedDescription string
 }
 
@@ -43,8 +43,8 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 	statusDescription := "Deployed"
 
 	reChecker := reChecker{
-		t:t,
-		expectedStatus: releaseStatus,
+		t:                   t,
+		expectedStatus:      releaseStatus,
 		expectedDescription: statusDescription,
 	}
 
@@ -270,35 +270,35 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should return error when failed to update RE", func(t *testing.T) {
-			namespacedName := types.NamespacedName{
-				Name: reName,
-			}
+		namespacedName := types.NamespacedName{
+			Name: reName,
+		}
 
-			managerClient := &mocks.RemoteEnvironmentManagerClient{}
-			managerClient.On(
-				"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
-				Run(setupREWithWrongAccessLabel).Return(nil)
-			managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(errors.NewBadRequest("Error"))
+		managerClient := &mocks.RemoteEnvironmentManagerClient{}
+		managerClient.On(
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			Run(setupREWithWrongAccessLabel).Return(nil)
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(errors.NewBadRequest("Error"))
 
-			releaseManager := &helmmocks.ReleaseManager{}
-			releaseManager.On("CheckReleaseExistence", reName).Return(true, nil)
-			releaseManager.On("CheckReleaseStatus", reName).Return(releaseStatus, statusDescription, nil)
+		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("CheckReleaseExistence", reName).Return(true, nil)
+		releaseManager.On("CheckReleaseStatus", reName).Return(releaseStatus, statusDescription, nil)
 
-			reReconciler := NewReconciler(managerClient, releaseManager)
+		reReconciler := NewReconciler(managerClient, releaseManager)
 
-			request := reconcile.Request{
-				NamespacedName: namespacedName,
-			}
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
 
-			// when
-			result, err := reReconciler.Reconcile(request)
+		// when
+		result, err := reReconciler.Reconcile(request)
 
-			// then
-			assert.Error(t, err)
-			assert.NotNil(t, result)
-			managerClient.AssertExpectations(t)
-			releaseManager.AssertExpectations(t)
-		})
+		// then
+		assert.Error(t, err)
+		assert.NotNil(t, result)
+		managerClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
+	})
 }
 
 func getREFromArgs(args mock.Arguments) *v1alpha1.RemoteEnvironment {
