@@ -29,3 +29,7 @@ dependencies:
     condition: ui-api.enabled
   - name: docs
     condition: docs.enabled
+  - name: logging
+    condition: logging.enabled
+  - name: k8s-dashboard-proxy
+    condition: k8s-dashboard-proxy.enabled

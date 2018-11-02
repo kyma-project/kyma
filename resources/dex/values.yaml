@@ -10,6 +10,8 @@ oidc:
   grafanaClientName: 'Grafana UI'
   jaegerClientId: jaeger
   jaegerClientName: 'Jaeger UI'
+  kubernetesDashboardClientId: kubernetes-dashboard
+  kubernetesDashboardClientName: Kubernetes Dashboard
 
 global:
   gateway:

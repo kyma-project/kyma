@@ -1,0 +1,8 @@
+containerPort: 3001  
+
+reverseproxy:
+  host: localhost
+  port: 8080
+
+keycloak:
+  image: quay.io/gambol99/keycloak-proxy:v2.3.0

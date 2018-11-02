@@ -110,5 +110,5 @@ CheckIfMinikubeIsInitialized
 InitializeMinikubeConfig
 StartMinikube
 WaitForMinikubeToBeUp
-AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "dex", "docs", "lambdas-ui", "ui-api", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service"
+AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "dex", "docs", "lambdas-ui", "ui-api", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service", "kubernetes-dashboard"
 IncreaseFsInotifyMaxUserInstances
