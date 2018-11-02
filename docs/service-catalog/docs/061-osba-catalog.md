@@ -1,11 +1,9 @@
 ---
-title: Classes
+title: Catalog
 type: UI OSBA Contracts
 ---
 
-# Contract with Open Broken Service API
-
-Catalog-ui directly uses the [ui-api-layer](https://github.com/kyma-project/kyma/tree/master/components/ui-api-layer) project to fetch the data. The ui-api-layer fetches the data from Service Brokers using the Service Catalog. The next section explains the mapping of [Service Object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#catalog-management) from [OSBA](https://openservicebrokerapi.org/) to UI fields.
+Catalog UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma/tree/master/components/ui-api-layer) project to fetch the data. The UI API Layer fetches the data from Service Brokers using the Service Catalog. The next section explains the mapping of [Service Object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#catalog-management) from [OSBA](https://openservicebrokerapi.org/) to UI fields.
 
 ## Catalog page
 

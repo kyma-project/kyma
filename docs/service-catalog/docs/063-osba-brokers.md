@@ -3,8 +3,6 @@ title: Brokers
 type: UI OSBA Contracts
 ---
 
-# Contract with the Open Service Broker API
-
 Brokers UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma/tree/master/components/ui-api-layer) project to fetch the data. The UI API Layer fetches the data from the Service Brokers using the Service Catalog. The next section explains the [Service Object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#catalog-management) mapping from the [Open Service Broker API](https://openservicebrokerapi.org/) (OSBA) to UI fields.
 
 ## Service Brokers page
