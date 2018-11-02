@@ -7,13 +7,12 @@ metadata:
   labels:
     "helm-chart-test": "true"
 spec:
+  hostNetwork: true
   serviceAccountName:  "test-{{ template "fullname" . }}-ui-api-acceptance"
   containers:
     - name: "test-{{ template "fullname" . }}-ui-api-acceptance"
       image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_api_layer_acceptance_tests.dir }}ui-api-layer-acceptance-tests:{{ .Values.global.ui_api_layer_acceptance_tests.version }}
       env:
-        - name: TILLER_HOST
-          value: "tiller-deploy.kube-system.svc.cluster.local:44134"
         - name: IS_LOCAL_CLUSTER
           value: "{{ .Values.global.isLocalEnv }}"
         - name: DOMAIN
