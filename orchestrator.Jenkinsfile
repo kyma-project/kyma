@@ -47,6 +47,7 @@ projects = [
     "components/event-bus": "event-bus-publish",
     "components/event-service": "event-service",
     "components/proxy-service": "proxy-service",
+    "components/k8s-dashboard-proxy": "k8s-dashboard-proxy",
     "tools/alpine-net": "alpine-net",
     "tools/watch-pods": "watch-pods",
     "tools/stability-checker": "stability-checker",

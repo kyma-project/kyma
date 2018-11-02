@@ -71,14 +71,14 @@ spec:
           httpGet:
             path: /oauth/health
             port: {{ .Values.containerPort}}
-          initialDelaySeconds: 100
-          timeoutSeconds: 20
+          initialDelaySeconds: 3
+          timeoutSeconds: 2
         readinessProbe:
           httpGet:
             path: /oauth/health
             port: {{ .Values.containerPort}}
-          initialDelaySeconds: 30
-          timeoutSeconds: 20
+          initialDelaySeconds: 3
+          timeoutSeconds: 2
       # - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.k8s_dashboard_proxy.dir }}k8s_dashboard_proxy:{{ .Values.global.k8s_dashboard_proxy.version }}
       - image: k8s-dashboard-proxy:{{ .Values.global.k8s_dashboard_proxy.version }}
         name: reverse-proxy

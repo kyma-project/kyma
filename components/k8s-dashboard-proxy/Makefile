@@ -12,7 +12,10 @@ docker:
 	mkdir -p docker/image
 	cp Dockerfile docker/image/
 	cp -R ./cmd/reverseproxy docker/image/
-	docker build --build-arg version=$(VERSION) -t $(NAME):$(VERSION) --rm docker/image
+	docker build --no-cache --build-arg version=$(VERSION) -t $(NAME):$(VERSION) --label version=${VERSION} --label component=${NAME} --rm docker/image
 	rm -rf docker
 tag:
 	docker tag $(NAME):$(VERSION) $(REGISTRY)/$(NAME):$(VERSION)
+
+vet:
+	go list ./... | grep -v generated | xargs go vet
