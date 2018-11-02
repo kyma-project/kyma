@@ -443,7 +443,7 @@ func ensureCorrectLog(namespace, funName string, pattern *regexp.Regexp, match s
 		log.Printf("Checking logs for pods: %v", pod)
 		select {
 		case <-timeout:
-			log.Printf("[%s] Timeout printing debug logs")
+			log.Printf("[%s] Timeout printing debug logs", funName)
 			if !serviceBinding {
 				printDebugLogsForEvents()
 			}
