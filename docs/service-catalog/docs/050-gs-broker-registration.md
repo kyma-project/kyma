@@ -12,18 +12,16 @@ This Getting Started guide shows how to register a new broker in the Service Cat
 
 ## Steps
 
-1. Fork the [`service-catalog`](https://github.com/kubernetes-incubator/service-catalog) repository and clone it to your local machine:
-```
-git clone https://github.com/{your-username}/{your-fork-name}.git
-```
+1. Fork the [`service-catalog`](https://github.com/kubernetes-incubator/service-catalog) repository and clone it to your local machine. To learn how, follow [this](https://github.com/kyma-project/community/blob/master/git-workflow.md#prepare-the-fork) instruction.
 
 2.  Run this command to install the chart with the `ups-broker` name in the `ups-broker` Namespace:
 
   ```
 helm install charts/ups-broker --name ups-broker --namespace ups-broker
 ```
+After you successfully register your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches services from this broker and creates ServiceClasses or ClusterServiceClasses from them.
 
-3. Check the status
+3. Check the status and see the available ClusterServiceClasses:
 
   ```
 kubectl get clusterserviceclasses
@@ -34,5 +32,3 @@ kubectl get clusterserviceclasses
 >```
 >kubectl get serviceclasses -n {namespace}
 >```
-
-After you successfully register your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches services from this broker and creates ServiceClasses or ClusterServiceClasses from them.
