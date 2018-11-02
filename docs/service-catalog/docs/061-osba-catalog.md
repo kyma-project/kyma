@@ -11,7 +11,7 @@ Catalog UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma
 | ------ | --------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------- |
 | (1)    | **metadata.displayName**              | **name***, **id***| If **metadata.displayName, name, id** fields are not present, the given Service Class does not appear on the landing page. |
 | (2)    | **metadata.providerDisplayName**      | -          | If not provided, UI displays without this information.                                                                     |
-| (3)    | **description\* **                     | -          | If not provided, UI displays without this information.                                                                     |
+| (3)    | **description\***                     | -          | If not provided, UI displays without this information.                                                                     |
 | (4)    | **metadata.labels\*\***               | -          | If not provided, UI does not display any labels.                                                                           |
 | (5)    | **metadata.labels.local\*\*** and/or **metadata.labels.showcase\*\*** | - | If not provided, choosing Basic Filter is not possible.                                                 |
 | (6)    | **tags**                              | -          | If not provided, filtering by Tag is not possible.                                                                         |
