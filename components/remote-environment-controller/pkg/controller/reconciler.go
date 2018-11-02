@@ -17,10 +17,6 @@ type RemoteEnvironmentManagerClient interface {
 	Update(ctx context.Context, obj runtime.Object) error
 }
 
-type RemoteEnvironmentClient interface {
-	Update(*v1alpha1.RemoteEnvironment) (*v1alpha1.RemoteEnvironment, error)
-}
-
 type RemoteEnvironmentReconciler interface {
 	Reconcile(request reconcile.Request) (reconcile.Result, error)
 }
@@ -50,7 +46,7 @@ func (r *remoteEnvironmentReconciler) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, err
 	}
 
-	r.updateRemoteEnvInstance(instance, status, description)
+	r.updateRemoteEnvDefinition(instance, status, description)
 
 	// TODO - consider updating with retries
 	err = r.reMgrClient.Update(context.Background(), instance)
@@ -102,7 +98,7 @@ func (r *remoteEnvironmentReconciler) installOrGetStatus(remoteEnv *v1alpha1.Rem
 	return status, description, nil
 }
 
-func (r *remoteEnvironmentReconciler) updateRemoteEnvInstance(remoteEnv *v1alpha1.RemoteEnvironment, status hapi_4.Status_Code, description string) {
+func (r *remoteEnvironmentReconciler) updateRemoteEnvDefinition(remoteEnv *v1alpha1.RemoteEnvironment, status hapi_4.Status_Code, description string) {
 	r.ensureAccessLabel(remoteEnv)
 	r.updateREStatus(remoteEnv, status, description)
 

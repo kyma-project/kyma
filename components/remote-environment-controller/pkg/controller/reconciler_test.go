@@ -19,7 +19,34 @@ const (
 	reName = "re-name"
 )
 
+type reChecker struct {
+	t *testing.T
+	expectedStatus hapi_4.Status_Code
+	expectedDescription string
+}
+
+func (checker reChecker) checkAccessLabel(args mock.Arguments) {
+	reInstance := args.Get(1).(*v1alpha1.RemoteEnvironment)
+
+	assert.Equal(checker.t, reName, reInstance.Spec.AccessLabel)
+}
+
+func (checker reChecker) checkStatus(args mock.Arguments) {
+	reInstance := args.Get(1).(*v1alpha1.RemoteEnvironment)
+
+	assert.Equal(checker.t, checker.expectedStatus.String(), reInstance.Status.InstallationStatus.Status)
+	assert.Equal(checker.t, checker.expectedDescription, reInstance.Status.InstallationStatus.Description)
+}
+
 func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
+	releaseStatus := hapi_4.Status_DEPLOYED
+	statusDescription := "Deployed"
+
+	reChecker := reChecker{
+		t:t,
+		expectedStatus: releaseStatus,
+		expectedDescription: statusDescription,
+	}
 
 	t.Run("should install chart when new RE is created", func(t *testing.T) {
 		// given
@@ -27,19 +54,18 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			Name: reName,
 		}
 
-		managerClient := &mocks.ManagerClient{}
+		managerClient := &mocks.RemoteEnvironmentManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREInstance).Return(nil)
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			Run(reChecker.checkStatus).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", reName).Return(false, nil)
-		releaseManager.On("InstallNewREChart", reName).Return(hapi_4.Status_DEPLOYED, "Deployed", nil)
+		releaseManager.On("InstallNewREChart", reName).Return(releaseStatus, statusDescription, nil)
 
-		reClient := &mocks.RemoteEnvironmentClient{}
-		reClient.On("Update", mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(nil, nil)
-
-		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
+		reReconciler := NewReconciler(managerClient, releaseManager)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -61,19 +87,18 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			Name: reName,
 		}
 
-		managerClient := &mocks.ManagerClient{}
+		managerClient := &mocks.RemoteEnvironmentManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREWithoutAccessLabel).Return(nil)
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			Run(reChecker.checkAccessLabel).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", reName).Return(false, nil)
-		releaseManager.On("InstallNewREChart", reName).Return(hapi_4.Status_DEPLOYED, "Deployed", nil)
+		releaseManager.On("InstallNewREChart", reName).Return(releaseStatus, statusDescription, nil)
 
-		reClient := &mocks.RemoteEnvironmentClient{}
-		reClient.On("Update", mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(nil, nil)
-
-		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
+		reReconciler := NewReconciler(managerClient, releaseManager)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -87,7 +112,6 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
 		releaseManager.AssertExpectations(t)
-		reClient.AssertExpectations(t)
 	})
 
 	t.Run("should delete chart when RE is deleted", func(t *testing.T) {
@@ -96,7 +120,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			Name: reName,
 		}
 
-		managerClient := &mocks.ManagerClient{}
+		managerClient := &mocks.RemoteEnvironmentManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Return(errors.NewNotFound(schema.GroupResource{}, reName))
@@ -104,9 +128,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("DeleteREChart", reName).Return(nil)
 
-		reClient := &mocks.RemoteEnvironmentClient{}
-
-		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
+		reReconciler := NewReconciler(managerClient, releaseManager)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -128,19 +150,18 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			Name: reName,
 		}
 
-		managerClient := &mocks.ManagerClient{}
+		managerClient := &mocks.RemoteEnvironmentManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREInstance).Return(nil)
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			Run(reChecker.checkStatus).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", reName).Return(true, nil)
-		releaseManager.On("CheckReleaseStatus", reName).Return(hapi_4.Status_DEPLOYED, "Installed", nil)
+		releaseManager.On("CheckReleaseStatus", reName).Return(releaseStatus, statusDescription, nil)
 
-		reClient := &mocks.RemoteEnvironmentClient{}
-		reClient.On("Update", mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(nil, nil)
-
-		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
+		reReconciler := NewReconciler(managerClient, releaseManager)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -162,19 +183,18 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			Name: reName,
 		}
 
-		managerClient := &mocks.ManagerClient{}
+		managerClient := &mocks.RemoteEnvironmentManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREWithWrongAccessLabel).Return(nil)
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			Run(reChecker.checkStatus).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", reName).Return(true, nil)
-		releaseManager.On("CheckReleaseStatus", reName).Return(hapi_4.Status_DEPLOYED, "Installed", nil)
+		releaseManager.On("CheckReleaseStatus", reName).Return(releaseStatus, statusDescription, nil)
 
-		reClient := &mocks.RemoteEnvironmentClient{}
-		reClient.On("Update", mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(nil, nil)
-
-		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
+		reReconciler := NewReconciler(managerClient, releaseManager)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -188,7 +208,6 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		assert.NotNil(t, result)
 		managerClient.AssertExpectations(t)
 		releaseManager.AssertExpectations(t)
-		reClient.AssertExpectations(t)
 	})
 
 	t.Run("should return error if error while Getting instance different than NotFound", func(t *testing.T) {
@@ -197,16 +216,14 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			Name: reName,
 		}
 
-		managerClient := &mocks.ManagerClient{}
+		managerClient := &mocks.RemoteEnvironmentManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Return(errors.NewResourceExpired("error"))
 
 		releaseManager := &helmmocks.ReleaseManager{}
 
-		reClient := &mocks.RemoteEnvironmentClient{}
-
-		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
+		reReconciler := NewReconciler(managerClient, releaseManager)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -228,7 +245,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			Name: reName,
 		}
 
-		managerClient := &mocks.ManagerClient{}
+		managerClient := &mocks.RemoteEnvironmentManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREInstance).Return(nil)
@@ -236,9 +253,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", reName).Return(false, errors.NewBadRequest("error"))
 
-		reClient := &mocks.RemoteEnvironmentClient{}
-
-		reReconciler := NewReconciler(managerClient, releaseManager, reClient)
+		reReconciler := NewReconciler(managerClient, releaseManager)
 
 		request := reconcile.Request{
 			NamespacedName: namespacedName,
@@ -253,6 +268,37 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		managerClient.AssertExpectations(t)
 		releaseManager.AssertExpectations(t)
 	})
+
+	t.Run("should return error when failed to update RE", func(t *testing.T) {
+			namespacedName := types.NamespacedName{
+				Name: reName,
+			}
+
+			managerClient := &mocks.RemoteEnvironmentManagerClient{}
+			managerClient.On(
+				"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+				Run(setupREWithWrongAccessLabel).Return(nil)
+			managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(errors.NewBadRequest("Error"))
+
+			releaseManager := &helmmocks.ReleaseManager{}
+			releaseManager.On("CheckReleaseExistence", reName).Return(true, nil)
+			releaseManager.On("CheckReleaseStatus", reName).Return(releaseStatus, statusDescription, nil)
+
+			reReconciler := NewReconciler(managerClient, releaseManager)
+
+			request := reconcile.Request{
+				NamespacedName: namespacedName,
+			}
+
+			// when
+			result, err := reReconciler.Reconcile(request)
+
+			// then
+			assert.Error(t, err)
+			assert.NotNil(t, result)
+			managerClient.AssertExpectations(t)
+			releaseManager.AssertExpectations(t)
+		})
 }
 
 func getREFromArgs(args mock.Arguments) *v1alpha1.RemoteEnvironment {
