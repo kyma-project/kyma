@@ -46,7 +46,7 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName, overrid
 		helm.ReleaseName(string(releaseName)),
 		helm.ValueOverrides([]byte(overrides)), //Without it default "values.yaml" file is ignored!
 		helm.InstallWait(true),
-		helm.InstallTimeout(3600),
+		helm.InstallTimeout(180),
 	)
 }
 
@@ -54,7 +54,7 @@ func (hc *helmClient) DeleteRelease(releaseName string) (*rls.UninstallReleaseRe
 	return hc.helm.DeleteRelease(
 		releaseName,
 		helm.DeletePurge(true),
-		helm.DeleteTimeout(3600),
+		helm.DeleteTimeout(180),
 	)
 }
 
