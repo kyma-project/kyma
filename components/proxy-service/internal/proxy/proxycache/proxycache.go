@@ -1,55 +1,29 @@
 package proxycache
 
 import (
+	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	"github.com/patrickmn/go-cache"
+	"net/http"
 	"net/http/httputil"
 	"time"
-	"github.com/patrickmn/go-cache"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
-	"net/http"
 )
 
 const cleanupInterval = 60
 
-type OauthCredentials struct {
-	AuthenticationUrl string
-	ClientId          string
-	ClientSecret      string
-}
-
-type BasicAuthCredentials struct {
-	UserName string
-	Password string
-}
-
 type AuthorizationStrategy interface {
-	Setup(proxy *httputil.ReverseProxy, r *http.Request) apperrors.AppError
+	Setup(r *http.Request) apperrors.AppError
 	Reset()
-}
-
-type Credentials struct {
-	Oauth *OauthCredentials
-	Basic *BasicAuthCredentials
 }
 
 type Proxy struct {
 	Proxy                 *httputil.ReverseProxy
-	Credentials           *Credentials
 	AuthorizationStrategy AuthorizationStrategy
 }
-
-type authorizationType int
-
-const (
-	None authorizationType = iota
-	Basic
-	OAuth
-	Unknown
-)
 
 type HTTPProxyCache interface {
 	Get(id string) (*Proxy, bool)
 	Add(id, oauthUrl, clientId, clientSecret string, proxy *httputil.ReverseProxy) *Proxy
-	PutWithCredentials(id string, credentials *Credentials, reverseProxy *httputil.ReverseProxy) *Proxy
+	Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *Proxy
 }
 
 type httpProxyCache struct {
@@ -74,36 +48,16 @@ func (p *httpProxyCache) Get(id string) (*Proxy, bool) {
 }
 
 func (p *httpProxyCache) Add(id, oauthUrl, clientId, clientSecret string, reverseProxy *httputil.ReverseProxy) *Proxy {
-	credentials := &Credentials{
-		Oauth: &OauthCredentials{
-			ClientId:          clientId,
-			ClientSecret:      clientSecret,
-			AuthenticationUrl: oauthUrl,
-		},
-	}
-	proxy := &Proxy{Proxy: reverseProxy, Credentials: credentials}
+
+	proxy := &Proxy{Proxy: reverseProxy}
 	p.proxyCache.Set(id, proxy, cache.DefaultExpiration)
 
 	return proxy
 }
 
-func (p *httpProxyCache) PutWithCredentials(id string, credentials *Credentials, reverseProxy *httputil.ReverseProxy) *Proxy {
-	proxy := &Proxy{Proxy: reverseProxy, Credentials: credentials}
+func (p *httpProxyCache) Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *Proxy {
+	proxy := &Proxy{Proxy: reverseProxy, AuthorizationStrategy: authorizationStrategy}
 	p.proxyCache.Set(id, proxy, cache.DefaultExpiration)
 
 	return proxy
 }
-
-func credentialsType(credentials *Credentials) authorizationType{
-	if credentials == nil {
-		return None
-	} else if credentials.Basic != nil {
-		return Basic
-	} else if credentials.Oauth != nil {
-		return OAuth
-	} else {
-		return Unknown
-	}
-}
-
-

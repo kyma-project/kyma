@@ -23,7 +23,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/tokencache"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authentication/oauth/tokencache"
 )
 
 type oauthResponse struct {

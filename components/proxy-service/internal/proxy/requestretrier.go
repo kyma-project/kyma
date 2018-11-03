@@ -2,25 +2,25 @@ package proxy
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/proxycache"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
-type requestRetrier struct {
+type retrier struct {
 	id      string
-	proxy   *proxy
 	request *http.Request
-	host    string
 	retried bool
+	timeout int
+	proxy   proxycache.Proxy
 }
 
-func newRequestRetrier(id string, proxy *proxy, request *http.Request) *requestRetrier {
-	return &requestRetrier{id: id, proxy: proxy, request: request, retried: false}
+func newRequestRetrier(id string, request *http.Request, proxy proxycache.Proxy, timeout int) *retrier {
+	return &retrier{id: id, request: request, retried: false, proxy: proxy, timeout: timeout}
 }
 
-func (rr *requestRetrier) CheckResponse(r *http.Response) error {
+func (rr *retrier) CheckResponse(r *http.Response) error {
 	if rr.retried {
 		return nil
 	}
@@ -30,7 +30,7 @@ func (rr *requestRetrier) CheckResponse(r *http.Response) error {
 	if r.StatusCode == 403 {
 		log.Infof("Request from service with id %s failed with 403 status, invalidating proxy and retrying.", rr.id)
 
-		res, err := rr.invalidateAndRetry()
+		res, err := rr.retry()
 		if err != nil {
 			return err
 		}
@@ -42,37 +42,39 @@ func (rr *requestRetrier) CheckResponse(r *http.Response) error {
 	return nil
 }
 
-func (rr *requestRetrier) invalidateAndRetry() (*http.Response, error) {
-	cacheObj, appError := rr.proxy.createAndCacheProxy(rr.id)
-	if appError != nil {
-		return nil, appError
-	}
-
-	if cacheObj.Credentials != nil || cacheObj.Credentials.Oauth == nil {
-		return nil, nil
-	}
-
-	rr.request.RequestURI = ""
-
-	_, appError = rr.proxy.invalidateAndHandleAuthHeaders(rr.request, cacheObj)
-	if appError != nil {
-		return nil, appError
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(rr.proxy.proxyTimeout)*time.Second)
+func (rr *retrier) retry() (*http.Response, error) {
+	request, cancel := rr.prepareRequest()
 	defer cancel()
 
-	requestWithContext := rr.request.WithContext(ctx)
-	cacheObj.Proxy.Director(requestWithContext)
-
-	client := &http.Client{
-		Transport: cacheObj.Proxy.Transport,
-	}
-
-	response, err := client.Do(requestWithContext)
+	err := rr.addAuthorization(request)
 	if err != nil {
 		return nil, err
 	}
 
-	return response, nil
+	return rr.performRequest(request)
+}
+
+func (rr *retrier) prepareRequest() (*http.Request, context.CancelFunc) {
+	rr.request.RequestURI = ""
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(rr.timeout)*time.Second)
+
+	return rr.request.WithContext(ctx), cancel
+}
+
+func (rr *retrier) addAuthorization(r *http.Request) error {
+	authorizationStrategy := rr.proxy.AuthorizationStrategy
+	authorizationStrategy.Reset()
+
+	return authorizationStrategy.Setup(r)
+}
+
+func (rr *retrier) performRequest(r *http.Request) (*http.Response, error) {
+	reverseProxy := rr.proxy.Proxy
+	reverseProxy.Director(r)
+
+	client := &http.Client{
+		Transport: reverseProxy.Transport,
+	}
+
+	return client.Do(r)
 }

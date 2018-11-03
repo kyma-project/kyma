@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authentication"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httptools"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/k8sconsts"
@@ -16,7 +17,6 @@ import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/proxycache"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/tokencache"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
@@ -35,7 +35,6 @@ func main() {
 	log.Infof("Options: %s", options)
 
 	proxyCache := proxycache.NewProxyCache(options.skipVerify, options.proxyCacheTTL)
-	tokenCache := tokencache.NewTokenCache()
 
 	nameResolver := k8sconsts.NewNameResolver(options.remoteEnvironment, options.namespace)
 
@@ -48,7 +47,7 @@ func main() {
 		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
 	}
 
-	internalHandler := newInternalHandler(serviceDefinitionService, nameResolver, proxyCache, tokenCache, options.skipVerify, options.proxyTimeout)
+	internalHandler := newInternalHandler(serviceDefinitionService, nameResolver, proxyCache, options.skipVerify, options.proxyTimeout)
 	externalHandler := externalapi.NewHandler()
 
 	if options.requestLogging {
@@ -85,11 +84,19 @@ func main() {
 }
 
 func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, nameResolver k8sconsts.NameResolver,
-	httpProxyCache proxycache.HTTPProxyCache, tokenCache tokencache.TokenCache, skipVerify bool, proxyTimeout int) http.Handler {
+	httpProxyCache proxycache.HTTPProxyCache, skipVerify bool, proxyTimeout int) http.Handler {
 	if serviceDefinitionService != nil {
-		return proxy.New(nameResolver, serviceDefinitionService, httpProxyCache, skipVerify, proxyTimeout)
+		authStrategyFactory := newAuthenticationStrategyFactory(proxyTimeout)
+
+		return proxy.New(nameResolver, serviceDefinitionService, httpProxyCache, authStrategyFactory, skipVerify, proxyTimeout)
 	}
 	return proxy.NewInvalidStateHandler("Proxy Service is not initialized properly")
+}
+
+func newAuthenticationStrategyFactory(oauthClientTimeout int) authentication.StrategyFactory {
+	return authentication.NewStrategyFactory(authentication.Configuration{
+		OAuthClientTimeout: oauthClientTimeout,
+	})
 }
 
 func newServiceDefinitionService(namespace string, remoteEnvironment string) (metadata.ServiceDefinitionService, apperrors.AppError) {
