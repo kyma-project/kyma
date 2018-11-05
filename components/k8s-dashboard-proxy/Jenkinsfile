@@ -49,6 +49,10 @@ podTemplate(label: label) {
 
                         stage("build image $application") {
                             execute("make docker")
+                            sh "mkdir -p docker/image"
+                            sh "cp -R ./cmd/reverseproxy docker/image/"
+                            sh "cp Dockerfile docker/image/"
+                            sh "docker build --no-cache --build-arg version=${VERSION} -t ${application}:${VERSION} --label version=${VERSION} --label component=${application} --rm docker/image"
                         }
 
                         stage("push image $application") {
