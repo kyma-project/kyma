@@ -15,9 +15,10 @@ You can disable the SSL certificate verification in the communication between Ky
 
 Follow these steps to disable SSL certificate verification for communication between Kyma and an existing Remote Environment:
 
-  1. Edit the `ec-default-proxy-service` Deployment in the `kyma-integration` Namespace. Run:
+  1. Edit the `{RE_NAME}-proxy-service` Deployment in the `kyma-integration` Namespace where {RE_NAME} is the name of existing Remote Environment.
+  Run:
     ```
-    kubectl -n kyma-integration edit deployment ec-default-proxy-service
+    kubectl -n kyma-integration edit deployment {RE_NAME}-proxy-service
     ```
   2. Edit the Deployment in Vim. Select `i` to start editing.
   3. Find the **skipVerify** parameter and change its value to `true`.

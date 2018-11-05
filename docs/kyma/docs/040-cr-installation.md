@@ -40,12 +40,6 @@ spec:
       namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
-    - name: "remote-environments"
-      namespace: "kyma-integration"
-      release: "ec-default"
-    - name: "remote-environments"
-      namespace: "kyma-integration"
-      release: "hmc-default"
 ```
 
 ## Custom resource parameters
