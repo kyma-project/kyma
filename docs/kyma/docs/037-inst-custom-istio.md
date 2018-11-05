@@ -13,6 +13,7 @@ In the installation process, the installer applies a custom patch to every Istio
 ## Prerequisites
 
 - A live Istio version compatible with the version currently supported by Kyma. To check the supported version, see the `resources/istio-kyma-patch/templates/job.yaml` file.
+- Security enabled in your Istio deployment. To verify if security is enabled, check if the `policies.authentication.istio.io` custom resource exists in the cluster. 
 - Kyma downloaded from the latest [release](https://github.com/kyma-project/kyma/releases).
 
 ## Local installation
