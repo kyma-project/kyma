@@ -2,14 +2,14 @@ package controller
 
 import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
-	rerelease "github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm/remoteenvironemnts"
+	reReleases "github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm/remoteenvironemnts"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-func InitRemoteEnvironmentController(mgr manager.Manager, releaseManager rerelease.ReleaseManager, appName string) error {
+func InitRemoteEnvironmentController(mgr manager.Manager, releaseManager reReleases.ReleaseManager, appName string) error {
 	reconciler := NewReconciler(mgr.GetClient(), releaseManager)
 
 	return startRemoteEnvController(appName, mgr, reconciler)

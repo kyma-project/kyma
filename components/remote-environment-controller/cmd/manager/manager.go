@@ -4,7 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/api"
 	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/controller"
 	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm"
-	rerelease "github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm/remoteenvironemnts"
+	reReleases "github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm/remoteenvironemnts"
 	log "github.com/sirupsen/logrus"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -64,21 +64,21 @@ func main() {
 	log.Info(mgr.Start(signals.SetupSignalHandler()))
 }
 
-func newReleaseManager(options *options) (rerelease.ReleaseManager, error) {
-	overridesData := rerelease.OverridesData{
+func newReleaseManager(options *options) (reReleases.ReleaseManager, error) {
+	overridesData := reReleases.OverridesData{
 		DomainName:             options.domainName,
 		ProxyServiceImage:      options.proxyServiceImage,
 		EventServiceImage:      options.eventServiceImage,
 		EventServiceTestsImage: options.eventServiceTestsImage,
 	}
 
-	overrides, err := kymahelm.ParseOverrides(overridesData, rerelease.OverridesTemplate)
+	overrides, err := kymahelm.ParseOverrides(overridesData, reReleases.OverridesTemplate)
 	if err != nil {
 		return nil, err
 	}
 
 	helmClient := kymahelm.NewClient(options.tillerUrl, options.installationTimeout)
-	releaseManager := rerelease.NewReleaseManager(helmClient, overrides, options.namespace)
+	releaseManager := reReleases.NewReleaseManager(helmClient, overrides, options.namespace)
 
 	return releaseManager, nil
 }
