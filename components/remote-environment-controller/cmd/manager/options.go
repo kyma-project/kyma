@@ -45,7 +45,7 @@ func parseArgs() *options {
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s --tillerUrl=%s --syncPeriod=%d --installationTimeout=%d"+
+	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s --tillerUrl=%s --syncPeriod=%d --installationTimeout=%d "+
 		"--proxyServiceImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s",
 		o.appName, o.domainName, o.namespace, o.tillerUrl, o.syncPeriod, o.installationTimeout,
 		o.proxyServiceImage, o.eventServiceImage, o.eventServiceTestsImage)
