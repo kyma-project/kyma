@@ -12,6 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/listener"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
@@ -371,6 +372,80 @@ func TestRemoteEnvironmentService_Update_SuccessAfterRetry(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fixLabels, re.Spec.Labels)
 	assert.Equal(t, fixDesc, re.Spec.Description)
+}
+
+func TestRemoteEnvironmentService_Subscribe(t *testing.T) {
+	t.Run("Simple", func(t *testing.T) {
+		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil, nil)
+		svc.Subscribe(remoteEnvironmentListener)
+	})
+
+	t.Run("Duplicated", func(t *testing.T) {
+		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil, nil)
+
+		svc.Subscribe(remoteEnvironmentListener)
+		svc.Subscribe(remoteEnvironmentListener)
+	})
+
+	t.Run("Multiple", func(t *testing.T) {
+		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+		remoteEnvironmentListenerA := listener.NewRemoteEnvironment(nil, nil, nil)
+		remoteEnvironmentListenerB := listener.NewRemoteEnvironment(nil, nil, nil)
+
+		svc.Subscribe(remoteEnvironmentListenerA)
+		svc.Subscribe(remoteEnvironmentListenerB)
+	})
+
+	t.Run("Nil", func(t *testing.T) {
+		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+
+		svc.Subscribe(nil)
+	})
+}
+
+func TestRemoteEnvironmentService_Unsubscribe(t *testing.T) {
+	t.Run("Existing", func(t *testing.T) {
+		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil, nil)
+		svc.Subscribe(remoteEnvironmentListener)
+
+		svc.Unsubscribe(remoteEnvironmentListener)
+	})
+
+	t.Run("Duplicated", func(t *testing.T) {
+		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil, nil)
+		svc.Subscribe(remoteEnvironmentListener)
+		svc.Subscribe(remoteEnvironmentListener)
+
+		svc.Unsubscribe(remoteEnvironmentListener)
+	})
+
+	t.Run("Multiple", func(t *testing.T) {
+		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+		remoteEnvironmentListenerA := listener.NewRemoteEnvironment(nil, nil, nil)
+		remoteEnvironmentListenerB := listener.NewRemoteEnvironment(nil, nil, nil)
+		svc.Subscribe(remoteEnvironmentListenerA)
+		svc.Subscribe(remoteEnvironmentListenerB)
+
+		svc.Unsubscribe(remoteEnvironmentListenerA)
+	})
+
+	t.Run("Nil", func(t *testing.T) {
+		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+
+		svc.Unsubscribe(nil)
+	})
 }
 
 func newDummyInformer() cache.SharedIndexInformer {
