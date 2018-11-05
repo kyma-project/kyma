@@ -36,8 +36,6 @@ func main() {
 
 	proxyCache := proxycache.NewProxyCache(options.skipVerify, options.proxyCacheTTL)
 
-	nameResolver := k8sconsts.NewNameResolver(options.remoteEnvironment, options.namespace)
-
 	serviceDefinitionService, err := newServiceDefinitionService(
 		options.namespace,
 		options.remoteEnvironment,
@@ -47,7 +45,7 @@ func main() {
 		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
 	}
 
-	internalHandler := newInternalHandler(serviceDefinitionService, nameResolver, proxyCache, options.skipVerify, options.proxyTimeout)
+	internalHandler := newInternalHandler(serviceDefinitionService, proxyCache, options)
 	externalHandler := externalapi.NewHandler()
 
 	if options.requestLogging {
@@ -83,12 +81,18 @@ func main() {
 	wg.Wait()
 }
 
-func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, nameResolver k8sconsts.NameResolver,
-	httpProxyCache proxycache.HTTPProxyCache, skipVerify bool, proxyTimeout int) http.Handler {
+func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService,
+	httpProxyCache proxycache.HTTPProxyCache, options *options) http.Handler {
 	if serviceDefinitionService != nil {
-		authStrategyFactory := newAuthenticationStrategyFactory(proxyTimeout)
-
-		return proxy.New(nameResolver, serviceDefinitionService, httpProxyCache, authStrategyFactory, skipVerify, proxyTimeout)
+		authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
+		proxyConfig := proxy.Config{
+			SkipVerify:        options.skipVerify,
+			ProxyTimeout:      options.proxyTimeout,
+			Namespace:         options.namespace,
+			RemoteEnvironment: options.remoteEnvironment,
+			ProxyCacheTTL:     options.proxyCacheTTL,
+		}
+		return proxy.New(serviceDefinitionService, authStrategyFactory, proxyConfig)
 	}
 	return proxy.NewInvalidStateHandler("Proxy Service is not initialized properly")
 }

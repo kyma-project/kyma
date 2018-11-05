@@ -25,14 +25,22 @@ type proxy struct {
 	authenticationStrategyFactory authentication.StrategyFactory
 }
 
+type Config struct {
+	SkipVerify        bool
+	ProxyTimeout      int
+	Namespace         string
+	RemoteEnvironment string
+	ProxyCacheTTL     int
+}
+
 // New creates proxy for handling user's services calls
-func New(nameResolver k8sconsts.NameResolver, serviceDefService metadata.ServiceDefinitionService, httpProxyCache proxycache.HTTPProxyCache, authenticationStrategyFactory authentication.StrategyFactory, skipVerify bool, proxyTimeout int) http.Handler {
+func New(serviceDefService metadata.ServiceDefinitionService, authenticationStrategyFactory authentication.StrategyFactory, config Config) http.Handler {
 	return &proxy{
-		nameResolver:                  nameResolver,
+		nameResolver:                  k8sconsts.NewNameResolver(config.RemoteEnvironment, config.Namespace),
 		serviceDefService:             serviceDefService,
-		httpProxyCache:                httpProxyCache,
-		skipVerify:                    skipVerify,
-		proxyTimeout:                  proxyTimeout,
+		httpProxyCache:                proxycache.NewProxyCache(config.SkipVerify, config.ProxyCacheTTL),
+		skipVerify:                    config.SkipVerify,
+		proxyTimeout:                  config.ProxyTimeout,
 		authenticationStrategyFactory: authenticationStrategyFactory,
 	}
 }
@@ -119,9 +127,9 @@ func (p *proxy) prepareRequest(r *http.Request, cacheEntry *proxycache.Proxy) (*
 }
 
 func (p *proxy) newAuthenticationStrategy(credentials *serviceapi.Credentials) authentication.Strategy {
-	var authCredentials *authentication.Credentials
+	var authCredentials authentication.Credentials
 	if oauthCredentialsProvided(credentials) {
-		authCredentials = &authentication.Credentials{
+		authCredentials = authentication.Credentials{
 			Oauth: &authentication.OauthCredentials{
 				ClientId:          credentials.Oauth.ClientID,
 				ClientSecret:      credentials.Oauth.ClientSecret,
