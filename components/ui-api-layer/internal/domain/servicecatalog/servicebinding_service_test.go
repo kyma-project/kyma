@@ -7,14 +7,13 @@ import (
 	api "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog"
+	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
-
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog"
-	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 )
 
 func TestBindingServiceCreate(t *testing.T) {

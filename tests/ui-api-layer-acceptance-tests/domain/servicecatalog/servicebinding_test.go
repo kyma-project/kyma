@@ -176,15 +176,14 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 
 func subscribeBinding(c *graphql.Client, resourceDetailsQuery string, environment, instanceName string) *graphql.Subscription {
 	query := fmt.Sprintf(`
-			subscription ($environment: String!, $instanceName: String!) {
-				serviceBindingEventForServiceInstance(environment: $environment, serviceInstanceName: $instanceName) {
+			subscription ($environment: String!) {
+				serviceBindingEvent(environment: $environment) {
 					%s
 				}
 			}
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("environment", environment)
-	req.SetVar("instanceName", instanceName)
 
 	return c.Subscribe(req)
 }
@@ -371,12 +370,12 @@ func bindingEventDetailsFields() string {
 
 func readServiceBindingEvent(sub *graphql.Subscription) (ServiceBindingEvent, error) {
 	type Response struct {
-		ServiceBindingEventForServiceInstance ServiceBindingEvent
+		ServiceBindingEvent ServiceBindingEvent
 	}
 	var bindingEvent Response
 	err := sub.Next(&bindingEvent, tester.DefaultSubscriptionTimeout)
 
-	return bindingEvent.ServiceBindingEventForServiceInstance, err
+	return bindingEvent.ServiceBindingEvent, err
 }
 
 func checkBindingEvent(t *testing.T, expected, actual ServiceBindingEvent) {

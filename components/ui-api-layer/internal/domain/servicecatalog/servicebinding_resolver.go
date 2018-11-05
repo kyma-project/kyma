@@ -104,12 +104,10 @@ func (r *serviceBindingResolver) ServiceBindingsToInstanceQuery(ctx context.Cont
 	return out, nil
 }
 
-func (r *serviceBindingResolver) ServiceBindingEventForInstanceSubscription(ctx context.Context, instanceName, environment string) (<-chan gqlschema.ServiceBindingEvent, error) {
+func (r *serviceBindingResolver) ServiceBindingEventSubscription(ctx context.Context, environment string) (<-chan gqlschema.ServiceBindingEvent, error) {
 	channel := make(chan gqlschema.ServiceBindingEvent, 1)
 	filter := func(binding *api.ServiceBinding) bool {
-		return binding != nil &&
-			binding.Namespace == environment &&
-			binding.Spec.ServiceInstanceRef.Name == instanceName
+		return binding != nil && binding.Namespace == environment
 	}
 
 	bindingListener := listener.NewBinding(channel, filter, &r.converter)
