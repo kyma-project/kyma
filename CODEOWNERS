@@ -254,6 +254,9 @@
 # The static-users-generator directory
 /tools/static-users-generator/ @piotrmsc @sjanota @kubadz 
 
+# The tools/ark-plugins directory
+/tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+
 # kubeless-test-client tests
 /tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
