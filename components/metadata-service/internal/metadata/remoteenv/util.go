@@ -13,6 +13,7 @@ import (
 	"unicode"
 )
 
+//TODO:
 func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) {
 	var api *ServiceAPI
 	var events bool
@@ -50,6 +51,7 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 	}, nil
 }
 
+//TODO:
 func convertToK8sType(service Service) v1alpha1.Service {
 	var serviceEntries = make([]v1alpha1.Entry, 0, 2)
 	if service.API != nil {

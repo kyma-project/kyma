@@ -39,6 +39,7 @@ type API struct {
 	Spec        json.RawMessage `json:"spec,omitempty"`
 }
 
+//TODO: Add Basic
 type Credentials struct {
 	Oauth Oauth `json:"oauth" valid:"required~oauth field cannot be empty"`
 }
@@ -47,6 +48,10 @@ type Oauth struct {
 	URL          string `json:"url" valid:"url,required~oauth url field cannot be empty"`
 	ClientID     string `json:"clientId" valid:"required~oauth clientId field cannot be empty"`
 	ClientSecret string `json:"clientSecret" valid:"required~oauth clientSecret cannot be empty"`
+}
+
+//TODO:
+type BasicAuth struct {
 }
 
 type Events struct {
@@ -80,6 +85,7 @@ func serviceDefinitionToService(serviceDefinition metadata.ServiceDefinition) Se
 	}
 }
 
+//TODO:
 func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinition) (ServiceDetails, apperrors.AppError) {
 	serviceDetails := ServiceDetails{
 		Provider:         serviceDefinition.Provider,
@@ -127,6 +133,7 @@ func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinit
 	return serviceDetails, nil
 }
 
+//TODO:
 func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (metadata.ServiceDefinition, apperrors.AppError) {
 	serviceDefinition := metadata.ServiceDefinition{
 		Provider:         serviceDetails.Provider,
