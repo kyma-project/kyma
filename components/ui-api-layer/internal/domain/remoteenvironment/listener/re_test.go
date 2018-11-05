@@ -21,7 +21,7 @@ func TestRemoteEnvironmentListener_OnAdd(t *testing.T) {
 		defer close(channel)
 		converter.On("ToGQL", remoteEnvironment).Return(*gqlRemoteEnvironment, nil).Once()
 		defer converter.AssertExpectations(t)
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(channel, filterRemoteEnvironmentTrue, converter)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(channel, converter)
 
 		// when
 		remoteEnvironmentListener.OnAdd(remoteEnvironment)
@@ -34,7 +34,7 @@ func TestRemoteEnvironmentListener_OnAdd(t *testing.T) {
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, filterRemoteEnvironmentTrue, nil)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil)
 
 		// when
 		remoteEnvironmentListener.OnAdd(nil)
@@ -42,7 +42,7 @@ func TestRemoteEnvironmentListener_OnAdd(t *testing.T) {
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, filterRemoteEnvironmentTrue, nil)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil)
 
 		// when
 		remoteEnvironmentListener.OnAdd(new(struct{}))
@@ -60,7 +60,7 @@ func TestRemoteEnvironmentListener_OnDelete(t *testing.T) {
 		defer close(channel)
 		converter.On("ToGQL", remoteEnvironment).Return(*gqlRemoteEnvironment, nil).Once()
 		defer converter.AssertExpectations(t)
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(channel, filterRemoteEnvironmentTrue, converter)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(channel, converter)
 
 		// when
 		remoteEnvironmentListener.OnDelete(remoteEnvironment)
@@ -74,7 +74,7 @@ func TestRemoteEnvironmentListener_OnDelete(t *testing.T) {
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, filterRemoteEnvironmentTrue, nil)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil)
 
 		// when
 		remoteEnvironmentListener.OnDelete(nil)
@@ -82,7 +82,7 @@ func TestRemoteEnvironmentListener_OnDelete(t *testing.T) {
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, filterRemoteEnvironmentTrue, nil)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil)
 
 		// when
 		remoteEnvironmentListener.OnDelete(new(struct{}))
@@ -100,7 +100,7 @@ func TestRemoteEnvironmentListener_OnUpdate(t *testing.T) {
 		defer close(channel)
 		converter.On("ToGQL", remoteEnvironment).Return(*gqlRemoteEnvironment, nil).Once()
 		defer converter.AssertExpectations(t)
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(channel, filterRemoteEnvironmentTrue, converter)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(channel, converter)
 
 		// when
 		remoteEnvironmentListener.OnUpdate(remoteEnvironment, remoteEnvironment)
@@ -114,7 +114,7 @@ func TestRemoteEnvironmentListener_OnUpdate(t *testing.T) {
 
 	t.Run("Nil", func(t *testing.T) {
 		// given
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, filterRemoteEnvironmentTrue, nil)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil)
 
 		// when
 		remoteEnvironmentListener.OnUpdate(nil, nil)
@@ -122,13 +122,9 @@ func TestRemoteEnvironmentListener_OnUpdate(t *testing.T) {
 
 	t.Run("Invalid type", func(t *testing.T) {
 		// given
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, filterRemoteEnvironmentTrue, nil)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil)
 
 		// when
 		remoteEnvironmentListener.OnUpdate(new(struct{}), new(struct{}))
 	})
-}
-
-func filterRemoteEnvironmentTrue(o *api.RemoteEnvironment) bool {
-	return true
 }

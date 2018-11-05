@@ -378,14 +378,14 @@ func TestRemoteEnvironmentService_Subscribe(t *testing.T) {
 	t.Run("Simple", func(t *testing.T) {
 		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil, nil)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil)
 		svc.Subscribe(remoteEnvironmentListener)
 	})
 
 	t.Run("Duplicated", func(t *testing.T) {
 		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil, nil)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil)
 
 		svc.Subscribe(remoteEnvironmentListener)
 		svc.Subscribe(remoteEnvironmentListener)
@@ -394,8 +394,8 @@ func TestRemoteEnvironmentService_Subscribe(t *testing.T) {
 	t.Run("Multiple", func(t *testing.T) {
 		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
-		remoteEnvironmentListenerA := listener.NewRemoteEnvironment(nil, nil, nil)
-		remoteEnvironmentListenerB := listener.NewRemoteEnvironment(nil, nil, nil)
+		remoteEnvironmentListenerA := listener.NewRemoteEnvironment(nil, nil)
+		remoteEnvironmentListenerB := listener.NewRemoteEnvironment(nil, nil)
 
 		svc.Subscribe(remoteEnvironmentListenerA)
 		svc.Subscribe(remoteEnvironmentListenerB)
@@ -413,7 +413,7 @@ func TestRemoteEnvironmentService_Unsubscribe(t *testing.T) {
 	t.Run("Existing", func(t *testing.T) {
 		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil, nil)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil)
 		svc.Subscribe(remoteEnvironmentListener)
 
 		svc.Unsubscribe(remoteEnvironmentListener)
@@ -422,7 +422,7 @@ func TestRemoteEnvironmentService_Unsubscribe(t *testing.T) {
 	t.Run("Duplicated", func(t *testing.T) {
 		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
-		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil, nil)
+		remoteEnvironmentListener := listener.NewRemoteEnvironment(nil, nil)
 		svc.Subscribe(remoteEnvironmentListener)
 		svc.Subscribe(remoteEnvironmentListener)
 
@@ -432,8 +432,8 @@ func TestRemoteEnvironmentService_Unsubscribe(t *testing.T) {
 	t.Run("Multiple", func(t *testing.T) {
 		svc, err := remoteenvironment.NewRemoteEnvironmentService(nil, remoteenvironment.Config{}, newDummyInformer(), nil, newDummyInformer())
 		require.NoError(t, err)
-		remoteEnvironmentListenerA := listener.NewRemoteEnvironment(nil, nil, nil)
-		remoteEnvironmentListenerB := listener.NewRemoteEnvironment(nil, nil, nil)
+		remoteEnvironmentListenerA := listener.NewRemoteEnvironment(nil, nil)
+		remoteEnvironmentListenerB := listener.NewRemoteEnvironment(nil, nil)
 		svc.Subscribe(remoteEnvironmentListenerA)
 		svc.Subscribe(remoteEnvironmentListenerB)
 

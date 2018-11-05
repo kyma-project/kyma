@@ -15,14 +15,12 @@ type reConverter interface {
 
 type RemoteEnvironment struct {
 	channel   chan<- gqlschema.RemoteEnvironmentEvent
-	filter    func(remoteEnvironment *api.RemoteEnvironment) bool
 	converter reConverter
 }
 
-func NewRemoteEnvironment(channel chan<- gqlschema.RemoteEnvironmentEvent, filter func(remoteEnvironment *api.RemoteEnvironment) bool, converter reConverter) *RemoteEnvironment {
+func NewRemoteEnvironment(channel chan<- gqlschema.RemoteEnvironmentEvent, converter reConverter) *RemoteEnvironment {
 	return &RemoteEnvironment{
 		channel:   channel,
-		filter:    filter,
 		converter: converter,
 	}
 }
@@ -46,9 +44,7 @@ func (l *RemoteEnvironment) onEvent(eventType gqlschema.SubscriptionEventType, o
 		return
 	}
 
-	if l.filter(remoteEnvironment) {
-		l.notify(eventType, remoteEnvironment)
-	}
+	l.notify(eventType, remoteEnvironment)
 }
 
 func (l *RemoteEnvironment) notify(eventType gqlschema.SubscriptionEventType, remoteEnvironment *api.RemoteEnvironment) {

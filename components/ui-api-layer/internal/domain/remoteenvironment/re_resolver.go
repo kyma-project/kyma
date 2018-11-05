@@ -95,11 +95,7 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentsQuery(ctx context.Context,
 
 func (r *remoteEnvironmentResolver) RemoteEnvironmentEventSubscription(ctx context.Context) (<-chan gqlschema.RemoteEnvironmentEvent, error) {
 	channel := make(chan gqlschema.RemoteEnvironmentEvent, 1)
-	filter := func(re *v1alpha1.RemoteEnvironment) bool {
-		return true
-	}
-
-	reListener := listener.NewRemoteEnvironment(channel, filter, &r.reConverter)
+	reListener := listener.NewRemoteEnvironment(channel, &r.reConverter)
 
 	r.reSvc.Subscribe(reListener)
 	go func() {
