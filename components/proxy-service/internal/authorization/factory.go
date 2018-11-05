@@ -1,9 +1,9 @@
-package authentication
+package authorization
 
 import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/authentication/oauth"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/authentication/oauth/tokencache"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/tokencache"
 	"net/http"
 )
 

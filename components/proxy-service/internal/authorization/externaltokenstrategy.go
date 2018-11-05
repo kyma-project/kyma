@@ -1,4 +1,4 @@
-package authentication
+package authorization
 
 import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"

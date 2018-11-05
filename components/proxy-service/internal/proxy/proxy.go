@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/authentication"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httperrors"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/k8sconsts"
@@ -21,7 +21,7 @@ type proxy struct {
 	cache                         Cache
 	skipVerify                    bool
 	proxyTimeout                  int
-	authenticationStrategyFactory authentication.StrategyFactory
+	authenticationStrategyFactory authorization.StrategyFactory
 }
 
 type Config struct {
@@ -33,7 +33,7 @@ type Config struct {
 }
 
 // New creates proxy for handling user's services calls
-func New(serviceDefService metadata.ServiceDefinitionService, authenticationStrategyFactory authentication.StrategyFactory, config Config) http.Handler {
+func New(serviceDefService metadata.ServiceDefinitionService, authenticationStrategyFactory authorization.StrategyFactory, config Config) http.Handler {
 	return &proxy{
 		nameResolver:                  k8sconsts.NewNameResolver(config.RemoteEnvironment, config.Namespace),
 		serviceDefService:             serviceDefService,
@@ -115,12 +115,12 @@ func (p *proxy) addAuthentication(r *http.Request, cacheEntry *CacheEntry) apper
 	return cacheEntry.AuthorizationStrategy.Setup(r)
 }
 
-func (p *proxy) newAuthenticationStrategy(credentials *serviceapi.Credentials) authentication.Strategy {
-	authCredentials := authentication.Credentials{}
+func (p *proxy) newAuthenticationStrategy(credentials *serviceapi.Credentials) authorization.Strategy {
+	authCredentials := authorization.Credentials{}
 	
 	if oauthCredentialsProvided(credentials) {
-		authCredentials = authentication.Credentials{
-			Oauth: &authentication.OauthCredentials{
+		authCredentials = authorization.Credentials{
+			Oauth: &authorization.OauthCredentials{
 				ClientId:          credentials.Oauth.ClientID,
 				ClientSecret:      credentials.Oauth.ClientSecret,
 				AuthenticationUrl: credentials.Oauth.URL,

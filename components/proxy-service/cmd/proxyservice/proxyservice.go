@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/authentication"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httptools"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata"
@@ -92,8 +92,8 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 	return proxy.NewInvalidStateHandler("Proxy Service is not initialized properly")
 }
 
-func newAuthenticationStrategyFactory(oauthClientTimeout int) authentication.StrategyFactory {
-	return authentication.NewStrategyFactory(authentication.Configuration{
+func newAuthenticationStrategyFactory(oauthClientTimeout int) authorization.StrategyFactory {
+	return authorization.NewStrategyFactory(authorization.Configuration{
 		OAuthClientTimeout: oauthClientTimeout,
 	})
 }

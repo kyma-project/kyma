@@ -3,8 +3,8 @@ package proxy
 import (
 	"encoding/json"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/authentication"
-	authMock "github.com/kyma-project/kyma/components/proxy-service/internal/authentication/mocks"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization"
+	authMock "github.com/kyma-project/kyma/components/proxy-service/internal/authorization/mocks"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httperrors"
 	metadataMock "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/mocks"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
@@ -35,7 +35,7 @@ func TestProxy(t *testing.T) {
 		authStrategyMock.On("Setup", mock.AnythingOfType("*http.Request")).Return(nil)
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", authentication.Credentials{}).Return(authStrategyMock)
+		authStrategyFactoryMock.On("Create", authorization.Credentials{}).Return(authStrategyMock)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
@@ -238,15 +238,6 @@ func NewTestServer(check func(req *http.Request)) *httptest.Server {
 	}))
 }
 
-func NewForbiddenServer(check func(req *http.Request)) *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
-		check(r)
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("test"))
-	}))
-}
-
 func NewTestServerForRetryTest(check func(req *http.Request)) *httptest.Server {
 	firstCall := true
 
@@ -273,8 +264,8 @@ func createProxyConfig(proxyTimeout int) Config {
 	}
 }
 
-func createOAuthCredentialsMatcher(clientId, clientSecret, url string) func(authentication.Credentials) bool {
-	return func(c authentication.Credentials) bool {
+func createOAuthCredentialsMatcher(clientId, clientSecret, url string) func(authorization.Credentials) bool {
+	return func(c authorization.Credentials) bool {
 		return c.Oauth != nil && c.Oauth.ClientId == clientId &&
 			c.Oauth.ClientSecret == clientSecret &&
 			c.Oauth.AuthenticationUrl == url

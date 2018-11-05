@@ -2,7 +2,7 @@ package oauth
 
 import (
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/authentication/oauth/tokencache/mocks"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/tokencache/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net/http"
