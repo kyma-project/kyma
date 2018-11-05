@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 type testKind int
@@ -31,6 +32,7 @@ func TestNew(t *testing.T) {
 	}{
 		{"K8sNotFound", someTestKind, k8serrors.NewNotFound(schema.GroupResource{}, "test"), gqlerror.IsNotFound},
 		{"K8sAlreadyExists", someTestKind, k8serrors.NewAlreadyExists(schema.GroupResource{}, "test"), gqlerror.IsAlreadyExists},
+		{"K8sInvalid", someTestKind, k8serrors.NewInvalid(schema.GroupKind{}, "test", field.ErrorList{}), gqlerror.IsInvalid},
 		{"K8sOther", someTestKind, k8serrors.NewBadRequest("test"), gqlerror.IsInternal},
 		{"Nested", someTestKind, errors.Wrap(k8serrors.NewNotFound(schema.GroupResource{}, "while test"), "test"), gqlerror.IsNotFound},
 		{"DoubleNested", someTestKind, errors.Wrap(errors.Wrap(k8serrors.NewNotFound(schema.GroupResource{}, "while test"), "while more"), "test"), gqlerror.IsNotFound},
@@ -115,6 +117,34 @@ func TestNewInternal(t *testing.T) {
 	assert.NotEmpty(t, result.Error())
 }
 
+func TestNewInvalid(t *testing.T) {
+	fixErr := "fix"
+
+	var testCases = []struct {
+		caseName string
+		err      string
+		kind     fmt.Stringer
+		opts     []gqlerror.Option
+	}{
+		{"AllParamsProvided", fixErr, someTestKind, []gqlerror.Option{gqlerror.WithEnvironment("namespace"), gqlerror.WithName("name"), gqlerror.WithDetails("some details")}},
+		{"NoKindNoOpts", fixErr, nil, nil},
+		{"NoKind", fixErr, nil, []gqlerror.Option{gqlerror.WithEnvironment("namespace"), gqlerror.WithName("name")}},
+		{"NoOpts", fixErr, someTestKind, nil},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.caseName, func(t *testing.T) {
+			// when
+			result := gqlerror.NewInvalid(testCase.err, testCase.kind, testCase.opts...)
+
+			// then
+			require.NotNil(t, result)
+			assert.True(t, gqlerror.IsInvalid(result))
+			assert.NotEmpty(t, result.Error())
+		})
+	}
+}
+
 func TestIsAlreadyExists(t *testing.T) {
 	var testCases = []struct {
 		caseName string
@@ -177,6 +207,30 @@ func TestIsInternalServer(t *testing.T) {
 		t.Run(testCase.caseName, func(t *testing.T) {
 			// when
 			result := gqlerror.IsInternal(testCase.given)
+
+			// then
+			assert.Equal(t, testCase.expected, result)
+		})
+	}
+}
+
+func TestIsInvalid(t *testing.T) {
+	var testCases = []struct {
+		caseName string
+		given    error
+		expected bool
+	}{
+		{"Internal", gqlerror.NewInternal(), false},
+		{"Invalid", gqlerror.NewInvalid("fix", nil, gqlerror.WithEnvironment("namespace")), true},
+		{"NotFound", gqlerror.NewNotFound(nil), false},
+		{"Generic", errors.New("generic"), false},
+		{"Nil", nil, false},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.caseName, func(t *testing.T) {
+			// when
+			result := gqlerror.IsInvalid(testCase.given)
 
 			// then
 			assert.Equal(t, testCase.expected, result)
