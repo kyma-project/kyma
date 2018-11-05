@@ -1,4 +1,4 @@
-FROM golang:1.9-alpine3.7
+FROM golang:1.11 as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/connector-service-tests
 
