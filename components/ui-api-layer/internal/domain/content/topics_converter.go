@@ -2,7 +2,6 @@ package content
 
 import (
 	"fmt"
-
 	"strings"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"

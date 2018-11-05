@@ -102,10 +102,16 @@ type Entry struct {
 	Type       string `json:"type"`
 	GatewayUrl string `json:"gatewayUrl"`
 	// AccessLabel is not required for Events, 'omitempty' is needed because of regexp validation
-	AccessLabel           string `json:"accessLabel,omitempty"`
-	TargetUrl             string `json:"targetUrl"`
-	OauthUrl              string `json:"oauthUrl"`
-	CredentialsSecretName string `json:"credentialsSecretName"`
+	AccessLabel string      `json:"accessLabel,omitempty"`
+	TargetUrl   string      `json:"targetUrl"`
+	Credentials Credentials `json:"credentials,omitempty"`
+}
+
+// Credentials defines type of authentication and where the credentials are stored
+type Credentials struct {
+	Type              string `json:"type"`
+	SecretName        string `json:"secretName"`
+	AuthenticationUrl string `json:"authenticationUrl,omitempty"`
 }
 
 // Service represents part of the remote environment, which is mapped 1 to 1 to service class in the service-catalog

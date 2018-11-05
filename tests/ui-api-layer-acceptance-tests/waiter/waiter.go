@@ -1,7 +1,6 @@
 package waiter
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -13,11 +12,11 @@ func WaitAtMost(fn func() (bool, error), duration time.Duration) error {
 	tick := time.Tick(500 * time.Millisecond)
 
 	for {
+		ok, err := fn()
 		select {
 		case <-timeout:
-			return errors.New(fmt.Sprintf("Waiting for resource failed in given timeout %f second(s)", duration.Seconds()))
+			return errors.Wrapf(err, "Waiting for resource failed in given timeout %f second(s)", duration.Seconds())
 		case <-tick:
-			ok, err := fn()
 			if err != nil {
 				log.Println(err)
 			} else if ok {
