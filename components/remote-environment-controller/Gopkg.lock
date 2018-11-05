@@ -998,6 +998,7 @@
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
+    "k8s.io/client-go/util/retry",
     "k8s.io/code-generator/cmd/deepcopy-gen",
     "k8s.io/helm/pkg/helm",
     "k8s.io/helm/pkg/proto/hapi/release",
