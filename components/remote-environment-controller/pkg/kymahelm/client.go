@@ -14,12 +14,14 @@ type HelmClient interface {
 }
 
 type helmClient struct {
-	helm *helm.Client
+	helm                *helm.Client
+	installationTimeout int64
 }
 
-func NewClient(host string) HelmClient {
+func NewClient(host string, installationTimeout int64) HelmClient {
 	return &helmClient{
-		helm: helm.NewClient(helm.Host(host)),
+		helm:                helm.NewClient(helm.Host(host)),
+		installationTimeout: installationTimeout,
 	}
 }
 
@@ -46,7 +48,7 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName, overrid
 		helm.ReleaseName(string(releaseName)),
 		helm.ValueOverrides([]byte(overrides)), //Without it default "values.yaml" file is ignored!
 		helm.InstallWait(true),
-		helm.InstallTimeout(180),
+		helm.InstallTimeout(hc.installationTimeout),
 	)
 }
 
@@ -54,7 +56,7 @@ func (hc *helmClient) DeleteRelease(releaseName string) (*rls.UninstallReleaseRe
 	return hc.helm.DeleteRelease(
 		releaseName,
 		helm.DeletePurge(true),
-		helm.DeleteTimeout(180),
+		helm.DeleteTimeout(hc.installationTimeout),
 	)
 }
 

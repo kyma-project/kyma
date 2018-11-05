@@ -1,4 +1,4 @@
-package kymahelm
+package remoteenvironemnts
 
 import (
 	helmmocks "github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm/mocks"

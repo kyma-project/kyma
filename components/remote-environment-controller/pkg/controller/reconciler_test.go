@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/controller/mocks"
-	helmmocks "github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm/mocks"
+	helmmocks "github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm/remoteenvironemnts/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"

@@ -1,6 +1,7 @@
-package kymahelm
+package remoteenvironemnts
 
 import (
+	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 )
 
@@ -16,12 +17,12 @@ type ReleaseManager interface {
 }
 
 type releaseManager struct {
-	helmClient HelmClient
+	helmClient kymahelm.HelmClient
 	overrides  string
 	namespace  string
 }
 
-func NewReleaseManager(helmClient HelmClient, overrides string, namespace string) ReleaseManager {
+func NewReleaseManager(helmClient kymahelm.HelmClient, overrides string, namespace string) ReleaseManager {
 	return &releaseManager{
 		helmClient: helmClient,
 		overrides:  overrides,

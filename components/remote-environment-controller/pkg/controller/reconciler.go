@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm"
+	reReleases "github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm/remoteenvironemnts"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -24,10 +24,10 @@ type RemoteEnvironmentReconciler interface {
 
 type remoteEnvironmentReconciler struct {
 	reMgrClient    RemoteEnvironmentManagerClient
-	releaseManager kymahelm.ReleaseManager
+	releaseManager reReleases.ReleaseManager
 }
 
-func NewReconciler(reMgrClient RemoteEnvironmentManagerClient, releaseManager kymahelm.ReleaseManager) RemoteEnvironmentReconciler {
+func NewReconciler(reMgrClient RemoteEnvironmentManagerClient, releaseManager reReleases.ReleaseManager) RemoteEnvironmentReconciler {
 	return &remoteEnvironmentReconciler{
 		reMgrClient:    reMgrClient,
 		releaseManager: releaseManager,

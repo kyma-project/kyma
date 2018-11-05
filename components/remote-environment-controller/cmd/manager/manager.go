@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/api"
 	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/controller"
+	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm"
+	rerelease "github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm/remoteenvironemnts"
 	log "github.com/sirupsen/logrus"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
@@ -44,20 +46,39 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("Setting up controller.")
+	log.Printf("Preparing Release Manager.")
 
-	overridesData := controller.OverridesData{
-		DomainName:             options.domainName,
-		ProxyServiceImage:      options.proxyServiceImage,
-		EventServiceImage:      options.eventServiceImage,
-		EventServiceTestsImage: options.eventServiceTestsImage,
+	releaseManager, err := newReleaseManager(options)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	err = controller.InitRemoteEnvironmentController(mgr, overridesData, options.namespace, options.appName, options.tillerUrl)
+	log.Printf("Setting up controller.")
+
+	err = controller.InitRemoteEnvironmentController(mgr, releaseManager, options.appName)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	log.Printf("Starting the Cmd.")
 	log.Info(mgr.Start(signals.SetupSignalHandler()))
+}
+
+func newReleaseManager(options *options) (rerelease.ReleaseManager, error) {
+	overridesData := rerelease.OverridesData{
+		DomainName:             options.domainName,
+		ProxyServiceImage:      options.proxyServiceImage,
+		EventServiceImage:      options.eventServiceImage,
+		EventServiceTestsImage: options.eventServiceTestsImage,
+	}
+
+	overrides, err := kymahelm.ParseOverrides(overridesData, rerelease.OverridesTemplate)
+	if err != nil {
+		return nil, err
+	}
+
+	helmClient := kymahelm.NewClient(options.tillerUrl, options.installationTimeout)
+	releaseManager := rerelease.NewReleaseManager(helmClient, overrides, options.namespace)
+
+	return releaseManager, nil
 }
