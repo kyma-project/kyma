@@ -2,7 +2,6 @@ package k8s
 
 import (
 	"fmt"
-
 	"strings"
 
 	"github.com/pkg/errors"

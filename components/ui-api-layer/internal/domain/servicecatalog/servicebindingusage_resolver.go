@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/golang/glog"
-	bindingApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/listener"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
@@ -13,21 +12,15 @@ import (
 	"github.com/pkg/errors"
 )
 
-type serviceBindingGetter interface {
-	ListForServiceInstance(env string, instanceName string) ([]*bindingApi.ServiceBinding, error)
-}
-
 type serviceBindingUsageResolver struct {
-	operations           serviceBindingUsageOperations
-	converter            bindingUsageConverter
-	serviceBindingGetter serviceBindingGetter
+	operations serviceBindingUsageOperations
+	converter  serviceBindingUsageConverter
 }
 
-func newServiceBindingUsageResolver(op serviceBindingUsageOperations, serviceBindingGetter serviceBindingGetter) *serviceBindingUsageResolver {
+func newServiceBindingUsageResolver(op serviceBindingUsageOperations) *serviceBindingUsageResolver {
 	return &serviceBindingUsageResolver{
-		operations:           op,
-		converter:            newBindingUsageConverter(),
-		serviceBindingGetter: serviceBindingGetter,
+		operations: op,
+		converter:  newBindingUsageConverter(),
 	}
 }
 
@@ -97,33 +90,18 @@ func (r *serviceBindingUsageResolver) ServiceBindingUsagesOfInstanceQuery(ctx co
 	return out, nil
 }
 
-func (r *serviceBindingUsageResolver) ServiceBindingUsageEventForInstanceSubscription(ctx context.Context, instanceName, environment string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
+func (r *serviceBindingUsageResolver) ServiceBindingUsageEventSubscription(ctx context.Context, environment string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
 	channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
 	filter := func(bindingUsage *api.ServiceBindingUsage) bool {
-		if bindingUsage == nil || bindingUsage.Namespace != environment {
-			return false
-		}
-
-		bindings, err := r.serviceBindingGetter.ListForServiceInstance(environment, instanceName)
-		if err != nil {
-			glog.Error(errors.Wrapf(err, "while getting %s of %s [environment: %s, instance: %s]", pretty.ServiceBindings, pretty.ServiceInstance, environment, instanceName))
-		}
-
-		bindingNames := make(map[string]struct{})
-		for _, binding := range bindings {
-			bindingNames[binding.Name] = struct{}{}
-		}
-
-		_, ex := bindingNames[bindingUsage.Spec.ServiceBindingRef.Name]
-		return ex
+		return bindingUsage != nil && bindingUsage.Namespace == environment
 	}
 
-	bindingListener := listener.NewBindingUsage(channel, filter, &r.converter)
+	bindingUsageListener := listener.NewBindingUsage(channel, filter, &r.converter)
 
-	r.operations.Subscribe(bindingListener)
+	r.operations.Subscribe(bindingUsageListener)
 	go func() {
 		defer close(channel)
-		defer r.operations.Unsubscribe(bindingListener)
+		defer r.operations.Unsubscribe(bindingUsageListener)
 		<-ctx.Done()
 	}()
 

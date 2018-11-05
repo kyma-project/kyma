@@ -19,7 +19,7 @@ func TestBindingUsageConversionToGQLCornerCases(t *testing.T) {
 			givenK8sSBU *api.ServiceBindingUsage       = nil
 			expGQLSBU   *gqlschema.ServiceBindingUsage = nil
 		)
-		sut := bindingUsageConverter{}
+		sut := serviceBindingUsageConverter{}
 
 		// WHEN
 		gotGQLSBU, err := sut.ToGQL(givenK8sSBU)
@@ -50,7 +50,7 @@ func TestBindingUsageConversionToGQLCornerCases(t *testing.T) {
 			On("Status", mock.Anything).
 			Return(gqlschema.ServiceBindingUsageStatus{})
 
-		sut := bindingUsageConverter{statusExtractorMock}
+		sut := serviceBindingUsageConverter{statusExtractorMock}
 
 		// WHEN
 		gotGQLSBU, err := sut.ToGQL(givenK8sSBU)
@@ -109,7 +109,7 @@ func TestBindingUsageConversionToGQL(t *testing.T) {
 				On("Status", tc.givenK8sSBU.Status.Conditions).
 				Return(gqlschema.ServiceBindingUsageStatus{})
 
-			sut := bindingUsageConverter{statusExtractorMock}
+			sut := serviceBindingUsageConverter{statusExtractorMock}
 
 			// WHEN
 			gotGQLSBU, err := sut.ToGQL(tc.givenK8sSBU)
@@ -251,7 +251,7 @@ func TestBindingUsageConversionInput(t *testing.T) {
 	for tn, tc := range tests {
 		t.Run(tn, func(t *testing.T) {
 			// GIVEN
-			sut := bindingUsageConverter{}
+			sut := serviceBindingUsageConverter{}
 			// WHEN
 			gotK8sSBU, err := sut.InputToK8s(tc.givenSBUInput)
 			// THEN
