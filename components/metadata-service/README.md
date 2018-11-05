@@ -47,7 +47,7 @@ kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o
 - Create a new service 
 
 ```sh
-curl -X POST https://gateway.kyma.local:{NODE_PORT}/ec-default/v1/metadata/services --cert ec-default.crt --key ec-default.key -k \
+curl -X POST https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/metadata/services --cert {CERT_NAME}.crt --key {KEY_NAME}.key -k \
   -d '{"name": "Some EC",
   "provider": "kyma",
   "description": "This is some EC!",
@@ -88,7 +88,7 @@ curl -X POST https://gateway.kyma.local:{NODE_PORT}/ec-default/v1/metadata/servi
 - Fetch all services
 
 ```
-curl https://gateway.kyma.local:{NODE_PORT}/ec-default/v1/metadata/services --cert ec-default.crt --key ec-default.key -k
+curl https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/metadata/services --cert {CERT_NAME}.crt --key {KEY_NAME}.key -k
 ```
 
 ## Development
