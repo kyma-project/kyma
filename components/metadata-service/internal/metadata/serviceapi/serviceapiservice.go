@@ -9,32 +9,6 @@ import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/secrets"
 )
 
-// API is an internal representation of a service's API.
-type API struct {
-	// TargetUrl points to API.
-	TargetUrl string
-	// Credentials is a credentials of API.
-	Credentials *Credentials
-	// Spec contains specification of an API.
-	Spec []byte
-}
-
-// Credentials contains OAuth configuration.
-type Credentials struct {
-	// Oauth is OAuth configuration.
-	Oauth Oauth
-}
-
-// Oauth contains details of OAuth configuration
-type Oauth struct {
-	// URL to OAuth token provider.
-	URL string
-	// ClientID to use for authentication.
-	ClientID string
-	// ClientSecret to use for authentication.
-	ClientSecret string
-}
-
 // Service manages API definition of a service
 type Service interface {
 	// New handles a new API. It creates all requires resources.
@@ -50,24 +24,25 @@ type Service interface {
 type defaultService struct {
 	nameResolver         k8sconsts.NameResolver
 	accessServiceManager accessservice.AccessServiceManager
-	secretsRepository    secrets.Repository
+	secretsService       secrets.Service
 	istioService         istio.Service
 }
 
 func NewService(
 	nameResolver k8sconsts.NameResolver,
 	accessServiceManager accessservice.AccessServiceManager,
-	secretsRepository secrets.Repository,
+	secretsService secrets.Service,
 	istioService istio.Service) Service {
 
 	return defaultService{
 		nameResolver:         nameResolver,
 		accessServiceManager: accessServiceManager,
-		secretsRepository:    secretsRepository,
+		secretsService:       secretsService,
 		istioService:         istioService,
 	}
 }
 
+//TODO:
 func (sas defaultService) New(remoteEnvironment, id string, api *API) (*remoteenv.ServiceAPI, apperrors.AppError) {
 	resourceName := sas.nameResolver.GetResourceName(remoteEnvironment, id)
 	gatewayUrl := sas.nameResolver.GetGatewayUrl(remoteEnvironment, id)
@@ -83,13 +58,9 @@ func (sas defaultService) New(remoteEnvironment, id string, api *API) (*remoteen
 
 	serviceAPI.AccessLabel = resourceName
 
-	if sas.oauthCredentialsProvided(api.Credentials) {
-		err := sas.secretsRepository.Create(remoteEnvironment, resourceName, api.Credentials.Oauth.ClientID, api.Credentials.Oauth.ClientSecret, id)
-		if err != nil {
-			return nil, apperrors.Internal("Creating credentials secret failed, %s", err.Error())
-		}
-		serviceAPI.OauthUrl = api.Credentials.Oauth.URL
-		serviceAPI.CredentialsSecretName = resourceName
+	err = sas.handleCredentials(remoteEnvironment, id, serviceAPI, api.Credentials)
+	if err != nil {
+		return nil, err
 	}
 
 	err = sas.istioService.Create(remoteEnvironment, id, resourceName)
@@ -100,6 +71,7 @@ func (sas defaultService) New(remoteEnvironment, id string, api *API) (*remoteen
 	return serviceAPI, nil
 }
 
+//TODO:
 func (sas defaultService) Read(remoteEnvironment string, remoteenvAPI *remoteenv.ServiceAPI) (*API, apperrors.AppError) {
 	api := &API{
 		TargetUrl: remoteenvAPI.TargetUrl,
@@ -112,7 +84,7 @@ func (sas defaultService) Read(remoteEnvironment string, remoteenvAPI *remoteenv
 			},
 		}
 
-		clientId, clientSecret, err := sas.secretsRepository.Get(remoteEnvironment, remoteenvAPI.CredentialsSecretName)
+		clientId, clientSecret, err := sas.secretsService.GetOauthSecret(remoteEnvironment, remoteenvAPI.CredentialsSecretName)
 		if err != nil {
 			return nil, apperrors.Internal("Reading oauth credentials from %s secret failed, %s",
 				remoteenvAPI.CredentialsSecretName, err.Error())
@@ -132,7 +104,7 @@ func (sas defaultService) Delete(remoteEnvironment, id string) apperrors.AppErro
 		return apperrors.Internal("Deleting access service failed, %s", err.Error())
 	}
 
-	err = sas.secretsRepository.Delete(resourceName)
+	err = sas.secretsService.DeleteSecret(resourceName)
 	if err != nil {
 		return apperrors.Internal("Deleting credentials secret failed, %s", err.Error())
 	}
@@ -145,6 +117,7 @@ func (sas defaultService) Delete(remoteEnvironment, id string) apperrors.AppErro
 	return nil
 }
 
+//TODO:
 func (sas defaultService) Update(remoteEnvironment, id string, api *API) (*remoteenv.ServiceAPI, apperrors.AppError) {
 	resourceName := sas.nameResolver.GetResourceName(remoteEnvironment, id)
 	gatewayUrl := sas.nameResolver.GetGatewayUrl(remoteEnvironment, id)
@@ -161,14 +134,14 @@ func (sas defaultService) Update(remoteEnvironment, id string, api *API) (*remot
 	serviceAPI.AccessLabel = resourceName
 
 	if sas.oauthCredentialsProvided(api.Credentials) {
-		err = sas.secretsRepository.Upsert(remoteEnvironment, resourceName, api.Credentials.Oauth.ClientID, api.Credentials.Oauth.ClientSecret, id)
+		err = sas.secretsService.UpdateOauthSecret(remoteEnvironment, resourceName, api.Credentials.Oauth.ClientID, api.Credentials.Oauth.ClientSecret, id)
 		if err != nil {
 			return nil, apperrors.Internal("Updating credentials secret failed, %s", err.Error())
 		}
 		serviceAPI.OauthUrl = api.Credentials.Oauth.URL
 		serviceAPI.CredentialsSecretName = resourceName
 	} else {
-		err := sas.secretsRepository.Delete(resourceName)
+		err := sas.secretsService.DeleteSecret(resourceName)
 		if err != nil {
 			return nil, apperrors.Internal("Deleting credentials secret failed, %s", err.Error())
 		}
@@ -182,6 +155,37 @@ func (sas defaultService) Update(remoteEnvironment, id string, api *API) (*remot
 	return serviceAPI, nil
 }
 
+//TODO:
+func (sas defaultService) handleCredentials(remoteEnvironment, id string, serviceAPI *remoteenv.ServiceAPI, credentials *Credentials) apperrors.AppError {
+	if credentials == nil {
+		return nil
+	}
+
+	if sas.basicCredentialsProvided(credentials) && sas.oauthCredentialsProvided(credentials) {
+		return apperrors.WrongInput("Creating access service failed: Multiple authentication methods provided.")
+	}
+
+	if sas.oauthCredentialsProvided(credentials) {
+		serviceAPI.OauthUrl = credentials.Oauth.URL
+	}
+
+	err := sas.createCredentialsSecret(remoteEnvironment, id, credentials)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//TODO:
+func (sas defaultService) createCredentialsSecret(remoteEnvironment, id string, credentials *Credentials) apperrors.AppError {
+	return nil
+}
+
 func (sas defaultService) oauthCredentialsProvided(credentials *Credentials) bool {
 	return credentials != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
+}
+
+func (sas defaultService) basicCredentialsProvided(credentials *Credentials) bool {
+	return credentials != nil && credentials.Basic.Username != "" && credentials.Basic.Password != ""
 }
