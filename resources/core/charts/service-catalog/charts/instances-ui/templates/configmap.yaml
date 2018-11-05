@@ -10,5 +10,6 @@ data:
   config.js: |
     window.clusterConfig = {
       catalogUrl: '/home/environments/{CURRENT_ENV}/catalog',
-      graphqlApiUrl: 'https://ui-api.{{ .Values.global.domainName }}/graphql'
+      graphqlApiUrl: 'https://ui-api.{{ .Values.global.domainName }}/graphql',
+      subscriptionsApiUrl: 'wss://ui-api.{{ .Values.global.domainName }}/graphql',
     };
