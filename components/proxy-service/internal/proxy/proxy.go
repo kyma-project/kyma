@@ -53,50 +53,41 @@ func NewInvalidStateHandler(message string) http.Handler {
 }
 
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	id := p.nameResolver.ExtractServiceId(r.Host)
+	id := p.extractServiceId(r.Host)
 
-	cacheObj, found := p.httpProxyCache.Get(id)
-
-	var err apperrors.AppError
-	if !found {
-		cacheObj, err = p.createAndCacheProxy(id)
-		if err != nil {
-			handleErrors(w, err)
-			return
-		}
+	cacheEntry, err := p.getCacheEntry(id)
+	if err != nil {
+		handleErrors(w, err)
+		return
 	}
 
-	//_, err = p.handleAuthHeaders(r, cacheObj)
-	//if err != nil {
-	//	handleErrors(w, err)
-	//	return
-	//}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(p.proxyTimeout)*time.Second)
+	newRequest, cancel := p.prepareRequest(r, cacheEntry)
 	defer cancel()
-	requestWithContext := r.WithContext(ctx)
 
-	//rr := newRequestRetrier(id, p, r)
-	//cacheObj.Proxy.ModifyResponse = rr.CheckResponse
+	err = p.addAuthorization(newRequest, cacheEntry)
+	if err != nil {
+		handleErrors(w, err)
+		return
+	}
 
-	cacheObj.Proxy.ServeHTTP(w, requestWithContext)
+	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
 
 func (p *proxy) extractServiceId(host string) string {
 	return p.nameResolver.ExtractServiceId(host)
 }
 
-func (p *proxy) fromCache(id string) (*proxycache.Proxy, apperrors.AppError) {
+func (p *proxy) getCacheEntry(id string) (*proxycache.CacheEntry, apperrors.AppError) {
 	cacheObj, found := p.httpProxyCache.Get(id)
 
 	if found {
 		return cacheObj, nil
 	} else {
-		return p.createAndCacheProxy(id)
+		return p.newCacheEntry(id)
 	}
 }
 
-func (p *proxy) newCacheEntry(id string) (*proxycache.Proxy, apperrors.AppError) {
+func (p *proxy) newCacheEntry(id string) (*proxycache.CacheEntry, apperrors.AppError) {
 	serviceApi, err := p.serviceDefService.GetAPI(id)
 	if err != nil {
 		return nil, err
@@ -112,22 +103,20 @@ func (p *proxy) newCacheEntry(id string) (*proxycache.Proxy, apperrors.AppError)
 	return p.httpProxyCache.Put(id, proxy, authenticationStrategy), nil
 }
 
-func (p *proxy) addAuthorization(r *http.Request, cacheEntry *proxycache.Proxy) {
-	cacheEntry.AuthorizationStrategy.Setup(r)
-}
-
-func (p *proxy) prepareRequest(r *http.Request, cacheEntry *proxycache.Proxy) (*http.Request, context.CancelFunc) {
+func (p *proxy) prepareRequest(r *http.Request, cacheEntry *proxycache.CacheEntry) (*http.Request, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(p.proxyTimeout)*time.Second)
-	// TODO remember to use cancel in the calling method
-	//defer cancel()
 	newRequest := r.WithContext(ctx)
-	cacheEntry.AuthorizationStrategy.Setup(newRequest)
 
 	return newRequest, cancel
 }
 
+func (p *proxy) addAuthorization(r *http.Request, cacheEntry *proxycache.CacheEntry) apperrors.AppError {
+	return cacheEntry.AuthorizationStrategy.Setup(r)
+}
+
 func (p *proxy) newAuthenticationStrategy(credentials *serviceapi.Credentials) authentication.Strategy {
-	var authCredentials authentication.Credentials
+	authCredentials := authentication.Credentials{}
+	
 	if oauthCredentialsProvided(credentials) {
 		authCredentials = authentication.Credentials{
 			Oauth: &authentication.OauthCredentials{
@@ -139,33 +128,6 @@ func (p *proxy) newAuthenticationStrategy(credentials *serviceapi.Credentials) a
 	}
 
 	return p.authenticationStrategyFactory.Create(authCredentials)
-}
-
-func (p *proxy) createAndCacheProxy(id string) (*proxycache.Proxy, apperrors.AppError) {
-	serviceApi, err := p.serviceDefService.GetAPI(id)
-	if err != nil {
-		return nil, err
-	}
-
-	proxy, err := makeProxy(serviceApi.TargetUrl, id, p.skipVerify)
-
-	if oauthCredentialsProvided(serviceApi.Credentials) {
-		return p.httpProxyCache.Add(
-			id,
-			serviceApi.Credentials.Oauth.URL,
-			serviceApi.Credentials.Oauth.ClientID,
-			serviceApi.Credentials.Oauth.ClientSecret,
-			proxy,
-		), nil
-	}
-
-	return p.httpProxyCache.Add(
-		id,
-		"",
-		"",
-		"",
-		proxy,
-	), nil
 }
 
 func respondWithBody(w http.ResponseWriter, code int, body httperrors.ErrorResponse) {

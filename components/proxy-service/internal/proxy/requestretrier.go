@@ -13,10 +13,10 @@ type retrier struct {
 	request *http.Request
 	retried bool
 	timeout int
-	proxy   proxycache.Proxy
+	proxy   proxycache.CacheEntry
 }
 
-func newRequestRetrier(id string, request *http.Request, proxy proxycache.Proxy, timeout int) *retrier {
+func newRequestRetrier(id string, request *http.Request, proxy proxycache.CacheEntry, timeout int) *retrier {
 	return &retrier{id: id, request: request, retried: false, proxy: proxy, timeout: timeout}
 }
 

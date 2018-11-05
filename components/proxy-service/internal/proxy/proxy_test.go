@@ -9,6 +9,7 @@ import (
 	metadataMock "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/mocks"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
@@ -28,18 +29,18 @@ func TestProxy(t *testing.T) {
 		defer ts.Close()
 
 		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		req.Host = "http://re-test-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local"
+		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("Setup", req).Return(nil)
+		authStrategyMock.On("Setup", mock.AnythingOfType("*http.Request")).Return(nil)
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", authentication.Credentials{}).Return()
+		authStrategyFactoryMock.On("Create", authentication.Credentials{}).Return(authStrategyMock)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
 			TargetUrl: ts.URL,
-		}, nil).Times(1)
+		}, nil).Times(2)
 
 		handler := New(serviceDefServiceMock, authStrategyFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
@@ -67,21 +68,15 @@ func TestProxy(t *testing.T) {
 		defer ts.Close()
 
 		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		req.Host = "http://re-test-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local"
+		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("Setup", req).Return(nil)
+		authStrategyMock.On("Setup", mock.AnythingOfType("*http.Request")).Return(nil)
 
-		authCredentials := authentication.Credentials{
-			Oauth: &authentication.OauthCredentials{
-				ClientId:          "clientId",
-				ClientSecret:      "clientSecret",
-				AuthenticationUrl: tsOAuth.URL + "/token",
-			},
-		}
+		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", tsOAuth.URL + "/token")
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", authCredentials).Return(authStrategyMock)
+		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
@@ -90,6 +85,7 @@ func TestProxy(t *testing.T) {
 				Oauth: serviceapi.Oauth{
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
+					URL:          tsOAuth.URL + "/token",
 				},
 			},
 		}, nil)
@@ -113,28 +109,16 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		tsOAuth := NewForbiddenServer(func(req *http.Request) {
-			assert.Equal(t, req.Method, http.MethodPost)
-			assert.Equal(t, req.RequestURI, "/token")
-		})
-		defer ts.Close()
-
 		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		req.Host = "http://re-test-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local"
+		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("Setup", req).Return(nil)
+		authStrategyMock.On("Setup", mock.AnythingOfType("*http.Request")).Return(apperrors.UpstreamServerCallFailed("failed"))
 
-		authCredentials := authentication.Credentials{
-			Oauth: &authentication.OauthCredentials{
-				ClientId:          "clientId",
-				ClientSecret:      "clientSecret",
-				AuthenticationUrl: tsOAuth.URL + "/token",
-			},
-		}
+		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", "www.example.com/token")
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", authCredentials).Return(authStrategyMock)
+		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
@@ -143,6 +127,7 @@ func TestProxy(t *testing.T) {
 				Oauth: serviceapi.Oauth{
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
+					URL:          "www.example.com/token",
 				},
 			},
 		}, nil)
@@ -155,14 +140,13 @@ func TestProxy(t *testing.T) {
 
 		// then
 		assert.Equal(t, http.StatusBadGateway, rr.Code)
-		assert.Equal(t, "test", rr.Body.String())
 	})
 
 	t.Run("should return 500 if failed to get service definition", func(t *testing.T) {
 		// given
 		req, err := http.NewRequest(http.MethodGet, "/", nil)
 		require.NoError(t, err)
-		req.Host = "http://re-test-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local"
+		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
 		rr := httptest.NewRecorder()
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
@@ -193,7 +177,7 @@ func TestProxy(t *testing.T) {
 		defer tsf.Close()
 
 		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		req.Host = "http://re-test-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local"
+		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
@@ -255,7 +239,7 @@ func NewTestServer(check func(req *http.Request)) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		check(r)
-		w.WriteHeader(http.StatusForbidden)
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("test"))
 	}))
 }
@@ -294,5 +278,13 @@ func createProxyConfig(proxyTimeout int) Config {
 		Namespace:         "kyma-integration",
 		RemoteEnvironment: "test",
 		ProxyCacheTTL:     proxyTimeout,
+	}
+}
+
+func createOAuthCredentialsMatcher(clientId, clientSecret, url string) func(authentication.Credentials) bool {
+	return func(c authentication.Credentials) bool {
+		return c.Oauth != nil && c.Oauth.ClientId == clientId &&
+			c.Oauth.ClientSecret == clientSecret &&
+			c.Oauth.AuthenticationUrl == url
 	}
 }

@@ -15,15 +15,15 @@ type AuthorizationStrategy interface {
 	Reset()
 }
 
-type Proxy struct {
+type CacheEntry struct {
 	Proxy                 *httputil.ReverseProxy
 	AuthorizationStrategy AuthorizationStrategy
 }
 
 type HTTPProxyCache interface {
-	Get(id string) (*Proxy, bool)
-	Add(id, oauthUrl, clientId, clientSecret string, proxy *httputil.ReverseProxy) *Proxy
-	Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *Proxy
+	Get(id string) (*CacheEntry, bool)
+	Add(id, oauthUrl, clientId, clientSecret string, proxy *httputil.ReverseProxy) *CacheEntry
+	Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *CacheEntry
 }
 
 type httpProxyCache struct {
@@ -38,25 +38,25 @@ func NewProxyCache(skipVerify bool, proxyCacheTTL int) HTTPProxyCache {
 	}
 }
 
-func (p *httpProxyCache) Get(id string) (*Proxy, bool) {
+func (p *httpProxyCache) Get(id string) (*CacheEntry, bool) {
 	proxy, found := p.proxyCache.Get(id)
 	if !found {
 		return nil, false
 	}
 
-	return proxy.(*Proxy), found
+	return proxy.(*CacheEntry), found
 }
 
-func (p *httpProxyCache) Add(id, oauthUrl, clientId, clientSecret string, reverseProxy *httputil.ReverseProxy) *Proxy {
+func (p *httpProxyCache) Add(id, oauthUrl, clientId, clientSecret string, reverseProxy *httputil.ReverseProxy) *CacheEntry {
 
-	proxy := &Proxy{Proxy: reverseProxy}
+	proxy := &CacheEntry{Proxy: reverseProxy}
 	p.proxyCache.Set(id, proxy, cache.DefaultExpiration)
 
 	return proxy
 }
 
-func (p *httpProxyCache) Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *Proxy {
-	proxy := &Proxy{Proxy: reverseProxy, AuthorizationStrategy: authorizationStrategy}
+func (p *httpProxyCache) Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *CacheEntry {
+	proxy := &CacheEntry{Proxy: reverseProxy, AuthorizationStrategy: authorizationStrategy}
 	p.proxyCache.Set(id, proxy, cache.DefaultExpiration)
 
 	return proxy
