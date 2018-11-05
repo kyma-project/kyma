@@ -145,7 +145,7 @@ func (r *remoteEnvironmentResolver) EnableRemoteEnvironmentMutation(ctx context.
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while enabling %s", pretty.RemoteEnvironment))
-		return nil, gqlerror.New(err, pretty.RemoteEnvironment, gqlerror.WithName(remoteEnvironment), gqlerror.WithEnvironment(environment))
+		return nil, gqlerror.New(err, pretty.EnvironmentMapping, gqlerror.WithName(remoteEnvironment), gqlerror.WithEnvironment(environment))
 	}
 
 	environmentMapping := &gqlschema.EnvironmentMapping{
@@ -161,7 +161,7 @@ func (r *remoteEnvironmentResolver) DisableRemoteEnvironmentMutation(ctx context
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while disabling %s", pretty.RemoteEnvironment))
-		return nil, gqlerror.New(err, pretty.RemoteEnvironment, gqlerror.WithName(remoteEnvironment), gqlerror.WithEnvironment(environment))
+		return nil, gqlerror.New(err, pretty.EnvironmentMapping, gqlerror.WithName(remoteEnvironment), gqlerror.WithEnvironment(environment))
 	}
 
 	environmentMapping := &gqlschema.EnvironmentMapping{
