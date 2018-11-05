@@ -1,20 +1,4 @@
 apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: k8s-dashboard-proxy
-  namespace: {{ .Release.Namespace }}
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "kubernetes-dashboard.{{ .Values.global.domainName }}"
----
-apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: {{ template "name" . }}
