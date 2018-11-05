@@ -6,7 +6,6 @@ type: Installation
 This Installation guide shows developers how to quickly deploy Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster. Kyma installs on a cluster using a proprietary installer based on a Kubernetes operator.
 
 ## Prerequisites
-
 - A domain for your GKE cluster
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project
 - [Docker](https://www.docker.com/)
@@ -73,7 +72,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
     ```
 4. Run the Certbot Docker image with the `letsencrypt` folder mounted. Certbot uses the key to apply DNS challenge for the certificate request and stores the TLS certificates in that folder. Run:
     ```
-    sudo docker run -it --name certbot --rm \
+    docker run -it --name certbot --rm \
         -v "$(pwd)/letsencrypt:/etc/letsencrypt" \
         certbot/dns-google \
         certonly \
@@ -87,12 +86,9 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 5. Export the certificate and key as environment variables. Run these commands:
 
     ```
-    export TLS_CERT=$(cat ./letsencrypt/live/$DOMAIN/fullchain.pem | base64)
+    export TLS_CERT=$(cat ./letsencrypt/live/$DOMAIN/fullchain.pem | base64 | sed 's/ /\\ /g')
+    export TLS_KEY=$(cat ./letsencrypt/live/$DOMAIN/privkey.pem | base64 | sed 's/ /\\ /g')
     ```
-    ```
-    export TLS_KEY=$(cat ./letsencrypt/live/$DOMAIN/privkey.pem | base64)
-    ```
-
 
 ## Prepare the GKE cluster
 
@@ -105,7 +101,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
     ```
     gcloud beta container --project "$PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.10.7-gke.6" --machine-type "n1-standard-2" \
+    --cluster-version "latest" --machine-type "n1-standard-2" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
     ```
 
@@ -119,7 +115,11 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 ### Using the latest GitHub release
 
-1. Download the `kyma-config-cluster` file bundled with the latest Kyma [release](https://github.com/kyma-project/kyma/releases/).
+1. Download the `kyma-config-cluster` file bundled with the latest Kyma [release](https://github.com/kyma-project/kyma/releases/). Run:
+   ```
+   LATEST=$(curl https://github.com/kyma-project/kyma/releases/latest -I|grep Location:| rev | cut -d'/' -f1 | rev|tr -d '\r')
+   wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-cluster.yaml
+   ```
 
 2. Update the file with the values from your environment variables. Run:
     ```
