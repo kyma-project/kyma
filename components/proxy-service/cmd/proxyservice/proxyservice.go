@@ -15,7 +15,6 @@ import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/secrets"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/proxycache"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
@@ -33,8 +32,6 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
-	proxyCache := proxycache.NewProxyCache(options.skipVerify, options.proxyCacheTTL)
-
 	serviceDefinitionService, err := newServiceDefinitionService(
 		options.namespace,
 		options.remoteEnvironment,
@@ -44,7 +41,7 @@ func main() {
 		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
 	}
 
-	internalHandler := newInternalHandler(serviceDefinitionService, proxyCache, options)
+	internalHandler := newInternalHandler(serviceDefinitionService, options)
 	externalHandler := externalapi.NewHandler()
 
 	if options.requestLogging {
@@ -80,8 +77,7 @@ func main() {
 	wg.Wait()
 }
 
-func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService,
-	httpProxyCache proxycache.HTTPProxyCache, options *options) http.Handler {
+func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
 	if serviceDefinitionService != nil {
 		authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
 		proxyConfig := proxy.Config{

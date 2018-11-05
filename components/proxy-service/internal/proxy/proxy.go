@@ -13,13 +13,12 @@ import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/proxycache"
 )
 
 type proxy struct {
 	nameResolver                  k8sconsts.NameResolver
 	serviceDefService             metadata.ServiceDefinitionService
-	httpProxyCache                proxycache.HTTPProxyCache
+	cache                         Cache
 	skipVerify                    bool
 	proxyTimeout                  int
 	authenticationStrategyFactory authentication.StrategyFactory
@@ -38,7 +37,7 @@ func New(serviceDefService metadata.ServiceDefinitionService, authenticationStra
 	return &proxy{
 		nameResolver:                  k8sconsts.NewNameResolver(config.RemoteEnvironment, config.Namespace),
 		serviceDefService:             serviceDefService,
-		httpProxyCache:                proxycache.NewProxyCache(config.SkipVerify, config.ProxyCacheTTL),
+		cache:                         NewProxyCache(config.SkipVerify, config.ProxyCacheTTL),
 		skipVerify:                    config.SkipVerify,
 		proxyTimeout:                  config.ProxyTimeout,
 		authenticationStrategyFactory: authenticationStrategyFactory,
@@ -79,8 +78,8 @@ func (p *proxy) extractServiceId(host string) string {
 	return p.nameResolver.ExtractServiceId(host)
 }
 
-func (p *proxy) getOrCreateCacheEntry(id string) (*proxycache.CacheEntry, apperrors.AppError) {
-	cacheObj, found := p.httpProxyCache.Get(id)
+func (p *proxy) getOrCreateCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
+	cacheObj, found := p.cache.Get(id)
 
 	if found {
 		return cacheObj, nil
@@ -89,7 +88,7 @@ func (p *proxy) getOrCreateCacheEntry(id string) (*proxycache.CacheEntry, apperr
 	}
 }
 
-func (p *proxy) createCacheEntry(id string) (*proxycache.CacheEntry, apperrors.AppError) {
+func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 	serviceApi, err := p.serviceDefService.GetAPI(id)
 	if err != nil {
 		return nil, err
@@ -102,17 +101,17 @@ func (p *proxy) createCacheEntry(id string) (*proxycache.CacheEntry, apperrors.A
 
 	authenticationStrategy := p.newAuthenticationStrategy(serviceApi.Credentials)
 
-	return p.httpProxyCache.Put(id, proxy, authenticationStrategy), nil
+	return p.cache.Put(id, proxy, authenticationStrategy), nil
 }
 
-func (p *proxy) prepareRequest(r *http.Request, cacheEntry *proxycache.CacheEntry) (*http.Request, context.CancelFunc) {
+func (p *proxy) prepareRequest(r *http.Request, cacheEntry *CacheEntry) (*http.Request, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(p.proxyTimeout)*time.Second)
 	newRequest := r.WithContext(ctx)
 
 	return newRequest, cancel
 }
 
-func (p *proxy) addAuthentication(r *http.Request, cacheEntry *proxycache.CacheEntry) apperrors.AppError {
+func (p *proxy) addAuthentication(r *http.Request, cacheEntry *CacheEntry) apperrors.AppError {
 	return cacheEntry.AuthorizationStrategy.Setup(r)
 }
 
@@ -132,7 +131,7 @@ func (p *proxy) newAuthenticationStrategy(credentials *serviceapi.Credentials) a
 	return p.authenticationStrategyFactory.Create(authCredentials)
 }
 
-func (p *proxy) addRetryHandler(r *http.Request, id string, cacheEntry *proxycache.CacheEntry) {
+func (p *proxy) addRetryHandler(r *http.Request, id string, cacheEntry *CacheEntry) {
 	cacheEntry.Proxy.ModifyResponse = p.createRequestRetrier(id, r)
 }
 

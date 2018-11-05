@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/proxycache"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
@@ -13,10 +12,10 @@ type retrier struct {
 	request *http.Request
 	retried bool
 	timeout int
-	proxyCacheEntry   *proxycache.CacheEntry
+	proxyCacheEntry   *CacheEntry
 }
 
-func newRequestRetrier(id string, request *http.Request, proxyCacheEntry *proxycache.CacheEntry, timeout int) *retrier {
+func newRequestRetrier(id string, request *http.Request, proxyCacheEntry *CacheEntry, timeout int) *retrier {
 	return &retrier{id: id, request: request, retried: false, proxyCacheEntry: proxyCacheEntry, timeout: timeout}
 }
 

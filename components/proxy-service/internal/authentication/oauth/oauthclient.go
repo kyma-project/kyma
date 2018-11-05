@@ -1,14 +1,3 @@
-/*
- * [y] hybris Platform
- *
- * Copyright (c) 2000-2018 hybris AG
- * All rights reserved.
- *
- * This software is the confidential and proprietary information of hybris
- * ("Confidential Information"). You shall not disclose such Confidential
- * Information and shall use it only in accordance with the terms of the
- * license agreement you entered into with hybris.
- */
 package oauth
 
 import (
@@ -33,58 +22,58 @@ type oauthResponse struct {
 	Scope       string `json:"scope"`
 }
 
-type OAuthClient interface {
+type Client interface {
 	GetToken(clientID string, clientSecret string, authURL string) (string, apperrors.AppError)
 	InvalidateAndRetry(clientID string, clientSecret string, authURL string) (string, apperrors.AppError)
 	InvalidateTokenCache(clientID string)
 }
 
-type oauthClient struct {
+type client struct {
 	timeoutDuration int
 	tokenCache      tokencache.TokenCache
 }
 
-func NewOauthClient(timeoutDuration int, tokenCache tokencache.TokenCache) OAuthClient {
-	return &oauthClient{
+func NewOauthClient(timeoutDuration int, tokenCache tokencache.TokenCache) Client {
+	return &client{
 		timeoutDuration: timeoutDuration,
 		tokenCache:      tokenCache,
 	}
 }
 
-func (oc *oauthClient) GetToken(clientID string, clientSecret string, authURL string) (string, apperrors.AppError) {
-	token, found := oc.tokenCache.Get(clientID)
+func (c *client) GetToken(clientID string, clientSecret string, authURL string) (string, apperrors.AppError) {
+	token, found := c.tokenCache.Get(clientID)
 	if found {
 		return "Bearer " + token, nil
 	}
 
-	tokenResponse, err := oc.requestToken(clientID, clientSecret, authURL)
+	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL)
 	if err != nil {
 		return "", err
 	}
 
-	oc.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
+	c.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
 	return "Bearer " + tokenResponse.AccessToken, nil
 }
 
-func (oc *oauthClient) InvalidateAndRetry(clientID string, clientSecret string, authURL string) (string, apperrors.AppError) {
-	oc.tokenCache.Remove(clientID)
+func (c *client) InvalidateAndRetry(clientID string, clientSecret string, authURL string) (string, apperrors.AppError) {
+	c.tokenCache.Remove(clientID)
 
-	tokenResponse, err := oc.requestToken(clientID, clientSecret, authURL)
+	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL)
 	if err != nil {
 		return "", err
 	}
 
-	oc.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
+	c.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
 	return "Bearer " + tokenResponse.AccessToken, nil
 }
 
-func (oc *oauthClient) InvalidateTokenCache(clientID string) {
-	oc.tokenCache.Remove(clientID)
+func (c *client) InvalidateTokenCache(clientID string) {
+	c.tokenCache.Remove(clientID)
 }
 
-func (oc *oauthClient) requestToken(clientID string, clientSecret string, authURL string) (*oauthResponse, apperrors.AppError) {
+func (c *client) requestToken(clientID string, clientSecret string, authURL string) (*oauthResponse, apperrors.AppError) {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -102,7 +91,7 @@ func (oc *oauthClient) requestToken(clientID string, clientSecret string, authUR
 
 	req.Header.Add(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationURLEncoded)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(oc.timeoutDuration)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.timeoutDuration)*time.Second)
 	defer cancel()
 	requestWithContext := req.WithContext(ctx)
 

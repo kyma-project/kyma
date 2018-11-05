@@ -1,4 +1,4 @@
-package proxycache
+package proxy
 
 import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
@@ -20,9 +20,8 @@ type CacheEntry struct {
 	AuthorizationStrategy AuthorizationStrategy
 }
 
-type HTTPProxyCache interface {
+type Cache interface {
 	Get(id string) (*CacheEntry, bool)
-	Add(id, oauthUrl, clientId, clientSecret string, proxy *httputil.ReverseProxy) *CacheEntry
 	Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *CacheEntry
 }
 
@@ -31,7 +30,7 @@ type httpProxyCache struct {
 	proxyCache *cache.Cache
 }
 
-func NewProxyCache(skipVerify bool, proxyCacheTTL int) HTTPProxyCache {
+func NewProxyCache(skipVerify bool, proxyCacheTTL int) Cache {
 	return &httpProxyCache{
 		skipVerify: skipVerify,
 		proxyCache: cache.New(time.Duration(proxyCacheTTL)*time.Second, cleanupInterval*time.Second),
@@ -45,14 +44,6 @@ func (p *httpProxyCache) Get(id string) (*CacheEntry, bool) {
 	}
 
 	return proxy.(*CacheEntry), found
-}
-
-func (p *httpProxyCache) Add(id, oauthUrl, clientId, clientSecret string, reverseProxy *httputil.ReverseProxy) *CacheEntry {
-
-	proxy := &CacheEntry{Proxy: reverseProxy}
-	p.proxyCache.Set(id, proxy, cache.DefaultExpiration)
-
-	return proxy
 }
 
 func (p *httpProxyCache) Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *CacheEntry {
