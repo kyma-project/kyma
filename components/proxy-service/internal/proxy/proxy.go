@@ -55,7 +55,7 @@ func NewInvalidStateHandler(message string) http.Handler {
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	id := p.extractServiceId(r.Host)
 
-	cacheEntry, err := p.getCacheEntry(id)
+	cacheEntry, err := p.getOrCreateCacheEntry(id)
 	if err != nil {
 		handleErrors(w, err)
 		return
@@ -64,11 +64,13 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	newRequest, cancel := p.prepareRequest(r, cacheEntry)
 	defer cancel()
 
-	err = p.addAuthorization(newRequest, cacheEntry)
+	err = p.addAuthentication(newRequest, cacheEntry)
 	if err != nil {
 		handleErrors(w, err)
 		return
 	}
+
+	p.addRetryHandler(newRequest, id, cacheEntry)
 
 	cacheEntry.Proxy.ServeHTTP(w, newRequest)
 }
@@ -77,17 +79,17 @@ func (p *proxy) extractServiceId(host string) string {
 	return p.nameResolver.ExtractServiceId(host)
 }
 
-func (p *proxy) getCacheEntry(id string) (*proxycache.CacheEntry, apperrors.AppError) {
+func (p *proxy) getOrCreateCacheEntry(id string) (*proxycache.CacheEntry, apperrors.AppError) {
 	cacheObj, found := p.httpProxyCache.Get(id)
 
 	if found {
 		return cacheObj, nil
 	} else {
-		return p.newCacheEntry(id)
+		return p.createCacheEntry(id)
 	}
 }
 
-func (p *proxy) newCacheEntry(id string) (*proxycache.CacheEntry, apperrors.AppError) {
+func (p *proxy) createCacheEntry(id string) (*proxycache.CacheEntry, apperrors.AppError) {
 	serviceApi, err := p.serviceDefService.GetAPI(id)
 	if err != nil {
 		return nil, err
@@ -110,7 +112,7 @@ func (p *proxy) prepareRequest(r *http.Request, cacheEntry *proxycache.CacheEntr
 	return newRequest, cancel
 }
 
-func (p *proxy) addAuthorization(r *http.Request, cacheEntry *proxycache.CacheEntry) apperrors.AppError {
+func (p *proxy) addAuthentication(r *http.Request, cacheEntry *proxycache.CacheEntry) apperrors.AppError {
 	return cacheEntry.AuthorizationStrategy.Setup(r)
 }
 
@@ -128,6 +130,24 @@ func (p *proxy) newAuthenticationStrategy(credentials *serviceapi.Credentials) a
 	}
 
 	return p.authenticationStrategyFactory.Create(authCredentials)
+}
+
+func (p *proxy) addRetryHandler(r *http.Request, id string, cacheEntry *proxycache.CacheEntry) {
+	cacheEntry.Proxy.ModifyResponse = p.createRequestRetrier(id, r)
+}
+
+func (p *proxy) createRequestRetrier(id string, r *http.Request) (func (*http.Response) error) {
+	return func (response *http.Response) error {
+		newCacheEntry, err := p.createCacheEntry(id)
+		if err != nil {
+			return err
+		}
+
+		// TODO Timeout : how to get it
+		retrier := newRequestRetrier(id, r, newCacheEntry, p.proxyTimeout)
+
+		return retrier.CheckResponse(response)
+	}
 }
 
 func respondWithBody(w http.ResponseWriter, code int, body httperrors.ErrorResponse) {

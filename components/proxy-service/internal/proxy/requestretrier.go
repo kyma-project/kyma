@@ -13,11 +13,11 @@ type retrier struct {
 	request *http.Request
 	retried bool
 	timeout int
-	proxy   proxycache.CacheEntry
+	proxyCacheEntry   *proxycache.CacheEntry
 }
 
-func newRequestRetrier(id string, request *http.Request, proxy proxycache.CacheEntry, timeout int) *retrier {
-	return &retrier{id: id, request: request, retried: false, proxy: proxy, timeout: timeout}
+func newRequestRetrier(id string, request *http.Request, proxyCacheEntry *proxycache.CacheEntry, timeout int) *retrier {
+	return &retrier{id: id, request: request, retried: false, proxyCacheEntry: proxyCacheEntry, timeout: timeout}
 }
 
 func (rr *retrier) CheckResponse(r *http.Response) error {
@@ -34,9 +34,12 @@ func (rr *retrier) CheckResponse(r *http.Response) error {
 		if err != nil {
 			return err
 		}
+
 		if res != nil {
-			r = res
+			r.Body.Close()
+			*r = *res
 		}
+
 	}
 
 	return nil
@@ -62,19 +65,21 @@ func (rr *retrier) prepareRequest() (*http.Request, context.CancelFunc) {
 }
 
 func (rr *retrier) addAuthorization(r *http.Request) error {
-	authorizationStrategy := rr.proxy.AuthorizationStrategy
+	authorizationStrategy := rr.proxyCacheEntry.AuthorizationStrategy
 	authorizationStrategy.Reset()
 
 	return authorizationStrategy.Setup(r)
 }
 
 func (rr *retrier) performRequest(r *http.Request) (*http.Response, error) {
-	reverseProxy := rr.proxy.Proxy
+	reverseProxy := rr.proxyCacheEntry.Proxy
 	reverseProxy.Director(r)
 
 	client := &http.Client{
 		Transport: reverseProxy.Transport,
 	}
 
-	return client.Do(r)
+	res, err := client.Do(r)
+
+	return res, err
 }

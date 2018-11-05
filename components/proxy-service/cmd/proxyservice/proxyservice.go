@@ -10,7 +10,6 @@ import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/authentication"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httptools"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/secrets"

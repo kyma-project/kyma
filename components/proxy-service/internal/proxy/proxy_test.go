@@ -185,18 +185,11 @@ func TestProxy(t *testing.T) {
 		}, nil)
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("Setup", req).Return(nil).Twice()
-		authStrategyMock.On("Reset", req).Return().Once()
-
-		authCredentials := authentication.Credentials{
-			Basic: &authentication.BasicAuthCredentials{
-				UserName: "username",
-				Password: "password",
-			},
-		}
-
+		authStrategyMock.On("Setup", mock.Anything).Return(nil).Twice()
+		authStrategyMock.On("Reset").Return().Once()
+		
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", authCredentials).Return(authStrategyMock)
+		authStrategyFactoryMock.On("Create", mock.Anything).Return(authStrategyMock)
 
 		handler := New(serviceDefServiceMock, authStrategyFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
@@ -209,6 +202,7 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, "test", rr.Body.String())
 
 		serviceDefServiceMock.AssertExpectations(t)
+		authStrategyMock.AssertExpectations(t)
 	})
 }
 
@@ -254,17 +248,15 @@ func NewForbiddenServer(check func(req *http.Request)) *httptest.Server {
 }
 
 func NewTestServerForRetryTest(check func(req *http.Request)) *httptest.Server {
-	var requestNotSent *bool
-
-	*requestNotSent = false
+	firstCall := true
 
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		check(r)
-		if *requestNotSent {
+		if firstCall {
 			w.WriteHeader(http.StatusForbidden)
+			firstCall = false
 		} else {
-			*requestNotSent = true
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("test"))
 		}
