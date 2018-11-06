@@ -266,6 +266,9 @@
 # Event Service Tests
 /tests/gateway-tests/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
+# Backup/restore e2e tests
+/tests/backup-restore-e2e/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+
 # All .md files
 *.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc
 
