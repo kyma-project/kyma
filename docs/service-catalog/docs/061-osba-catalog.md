@@ -3,13 +3,15 @@ title: Catalog
 type: UI OSBA Contracts
 ---
 
-Catalog UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma/tree/master/components/ui-api-layer) project which fetches the data from Service Brokers using the Service Catalog. The next section explains the mapping of [Service Object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#catalog-management) from [OSBA](https://openservicebrokerapi.org/) to UI fields.
+Catalog UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma/tree/master/components/ui-api-layer) project which fetches the data from Service Brokers using the Service Catalog. The next section explains the mapping of [Service Object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#catalog-management) from the [OSBA](https://openservicebrokerapi.org/) to UI fields.
 
 ## Catalog page
 
+These are the OSBA fields used in the main Catalog page:
+
 | Number | OSBA field                        | Fallbacks  | Description                                                                                                                |
 | ------ | --------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------- |
-| (1)    | **metadata.displayName**              | **name***, **id***| If **metadata.displayName, name, id** fields are not present, the given Service Class does not appear on the landing page. |
+| (1)    | **metadata.displayName**              | **name***, **id***| If **metadata.displayName**, **name**, or **id** fields are not present, a given Service Class does not appear on the landing page. |
 | (2)    | **metadata.providerDisplayName**      | -          | If not provided, UI displays without this information.                                                                     |
 | (3)    | **description\***                     | -          | If not provided, UI displays without this information.                                                                     |
 | (4)    | **metadata.labels\*\***               | -          | If not provided, UI does not display any labels.                                                                           |
@@ -26,6 +28,8 @@ Catalog UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma
 
 ## Catalog Details page
 
+These are the OSBA fields used in the detailed Service Class view:
+
 | Number | OSBA field                   | Fallbacks      | Description                                                       |
 | ------ | ---------------------------- | -------------- | ----------------------------------------------------------------- |
 | (1)    | **metadata.displayName**         | **name***, **id***     | -                                                                 |
@@ -34,7 +38,7 @@ Catalog UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma
 | (4)    | **metadata.documentationUrl**    | -              | If not provided, the link with documentation does not appear.     |
 | (5)    | **metadata.supportUrl**          | -              | If not provided, the link with support does not appear.           |
 | (6)    | **tags**                         | -              | If not provided, UI displays without tags.                        |
-| (7)    | **metadata.longDescription**     | **description\***  | If not provided, the `General Information` panel does not appear. |
+| (7)    | **metadata.longDescription**     | **description\***  | If not provided, the **General Information** panel does not appear. |
 | (8)    | not related to OSBA          | -              | -                                                                 |
 
 \*Fields with an asterisk are required OSBA attributes.
@@ -42,6 +46,8 @@ Catalog UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma
 ![alt text](./assets/catalog-details-page.png 'Catalog Details')
 
 ## Add to Environment
+
+These are the OSBA fields used in the **Add to Environment** window:
 
 | Number | OSBA field                | Fallbacks            | Description |
 | ------ | ------------------------- | -------------------- | ----------- |
@@ -55,9 +61,9 @@ Catalog UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma
 
 ### Plan schema
 
-[Plan Object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#schema-object) in the OSBA can have the **schemas** field. Schema is used to generate form to enable provisioning of the Service Class.
+The [Plan Object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#plan-object) in the OSBA can have the **schemas** field. Schema is used to generate a form which enables provisioning of the Service Class.
 
-Example:
+See the sample schema:
 
 ```
 {
@@ -85,13 +91,13 @@ Example:
         }
 ```
 
-Form:
+This sample displays in the following way:
 
 ![alt text](./assets/schema-form.png 'SchemaForm')
 
-Best practices for designing schema object:
+Follow these rules when you design schema objects:
 
-* If the field has limited possible values, use the **enum** field. It renders a field as dropdown, so it prevents user from making the mistakes.
+* If the field has limited possible values, use the **enum** field. It renders a field as dropdown, so it prevents the user from making mistakes.
 * If the field is required for the Service Class, mark it as **required**. UI blocks provisioning if you do not fill in the required fields.
 * Fill the **default** value for a field whenever possible, it makes the provisioning faster.
-* If the field, such as the field for a password, must be starred, use the **format** key with the **password** value.
+* If the field, such as the password field, must be starred, use the **format** key with the **password** value.

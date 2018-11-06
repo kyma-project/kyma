@@ -3,9 +3,11 @@ title: Instances
 type: UI OSBA Contracts
 ---
 
-Instances UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma/tree/master/components/ui-api-layer) project which fetches the data from Service Brokers using the Service Catalog. The next section explains the mapping of [Service Object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#catalog-management) from [OSBA](https://openservicebrokerapi.org/) to UI fields.
+Instances UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma/tree/master/components/ui-api-layer) project which fetches the data from Service Brokers using the Service Catalog. The next section explains the mapping of [Service Object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#catalog-management) from the [OSBA](https://openservicebrokerapi.org/) to UI fields.
 
 ## Service Instances page
+
+These are the OSBA fields used in the main Instances page:
 
 | Number | OSBA field                | Fallbacks            | Description                                                                  |
 | ------ | ------------------------- | -------------------- | ---------------------------------------------------------------------------- |
@@ -21,6 +23,8 @@ Instances UI directly uses the [UI API Layer](https://github.com/kyma-project/ky
 ![alt text](./assets/instances.png 'Service Instances')
 
 ## Service Instance Details page
+
+These are the OSBA fields used in the detailed Service Instance view:
 
 | Number | OSBA field                | Fallbacks            | Description                                           |
 | ------ | ------------------------- | -------------------- | ----------------------------------------------------- |
