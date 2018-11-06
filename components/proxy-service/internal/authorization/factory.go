@@ -41,24 +41,19 @@ type Credentials struct {
 	Basic *BasicAuthCredentials
 }
 
-func (asf authorizationStrategyFactory) Create(credentials Credentials) Strategy {
-	if credentials.Oauth != nil {
-		clientId := credentials.Oauth.ClientId
-		clientSecret := credentials.Oauth.ClientSecret
-		url := credentials.Oauth.AuthenticationUrl
-
-		oauthStrategy := newOAuthStrategy(asf.oauthClient, clientId, clientSecret, url)
+func (asf authorizationStrategyFactory) Create(c Credentials) Strategy {
+	if c.Oauth != nil {
+		oauthStrategy := newOAuthStrategy(asf.oauthClient, c.Oauth.ClientId, c.Oauth.ClientSecret, c.Oauth.AuthenticationUrl)
 
 		return newExternalTokenStrategy(oauthStrategy)
-	} else if credentials.Basic != nil {
-		username := credentials.Basic.UserName
-		password := credentials.Basic.Password
-
-		basicAuthStrategy := newBasicAuthStrategy(username, password)
+	} else if c.Basic != nil {
+		basicAuthStrategy := newBasicAuthStrategy(c.Basic.UserName, c.Basic.Password)
 
 		return newExternalTokenStrategy(basicAuthStrategy)
 	} else {
-		return newExternalTokenStrategy(noneStrategy{})
+		noAuthStrategy := newNoAuthStrategy()
+
+		return newExternalTokenStrategy(noAuthStrategy)
 	}
 }
 
@@ -73,13 +68,3 @@ func NewStrategyFactory(config Configuration) StrategyFactory {
 	return authorizationStrategyFactory{oauthClient: oauthClient}
 }
 
-type noneStrategy struct {
-}
-
-func (ns noneStrategy) Setup(r *http.Request) apperrors.AppError {
-	return nil
-}
-
-func (ns noneStrategy) Reset() {
-
-}

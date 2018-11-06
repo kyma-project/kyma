@@ -43,7 +43,7 @@ func NewOauthClient(timeoutDuration int, tokenCache tokencache.TokenCache) Clien
 func (c *client) GetToken(clientID string, clientSecret string, authURL string) (string, apperrors.AppError) {
 	token, found := c.tokenCache.Get(clientID)
 	if found {
-		return "Bearer " + token, nil
+		return token, nil
 	}
 
 	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL)
@@ -53,7 +53,7 @@ func (c *client) GetToken(clientID string, clientSecret string, authURL string) 
 
 	c.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
-	return "Bearer " + tokenResponse.AccessToken, nil
+	return tokenResponse.AccessToken, nil
 }
 
 func (c *client) InvalidateAndRetry(clientID string, clientSecret string, authURL string) (string, apperrors.AppError) {
@@ -66,7 +66,7 @@ func (c *client) InvalidateAndRetry(clientID string, clientSecret string, authUR
 
 	c.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
-	return "Bearer " + tokenResponse.AccessToken, nil
+	return tokenResponse.AccessToken, nil
 }
 
 func (c *client) InvalidateTokenCache(clientID string) {
