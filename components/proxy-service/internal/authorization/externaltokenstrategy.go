@@ -15,24 +15,19 @@ func newExternalTokenStrategy(strategy Strategy) Strategy {
 }
 
 func (o externalTokenStrategy) Setup(r *http.Request) apperrors.AppError {
-	if !handleKymaAuthentication(r) {
+	externalToken := r.Header.Get(httpconsts.HeaderAccessToken)
+
+	if externalToken != "" {
+		r.Header.Del(httpconsts.HeaderAccessToken)
+		r.Header.Set(httpconsts.HeaderAuthorization, externalToken)
+
+		return nil
+	} else {
 		return o.strategy.Setup(r)
 	}
-
-	return nil
 }
 
 func (o externalTokenStrategy) Reset() {
 	o.strategy.Reset()
 }
 
-func handleKymaAuthentication(r *http.Request) bool {
-	kymaAuthorization := r.Header.Get(httpconsts.HeaderAccessToken)
-	if kymaAuthorization != "" {
-		r.Header.Del(httpconsts.HeaderAccessToken)
-		r.Header.Set(httpconsts.HeaderAuthorization, kymaAuthorization)
-		return true
-	}
-
-	return false
-}

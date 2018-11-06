@@ -20,7 +20,7 @@ func TestProxy(t *testing.T) {
 
 	proxyTimeout := 10
 
-	t.Run("should proxy", func(t *testing.T) {
+	t.Run("should proxy and use internal cache", func(t *testing.T) {
 		// given
 		ts := NewTestServer(func(req *http.Request) {
 			assert.Equal(t, req.Method, http.MethodGet)
@@ -32,15 +32,15 @@ func TestProxy(t *testing.T) {
 		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("Setup", mock.AnythingOfType("*http.Request")).Return(nil)
+		authStrategyMock.On("Setup", mock.AnythingOfType("*http.Request")).Return(nil).Twice()
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", authorization.Credentials{}).Return(authStrategyMock)
+		authStrategyFactoryMock.On("Create", authorization.Credentials{}).Return(authStrategyMock).Once()
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
 			TargetUrl: ts.URL,
-		}, nil).Times(2)
+		}, nil).Once()
 
 		handler := New(serviceDefServiceMock, authStrategyFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
@@ -51,6 +51,20 @@ func TestProxy(t *testing.T) {
 		// then
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "test", rr.Body.String())
+
+		// given
+		nextReq, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		nextReq.Host = "re-test-uuid-1.namespace.svc.cluster.local"
+		rr = httptest.NewRecorder()
+
+		//when
+		handler.ServeHTTP(rr, nextReq)
+
+		//then
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "test", rr.Body.String())
+		authStrategyFactoryMock.AssertExpectations(t)
+		authStrategyMock.AssertExpectations(t)
 	})
 
 	t.Run("should proxy OAuth calls", func(t *testing.T) {
@@ -182,14 +196,14 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
 			TargetUrl: tsf.URL,
-		}, nil)
+		}, nil).Twice()
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.On("Setup", mock.Anything).Return(nil).Twice()
 		authStrategyMock.On("Reset").Return().Once()
 		
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", mock.Anything).Return(authStrategyMock)
+		authStrategyFactoryMock.On("Create", mock.Anything).Return(authStrategyMock).Twice()
 
 		handler := New(serviceDefServiceMock, authStrategyFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
@@ -202,6 +216,7 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, "test", rr.Body.String())
 
 		serviceDefServiceMock.AssertExpectations(t)
+		authStrategyFactoryMock.AssertExpectations(t)
 		authStrategyMock.AssertExpectations(t)
 	})
 }
@@ -239,14 +254,14 @@ func NewTestServer(check func(req *http.Request)) *httptest.Server {
 }
 
 func NewTestServerForRetryTest(check func(req *http.Request)) *httptest.Server {
-	firstCall := true
+	respondWithForbiddenStatus := true
 
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		check(r)
-		if firstCall {
+		if respondWithForbiddenStatus {
 			w.WriteHeader(http.StatusForbidden)
-			firstCall = false
+			respondWithForbiddenStatus = false
 		} else {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("test"))

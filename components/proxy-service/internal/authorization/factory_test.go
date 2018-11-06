@@ -143,6 +143,5 @@ func TestStrategyFactory(t *testing.T) {
 		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)
 		assert.Nil(t, err)
 		assert.Equal(t, "Bearer external", authHeader)
-
 	})
 }
