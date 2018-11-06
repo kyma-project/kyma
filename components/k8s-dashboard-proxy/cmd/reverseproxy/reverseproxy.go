@@ -6,33 +6,43 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"sync"
+	"time"
 )
 
 const (
-	dashboardURL   = "http://localhost:30000"
-	secretFilePath = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-	port           = ":8080"
+	dashboardURL          = "http://localhost:30000"
+	defaultSecretFilePath = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+	port                  = ":8080"
 )
 
 var (
 	proxy    *httputil.ReverseProxy
 	proxyURL *url.URL
+	sfp      *secret
 )
 
-func readSecret() string {
+type secret struct {
+	token string
+	mux   sync.Mutex
+}
+
+func (sfp *secret) updateSecret() {
+	sfp.mux.Lock()
 	var accountSecret []byte
-	if token, err := ioutil.ReadFile(secretFilePath); err != nil {
+	if token, err := ioutil.ReadFile(defaultSecretFilePath); err != nil {
 		log.Printf("Error: read service account failed: %v", err)
+	} else {
 		accountSecret = token
-		return ""
 	}
-	return string(accountSecret)
+	sfp.token = string(accountSecret)
+	sfp.mux.Unlock()
 }
 
 func serveProxy(rw http.ResponseWriter, req *http.Request) {
 	req.URL.Host = proxyURL.Host
 	req.URL.Scheme = proxyURL.Scheme
-	req.Header.Set("Authorization", "Bearer "+readSecret())
+	req.Header.Set("Authorization", "Bearer "+sfp.token)
 	req.Host = proxyURL.Host
 	proxy.ServeHTTP(rw, req)
 }
@@ -44,6 +54,14 @@ func handleRequest(rw http.ResponseWriter, req *http.Request) {
 
 func main() {
 	log.Printf("starting kubernetes dashboard reverse proxy...")
+	sfp = &secret{token: defaultSecretFilePath}
+	sfp.updateSecret()
+	ticker := time.NewTicker(60 * time.Second)
+	go func() {
+		for range ticker.C {
+			sfp.updateSecret()
+		}
+	}()
 	var err error
 	proxyURL, err = url.Parse(dashboardURL)
 	log.Printf("proxied URL: %v", proxyURL)
