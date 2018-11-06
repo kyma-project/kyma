@@ -37,7 +37,7 @@ func New(serviceDefService metadata.ServiceDefinitionService, authenticationStra
 	return &proxy{
 		nameResolver:                  k8sconsts.NewNameResolver(config.RemoteEnvironment, config.Namespace),
 		serviceDefService:             serviceDefService,
-		cache:                         NewProxyCache(config.SkipVerify, config.ProxyCacheTTL),
+		cache:                         NewCache(config.ProxyCacheTTL),
 		skipVerify:                    config.SkipVerify,
 		proxyTimeout:                  config.ProxyTimeout,
 		authenticationStrategyFactory: authenticationStrategyFactory,

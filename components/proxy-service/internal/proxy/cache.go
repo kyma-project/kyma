@@ -2,7 +2,7 @@ package proxy
 
 import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
-	"github.com/patrickmn/go-cache"
+	gocache "github.com/patrickmn/go-cache"
 	"net/http"
 	"net/http/httputil"
 	"time"
@@ -25,19 +25,17 @@ type Cache interface {
 	Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *CacheEntry
 }
 
-type httpProxyCache struct {
-	skipVerify bool
-	proxyCache *cache.Cache
+type cache struct {
+	proxyCache *gocache.Cache
 }
 
-func NewProxyCache(skipVerify bool, proxyCacheTTL int) Cache {
-	return &httpProxyCache{
-		skipVerify: skipVerify,
-		proxyCache: cache.New(time.Duration(proxyCacheTTL)*time.Second, cleanupInterval*time.Second),
+func NewCache(proxyCacheTTL int) Cache {
+	return &cache{
+		proxyCache: gocache.New(time.Duration(proxyCacheTTL)*time.Second, cleanupInterval*time.Second),
 	}
 }
 
-func (p *httpProxyCache) Get(id string) (*CacheEntry, bool) {
+func (p *cache) Get(id string) (*CacheEntry, bool) {
 	proxy, found := p.proxyCache.Get(id)
 	if !found {
 		return nil, false
@@ -46,9 +44,9 @@ func (p *httpProxyCache) Get(id string) (*CacheEntry, bool) {
 	return proxy.(*CacheEntry), found
 }
 
-func (p *httpProxyCache) Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *CacheEntry {
+func (p *cache) Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *CacheEntry {
 	proxy := &CacheEntry{Proxy: reverseProxy, AuthorizationStrategy: authorizationStrategy}
-	p.proxyCache.Set(id, proxy, cache.DefaultExpiration)
+	p.proxyCache.Set(id, proxy, gocache.DefaultExpiration)
 
 	return proxy
 }
