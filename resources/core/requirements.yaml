@@ -1,4 +1,6 @@
 dependencies:
+  - name: dex
+    condition: dex.enabled
   - name: apiserver-proxy
     condition: apiserver-proxy.enabled
   - name: monitoring
@@ -9,6 +11,8 @@ dependencies:
     condition: console.enabled
   - name: helm-broker
     condition: helm-broker.enabled
+  - name: remote-environment-broker
+    condition: remote-environment-broker.enabled
   - name: azure-broker
     condition: azure-broker.enabled
   - name: environments
