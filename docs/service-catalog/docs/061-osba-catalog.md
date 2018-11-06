@@ -22,7 +22,7 @@ Catalog UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma
 
 \*\***metadata.labels** is the custom object that is not defined in the [OSBA metadata convention](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#service-metadata)
 
-![alt text](./assets/screen-catalog-page.png 'Catalog')
+![alt text](./assets/catalog-page.png 'Catalog')
 
 ## Catalog Details page
 
@@ -39,7 +39,7 @@ Catalog UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma
 
 \*Fields with an asterisk are required OSBA attributes.
 
-![alt text](./assets/screen-catalog-details-page.png 'Catalog Details')
+![alt text](./assets/catalog-details-page.png 'Catalog Details')
 
 ## Add to Environment
 
@@ -51,7 +51,7 @@ Catalog UI directly uses the [UI API Layer](https://github.com/kyma-project/kyma
 
 \*Fields with an asterisk are required OSBA attributes.
 
-![alt text](./assets/screen-add-to-environment.png 'Add to Environment')
+![alt text](./assets/add-to-environment.png 'Add to Environment')
 
 ### Plan schema
 
@@ -87,7 +87,7 @@ Example:
 
 Form:
 
-![alt text](./assets/screen-schema-form.png 'SchemaForm')
+![alt text](./assets/schema-form.png 'SchemaForm')
 
 Best practices for designing schema object:
 

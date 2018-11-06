@@ -18,7 +18,7 @@ Instances UI directly uses the [UI API Layer](https://github.com/kyma-project/ky
 
 \*Fields with an asterisk are required OSBA attributes.
 
-![alt text](./assets/screen-instances.png 'Service Instances')
+![alt text](./assets/instances.png 'Service Instances')
 
 ## Service Instance Details page
 
@@ -34,4 +34,4 @@ Instances UI directly uses the [UI API Layer](https://github.com/kyma-project/ky
 
 \*Fields with an asterisk are required OSBA attributes.
 
-![alt text](./assets/screen-instances-details.png 'Service Instance Details')
+![alt text](./assets/instances-details.png 'Service Instance Details')
