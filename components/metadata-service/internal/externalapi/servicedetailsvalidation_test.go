@@ -301,6 +301,84 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 	})
 }
 
+func TestServiceDetailsValidator_API_Basic(t *testing.T) {
+	t.Run("should accept Basic Auth credentials", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				Credentials: &Credentials{
+					Basic: &BasicAuth{
+						Username: "username",
+						Password: "password",
+					},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.NoError(t, err)
+	})
+
+	t.Run("should not accept Basic Auth credentials with empty basic", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				Credentials: &Credentials{
+					Basic: &BasicAuth{},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	})
+
+	t.Run("should not accept Basic Auth credentials with incomplete basic", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				Credentials: &Credentials{
+					Basic: &BasicAuth{
+						Username: "username",
+					},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	})
+}
+
 func TestServiceDetailsValidator_Events(t *testing.T) {
 	t.Run("should not accept events spec other than json object", func(t *testing.T) {
 		// given

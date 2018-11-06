@@ -51,8 +51,8 @@ type Oauth struct {
 }
 
 type BasicAuth struct {
-	Username string `json:"username" valid:"username,required~basic auth username field cannot be empty"`
-	Password string `json:"password" valid:"password,required~basic auth password field cannot be empty"`
+	Username string `json:"username" valid:"required~basic auth username field cannot be empty"`
+	Password string `json:"password" valid:"required~basic auth password field cannot be empty"`
 }
 
 type Events struct {
