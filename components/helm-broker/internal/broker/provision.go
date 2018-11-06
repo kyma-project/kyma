@@ -33,7 +33,7 @@ type provisionService struct {
 	testHookAsyncCalled func(internal.OperationID)
 }
 
-func (svc *provisionService) Provision(ctx context.Context, osbCtx osbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, error) {
+func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, error) {
 	if !req.AcceptsIncomplete {
 		return nil, errors.New("asynchronous operation mode required")
 	}

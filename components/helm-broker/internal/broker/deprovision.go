@@ -26,7 +26,7 @@ type deprovisionService struct {
 	testHookAsyncCalled func(internal.OperationID)
 }
 
-func (svc *deprovisionService) Deprovision(ctx context.Context, osbCtx osbContext, req *osb.DeprovisionRequest) (*osb.DeprovisionResponse, error) {
+func (svc *deprovisionService) Deprovision(ctx context.Context, osbCtx OsbContext, req *osb.DeprovisionRequest) (*osb.DeprovisionResponse, error) {
 	if !req.AcceptsIncomplete {
 		return nil, errors.New("asynchronous operation mode required")
 	}
