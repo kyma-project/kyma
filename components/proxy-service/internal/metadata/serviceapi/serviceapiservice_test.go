@@ -16,8 +16,11 @@ func TestDefaultService_Read(t *testing.T) {
 		// given
 		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
 			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com",
-			CredentialsSecretName: "secret-name",
+			Credentials: &remoteenv.Credentials{
+				Type: "OAuth",
+				SecretName: "secret-name",
+				Url:  "http://oauth.com",
+			},
 		}
 
 		secretsRepository := new(secretsmocks.Repository)
@@ -61,8 +64,11 @@ func TestDefaultService_Read(t *testing.T) {
 		// given
 		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
 			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com",
-			CredentialsSecretName: "secret-name",
+			Credentials: &remoteenv.Credentials{
+				Type: "OAuth",
+				SecretName: "secret-name",
+				Url:  "http://oauth.com",
+			},
 		}
 
 		secretsRepository := new(secretsmocks.Repository)

@@ -18,8 +18,7 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 					GatewayURL:            entry.GatewayUrl,
 					AccessLabel:           entry.AccessLabel,
 					TargetUrl:             entry.TargetUrl,
-					OauthUrl:              entry.OauthUrl,
-					CredentialsSecretName: entry.CredentialsSecretName,
+					Credentials: convertCredentialsFromK8sType(entry.Credentials),
 				}
 			} else if entry.Type == specEventsType {
 				events = true
@@ -40,4 +39,17 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 		API:                 api,
 		Events:              events,
 	}, nil
+}
+
+func convertCredentialsFromK8sType(credentials v1alpha1.Credentials) *Credentials {
+	emptyCredentials := v1alpha1.Credentials{}
+	if credentials == emptyCredentials {
+		return nil
+	}
+
+	return &Credentials{
+		Type: credentials.Type,
+		SecretName: credentials.SecretName,
+		Url: credentials.AuthenticationUrl,
+	}
 }

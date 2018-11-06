@@ -38,8 +38,11 @@ func TestGetServices(t *testing.T) {
 			GatewayURL:            "http://re-ec-default-4862c1fb-a047-4add-94e3-c4ff594b3514.kyma-integration.svc.cluster.local",
 			AccessLabel:           "access-label-1",
 			TargetUrl:             "https://192.168.1.2",
-			OauthUrl:              "https://192.168.1.3/token",
-			CredentialsSecretName: "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
+			Credentials: &remoteenv.Credentials{
+				Type: "OAuth",
+				SecretName: "SecretName",
+				Url: "www.example.com/token",
+			},
 		})
 	})
 
@@ -69,8 +72,11 @@ func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
 		GatewayUrl:            "http://re-ec-default-4862c1fb-a047-4add-94e3-c4ff594b3514.kyma-integration.svc.cluster.local",
 		AccessLabel:           "access-label-1",
 		TargetUrl:             "https://192.168.1.2",
-		OauthUrl:              "https://192.168.1.3/token",
-		CredentialsSecretName: "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
+		Credentials:		  v1alpha1.Credentials{
+			Type: "OAuth",
+			SecretName: "SecretName",
+			AuthenticationUrl: "www.example.com/token",
+		},
 	}
 	reService1 := v1alpha1.Service{
 		ID:                  "id1",
@@ -86,8 +92,11 @@ func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
 		GatewayUrl:            "http://re-ec-default-f8c614e1-867e-4887-9f6c-334ca2603251.kyma-integration.svc.cluster.local",
 		AccessLabel:           "access-label-2",
 		TargetUrl:             "https://192.168.1.3",
-		OauthUrl:              "https://192.168.1.4/token",
-		CredentialsSecretName: "re-bc031e8c-9aa4-4cb7-8999-0d358726ffab",
+		Credentials:		  v1alpha1.Credentials{
+			Type: "OAuth",
+			SecretName: "SecretName",
+			AuthenticationUrl: "www.example.com/token",
+		},
 	}
 
 	reService2 := v1alpha1.Service{

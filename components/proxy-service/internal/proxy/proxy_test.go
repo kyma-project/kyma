@@ -96,7 +96,7 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
 			TargetUrl: ts.URL,
 			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
+				Oauth: &serviceapi.Oauth{
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
 					URL:          tsOAuth.URL + "/token",
@@ -138,7 +138,7 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
 			TargetUrl: ts.URL,
 			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
+				Oauth: &serviceapi.Oauth{
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
 					URL:          "www.example.com/token",

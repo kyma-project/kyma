@@ -19,7 +19,13 @@ type API struct {
 // Credentials contains OAuth configuration.
 type Credentials struct {
 	// Oauth is OAuth configuration.
-	Oauth Oauth
+	Oauth *Oauth
+	Basic *Basic
+}
+
+type Basic struct {
+	Username string
+	Password string
 }
 
 // Oauth contains details of OAuth configuration
@@ -31,6 +37,15 @@ type Oauth struct {
 	// ClientSecret to use for authentication.
 	ClientSecret string
 }
+
+const (
+	ClientIDKey     = "clientId"
+	ClientSecretKey = "clientSecret"
+	UsernameKey = "username"
+	PasswordKey = "password"
+	TypeOAuth = "OAuth"
+	TypeBasic = "Basic"
+)
 
 // Service manages API definition of a service
 type Service interface {
@@ -54,21 +69,43 @@ func (sas defaultService) Read(remoteenvAPI *remoteenv.ServiceAPI) (*API, apperr
 		TargetUrl: remoteenvAPI.TargetUrl,
 	}
 
-	if remoteenvAPI.OauthUrl != "" && remoteenvAPI.CredentialsSecretName != "" {
-		api.Credentials = &Credentials{
-			Oauth: Oauth{
-				URL: remoteenvAPI.OauthUrl,
-			},
+	if remoteenvAPI.Credentials != nil {
+		credentialsSecretName := remoteenvAPI.Credentials.SecretName
+		credentialsType := remoteenvAPI.Credentials.Type
+
+		secret, err := sas.secretsRepository.Get(credentialsSecretName)
+
+		if err != nil {
+			return nil, err
 		}
 
-		clientId, clientSecret, err := sas.secretsRepository.Get(remoteenvAPI.CredentialsSecretName)
-		if err != nil {
-			return nil, apperrors.Internal("failed to read oauth credentials from %s secret, %s",
-				remoteenvAPI.CredentialsSecretName, err.Error())
+		if credentialsType == TypeOAuth {
+			api.Credentials = &Credentials{
+				Oauth: getOAuthCredentials(secret),
+			}
+		} else if credentialsType == TypeBasic {
+			api.Credentials = &Credentials{
+				Basic: getBasicAuthCredentials(secret),
+			}
+		} else {
+		 	api.Credentials = nil
 		}
-		api.Credentials.Oauth.ClientID = clientId
-		api.Credentials.Oauth.ClientSecret = clientSecret
 	}
 
 	return api, nil
+}
+
+
+func getOAuthCredentials(secret map[string][]byte) *Oauth{
+	return &Oauth{
+		ClientID: string(secret[ClientIDKey]),
+		ClientSecret: string(secret[ClientSecretKey]),
+	}
+}
+
+func getBasicAuthCredentials(secret map[string][]byte) *Basic{
+	return &Basic{
+		Username: string(secret[UsernameKey]),
+		Password: string(secret[PasswordKey]),
+	}
 }
