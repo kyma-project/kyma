@@ -28,3 +28,5 @@ spec:
       id: api-gateway
     - displayName: Logging
       id: logging
+    - displayName: Console
+      id: console
