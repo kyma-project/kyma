@@ -39,9 +39,9 @@ type API struct {
 	Spec        json.RawMessage `json:"spec,omitempty"`
 }
 
-//TODO: Add Basic
 type Credentials struct {
-	Oauth Oauth `json:"oauth" valid:"required~oauth field cannot be empty"`
+	Oauth *Oauth     `json:"oauth,omitempty"`
+	Basic *BasicAuth `json:"basic,omitempty"`
 }
 
 type Oauth struct {
@@ -50,8 +50,9 @@ type Oauth struct {
 	ClientSecret string `json:"clientSecret" valid:"required~oauth clientSecret cannot be empty"`
 }
 
-//TODO:
 type BasicAuth struct {
+	Username string `json:"username" valid:"username,required~basic auth username field cannot be empty"`
+	Password string `json:"password" valid:"password,required~basic auth password field cannot be empty"`
 }
 
 type Events struct {
@@ -85,7 +86,6 @@ func serviceDefinitionToService(serviceDefinition metadata.ServiceDefinition) Se
 	}
 }
 
-//TODO:
 func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinition) (ServiceDetails, apperrors.AppError) {
 	serviceDetails := ServiceDetails{
 		Provider:         serviceDefinition.Provider,
@@ -106,12 +106,23 @@ func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinit
 		}
 
 		if serviceDefinition.Api.Credentials != nil {
-			serviceDetails.Api.Credentials = &Credentials{
-				Oauth: Oauth{
-					ClientID:     stars,
-					ClientSecret: stars,
-					URL:          serviceDefinition.Api.Credentials.Oauth.URL,
-				},
+			if serviceDefinition.Api.Credentials.Oauth != nil {
+				serviceDetails.Api.Credentials = &Credentials{
+					Oauth: &Oauth{
+						ClientID:     stars,
+						ClientSecret: stars,
+						URL:          serviceDefinition.Api.Credentials.Oauth.URL,
+					},
+				}
+			}
+
+			if serviceDefinition.Api.Credentials.Basic != nil {
+				serviceDetails.Api.Credentials = &Credentials{
+					Basic: &BasicAuth{
+						Username: stars,
+						Password: stars,
+					},
+				}
 			}
 		}
 	}
@@ -152,12 +163,23 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (metadata.
 			TargetUrl: serviceDetails.Api.TargetUrl,
 		}
 		if serviceDetails.Api.Credentials != nil {
-			serviceDefinition.Api.Credentials = &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
-					ClientID:     serviceDetails.Api.Credentials.Oauth.ClientID,
-					ClientSecret: serviceDetails.Api.Credentials.Oauth.ClientSecret,
-					URL:          serviceDetails.Api.Credentials.Oauth.URL,
-				},
+			if serviceDetails.Api.Credentials.Oauth != nil {
+				serviceDefinition.Api.Credentials = &serviceapi.Credentials{
+					Oauth: &serviceapi.Oauth{
+						ClientID:     serviceDetails.Api.Credentials.Oauth.ClientID,
+						ClientSecret: serviceDetails.Api.Credentials.Oauth.ClientSecret,
+						URL:          serviceDetails.Api.Credentials.Oauth.URL,
+					},
+				}
+			}
+
+			if serviceDetails.Api.Credentials.Basic != nil {
+				serviceDefinition.Api.Credentials = &serviceapi.Credentials{
+					Basic: &serviceapi.Basic{
+						Username: serviceDetails.Api.Credentials.Basic.Username,
+						Password: serviceDetails.Api.Credentials.Basic.Password,
+					},
+				}
 			}
 		}
 		if serviceDetails.Api.Spec != nil {

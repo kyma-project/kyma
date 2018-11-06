@@ -45,7 +45,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Api: &API{
 				TargetUrl: "http://service.com",
 				Credentials: &Credentials{
-					Oauth: Oauth{
+					Oauth: &Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -74,7 +74,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			Api: &serviceapi.API{
 				TargetUrl: "http://service.com",
 				Credentials: &serviceapi.Credentials{
-					Oauth: serviceapi.Oauth{
+					Oauth: &serviceapi.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -269,7 +269,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Api: &serviceapi.API{
 				TargetUrl: "http://service.com",
 				Credentials: &serviceapi.Credentials{
-					Oauth: serviceapi.Oauth{
+					Oauth: &serviceapi.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -334,7 +334,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Api: &serviceapi.API{
 				TargetUrl: "http://service.com",
 				Credentials: &serviceapi.Credentials{
-					Oauth: serviceapi.Oauth{
+					Oauth: &serviceapi.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -561,7 +561,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Api: &API{
 				TargetUrl: "http://service.com",
 				Credentials: &Credentials{
-					Oauth: Oauth{
+					Oauth: &Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -587,7 +587,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Api: &serviceapi.API{
 				TargetUrl: "http://service.com",
 				Credentials: &serviceapi.Credentials{
-					Oauth: serviceapi.Oauth{
+					Oauth: &serviceapi.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",

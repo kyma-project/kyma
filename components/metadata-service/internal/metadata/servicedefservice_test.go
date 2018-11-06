@@ -29,7 +29,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceAPI := &serviceapi.API{
 			TargetUrl: "http://target.com",
 			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
+				Oauth: &serviceapi.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -234,7 +234,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceAPI := &serviceapi.API{
 			TargetUrl: "http://target.com",
 			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
+				Oauth: &serviceapi.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -418,7 +418,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceAPI := &serviceapi.API{
 			TargetUrl: "http://target.com",
 			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
+				Oauth: &serviceapi.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -674,7 +674,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		serviceAPI := &serviceapi.API{
 			TargetUrl: "http://target.com",
 			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
+				Oauth: &serviceapi.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -823,7 +823,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPI := &serviceapi.API{
 			TargetUrl: "http://target.com",
 			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
+				Oauth: &serviceapi.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -900,7 +900,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPI := &serviceapi.API{
 			TargetUrl: "http://target.com",
 			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
+				Oauth: &serviceapi.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -1067,7 +1067,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPI := &serviceapi.API{
 			TargetUrl: "http://target.com",
 			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
+				Oauth: &serviceapi.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -1132,7 +1132,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPI := &serviceapi.API{
 			TargetUrl: "http://target.com",
 			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
+				Oauth: &serviceapi.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -1197,7 +1197,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPI := &serviceapi.API{
 			TargetUrl: "http://target.com",
 			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
+				Oauth: &serviceapi.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -1263,7 +1263,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPI := &serviceapi.API{
 			TargetUrl: "http://target.com",
 			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
+				Oauth: &serviceapi.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",

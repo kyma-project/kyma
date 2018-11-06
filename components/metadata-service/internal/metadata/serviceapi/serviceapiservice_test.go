@@ -30,7 +30,7 @@ func TestNewService(t *testing.T) {
 		api := &API{
 			TargetUrl: "http://target.com",
 			Credentials: &Credentials{
-				Oauth: Oauth{
+				Oauth: &Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -81,7 +81,7 @@ func TestNewService(t *testing.T) {
 		api := &API{
 			TargetUrl: "http://target.com",
 			Credentials: &Credentials{
-				Basic: Basic{
+				Basic: &Basic{
 					Username: "clientUsername",
 					Password: "clientPassword",
 				},
@@ -118,7 +118,6 @@ func TestNewService(t *testing.T) {
 		assert.Equal(t, gatewayUrl, remoteEnvServiceAPI.GatewayURL)
 		assert.Equal(t, resourceName, remoteEnvServiceAPI.AccessLabel)
 		assert.Equal(t, api.TargetUrl, remoteEnvServiceAPI.TargetUrl)
-		assert.Equal(t, api.Credentials.Oauth.URL, remoteEnvServiceAPI.Credentials.AuthenticationUrl)
 		assert.Equal(t, resourceName, remoteEnvServiceAPI.Credentials.SecretName)
 
 		accessServiceManager.AssertExpectations(t)
@@ -164,7 +163,7 @@ func TestNewService(t *testing.T) {
 		api := &API{
 			TargetUrl: "http://target.com",
 			Credentials: &Credentials{
-				Oauth: Oauth{
+				Oauth: &Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -197,7 +196,7 @@ func TestNewService(t *testing.T) {
 		api := &API{
 			TargetUrl: "http://target.com",
 			Credentials: &Credentials{
-				Oauth: Oauth{
+				Oauth: &Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -241,7 +240,7 @@ func TestNewService(t *testing.T) {
 		api := &API{
 			TargetUrl: "http://target.com",
 			Credentials: &Credentials{
-				Basic: Basic{
+				Basic: &Basic{
 					Username: "clientUsername",
 					Password: "clientPassword",
 				},
@@ -284,7 +283,7 @@ func TestNewService(t *testing.T) {
 		api := &API{
 			TargetUrl: "http://target.com",
 			Credentials: &Credentials{
-				Oauth: Oauth{
+				Oauth: &Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -576,7 +575,7 @@ func TestDefaultService_Update(t *testing.T) {
 		api := &API{
 			TargetUrl: "http://target.com",
 			Credentials: &Credentials{
-				Oauth: Oauth{
+				Oauth: &Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -628,7 +627,7 @@ func TestDefaultService_Update(t *testing.T) {
 		api := &API{
 			TargetUrl: "http://target.com",
 			Credentials: &Credentials{
-				Basic: Basic{
+				Basic: &Basic{
 					Username: "clientUsername",
 					Password: "clientPassword",
 				},
@@ -722,7 +721,7 @@ func TestDefaultService_Update(t *testing.T) {
 		api := &API{
 			TargetUrl: "http://target.com",
 			Credentials: &Credentials{
-				Oauth: Oauth{
+				Oauth: &Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -758,7 +757,7 @@ func TestDefaultService_Update(t *testing.T) {
 		api := &API{
 			TargetUrl: "http://target.com",
 			Credentials: &Credentials{
-				Oauth: Oauth{
+				Oauth: &Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -804,7 +803,7 @@ func TestDefaultService_Update(t *testing.T) {
 		api := &API{
 			TargetUrl: "http://target.com",
 			Credentials: &Credentials{
-				Basic: Basic{
+				Basic: &Basic{
 					Username: "clientUsername",
 					Password: "clientPassword",
 				},
@@ -882,7 +881,7 @@ func TestDefaultService_Update(t *testing.T) {
 		api := &API{
 			TargetUrl: "http://target.com",
 			Credentials: &Credentials{
-				Oauth: Oauth{
+				Oauth: &Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",

@@ -13,8 +13,8 @@ type API struct {
 // Credentials contains OAuth configuration.
 type Credentials struct {
 	// Oauth is OAuth configuration.
-	Oauth Oauth
-	Basic Basic
+	Oauth *Oauth
+	Basic *Basic
 }
 
 // Oauth contains details of OAuth configuration.

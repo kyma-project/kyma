@@ -170,28 +170,6 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
-	t.Run("should not accept empty API credentials", func(t *testing.T) {
-		// given
-		serviceDetails := ServiceDetails{
-			Name:        "name",
-			Provider:    "provider",
-			Description: "description",
-			Api: &API{
-				TargetUrl:   "http://target.com",
-				Credentials: &Credentials{},
-			},
-		}
-
-		validator := NewServiceDetailsValidator()
-
-		// when
-		err := validator.Validate(serviceDetails)
-
-		// then
-		assert.Error(t, err)
-		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
-	})
-
 	t.Run("should not accept API spec other than json object", func(t *testing.T) {
 		// given
 		serviceDetails := ServiceDetails{
@@ -225,7 +203,7 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Api: &API{
 				TargetUrl: "http://target.com",
 				Credentials: &Credentials{
-					Oauth: Oauth{
+					Oauth: &Oauth{
 						URL:          "http://test.com/token",
 						ClientID:     "client",
 						ClientSecret: "secret",
@@ -252,7 +230,7 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Api: &API{
 				TargetUrl: "http://target.com",
 				Credentials: &Credentials{
-					Oauth: Oauth{},
+					Oauth: &Oauth{},
 				},
 			},
 		}
@@ -276,7 +254,7 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Api: &API{
 				TargetUrl: "http://target.com",
 				Credentials: &Credentials{
-					Oauth: Oauth{
+					Oauth: &Oauth{
 						URL:      "http://test.com/token",
 						ClientID: "client",
 					},
@@ -303,7 +281,7 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Api: &API{
 				TargetUrl: "http://target.com",
 				Credentials: &Credentials{
-					Oauth: Oauth{
+					Oauth: &Oauth{
 						URL:          "test_com/token",
 						ClientID:     "client",
 						ClientSecret: "secret",

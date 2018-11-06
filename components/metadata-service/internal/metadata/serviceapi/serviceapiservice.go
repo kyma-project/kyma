@@ -185,7 +185,7 @@ func (sas defaultService) handleCredentialsFetch(remoteEnvironment string, remot
 
 	if remoteenvAPI.Credentials.Type == remoteenv.CredentialsOAuthType {
 		api.Credentials = &Credentials{
-			Oauth: Oauth{
+			Oauth: &Oauth{
 				URL: remoteenvAPI.Credentials.AuthenticationUrl,
 			},
 		}
@@ -201,7 +201,7 @@ func (sas defaultService) handleCredentialsFetch(remoteEnvironment string, remot
 
 	if remoteenvAPI.Credentials.Type == remoteenv.CredentialsBasicType {
 		api.Credentials = &Credentials{
-			Basic: Basic{},
+			Basic: &Basic{},
 		}
 
 		username, password, err := sas.secretsService.GetBasicAuthSecret(remoteEnvironment, remoteenvAPI.Credentials.SecretName)
@@ -263,9 +263,9 @@ func (sas defaultService) updateCredentialsSecret(remoteEnvironment, id, name st
 }
 
 func (sas defaultService) oauthCredentialsProvided(credentials *Credentials) bool {
-	return credentials != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
+	return credentials != nil && credentials.Oauth != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
 }
 
 func (sas defaultService) basicCredentialsProvided(credentials *Credentials) bool {
-	return credentials != nil && credentials.Basic.Username != "" && credentials.Basic.Password != ""
+	return credentials != nil && credentials.Basic != nil && credentials.Basic.Username != "" && credentials.Basic.Password != ""
 }

@@ -348,12 +348,14 @@ func TestUpdateServices(t *testing.T) {
 			Return(remoteEnvironment, nil)
 
 		reEntry1 := v1alpha1.Entry{
-			Type:                  "API",
-			GatewayUrl:            "https://promotions-gateway.production.svc.cluster.local/",
-			AccessLabel:           "access-label-3",
-			TargetUrl:             "https://192.168.10.10",
-			OauthUrl:              "https://192.168.10.10/token",
-			CredentialsSecretName: "new_secret",
+			Type:        "API",
+			GatewayUrl:  "https://promotions-gateway.production.svc.cluster.local/",
+			AccessLabel: "access-label-3",
+			TargetUrl:   "https://192.168.10.10",
+			Credentials: v1alpha1.Credentials{
+				AuthenticationUrl: "https://192.168.10.10/token",
+				SecretName:        "new_secret",
+			},
 		}
 
 		reEntry2 := v1alpha1.Entry{
@@ -424,12 +426,14 @@ func TestUpdateServices(t *testing.T) {
 func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
 
 	reService1Entry := v1alpha1.Entry{
-		Type:                  "API",
-		GatewayUrl:            "https://orders-gateway.production.svc.cluster.local/",
-		AccessLabel:           "access-label-1",
-		TargetUrl:             "https://192.168.1.2",
-		OauthUrl:              "https://192.168.1.3/token",
-		CredentialsSecretName: "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
+		Type:        "API",
+		GatewayUrl:  "https://orders-gateway.production.svc.cluster.local/",
+		AccessLabel: "access-label-1",
+		TargetUrl:   "https://192.168.1.2",
+		Credentials: v1alpha1.Credentials{
+			AuthenticationUrl: "https://192.168.1.3/token",
+			SecretName:        "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
+		},
 	}
 	reService1 := v1alpha1.Service{
 		ID:                  "id1",
@@ -441,12 +445,14 @@ func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
 	}
 
 	reService2Entry := v1alpha1.Entry{
-		Type:                  "API",
-		GatewayUrl:            "https://products-gateway.production.svc.cluster.local/",
-		AccessLabel:           "access-label-2",
-		TargetUrl:             "https://192.168.1.3",
-		OauthUrl:              "https://192.168.1.4/token",
-		CredentialsSecretName: "re-bc031e8c-9aa4-4cb7-8999-0d358726ffab",
+		Type:        "API",
+		GatewayUrl:  "https://products-gateway.production.svc.cluster.local/",
+		AccessLabel: "access-label-2",
+		TargetUrl:   "https://192.168.1.3",
+		Credentials: v1alpha1.Credentials{
+			AuthenticationUrl: "https://192.168.1.4/token",
+			SecretName:        "re-bc031e8c-9aa4-4cb7-8999-0d358726ffab",
+		},
 	}
 
 	reService2 := v1alpha1.Service{
@@ -494,12 +500,14 @@ func createService() remoteenv.Service {
 
 func createK8sService() v1alpha1.Service {
 	serviceEntry1 := v1alpha1.Entry{
-		Type:                  "API",
-		GatewayUrl:            "https://promotions-gateway.production.svc.cluster.local/",
-		AccessLabel:           "access-label-1",
-		TargetUrl:             "https://192.168.1.2",
-		OauthUrl:              "https://192.168.1.3/token",
-		CredentialsSecretName: "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
+		Type:        "API",
+		GatewayUrl:  "https://promotions-gateway.production.svc.cluster.local/",
+		AccessLabel: "access-label-1",
+		TargetUrl:   "https://192.168.1.2",
+		Credentials: v1alpha1.Credentials{
+			AuthenticationUrl: "https://192.168.1.3/token",
+			SecretName:        "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
+		},
 	}
 	serviceEntry2 := v1alpha1.Entry{
 		Type: "Events",
