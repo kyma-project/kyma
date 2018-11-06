@@ -25,20 +25,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-const (
-	namespace                                      = "kyma-system"
-	ingressGatewayControllerServiceURL             = "istio-ingressgateway.istio-system.svc.cluster.local"
-	testIdLength                                   = 8
-	maxRetries                                     = 1000
-	minimalNumberOfCorrectResults                  = 5
-	retrySleep                                     = 2 * time.Second
-	domainNameEnv                                  = "DOMAIN_NAME"
-	apiSecurityDisabled                ApiSecurity = false
-)
 
-type ApiSecurity bool
-
-func TestSpec(t *testing.T) {
+func TestIntegrationSpec(t *testing.T) {
 
 	domainName := os.Getenv(domainNameEnv)
 	if domainName == "" {

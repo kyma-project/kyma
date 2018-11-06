@@ -24,16 +24,7 @@ import (
 	"github.com/avast/retry-go"
 )
 
-const (
-	namespace                                      = "kyma-system"
-	testIdLength                                   = 8
-	domainNameEnv                                  = "DOMAIN_NAME"
-	apiSecurityDisabled                ApiSecurity = false
-)
-
-type ApiSecurity bool
-
-func TestSpec(t *testing.T) {
+func TestComponentSpec(t *testing.T) {
 
 	domainName := os.Getenv(domainNameEnv)
 	if domainName == "" {

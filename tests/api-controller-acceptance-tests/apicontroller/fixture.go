@@ -12,6 +12,19 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+const (
+	namespace                                      = "kyma-system"
+	ingressGatewayControllerServiceURL             = "istio-ingressgateway.istio-system.svc.cluster.local"
+	testIdLength                                   = 8
+	maxRetries                                     = 1000
+	minimalNumberOfCorrectResults                  = 5
+	retrySleep                                     = 2 * time.Second
+	domainNameEnv                                  = "DOMAIN_NAME"
+	apiSecurityDisabled                ApiSecurity = false
+)
+
+type ApiSecurity bool
+
 type Fixture struct {
 	sampleAppCtrl    *sampleAppCtrl
 	SampleAppDepl    *appv1.Deployment
