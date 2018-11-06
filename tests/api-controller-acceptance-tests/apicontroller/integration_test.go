@@ -25,6 +25,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+type integrationTestContext struct{}
 
 func TestIntegrationSpec(t *testing.T) {
 
@@ -33,7 +34,8 @@ func TestIntegrationSpec(t *testing.T) {
 		t.Fatal("Domain name not set.")
 	}
 
-	testId := generateTestId(testIdLength)
+	ctx := integrationTestContext{}
+	testId := ctx.generateTestId(testIdLength)
 
 	log.Infof("Running test: %s", testId)
 
@@ -42,8 +44,8 @@ func TestIntegrationSpec(t *testing.T) {
 		t.Fatalf("Error while creating HTTP client. Root cause: %v", err)
 	}
 
-	kubeConfig := defaultConfigOrExit()
-	k8sInterface := k8sInterfaceOrExit(kubeConfig)
+	kubeConfig := ctx.defaultConfigOrExit()
+	k8sInterface := ctx.k8sInterfaceOrExit(kubeConfig)
 
 	t.Logf("Set up...")
 	fixture := setUpOrExit(k8sInterface, namespace, testId)
@@ -70,14 +72,14 @@ func TestIntegrationSpec(t *testing.T) {
 
 		Convey("create API with authentication disabled", func() {
 
-			api := apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled, true)
+			api := ctx.apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled, true)
 
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Create(api)
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			validateApiNotSecured(httpClient, lastApi.Spec.Hostname)
+			ctx.validateApiNotSecured(httpClient, lastApi.Spec.Hostname)
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
@@ -87,14 +89,14 @@ func TestIntegrationSpec(t *testing.T) {
 		Convey("update API with custom jwt configuration", func() {
 
 			api := *lastApi
-			setCustomJwtAuthenticationConfig(&api)
+			ctx.setCustomJwtAuthenticationConfig(&api)
 
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			validateApiSecured(httpClient, lastApi)
+			ctx.validateApiSecured(httpClient, lastApi)
 			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
@@ -104,7 +106,7 @@ func TestIntegrationSpec(t *testing.T) {
 		Convey("delete API", func() {
 
 			suiteFinished = true
-			checkPreconditions(lastApi, t)
+			ctx.checkPreconditions(lastApi, t)
 
 			err := kymaInterface.GatewayV1alpha2().Apis(namespace).Delete(lastApi.Name, &metav1.DeleteOptions{})
 			So(err, ShouldBeNil)
@@ -115,7 +117,7 @@ func TestIntegrationSpec(t *testing.T) {
 	})
 }
 
-func apiFor(testId, domainName string, svc *apiv1.Service, secured ApiSecurity, hostWithDomain bool) *kymaApi.Api {
+func (ctx integrationTestContext) apiFor(testId, domainName string, svc *apiv1.Service, secured ApiSecurity, hostWithDomain bool) *kymaApi.Api {
 
 	return &kymaApi.Api{
 		ObjectMeta: metav1.ObjectMeta{
@@ -123,7 +125,7 @@ func apiFor(testId, domainName string, svc *apiv1.Service, secured ApiSecurity, 
 			Name:      fmt.Sprintf("sample-app-api-%s", testId),
 		},
 		Spec: kymaApi.ApiSpec{
-			Hostname: hostnameFor(testId, domainName, hostWithDomain),
+			Hostname: ctx. hostnameFor(testId, domainName, hostWithDomain),
 			Service: kymaApi.Service{
 				Name: svc.Name,
 				Port: int(svc.Spec.Ports[0].Port),
@@ -134,7 +136,7 @@ func apiFor(testId, domainName string, svc *apiv1.Service, secured ApiSecurity, 
 	}
 }
 
-func setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
+func (integrationTestContext) setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
 	// OTHER EXAMPLE OF POSSIBLE VALUES:
 	//issuer := "https://accounts.google.com"
 	//jwksUri := "https://www.googleapis.com/oauth2/v3/certs"
@@ -159,40 +161,40 @@ func setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
 	api.Spec.Authentication = rules
 }
 
-func checkPreconditions(lastApi *kymaApi.Api, t *testing.T) {
+func (integrationTestContext) checkPreconditions(lastApi *kymaApi.Api, t *testing.T) {
 	if lastApi == nil {
 		t.Fatal("Precondition failed - last API not set")
 	}
 }
 
-func hostnameFor(testId, domainName string, hostWithDomain bool) string {
+func (integrationTestContext) hostnameFor(testId, domainName string, hostWithDomain bool) string {
 	if hostWithDomain {
 		return fmt.Sprintf("%s.%s", testId, domainName)
 	}
 	return testId
 }
 
-func validateApiSecured(httpClient *http.Client, api *kymaApi.Api) {
+func (ctx integrationTestContext) validateApiSecured(httpClient *http.Client, api *kymaApi.Api) {
 
-	response, err := withRetries(maxRetries, minimalNumberOfCorrectResults, func() (*http.Response, error) {
+	response, err := ctx.withRetries(maxRetries, minimalNumberOfCorrectResults, func() (*http.Response, error) {
 		return httpClient.Get(fmt.Sprintf("https://%s", api.Spec.Hostname))
-	}, httpUnauthorizedPredicate)
+	}, ctx.httpUnauthorizedPredicate)
 
 	So(err, ShouldBeNil)
 	So(response.StatusCode, ShouldEqual, http.StatusUnauthorized)
 }
 
-func validateApiNotSecured(httpClient *http.Client, hostname string) {
+func (ctx integrationTestContext) validateApiNotSecured(httpClient *http.Client, hostname string) {
 
-	response, err := withRetries(maxRetries, minimalNumberOfCorrectResults, func() (*http.Response, error) {
+	response, err := ctx.withRetries(maxRetries, minimalNumberOfCorrectResults, func() (*http.Response, error) {
 		return httpClient.Get(fmt.Sprintf("https://%s", hostname))
-	}, httpOkPredicate)
+	}, ctx.httpOkPredicate)
 
 	So(err, ShouldBeNil)
 	So(response.StatusCode, ShouldEqual, http.StatusOK)
 }
 
-func withRetries(maxRetries, minCorrect int, httpCall func() (*http.Response, error), shouldRetryPredicate func(*http.Response) bool) (*http.Response, error) {
+func (integrationTestContext) withRetries(maxRetries, minCorrect int, httpCall func() (*http.Response, error), shouldRetryPredicate func(*http.Response) bool) (*http.Response, error) {
 
 	var response *http.Response
 	var err error
@@ -233,15 +235,15 @@ func withRetries(maxRetries, minCorrect int, httpCall func() (*http.Response, er
 	return response, err
 }
 
-func httpOkPredicate(response *http.Response) bool {
+func (integrationTestContext) httpOkPredicate(response *http.Response) bool {
 	return response.StatusCode < 200 || response.StatusCode > 299
 }
 
-func httpUnauthorizedPredicate(response *http.Response) bool {
+func (integrationTestContext) httpUnauthorizedPredicate(response *http.Response) bool {
 	return response.StatusCode != 401
 }
 
-func defaultConfigOrExit() *rest.Config {
+func (integrationTestContext) defaultConfigOrExit() *rest.Config {
 
 	kubeConfigLocation := filepath.Join(os.Getenv("HOME"), ".kube", "config")
 
@@ -257,7 +259,7 @@ func defaultConfigOrExit() *rest.Config {
 	return kubeConfig
 }
 
-func k8sInterfaceOrExit(kubeConfig *rest.Config) kubernetes.Interface {
+func (integrationTestContext) k8sInterfaceOrExit(kubeConfig *rest.Config) kubernetes.Interface {
 
 	k8sInterface, k8sErr := kubernetes.NewForConfig(kubeConfig)
 	if k8sErr != nil {
@@ -266,7 +268,7 @@ func k8sInterfaceOrExit(kubeConfig *rest.Config) kubernetes.Interface {
 	return k8sInterface
 }
 
-func generateTestId(n int) string {
+func (integrationTestContext) generateTestId(n int) string {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -279,14 +281,14 @@ func generateTestId(n int) string {
 	return string(b)
 }
 
-func newHttpClient(testId, domainName string) (*http.Client, error) {
+func (tctx integrationTestContext) newHttpClient(testId, domainName string) (*http.Client, error) {
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	ingressGatewayControllerAddr, err := net.LookupHost(ingressGatewayControllerServiceURL)
 	if err != nil {
 		log.Warnf("Unable to resolve host '%s' (if you are running this test from outside of Kyma ignore this log). Root cause: %v", ingressGatewayControllerServiceURL, err)
-		minikubeIp := tryToGetMinikubeIp()
+		minikubeIp := tctx.tryToGetMinikubeIp()
 		if minikubeIp == "" {
 			return nil, err
 		}
@@ -298,7 +300,7 @@ func newHttpClient(testId, domainName string) (*http.Client, error) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			// Changes request destination address to ingressGateway internal cluster address for requests to sample app service.
-			hostname := hostnameFor(testId, domainName, true)
+			hostname := tctx.hostnameFor(testId, domainName, true)
 			if strings.HasPrefix(addr, hostname) {
 				addr = strings.Replace(addr, hostname, ingressGatewayControllerAddr[0], 1)
 			}
@@ -314,7 +316,7 @@ func newHttpClient(testId, domainName string) (*http.Client, error) {
 	return client, nil
 }
 
-func tryToGetMinikubeIp() string {
+func (integrationTestContext) tryToGetMinikubeIp() string {
 	mipCmd := exec.Command("minikube", "ip")
 	if mipOut, err := mipCmd.Output(); err != nil {
 		log.Warnf("Error while getting minikube IP (ignore this message if you are running this test inside Kyma). Root cause: %s", err)

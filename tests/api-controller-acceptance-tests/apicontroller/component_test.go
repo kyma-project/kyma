@@ -24,6 +24,8 @@ import (
 	"github.com/avast/retry-go"
 )
 
+type componentTestContext struct{}
+
 func TestComponentSpec(t *testing.T) {
 
 	domainName := os.Getenv(domainNameEnv)
@@ -31,7 +33,9 @@ func TestComponentSpec(t *testing.T) {
 		t.Fatal("Domain name not set.")
 	}
 
-	kubeConfig := defaultConfigOrExit()
+	ctx := componentTestContext{}
+
+	kubeConfig := ctx.defaultConfigOrExit()
 
 	kymaClient := kyma.NewForConfigOrDie(kubeConfig)
 	istioNetClient := istioNet.NewForConfigOrDie(kubeConfig)
@@ -42,58 +46,58 @@ func TestComponentSpec(t *testing.T) {
 		Convey("create API with authentication disabled", func() {
 			t.Log("create API with authentication disabled")
 
-			testId := generateTestId(testIdLength)
+			testId := ctx.generateTestId(testIdLength)
 			t.Logf("Running test: %s", testId)
-			api := apiFor(testId, domainName, apiSecurityDisabled, true)
+			api := ctx.apiFor(testId, domainName, apiSecurityDisabled, true)
 
 			lastApi, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			defer cleanUpApi(kymaClient, lastApi, t, false)
+			defer ctx.cleanUpApi(kymaClient, lastApi, t, false)
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			lastApi, err = awaitApiCreated(kymaClient, lastApi, true, false)
+			lastApi, err = ctx.awaitApiCreated(kymaClient, lastApi, true, false)
 			So(err, ShouldBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-			So(lastApi.Spec, ShouldDeepEqual, api.Spec)
+			So(lastApi.Spec, ctx.ShouldDeepEqual, api.Spec)
 
 			lastVs, err := istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(lastApi.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
-			expectedVs := virtualServiceFor(testId, domainName)
+			expectedVs := ctx.virtualServiceFor(testId, domainName)
 			So(err, ShouldBeNil)
-			So(lastVs.Spec, ShouldDeepEqual, expectedVs)
+			So(lastVs.Spec, ctx.ShouldDeepEqual, expectedVs)
 		})
 
 		Convey("create API with hostname without domain", func() {
 			t.Log("create API with hostname without domain")
 
 
-			testId := generateTestId(testIdLength)
+			testId := ctx.generateTestId(testIdLength)
 			t.Logf("Running test: %s", testId)
-			api := apiFor(testId, domainName, apiSecurityDisabled, false)
+			api := ctx.apiFor(testId, domainName, apiSecurityDisabled, false)
 
 			lastApi, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			defer cleanUpApi(kymaClient, lastApi, t, false)
+			defer ctx.cleanUpApi(kymaClient, lastApi, t, false)
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			lastApi, err = awaitApiCreated(kymaClient, lastApi, true, false)
+			lastApi, err = ctx.awaitApiCreated(kymaClient, lastApi, true, false)
 			So(err, ShouldBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-			So(lastApi.Spec, ShouldDeepEqual, api.Spec)
+			So(lastApi.Spec, ctx.ShouldDeepEqual, api.Spec)
 
 			lastVs, err := istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(lastApi.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
-			expectedVs := virtualServiceFor(testId, domainName)
+			expectedVs := ctx.virtualServiceFor(testId, domainName)
 			So(err, ShouldBeNil)
-			So(lastVs.Spec, ShouldDeepEqual, expectedVs)
+			So(lastVs.Spec, ctx.ShouldDeepEqual, expectedVs)
 		})
 
 		Convey("not create API with wrong domain", func() {
 			t.Log("not create API with wrong domain")
 
-			testId := generateTestId(testIdLength)
+			testId := ctx.generateTestId(testIdLength)
 			t.Logf("Running test: %s", testId)
-			api := apiFor(testId, domainName+"x", apiSecurityDisabled, true)
+			api := ctx.apiFor(testId, domainName+"x", apiSecurityDisabled, true)
 
 			_, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
 			So(err, ShouldNotBeNil)
@@ -102,53 +106,53 @@ func TestComponentSpec(t *testing.T) {
 		Convey("create API with default jwt configuration to enable authentication", func() {
 			t.Log("create API with default jwt configuration to enable authentication")
 
-			testId := generateTestId(testIdLength)
+			testId := ctx.generateTestId(testIdLength)
 			t.Logf("Running test: %s", testId)
-			api := apiFor(testId, domainName, apiSecurityDisabled, true)
+			api := ctx.apiFor(testId, domainName, apiSecurityDisabled, true)
 			authEnabled := true
 			api.Spec.AuthenticationEnabled = &authEnabled
 
 			lastApi, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			defer cleanUpApi(kymaClient, lastApi, t, false)
+			defer ctx.cleanUpApi(kymaClient, lastApi, t, false)
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			lastApi, err = awaitApiCreated(kymaClient, lastApi, true, true)
+			lastApi, err = ctx.awaitApiCreated(kymaClient, lastApi, true, true)
 			So(err, ShouldBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-			So(lastApi.Spec, ShouldDeepEqual, api.Spec)
+			So(lastApi.Spec, ctx.ShouldDeepEqual, api.Spec)
 
 			vs, err := istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(lastApi.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
-			expectedVs := virtualServiceFor(testId, domainName)
+			expectedVs := ctx.virtualServiceFor(testId, domainName)
 			So(err, ShouldBeNil)
-			So(vs.Spec, ShouldDeepEqual, expectedVs)
+			So(vs.Spec, ctx.ShouldDeepEqual, expectedVs)
 
 			lastPolicy, err := istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(lastApi.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
-			expectedPolicy := policyFor(testId, fmt.Sprintf("https://dex.%s", domainName))
+			expectedPolicy := ctx.policyFor(testId, fmt.Sprintf("https://dex.%s", domainName))
 			So(err, ShouldBeNil)
-			So(lastPolicy.Spec, ShouldDeepEqual, expectedPolicy)
+			So(lastPolicy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
 		})
 
 		Convey("update API to disable authentication", func() {
 			t.Log("update API to disable authentication")
 
-			testId := generateTestId(testIdLength)
+			testId := ctx.generateTestId(testIdLength)
 			t.Logf("Running test: %s", testId)
-			api := apiFor(testId, domainName, apiSecurityDisabled, true)
+			api := ctx.apiFor(testId, domainName, apiSecurityDisabled, true)
 			authEnabled := true
 			api.Spec.AuthenticationEnabled = &authEnabled
 
 			createdApi, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			defer cleanUpApi(kymaClient, createdApi, t, false)
+			defer ctx.cleanUpApi(kymaClient, createdApi, t, false)
 			So(err, ShouldBeNil)
 			So(createdApi, ShouldNotBeNil)
 			So(createdApi.ResourceVersion, ShouldNotBeEmpty)
 
-			createdApi, err = awaitApiCreated(kymaClient, createdApi, true, true)
+			createdApi, err = ctx.awaitApiCreated(kymaClient, createdApi, true, true)
 			So(err, ShouldBeNil)
 			So(createdApi.ResourceVersion, ShouldNotBeEmpty)
-			So(createdApi.Spec, ShouldDeepEqual, api.Spec)
+			So(createdApi.Spec, ctx.ShouldDeepEqual, api.Spec)
 
 			authEnabled = false
 			createdApi.Spec.AuthenticationEnabled = &authEnabled
@@ -158,10 +162,10 @@ func TestComponentSpec(t *testing.T) {
 			So(updatedApi, ShouldNotBeNil)
 			So(updatedApi.ResourceVersion, ShouldNotBeEmpty)
 
-			updatedApi, err = awaitApiCreated(kymaClient, updatedApi, false, true)
+			updatedApi, err = ctx.awaitApiCreated(kymaClient, updatedApi, false, true)
 			So(err, ShouldBeNil)
 			So(updatedApi.ResourceVersion, ShouldNotBeEmpty)
-			So(updatedApi.Spec, ShouldDeepEqual, api.Spec)
+			So(updatedApi.Spec, ctx.ShouldDeepEqual, api.Spec)
 			So(updatedApi.Status.AuthenticationStatus.Resource.Uid, ShouldBeEmpty)
 
 			_, err = istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(createdApi.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
@@ -171,47 +175,47 @@ func TestComponentSpec(t *testing.T) {
 		Convey("create API with custom jwt configuration", func() {
 			t.Log("create API with custom jwt configuration")
 
-			testId := generateTestId(testIdLength)
+			testId := ctx.generateTestId(testIdLength)
 			t.Logf("Running test: %s", testId)
-			api := apiFor(testId, domainName, apiSecurityDisabled, true)
-			setCustomJwtAuthenticationConfig(api)
+			api := ctx.apiFor(testId, domainName, apiSecurityDisabled, true)
+			ctx.setCustomJwtAuthenticationConfig(api)
 
 			lastApi, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			defer cleanUpApi(kymaClient, lastApi, t, false)
+			defer ctx.cleanUpApi(kymaClient, lastApi, t, false)
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			lastApi, err = awaitApiCreated(kymaClient, lastApi, true, true)
+			lastApi, err = ctx.awaitApiCreated(kymaClient, lastApi, true, true)
 			So(err, ShouldBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-			So(lastApi.Spec, ShouldDeepEqual, api.Spec)
+			So(lastApi.Spec, ctx.ShouldDeepEqual, api.Spec)
 
 			policy, err := istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(lastApi.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
-			expectedPolicy := policyFor(testId, api.Spec.Authentication[0].Jwt.Issuer)
+			expectedPolicy := ctx.policyFor(testId, api.Spec.Authentication[0].Jwt.Issuer)
 			So(err, ShouldBeNil)
-			So(policy.Spec, ShouldDeepEqual, expectedPolicy)
+			So(policy.Spec, ctx.ShouldDeepEqual, expectedPolicy)
 		})
 
 		Convey("delete API and all its related resources", func() {
 			t.Log("delete API and all its related resources")
 
-			testId := generateTestId(testIdLength)
+			testId := ctx.generateTestId(testIdLength)
 			t.Logf("Running test: %s", testId)
-			api := apiFor(testId, domainName, apiSecurityDisabled, true)
+			api := ctx.apiFor(testId, domainName, apiSecurityDisabled, true)
 			authEnabled := true
 			api.Spec.AuthenticationEnabled = &authEnabled
 
 			lastApi, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			defer cleanUpApi(kymaClient, lastApi, t, true)
+			defer ctx.cleanUpApi(kymaClient, lastApi, t, true)
 			So(err, ShouldBeNil)
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			lastApi, err = awaitApiCreated(kymaClient, lastApi, true, true)
+			lastApi, err = ctx.awaitApiCreated(kymaClient, lastApi, true, true)
 			So(err, ShouldBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
-			So(lastApi.Spec, ShouldDeepEqual, api.Spec)
+			So(lastApi.Spec, ctx.ShouldDeepEqual, api.Spec)
 			policy, err := istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(lastApi.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
 			So(err, ShouldBeNil)
 			vs, err := istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(lastApi.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
@@ -234,7 +238,7 @@ func TestComponentSpec(t *testing.T) {
 	})
 }
 
-func apiFor(testId, domainName string, secured ApiSecurity, hostWithDomain bool) *kymaApi.Api {
+func (ctx componentTestContext) apiFor(testId, domainName string, secured ApiSecurity, hostWithDomain bool) *kymaApi.Api {
 
 	return &kymaApi.Api{
 		ObjectMeta: metav1.ObjectMeta{
@@ -242,7 +246,7 @@ func apiFor(testId, domainName string, secured ApiSecurity, hostWithDomain bool)
 			Name:      fmt.Sprintf("sample-app-api-%s", testId),
 		},
 		Spec: kymaApi.ApiSpec{
-			Hostname: hostnameFor(testId, domainName, hostWithDomain),
+			Hostname: ctx.hostnameFor(testId, domainName, hostWithDomain),
 			Service: kymaApi.Service{
 				Name: fmt.Sprintf("sample-app-svc-%s", testId),
 				Port: 80,
@@ -253,7 +257,7 @@ func apiFor(testId, domainName string, secured ApiSecurity, hostWithDomain bool)
 	}
 }
 
-func virtualServiceFor(testId, domainName string) *istioNetApi.VirtualServiceSpec {
+func (componentTestContext) virtualServiceFor(testId, domainName string) *istioNetApi.VirtualServiceSpec {
 	return &istioNetApi.VirtualServiceSpec{
 		Hosts: []string{testId+"."+domainName},
 		Gateways: []string{"kyma-gateway.kyma-system.svc.cluster.local"},
@@ -276,7 +280,7 @@ func virtualServiceFor(testId, domainName string) *istioNetApi.VirtualServiceSpe
 	}
 }
 
-func policyFor(testId, issuer string) *istioAuthApi.PolicySpec {
+func (componentTestContext) policyFor(testId, issuer string) *istioAuthApi.PolicySpec {
 	return &istioAuthApi.PolicySpec{
 		Targets: istioAuthApi.Targets{
 			{Name: fmt.Sprintf("sample-app-svc-%s", testId)},
@@ -293,7 +297,7 @@ func policyFor(testId, issuer string) *istioAuthApi.PolicySpec {
 	}
 }
 
-func setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
+func (componentTestContext) setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
 	// OTHER EXAMPLE OF POSSSIBLE VALUES:
 	//issuer := "https://accounts.google.com"
 	//jwksUri := "https://www.googleapis.com/oauth2/v3/certs"
@@ -318,14 +322,14 @@ func setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
 	api.Spec.Authentication = rules
 }
 
-func hostnameFor(testId, domainName string, hostWithDomain bool) string {
+func (componentTestContext) hostnameFor(testId, domainName string, hostWithDomain bool) string {
 	if hostWithDomain {
 		return fmt.Sprintf("%s.%s", testId, domainName)
 	}
 	return testId
 }
 
-func awaitApiCreated(iface *kyma.Clientset, api *kymaApi.Api, vsChanged, policyChanged bool) (*kymaApi.Api, error) {
+func (componentTestContext) awaitApiCreated(iface *kyma.Clientset, api *kymaApi.Api, vsChanged, policyChanged bool) (*kymaApi.Api, error) {
 	var result *kymaApi.Api
 	err := retry.Do(func() error {
 		lastApi, err := iface.GatewayV1alpha2().Apis(namespace).Get(api.Name, metav1.GetOptions{})
@@ -349,7 +353,7 @@ func awaitApiCreated(iface *kyma.Clientset, api *kymaApi.Api, vsChanged, policyC
 	return result, err
 }
 
-func defaultConfigOrExit() *rest.Config {
+func (componentTestContext) defaultConfigOrExit() *rest.Config {
 
 	kubeConfigLocation := filepath.Join(os.Getenv("HOME"), ".kube", "config")
 
@@ -365,7 +369,7 @@ func defaultConfigOrExit() *rest.Config {
 	return kubeConfig
 }
 
-func generateTestId(n int) string {
+func (componentTestContext) generateTestId(n int) string {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -378,11 +382,11 @@ func generateTestId(n int) string {
 	return string(b)
 }
 
-func ShouldDeepEqual(actual interface{}, expected ...interface{}) string {
+func (componentTestContext) ShouldDeepEqual(actual interface{}, expected ...interface{}) string {
 	return strings.Join(deep.Equal(actual, expected[0]), "\n")
 }
 
-func cleanUpApi(kymaClient *kyma.Clientset, api * kymaApi.Api, t *testing.T, allowMissing bool) {
+func (componentTestContext) cleanUpApi(kymaClient *kyma.Clientset, api * kymaApi.Api, t *testing.T, allowMissing bool) {
 	if api == nil {
 		return
 	}
