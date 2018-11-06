@@ -144,7 +144,6 @@ func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinit
 	return serviceDetails, nil
 }
 
-//TODO:
 func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (metadata.ServiceDefinition, apperrors.AppError) {
 	serviceDefinition := metadata.ServiceDefinition{
 		Provider:         serviceDetails.Provider,

@@ -17,7 +17,6 @@ func (f ServiceDetailsValidatorFunc) Validate(details ServiceDetails) apperrors.
 	return f(details)
 }
 
-//TODO: ?
 func NewServiceDetailsValidator() ServiceDetailsValidator {
 	return ServiceDetailsValidatorFunc(func(details ServiceDetails) apperrors.AppError {
 		_, err := govalidator.ValidateStruct(details)
