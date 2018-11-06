@@ -14,7 +14,7 @@ type getLastOperationService struct {
 	getter operationGetter
 }
 
-func (svc *getLastOperationService) GetLastOperation(ctx context.Context, osbCtx osbContext, req *osb.LastOperationRequest) (*osb.LastOperationResponse, error) {
+func (svc *getLastOperationService) GetLastOperation(ctx context.Context, osbCtx OsbContext, req *osb.LastOperationRequest) (*osb.LastOperationResponse, error) {
 	iID := internal.InstanceID(req.InstanceID)
 
 	var opID internal.OperationID
