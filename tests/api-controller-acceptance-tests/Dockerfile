@@ -6,7 +6,7 @@ WORKDIR ${SRC_DIR}
 COPY ./apicontroller ${SRC_DIR}/apicontroller/
 COPY ./vendor ${SRC_DIR}/vendor/
 
-RUN go test -c ./apicontroller -o /acceptance.test
+RUN go test -c ./apicontroller/... -o /acceptance.test
 
 FROM alpine:3.7
 
