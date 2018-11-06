@@ -8,7 +8,6 @@ groups:
     labels:
       severity: critical
     annotations:
-      description: "{{ $labels.namespace }}/{{ $labels.pod }} is not running"
-      summary: "{{ $labels.pod }} is not running"
-kind: ConfigMap
+      description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
+      summary: "{{`{{ $labels.pod }}`}} is not running"
 {{ end }}
