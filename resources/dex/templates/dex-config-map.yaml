@@ -56,7 +56,7 @@ data:
       name: {{ .Values.oidc.kubernetesDashboardClientName }}
       redirectURIs:
       - 'https://kubernetes-dashboard.{{ .Values.global.domainName }}/oauth/callback'
-      secret: oiEWUWOIEwedfgg
+      secret: 94e412ebd7c9440f6947972a1bb35698f007ba2d6401d65a8c2e8490a453d472
 
     enablePasswordDB: true
     #__STATIC_PASSWORDS__

@@ -4,14 +4,7 @@ metadata:
   name: {{ template "name" . }}
   namespace: {{ .Release.Namespace }}
 spec:
-  {{ if not .Values.global.isLocalEnv }}
-  replicas: 2
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 1  
-      maxSurge: 1
-  {{ end }}
+  replicas: 1
   template:
     metadata:
       name: {{ template "name" . }}
@@ -41,7 +34,7 @@ spec:
           - --discovery-url=https://dex.{{ .Values.global.domainName }}
           - --skip-openid-provider-tls-verify=true
           - --client-id=kubernetes-dashboard
-          - --client-secret=oiEWUWOIEwedfgg
+          - --client-secret=94e412ebd7c9440f6947972a1bb35698f007ba2d6401d65a8c2e8490a453d472
           - --resources=uri=/*|methods=GET,POST,PUT,DELETE
           - --redirection-url=https://kubernetes-dashboard.{{ .Values.global.domainName }}
           - --verbose=true
@@ -83,4 +76,3 @@ spec:
       - image: k8s-dashboard-proxy:{{ .Values.global.k8s_dashboard_proxy.version }}
         name: reverse-proxy
         imagePullPolicy: IfNotPresent
-            
