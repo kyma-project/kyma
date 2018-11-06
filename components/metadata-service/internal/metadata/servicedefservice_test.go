@@ -50,11 +50,13 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com/token",
-			AccessLabel:           "access-label",
-			GatewayURL:            "gateway-url",
-			CredentialsSecretName: "secret-name",
+			TargetUrl:   "http://target.com",
+			AccessLabel: "access-label",
+			GatewayURL:  "gateway-url",
+			Credentials: remoteenv.Credentials{
+				AuthenticationUrl: "http://oauth.com/token",
+				SecretName:        "secret-name",
+			},
 		}
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
@@ -251,11 +253,13 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com/token",
-			AccessLabel:           "access-label",
-			GatewayURL:            "http://gateway-url.kyma.local",
-			CredentialsSecretName: "secret-name",
+			TargetUrl:   "http://target.com",
+			AccessLabel: "access-label",
+			GatewayURL:  "http://gateway-url.kyma.local",
+			Credentials: remoteenv.Credentials{
+				AuthenticationUrl: "http://oauth.com/token",
+				SecretName:        "secret-name",
+			},
 		}
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
@@ -433,11 +437,13 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com/token",
-			AccessLabel:           "access-label",
-			GatewayURL:            "gateway-url",
-			CredentialsSecretName: "secret-name",
+			TargetUrl:   "http://target.com",
+			AccessLabel: "access-label",
+			GatewayURL:  "gateway-url",
+			Credentials: remoteenv.Credentials{
+				AuthenticationUrl: "http://oauth.com/token",
+				SecretName:        "secret-name",
+			},
 		}
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
@@ -503,11 +509,13 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Api:         serviceAPI,
 		}
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "",
-			AccessLabel:           "access-label",
-			GatewayURL:            "gateway-utr",
-			CredentialsSecretName: "",
+			TargetUrl:   "http://target.com",
+			AccessLabel: "access-label",
+			GatewayURL:  "gateway-utr",
+			Credentials: remoteenv.Credentials{
+				AuthenticationUrl: "",
+				SecretName:        "",
+			},
 		}
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
@@ -600,8 +608,10 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 				Labels:              map[string]string{"connected-app": "re"},
 				Tags:                nil,
 				API: &remoteenv.ServiceAPI{
-					TargetUrl:             "http://service1.com",
-					CredentialsSecretName: "testSecret1",
+					TargetUrl: "http://service1.com",
+					Credentials: remoteenv.Credentials{
+						SecretName: "testSecret1",
+					},
 				},
 				Events: false,
 			},
@@ -673,11 +683,13 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		}
 
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com/token",
-			AccessLabel:           "access-label",
-			GatewayURL:            "gateway-url",
-			CredentialsSecretName: "secret-name",
+			TargetUrl:   "http://target.com",
+			AccessLabel: "access-label",
+			GatewayURL:  "gateway-url",
+			Credentials: remoteenv.Credentials{
+				AuthenticationUrl: "http://oauth.com/token",
+				SecretName:        "secret-name",
+			},
 		}
 
 		remoteEnvService := remoteenv.Service{
@@ -737,11 +749,13 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 	t.Run("should return error when reading API fails", func(t *testing.T) {
 		// given
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com/token",
-			AccessLabel:           "access-label",
-			GatewayURL:            "gateway-url",
-			CredentialsSecretName: "secret-name",
+			TargetUrl:   "http://target.com",
+			AccessLabel: "access-label",
+			GatewayURL:  "gateway-url",
+			Credentials: remoteenv.Credentials{
+				AuthenticationUrl: "http://oauth.com/token",
+				SecretName:        "secret-name",
+			},
 		}
 
 		remoteEnvService := remoteenv.Service{
@@ -831,11 +845,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com/token",
-			AccessLabel:           "access-label",
-			GatewayURL:            "gateway-url",
-			CredentialsSecretName: "secret-name",
+			TargetUrl:   "http://target.com",
+			AccessLabel: "access-label",
+			GatewayURL:  "gateway-url",
+
+			Credentials: remoteenv.Credentials{
+				SecretName: "secret-name",
+			},
 		}
 
 		remoteEnvService := remoteenv.Service{
@@ -905,11 +921,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com/token",
-			AccessLabel:           "access-label",
-			GatewayURL:            "gateway-url",
-			CredentialsSecretName: "secret-name",
+			TargetUrl:   "http://target.com",
+			AccessLabel: "access-label",
+			GatewayURL:  "gateway-url",
+			Credentials: remoteenv.Credentials{
+				AuthenticationUrl: "http://oauth.com/token",
+				SecretName:        "secret-name",
+			},
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
@@ -1267,11 +1285,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com/token",
-			AccessLabel:           "access-label",
-			GatewayURL:            "gateway-url",
-			CredentialsSecretName: "secret-name",
+			TargetUrl:   "http://target.com",
+			AccessLabel: "access-label",
+			GatewayURL:  "gateway-url",
+			Credentials: remoteenv.Credentials{
+				AuthenticationUrl: "http://oauth.com/token",
+				SecretName:        "secret-name",
+			},
 		}
 
 		remoteEnvService := remoteenv.Service{

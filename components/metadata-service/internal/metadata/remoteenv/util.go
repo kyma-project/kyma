@@ -21,11 +21,13 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 		for _, entry := range service.Entries {
 			if entry.Type == specAPIType {
 				api = &ServiceAPI{
-					GatewayURL:            entry.GatewayUrl,
-					AccessLabel:           entry.AccessLabel,
-					TargetUrl:             entry.TargetUrl,
-					OauthUrl:              entry.OauthUrl,
-					CredentialsSecretName: entry.CredentialsSecretName,
+					GatewayURL:  entry.GatewayUrl,
+					AccessLabel: entry.AccessLabel,
+					TargetUrl:   entry.TargetUrl,
+					Credentials: Credentials{
+						AuthenticationUrl: entry.OauthUrl,
+						SecretName:        entry.CredentialsSecretName,
+					},
 				}
 			} else if entry.Type == specEventsType {
 				events = true
@@ -60,8 +62,8 @@ func convertToK8sType(service Service) v1alpha1.Service {
 			GatewayUrl:            service.API.GatewayURL,
 			AccessLabel:           service.API.AccessLabel,
 			TargetUrl:             service.API.TargetUrl,
-			OauthUrl:              service.API.OauthUrl,
-			CredentialsSecretName: service.API.CredentialsSecretName,
+			OauthUrl:              service.API.Credentials.AuthenticationUrl,
+			CredentialsSecretName: service.API.Credentials.SecretName,
 		}
 		serviceEntries = append(serviceEntries, apiEntry)
 	}
