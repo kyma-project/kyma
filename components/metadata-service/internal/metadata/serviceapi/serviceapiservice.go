@@ -17,6 +17,10 @@ type API struct {
 	Credentials *Credentials
 	// Spec contains specification of an API.
 	Spec []byte
+	// SpecUrl is url from where the specification of an API can be acquired - used if Spec is not defined
+	SpecUrl string
+	// Type of API ex. OData, OpenApi
+	Type string
 }
 
 // Credentials contains OAuth configuration.

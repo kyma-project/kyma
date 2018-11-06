@@ -3,18 +3,23 @@ package metadata
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/go-openapi/spec"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/minio"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 )
 
 const (
 	targetSwaggerVersion = "2.0"
 	connectedApp         = "connected-app"
+	oDataSpecFormat      = "%s/$metadata"
+	oDataSpecType        = "odata"
 )
 
 // ServiceDefinitionService is a service that manages ServiceDefinition objects.
@@ -75,9 +80,12 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 		}
 		service.API = serviceAPI
 
-		serviceDef.Api.Spec, err = modifyAPISpec(serviceDef.Api.Spec, serviceAPI.GatewayURL)
+		err = determiningAPISpecification(serviceDef.Api, serviceAPI.GatewayURL)
 		if err != nil {
-			return "", apperrors.Internal("Modifying API spec failed, %s", err.Error())
+			if err.Code() == apperrors.CodeUpstreamServerCallFailed {
+				return "", apperrors.UpstreamServerCallFailed("Determining API spec for service with ID %s failed, %s", serviceDef.ID, err.Error())
+			}
+			return "", apperrors.Internal("Determining API spec for service with ID %s failed, %s", serviceDef.ID, err.Error())
 		}
 	}
 
@@ -93,6 +101,79 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 
 	serviceDef.ID = id
 	return id, nil
+}
+
+func determiningAPISpecification(api *serviceapi.API, gatewayUrl string) apperrors.AppError {
+	apiSpec := api.Spec
+
+	var err apperrors.AppError
+
+	if isNilOrEmpty(apiSpec) {
+		apiSpec, err = fetchSpec(api)
+		if err != nil {
+			return err
+		}
+	}
+
+	api.Spec, err = modifyAPISpec(apiSpec, gatewayUrl)
+	if err != nil {
+		return apperrors.Internal("Modifying API spec failed, %s", err.Error())
+	}
+
+	return nil
+}
+
+func fetchSpec(api *serviceapi.API) ([]byte, apperrors.AppError) {
+	specUrl, err := url.ParseRequestURI(api.SpecUrl)
+	if err != nil {
+		specUrl, err = url.ParseRequestURI(fmt.Sprintf(oDataSpecFormat, api.TargetUrl))
+		if err != nil {
+			return nil, apperrors.Internal("Parsing OData spec url failed, %s", err.Error())
+		}
+		api.Type = oDataSpecType
+	}
+
+	response, apperr := requestAPISpec(specUrl.String(), api.Credentials)
+	if apperr != nil {
+		return nil, apperr
+	}
+
+	if api.Type == "" {
+		// determine Type
+	}
+
+	spec, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, apperrors.Internal("Reading API spec response body failed, %s", err.Error())
+	}
+
+	return spec, nil
+}
+
+func isNilOrEmpty(array []byte) bool {
+	return array == nil || len(array) == 0
+}
+
+func requestAPISpec(specUrl string, credentials *serviceapi.Credentials) (*http.Response, apperrors.AppError) {
+	req, err := http.NewRequest(http.MethodGet, specUrl, nil)
+	if err != nil {
+		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())
+	}
+
+	if credentials != nil {
+		// TODO - setup authentication
+	}
+
+	response, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec failed, %s", err.Error())
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec failed with status %s", response.Status)
+	}
+
+	return response, nil
 }
 
 // GetByID returns ServiceDefinition with provided ID.
@@ -323,7 +404,9 @@ func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppE
 	var apiSpec spec.Swagger
 	err := json.Unmarshal(rawApiSpec, &apiSpec)
 	if err != nil {
-		return []byte{}, apperrors.Internal("Unmarshalling API spec failed, %s", err.Error())
+		//return []byte{}, apperrors.Internal("Unmarshalling API spec failed, %s", err.Error())
+		// OData might have different type than JSON
+		return rawApiSpec, nil
 	}
 
 	if apiSpec.Swagger != targetSwaggerVersion {

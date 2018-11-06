@@ -37,6 +37,8 @@ type API struct {
 	TargetUrl   string          `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
 	Credentials *Credentials    `json:"credentials,omitempty"`
 	Spec        json.RawMessage `json:"spec,omitempty"`
+	SpecUrl     string			`json:"specUrl,omitempty"`
+	Type 		string			`json:"type"`
 }
 
 type Credentials struct {
