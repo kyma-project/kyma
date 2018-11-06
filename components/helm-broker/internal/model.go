@@ -136,7 +136,6 @@ type Bundle struct {
 	Metadata    BundleMetadata
 	Tags        []BundleTag
 	Bindable    bool
-	Repository  RemoteRepository
 }
 
 // Labels are key-value pairs which add metadata information for bundle.
@@ -181,16 +180,6 @@ func (b BundleMetadata) DeepCopy() BundleMetadata {
 	}
 
 	return out
-}
-
-// RemoteRepository contains information about the repository which contains the given bundle.
-type RemoteRepository struct {
-	URL string
-}
-
-// ID returns an identifier of a repository which is the repository URL.
-func (r RemoteRepository) ID() string {
-	return r.URL
 }
 
 // InstanceID is a service instance identifier.
