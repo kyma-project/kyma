@@ -1,4 +1,4 @@
-package component
+package apicontroller
 
 import (
 	"fmt"
