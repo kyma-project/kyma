@@ -12,7 +12,7 @@ See the example usage of running backup phase tests:
 go test -run Backup --kubeconfig $KUBECONFIG --namespace test
 ```
 
-This test creates a `test` Namespace with several resources, such as Service Instances or bindings, which depends on brokers selected for the test. It also creates two backups: `test-re`, which contains cluster-scoped  RemoteEnvironments, and `test-ns`, which contains Namespace-scoped resources. Backup prefix always contains the name of the Namespace.
+This test creates a `test` Namespace with several resources, such as Service Instances or bindings, which depends on brokers selected for the test. It also creates two backups: `test-re`, which contains cluster-scoped  RemoteEnvironments, and `test-ns`, which contains Namespace-scoped resources. The backup prefix always contains the name of the Namespace.
 
  See the example usage of running restore phase tests:
 
