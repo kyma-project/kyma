@@ -314,7 +314,6 @@ func createProxyConfig(proxyTimeout int) Config {
 	return Config{
 		SkipVerify:        true,
 		ProxyTimeout:      proxyTimeout,
-		Namespace:         "kyma-integration",
 		RemoteEnvironment: "test",
 		ProxyCacheTTL:     proxyTimeout,
 	}
@@ -324,13 +323,13 @@ func createOAuthCredentialsMatcher(clientId, clientSecret, url string) func(auth
 	return func(c authorization.Credentials) bool {
 		return c.Oauth != nil && c.Oauth.ClientId == clientId &&
 			c.Oauth.ClientSecret == clientSecret &&
-			c.Oauth.AuthenticationUrl == url
+			c.Oauth.Url == url
 	}
 }
 
 func createBasicCredentialsMatcher(username, password string) func(authorization.Credentials) bool {
 	return func(c authorization.Credentials) bool {
-		return c.Basic != nil && c.Basic.UserName == username &&
+		return c.Basic != nil && c.Basic.Username == username &&
 			c.Basic.Password == password
 	}
 }

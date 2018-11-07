@@ -16,31 +16,30 @@ import (
 )
 
 type proxy struct {
-	nameResolver                  k8sconsts.NameResolver
-	serviceDefService             metadata.ServiceDefinitionService
-	cache                         Cache
-	skipVerify                    bool
-	proxyTimeout                  int
-	authenticationStrategyFactory authorization.StrategyFactory
+	nameResolver                 k8sconsts.NameResolver
+	serviceDefService            metadata.ServiceDefinitionService
+	cache                        Cache
+	skipVerify                   bool
+	proxyTimeout                 int
+	authorizationStrategyFactory authorization.StrategyFactory
 }
 
 type Config struct {
 	SkipVerify        bool
 	ProxyTimeout      int
-	Namespace         string
 	RemoteEnvironment string
 	ProxyCacheTTL     int
 }
 
 // New creates proxy for handling user's services calls
-func New(serviceDefService metadata.ServiceDefinitionService, authenticationStrategyFactory authorization.StrategyFactory, config Config) http.Handler {
+func New(serviceDefService metadata.ServiceDefinitionService, authorizationStrategyFactory authorization.StrategyFactory, config Config) http.Handler {
 	return &proxy{
-		nameResolver:                  k8sconsts.NewNameResolver(config.RemoteEnvironment, config.Namespace),
-		serviceDefService:             serviceDefService,
-		cache:                         NewCache(config.ProxyCacheTTL),
-		skipVerify:                    config.SkipVerify,
-		proxyTimeout:                  config.ProxyTimeout,
-		authenticationStrategyFactory: authenticationStrategyFactory,
+		nameResolver:                 k8sconsts.NewNameResolver(config.RemoteEnvironment),
+		serviceDefService:            serviceDefService,
+		cache:                        NewCache(config.ProxyCacheTTL),
+		skipVerify:                   config.SkipVerify,
+		proxyTimeout:                 config.ProxyTimeout,
+		authorizationStrategyFactory: authorizationStrategyFactory,
 	}
 }
 
@@ -63,15 +62,15 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	newRequest, cancel := p.prepareRequest(r, cacheEntry)
 	defer cancel()
 
-	err = p.addAuthentication(newRequest, cacheEntry)
+	err = p.addAuthorizationHeader(newRequest, cacheEntry)
 	if err != nil {
 		handleErrors(w, err)
 		return
 	}
 
-	p.addRetryHandler(newRequest, id, cacheEntry)
-
-	cacheEntry.Proxy.ServeHTTP(w, newRequest)
+	p.addModifyResponseHandler(newRequest, id, cacheEntry)
+	
+	p.executeRequest(w, newRequest, cacheEntry)
 }
 
 func (p *proxy) extractServiceId(host string) string {
@@ -99,9 +98,9 @@ func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 		return nil, err
 	}
 
-	authenticationStrategy := p.newAuthenticationStrategy(serviceApi.Credentials)
+	authorizationStrategy := p.newAuthorizationStrategy(serviceApi.Credentials)
 
-	return p.cache.Put(id, proxy, authenticationStrategy), nil
+	return p.cache.Put(id, proxy, authorizationStrategy), nil
 }
 
 func (p *proxy) prepareRequest(r *http.Request, cacheEntry *CacheEntry) (*http.Request, context.CancelFunc) {
@@ -111,57 +110,31 @@ func (p *proxy) prepareRequest(r *http.Request, cacheEntry *CacheEntry) (*http.R
 	return newRequest, cancel
 }
 
-func (p *proxy) addAuthentication(r *http.Request, cacheEntry *CacheEntry) apperrors.AppError {
+func (p *proxy) addAuthorizationHeader(r *http.Request, cacheEntry *CacheEntry) apperrors.AppError {
 	return cacheEntry.AuthorizationStrategy.Setup(r)
 }
 
-func (p *proxy) newAuthenticationStrategy(credentials *serviceapi.Credentials) authorization.Strategy {
+func (p *proxy) newAuthorizationStrategy(credentials *serviceapi.Credentials) authorization.Strategy {
 	authCredentials := authorization.Credentials{}
 
 	if oauthCredentialsProvided(credentials) {
 		authCredentials = authorization.Credentials{
 			Oauth: &authorization.OauthCredentials{
-				ClientId:          credentials.Oauth.ClientID,
-				ClientSecret:      credentials.Oauth.ClientSecret,
-				AuthenticationUrl: credentials.Oauth.URL,
+				ClientId:     credentials.Oauth.ClientID,
+				ClientSecret: credentials.Oauth.ClientSecret,
+				Url:          credentials.Oauth.URL,
 			},
 		}
 	} else if basicAuthCredentialsProvided(credentials) {
 		authCredentials = authorization.Credentials{
 			Basic: &authorization.BasicAuthCredentials{
-				UserName: credentials.Basic.Username,
+				Username: credentials.Basic.Username,
 				Password: credentials.Basic.Password,
 			},
 		}
 	}
 
-	return p.authenticationStrategyFactory.Create(authCredentials)
-}
-
-func (p *proxy) addRetryHandler(r *http.Request, id string, cacheEntry *CacheEntry) {
-	cacheEntry.Proxy.ModifyResponse = p.createRequestRetrier(id, r)
-}
-
-func (p *proxy) createRequestRetrier(id string, r *http.Request) func(*http.Response) error {
-	// Handle the case when credentials has been changed or OAuth token has expired
-	return func(response *http.Response) error {
-		retrier := newForbiddenRequestRetrier(id, r, p.proxyTimeout, p.createCacheEntry)
-
-		return retrier.RetryIfFailedToAuthorize(response)
-	}
-}
-
-func respondWithBody(w http.ResponseWriter, code int, body httperrors.ErrorResponse) {
-	w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
-
-	w.WriteHeader(code)
-
-	json.NewEncoder(w).Encode(body)
-}
-
-func handleErrors(w http.ResponseWriter, apperr apperrors.AppError) {
-	code, body := httperrors.AppErrorToResponse(apperr)
-	respondWithBody(w, code, body)
+	return p.authorizationStrategyFactory.Create(authCredentials)
 }
 
 func oauthCredentialsProvided(credentials *serviceapi.Credentials) bool {
@@ -170,4 +143,34 @@ func oauthCredentialsProvided(credentials *serviceapi.Credentials) bool {
 
 func basicAuthCredentialsProvided(credentials *serviceapi.Credentials) bool {
 	return credentials != nil && credentials.Basic != nil
+}
+
+func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry *CacheEntry) {
+	cacheEntry.Proxy.ModifyResponse = p.createModifyResponseFunction(id, r)
+}
+
+func (p *proxy) createModifyResponseFunction(id string, r *http.Request) func(*http.Response) error {
+	// Handle the case when credentials has been changed or OAuth token has expired
+	return func(response *http.Response) error {
+		retrier := newForbiddenRequestRetrier(id, r, p.proxyTimeout, p.createCacheEntry)
+
+		return retrier.RetryIfFailedToAuthorize(response)
+	}
+}
+
+func (p *proxy) executeRequest(w http.ResponseWriter, r *http.Request, cacheEntry *CacheEntry){
+	cacheEntry.Proxy.ServeHTTP(w, r)
+}
+
+func handleErrors(w http.ResponseWriter, apperr apperrors.AppError) {
+	code, body := httperrors.AppErrorToResponse(apperr)
+	respondWithBody(w, code, body)
+}
+
+func respondWithBody(w http.ResponseWriter, code int, body httperrors.ErrorResponse) {
+	w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
+
+	w.WriteHeader(code)
+
+	json.NewEncoder(w).Encode(body)
 }

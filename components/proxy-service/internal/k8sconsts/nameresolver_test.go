@@ -39,7 +39,7 @@ func TestNameResolver(t *testing.T) {
 
 	t.Run("should get resource name with truncated remote environment name if needed", func(t *testing.T) {
 		for _, testCase := range testCases {
-			resolver := NewNameResolver(testCase.remotEnv, "namespace")
+			resolver := NewNameResolver(testCase.remotEnv)
 
 			result := resolver.GetResourceName(testCase.id)
 
@@ -49,7 +49,7 @@ func TestNameResolver(t *testing.T) {
 
 	t.Run("should extract service ID from the access service host name", func(t *testing.T) {
 		for _, testCase := range testCases {
-			resolver := NewNameResolver(testCase.remotEnv, "namespace")
+			resolver := NewNameResolver(testCase.remotEnv)
 
 			result := resolver.ExtractServiceId(testCase.host)
 

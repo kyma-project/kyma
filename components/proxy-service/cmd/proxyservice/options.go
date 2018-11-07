@@ -21,7 +21,6 @@ func parseArgs() *options {
 	externalAPIPort := flag.Int("externalAPIPort", 8081, "External API port.")
 	proxyPort := flag.Int("proxyPort", 8080, "Proxy port.")
 	remoteEnvironment := flag.String("remoteEnvironment", "default-ec", "Remote environment name for reading and updating services.")
-	namespace := flag.String("namespace", "kyma-system", "Namespace used by the Proxy Service")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	skipVerify := flag.Bool("skipVerify", false, "Flag for skipping certificate verification for proxy target.")
 	proxyTimeout := flag.Int("proxyTimeout", 10, "Timeout for proxy call.")
@@ -34,7 +33,6 @@ func parseArgs() *options {
 		externalAPIPort:   *externalAPIPort,
 		proxyPort:         *proxyPort,
 		remoteEnvironment: *remoteEnvironment,
-		namespace:         *namespace,
 		requestTimeout:    *requestTimeout,
 		skipVerify:        *skipVerify,
 		proxyTimeout:      *proxyTimeout,

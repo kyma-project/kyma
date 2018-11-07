@@ -1,28 +1,22 @@
 package proxy
 
 import (
-	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
 	gocache "github.com/patrickmn/go-cache"
-	"net/http"
 	"net/http/httputil"
 	"time"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization"
 )
 
 const cleanupInterval = 60
 
-type AuthorizationStrategy interface {
-	Setup(r *http.Request) apperrors.AppError
-	Reset()
-}
-
 type CacheEntry struct {
 	Proxy                 *httputil.ReverseProxy
-	AuthorizationStrategy AuthorizationStrategy
+	AuthorizationStrategy authorization.Strategy
 }
 
 type Cache interface {
 	Get(id string) (*CacheEntry, bool)
-	Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *CacheEntry
+	Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy) *CacheEntry
 }
 
 type cache struct {
@@ -44,7 +38,7 @@ func (p *cache) Get(id string) (*CacheEntry, bool) {
 	return proxy.(*CacheEntry), found
 }
 
-func (p *cache) Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy AuthorizationStrategy) *CacheEntry {
+func (p *cache) Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy) *CacheEntry {
 	proxy := &CacheEntry{Proxy: reverseProxy, AuthorizationStrategy: authorizationStrategy}
 	p.proxyCache.Set(id, proxy, gocache.DefaultExpiration)
 

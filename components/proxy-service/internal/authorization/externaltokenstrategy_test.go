@@ -14,11 +14,10 @@ func TestExternalAuthStrategy(t *testing.T) {
 	t.Run("should use external token", func(t *testing.T) {
 		// given
 		oauthClientMock := &mocks.Client{}
-		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token")
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
 
-		basicAuthStrategy := newExternalTokenStrategy(oauthStrategy)
+		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
@@ -26,7 +25,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 		request.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = basicAuthStrategy.Setup(request)
+		err = externalTokenStrategy.Setup(request)
 
 		// then
 		require.NoError(t, err)
@@ -41,17 +40,17 @@ func TestExternalAuthStrategy(t *testing.T) {
 	t.Run("should use provider strategy in external token header is missing", func(t *testing.T) {
 		// given
 		oauthClientMock := &mocks.Client{}
-		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token").Return("token", nil)
+		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token").Return("token", nil).Once()
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
 
-		basicAuthStrategy := newExternalTokenStrategy(oauthStrategy)
+		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
 
 		// when
-		err = basicAuthStrategy.Setup(request)
+		err = externalTokenStrategy.Setup(request)
 
 		// then
 		require.NoError(t, err)
@@ -64,14 +63,14 @@ func TestExternalAuthStrategy(t *testing.T) {
 	t.Run("should call Reset method on the provided strategy", func(t *testing.T) {
 		// given
 		oauthClientMock := &mocks.Client{}
-		oauthClientMock.On("InvalidateTokenCache", "clientId").Return("token", nil)
+		oauthClientMock.On("InvalidateTokenCache", "clientId").Return("token", nil).Once()
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
 
-		basicAuthStrategy := newExternalTokenStrategy(oauthStrategy)
+		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
 
 		// when
-		basicAuthStrategy.Reset()
+		externalTokenStrategy.Reset()
 
 		// then
 		oauthClientMock.AssertExpectations(t)

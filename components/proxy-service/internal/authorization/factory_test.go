@@ -1,7 +1,7 @@
 package authorization
 
 import (
-	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/mocks"
+	oauthMocks "github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/mocks"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -12,7 +12,7 @@ import (
 func TestStrategyFactory(t *testing.T) {
 	t.Run("should create no auth strategy", func(t *testing.T) {
 		// given
-		oauthClientMock := &mocks.Client{}
+		oauthClientMock := &oauthMocks.Client{}
 
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
 		credentials := Credentials{}
@@ -52,12 +52,12 @@ func TestStrategyFactory(t *testing.T) {
 
 	t.Run("should create basic auth strategy", func(t *testing.T) {
 		// given
-		oauthClientMock := &mocks.Client{}
+		oauthClientMock := &oauthMocks.Client{}
 
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
 		credentials := Credentials{
 			Basic: &BasicAuthCredentials{
-				UserName: "username",
+				Username: "username",
 				Password: "password",
 			},
 		}
@@ -97,15 +97,15 @@ func TestStrategyFactory(t *testing.T) {
 
 	t.Run("should create oauth strategy", func(t *testing.T) {
 		// given
-		oauthClientMock := &mocks.Client{}
+		oauthClientMock := &oauthMocks.Client{}
 		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token").Return("token", nil)
 
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
 		credentials := Credentials{
 			Oauth: &OauthCredentials{
-				ClientId:          "clientId",
-				ClientSecret:      "clientSecret",
-				AuthenticationUrl: "www.example.com/token",
+				ClientId:     "clientId",
+				ClientSecret: "clientSecret",
+				Url:          "www.example.com/token",
 			},
 		}
 
@@ -115,7 +115,6 @@ func TestStrategyFactory(t *testing.T) {
 		// then
 		require.NotNil(t, strategy)
 
-		// given
 		// given
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)

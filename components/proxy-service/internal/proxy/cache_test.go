@@ -47,6 +47,5 @@ func TestCache(t *testing.T) {
 		assert.True(t, found)
 		assert.Equal(t, proxy, cacheEntry.Proxy)
 		assert.Equal(t, authorizationStrategyMock, cacheEntry.AuthorizationStrategy)
-
 	})
 }

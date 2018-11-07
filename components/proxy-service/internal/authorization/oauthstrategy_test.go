@@ -2,7 +2,7 @@ package authorization
 
 import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/mocks"
+	oauthMocks "github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/mocks"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -14,7 +14,7 @@ func TestAuthStrategy(t *testing.T) {
 
 	t.Run("should add Authorization header", func(t *testing.T) {
 		// given
-		oauthClientMock := &mocks.Client{}
+		oauthClientMock := &oauthMocks.Client{}
 		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token").Return("token", nil)
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
@@ -33,8 +33,8 @@ func TestAuthStrategy(t *testing.T) {
 
 	t.Run("should invalidate cache", func(t *testing.T) {
 		// given
-		oauthClientMock := &mocks.Client{}
-		oauthClientMock.On("InvalidateTokenCache", "clientId").Return("token", nil)
+		oauthClientMock := &oauthMocks.Client{}
+		oauthClientMock.On("InvalidateTokenCache", "clientId").Return("token", nil).Once()
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
 
@@ -47,8 +47,8 @@ func TestAuthStrategy(t *testing.T) {
 
 	t.Run("should not add Authorization header when getting token failed", func(t *testing.T) {
 		// given
-		oauthClientMock := &mocks.Client{}
-		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token").Return("", apperrors.Internal("failed")).Times(0)
+		oauthClientMock := &oauthMocks.Client{}
+		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token").Return("", apperrors.Internal("failed")).Once()
 
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
 

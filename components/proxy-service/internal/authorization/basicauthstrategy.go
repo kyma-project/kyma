@@ -20,8 +20,8 @@ func newBasicAuthStrategy(username, password string) basicAuthStrategy {
 	}
 }
 
-func (o basicAuthStrategy) Setup(r *http.Request) apperrors.AppError {
-	r.Header.Set(httpconsts.HeaderAuthorization, fmt.Sprintf("Basic %s", basicAuth(o.username, o.password)))
+func (b basicAuthStrategy) Setup(r *http.Request) apperrors.AppError {
+	r.Header.Set(httpconsts.HeaderAuthorization, fmt.Sprintf("Basic %s", basicAuth(b.username, b.password)))
 
 	return nil
 }

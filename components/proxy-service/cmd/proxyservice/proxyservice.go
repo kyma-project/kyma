@@ -83,7 +83,6 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 		proxyConfig := proxy.Config{
 			SkipVerify:        options.skipVerify,
 			ProxyTimeout:      options.proxyTimeout,
-			Namespace:         options.namespace,
 			RemoteEnvironment: options.remoteEnvironment,
 			ProxyCacheTTL:     options.proxyCacheTTL,
 		}

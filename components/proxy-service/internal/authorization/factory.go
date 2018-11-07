@@ -26,13 +26,13 @@ type OAuthClient interface {
 }
 
 type OauthCredentials struct {
-	AuthenticationUrl string
-	ClientId          string
-	ClientSecret      string
+	Url          string
+	ClientId     string
+	ClientSecret string
 }
 
 type BasicAuthCredentials struct {
-	UserName string
+	Username string
 	Password string
 }
 
@@ -43,11 +43,11 @@ type Credentials struct {
 
 func (asf authorizationStrategyFactory) Create(c Credentials) Strategy {
 	if c.Oauth != nil {
-		oauthStrategy := newOAuthStrategy(asf.oauthClient, c.Oauth.ClientId, c.Oauth.ClientSecret, c.Oauth.AuthenticationUrl)
+		oauthStrategy := newOAuthStrategy(asf.oauthClient, c.Oauth.ClientId, c.Oauth.ClientSecret, c.Oauth.Url)
 
 		return newExternalTokenStrategy(oauthStrategy)
 	} else if c.Basic != nil {
-		basicAuthStrategy := newBasicAuthStrategy(c.Basic.UserName, c.Basic.Password)
+		basicAuthStrategy := newBasicAuthStrategy(c.Basic.Username, c.Basic.Password)
 
 		return newExternalTokenStrategy(basicAuthStrategy)
 	} else {
