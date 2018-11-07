@@ -265,14 +265,12 @@
     "pkg/apis/servicecatalog/v1beta1",
     "pkg/apis/settings",
     "pkg/apis/settings/v1alpha1",
-    "pkg/client/clientset_generated/clientset",
     "pkg/client/clientset_generated/clientset/scheme",
     "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
-    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1",
     "pkg/filter"
   ]
-  revision = "0aaf02aba556b945a357fce4e82f62122d158f2a"
-  version = "v0.1.28"
+  revision = "9a11d65cffff657bebf09ec7cbfdc4e5cd768628"
+  version = "v0.1.34"
 
 [[projects]]
   branch = "master"
@@ -656,6 +654,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "77197c65a39cf2512db2fee6da473fb2d710fddf74eb905083fca3c60ddd6e67"
+  inputs-digest = "1536ed13e2b49175dab241b57a151fa9a9a63a68db79be9912c2725f9430fedc"
   solver-name = "gps-cdcl"
   solver-version = 1

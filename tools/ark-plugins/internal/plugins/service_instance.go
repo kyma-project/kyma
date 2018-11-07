@@ -29,7 +29,7 @@ func (p *RemoveServiceInstanceFields) Execute(item runtime.Unstructured, restore
 		return nil, nil, err
 	}
 
-	p.Log.Infof("Removing serviceClassRef/serviceClassRef fields from instance %s in namespace %s", metadata.GetName(), metadata.GetNamespace())
+	p.Log.Infof("Removing serviceClassRef/servicePlanRef fields from instance %s in namespace %s", metadata.GetName(), metadata.GetNamespace())
 	unstructured.RemoveNestedField(item.UnstructuredContent(), "spec", "serviceClassRef")
 	unstructured.RemoveNestedField(item.UnstructuredContent(), "spec", "servicePlanRef")
 
