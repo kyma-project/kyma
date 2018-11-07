@@ -9,7 +9,8 @@ service:
   internalPort: 8080
 
 repository:
-  URL: "https://github.com/kyma-project/bundles/releases/download/0.1.0/"
+  # semicolon separated repository URLs
+  URLs: "https://github.com/kyma-project/bundles/releases/download/0.1.0/"
 
 config:
   storage:
