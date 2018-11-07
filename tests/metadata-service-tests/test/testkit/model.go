@@ -54,13 +54,19 @@ type API struct {
 }
 
 type Credentials struct {
-	Oauth Oauth `json:"oauth"`
+	Oauth *Oauth `json:"oauth,omitempty"`
+	Basic *Basic `json:"basic,omitempty"`
 }
 
 type Oauth struct {
 	URL          string `json:"url"`
 	ClientID     string `json:"clientId"`
 	ClientSecret string `json:"clientSecret"`
+}
+
+type Basic struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type Events struct {

@@ -35,7 +35,7 @@ func TestK8sResources(t *testing.T) {
 			Api: &testkit.API{
 				TargetUrl: "http://service.com",
 				Credentials: &testkit.Credentials{
-					Oauth: testkit.Oauth{
+					Oauth: &testkit.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -194,7 +194,7 @@ func TestK8sResources(t *testing.T) {
 			Api: &testkit.API{
 				TargetUrl: "http://service.com",
 				Credentials: &testkit.Credentials{
-					Oauth: testkit.Oauth{
+					Oauth: &testkit.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -220,7 +220,7 @@ func TestK8sResources(t *testing.T) {
 			Api: &testkit.API{
 				TargetUrl: "http://updated-service.com",
 				Credentials: &testkit.Credentials{
-					Oauth: testkit.Oauth{
+					Oauth: &testkit.Oauth{
 						URL:          "http://updated-oauth.com",
 						ClientID:     "updated-clientId",
 						ClientSecret: "updated-clientSecret",
@@ -307,7 +307,7 @@ func TestK8sResources(t *testing.T) {
 			Api: &testkit.API{
 				TargetUrl: "http://service.com",
 				Credentials: &testkit.Credentials{
-					Oauth: testkit.Oauth{
+					Oauth: &testkit.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -416,7 +416,7 @@ func TestK8sResources(t *testing.T) {
 			Api: &testkit.API{
 				TargetUrl: "http://service.com",
 				Credentials: &testkit.Credentials{
-					Oauth: testkit.Oauth{
+					Oauth: &testkit.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -500,7 +500,7 @@ func TestK8sResources(t *testing.T) {
 			Api: &testkit.API{
 				TargetUrl: "http://service.com",
 				Credentials: &testkit.Credentials{
-					Oauth: testkit.Oauth{
+					Oauth: &testkit.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
