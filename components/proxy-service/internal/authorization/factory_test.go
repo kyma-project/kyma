@@ -28,7 +28,7 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = strategy.Setup(request)
+		err = strategy.AddAuthorizationHeader(request)
 
 		// then
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
@@ -42,7 +42,7 @@ func TestStrategyFactory(t *testing.T) {
 		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = strategy.Setup(requestWithExternalToken)
+		err = strategy.AddAuthorizationHeader(requestWithExternalToken)
 
 		// then
 		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)
@@ -73,7 +73,7 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = strategy.Setup(request)
+		err = strategy.AddAuthorizationHeader(request)
 
 		// then
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
@@ -87,7 +87,7 @@ func TestStrategyFactory(t *testing.T) {
 		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = strategy.Setup(requestWithExternalToken)
+		err = strategy.AddAuthorizationHeader(requestWithExternalToken)
 
 		// then
 		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)
@@ -120,7 +120,7 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = strategy.Setup(request)
+		err = strategy.AddAuthorizationHeader(request)
 
 		// then
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
@@ -134,7 +134,7 @@ func TestStrategyFactory(t *testing.T) {
 		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = strategy.Setup(requestWithExternalToken)
+		err = strategy.AddAuthorizationHeader(requestWithExternalToken)
 
 		// then
 		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)

@@ -75,9 +75,9 @@ func (rr *retrier) prepareRequest() (*http.Request, context.CancelFunc) {
 
 func (rr *retrier) addAuthorization(r *http.Request, cacheEntry *CacheEntry) error {
 	authorizationStrategy := cacheEntry.AuthorizationStrategy
-	authorizationStrategy.Reset()
+	authorizationStrategy.Invalidate()
 
-	return authorizationStrategy.Setup(r)
+	return authorizationStrategy.AddAuthorizationHeader(r)
 }
 
 func (rr *retrier) performRequest(r *http.Request, cacheEntry *CacheEntry) (*http.Response, error) {

@@ -12,10 +12,10 @@ func newNoAuthStrategy() noAuthStrategy {
 type noAuthStrategy struct {
 }
 
-func (ns noAuthStrategy) Setup(r *http.Request) apperrors.AppError {
+func (ns noAuthStrategy) AddAuthorizationHeader(r *http.Request) apperrors.AppError {
 	return nil
 }
 
-func (ns noAuthStrategy) Reset() {
+func (ns noAuthStrategy) Invalidate() {
 
 }

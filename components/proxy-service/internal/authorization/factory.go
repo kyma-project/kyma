@@ -8,8 +8,8 @@ import (
 )
 
 type Strategy interface {
-	Setup(r *http.Request) apperrors.AppError
-	Reset()
+	AddAuthorizationHeader(r *http.Request) apperrors.AppError
+	Invalidate()
 }
 
 type StrategyFactory interface {

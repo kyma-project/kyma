@@ -14,7 +14,7 @@ func newExternalTokenStrategy(strategy Strategy) Strategy {
 	return externalTokenStrategy{strategy: strategy}
 }
 
-func (e externalTokenStrategy) Setup(r *http.Request) apperrors.AppError {
+func (e externalTokenStrategy) AddAuthorizationHeader(r *http.Request) apperrors.AppError {
 	externalToken := r.Header.Get(httpconsts.HeaderAccessToken)
 
 	if externalToken != "" {
@@ -23,10 +23,10 @@ func (e externalTokenStrategy) Setup(r *http.Request) apperrors.AppError {
 
 		return nil
 	} else {
-		return e.strategy.Setup(r)
+		return e.strategy.AddAuthorizationHeader(r)
 	}
 }
 
-func (o externalTokenStrategy) Reset() {
-	o.strategy.Reset()
+func (o externalTokenStrategy) Invalidate() {
+	o.strategy.Invalidate()
 }

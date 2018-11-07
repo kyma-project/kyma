@@ -25,7 +25,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 		request.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = externalTokenStrategy.Setup(request)
+		err = externalTokenStrategy.AddAuthorizationHeader(request)
 
 		// then
 		require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = externalTokenStrategy.Setup(request)
+		err = externalTokenStrategy.AddAuthorizationHeader(request)
 
 		// then
 		require.NoError(t, err)
@@ -60,7 +60,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 		oauthClientMock.AssertExpectations(t)
 	})
 
-	t.Run("should call Reset method on the provided strategy", func(t *testing.T) {
+	t.Run("should call Invalidate method on the provided strategy", func(t *testing.T) {
 		// given
 		oauthClientMock := &mocks.Client{}
 		oauthClientMock.On("InvalidateTokenCache", "clientId").Return("token", nil).Once()
@@ -70,7 +70,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 		externalTokenStrategy := newExternalTokenStrategy(oauthStrategy)
 
 		// when
-		externalTokenStrategy.Reset()
+		externalTokenStrategy.Invalidate()
 
 		// then
 		oauthClientMock.AssertExpectations(t)

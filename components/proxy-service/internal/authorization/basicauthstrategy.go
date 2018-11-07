@@ -20,7 +20,7 @@ func newBasicAuthStrategy(username, password string) basicAuthStrategy {
 	}
 }
 
-func (b basicAuthStrategy) Setup(r *http.Request) apperrors.AppError {
+func (b basicAuthStrategy) AddAuthorizationHeader(r *http.Request) apperrors.AppError {
 	r.Header.Set(httpconsts.HeaderAuthorization, fmt.Sprintf("Basic %s", basicAuth(b.username, b.password)))
 
 	return nil
@@ -32,5 +32,5 @@ func basicAuth(username, password string) string {
 	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
-func (o basicAuthStrategy) Reset() {
+func (b basicAuthStrategy) Invalidate() {
 }

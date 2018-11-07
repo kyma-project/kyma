@@ -111,7 +111,7 @@ func (p *proxy) prepareRequest(r *http.Request, cacheEntry *CacheEntry) (*http.R
 }
 
 func (p *proxy) addAuthorizationHeader(r *http.Request, cacheEntry *CacheEntry) apperrors.AppError {
-	return cacheEntry.AuthorizationStrategy.Setup(r)
+	return cacheEntry.AuthorizationStrategy.AddAuthorizationHeader(r)
 }
 
 func (p *proxy) newAuthorizationStrategy(credentials *serviceapi.Credentials) authorization.Strategy {

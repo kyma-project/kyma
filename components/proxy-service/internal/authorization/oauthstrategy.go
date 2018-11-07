@@ -24,7 +24,7 @@ func newOAuthStrategy(oauthClient OAuthClient, clientId, clientSecret, url strin
 	}
 }
 
-func (o oauthStrategy) Setup(r *http.Request) apperrors.AppError {
+func (o oauthStrategy) AddAuthorizationHeader(r *http.Request) apperrors.AppError {
 	token, err := o.oauthClient.GetToken(o.clientId, o.clientSecret, o.url)
 	if err != nil {
 		log.Errorf("failed to get token : '%s'", err)
@@ -37,6 +37,6 @@ func (o oauthStrategy) Setup(r *http.Request) apperrors.AppError {
 	return nil
 }
 
-func (o oauthStrategy) Reset() {
+func (o oauthStrategy) Invalidate() {
 	o.oauthClient.InvalidateTokenCache(o.clientId)
 }

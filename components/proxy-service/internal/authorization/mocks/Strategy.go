@@ -12,13 +12,8 @@ type Strategy struct {
 	mock.Mock
 }
 
-// Reset provides a mock function with given fields:
-func (_m *Strategy) Reset() {
-	_m.Called()
-}
-
-// Setup provides a mock function with given fields: r
-func (_m *Strategy) Setup(r *http.Request) apperrors.AppError {
+// AddAuthorizationHeader provides a mock function with given fields: r
+func (_m *Strategy) AddAuthorizationHeader(r *http.Request) apperrors.AppError {
 	ret := _m.Called(r)
 
 	var r0 apperrors.AppError
@@ -31,4 +26,9 @@ func (_m *Strategy) Setup(r *http.Request) apperrors.AppError {
 	}
 
 	return r0
+}
+
+// Invalidate provides a mock function with given fields:
+func (_m *Strategy) Invalidate() {
+	_m.Called()
 }

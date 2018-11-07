@@ -23,7 +23,7 @@ func TestAuthStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = oauthStrategy.Setup(request)
+		err = oauthStrategy.AddAuthorizationHeader(request)
 
 		// then
 		require.NoError(t, err)
@@ -39,7 +39,7 @@ func TestAuthStrategy(t *testing.T) {
 		oauthStrategy := newOAuthStrategy(oauthClientMock, "clientId", "clientSecret", "www.example.com/token")
 
 		// when
-		oauthStrategy.Reset()
+		oauthStrategy.Invalidate()
 
 		// then
 		oauthClientMock.AssertExpectations(t)
@@ -56,7 +56,7 @@ func TestAuthStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = oauthStrategy.Setup(request)
+		err = oauthStrategy.AddAuthorizationHeader(request)
 
 		// then
 		require.Error(t, err)
