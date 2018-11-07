@@ -20,14 +20,14 @@ global:
     dir: develop/
     version: 6e0a7fe2
   proxy_service:
-    dir: develop/
-    version: cb19afea
+    dir: pr/
+    version: PR-1519
   gateway_tests:
     dir: develop/
     version: cb19afea
   metadata_service:
-    dir: develop/
-    version: cb19afea
+    dir: pr/
+    version: PR-1526
   metadata_service_tests:
     dir: develop/
     version: 16a332c1
