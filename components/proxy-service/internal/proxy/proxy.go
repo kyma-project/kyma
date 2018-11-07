@@ -117,13 +117,20 @@ func (p *proxy) addAuthentication(r *http.Request, cacheEntry *CacheEntry) apper
 
 func (p *proxy) newAuthenticationStrategy(credentials *serviceapi.Credentials) authorization.Strategy {
 	authCredentials := authorization.Credentials{}
-	
+
 	if oauthCredentialsProvided(credentials) {
 		authCredentials = authorization.Credentials{
 			Oauth: &authorization.OauthCredentials{
 				ClientId:          credentials.Oauth.ClientID,
 				ClientSecret:      credentials.Oauth.ClientSecret,
 				AuthenticationUrl: credentials.Oauth.URL,
+			},
+		}
+	} else if basicAuthCredentialsProvided(credentials) {
+		authCredentials = authorization.Credentials{
+			Basic: &authorization.BasicAuthCredentials{
+				UserName: credentials.Basic.Username,
+				Password: credentials.Basic.Password,
 			},
 		}
 	}
@@ -135,9 +142,9 @@ func (p *proxy) addRetryHandler(r *http.Request, id string, cacheEntry *CacheEnt
 	cacheEntry.Proxy.ModifyResponse = p.createRequestRetrier(id, r)
 }
 
-func (p *proxy) createRequestRetrier(id string, r *http.Request) (func (*http.Response) error) {
+func (p *proxy) createRequestRetrier(id string, r *http.Request) func(*http.Response) error {
 	// Handle the case when credentials has been changed or OAuth token has expired
-	return func (response *http.Response) error {
+	return func(response *http.Response) error {
 		retrier := newForbiddenRequestRetrier(id, r, p.proxyTimeout, p.createCacheEntry)
 
 		return retrier.RetryIfFailedToAuthorize(response)
@@ -158,5 +165,9 @@ func handleErrors(w http.ResponseWriter, apperr apperrors.AppError) {
 }
 
 func oauthCredentialsProvided(credentials *serviceapi.Credentials) bool {
-	return credentials != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
+	return credentials != nil && credentials.Oauth != nil
+}
+
+func basicAuthCredentialsProvided(credentials *serviceapi.Credentials) bool {
+	return credentials != nil && credentials.Basic != nil
 }

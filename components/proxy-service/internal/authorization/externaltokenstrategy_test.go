@@ -1,12 +1,12 @@
 package authorization
 
 import (
-	"github.com/stretchr/testify/require"
-	"testing"
-	"net/http"
-	"github.com/stretchr/testify/assert"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/mocks"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"net/http"
+	"testing"
 )
 
 func TestExternalAuthStrategy(t *testing.T) {
@@ -60,7 +60,6 @@ func TestExternalAuthStrategy(t *testing.T) {
 		assert.Equal(t, "Bearer token", authHeader)
 		oauthClientMock.AssertExpectations(t)
 	})
-
 
 	t.Run("should call Reset method on the provided strategy", func(t *testing.T) {
 		// given

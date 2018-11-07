@@ -1,11 +1,11 @@
 package authorization
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
 	log "github.com/sirupsen/logrus"
 	"net/http"
-	"fmt"
 )
 
 type oauthStrategy struct {
@@ -31,7 +31,7 @@ func (o oauthStrategy) Setup(r *http.Request) apperrors.AppError {
 		return err
 	}
 
-	r.Header.Set(httpconsts.HeaderAuthorization, fmt.Sprintf("Bearer %s",token))
+	r.Header.Set(httpconsts.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
 	log.Infof("OAuth token fetched. Adding Authorization header: %s", r.Header.Get(httpconsts.HeaderAuthorization))
 
 	return nil

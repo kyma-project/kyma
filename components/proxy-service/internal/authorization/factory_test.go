@@ -1,12 +1,12 @@
 package authorization
 
 import (
-	"testing"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/mocks"
-	"github.com/stretchr/testify/require"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
-	"net/http"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"net/http"
+	"testing"
 )
 
 func TestStrategyFactory(t *testing.T) {
@@ -15,9 +15,7 @@ func TestStrategyFactory(t *testing.T) {
 		oauthClientMock := &mocks.Client{}
 
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
-		credentials := Credentials{
-
-		}
+		credentials := Credentials{}
 
 		// when
 		strategy := factory.Create(credentials)
@@ -105,8 +103,8 @@ func TestStrategyFactory(t *testing.T) {
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
 		credentials := Credentials{
 			Oauth: &OauthCredentials{
-				ClientId: "clientId",
-				ClientSecret: "clientSecret",
+				ClientId:          "clientId",
+				ClientSecret:      "clientSecret",
 				AuthenticationUrl: "www.example.com/token",
 			},
 		}

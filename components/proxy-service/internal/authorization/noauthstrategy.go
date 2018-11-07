@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func newNoAuthStrategy() noAuthStrategy{
+func newNoAuthStrategy() noAuthStrategy {
 	return noAuthStrategy{}
 }
 

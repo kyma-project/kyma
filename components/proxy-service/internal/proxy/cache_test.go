@@ -1,12 +1,12 @@
 package proxy
 
 import (
-	"github.com/stretchr/testify/assert"
-	"testing"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/mocks"
-	"net/http/httputil"
-	"k8s.io/apimachinery/pkg/util/net"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"k8s.io/apimachinery/pkg/util/net"
+	"net/http/httputil"
+	"testing"
 )
 
 func TestCache(t *testing.T) {

@@ -1,14 +1,14 @@
 package proxy
 
 import (
-	"testing"
-	"net/http"
-	"github.com/stretchr/testify/assert"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	"github.com/stretchr/testify/assert"
+	"net/http"
+	"testing"
 )
 
 func TestForbiddenRequestRetrier_CheckResponse(t *testing.T) {
-	updateCacheEntryFunction :=  func (id string) (*CacheEntry, apperrors.AppError) {
+	updateCacheEntryFunction := func(id string) (*CacheEntry, apperrors.AppError) {
 		return nil, nil
 	}
 

@@ -30,4 +30,3 @@ func (o externalTokenStrategy) Setup(r *http.Request) apperrors.AppError {
 func (o externalTokenStrategy) Reset() {
 	o.strategy.Reset()
 }
-

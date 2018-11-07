@@ -2,10 +2,10 @@ package proxy
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"time"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
 )
 
 type retrier struct {
@@ -16,7 +16,7 @@ type retrier struct {
 	updateCacheEntryFunction updateCacheEntryFunction
 }
 
-type updateCacheEntryFunction = func (string) (*CacheEntry, apperrors.AppError)
+type updateCacheEntryFunction = func(string) (*CacheEntry, apperrors.AppError)
 
 func newForbiddenRequestRetrier(id string, request *http.Request, timeout int, updateCacheEntryFunc updateCacheEntryFunction) *retrier {
 	return &retrier{id: id, request: request, retried: false, timeout: timeout, updateCacheEntryFunction: updateCacheEntryFunc}

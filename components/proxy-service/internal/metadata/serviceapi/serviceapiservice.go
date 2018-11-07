@@ -41,10 +41,10 @@ type Oauth struct {
 const (
 	ClientIDKey     = "clientId"
 	ClientSecretKey = "clientSecret"
-	UsernameKey = "username"
-	PasswordKey = "password"
-	TypeOAuth = "OAuth"
-	TypeBasic = "Basic"
+	UsernameKey     = "username"
+	PasswordKey     = "password"
+	TypeOAuth       = "OAuth"
+	TypeBasic       = "Basic"
 )
 
 // Service manages API definition of a service
@@ -88,23 +88,22 @@ func (sas defaultService) Read(remoteenvAPI *remoteenv.ServiceAPI) (*API, apperr
 				Basic: getBasicAuthCredentials(secret),
 			}
 		} else {
-		 	api.Credentials = nil
+			api.Credentials = nil
 		}
 	}
 
 	return api, nil
 }
 
-
-func getOAuthCredentials(secret map[string][]byte, url string) *Oauth{
+func getOAuthCredentials(secret map[string][]byte, url string) *Oauth {
 	return &Oauth{
-		ClientID: string(secret[ClientIDKey]),
+		ClientID:     string(secret[ClientIDKey]),
 		ClientSecret: string(secret[ClientSecretKey]),
-		URL: url,
+		URL:          url,
 	}
 }
 
-func getBasicAuthCredentials(secret map[string][]byte) *Basic{
+func getBasicAuthCredentials(secret map[string][]byte) *Basic {
 	return &Basic{
 		Username: string(secret[UsernameKey]),
 		Password: string(secret[PasswordKey]),

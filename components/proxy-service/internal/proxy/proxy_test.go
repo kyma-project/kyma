@@ -87,7 +87,7 @@ func TestProxy(t *testing.T) {
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.On("Setup", mock.AnythingOfType("*http.Request")).Return(nil)
 
-		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", tsOAuth.URL + "/token")
+		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", tsOAuth.URL+"/token")
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
@@ -100,6 +100,47 @@ func TestProxy(t *testing.T) {
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
 					URL:          tsOAuth.URL + "/token",
+				},
+			},
+		}, nil)
+
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		rr := httptest.NewRecorder()
+
+		// when
+		handler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "test", rr.Body.String())
+	})
+
+	t.Run("should proxy Basic auth calls", func(t *testing.T) {
+		// given
+		ts := NewTestServer(func(req *http.Request) {
+			assert.Equal(t, req.Method, http.MethodGet)
+			assert.Equal(t, req.RequestURI, "/orders/123")
+		})
+		defer ts.Close()
+
+		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
+
+		authStrategyMock := &authMock.Strategy{}
+		authStrategyMock.On("Setup", mock.AnythingOfType("*http.Request")).Return(nil)
+
+		credentialsMatcher := createBasicCredentialsMatcher("username", "password")
+
+		authStrategyFactoryMock := &authMock.StrategyFactory{}
+		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
+
+		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
+			TargetUrl: ts.URL,
+			Credentials: &serviceapi.Credentials{
+				Basic: &serviceapi.Basic{
+					Username: "username",
+					Password: "password",
 				},
 			},
 		}, nil)
@@ -201,7 +242,7 @@ func TestProxy(t *testing.T) {
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.On("Setup", mock.Anything).Return(nil).Twice()
 		authStrategyMock.On("Reset").Return().Once()
-		
+
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", mock.Anything).Return(authStrategyMock).Twice()
 
@@ -284,5 +325,12 @@ func createOAuthCredentialsMatcher(clientId, clientSecret, url string) func(auth
 		return c.Oauth != nil && c.Oauth.ClientId == clientId &&
 			c.Oauth.ClientSecret == clientSecret &&
 			c.Oauth.AuthenticationUrl == url
+	}
+}
+
+func createBasicCredentialsMatcher(username, password string) func(authorization.Credentials) bool {
+	return func(c authorization.Credentials) bool {
+		return c.Basic != nil && c.Basic.UserName == username &&
+			c.Basic.Password == password
 	}
 }

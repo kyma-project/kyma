@@ -27,17 +27,17 @@ type repository struct {
 }
 
 type Credentials struct {
-	Type 		string
-	SecretName 	string
-	Url 		string
+	Type       string
+	SecretName string
+	Url        string
 }
 
 // ServiceAPI stores information needed to call an API
 type ServiceAPI struct {
-	GatewayURL            string
-	AccessLabel           string
-	TargetUrl             string
-	Credentials 		  *Credentials
+	GatewayURL  string
+	AccessLabel string
+	TargetUrl   string
+	Credentials *Credentials
 }
 
 // Service represents a service stored in Remote Environment RE

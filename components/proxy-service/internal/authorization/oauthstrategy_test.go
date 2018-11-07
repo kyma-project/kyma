@@ -1,13 +1,13 @@
 package authorization
 
 import (
-	"github.com/stretchr/testify/require"
-	"testing"
-	"net/http"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/mocks"
-	"github.com/stretchr/testify/assert"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/mocks"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"net/http"
+	"testing"
 )
 
 func TestAuthStrategy(t *testing.T) {
@@ -64,6 +64,5 @@ func TestAuthStrategy(t *testing.T) {
 		assert.Equal(t, "", authHeader)
 		oauthClientMock.AssertExpectations(t)
 	})
-
 
 }

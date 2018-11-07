@@ -15,16 +15,16 @@ func TestDefaultService_Read(t *testing.T) {
 	t.Run("should read API with oauth credentials", func(t *testing.T) {
 		// given
 		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
+			TargetUrl: "http://target.com",
 			Credentials: &remoteenv.Credentials{
-				Type: "OAuth",
+				Type:       "OAuth",
 				SecretName: "secret-name",
-				Url:  "http://oauth.com",
+				Url:        "http://oauth.com",
 			},
 		}
 
 		secret := map[string][]byte{
-			ClientIDKey: []byte("clientId"),
+			ClientIDKey:     []byte("clientId"),
 			ClientSecretKey: []byte("clientSecret"),
 		}
 
@@ -68,11 +68,11 @@ func TestDefaultService_Read(t *testing.T) {
 	t.Run("should return error when reading secret fails", func(t *testing.T) {
 		// given
 		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
+			TargetUrl: "http://target.com",
 			Credentials: &remoteenv.Credentials{
-				Type: "OAuth",
+				Type:       "OAuth",
 				SecretName: "secret-name",
-				Url:  "http://oauth.com",
+				Url:        "http://oauth.com",
 			},
 		}
 

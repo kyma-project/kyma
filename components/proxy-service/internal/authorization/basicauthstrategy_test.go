@@ -1,11 +1,11 @@
 package authorization
 
 import (
-	"testing"
-	"net/http"
-	"github.com/stretchr/testify/require"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"net/http"
+	"testing"
 )
 
 func TestBasicAuthStrategy(t *testing.T) {
@@ -23,6 +23,6 @@ func TestBasicAuthStrategy(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
-	   	assert.Equal(t, "Basic dXNlcm5hbWU6cGFzc3dvcmQ=", authHeader)
+		assert.Equal(t, "Basic dXNlcm5hbWU6cGFzc3dvcmQ=", authHeader)
 	})
 }

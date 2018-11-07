@@ -67,4 +67,3 @@ func NewStrategyFactory(config Configuration) StrategyFactory {
 
 	return authorizationStrategyFactory{oauthClient: oauthClient}
 }
-
