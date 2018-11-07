@@ -17,9 +17,9 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCES_DIR="${CURRENT_DIR}/../resources"
 
 ${CURRENT_DIR}/generate-kyma-installer.sh ${RESOURCES_DIR}/installer-config-local.yaml.tpl \
-  | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project${KYMA_INSTALLER_PUSH_DIR}/kyma-installer:${KYMA_INSTALLER_VERSION};" \
+  | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project/${KYMA_INSTALLER_PUSH_DIR}kyma-installer:${KYMA_INSTALLER_VERSION};" \
   > ${ARTIFACTS_DIR}/kyma-config-local.yaml
 
 ${CURRENT_DIR}/generate-kyma-installer.sh ${RESOURCES_DIR}/installer-config-cluster.yaml.tpl \
-  | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project${KYMA_INSTALLER_PUSH_DIR}/kyma-installer:${KYMA_INSTALLER_VERSION};" \
+  | sed -E ";s;image: eu.gcr.io\/kyma-project\/develop\/installer:.+;image: eu.gcr.io/kyma-project/${KYMA_INSTALLER_PUSH_DIR}kyma-installer:${KYMA_INSTALLER_VERSION};" \
   > ${ARTIFACTS_DIR}/kyma-config-cluster.yaml
