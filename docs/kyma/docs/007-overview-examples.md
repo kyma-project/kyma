@@ -5,7 +5,7 @@ type: Overview
 
 Use the available examples to test functionalities that Kyma offers.
 
-The table contains a list of all examples organized by the feature or concept they showcase, and technologies they use. Follow the direct links to examples and try them on your own.
+The table contains a list of all examples organized by the feature or concept they showcase, and technologies they use. Follow the links and try them on your own.
 
 | Example | Description | Technology |
 |---|---|---|
