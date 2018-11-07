@@ -121,6 +121,17 @@ try {
     //     parallel jobs
     // }
 
+    // test the release
+    // stage('launch Kyma integration') {
+    //     build job: 'kyma/integration-release',
+    //         wait: true,
+    //         parameters: [
+    //             string(name:'GIT_REVISION', value: "$commitID"),
+    //             string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+    //             string(name:'APP_VERSION', value: "$appVersion")
+    //         ]
+    // }
+
     // build kyma-installer
     stage('build kyma-installer') {
         build job: 'kyma/kyma-installer',
@@ -148,34 +159,14 @@ try {
         node(label) {
             timestamps {
                 ansiColor('xterm') {
-                    stage('copy kyma-installer artifacts') {
+                    stage("Setup") {
+                        checkout scm
+                    }
+
+                    stage('Copy kyma-installer artifacts') {
                         copyArtifacts projectName: 'kyma/kyma-installer-artifacts', 
                             selector: specific("${kymaInstallerArtifactsBuild.number}"),
                             target: "kyma-installer-artifacts"
-                    }
-                }
-            }
-        }
-    }
-
-    // test the release
-    // stage('launch Kyma integration') {
-    //     build job: 'kyma/integration-release',
-    //         wait: true,
-    //         parameters: [
-    //             string(name:'GIT_REVISION', value: "$commitID"),
-    //             string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-    //             string(name:'APP_VERSION', value: "$appVersion")
-    //         ]
-    // }
-
-    // publish release artifacts
-    podTemplate(label: label) {
-        node(label) {
-            timestamps {
-                ansiColor('xterm') {
-                    stage("setup") {
-                        checkout scm
                     }
 
                     stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
