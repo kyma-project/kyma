@@ -181,34 +181,19 @@ try {
                     stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
                         // create release on github
                         withCredentials(
-                                [string(credentialsId: 'public-github-token', variable: 'token'),
-                                sshUserPrivateKey(credentialsId: "bitbucket-rw", keyFileVariable: 'sshfile')
-                            ]) {
-                            
-                            // Build changelog generator
-                            dir(changelogGeneratorPath) {
-                                sh "docker build -t changelog-generator ."
-                            }   
-                            
-                            // Generate release changelog
-                            changelogGenerator('/app/generate-release-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}"])
-
-                            // Generate CHANGELOG.md
-                            changelogGenerator('/app/generate-full-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}"])
-                            //sh "BRANCH=${params.RELEASE_BRANCH} LATEST_VERSION=${appVersion} SSH_FILE=${sshfile} APP_PATH=./tools/changelog-generator/app ./tools/changelog-generator/app/push-full-changelog.sh --configure-git"
+                                [string(credentialsId: 'public-github-token', variable: 'token')]
+                        ) { 
                             commitID = sh (script: "git rev-parse HEAD", returnStdout: true).trim()
 
-                            def releaseChangelog = readFile "./.changelog/release-changelog.md"
-                            def body = releaseChangelog.replaceAll("(\\r|\\n|\\r\\n)+", "\\\\n")
+                            def body = ""
                             def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"${body}\",\"draft\": false,\"prerelease\": ${isRelease ? 'false' : 'true'}}'"
-                            echo "${data}"
                             
                             echo "Creating a new release using GitHub API..."
-                            def json = sh (script: "curl --data \"${data}\" -H \"Authorization: token ${token}\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
+                            def json = sh (script: "curl --data ${data} -H \"Authorization: token ${token}\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
                             echo "Response: ${json}"
                             def releaseID = getGithubReleaseID(json)
                             
-                            // upload kyma-installer artifacts
+                            // upload artifacts
                             def kymaConfigLocal = "kyma-installer-artifacts/kyma-config-local.yaml"
                             def kymaConfigCluster = "kyma-installer-artifacts/kyma-config-cluster.yaml"
                             
