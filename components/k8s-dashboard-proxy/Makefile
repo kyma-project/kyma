@@ -4,14 +4,15 @@ REGISTRY = eu.gcr.io
 .PHONY: all clean compile docker tag
 all: clean compile docker tag
 clean: 
-	rm -rf bin/
 	rm -rf docker/
 compile:
-	go build -o bin/k8s-dashboard-proxy ./cmd/reverseproxy
+	mkdir -p ./bin
+	go build ./cmd/reverseproxy
+	mv ./reverseproxy ./bin
 docker:
 	mkdir -p docker/image
 	cp Dockerfile docker/image/
-	cp -R ./cmd/reverseproxy docker/image/
+	cp -R cmd util docker/image/
 	docker build --no-cache --build-arg version=$(VERSION) -t $(NAME):$(VERSION) --label version=${VERSION} --label component=${NAME} --rm docker/image
 	rm -rf docker
 tag:

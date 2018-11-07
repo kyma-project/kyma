@@ -8,18 +8,21 @@ import (
 	"net/url"
 	"sync"
 	"time"
-)
 
-const (
-	dashboardURL          = "http://localhost:30000"
-	defaultSecretFilePath = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-	port                  = ":8080"
+	"github.com/kyma-project/kyma/components/k8s-dashboard-proxy/util"
 )
 
 var (
-	proxy    *httputil.ReverseProxy
-	proxyURL *url.URL
-	sfp      *secret
+	dashboardURL   string
+	secretFilePath string
+	port           string
+)
+
+var (
+	proxy     *httputil.ReverseProxy
+	proxyURL  *url.URL
+	sfp       *secret
+	proxyOpts *util.Options
 )
 
 type secret struct {
@@ -30,7 +33,7 @@ type secret struct {
 func (sfp *secret) updateSecret() {
 	sfp.mux.Lock()
 	var accountSecret []byte
-	if token, err := ioutil.ReadFile(defaultSecretFilePath); err != nil {
+	if token, err := ioutil.ReadFile(secretFilePath); err != nil {
 		log.Printf("Error: read service account failed: %v", err)
 	} else {
 		accountSecret = token
@@ -54,7 +57,11 @@ func handleRequest(rw http.ResponseWriter, req *http.Request) {
 
 func main() {
 	log.Printf("starting kubernetes dashboard reverse proxy...")
-	sfp = &secret{token: defaultSecretFilePath}
+	proxyOpts = util.ParseFlags()
+	dashboardURL = proxyOpts.DashboardURL
+	secretFilePath = proxyOpts.SecretFilePath
+	port = proxyOpts.Port
+	sfp = &secret{token: "INVALID TOKEN"}
 	sfp.updateSecret()
 	ticker := time.NewTicker(60 * time.Second)
 	go func() {
@@ -64,6 +71,7 @@ func main() {
 	}()
 	var err error
 	proxyURL, err = url.Parse(dashboardURL)
+	log.Printf("kubernetes dashboard reverse proxy started and listening on port%v", port)
 	log.Printf("proxied URL: %v", proxyURL)
 	if err != nil {
 		log.Fatalf("failed in parsing the kubernetes kubernetes dashboard URL: %v", err)
