@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
@@ -13,6 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -293,6 +295,38 @@ func TestConnectorServiceQueryFail(t *testing.T) {
 	require.Error(t, err)
 	assert.True(t, gqlerror.IsInternal(err))
 	assert.Zero(t, gotURLObj)
+}
+func TestRemoteEnvironmentResolver_RemoteEnvironmentEventSubscription(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), (-24 * time.Hour))
+		cancel()
+
+		reSvc := automock.NewReSvc()
+		reSvc.On("Subscribe", mock.Anything).Once()
+		reSvc.On("Unsubscribe", mock.Anything).Once()
+		resolver := remoteenvironment.NewRemoteEnvironmentResolver(reSvc, nil)
+
+		_, err := resolver.RemoteEnvironmentEventSubscription(ctx)
+
+		require.NoError(t, err)
+		reSvc.AssertCalled(t, "Subscribe", mock.Anything)
+	})
+
+	t.Run("Unsubscribe after connection close", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), (-24 * time.Hour))
+		cancel()
+
+		reSvc := automock.NewReSvc()
+		reSvc.On("Subscribe", mock.Anything).Once()
+		reSvc.On("Unsubscribe", mock.Anything).Once()
+		resolver := remoteenvironment.NewRemoteEnvironmentResolver(reSvc, nil)
+
+		channel, err := resolver.RemoteEnvironmentEventSubscription(ctx)
+		<-channel
+
+		require.NoError(t, err)
+		reSvc.AssertCalled(t, "Unsubscribe", mock.Anything)
+	})
 }
 
 func ptrStr(str string) *string {
