@@ -44,12 +44,12 @@ projects = [
     "components/remote-environment-broker",
     "components/remote-environment-controller",
     "components/metadata-service",
-    "components/gateway",
     "components/installer",
     "components/connector-service",
     "components/ui-api-layer",
     "components/event-bus",
     "components/event-service",
+    "components/proxy-service",
     "tools/alpine-net",
     "tools/watch-pods",
     "tools/stability-checker",
@@ -100,14 +100,14 @@ try {
                             def index = i
                             jobs["${projects[index]}"] = { ->
                                     build job: "kyma/"+projects[index]+"-release",
-                                            wait: true,
-                                            parameters: [
-                                                string(name:'GIT_REVISION', value: "$commitID"),
-                                                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-                                                string(name:'APP_VERSION', value: "$appVersion"),
-                                                string(name:'PUSH_DIR', value: "$dockerPushRoot"),
-                                                booleanParam(name:'FULL_BUILD', value: true)
-                                            ]
+                                        wait: true,
+                                        parameters: [
+                                            string(name:'GIT_REVISION', value: "$commitID"),
+                                            string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+                                            string(name:'APP_VERSION', value: "$appVersion"),
+                                            string(name:'PUSH_DIR', value: "$dockerPushRoot"),
+                                            booleanParam(name:'FULL_BUILD', value: true)
+                                        ]
                             }
                         }
                     }
@@ -119,6 +119,17 @@ try {
     // build components
     stage('build projects') {
         parallel jobs
+    }
+
+    // build kyma-installer
+    stage('build kyma-installer') {
+        build job: 'kyma/kyma-installer',
+            wait: true,
+            parameters: [
+                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+                string(name:'PUSH_DIR', value: "$dockerPushRoot"),
+                string(name:'APP_VERSION', value: "$appVersion")
+            ]
     }
 
     // test the release
