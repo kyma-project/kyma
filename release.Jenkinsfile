@@ -201,8 +201,10 @@ try {
                             def releaseChangelog = readFile "./.changelog/release-changelog.md"
                             def body = releaseChangelog.replaceAll("(\\r|\\n|\\r\\n)+", "\\\\n")
                             def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"${body}\",\"draft\": false,\"prerelease\": ${isRelease ? 'false' : 'true'}}'"
+                            echo "${data}"
+                            
                             echo "Creating a new release using GitHub API..."
-                            def json = sh (script: "curl --data ${data} -H \"Authorization: token ${token}\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
+                            def json = sh (script: "curl --data \"${data}\" -H \"Authorization: token ${token}\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
                             echo "Response: ${json}"
                             def releaseID = getGithubReleaseID(json)
                             
