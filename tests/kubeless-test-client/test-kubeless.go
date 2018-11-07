@@ -573,7 +573,7 @@ func main() {
 	go func() {
 		log.Println("Deploying test-event function")
 		deployFun("kubeless-test", "test-event", "nodejs6", "event.js", "event.handler")
-		time.Sleep(60 * time.Second) // Sometimes subsctiptions take long time. So lambda might not get the events
+		time.Sleep(2 * time.Minute) // Sometimes subsctiptions take long time. So lambda might not get the events
 		log.Println("Publishing event to function test-event")
 		publishEvent(testID)
 		log.Println("Verifying correct event processing for test-event")
