@@ -1,4 +1,5 @@
 def label = "kyma-${UUID.randomUUID().toString()}"
+def registry = 'eu.gcr.io/kyma-project'
 def acsImageName = 'acs-installer:0.0.4'
 
 echo """********************************
@@ -25,7 +26,7 @@ podTemplate(label: label) {
                     def dockerOpts = "--rm --volume ${WORKSPACE}:/kyma"
                     def dockerEntry = "--entrypoint /kyma/installation/scripts/release-generate-kyma-installer-artifacts.sh"
                     
-                    sh "docker run $dockerOpts $dockerEnv $dockerEntry $acsImageName"
+                    sh "docker run $dockerOpts $dockerEnv $dockerEntry $registry/$acsImageName"
                 }
 
                 archiveArtifacts artifacts: "/kyma-config-cluster.yaml" "/kyma-config-local.yaml"
