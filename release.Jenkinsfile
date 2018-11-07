@@ -152,9 +152,6 @@ try {
                         copyArtifacts projectName: 'kyma/kyma-installer-artifacts', 
                             selector: specific("${kymaInstallerArtifactsBuild.number}"),
                             target: "kyma-installer-artifacts"
-
-                        sh "ls -la"
-                        sh "ls -la kyma-installer-artifacts"
                     }
                 }
             }
@@ -162,65 +159,65 @@ try {
     }
 
     // test the release
-    stage('launch Kyma integration') {
-        build job: 'kyma/integration-release',
-            wait: true,
-            parameters: [
-                string(name:'GIT_REVISION', value: "$commitID"),
-                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-                string(name:'APP_VERSION', value: "$appVersion")
-            ]
-    }
+    // stage('launch Kyma integration') {
+    //     build job: 'kyma/integration-release',
+    //         wait: true,
+    //         parameters: [
+    //             string(name:'GIT_REVISION', value: "$commitID"),
+    //             string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+    //             string(name:'APP_VERSION', value: "$appVersion")
+    //         ]
+    // }
 
     // publish release artifacts
-    // podTemplate(label: label) {
-    //     node(label) {
-    //         timestamps {
-    //             ansiColor('xterm') {
-    //                 stage("setup") {
-    //                     checkout scm
-    //                 }
+    podTemplate(label: label) {
+        node(label) {
+            timestamps {
+                ansiColor('xterm') {
+                    stage("setup") {
+                        checkout scm
+                    }
 
-    //                 stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
-    //                     def zip = "${appVersion}.tar.gz"
-                        
-    //                     // create release zip                        
-    //                     sh "tar -czf ${zip} ./installation ./resources"
-
-    //                     // create release on github
-    //                     withCredentials(
-    //                             [string(credentialsId: 'public-github-token', variable: 'token'),
-    //                             sshUserPrivateKey(credentialsId: "bitbucket-rw", keyFileVariable: 'sshfile')
-    //                         ]) {
+                    stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
+                        // create release on github
+                        withCredentials(
+                                [string(credentialsId: 'public-github-token', variable: 'token'),
+                                sshUserPrivateKey(credentialsId: "bitbucket-rw", keyFileVariable: 'sshfile')
+                            ]) {
                             
-    //                         // Build changelog generator
-    //                         dir(changelogGeneratorPath) {
-    //                             sh "docker build -t changelog-generator ."
-    //                         }   
+                            // Build changelog generator
+                            dir(changelogGeneratorPath) {
+                                sh "docker build -t changelog-generator ."
+                            }   
                             
-    //                         // Generate release changelog
-    //                         changelogGenerator('/app/generate-release-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}"])
+                            // Generate release changelog
+                            changelogGenerator('/app/generate-release-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}"])
 
-    //                         // Generate CHANGELOG.md
-    //                         changelogGenerator('/app/generate-full-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}"])
-    //                         sh "BRANCH=${params.RELEASE_BRANCH} LATEST_VERSION=${appVersion} SSH_FILE=${sshfile} APP_PATH=./tools/changelog-generator/app ./tools/changelog-generator/app/push-full-changelog.sh --configure-git"
-    //                         commitID = sh (script: "git rev-parse HEAD", returnStdout: true).trim()
+                            // Generate CHANGELOG.md
+                            changelogGenerator('/app/generate-full-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}"])
+                            //sh "BRANCH=${params.RELEASE_BRANCH} LATEST_VERSION=${appVersion} SSH_FILE=${sshfile} APP_PATH=./tools/changelog-generator/app ./tools/changelog-generator/app/push-full-changelog.sh --configure-git"
+                            commitID = sh (script: "git rev-parse HEAD", returnStdout: true).trim()
 
-    //                         def releaseChangelog = readFile "./.changelog/release-changelog.md"
-    //                         def body = releaseChangelog.replaceAll("(\\r|\\n|\\r\\n)+", "\\\\n")
-    //                         def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"${body}\",\"draft\": false,\"prerelease\": ${isRelease ? 'false' : 'true'}}'"
-    //                         echo "Creating a new release using GitHub API..."
-    //                         def json = sh (script: "curl --data ${data} -H \"Authorization: token $token\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
-    //                         echo "Response: ${json}"
-    //                         def releaseID = getGithubReleaseID(json)
-    //                         // upload zip file
-    //                         sh "curl --data-binary @$zip -H \"Authorization: token $token\" -H \"Content-Type: application/zip\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${zip}"                          
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+                            def releaseChangelog = readFile "./.changelog/release-changelog.md"
+                            def body = releaseChangelog.replaceAll("(\\r|\\n|\\r\\n)+", "\\\\n")
+                            def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"${body}\",\"draft\": false,\"prerelease\": ${isRelease ? 'false' : 'true'}}'"
+                            echo "Creating a new release using GitHub API..."
+                            def json = sh (script: "curl --data ${data} -H \"Authorization: token ${token}\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
+                            echo "Response: ${json}"
+                            def releaseID = getGithubReleaseID(json)
+                            
+                            // upload kyma-installer artifacts
+                            def kymaConfigLocal = "kyma-installer-artifacts/kyma-config-local.yaml"
+                            def kymaConfigCluster = "kyma-installer-artifacts/kyma-config-cluster.yaml"
+                            
+                            sh "curl --data-binary @${kymaConfigLocal} -H \"Authorization: token ${token}\" -H \"Content-Type: application/x-yaml\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=kyma-config-local.yaml"
+                            sh "curl --data-binary @${kymaConfigCluster} -H \"Authorization: token ${token}\" -H \"Content-Type: application/x-yaml\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=kyma-config-cluster.yaml"
+                        }
+                    }
+                }
+            }
+        }
+    }
 } catch (ex) {
     echo "Got exception: ${ex}"
     currentBuild.result = "FAILURE"
