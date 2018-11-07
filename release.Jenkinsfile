@@ -80,7 +80,7 @@ try {
         node(label) {
             timestamps {
                 ansiColor('xterm') {
-                    stage("setup") {
+                    stage("Setup") {
                         checkout scm
 
                         // validate parameters
@@ -95,7 +95,7 @@ try {
                         configureBuilds()
                     }
 
-                    stage('collect projects') {
+                    stage('Collect projects') {
                         for (int i=0; i < projects.size(); i++) {
                             def index = i
                             jobs["${projects[index]}"] = { ->
@@ -111,56 +111,44 @@ try {
                             }
                         }
                     }
-                }
-            }
-        }
-    }
 
-    // build components
-    // stage('build projects') {
-    //     parallel jobs
-    // }
+                    // build components
+                    stage('Build projects') {
+                        parallel jobs
+                    }
 
-    // test the release
-    // stage('launch Kyma integration') {
-    //     build job: 'kyma/integration-release',
-    //         wait: true,
-    //         parameters: [
-    //             string(name:'GIT_REVISION', value: "$commitID"),
-    //             string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-    //             string(name:'APP_VERSION', value: "$appVersion")
-    //         ]
-    // }
+                    // test the release
+                    stage('Launch Kyma integration') {
+                        build job: 'kyma/integration-release',
+                            wait: true,
+                            parameters: [
+                                string(name:'GIT_REVISION', value: "$commitID"),
+                                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+                                string(name:'APP_VERSION', value: "$appVersion")
+                            ]
+                    }
 
-    // build kyma-installer
-    stage('build kyma-installer') {
-        build job: 'kyma/kyma-installer',
-            wait: true,
-            parameters: [
-                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-                string(name:'PUSH_DIR', value: "$dockerPushRoot"),
-                string(name:'APP_VERSION', value: "$appVersion")
-            ]
-    }
+                    // build kyma-installer
+                    stage('Build kyma-installer') {
+                        build job: 'kyma/kyma-installer',
+                            wait: true,
+                            parameters: [
+                                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+                                string(name:'PUSH_DIR', value: "$dockerPushRoot"),
+                                string(name:'APP_VERSION', value: "$appVersion")
+                            ]
+                    }
 
-    // generate kyma-installer artifacts
-    def kymaInstallerArtifactsBuild = null
-    stage('build kyma-installer artifacts') {
-        kymaInstallerArtifactsBuild = build job: 'kyma/kyma-installer-artifacts',
-            wait: true,
-            parameters: [
-                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-                string(name:'KYMA_INSTALLER_PUSH_DIR', value: "$dockerPushRoot"),
-                string(name:'KYMA_INSTALLER_VERSION', value: "$appVersion")
-            ]
-    }
-    
-    podTemplate(label: label) {
-        node(label) {
-            timestamps {
-                ansiColor('xterm') {
-                    stage("Setup") {
-                        checkout scm
+                    // generate kyma-installer artifacts
+                    def kymaInstallerArtifactsBuild = null
+                    stage('Generate kyma-installer artifacts') {
+                        kymaInstallerArtifactsBuild = build job: 'kyma/kyma-installer-artifacts',
+                            wait: true,
+                            parameters: [
+                                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+                                string(name:'KYMA_INSTALLER_PUSH_DIR', value: "$dockerPushRoot"),
+                                string(name:'KYMA_INSTALLER_VERSION', value: "$appVersion")
+                            ]
                     }
 
                     stage('Copy kyma-installer artifacts') {
@@ -169,8 +157,9 @@ try {
                             target: "kyma-installer-artifacts"
                     }
 
+                    // create release on github
                     stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
-                        // create release on github
+                        
                         withCredentials(
                                 [string(credentialsId: 'public-github-token', variable: 'token')]
                         ) { 
