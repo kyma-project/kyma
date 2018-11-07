@@ -133,6 +133,7 @@ try {
     }
 
     // generate kyma-installer artifacts
+    def kymaInstallerArtifactsBuild = null
     stage('build kyma-installer artifacts') {
         build job: 'kyma/kyma-installer-artifacts',
             wait: true,
@@ -141,6 +142,23 @@ try {
                 string(name:'KYMA_INSTALLER_PUSH_DIR', value: "$dockerPushRoot"),
                 string(name:'KYMA_INSTALLER_VERSION', value: "$appVersion")
             ]
+    }
+    
+    podTemplate(label: label) {
+        node(label) {
+            timestamps {
+                ansiColor('xterm') {
+                    stage('copy kyma-installer artifacts') {
+                        copyArtifacts projectName: 'kyma/kyma-installer-artifacts', 
+                            selector: specific("${kymaInstallerArtifactsBuild.number}"),
+                            target: "kyma-installer-artifacts"
+
+                        sh "ls -la"
+                        sh "ls -la kyma-installer-artifacts"
+                    }
+                }
+            }
+        }
     }
 
     // test the release
