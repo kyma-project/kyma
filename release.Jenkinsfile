@@ -151,6 +151,17 @@ try {
                             ]
                     }
 
+                    stage('Launch Kyma integration on cluster') {
+                        build job: 'kyma/integration-release-cluster',
+                            wait: true,
+                            parameters: [
+                                string(name:'SOURCE_BRANCH', value: "master"),
+                                string(name:'KYMA_SOURCE_BRANCH', value: "${params.RELEASE_BRANCH}"),
+                                string(name:'KYMA_FORK_URL', value: "https://github.com/kyma-project/kyma.git"),
+                                string(name:'ARTIFACTS_BUILD_NUMBER', value: "${kymaInstallerArtifactsBuild.number}")
+                            ]
+                    }
+
                     stage('Copy kyma-installer artifacts') {
                         copyArtifacts projectName: 'kyma/kyma-installer-artifacts', 
                             selector: specific("${kymaInstallerArtifactsBuild.number}"),
