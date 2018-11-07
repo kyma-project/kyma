@@ -117,9 +117,9 @@ try {
     }
 
     // build components
-    stage('build projects') {
-        parallel jobs
-    }
+    // stage('build projects') {
+    //     parallel jobs
+    // }
 
     // build kyma-installer
     stage('build kyma-installer') {
@@ -134,13 +134,20 @@ try {
 
     // generate kyma-installer artifacts
     stage('build kyma-installer artifacts') {
-        build job: 'kyma/kyma-installer-artifacts',
+        def kymaInstallerArtifactsBuild = build job: 'kyma/kyma-installer-artifacts',
             wait: true,
             parameters: [
                 string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
                 string(name:'KYMA_INSTALLER_PUSH_DIR', value: "$dockerPushRoot"),
                 string(name:'KYMA_INSTALLER_VERSION', value: "$appVersion")
             ]
+        
+        copyArtifacts projectName: 'kyma/kyma-installer-artifacts', 
+            selector: specific("${kymaInstallerArtifactsBuild.number}"),
+            target: "kyma-installer-artifacts"
+
+        sh "ls -la"
+        sh "ls -la kyma-installer-artifacts"
     }
 
     // test the release
