@@ -1,30 +1,34 @@
-# Event Bus
+# Kubernetes Dashboard Proxy
 
 ## Overview
 
-The Event Bus enables Kyma to integrate with various other external solutions. The integration uses the `publish-subscribe` messaging pattern that allows Kyma to receive business Events from different solutions, enrich the events, and trigger business flows using lambdas or services defined in Kyma. See the [Event Bus documentation](https://github.com/kyma-project/kyma/tree/master/docs/event-bus/docs).
+The `Kubernetes Dashboard Proxy` is a transparent proxy for the `Kubernetes Dashboard` to enable Kyma clients to control the access to the `Kubernetes Dashboard`. `Kubernetes Dashboard` by default is accessible with no authentication/authorization required. `Kubernetes Dashboard Proxy` leverages the Kyma Identity Provider (dex) to authenticate and authorize the `Kubernetes Dashboard` users.
+
+## Concept
+
+The idea is to introduce a reverse proxy in front of the Kubernetes Dashboard. The reverse proxy forwards the requests to the Authorization Server (`dex`) as it's the identity provider, asking the user for the authentication credentials. [Keycloak Proxy] (https://github.com/keycloak/keycloak-gatekeeper) is used here to be the gateway for the `Kubernetes Dashboard Proxy`.
+
+Based on the authentication credentials correctness, `dex` checks if the user is authorized to access the Kubernetes Dashboard or not.
+The currently used version of the `Kubernetes Dashboard` (*v1.8.1*), requires a second layer of authorization to get a full access to the dashboard which is providing the HTTP Authorization Header with a K8s Service Account Secret value as a Bearer Token. This Service Account should be the same Service Account who started the Kubernetes Dashboard Proxy pod and must be bound to a K8s Cluster Role allows the access to the     `Kubernetes Dashboard` resources.
+
+A very thin layer Go application here is used as a reverse proxy in front of the `Kubernetes Dashboard` and is used as an upstream for the Keycloak Proxy. This thin layer app obtains the K8s Service Account Secret, injects it as a value for the Authorization header and then, forwards the HTTP request to the Kubernetes Dashboard.
 
 ## Docker Images
 
-Currently, Event Bus makes the following three Docker images available to the `kyma core` Helm chart:
+Currently, `Kubernetes Dashboard Proxy` makes the following Docker image available to the `kyma core` Helm chart:
 
-- event-bus-publish
-- event-bus-push
-- event-bus-sub-validator
-
-There are also end-to-end test Docker images to use as `helm tests`. See [the tests in the `event-bus` directory](https://github.com/kyma-project/kyma/tree/master/tests/event-bus) for more details.
+- k8s-dashboard-proxy
 
 ## Development
 
-The three binaries of `Event Bus` reside under `cmd/event-bus-XXXX` "e.g. `cmd/event-bus-publish`". They each have a Makefile to build and test the component as well as to create and push a Docker image. The following table explains the various make targets.
+The main source code file of `Kubernetes Dashboard Proxy` resides under `cmd/reverseproxy`. It has a Makefile to build the component as well as to create and push a Docker image. The following table explains the various make targets.
 
 
 |Command| Description|
 |-----------|------------|
-|`make`|This is the default target for building the Docker image. It tests, compiles, creates, and appropriately tags a Docker image.|
-|`make build`|Runs all the tests and the linter. It compiles the binary in the `bin` directory.|
+|`make`|This is the default target for building the Docker image. It compiles, creates, and appropriately tags the Docker image.|
+|`make compile`|It compiles the binary in the `bin` directory.|
 |`make push`|Pushes the Docker image to the registry specified in the `REGISTRY` variable of the Makefile.|
-|`make docker-build`|Creates a Docker image.|
-|`make test`|Run all the tests.|
+|`make docker`|Creates the Docker image.|
+|`make tag`|Tags the Docker image.|
 |`make vet`|Runs `go vet` on all sources including `vendor` but excluding the `generated` directory.|
-|`make compile`|Builds a binary without running any tests.|
