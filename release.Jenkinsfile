@@ -133,6 +133,7 @@ try {
     }
 
     // generate kyma-installer artifacts
+    def kymaInstallerArtifactsBuild = null
     stage('build kyma-installer artifacts') {
         def kymaInstallerArtifactsBuild = build job: 'kyma/kyma-installer-artifacts',
             wait: true,
@@ -148,6 +149,23 @@ try {
 
         sh "ls -la"
         sh "ls -la kyma-installer-artifacts"
+    }
+    
+    podTemplate(label: label) {
+        node(label) {
+            timestamps {
+                ansiColor('xterm') {
+                    stage('copy kyma-installer artifacts') {
+                        copyArtifacts projectName: 'kyma/kyma-installer-artifacts', 
+                            selector: specific("${kymaInstallerArtifactsBuild.number}"),
+                            target: "kyma-installer-artifacts"
+
+                        sh "ls -la"
+                        sh "ls -la kyma-installer-artifacts"
+                    }
+                }
+            }
+        }
     }
 
     // test the release
