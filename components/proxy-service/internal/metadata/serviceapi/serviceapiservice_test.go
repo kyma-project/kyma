@@ -23,8 +23,13 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 		}
 
+		secret := map[string][]byte{
+			ClientIDKey: []byte("clientId"),
+			ClientSecretKey: []byte("clientSecret"),
+		}
+
 		secretsRepository := new(secretsmocks.Repository)
-		secretsRepository.On("Get", "secret-name").Return("clientId", "clientSecret", nil)
+		secretsRepository.On("Get", "secret-name").Return(secret, nil)
 
 		service := NewService(secretsRepository)
 
@@ -73,7 +78,7 @@ func TestDefaultService_Read(t *testing.T) {
 
 		secretsRepository := new(secretsmocks.Repository)
 		secretsRepository.On("Get", "secret-name").
-			Return("", "", apperrors.Internal("secret error"))
+			Return(nil, apperrors.Internal("secret error"))
 
 		service := NewService(secretsRepository)
 

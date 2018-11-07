@@ -81,7 +81,7 @@ func (sas defaultService) Read(remoteenvAPI *remoteenv.ServiceAPI) (*API, apperr
 
 		if credentialsType == TypeOAuth {
 			api.Credentials = &Credentials{
-				Oauth: getOAuthCredentials(secret),
+				Oauth: getOAuthCredentials(secret, remoteenvAPI.Credentials.Url),
 			}
 		} else if credentialsType == TypeBasic {
 			api.Credentials = &Credentials{
@@ -96,10 +96,11 @@ func (sas defaultService) Read(remoteenvAPI *remoteenv.ServiceAPI) (*API, apperr
 }
 
 
-func getOAuthCredentials(secret map[string][]byte) *Oauth{
+func getOAuthCredentials(secret map[string][]byte, url string) *Oauth{
 	return &Oauth{
 		ClientID: string(secret[ClientIDKey]),
 		ClientSecret: string(secret[ClientSecretKey]),
+		URL: url,
 	}
 }
 

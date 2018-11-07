@@ -34,7 +34,7 @@ func (sds *serviceDefinitionService) GetAPI(serviceId string) (*serviceapi.API, 
 		if err.Code() == apperrors.CodeNotFound {
 			return nil, apperrors.NotFound("service with ID %s not found", serviceId)
 		}
-		log.Errorf("failed to service with id '%s': %s", serviceId, err.Error())
+		log.Errorf("failed to get service with id '%s': %s", serviceId, err.Error())
 		return nil, apperrors.Internal("failed to read %s service, %s", serviceId, err)
 	}
 
