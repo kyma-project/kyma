@@ -69,6 +69,7 @@ func TestNewService(t *testing.T) {
 		assert.Equal(t, resourceName, remoteEnvServiceAPI.AccessLabel)
 		assert.Equal(t, api.TargetUrl, remoteEnvServiceAPI.TargetUrl)
 		assert.Equal(t, api.Credentials.Oauth.URL, remoteEnvServiceAPI.Credentials.AuthenticationUrl)
+		assert.Equal(t, "OAuth", remoteEnvServiceAPI.Credentials.Type)
 		assert.Equal(t, resourceName, remoteEnvServiceAPI.Credentials.SecretName)
 
 		accessServiceManager.AssertExpectations(t)
@@ -118,6 +119,7 @@ func TestNewService(t *testing.T) {
 		assert.Equal(t, gatewayUrl, remoteEnvServiceAPI.GatewayURL)
 		assert.Equal(t, resourceName, remoteEnvServiceAPI.AccessLabel)
 		assert.Equal(t, api.TargetUrl, remoteEnvServiceAPI.TargetUrl)
+		assert.Equal(t, "Basic", remoteEnvServiceAPI.Credentials.Type)
 		assert.Equal(t, resourceName, remoteEnvServiceAPI.Credentials.SecretName)
 
 		accessServiceManager.AssertExpectations(t)
@@ -614,6 +616,7 @@ func TestDefaultService_Update(t *testing.T) {
 		assert.Equal(t, resourceName, remoteEnvServiceAPI.AccessLabel)
 		assert.Equal(t, "http://target.com", remoteEnvServiceAPI.TargetUrl)
 		assert.Equal(t, "http://oauth.com", remoteEnvServiceAPI.Credentials.AuthenticationUrl)
+		assert.Equal(t, "OAuth", remoteEnvServiceAPI.Credentials.Type)
 		assert.Equal(t, resourceName, remoteEnvServiceAPI.Credentials.SecretName)
 
 		nameResolver.AssertExpectations(t)
@@ -664,6 +667,7 @@ func TestDefaultService_Update(t *testing.T) {
 		assert.Equal(t, gatewayUrl, remoteEnvServiceAPI.GatewayURL)
 		assert.Equal(t, resourceName, remoteEnvServiceAPI.AccessLabel)
 		assert.Equal(t, "http://target.com", remoteEnvServiceAPI.TargetUrl)
+		assert.Equal(t, "Basic", remoteEnvServiceAPI.Credentials.Type)
 		assert.Equal(t, resourceName, remoteEnvServiceAPI.Credentials.SecretName)
 
 		nameResolver.AssertExpectations(t)

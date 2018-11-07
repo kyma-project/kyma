@@ -141,6 +141,11 @@ func (sas defaultService) handleCredentialsCreate(remoteEnvironment, id string, 
 
 	if sas.oauthCredentialsProvided(credentials) {
 		serviceAPI.Credentials.AuthenticationUrl = credentials.Oauth.URL
+		serviceAPI.Credentials.Type = remoteenv.CredentialsOAuthType
+	}
+
+	if sas.basicCredentialsProvided(credentials) {
+		serviceAPI.Credentials.Type = remoteenv.CredentialsBasicType
 	}
 
 	name := sas.nameResolver.GetResourceName(remoteEnvironment, id)
@@ -168,6 +173,11 @@ func (sas defaultService) handleCredentialsUpdate(remoteEnvironment, id string, 
 
 	if sas.oauthCredentialsProvided(credentials) {
 		serviceAPI.Credentials.AuthenticationUrl = credentials.Oauth.URL
+		serviceAPI.Credentials.Type = remoteenv.CredentialsOAuthType
+	}
+
+	if sas.basicCredentialsProvided(credentials) {
+		serviceAPI.Credentials.Type = remoteenv.CredentialsBasicType
 	}
 
 	err := sas.updateCredentialsSecret(remoteEnvironment, id, name, credentials)
