@@ -550,6 +550,7 @@ var testDataRegex = regexp.MustCompile(`(?m)^OK ([a-z0-9]{8})$`)
 
 func main() {
 	cleanup()
+	time.Sleep(10 * time.Second)
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	log.Println("Starting test")
