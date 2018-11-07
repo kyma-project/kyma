@@ -22,5 +22,6 @@ service:
     port: *internalAPIPort
 
 tests:
+  skipSslVerify: false
   image:
     pullPolicy: IfNotPresent
