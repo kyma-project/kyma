@@ -1,23 +1,24 @@
-# Backup/Restore e2e tests
+# End-to-end backup and restore tests
 
 ## Overview
 
-This project contains end-to-end tests for backup & restore of resources related to kyma's environments (namespaces).
+This project contains end-to-end backup and restore tests for resources related to Kyma Environments.
 
 ## Usage
 
-Example usage to run backup phase tests:
+See the example usage of running backup phase tests:
 
 ```bash
 go test -run Backup --kubeconfig $KUBECONFIG --namespace test
 ```
 
-It will create namespace `test` with several resources (service instances/bindings depends on selected brokers for test) and will create 2 backups: `test-re` (containing cluster scoped resources: RemoteEnvironments) and `test-ns` (containing namespace scoped resources). Backup prefix will always contain namespace name.
+This test creates a `test` Namespace with several resources, such as Service Instances or bindings, which depends on brokers selected for the test. It also creates two backups: `test-re`, which contains cluster-scoped  RemoteEnvironments, and `test-ns`, which contains Namespace-scoped resources. Backup prefix always contains the name of the Namespace.
 
-Example usage to run restore phase tests:
+ See the example usage of running restore phase tests:
 
 ```bash
 go test -run Backup --kubeconfig $KUBECONFIG --namespace test
 ```
 
-It will look for 2 backups `test-re` and `test-ns` (backup name prefix is always name of namespace) and restore them into k8s cluster and check service instantes/bindings for defined time. If service instances/bindings won't get ready phase the test will fail.
+This test looks for `test-re` and `test-ns` backups and restores them into a Kubernetes cluster. It also checks Service Instances or bindings for a defined time. If Service Instances or bindings do not reach the `ready` phase, the test fails.
+>**NOTE:** The backup name prefix is always the same as the name of the Namespace.
