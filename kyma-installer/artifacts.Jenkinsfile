@@ -22,14 +22,14 @@ podTemplate(label: label) {
                 }
 
                 stage("Generate artifacts") {
-                    def dockerEnv = "-e KYMA_INSTALLER_PUSH_DIR -e KYMA_INSTALLER_VERSION"
+                    def dockerEnv = "-e KYMA_INSTALLER_PUSH_DIR -e KYMA_INSTALLER_VERSION -e ARTIFACTS_DIR=/kyma"
                     def dockerOpts = "--rm --volume ${WORKSPACE}:/kyma"
                     def dockerEntry = "--entrypoint /kyma/installation/scripts/release-generate-kyma-installer-artifacts.sh"
                     
                     sh "docker run $dockerOpts $dockerEnv $dockerEntry $registry/$acsImageName"
                 }
 
-                archiveArtifacts artifacts: "/kyma-config-cluster.yaml" "/kyma-config-local.yaml"
+                archiveArtifacts artifacts: "kyma-config-cluster.yaml, kyma-config-local.yaml"
             }
         }
     }
