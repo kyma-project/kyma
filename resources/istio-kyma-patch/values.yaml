@@ -2,8 +2,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio_webhook:
-    dir: develop/
-    version: 84219cbc
+    dir: rc/
+    version: 0.5-rc
   istio_kyma_patch:
-    dir: develop/
-    version: 9efe286c
+    dir: rc/
+    version: 0.5-rc
