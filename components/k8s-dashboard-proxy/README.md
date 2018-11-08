@@ -1,34 +1,32 @@
-# Kubernetes Dashboard Proxy
+# Kubernetes Dashboard proxy
 
 ## Overview
 
-The `Kubernetes Dashboard Proxy` is a transparent proxy for the `Kubernetes Dashboard` to enable Kyma clients to control the access to the `Kubernetes Dashboard`. `Kubernetes Dashboard` by default is accessible with no authentication/authorization required. `Kubernetes Dashboard Proxy` leverages the Kyma Identity Provider (dex) to authenticate and authorize the `Kubernetes Dashboard` users.
+The Kubernetes Dashboard proxy is a transparent proxy for the Kubernetes Dashboard allowing the Kyma clients to control the access to the Kubernetes Dashboard. Even though by default you don't need any verification to access the the Dashboard, the proxy uses Dex identity provider to ensure the Dashboard users are authenticated and authorized.
 
 ## Concept
 
-The idea is to introduce a reverse proxy in front of the Kubernetes Dashboard. The reverse proxy forwards the requests to the Authorization Server (`dex`) as it's the identity provider, asking the user for the authentication credentials. [Keycloak Proxy] (https://github.com/keycloak/keycloak-gatekeeper) is used here to be the gateway for the `Kubernetes Dashboard Proxy`.
+The reverse proxy is a very thin layer Go application used by the Kubernetes Dashboard. It is used as an upstream for the [Keycloak Proxy](https://github.com/keycloak/keycloak-gatekeeper) which acts as a gateway for the Kubernetes Dashboard proxy. 
 
-Based on the authentication credentials correctness, `dex` checks if the user is authorized to access the Kubernetes Dashboard or not.
-The currently used version of the `Kubernetes Dashboard` (*v1.8.1*), requires a second layer of authorization to get a full access to the dashboard which is providing the HTTP Authorization Header with a K8s Service Account Secret value as a Bearer Token. This Service Account should be the same Service Account who started the Kubernetes Dashboard Proxy pod and must be bound to a K8s Cluster Role allows the access to the     `Kubernetes Dashboard` resources.
+The Keycloak proxy forwards the requests to Dex identity service, asking the user for authentication credentials. Based on the authentication credentials correctness, Dex checks if you are authorized to access the Kubernetes Dashboard.
 
-A very thin layer Go application here is used as a reverse proxy in front of the `Kubernetes Dashboard` and is used as an upstream for the Keycloak Proxy. This thin layer app obtains the K8s Service Account Secret, injects it as a value for the Authorization header and then, forwards the HTTP request to the Kubernetes Dashboard.
+The 1.8.1 version of Kubernetes Dashboard requires a second layer of authorization to get the full access to the Dashboard. You need to provide the HTTP authorization header with a Kubernetes service account secret value as a bearer token. The service account should be the same service account used to run the Kubernetes Dashboard proxy Pod, and must be bound to a Kubernetes cluster role allowing the access to the Dashboard resources. The application retrieves the Kubernetes services account secret, injects it as the value for the Authorization header and then forwards the HTTP request to the Kubernetes Dashboard.
 
-## Docker Images
+## Docker images
 
-Currently, `Kubernetes Dashboard Proxy` makes the following Docker image available to the `kyma core` Helm chart:
+Currently, the Kubernetes Dashboard proxy makes the following Docker image available to the Kyma Core Helm chart:
 
 - k8s-dashboard-proxy
 
 ## Development
 
-The main source code file of `Kubernetes Dashboard Proxy` resides under `cmd/reverseproxy`. It has a Makefile to build the component as well as to create and push a Docker image. The following table explains the various make targets.
-
+The main source code file for the Kubernetes Dashboard proxy resides under `cmd/reverseproxy`. It uses a Makefile to build the component as well as to create and push a Docker image. The following table explains the various `make` targets.
 
 |Command| Description|
 |-----------|------------|
 |`make`|This is the default target for building the Docker image. It compiles, creates, and appropriately tags the Docker image.|
 |`make compile`|It compiles the binary in the `bin` directory.|
-|`make push`|Pushes the Docker image to the registry specified in the `REGISTRY` variable of the Makefile.|
+|`make push`|Pushes the Docker image to the registry specified in the **REGISTRY** variable of the Makefile.|
 |`make docker`|Creates the Docker image.|
 |`make tag`|Tags the Docker image.|
-|`make vet`|Runs `go vet` on all sources including `vendor` but excluding the `generated` directory.|
+|`make vet`|Runs `go vet` on all sources including **vendor** but excluding the `generated` directory.|
