@@ -159,7 +159,7 @@ try {
                             }
 
                             // Setup path to repository config file for `lerna-changelog`
-                            configFile = "./tools/changelog-generator/package.json"
+                            def configFile = "./tools/changelog-generator/package.json"
 
                             // Generate release changelog
                             changelogGenerator('/app/generate-release-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}", "CONFIG_FILE=${configFile}"])

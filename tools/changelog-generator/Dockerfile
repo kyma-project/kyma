@@ -1,5 +1,7 @@
 FROM node:10.11.0-alpine
 
+LABEL source git@github.com:kyma-project/kyma.git
+
 WORKDIR /app
 
 # Install dependencies
