@@ -177,6 +177,7 @@ func respond(w http.ResponseWriter, statusCode int) {
 
 func respondWithBody(w http.ResponseWriter, statusCode int, responseBody interface{}) {
 	respond(w, statusCode)
+	// TODO - handle error
 	json.NewEncoder(w).Encode(responseBody)
 }
 

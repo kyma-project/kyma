@@ -80,12 +80,12 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 		}
 		service.API = serviceAPI
 
-		err = determiningAPISpecification(serviceDef.Api, serviceAPI.GatewayURL)
+		err = determineAPISpecification(serviceDef.Api, serviceAPI.GatewayURL)
 		if err != nil {
 			if err.Code() == apperrors.CodeUpstreamServerCallFailed {
-				return "", apperrors.UpstreamServerCallFailed("Determining API spec for service with ID %s failed, %s", serviceDef.ID, err.Error())
+				return "", apperrors.UpstreamServerCallFailed("Determining API spec for service with ID %s failed, %s", id, err.Error())
 			}
-			return "", apperrors.Internal("Determining API spec for service with ID %s failed, %s", serviceDef.ID, err.Error())
+			return "", apperrors.Internal("Determining API spec for service with ID %s failed, %s", id, err.Error())
 		}
 	}
 
@@ -103,7 +103,7 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 	return id, nil
 }
 
-func determiningAPISpecification(api *serviceapi.API, gatewayUrl string) apperrors.AppError {
+func determineAPISpecification(api *serviceapi.API, gatewayUrl string) apperrors.AppError {
 	apiSpec := api.Spec
 
 	var err apperrors.AppError
@@ -166,11 +166,11 @@ func requestAPISpec(specUrl string, credentials *serviceapi.Credentials) (*http.
 
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec failed, %s", err.Error())
+		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed, %s", specUrl, err.Error())
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec failed with status %s", response.Status)
+		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed with status %s", specUrl, response.Status)
 	}
 
 	return response, nil

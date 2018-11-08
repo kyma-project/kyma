@@ -37,8 +37,8 @@ type API struct {
 	TargetUrl   string          `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
 	Credentials *Credentials    `json:"credentials,omitempty"`
 	Spec        json.RawMessage `json:"spec,omitempty"`
-	SpecUrl     string			`json:"specUrl,omitempty"`
-	Type 		string			`json:"type"`
+	SpecUrl     string          `json:"specUrl,omitempty"`
+	Type        string          `json:"type"`
 }
 
 type Credentials struct {
@@ -99,6 +99,8 @@ func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinit
 		serviceDetails.Api = &API{
 			TargetUrl: serviceDefinition.Api.TargetUrl,
 			Spec:      serviceDefinition.Api.Spec,
+			SpecUrl:   serviceDefinition.Api.SpecUrl,
+			Type:      serviceDefinition.Api.Type,
 		}
 
 		if serviceDefinition.Api.Credentials != nil {
@@ -145,6 +147,8 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (metadata.
 	if serviceDetails.Api != nil {
 		serviceDefinition.Api = &serviceapi.API{
 			TargetUrl: serviceDetails.Api.TargetUrl,
+			SpecUrl:   serviceDetails.Api.SpecUrl,
+			Type:      serviceDetails.Api.Type,
 		}
 		if serviceDetails.Api.Credentials != nil {
 			serviceDefinition.Api.Credentials = &serviceapi.Credentials{
@@ -175,4 +179,44 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (metadata.
 	}
 
 	return serviceDefinition, nil
+}
+
+// TODO - add unit test
+func (api API) MarshalJSON() ([]byte, error) {
+	bytes, err := json.Marshal(&struct {
+		TargetUrl   string          `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+		Credentials *Credentials    `json:"credentials,omitempty"`
+		Spec        json.RawMessage `json:"spec,omitempty"`
+		SpecUrl     string          `json:"specUrl,omitempty"`
+		Type        string          `json:"type"`
+	}{
+		api.TargetUrl,
+		api.Credentials,
+		api.Spec,
+		api.SpecUrl,
+		api.Type,
+	})
+
+	if err == nil {
+		return bytes, nil
+	}
+
+	bytes, err = json.Marshal(&struct {
+		TargetUrl   string       `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+		Credentials *Credentials `json:"credentials,omitempty"`
+		Spec        string       `json:"spec,omitempty"`
+		SpecUrl     string       `json:"specUrl,omitempty"`
+		Type        string       `json:"type"`
+	}{
+		api.TargetUrl,
+		api.Credentials,
+		string(api.Spec),
+		api.SpecUrl,
+		api.Type,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
 }
