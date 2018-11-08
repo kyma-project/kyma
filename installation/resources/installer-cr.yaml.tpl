@@ -22,6 +22,3 @@ spec:
       namespace: "kyma-system"
     - name: "application-connector"
       namespace: "kyma-system"
-    - name: "remote-environments"
-      namespace: "kyma-integration"
-      release: "default-remote-environments"
