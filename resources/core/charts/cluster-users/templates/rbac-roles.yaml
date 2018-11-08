@@ -3,6 +3,7 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: kube-system-view
+  namespace: {{ .Release.Namespace }}
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -39,6 +40,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   name: kyma-view-binding
+  namespace: {{ .Release.Namespace }}
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -86,6 +88,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   name: kyma-admin-binding
+  namespace: {{ .Release.Namespace }}
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
