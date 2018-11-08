@@ -58,7 +58,7 @@ required = [
 [[constraint]]
   name = "github.com/kyma-project/kyma"
   source = "https://github.com/sjanota/kyma"
-  branch = "api-domain"
+  revision = "a13f879"
 
 [[override]]
   name = "k8s.io/api"
