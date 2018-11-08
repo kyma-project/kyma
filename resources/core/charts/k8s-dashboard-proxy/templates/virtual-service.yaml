@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "name" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+  - "kubernetes-dashboard.{{ .Values.global.domainName }}"
+  gateways:
+  - {{ .Values.global.istio.gateway.name }}
+  http:
+  - match:
+    route:
+    - destination:
+        host: {{ template "name" . }}
+        port:
+          number: 80

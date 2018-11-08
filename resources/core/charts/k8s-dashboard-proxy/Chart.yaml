@@ -1,0 +1,6 @@
+name: k8s-dashboard-proxy
+version: 0.0.1
+description: Proxy for Kubernetes Dashboard
+keywords:
+  - kubernetes-dashboard
+  - dashboard-proxy

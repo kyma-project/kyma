@@ -50,9 +50,13 @@ data:
     - id: {{ .Values.oidc.jaegerClientId }}
       name: {{ .Values.oidc.jaegerClientName }}
       redirectURIs:
-      - 'http://jaeger.{{ .Values.global.domainName }}:3000/oauth/callback'
       - 'https://jaeger.{{ .Values.global.domainName }}/oauth/callback'
       secret: oiEWUWOIEwedfgg
+    - id: {{ .Values.oidc.kubernetesDashboardClientId }}
+      name: {{ .Values.oidc.kubernetesDashboardClientName }}
+      redirectURIs:
+      - 'https://kubernetes-dashboard.{{ .Values.global.domainName }}/oauth/callback'
+      secret: 94e412ebd7c9440f6947972a1bb35698f007ba2d6401d65a8c2e8490a453d472
 
     enablePasswordDB: true
     #__STATIC_PASSWORDS__

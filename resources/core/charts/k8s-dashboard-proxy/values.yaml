@@ -1,0 +1,10 @@
+containerPort: 3001  
+
+reverseproxy:
+  host: localhost
+  port: 8080
+  secret_token_path: /var/run/secrets/kubernetes.io/serviceaccount/token
+  k8s_dashboard_URL: http://localhost:30000
+
+keycloak:
+  image: quay.io/gambol99/keycloak-proxy:v2.3.0
