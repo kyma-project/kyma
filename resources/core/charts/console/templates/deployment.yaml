@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/console:{{ .Values.image.tag }}"
+          image: "{{ .Values.global.containerRegistry.path }}/snapshot/console:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
