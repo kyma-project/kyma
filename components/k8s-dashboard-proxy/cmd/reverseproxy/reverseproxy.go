@@ -32,20 +32,24 @@ type secret struct {
 
 func (sfp *secret) updateSecret() {
 	sfp.mux.Lock()
-	var accountSecret []byte
+	defer sfp.mux.Unlock()
 	if token, err := ioutil.ReadFile(secretFilePath); err != nil {
 		log.Printf("Error: read service account failed: %v", err)
 	} else {
-		accountSecret = token
+		sfp.token = string(token)
 	}
-	sfp.token = string(accountSecret)
-	sfp.mux.Unlock()
+}
+
+func (sfp *secret) readSecret() string {
+	sfp.mux.Lock()
+	defer sfp.mux.Unlock()
+	return sfp.token
 }
 
 func serveProxy(rw http.ResponseWriter, req *http.Request) {
 	req.URL.Host = proxyURL.Host
 	req.URL.Scheme = proxyURL.Scheme
-	req.Header.Set("Authorization", "Bearer "+sfp.token)
+	req.Header.Set("Authorization", "Bearer "+sfp.readSecret())
 	req.Host = proxyURL.Host
 	proxy.ServeHTTP(rw, req)
 }
