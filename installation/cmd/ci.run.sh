@@ -38,6 +38,8 @@ echo $y
 x=$(docker version)
 echo $x
 
+z=$
+
 DOCKER_RUN_COMMAND="docker run --rm -v /var/lib/docker \
         -p 443:443 \
         -p 8443:8443 \
@@ -53,7 +55,18 @@ if [ -z "${NON_INTERACTIVE}" ]; then
   DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} -it "
 fi
 
-DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} ${FINAL_IMAGE}"
+# DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} ${FINAL_IMAGE}"
+
+docker run --rm -v /var/lib/docker \
+        -p 443:443 \
+        -p 8443:8443 \
+        -p 8001:8001 \
+        -p 9411:9411 \
+        -p 32000:32000 \
+        -p 32001:32001 \
+        -e IGNORE_TEST_FAIL=${IGNORE_TEST_FAIL} \
+        -e RUN_TESTS=${RUN_TESTS} \
+        --privileged -it ${FINAL_IMAGE}
 
 if type sudo 1> /dev/null 2> /dev/null;  then
   sudo ${DOCKER_RUN_COMMAND}
