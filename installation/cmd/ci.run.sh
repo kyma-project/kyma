@@ -57,7 +57,7 @@ fi
 
 # DOCKER_RUN_COMMAND="${DOCKER_RUN_COMMAND} ${FINAL_IMAGE}"
 
-DOCKER_RUN_COMMAND="docker run --rm -v /var/lib/docker \
+docker run --rm -v /var/lib/docker \
         -p 443:443 \
         -p 8443:8443 \
         -p 8001:8001 \
@@ -66,13 +66,13 @@ DOCKER_RUN_COMMAND="docker run --rm -v /var/lib/docker \
         -p 32001:32001 \
         -e IGNORE_TEST_FAIL=${IGNORE_TEST_FAIL} \
         -e RUN_TESTS=${RUN_TESTS} \
-        --privileged -it ${FINAL_IMAGE}"
+        --privileged -it ${FINAL_IMAGE}
 echo $DOCKER_RUN_COMMAND
 
-if type sudo 1> /dev/null 2> /dev/null;  then
-  echo "here"
-  sudo ${DOCKER_RUN_COMMAND}
-else
-  echo "there"
-  ${DOCKER_RUN_COMMAND}
-fi
+# if type sudo 1> /dev/null 2> /dev/null;  then
+#   echo "here"
+#   sudo ${DOCKER_RUN_COMMAND}
+# else
+#   echo "there"
+#   ${DOCKER_RUN_COMMAND}
+# fi
