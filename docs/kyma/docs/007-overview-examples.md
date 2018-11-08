@@ -5,7 +5,9 @@ type: Overview
 
 Use the available examples to test functionalities that Kyma offers.
 
-The table contains a list of all examples organized by the feature or concept they showcase, and technologies they use. Follow the links and try them on your own.
+The table contains a list of examples and technologies they use. Examples are organized by a feature or concept they showcase. Each of them contains ready-to-use code snippets and the instructions in `README.md` documents.
+
+Follow the links to example code and content sources, and try them on your own.
 
 | Example | Description | Technology |
 |---|---|---|
