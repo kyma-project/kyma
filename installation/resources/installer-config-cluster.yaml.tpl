@@ -62,30 +62,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ec-default-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: ec-default
-data:
-  deployment.args.sourceType: commerce
-  service.externalapi.nodePort: "32001"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: hmc-default-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: hmc-default
-data:
-  deployment.args.sourceType: marketing
-  service.externalapi.nodePort: "32000"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: istio-overrides
   namespace: kyma-installer
   labels:
