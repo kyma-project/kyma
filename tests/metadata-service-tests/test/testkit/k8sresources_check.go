@@ -90,7 +90,7 @@ func CheckK8sRemoteEnvironment(t *testing.T, re *remoteenv.RemoteEnvironment, na
 		require.NotNil(t, apiEntry)
 
 		require.Equal(t, expectedServiceData.TargetUrl, apiEntry.TargetUrl)
-		require.Equal(t, expectedServiceData.OauthUrl, apiEntry.OauthUrl)
+		require.Equal(t, expectedServiceData.OauthUrl, apiEntry.Credentials.AuthenticationUrl)
 		require.Equal(t, expectedServiceData.GatewayUrl, apiEntry.GatewayUrl)
 		require.Equal(t, expectedServiceData.AccessLabel, apiEntry.AccessLabel)
 	}

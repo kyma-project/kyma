@@ -560,7 +560,7 @@ func hideClientCredentials(original testkit.ServiceDetails) testkit.ServiceDetai
 			if original.Api.Credentials.Basic != nil {
 				result.Api.Credentials = &testkit.Credentials{
 					Basic: &testkit.Basic{
-						Username:     "********",
+						Username: "********",
 						Password: "********",
 					},
 				}
