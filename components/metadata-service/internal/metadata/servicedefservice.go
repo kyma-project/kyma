@@ -2,24 +2,15 @@
 package metadata
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/go-openapi/spec"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/minio"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 )
 
 const (
-	targetSwaggerVersion = "2.0"
-	connectedApp         = "connected-app"
-	oDataSpecFormat      = "%s/$metadata"
-	oDataSpecType        = "odata"
+	connectedApp = "connected-app"
 )
 
 // ServiceDefinitionService is a service that manages ServiceDefinition objects.
@@ -47,16 +38,16 @@ type serviceDefinitionService struct {
 	uuidGenerator               uuid.Generator
 	serviceAPIService           serviceapi.Service
 	remoteEnvironmentRepository remoteenv.ServiceRepository
-	minioService                minio.Service
+	specService                 specification.SpecService
 }
 
 // NewServiceDefinitionService creates new ServiceDefinitionService with provided dependencies.
-func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService serviceapi.Service, remoteEnvironmentRepository remoteenv.ServiceRepository, minioService minio.Service) ServiceDefinitionService {
+func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService serviceapi.Service, remoteEnvironmentRepository remoteenv.ServiceRepository, specService specification.SpecService) ServiceDefinitionService {
 	return &serviceDefinitionService{
 		uuidGenerator:               uuidGenerator,
 		serviceAPIService:           serviceAPIService,
 		remoteEnvironmentRepository: remoteEnvironmentRepository,
-		minioService:                minioService,
+		specService:                 specService,
 	}
 }
 
@@ -70,28 +61,26 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 	}
 
 	id := sds.uuidGenerator.NewUUID()
-
 	service := initService(serviceDef, id, serviceDef.Identifier, remoteEnvironment)
+
+	specData := prepareSpecData(id, serviceDef)
 
 	if apiDefined(serviceDef) {
 		serviceAPI, err := sds.serviceAPIService.New(remoteEnvironment, id, serviceDef.Api)
 		if err != nil {
 			return "", apperrors.Internal("Adding new API failed, %s", err.Error())
 		}
-		service.API = serviceAPI
 
-		err = determineAPISpecification(serviceDef.Api, serviceAPI.GatewayURL)
-		if err != nil {
-			if err.Code() == apperrors.CodeUpstreamServerCallFailed {
-				return "", apperrors.UpstreamServerCallFailed("Determining API spec for service with ID %s failed, %s", id, err.Error())
-			}
-			return "", apperrors.Internal("Determining API spec for service with ID %s failed, %s", id, err.Error())
-		}
+		service.API = serviceAPI
+		specData.GatewayUrl = serviceAPI.GatewayURL
 	}
 
-	err := sds.insertSpecs(id, serviceDef.Documentation, serviceDef.Api, serviceDef.Events)
+	err := sds.specService.SaveServiceSpecs(specData)
 	if err != nil {
-		return "", apperrors.Internal("Inserting specs failed, %s", err.Error())
+		if err.Code() == apperrors.CodeUpstreamServerCallFailed {
+			return "", apperrors.UpstreamServerCallFailed("Determining API spec for service with ID %s failed, %s", id, err.Error())
+		}
+		return "", apperrors.Internal("Determining API spec for service with ID %s failed, %s", id, err.Error())
 	}
 
 	err = sds.remoteEnvironmentRepository.Create(remoteEnvironment, *service)
@@ -103,85 +92,12 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 	return id, nil
 }
 
-func determineAPISpecification(api *serviceapi.API, gatewayUrl string) apperrors.AppError {
-	apiSpec := api.Spec
-
-	var err apperrors.AppError
-
-	if isNilOrEmpty(apiSpec) {
-		apiSpec, err = fetchSpec(api)
-		if err != nil {
-			return err
-		}
-	}
-
-	api.Spec, err = modifyAPISpec(apiSpec, gatewayUrl)
-	if err != nil {
-		return apperrors.Internal("Modifying API spec failed, %s", err.Error())
-	}
-
-	return nil
-}
-
-func fetchSpec(api *serviceapi.API) ([]byte, apperrors.AppError) {
-	specUrl, err := url.ParseRequestURI(api.SpecUrl)
-	if err != nil {
-		specUrl, err = url.ParseRequestURI(fmt.Sprintf(oDataSpecFormat, api.TargetUrl))
-		if err != nil {
-			return nil, apperrors.Internal("Parsing OData spec url failed, %s", err.Error())
-		}
-		api.Type = oDataSpecType
-	}
-
-	response, apperr := requestAPISpec(specUrl.String(), api.Credentials)
-	if apperr != nil {
-		return nil, apperr
-	}
-
-	if api.Type == "" {
-		// determine Type
-	}
-
-	spec, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, apperrors.Internal("Reading API spec response body failed, %s", err.Error())
-	}
-
-	return spec, nil
-}
-
-func isNilOrEmpty(array []byte) bool {
-	return array == nil || len(array) == 0
-}
-
-func requestAPISpec(specUrl string, credentials *serviceapi.Credentials) (*http.Response, apperrors.AppError) {
-	req, err := http.NewRequest(http.MethodGet, specUrl, nil)
-	if err != nil {
-		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())
-	}
-
-	if credentials != nil {
-		// TODO - setup authentication
-	}
-
-	response, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed, %s", specUrl, err.Error())
-	}
-
-	if response.StatusCode != http.StatusOK {
-		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed with status %s", specUrl, response.Status)
-	}
-
-	return response, nil
-}
-
 // GetByID returns ServiceDefinition with provided ID.
 func (sds *serviceDefinitionService) GetByID(remoteEnvironment, id string) (ServiceDefinition, apperrors.AppError) {
 	service, err := sds.remoteEnvironmentRepository.Get(remoteEnvironment, id)
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {
-			return ServiceDefinition{}, apperrors.NotFound("Service with ID %s not found", id)
+			return ServiceDefinition{}, apperrors.NotFound("SpecService with ID %s not found", id)
 		}
 		return ServiceDefinition{}, apperrors.Internal("Reading service with ID %s failed, %s", id, err.Error())
 	}
@@ -216,6 +132,8 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 
 	service := initService(serviceDef, id, existingSvc.Identifier, remoteEnvironment)
 
+	specData := prepareSpecData(id, serviceDef)
+
 	if !apiDefined(serviceDef) {
 		err = sds.serviceAPIService.Delete(remoteEnvironment, id)
 		if err != nil {
@@ -227,13 +145,10 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 			return ServiceDefinition{}, apperrors.Internal("Updating %s service failed, updating API failed, %s", id, err.Error())
 		}
 
-		serviceDef.Api.Spec, err = modifyAPISpec(serviceDef.Api.Spec, service.API.GatewayURL)
-		if err != nil {
-			return ServiceDefinition{}, apperrors.Internal("Updating %s service failed, modifying API spec failed, %s", id, err.Error())
-		}
+		specData.GatewayUrl = service.API.GatewayURL
 	}
 
-	err = sds.insertSpecs(id, serviceDef.Documentation, serviceDef.Api, serviceDef.Events)
+	err = sds.specService.SaveServiceSpecs(specData)
 	if err != nil {
 		return ServiceDefinition{}, apperrors.Internal("Updating %s service failed, inserting specification to Minio failed, %s", id, err.Error())
 	}
@@ -259,9 +174,9 @@ func (sds *serviceDefinitionService) Delete(remoteEnvironment, id string) apperr
 		return apperrors.Internal("Deleting service from Remote Environment repository failed, %s", err.Error())
 	}
 
-	err = sds.minioService.Remove(id)
+	err = sds.specService.RemoveSpec(id)
 	if err != nil {
-		return apperrors.Internal("Deleting service data from Minio failed, %s", err.Error())
+		return apperrors.Internal("Deleting service specification failed, %s", err.Error())
 	}
 
 	return nil
@@ -272,13 +187,13 @@ func (sds *serviceDefinitionService) GetAPI(remoteEnvironment, serviceId string)
 	service, err := sds.remoteEnvironmentRepository.Get(remoteEnvironment, serviceId)
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {
-			return nil, apperrors.NotFound("Service with ID %s not found", serviceId)
+			return nil, apperrors.NotFound("SpecService with ID %s not found", serviceId)
 		}
 		return nil, apperrors.Internal("Reading %s service failed, %s", serviceId, err.Error())
 	}
 
 	if service.API == nil {
-		return nil, apperrors.WrongInput("Service with ID %s has no API", service.ID)
+		return nil, apperrors.WrongInput("SpecService with ID %s has no API", service.ID)
 	}
 
 	api, err := sds.serviceAPIService.Read(remoteEnvironment, service.API)
@@ -334,7 +249,7 @@ func (sds *serviceDefinitionService) ensureUniqueIdentifier(identifier, remoteEn
 
 	for _, service := range services {
 		if service.Identifier == identifier {
-			return apperrors.AlreadyExists("Service with Identifier %s already exists", identifier)
+			return apperrors.AlreadyExists("SpecService with Identifier %s already exists", identifier)
 		}
 	}
 
@@ -344,7 +259,7 @@ func (sds *serviceDefinitionService) ensureUniqueIdentifier(identifier, remoteEn
 func (sds *serviceDefinitionService) readService(remoteEnvironment string, service remoteenv.Service) (ServiceDefinition, apperrors.AppError) {
 	serviceDef := convertServiceBaseInfo(service)
 
-	documentation, apiSpec, eventsSpec, err := sds.minioService.Get(service.ID)
+	documentation, apiSpec, eventsSpec, err := sds.specService.GetSpec(service.ID)
 	if err != nil {
 		return ServiceDefinition{}, apperrors.Internal("Reading specs failed, %s", err.Error())
 	}
@@ -362,7 +277,7 @@ func (sds *serviceDefinitionService) readService(remoteEnvironment string, servi
 	}
 
 	if eventsSpec != nil {
-		serviceDef.Events = &Events{eventsSpec}
+		serviceDef.Events = &specification.Events{eventsSpec}
 	}
 
 	if documentation != nil {
@@ -376,69 +291,6 @@ func apiDefined(serviceDefinition *ServiceDefinition) bool {
 	return serviceDefinition.Api != nil
 }
 
-func (sds *serviceDefinitionService) insertSpecs(id string, docs []byte, api *serviceapi.API, events *Events) apperrors.AppError {
-	var documentation []byte
-	var apiSpec []byte
-	var eventsSpec []byte
-
-	if docs != nil {
-		documentation = docs
-	}
-
-	if api != nil {
-		apiSpec = api.Spec
-	}
-
-	if events != nil {
-		eventsSpec = events.Spec
-	}
-
-	return sds.minioService.Put(id, documentation, apiSpec, eventsSpec)
-}
-
-func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppError) {
-	if rawApiSpec == nil {
-		return rawApiSpec, nil
-	}
-
-	var apiSpec spec.Swagger
-	err := json.Unmarshal(rawApiSpec, &apiSpec)
-	if err != nil {
-		//return []byte{}, apperrors.Internal("Unmarshalling API spec failed, %s", err.Error())
-		// OData might have different type than JSON
-		return rawApiSpec, nil
-	}
-
-	if apiSpec.Swagger != targetSwaggerVersion {
-		return rawApiSpec, nil
-	}
-
-	newSpec, err := updateBaseUrl(apiSpec, gatewayUrl)
-	if err != nil {
-		return rawApiSpec, apperrors.Internal("Updating base url failed, %s", err.Error())
-	}
-
-	modifiedSpec, err := json.Marshal(newSpec)
-	if err != nil {
-		return rawApiSpec, apperrors.Internal("Marshalling updated API spec failed, %s", err.Error())
-	}
-
-	return modifiedSpec, nil
-}
-
-func updateBaseUrl(apiSpec spec.Swagger, gatewayUrl string) (spec.Swagger, apperrors.AppError) {
-	fullUrl, err := url.Parse(gatewayUrl)
-	if err != nil {
-		return spec.Swagger{}, apperrors.Internal("Failed to parse gateway URL, %s", err.Error())
-	}
-
-	apiSpec.Host = fullUrl.Hostname()
-	apiSpec.BasePath = ""
-	apiSpec.Schemes = []string{"http"}
-
-	return apiSpec, nil
-}
-
 func overrideLabels(remoteEnvironment string, labels map[string]string) map[string]string {
 	_, found := labels[connectedApp]
 	if found {
@@ -446,4 +298,13 @@ func overrideLabels(remoteEnvironment string, labels map[string]string) map[stri
 	}
 
 	return labels
+}
+
+func prepareSpecData(id string, serviceDef *ServiceDefinition) specification.SpecData {
+	return specification.SpecData{
+		Id:     id,
+		API:    serviceDef.Api,
+		Events: serviceDef.Events,
+		Docs:   serviceDef.Documentation,
+	}
 }

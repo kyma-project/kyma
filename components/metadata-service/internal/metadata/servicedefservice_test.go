@@ -7,11 +7,12 @@ import (
 	"encoding/json"
 
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	miniomocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/minio/mocks"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	remoteenvmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv/mocks"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
 	serviceapimocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi/mocks"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification"
+	miniomocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification/minio/mocks"
 	uuidmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -44,7 +45,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Api:         serviceAPI,
 			Labels:      &map[string]string{"connected-app": "re"},
 			Identifier:  "Some cool external identifier",
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -78,7 +79,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		serviceID, err := service.Create("re", &serviceDefinition)
@@ -100,7 +101,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         nil,
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("test"),
 			},
 			Documentation: []byte("documentation"),
@@ -124,7 +125,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Put", "uuid-1", mock.Anything, empty, []byte("test")).Return(nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, specService)
 
 		// when
 		serviceID, err := service.Create("re", &serviceDefinition)
@@ -167,7 +168,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Put", "uuid-1", mock.Anything, empty, empty).Return(nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, specService)
 
 		// when
 		serviceID, err := service.Create("re", &serviceDefinition)
@@ -210,7 +211,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Put", "uuid-1", empty, empty, empty).Return(nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, specService)
 
 		// when
 		serviceID, err := service.Create("re", &serviceDefinition)
@@ -245,7 +246,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -277,7 +278,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Put", "uuid-1", []byte("documentation"), expectedAPISpec, []byte("events spec")).Return(nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		serviceID, err := service.Create("re", &serviceDefinition)
@@ -322,7 +323,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Put", "uuid-1", empty, empty, empty).Return(nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, specService)
 
 		// when
 		serviceID, err := service.Create("re", &serviceDefinition)
@@ -365,7 +366,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Put", "uuid-1", empty, empty, empty).Return(nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, specService)
 
 		// when
 		serviceID, err := service.Create("re", &serviceDefinition)
@@ -427,7 +428,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -446,7 +447,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		minioService := new(miniomocks.Service)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		serviceID, err := service.Create("re", &serviceDefinition)
@@ -468,7 +469,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         nil,
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: nil,
@@ -479,7 +480,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Put", "uuid-1", empty, empty, []byte("events spec")).Return(apperrors.Internal("Error"))
 
-		service := NewServiceDefinitionService(uuidGenerator, nil, nil, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, nil, nil, specService)
 
 		// when
 		_, err := service.Create("re", &serviceDefinition)
@@ -529,7 +530,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Put", "uuid-1", empty, empty, empty).Return(nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		serviceID, err := service.Create("re", &serviceDefinition)
@@ -697,7 +698,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Get", "uuid-1").Return(empty, empty, empty, nil)
 
-		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
 		// when
 		result, err := service.GetByID("re", "uuid-1")
@@ -761,7 +762,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Get", "uuid-1").Return(empty, empty, empty, nil)
 
-		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
 		// when
 		_, err := service.GetByID("re", "uuid-1")
@@ -788,7 +789,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Get", "uuid-1").Return(empty, empty, empty, apperrors.Internal("error"))
 
-		service := NewServiceDefinitionService(nil, nil, serviceRepository, minioService)
+		service := NewServiceDefinitionService(nil, nil, serviceRepository, specService)
 
 		// when
 		_, err := service.GetByID("re", "uuid-1")
@@ -824,7 +825,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Provider:    "Service Provider",
 			Identifier:  "Identifier",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -866,7 +867,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(nil)
 		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		_, err := service.Update("re", "uuid-1", &serviceDefinition)
@@ -898,7 +899,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -926,7 +927,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(nil)
 		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		_, err := service.Update("re", "uuid-1", &serviceDefinition)
@@ -944,7 +945,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Provider:    "Service Provider",
 			Identifier:  "Identifier",
 			Api:         nil,
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -977,7 +978,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		minioService.On("Put", "uuid-1", []byte("documentation"), []byte(nil), []byte("events spec")).Return(nil)
 		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		_, err := service.Update("re", "uuid-1", &serviceDefinition)
@@ -998,7 +999,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Provider:    "Service Provider",
 			Identifier:  "DifferentIdentifier",
 			Api:         nil,
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -1031,7 +1032,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		minioService.On("Put", "uuid-1", []byte("documentation"), []byte(nil), []byte("events spec")).Return(nil)
 		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		_, err := service.Update("re", "uuid-1", &serviceDefinition)
@@ -1064,7 +1065,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Provider:    "Service Provider",
 			Identifier:  "Identifier",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -1096,7 +1097,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		minioService.On("Put", "uuid-1", []byte("documentation"), []byte(nil), []byte("events spec")).Return(nil)
 		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		_, err := service.Update("re", "uuid-1", &serviceDefinition)
@@ -1129,7 +1130,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Provider:    "Service Provider",
 			Identifier:  "Identifier",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -1161,7 +1162,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		minioService.On("Put", "uuid-1", []byte("documentation"), []byte(nil), []byte("events spec")).Return(nil)
 		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		_, err := service.Update("re", "uuid-1", &serviceDefinition)
@@ -1194,7 +1195,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Provider:    "Service Provider",
 			Identifier:  "Identifier",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -1226,7 +1227,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(apperrors.Internal("an error"))
 		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		_, err := service.Update("re", "uuid-1", &serviceDefinition)
@@ -1260,7 +1261,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Provider:    "Service Provider",
 			Identifier:  "Identifier",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -1302,7 +1303,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(nil)
 		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		_, err := service.Update("re", "uuid-1", &serviceDefinition)
@@ -1334,7 +1335,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Remove", "uuid-1").Return(nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
 		// when
 		err := service.Delete("re", "uuid-1")
@@ -1401,7 +1402,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		minioService := new(miniomocks.Service)
 		minioService.On("Remove", "uuid-1").Return(apperrors.Internal("an error"))
 
-		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, minioService)
+		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
 		// when
 		err := service.Delete("re", "uuid-1")

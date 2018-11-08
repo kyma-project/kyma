@@ -53,7 +53,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: &Documentation{
@@ -569,7 +569,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &Events{
+			Events: &specification.Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: &Documentation{

@@ -14,10 +14,11 @@ import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/accessservice"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/istio"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/minio"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/secrets"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification/minio"
 	metauuid "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/monitoring"
 	istioclient "github.com/kyma-project/kyma/components/metadata-service/pkg/client/clientset/versioned"
@@ -128,6 +129,8 @@ func newServiceDefinitionService(minioURL, namespace string, proxyPort int, name
 
 	minioService := minio.NewService(minioRepository)
 
+	specificationService := specification.NewSpecService(minioService)
+
 	remoteEnvironmentServiceRepository, apperror := newRemoteEnvironmentRepository(k8sConfig)
 	if apperror != nil {
 		return nil, apperror
@@ -147,7 +150,7 @@ func newServiceDefinitionService(minioURL, namespace string, proxyPort int, name
 
 	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, secretsRepository, istioService)
 
-	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, remoteEnvironmentServiceRepository, minioService), nil
+	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, remoteEnvironmentServiceRepository, specificationService), nil
 }
 
 func newRemoteEnvironmentRepository(config *restclient.Config) (remoteenv.ServiceRepository, apperrors.AppError) {

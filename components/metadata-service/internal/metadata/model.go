@@ -1,6 +1,9 @@
 package metadata
 
-import "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
+import (
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification"
+)
 
 // ServiceDefinition is an internal representation of a service.
 type ServiceDefinition struct {
@@ -21,13 +24,7 @@ type ServiceDefinition struct {
 	// Api of a service
 	Api *serviceapi.API
 	// Events of a service
-	Events *Events
+	Events *specification.Events
 	// Documentation of service
 	Documentation []byte
-}
-
-// Events contains specification for events.
-type Events struct {
-	// Spec contains data of events specification.
-	Spec []byte
 }
