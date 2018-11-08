@@ -39,7 +39,7 @@ func (sds *serviceDefinitionService) GetAPI(serviceId string) (*serviceapi.API, 
 	}
 
 	if service.API == nil {
-		return nil, apperrors.WrongInput("service with ID '%s' has no API")
+		return nil, apperrors.WrongInput("service with ID '%s' has no API", serviceId)
 	}
 
 	api, err := sds.serviceAPIService.Read(service.API)
