@@ -10,6 +10,16 @@ and a custom Envoy filter.
 The Authentication Policy is configured with the default Kyma OpenID Connect provider, Dex. This means that you must use an ID token issued by Dex to access GraphQL.
 The Authentication Policy is defined in [this](./templates/authentication.yaml) file.
 
+### Custom Envoy filter
+
+The Envoy filter extracts security-related attributes from GraphQL queries. These attributes are added to the request as additional headers and are sent to the target service. These are the additional request headers:
+
+- **kyma-graphql-parsed** - this header is set if the filter parsed the query.
+
+- **kyma-graphql-resources** - this header contains the names of the queried resources. The names are comma-separated and sorted in alphabetical order. The list is enclosed with curly braces.
+
+The Envoy filter is registered with the use of EnvoyFilter CR. The source code of the Envoy filter, in the form of a LUA script, is located in [this](./templates/scripts) directory.
+
 ### Authorization
 
 Authorization relies on Istio Role-Based Access Control (RBAC).
@@ -29,7 +39,26 @@ RBAC in Istio is based on these concepts:
 
   - **spec.rules[0].methods** indicates the secured HTTP methods. As a minimum you must secure the `POST` method.
 
-  - **spec.rules[0].constraints** allows to specify additional conditions which can be found [here](https://istio.io/docs/reference/config/authorization/constraints-and-properties/#constraints).
+  - **spec.rules[0].constraints** allows to specify additional conditions which can be found [here](https://istio.io/docs/reference/config/authorization/constraints-and-properties/#constraints). The one, crucial for GraphQL use case, is specifying the query by use of custom header described in the [Custom Envoy filter section](##custom-envoy-filter):
+
+    - **request.headers[kyma-graphql-resources]** - The value should contain the names of the queried resources. List the resources in alphabetical order. Enclose the list in curly brackets.
+  
+  For example, to define a role for access to the query with `remoteEnvironments` resource you must define the following Service Role:
+   ```yaml	
+  apiVersion: "rbac.istio.io/v1alpha1"
+  kind: ServiceRole
+  metadata:
+    name: SERVICE_ROLE_REQUIRED_TO_ACCESS_QUERY
+  spec:
+    rules:
+    - services: ["core-ui-api.kyma-system.svc.cluster.local"]
+      paths: ["/graphql"]
+      methods: ["*"]
+      constraints:
+      - key: request.headers[kyma-graphql-resources]
+        values:
+        - '{remoteEnvironments}'
+  ```
 
 - **Service Role Binding** grants a role to subjects (e.g., a user, a group, a service).
 
@@ -37,7 +66,7 @@ RBAC in Istio is based on these concepts:
   for the `USER_EMAIL` user, you must define the following Service Role Binding:  
 
   ```yaml
-  apiVersion: "config.istio.io/v1alpha2"
+  apiVersion: "rbac.istio.io/v1alpha1"
   kind: ServiceRoleBinding
   metadata:
     name: BINDING_NAME
@@ -77,7 +106,7 @@ To restrict access to the queries, you must implement these changes:
 
 ### Example
 
-This example shows how to set up the authorization for queries in GraphQL.
+This example shows how to set up the authorization only for the specific queries in GraphQL.
 
 The secured query is as follows:
 
@@ -94,7 +123,7 @@ To create the role for the query, use the following command:
 ```bash
 cat <<EOF | kubectl create -f -
 ---
-apiVersion: "config.istio.io/v1alpha2"
+apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRole
 metadata:
   name: graphql-groups-read
@@ -104,6 +133,10 @@ spec:
   - services: ["core-ui-api.kyma-system.svc.cluster.local"]
     paths: ["/graphql"]
     methods: ["*"]
+    constraints:
+      - key: request.headers[kyma-graphql-resources]
+        values:
+        - '{apis}'
 EOF
 ```
 
@@ -113,7 +146,7 @@ The following Service Role Binding grants `graphql-groups-read` role to the `adm
 ```bash
 cat <<EOF | kubectl create -f -
 ---
-apiVersion: "config.istio.io/v1alpha2"
+apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRoleBinding
 metadata:
   name: admin-graphql-groups-read
