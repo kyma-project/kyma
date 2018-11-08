@@ -18,7 +18,7 @@ type retrier struct {
 
 type updateCacheEntryFunction = func(string) (*CacheEntry, apperrors.AppError)
 
-func newForbiddenResponseRetrier(id string, request *http.Request, timeout int, updateCacheEntryFunc updateCacheEntryFunction) *retrier {
+func newUnathorizedResponseRetrier(id string, request *http.Request, timeout int, updateCacheEntryFunc updateCacheEntryFunction) *retrier {
 	return &retrier{id: id, request: request, retried: false, timeout: timeout, updateCacheEntryFunction: updateCacheEntryFunc}
 }
 
@@ -29,8 +29,8 @@ func (rr *retrier) RetryIfFailedToAuthorize(r *http.Response) error {
 
 	rr.retried = true
 
-	if r.StatusCode == 403 {
-		log.Infof("Request from service with id %s failed with 403 status, invalidating proxy and retrying.", rr.id)
+	if r.StatusCode == http.StatusForbidden || r.StatusCode == http.StatusUnauthorized {
+		log.Infof("Request from service with id %s failed with %d status, invalidating proxy and retrying.", rr.id, r.StatusCode)
 
 		res, err := rr.retry()
 		if err != nil {

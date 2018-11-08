@@ -223,9 +223,47 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
 	})
 
+	t.Run("should invalidate proxy and retry when 401 occurred", func(t *testing.T) {
+		// given
+		tsf := NewTestServerForRetryTest(http.StatusUnauthorized, func(req *http.Request) {
+			assert.Equal(t, req.Method, http.MethodGet)
+			assert.Equal(t, req.RequestURI, "/orders/123")
+		})
+		defer tsf.Close()
+
+		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
+
+		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
+			TargetUrl: tsf.URL,
+		}, nil).Twice()
+
+		authStrategyMock := &authMock.Strategy{}
+		authStrategyMock.On("AddAuthorizationHeader", mock.Anything).Return(nil).Twice()
+		authStrategyMock.On("Invalidate").Return().Once()
+
+		authStrategyFactoryMock := &authMock.StrategyFactory{}
+		authStrategyFactoryMock.On("Create", mock.Anything).Return(authStrategyMock).Twice()
+
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		rr := httptest.NewRecorder()
+
+		// when
+		handler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "test", rr.Body.String())
+
+		serviceDefServiceMock.AssertExpectations(t)
+		authStrategyFactoryMock.AssertExpectations(t)
+		authStrategyMock.AssertExpectations(t)
+	})
+
 	t.Run("should invalidate proxy and retry when 403 occurred", func(t *testing.T) {
 		// given
-		tsf := NewTestServerForRetryTest(func(req *http.Request) {
+		tsf := NewTestServerForRetryTest(http.StatusForbidden, func(req *http.Request) {
 			assert.Equal(t, req.Method, http.MethodGet)
 			assert.Equal(t, req.RequestURI, "/orders/123")
 		})
@@ -294,15 +332,15 @@ func NewTestServer(check func(req *http.Request)) *httptest.Server {
 	}))
 }
 
-func NewTestServerForRetryTest(check func(req *http.Request)) *httptest.Server {
-	respondWithForbiddenStatus := true
+func NewTestServerForRetryTest(status int, check func(req *http.Request)) *httptest.Server {
+	firstCall := true
 
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		check(r)
-		if respondWithForbiddenStatus {
-			w.WriteHeader(http.StatusForbidden)
-			respondWithForbiddenStatus = false
+		if firstCall {
+			w.WriteHeader(status)
+			firstCall = false
 		} else {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("test"))
