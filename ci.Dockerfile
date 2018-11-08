@@ -6,6 +6,7 @@ ARG KUBECTL_CLI_VERSION
 ARG KUBELESS_CLI_VERSION
 ARG MINIKUBE_VERSION
 ARG HELM_VERSION
+ARG DOCKER_VERSION
 
 # Get dependencies for curl of the docker
 RUN apt-get update && apt-get install -y \
@@ -35,6 +36,7 @@ RUN curl -Lo /usr/local/bin/minikube https://storage.googleapis.com/minikube/rel
 RUN chmod +x /usr/local/bin/minikube
 
 # Install Docker from Docker Inc. repositories.
+ENV VERSION=$DOCKER_VERSION
 RUN curl -sSL https://get.docker.com/ | sh
 
 # Install Helm
