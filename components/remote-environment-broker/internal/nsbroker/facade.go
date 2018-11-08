@@ -2,6 +2,7 @@ package nsbroker
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -27,6 +28,16 @@ type serviceNameProvider interface {
 	GetServiceNameForNsBroker(ns string) string
 }
 
+//go:generate mockery -name=serviceChecker -output=automock -outpkg=automock -case=underscore
+type serviceChecker interface {
+	WaitUntilIsAvailable(url string, timeout time.Duration)
+}
+
+//go:generate mockery -name=brokerSyncer -output=automock -outpkg=automock -case=underscore
+type brokerSyncer interface {
+	SyncBroker(namespace string) error
+}
+
 // Facade is responsible for creation k8s objects for namespaced broker
 type Facade struct {
 	brokerGetter        scbeta.ServiceBrokersGetter
@@ -37,10 +48,18 @@ type Facade struct {
 	rebSelectorValue    string
 	rebTargetPort       int32
 	log                 logrus.FieldLogger
+
+	serviceChecker serviceChecker
+	brokerSyncer   brokerSyncer
 }
 
 // NewFacade returns facade
-func NewFacade(brokerGetter scbeta.ServiceBrokersGetter, servicesGetter typedCorev1.ServicesGetter, serviceNameProvider serviceNameProvider, workingNamespace, rebSelectorKey, rebSelectorValue string, rebTargetPort int32, log logrus.FieldLogger) *Facade {
+func NewFacade(brokerGetter scbeta.ServiceBrokersGetter,
+	servicesGetter typedCorev1.ServicesGetter,
+	serviceNameProvider serviceNameProvider,
+	brokerSyncer brokerSyncer,
+	workingNamespace, rebSelectorKey, rebSelectorValue string,
+	rebTargetPort int32, log logrus.FieldLogger) *Facade {
 	return &Facade{
 		brokerGetter:        brokerGetter,
 		servicesGetter:      servicesGetter,
@@ -49,6 +68,8 @@ func NewFacade(brokerGetter scbeta.ServiceBrokersGetter, servicesGetter typedCor
 		rebSelectorValue:    rebSelectorValue,
 		rebTargetPort:       rebTargetPort,
 		workingNamespace:    workingNamespace,
+		serviceChecker:      newHTTPChecker(log),
+		brokerSyncer:        brokerSyncer,
 		log:                 log.WithField("service", "nsbroker-facade"),
 	}
 }
@@ -82,6 +103,7 @@ func (f *Facade) Create(destinationNs string) error {
 		resultErr = multierror.Append(resultErr, err)
 	}
 
+	svcURL := fmt.Sprintf("http://%s.%s.svc.cluster.local", f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs), f.workingNamespace)
 	broker := &v1beta1.ServiceBroker{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      NamespacedBrokerName,
@@ -92,7 +114,7 @@ func (f *Facade) Create(destinationNs string) error {
 		},
 		Spec: v1beta1.ServiceBrokerSpec{
 			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
-				URL: fmt.Sprintf("http://%s.%s.svc.cluster.local", f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs), f.workingNamespace),
+				URL: svcURL,
 			},
 		},
 	}
@@ -100,6 +122,18 @@ func (f *Facade) Create(destinationNs string) error {
 		resultErr = multierror.Append(resultErr, err)
 		f.log.Warnf("Creation of namespaced-broker for namespace [%s] results in error: [%s]. AlreadyExist errors will be ignored.", destinationNs, err)
 	}
+
+	go func(ns, url string) {
+		sURL := fmt.Sprintf("%s/statusz", url)
+		f.log.Infof("Checking service availability: %s", sURL)
+		f.serviceChecker.WaitUntilIsAvailable(sURL, 2*time.Minute)
+
+		f.log.Infof("Triggering Service Catalog to do a sync with a broker in %s namespace", destinationNs)
+		err := f.brokerSyncer.SyncBroker(destinationNs)
+		if err != nil {
+			f.log.Warnf("Failed to sync a broker in the namespace %s: %s", destinationNs, err.Error())
+		}
+	}(destinationNs, svcURL)
 
 	resultErr = f.filterOutMultiError(resultErr, f.ignoreAlreadyExist)
 
