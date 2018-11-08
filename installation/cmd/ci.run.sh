@@ -32,6 +32,9 @@ do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
+x="${docker version}"
+echo $x
+
 DOCKER_RUN_COMMAND="docker run --rm -v /var/lib/docker \
         -p 443:443 \
         -p 8443:8443 \
