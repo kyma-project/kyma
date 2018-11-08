@@ -89,3 +89,7 @@ required= [
 [[override]]
   name = "k8s.io/code-generator"
   version = "kubernetes-1.10.1"
+
+[[constraint]]
+  name = "github.com/kubernetes-incubator/service-catalog"
+  version = "=v0.1.28"

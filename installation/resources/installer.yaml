@@ -85,7 +85,7 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/develop/installer:2dc3ac03
+        image: eu.gcr.io/kyma-project/develop/installer:7bd3337d
         imagePullPolicy: IfNotPresent
 ---
 kind: ClusterRole

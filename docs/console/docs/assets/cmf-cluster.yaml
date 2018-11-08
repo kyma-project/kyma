@@ -1,0 +1,17 @@
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: tractorsconfigclustermicrofrontend
+  labels:
+    app:  tractorsconfigclustermicrofrontend
+spec:
+  appName: tractors-cnf
+  displayName: Tractors View Configuration
+  version: v1
+  category: Administration
+  placement: cluster
+  viewBaseUrl: https://base_url_of_the_microfrontend
+  navigationNodes:
+    - label: Tractors View Configuration
+      navigationPath: tractorviewconfig
+      viewUrl: /

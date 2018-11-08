@@ -2,7 +2,7 @@
 ##
 image:
   repository: minio/minio
-  tag: RELEASE.2018-04-27T23-33-52Z
+  tag: RELEASE.2018-10-18T00-28-58Z
   pullPolicy: IfNotPresent
 
 ## Set default image, imageTag, and imagePullPolicy for the `mc` (the minio
@@ -10,7 +10,7 @@ image:
 ##
 mcImage:
   repository: minio/mc
-  tag: RELEASE.2018-04-28T00-08-20Z
+  tag: RELEASE.2018-10-18T00-40-05Z
   pullPolicy: IfNotPresent
 
 ## minio server mode, i.e. standalone or distributed.
@@ -18,14 +18,22 @@ mcImage:
 ##
 mode: standalone
 
+## Pod priority settings
+## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+##
+priorityClassName: ""
+
 ## Set default accesskey, secretkey, Minio config file path, volume mount path and
 ## number of nodes (only used for Minio distributed mode)
 ## Distributed Minio ref: https://docs.minio.io/docs/distributed-minio-quickstart-guide
-## WARNING - when changing `accessKey` and/or `secretKey`, change `resources/cluster-essentials/remote-environments-minio-secret.yaml` accordingly
 ##
+existingSecret: ""
+# MODIFIED: Block - START
+## WARNING - when changing `accessKey` and/or `secretKey`, change `resources/cluster-essentials/remote-environments-minio-secret.yaml` accordingly
 accessKey: "admin"
 secretKey: "topSecretKey"
-configPath: ""
+# MODIFIED: Block - END
+configPath: "/root/.minio/"
 mountPath: "/export"
 replicas: 4
 
@@ -47,14 +55,16 @@ persistence:
   ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
   ##   GKE, AWS & OpenStack)
   ##
-  # storageClass: "-"
+  ## Storage class of PV to bind. By default it looks for standard storage class.
+  ## If the PV uses a different storage class, specify that here.
+  # storageClass: standard
   accessMode: ReadWriteOnce
   size: 10Gi
 
-## If subPath is set mount a sub folder of a volume instead of the root of the volume.
-## This is especially handy for volume plugins that don't natively support sub mounting (like glusterfs).
-##
-subPath: ""
+  ## If subPath is set mount a sub folder of a volume instead of the root of the volume.
+  ## This is especially handy for volume plugins that don't natively support sub mounting (like glusterfs).
+  ##
+  subPath: ""
 
 ## Expose the Minio service to be accessed from outside the cluster (LoadBalancer service).
 ## or access it from within the cluster (ClusterIP service). Set the service type and the port to serve it.
@@ -62,15 +72,32 @@ subPath: ""
 ##
 
 service:
-  type: NodePort
-  clusterIP: None
+  type: ClusterIP
+  clusterIP: ~
   port: 9000
+  # nodePort: 31311
+  # externalIPs:
+  #   - externalIp1
+  # MODIFIED: Block - START
   annotations:
     auth.istio.io/9000: NONE
+  # MODIFIED: Block - END
     # prometheus.io/scrape: 'true'
     # prometheus.io/path:   '/minio/prometheus/metrics'
     # prometheus.io/port:   '9000'
 
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  path: /
+  hosts:
+    - chart-example.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
 
 ## Node labels for pod assignment
 ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -78,6 +105,21 @@ service:
 nodeSelector: {}
 tolerations: []
 affinity: {}
+
+## Liveness and Readiness probe values.
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
+livenessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 30
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 3
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 15
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 3
 
 ## Configure resource requests and limits
 ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
@@ -89,7 +131,6 @@ resources:
   limits:
     memory: 64Mi
     cpu: 100m
-
 
 ## Create a bucket after minio install
 ##
@@ -117,87 +158,108 @@ gcsgateway:
   # Google cloud project-id
   projectId: ""
 
-# only minioConfig.browser is used
+## Use minio on NAS backend
+## https://docs.minio.io/docs/minio-gateway-for-nas
+
+nasgateway:
+  enabled: false
+  # Number of parallel instances
+  replicas: 4
+  # For NAS Gateway, you may want to bind the PVC to a specific PV. To ensure that happens, PV to bind to should have
+  # a label like "pv: <value>", use value here.
+  pv: ~
+
+## https://docs.minio.io/docs/minio-bucket-notification-guide
+## https://github.com/minio/minio/blob/master/docs/config
+
 minioConfig:
-#  region: "us-east-1"
-  browser: "off"
-#  domain: ""
-#  standardStorageClass: ""
-#  reducedRedundancyStorageClass: ""
-#  aqmp:
-#    enable: false
-#    url: ""
-#    exchange: ""
-#    routingKey: ""
-#    exchangeType: ""
-#    deliveryMode: 0
-#    mandatory: false
-#    immediate: false
-#    durable: false
-#    internal: false
-#    noWait: false
-#    autoDeleted: false
-#  nats:
-#    enable: false
-#    address: ""
-#    subject: ""
-#    username: ""
-#    password: ""
-#    token: ""
-#    secure: false
-#    pingInterval: 0
-#    enableStreaming: false
-#    clusterID: ""
-#    clientID: ""
-#    async: false
-#    maxPubAcksInflight: 0
-#  elasticsearch:
-#    enable: false
-#    format: "namespace"
-#    url: ""
-#    index: ""
-#  redis:
-#    enable: false
-#    format: "namespace"
-#    address: ""
-#    password: ""
-#    key: ""
-#  postgresql:
-#    enable: false
-#    format: "namespace"
-#    connectionString: ""
-#    table: ""
-#    host: ""
-#    port: ""
-#    user: ""
-#    password: ""
-#    database: ""
-#  kafka:
-#    enable: false
-#    brokers: "null"
-#    topic: ""
-#  webhook:
-#    enable: false
-#    endpoint: ""
-#  mysql:
-#    enable: false
-#    format: "namespace"
-#    dsnString: ""
-#    table: ""
-#    host: ""
-#    port: ""
-#    user: ""
-#    password: ""
-#    database: ""
-#  mqtt:
-#    enable: false
-#    broker: ""
-#    topic: ""
-#    qos: 0
-#    clientId: ""
-#    username: ""
-#    password: ""
-#
+  region: "us-east-1"
+  browser: "off" # MODIFIED: Line
+  domain: ""
+  worm: "off"
+  storageClass:
+    standardStorageClass: ""
+    reducedRedundancyStorageClass: ""
+  cache:
+    drives: []
+    expiry: 90
+    maxuse: 80
+    exclude: []
+  aqmp:
+    enable: false
+    url: ""
+    exchange: ""
+    routingKey: ""
+    exchangeType: ""
+    deliveryMode: 0
+    mandatory: false
+    immediate: false
+    durable: false
+    internal: false
+    noWait: false
+    autoDeleted: false
+  nats:
+    enable: false
+    address: ""
+    subject: ""
+    username: ""
+    password: ""
+    token: ""
+    secure: false
+    pingInterval: 0
+    enableStreaming: false
+    clusterID: ""
+    clientID: ""
+    async: false
+    maxPubAcksInflight: 0
+  elasticsearch:
+    enable: false
+    format: "namespace"
+    url: ""
+    index: ""
+  redis:
+    enable: false
+    format: "namespace"
+    address: ""
+    password: ""
+    key: ""
+  postgresql:
+    enable: false
+    format: "namespace"
+    connectionString: ""
+    table: ""
+    host: ""
+    port: ""
+    user: ""
+    password: ""
+    database: ""
+  kafka:
+    enable: false
+    brokers: "null"
+    topic: ""
+  webhook:
+    enable: false
+    endpoint: ""
+  mysql:
+    enable: false
+    format: "namespace"
+    dsnString: ""
+    table: ""
+    host: ""
+    port: ""
+    user: ""
+    password: ""
+    database: ""
+  mqtt:
+    enable: false
+    broker: ""
+    topic: ""
+    qos: 0
+    clientId: ""
+    username: ""
+    password: ""
+    reconnectInterval: 0
+    keepAliveInterval: 0
 networkPolicy:
   enabled: false
   allowExternal: true

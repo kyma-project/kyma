@@ -14,7 +14,7 @@ type bindService struct {
 	instanceBindDataGetter instanceBindDataGetter
 }
 
-func (svc *bindService) Bind(ctx context.Context, osbCtx osbContext, req *osb.BindRequest) (*osb.BindResponse, error) {
+func (svc *bindService) Bind(ctx context.Context, osbCtx OsbContext, req *osb.BindRequest) (*osb.BindResponse, error) {
 	if len(req.Parameters) > 0 {
 		return nil, fmt.Errorf("helm-broker does not support configuration options for the service binding")
 	}
