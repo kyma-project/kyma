@@ -171,9 +171,6 @@
 /components/environments/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
 
 # Istio Extensions Component
-/components/istio-webhook/ @piotrmsc @sjanota @kubadz
-
-# Istio Extensions Component
 /components/istio-kyma-patch/ @piotrmsc @sjanota @kubadz
 
 # Remote environment controller Component

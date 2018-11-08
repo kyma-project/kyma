@@ -38,7 +38,6 @@ projects = [
     "components/binding-usage-controller",
     "components/configurations-generator",
     "components/environments",
-    "components/istio-webhook",
     "components/istio-kyma-patch",
     "components/helm-broker",
     "components/remote-environment-broker",
