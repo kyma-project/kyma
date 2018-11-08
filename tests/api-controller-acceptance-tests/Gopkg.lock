@@ -84,11 +84,11 @@
   branch = "master"
   name = "github.com/kyma-project/kyma"
   packages = [
-    "components/api-controller/pkg/apis/gateway.kyma.cx/meta/v1",
-    "components/api-controller/pkg/apis/gateway.kyma.cx/v1alpha2",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned/scheme",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned/typed/gateway.kyma.cx/v1alpha2"
+    "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
+    "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2"
   ]
   revision = "e22316a37f7ed482fedcd934ee55d6cd3131e814"
 
