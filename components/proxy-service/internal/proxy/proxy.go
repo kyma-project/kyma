@@ -152,7 +152,7 @@ func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry 
 func (p *proxy) createModifyResponseFunction(id string, r *http.Request) func(*http.Response) error {
 	// Handle the case when credentials has been changed or OAuth token has expired
 	return func(response *http.Response) error {
-		retrier := newForbiddenRequestRetrier(id, r, p.proxyTimeout, p.createCacheEntry)
+		retrier := newForbiddenResponseRetrier(id, r, p.proxyTimeout, p.createCacheEntry)
 
 		return retrier.RetryIfFailedToAuthorize(response)
 	}

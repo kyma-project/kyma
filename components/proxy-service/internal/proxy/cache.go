@@ -15,7 +15,9 @@ type CacheEntry struct {
 }
 
 type Cache interface {
+	// Get returns entry fro the cache
 	Get(id string) (*CacheEntry, bool)
+	// Put adds entry to the cache
 	Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy) *CacheEntry
 }
 
@@ -23,6 +25,7 @@ type cache struct {
 	proxyCache *gocache.Cache
 }
 
+// NewCache creates new cache with specified TTL
 func NewCache(proxyCacheTTL int) Cache {
 	return &cache{
 		proxyCache: gocache.New(time.Duration(proxyCacheTTL)*time.Second, cleanupInterval*time.Second),

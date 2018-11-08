@@ -18,7 +18,7 @@ type retrier struct {
 
 type updateCacheEntryFunction = func(string) (*CacheEntry, apperrors.AppError)
 
-func newForbiddenRequestRetrier(id string, request *http.Request, timeout int, updateCacheEntryFunc updateCacheEntryFunction) *retrier {
+func newForbiddenResponseRetrier(id string, request *http.Request, timeout int, updateCacheEntryFunc updateCacheEntryFunction) *retrier {
 	return &retrier{id: id, request: request, retried: false, timeout: timeout, updateCacheEntryFunction: updateCacheEntryFunc}
 }
 
