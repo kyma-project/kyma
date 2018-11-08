@@ -3,7 +3,7 @@ title: Examples
 type: Overview
 ---
 
-The table contains a list of examples that demonstrate Kyma functionalities. You can run all examples locally or on a cluster. Examples are organized by a feature or concept they showcase. Each of them contains ready-to-use code snippets and the instructions in `README.md` documents.
+The table contains a list of examples that demonstrate Kyma functionalities. You can run all of them locally or on a cluster. Examples are organized by a feature or concept they showcase. Each of them contains ready-to-use code snippets and the instructions in `README.md` documents.
 
 Follow the links to example code and content sources, and try them on your own.
 
