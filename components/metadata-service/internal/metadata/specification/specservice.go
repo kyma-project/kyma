@@ -88,16 +88,13 @@ func processAPISpecification(api *serviceapi.API, gatewayUrl string) ([]byte, ap
 		return nil, apperrors.Internal("Modifying API spec failed, %s", err.Error())
 	}
 
-	str := string(apiSpec)
-	fmt.Println(str)
-
 	return apiSpec, nil
 }
 
 func fetchSpec(api *serviceapi.API) ([]byte, apperrors.AppError) {
-	specUrl, err := url.ParseRequestURI(api.SpecUrl)
-	if err != nil {
-		specUrl, err = url.ParseRequestURI(fmt.Sprintf(oDataSpecFormat, api.TargetUrl))
+	specUrl, err := url.Parse(api.SpecUrl)
+	if err != nil || api.SpecUrl == "" {
+		specUrl, err = url.Parse(fmt.Sprintf(oDataSpecFormat, api.TargetUrl))
 		if err != nil {
 			return nil, apperrors.Internal("Parsing OData spec url failed, %s", err.Error())
 		}

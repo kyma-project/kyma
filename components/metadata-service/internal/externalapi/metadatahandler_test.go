@@ -14,6 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata"
 	metadataMock "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/mocks"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -53,7 +54,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &specification.Events{
+			Events: &Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: &Documentation{
@@ -82,7 +83,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &metadata.Events{
+			Events: &specification.Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: documentationRaw,
@@ -277,7 +278,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &metadata.Events{
+			Events: &specification.Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: documentationRaw,
@@ -387,7 +388,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 			Name:        "service name",
 			Provider:    "service provider",
 			Description: "service description",
-			Events: &metadata.Events{
+			Events: &specification.Events{
 				Spec: eventsRawSpec,
 			},
 		}
@@ -569,7 +570,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &specification.Events{
+			Events: &Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: &Documentation{
@@ -595,7 +596,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &metadata.Events{
+			Events: &specification.Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: documentationRaw,

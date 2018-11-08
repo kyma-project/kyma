@@ -1,16 +1,18 @@
 package specification
 
 import (
-	"testing"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification/minio/mocks"
-	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/assert"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification/minio/mocks"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 const (
-	serviceId = "abcd"
+	serviceId  = "1234"
 	gatewayUrl = "http://re-1234.io"
 )
 
@@ -19,23 +21,15 @@ var (
 	baseEventSpec = []byte("{\"event\":\"spec\"}")
 	baseDocs      = []byte("{\"baseDocs\":\"baseDocs\"}")
 
-	swaggerApiSpec   = []byte("{\"swagger\":\"2.0\"}")
+	swaggerApiSpec      = []byte("{\"swagger\":\"2.0\"}")
 	modifiedSwaggerSpec = []byte("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"re-1234.io\",\"paths\":null}")
 )
 
 func TestSpecService_SaveServiceSpecs(t *testing.T) {
 
-	events := &Events{ Spec: baseEventSpec }
-
 	t.Run("should save inline spec", func(t *testing.T) {
 		// given
-		specData := SpecData{
-			Id: serviceId,
-			API: &serviceapi.API{ Spec: baseApiSpec },
-			Events: events,
-			Docs: baseDocs,
-			GatewayUrl: gatewayUrl,
-		}
+		specData := defaultSpecDataWithAPI(&serviceapi.API{Spec: baseApiSpec})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
@@ -47,17 +41,12 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
+		minioSvc.AssertExpectations(t)
 	})
 
 	t.Run("should modify and save inline swagger spec", func(t *testing.T) {
 		// given
-		specData := SpecData{
-			Id: serviceId,
-			API: &serviceapi.API{ Spec: swaggerApiSpec },
-			Events: events,
-			Docs: baseDocs,
-			GatewayUrl: gatewayUrl,
-		}
+		specData := defaultSpecDataWithAPI(&serviceapi.API{Spec: swaggerApiSpec})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
@@ -69,6 +58,107 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
+		minioSvc.AssertExpectations(t)
+	})
+
+	t.Run("should fetch and save spec", func(t *testing.T) {
+		// given
+		specServer := newSpecServer(baseApiSpec, func(req *http.Request) {
+			assert.Equal(t, http.MethodGet, req.Method)
+		})
+
+		specData := defaultSpecDataWithAPI(&serviceapi.API{SpecUrl: specServer.URL})
+
+		minioSvc := &mocks.Service{}
+		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
+
+		specService := NewSpecService(minioSvc)
+
+		// when
+		err := specService.SaveServiceSpecs(specData)
+
+		// then
+		require.NoError(t, err)
+		minioSvc.AssertExpectations(t)
+	})
+
+	t.Run("should fetch, modify and save spec", func(t *testing.T) {
+		// given
+		specServer := newSpecServer(swaggerApiSpec, func(req *http.Request) {
+			assert.Equal(t, http.MethodGet, req.Method)
+		})
+
+		specData := defaultSpecDataWithAPI(&serviceapi.API{SpecUrl: specServer.URL})
+
+		minioSvc := &mocks.Service{}
+		minioSvc.On("Put", serviceId, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
+
+		specService := NewSpecService(minioSvc)
+
+		// when
+		err := specService.SaveServiceSpecs(specData)
+
+		// then
+		require.NoError(t, err)
+		minioSvc.AssertExpectations(t)
+	})
+
+	t.Run("should return UpstreamServerCallFailed error when failed to fetch spec", func(t *testing.T) {
+		// given
+		specServer := new404server()
+
+		specData := defaultSpecDataWithAPI(&serviceapi.API{SpecUrl: specServer.URL})
+
+		minioSvc := &mocks.Service{}
+
+		specService := NewSpecService(minioSvc)
+
+		// when
+		err := specService.SaveServiceSpecs(specData)
+
+		// then
+		require.Error(t, err)
+		assert.Equal(t, apperrors.CodeUpstreamServerCallFailed, err.Code())
+	})
+
+	t.Run("should fetch spec from /$metadata when no url provided", func(t *testing.T) {
+		// given
+		specServer := newSpecServer(baseApiSpec, func(req *http.Request) {
+			assert.Equal(t, http.MethodGet, req.Method)
+			assert.Equal(t, "/$metadata", req.URL.Path)
+		})
+
+		specData := defaultSpecDataWithAPI(&serviceapi.API{TargetUrl: specServer.URL})
+
+		minioSvc := &mocks.Service{}
+		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
+
+		specService := NewSpecService(minioSvc)
+
+		// when
+		err := specService.SaveServiceSpecs(specData)
+
+		// then
+		require.NoError(t, err)
+		minioSvc.AssertExpectations(t)
+	})
+
+	t.Run("should return error when saving to Minio failed", func(t *testing.T) {
+		// given
+		specData := defaultSpecDataWithAPI(&serviceapi.API{Spec: baseApiSpec})
+
+		minioSvc := &mocks.Service{}
+		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(apperrors.Internal("Error"))
+
+		specService := NewSpecService(minioSvc)
+
+		// when
+		err := specService.SaveServiceSpecs(specData)
+
+		// then
+		require.Error(t, err)
+		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		minioSvc.AssertExpectations(t)
 	})
 }
 
@@ -140,4 +230,29 @@ func TestSpecService_RemoveSpec(t *testing.T) {
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 	})
+}
+
+func defaultSpecDataWithAPI(api *serviceapi.API) SpecData {
+	return SpecData{
+		Id:         serviceId,
+		API:        api,
+		Events:     &Events{Spec: baseEventSpec},
+		Docs:       baseDocs,
+		GatewayUrl: gatewayUrl,
+	}
+}
+
+func newSpecServer(spec []byte, check func(req *http.Request)) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		check(r)
+		w.WriteHeader(http.StatusOK)
+		w.Write(spec)
+	}))
+}
+
+func new404server() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadGateway)
+	}))
 }
