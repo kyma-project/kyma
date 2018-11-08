@@ -32,7 +32,6 @@ func (o oauthStrategy) AddAuthorizationHeader(r *http.Request) apperrors.AppErro
 	}
 
 	r.Header.Set(httpconsts.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
-	log.Infof("OAuth token fetched. Adding Authorization header: %s", r.Header.Get(httpconsts.HeaderAuthorization))
 
 	return nil
 }
