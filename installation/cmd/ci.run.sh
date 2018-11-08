@@ -32,7 +32,9 @@ do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-x="${docker version}"
+DOCKER_VERSION="docker version"
+
+x=${DOCKER_VERSION}
 echo $x
 
 DOCKER_RUN_COMMAND="docker run --rm -v /var/lib/docker \
