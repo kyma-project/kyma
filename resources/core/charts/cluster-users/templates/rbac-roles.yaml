@@ -104,6 +104,7 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 - kind: ServiceAccount
   name: kube-rbac-proxy
+  namespace: {{ .Release.Namespace }}
 {{ if .Values.users.adminGroup }}
 - kind: Group
   name: {{ .Values.users.adminGroup }}
