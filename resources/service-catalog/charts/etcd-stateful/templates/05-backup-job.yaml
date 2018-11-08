@@ -42,11 +42,11 @@ spec:
             - name: APP_BACKUP_ETCD_ENDPOINTS
             # After helm v2.9 we can replace it with sprig ternary function:
             # http://masterminds.github.io/sprig/defaults.html#ternary
-            # value: \{\{ ternary "https" "http" .Values.cluster.TLS.enabled }}://core-service-catalog-etcd-client.kyma-system.svc.cluster.local:2379
+            # value: \{\{ ternary "https" "http" .Values.cluster.TLS.enabled }}://service-catalog-etcd-client.kyma-system.svc.cluster.local:2379
             {{- if .Values.etcd.secure }}
-              value: https://core-catalog-etcd-stateful-client.kyma-system.svc.cluster.local:2379
+              value: https://service-catalog-etcd-stateful-client.kyma-system.svc.cluster.local:2379
             {{ else }}
-              value: http://core-catalog-etcd-stateful-client.kyma-system.svc.cluster.local:2379
+              value: http://service-catalog-etcd-stateful-client.kyma-system.svc.cluster.local:2379
             {{ end }}
             - name: APP_CLEANER_LEAVE_MIN_NEWEST_BACKUP_BLOBS
               value: "{{ .Values.backupApp.cleaner.leaveMinNewestBackupBlobs }}"
