@@ -67,9 +67,12 @@ DOCKER_RUN_COMMAND="docker run --rm -v /var/lib/docker \
         -e IGNORE_TEST_FAIL=${IGNORE_TEST_FAIL} \
         -e RUN_TESTS=${RUN_TESTS} \
         --privileged -it ${FINAL_IMAGE}"
+echo $DOCKER_RUN_COMMAND
 
 if type sudo 1> /dev/null 2> /dev/null;  then
+  echo "here"
   sudo ${DOCKER_RUN_COMMAND}
 else
+  echo "there"
   ${DOCKER_RUN_COMMAND}
 fi
