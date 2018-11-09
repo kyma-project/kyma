@@ -62,7 +62,7 @@ Replace values in curly braces with proper details, where:
 - `{absolutePathToRepository}` is the absolute path to the repository.
 - `{previousTag}` optionally, one tag before last. If provided changelog will be generated from `{previousTag}` to `{latestTag}`. If not provided changelog will be generated from the one tag before latest used tag.
 - `{latestTag}` optionally, is tag to which changelog is created. If provided changelog will be generated to `{latestTag}`. If not provided changelog will be generated to latest used tag.
-- `{releaseTitle}` is the currently released application title uses as title in file or in commit message.
+- `{releaseTitle}` is the currently released application title which specifies the release version.
 - `{githubToken}` is the GitHub API token with the read-only access to the repository.
 - `{sshFilePath}` is the path to the SSH file used for Git to authenticate with the repository.
 - `{configFilePath}` is the path to file used by `lerna-changelog` to repository configuration
