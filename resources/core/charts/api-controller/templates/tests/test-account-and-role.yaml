@@ -16,7 +16,7 @@ metadata:
   labels:
     helm-chart-test: "true"
 rules:
-  - apiGroups: [ "", "apps", "gateway.kyma.cx", "networking.istio.io", "rbac.istio.io"]
+  - apiGroups: [ "", "apps", "gateway.kyma.cx", "networking.istio.io", "authentication.istio.io"]
     resources: ["deployments", "services", "apis", "virtualservices", "policies"]
     verbs: ["*"]
 ---
