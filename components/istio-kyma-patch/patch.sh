@@ -28,11 +28,8 @@ function require_istio_system() {
 
 function require_mtls_disabled() {
     let result
-    set +e
-    kubectl get meshpolicy default
-    result=$?
-    set -e
-    if [[ ${result} -eq 0 ]]; then
+    let mtls=$(kubectl get meshpolicy default -o jsonpathj='{.spec.peers}' --ignore-not-found=true | grep "mtls")
+    if [[ ${mtls} != "" ]]; then
         echo "mTLS must be disabled"
         exit 1
     fi
