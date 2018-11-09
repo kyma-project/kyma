@@ -63,3 +63,9 @@ Section **authenticationStatus** is optional and will not be created if authenti
 
 ### Status code
 
+Following status codes are possible:
+
+ 0 - resource is not created
+ 1 - resource creation is in progress
+ 2 - resource is created
+ 3 - there was an error during resource creation
