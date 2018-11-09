@@ -71,3 +71,4 @@ Following status codes are possible:
  1 - resource creation is in progress
  2 - resource is created
  3 - there was an error during resource creation
+ 4 - hostname is already in use by different VirtualService
