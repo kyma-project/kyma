@@ -6,4 +6,4 @@ global:
     version: 84219cbc
   istio_kyma_patch:
     dir: pr/
-    version: PR-1612
+    version: PR-1615
