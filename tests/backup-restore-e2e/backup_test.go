@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
@@ -13,6 +14,18 @@ import (
 	"github.com/kyma-project/kyma/tests/backup-restore-e2e/framework"
 	"github.com/kyma-project/kyma/tests/backup-restore-e2e/utils"
 )
+
+type brokerTestParams struct {
+	isClusterScoped   bool
+	instanceName      string
+	className         string
+	planName          string
+	bindingUsedByType string
+	bindingUsedByName string
+	brokerType        string
+	instanceParams    *runtime.RawExtension
+	bindingsParams    *runtime.RawExtension
+}
 
 // TestBackupCreate is the main test for backup phase
 func TestBackupCreate(t *testing.T) {
@@ -35,7 +48,7 @@ func TestBackupCreate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	logrus.Infof("Tests will be run for those brokers: %s", strings.Join(f.Brokers, ","))
+	logrus.Infof("Tests will be run for brokers: %s", strings.Join(f.Brokers, ","))
 
 	// REMOTE ENVIRONMENT BROKER
 	if framework.IsBrokerSelected(consts.BrokerReb) {
@@ -59,30 +72,73 @@ func TestBackupCreate(t *testing.T) {
 			t.Fatalf("failed to wait for service broker %s: %v", consts.RemoteEnvBrokerName, err)
 		}
 
-		instanceName := fmt.Sprintf("promotions-%s", uuid.NewV4().String()[0:7])
-		className := envServiceName
-		planName := "default"
+		rebBroker := brokerTestParams{
+			isClusterScoped:   false,
+			instanceName:      fmt.Sprintf("promotions-%s", uuid.NewV4().String()[0:7]),
+			className:         envServiceName,
+			planName:          "default",
+			bindingUsedByType: "function",
+			bindingUsedByName: fname,
+			brokerType:        "reb",
+		}
 
-		createServiceInstanceAndBinding(t, f, false, nil, className, planName, instanceName, fname, "reb")
+		rebBroker.createServiceInstanceAndBinding(t, f)
 	}
 
 	// HELM BROKER
 	if framework.IsBrokerSelected(consts.BrokerHelm) {
-		createServiceInstanceAndBinding(t, f, true, nil, "redis", "micro", "redis-helm", fname, "helmbroker")
+		helmBroker := brokerTestParams{
+			isClusterScoped:   true,
+			instanceName:      "redis-helm",
+			className:         "redis",
+			planName:          "micro",
+			bindingUsedByType: "function",
+			bindingUsedByName: fname,
+			brokerType:        "helmbroker",
+		}
+		helmBroker.createServiceInstanceAndBinding(t, f)
 	}
 
 	// GCP BROKER
 	if framework.IsBrokerSelected(consts.BrokerGcp) {
-		createServiceInstanceAndBinding(t, f, true, nil, "gcp-example", "gcp-example", "gcp-example", fname, "gcpbroker")
+		bucketName := fmt.Sprintf("ark-e2e-tests-%d", time.Now().Unix())
 
+		gcpBroker := brokerTestParams{
+			isClusterScoped:   true,
+			instanceName:      "gcp-bucket",
+			className:         "cloud-storage",
+			planName:          "beta",
+			bindingUsedByType: "function",
+			bindingUsedByName: fname,
+			brokerType:        "gcpbroker",
+			instanceParams: &runtime.RawExtension{
+				Raw: []byte(fmt.Sprintf(`{ "bucketId": "%s", "location":"EU" }`, bucketName)),
+			},
+			bindingsParams: &runtime.RawExtension{
+				Raw: []byte(fmt.Sprintf(`{ "createServiceAccount": true, "roles":["roles/storage.objectAdmin"], "serviceAccount": "%s" }`, bucketName)),
+			},
+		}
+
+		gcpBroker.createServiceInstanceAndBinding(t, f)
 	}
 
 	// AZURE BROKER
 	if framework.IsBrokerSelected(consts.BrokerAzure) {
-		instanceParams := &runtime.RawExtension{
-			Raw: []byte(`{ "location": "westeurope", "resourceGroup":"ark-test" }`),
+
+		azureBroker := brokerTestParams{
+			isClusterScoped:   true,
+			instanceName:      "ark-test-azure-sa",
+			className:         "azure-storage",
+			planName:          "blob-storage-account",
+			bindingUsedByType: "function",
+			bindingUsedByName: fname,
+			brokerType:        "azurebroker",
+			instanceParams: &runtime.RawExtension{
+				Raw: []byte(`{ "location": "westeurope", "resourceGroup":"ark-test" }`),
+			},
 		}
-		createServiceInstanceAndBinding(t, f, true, instanceParams, "azure-storage", "blob-storage-account", "ark-test-azure-sa", fname, "azurebroker")
+
+		azureBroker.createServiceInstanceAndBinding(t, f)
 	}
 
 	// BACKUP
@@ -113,30 +169,30 @@ func TestBackupCreate(t *testing.T) {
 	}
 }
 
-func createServiceInstanceAndBinding(t *testing.T, f *framework.Framework, isClusterScoped bool, params *runtime.RawExtension, className string, planName string, instanceName string, fname string, brokerName string) error {
-	logrus.Infof("Creating service instance for %s", brokerName)
-	hbsi := utils.NewServiceInstance(isClusterScoped, params, f.Namespace, className, planName, instanceName)
+func (b *brokerTestParams) createServiceInstanceAndBinding(t *testing.T, f *framework.Framework) error {
+	logrus.Infof("Creating service instance for %s", b.brokerType)
+	hbsi := utils.NewServiceInstance(b.isClusterScoped, b.instanceParams, f.Namespace, b.className, b.planName, b.instanceName)
 	_, err := utils.CreateServiceInstance(t, hbsi, f.SBClient)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	logrus.Info("Waiting for service instance to be ready")
-	if err := utils.WaitForServiceInstanceReady(f.SBClient, f.Namespace, instanceName); err != nil {
+	if err := utils.WaitForServiceInstanceReady(f.SBClient, f.Namespace, b.instanceName); err != nil {
 		t.Fatalf("failed to wait for service instance: %v", err)
 	}
 
 	logrus.Info("Creating service binding")
-	sbName := fmt.Sprintf("%s-%s", brokerName, uuid.NewV4().String()[0:7])
-	sb := utils.NewServiceBinding(sbName, f.Namespace, instanceName)
+	sbName := fmt.Sprintf("%s-%s", b.brokerType, uuid.NewV4().String()[0:7])
+	sb := utils.NewServiceBinding(sbName, f.Namespace, b.instanceName, b.bindingsParams)
 	_, err = utils.CreateServiceBinding(t, sb, f.SBClient)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	logrus.Info("Creating service binding usage")
-	sbuName := fmt.Sprintf("%s-%s", brokerName, uuid.NewV4().String()[0:7])
-	sbu := utils.NewServiceBindingUsage(sbuName, f.Namespace, sbName, "function", fname)
+	sbuName := fmt.Sprintf("%s-%s", b.brokerType, uuid.NewV4().String()[0:7])
+	sbu := utils.NewServiceBindingUsage(sbuName, f.Namespace, sbName, b.bindingUsedByType, b.bindingUsedByName)
 	_, err = utils.CreateServiceBindingUsage(t, sbu, f.SbuClient)
 	if err != nil {
 		t.Fatal(err)

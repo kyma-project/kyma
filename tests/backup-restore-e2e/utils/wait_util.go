@@ -168,7 +168,7 @@ func WaitForRestoreCompleted(arkCli arkclient.Interface, namespace string, name 
 			}
 			return true, nil
 		} else if b.Status.Phase == arkv1.RestorePhaseFailedValidation {
-			return false, fmt.Errorf("Restore has failed with status: %s", b.Status.Phase)
+			return false, fmt.Errorf("Restore has failed validation with errors: %s. ", b.Status.ValidationErrors)
 		}
 
 		return false, nil

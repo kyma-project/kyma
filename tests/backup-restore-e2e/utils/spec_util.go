@@ -3,11 +3,12 @@ package utils
 import (
 	"fmt"
 
-	arkv1 "github.com/heptio/ark/pkg/apis/ark/v1"
+	arkapi "github.com/heptio/ark/pkg/apis/ark/v1"
 	kubelessapi "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
-	scv1beta1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	scapi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	sbuapi "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	acv1 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	acapi "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+
 	uuid "github.com/satori/go.uuid"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,9 +29,9 @@ func NewEnvironmentNamespace(name string) *v1.Namespace {
 	}
 }
 
-// NewRemoteEnvironment returns a REmoteEnvironment with one service class containing both service and events
-func NewRemoteEnvironment(namespace string, envServiceName string) *acv1.RemoteEnvironment {
-	return &acv1.RemoteEnvironment{
+// NewRemoteEnvironment returns a RemoteEnvironment with one service class containing both service and events
+func NewRemoteEnvironment(namespace string, envServiceName string) *acapi.RemoteEnvironment {
+	return &acapi.RemoteEnvironment{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "RemoteEnvironment",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
@@ -38,10 +39,10 @@ func NewRemoteEnvironment(namespace string, envServiceName string) *acv1.RemoteE
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fmt.Sprintf("re-%s", namespace),
 		},
-		Spec: acv1.RemoteEnvironmentSpec{
+		Spec: acapi.RemoteEnvironmentSpec{
 			AccessLabel: "access-label-1",
 			Description: "Remote Environment",
-			Services: []acv1.Service{
+			Services: []acapi.Service{
 				{
 					ID:   uuid.NewV4().String(),
 					Name: envServiceName,
@@ -52,7 +53,7 @@ func NewRemoteEnvironment(namespace string, envServiceName string) *acv1.RemoteE
 					DisplayName:         "Promotions",
 					Description:         "Remote Environment Service Class",
 					Tags:                []string{"occ", "promotions"},
-					Entries: []acv1.Entry{
+					Entries: []acapi.Entry{
 						{
 							Type:        "API",
 							AccessLabel: "access-label-1",
@@ -69,8 +70,8 @@ func NewRemoteEnvironment(namespace string, envServiceName string) *acv1.RemoteE
 }
 
 // NewEnvironmentMapping returns EnvironmentMapping for provided namespace
-func NewEnvironmentMapping(namespace string) *acv1.EnvironmentMapping {
-	return &acv1.EnvironmentMapping{
+func NewEnvironmentMapping(namespace string) *acapi.EnvironmentMapping {
+	return &acapi.EnvironmentMapping{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "EnvironmentMapping",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
@@ -119,8 +120,8 @@ func NewFunction(name string, namespace string) *kubelessapi.Function {
 // NewServiceInstance returns ServiceInstance
 // use flag isClusterScoped to control whether serviceClass/servicePlan should be set as cluster or non-cluster
 // use params to provide additional parameters for the instance
-func NewServiceInstance(isClusterScoped bool, params *runtime.RawExtension, namespace, serviceClass, servicePlan, instanceName string) *scv1beta1.ServiceInstance {
-	si := scv1beta1.ServiceInstance{
+func NewServiceInstance(isClusterScoped bool, params *runtime.RawExtension, namespace, serviceClass, servicePlan, instanceName string) *scapi.ServiceInstance {
+	si := scapi.ServiceInstance{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceInstance",
 			APIVersion: "servicecatalog.k8s.io/v1beta1",
@@ -128,6 +129,9 @@ func NewServiceInstance(isClusterScoped bool, params *runtime.RawExtension, name
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instanceName,
 			Namespace: namespace,
+		},
+		Spec: scapi.ServiceInstanceSpec{
+			Parameters: params,
 		},
 	}
 
@@ -138,14 +142,13 @@ func NewServiceInstance(isClusterScoped bool, params *runtime.RawExtension, name
 		si.Spec.PlanReference.ServiceClassExternalName = serviceClass
 		si.Spec.PlanReference.ServicePlanExternalName = servicePlan
 	}
-	si.Spec.Parameters = params
 
 	return &si
 }
 
 // NewServiceBinding returns a ServiceBindings for provided service instance instanceName
-func NewServiceBinding(name string, namespace string, instanceName string) *scv1beta1.ServiceBinding {
-	return &scv1beta1.ServiceBinding{
+func NewServiceBinding(name string, namespace string, instanceName string, params *runtime.RawExtension) *scapi.ServiceBinding {
+	return &scapi.ServiceBinding{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceBinding",
 			APIVersion: "servicecatalog.k8s.io/v1beta1",
@@ -154,10 +157,11 @@ func NewServiceBinding(name string, namespace string, instanceName string) *scv1
 			Name:      name,
 			Namespace: namespace,
 		},
-		Spec: scv1beta1.ServiceBindingSpec{
-			ServiceInstanceRef: scv1beta1.LocalObjectReference{
+		Spec: scapi.ServiceBindingSpec{
+			ServiceInstanceRef: scapi.LocalObjectReference{
 				Name: instanceName,
 			},
+			Parameters: params,
 		},
 	}
 }
@@ -186,8 +190,8 @@ func NewServiceBindingUsage(name, namespace, sbName, usageKind, usageName string
 }
 
 // NewBackup returns a heptio ark's Backup with includedNamespaces and includedResources
-func NewBackup(name string, includedNamespaces []string, includedResources []string) *arkv1.Backup {
-	return &arkv1.Backup{
+func NewBackup(name string, includedNamespaces []string, includedResources []string) *arkapi.Backup {
+	return &arkapi.Backup{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Backup",
 			APIVersion: "ark.heptio.com/v1",
@@ -196,7 +200,7 @@ func NewBackup(name string, includedNamespaces []string, includedResources []str
 			Name:      name,
 			Namespace: "heptio-ark",
 		},
-		Spec: arkv1.BackupSpec{
+		Spec: arkapi.BackupSpec{
 			IncludedNamespaces: includedNamespaces,
 			IncludedResources:  includedResources,
 		},
@@ -204,8 +208,8 @@ func NewBackup(name string, includedNamespaces []string, includedResources []str
 }
 
 // NewRestore returns a heptio ark's Restore for provided backupName
-func NewRestore(name string, backupName string) *arkv1.Restore {
-	return &arkv1.Restore{
+func NewRestore(name string, backupName string) *arkapi.Restore {
+	return &arkapi.Restore{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Restore",
 			APIVersion: "ark.heptio.com/v1",
@@ -214,7 +218,7 @@ func NewRestore(name string, backupName string) *arkv1.Restore {
 			Name:      name,
 			Namespace: "heptio-ark",
 		},
-		Spec: arkv1.RestoreSpec{
+		Spec: arkapi.RestoreSpec{
 			BackupName: backupName,
 		},
 	}

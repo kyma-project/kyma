@@ -5,6 +5,7 @@ import (
 	"sync"
 	"testing"
 
+	arkclient "github.com/heptio/ark/pkg/generated/clientset/versioned"
 	scClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kyma-project/kyma/tests/backup-restore-e2e/consts"
 	"github.com/kyma-project/kyma/tests/backup-restore-e2e/utils"
@@ -19,31 +20,8 @@ func TestRestoreCreate(t *testing.T) {
 	logrus.Info("Starting restore test")
 	f := framework.Global
 
-	restoreName := fmt.Sprintf("%s-re", f.Namespace)
-	logrus.Infof("Creating restore %s for remote environments", restoreName)
-	r := utils.NewRestore(restoreName, restoreName)
-	_, err := utils.CreateRestore(t, r, f.ArkClient)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	logrus.Info("Waiting for restore to complete")
-	if err := utils.WaitForRestoreCompleted(f.ArkClient, consts.HeptioArkNamespace, restoreName); err != nil {
-		t.Fatalf("Failed to wait for restore to complete: %v", err)
-	}
-
-	logrus.Info("Creating restore for namespace")
-	restoreName = fmt.Sprintf("%s-ns", f.Namespace)
-	r = utils.NewRestore(restoreName, restoreName)
-	_, err = utils.CreateRestore(t, r, f.ArkClient)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	logrus.Info("Waiting for restore to complete")
-	if err := utils.WaitForRestoreCompleted(f.ArkClient, consts.HeptioArkNamespace, restoreName); err != nil {
-		t.Fatalf("Failed to wait for restore to complete: %v", err)
-	}
+	createAndWaitForRestore(t, f.ArkClient, fmt.Sprintf("%s-re", f.Namespace))
+	createAndWaitForRestore(t, f.ArkClient, fmt.Sprintf("%s-ns", f.Namespace))
 
 	// Let's check everything...
 	var siWg sync.WaitGroup
@@ -75,4 +53,20 @@ func TestRestoreCreate(t *testing.T) {
 	logrus.Info("Waiting for service instances and bindings to become ready...")
 	siWg.Wait()
 	sbWg.Wait()
+
+}
+
+func createAndWaitForRestore(t *testing.T, arkCli arkclient.Interface, restoreName string) {
+	logrus.Infof("Creating restore %s", restoreName)
+	r := utils.NewRestore(restoreName, restoreName)
+	_, err := utils.CreateRestore(t, r, arkCli)
+	if err != nil {
+		t.Fatal(err)
+		t.FailNow()
+	}
+
+	logrus.Info("Waiting for restore to complete")
+	if err := utils.WaitForRestoreCompleted(arkCli, consts.HeptioArkNamespace, restoreName); err != nil {
+		t.Fatalf("Failed to wait for restore to complete: %v", err)
+	}
 }

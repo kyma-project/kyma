@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+	"io/ioutil"
 	"testing"
 
 	arkv1 "github.com/heptio/ark/pkg/apis/ark/v1"
@@ -144,4 +146,26 @@ func DeleteAllServiceInstances(namespace string, cli scClient.Interface) error {
 	}
 
 	return nil
+}
+
+func PodLogs(t *testing.T, cli kubernetes.Interface, podName string, podNamespace string, containerName string) string {
+	plo := &v1.PodLogOptions{}
+	if containerName != "" {
+		plo.Container = containerName
+	}
+	req := cli.CoreV1().Pods(podNamespace).GetLogs(podName, plo)
+
+	readCloser, err := req.Stream()
+	if err != nil {
+		t.Logf("error while getting log stream: %s", err.Error())
+		return ""
+	}
+	defer readCloser.Close()
+
+	logs, err := ioutil.ReadAll(readCloser)
+	if err != nil {
+		t.Logf("error while reading logs from pod %s, error: %s", podName, err.Error())
+		return ""
+	}
+	return fmt.Sprintf("Logs from pod %s:\n%s", podName, string(logs))
 }
