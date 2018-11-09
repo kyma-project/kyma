@@ -6,15 +6,14 @@ type: UI Contracts
 UI Contracts are contracts between the Service Catalog views in the Kyma Console UI and the [Open Service Broker API](https://www.openservicebrokerapi.org/) (OSBA) specification.
 
 There are three types of OSBA fields:
-* mandatory fields, which are crucial to display the page content properly
+* mandatory fields, which are crucial to define
 * optional fields, which you can but do not have to define
 * conventions, which are proposed fields that can be changed with your own fallbacks
 
-The Service Catalog in Kyma is OSBA-compliant, which means that you can register a Service Class that has only the mandatory fields defined. Such Service Class displays in the Catalog view, however, it does not display in a pleasant and satisfactory way. Follow the UI Contracts and write your definitions in the recommended way to provide the best user experience.
+The Service Catalog is OSBA-compliant, which means that you can register a Service Class that has only the mandatory fields.
 
-The are three views in the Kyma Console UI:
+In the Kyma Console UI, there are two types of views:
 - Catalog view
 - Instances view
-- Brokers view
 
-Read the **Catalog view**, **Instances view**, and **Brokers view** documents to learn more about the OSBA fields used in those particular Kyma Console UI views.
+Read the **Catalog view** and **Instances view** documents to understand the contract mapping between the Kyma Console UI and the OSBA, to learn which fields are primary to define to provide the best user experience, and to see which fields are used as fallbacks if you do not provide the primary ones.
