@@ -3,6 +3,7 @@ package externalapi
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -11,9 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/httperrors"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata"
 	metadataMock "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/mocks"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -63,17 +62,17 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			},
 		}
 
-		serviceDefinition := &metadata.ServiceDefinition{
+		serviceDefinition := &model.ServiceDefinition{
 			Name:             "service name",
 			Provider:         "service provider",
 			Description:      "service description",
 			ShortDescription: "service short description",
 			Identifier:       "service identifier",
 			Labels:           &map[string]string{"showcase": "true"},
-			Api: &serviceapi.API{
+			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &serviceapi.Credentials{
-					Oauth: &serviceapi.Oauth{
+				Credentials: &model.Credentials{
+					Oauth: &model.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -81,7 +80,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &metadata.Events{
+			Events: &model.Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: documentationRaw,
@@ -149,24 +148,24 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			},
 		}
 
-		serviceDefinition := &metadata.ServiceDefinition{
+		serviceDefinition := &model.ServiceDefinition{
 			Name:             "service name",
 			Provider:         "service provider",
 			Description:      "service description",
 			ShortDescription: "service short description",
 			Identifier:       "service identifier",
 			Labels:           &map[string]string{"showcase": "true"},
-			Api: &serviceapi.API{
+			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &serviceapi.Credentials{
-					Basic: &serviceapi.Basic{
+				Credentials: &model.Credentials{
+					Basic: &model.Basic{
 						Username: "username",
 						Password: "password",
 					},
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &metadata.Events{
+			Events: &model.Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: documentationRaw,
@@ -216,11 +215,11 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			},
 		}
 
-		serviceDefinition := &metadata.ServiceDefinition{
+		serviceDefinition := &model.ServiceDefinition{
 			Name:        "service name",
 			Provider:    "service provider",
 			Description: "service description",
-			Api: &serviceapi.API{
+			Api: &model.API{
 				TargetUrl: "http://service.com",
 			},
 		}
@@ -293,7 +292,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, errorResponse.Code)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		serviceDefinitionService.AssertNotCalled(t, "Create", "re", mock.AnythingOfType("*metadata.ServiceDefinition"))
+		serviceDefinitionService.AssertNotCalled(t, "Create", "re", mock.AnythingOfType("*model.ServiceDefinition"))
 	})
 
 	t.Run("should handle internal errors", func(t *testing.T) {
@@ -312,7 +311,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Create", "re", mock.AnythingOfType("*metadata.ServiceDefinition")).Return(
+		serviceDefinitionService.On("Create", "re", mock.AnythingOfType("*model.ServiceDefinition")).Return(
 			"", apperrors.Internal(""))
 		detailedErrorResponse := false
 
@@ -346,14 +345,14 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 func TestMetadataHandler_GetService(t *testing.T) {
 	t.Run("should return requested service with OAuth credentials", func(t *testing.T) {
 		// given
-		serviceDefinition := metadata.ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "service name",
 			Provider:    "service provider",
 			Description: "service description",
-			Api: &serviceapi.API{
+			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &serviceapi.Credentials{
-					Oauth: &serviceapi.Oauth{
+				Credentials: &model.Credentials{
+					Oauth: &model.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -361,7 +360,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &metadata.Events{
+			Events: &model.Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: documentationRaw,
@@ -411,21 +410,21 @@ func TestMetadataHandler_GetService(t *testing.T) {
 
 	t.Run("should return requested service with Basic Auth credentials", func(t *testing.T) {
 		// given
-		serviceDefinition := metadata.ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "service name",
 			Provider:    "service provider",
 			Description: "service description",
-			Api: &serviceapi.API{
+			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &serviceapi.Credentials{
-					Basic: &serviceapi.Basic{
+				Credentials: &model.Credentials{
+					Basic: &model.Basic{
 						Username: "username",
 						Password: "password",
 					},
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &metadata.Events{
+			Events: &model.Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: documentationRaw,
@@ -474,14 +473,14 @@ func TestMetadataHandler_GetService(t *testing.T) {
 
 	t.Run("should return requested service only with API", func(t *testing.T) {
 		// given
-		serviceDefinition := metadata.ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "service name",
 			Provider:    "service provider",
 			Description: "service description",
-			Api: &serviceapi.API{
+			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &serviceapi.Credentials{
-					Oauth: &serviceapi.Oauth{
+				Credentials: &model.Credentials{
+					Oauth: &model.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -530,11 +529,11 @@ func TestMetadataHandler_GetService(t *testing.T) {
 
 	t.Run("should return requested service only with Events", func(t *testing.T) {
 		// given
-		serviceDefinition := metadata.ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "service name",
 			Provider:    "service provider",
 			Description: "service description",
-			Events: &metadata.Events{
+			Events: &model.Events{
 				Spec: eventsRawSpec,
 			},
 		}
@@ -577,7 +576,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		// given
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("GetByID", "re", "654321").Return(
-			metadata.ServiceDefinition{},
+			model.ServiceDefinition{},
 			apperrors.NotFound("Service with ID %d not found", 654321),
 		)
 		detailedErrorResponse := false
@@ -603,7 +602,7 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 	t.Run("should return list of available services", func(t *testing.T) {
 		// given
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("GetAll", "re").Return([]metadata.ServiceDefinition{{
+		serviceDefinitionService.On("GetAll", "re").Return([]model.ServiceDefinition{{
 			Name:        "service name",
 			Provider:    "service provider",
 			Description: "service description",
@@ -638,7 +637,7 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 
 	t.Run("should empty list when no services found", func(t *testing.T) {
 		// given
-		var empty []metadata.ServiceDefinition
+		var empty []model.ServiceDefinition
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
 		serviceDefinitionService.On("GetAll", "re").Return(empty, nil)
 		detailedErrorResponse := false
@@ -727,14 +726,14 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			},
 		}
 
-		serviceDefinition := &metadata.ServiceDefinition{
+		serviceDefinition := &model.ServiceDefinition{
 			Name:        "service name",
 			Provider:    "service provider",
 			Description: "service description",
-			Api: &serviceapi.API{
+			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &serviceapi.Credentials{
-					Oauth: &serviceapi.Oauth{
+				Credentials: &model.Credentials{
+					Oauth: &model.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
@@ -742,7 +741,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &metadata.Events{
+			Events: &model.Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: documentationRaw,
@@ -822,21 +821,21 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			},
 		}
 
-		serviceDefinition := &metadata.ServiceDefinition{
+		serviceDefinition := &model.ServiceDefinition{
 			Name:        "service name",
 			Provider:    "service provider",
 			Description: "service description",
-			Api: &serviceapi.API{
+			Api: &model.API{
 				TargetUrl: "http://service.com",
-				Credentials: &serviceapi.Credentials{
-					Basic: &serviceapi.Basic{
+				Credentials: &model.Credentials{
+					Basic: &model.Basic{
 						Username: "username",
 						Password: "password",
 					},
 				},
 				Spec: apiRawSpec,
 			},
-			Events: &metadata.Events{
+			Events: &model.Events{
 				Spec: eventsRawSpec,
 			},
 			Documentation: documentationRaw,
@@ -937,7 +936,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", mock.Anything).Return(metadata.ServiceDefinition{}, apperrors.Internal(""))
+		serviceDefinitionService.On("Update", "re", "1234", mock.Anything).Return(model.ServiceDefinition{}, apperrors.Internal(""))
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -974,7 +973,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			Description: "service description",
 		}
 
-		serviceDefinition := &metadata.ServiceDefinition{
+		serviceDefinition := &model.ServiceDefinition{
 			Name:        "service name",
 			Provider:    "service provider",
 			Description: "service description",
@@ -985,7 +984,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		})
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "654321", serviceDefinition).Return(metadata.ServiceDefinition{}, apperrors.NotFound(""))
+		serviceDefinitionService.On("Update", "re", "654321", serviceDefinition).Return(model.ServiceDefinition{}, apperrors.NotFound(""))
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)

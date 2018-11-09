@@ -1,6 +1,7 @@
 package metadata
 
 import (
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 	"testing"
 
 	"bytes"
@@ -10,7 +11,6 @@ import (
 	miniomocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/minio/mocks"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	remoteenvmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv/mocks"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
 	serviceapimocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi/mocks"
 	uuidmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid/mocks"
 	"github.com/stretchr/testify/assert"
@@ -26,10 +26,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 	t.Run("should create service with API, events and documentation", func(t *testing.T) {
 		// given
-		serviceAPI := &serviceapi.API{
+		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &serviceapi.Credentials{
-				Oauth: &serviceapi.Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -37,14 +37,14 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			},
 			Spec: []byte("{\"api\":\"spec\"}"),
 		}
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         serviceAPI,
 			Labels:      &map[string]string{"connected-app": "re"},
 			Identifier:  "Some cool external identifier",
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -97,12 +97,12 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 	t.Run("should create service without API", func(t *testing.T) {
 		// given
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         nil,
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("test"),
 			},
 			Documentation: []byte("documentation"),
@@ -142,7 +142,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 	t.Run("should create service with documentation only", func(t *testing.T) {
 		// given
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:          "Some service",
 			Description:   "Some cool service",
 			Provider:      "Service Provider",
@@ -185,7 +185,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 	t.Run("should create service without specs", func(t *testing.T) {
 		// given
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:          "Some service",
 			Description:   "Some cool service",
 			Provider:      "Service Provider",
@@ -231,10 +231,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		initialAPISpec := []byte("{\"swagger\":\"2.0\"}")
 		expectedAPISpec := compact([]byte(`{"schemes":["http"],"swagger":"2.0","host":"gateway-url.kyma.local","paths":null}`))
 
-		serviceAPI := &serviceapi.API{
+		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &serviceapi.Credentials{
-				Oauth: &serviceapi.Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -242,12 +242,12 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			},
 			Spec: initialAPISpec,
 		}
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -298,7 +298,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 	t.Run("should override connected-app label", func(t *testing.T) {
 		// given
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:          "Some service",
 			Description:   "Some cool service",
 			Provider:      "Service Provider",
@@ -342,7 +342,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 	t.Run("should create connected-app label if not provided", func(t *testing.T) {
 		// given
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:          "Some service",
 			Description:   "Some cool service",
 			Provider:      "Service Provider",
@@ -385,10 +385,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 	t.Run("should return error when adding API fails", func(t *testing.T) {
 		// given
-		serviceAPI := &serviceapi.API{
+		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
 		}
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
@@ -415,10 +415,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 	t.Run("should return error when failed to unmarshal api spec", func(t *testing.T) {
 		// given
-		serviceAPI := &serviceapi.API{
+		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &serviceapi.Credentials{
-				Oauth: &serviceapi.Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -426,12 +426,12 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			},
 			Spec: []byte("invalid spec"),
 		}
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -469,12 +469,12 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 	t.Run("should return error when adding spec to Minio fails", func(t *testing.T) {
 		// given
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         nil,
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: nil,
@@ -499,10 +499,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 	t.Run("should return error when creating service in remote environment fails", func(t *testing.T) {
 		// given
-		serviceAPI := &serviceapi.API{
+		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
 		}
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
@@ -555,7 +555,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 	t.Run("should return an error when identifier conflict occurs", func(t *testing.T) {
 		// given
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:          "Some service",
 			Description:   "Some cool service",
 			Provider:      "Service Provider",
@@ -635,14 +635,14 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 
 		// then
 		assert.Len(t, result, 2)
-		assert.Contains(t, result, ServiceDefinition{
+		assert.Contains(t, result, model.ServiceDefinition{
 			ID:          "uuid-1",
 			Name:        "Service1",
 			Labels:      &map[string]string{"connected-app": "re"},
 			Description: "Service1 description",
 			Provider:    "Service1 Provider",
 		})
-		assert.Contains(t, result, ServiceDefinition{
+		assert.Contains(t, result, model.ServiceDefinition{
 			ID:          "uuid-2",
 			Name:        "Service2",
 			Labels:      &map[string]string{"connected-app": "re"},
@@ -671,10 +671,10 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 
 	t.Run("should get service by ID", func(t *testing.T) {
 		// given
-		serviceAPI := &serviceapi.API{
+		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &serviceapi.Credentials{
-				Oauth: &serviceapi.Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -820,10 +820,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 	t.Run("should update a service", func(t *testing.T) {
 		// given
-		serviceAPI := &serviceapi.API{
+		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &serviceapi.Credentials{
-				Oauth: &serviceapi.Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -832,13 +832,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Spec: []byte("{\"api\":\"spec\"}"),
 		}
 
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Identifier:  "Identifier",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -897,10 +897,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 	t.Run("should return not found when update a not existing service", func(t *testing.T) {
 		// given
-		serviceAPI := &serviceapi.API{
+		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &serviceapi.Credentials{
-				Oauth: &serviceapi.Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -909,12 +909,12 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Spec: []byte("{\"api\":\"spec\"}"),
 		}
 
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -956,13 +956,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 	t.Run("should update a service when no API was given", func(t *testing.T) {
 		// given
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Identifier:  "Identifier",
 			Api:         nil,
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -1010,13 +1010,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 	t.Run("should preserve a service identifier", func(t *testing.T) {
 		// given
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Identifier:  "DifferentIdentifier",
 			Api:         nil,
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -1064,10 +1064,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 	t.Run("should return an error if cache initialization failed", func(t *testing.T) {
 		// given
-		serviceAPI := &serviceapi.API{
+		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &serviceapi.Credentials{
-				Oauth: &serviceapi.Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -1076,13 +1076,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Spec: []byte("api docs"),
 		}
 
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Identifier:  "Identifier",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -1129,10 +1129,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 	t.Run("should return an error if API update failed", func(t *testing.T) {
 		// given
-		serviceAPI := &serviceapi.API{
+		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &serviceapi.Credentials{
-				Oauth: &serviceapi.Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -1141,13 +1141,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Spec: []byte("api docs"),
 		}
 
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Identifier:  "Identifier",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -1194,10 +1194,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 	t.Run("should return an error if Minio data update failed", func(t *testing.T) {
 		// given
-		serviceAPI := &serviceapi.API{
+		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &serviceapi.Credentials{
-				Oauth: &serviceapi.Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -1206,13 +1206,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Spec: []byte("{\"api\":\"spec\"}"),
 		}
 
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Identifier:  "Identifier",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -1260,10 +1260,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 	t.Run("should return an error if remoteenv update failed", func(t *testing.T) {
 		// given
-		serviceAPI := &serviceapi.API{
+		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &serviceapi.Credentials{
-				Oauth: &serviceapi.Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com/token",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -1272,13 +1272,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Spec: []byte("{\"api\":\"spec\"}"),
 		}
 
-		serviceDefinition := ServiceDefinition{
+		serviceDefinition := model.ServiceDefinition{
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
 			Identifier:  "Identifier",
 			Api:         serviceAPI,
-			Events: &Events{
+			Events: &model.Events{
 				Spec: []byte("events spec"),
 			},
 			Documentation: []byte("documentation"),
@@ -1443,7 +1443,7 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 		// given
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{}
 		remoteEnvService := remoteenv.Service{API: remoteEnvServiceAPI}
-		serviceAPI := &serviceapi.API{}
+		serviceAPI := &model.API{}
 
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)

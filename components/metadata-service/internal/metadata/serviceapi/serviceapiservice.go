@@ -5,6 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/accessservice"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/istio"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/secrets"
 )
@@ -12,13 +13,13 @@ import (
 // Service manages API definition of a service
 type Service interface {
 	// New handles a new API. It creates all requires resources.
-	New(remoteEnvironment, id string, api *API) (*remoteenv.ServiceAPI, apperrors.AppError)
+	New(remoteEnvironment, id string, api *model.API) (*remoteenv.ServiceAPI, apperrors.AppError)
 	// Read reads API from Remote Environment API definition. It also reads all additional information.
-	Read(remoteEnvironment string, serviceApi *remoteenv.ServiceAPI) (*API, apperrors.AppError)
+	Read(remoteEnvironment string, serviceApi *remoteenv.ServiceAPI) (*model.API, apperrors.AppError)
 	// Delete removes API with given id.
 	Delete(remoteEnvironment, id string) apperrors.AppError
 	// Update replaces existing API with a new one.
-	Update(remoteEnvironment, id string, api *API) (*remoteenv.ServiceAPI, apperrors.AppError)
+	Update(remoteEnvironment, id string, api *model.API) (*remoteenv.ServiceAPI, apperrors.AppError)
 }
 
 type defaultService struct {
@@ -42,7 +43,7 @@ func NewService(
 	}
 }
 
-func (sas defaultService) New(remoteEnvironment, id string, api *API) (*remoteenv.ServiceAPI, apperrors.AppError) {
+func (sas defaultService) New(remoteEnvironment, id string, api *model.API) (*remoteenv.ServiceAPI, apperrors.AppError) {
 	resourceName := sas.nameResolver.GetResourceName(remoteEnvironment, id)
 	gatewayUrl := sas.nameResolver.GetGatewayUrl(remoteEnvironment, id)
 
@@ -70,7 +71,7 @@ func (sas defaultService) New(remoteEnvironment, id string, api *API) (*remoteen
 	return serviceAPI, nil
 }
 
-func (sas defaultService) Read(remoteEnvironment string, remoteenvAPI *remoteenv.ServiceAPI) (*API, apperrors.AppError) {
+func (sas defaultService) Read(remoteEnvironment string, remoteenvAPI *remoteenv.ServiceAPI) (*model.API, apperrors.AppError) {
 	api, err := sas.handleCredentialsFetch(remoteEnvironment, remoteenvAPI)
 	if err != nil {
 		return nil, err
@@ -102,7 +103,7 @@ func (sas defaultService) Delete(remoteEnvironment, id string) apperrors.AppErro
 	return nil
 }
 
-func (sas defaultService) Update(remoteEnvironment, id string, api *API) (*remoteenv.ServiceAPI, apperrors.AppError) {
+func (sas defaultService) Update(remoteEnvironment, id string, api *model.API) (*remoteenv.ServiceAPI, apperrors.AppError) {
 	resourceName := sas.nameResolver.GetResourceName(remoteEnvironment, id)
 	gatewayUrl := sas.nameResolver.GetGatewayUrl(remoteEnvironment, id)
 
@@ -130,7 +131,7 @@ func (sas defaultService) Update(remoteEnvironment, id string, api *API) (*remot
 	return serviceAPI, nil
 }
 
-func (sas defaultService) handleCredentialsCreate(remoteEnvironment, id string, serviceAPI *remoteenv.ServiceAPI, credentials *Credentials) (*remoteenv.ServiceAPI, apperrors.AppError) {
+func (sas defaultService) handleCredentialsCreate(remoteEnvironment, id string, serviceAPI *remoteenv.ServiceAPI, credentials *model.Credentials) (*remoteenv.ServiceAPI, apperrors.AppError) {
 	if credentials == nil {
 		return serviceAPI, nil
 	}
@@ -160,7 +161,7 @@ func (sas defaultService) handleCredentialsCreate(remoteEnvironment, id string, 
 	return serviceAPI, nil
 }
 
-func (sas defaultService) handleCredentialsUpdate(remoteEnvironment, id string, serviceAPI *remoteenv.ServiceAPI, credentials *Credentials) (*remoteenv.ServiceAPI, apperrors.AppError) {
+func (sas defaultService) handleCredentialsUpdate(remoteEnvironment, id string, serviceAPI *remoteenv.ServiceAPI, credentials *model.Credentials) (*remoteenv.ServiceAPI, apperrors.AppError) {
 	name := sas.nameResolver.GetResourceName(remoteEnvironment, id)
 
 	if credentials == nil {
@@ -190,12 +191,12 @@ func (sas defaultService) handleCredentialsUpdate(remoteEnvironment, id string, 
 	return serviceAPI, nil
 }
 
-func (sas defaultService) handleCredentialsFetch(remoteEnvironment string, remoteenvAPI *remoteenv.ServiceAPI) (*API, apperrors.AppError) {
-	api := &API{}
+func (sas defaultService) handleCredentialsFetch(remoteEnvironment string, remoteenvAPI *remoteenv.ServiceAPI) (*model.API, apperrors.AppError) {
+	api := &model.API{}
 
 	if remoteenvAPI.Credentials.Type == remoteenv.CredentialsOAuthType {
-		api.Credentials = &Credentials{
-			Oauth: &Oauth{
+		api.Credentials = &model.Credentials{
+			Oauth: &model.Oauth{
 				URL: remoteenvAPI.Credentials.AuthenticationUrl,
 			},
 		}
@@ -210,8 +211,8 @@ func (sas defaultService) handleCredentialsFetch(remoteEnvironment string, remot
 	}
 
 	if remoteenvAPI.Credentials.Type == remoteenv.CredentialsBasicType {
-		api.Credentials = &Credentials{
-			Basic: &Basic{},
+		api.Credentials = &model.Credentials{
+			Basic: &model.Basic{},
 		}
 
 		username, password, err := sas.secretsService.GetBasicAuthSecret(remoteEnvironment, remoteenvAPI.Credentials.SecretName)
@@ -226,7 +227,7 @@ func (sas defaultService) handleCredentialsFetch(remoteEnvironment string, remot
 	return api, nil
 }
 
-func (sas defaultService) createCredentialsSecret(remoteEnvironment, id, name string, credentials *Credentials) apperrors.AppError {
+func (sas defaultService) createCredentialsSecret(remoteEnvironment, id, name string, credentials *model.Credentials) apperrors.AppError {
 	if sas.oauthCredentialsProvided(credentials) {
 		return sas.secretsService.CreateOauthSecret(
 			remoteEnvironment,
@@ -249,7 +250,7 @@ func (sas defaultService) createCredentialsSecret(remoteEnvironment, id, name st
 	return nil
 }
 
-func (sas defaultService) updateCredentialsSecret(remoteEnvironment, id, name string, credentials *Credentials) apperrors.AppError {
+func (sas defaultService) updateCredentialsSecret(remoteEnvironment, id, name string, credentials *model.Credentials) apperrors.AppError {
 	if sas.oauthCredentialsProvided(credentials) {
 		return sas.secretsService.UpdateOauthSecret(
 			remoteEnvironment,
@@ -272,10 +273,10 @@ func (sas defaultService) updateCredentialsSecret(remoteEnvironment, id, name st
 	return nil
 }
 
-func (sas defaultService) oauthCredentialsProvided(credentials *Credentials) bool {
+func (sas defaultService) oauthCredentialsProvided(credentials *model.Credentials) bool {
 	return credentials != nil && credentials.Oauth != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
 }
 
-func (sas defaultService) basicCredentialsProvided(credentials *Credentials) bool {
+func (sas defaultService) basicCredentialsProvided(credentials *model.Credentials) bool {
 	return credentials != nil && credentials.Basic != nil && credentials.Basic.Username != "" && credentials.Basic.Password != ""
 }

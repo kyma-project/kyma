@@ -1,6 +1,7 @@
 package serviceapi
 
 import (
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 	"testing"
 
 	k8smocks "github.com/kyma-project/kyma/components/metadata-service/internal/k8sconsts/mocks"
@@ -27,10 +28,10 @@ var (
 func TestNewService(t *testing.T) {
 	t.Run("should add all required components for API with OAuth credentials", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &Credentials{
-				Oauth: &Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -79,10 +80,10 @@ func TestNewService(t *testing.T) {
 
 	t.Run("should add all required components for API with BasicAuth credentials", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &Credentials{
-				Basic: &Basic{
+			Credentials: &model.Credentials{
+				Basic: &model.Basic{
 					Username: "clientUsername",
 					Password: "clientPassword",
 				},
@@ -129,7 +130,7 @@ func TestNewService(t *testing.T) {
 
 	t.Run("should add all required components for API without credentials", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
 		}
 
@@ -162,10 +163,10 @@ func TestNewService(t *testing.T) {
 
 	t.Run("should return error when creating access service fails", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &Credentials{
-				Oauth: &Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -195,10 +196,10 @@ func TestNewService(t *testing.T) {
 
 	t.Run("should return error when creating OAuth secret fails", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &Credentials{
-				Oauth: &Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -239,10 +240,10 @@ func TestNewService(t *testing.T) {
 
 	t.Run("should return error when creating BasicAuth secret fails", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &Credentials{
-				Basic: &Basic{
+			Credentials: &model.Credentials{
+				Basic: &model.Basic{
 					Username: "clientUsername",
 					Password: "clientPassword",
 				},
@@ -282,10 +283,10 @@ func TestNewService(t *testing.T) {
 
 	t.Run("should return error when creating istio resources fails", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &Credentials{
-				Oauth: &Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -574,10 +575,10 @@ func TestDefaultService_Delete(t *testing.T) {
 func TestDefaultService_Update(t *testing.T) {
 	t.Run("should update an API with a new one containing an OAuth secret", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &Credentials{
-				Oauth: &Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -627,10 +628,10 @@ func TestDefaultService_Update(t *testing.T) {
 
 	t.Run("should update an API with a new one containing a BasicAuth secret", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &Credentials{
-				Basic: &Basic{
+			Credentials: &model.Credentials{
+				Basic: &model.Basic{
 					Username: "clientUsername",
 					Password: "clientPassword",
 				},
@@ -678,7 +679,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 	t.Run("should update an API with a new one not containing a secret", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl:   "http://target.com",
 			Credentials: nil,
 		}
@@ -722,10 +723,10 @@ func TestDefaultService_Update(t *testing.T) {
 
 	t.Run("should return error when updating access service fails", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &Credentials{
-				Oauth: &Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -758,10 +759,10 @@ func TestDefaultService_Update(t *testing.T) {
 
 	t.Run("should return error when updating OAuth secret fails", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &Credentials{
-				Oauth: &Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
@@ -804,10 +805,10 @@ func TestDefaultService_Update(t *testing.T) {
 
 	t.Run("should return error when updating BasicAuth secret fails", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &Credentials{
-				Basic: &Basic{
+			Credentials: &model.Credentials{
+				Basic: &model.Basic{
 					Username: "clientUsername",
 					Password: "clientPassword",
 				},
@@ -849,7 +850,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 	t.Run("should return error when deleting secret fails", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl:   "http://target.com",
 			Credentials: nil,
 		}
@@ -882,10 +883,10 @@ func TestDefaultService_Update(t *testing.T) {
 
 	t.Run("should return error when updating istio resources fails", func(t *testing.T) {
 		// given
-		api := &API{
+		api := &model.API{
 			TargetUrl: "http://target.com",
-			Credentials: &Credentials{
-				Oauth: &Oauth{
+			Credentials: &model.Credentials{
+				Oauth: &model.Oauth{
 					URL:          "http://oauth.com",
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
