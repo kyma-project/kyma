@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/httperrors"
@@ -549,6 +550,67 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		serviceDefinitionService.AssertExpectations(t)
+	})
+
+	t.Run("should return requested service with non json API spec", func(t *testing.T) {
+		// given
+		nonJsonApiSpec := []byte("non json api spec")
+
+		serviceDefinition := metadata.ServiceDefinition{
+			Name:        "service name",
+			Provider:    "service provider",
+			Description: "service description",
+			Api: &serviceapi.API{
+				TargetUrl: "http://service.com",
+				Credentials: &serviceapi.Credentials{
+					Oauth: serviceapi.Oauth{
+						URL:          "http://oauth.com",
+						ClientID:     "clientId",
+						ClientSecret: "clientSecret",
+					},
+				},
+				Spec: nonJsonApiSpec,
+			},
+		}
+
+		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
+		serviceDefinitionService.On("GetByID", "re", "123456").Return(serviceDefinition, nil)
+		detailedErrorResponse := false
+
+		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
+
+		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/123456", nil)
+		require.NoError(t, err)
+
+		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "123456"})
+		rr := httptest.NewRecorder()
+
+		// when
+		metadataHandler.GetService(rr, req)
+
+		// then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var serviceDetails ServiceDetails
+		err = json.Unmarshal(responseBody, &serviceDetails)
+
+		str := string(serviceDetails.Api.Spec)
+		fmt.Sprintf(str)
+
+		require.NoError(t, err)
+		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
+		assert.Equal(t, "service name", serviceDetails.Name)
+		assert.Equal(t, "service provider", serviceDetails.Provider)
+		assert.Equal(t, "service description", serviceDetails.Description)
+		assert.Equal(t, "http://service.com", serviceDetails.Api.TargetUrl)
+		assert.Equal(t, "http://oauth.com", serviceDetails.Api.Credentials.Oauth.URL)
+		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientID)
+		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientSecret)
+		assert.Equal(t, []byte("\"non json api spec\""), []byte(serviceDetails.Api.Spec))
+		assert.Nil(t, serviceDetails.Events)
+		assert.Nil(t, serviceDetails.Documentation)
+		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 }
 
