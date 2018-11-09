@@ -66,7 +66,7 @@ Replace values in curly braces with proper details, where:
 - `{githubToken}` is the GitHub API token with the read-only access to the repository.
 - `{sshFilePath}` is the path to the SSH file used for Git to authenticate with the repository.
 - `{configFilePath}` is a path to the `package.json` file used by the `lerna-changelog` tool.
-- `{skipRemovingLatest}` if true then removing 'latest' tag functionality is skipped.
+- `{skipRemovingLatest}` if set to true, removing the `latest` tag functionality is skipped.
 
 The script generates a new `./.changelog/release-changelog.md` file under the specified absolute path to the repository.
 
