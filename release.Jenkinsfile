@@ -117,17 +117,6 @@ try {
                         parallel jobs
                     }
 
-                    // test the release
-                    stage('Launch Kyma integration') {
-                        build job: 'kyma/integration-release',
-                            wait: true,
-                            parameters: [
-                                string(name:'GIT_REVISION', value: "$commitID"),
-                                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-                                string(name:'APP_VERSION', value: "$appVersion")
-                            ]
-                    }
-
                     // build kyma-installer
                     stage('Build kyma-installer') {
                         build job: 'kyma/kyma-installer',
@@ -151,46 +140,10 @@ try {
                             ]
                     }
 
-                    stage('Launch Kyma integration on cluster') {
-                        build job: 'kyma/integration-release-cluster',
-                            wait: true,
-                            parameters: [
-                                string(name:'SOURCE_BRANCH', value: "master"),
-                                string(name:'KYMA_SOURCE_BRANCH', value: "${params.RELEASE_BRANCH}"),
-                                string(name:'KYMA_FORK_URL', value: "https://github.com/kyma-project/kyma.git"),
-                                string(name:'ARTIFACTS_BUILD_NUMBER', value: "${kymaInstallerArtifactsBuild.number}")
-                            ]
-                    }
-
                     stage('Copy kyma-installer artifacts') {
                         copyArtifacts projectName: 'kyma/kyma-installer-artifacts', 
                             selector: specific("${kymaInstallerArtifactsBuild.number}"),
                             target: "kyma-installer-artifacts"
-                    }
-
-                    // create release on github
-                    stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
-                        
-                        withCredentials(
-                                [string(credentialsId: 'public-github-token', variable: 'token')]
-                        ) { 
-                            commitID = sh (script: "git rev-parse HEAD", returnStdout: true).trim()
-
-                            def body = ""
-                            def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"${body}\",\"draft\": false,\"prerelease\": ${isRelease ? 'false' : 'true'}}'"
-                            
-                            echo "Creating a new release using GitHub API..."
-                            def json = sh (script: "curl --data ${data} -H \"Authorization: token ${token}\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
-                            echo "Response: ${json}"
-                            def releaseID = getGithubReleaseID(json)
-                            
-                            // upload artifacts
-                            def kymaConfigLocal = "kyma-installer-artifacts/kyma-config-local.yaml"
-                            def kymaConfigCluster = "kyma-installer-artifacts/kyma-config-cluster.yaml"
-                            
-                            sh "curl --data-binary @${kymaConfigLocal} -H \"Authorization: token ${token}\" -H \"Content-Type: application/x-yaml\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=kyma-config-local.yaml"
-                            sh "curl --data-binary @${kymaConfigCluster} -H \"Authorization: token ${token}\" -H \"Content-Type: application/x-yaml\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=kyma-config-cluster.yaml"
-                        }
                     }
                 }
             }
