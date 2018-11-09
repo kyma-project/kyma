@@ -10,21 +10,15 @@ type BindingExtractor struct{}
 func (ext *BindingExtractor) Status(conditions []v1beta1.ServiceBindingCondition) gqlschema.ServiceBindingStatus {
 	activeConditions := ext.findActiveConditions(conditions)
 
-	if len(conditions) == 0 {
+	if len(activeConditions) == 0 {
 		return gqlschema.ServiceBindingStatus{
 			Type: gqlschema.ServiceBindingStatusTypePending,
 		}
 	}
+
 	if cond, found := ext.findReadyCondition(activeConditions); found {
 		return gqlschema.ServiceBindingStatus{
 			Type:    gqlschema.ServiceBindingStatusTypeReady,
-			Message: cond.Message,
-			Reason:  cond.Reason,
-		}
-	}
-	if cond, found := ext.findReadyCondition(conditions); found {
-		return gqlschema.ServiceBindingStatus{
-			Type:    gqlschema.ServiceBindingStatusTypeFailed,
 			Message: cond.Message,
 			Reason:  cond.Reason,
 		}

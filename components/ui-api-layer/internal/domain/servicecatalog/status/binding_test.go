@@ -29,10 +29,10 @@ func TestBindingExtractor_Status(t *testing.T) {
 		"FailedStatus": {
 			given: []v1beta1.ServiceBindingCondition{
 				{
-					Status:  v1beta1.ConditionFalse,
+					Status:  v1beta1.ConditionTrue,
 					Reason:  "error",
 					Message: "supa error",
-					Type:    v1beta1.ServiceBindingConditionReady,
+					Type:    v1beta1.ServiceBindingConditionFailed,
 				},
 			},
 			expected: gqlschema.ServiceBindingStatus{
@@ -50,7 +50,8 @@ func TestBindingExtractor_Status(t *testing.T) {
 		"UnknownStatus": {
 			given: []v1beta1.ServiceBindingCondition{
 				{
-					Type: "different",
+					Status: v1beta1.ConditionTrue,
+					Type:   "different",
 				},
 			},
 			expected: gqlschema.ServiceBindingStatus{
