@@ -64,12 +64,12 @@ func (asf authorizationStrategyFactory) Create(c Credentials) Strategy {
 }
 
 // Factory configuration options
-type Configuration struct {
+type FactoryConfiguration struct {
 	OAuthClientTimeout int
 }
 
 // NewStrategyFactory creates factory for instantiating Strategy implementations
-func NewStrategyFactory(config Configuration) StrategyFactory {
+func NewStrategyFactory(config FactoryConfiguration) StrategyFactory {
 	cache := tokencache.NewTokenCache()
 	oauthClient := oauth.NewOauthClient(config.OAuthClientTimeout, cache)
 

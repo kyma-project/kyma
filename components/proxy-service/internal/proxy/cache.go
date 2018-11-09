@@ -15,7 +15,7 @@ type CacheEntry struct {
 }
 
 type Cache interface {
-	// Get returns entry fro the cache
+	// Get returns entry from the cache
 	Get(id string) (*CacheEntry, bool)
 	// Put adds entry to the cache
 	Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy) *CacheEntry

@@ -92,7 +92,7 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 }
 
 func newAuthenticationStrategyFactory(oauthClientTimeout int) authorization.StrategyFactory {
-	return authorization.NewStrategyFactory(authorization.Configuration{
+	return authorization.NewStrategyFactory(authorization.FactoryConfiguration{
 		OAuthClientTimeout: oauthClientTimeout,
 	})
 }
