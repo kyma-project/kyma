@@ -48,8 +48,12 @@ func (mh *metadataHandler) CreateService(w http.ResponseWriter, r *http.Request)
 	}
 
 	responseBody := CreateServiceResponse{ID: serviceId}
-	respondWithBody(w, http.StatusOK, responseBody)
-
+	apperr = mh.respondWithBody(w, http.StatusOK, responseBody)
+	if apperr != nil {
+		contextLogger.Errorf("Creating service failed, %s", apperr.Error())
+		mh.handleErrors(w, apperr)
+		return
+	}
 	contextLogger.Infof("Service with ID %s created successfully.", serviceId)
 }
 
@@ -71,7 +75,12 @@ func (mh *metadataHandler) GetService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithBody(w, http.StatusOK, responseBody)
+	apperr = mh.respondWithBody(w, http.StatusOK, responseBody)
+	if apperr != nil {
+		contextLogger.Errorf("Getting service failed, %s", apperr.Error())
+		mh.handleErrors(w, apperr)
+		return
+	}
 	contextLogger.Info("Service read successfully.")
 }
 
@@ -91,7 +100,12 @@ func (mh *metadataHandler) GetServices(w http.ResponseWriter, r *http.Request) {
 		responseBody = append(responseBody, serviceDefinitionToService(element))
 	}
 
-	respondWithBody(w, http.StatusOK, responseBody)
+	apperr = mh.respondWithBody(w, http.StatusOK, responseBody)
+	if apperr != nil {
+		contextLogger.Errorf("Getting all services failed, %s", apperr.Error())
+		mh.handleErrors(w, apperr)
+		return
+	}
 	contextLogger.Info("Services read successfully.")
 }
 
@@ -121,7 +135,12 @@ func (mh *metadataHandler) UpdateService(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	respondWithBody(w, http.StatusOK, responseBody)
+	apperr = mh.respondWithBody(w, http.StatusOK, responseBody)
+	if apperr != nil {
+		contextLogger.Errorf("Updating service failed, %s", apperr.Error())
+		mh.handleErrors(w, apperr)
+		return
+	}
 	contextLogger.Info("Service updated successfully.")
 }
 
@@ -175,10 +194,14 @@ func respond(w http.ResponseWriter, statusCode int) {
 	w.WriteHeader(statusCode)
 }
 
-func respondWithBody(w http.ResponseWriter, statusCode int, responseBody interface{}) {
+func (mh *metadataHandler) respondWithBody(w http.ResponseWriter, statusCode int, responseBody interface{}) apperrors.AppError {
+	err := json.NewEncoder(w).Encode(responseBody)
+	if err != nil {
+		return apperrors.Internal("Failed to marshall body, %s", err.Error())
+	}
+
 	respond(w, statusCode)
-	// TODO - handle error
-	json.NewEncoder(w).Encode(responseBody)
+	return nil
 }
 
 func compact(src []byte) []byte {
