@@ -48,12 +48,14 @@ Also when existing API is retrieved it contains additional **status** field. Sta
 |:----------:|:-------------:|:------|
 | **status.virtualService** | **YES** | Section with statuses of related VirtualService |
 | **status.virtualService.code** | **YES** | Status code of related VirtualService. See section **Status code** below |
+| **status.virtualService.lastError** | **NO** | Last error reported while creating/updating VirtualService |
 | **status.virtualService.resource** | **NO** | Section with information about created VirtualService. Not present if resource couldn't be created |
 | **status.virtualService.resource.name** | **NO** | Name of created VirtualService |
 | **status.virtualService.resource.version** | **NO** | Version of created VirtualService |
 | **status.virtualService.resource.uid** | **NO** | Version of created VirtualService |
 | **status.authenticationStatus** | **NO** | Section with statuses of related Policy |
 | **status.authenticationStatus.code** | **NO** | Status code of related Policy. See section **Status code** below |
+| **status.authenticationStatus.lastError** | **NO** | Last error reported while creating/updating Policy |
 | **status.authenticationStatus.resource** | **NO** | Section with information about created Policy. Not present if resource couldn't be created |
 | **status.authenticationStatus.resource.name** | **NO** | Name of created Policy |
 | **status.authenticationStatus.resource.version** | **NO** | Version of created Policy |
