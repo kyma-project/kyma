@@ -61,7 +61,7 @@ These are the OSBA fields used in the **Add to Environment** window:
 
 ### Plan schema
 
-The [Plan Object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#plan-object) in the OSBA can have the **schemas** field. Schema is used to generate a form which enables provisioning of the Service Class.
+A [plan object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#plan-object) in the OSBA can have the **schemas** field. Schema is used to generate a form which enables provisioning of the Service Class.
 
 See the sample schema:
 

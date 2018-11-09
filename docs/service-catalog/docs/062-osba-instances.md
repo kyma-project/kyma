@@ -30,11 +30,9 @@ These are the OSBA fields used in the detailed Service Instance view:
 | ------ | ------------------------- | -------------------- | ----------------------------------------------------- |
 | (1)    | **metadata.displayName**      | **name***, **id***           | -                                                     |
 | (2)    | **plan.metadata.displayName** | **plan.name***, **plan.id*** | -                                                     |
-| (3)    | not related to OSBA       | -                    | If not provided, UI displays without this information |
-| (4)    | **metadata.documentationUrl** | -                    | If not provided, UI displays without this information |
-| (5)    | **metadata.supportUrl**       | -                    | If not provided, UI displays without this information |
-| (6)    | **description\***             | -                    | If not provided, UI displays without this information |
-| (7)    | not related to OSBA       | -                    | -                                                     |
+| (3)    | **metadata.documentationUrl** | -                    | If not provided, UI displays without this information |
+| (4)    | **metadata.supportUrl**       | -                    | If not provided, UI displays without this information |
+| (5)    | **description\***             | -                    | If not provided, UI displays without this information |
 
 \*Fields with an asterisk are required OSBA attributes.
 
