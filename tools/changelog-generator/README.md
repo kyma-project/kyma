@@ -61,7 +61,7 @@ docker run --rm -v {absolutePathToRepository}:/repository -w /repository -e FROM
 Replace values in curly braces with proper details, where:
 - `{absolutePathToRepository}` is the absolute path to the repository.
 - `{previousTag}` specifies the first tag which is included in the changelog. If not provided, the changelog is generated from the tag which precedes the latest tag used.
-- `{latestTag}` optionally, is tag to which changelog is created. If provided changelog will be generated to `{latestTag}`. If not provided changelog will be generated to latest used tag.
+- `{latestTag}` specifies the last tag which is included in the changelog. If not provided, the changelog is generated to the latest tag used.
 - `{releaseTitle}` is the currently released application title which specifies the release version.
 - `{githubToken}` is the GitHub API token with the read-only access to the repository.
 - `{sshFilePath}` is the path to the SSH file used for Git to authenticate with the repository.
