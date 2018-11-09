@@ -47,7 +47,7 @@ docker run --rm -v {absolutePathToRepository}:/repository -w /repository -e BRAN
 Replace values in curly braces with proper details, where:
 - `{absolutePathToRepository}` is the absolute path to the repository.
 - `{currentBranch}` is the current Git branch name.
-- `{releaseTitle}` is the currently released application title uses as title in file or in commit message.
+- `{releaseTitle}` is the currently released application title which specifies the release version.
 - `{sshFilePath}` is the path to the SSH file used for Git to authenticate with the repository.
 
 ### Generate the latest release changelog
