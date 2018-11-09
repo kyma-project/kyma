@@ -35,7 +35,7 @@ Replace values in curly braces with proper details, where:
 - `{releaseTitle}` is the currently released application title which specifies the release version.
 - `{githubToken}` is the GitHub API token with the read-only access to the repository.
 - `{sshFilePath}` is the path to the SSH file used for Git to authenticate with the repository.
-- `{configFilePath}` is the path to file used by `lerna-changelog` to repository configuration.
+- `{configFilePath}` is a path to the `package.json` file used by the `lerna-changelog` tool.
 - `{skipRemovingLatest}` if true then removing 'latest' tag functionality is skipped.
 
 2. Commit and push the `CHANGELOG.md` file. Use this command:
