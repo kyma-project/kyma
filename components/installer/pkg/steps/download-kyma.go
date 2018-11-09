@@ -9,17 +9,19 @@ import (
 )
 
 //DownloadKyma .
-func (steps InstallationSteps) DownloadKyma(installationData *config.InstallationData) (kymasources.KymaPackage, error) {
-	const stepName string = "Downloading Kyma"
+func (steps InstallationSteps) EnsureKymaSources(installationData *config.InstallationData) (kymasources.KymaPackage, error) {
+	const stepName string = "Get Kyma Sources"
 	steps.PrintStep(stepName)
 	steps.statusManager.InProgress(stepName)
 
 	if steps.kymaPackages.HasInjectedSources() {
-		log.Println("Kyma sources injected. Download of sources not required.")
+		log.Println("Kyma sources available locally.")
 		log.Println(stepName + "...DONE")
 
 		return steps.kymaPackages.GetInjectedPackage()
 	}
+
+	log.Println("Kyma sources not available. Downloading...")
 
 	if installationData.KymaVersion == "" {
 		validationErr := errors.New("Set version for Kyma package")

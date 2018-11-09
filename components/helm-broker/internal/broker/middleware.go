@@ -11,7 +11,7 @@ type OSBContextMiddleware struct{}
 
 // ServeHTTP adds content of Open Service Broker Api headers to the requests
 func (OSBContextMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	osbCtx := osbContext{
+	osbCtx := OsbContext{
 		APIVersion:          r.Header.Get(osb.APIVersionHeader),
 		OriginatingIdentity: r.Header.Get(osb.OriginatingIdentityHeader),
 	}

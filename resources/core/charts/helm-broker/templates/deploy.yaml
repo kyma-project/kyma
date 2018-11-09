@@ -13,9 +13,7 @@ spec:
     matchLabels:
       app: {{ template "fullname" . }}
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
+    type: Recreate
   template:
     metadata:
       labels:
@@ -45,8 +43,12 @@ spec:
             value: /etc/config/helm-broker/config.yaml
           - name: APP_HELM_TILLER_HOST
             value: "tiller-deploy.kube-system.svc.cluster.local:44134"
-          - name: APP_REPOSITORY_URL
-            value: {{ .Values.repository.URL }}
+          - name: APP_REPOSITORY_URLS
+            value: {{ .Values.repository.URLs }}
+          - name: APP_CLUSTER_SERVICE_BROKER_NAME
+            value: {{ template "fullname" . }}
+          - name: APP_HELM_BROKER_URL
+            value: http://{{ template "fullname" . }}
 
         volumeMounts:
         - mountPath: /tmp

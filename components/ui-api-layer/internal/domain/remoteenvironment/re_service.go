@@ -15,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/iosafety"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,6 +41,7 @@ type remoteEnvironmentService struct {
 	connectorSvcURL string
 	httpClient      *http.Client
 	reNameRegex     *regexp.Regexp
+	notifier        notifier
 }
 
 func newRemoteEnvironmentService(client remoteenvironmentv1alpha1.ApplicationconnectorV1alpha1Interface, cfg Config, mappingInformer cache.SharedIndexInformer, mappingLister reMappinglister.EnvironmentMappingLister, reInformer cache.SharedIndexInformer) (*remoteEnvironmentService, error) {
@@ -54,6 +56,9 @@ func newRemoteEnvironmentService(client remoteenvironmentv1alpha1.Applicationcon
 		},
 	})
 
+	notifier := resource.NewNotifier()
+	reInformer.AddEventHandler(notifier)
+
 	regex, err := regexp.Compile(reNameRegex)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while compiling %s regex", reNameRegex)
@@ -67,6 +72,7 @@ func newRemoteEnvironmentService(client remoteenvironmentv1alpha1.Applicationcon
 		httpClient: &http.Client{
 			Timeout: cfg.Connector.HTTPCallTimeout,
 		},
+		notifier:    notifier,
 		reNameRegex: regex,
 	}, nil
 }
@@ -274,4 +280,12 @@ func (svc *remoteEnvironmentService) extractErrorCause(body io.ReadCloser) error
 func (svc *remoteEnvironmentService) drainAndCloseBody(body io.ReadCloser) {
 	_ = iosafety.DrainReader(body)
 	body.Close()
+}
+
+func (svc *remoteEnvironmentService) Subscribe(listener resource.Listener) {
+	svc.notifier.AddListener(listener)
+}
+
+func (svc *remoteEnvironmentService) Unsubscribe(listener resource.Listener) {
+	svc.notifier.DeleteListener(listener)
 }

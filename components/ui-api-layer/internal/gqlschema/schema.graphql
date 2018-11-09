@@ -439,6 +439,11 @@ enum RemoteEnvironmentStatus {
     GATEWAY_NOT_CONFIGURED
 }
 
+type RemoteEnvironmentEvent {
+    type: SubscriptionEventType!
+    remoteEnvironment: RemoteEnvironment!
+}
+
 type RemoteEnvironmentMutationOutput {
     name: String!
     description: String!
@@ -606,7 +611,8 @@ type Subscription {
     serviceBindingEvent(environment: String!): ServiceBindingEvent!
     serviceBindingUsageEvent(environment: String!): ServiceBindingUsageEvent!
     serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
-    clusterServiceBrokerEvent: ClusterServiceBrokerEvent!
+    clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
+    remoteEnvironmentEvent: RemoteEnvironmentEvent!,
 }
 
 # Schema

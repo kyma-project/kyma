@@ -39,13 +39,13 @@ global:
     version: 6e0a7fe2
   binding_usage_controller:
     dir: develop/
-    version: 83692fd8
+    version: b7683312
   configurations_generator:
     dir: develop/
     version: 4a23580f
   docs:
     dir: develop/
-    version: "79550619"
+    version: c9d6681a
   environments:
     dir: develop/
     version: 6e0a7fe2
@@ -60,10 +60,10 @@ global:
     version: 1daa11b7
   helm_broker:
     dir: develop/
-    version: 70ba3ce9
+    version: 0d1ffe15
   kubeless_test_client:
     dir: develop/
-    version: b1248e73
+    version: 7bd3337d
   test_environments:
     dir: develop/
     version: '84359277'
@@ -72,7 +72,7 @@ global:
     version: 6e0a7fe2
   ui_api_layer:
     dir: develop/
-    version: a84b8f6e
+    version: af2336e7
   ui_api_layer_acceptance_tests:
     dir: develop/
     version: a84b8f6e
