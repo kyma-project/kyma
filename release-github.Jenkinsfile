@@ -1,3 +1,6 @@
+#!/usr/bin/env groovy
+import groovy.json.JsonSlurperClassic
+
 def label = "kyma-${UUID.randomUUID().toString()}"
 def registry = 'eu.gcr.io/kyma-project'
 def acsImageName = 'acs-installer:0.0.4'
@@ -74,4 +77,14 @@ podTemplate(label: label) {
             }
         }
     }
+}
+
+/**
+ * Obtain the github release ID from its JSON data.
+ * More info: https://developer.github.com/v3/repos/releases 
+ */
+@NonCPS
+def getGithubReleaseID(releaseJson) {
+    def slurper = new JsonSlurperClassic()
+    return slurper.parseText(releaseJson).id
 }
