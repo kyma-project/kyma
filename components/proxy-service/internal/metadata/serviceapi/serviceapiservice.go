@@ -2,44 +2,10 @@ package serviceapi
 
 import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/secrets"
 )
-
-// API is an internal representation of a service's API.
-type API struct {
-	// TargetUrl points to API.
-	TargetUrl string
-	// Credentials is a credentials of API.
-	Credentials *Credentials
-	// Spec contains specification of an API.
-	Spec []byte
-}
-
-// Credentials contains OAuth or Basic Auth configuration.
-type Credentials struct {
-	// Oauth is OAuth configuration.
-	Oauth *Oauth
-	Basic *Basic
-}
-
-// Basic contains details of Basic Auth configuration
-type Basic struct {
-	// Username to use for authentication
-	Username string
-	// Password to use for authentication
-	Password string
-}
-
-// Oauth contains details of OAuth configuration
-type Oauth struct {
-	// URL to OAuth token provider.
-	URL string
-	// ClientID to use for authorization.
-	ClientID string
-	// ClientSecret to use for authorization.
-	ClientSecret string
-}
 
 const (
 	ClientIDKey     = "clientId"
@@ -53,7 +19,7 @@ const (
 // Service manages API definition of a service
 type Service interface {
 	// Read reads API from Remote Environment API definition. It also reads all additional information.
-	Read(*remoteenv.ServiceAPI) (*API, apperrors.AppError)
+	Read(*remoteenv.ServiceAPI) (*model.API, apperrors.AppError)
 }
 
 type defaultService struct {
@@ -67,8 +33,8 @@ func NewService(secretsRepository secrets.Repository) Service {
 	}
 }
 
-func (sas defaultService) Read(remoteenvAPI *remoteenv.ServiceAPI) (*API, apperrors.AppError) {
-	api := &API{
+func (sas defaultService) Read(remoteenvAPI *remoteenv.ServiceAPI) (*model.API, apperrors.AppError) {
+	api := &model.API{
 		TargetUrl: remoteenvAPI.TargetUrl,
 	}
 
@@ -83,11 +49,11 @@ func (sas defaultService) Read(remoteenvAPI *remoteenv.ServiceAPI) (*API, apperr
 		}
 
 		if credentialsType == TypeOAuth {
-			api.Credentials = &Credentials{
+			api.Credentials = &model.Credentials{
 				Oauth: getOAuthCredentials(secret, remoteenvAPI.Credentials.Url),
 			}
 		} else if credentialsType == TypeBasic {
-			api.Credentials = &Credentials{
+			api.Credentials = &model.Credentials{
 				Basic: getBasicAuthCredentials(secret),
 			}
 		} else {
@@ -98,16 +64,16 @@ func (sas defaultService) Read(remoteenvAPI *remoteenv.ServiceAPI) (*API, apperr
 	return api, nil
 }
 
-func getOAuthCredentials(secret map[string][]byte, url string) *Oauth {
-	return &Oauth{
+func getOAuthCredentials(secret map[string][]byte, url string) *model.Oauth {
+	return &model.Oauth{
 		ClientID:     string(secret[ClientIDKey]),
 		ClientSecret: string(secret[ClientSecretKey]),
 		URL:          url,
 	}
 }
 
-func getBasicAuthCredentials(secret map[string][]byte) *Basic {
-	return &Basic{
+func getBasicAuthCredentials(secret map[string][]byte) *model.Basic {
+	return &model.Basic{
 		Username: string(secret[UsernameKey]),
 		Password: string(secret[PasswordKey]),
 	}

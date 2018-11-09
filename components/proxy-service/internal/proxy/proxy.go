@@ -12,7 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httperrors"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
+	metadatamodel "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/model"
 )
 
 type proxy struct {
@@ -69,7 +69,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.addModifyResponseHandler(newRequest, id, cacheEntry)
-	
+
 	p.executeRequest(w, newRequest, cacheEntry)
 }
 
@@ -114,7 +114,7 @@ func (p *proxy) addAuthorizationHeader(r *http.Request, cacheEntry *CacheEntry) 
 	return cacheEntry.AuthorizationStrategy.AddAuthorizationHeader(r)
 }
 
-func (p *proxy) newAuthorizationStrategy(credentials *serviceapi.Credentials) authorization.Strategy {
+func (p *proxy) newAuthorizationStrategy(credentials *metadatamodel.Credentials) authorization.Strategy {
 	authCredentials := authorization.Credentials{}
 
 	if oauthCredentialsProvided(credentials) {
@@ -137,11 +137,11 @@ func (p *proxy) newAuthorizationStrategy(credentials *serviceapi.Credentials) au
 	return p.authorizationStrategyFactory.Create(authCredentials)
 }
 
-func oauthCredentialsProvided(credentials *serviceapi.Credentials) bool {
+func oauthCredentialsProvided(credentials *metadatamodel.Credentials) bool {
 	return credentials != nil && credentials.Oauth != nil
 }
 
-func basicAuthCredentialsProvided(credentials *serviceapi.Credentials) bool {
+func basicAuthCredentialsProvided(credentials *metadatamodel.Credentials) bool {
 	return credentials != nil && credentials.Basic != nil
 }
 
@@ -158,7 +158,7 @@ func (p *proxy) createModifyResponseFunction(id string, r *http.Request) func(*h
 	}
 }
 
-func (p *proxy) executeRequest(w http.ResponseWriter, r *http.Request, cacheEntry *CacheEntry){
+func (p *proxy) executeRequest(w http.ResponseWriter, r *http.Request, cacheEntry *CacheEntry) {
 	cacheEntry.Proxy.ServeHTTP(w, r)
 }
 

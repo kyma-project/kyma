@@ -3,6 +3,7 @@ package metadata
 
 import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
 	log "github.com/sirupsen/logrus"
@@ -11,7 +12,7 @@ import (
 // ServiceDefinitionService is a service that manages ServiceDefinition objects.
 type ServiceDefinitionService interface {
 	// GetAPI gets API of a service with given ID
-	GetAPI(serviceId string) (*serviceapi.API, apperrors.AppError)
+	GetAPI(serviceId string) (*model.API, apperrors.AppError)
 }
 
 type serviceDefinitionService struct {
@@ -28,7 +29,7 @@ func NewServiceDefinitionService(serviceAPIService serviceapi.Service, remoteEnv
 }
 
 // GetAPI gets API of a service with given ID
-func (sds *serviceDefinitionService) GetAPI(serviceId string) (*serviceapi.API, apperrors.AppError) {
+func (sds *serviceDefinitionService) GetAPI(serviceId string) (*model.API, apperrors.AppError) {
 	service, err := sds.remoteEnvironmentRepository.Get(serviceId)
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {

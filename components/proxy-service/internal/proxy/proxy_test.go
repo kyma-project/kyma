@@ -7,7 +7,7 @@ import (
 	authMock "github.com/kyma-project/kyma/components/proxy-service/internal/authorization/mocks"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httperrors"
 	metadataMock "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/mocks"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
+	metadatamodel "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -40,7 +40,7 @@ func TestProxy(t *testing.T) {
 		authStrategyFactoryMock.On("Create", authorization.Credentials{}).Return(authStrategyMock).Once()
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
 		}, nil).Once()
 
@@ -97,10 +97,10 @@ func TestProxy(t *testing.T) {
 		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
-			Credentials: &serviceapi.Credentials{
-				Oauth: &serviceapi.Oauth{
+			Credentials: &metadatamodel.Credentials{
+				Oauth: &metadatamodel.Oauth{
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
 					URL:          tsOAuth.URL + "/token",
@@ -141,10 +141,10 @@ func TestProxy(t *testing.T) {
 		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
-			Credentials: &serviceapi.Credentials{
-				Basic: &serviceapi.Basic{
+			Credentials: &metadatamodel.Credentials{
+				Basic: &metadatamodel.Basic{
 					Username: "username",
 					Password: "password",
 				},
@@ -184,10 +184,10 @@ func TestProxy(t *testing.T) {
 		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
-			Credentials: &serviceapi.Credentials{
-				Oauth: &serviceapi.Oauth{
+			Credentials: &metadatamodel.Credentials{
+				Oauth: &metadatamodel.Oauth{
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
 					URL:          "www.example.com/token",
@@ -214,7 +214,7 @@ func TestProxy(t *testing.T) {
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").
-			Return(&serviceapi.API{}, apperrors.Internal("Failed to read services"))
+			Return(&metadatamodel.API{}, apperrors.Internal("Failed to read services"))
 
 		handler := New(serviceDefServiceMock, nil, createProxyConfig(proxyTimeout))
 
@@ -243,7 +243,7 @@ func TestProxy(t *testing.T) {
 		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
 			TargetUrl: tsf.URL,
 		}, nil).Twice()
 
