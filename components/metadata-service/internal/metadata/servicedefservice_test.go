@@ -12,10 +12,9 @@ import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
 	serviceapimocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi/mocks"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification"
-	miniomocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification/minio/mocks"
+	specmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification/mocks"
 	uuidmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid/mocks"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -38,17 +37,19 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			},
 			Spec: []byte("{\"api\":\"spec\"}"),
 		}
+		events := &specification.Events{
+			Spec: []byte("events spec"),
+		}
+		docs := []byte("documentation")
 		serviceDefinition := ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Api:         serviceAPI,
-			Labels:      &map[string]string{"connected-app": "re"},
-			Identifier:  "Some cool external identifier",
-			Events: &specification.Events{
-				Spec: []byte("events spec"),
-			},
-			Documentation: []byte("documentation"),
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Api:           serviceAPI,
+			Labels:        &map[string]string{"connected-app": "re"},
+			Identifier:    "Some cool external identifier",
+			Events:        events,
+			Documentation: docs,
 		}
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
 			TargetUrl:             "http://target.com",
@@ -69,6 +70,8 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			API:                 remoteEnvServiceAPI,
 			Events:              true,
 		}
+		specData := newSpecData("uuid-1", serviceAPI, events, docs, "gateway-url")
+
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 		serviceAPIService := new(serviceapimocks.Service)
@@ -76,8 +79,8 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
 		serviceRepository.On("GetAll", "re").Return(nil, nil)
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(nil)
+		specService := new(specmocks.SpecService)
+		specService.On("SaveServiceSpecs", specData).Return(nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
@@ -91,19 +94,21 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.AssertExpectations(t)
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should create service without API", func(t *testing.T) {
 		// given
+		events := &specification.Events{
+			Spec: []byte("events spec"),
+		}
+		docs := []byte("documentation")
 		serviceDefinition := ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Api:         nil,
-			Events: &specification.Events{
-				Spec: []byte("test"),
-			},
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Api:           nil,
+			Events:        events,
 			Documentation: []byte("documentation"),
 		}
 
@@ -118,12 +123,14 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			API:                 nil,
 			Events:              true,
 		}
+		specData := newSpecData("uuid-1", nil, events, docs, "")
+
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", mock.Anything, empty, []byte("test")).Return(nil)
+		specService := new(specmocks.SpecService)
+		specService.On("SaveServiceSpecs", specData).Return(nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, specService)
 
@@ -136,18 +143,19 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should create service with documentation only", func(t *testing.T) {
 		// given
+		docs := []byte("documentation")
 		serviceDefinition := ServiceDefinition{
 			Name:          "Some service",
 			Description:   "Some cool service",
 			Provider:      "Service Provider",
 			Api:           nil,
 			Events:        nil,
-			Documentation: []byte("documentation"),
+			Documentation: docs,
 		}
 
 		remoteEnvService := remoteenv.Service{
@@ -161,12 +169,14 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			API:                 nil,
 			Events:              false,
 		}
+		specData := newSpecData("uuid-1", nil, nil, docs, "")
+
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", mock.Anything, empty, empty).Return(nil)
+		specService := new(specmocks.SpecService)
+		specService.On("SaveServiceSpecs", specData).Return(nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, specService)
 
@@ -179,7 +189,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should create service without specs", func(t *testing.T) {
@@ -204,12 +214,14 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			API:                 nil,
 			Events:              false,
 		}
+		specData := newSpecData("uuid-1", nil, nil, nil, "")
+
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", empty, empty, empty).Return(nil)
+		specService := new(specmocks.SpecService)
+		specService.On("SaveServiceSpecs", specData).Return(nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, specService)
 
@@ -222,75 +234,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
-	})
-
-	t.Run("should create service with modified API spec", func(t *testing.T) {
-		// given
-		initialAPISpec := []byte("{\"swagger\":\"2.0\"}")
-		expectedAPISpec := compact([]byte(`{"schemes":["http"],"swagger":"2.0","host":"gateway-url.kyma.local","paths":null}`))
-
-		serviceAPI := &serviceapi.API{
-			TargetUrl: "http://target.com",
-			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
-					URL:          "http://oauth.com/token",
-					ClientID:     "clientId",
-					ClientSecret: "clientSecret",
-				},
-			},
-			Spec: initialAPISpec,
-		}
-		serviceDefinition := ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Api:         serviceAPI,
-			Events: &specification.Events{
-				Spec: []byte("events spec"),
-			},
-			Documentation: []byte("documentation"),
-		}
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com/token",
-			AccessLabel:           "access-label",
-			GatewayURL:            "http://gateway-url.kyma.local",
-			CredentialsSecretName: "secret-name",
-		}
-		remoteEnvService := remoteenv.Service{
-			ID:                  "uuid-1",
-			DisplayName:         "Some service",
-			LongDescription:     "Some cool service",
-			ShortDescription:    "Some cool service",
-			ProviderDisplayName: "Service Provider",
-			Labels:              map[string]string{"connected-app": "re"},
-			Tags:                make([]string, 0),
-			API:                 remoteEnvServiceAPI,
-			Events:              true,
-		}
-		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
-		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("New", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", []byte("documentation"), expectedAPISpec, []byte("events spec")).Return(nil)
-
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
-
-		// when
-		serviceID, err := service.Create("re", &serviceDefinition)
-
-		// then
-		require.NoError(t, err)
-		assert.Equal(t, "uuid-1", serviceID)
-
-		uuidGenerator.AssertExpectations(t)
-		serviceAPIService.AssertExpectations(t)
-		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should override connected-app label", func(t *testing.T) {
@@ -316,12 +260,14 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			API:                 nil,
 			Events:              false,
 		}
+		specData := newSpecData("uuid-1", nil, nil, nil, "")
+
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", empty, empty, empty).Return(nil)
+		specService := new(specmocks.SpecService)
+		specService.On("SaveServiceSpecs", specData).Return(nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, specService)
 
@@ -334,7 +280,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should create connected-app label if not provided", func(t *testing.T) {
@@ -359,12 +305,14 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			API:                 nil,
 			Events:              false,
 		}
+		specData := newSpecData("uuid-1", nil, nil, nil, "")
+
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", empty, empty, empty).Return(nil)
+		specService := new(specmocks.SpecService)
+		specService.On("SaveServiceSpecs", specData).Return(nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, specService)
 
@@ -377,7 +325,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should return error when adding API fails", func(t *testing.T) {
@@ -410,75 +358,25 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceAPIService.AssertExpectations(t)
 	})
 
-	t.Run("should return error when failed to unmarshal api spec", func(t *testing.T) {
+	t.Run("should return error when saving spec fails", func(t *testing.T) {
 		// given
-		serviceAPI := &serviceapi.API{
-			TargetUrl: "http://target.com",
-			Credentials: &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
-					URL:          "http://oauth.com/token",
-					ClientID:     "clientId",
-					ClientSecret: "clientSecret",
-				},
-			},
-			Spec: []byte("invalid spec"),
+		events := &specification.Events{
+			Spec: []byte("events spec"),
 		}
 		serviceDefinition := ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Api:         serviceAPI,
-			Events: &specification.Events{
-				Spec: []byte("events spec"),
-			},
-			Documentation: []byte("documentation"),
-		}
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com/token",
-			AccessLabel:           "access-label",
-			GatewayURL:            "gateway-url",
-			CredentialsSecretName: "secret-name",
-		}
-		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
-		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("New", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		minioService := new(miniomocks.Service)
-
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
-
-		// when
-		serviceID, err := service.Create("re", &serviceDefinition)
-
-		// then
-		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
-		assert.Equal(t, "", serviceID)
-
-		uuidGenerator.AssertExpectations(t)
-		serviceAPIService.AssertExpectations(t)
-		serviceRepository.AssertExpectations(t)
-	})
-
-	t.Run("should return error when adding spec to Minio fails", func(t *testing.T) {
-		// given
-		serviceDefinition := ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Api:         nil,
-			Events: &specification.Events{
-				Spec: []byte("events spec"),
-			},
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Api:           nil,
+			Events:        events,
 			Documentation: nil,
 		}
+		specData := newSpecData("uuid-1", nil, events, nil, "")
 
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", empty, empty, []byte("events spec")).Return(apperrors.Internal("Error"))
+		specService := new(specmocks.SpecService)
+		specService.On("SaveServiceSpecs", specData).Return(apperrors.Internal("error"))
 
 		service := NewServiceDefinitionService(uuidGenerator, nil, nil, specService)
 
@@ -489,7 +387,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		require.Error(t, err)
 
 		uuidGenerator.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should return error when creating service in remote environment fails", func(t *testing.T) {
@@ -507,7 +405,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			TargetUrl:             "http://target.com",
 			OauthUrl:              "",
 			AccessLabel:           "access-label",
-			GatewayURL:            "gateway-utr",
+			GatewayURL:            "gateway-url",
 			CredentialsSecretName: "",
 		}
 		remoteEnvService := remoteenv.Service{
@@ -521,14 +419,16 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			API:                 remoteEnvServiceAPI,
 			Events:              false,
 		}
+		specData := newSpecData("uuid-1", serviceAPI, nil, nil, "gateway-url")
+
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("New", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(apperrors.Internal("some error"))
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", empty, empty, empty).Return(nil)
+		specService := new(specmocks.SpecService)
+		specService.On("SaveServiceSpecs", specData).Return(nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
@@ -543,7 +443,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.AssertExpectations(t)
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should return an error when identifier conflict occurs", func(t *testing.T) {
@@ -695,8 +595,8 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		serviceAPIService.On("Read", "re", remoteEnvServiceAPI).Return(serviceAPI, nil)
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
-		minioService := new(miniomocks.Service)
-		minioService.On("Get", "uuid-1").Return(empty, empty, empty, nil)
+		specService := new(specmocks.SpecService)
+		specService.On("GetSpec", "uuid-1").Return(empty, empty, empty, nil)
 
 		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
@@ -717,7 +617,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should return error when getting service from remote environment fails", func(t *testing.T) {
@@ -759,8 +659,8 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		serviceAPIService.On("Read", "re", remoteEnvServiceAPI).Return(nil, apperrors.Internal("api error"))
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
-		minioService := new(miniomocks.Service)
-		minioService.On("Get", "uuid-1").Return(empty, empty, empty, nil)
+		specService := new(specmocks.SpecService)
+		specService.On("GetSpec", "uuid-1").Return(empty, empty, empty, nil)
 
 		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
@@ -772,7 +672,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		assert.Contains(t, err.Error(), "api error")
 	})
 
-	t.Run("should return error when reading specs from Minio fails", func(t *testing.T) {
+	t.Run("should return error when reading specs fails", func(t *testing.T) {
 		// given
 		remoteEnvService := remoteenv.Service{
 			ID:                  "uuid-1",
@@ -786,8 +686,8 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
-		minioService := new(miniomocks.Service)
-		minioService.On("Get", "uuid-1").Return(empty, empty, empty, apperrors.Internal("error"))
+		specService := new(specmocks.SpecService)
+		specService.On("GetSpec", "uuid-1").Return(empty, empty, empty, apperrors.Internal("error"))
 
 		service := NewServiceDefinitionService(nil, nil, serviceRepository, specService)
 
@@ -799,7 +699,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		assert.Contains(t, err.Error(), "error")
 
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 }
 
@@ -819,16 +719,20 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Spec: []byte("{\"api\":\"spec\"}"),
 		}
 
+		events := &specification.Events{
+			Spec: []byte("events spec"),
+		}
+
+		docs := []byte("documentation")
+
 		serviceDefinition := ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Identifier:  "Identifier",
-			Api:         serviceAPI,
-			Events: &specification.Events{
-				Spec: []byte("events spec"),
-			},
-			Documentation: []byte("documentation"),
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Identifier:    "Identifier",
+			Api:           serviceAPI,
+			Events:        events,
+			Documentation: docs,
 		}
 
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
@@ -851,6 +755,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			API:                 remoteEnvServiceAPI,
 			Events:              true,
 		}
+		specData := newSpecData("uuid-1", serviceAPI, events, docs, "gateway-url")
 
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
@@ -863,9 +768,9 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(nil)
-		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
+		specService := new(specmocks.SpecService)
+		specService.On("SaveServiceSpecs", specData).Return(nil)
+		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
@@ -877,7 +782,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should return not found when update a not existing service", func(t *testing.T) {
@@ -895,13 +800,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceDefinition := ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Api:         serviceAPI,
-			Events: &specification.Events{
-				Spec: []byte("events spec"),
-			},
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Api:           serviceAPI,
 			Documentation: []byte("documentation"),
 		}
 
@@ -923,9 +825,8 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(nil)
-		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
+		specService := new(specmocks.SpecService)
+		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
@@ -939,16 +840,20 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 	t.Run("should update a service when no API was given", func(t *testing.T) {
 		// given
+		events := &specification.Events{
+			Spec: []byte("events spec"),
+		}
+
+		docs := []byte("documentation")
+
 		serviceDefinition := ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Identifier:  "Identifier",
-			Api:         nil,
-			Events: &specification.Events{
-				Spec: []byte("events spec"),
-			},
-			Documentation: []byte("documentation"),
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Identifier:    "Identifier",
+			Api:           nil,
+			Events:        events,
+			Documentation: docs,
 		}
 
 		remoteEnvService := remoteenv.Service{
@@ -963,6 +868,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			API:                 nil,
 			Events:              true,
 		}
+		specData := newSpecData("uuid-1", nil, events, docs, "")
 
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Delete", "re", "uuid-1").Return(nil)
@@ -974,9 +880,9 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", []byte("documentation"), []byte(nil), []byte("events spec")).Return(nil)
-		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
+		specService := new(specmocks.SpecService)
+		specService.On("SaveServiceSpecs", specData).Return(nil)
+		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
@@ -988,21 +894,20 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should preserve a service identifier", func(t *testing.T) {
 		// given
+		docs := []byte("documentation")
+
 		serviceDefinition := ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Identifier:  "DifferentIdentifier",
-			Api:         nil,
-			Events: &specification.Events{
-				Spec: []byte("events spec"),
-			},
-			Documentation: []byte("documentation"),
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Identifier:    "DifferentIdentifier",
+			Api:           nil,
+			Documentation: docs,
 		}
 
 		remoteEnvService := remoteenv.Service{
@@ -1015,8 +920,9 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
-			Events:              true,
+			Events:              false,
 		}
+		specData := newSpecData("uuid-1", nil, nil, docs, "")
 
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Delete", "re", "uuid-1").Return(nil)
@@ -1028,9 +934,9 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", []byte("documentation"), []byte(nil), []byte("events spec")).Return(nil)
-		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
+		specService := new(specmocks.SpecService)
+		specService.On("SaveServiceSpecs", specData).Return(nil)
+		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
@@ -1042,7 +948,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should return an error if cache initialization failed", func(t *testing.T) {
@@ -1093,9 +999,8 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", []byte("documentation"), []byte(nil), []byte("events spec")).Return(nil)
-		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
+		specService := new(specmocks.SpecService)
+		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
@@ -1158,9 +1063,8 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", []byte("documentation"), []byte(nil), []byte("events spec")).Return(nil)
-		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
+		specService := new(specmocks.SpecService)
+		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
@@ -1177,6 +1081,8 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 	t.Run("should return an error if Minio data update failed", func(t *testing.T) {
 		// given
+		docs := []byte("documentation")
+
 		serviceAPI := &serviceapi.API{
 			TargetUrl: "http://target.com",
 			Credentials: &serviceapi.Credentials{
@@ -1190,15 +1096,12 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceDefinition := ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Identifier:  "Identifier",
-			Api:         serviceAPI,
-			Events: &specification.Events{
-				Spec: []byte("events spec"),
-			},
-			Documentation: []byte("documentation"),
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Identifier:    "Identifier",
+			Api:           serviceAPI,
+			Documentation: docs,
 		}
 
 		remoteEnvService := remoteenv.Service{
@@ -1211,8 +1114,9 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Labels:              map[string]string{"connected-app": "re"},
 			Tags:                make([]string, 0),
 			API:                 nil,
-			Events:              true,
+			Events:              false,
 		}
+		specData := newSpecData("uuid-1", serviceAPI, nil, docs, "")
 
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(&remoteenv.ServiceAPI{}, nil)
@@ -1223,9 +1127,9 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(apperrors.Internal("an error"))
-		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
+		specService := new(specmocks.SpecService)
+		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
+		specService.On("SaveServiceSpecs", specData).Return(apperrors.Internal("Error"))
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
@@ -1238,11 +1142,17 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		assert.NotEmpty(t, err.Error())
 
 		serviceAPIService.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should return an error if remoteenv update failed", func(t *testing.T) {
 		// given
+		docs := []byte("documentation")
+
+		events := &specification.Events{
+			Spec: []byte("events spec"),
+		}
+
 		serviceAPI := &serviceapi.API{
 			TargetUrl: "http://target.com",
 			Credentials: &serviceapi.Credentials{
@@ -1256,15 +1166,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceDefinition := ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Identifier:  "Identifier",
-			Api:         serviceAPI,
-			Events: &specification.Events{
-				Spec: []byte("events spec"),
-			},
-			Documentation: []byte("documentation"),
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Identifier:    "Identifier",
+			Api:           serviceAPI,
+			Events:        events,
+			Documentation: docs,
 		}
 
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
@@ -1287,6 +1195,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			API:                 remoteEnvServiceAPI,
 			Events:              true,
 		}
+		specData := newSpecData("uuid-1", serviceAPI, events, docs, "gateway-url")
 
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
@@ -1299,9 +1208,9 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 
-		minioService := new(miniomocks.Service)
-		minioService.On("Put", "uuid-1", []byte("documentation"), []byte("{\"api\":\"spec\"}"), []byte("events spec")).Return(nil)
-		minioService.On("Get", "uuid-1").Return(nil, nil, nil, nil)
+		specService := new(specmocks.SpecService)
+		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
+		specService.On("SaveServiceSpecs", specData).Return(nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
@@ -1315,7 +1224,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 }
 
@@ -1332,8 +1241,8 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 
-		minioService := new(miniomocks.Service)
-		minioService.On("Remove", "uuid-1").Return(nil)
+		specService := new(specmocks.SpecService)
+		specService.On("RemoveSpec", "uuid-1").Return(nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
 
@@ -1345,7 +1254,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 
 	t.Run("should return an error if API deletion failed", func(t *testing.T) {
@@ -1399,8 +1308,8 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Delete", "re", "uuid-1").Return(nil)
 
-		minioService := new(miniomocks.Service)
-		minioService.On("Remove", "uuid-1").Return(apperrors.Internal("an error"))
+		specService := new(specmocks.SpecService)
+		specService.On("RemoveSpec", "uuid-1").Return(apperrors.Internal("an error"))
 
 		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
@@ -1414,7 +1323,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		minioService.AssertExpectations(t)
+		specService.AssertExpectations(t)
 	})
 }
 
@@ -1523,4 +1432,14 @@ func compact(src []byte) []byte {
 		return src
 	}
 	return buffer.Bytes()
+}
+
+func newSpecData(id string, api *serviceapi.API, events *specification.Events, docs []byte, gatewayUrl string) specification.SpecData {
+	return specification.SpecData{
+		Id:         id,
+		API:        api,
+		Events:     events,
+		Docs:       docs,
+		GatewayUrl: gatewayUrl,
+	}
 }
