@@ -49,6 +49,11 @@ func validateApiSpec(api *API) apperrors.AppError {
 		if err != nil {
 			return apperrors.WrongInput("api.Spec is not a proper json object, %s", err.Error())
 		}
+
+		err = validateApiCredentials(api.Credentials)
+		if err != nil {
+			return apperrors.WrongInput("api.Credentials is invalid: %s", err.Error())
+		}
 	}
 
 	return nil
@@ -59,6 +64,16 @@ func validateEventsSpec(events *Events) apperrors.AppError {
 		err := validateSpec(events.Spec)
 		if err != nil {
 			return apperrors.WrongInput("events.Spec is not a proper json object, %s", err.Error())
+		}
+	}
+
+	return nil
+}
+
+func validateApiCredentials(credentials *Credentials) apperrors.AppError {
+	if credentials != nil {
+		if credentials.Basic != nil && credentials.Oauth != nil {
+			return apperrors.WrongInput("both basic and oauth credentials provided")
 		}
 	}
 

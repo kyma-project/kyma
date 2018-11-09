@@ -191,6 +191,31 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 		assert.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
+
+	t.Run("should not accept API spec with more than 1 type of auth", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				Credentials: &Credentials{
+					Oauth: &Oauth{},
+					Basic: &BasicAuth{},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	})
 }
 
 func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
