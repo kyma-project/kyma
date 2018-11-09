@@ -45,6 +45,17 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: connector-service-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: application-connector
+data:
+  connector-service.tests.skipSslVerify: "__SKIP__SLL_VERIFICATION__"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: core-overrides
   namespace: kyma-installer
   labels:
