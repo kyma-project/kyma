@@ -8,7 +8,7 @@ UI Contracts are contracts between the Service Catalog views in the Kyma Console
 There are three types of OSBA fields:
 * mandatory fields, which are crucial to define
 * optional fields, which you can but do not have to define
-* conventions, which are proposed fields that can be passed in the `metadata` object
+* conventions, which are proposed fields that can be passed in the **metadata** object
 
 The Service Catalog is OSBA-compliant, which means that you can register a Service Class that has only the mandatory fields.
 However, it is recommended to provide more detailed Service Class definitions for better user experience.
