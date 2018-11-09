@@ -51,7 +51,7 @@ metadata:
     installer: overrides
     component: application-connector
 data:
-  connector-service.tests.skipSslVerify: "__SKIP__SLL_VERIFY__"
+  connector-service.tests.skipSslVerify: "__SKIP_SLL_VERIFY__"
 ---
 apiVersion: v1
 kind: ConfigMap
