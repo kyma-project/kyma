@@ -26,6 +26,19 @@ function require_istio_system() {
     kubectl get namespace istio-system
 }
 
+function require_mtls_disabled() {
+    let result
+    set +e
+    kubectl get meshpolicy default
+    result=$?
+    set -e
+    if [[ ${result} -eq 0 ]]; then
+        echo "mTLS must be disabled"
+        exit 1
+    fi
+}
+
+
 function run_all_patches() {
   echo "--> Patch resources"
   for f in $(find ${CONFIG_DIR} -name '*\.patch\.json' -maxdepth 1); do
@@ -92,6 +105,7 @@ function check_requirements() {
 
 require_istio_system
 require_istio_version
+require_mtls_disabled
 check_requirements
 configure_sidecar_injector
 run_all_patches
