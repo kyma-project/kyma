@@ -37,7 +37,7 @@ RBAC in Istio is based on these concepts:
   for the `USER_EMAIL` user, you must define the following Service Role Binding:  
 
   ```yaml
-  apiVersion: "config.istio.io/v1alpha2"
+  apiVersion: "rbac.istio.io/v1alpha1"
   kind: ServiceRoleBinding
   metadata:
     name: BINDING_NAME
@@ -94,7 +94,7 @@ To create the role for the query, use the following command:
 ```bash
 cat <<EOF | kubectl create -f -
 ---
-apiVersion: "config.istio.io/v1alpha2"
+apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRole
 metadata:
   name: graphql-groups-read
@@ -113,7 +113,7 @@ The following Service Role Binding grants `graphql-groups-read` role to the `adm
 ```bash
 cat <<EOF | kubectl create -f -
 ---
-apiVersion: "config.istio.io/v1alpha2"
+apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRoleBinding
 metadata:
   name: admin-graphql-groups-read
