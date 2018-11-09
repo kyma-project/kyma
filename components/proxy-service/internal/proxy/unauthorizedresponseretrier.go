@@ -38,7 +38,9 @@ func (rr *retrier) RetryIfFailedToAuthorize(r *http.Response) error {
 		}
 
 		if res != nil {
-			r.Body.Close()
+			if r.Body != nil {
+				r.Body.Close()
+			}
 			*r = *res
 		}
 

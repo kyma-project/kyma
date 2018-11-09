@@ -28,7 +28,9 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		require.NoError(t, err)
+
 		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
@@ -81,7 +83,9 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		require.NoError(t, err)
+
 		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
@@ -123,7 +127,9 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		require.NoError(t, err)
+
 		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
@@ -164,7 +170,9 @@ func TestProxy(t *testing.T) {
 		})
 		defer ts.Close()
 
-		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		require.NoError(t, err)
+
 		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
@@ -226,44 +234,6 @@ func TestProxy(t *testing.T) {
 	t.Run("should invalidate proxy and retry when 401 occurred", func(t *testing.T) {
 		// given
 		tsf := NewTestServerForRetryTest(http.StatusUnauthorized, func(req *http.Request) {
-			assert.Equal(t, req.Method, http.MethodGet)
-			assert.Equal(t, req.RequestURI, "/orders/123")
-		})
-		defer tsf.Close()
-
-		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
-
-		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
-		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&serviceapi.API{
-			TargetUrl: tsf.URL,
-		}, nil).Twice()
-
-		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("AddAuthorizationHeader", mock.Anything).Return(nil).Twice()
-		authStrategyMock.On("Invalidate").Return().Once()
-
-		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", mock.Anything).Return(authStrategyMock).Twice()
-
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, createProxyConfig(proxyTimeout))
-		rr := httptest.NewRecorder()
-
-		// when
-		handler.ServeHTTP(rr, req)
-
-		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, "test", rr.Body.String())
-
-		serviceDefServiceMock.AssertExpectations(t)
-		authStrategyFactoryMock.AssertExpectations(t)
-		authStrategyMock.AssertExpectations(t)
-	})
-
-	t.Run("should invalidate proxy and retry when 403 occurred", func(t *testing.T) {
-		// given
-		tsf := NewTestServerForRetryTest(http.StatusForbidden, func(req *http.Request) {
 			assert.Equal(t, req.Method, http.MethodGet)
 			assert.Equal(t, req.RequestURI, "/orders/123")
 		})
