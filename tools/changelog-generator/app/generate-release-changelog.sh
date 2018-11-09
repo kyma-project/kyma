@@ -9,15 +9,19 @@ fi
 
 source ${APP_PATH}/config-setup.sh
 
-mkdir -p ${RELEASE_CHANGELOG_FILE_DIRECTORY}
-if [ -n "$FROM_TAG" ]; then
-    echo "Getting new changes starting from the '${FROM_TAG}' tag to '${NEW_RELEASE_TITLE}' tag..."
-    lerna-changelog --from=${FROM_TAG} --to=${NEW_RELEASE_TITLE} | sed -e "s/## Unreleased/## ${NEW_RELEASE_TITLE}/g" > ${RELEASE_CHANGELOG_FILE_PATH}
-else
+if [ -z "$FROM_TAG" ]; then
     REVISION=$(git rev-list --tags --max-count=1)
-    LAST_VERSION_TAG=$(git describe --tags ${REVISION});
-    echo "Getting new changes starting from the '${LAST_VERSION_TAG}' tag..."
-    lerna-changelog --from=${LAST_VERSION_TAG} | sed -e "s/## Unreleased/## ${NEW_RELEASE_TITLE}/g" > ${RELEASE_CHANGELOG_FILE_PATH}
+    FROM_TAG=$(git describe --tags ${REVISION});
 fi
+
+TO_ARGUMENT=""
+if [ -n "$TO_TAG" ]; then
+    TO_ARGUMENT="--to=${TO_TAG}"
+    TO_ARGUMENT_MSG="to '${TO_TAG}' tag"
+fi
+
+mkdir -p ${RELEASE_CHANGELOG_FILE_DIRECTORY}
+echo "Getting new changes starting from the '${FROM_TAG}' tag ${TO_ARGUMENT_MSG}..."
+eval "lerna-changelog --from=${FROM_TAG} ${TO_ARGUMENT}" | sed -e "s/## Unreleased/## ${NEW_RELEASE_TITLE}/g" > ${RELEASE_CHANGELOG_FILE_PATH}
 
 source ${APP_PATH}/config-cleanup.sh
