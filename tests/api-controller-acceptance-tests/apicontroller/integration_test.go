@@ -39,7 +39,7 @@ func TestIntegrationSpec(t *testing.T) {
 
 	log.Infof("Running test: %s", testId)
 
-	httpClient, err := newHttpClient(testId, domainName)
+	httpClient, err := ctx.newHttpClient(testId, domainName)
 	if err != nil {
 		t.Fatalf("Error while creating HTTP client. Root cause: %v", err)
 	}
@@ -125,7 +125,7 @@ func (ctx integrationTestContext) apiFor(testId, domainName string, svc *apiv1.S
 			Name:      fmt.Sprintf("sample-app-api-%s", testId),
 		},
 		Spec: kymaApi.ApiSpec{
-			Hostname: ctx. hostnameFor(testId, domainName, hostWithDomain),
+			Hostname: ctx.hostnameFor(testId, domainName, hostWithDomain),
 			Service: kymaApi.Service{
 				Name: svc.Name,
 				Port: int(svc.Spec.Ports[0].Port),

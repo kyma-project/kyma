@@ -392,6 +392,6 @@ func (componentTestContext) cleanUpApi(kymaClient *kyma.Clientset, api * kymaApi
 	}
 	err := kymaClient.GatewayV1alpha2().Apis(namespace).Delete(api.Name, &metav1.DeleteOptions{})
 	if !allowMissing && err != nil {
-		t.Fatalf("Cannot clean up API: %s", err)
+		t.Fatalf("Cannot clean up API %s: %s", api.Name, err)
 	}
 }
