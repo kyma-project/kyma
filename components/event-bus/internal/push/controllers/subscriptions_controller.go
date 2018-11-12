@@ -5,9 +5,9 @@ import (
 
 	"time"
 
-	subscriptionApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
+	subscriptionApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
-	"github.com/kyma-project/kyma/components/event-bus/generated/push/informers/externalversions/eventing.kyma.cx/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/generated/push/informers/externalversions/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/push/actors"
 	"github.com/kyma-project/kyma/components/event-bus/internal/push/opts"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
