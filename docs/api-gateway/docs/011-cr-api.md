@@ -59,6 +59,8 @@ When you fetch an existing Api CR, the system adds the **status** section which 
 | **status.authenticationStatus.resource.uid** | UID of the created Authentication Policy. |
 | **status.authenticationStatus.resource.version** | Version of the created Authentication Policy. |
 
+>**NOTE:** The **authenticationStatus** section is optional and is created only when authentication is enabled for the given API.
+
 
 ### Status codes
 
