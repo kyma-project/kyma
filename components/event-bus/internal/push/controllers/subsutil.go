@@ -3,7 +3,7 @@ package controllers
 import (
 	"log"
 
-	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
+	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 )
 
 func checkSubscriptions(oldObj, newObj interface{}) (*subApis.Subscription, *subApis.Subscription, bool) {
