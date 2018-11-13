@@ -57,8 +57,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  source = "https://github.com/sjanota/kyma"
-  revision = "a13f879"
+  revision = "343d311bb9f41f217ff66869cb7398b2d8d7ae43"
 
 [[override]]
   name = "k8s.io/api"
