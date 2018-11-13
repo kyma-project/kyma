@@ -37,7 +37,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 		oauthClientMock.AssertNotCalled(t, "GetToken")
 	})
 
-	t.Run("should use provider strategy when external token header is missing", func(t *testing.T) {
+	t.Run("should use provided strategy when external token header is missing", func(t *testing.T) {
 		// given
 		oauthClientMock := &mocks.Client{}
 		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token").Return("token", nil).Once()
