@@ -103,6 +103,10 @@ func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 	return p.cache.Put(id, proxy, authorizationStrategy), nil
 }
 
+func (p *proxy) newAuthorizationStrategy(credentials *metadatamodel.Credentials) authorization.Strategy {
+	return p.authorizationStrategyFactory.Create(credentials)
+}
+
 func (p *proxy) prepareRequest(r *http.Request, cacheEntry *CacheEntry) (*http.Request, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(p.proxyTimeout)*time.Second)
 	newRequest := r.WithContext(ctx)
@@ -112,37 +116,6 @@ func (p *proxy) prepareRequest(r *http.Request, cacheEntry *CacheEntry) (*http.R
 
 func (p *proxy) addAuthorizationHeader(r *http.Request, cacheEntry *CacheEntry) apperrors.AppError {
 	return cacheEntry.AuthorizationStrategy.AddAuthorizationHeader(r)
-}
-
-func (p *proxy) newAuthorizationStrategy(credentials *metadatamodel.Credentials) authorization.Strategy {
-	authCredentials := authorization.Credentials{}
-
-	if oauthCredentialsProvided(credentials) {
-		authCredentials = authorization.Credentials{
-			Oauth: &authorization.OauthCredentials{
-				ClientId:     credentials.Oauth.ClientID,
-				ClientSecret: credentials.Oauth.ClientSecret,
-				Url:          credentials.Oauth.URL,
-			},
-		}
-	} else if basicAuthCredentialsProvided(credentials) {
-		authCredentials = authorization.Credentials{
-			Basic: &authorization.BasicAuthCredentials{
-				Username: credentials.Basic.Username,
-				Password: credentials.Basic.Password,
-			},
-		}
-	}
-
-	return p.authorizationStrategyFactory.Create(authCredentials)
-}
-
-func oauthCredentialsProvided(credentials *metadatamodel.Credentials) bool {
-	return credentials != nil && credentials.Oauth != nil
-}
-
-func basicAuthCredentialsProvided(credentials *metadatamodel.Credentials) bool {
-	return credentials != nil && credentials.Basic != nil
 }
 
 func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry *CacheEntry) {

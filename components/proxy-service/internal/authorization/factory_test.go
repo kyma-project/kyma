@@ -3,6 +3,7 @@ package authorization
 import (
 	oauthMocks "github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/mocks"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
+	metadatamodel "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net/http"
@@ -15,10 +16,9 @@ func TestStrategyFactory(t *testing.T) {
 		oauthClientMock := &oauthMocks.Client{}
 
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
-		credentials := Credentials{}
 
 		// when
-		strategy := factory.Create(credentials)
+		strategy := factory.Create(nil)
 
 		// then
 		require.NotNil(t, strategy)
@@ -55,8 +55,8 @@ func TestStrategyFactory(t *testing.T) {
 		oauthClientMock := &oauthMocks.Client{}
 
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
-		credentials := Credentials{
-			Basic: &BasicAuthCredentials{
+		credentials := &metadatamodel.Credentials{
+			BasicAuth: &metadatamodel.BasicAuth{
 				Username: "username",
 				Password: "password",
 			},
@@ -101,11 +101,11 @@ func TestStrategyFactory(t *testing.T) {
 		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token").Return("token", nil)
 
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
-		credentials := Credentials{
-			Oauth: &OauthCredentials{
-				ClientId:     "clientId",
+		credentials := &metadatamodel.Credentials{
+			OAuth: &metadatamodel.OAuth{
+				ClientID:     "clientId",
 				ClientSecret: "clientSecret",
-				Url:          "www.example.com/token",
+				URL:          "www.example.com/token",
 			},
 		}
 

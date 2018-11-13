@@ -4,6 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/tokencache"
+	metadatamodel "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/model"
 	"net/http"
 )
 
@@ -16,7 +17,7 @@ type Strategy interface {
 
 type StrategyFactory interface {
 	// Creates strategy for credentials provided
-	Create(credentials Credentials) Strategy
+	Create(credentials *metadatamodel.Credentials) Strategy
 }
 
 type OAuthClient interface {
@@ -30,30 +31,15 @@ type authorizationStrategyFactory struct {
 	oauthClient OAuthClient
 }
 
-type OauthCredentials struct {
-	Url          string
-	ClientId     string
-	ClientSecret string
-}
-
-type BasicAuthCredentials struct {
-	Username string
-	Password string
-}
-
-type Credentials struct {
-	Oauth *OauthCredentials
-	Basic *BasicAuthCredentials
-}
-
 // Create creates strategy for credentials provided
-func (asf authorizationStrategyFactory) Create(c Credentials) Strategy {
-	if c.Oauth != nil {
-		oauthStrategy := newOAuthStrategy(asf.oauthClient, c.Oauth.ClientId, c.Oauth.ClientSecret, c.Oauth.Url)
+func (asf authorizationStrategyFactory) Create(c *metadatamodel.Credentials) Strategy {
+
+	if c != nil && c.OAuth != nil {
+		oauthStrategy := newOAuthStrategy(asf.oauthClient, c.OAuth.ClientID, c.OAuth.ClientSecret, c.OAuth.URL)
 
 		return newExternalTokenStrategy(oauthStrategy)
-	} else if c.Basic != nil {
-		basicAuthStrategy := newBasicAuthStrategy(c.Basic.Username, c.Basic.Password)
+	} else if c != nil && c.BasicAuth != nil {
+		basicAuthStrategy := newBasicAuthStrategy(c.BasicAuth.Username, c.BasicAuth.Password)
 
 		return newExternalTokenStrategy(basicAuthStrategy)
 	} else {

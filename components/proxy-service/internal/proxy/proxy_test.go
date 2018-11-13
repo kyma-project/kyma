@@ -3,7 +3,6 @@ package proxy
 import (
 	"encoding/json"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization"
 	authMock "github.com/kyma-project/kyma/components/proxy-service/internal/authorization/mocks"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httperrors"
 	metadataMock "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/mocks"
@@ -37,7 +36,7 @@ func TestProxy(t *testing.T) {
 		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(nil).Twice()
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", authorization.Credentials{}).Return(authStrategyMock).Once()
+		authStrategyFactoryMock.On("Create", (*metadatamodel.Credentials)(nil)).Return(authStrategyMock).Once()
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
@@ -100,7 +99,7 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
 			Credentials: &metadatamodel.Credentials{
-				Oauth: &metadatamodel.Oauth{
+				OAuth: &metadatamodel.OAuth{
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
 					URL:          tsOAuth.URL + "/token",
@@ -119,7 +118,7 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, "test", rr.Body.String())
 	})
 
-	t.Run("should proxy Basic auth calls", func(t *testing.T) {
+	t.Run("should proxy BasicAuth auth calls", func(t *testing.T) {
 		// given
 		ts := NewTestServer(func(req *http.Request) {
 			assert.Equal(t, req.Method, http.MethodGet)
@@ -144,7 +143,7 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
 			Credentials: &metadatamodel.Credentials{
-				Basic: &metadatamodel.Basic{
+				BasicAuth: &metadatamodel.BasicAuth{
 					Username: "username",
 					Password: "password",
 				},
@@ -187,7 +186,7 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
 			TargetUrl: ts.URL,
 			Credentials: &metadatamodel.Credentials{
-				Oauth: &metadatamodel.Oauth{
+				OAuth: &metadatamodel.OAuth{
 					ClientID:     "clientId",
 					ClientSecret: "clientSecret",
 					URL:          "www.example.com/token",
@@ -327,17 +326,17 @@ func createProxyConfig(proxyTimeout int) Config {
 	}
 }
 
-func createOAuthCredentialsMatcher(clientId, clientSecret, url string) func(authorization.Credentials) bool {
-	return func(c authorization.Credentials) bool {
-		return c.Oauth != nil && c.Oauth.ClientId == clientId &&
-			c.Oauth.ClientSecret == clientSecret &&
-			c.Oauth.Url == url
+func createOAuthCredentialsMatcher(clientId, clientSecret, url string) func(*metadatamodel.Credentials) bool {
+	return func(c *metadatamodel.Credentials) bool {
+		return c.OAuth != nil && c.OAuth.ClientID == clientId &&
+			c.OAuth.ClientSecret == clientSecret &&
+			c.OAuth.URL == url
 	}
 }
 
-func createBasicCredentialsMatcher(username, password string) func(authorization.Credentials) bool {
-	return func(c authorization.Credentials) bool {
-		return c.Basic != nil && c.Basic.Username == username &&
-			c.Basic.Password == password
+func createBasicCredentialsMatcher(username, password string) func(*metadatamodel.Credentials) bool {
+	return func(c *metadatamodel.Credentials) bool {
+		return c.BasicAuth != nil && c.BasicAuth.Username == username &&
+			c.BasicAuth.Password == password
 	}
 }

@@ -39,9 +39,9 @@ func TestDefaultService_Read(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, "http://target.com", api.TargetUrl)
-		assert.Equal(t, "http://oauth.com", api.Credentials.Oauth.URL)
-		assert.Equal(t, "clientId", api.Credentials.Oauth.ClientID)
-		assert.Equal(t, "clientSecret", api.Credentials.Oauth.ClientSecret)
+		assert.Equal(t, "http://oauth.com", api.Credentials.OAuth.URL)
+		assert.Equal(t, "clientId", api.Credentials.OAuth.ClientID)
+		assert.Equal(t, "clientSecret", api.Credentials.OAuth.ClientSecret)
 		assert.Nil(t, api.Spec)
 
 		secretsRepository.AssertExpectations(t)

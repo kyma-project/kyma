@@ -28,23 +28,23 @@ type API struct {
 	Spec []byte
 }
 
-// Credentials contains OAuth or Basic Auth configuration.
+// Credentials contains OAuth or BasicAuth configuration.
 type Credentials struct {
-	// Oauth is OAuth configuration.
-	Oauth *Oauth
-	Basic *Basic
+	// OAuth is OAuth configuration.
+	OAuth     *OAuth
+	BasicAuth *BasicAuth
 }
 
-// Basic contains details of Basic Auth configuration
-type Basic struct {
+// BasicAuth contains details of BasicAuth Auth configuration
+type BasicAuth struct {
 	// Username to use for authentication
 	Username string
 	// Password to use for authentication
 	Password string
 }
 
-// Oauth contains details of OAuth configuration
-type Oauth struct {
+// OAuth contains details of OAuth configuration
+type OAuth struct {
 	// URL to OAuth token provider.
 	URL string
 	// ClientID to use for authorization.

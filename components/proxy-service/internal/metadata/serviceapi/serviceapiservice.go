@@ -13,7 +13,7 @@ const (
 	UsernameKey     = "username"
 	PasswordKey     = "password"
 	TypeOAuth       = "OAuth"
-	TypeBasic       = "Basic"
+	TypeBasic       = "BasicAuth"
 )
 
 // Service manages API definition of a service
@@ -50,11 +50,11 @@ func (sas defaultService) Read(remoteenvAPI *remoteenv.ServiceAPI) (*model.API, 
 
 		if credentialsType == TypeOAuth {
 			api.Credentials = &model.Credentials{
-				Oauth: getOAuthCredentials(secret, remoteenvAPI.Credentials.Url),
+				OAuth: getOAuthCredentials(secret, remoteenvAPI.Credentials.Url),
 			}
 		} else if credentialsType == TypeBasic {
 			api.Credentials = &model.Credentials{
-				Basic: getBasicAuthCredentials(secret),
+				BasicAuth: getBasicAuthCredentials(secret),
 			}
 		} else {
 			api.Credentials = nil
@@ -64,16 +64,16 @@ func (sas defaultService) Read(remoteenvAPI *remoteenv.ServiceAPI) (*model.API, 
 	return api, nil
 }
 
-func getOAuthCredentials(secret map[string][]byte, url string) *model.Oauth {
-	return &model.Oauth{
+func getOAuthCredentials(secret map[string][]byte, url string) *model.OAuth {
+	return &model.OAuth{
 		ClientID:     string(secret[ClientIDKey]),
 		ClientSecret: string(secret[ClientSecretKey]),
 		URL:          url,
 	}
 }
 
-func getBasicAuthCredentials(secret map[string][]byte) *model.Basic {
-	return &model.Basic{
+func getBasicAuthCredentials(secret map[string][]byte) *model.BasicAuth {
+	return &model.BasicAuth{
 		Username: string(secret[UsernameKey]),
 		Password: string(secret[PasswordKey]),
 	}
