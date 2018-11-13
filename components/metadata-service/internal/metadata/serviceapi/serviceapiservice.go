@@ -50,17 +50,21 @@ func (sas defaultService) New(remoteEnvironment, id string, api *model.API) (*re
 	serviceAPI := &remoteenv.ServiceAPI{}
 	serviceAPI.TargetUrl = api.TargetUrl
 	serviceAPI.GatewayURL = gatewayUrl
+	serviceAPI.AccessLabel = resourceName
 
 	err := sas.accessServiceManager.Create(remoteEnvironment, id, resourceName)
 	if err != nil {
 		return nil, apperrors.Internal("Creating access service failed, %s", err.Error())
 	}
 
-	serviceAPI.AccessLabel = resourceName
+	if api.Credentials != nil {
+		credentials, err := sas.secretsService.Create(remoteEnvironment, resourceName, api.Credentials)
+		if err != nil {
+			return nil, err
+		}
 
-	serviceAPI, err = sas.handleCredentialsCreate(remoteEnvironment, id, serviceAPI, api.Credentials)
-	if err != nil {
-		return nil, err
+		serviceAPI.Credentials = credentials
+		serviceAPI.Credentials.SecretName = sas.nameResolver.GetResourceName(remoteEnvironment, id)
 	}
 
 	err = sas.istioService.Create(remoteEnvironment, id, resourceName)
@@ -72,12 +76,17 @@ func (sas defaultService) New(remoteEnvironment, id string, api *model.API) (*re
 }
 
 func (sas defaultService) Read(remoteEnvironment string, remoteenvAPI *remoteenv.ServiceAPI) (*model.API, apperrors.AppError) {
-	api, err := sas.handleCredentialsFetch(remoteEnvironment, remoteenvAPI)
-	if err != nil {
-		return nil, err
-	}
-
+	api := &model.API{}
 	api.TargetUrl = remoteenvAPI.TargetUrl
+
+	if remoteenvAPI.Credentials.Type != "" {
+		credentials, err := sas.secretsService.Get(remoteEnvironment, remoteenvAPI.Credentials)
+		if err != nil {
+			return nil, err
+		}
+
+		api.Credentials = &credentials
+	}
 
 	return api, nil
 }
@@ -90,7 +99,7 @@ func (sas defaultService) Delete(remoteEnvironment, id string) apperrors.AppErro
 		return apperrors.Internal("Deleting access service failed, %s", err.Error())
 	}
 
-	err = sas.secretsService.DeleteSecret(resourceName)
+	err = sas.secretsService.Delete(resourceName)
 	if err != nil {
 		return apperrors.Internal("Deleting credentials secret failed, %s", err.Error())
 	}
@@ -110,17 +119,26 @@ func (sas defaultService) Update(remoteEnvironment, id string, api *model.API) (
 	serviceAPI := &remoteenv.ServiceAPI{}
 	serviceAPI.TargetUrl = api.TargetUrl
 	serviceAPI.GatewayURL = gatewayUrl
+	serviceAPI.AccessLabel = resourceName
 
 	err := sas.accessServiceManager.Upsert(remoteEnvironment, id, resourceName)
 	if err != nil {
 		return nil, apperrors.Internal("Creating access service failed, %s", err.Error())
 	}
 
-	serviceAPI.AccessLabel = resourceName
+	if api.Credentials != nil {
+		credentials, err := sas.secretsService.Update(remoteEnvironment, id, api.Credentials)
+		if err != nil {
+			return nil, err
+		}
 
-	serviceAPI, err = sas.handleCredentialsUpdate(remoteEnvironment, id, serviceAPI, api.Credentials)
-	if err != nil {
-		return nil, err
+		serviceAPI.Credentials = credentials
+		serviceAPI.Credentials.SecretName = sas.nameResolver.GetResourceName(remoteEnvironment, id)
+	} else {
+		err := sas.secretsService.Delete(resourceName)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	err = sas.istioService.Upsert(remoteEnvironment, id, resourceName)
@@ -129,154 +147,4 @@ func (sas defaultService) Update(remoteEnvironment, id string, api *model.API) (
 	}
 
 	return serviceAPI, nil
-}
-
-func (sas defaultService) handleCredentialsCreate(remoteEnvironment, id string, serviceAPI *remoteenv.ServiceAPI, credentials *model.Credentials) (*remoteenv.ServiceAPI, apperrors.AppError) {
-	if credentials == nil {
-		return serviceAPI, nil
-	}
-
-	if sas.basicCredentialsProvided(credentials) && sas.oauthCredentialsProvided(credentials) {
-		return nil, apperrors.WrongInput("Creating access service failed: Multiple authentication methods provided.")
-	}
-
-	if sas.oauthCredentialsProvided(credentials) {
-		serviceAPI.Credentials.AuthenticationUrl = credentials.Oauth.URL
-		serviceAPI.Credentials.Type = remoteenv.CredentialsOAuthType
-	}
-
-	if sas.basicCredentialsProvided(credentials) {
-		serviceAPI.Credentials.Type = remoteenv.CredentialsBasicType
-	}
-
-	name := sas.nameResolver.GetResourceName(remoteEnvironment, id)
-
-	err := sas.createCredentialsSecret(remoteEnvironment, id, name, credentials)
-	if err != nil {
-		return nil, err
-	}
-
-	serviceAPI.Credentials.SecretName = sas.nameResolver.GetResourceName(remoteEnvironment, id)
-
-	return serviceAPI, nil
-}
-
-func (sas defaultService) handleCredentialsUpdate(remoteEnvironment, id string, serviceAPI *remoteenv.ServiceAPI, credentials *model.Credentials) (*remoteenv.ServiceAPI, apperrors.AppError) {
-	name := sas.nameResolver.GetResourceName(remoteEnvironment, id)
-
-	if credentials == nil {
-		return serviceAPI, sas.secretsService.DeleteSecret(name)
-	}
-
-	if sas.basicCredentialsProvided(credentials) && sas.oauthCredentialsProvided(credentials) {
-		return nil, apperrors.WrongInput("Creating access service failed: Multiple authentication methods provided.")
-	}
-
-	if sas.oauthCredentialsProvided(credentials) {
-		serviceAPI.Credentials.AuthenticationUrl = credentials.Oauth.URL
-		serviceAPI.Credentials.Type = remoteenv.CredentialsOAuthType
-	}
-
-	if sas.basicCredentialsProvided(credentials) {
-		serviceAPI.Credentials.Type = remoteenv.CredentialsBasicType
-	}
-
-	err := sas.updateCredentialsSecret(remoteEnvironment, id, name, credentials)
-	if err != nil {
-		return nil, err
-	}
-
-	serviceAPI.Credentials.SecretName = sas.nameResolver.GetResourceName(remoteEnvironment, id)
-
-	return serviceAPI, nil
-}
-
-func (sas defaultService) handleCredentialsFetch(remoteEnvironment string, remoteenvAPI *remoteenv.ServiceAPI) (*model.API, apperrors.AppError) {
-	api := &model.API{}
-
-	if remoteenvAPI.Credentials.Type == remoteenv.CredentialsOAuthType {
-		api.Credentials = &model.Credentials{
-			Oauth: &model.Oauth{
-				URL: remoteenvAPI.Credentials.AuthenticationUrl,
-			},
-		}
-
-		clientId, clientSecret, err := sas.secretsService.GetOauthSecret(remoteEnvironment, remoteenvAPI.Credentials.SecretName)
-		if err != nil {
-			return nil, apperrors.Internal("Reading oauth credentials from %s secret failed, %s",
-				remoteenvAPI.Credentials.SecretName, err.Error())
-		}
-		api.Credentials.Oauth.ClientID = clientId
-		api.Credentials.Oauth.ClientSecret = clientSecret
-	}
-
-	if remoteenvAPI.Credentials.Type == remoteenv.CredentialsBasicType {
-		api.Credentials = &model.Credentials{
-			Basic: &model.Basic{},
-		}
-
-		username, password, err := sas.secretsService.GetBasicAuthSecret(remoteEnvironment, remoteenvAPI.Credentials.SecretName)
-		if err != nil {
-			return nil, apperrors.Internal("Reading oauth credentials from %s secret failed, %s",
-				remoteenvAPI.Credentials.SecretName, err.Error())
-		}
-		api.Credentials.Basic.Username = username
-		api.Credentials.Basic.Password = password
-	}
-
-	return api, nil
-}
-
-func (sas defaultService) createCredentialsSecret(remoteEnvironment, id, name string, credentials *model.Credentials) apperrors.AppError {
-	if sas.oauthCredentialsProvided(credentials) {
-		return sas.secretsService.CreateOauthSecret(
-			remoteEnvironment,
-			name,
-			credentials.Oauth.ClientID,
-			credentials.Oauth.ClientSecret,
-			id,
-		)
-	}
-
-	if sas.basicCredentialsProvided(credentials) {
-		return sas.secretsService.CreateBasicAuthSecret(remoteEnvironment,
-			name,
-			credentials.Basic.Username,
-			credentials.Basic.Password,
-			id,
-		)
-	}
-
-	return nil
-}
-
-func (sas defaultService) updateCredentialsSecret(remoteEnvironment, id, name string, credentials *model.Credentials) apperrors.AppError {
-	if sas.oauthCredentialsProvided(credentials) {
-		return sas.secretsService.UpdateOauthSecret(
-			remoteEnvironment,
-			name,
-			credentials.Oauth.ClientID,
-			credentials.Oauth.ClientSecret,
-			id,
-		)
-	}
-
-	if sas.basicCredentialsProvided(credentials) {
-		return sas.secretsService.UpdateBasicAuthSecret(remoteEnvironment,
-			name,
-			credentials.Basic.Username,
-			credentials.Basic.Password,
-			id,
-		)
-	}
-
-	return nil
-}
-
-func (sas defaultService) oauthCredentialsProvided(credentials *model.Credentials) bool {
-	return credentials != nil && credentials.Oauth != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
-}
-
-func (sas defaultService) basicCredentialsProvided(credentials *model.Credentials) bool {
-	return credentials != nil && credentials.Basic != nil && credentials.Basic.Username != "" && credentials.Basic.Password != ""
 }

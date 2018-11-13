@@ -12,17 +12,12 @@ import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 const (
 	resourceName = "resource-uuid-1"
 	gatewayUrl   = "url-uuid-1"
-)
-
-var (
-	anyString = mock.AnythingOfType("string")
 )
 
 func TestNewService(t *testing.T) {
@@ -39,6 +34,12 @@ func TestNewService(t *testing.T) {
 			},
 		}
 
+		remoteEnvCredentials := remoteenv.Credentials{
+			Type:              remoteenv.CredentialsOAuthType,
+			SecretName:        "secret-name",
+			AuthenticationUrl: api.Credentials.Oauth.URL,
+		}
+
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
 		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
@@ -48,13 +49,11 @@ func TestNewService(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"CreateOauthSecret",
+			"Create",
 			"re",
 			resourceName,
-			api.Credentials.Oauth.ClientID,
-			api.Credentials.Oauth.ClientSecret,
-			"uuid-1",
-		).Return(nil)
+			api.Credentials,
+		).Return(remoteEnvCredentials, nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Create", "re", "uuid-1", resourceName).Return(nil)
@@ -90,6 +89,11 @@ func TestNewService(t *testing.T) {
 			},
 		}
 
+		remoteEnvCredentials := remoteenv.Credentials{
+			Type:       remoteenv.CredentialsBasicType,
+			SecretName: "secret-name",
+		}
+
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
 		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
@@ -99,13 +103,11 @@ func TestNewService(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"CreateBasicAuthSecret",
+			"Create",
 			"re",
 			resourceName,
-			api.Credentials.Basic.Username,
-			api.Credentials.Basic.Password,
-			"uuid-1",
-		).Return(nil)
+			api.Credentials,
+		).Return(remoteEnvCredentials, nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Create", "re", "uuid-1", resourceName).Return(nil)
@@ -216,13 +218,11 @@ func TestNewService(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"CreateOauthSecret",
+			"Create",
 			"re",
 			resourceName,
-			api.Credentials.Oauth.ClientID,
-			api.Credentials.Oauth.ClientSecret,
-			"uuid-1",
-		).Return(apperrors.Internal("some error"))
+			api.Credentials,
+		).Return(remoteenv.Credentials{}, apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
@@ -259,13 +259,11 @@ func TestNewService(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"CreateBasicAuthSecret",
+			"Create",
 			"re",
 			resourceName,
-			api.Credentials.Basic.Username,
-			api.Credentials.Basic.Password,
-			"uuid-1",
-		).Return(apperrors.Internal("some error"))
+			api.Credentials,
+		).Return(remoteenv.Credentials{}, apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
@@ -303,13 +301,11 @@ func TestNewService(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"CreateOauthSecret",
+			"Create",
 			"re",
 			resourceName,
-			api.Credentials.Oauth.ClientID,
-			api.Credentials.Oauth.ClientSecret,
-			"uuid-1",
-		).Return(nil)
+			api.Credentials,
+		).Return(remoteenv.Credentials{}, nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Create", "re", "uuid-1", resourceName).Return(apperrors.Internal("some error"))
@@ -342,8 +338,16 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 		}
 
+		credentials := model.Credentials{
+			Oauth: &model.Oauth{
+				ClientID:     "clientId",
+				ClientSecret: "clientSecret",
+				URL:          "http://oauth.com",
+			},
+		}
+
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("GetOauthSecret", "re", "secret-name").Return("clientId", "clientSecret", nil)
+		secretsService.On("Get", "re", remoteEnvServiceAPi.Credentials).Return(credentials, nil)
 
 		service := NewService(nil, nil, secretsService, nil)
 
@@ -371,8 +375,15 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 		}
 
+		credentials := model.Credentials{
+			Basic: &model.Basic{
+				Username: "clientUsername",
+				Password: "clientPassword",
+			},
+		}
+
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("GetBasicAuthSecret", "re", "secret-name").Return("clientUsername", "clientPassword", nil)
+		secretsService.On("Get", "re", remoteEnvServiceAPi.Credentials).Return(credentials, nil)
 
 		service := NewService(nil, nil, secretsService, nil)
 
@@ -419,8 +430,8 @@ func TestDefaultService_Read(t *testing.T) {
 		}
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("GetOauthSecret", "re", "secret-name").
-			Return("", "", apperrors.Internal("secret error"))
+		secretsService.On("Get", "re", remoteEnvServiceAPi.Credentials).
+			Return(model.Credentials{}, apperrors.Internal("secret error"))
 
 		service := NewService(nil, nil, secretsService, nil)
 
@@ -447,8 +458,8 @@ func TestDefaultService_Read(t *testing.T) {
 		}
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("GetBasicAuthSecret", "re", "secret-name").
-			Return("", "", apperrors.Internal("secret error"))
+		secretsService.On("Get", "re", remoteEnvServiceAPi.Credentials).
+			Return(model.Credentials{}, apperrors.Internal("secret error"))
 
 		service := NewService(nil, nil, secretsService, nil)
 
@@ -474,7 +485,7 @@ func TestDefaultService_Delete(t *testing.T) {
 		accessServiceManager.On("Delete", resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("DeleteSecret", resourceName).Return(nil)
+		secretsService.On("Delete", resourceName).Return(nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Delete", resourceName).Return(nil)
@@ -524,7 +535,7 @@ func TestDefaultService_Delete(t *testing.T) {
 		accessServiceManager.On("Delete", resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("DeleteSecret", resourceName).Return(apperrors.Internal("an error"))
+		secretsService.On("Delete", resourceName).Return(apperrors.Internal("an error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
@@ -550,7 +561,7 @@ func TestDefaultService_Delete(t *testing.T) {
 		accessServiceManager.On("Delete", resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("DeleteSecret", resourceName).Return(nil)
+		secretsService.On("Delete", resourceName).Return(nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Delete", resourceName).Return(apperrors.Internal(""))
@@ -586,6 +597,12 @@ func TestDefaultService_Update(t *testing.T) {
 			},
 		}
 
+		remoteEnvCredentials := remoteenv.Credentials{
+			Type:              remoteenv.CredentialsOAuthType,
+			SecretName:        "secret-name",
+			AuthenticationUrl: api.Credentials.Oauth.URL,
+		}
+
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
 		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
@@ -595,13 +612,11 @@ func TestDefaultService_Update(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"UpdateOauthSecret",
+			"Update",
 			"re",
-			resourceName,
-			api.Credentials.Oauth.ClientID,
-			api.Credentials.Oauth.ClientSecret,
 			"uuid-1",
-		).Return(nil)
+			api.Credentials,
+		).Return(remoteEnvCredentials, nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Upsert", "re", "uuid-1", resourceName).Return(nil)
@@ -638,6 +653,11 @@ func TestDefaultService_Update(t *testing.T) {
 			},
 		}
 
+		remoteEnvCredentials := remoteenv.Credentials{
+			Type:       remoteenv.CredentialsBasicType,
+			SecretName: "secret-name",
+		}
+
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", "re", "uuid-1").Return(resourceName)
 		nameResolver.On("GetGatewayUrl", "re", "uuid-1").Return(gatewayUrl)
@@ -647,13 +667,11 @@ func TestDefaultService_Update(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"UpdateBasicAuthSecret",
+			"Update",
 			"re",
-			resourceName,
-			api.Credentials.Basic.Username,
-			api.Credentials.Basic.Password,
 			"uuid-1",
-		).Return(nil)
+			api.Credentials,
+		).Return(remoteEnvCredentials, nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Upsert", "re", "uuid-1", resourceName).Return(nil)
@@ -692,7 +710,7 @@ func TestDefaultService_Update(t *testing.T) {
 		accessServiceManager.On("Upsert", "re", "uuid-1", resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("DeleteSecret", resourceName).Return(nil)
+		secretsService.On("Delete", resourceName).Return(nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Upsert", "re", "uuid-1", resourceName).Return(nil)
@@ -779,13 +797,11 @@ func TestDefaultService_Update(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"UpdateOauthSecret",
+			"Update",
 			"re",
-			resourceName,
-			api.Credentials.Oauth.ClientID,
-			api.Credentials.Oauth.ClientSecret,
 			"uuid-1",
-		).Return(apperrors.Internal("some error"))
+			api.Credentials,
+		).Return(remoteenv.Credentials{}, apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
@@ -824,13 +840,11 @@ func TestDefaultService_Update(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"UpdateBasicAuthSecret",
+			"Update",
 			"re",
-			resourceName,
-			api.Credentials.Basic.Username,
-			api.Credentials.Basic.Password,
 			"uuid-1",
-		).Return(apperrors.Internal("some error"))
+			api.Credentials,
+		).Return(remoteenv.Credentials{}, apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
@@ -863,7 +877,7 @@ func TestDefaultService_Update(t *testing.T) {
 		accessServiceManager.On("Upsert", "re", "uuid-1", resourceName).Return(nil)
 
 		secretsService := new(secretsmocks.Service)
-		secretsService.On("DeleteSecret", resourceName).Return(apperrors.Internal("some error"))
+		secretsService.On("Delete", resourceName).Return(apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
@@ -903,13 +917,11 @@ func TestDefaultService_Update(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"UpdateOauthSecret",
+			"Update",
 			"re",
-			resourceName,
-			api.Credentials.Oauth.ClientID,
-			api.Credentials.Oauth.ClientSecret,
 			"uuid-1",
-		).Return(nil)
+			api.Credentials,
+		).Return(remoteenv.Credentials{}, nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Upsert", "re", "uuid-1", resourceName).Return(apperrors.Internal("some error"))
