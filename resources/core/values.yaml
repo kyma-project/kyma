@@ -63,7 +63,7 @@ global:
     version: 0d1ffe15
   kubeless_test_client:
     dir: develop/
-    version: b1248e73
+    version: c3c08515
   test_environments:
     dir: develop/
     version: '84359277'
