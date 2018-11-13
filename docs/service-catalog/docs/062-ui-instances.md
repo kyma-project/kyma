@@ -11,9 +11,9 @@ These are the OSBA fields used in the main Instances page:
 
 | Number | OSBA field                | Fallbacks            | Description                                                                  |
 | ------ | ------------------------- | -------------------- | ---------------------------------------------------------------------------- |
-| (1)    | not related to OSBA       | -                    | It is the name of the service instance, created during service provisioning. |
-| (2)    | **metadata.displayName**      | **name***, **id***           | If not provided, UI displays without this information.                       |
-| (3)    | **plan.metadata.displayName** | **plan.name***, **plan.id***| If not provided, UI displays without this information.                       |
+| (1)    | not related to OSBA       | -                    | It is the name of the Service Instance, created during service provisioning. |
+| (2)    | **metadata.displayName**      | **name***, **id***           | If not provided, UI does not display this information.                       |
+| (3)    | **plan.metadata.displayName** | **plan.name***, **plan.id***| If not provided, UI does not display this information.                       |
 | (4)    | not related to OSBA       | -                    |                                                                              |
 | (5)    | not related to OSBA       | -                    |                                                                              |
 |        |
@@ -30,9 +30,9 @@ These are the OSBA fields used in the detailed Service Instance view:
 | ------ | ------------------------- | -------------------- | ----------------------------------------------------- |
 | (1)    | **metadata.displayName**      | **name***, **id***           | -                                                     |
 | (2)    | **plan.metadata.displayName** | **plan.name***, **plan.id*** | -                                                     |
-| (3)    | **metadata.documentationUrl** | -                    | If not provided, UI displays without this information |
-| (4)    | **metadata.supportUrl**       | -                    | If not provided, UI displays without this information |
-| (5)    | **description\***             | -                    | If not provided, UI displays without this information |
+| (3)    | **metadata.documentationUrl** | -                    | If not provided, UI does not display this information |
+| (4)    | **metadata.supportUrl**       | -                    | If not provided, UI does not display this information |
+| (5)    | **description\***             | -                    | If not provided, UI does not display this information |
 
 \*Fields with an asterisk are required OSBA attributes.
 

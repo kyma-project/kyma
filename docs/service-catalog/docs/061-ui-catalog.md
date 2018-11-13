@@ -12,17 +12,17 @@ These are the OSBA fields used in the main Catalog page:
 | Number | OSBA field                        | Fallbacks  | Description                                                                                                                |
 | ------ | --------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------- |
 | (1)    | **metadata.displayName**              | **name***, **id***| If **metadata.displayName**, **name**, or **id** fields are not present, a given Service Class does not appear on the landing page. |
-| (2)    | **metadata.providerDisplayName**      | -          | If not provided, UI displays without this information.                                                                     |
-| (3)    | **description\***                     | -          | If not provided, UI displays without this information.                                                                     |
+| (2)    | **metadata.providerDisplayName**      | -          | If not provided, UI does not display this information.                                                                     |
+| (3)    | **description\***                     | -          | If not provided, UI does not display this information.                                                                     |
 | (4)    | **metadata.labels\*\***               | -          | If not provided, UI does not display any labels.                                                                           |
-| (5)    | **metadata.labels.local\*\*** and/or **metadata.labels.showcase\*\*** | - | If not provided, choosing Basic Filter is not possible.                                                 |
-| (6)    | **tags**                              | -          | If not provided, filtering by Tag is not possible.                                                                         |
-| (7)    | **metadata.labels.connected-app\*\*** | -          | If not provided, choosing Connected Applications is not possible.                                                          |
-| (8)    | **metadata.providerDisplayName**      | -          | If not provided, filtering by Provider is not possible.                                                                    |
+| (5)    | **metadata.labels.local\*\*** and/or **metadata.labels.showcase\*\*** | - | If not provided, it is not possible to choose a Basic Filter.                                                 |
+| (6)    | **tags**                              | -          | If not provided, it is not possible to filter by Tag.                                                                         |
+| (7)    | **metadata.labels.connected-app\*\*** | -          | If not provided, it is not possible to choose Connected Applications.                                                          |
+| (8)    | **metadata.providerDisplayName**      | -          | If not provided, it is not possible to filter by Provider.                                                                    |
 
 \*Fields with an asterisk are required OSBA attributes.
 
-\*\***metadata.labels** is the custom object that is not defined in the [OSBA metadata convention](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#service-metadata)
+\*\***metadata.labels** is the custom object that is not defined in the [OSBA metadata convention](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#service-metadata).
 
 ![alt text](./assets/catalog-page.png 'Catalog')
 
@@ -33,11 +33,11 @@ These are the OSBA fields used in the detailed Service Class view:
 | Number | OSBA field                   | Fallbacks      | Description                                                       |
 | ------ | ---------------------------- | -------------- | ----------------------------------------------------------------- |
 | (1)    | **metadata.displayName**         | **name***, **id***     | -                                                                 |
-| (2)    | **metadata.providerDisplayName** | -              | If not provided, UI displays without this information.            |
+| (2)    | **metadata.providerDisplayName** | -              | If not provided, UI does not display this information.            |
 | (3)    | not related to OSBA          | -              | -                                                                 |
 | (4)    | **metadata.documentationUrl**    | -              | If not provided, the link with documentation does not appear.     |
 | (5)    | **metadata.supportUrl**          | -              | If not provided, the link with support does not appear.           |
-| (6)    | **tags**                         | -              | If not provided, UI displays without tags.                        |
+| (6)    | **tags**                         | -              | If not provided, UI does not display tags.                        |
 | (7)    | **metadata.longDescription**     | **description\***  | If not provided, the **General Information** panel does not appear. |
 | (8)    | not related to OSBA          | -              | -                                                                 |
 
@@ -91,13 +91,13 @@ See the sample schema:
         }
 ```
 
-This sample displays in the following way:
+This sample renders in the following way:
 
 ![alt text](./assets/schema-form.png 'SchemaForm')
 
 Follow these rules when you design schema objects:
 
-* If the field has limited possible values, use the **enum** field. It renders a field as dropdown, so it prevents the user from making mistakes.
+* If the field has limited possible values, use the **enum** field. It renders a field as a dropdown, so it prevents the user from making mistakes.
 * If the field is required for the Service Class, mark it as **required**. UI blocks provisioning if you do not fill in the required fields.
 * Fill the **default** value for a field whenever possible, it makes the provisioning faster.
 * If the field, such as the password field, must be starred, use the **format** key with the **password** value.
