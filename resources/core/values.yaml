@@ -29,11 +29,11 @@ global:
     dir: develop/
     version: ed568f0f
   api_controller:
-    dir: pr/
-    version: PR-1529
+    dir: develop/
+    version: 8c274255
   api_controller_acceptance_tests:
-    dir: pr/
-    version: PR-1573
+    dir: develop/
+    version: 8c274255
   apiserver_proxy:
     dir: develop/
     version: 6e0a7fe2
@@ -44,8 +44,8 @@ global:
     dir: develop/
     version: 4a23580f
   docs:
-    dir: pr/
-    version: "PR-1573"
+    dir: develop/
+    version: 8c274255
   environments:
     dir: develop/
     version: 6e0a7fe2
@@ -71,8 +71,8 @@ global:
     dir: develop/
     version: 6e0a7fe2
   ui_api_layer:
-    dir: pr/
-    version: PR-1573
+    dir: develop/
+    version: 8c274255
   ui_api_layer_acceptance_tests:
     dir: develop/
     version: a84b8f6e
