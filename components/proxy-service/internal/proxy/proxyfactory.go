@@ -40,10 +40,8 @@ func makeProxy(targetUrl string, id string, skipVerify bool) (*httputil.ReverseP
 	}
 	newProxy := &httputil.ReverseProxy{Director: director}
 
-	if skipVerify {
-		newProxy.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
-	}
-
+	newProxy.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify}}
+	
 	return newProxy, nil
 }
 
