@@ -11,7 +11,7 @@ import (
 	types "k8s.io/apimachinery/pkg/types"
 	k8sClient "k8s.io/client-go/kubernetes"
 
-	kymaMeta "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma.cx/meta/v1"
+	kymaMeta "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1"
 	istioNetworkingApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/networking.istio.io/v1alpha3"
 	istioNetworking "github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io/clientset/versioned"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/controller/commons"
