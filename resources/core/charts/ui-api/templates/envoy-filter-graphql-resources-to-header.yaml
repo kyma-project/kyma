@@ -11,4 +11,4 @@ spec:
     filterType: HTTP
     filterConfig:
       inlineCode: |
-{{ .Files.Get "scripts/filter.lua" | indent 8 }}
+{{ .Files.Get "./../scripts/filter.lua" | indent 8 }}

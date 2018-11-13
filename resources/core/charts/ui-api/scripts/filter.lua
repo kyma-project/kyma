@@ -95,7 +95,7 @@ function handleMutationStatement(item)
 		-- TODO implement mutations
 		return nil
 	end
-	-- if not query statement try again until query statement found
+	-- if not mutation statement try again until mutation statement found
 	return handleMutationStatement
 end
 
