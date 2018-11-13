@@ -10,12 +10,17 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
+	"time"
+	"context"
 )
 
 const (
 	oDataSpecFormat      = "%s/$metadata"
 	oDataSpecType        = "odata"
 	targetSwaggerVersion = "2.0"
+
+	specRequestTimeout = time.Duration(5)
 )
 
 type SpecService interface {
@@ -94,14 +99,15 @@ func processAPISpecification(api *serviceapi.API, gatewayUrl string) ([]byte, ap
 func fetchSpec(api *serviceapi.API) ([]byte, apperrors.AppError) {
 	specUrl, err := url.Parse(api.SpecUrl)
 	if err != nil || api.SpecUrl == "" {
-		specUrl, err = url.Parse(fmt.Sprintf(oDataSpecFormat, api.TargetUrl))
+		targetUrl := strings.TrimSuffix(api.TargetUrl, "/")
+		specUrl, err = url.Parse(fmt.Sprintf(oDataSpecFormat, targetUrl))
 		if err != nil {
 			return nil, apperrors.Internal("Parsing OData spec url failed, %s", err.Error())
 		}
 		api.Type = oDataSpecType
 	}
 
-	response, apperr := requestAPISpec(specUrl.String(), api.Credentials)
+	response, apperr := requestAPISpec(specUrl.String())
 	if apperr != nil {
 		return nil, apperr
 	}
@@ -118,15 +124,15 @@ func isNilOrEmpty(array []byte) bool {
 	return array == nil || len(array) == 0
 }
 
-func requestAPISpec(specUrl string, credentials *serviceapi.Credentials) (*http.Response, apperrors.AppError) {
+func requestAPISpec(specUrl string) (*http.Response, apperrors.AppError) {
 	req, err := http.NewRequest(http.MethodGet, specUrl, nil)
 	if err != nil {
 		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())
 	}
 
-	if credentials != nil {
-		// TODO: setup authentication
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), specRequestTimeout)
+	defer cancel()
+	req = req.WithContext(ctx)
 
 	response, err := http.DefaultClient.Do(req)
 	if err != nil {
