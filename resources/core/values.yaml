@@ -30,22 +30,22 @@ global:
     version: ed568f0f
   api_controller:
     dir: develop/
-    version: 2df5bbfd
+    version: 8c274255
   api_controller_acceptance_tests:
     dir: pr/
-    version: PR-1521
+    version: PR-1536
   apiserver_proxy:
     dir: develop/
     version: 6e0a7fe2
   binding_usage_controller:
     dir: develop/
-    version: b7683312
+    version: 83692fd8
   configurations_generator:
     dir: develop/
     version: 4a23580f
   docs:
     dir: develop/
-    version: f53cec45
+    version: 8c274255
   environments:
     dir: develop/
     version: 6e0a7fe2
@@ -63,7 +63,7 @@ global:
     version: 0d1ffe15
   kubeless_test_client:
     dir: develop/
-    version: 7bd3337d
+    version: c3c08515
   test_environments:
     dir: develop/
     version: '84359277'
@@ -72,7 +72,7 @@ global:
     version: 6e0a7fe2
   ui_api_layer:
     dir: develop/
-    version: af2336e7
+    version: 8c274255
   ui_api_layer_acceptance_tests:
     dir: develop/
     version: a84b8f6e

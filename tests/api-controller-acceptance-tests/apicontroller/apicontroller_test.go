@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	kymaApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma.cx/v1alpha2"
-	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned"
+	kymaApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
+	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	apiv1 "k8s.io/api/core/v1"

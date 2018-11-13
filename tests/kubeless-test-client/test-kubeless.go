@@ -555,6 +555,12 @@ func main() {
 
 	log.Println("Starting test")
 	log.Printf("Domain Name is: %v", os.Getenv("DOMAIN_NAME"))
+
+	if os.Getenv("DOMAIN_NAME") == "kyma.local" {
+		log.Printf("We dont run this test on Minikube!!")
+		os.Exit(0)
+	}
+
 	testID := randomString(8)
 	deployK8s("ns.yaml")
 	deployK8s("k8syaml/k8s.yaml")
