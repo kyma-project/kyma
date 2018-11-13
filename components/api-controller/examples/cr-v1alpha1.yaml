@@ -1,5 +1,5 @@
 ---
-apiVersion: gateway.kyma.cx/v1alpha1
+apiVersion: gateway.kyma-project.io/v1alpha1
 kind: api
 metadata:
     name: sample-api
