@@ -78,6 +78,17 @@ function WaitForMinikubeToBeUp() {
     }
 }
 
+
+function EnableMinikubeAddons() {
+
+    Write-Output "Enabling minikube addons..."
+
+    minikube addons enable metrics-server
+    minikube addons enable heapster
+
+    minikube addons list
+}
+
 function IncreaseFsInotifyMaxUserInstances() {
     # Default value of 128 is not enough to perform “kubectl log -f” from pods, hence increased to 524288
     $cmd = "minikube ssh -- `"sudo sysctl -w fs.inotify.max_user_instances=524288`""
@@ -110,5 +121,6 @@ CheckIfMinikubeIsInitialized
 InitializeMinikubeConfig
 StartMinikube
 WaitForMinikubeToBeUp
+EnableMinikubeAddons
 AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "dex", "docs", "lambdas-ui", "ui-api", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service"
 IncreaseFsInotifyMaxUserInstances

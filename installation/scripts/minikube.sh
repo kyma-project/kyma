@@ -157,6 +157,16 @@ function increaseFsInotifyMaxUserInstances() {
     fi
 }
 
+function enableMinikubeAddons() {
+
+    log "Enabling minikube addons..." green
+
+    minikube addons enable metrics-server
+    minikube addons enable heapster
+
+    minikube addons list
+}
+
 function start() {
     checkMinikubeVersion
 
@@ -184,6 +194,8 @@ function start() {
     -b=localkube
 
     waitForMinikubeToBeUp
+
+    enableMinikubeAddons
 
     # Adding domains to /etc/hosts files
     addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} brokers.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} ui-api.${MINIKUBE_DOMAIN} minio.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN}  configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN}"
