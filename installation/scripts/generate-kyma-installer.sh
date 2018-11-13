@@ -28,17 +28,9 @@ if [ ! -f ${INSTALLER_YAML_PATH} ]; then
     usage
 fi
 
-cat ${INSTALLER_YAML_PATH}
-
-echo "---"
-
-cat ${INSTALLER_CONFIG_PATH}
-
-echo "---"
-
 TMP_CR=$(mktemp)
 bash ${KYMA_PATH}/installation/scripts/create-cr.sh --url "" --output "${TMP_CR}" --version 0.0.1
-cat ${TMP_CR}
-rm -rf ${TMP_CR}
 
-echo "---"
+bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER_YAML_PATH} ${INSTALLER_CONFIG_PATH} ${TMP_CR}
+
+rm -rf ${TMP_CR}
