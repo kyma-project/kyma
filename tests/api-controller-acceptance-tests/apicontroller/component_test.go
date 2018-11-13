@@ -56,7 +56,7 @@ func TestComponentSpec(t *testing.T) {
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			lastApi, err = ctx.awaitApiCreated(kymaClient, lastApi, true, false)
+			lastApi, err = ctx.awaitApiChanged(kymaClient, lastApi, true, false)
 			So(err, ShouldBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 			So(lastApi.Spec, ctx.ShouldDeepEqual, api.Spec)
@@ -80,7 +80,7 @@ func TestComponentSpec(t *testing.T) {
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			lastApi, err = ctx.awaitApiCreated(kymaClient, lastApi, true, false)
+			lastApi, err = ctx.awaitApiChanged(kymaClient, lastApi, true, false)
 			So(err, ShouldBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 			So(lastApi.Spec, ctx.ShouldDeepEqual, api.Spec)
@@ -117,7 +117,7 @@ func TestComponentSpec(t *testing.T) {
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			lastApi, err = ctx.awaitApiCreated(kymaClient, lastApi, true, true)
+			lastApi, err = ctx.awaitApiChanged(kymaClient, lastApi, true, true)
 			So(err, ShouldBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 			So(lastApi.Spec, ctx.ShouldDeepEqual, api.Spec)
@@ -146,7 +146,7 @@ func TestComponentSpec(t *testing.T) {
 			So(createdApi, ShouldNotBeNil)
 			So(createdApi.ResourceVersion, ShouldNotBeEmpty)
 
-			createdApi, err = ctx.awaitApiCreated(kymaClient, createdApi, true, true)
+			createdApi, err = ctx.awaitApiChanged(kymaClient, createdApi, true, true)
 			So(err, ShouldBeNil)
 			So(createdApi.ResourceVersion, ShouldNotBeEmpty)
 			So(createdApi.Spec, ctx.ShouldDeepEqual, api.Spec)
@@ -159,7 +159,7 @@ func TestComponentSpec(t *testing.T) {
 			So(updatedApi, ShouldNotBeNil)
 			So(updatedApi.ResourceVersion, ShouldNotBeEmpty)
 
-			updatedApi, err = ctx.awaitApiCreated(kymaClient, updatedApi, false, true)
+			updatedApi, err = ctx.awaitApiChanged(kymaClient, updatedApi, false, true)
 			So(err, ShouldBeNil)
 			So(updatedApi.ResourceVersion, ShouldNotBeEmpty)
 			So(updatedApi.Spec, ctx.ShouldDeepEqual, api.Spec)
@@ -183,7 +183,7 @@ func TestComponentSpec(t *testing.T) {
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			lastApi, err = ctx.awaitApiCreated(kymaClient, lastApi, true, true)
+			lastApi, err = ctx.awaitApiChanged(kymaClient, lastApi, true, true)
 			So(err, ShouldBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 			So(lastApi.Spec, ctx.ShouldDeepEqual, api.Spec)
@@ -207,7 +207,7 @@ func TestComponentSpec(t *testing.T) {
 			So(lastApi, ShouldNotBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 
-			lastApi, err = ctx.awaitApiCreated(kymaClient, lastApi, true, true)
+			lastApi, err = ctx.awaitApiChanged(kymaClient, lastApi, true, true)
 			So(err, ShouldBeNil)
 			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
 			So(lastApi.Spec, ctx.ShouldDeepEqual, api.Spec)
@@ -324,7 +324,7 @@ func (componentTestContext) hostnameFor(testId, domainName string, hostWithDomai
 	return testId
 }
 
-func (componentTestContext) awaitApiCreated(iface *kyma.Clientset, api *kymaApi.Api, vsChanged, policyChanged bool) (*kymaApi.Api, error) {
+func (componentTestContext) awaitApiChanged(iface *kyma.Clientset, api *kymaApi.Api, vsChanged, policyChanged bool) (*kymaApi.Api, error) {
 	var result *kymaApi.Api
 	err := retry.Do(func() error {
 		lastApi, err := iface.GatewayV1alpha2().Apis(namespace).Get(api.Name, metav1.GetOptions{})
