@@ -248,8 +248,7 @@
     "components/remote-environment-broker/pkg/client/informers/externalversions/internalinterfaces",
     "components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
   ]
-  revision = "a13f879"
-  source = "https://github.com/sjanota/kyma"
+  revision = "343d311bb9f41f217ff66869cb7398b2d8d7ae43"
 
 [[projects]]
   name = "github.com/magiconair/properties"
@@ -719,6 +718,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9363bc06fa9d114a42915c024a9cfdff9898eb288b77bad433314cf55719d348"
+  inputs-digest = "0978688f584720b5202d3d68141d6cbd6b3f5864f654818602e2b08c9e24249f"
   solver-name = "gps-cdcl"
   solver-version = 1
