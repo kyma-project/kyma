@@ -42,5 +42,4 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  source = "https://github.com/sjanota/kyma"
-  revision = "a13f879"
+  branch = "master"
