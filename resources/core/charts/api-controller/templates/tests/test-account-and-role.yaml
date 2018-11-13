@@ -16,7 +16,7 @@ metadata:
   labels:
     helm-chart-test: "true"
 rules:
-  - apiGroups: [ "", "apps", "gateway.kyma.cx"]
+  - apiGroups: [ "", "apps", "gateway.kyma-project.io"]
     resources: ["deployments", "services", "apis"]
     verbs: ["*"]
 ---

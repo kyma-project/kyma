@@ -29,7 +29,7 @@ rules:
   - apiGroups: ["kubeless.io"]
     resources: ["functions"]
     verbs: ["get", "list", "watch"]
-  - apiGroups: ["gateway.kyma.cx"]
+  - apiGroups: ["gateway.kyma-project.io"]
     resources: ["apis"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["authentication.kyma-project.io"]
