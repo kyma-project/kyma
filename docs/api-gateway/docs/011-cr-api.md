@@ -3,10 +3,10 @@ title: Api
 type: Custom Resource
 ---
 
-The `api.gateway.kyma.cx` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format the API Controller listens for. To get the up-to-date CRD and show
+The `api.gateway.kyma-project.io` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format the API Controller listens for. To get the up-to-date CRD and show
 the output in the `yaml` format, run this command:
 ```
-kubectl get crd apis.gateway.kyma.cx -o yaml
+kubectl get crd apis.gateway.kyma-project.io -o yaml
 ```
 
 ## Sample Custom Resource
@@ -14,7 +14,7 @@ kubectl get crd apis.gateway.kyma.cx -o yaml
 This is a sample CR that the API-Controller listens for to expose a service. This example has the **authentication** section specified which makes the API Controller create an Istio Authentication Policy for this service.
 
 ```
-apiVersion: gateway.kyma.cx/v1alpha2
+apiVersion: gateway.kyma-project.io/v1alpha2
 kind: api
 metadata:
     name: sample-api
