@@ -16,7 +16,6 @@ Monorepo releaser: This Jenkinsfile runs the Jenkinsfiles of all subprojects bas
 def label = "kyma-${UUID.randomUUID().toString()}"
 def registry = 'eu.gcr.io/kyma-project'
 def acsImageName = 'acs-installer:0.0.4'
-def changelogGeneratorPath = "tools/changelog-generator"
 
 semVerRegex = /^([0-9]+\.[0-9]+\.[0-9]+)$/ // semVer format: 1.2.3
 releaseBranchRegex = /^release\-([0-9]+\.[0-9]+)$/ // release branch format: release-1.5
@@ -140,7 +139,7 @@ try {
                     }
 
                     stage('Copy kyma-installer artifacts') {
-                        copyArtifacts projectName: 'kyma/kyma-installer-artifacts', 
+                        copyArtifacts projectName: 'kyma/kyma-installer-artifacts',
                             selector: specific("${kymaInstallerArtifactsBuild.number}"),
                             target: "kyma-installer-artifacts"
                     }
@@ -171,27 +170,4 @@ def configureBuilds() {
         dockerPushRoot = "rc/"
         appVersion = "${(params.RELEASE_BRANCH =~ /([0-9]+\.[0-9]+)$/)[0][1]}-rc" // release branch number + '-rc' suffix (e.g. 1.0-rc)
     }   
-}
-
-/**
- * Obtain the github release ID from its JSON data.
- * More info: https://developer.github.com/v3/repos/releases 
- */
-@NonCPS
-def getGithubReleaseID(releaseJson) {
-    def slurper = new JsonSlurperClassic()
-    return slurper.parseText(releaseJson).id
-}
-
-def changelogGenerator(command, envs = []) {
-    def repositoryName = 'kyma'
-    def image = 'changelog-generator'
-    def envText = ''
-    for (it in envs) {
-        envText = "$envText --env $it"
-    }
-    workDir = pwd()
-
-    def dockerRegistry = env.DOCKER_REGISTRY
-    sh "docker run --rm -v $workDir:/$repositoryName -w /$repositoryName $envText $image sh $command"
 }
