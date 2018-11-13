@@ -97,7 +97,7 @@ This sample renders in the following way:
 
 Follow these rules when you design schema objects:
 
-* If the field has limited possible values, use the **enum** field. It renders a field as a dropdown, so it prevents the user from making mistakes.
+* If the field has limited possible values, use the **enum** field. It renders as a dropdown menu, so it prevents the user from making mistakes.
 * If the field is required for the Service Class, mark it as **required**. UI blocks provisioning if you do not fill in the required fields.
 * Fill the **default** value for a field whenever possible, it makes the provisioning faster.
 * If the field, such as the password field, must be starred, use the **format** key with the **password** value.
