@@ -16,8 +16,8 @@ type LocalRepository struct {
 	path string
 }
 
-// GetIndexFile returns index.yaml file from local repository
-func (p *LocalRepository) GetIndexFile() (io.Reader, func(), error) {
+// IndexReader returns index.yaml file from local repository
+func (p *LocalRepository) IndexReader() (io.Reader, func(), error) {
 	fName := fmt.Sprintf("%s/%s", p.path, "index.yaml")
 	f, err := os.Open(fName)
 	if err != nil {
@@ -26,7 +26,11 @@ func (p *LocalRepository) GetIndexFile() (io.Reader, func(), error) {
 	return f, func() { f.Close() }, nil
 }
 
-// GetBundlePath returns path to the bundle from local repository
-func (p *LocalRepository) GetBundlePath(name string) (string, error) {
-	return fmt.Sprintf("%s/%s", p.path, name), nil
+// BundleReader calls repository for a specific bundle and returns means to read bundle content.
+func (p *LocalRepository) BundleReader(name Name, version Version) (r io.Reader, closer func(), err error) {
+	f, err := os.Open(fmt.Sprintf("%s/%s-%s.tgz", p.path, name, version))
+	if err != nil {
+		return nil, nil, err
+	}
+	return f, func() { f.Close() }, nil
 }

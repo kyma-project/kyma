@@ -12,7 +12,7 @@ Go to the [Kyma project website](https://kyma-project.io/) to learn more about t
 
 ## Installation
 
-Install Kyma on a [cluster](https://kyma-project.io/docs/root/kyma#getting-started-cluster-kyma-installation), run it on Minikube from the [latest release](https://kyma-project.io/docs/root/kyma#getting-started-local-kyma-installation), or develop it from [local sources](./docs/kyma/docs/017-details-local-installation-scripts.md)
+Install Kyma [locally](https://kyma-project.io/docs/root/kyma#getting-started-local-kyma-installation) and on a [cluster](https://kyma-project.io/docs/root/kyma#getting-started-cluster-kyma-installation).
 
 ## Usage
 

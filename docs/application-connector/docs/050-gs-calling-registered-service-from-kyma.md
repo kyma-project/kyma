@@ -159,7 +159,7 @@ EOF
 6. To expose the lambda function outside the cluster create an **Api** custom resource:
 ```
 cat <<EOF | kubectl apply -f -
-apiVersion: gateway.kyma.cx/v1alpha2
+apiVersion: gateway.kyma-project.io/v1alpha2
 kind: Api
 metadata:
   labels:

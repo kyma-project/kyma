@@ -7,10 +7,12 @@ import (
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/gateway"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/listener"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
 	"github.com/pkg/errors"
 )
 
@@ -26,6 +28,8 @@ type reSvc interface {
 	Disable(namespace, name string) error
 	Enable(namespace, name string) (*v1alpha1.EnvironmentMapping, error)
 	GetConnectionURL(remoteEnvironment string) (string, error)
+	Subscribe(listener resource.Listener)
+	Unsubscribe(listener resource.Listener)
 }
 
 //go:generate mockery -name=statusGetter -output=automock -outpkg=automock -case=underscore
@@ -89,6 +93,20 @@ func (r *remoteEnvironmentResolver) RemoteEnvironmentsQuery(ctx context.Context,
 	return res, nil
 }
 
+func (r *remoteEnvironmentResolver) RemoteEnvironmentEventSubscription(ctx context.Context) (<-chan gqlschema.RemoteEnvironmentEvent, error) {
+	channel := make(chan gqlschema.RemoteEnvironmentEvent, 1)
+	reListener := listener.NewRemoteEnvironment(channel, &r.reConverter)
+
+	r.reSvc.Subscribe(reListener)
+	go func() {
+		defer close(channel)
+		defer r.reSvc.Unsubscribe(reListener)
+		<-ctx.Done()
+	}()
+
+	return channel, nil
+}
+
 func (r *remoteEnvironmentResolver) CreateRemoteEnvironment(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.RemoteEnvironmentMutationOutput, error) {
 	desc, labels := r.returnWithDefaults(description, qglLabels)
 	_, err := r.reSvc.Create(name, desc, labels)
@@ -145,7 +163,7 @@ func (r *remoteEnvironmentResolver) EnableRemoteEnvironmentMutation(ctx context.
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while enabling %s", pretty.RemoteEnvironment))
-		return nil, gqlerror.New(err, pretty.RemoteEnvironment, gqlerror.WithName(remoteEnvironment), gqlerror.WithEnvironment(environment))
+		return nil, gqlerror.New(err, pretty.EnvironmentMapping, gqlerror.WithName(remoteEnvironment), gqlerror.WithEnvironment(environment))
 	}
 
 	environmentMapping := &gqlschema.EnvironmentMapping{
@@ -161,7 +179,7 @@ func (r *remoteEnvironmentResolver) DisableRemoteEnvironmentMutation(ctx context
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while disabling %s", pretty.RemoteEnvironment))
-		return nil, gqlerror.New(err, pretty.RemoteEnvironment, gqlerror.WithName(remoteEnvironment), gqlerror.WithEnvironment(environment))
+		return nil, gqlerror.New(err, pretty.EnvironmentMapping, gqlerror.WithName(remoteEnvironment), gqlerror.WithEnvironment(environment))
 	}
 
 	environmentMapping := &gqlschema.EnvironmentMapping{

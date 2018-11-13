@@ -3,14 +3,13 @@ package content_test
 import (
 	"testing"
 
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestContentResolver_ContentQuery(t *testing.T) {

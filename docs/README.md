@@ -8,6 +8,7 @@ Start with the overarching [Kyma](kyma/docs) documentation where you can find th
 
 -   [API Gateway](api-gateway/docs)
 -   [Application Connector](application-connector/docs/)
+-   [Console](console/docs/)
 -   [Security](security/docs/)
 -   [Event Bus](event-bus/docs/)
 -   [Monitoring](monitoring/docs/)

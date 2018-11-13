@@ -16,6 +16,9 @@
 # The `kyma-installer` directory
 /kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek @jasiu001
 
+# The `prow` directory
+/prow/ @aszecowka @strekm @suleymanakbas91 @crabtree @michal-hudy @pbochynski
+
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @piotrmsc @PK85
 
@@ -27,6 +30,9 @@
 
 # The `values.yaml` file for `application-connector` chart
 /resources/application-connector/values.yaml @kyma-project/developers
+
+# The `heptio ark` chart
+/resources/ark/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @sjanota
@@ -42,6 +48,9 @@
 
 # The `configurations-generator` subchart
 /resources/core/charts/configurations-generator @piotrmsc @kubadz @sjanota
+
+# The `application-connector` chart
+/resources/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `connector-service` subchart
 /resources/application-connector/charts/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -160,9 +169,6 @@
 
 # Environments controller Component
 /components/environments/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
-
-# Istio Extensions Component
-/components/istio-webhook/ @piotrmsc @sjanota @kubadz
 
 # Istio Extensions Component
 /components/istio-kyma-patch/ @piotrmsc @sjanota @kubadz

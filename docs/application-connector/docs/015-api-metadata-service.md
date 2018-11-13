@@ -8,12 +8,12 @@ You can get the API specification of the Metadata Service for a given version of
 curl https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/metadata/api.yaml
 ```
 
-To access the API specification of the Metadata Service locally, provide the NodePort of the `core-nginx-ingress-controller`.
+To access the API specification of the Metadata Service locally, provide the NodePort of the `application-connector-nginx-ingress-controller`.
 
 To get the NodePort, run this command:
 
 ```
-kubectl -n kyma-system get svc core-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
+kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
 ```
 
 To access the specification, run:

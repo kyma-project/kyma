@@ -1,6 +1,8 @@
 package kymainstallation
 
 import (
+	"errors"
+
 	"github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymasources"
@@ -40,11 +42,12 @@ func (sf stepFactory) NewStep(component v1alpha1.KymaComponent) Step {
 }
 
 // NewStepFactory returns implementation of StepFactory implementation
-func NewStepFactory(kymaPackage kymasources.KymaPackage, helmClient kymahelm.ClientInterface, overrideData overrides.OverrideData) StepFactory {
+func NewStepFactory(kymaPackage kymasources.KymaPackage, helmClient kymahelm.ClientInterface, overrideData overrides.OverrideData) (StepFactory, error) {
 	installedReleases := make(map[string]bool)
+
 	relesesRes, err := helmClient.ListReleases()
 	if err != nil {
-		panic(err)
+		return nil, errors.New("Helm error: " + err.Error())
 	}
 
 	if relesesRes != nil {
@@ -58,5 +61,5 @@ func NewStepFactory(kymaPackage kymasources.KymaPackage, helmClient kymahelm.Cli
 		helmClient:        helmClient,
 		installedReleases: installedReleases,
 		overrideData:      overrideData,
-	}
+	}, nil
 }

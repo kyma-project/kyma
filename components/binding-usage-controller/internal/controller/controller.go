@@ -254,10 +254,16 @@ func (c *ServiceBindingUsageController) syncServiceBindingUsage(key string) erro
 
 	if err := c.reconcileServiceBindingUsageAdd(bindingUsage); err != nil {
 		condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, err.Reason, err.Message)
-		if err := c.updateStatus(bindingUsage, *condition); err != nil {
-			return errors.Wrapf(err, "while updating sbu status with condition %+v", condition)
+		if updateErr := c.updateStatus(bindingUsage, *condition); updateErr != nil {
+			return errors.Wrapf(updateErr, "while updating sbu status with condition %+v", condition)
 		}
 		return errors.Wrapf(err, "while processing %s", pretty.ServiceBindingUsageName(bindingUsage))
+	}
+
+	// retrieves the latest ServiceBindingUsage info from apiserver
+	bindingUsage, err = c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
+	if err != nil {
+		return errors.Wrapf(err, "while getting ServiceBindingUsage %s", name)
 	}
 
 	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionTrue, "", "")
@@ -276,9 +282,21 @@ func (c *ServiceBindingUsageController) reconcileServiceBindingUsageAdd(newUsage
 
 	svcBinding, err := c.bindingLister.ServiceBindings(workNS).Get(newBindingName)
 	if err != nil {
+		if apiErrors.IsNotFound(err) {
+			if err := c.ensureOwnerRefNotExists(newUsage); err != nil {
+				c.log.Errorf("%v: while deleting OwnerReferences from sbu %q", err)
+			}
+		}
 		return newProcessServiceBindingError(
 			sbuStatus.ServiceBindingGetErrorReason,
 			errors.Wrapf(err, "while getting ServiceBinding %q from namespace %q", newBindingName, workNS),
+		)
+	}
+
+	if err := c.ensureOwnerRef(newUsage, svcBinding); err != nil {
+		return newProcessServiceBindingError(
+			sbuStatus.AddOwnerReferenceErrorReason,
+			errors.Wrapf(err, "while adding OwnerReference to %s", pretty.ServiceBindingUsageName(newUsage)),
 		)
 	}
 
@@ -326,6 +344,47 @@ func (c *ServiceBindingUsageController) reconcileServiceBindingUsageAdd(newUsage
 			sbuStatus.EnsureLabelsAppliedErrorReason,
 			errors.Wrapf(err, "while ensuring proper labels on kind %s", newUsage.Spec.UsedBy.Kind),
 		)
+	}
+
+	return nil
+}
+
+func (c *ServiceBindingUsageController) ensureOwnerRef(newUsage *sbuTypes.ServiceBindingUsage, binding *scTypes.ServiceBinding) error {
+	for _, ref := range newUsage.OwnerReferences {
+		if ref.Kind == "ServiceBinding" && ref.Name == binding.Name {
+			return nil
+		}
+	}
+
+	newUsage.OwnerReferences = append(newUsage.OwnerReferences, metaV1.OwnerReference{
+		APIVersion: "servicecatalog.k8s.io/v1beta1",
+		Kind:       "ServiceBinding",
+		Name:       binding.Name,
+		UID:        binding.UID,
+	})
+
+	if _, err := c.bindingUsageClient.ServiceBindingUsages(newUsage.Namespace).Update(newUsage); err != nil {
+		return errors.Wrapf(err, "while updating %s", pretty.ServiceBindingUsageName(newUsage))
+	}
+
+	return nil
+}
+
+func (c *ServiceBindingUsageController) ensureOwnerRefNotExists(newUsage *sbuTypes.ServiceBindingUsage) error {
+	if len(newUsage.OwnerReferences) == 0 {
+		return nil
+	}
+
+	ownerReferences := make([]metaV1.OwnerReference, 0)
+	for _, ref := range newUsage.OwnerReferences {
+		if ref.Kind != "ServiceBinding" {
+			ownerReferences = append(ownerReferences, ref)
+		}
+	}
+
+	newUsage.OwnerReferences = ownerReferences
+	if _, err := c.bindingUsageClient.ServiceBindingUsages(newUsage.Namespace).Update(newUsage); err != nil {
+		return errors.Wrapf(err, "while updating %s", pretty.ServiceBindingUsageName(newUsage))
 	}
 
 	return nil

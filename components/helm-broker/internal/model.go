@@ -136,7 +136,11 @@ type Bundle struct {
 	Metadata    BundleMetadata
 	Tags        []BundleTag
 	Bindable    bool
+	Repository  RemoteRepository
 }
+
+// Labels are key-value pairs which add metadata information for bundle.
+type Labels map[string]string
 
 // BundleMetadata holds bundle metadata as defined by OSB API.
 type BundleMetadata struct {
@@ -148,6 +152,7 @@ type BundleMetadata struct {
 	// ImageURL is graphical representation of the bundle.
 	// Currently SVG is required.
 	ImageURL string
+	Labels   Labels
 }
 
 // ToMap collect data from BundleMetadata to format compatible with YAML encoder.
@@ -159,8 +164,33 @@ func (b BundleMetadata) ToMap() map[string]interface{} {
 		DocumentationURL    string `structs:"documentationUrl"`
 		SupportURL          string `structs:"supportUrl"`
 		ImageURL            string `structs:"imageUrl"`
+		Labels              Labels `structs:"labels"`
 	}
 	return structs.Map(mapped(b))
+}
+
+// DeepCopy returns a new BundleMetadata object.
+func (b BundleMetadata) DeepCopy() BundleMetadata {
+	out := b
+	if b.Labels != nil {
+		out.Labels = make(Labels, len(b.Labels))
+		for k, v := range b.Labels {
+			out.Labels[k] = v
+		}
+
+	}
+
+	return out
+}
+
+// RemoteRepository contains information about the repository which contains the given bundle.
+type RemoteRepository struct {
+	URL string
+}
+
+// ID returns an identifier of a repository which is the repository URL.
+func (r RemoteRepository) ID() string {
+	return r.URL
 }
 
 // InstanceID is a service instance identifier.

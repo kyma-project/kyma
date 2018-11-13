@@ -1,0 +1,8 @@
+storage:
+  - driver: memory
+    provide:
+      chart: ~
+      bundle: ~
+      instance: ~
+      instanceOperation: ~
+      entityInstanceBindData: ~

@@ -35,6 +35,9 @@ spec:
         - name: ark
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: metrics
+              containerPort: 8085
           command:
             - /ark
           args:

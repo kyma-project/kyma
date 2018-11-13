@@ -1,5 +1,5 @@
 ---
-apiVersion: gateway.kyma.cx/v1alpha2
+apiVersion: gateway.kyma-project.io/v1alpha2
 kind: Api
 metadata:
   labels:

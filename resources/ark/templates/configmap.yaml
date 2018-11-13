@@ -55,11 +55,17 @@ data:
     - namespaces
     - persistentvolumes
     - persistentvolumeclaims
+    - remoteenvironments # added
+    - environmentmappings #
+    - servicebrokers #
+    - serviceclasses #
+    - serviceinstances #
+    - servicebindings #
     - secrets
     - configmaps
     - serviceaccounts
     - limitranges
-    - podpresets # added in compare to default priorities
+    - podpresets # added
     - pods
     - replicaset
 {{- end }}
