@@ -35,11 +35,11 @@ type CreateServiceResponse struct {
 }
 
 type API struct {
-	TargetUrl   string          `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
-	Credentials *Credentials    `json:"credentials,omitempty"`
-	Spec        json.RawMessage `json:"spec,omitempty"`
-	SpecUrl     string          `json:"specUrl,omitempty"`
-	Type        string          `json:"type"`
+	TargetUrl        string          `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+	Credentials      *Credentials    `json:"credentials,omitempty"`
+	Spec             json.RawMessage `json:"spec,omitempty"`
+	SpecificationUrl string          `json:"specificationUrl,omitempty"`
+	ApiType          string          `json:"apiType"`
 }
 
 type Credentials struct {
@@ -98,10 +98,10 @@ func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinit
 
 	if serviceDefinition.Api != nil {
 		serviceDetails.Api = &API{
-			TargetUrl: serviceDefinition.Api.TargetUrl,
-			Spec:      serviceDefinition.Api.Spec,
-			SpecUrl:   serviceDefinition.Api.SpecUrl,
-			Type:      serviceDefinition.Api.Type,
+			TargetUrl:        serviceDefinition.Api.TargetUrl,
+			Spec:             serviceDefinition.Api.Spec,
+			SpecificationUrl: serviceDefinition.Api.SpecificationUrl,
+			ApiType:          serviceDefinition.Api.ApiType,
 		}
 
 		if serviceDefinition.Api.Credentials != nil {
@@ -147,9 +147,9 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (metadata.
 
 	if serviceDetails.Api != nil {
 		serviceDefinition.Api = &serviceapi.API{
-			TargetUrl: serviceDetails.Api.TargetUrl,
-			SpecUrl:   serviceDetails.Api.SpecUrl,
-			Type:      serviceDetails.Api.Type,
+			TargetUrl:        serviceDetails.Api.TargetUrl,
+			SpecificationUrl: serviceDetails.Api.SpecificationUrl,
+			ApiType:          serviceDetails.Api.ApiType,
 		}
 		if serviceDetails.Api.Credentials != nil {
 			serviceDefinition.Api.Credentials = &serviceapi.Credentials{
@@ -184,33 +184,33 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (metadata.
 
 func (api API) MarshalJSON() ([]byte, error) {
 	bytes, err := json.Marshal(&struct {
-		TargetUrl   string          `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
-		Credentials *Credentials    `json:"credentials,omitempty"`
-		Spec        json.RawMessage `json:"spec,omitempty"`
-		SpecUrl     string          `json:"specUrl,omitempty"`
-		Type        string          `json:"type"`
+		TargetUrl        string          `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+		Credentials      *Credentials    `json:"credentials,omitempty"`
+		Spec             json.RawMessage `json:"spec,omitempty"`
+		SpecificationUrl string          `json:"specificationUrl,omitempty"`
+		ApiType          string          `json:"apiType"`
 	}{
 		api.TargetUrl,
 		api.Credentials,
 		api.Spec,
-		api.SpecUrl,
-		api.Type,
+		api.SpecificationUrl,
+		api.ApiType,
 	})
 	if err == nil {
 		return bytes, nil
 	}
 	bytes, err = json.Marshal(&struct {
-		TargetUrl   string       `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
-		Credentials *Credentials `json:"credentials,omitempty"`
-		Spec        string       `json:"spec,omitempty"`
-		SpecUrl     string       `json:"specUrl,omitempty"`
-		Type        string       `json:"type"`
+		TargetUrl        string       `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
+		Credentials      *Credentials `json:"credentials,omitempty"`
+		Spec             string       `json:"spec,omitempty"`
+		SpecificationUrl string       `json:"specificationUrl,omitempty"`
+		ApiType          string       `json:"apiType"`
 	}{
 		api.TargetUrl,
 		api.Credentials,
 		string(api.Spec),
-		api.SpecUrl,
-		api.Type,
+		api.SpecificationUrl,
+		api.ApiType,
 	})
 	if err != nil {
 		return nil, err

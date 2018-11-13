@@ -1,6 +1,7 @@
 package specification
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/go-openapi/spec"
@@ -12,7 +13,6 @@ import (
 	"net/url"
 	"strings"
 	"time"
-	"context"
 )
 
 const (
@@ -20,7 +20,7 @@ const (
 	oDataSpecType        = "odata"
 	targetSwaggerVersion = "2.0"
 
-	specRequestTimeout = time.Duration(5)
+	specRequestTimeout = time.Duration(5 * time.Second)
 )
 
 type SpecService interface {
@@ -97,14 +97,14 @@ func processAPISpecification(api *serviceapi.API, gatewayUrl string) ([]byte, ap
 }
 
 func fetchSpec(api *serviceapi.API) ([]byte, apperrors.AppError) {
-	specUrl, err := url.Parse(api.SpecUrl)
-	if err != nil || api.SpecUrl == "" {
+	specUrl, err := url.Parse(api.SpecificationUrl)
+	if err != nil || api.SpecificationUrl == "" {
 		targetUrl := strings.TrimSuffix(api.TargetUrl, "/")
 		specUrl, err = url.Parse(fmt.Sprintf(oDataSpecFormat, targetUrl))
 		if err != nil {
 			return nil, apperrors.Internal("Parsing OData spec url failed, %s", err.Error())
 		}
-		api.Type = oDataSpecType
+		api.ApiType = oDataSpecType
 	}
 
 	response, apperr := requestAPISpec(specUrl.String())
@@ -132,9 +132,9 @@ func requestAPISpec(specUrl string) (*http.Response, apperrors.AppError) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), specRequestTimeout)
 	defer cancel()
-	req = req.WithContext(ctx)
+	reqWithTimeout := req.WithContext(ctx)
 
-	response, err := http.DefaultClient.Do(req)
+	response, err := http.DefaultClient.Do(reqWithTimeout)
 	if err != nil {
 		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed, %s", specUrl, err.Error())
 	}

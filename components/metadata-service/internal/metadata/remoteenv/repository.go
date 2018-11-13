@@ -30,6 +30,8 @@ type ServiceAPI struct {
 	GatewayURL            string
 	AccessLabel           string
 	TargetUrl             string
+	SpecificationUrl      string
+	ApiType               string
 	OauthUrl              string
 	CredentialsSecretName string
 }

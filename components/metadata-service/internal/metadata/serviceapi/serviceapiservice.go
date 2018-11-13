@@ -17,10 +17,10 @@ type API struct {
 	Credentials *Credentials
 	// Spec contains specification of an API.
 	Spec []byte
-	// SpecUrl is url from where the specification of an API can be acquired - used if Spec is not defined
-	SpecUrl string
-	// Type of API ex. OData, OpenApi
-	Type string
+	// SpecificationUrl is url from where the specification of an API can be acquired - used if Spec is not defined
+	SpecificationUrl string
+	// ApiType is a type of and API ex. OData, OpenApi
+	ApiType string
 }
 
 // Credentials contains OAuth configuration.
@@ -106,8 +106,9 @@ func (sas defaultService) New(remoteEnvironment, id string, api *API) (*remoteen
 
 func (sas defaultService) Read(remoteEnvironment string, remoteenvAPI *remoteenv.ServiceAPI) (*API, apperrors.AppError) {
 	api := &API{
-		TargetUrl: remoteenvAPI.TargetUrl,
-		// TODO: Read Type and SpecUrl from the RE
+		TargetUrl:        remoteenvAPI.TargetUrl,
+		SpecificationUrl: remoteenvAPI.SpecificationUrl,
+		ApiType:          remoteenvAPI.ApiType,
 	}
 
 	if remoteenvAPI.OauthUrl != "" && remoteenvAPI.CredentialsSecretName != "" {

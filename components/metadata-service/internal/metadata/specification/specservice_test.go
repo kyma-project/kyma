@@ -68,7 +68,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 			assert.Equal(t, "/path", req.URL.Path)
 		})
 
-		specData := defaultSpecDataWithAPI(&serviceapi.API{SpecUrl: specServer.URL + "/path"})
+		specData := defaultSpecDataWithAPI(&serviceapi.API{SpecificationUrl: specServer.URL + "/path"})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
@@ -90,7 +90,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 			assert.Equal(t, "/path", req.URL.Path)
 		})
 
-		specData := defaultSpecDataWithAPI(&serviceapi.API{SpecUrl: specServer.URL + "/path"})
+		specData := defaultSpecDataWithAPI(&serviceapi.API{SpecificationUrl: specServer.URL + "/path"})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
@@ -109,7 +109,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		// given
 		specServer := new404server()
 
-		specData := defaultSpecDataWithAPI(&serviceapi.API{SpecUrl: specServer.URL})
+		specData := defaultSpecDataWithAPI(&serviceapi.API{SpecificationUrl: specServer.URL})
 
 		minioSvc := &mocks.Service{}
 
