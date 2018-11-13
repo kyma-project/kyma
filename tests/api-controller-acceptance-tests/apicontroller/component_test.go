@@ -9,19 +9,19 @@ import (
 	"testing"
 	"time"
 
-	kymaApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
-	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
-	istioNetApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/networking.istio.io/v1alpha3"
-	istioNet "github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io/clientset/versioned"
+	"github.com/avast/retry-go"
+	"github.com/go-test/deep"
 	istioAuthApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/authentication.istio.io/v1alpha1"
+	kymaApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
+	istioNetApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/networking.istio.io/v1alpha3"
 	istioAuth "github.com/kyma-project/kyma/components/api-controller/pkg/clients/authentication.istio.io/clientset/versioned"
+	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	istioNet "github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io/clientset/versioned"
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"github.com/go-test/deep"
-	"github.com/avast/retry-go"
 )
 
 type componentTestContext struct{}
@@ -69,7 +69,6 @@ func TestComponentSpec(t *testing.T) {
 
 		Convey("create API with hostname without domain", func() {
 			t.Log("create API with hostname without domain")
-
 
 			testId := ctx.generateTestId(testIdLength)
 			t.Logf("Running test: %s", testId)
@@ -139,9 +138,7 @@ func TestComponentSpec(t *testing.T) {
 
 			testId := ctx.generateTestId(testIdLength)
 			t.Logf("Running test: %s", testId)
-			api := ctx.apiFor(testId, domainName, apiSecurityDisabled, true)
-			authEnabled := true
-			api.Spec.AuthenticationEnabled = &authEnabled
+			api := ctx.apiFor(testId, domainName, apiSecurityEnabled, true)
 
 			createdApi, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
 			defer ctx.cleanUpApi(kymaClient, createdApi, t, false)
@@ -154,7 +151,7 @@ func TestComponentSpec(t *testing.T) {
 			So(createdApi.ResourceVersion, ShouldNotBeEmpty)
 			So(createdApi.Spec, ctx.ShouldDeepEqual, api.Spec)
 
-			authEnabled = false
+			authEnabled := false
 			createdApi.Spec.AuthenticationEnabled = &authEnabled
 
 			updatedApi, err := kymaClient.GatewayV1alpha2().Apis(namespace).Update(createdApi)
@@ -202,9 +199,7 @@ func TestComponentSpec(t *testing.T) {
 
 			testId := ctx.generateTestId(testIdLength)
 			t.Logf("Running test: %s", testId)
-			api := ctx.apiFor(testId, domainName, apiSecurityDisabled, true)
-			authEnabled := true
-			api.Spec.AuthenticationEnabled = &authEnabled
+			api := ctx.apiFor(testId, domainName, apiSecurityEnabled, true)
 
 			lastApi, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
 			defer ctx.cleanUpApi(kymaClient, lastApi, t, true)
@@ -259,7 +254,7 @@ func (ctx componentTestContext) apiFor(testId, domainName string, secured ApiSec
 
 func (componentTestContext) virtualServiceFor(testId, domainName string) *istioNetApi.VirtualServiceSpec {
 	return &istioNetApi.VirtualServiceSpec{
-		Hosts: []string{testId+"."+domainName},
+		Hosts:    []string{testId + "." + domainName},
 		Gateways: []string{"kyma-gateway.kyma-system.svc.cluster.local"},
 		Http: []*istioNetApi.HTTPRoute{
 			{
@@ -289,7 +284,7 @@ func (componentTestContext) policyFor(testId, issuer string) *istioAuthApi.Polic
 		Origins: istioAuthApi.Origins{
 			{
 				Jwt: &istioAuthApi.Jwt{
-					Issuer: issuer,
+					Issuer:  issuer,
 					JwksUri: "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
 				},
 			},
@@ -386,7 +381,7 @@ func (componentTestContext) ShouldDeepEqual(actual interface{}, expected ...inte
 	return strings.Join(deep.Equal(actual, expected[0]), "\n")
 }
 
-func (componentTestContext) cleanUpApi(kymaClient *kyma.Clientset, api * kymaApi.Api, t *testing.T, allowMissing bool) {
+func (componentTestContext) cleanUpApi(kymaClient *kyma.Clientset, api *kymaApi.Api, t *testing.T, allowMissing bool) {
 	if api == nil {
 		return
 	}

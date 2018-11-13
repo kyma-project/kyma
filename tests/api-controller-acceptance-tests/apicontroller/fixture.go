@@ -22,6 +22,7 @@ const (
 	retrySleep                                     = 2 * time.Second
 	domainNameEnv                                  = "DOMAIN_NAME"
 	apiSecurityDisabled                ApiSecurity = false
+	apiSecurityEnabled                 ApiSecurity = true
 )
 
 type ApiSecurity bool
