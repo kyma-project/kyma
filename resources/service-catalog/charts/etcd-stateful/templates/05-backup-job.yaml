@@ -90,7 +90,7 @@ metadata:
   name: {{ template "etcd-fullname" . }}-backup
   namespace: "{{ .Release.Namespace }}"
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "etcd-fullname" . }}-backup
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"

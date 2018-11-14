@@ -2,10 +2,6 @@ dex:
   tls:
     createSecret: false
 
-service-catalog:
-  etcd-stateful:
-    replicaCount: 1
-
 minio:
   service:
     type: NodePort
