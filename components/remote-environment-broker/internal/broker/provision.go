@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -200,30 +201,38 @@ func (svc *ProvisionService) createEaOnSuccessProvision(reName, reID, ns string,
 	if err != nil {
 		return errors.Wrapf(err, "while getting service instance with external id: %q in namespace: %q", iID, ns)
 	}
-
-	_, err = svc.reClient.EventActivations(ns).Create(
-		&v1alpha1.EventActivation{
-			ObjectMeta: v1.ObjectMeta{
-				Name:      reID,
-				Namespace: ns,
-				OwnerReferences: []v1.OwnerReference{
-					{
-						APIVersion: serviceCatalogAPIVersion,
-						Kind:       "ServiceInstance",
-						Name:       si.Name,
-						UID:        si.UID,
-					},
+	ea := &v1alpha1.EventActivation{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      reID,
+			Namespace: ns,
+			OwnerReferences: []v1.OwnerReference{
+				{
+					APIVersion: serviceCatalogAPIVersion,
+					Kind:       "ServiceInstance",
+					Name:       si.Name,
+					UID:        si.UID,
 				},
 			},
-			Spec: v1alpha1.EventActivationSpec{
-				DisplayName: displayName,
-				SourceID:    reName,
-			},
-		})
-	if err != nil {
+		},
+		Spec: v1alpha1.EventActivationSpec{
+			DisplayName: displayName,
+			SourceID:    reName,
+		},
+	}
+	_, err = svc.reClient.EventActivations(ns).Create(ea)
+	switch {
+	case err == nil:
+		svc.log.Infof("Created EventActivation: [%s], in namespace: [%s]", reID, ns)
+	case apiErrors.IsAlreadyExists(err):
+		// We perform update action to adjust OwnerReference of the EventActivation after the backup restore.
+		_, err := svc.reClient.EventActivations(ns).Update(ea)
+		if err != nil {
+			return errors.Wrapf(err, "while updating EventActivation with name: %q in namespace: %q", reID, ns)
+		}
+		svc.log.Infof("Updated EventActivation: [%s], in namespace: [%s]", reID, ns)
+	default:
 		return errors.Wrapf(err, "while creating EventActivation with name: %q in namespace: %q", reID, ns)
 	}
-	svc.log.Infof("Created EventActivation: [%s], in namespace: [%s]", reID, ns)
 	return nil
 }
 
