@@ -1,6 +1,6 @@
 # Binding Usage Controller
 
-## Overview
+## Overview 
 
 The Binding Usage Controller injects the **ServiceBindings** into a given application using the **ServiceBindingUsage** resource, which allows this application to bind to a given ServiceInstance. The ServiceBindingUsage is a Kubernetes custom resource which is Namespace-scoped. For the custom resource definition, see the [ServiceBindingUsage CRD file](../../resources/cluster-essentials/templates/service-binding-usage.crd.yaml). For more detailed information on the Binding Usage Controller, see the [docs](./docs) folder in this repository.
 
