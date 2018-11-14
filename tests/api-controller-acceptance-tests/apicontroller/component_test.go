@@ -162,7 +162,7 @@ func TestComponentSpec(t *testing.T) {
 			updatedApi, err = ctx.awaitApiChanged(kymaClient, updatedApi, false, true)
 			So(err, ShouldBeNil)
 			So(updatedApi.ResourceVersion, ShouldNotBeEmpty)
-			So(updatedApi.Spec, ctx.ShouldDeepEqual, api.Spec)
+			So(updatedApi.Spec, ctx.ShouldDeepEqual, createdApi.Spec)
 			So(updatedApi.Status.AuthenticationStatus.Resource.Uid, ShouldBeEmpty)
 
 			_, err = istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(createdApi.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
