@@ -1,9 +1,9 @@
 ---
-title: Register a ClusterServiceBroker
+title: Register a broker in the Service Catalog
 type: Getting Started
 ---
 
-This Getting Started guide shows how to register a new ClusterServiceBroker in the Service Catalog. Follow this guide to register a cluster-wide [UPS Broker](https://github.com/kubernetes-incubator/service-catalog/tree/master/charts/ups-broker) in the Service Catalog.
+This Getting Started guide shows how to register a broker in the Service Catalog. The broker can be either a Namespace-scoped ServiceBroker or a cluster-wide ClusterServiceBroker. Follow this guide to register a cluster-wide or Namespace-scoped version of the  [UPS Broker](https://github.com/kubernetes-incubator/service-catalog/tree/master/charts/ups-broker).
 
 ## Prerequisites
 
@@ -22,15 +22,23 @@ This Getting Started guide shows how to register a new ClusterServiceBroker in t
      helm install service-catalog/charts/ups-broker --name ups-broker --namespace stage
      ```
 
-3. Register your broker:
+3. Register a ClusterServiceBroker:
      ```
-    kubectl create -f service-catalog/contrib/examples/walkthrough/ups-broker.yaml
+    kubectl create -f service-catalog/contrib/examples/walkthrough/ups-clusterservicebroker.yaml
     ```
-     After you successfully register your ClusterServiceBroker, the Service Catalog periodically fetches services from this broker and creates ClusterServiceClasses from them.
+    In case of the ServiceBroker, this command looks as follows:
+    ```
+    kubectl create -f service-catalog/contrib/examples/walkthrough/ups-servicebroker.yaml
+    ```    
+    After you successfully register your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches services from this broker and creates ServiceClasses or ClusterServiceClasses from them.
 
-4. Check the status of the broker:
+4. Check the status of the ClusterServiceBroker:
      ```
     kubectl get clusterservicebrokers ups-broker -o jsonpath="{.status.conditions}"
+    ```
+    In case of ServiceBrokers, run:
+    ```
+    kubectl get servicebrokers ups-broker -n stage -o jsonpath="{.status.conditions}"
     ```
 
     The output looks as follows:
@@ -45,13 +53,17 @@ This Getting Started guide shows how to register a new ClusterServiceBroker in t
      ```
 
 5. View ClusterServiceClasses that this broker provides:
-     ```
-    kubectl get clusterserviceclasses
+      ```
+     kubectl get clusterserviceclasses
+      ```
+      In case of ServiceBrokers, the command looks as follows:
+      ```
+      kubectl get serviceclasses -n {namespace}
       ```
 
-     These are the UPS Broker ClusterServiceClasses:
+     These are the UPS Broker Service Classes:
      ```
-    NAME                                   EXTERNAL NAME
+     NAME                                   EXTERNAL NAME
      4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468   user-provided-service
      5f6e6cf6-ffdd-425f-a2c7-3c9258ad2468   user-provided-service-single-plan
      8a6229d4-239e-4790-ba1f-8367004d0473   user-provided-service-with-schemas
