@@ -51,7 +51,7 @@ func TestNewService(t *testing.T) {
 		secretsService.On(
 			"Create",
 			"re",
-			resourceName,
+			"uuid-1",
 			api.Credentials,
 		).Return(remoteEnvCredentials, nil)
 
@@ -105,7 +105,7 @@ func TestNewService(t *testing.T) {
 		secretsService.On(
 			"Create",
 			"re",
-			resourceName,
+			"uuid-1",
 			api.Credentials,
 		).Return(remoteEnvCredentials, nil)
 
@@ -220,7 +220,7 @@ func TestNewService(t *testing.T) {
 		secretsService.On(
 			"Create",
 			"re",
-			resourceName,
+			"uuid-1",
 			api.Credentials,
 		).Return(remoteenv.Credentials{}, apperrors.Internal("some error"))
 
@@ -261,7 +261,7 @@ func TestNewService(t *testing.T) {
 		secretsService.On(
 			"Create",
 			"re",
-			resourceName,
+			"uuid-1",
 			api.Credentials,
 		).Return(remoteenv.Credentials{}, apperrors.Internal("some error"))
 
@@ -303,7 +303,7 @@ func TestNewService(t *testing.T) {
 		secretsService.On(
 			"Create",
 			"re",
-			resourceName,
+			"uuid-1",
 			api.Credentials,
 		).Return(remoteenv.Credentials{}, nil)
 

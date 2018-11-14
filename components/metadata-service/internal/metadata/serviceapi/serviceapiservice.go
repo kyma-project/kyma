@@ -58,13 +58,13 @@ func (sas defaultService) New(remoteEnvironment, id string, api *model.API) (*re
 	}
 
 	if api.Credentials != nil {
-		credentials, err := sas.secretsService.Create(remoteEnvironment, resourceName, api.Credentials)
+		credentials, err := sas.secretsService.Create(remoteEnvironment, id, api.Credentials)
 		if err != nil {
 			return nil, err
 		}
 
 		serviceAPI.Credentials = credentials
-		serviceAPI.Credentials.SecretName = sas.nameResolver.GetResourceName(remoteEnvironment, id)
+		serviceAPI.Credentials.SecretName = resourceName
 	}
 
 	err = sas.istioService.Create(remoteEnvironment, id, resourceName)
@@ -133,7 +133,7 @@ func (sas defaultService) Update(remoteEnvironment, id string, api *model.API) (
 		}
 
 		serviceAPI.Credentials = credentials
-		serviceAPI.Credentials.SecretName = sas.nameResolver.GetResourceName(remoteEnvironment, id)
+		serviceAPI.Credentials.SecretName = resourceName
 	} else {
 		err := sas.secretsService.Delete(resourceName)
 		if err != nil {
