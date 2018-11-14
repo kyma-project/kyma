@@ -4,7 +4,6 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 )
 
@@ -13,37 +12,29 @@ type K8sResourcesClient interface {
 	DeleteRemoteEnvironment(name string, options *v1.DeleteOptions) error
 }
 type k8sResourcesClient struct {
-	coreClient              *kubernetes.Clientset
 	remoteEnvironmentClient *versioned.Clientset
-	namespace               string
 }
 
-func NewK8sResourcesClient(namespace string) (K8sResourcesClient, error) {
+func NewK8sResourcesClient() (K8sResourcesClient, error) {
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
 		return nil, err
 	}
-	return initClient(k8sConfig, namespace)
+	return initClient(k8sConfig)
 }
-func initClient(k8sConfig *restclient.Config, namespace string) (K8sResourcesClient, error) {
-	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, err
-	}
+func initClient(k8sConfig *restclient.Config) (K8sResourcesClient, error) {
 	remoteEnvironmentClientset, err := versioned.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 	return &k8sResourcesClient{
-		coreClient:              coreClientset,
 		remoteEnvironmentClient: remoteEnvironmentClientset,
-		namespace:               namespace,
 	}, nil
 }
 func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, accessLabel string) (*v1alpha1.RemoteEnvironment, error) {
 	dummyRe := &v1alpha1.RemoteEnvironment{
 		TypeMeta:   v1.TypeMeta{Kind: "RemoteEnvironment", APIVersion: v1alpha1.SchemeGroupVersion.String()},
-		ObjectMeta: v1.ObjectMeta{Name: name, Namespace: c.namespace},
+		ObjectMeta: v1.ObjectMeta{Name: name},
 		Spec: v1alpha1.RemoteEnvironmentSpec{
 			Services:    []v1alpha1.Service{},
 			AccessLabel: accessLabel,

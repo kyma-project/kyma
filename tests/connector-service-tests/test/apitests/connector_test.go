@@ -28,9 +28,15 @@ func TestConnector(t *testing.T) {
 	config, err := testkit.ReadConfig()
 	require.NoError(t, err)
 
-	remoteEnvName := "ec-default"
+	remoteEnvName := "dummy-re"
+
+	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
+	require.NoError(t, err)
+	_, e := k8sResourcesClient.CreateDummyRemoteEnvironment(remoteEnvName, "")
 
 	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
+
+	require.NoError(t, e)
 
 	clientKey := testkit.CreateKey(t)
 
@@ -217,6 +223,7 @@ func TestConnector(t *testing.T) {
 		require.Equal(t, StatusBadRequest, err.ErrorResponse.Code)
 		require.Equal(t, "There was an error while parsing the base64 content. An incorrect value was provided.", err.ErrorResponse.Error)
 	})
+	k8sResourcesClient.DeleteRemoteEnvironment(remoteEnvName, &v1.DeleteOptions{})
 }
 
 func TestApiSpec(t *testing.T) {
@@ -273,7 +280,7 @@ func TestCertificateValidation(t *testing.T) {
 	remoteEnvName := "ec-default"
 	forbiddenRemoteEnvName := "hmc-default"
 
-	k8sResourcesClient, err := testkit.NewK8sResourcesClient("kyma-integration")
+	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
 	require.NoError(t, err)
 	_, e := k8sResourcesClient.CreateDummyRemoteEnvironment(remoteEnvName, "")
 	require.NoError(t, e)
