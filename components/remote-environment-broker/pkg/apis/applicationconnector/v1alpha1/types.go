@@ -64,14 +64,6 @@ type ReCondition struct {
 // ReConditionType represents an Issuer condition value.
 type ReConditionType string
 
-const (
-	// IssuerConditionReady represents the fact that a given Issuer condition
-	// is in ready state.
-	Stage1Done ReConditionType = "Stage_1"
-	Stage2Done ReConditionType = "Stage_2"
-	Stage3Done ReConditionType = "Stage_3"
-)
-
 // ConditionStatus represents a condition's status.
 type ConditionStatus string
 
