@@ -282,7 +282,7 @@ func (sds *serviceDefinitionService) readService(remoteEnvironment string, servi
 	}
 
 	if eventsSpec != nil {
-		serviceDef.Events = &model.Events{Spec: eventsSpec}
+		serviceDef.Events = &model.Events{eventsSpec}
 	}
 
 	if documentation != nil {
