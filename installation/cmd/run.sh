@@ -68,51 +68,19 @@ if [[ ! ${SKIP_MINIKUBE_START} ]]; then
     bash ${CURRENT_DIR}/../scripts/minikube.sh $MINIKUBE_ARGS
 fi
 
-if [[ $KNATIVE ]]; then
-    if [ -n "${KN_SERVING_URL}" ]
-    then
-        EXTRA_ARGS="--serving-url ${KN_SERVING_URL}"
-    fi
+bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
 
-    if [ -n "${KN_EVENTING_URL}" ]
-    then
-        EXTRA_ARGS="${EXTRA_ARGS} --eventing-url ${KN_EVENTING_URL}"
-    fi
+bash ${CURRENT_DIR}/../scripts/generate-local-config.sh
 
-    bash ${CURRENT_DIR}/../scripts/knative-install.sh ${EXTRA_ARGS}
-    bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
+CRTPL_PATH=${CRTPL_PATH:-"$CURRENT_DIR/../resources/installer-cr.yaml.tpl"}
 
-    bash ${CURRENT_DIR}/../scripts/generate-local-config.sh
+if [ -z "$CR_PATH" ]; then
 
-    CRTPL_PATH=${CRTPL_PATH:-"$CURRENT_DIR/../resources/installer-cr-knative.yaml.tpl"}
+    TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
+    CR_PATH="${TMPDIR}/installer-cr-local.yaml"
+    bash ${CURRENT_DIR}/../scripts/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}" --crtpl_path "${CRTPL_PATH}"
 
-    if [ -z "$CR_PATH" ]; then
-
-        TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
-        CR_PATH="${TMPDIR}/installer-cr-local.yaml"
-        bash ${CURRENT_DIR}/../scripts/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}" --crtpl_path "${CRTPL_PATH}"
-
-    fi
-
-
-
-    bash ${CURRENT_DIR}/../scripts/installer.sh --local --knative --cr "${CR_PATH}"
-    rm -rf $TMPDIR
-else
-    bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
-
-    bash ${CURRENT_DIR}/../scripts/generate-local-config.sh
-
-    CRTPL_PATH=${CRTPL_PATH:-"$CURRENT_DIR/../resources/installer-cr.yaml.tpl"}
-
-    if [ -z "$CR_PATH" ]; then
-
-        TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
-        CR_PATH="${TMPDIR}/installer-cr-local.yaml"
-        bash ${CURRENT_DIR}/../scripts/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}" --crtpl_path "${CRTPL_PATH}"
-
-    fi
-
-    bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}"
-    rm -rf $TMPDIR
 fi
+
+bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}"
+rm -rf $TMPDIR
