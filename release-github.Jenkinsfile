@@ -42,7 +42,7 @@ podTemplate(label: label) {
                         appVersion = params.RELEASE_VERSION
                     } else {
                         echo ("Building Release Candidate for ${params.RELEASE_BRANCH}")
-                        appVersion = "${(params.RELEASE_BRANCH =~ /([0-9]+\.[0-9]+)$/)[0][1]}-rc" // release branch number + '-rc' suffix (e.g. 1.0-rc)
+                        appVersion = "${(params.RELEASE_BRANCH =~ /([0-9]+\.[0-9]+)$/)[0][1]}-rc2" // release branch number + '-rc' suffix (e.g. 1.0-rc)
                     }
                 }
 

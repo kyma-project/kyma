@@ -24,58 +24,58 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   alpine_net:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   api_controller:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   api_controller_acceptance_tests:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   apiserver_proxy:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   binding_usage_controller:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   configurations_generator:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   docs:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   environments:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   etcd_backup:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   event_bus:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   event_bus_tests:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   helm_broker:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   kubeless_test_client:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   test_environments:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   test_logging_monitoring:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   ui_api_layer:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   ui_api_layer_acceptance_tests:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
 
 test:
   acceptance:
