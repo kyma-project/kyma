@@ -25,7 +25,7 @@ EOF
 ```
 >**NOTE:** If you don't specify the Namespace in which you want to create the Secret, the system creates it in the `default` Namespace.
 
-The following table describes the fields that are mandatory to create a static user. If any of these fields is not included, the user is not created.
+The following table describes the fields that are mandatory to create a static user. If you don't include any of these fields, the user is not created.
 
 |Field | Description |
 |---|---|
