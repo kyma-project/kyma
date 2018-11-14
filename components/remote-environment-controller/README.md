@@ -16,15 +16,6 @@ Remote Environment Controller performs different operations as a result of the f
  
  ## Usage
  
- This section explains how to use the Remote Environment Controller
- 
- ### Start the Remote Environment Controller
- To start the Remote Environment Controller, run this command:
- 
- ```
- ./manager
- ```
- 
  The Remote Environment Controller has the following parameters:
  - **appName** - This is the name used in controller registration. The default value is `remote-environment-controller`.
  - **domainName** - Domain name of the cluster. Default domain name is `kyma.local`.
