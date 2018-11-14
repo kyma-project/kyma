@@ -44,15 +44,15 @@ This Getting Started guide shows how to register a broker in the Service Catalog
     ```
 
   The output looks as follows:
-      ```
-    {
+  ```
+  {
     "lastTransitionTime": "2018-10-26T12:03:32Z",
     "message": "Successfully fetched catalog entries from broker.",
     "reason": "FetchedCatalog",
     "status": "True",
     "type": "Ready"
-    }
-     ```
+  }
+  ```
 
 5. View Service Classes that this broker provides:
   * To check the ClusterServiceClasses, run:
@@ -65,9 +65,9 @@ This Getting Started guide shows how to register a broker in the Service Catalog
       ```
 
   These are the UPS Broker Service Classes:
-     ```
-     NAME                                   EXTERNAL NAME
-     4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468   user-provided-service
-     5f6e6cf6-ffdd-425f-a2c7-3c9258ad2468   user-provided-service-single-plan
-     8a6229d4-239e-4790-ba1f-8367004d0473   user-provided-service-with-schemas
-     ```
+  ```
+  NAME                                   EXTERNAL NAME
+  4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468   user-provided-service
+  5f6e6cf6-ffdd-425f-a2c7-3c9258ad2468   user-provided-service-single-plan
+  8a6229d4-239e-4790-ba1f-8367004d0473   user-provided-service-with-schemas
+  ```
