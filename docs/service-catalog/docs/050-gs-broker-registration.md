@@ -26,7 +26,7 @@ This Getting Started guide shows how to register a broker in the Service Catalog
      ```
     kubectl create -f service-catalog/contrib/examples/walkthrough/ups-clusterservicebroker.yaml
     ```
-    To register UPS Broker as a ServiceBroker, run:
+    To register UPS Broker as a ServiceBroker in the `stage` Namespace, run:
     ```
     kubectl create -f service-catalog/contrib/examples/walkthrough/ups-servicebroker.yaml -n stage
     ```     
@@ -36,7 +36,7 @@ This Getting Started guide shows how to register a broker in the Service Catalog
      ```
     kubectl get clusterservicebrokers ups-broker -o jsonpath="{.status.conditions}"
     ```
-    In case of the ServiceBrokers, run:
+    In case of the ServiceBroker, run:
     ```
     kubectl get servicebrokers ups-broker -n stage -o jsonpath="{.status.conditions}"
     ```
@@ -56,7 +56,7 @@ This Getting Started guide shows how to register a broker in the Service Catalog
       ```
      kubectl get clusterserviceclasses
       ```
-      In case of ServiceBrokers, the command looks as follows:
+      In case of the ServiceBroker, the command looks as follows:
       ```
       kubectl get serviceclasses -n stage
       ```
