@@ -12,31 +12,31 @@ global:
     path: eu.gcr.io/kyma-project
   connector_service:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   connector_service_tests:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   event_service:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   proxy_service:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   gateway_tests:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   metadata_service:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   metadata_service_tests:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   remote_environment_controller:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   remote_environment_controller_tests:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
   remote_environment_broker:
     dir: rc/
-    version: 0.5-rc
+    version: 0.5-rc2
