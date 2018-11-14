@@ -100,6 +100,9 @@
 # The `event-bus` subchart
 /resources/core/charts/event-bus/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
+# The `k8s-dashboard-proxy` subchart
+/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+
 # The `remote-environment-broker` subchart
 /resources/application-connector/charts/remote-environment-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001
 
@@ -202,6 +205,9 @@
 
 # Event Bus Component
 /components/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+
+# K8s Dashboard Proxy Component
+/components/k8s-dashboard-proxy/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
 # Event Service Component
 /components/event-service/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
