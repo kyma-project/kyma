@@ -39,7 +39,7 @@ func (s *service) Create(remoteEnvironment, serviceID string, credentials *model
 		return remoteenv.Credentials{}, nil
 	}
 
-	if s.basicCredentialsProvided(credentials) && s.oauthCredentialsProvided(credentials) {
+	if basicCredentialsProvided(credentials) && oauthCredentialsProvided(credentials) {
 		return remoteenv.Credentials{}, apperrors.WrongInput("Creating access service failed: Multiple authentication methods provided.")
 	}
 
@@ -97,7 +97,7 @@ func (s *service) Update(remoteEnvironment, serviceID string, credentials *model
 		return remoteenv.Credentials{}, nil
 	}
 
-	if s.basicCredentialsProvided(credentials) && s.oauthCredentialsProvided(credentials) {
+	if basicCredentialsProvided(credentials) && oauthCredentialsProvided(credentials) {
 		return remoteenv.Credentials{}, apperrors.WrongInput("Creating access service failed: Multiple authentication methods provided.")
 	}
 
@@ -118,7 +118,7 @@ func (s *service) Delete(name string) apperrors.AppError {
 }
 
 func (s *service) createCredentialsSecret(remoteEnvironment, id, name string, credentials *model.Credentials) apperrors.AppError {
-	if s.oauthCredentialsProvided(credentials) {
+	if oauthCredentialsProvided(credentials) {
 		return s.createOauthSecret(
 			remoteEnvironment,
 			name,
@@ -128,7 +128,7 @@ func (s *service) createCredentialsSecret(remoteEnvironment, id, name string, cr
 		)
 	}
 
-	if s.basicCredentialsProvided(credentials) {
+	if basicCredentialsProvided(credentials) {
 		return s.createBasicAuthSecret(remoteEnvironment,
 			name,
 			credentials.Basic.Username,
@@ -141,7 +141,7 @@ func (s *service) createCredentialsSecret(remoteEnvironment, id, name string, cr
 }
 
 func (s *service) updateCredentialsSecret(remoteEnvironment, id, name string, credentials *model.Credentials) apperrors.AppError {
-	if s.oauthCredentialsProvided(credentials) {
+	if oauthCredentialsProvided(credentials) {
 		return s.updateOauthSecret(
 			remoteEnvironment,
 			name,
@@ -151,7 +151,7 @@ func (s *service) updateCredentialsSecret(remoteEnvironment, id, name string, cr
 		)
 	}
 
-	if s.basicCredentialsProvided(credentials) {
+	if basicCredentialsProvided(credentials) {
 		return s.updateBasicAuthSecret(remoteEnvironment,
 			name,
 			credentials.Basic.Username,
@@ -223,29 +223,29 @@ func (s *service) updateBasicAuthSecret(remoteEnvironment, name, username, passw
 	return s.repository.Upsert(remoteEnvironment, name, serviceID, data)
 }
 
-func (s *service) oauthCredentialsProvided(credentials *model.Credentials) bool {
-	return credentials != nil && credentials.Oauth != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
-}
-
-func (s *service) basicCredentialsProvided(credentials *model.Credentials) bool {
-	return credentials != nil && credentials.Basic != nil && credentials.Basic.Username != "" && credentials.Basic.Password != ""
-}
-
 func (s *service) modelToRemoteEnvCredentials(credentials *model.Credentials, remoteEnvironment, serviceID string) remoteenv.Credentials {
 	remoteEnvCredentials := remoteenv.Credentials{}
 
-	if s.oauthCredentialsProvided(credentials) {
+	if oauthCredentialsProvided(credentials) {
 		remoteEnvCredentials.AuthenticationUrl = credentials.Oauth.URL
 		remoteEnvCredentials.Type = remoteenv.CredentialsOAuthType
 	}
 
-	if s.basicCredentialsProvided(credentials) {
+	if basicCredentialsProvided(credentials) {
 		remoteEnvCredentials.Type = remoteenv.CredentialsBasicType
 	}
 
 	remoteEnvCredentials.SecretName = s.nameResolver.GetResourceName(remoteEnvironment, serviceID)
 
 	return remoteEnvCredentials
+}
+
+func oauthCredentialsProvided(credentials *model.Credentials) bool {
+	return credentials != nil && credentials.Oauth != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
+}
+
+func basicCredentialsProvided(credentials *model.Credentials) bool {
+	return credentials != nil && credentials.Basic != nil && credentials.Basic.Username != "" && credentials.Basic.Password != ""
 }
 
 func verifySecretData(remoteEnvironment, name, serviceID string) apperrors.AppError {
