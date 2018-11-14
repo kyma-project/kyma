@@ -29,8 +29,8 @@ global:
     dir: pr/
     version: PR-1526
   metadata_service_tests:
-    dir: develop/
-    version: 16a332c1
+    dir: pr/
+    version: PR-1526
   remote_environment_controller:
     dir: develop/
     version: cb19afea
