@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Following script deprovisions GKE cluster.
+# Following script provisions and deprovisions GKE cluster.
 #
 # Expected environment variables:
 #   - WORKING_NAMESPACE - name of the namespace where GCP Broker should be installed

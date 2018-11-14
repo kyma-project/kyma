@@ -51,6 +51,7 @@ projects = [
     "tools/stability-checker": "stability-checker",
     "tools/etcd-backup": "etcd-backup",
     "tools/etcd-tls-setup": "etcd-tls-setup",
+    "tools/gcp-broker-provider": "gcp-broker-provider",
     "tools/static-users-generator": "static-users-generator",
     "tests/test-logging-monitoring": "test-logging-monitoring",
     "tests/logging": "test-logging",
