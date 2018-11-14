@@ -33,55 +33,12 @@ type RemoteEnvironment struct {
 type REStatus struct {
 	// Represents the status of Remote Environment release installation
 	InstallationStatus InstallationStatus `json:"installationStatus"`
-	Conditions         []ReCondition      `json:"conditions"`
 }
 
 type InstallationStatus struct {
 	Status      string `json:"status"`
 	Description string `json:"description"`
 }
-
-type ReCondition struct {
-	// Type of the condition, currently ('Ready').
-	Type ReConditionType `json:"type"`
-
-	// Status of the condition, one of ('True', 'False', 'Unknown').
-	Status ConditionStatus `json:"status"`
-
-	// LastTransitionTime is the timestamp corresponding to the last status
-	// change of this condition.
-	LastTransitionTime metav1.Time `json:"lastTransitionTime"`
-
-	// Reason is a brief machine readable explanation for the condition's last
-	// transition.
-	Reason string `json:"reason"`
-
-	// Message is a human readable description of the details of the last
-	// transition, complementing reason.
-	Message string `json:"message"`
-}
-
-// ReConditionType represents an Issuer condition value.
-type ReConditionType string
-
-// ConditionStatus represents a condition's status.
-type ConditionStatus string
-
-// These are valid condition statuses. "ConditionTrue" means a resource is in
-// the condition; "ConditionFalse" means a resource is not in the condition;
-// "ConditionUnknown" means kubernetes can't decide if a resource is in the
-// condition or not. In the future, we could add other intermediate
-// conditions, e.g. ConditionDegraded.
-const (
-	// ConditionTrue represents the fact that a given condition is true
-	ConditionTrue ConditionStatus = "True"
-
-	// ConditionFalse represents the fact that a given condition is false
-	ConditionFalse ConditionStatus = "False"
-
-	// ConditionUnknown represents the fact that a given condition is unknown
-	ConditionUnknown ConditionStatus = "Unknown"
-)
 
 func (pw *RemoteEnvironment) GetObjectKind() schema.ObjectKind {
 	return &RemoteEnvironment{}
