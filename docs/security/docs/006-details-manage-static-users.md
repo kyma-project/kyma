@@ -23,7 +23,7 @@ data:
 type: Opaque
 EOF
 ```
->**NOTE:** If you don't specify the Namespace in which you want to create the Secret, by default the system creates it in the `default` Namespace.
+>**NOTE:** If you don't specify the Namespace in which you want to create the Secret, the system creates it in the `default` Namespace.
 
 The following table describes the fields that are mandatory to create a static user. If any of these fields is not included, the user is not created.
 
@@ -33,13 +33,14 @@ The following table describes the fields that are mandatory to create a static u
 | data.username | Base64-encoded username displayed in the console UI. |
 | data.password | Base64-encoded user password. There are no specific requirements regarding password strength, but it is recommended to use a password that is at least 8-characters-long. |
 
-Create the Secrets in the cluster before Dex is installed. The Dex init-container with the tool that configures Dex generates user configuration data basing on properly labelled Secrets, and adds the data to the ConfigMap.
+Create the Secrets in the cluster before Dex is installed. The Dex init-container with the tool that configures Dex generates user configuration data basing on properly labeled Secrets, and adds the data to the ConfigMap.
 
 If you want to add a new static user after Dex is installed, restart the Dex Pod. This creates a new Pod with an updated ConfigMap.
 
 ## Bind a user to a Role or a ClusterRole
 
-When you create a new static user, by default it does not have any Role or ClusterRole bound to it. This means that such user has no access to any resources of the cluster whatsoever. By default, Kyma comes with two ClusterRoles: `kyma-admin` and `kyma-view`, which allow to get full admin access to the entire cluster, or to view and list all of the resources of the cluster.
+A newly created static user has no access to any resources of the cluster as there is no Role or ClusterRole bound to it.  
+By default, Kyma comes with two ClusterRoles: `kyma-admin`, which allows to get full admin access to the entire cluster, and `kyma-view`, which allows to view and list all of the resources of the cluster.
 
 To bind a newly created user to the `kyma-view` ClusterRole, run this command:
 ```
