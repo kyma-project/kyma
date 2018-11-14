@@ -45,6 +45,7 @@ func TestService_Create(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "http://oauth.com", res.AuthenticationUrl)
 		assert.Equal(t, remoteenv.CredentialsOAuthType, res.Type)
+		assert.Equal(t, "resourceName", res.SecretName)
 
 		repositoryMock.AssertExpectations(t)
 		nameResolverMock.AssertExpectations(t)
@@ -83,6 +84,7 @@ func TestService_Create(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "", res.AuthenticationUrl)
 		assert.Equal(t, remoteenv.CredentialsBasicType, res.Type)
+		assert.Equal(t, "resourceName", res.SecretName)
 
 		repositoryMock.AssertExpectations(t)
 		nameResolverMock.AssertExpectations(t)

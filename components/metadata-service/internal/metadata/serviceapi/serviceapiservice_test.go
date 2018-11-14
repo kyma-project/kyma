@@ -36,7 +36,7 @@ func TestNewService(t *testing.T) {
 
 		remoteEnvCredentials := remoteenv.Credentials{
 			Type:              remoteenv.CredentialsOAuthType,
-			SecretName:        "secret-name",
+			SecretName:        resourceName,
 			AuthenticationUrl: api.Credentials.Oauth.URL,
 		}
 
@@ -91,7 +91,7 @@ func TestNewService(t *testing.T) {
 
 		remoteEnvCredentials := remoteenv.Credentials{
 			Type:       remoteenv.CredentialsBasicType,
-			SecretName: "secret-name",
+			SecretName: resourceName,
 		}
 
 		nameResolver := new(k8smocks.NameResolver)
@@ -599,7 +599,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		remoteEnvCredentials := remoteenv.Credentials{
 			Type:              remoteenv.CredentialsOAuthType,
-			SecretName:        "secret-name",
+			SecretName:        resourceName,
 			AuthenticationUrl: api.Credentials.Oauth.URL,
 		}
 
@@ -655,7 +655,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		remoteEnvCredentials := remoteenv.Credentials{
 			Type:       remoteenv.CredentialsBasicType,
-			SecretName: "secret-name",
+			SecretName: resourceName,
 		}
 
 		nameResolver := new(k8smocks.NameResolver)

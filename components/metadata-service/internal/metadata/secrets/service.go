@@ -35,40 +35,8 @@ func NewService(repository Repository, nameResolver k8sconsts.NameResolver) Serv
 }
 
 func (s *service) Create(remoteEnvironment, serviceID string, credentials *model.Credentials) (remoteenv.Credentials, apperrors.AppError) {
-	remoteEnvCredentials := remoteenv.Credentials{}
-
 	if credentials == nil {
-		return remoteEnvCredentials, nil
-	}
-
-	if s.basicCredentialsProvided(credentials) && s.oauthCredentialsProvided(credentials) {
-		return remoteEnvCredentials, apperrors.WrongInput("Creating access service failed: Multiple authentication methods provided.")
-	}
-
-	name := s.nameResolver.GetResourceName(remoteEnvironment, serviceID)
-
-	err := s.createCredentialsSecret(remoteEnvironment, serviceID, name, credentials)
-	if err != nil {
-		return remoteEnvCredentials, err
-	}
-
-	if s.oauthCredentialsProvided(credentials) {
-		remoteEnvCredentials.AuthenticationUrl = credentials.Oauth.URL
-		remoteEnvCredentials.Type = remoteenv.CredentialsOAuthType
-	}
-
-	if s.basicCredentialsProvided(credentials) {
-		remoteEnvCredentials.Type = remoteenv.CredentialsBasicType
-	}
-
-	return remoteEnvCredentials, nil
-}
-
-func (s *service) Update(remoteEnvironment, serviceID string, credentials *model.Credentials) (remoteenv.Credentials, apperrors.AppError) {
-	remoteEnvCredentials := remoteenv.Credentials{}
-
-	if credentials == nil {
-		return remoteEnvCredentials, nil
+		return remoteenv.Credentials{}, nil
 	}
 
 	if s.basicCredentialsProvided(credentials) && s.oauthCredentialsProvided(credentials) {
@@ -77,21 +45,12 @@ func (s *service) Update(remoteEnvironment, serviceID string, credentials *model
 
 	name := s.nameResolver.GetResourceName(remoteEnvironment, serviceID)
 
-	err := s.updateCredentialsSecret(remoteEnvironment, serviceID, name, credentials)
+	err := s.createCredentialsSecret(remoteEnvironment, serviceID, name, credentials)
 	if err != nil {
-		return remoteEnvCredentials, err
+		return remoteenv.Credentials{}, err
 	}
 
-	if s.oauthCredentialsProvided(credentials) {
-		remoteEnvCredentials.AuthenticationUrl = credentials.Oauth.URL
-		remoteEnvCredentials.Type = remoteenv.CredentialsOAuthType
-	}
-
-	if s.basicCredentialsProvided(credentials) {
-		remoteEnvCredentials.Type = remoteenv.CredentialsBasicType
-	}
-
-	remoteEnvCredentials.SecretName = s.nameResolver.GetResourceName(remoteEnvironment, serviceID)
+	remoteEnvCredentials := s.modelToRemoteEnvCredentials(credentials, remoteEnvironment, serviceID)
 
 	return remoteEnvCredentials, nil
 }
@@ -133,7 +92,32 @@ func (s *service) Get(remoteEnvironment string, credentials remoteenv.Credential
 	return model.Credentials{}, nil
 }
 
-func (s service) createCredentialsSecret(remoteEnvironment, id, name string, credentials *model.Credentials) apperrors.AppError {
+func (s *service) Update(remoteEnvironment, serviceID string, credentials *model.Credentials) (remoteenv.Credentials, apperrors.AppError) {
+	if credentials == nil {
+		return remoteenv.Credentials{}, nil
+	}
+
+	if s.basicCredentialsProvided(credentials) && s.oauthCredentialsProvided(credentials) {
+		return remoteenv.Credentials{}, apperrors.WrongInput("Creating access service failed: Multiple authentication methods provided.")
+	}
+
+	name := s.nameResolver.GetResourceName(remoteEnvironment, serviceID)
+
+	err := s.updateCredentialsSecret(remoteEnvironment, serviceID, name, credentials)
+	if err != nil {
+		return remoteenv.Credentials{}, err
+	}
+
+	remoteEnvCredentials := s.modelToRemoteEnvCredentials(credentials, remoteEnvironment, serviceID)
+
+	return remoteEnvCredentials, nil
+}
+
+func (s *service) Delete(name string) apperrors.AppError {
+	return s.repository.Delete(name)
+}
+
+func (s *service) createCredentialsSecret(remoteEnvironment, id, name string, credentials *model.Credentials) apperrors.AppError {
 	if s.oauthCredentialsProvided(credentials) {
 		return s.createOauthSecret(
 			remoteEnvironment,
@@ -239,16 +223,29 @@ func (s *service) updateBasicAuthSecret(remoteEnvironment, name, username, passw
 	return s.repository.Upsert(remoteEnvironment, name, serviceID, data)
 }
 
-func (s *service) Delete(name string) apperrors.AppError {
-	return s.repository.Delete(name)
-}
-
 func (s *service) oauthCredentialsProvided(credentials *model.Credentials) bool {
 	return credentials != nil && credentials.Oauth != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
 }
 
 func (s *service) basicCredentialsProvided(credentials *model.Credentials) bool {
 	return credentials != nil && credentials.Basic != nil && credentials.Basic.Username != "" && credentials.Basic.Password != ""
+}
+
+func (s *service) modelToRemoteEnvCredentials(credentials *model.Credentials, remoteEnvironment, serviceID string) remoteenv.Credentials {
+	remoteEnvCredentials := remoteenv.Credentials{}
+
+	if s.oauthCredentialsProvided(credentials) {
+		remoteEnvCredentials.AuthenticationUrl = credentials.Oauth.URL
+		remoteEnvCredentials.Type = remoteenv.CredentialsOAuthType
+	}
+
+	if s.basicCredentialsProvided(credentials) {
+		remoteEnvCredentials.Type = remoteenv.CredentialsBasicType
+	}
+
+	remoteEnvCredentials.SecretName = s.nameResolver.GetResourceName(remoteEnvironment, serviceID)
+
+	return remoteEnvCredentials
 }
 
 func verifySecretData(remoteEnvironment, name, serviceID string) apperrors.AppError {
