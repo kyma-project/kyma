@@ -31,7 +31,7 @@ This Getting Started guide shows how to register a broker in the Service Catalog
     ```
     kubectl create -f service-catalog/contrib/examples/walkthrough/ups-servicebroker.yaml -n stage
     ```     
-  After you successfully register your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches services from this broker and creates ServiceClasses or ClusterServiceClasses from them.
+    After you successfully register your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches services from this broker and creates ServiceClasses or ClusterServiceClasses from them.
 
 4. Check the status of your broker:
   * To check the status of your ClusterServiceBroker, run:
@@ -43,16 +43,16 @@ This Getting Started guide shows how to register a broker in the Service Catalog
     kubectl get servicebrokers ups-broker -n stage -o jsonpath="{.status.conditions}"
     ```
 
-  The output looks as follows:
-  ```
-  {
+    The output looks as follows:
+    ```
+    {
     "lastTransitionTime": "2018-10-26T12:03:32Z",
     "message": "Successfully fetched catalog entries from broker.",
     "reason": "FetchedCatalog",
     "status": "True",
     "type": "Ready"
-  }
-  ```
+    }
+    ```
 
 5. View Service Classes that this broker provides:
   * To check the ClusterServiceClasses, run:
@@ -64,10 +64,10 @@ This Getting Started guide shows how to register a broker in the Service Catalog
       kubectl get serviceclasses -n stage
       ```
 
-  These are the UPS Broker Service Classes:
-  ```
-  NAME                                   EXTERNAL NAME
-  4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468   user-provided-service
-  5f6e6cf6-ffdd-425f-a2c7-3c9258ad2468   user-provided-service-single-plan
-  8a6229d4-239e-4790-ba1f-8367004d0473   user-provided-service-with-schemas
-  ```
+      These are the UPS Broker Service Classes:
+      ```
+      NAME                                   EXTERNAL NAME
+      4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468   user-provided-service
+      5f6e6cf6-ffdd-425f-a2c7-3c9258ad2468   user-provided-service-single-plan
+      8a6229d4-239e-4790-ba1f-8367004d0473   user-provided-service-with-schemas
+      ```
