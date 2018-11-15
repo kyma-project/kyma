@@ -294,7 +294,7 @@ func TestCertificateValidation(t *testing.T) {
 
 	t.Run("should access remote environment", func(t *testing.T) {
 		// when
-		response, err := repeatUntilReIsCreated(tlsClient, gatewayUrlFormat, remoteEnvName)
+		response, err := repeatUntilIngressIsCreated(tlsClient, gatewayUrlFormat, remoteEnvName)
 
 		// then
 		require.NoError(t, err)
@@ -303,7 +303,7 @@ func TestCertificateValidation(t *testing.T) {
 
 	t.Run("should receive 403 when accessing RE with invalid CN", func(t *testing.T) {
 		// when
-		response, err := repeatUntilReIsCreated(tlsClient, gatewayUrlFormat, forbiddenRemoteEnvName)
+		response, err := repeatUntilIngressIsCreated(tlsClient, gatewayUrlFormat, forbiddenRemoteEnvName)
 
 		// then
 		require.NoError(t, err)
@@ -314,7 +314,7 @@ func TestCertificateValidation(t *testing.T) {
 	k8sResourcesClient.DeleteRemoteEnvironment(forbiddenRemoteEnvName, &v1.DeleteOptions{})
 }
 
-func repeatUntilReIsCreated(tlsClient *Client, gatewayUrlFormat string, remoteEnvName string) (*Response, error) {
+func repeatUntilIngressIsCreated(tlsClient *Client, gatewayUrlFormat string, remoteEnvName string) (*Response, error) {
 	var response *Response
 	var err error
 	for i := 0; (shouldRetry(response, err)) && i < retryCount; i++ {
