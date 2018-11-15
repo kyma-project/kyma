@@ -19,10 +19,6 @@ do
     key="$1"
 
     case ${key} in
-        --kubeadm)
-            KUBEADM=1
-            shift
-            ;;
         --disk-size)
             DISK_SIZE=$2
             shift
@@ -180,36 +176,20 @@ function start() {
         fixDindMinikubeIssue
     fi
 
-    if [[ $KUBEADM ]]; then
+    minikube start \
+        --memory 8192 \
+        --cpus 4 \
+        --bootstrapper=localkube \
+        --extra-config=apiserver.Authorization.Mode=RBAC \
+        --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList=".*" \
+        --extra-config=controller-manager.ClusterSigningCertFile="/var/lib/localkube/certs/ca.crt" \
+        --extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
+        --extra-config=apiserver.admission-control="LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota" \
+        --kubernetes-version=v$KUBERNETES_VERSION \
+        --vm-driver=$VM_DRIVER \
+        --disk-size=$DISK_SIZE \
+        --feature-gates="MountPropagation=false"
 
-        minikube start \
-            --memory 8192 \
-            --cpus 4 \
-            --bootstrapper=kubeadm \
-            --extra-config=apiserver.authorization-mode=RBAC \
-            --extra-config=apiserver.admission-control="DefaultStorageClass,LimitRanger,MutatingAdmissionWebhook,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,ValidatingAdmissionWebhook" \
-            --extra-config=apiserver.cors-allowed-origins=".*" \
-            --extra-config=controller-manager.cluster-signing-cert-file="/var/lib/localkube/certs/ca.crt" \
-            --extra-config=controller-manager.cluster-signing-key-file="/var/lib/localkube/certs/ca.key" \
-            --kubernetes-version=v1.10.0 \
-            --vm-driver=$VM_DRIVER \
-            --disk-size=$DISK_SIZE \
-            --feature-gates="MountPropagation=false"
-    else
-        minikube start \
-            --memory 8192 \
-            --cpus 4 \
-            --bootstrapper=localkube \
-            --extra-config=apiserver.Authorization.Mode=RBAC \
-            --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList=".*" \
-            --extra-config=controller-manager.ClusterSigningCertFile="/var/lib/localkube/certs/ca.crt" \
-            --extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
-            --extra-config=apiserver.admission-control="LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota" \
-            --kubernetes-version=v$KUBERNETES_VERSION \
-            --vm-driver=$VM_DRIVER \
-            --disk-size=$DISK_SIZE \
-            --feature-gates="MountPropagation=false"
-    fi
     waitForMinikubeToBeUp
 
     # Adding domains to /etc/hosts files
