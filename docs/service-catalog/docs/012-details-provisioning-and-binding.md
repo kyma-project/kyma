@@ -60,12 +60,8 @@ The UsageKind is a cluster-wide custom resource which allows you to bind a Servi
 
 ### Delete a ServiceBinding
 
-Kyma unbinding operation consists of two phases:
-1. Delete the ServiceBindingUsage.
-2. Delete the ServiceBinding.
+Kyma unbinding can be achieved in two ways:
+1. Delete the ServiceBindingUsage. The Secret injected into application will be deleted by BindingUsageController but the Secret still exist.
+2. Delete the ServiceBinding. It deletes the Secret and triggers the deletion of all the related ServiceBindingUsages. 
 
 ![Kyma unbinding](assets/unbinding.png)
-
->**NOTE:** The order in which you delete the two resources is important because the ServiceBindingUsage depends on the ServiceBinding. As long as the System Catalog does not automatically block deletions of the ServiceBinding with the ServiceBindingUsage connected to it, follow the recommended deletion order.
-
-See the [Corner Case](013-details-unbinding-corner-case.md) document that explains the consequences of deleting a ServiceBinding for an existing ServieBindingUsage.

@@ -39,4 +39,4 @@ global:
     version: cb19afea
   remote_environment_broker:
     dir: develop/
-    version: 1423f8ce
+    version: 0d408e11

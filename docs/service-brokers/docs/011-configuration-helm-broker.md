@@ -33,34 +33,32 @@ Follow these steps to change the configuration and make the Helm Broker fetch bu
 
     - A `{bundle_name}-{bundle_version}.tgz` file for each bundle version defined in the `yaml` file. The `.tgz` file is an archive of your bundle's directory.
 
-2. In the `values.yaml` provide your server's URL in the **repository.URL** attribute:
+2. In the `values.yaml` provide your server's URLs in the **repository.URLs** attribute as a list of URLs separated by a semicolon:
 
   ```yaml
     repository:
-      URL: "http://custom.bundles-repository/bundles.yaml"
+      URLs: "http://custom.bundles-repository/bundles.yaml;http://another.bundles-repository/bundles.yaml"
   ```
   > **NOTE:** You can skip the `yaml` filename in the URL if the name of the file is `index.yaml`. In that case, your URL should be equal to `http://custom.bundles-repository/`.
 
-3. Install Kyma on Minikube. See the **Local Kyma installation** document to learn how.
+3. Install Kyma on Minikube. See the **Install Kyma locally from the release** document to learn how.
 
-### Configure repository URL in the runtime
+### Configure repository URLs in the runtime
 
-Follow these steps to change the repository URL:
+Follow these steps to add the repository URL:
 
-1. Configure Helm Broker:
+1. Add a new bundle repository URL:
 
  ```bash
- kubectl set env -n kyma-system deployment/core-helm-broker -e APP_REPOSITORY_URL="http://custom.bundles-repository/bundles.yaml"
+ URLS=$(kubectl get -n kyma-system deployment/core-helm-broker --output=jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="APP_REPOSITORY_URLS")].value}')
+ kubectl set env -n kyma-system deployment/core-helm-broker -e APP_REPOSITORY_URLS="$URLS;http://custom.bundles-repository/bundles.yaml"
  ```
- 
+
 2. Wait for the Helm Broker to run using the following command:
 
  ```bash
  kubectl get pod -n kyma-system -l app=core-helm-broker
  ```
 
-3. Trigger the Service Catalog synchronization:
+Running the Helm Broker triggers the Service Catalog synchronization automatically. New ClusterServiceClasses appear after a half-minute.
 
- ```bash
- svcat sync broker core-helm-broker
- ```

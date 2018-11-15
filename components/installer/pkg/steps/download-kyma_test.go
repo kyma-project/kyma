@@ -14,7 +14,7 @@ import (
 
 func TestDownloadKyma(t *testing.T) {
 
-	Convey("DownloadKyma function", t, func() {
+	Convey("EnsureKymaSources function", t, func() {
 
 		Convey("should download kyma package in case of remote installation", func() {
 			testInst := &config.InstallationData{
@@ -29,7 +29,7 @@ func TestDownloadKyma(t *testing.T) {
 
 			kymaTestSteps := New(nil, nil, nil, mockStatusManager, nil, nil, mockKymaPackages)
 
-			kymaPackage, err := kymaTestSteps.DownloadKyma(testInst)
+			kymaPackage, err := kymaTestSteps.EnsureKymaSources(testInst)
 
 			So(err, ShouldBeNil)
 			So(kymaPackage, ShouldNotBeNil)
@@ -45,7 +45,7 @@ func TestDownloadKyma(t *testing.T) {
 
 			kymaTestSteps := New(nil, nil, nil, mockStatusManager, nil, nil, mockKymaPackages)
 
-			kymaPackage, err := kymaTestSteps.DownloadKyma(testInst)
+			kymaPackage, err := kymaTestSteps.EnsureKymaSources(testInst)
 
 			So(err, ShouldBeNil)
 			So(kymaPackage, ShouldNotBeNil)
@@ -61,7 +61,7 @@ func TestDownloadKyma(t *testing.T) {
 			mockKymaPackages := &mockKymaPackagesForDownload{}
 			kymaTestSteps := New(nil, nil, nil, mockStatusManager, nil, nil, mockKymaPackages)
 
-			kymaPackage, err := kymaTestSteps.DownloadKyma(testInst)
+			kymaPackage, err := kymaTestSteps.EnsureKymaSources(testInst)
 
 			So(err, ShouldNotBeNil)
 			So(kymaPackage, ShouldBeNil)

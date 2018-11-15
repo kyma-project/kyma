@@ -20,29 +20,31 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
+//go:generate mockery -name=catalogGetter -output=automock -outpkg=automock -case=underscore
+
 type (
 	catalogGetter interface {
-		GetCatalog(ctx context.Context, osbCtx osbContext) (*osb.CatalogResponse, error)
+		GetCatalog(ctx context.Context, osbCtx OsbContext) (*osb.CatalogResponse, error)
 	}
 
 	provisioner interface {
-		Provision(ctx context.Context, osbCtx osbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, error)
+		Provision(ctx context.Context, osbCtx OsbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, error)
 	}
 
 	deprovisioner interface {
-		Deprovision(ctx context.Context, osbCtx osbContext, req *osb.DeprovisionRequest) (*osb.DeprovisionResponse, error)
+		Deprovision(ctx context.Context, osbCtx OsbContext, req *osb.DeprovisionRequest) (*osb.DeprovisionResponse, error)
 	}
 
 	binder interface {
-		Bind(ctx context.Context, osbCtx osbContext, req *osb.BindRequest) (*osb.BindResponse, error)
+		Bind(ctx context.Context, osbCtx OsbContext, req *osb.BindRequest) (*osb.BindResponse, error)
 	}
 
 	unbinder interface {
-		Unbind(ctx context.Context, osbCtx osbContext, req *osb.UnbindRequest) (*osb.UnbindResponse, error)
+		Unbind(ctx context.Context, osbCtx OsbContext, req *osb.UnbindRequest) (*osb.UnbindResponse, error)
 	}
 
 	lastOpGetter interface {
-		GetLastOperation(ctx context.Context, osbCtx osbContext, req *osb.LastOperationRequest) (*osb.LastOperationResponse, error)
+		GetLastOperation(ctx context.Context, osbCtx OsbContext, req *osb.LastOperationRequest) (*osb.LastOperationResponse, error)
 	}
 )
 
@@ -77,12 +79,13 @@ func (srv *Server) Addr() string {
 }
 
 // Run is starting HTTP server
-func (srv *Server) Run(ctx context.Context, addr string) error {
+func (srv *Server) Run(ctx context.Context, addr string, startedCh chan struct{}) error {
 	listenAndServe := func(httpSrv *http.Server) error {
 		ln, err := net.Listen("tcp", addr)
 		if err != nil {
 			return err
 		}
+		close(startedCh)
 		lnTCP := ln.(*net.TCPListener)
 
 		srv.addr = lnTCP.Addr().String()
@@ -439,11 +442,6 @@ func writeErrorResponse(w http.ResponseWriter, code int, errorMsg, desc string) 
 		dto.Desc = desc
 	}
 	writeResponse(w, code, &dto)
-}
-
-type osbContext struct {
-	APIVersion          string
-	OriginatingIdentity string
 }
 
 func httpBodyToDTO(r *http.Request, object interface{}) error {

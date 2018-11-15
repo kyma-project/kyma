@@ -34,17 +34,8 @@ podTemplate(label: label) {
                             }
                         }
 
-                        stage("fetch installer image version") {
-                            installerImageTag = sh(returnStdout: true, script: "bash installation/scripts/extract-installer-version.sh")
-                            installerImageTag = installerImageTag.trim()
-                            
-                            if(installerImageTag == ""){
-                                error("No installer image tag found")
-                            }
-                        }
-
                         stage("build image $application") {
-                            sh "docker build -t ${dockerPushRoot}${application}:latest -f ${application}/kyma.Dockerfile . --build-arg INSTALLER_VERSION=${installerImageTag} --label version=${dockerImageTag} --label component=${application}"
+                            sh "docker build -t ${dockerPushRoot}${application}:latest -f ${application}/kyma.Dockerfile . --label version=${dockerImageTag} --label component=${application}"
                         }
 
                         stage("push image") {

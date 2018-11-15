@@ -40,10 +40,18 @@ data:
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
   service-catalog.etcd-stateful.replicaCount: "3"
-  minio.accessKey: "admin"
-  minio.secretKey: "topSecretKey"
-  minio.resources.limits.memory: 128Mi
   acceptanceTest.remoteEnvironment.disabled: "true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: connector-service-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: application-connector
+data:
+  connector-service.tests.skipSslVerify: "__SKIP_SSL_VERIFY__"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -57,6 +65,10 @@ data:
   console.cluster.headerLogoUrl: "assets/logo.svg"
   console.cluster.headerTitle: ""
   console.cluster.faviconUrl: "favicon.ico"
+  minio.accessKey: "admin"
+  minio.secretKey: "topSecretKey"
+  minio.resources.limits.memory: 128Mi
+  minio.resources.limits.cpu: 250m
 ---
 apiVersion: v1
 kind: ConfigMap

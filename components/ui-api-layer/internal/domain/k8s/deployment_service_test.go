@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s"
+	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/api/apps/v1beta2"
@@ -12,9 +14,6 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
-
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s"
-	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 )
 
 func TestDeploymentService_List(t *testing.T) {

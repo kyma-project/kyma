@@ -192,6 +192,11 @@ type RemoteEnvironmentEntry struct {
 	AccessLabel *string `json:"accessLabel"`
 }
 
+type RemoteEnvironmentEvent struct {
+	Type              SubscriptionEventType `json:"type"`
+	RemoteEnvironment RemoteEnvironment     `json:"remoteEnvironment"`
+}
+
 type RemoteEnvironmentMutationOutput struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`

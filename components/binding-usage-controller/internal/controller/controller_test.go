@@ -10,7 +10,6 @@ import (
 	scInformers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/automock"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/pretty"
 	sbuStatus "github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/status"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/platform/logger/spy"
 	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
@@ -78,10 +77,10 @@ func TestControllerRunAddSuccess(t *testing.T) {
 		Once()
 
 	tc.sbuSpecStorageMock.
-		ExpectOnUpsert(fixSBU, false).
+		ExpectOnUpsert(expSBU, false).
 		Once()
 	tc.sbuSpecStorageMock.
-		ExpectOnUpsert(fixSBU, true).
+		ExpectOnUpsert(expSBU, true).
 		Once()
 
 	asyncOpDone := make(chan struct{})
@@ -123,6 +122,157 @@ func TestControllerRunAddSuccess(t *testing.T) {
 	assert.Empty(t, logErrSink.DumpAll())
 }
 
+func TestControllerRunDeleteOwnerReferencesToBinding(t *testing.T) {
+	// given
+	tc := newCtrlTestCase()
+	defer tc.AssertExpectation(t)
+
+	fixTimeNow := metaV1.Now()
+	sbuStatus.TimeNowFn = func() metaV1.Time {
+		return fixTimeNow
+	}
+	fixErr := errors.New("while getting ServiceBinding")
+
+	fixSBU := tc.fixDeploymentServiceBindingUsage()
+	fixSBU.OwnerReferences = []metaV1.OwnerReference{
+		{
+			Name:       "test",
+			UID:        "test",
+			APIVersion: "test",
+			Kind:       "ServiceBinding",
+		},
+	}
+	fixSB := tc.fixReadyServiceBinding(fixSBU)
+	fixSBU.Spec.ServiceBindingRef = sbuTypes.LocalReferenceByName{
+		Name: "wrong",
+	}
+	expSBU := fixSBU.DeepCopy()
+	expSBU.OwnerReferences = []metaV1.OwnerReference{}
+	failedSBU := expSBU.DeepCopy()
+	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.ServiceBindingGetErrorReason, "while getting ServiceBinding \"wrong\" from namespace \"production\": servicebinding.servicecatalog.k8s.io \"wrong\" not found")
+	failedSBU.Status.Conditions = []sbuTypes.ServiceBindingUsageCondition{*condition}
+
+	usageCli := sbuFake.NewSimpleClientset(fixSBU)
+	scCli := scFake.NewSimpleClientset(fixSB)
+
+	usageInformersFactory := bindingUsageInformers.NewSharedInformerFactory(usageCli, 0)
+	scInformerFactory := scInformers.NewSharedInformerFactory(scCli, 0)
+
+	asyncOpDone := make(chan struct{})
+	hookAsyncOp := func() {
+		asyncOpDone <- struct{}{}
+	}
+
+	logSink := spy.NewLogSink()
+
+	ctr := controller.NewServiceBindingUsage(
+		tc.sbuSpecStorageMock,
+		usageCli.ServicecatalogV1alpha1(),
+		usageInformersFactory.Servicecatalog().V1alpha1().ServiceBindingUsages(),
+		scInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
+		tc.kindsSupervisorsMock,
+		tc.podPresetModifierMock, tc.labelsFetcherMock,
+		logSink.Logger).
+		WithTestHookOnAsyncOpDone(hookAsyncOp).
+		WithoutRetries()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	scInformerFactory.Start(ctx.Done())
+	usageInformersFactory.Start(ctx.Done())
+
+	// when
+	go ctr.Run(ctx.Done())
+
+	// then
+	awaitForChanAtMost(t, asyncOpDone, 5*time.Second)
+
+	performedActions := filterOutInformerActions(usageCli.Actions())
+	require.Len(t, performedActions, 2)
+
+	checkAction(t, updateUsageAction(expSBU), performedActions[0])
+	checkAction(t, updateUsageAction(failedSBU), performedActions[1])
+
+	logSink.AssertLogged(t, logrus.ErrorLevel, fixErr.Error())
+}
+
+func TestControllerRunErrorOnDeleteOwnerReferences(t *testing.T) {
+	// given
+	tc := newCtrlTestCase()
+	defer tc.AssertExpectation(t)
+
+	fixTimeNow := metaV1.Now()
+	sbuStatus.TimeNowFn = func() metaV1.Time {
+		return fixTimeNow
+	}
+	fixErr := errors.New("while deleting OwnerReferences")
+
+	fixSBU := tc.fixDeploymentServiceBindingUsage()
+	fixSBU.OwnerReferences = []metaV1.OwnerReference{
+		{
+			Name:       "test",
+			UID:        "test",
+			APIVersion: "test",
+			Kind:       "ServiceBinding",
+		},
+	}
+	fixSB := tc.fixReadyServiceBinding(fixSBU)
+	fixSBU.Spec.ServiceBindingRef = sbuTypes.LocalReferenceByName{
+		Name: "wrong",
+	}
+	expSBU := fixSBU.DeepCopy()
+	expSBU.OwnerReferences = []metaV1.OwnerReference{}
+	failedSBU := expSBU.DeepCopy()
+	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.ServiceBindingGetErrorReason, "while getting ServiceBinding \"wrong\" from namespace \"production\": servicebinding.servicecatalog.k8s.io \"wrong\" not found")
+	failedSBU.Status.Conditions = []sbuTypes.ServiceBindingUsageCondition{*condition}
+
+	usageCli := sbuFake.NewSimpleClientset(fixSBU)
+	usageCli.PrependReactor("update", "servicebindingusages", failingReactor)
+	scCli := scFake.NewSimpleClientset(fixSB)
+
+	usageInformersFactory := bindingUsageInformers.NewSharedInformerFactory(usageCli, 0)
+	scInformerFactory := scInformers.NewSharedInformerFactory(scCli, 0)
+
+	asyncOpDone := make(chan struct{})
+	hookAsyncOp := func() {
+		asyncOpDone <- struct{}{}
+	}
+
+	logSink := spy.NewLogSink()
+
+	ctr := controller.NewServiceBindingUsage(
+		tc.sbuSpecStorageMock,
+		usageCli.ServicecatalogV1alpha1(),
+		usageInformersFactory.Servicecatalog().V1alpha1().ServiceBindingUsages(),
+		scInformerFactory.Servicecatalog().V1beta1().ServiceBindings(),
+		tc.kindsSupervisorsMock,
+		tc.podPresetModifierMock, tc.labelsFetcherMock,
+		logSink.Logger).
+		WithTestHookOnAsyncOpDone(hookAsyncOp).
+		WithoutRetries()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	scInformerFactory.Start(ctx.Done())
+	usageInformersFactory.Start(ctx.Done())
+
+	// when
+	go ctr.Run(ctx.Done())
+
+	// then
+	awaitForChanAtMost(t, asyncOpDone, 5*time.Second)
+
+	performedActions := filterOutInformerActions(usageCli.Actions())
+	require.Len(t, performedActions, 2)
+
+	checkAction(t, updateUsageAction(expSBU), performedActions[0])
+	checkAction(t, updateUsageAction(failedSBU), performedActions[1])
+
+	logSink.AssertLogged(t, logrus.ErrorLevel, fixErr.Error())
+}
+
 func TestControllerRunAddFailOnFetchingLabels(t *testing.T) {
 	// given
 	tc := newCtrlTestCase()
@@ -138,11 +288,14 @@ func TestControllerRunAddFailOnFetchingLabels(t *testing.T) {
 	fixPP := tc.fixPodPreset(fixSBU)
 	fixErr := errors.New("cannot fetch labels")
 	expSBU := fixSBU.DeepCopy()
-	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse,
-		sbuStatus.FetchBindingLabelsErrorReason,
-		errors.Wrapf(fixErr, "while fetching bindings labels for binding [%s]", pretty.ServiceBindingName(fixSB)).Error(),
-	)
-	expSBU.Status.Conditions = []sbuTypes.ServiceBindingUsageCondition{*condition}
+	expSBU.OwnerReferences = append(expSBU.OwnerReferences, metaV1.OwnerReference{
+		APIVersion: "servicecatalog.k8s.io/v1beta1",
+		Kind:       "ServiceBinding",
+		Name:       "redis-client",
+	})
+	failedSBU := expSBU.DeepCopy()
+	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.FetchBindingLabelsErrorReason, "while fetching bindings labels for binding [ServiceBinding \"production/redis-client\"]: cannot fetch labels")
+	failedSBU.Status.Conditions = []sbuTypes.ServiceBindingUsageCondition{*condition}
 
 	usageCli := sbuFake.NewSimpleClientset(fixSBU)
 	scCli := scFake.NewSimpleClientset(fixSB)
@@ -184,8 +337,9 @@ func TestControllerRunAddFailOnFetchingLabels(t *testing.T) {
 	awaitForChanAtMost(t, asyncOpDone, 5*time.Second) // add event processed
 
 	performedActions := filterOutInformerActions(usageCli.Actions())
-	require.Len(t, performedActions, 1)
+	require.Len(t, performedActions, 2)
 	checkAction(t, updateUsageAction(expSBU), performedActions[0])
+	checkAction(t, updateUsageAction(failedSBU), performedActions[1])
 
 	logSink.AssertLogged(t, logrus.ErrorLevel, fixErr.Error())
 }
@@ -202,7 +356,6 @@ func TestControllerRunAddFailOnOwnerReferenceAdd(t *testing.T) {
 
 	fixSBU := tc.fixDeploymentServiceBindingUsage()
 	fixSB := tc.fixReadyServiceBinding(fixSBU)
-	fixPP := tc.fixPodPreset(fixSBU)
 	fixErr := errors.New("while adding OwnerReference")
 
 	usageCli := sbuFake.NewSimpleClientset(fixSBU)
@@ -211,16 +364,6 @@ func TestControllerRunAddFailOnOwnerReferenceAdd(t *testing.T) {
 	usageInformersFactory := bindingUsageInformers.NewSharedInformerFactory(usageCli, 0)
 	scInformerFactory := scInformers.NewSharedInformerFactory(scCli, 0)
 
-	tc.podPresetModifierMock.ExpectOnUpsertPodPreset(fixPP)
-	tc.kindsSupervisorsMock.ExpectOnGet("deployment", tc.deploySupervisorMock)
-	tc.labelsFetcherMock.ExpectOnFetch(fixSB, map[string]string{"access-label-123": "true"})
-	tc.sbuSpecStorageMock.ExpectOnGet(fixSBU.Namespace, fixSBU.Name, nil, false)
-	tc.sbuSpecStorageMock.ExpectOnUpsert(fixSBU, false)
-	tc.sbuSpecStorageMock.ExpectOnUpsert(fixSBU, true)
-	tc.deploySupervisorMock.ExpectOnEnsureLabelsCreated(fixSBU.Namespace, fixSBU.Spec.UsedBy.Name, fixSBU.Name, map[string]string{
-		"use-uid-123":      "",
-		"access-label-123": "true",
-	})
 	usageCli.PrependReactor("update", "servicebindingusages", failingReactor)
 
 	asyncOpDone := make(chan struct{})

@@ -45,7 +45,7 @@ required = [
 
 [[constraint]]
   name = "github.com/99designs/gqlgen"
-  version = "v0.5.1"
+  version = "v0.6.0"
 
 [[constraint]]
   name = "github.com/kubeless/kubeless"
@@ -57,7 +57,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "19bd8876363a9b27c68344898a3c0220fbf03c11"
+  revision = "343d311bb9f41f217ff66869cb7398b2d8d7ae43"
 
 [[override]]
   name = "k8s.io/api"

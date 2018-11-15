@@ -10,7 +10,22 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
+	"time"
 )
+
+const (
+	namespace                                      = "kyma-system"
+	ingressGatewayControllerServiceURL             = "istio-ingressgateway.istio-system.svc.cluster.local"
+	testIdLength                                   = 8
+	maxRetries                                     = 1000
+	minimalNumberOfCorrectResults                  = 5
+	retrySleep                                     = 2 * time.Second
+	domainNameEnv                                  = "DOMAIN_NAME"
+	apiSecurityDisabled                ApiSecurity = false
+	apiSecurityEnabled                 ApiSecurity = true
+)
+
+type ApiSecurity bool
 
 type Fixture struct {
 	sampleAppCtrl    *sampleAppCtrl

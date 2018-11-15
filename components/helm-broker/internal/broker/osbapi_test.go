@@ -22,6 +22,7 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker/automock"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/platform/logger/spy"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 )
@@ -54,7 +55,9 @@ func newOSBAPITestSuite(t *testing.T) *osbapiTestSuite {
 		sFact.InstanceBindData(),
 		&fakeBindTmplRenderer{},
 		&fakeBindTmplResolver{},
-		ts.HelmClient, logSink.Logger, ts.OperationIDProvider)
+		ts.HelmClient,
+		bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), logSink.Logger),
+		logSink.Logger, ts.OperationIDProvider)
 
 	return ts
 }
@@ -81,12 +84,15 @@ func (ts *osbapiTestSuite) ServerRun() {
 	ctx, cancel := context.WithCancel(context.Background())
 	ts.serverWg.Add(1)
 
+	startedCh := make(chan struct{})
+
 	go func() {
-		assert.Equal(ts.t, http.ErrServerClosed, ts.BrokerServer.Run(ctx, ":0"))
+		assert.Equal(ts.t, http.ErrServerClosed, ts.BrokerServer.Run(ctx, ":0", startedCh))
 		ts.serverWg.Done()
 	}()
 
 	// TODO: wrap in timeout
+	<-startedCh
 	ts.ServerAddr = ts.BrokerServer.Addr()
 	ts.serverCancel = cancel
 }
