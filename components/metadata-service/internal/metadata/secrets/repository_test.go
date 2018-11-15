@@ -21,11 +21,17 @@ func TestRepository_Create(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId", "re")
+		secret := makeSecret("new-secret", "secretId", "re", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 		secretsManagerMock.On("Create", secret).Return(secret, nil)
 
 		// when
-		err := repository.Create("re", "new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId")
+		err := repository.Create("re", "new-secret", "secretId", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 
 		// then
 		assert.NoError(t, err)
@@ -37,11 +43,17 @@ func TestRepository_Create(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId", "re")
+		secret := makeSecret("new-secret", "secretId", "re", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 		secretsManagerMock.On("Create", secret).Return(nil, errors.New("some error"))
 
 		// when
-		err := repository.Create("re", "new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId")
+		err := repository.Create("re", "new-secret", "secretId", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 
 		// then
 		require.Error(t, err)
@@ -54,11 +66,17 @@ func TestRepository_Create(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId", "re")
+		secret := makeSecret("new-secret", "secretId", "re", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 		secretsManagerMock.On("Create", secret).Return(nil, k8serrors.NewAlreadyExists(schema.GroupResource{}, ""))
 
 		// when
-		err := repository.Create("re", "new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId")
+		err := repository.Create("re", "new-secret", "secretId", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 
 		// then
 		require.Error(t, err)
@@ -73,16 +91,19 @@ func TestRepository_Get(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId", "re")
+		secret := makeSecret("new-secret", "secretId", "re", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 		secretsManagerMock.On("Get", "new-secret", metav1.GetOptions{}).Return(secret, nil)
 
 		// when
-		clientId, clientSecret, err := repository.Get("re", "new-secret")
+		data, err := repository.Get("re", "new-secret")
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, "CLIENT_ID", clientId)
-		assert.Equal(t, "CLIENT_SECRET", clientSecret)
+		assert.Equal(t, []byte("testValue1"), data["testKey1"])
+		assert.Equal(t, []byte("testValue2"), data["testKey2"])
 
 		secretsManagerMock.AssertExpectations(t)
 	})
@@ -97,15 +118,15 @@ func TestRepository_Get(t *testing.T) {
 			errors.New("some error"))
 
 		// when
-		clientId, clientSecret, err := repository.Get("re", "secret-name")
+		data, err := repository.Get("re", "secret-name")
 
 		// then
 		assert.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.NotEmpty(t, err.Error())
 
-		assert.Equal(t, "", clientId)
-		assert.Equal(t, "", clientSecret)
+		assert.Equal(t, []byte(nil), data["testKey1"])
+		assert.Equal(t, []byte(nil), data["testKey2"])
 
 		secretsManagerMock.AssertExpectations(t)
 	})
@@ -121,15 +142,15 @@ func TestRepository_Get(t *testing.T) {
 				""))
 
 		// when
-		clientId, clientSecret, err := repository.Get("re", "secret-name")
+		data, err := repository.Get("re", "secret-name")
 
 		// then
 		assert.Error(t, err)
 		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 		assert.NotEmpty(t, err.Error())
 
-		assert.Equal(t, "", clientId)
-		assert.Equal(t, "", clientSecret)
+		assert.Equal(t, []byte(nil), data["testKey1"])
+		assert.Equal(t, []byte(nil), data["testKey2"])
 
 		secretsManagerMock.AssertExpectations(t)
 	})
@@ -197,12 +218,18 @@ func TestRepository_Upsert(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId", "re")
+		secret := makeSecret("new-secret", "secretId", "re", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 		secretsManagerMock.On("Update", secret).Return(
 			secret, nil)
 
 		// when
-		err := repository.Upsert("re", "new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId")
+		err := repository.Upsert("re", "new-secret", "secretId", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 
 		// then
 		assert.NoError(t, err)
@@ -214,13 +241,19 @@ func TestRepository_Upsert(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId", "re")
+		secret := makeSecret("new-secret", "secretId", "re", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 		secretsManagerMock.On("Update", secret).Return(
 			nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 		secretsManagerMock.On("Create", secret).Return(secret, nil)
 
 		// when
-		err := repository.Upsert("re", "new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId")
+		err := repository.Upsert("re", "new-secret", "secretId", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 
 		// then
 		assert.NoError(t, err)
@@ -232,11 +265,17 @@ func TestRepository_Upsert(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId", "re")
+		secret := makeSecret("new-secret", "secretId", "re", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 		secretsManagerMock.On("Update", secret).Return(nil, errors.New("some error"))
 
 		// when
-		err := repository.Upsert("re", "new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId")
+		err := repository.Upsert("re", "new-secret", "secretId", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 
 		// then
 		assert.Error(t, err)
@@ -252,13 +291,19 @@ func TestRepository_Upsert(t *testing.T) {
 		secretsManagerMock := &mocks.Manager{}
 		repository := NewRepository(secretsManagerMock)
 
-		secret := makeSecret("new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId", "re")
+		secret := makeSecret("new-secret", "secretId", "re", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 		secretsManagerMock.On("Update", secret).Return(
 			nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 		secretsManagerMock.On("Create", secret).Return(secret, errors.New("some error"))
 
 		// when
-		err := repository.Upsert("re", "new-secret", "CLIENT_ID", "CLIENT_SECRET", "secretId")
+		err := repository.Upsert("re", "new-secret", "secretId", map[string][]byte{
+			"testKey1": []byte("testValue1"),
+			"testKey2": []byte("testValue2"),
+		})
 
 		// then
 		assert.Error(t, err)
