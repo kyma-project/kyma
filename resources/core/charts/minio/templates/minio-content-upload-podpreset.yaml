@@ -15,12 +15,12 @@ spec:
     - name: APP_UPLOAD_ACCESS_KEY
       valueFrom:
         secretKeyRef:
-          name: {{ template "minio.fullname" . }}
+          name: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
           key: accesskey
     - name: APP_UPLOAD_SECRET_KEY
       valueFrom:
         secretKeyRef:
-          name: {{ template "minio.fullname" . }}
+          name: {{ if .Values.existingSecret }}{{ .Values.existingSecret }}{{ else }}{{ template "minio.fullname" . }}{{ end }}
           key: secretkey
   envFrom:
     - configMapRef:

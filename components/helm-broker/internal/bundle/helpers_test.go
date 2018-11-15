@@ -1,35 +1,22 @@
 package bundle_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 	"testing"
 
-	"encoding/json"
+	"github.com/kyma-project/kyma/components/helm-broker/internal"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 
 	"github.com/Masterminds/semver"
 	"github.com/ghodss/yaml"
-	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/stretchr/testify/require"
 )
 
 func fixtureBundle(t *testing.T, testdataBasePath string) internal.Bundle {
-	var meta struct {
-		ID                  string `yaml:"id"`
-		Name                string `yaml:"name"`
-		Version             string `yaml:"version"`
-		Description         string `yaml:"description"`
-		DisplayName         string `yaml:"displayName"`
-		Tags                string `yaml:"tags"`
-		ProviderDisplayName string `yaml:"providerDisplayName"`
-		LongDescription     string `yaml:"longDescription"`
-		DocumentationURL    string `yaml:"documentationURL"`
-		SupportURL          string `yaml:"supportURL"`
-		ImageURL            string `yaml:"imageURL"`
-		Bindable            bool   `yaml:"bindable"`
-	}
+	meta := bundle.FormMeta{}
 	unmarshalYamlTestdata(t, testdataBasePath+"meta.yaml", &meta)
 	bVer, err := semver.NewVersion(meta.Version)
 	require.NoError(t, err)
@@ -37,15 +24,6 @@ func fixtureBundle(t *testing.T, testdataBasePath string) internal.Bundle {
 	charRef := fixChartRef(t, testdataBasePath)
 	micro := fixturePlan(t, testdataBasePath, "micro", charRef)
 	enterprise := fixturePlan(t, testdataBasePath, "enterprise", charRef)
-
-	mapTagsToModel := func(tags string) []internal.BundleTag {
-		splittedTags := strings.Split(tags, ",")
-		mapped := make([]internal.BundleTag, 0, len(splittedTags))
-		for i := range splittedTags {
-			mapped = append(mapped, internal.BundleTag(strings.TrimSpace(splittedTags[i])))
-		}
-		return mapped
-	}
 
 	return internal.Bundle{
 		ID:          internal.BundleID(meta.ID),
@@ -60,8 +38,9 @@ func fixtureBundle(t *testing.T, testdataBasePath string) internal.Bundle {
 			LongDescription:     meta.LongDescription,
 			ProviderDisplayName: meta.ProviderDisplayName,
 			SupportURL:          meta.SupportURL,
+			Labels:              meta.MapLabelsToModel(),
 		},
-		Tags: mapTagsToModel(meta.Tags),
+		Tags: meta.MapTagsToModel(),
 		Plans: map[internal.BundlePlanID]internal.BundlePlan{
 			micro.ID:      micro,
 			enterprise.ID: enterprise,

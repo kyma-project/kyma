@@ -1,6 +1,7 @@
 package kymainstallation
 
 import (
+	"errors"
 	"fmt"
 	"path"
 
@@ -55,7 +56,7 @@ func (s installStep) Run() error {
 		overrides)
 
 	if installErr != nil {
-		return installErr
+		return errors.New("Helm install error: " + installErr.Error())
 	}
 
 	s.helmClient.PrintRelease(installResp.Release)
@@ -96,7 +97,7 @@ func (s upgradeStep) Run() error {
 		overrides)
 
 	if upgradeErr != nil {
-		return upgradeErr
+		return errors.New("Helm upgrade error: " + upgradeErr.Error())
 	}
 
 	s.helmClient.PrintRelease(upgradeResp.Release)

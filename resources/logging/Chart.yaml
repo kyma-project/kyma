@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+description: A Helm chart for OKLog and Logspout
+name: logging
+version: 0.0.1
+keywords:
+  - logging
+  - oklog
+  - logspout
+  - alerting
+  - kyma
+appVersion: 0.3.2

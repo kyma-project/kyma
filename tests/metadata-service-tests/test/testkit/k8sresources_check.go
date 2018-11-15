@@ -113,7 +113,7 @@ func checkLabels(t *testing.T, expected, actual Labels) {
 }
 
 func makeMatchExpression(name, namespace string) string {
-	return `(destination.service == "` + name + "." + namespace + `.svc.cluster.local") && (source.labels["` + name + `"] != "true")`
+	return `(destination.service.host == "` + name + "." + namespace + `.svc.cluster.local") && (source.labels["` + name + `"] != "true")`
 }
 
 func findServiceInRemoteEnv(reServices []remoteenv.Service, searchedID string) *remoteenv.Service {

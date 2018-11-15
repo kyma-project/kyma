@@ -73,6 +73,7 @@ func TestServiceClassesQueries(t *testing.T) {
 		supportUrl
 		providerDisplayName
 		tags
+		labels
 		plans {
 			name
 			displayName

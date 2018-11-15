@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	matchTemplateFormat = `(destination.service == "%s.%s.svc.cluster.local") && (source.labels["%s"] != "true")`
+	matchTemplateFormat = `(destination.service.host == "%s.%s.svc.cluster.local") && (source.labels["%s"] != "true")`
 )
 
 // RuleInterface allows to perform operations for Rules in kubernetes

@@ -3,25 +3,17 @@ title: The Remote Environment Broker architecture
 type: Architecture
 ---
 
-The Remote Environment Broker (REB) workflow starts with the registration process, during which a remote environment (RE) is registered on the Kyma cluster.
+The Remote Environment Broker (REB) workflow consists of the following steps:
 
-### Remote environment registration process
+1. The Remote Environment Broker watches for RemoteEnvironments (REs) in the cluster and EnvironmentMappings (EMs) in all Namespaces.
+2. The user creates an EnvironmentMapping custom resource in a given Environment. The EnvironmentMapping activates services offered by a RE. The EnvironmentMapping must have the same name as the RE.
+3. The Remote Environment Broker creates a `remote-env-broker` Service Broker (SB) inside the Environment in which the EnvironmentMapping is created. This Service Broker contains data of all services provided by the activated RemoteEnvironments. There is always only one `remote-env-broker` Service Broker per Environment, even if there are more EnvironmentMappings.
+4. The Service Catalog fetches services that the `remote-env-broker` Service Broker exposes.
+5. The Service Catalog creates a ServiceClass for each service received from the Service Broker.
 
-The registration process of the remote environment consists of the following steps:
+![REB architecture](assets/001-REB-architecture.svg)
 
-1. Kyma administrator registers the remote environment's APIs and Events definitions to the Kyma cluster through the Application Connector which creates a remote environment custom resource inside the cluster.
-2. The Remote Environment Broker observes and registers all the remote environment custom resources.
-3. Whenever services (APIs and/or Events) appear in a given remote environment, the REB registers them as ServiceClasses in the Service Catalog.
-
-![REB registration](assets/001-REB-registration.png)
-
-### Enable the provisioning process
-
-After the registration, trigger the provisioning of a given ServiceClass by creating a ServiceInstance. Before you create a ServiceInstance of a given ServiceClass, you must create the EnvironmentMapping. The EnvironmentMapping enables the remote environment offering in a given Environment. Creating a ServiceInstance without the EnvironmentMapping ends with failure. For more details about the EnvironmentMapping, see the **Examples** document.
-
-![REB envmapping](assets/002-REB-envmapping.png)
-
-Provisioning and binding work differently for API, Event, and both the API and Event ServiceClass. Because of that, these operations are described in separate sections. In relation to the nature of remote environment ServiceClasses, you can provision them just once in a given Environment.
+When this process is complete, you can provision and bind your services.
 
 ### Provisioning and binding for an API ServiceClass
 
@@ -43,7 +35,7 @@ This ServiceClass has a **bindable** flag set to `false` which means that after 
 2. Provision this ServiceClass by creating a ServiceInstance in the given Environment.
 3. During the provisioning process, the EventActivation resource is created together with the ServiceInstance. EventActivation allows you to create an Event Bus Subscription.
 4. A Subscription is a custom resource by which an Event Bus triggers the lambda for a particular type of Event in this step.
-5. The Remote Environment (RE2) sends an Event to the Application Connector.
+5. The RemoteEnvironment sends an Event to the Application Connector.
 6. The Application Connector sends an Event to the lambda through the Event Bus.
 
 

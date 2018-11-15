@@ -14,8 +14,9 @@ def azure_redis_cache = "azure-redis-cache"
 def azure_sql = "azure-sql"
 def azure_classes_docs_dir = "$service_brokers/azure-broker-service-classes"
 def api_gateway = "api-gateway"
-def authorization_and_authentication = "authorization-and-authentication"
+def security = "security"
 def logging = "logging"
+def console = "console"
 def label = "kyma-${UUID.randomUUID().toString()}"
 
 def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
@@ -89,11 +90,14 @@ podTemplate(label: label) {
                             dir("$docs_image_suffix/$api_gateway") {
                                 sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$api_gateway-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
-                            dir("$docs_image_suffix/$authorization_and_authentication") {
-                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:latest"
+                            dir("$docs_image_suffix/$security") {
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$security-$docs_image_suffix:latest"
                             }
                             dir("$docs_image_suffix/$logging") {
                                 sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$logging-$docs_image_suffix:latest"
+                            }
+                            dir("$docs_image_suffix/$console") {
+                                sh "cat ../Dockerfile | docker build -f - . -t ${dockerPushRoot}$console-$docs_image_suffix:latest"
                             }
 
                         }
@@ -138,11 +142,14 @@ podTemplate(label: label) {
                             sh "docker tag ${dockerPushRoot}$api_gateway-$docs_image_suffix:latest ${dockerPushRoot}$api_gateway-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$api_gateway-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:latest ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:$dockerImageTag"
-                            sh "docker push ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$security-$docs_image_suffix:latest ${dockerPushRoot}$security-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$security-$docs_image_suffix:$dockerImageTag"
 
                             sh "docker tag ${dockerPushRoot}$logging-$docs_image_suffix:latest ${dockerPushRoot}$logging-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$logging-$docs_image_suffix:$dockerImageTag"
+
+                            sh "docker tag ${dockerPushRoot}$console-$docs_image_suffix:latest ${dockerPushRoot}$console-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$console-$docs_image_suffix:$dockerImageTag"
 
                             if (params.GIT_BRANCH == 'master') {
                                 sh "docker push ${dockerPushRoot}$kyma-$docs_image_suffix:latest"
@@ -158,8 +165,9 @@ podTemplate(label: label) {
                                 sh "docker push ${dockerPushRoot}$azure_sql-$docs_image_suffix:latest"
                                 sh "docker push ${dockerPushRoot}$azure_redis_cache-$docs_image_suffix:latest"
                                 sh "docker push ${dockerPushRoot}$api_gateway-$docs_image_suffix:latest"
-                                sh "docker push ${dockerPushRoot}$authorization_and_authentication-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$security-$docs_image_suffix:latest"
                                 sh "docker push ${dockerPushRoot}$logging-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$console-$docs_image_suffix:latest"
                             }
                         }
                     }

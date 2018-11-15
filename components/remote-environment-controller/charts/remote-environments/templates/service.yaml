@@ -3,12 +3,12 @@ kind: Service
 metadata:
   annotations:
     "auth.istio.io/{{ .Values.service.externalapi.port }}": NONE
-  name: {{ .Release.Name }}-gateway-external-api
+  name: {{ .Release.Name }}-proxy-service-external-api
   labels:
     remoteEnvironment: {{ .Release.Name }}
-    app: {{ .Release.Name }}-gateway
-    release: {{ .Release.Name }}-gateway
-    heritage: {{ .Release.Service }}-gateway
+    app: {{ .Release.Name }}-proxy-service
+    release: {{ .Release.Name }}-proxy-service
+    heritage: {{ .Release.Service }}-proxy-service
 spec:
   type: ClusterIP
   ports:
@@ -16,8 +16,8 @@ spec:
       protocol: TCP
       name: http-api-port
   selector:
-    app: {{ .Release.Name }}-gateway
-    release: {{ .Release.Name }}-gateway
+    app: {{ .Release.Name }}-proxy-service
+    release: {{ .Release.Name }}-proxy-service
 ---
 apiVersion: v1
 kind: Service

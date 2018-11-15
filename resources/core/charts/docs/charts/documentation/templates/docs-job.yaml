@@ -86,8 +86,8 @@ spec:
              memory: {{ .Values.resources.documentation.requests.memory }}
            limits:
              memory: {{ .Values.resources.documentation.limits.memory }}
-      - name:  authorization-and-authentication
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.docs.dir }}authorization-and-authentication-docs:{{ .Values.global.docs.version }}
+      - name:  security
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.docs.dir }}security-docs:{{ .Values.global.docs.version }}
         resources:
            requests:
              memory: {{ .Values.resources.documentation.requests.memory }}
@@ -100,4 +100,3 @@ spec:
              memory: {{ .Values.resources.documentation.requests.memory }}
            limits:
              memory: {{ .Values.resources.documentation.limits.memory }}
-     

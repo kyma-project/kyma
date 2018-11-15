@@ -54,6 +54,7 @@ spec:
         {{- if index .Values "configurationFiles" "stan.conf" }}
         - --stan_config=/etc/nats-streaming/{{ template "nats-streaming.fullname" . }}/stan.conf
         {{- end }}
+        - --max_inactivity={{ .Values.global.natsStreaming.channel.maxInactivity }}
         env:
         - name: POD_NAME
           valueFrom:

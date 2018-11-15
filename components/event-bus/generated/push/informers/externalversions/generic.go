@@ -5,7 +5,7 @@ package externalversions
 import (
 	"fmt"
 
-	v1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -36,7 +36,7 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=eventing.kyma.cx, Version=v1alpha1
+	// Group=eventing.kyma-project.io, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("subscriptions"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Eventing().V1alpha1().Subscriptions().Informer()}, nil
 

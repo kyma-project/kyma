@@ -3,7 +3,7 @@ package controllers
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/stretchr/testify/mock"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -57,6 +57,7 @@ func verifyStartSubCalledOnEventActivation(orgSub *v1alpha1.Subscription, mockSu
 	subWithEventsActivation := orgSub.DeepCopy()
 	subWithEventsActivation.Status = activeStatus
 	mockSupervisor.On("StartSubscriptionReq", subWithEventsActivation).Return()
+	mockSupervisor.On("StopSubscriptionReq", orgSub).Return()
 	updateFunction(orgSub, subWithEventsActivation)
 	mockSupervisor.AssertCalled(t, "StartSubscriptionReq", subWithEventsActivation)
 	return subWithEventsActivation
@@ -71,9 +72,10 @@ func verifyStopSubCalledOnEventDeactivation(orgSub *v1alpha1.Subscription, mockS
 			},
 		},
 	}
-	SubWithEventsDeactivation := orgSub.DeepCopy()
-	SubWithEventsDeactivation.Status = deactiveStatus
-	mockSupervisor.On("StopSubscriptionReq", SubWithEventsDeactivation).Return()
-	updateFunction(orgSub, SubWithEventsDeactivation)
-	mockSupervisor.AssertCalled(t, "StopSubscriptionReq", SubWithEventsDeactivation)
+	subWithEventsDeactivation := orgSub.DeepCopy()
+	subWithEventsDeactivation.Status = deactiveStatus
+	mockSupervisor.On("StopSubscriptionReq", orgSub).Return()
+	mockSupervisor.On("StopSubscriptionReq", subWithEventsDeactivation).Return()
+	updateFunction(orgSub, subWithEventsDeactivation)
+	mockSupervisor.AssertCalled(t, "StopSubscriptionReq", subWithEventsDeactivation)
 }

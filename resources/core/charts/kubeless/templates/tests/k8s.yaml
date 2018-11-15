@@ -1,6 +1,6 @@
 {{ define "k8s.yaml.tpl" }}
 
-apiVersion: gateway.kyma.cx/v1alpha2
+apiVersion: gateway.kyma-project.io/v1alpha2
 kind: Api
 metadata:
   namespace: kubeless-test
@@ -14,7 +14,7 @@ spec:
     name: test-hello
     port: 8080
 ---
-apiVersion: gateway.kyma.cx/v1alpha2
+apiVersion: gateway.kyma-project.io/v1alpha2
 kind: Api
 metadata:
   namespace: kubeless-test
@@ -43,7 +43,7 @@ metadata:
   name: test-event
 spec:
   endpoint: http://test-event.kubeless-test:8080/
-  push_request_timeout_ms: 2000
+  push_request_timeout_ms: 5000
   max_inflight: 400
   include_subscription_name_header: true
   event_type: test

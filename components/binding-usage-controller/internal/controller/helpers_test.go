@@ -12,44 +12,19 @@ import (
 	svcatSettings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	appsV1beta2 "k8s.io/api/apps/v1beta2"
 	coreV1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/util/strategicpatch"
 	k8sTesting "k8s.io/client-go/testing"
 )
 
 var deploymentsResource = schema.GroupVersionResource{Group: "apps", Version: "v1beta2", Resource: "deployments"}
 
-func patchDeploymentAction(oldDeploy, newDeploy *appsV1beta2.Deployment) k8sTesting.PatchAction {
-	oldData, err := json.Marshal(oldDeploy)
-	if err != nil {
-		panic(err)
-	}
-
-	newData, err := json.Marshal(newDeploy)
-	if err != nil {
-		panic(err)
-	}
-
-	patchBytes, err := strategicpatch.CreateTwoWayMergePatch(oldData, newData, appsV1beta2.Deployment{})
-	if err != nil {
-		panic(err)
-	}
-
-	return k8sTesting.NewPatchAction(deploymentsResource, oldDeploy.Namespace, oldDeploy.Name, patchBytes)
-}
-
 var podpresetsResource = schema.GroupVersionResource{Group: "settings.k8s.io", Version: "v1alpha1", Resource: "podpresets"}
 
 func createPodPresetAction(pp *svcatSettings.PodPreset) k8sTesting.Action {
 	return k8sTesting.NewCreateAction(podpresetsResource, pp.Namespace, pp)
-}
-
-func updatePodPresetAction(pp *svcatSettings.PodPreset) k8sTesting.Action {
-	return k8sTesting.NewUpdateAction(podpresetsResource, pp.Namespace, pp)
 }
 
 func deletePodPresetAction(pp *svcatSettings.PodPreset) k8sTesting.Action {

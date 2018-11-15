@@ -92,6 +92,7 @@ type ComplexityRoot struct {
 		SupportUrl          func(childComplexity int) int
 		ProviderDisplayName func(childComplexity int) int
 		Tags                func(childComplexity int) int
+		Labels              func(childComplexity int) int
 		Plans               func(childComplexity int) int
 		Activated           func(childComplexity int) int
 		ApiSpec             func(childComplexity int) int
@@ -106,6 +107,7 @@ type ComplexityRoot struct {
 		Description                    func(childComplexity int) int
 		RelatedClusterServiceClassName func(childComplexity int) int
 		InstanceCreateParameterSchema  func(childComplexity int) int
+		BindingCreateParameterSchema   func(childComplexity int) int
 	}
 
 	ConnectorService struct {
@@ -292,6 +294,11 @@ type ComplexityRoot struct {
 		AccessLabel func(childComplexity int) int
 	}
 
+	RemoteEnvironmentEvent struct {
+		Type              func(childComplexity int) int
+		RemoteEnvironment func(childComplexity int) int
+	}
+
 	RemoteEnvironmentMutationOutput struct {
 		Name        func(childComplexity int) int
 		Description func(childComplexity int) int
@@ -436,6 +443,7 @@ type ComplexityRoot struct {
 		SupportUrl          func(childComplexity int) int
 		ProviderDisplayName func(childComplexity int) int
 		Tags                func(childComplexity int) int
+		Labels              func(childComplexity int) int
 		Plans               func(childComplexity int) int
 		Activated           func(childComplexity int) int
 		ApiSpec             func(childComplexity int) int
@@ -490,11 +498,12 @@ type ComplexityRoot struct {
 	}
 
 	Subscription struct {
-		ServiceInstanceEvent                       func(childComplexity int, environment string) int
-		ServiceBindingEventForServiceInstance      func(childComplexity int, serviceInstanceName string, environment string) int
-		ServiceBindingUsageEventForServiceInstance func(childComplexity int, serviceInstanceName string, environment string) int
-		ServiceBrokerEvent                         func(childComplexity int, environment string) int
-		ClusterServiceBrokerEvent                  func(childComplexity int) int
+		ServiceInstanceEvent      func(childComplexity int, environment string) int
+		ServiceBindingEvent       func(childComplexity int, environment string) int
+		ServiceBindingUsageEvent  func(childComplexity int, environment string) int
+		ServiceBrokerEvent        func(childComplexity int, environment string) int
+		ClusterServiceBrokerEvent func(childComplexity int) int
+		RemoteEnvironmentEvent    func(childComplexity int) int
 	}
 
 	Title struct {
@@ -611,10 +620,11 @@ type ServiceInstanceResolver interface {
 }
 type SubscriptionResolver interface {
 	ServiceInstanceEvent(ctx context.Context, environment string) (<-chan ServiceInstanceEvent, error)
-	ServiceBindingEventForServiceInstance(ctx context.Context, serviceInstanceName string, environment string) (<-chan ServiceBindingEvent, error)
-	ServiceBindingUsageEventForServiceInstance(ctx context.Context, serviceInstanceName string, environment string) (<-chan ServiceBindingUsageEvent, error)
+	ServiceBindingEvent(ctx context.Context, environment string) (<-chan ServiceBindingEvent, error)
+	ServiceBindingUsageEvent(ctx context.Context, environment string) (<-chan ServiceBindingUsageEvent, error)
 	ServiceBrokerEvent(ctx context.Context, environment string) (<-chan ServiceBrokerEvent, error)
 	ClusterServiceBrokerEvent(ctx context.Context) (<-chan ClusterServiceBrokerEvent, error)
+	RemoteEnvironmentEvent(ctx context.Context) (<-chan RemoteEnvironmentEvent, error)
 }
 
 func field_Mutation_createServiceInstance_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -1823,50 +1833,32 @@ func field_Subscription_serviceInstanceEvent_args(rawArgs map[string]interface{}
 
 }
 
-func field_Subscription_serviceBindingEventForServiceInstance_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Subscription_serviceBindingEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["serviceInstanceName"]; ok {
+	if tmp, ok := rawArgs["environment"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["serviceInstanceName"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
-		var err error
-		arg1, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["environment"] = arg1
+	args["environment"] = arg0
 	return args, nil
 
 }
 
-func field_Subscription_serviceBindingUsageEventForServiceInstance_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Subscription_serviceBindingUsageEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["serviceInstanceName"]; ok {
+	if tmp, ok := rawArgs["environment"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["serviceInstanceName"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
-		var err error
-		arg1, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["environment"] = arg1
+	args["environment"] = arg0
 	return args, nil
 
 }
@@ -2125,6 +2117,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ClusterServiceClass.Tags(childComplexity), true
 
+	case "ClusterServiceClass.labels":
+		if e.complexity.ClusterServiceClass.Labels == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.Labels(childComplexity), true
+
 	case "ClusterServiceClass.plans":
 		if e.complexity.ClusterServiceClass.Plans == nil {
 			break
@@ -2201,6 +2200,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ClusterServicePlan.InstanceCreateParameterSchema(childComplexity), true
+
+	case "ClusterServicePlan.bindingCreateParameterSchema":
+		if e.complexity.ClusterServicePlan.BindingCreateParameterSchema == nil {
+			break
+		}
+
+		return e.complexity.ClusterServicePlan.BindingCreateParameterSchema(childComplexity), true
 
 	case "ConnectorService.url":
 		if e.complexity.ConnectorService.Url == nil {
@@ -3201,6 +3207,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RemoteEnvironmentEntry.AccessLabel(childComplexity), true
 
+	case "RemoteEnvironmentEvent.type":
+		if e.complexity.RemoteEnvironmentEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.RemoteEnvironmentEvent.Type(childComplexity), true
+
+	case "RemoteEnvironmentEvent.remoteEnvironment":
+		if e.complexity.RemoteEnvironmentEvent.RemoteEnvironment == nil {
+			break
+		}
+
+		return e.complexity.RemoteEnvironmentEvent.RemoteEnvironment(childComplexity), true
+
 	case "RemoteEnvironmentMutationOutput.name":
 		if e.complexity.RemoteEnvironmentMutationOutput.Name == nil {
 			break
@@ -3761,6 +3781,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceClass.Tags(childComplexity), true
 
+	case "ServiceClass.labels":
+		if e.complexity.ServiceClass.Labels == nil {
+			break
+		}
+
+		return e.complexity.ServiceClass.Labels(childComplexity), true
+
 	case "ServiceClass.plans":
 		if e.complexity.ServiceClass.Plans == nil {
 			break
@@ -4025,29 +4052,29 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Subscription.ServiceInstanceEvent(childComplexity, args["environment"].(string)), true
 
-	case "Subscription.serviceBindingEventForServiceInstance":
-		if e.complexity.Subscription.ServiceBindingEventForServiceInstance == nil {
+	case "Subscription.serviceBindingEvent":
+		if e.complexity.Subscription.ServiceBindingEvent == nil {
 			break
 		}
 
-		args, err := field_Subscription_serviceBindingEventForServiceInstance_args(rawArgs)
+		args, err := field_Subscription_serviceBindingEvent_args(rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Subscription.ServiceBindingEventForServiceInstance(childComplexity, args["serviceInstanceName"].(string), args["environment"].(string)), true
+		return e.complexity.Subscription.ServiceBindingEvent(childComplexity, args["environment"].(string)), true
 
-	case "Subscription.serviceBindingUsageEventForServiceInstance":
-		if e.complexity.Subscription.ServiceBindingUsageEventForServiceInstance == nil {
+	case "Subscription.serviceBindingUsageEvent":
+		if e.complexity.Subscription.ServiceBindingUsageEvent == nil {
 			break
 		}
 
-		args, err := field_Subscription_serviceBindingUsageEventForServiceInstance_args(rawArgs)
+		args, err := field_Subscription_serviceBindingUsageEvent_args(rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Subscription.ServiceBindingUsageEventForServiceInstance(childComplexity, args["serviceInstanceName"].(string), args["environment"].(string)), true
+		return e.complexity.Subscription.ServiceBindingUsageEvent(childComplexity, args["environment"].(string)), true
 
 	case "Subscription.serviceBrokerEvent":
 		if e.complexity.Subscription.ServiceBrokerEvent == nil {
@@ -4067,6 +4094,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.ClusterServiceBrokerEvent(childComplexity), true
+
+	case "Subscription.remoteEnvironmentEvent":
+		if e.complexity.Subscription.RemoteEnvironmentEvent == nil {
+			break
+		}
+
+		return e.complexity.Subscription.RemoteEnvironmentEvent(childComplexity), true
 
 	case "Title.name":
 		if e.complexity.Title.Name == nil {
@@ -4937,6 +4971,11 @@ func (ec *executionContext) _ClusterServiceClass(ctx context.Context, sel ast.Se
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "labels":
+			out.Values[i] = ec._ClusterServiceClass_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "plans":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -5242,6 +5281,28 @@ func (ec *executionContext) _ClusterServiceClass_tags(ctx context.Context, field
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_labels(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Labels)
+	rctx.Result = res
+	return res
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_plans(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
@@ -5425,6 +5486,8 @@ func (ec *executionContext) _ClusterServicePlan(ctx context.Context, sel ast.Sel
 			}
 		case "instanceCreateParameterSchema":
 			out.Values[i] = ec._ClusterServicePlan_instanceCreateParameterSchema(ctx, field, obj)
+		case "bindingCreateParameterSchema":
+			out.Values[i] = ec._ClusterServicePlan_bindingCreateParameterSchema(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5557,6 +5620,29 @@ func (ec *executionContext) _ClusterServicePlan_instanceCreateParameterSchema(ct
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
 		return obj.InstanceCreateParameterSchema, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*JSON)
+	rctx.Result = res
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServicePlan_bindingCreateParameterSchema(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServicePlan",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.BindingCreateParameterSchema, nil
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -10431,6 +10517,86 @@ func (ec *executionContext) _RemoteEnvironmentEntry_accessLabel(ctx context.Cont
 	return graphql.MarshalString(*res)
 }
 
+var remoteEnvironmentEventImplementors = []string{"RemoteEnvironmentEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _RemoteEnvironmentEvent(ctx context.Context, sel ast.SelectionSet, obj *RemoteEnvironmentEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, remoteEnvironmentEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RemoteEnvironmentEvent")
+		case "type":
+			out.Values[i] = ec._RemoteEnvironmentEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "remoteEnvironment":
+			out.Values[i] = ec._RemoteEnvironmentEvent_remoteEnvironment(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _RemoteEnvironmentEvent_type(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironmentEvent) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "RemoteEnvironmentEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _RemoteEnvironmentEvent_remoteEnvironment(ctx context.Context, field graphql.CollectedField, obj *RemoteEnvironmentEvent) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "RemoteEnvironmentEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.RemoteEnvironment, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(RemoteEnvironment)
+	rctx.Result = res
+
+	return ec._RemoteEnvironment(ctx, field.Selections, &res)
+}
+
 var remoteEnvironmentMutationOutputImplementors = []string{"RemoteEnvironmentMutationOutput"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -12990,6 +13156,11 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "labels":
+			out.Values[i] = ec._ServiceClass_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "plans":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -13314,6 +13485,28 @@ func (ec *executionContext) _ServiceClass_tags(ctx context.Context, field graphq
 	}
 
 	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceClass_labels(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(ctx context.Context) (interface{}, error) {
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Labels)
+	rctx.Result = res
+	return res
 }
 
 // nolint: vetshadow
@@ -14500,14 +14693,16 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 	switch fields[0].Name {
 	case "serviceInstanceEvent":
 		return ec._Subscription_serviceInstanceEvent(ctx, fields[0])
-	case "serviceBindingEventForServiceInstance":
-		return ec._Subscription_serviceBindingEventForServiceInstance(ctx, fields[0])
-	case "serviceBindingUsageEventForServiceInstance":
-		return ec._Subscription_serviceBindingUsageEventForServiceInstance(ctx, fields[0])
+	case "serviceBindingEvent":
+		return ec._Subscription_serviceBindingEvent(ctx, fields[0])
+	case "serviceBindingUsageEvent":
+		return ec._Subscription_serviceBindingUsageEvent(ctx, fields[0])
 	case "serviceBrokerEvent":
 		return ec._Subscription_serviceBrokerEvent(ctx, fields[0])
 	case "clusterServiceBrokerEvent":
 		return ec._Subscription_clusterServiceBrokerEvent(ctx, fields[0])
+	case "remoteEnvironmentEvent":
+		return ec._Subscription_remoteEnvironmentEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -14541,9 +14736,9 @@ func (ec *executionContext) _Subscription_serviceInstanceEvent(ctx context.Conte
 	}
 }
 
-func (ec *executionContext) _Subscription_serviceBindingEventForServiceInstance(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+func (ec *executionContext) _Subscription_serviceBindingEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Subscription_serviceBindingEventForServiceInstance_args(rawArgs)
+	args, err := field_Subscription_serviceBindingEvent_args(rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil
@@ -14551,7 +14746,7 @@ func (ec *executionContext) _Subscription_serviceBindingEventForServiceInstance(
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Field: field,
 	})
-	results, err := ec.resolvers.Subscription().ServiceBindingEventForServiceInstance(ctx, args["serviceInstanceName"].(string), args["environment"].(string))
+	results, err := ec.resolvers.Subscription().ServiceBindingEvent(ctx, args["environment"].(string))
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil
@@ -14569,9 +14764,9 @@ func (ec *executionContext) _Subscription_serviceBindingEventForServiceInstance(
 	}
 }
 
-func (ec *executionContext) _Subscription_serviceBindingUsageEventForServiceInstance(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+func (ec *executionContext) _Subscription_serviceBindingUsageEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Subscription_serviceBindingUsageEventForServiceInstance_args(rawArgs)
+	args, err := field_Subscription_serviceBindingUsageEvent_args(rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil
@@ -14579,7 +14774,7 @@ func (ec *executionContext) _Subscription_serviceBindingUsageEventForServiceInst
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Field: field,
 	})
-	results, err := ec.resolvers.Subscription().ServiceBindingUsageEventForServiceInstance(ctx, args["serviceInstanceName"].(string), args["environment"].(string))
+	results, err := ec.resolvers.Subscription().ServiceBindingUsageEvent(ctx, args["environment"].(string))
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil
@@ -14642,6 +14837,28 @@ func (ec *executionContext) _Subscription_clusterServiceBrokerEvent(ctx context.
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._ClusterServiceBrokerEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_remoteEnvironmentEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	results, err := ec.resolvers.Subscription().RemoteEnvironmentEvent(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._RemoteEnvironmentEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -16824,6 +17041,7 @@ type ServiceClass {
     supportUrl: String
     providerDisplayName: String
     tags: [String!]!
+    labels: Labels!
     plans: [ServicePlan!]!
     activated: Boolean!
     apiSpec: JSON
@@ -16843,6 +17061,7 @@ type ClusterServiceClass {
     supportUrl: String
     providerDisplayName: String
     tags: [String!]!
+    labels: Labels!
     plans: [ClusterServicePlan!]!
     activated: Boolean!
     apiSpec: JSON
@@ -16868,6 +17087,7 @@ type ClusterServicePlan {
     description: String!
     relatedClusterServiceClassName: String!
     instanceCreateParameterSchema: JSON
+    bindingCreateParameterSchema: JSON
 }
 
 type ServiceBroker {
@@ -17144,6 +17364,11 @@ enum RemoteEnvironmentStatus {
     GATEWAY_NOT_CONFIGURED
 }
 
+type RemoteEnvironmentEvent {
+    type: SubscriptionEventType!
+    remoteEnvironment: RemoteEnvironment!
+}
+
 type RemoteEnvironmentMutationOutput {
     name: String!
     description: String!
@@ -17308,10 +17533,11 @@ type Mutation {
 
 type Subscription {
     serviceInstanceEvent(environment: String!): ServiceInstanceEvent!
-    serviceBindingEventForServiceInstance(serviceInstanceName: String!, environment: String!): ServiceBindingEvent!
-    serviceBindingUsageEventForServiceInstance(serviceInstanceName: String!, environment: String!): ServiceBindingUsageEvent!
+    serviceBindingEvent(environment: String!): ServiceBindingEvent!
+    serviceBindingUsageEvent(environment: String!): ServiceBindingUsageEvent!
     serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
-    clusterServiceBrokerEvent: ClusterServiceBrokerEvent!
+    clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
+    remoteEnvironmentEvent: RemoteEnvironmentEvent!,
 }
 
 # Schema

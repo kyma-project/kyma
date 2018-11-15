@@ -17,8 +17,8 @@ const (
 type NameResolver interface {
 	// GetResourceName returns resource name with given ID
 	GetResourceName(remoteEnvironment, id string) string
-	// GetMetadataUrl return gateway url with given ID
-	GetMetadataUrl(remoteEnvironment, id string) string
+	// GetGatewayUrl return gateway url with given ID
+	GetGatewayUrl(remoteEnvironment, id string) string
 	// ExtractServiceId extracts service ID from given host
 	ExtractServiceId(remoteEnvironment, host string) string
 }
@@ -39,8 +39,8 @@ func (resolver nameResolver) GetResourceName(remoteEnvironment, id string) strin
 	return getResourceNamePrefix(remoteEnvironment) + id
 }
 
-// GetMetadataUrl return gateway url with given ID
-func (resolver nameResolver) GetMetadataUrl(remoteEnvironment, id string) string {
+// GetGatewayUrl return gateway url with given ID
+func (resolver nameResolver) GetGatewayUrl(remoteEnvironment, id string) string {
 	return fmt.Sprintf(metadataUrlFormat, resolver.GetResourceName(remoteEnvironment, id), resolver.namespace)
 }
 

@@ -322,12 +322,12 @@ func (r *subscriptionResolver) ServiceInstanceEvent(ctx context.Context, environ
 	return r.sc.ServiceInstanceEventSubscription(ctx, environment)
 }
 
-func (r *subscriptionResolver) ServiceBindingUsageEventForServiceInstance(ctx context.Context, instanceName, environment string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
-	return r.sc.ServiceBindingUsageEventForInstanceSubscription(ctx, instanceName, environment)
+func (r *subscriptionResolver) ServiceBindingUsageEvent(ctx context.Context, environment string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
+	return r.sc.ServiceBindingUsageEventSubscription(ctx, environment)
 }
 
-func (r *subscriptionResolver) ServiceBindingEventForServiceInstance(ctx context.Context, instanceName, environment string) (<-chan gqlschema.ServiceBindingEvent, error) {
-	return r.sc.ServiceBindingEventForInstanceSubscription(ctx, instanceName, environment)
+func (r *subscriptionResolver) ServiceBindingEvent(ctx context.Context, environment string) (<-chan gqlschema.ServiceBindingEvent, error) {
+	return r.sc.ServiceBindingEventSubscription(ctx, environment)
 }
 
 func (r *subscriptionResolver) ServiceBrokerEvent(ctx context.Context, environment string) (<-chan gqlschema.ServiceBrokerEvent, error) {
@@ -336,6 +336,10 @@ func (r *subscriptionResolver) ServiceBrokerEvent(ctx context.Context, environme
 
 func (r *subscriptionResolver) ClusterServiceBrokerEvent(ctx context.Context) (<-chan gqlschema.ClusterServiceBrokerEvent, error) {
 	return r.sc.ClusterServiceBrokerEventSubscription(ctx)
+}
+
+func (r *subscriptionResolver) RemoteEnvironmentEvent(ctx context.Context) (<-chan gqlschema.RemoteEnvironmentEvent, error) {
+	return r.re.RemoteEnvironmentEventSubscription(ctx)
 }
 
 // Service Instance

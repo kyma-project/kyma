@@ -13,7 +13,7 @@ To create your own bundle, you must create a directory with the following struct
 
 ```
 sample-bundle/
-  ├── meta.yaml                             # A file which contains the metadata information about this yBundle
+  ├── meta.yaml                             # A file which contains the metadata information about this bundle
   ├── chart/                                # A directory which contains a Helm chart that installs your Kubernetes resources
   │    └── <chart-name>/                    # A Helm chart directory
   │         └── ....                        # Helm chart files
@@ -21,8 +21,8 @@ sample-bundle/
        ├── example-enterprise               # A directory of files for a specific plan
        │   ├── meta.yaml                    # A file which contains the metadata information about this plan
        │   ├── bind.yaml                    # A file which contains information about the values that the Helm Broker returns when it receives the bind request
-       │   ├── create-instance-schema.json  # The JSON Schema definitions for creating a service instance
-       │   └── values.yaml                  # The default configuration values in this plan for a chart defined in chart directory
+       │   ├── create-instance-schema.json  # The JSON Schema definitions for creating a ServiceInstance
+       │   └── values.yaml                  # The default configuration values in this plan for a chart defined in the `chart` directory
        └── ....
 ```
 
@@ -77,7 +77,7 @@ The `meta.yaml` file contains information about a bundle plan. Set the following
 
 The `bind.yaml` file contains the information required for the [binding action][bind] in a specific plan.
 If you defined in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file.
-For more information about the content of the `bind.yaml` file, see the **Binding bundles** document.
+For more information about the content of the `bind.yaml` file, see the [Binding bundles](https://github.com/kyma-project/kyma/blob/master/docs/service-brokers/docs/013-configuration-helm-broker-bundles-binding.md) document.
 
 #### The values.yaml file
 

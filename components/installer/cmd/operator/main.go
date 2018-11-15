@@ -85,7 +85,7 @@ func main() {
 	kubeInformerFactory.Start(stop)
 	internalInformerFactory.Start(stop)
 
-	installationController.Run(2, stop)
+	installationController.Run(stop)
 }
 
 func getClientConfig(kubeconfig string) (*rest.Config, error) {

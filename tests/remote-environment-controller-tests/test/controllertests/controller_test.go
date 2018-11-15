@@ -12,7 +12,7 @@ const (
 	initialWaitTimeSeconds      = 10 * time.Second
 	beforeDeleteWaitTimeSeconds = 20 * time.Second
 	retryWaitTimeSeconds        = 5 * time.Second
-	retryCount                  = 6
+	retryCount                  = 15
 )
 
 func TestRemoteEnvironmentCreation(t *testing.T) {

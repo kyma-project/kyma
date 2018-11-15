@@ -28,11 +28,19 @@ func (p *clusterServicePlanConverter) ToGQL(item *v1beta1.ClusterServicePlan) (*
 
 	var instanceCreateParameterSchema *gqlschema.JSON
 	if item.Spec.ServiceInstanceCreateParameterSchema != nil {
-		unpackedSchema, err := p.unpackInstanceCreateParameterSchema(item.Spec.ServiceInstanceCreateParameterSchema.Raw)
+		unpackedSchema, err := p.unpackCreateParameterSchema(item.Spec.ServiceInstanceCreateParameterSchema.Raw)
 		if err != nil {
 			return nil, p.wrapConversionError(err, item.Name)
 		}
 		instanceCreateParameterSchema = &unpackedSchema
+	}
+	var bindingCreateParameterSchema *gqlschema.JSON
+	if item.Spec.ServiceBindingCreateParameterSchema != nil {
+		unpackedSchema, err := p.unpackCreateParameterSchema(item.Spec.ServiceBindingCreateParameterSchema.Raw)
+		if err != nil {
+			return nil, errors.Wrapf(err, "while unpacking service binding create parameter schema from ClusterServicePlan [%s]", item.Name)
+		}
+		bindingCreateParameterSchema = &unpackedSchema
 	}
 
 	displayName := resource.ToStringPtr(externalMetadata["displayName"])
@@ -43,6 +51,7 @@ func (p *clusterServicePlanConverter) ToGQL(item *v1beta1.ClusterServicePlan) (*
 		Description:                    item.Spec.Description,
 		RelatedClusterServiceClassName: item.Spec.ClusterServiceClassRef.Name,
 		InstanceCreateParameterSchema:  instanceCreateParameterSchema,
+		BindingCreateParameterSchema:   bindingCreateParameterSchema,
 	}
 
 	return &plan, nil
@@ -67,7 +76,7 @@ func (p *clusterServicePlanConverter) wrapConversionError(err error, name string
 	return errors.Wrapf(err, "while converting item %s to ClusterServicePlan", name)
 }
 
-func (p *clusterServicePlanConverter) unpackInstanceCreateParameterSchema(raw []byte) (gqlschema.JSON, error) {
+func (p *clusterServicePlanConverter) unpackCreateParameterSchema(raw []byte) (gqlschema.JSON, error) {
 	if len(raw) == 0 {
 		return nil, nil
 	}
@@ -75,18 +84,18 @@ func (p *clusterServicePlanConverter) unpackInstanceCreateParameterSchema(raw []
 	decoded := make([]byte, base64.StdEncoding.DecodedLen(len(raw)))
 	_, err := base64.StdEncoding.Decode(decoded, raw)
 	if err != nil {
-		return p.extractInstanceCreateSchema(raw)
+		return p.extractCreateSchema(raw)
 	}
 
-	return p.extractInstanceCreateSchema(decoded)
+	return p.extractCreateSchema(decoded)
 }
 
-func (p *clusterServicePlanConverter) extractInstanceCreateSchema(raw []byte) (map[string]interface{}, error) {
+func (p *clusterServicePlanConverter) extractCreateSchema(raw []byte) (map[string]interface{}, error) {
 	extracted := make(map[string]interface{})
 
 	err := json.Unmarshal(raw, &extracted)
 	if err != nil {
-		return nil, errors.Wrap(err, "while extracting instance creation parameter schema")
+		return nil, errors.Wrap(err, "while extracting creation parameter schema")
 	}
 
 	return extracted, nil

@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/kyma-project/kyma/components/event-bus/internal/push/handlers"
 	"github.com/kyma-project/kyma/components/event-bus/internal/push/opts"

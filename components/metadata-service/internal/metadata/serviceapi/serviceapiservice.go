@@ -70,7 +70,7 @@ func NewService(
 
 func (sas defaultService) New(remoteEnvironment, id string, api *API) (*remoteenv.ServiceAPI, apperrors.AppError) {
 	resourceName := sas.nameResolver.GetResourceName(remoteEnvironment, id)
-	gatewayUrl := sas.nameResolver.GetMetadataUrl(remoteEnvironment, id)
+	gatewayUrl := sas.nameResolver.GetGatewayUrl(remoteEnvironment, id)
 
 	serviceAPI := &remoteenv.ServiceAPI{}
 	serviceAPI.TargetUrl = api.TargetUrl
@@ -147,7 +147,7 @@ func (sas defaultService) Delete(remoteEnvironment, id string) apperrors.AppErro
 
 func (sas defaultService) Update(remoteEnvironment, id string, api *API) (*remoteenv.ServiceAPI, apperrors.AppError) {
 	resourceName := sas.nameResolver.GetResourceName(remoteEnvironment, id)
-	gatewayUrl := sas.nameResolver.GetMetadataUrl(remoteEnvironment, id)
+	gatewayUrl := sas.nameResolver.GetGatewayUrl(remoteEnvironment, id)
 
 	serviceAPI := &remoteenv.ServiceAPI{}
 	serviceAPI.TargetUrl = api.TargetUrl

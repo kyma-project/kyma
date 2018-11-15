@@ -3,11 +3,10 @@ package broker
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
-
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
+
+	"github.com/pkg/errors"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
 )
 
 type catalogService struct {
@@ -21,7 +20,7 @@ type converter interface {
 }
 
 // TODO: switch from osb.CatalogResponse to CatalogSuccessResponseDTO
-func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*osb.CatalogResponse, error) {
+func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx OsbContext) (*osb.CatalogResponse, error) {
 	bundles, err := svc.finder.FindAll()
 	if err != nil {
 		return nil, errors.Wrap(err, "while finding all bundles")
@@ -42,39 +41,18 @@ func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*
 type bundleToServiceConverter struct{}
 
 func (f *bundleToServiceConverter) Convert(b *internal.Bundle) (osb.Service, error) {
-	sPlans := make([]osb.Plan, 0)
+	var sPlans []osb.Plan
 	for _, bPlan := range b.Plans {
-
 		sPlan := osb.Plan{
 			ID:          string(bPlan.ID),
 			Name:        string(bPlan.Name),
 			Bindable:    bPlan.Bindable,
 			Description: bPlan.Description,
-			ParameterSchemas: &osb.ParameterSchemas{
-				ServiceInstances: &osb.ServiceInstanceSchema{
-					Create: &osb.InputParameters{},
-					Update: &osb.InputParameters{},
-				},
-				ServiceBindings: &osb.ServiceBindingSchema{
-					Create: &osb.InputParameters{},
-				},
-			},
-			Metadata: bPlan.Metadata.ToMap(),
+			Metadata:    bPlan.Metadata.ToMap(),
 		}
-		if provisionSchema, exists := bPlan.Schemas[internal.SchemaTypeProvision]; exists {
-			sPlan.ParameterSchemas.ServiceInstances.Create = &osb.InputParameters{
-				Parameters: provisionSchema,
-			}
-		}
-		if updateSchema, exists := bPlan.Schemas[internal.SchemaTypeUpdate]; exists {
-			sPlan.ParameterSchemas.ServiceInstances.Update = &osb.InputParameters{
-				Parameters: updateSchema,
-			}
-		}
-		if bindSchema, exists := bPlan.Schemas[internal.SchemaTypeBind]; exists {
-			sPlan.ParameterSchemas.ServiceBindings.Create = &osb.InputParameters{
-				Parameters: bindSchema,
-			}
+
+		if len(bPlan.Schemas) > 0 {
+			sPlan.ParameterSchemas = f.mapToParametersSchemas(bPlan.Schemas)
 		}
 
 		sPlans = append(sPlans, sPlan)
@@ -85,13 +63,60 @@ func (f *bundleToServiceConverter) Convert(b *internal.Bundle) (osb.Service, err
 		sTags = append(sTags, string(tag))
 	}
 
+	meta := f.applyOverridesOnBundleMetadata(b.Metadata)
+
 	return osb.Service{
 		ID:          string(b.ID),
 		Name:        string(b.Name),
 		Description: b.Description,
 		Bindable:    b.Bindable,
 		Plans:       sPlans,
-		Metadata:    b.Metadata.ToMap(),
+		Metadata:    meta.ToMap(),
 		Tags:        sTags,
 	}, nil
+}
+
+func (f *bundleToServiceConverter) mapToParametersSchemas(planSchemas map[internal.PlanSchemaType]internal.PlanSchema) *osb.ParameterSchemas {
+	ensureServiceInstancesInit := func(in *osb.ServiceInstanceSchema) *osb.ServiceInstanceSchema {
+		if in == nil {
+			return &osb.ServiceInstanceSchema{}
+		}
+		return in
+	}
+
+	out := &osb.ParameterSchemas{}
+
+	if schema, exists := planSchemas[internal.SchemaTypeProvision]; exists {
+		out.ServiceInstances = ensureServiceInstancesInit(out.ServiceInstances)
+		out.ServiceInstances.Create = &osb.InputParameters{
+			Parameters: schema,
+		}
+	}
+	if schema, exists := planSchemas[internal.SchemaTypeUpdate]; exists {
+		out.ServiceInstances = ensureServiceInstancesInit(out.ServiceInstances)
+		out.ServiceInstances.Update = &osb.InputParameters{
+			Parameters: schema,
+		}
+	}
+	if schema, exists := planSchemas[internal.SchemaTypeBind]; exists {
+		out.ServiceBindings = &osb.ServiceBindingSchema{
+			Create: &osb.InputParameters{
+				Parameters: schema,
+			},
+		}
+	}
+
+	return out
+}
+
+func (f *bundleToServiceConverter) applyOverridesOnBundleMetadata(m internal.BundleMetadata) internal.BundleMetadata {
+	metaCopy := m.DeepCopy()
+
+	if metaCopy.Labels == nil {
+		metaCopy.Labels = map[string]string{}
+	}
+	// Business requirement that helm bundles are always treated as local
+	metaCopy.Labels["local"] = "true"
+
+	return metaCopy
 }

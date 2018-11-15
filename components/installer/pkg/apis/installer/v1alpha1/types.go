@@ -26,22 +26,23 @@ func (i *Installation) ShouldInstall() bool {
 }
 
 func (i *Installation) canInstall() bool {
-	return (i.Status.State == StateEmpty || i.Status.State == StateUninstalled || i.Status.State == StateInstalled)
+	//TODO: Now this function always returns true. Remove.
+	return (i.Status.State == StateEmpty ||
+		i.Status.State == StateUninstalled ||
+		i.Status.State == StateInstalled ||
+		i.Status.State == StateError ||
+		i.Status.State == StateInProgress)
 }
 
 // ShouldUninstall returns true when user requested uninstall action
 func (i *Installation) ShouldUninstall() bool {
 	action := i.ObjectMeta.Labels["action"]
 
-	if i.Status.State == "" {
-		return false
-	}
-
 	return action == ActionUninstall && i.canUninstall()
 }
 
 func (i *Installation) canUninstall() bool {
-	return (i.Status.State == StateInstalled || i.Status.State == StateError)
+	return (i.Status.State != StateInProgress && i.Status.State != StateEmpty)
 }
 
 func (i *Installation) hasCondition(condition InstallationConditionType) bool {

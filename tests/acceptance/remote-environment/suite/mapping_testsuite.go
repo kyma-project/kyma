@@ -5,7 +5,7 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog/wait"
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -79,7 +79,7 @@ func (ts *MappingTestSuite) TearDown() {
 }
 
 func (ts *MappingTestSuite) WaitForServiceClassWithTimeout(timeout time.Duration) {
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		_, err := ts.scClient.ServiceClasses(ts.MappedNs).Get(ts.osbServiceId, metav1.GetOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "error while getting service class %s", ts.osbServiceId)
@@ -89,7 +89,7 @@ func (ts *MappingTestSuite) WaitForServiceClassWithTimeout(timeout time.Duration
 }
 
 func (ts *MappingTestSuite) WaitForServiceBrokerWithTimeout(timeout time.Duration) {
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		_, err := ts.scClient.ServiceBrokers(ts.MappedNs).Get(ts.brokerName, metav1.GetOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "error while getting service broker %s", ts.brokerName)
@@ -99,7 +99,7 @@ func (ts *MappingTestSuite) WaitForServiceBrokerWithTimeout(timeout time.Duratio
 }
 
 func (ts *MappingTestSuite) EnsureServiceBrokerNotExistWithTimeout(timeout time.Duration) {
-	wait.ForFuncAtMost(ts.t, func() error {
+	repeat.FuncAtMost(ts.t, func() error {
 		_, err := ts.scClient.ServiceBrokers(ts.MappedNs).Get(ts.brokerName, metav1.GetOptions{})
 		switch {
 		case apierrors.IsNotFound(err):

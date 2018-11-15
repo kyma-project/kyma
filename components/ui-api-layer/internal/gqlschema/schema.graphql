@@ -116,6 +116,7 @@ type ServiceClass {
     supportUrl: String
     providerDisplayName: String
     tags: [String!]!
+    labels: Labels!
     plans: [ServicePlan!]!
     activated: Boolean!
     apiSpec: JSON
@@ -135,6 +136,7 @@ type ClusterServiceClass {
     supportUrl: String
     providerDisplayName: String
     tags: [String!]!
+    labels: Labels!
     plans: [ClusterServicePlan!]!
     activated: Boolean!
     apiSpec: JSON
@@ -160,6 +162,7 @@ type ClusterServicePlan {
     description: String!
     relatedClusterServiceClassName: String!
     instanceCreateParameterSchema: JSON
+    bindingCreateParameterSchema: JSON
 }
 
 type ServiceBroker {
@@ -436,6 +439,11 @@ enum RemoteEnvironmentStatus {
     GATEWAY_NOT_CONFIGURED
 }
 
+type RemoteEnvironmentEvent {
+    type: SubscriptionEventType!
+    remoteEnvironment: RemoteEnvironment!
+}
+
 type RemoteEnvironmentMutationOutput {
     name: String!
     description: String!
@@ -600,10 +608,11 @@ type Mutation {
 
 type Subscription {
     serviceInstanceEvent(environment: String!): ServiceInstanceEvent!
-    serviceBindingEventForServiceInstance(serviceInstanceName: String!, environment: String!): ServiceBindingEvent!
-    serviceBindingUsageEventForServiceInstance(serviceInstanceName: String!, environment: String!): ServiceBindingUsageEvent!
+    serviceBindingEvent(environment: String!): ServiceBindingEvent!
+    serviceBindingUsageEvent(environment: String!): ServiceBindingUsageEvent!
     serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
-    clusterServiceBrokerEvent: ClusterServiceBrokerEvent!
+    clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
+    remoteEnvironmentEvent: RemoteEnvironmentEvent!,
 }
 
 # Schema

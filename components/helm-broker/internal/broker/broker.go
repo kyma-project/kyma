@@ -139,7 +139,7 @@ type (
 
 // New creates instance of broker.
 func New(bs bundleStorage, cs chartStorage, os operationStorage, is instanceStorage, ibd instanceBindDataStorage,
-	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver, hc helmClient, log *logrus.Entry) *Server {
+	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver, hc helmClient, syncer syncer, log *logrus.Entry) *Server {
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {
 		idRaw, err := idpRaw()
@@ -149,17 +149,17 @@ func New(bs bundleStorage, cs chartStorage, os operationStorage, is instanceStor
 		return internal.OperationID(idRaw), nil
 	}
 
-	return newWithIDProvider(bs, cs, os, is, ibd, bindTmplRenderer, bindTmplResolver, hc, log, idp)
+	return newWithIDProvider(bs, cs, os, is, ibd, bindTmplRenderer, bindTmplResolver, hc, syncer, log, idp)
 }
 
 func newWithIDProvider(bs bundleStorage, cs chartStorage, os operationStorage, is instanceStorage, ibd instanceBindDataStorage,
-	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver, hc helmClient,
+	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver, hc helmClient, syncer syncer,
 	log *logrus.Entry, idp func() (internal.OperationID, error)) *Server {
 	return &Server{
-		catalogGetter: &catalogService{
+		catalogGetter: newCatalogSyncerService(&catalogService{
 			finder: bs,
 			conv:   &bundleToServiceConverter{},
-		},
+		}, syncer),
 		provisioner: &provisionService{
 			bundleIDGetter:   bs,
 			chartGetter:      cs,

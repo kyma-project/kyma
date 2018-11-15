@@ -48,6 +48,7 @@ type ClusterServicePlan struct {
 	Description                    string  `json:"description"`
 	RelatedClusterServiceClassName string  `json:"relatedClusterServiceClassName"`
 	InstanceCreateParameterSchema  *JSON   `json:"instanceCreateParameterSchema"`
+	BindingCreateParameterSchema   *JSON   `json:"bindingCreateParameterSchema"`
 }
 
 type ConnectorService struct {
@@ -189,6 +190,11 @@ type RemoteEnvironmentEntry struct {
 	Type        string  `json:"type"`
 	GatewayURL  *string `json:"gatewayUrl"`
 	AccessLabel *string `json:"accessLabel"`
+}
+
+type RemoteEnvironmentEvent struct {
+	Type              SubscriptionEventType `json:"type"`
+	RemoteEnvironment RemoteEnvironment     `json:"remoteEnvironment"`
 }
 
 type RemoteEnvironmentMutationOutput struct {

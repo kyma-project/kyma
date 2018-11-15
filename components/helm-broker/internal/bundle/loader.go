@@ -49,12 +49,12 @@ func NewLoader(tmpDir string, log logrus.FieldLogger) *Loader {
 		tmpDir:       tmpDir,
 		loadChart:    chartutil.Load,
 		createTmpDir: ioutil.TempDir,
-		log:          log.WithField("service", "ybundle:loader"),
+		log:          log.WithField("service", "bundle:loader"),
 	}
 }
 
 // Load takes stream with compressed tgz archive as io.Reader, tries to unpack it to tmp directory,
-// and then loads it as YBundle and helm Chart
+// and then loads it as bundle and Helm chart
 func (l *Loader) Load(in io.Reader) (*internal.Bundle, []*chart.Chart, error) {
 	unpackedDir, err := l.unpackArchive(l.tmpDir, in)
 	if err != nil {

@@ -17,8 +17,6 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
-    tls:
-      secretName: istio-ingress-certs
     gateway:
       name: kyma-gateway
   etcdBackup:
@@ -26,16 +24,16 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: 6e0a7fe2
+    version: 3d71d245
   alpine_net:
     dir: develop/
     version: ed568f0f
   api_controller:
     dir: develop/
-    version: 6e0a7fe2
+    version: 8c274255
   api_controller_acceptance_tests:
     dir: develop/
-    version: 6e0a7fe2
+    version: 488696a0
   apiserver_proxy:
     dir: develop/
     version: 6e0a7fe2
@@ -45,15 +43,9 @@ global:
   configurations_generator:
     dir: develop/
     version: 4a23580f
-  connector_service:
-    dir: develop/
-    version: 4ea83ddd
-  connector_service_tests:
-    dir: develop/
-    version: 1bc49b46
   docs:
     dir: develop/
-    version: 43d564ee
+    version: 8c274255
   environments:
     dir: develop/
     version: 6e0a7fe2
@@ -62,67 +54,41 @@ global:
     version: 6e0a7fe2
   event_bus:
     dir: develop/
-    version: 6eacb013
+    version: f9df7d26
   event_bus_tests:
     dir: develop/
     version: 1daa11b7
-  event_service:
-    dir: develop/
-    version: 6e0a7fe2
   helm_broker:
     dir: develop/
-    version: 4d048ded
-  gateway:
-    dir: develop/
-    version: 6e0a7fe2
-  gateway_tests:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 0d1ffe15
   kubeless_test_client:
     dir: develop/
-    version: 6e0a7fe2
-  metadata_service:
-    dir: develop/
-    version: 78e1f9e0
-  metadata_service_tests:
-    dir: develop/
-    version: d9e91df2
-  remote_environment_controller:
-    dir: develop/
-    version: b93a91c9
-  remote_environment_controller_tests:
-    dir: develop/
-    version: f649732b
+    version: c3c08515
   test_environments:
     dir: develop/
     version: '84359277'
-  remote_environment_broker:
-    dir: develop/
-    version: 8f0a3611
-  test_logging:
-    dir: develop/
-    version: 293e4a23
   test_logging_monitoring:
     dir: develop/
     version: 6e0a7fe2
   ui_api_layer:
     dir: develop/
-    version: b58068ee
+    version: 8c274255
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: b58068ee
+    version: 6be9cda2
 
 test:
-  auth:
-    username: admin@kyma.cx
-    password: nimda123
   acceptance:
     core:
       # environments used in remote-environment acceptance test
       remoteEnvironment:
-        disabled: "false"
+        disabled: "true"
+        brokerNamespace: kyma-integration
         linkingTimeout: 4m
         unlinkingTimeout: 4m
+        # Currently Pods with istio sidecar they have a long termination time, because of that we need to have
+        # such log timeout for teardown (waiting until namespace will be terminated)
+        tearDownTimeoutPerStep: 3m
     ui:
       # tests uses chromium that require more memory
       requests:

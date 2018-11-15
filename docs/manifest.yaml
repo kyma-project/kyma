@@ -6,6 +6,8 @@ spec:
     displayName: Kyma
     id: kyma
   components:
+    - displayName: Security
+      id: security
     - displayName: Service Catalog
       id: service-catalog
     - displayName: Service Brokers
@@ -24,7 +26,7 @@ spec:
       id: tracing
     - displayName: API Gateway
       id: api-gateway
-    - displayName: Authorization and Authentication
-      id: authorization-and-authentication
     - displayName: Logging
       id: logging
+    - displayName: Console
+      id: console

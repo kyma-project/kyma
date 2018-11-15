@@ -52,20 +52,17 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, asyncApiSp
 
 	informerFactory := catalogInformers.NewSharedInformerFactory(client, informerResyncPeriod)
 
-	instanceService := newServiceInstanceService(informerFactory.Servicecatalog().V1beta1().ServiceInstances().Informer(), client)
-
-	clusterServicePlanService := newClusterServicePlanService(informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer())
+	serviceInstanceService := newServiceInstanceService(informerFactory.Servicecatalog().V1beta1().ServiceInstances().Informer(), client)
 	servicePlanService := newServicePlanService(informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer())
+	serviceClassService := newServiceClassService(informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer())
+	serviceBrokerService := newServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ServiceBrokers().Informer())
+	serviceBindingService := newServiceBindingService(client.ServicecatalogV1beta1(), informerFactory.Servicecatalog().V1beta1().ServiceBindings().Informer(), name.Generate)
 
 	clusterServiceClassService := newClusterServiceClassService(informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer())
-	serviceClassService := newServiceClassService(informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer())
-
+	clusterServicePlanService := newClusterServicePlanService(informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer())
 	clusterServiceBrokerService := newClusterServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ClusterServiceBrokers().Informer())
-	serviceBrokerService := newServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ServiceBrokers().Informer())
 
-	bindingService := newServiceBindingService(client.ServicecatalogV1beta1(), informerFactory.Servicecatalog().V1beta1().ServiceBindings().Informer(), name.Generate)
-
-	bindingUsageClient, err := bindingUsageClientset.NewForConfig(restConfig)
+	serviceBindingUsageClient, err := bindingUsageClientset.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Binding Usage Clientset")
 	}
@@ -75,26 +72,26 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, asyncApiSp
 		return nil, errors.Wrap(err, "while initializing Dynamic Clientset")
 	}
 
-	bindingUsageInformerFactory := bindingUsageInformers.NewSharedInformerFactory(bindingUsageClient, informerResyncPeriod)
-	usageKindService := newUsageKindService(bindingUsageClient.ServicecatalogV1alpha1(), dynamicClient, bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer())
-	bindingUsageService := newServiceBindingUsageService(bindingUsageClient.ServicecatalogV1alpha1(), bindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer(), bindingService, name.Generate)
+	serviceBindingUsageInformerFactory := bindingUsageInformers.NewSharedInformerFactory(serviceBindingUsageClient, informerResyncPeriod)
+	usageKindService := newUsageKindService(serviceBindingUsageClient.ServicecatalogV1alpha1(), dynamicClient, serviceBindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer())
+	serviceBindingUsageService := newServiceBindingUsageService(serviceBindingUsageClient.ServicecatalogV1alpha1(), serviceBindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer(), serviceBindingService, name.Generate)
 
 	return &Container{
 		Resolver: &Resolver{
 			informerFactory:              informerFactory,
-			bindingUsageInformerFactory:  bindingUsageInformerFactory,
-			serviceInstanceResolver:      newServiceInstanceResolver(instanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
-			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, instanceService, asyncApiSpecGetter, apiSpecGetter, contentGetter),
-			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, instanceService, asyncApiSpecGetter, apiSpecGetter, contentGetter),
+			bindingUsageInformerFactory:  serviceBindingUsageInformerFactory,
+			serviceInstanceResolver:      newServiceInstanceResolver(serviceInstanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
+			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, asyncApiSpecGetter, apiSpecGetter, contentGetter),
+			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, asyncApiSpecGetter, apiSpecGetter, contentGetter),
 			clusterServiceBrokerResolver: newClusterServiceBrokerResolver(clusterServiceBrokerService),
 			serviceBrokerResolver:        newServiceBrokerResolver(serviceBrokerService),
-			serviceBindingResolver:       newServiceBindingResolver(bindingService),
-			serviceBindingUsageResolver:  newServiceBindingUsageResolver(bindingUsageService, bindingService),
+			serviceBindingResolver:       newServiceBindingResolver(serviceBindingService),
+			serviceBindingUsageResolver:  newServiceBindingUsageResolver(serviceBindingUsageService),
 			usageKindResolver:            newUsageKindResolver(usageKindService),
 			bindableResourcesResolver:    newBindableResourcesResolver(usageKindService),
 		},
-		ServiceBindingUsageLister: bindingUsageService,
-		ServiceBindingGetter:      bindingService,
+		ServiceBindingUsageLister: serviceBindingUsageService,
+		ServiceBindingGetter:      serviceBindingService,
 	}, nil
 }
 

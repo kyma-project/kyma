@@ -7,15 +7,6 @@ metadata:
     app: istio-kyma-patch
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
-  istio-egressgateway.deployment.patch.json: |
-    [
-      {
-        "op": "replace",
-        "path": "/spec/template/spec/containers/0/args/15",
-        "value": "zipkin.kyma-system:9411"
-      }
-    ]
-
   istio-ingressgateway.deployment.patch.json: |
     [
       {
@@ -35,13 +26,13 @@ data:
       }
       {{ end }}
     ]
-
-  istio-pilot.deployment.patch.json: |
+    
+  istio-egressgateway.deployment.patch.json: |
     [
       {
-        "op": "add",
-        "path": "/spec/template/spec/containers/0/args",
-        "value": ["discovery", "--webhookEndpoint", "http://istio-webhook:5000"]
+        "op": "replace",
+        "path": "/spec/template/spec/containers/0/args/15",
+        "value": "zipkin.kyma-system:9411"
       }
     ]
 
@@ -86,6 +77,7 @@ data:
     service jaeger-query
     service jaeger-agent
     service jaeger-collector
+    pod -lapp=istio-ingressgateway
 
   required-crds: |
     policies.authentication.istio.io

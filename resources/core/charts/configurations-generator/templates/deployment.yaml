@@ -12,6 +12,7 @@ spec:
     metadata:
       labels:
         app: {{ template "name" . }}
+        tlsSecret: ingress-tls-cert
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
       annotations:
         sidecar.istio.io/inject: "true"
@@ -23,8 +24,16 @@ spec:
           "/app",
           "-kube-config-cluster-name={{ .Values.global.domainName }}",
           "-kube-config-url=https://apiserver.{{ .Values.global.domainName }}",
-          "-kube-config-ca={{ .Values.global.tlsCrt }}"
+          "-kube-config-ca-file=/etc/ingress-tls-cert/tls.crt"
         ]
         ports:
           - name: http
             containerPort: 8000
+        volumeMounts:
+        - name: ingress-tls-cert
+          mountPath: "/etc/ingress-tls-cert"
+          readOnly: true
+      volumes:
+      - name: ingress-tls-cert
+        secret:
+          secretName: ingress-tls-cert

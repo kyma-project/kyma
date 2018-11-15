@@ -17,10 +17,12 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/99designs/gqlgen/handler"
+	"github.com/gorilla/websocket"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/origin"
 )
 
 type config struct {
@@ -97,7 +99,12 @@ func runServer(stop <-chan struct{}, addr string, allowedOrigins []string, schem
 
 	mux := http.NewServeMux()
 	mux.Handle("/", handler.Playground("Dataloader", "/graphql"))
-	mux.Handle("/graphql", handler.GraphQL(schema))
+	mux.Handle("/graphql", handler.GraphQL(schema,
+		handler.WebsocketUpgrader(websocket.Upgrader{
+			CheckOrigin: origin.CheckFn(allowedOrigins),
+		}),
+	))
+
 	serverHandler := cors.New(cors.Options{
 		AllowedOrigins: allowedOrigins,
 		AllowedMethods: []string{
