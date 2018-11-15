@@ -22,14 +22,12 @@ type NameResolver interface {
 
 type nameResolver struct {
 	resourceNamePrefix string
-	namespace          string
 }
 
 // NewNameResolver creates NameResolver that uses remote environment name and namespace.
-func NewNameResolver(remoteEnvironment, namespace string) NameResolver {
+func NewNameResolver(remoteEnvironment string) NameResolver {
 	return nameResolver{
 		resourceNamePrefix: getResourceNamePrefix(remoteEnvironment),
-		namespace:          namespace,
 	}
 }
 

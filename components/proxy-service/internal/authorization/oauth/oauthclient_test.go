@@ -1,8 +1,8 @@
-package proxy
+package oauth
 
 import (
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/tokencache/mocks"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization/oauth/tokencache/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net/http"
@@ -23,7 +23,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assert.Equal(t, "Bearer 123456789", token)
+		assert.Equal(t, "123456789", token)
 		tokenCache.AssertExpectations(t)
 	})
 
@@ -55,7 +55,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assert.Equal(t, "Bearer 123456789", token)
+		assert.Equal(t, "123456789", token)
 		tokenCache.AssertExpectations(t)
 	})
 
@@ -161,7 +161,7 @@ func TestOauthClient_InvalidateAndRetry(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		assert.Equal(t, "Bearer 123456789", token)
+		assert.Equal(t, "123456789", token)
 		tokenCache.AssertExpectations(t)
 	})
 

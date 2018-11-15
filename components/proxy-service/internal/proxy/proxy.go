@@ -7,34 +7,39 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httperrors"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/proxycache"
-	log "github.com/sirupsen/logrus"
+	metadatamodel "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/model"
 )
 
 type proxy struct {
-	nameResolver      k8sconsts.NameResolver
-	serviceDefService metadata.ServiceDefinitionService
-	oauthClient       OAuthClient
-	httpProxyCache    proxycache.HTTPProxyCache
-	skipVerify        bool
-	proxyTimeout      int
+	nameResolver                 k8sconsts.NameResolver
+	serviceDefService            metadata.ServiceDefinitionService
+	cache                        Cache
+	skipVerify                   bool
+	proxyTimeout                 int
+	authorizationStrategyFactory authorization.StrategyFactory
+}
+
+type Config struct {
+	SkipVerify        bool
+	ProxyTimeout      int
+	RemoteEnvironment string
+	ProxyCacheTTL     int
 }
 
 // New creates proxy for handling user's services calls
-func New(nameResolver k8sconsts.NameResolver, serviceDefService metadata.ServiceDefinitionService,
-	oauthClient OAuthClient, httpProxyCache proxycache.HTTPProxyCache, skipVerify bool, proxyTimeout int) http.Handler {
+func New(serviceDefService metadata.ServiceDefinitionService, authorizationStrategyFactory authorization.StrategyFactory, config Config) http.Handler {
 	return &proxy{
-		nameResolver:      nameResolver,
-		serviceDefService: serviceDefService,
-		oauthClient:       oauthClient,
-		httpProxyCache:    httpProxyCache,
-		skipVerify:        skipVerify,
-		proxyTimeout:      proxyTimeout,
+		nameResolver:                 k8sconsts.NewNameResolver(config.RemoteEnvironment),
+		serviceDefService:            serviceDefService,
+		cache:                        NewCache(config.ProxyCacheTTL),
+		skipVerify:                   config.SkipVerify,
+		proxyTimeout:                 config.ProxyTimeout,
+		authorizationStrategyFactory: authorizationStrategyFactory,
 	}
 }
 
@@ -46,112 +51,93 @@ func NewInvalidStateHandler(message string) http.Handler {
 }
 
 func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	id := p.nameResolver.ExtractServiceId(r.Host)
+	id := p.extractServiceId(r.Host)
 
-	cacheObj, found := p.httpProxyCache.Get(id)
-
-	var err apperrors.AppError
-	if !found {
-		cacheObj, err = p.createAndCacheProxy(id)
-		if err != nil {
-			handleErrors(w, err)
-			return
-		}
-	}
-
-	_, err = p.handleAuthHeaders(r, cacheObj)
+	cacheEntry, err := p.getOrCreateCacheEntry(id)
 	if err != nil {
 		handleErrors(w, err)
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(p.proxyTimeout)*time.Second)
+	newRequest, cancel := p.prepareRequest(r, cacheEntry)
 	defer cancel()
-	requestWithContext := r.WithContext(ctx)
 
-	rr := newRequestRetrier(id, p, r)
-	cacheObj.Proxy.ModifyResponse = rr.CheckResponse
+	err = p.addAuthorizationHeader(newRequest, cacheEntry)
+	if err != nil {
+		handleErrors(w, err)
+		return
+	}
 
-	cacheObj.Proxy.ServeHTTP(w, requestWithContext)
+	p.addModifyResponseHandler(newRequest, id, cacheEntry)
+
+	p.executeRequest(w, newRequest, cacheEntry)
 }
 
-func (p *proxy) createAndCacheProxy(id string) (*proxycache.Proxy, apperrors.AppError) {
+func (p *proxy) extractServiceId(host string) string {
+	return p.nameResolver.ExtractServiceId(host)
+}
+
+func (p *proxy) getOrCreateCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
+	cacheObj, found := p.cache.Get(id)
+
+	if found {
+		return cacheObj, nil
+	} else {
+		return p.createCacheEntry(id)
+	}
+}
+
+func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 	serviceApi, err := p.serviceDefService.GetAPI(id)
 	if err != nil {
 		return nil, err
 	}
 
 	proxy, err := makeProxy(serviceApi.TargetUrl, id, p.skipVerify)
-
-	if oauthCredentialsProvided(serviceApi.Credentials) {
-		return p.httpProxyCache.Add(
-			id,
-			serviceApi.Credentials.Oauth.URL,
-			serviceApi.Credentials.Oauth.ClientID,
-			serviceApi.Credentials.Oauth.ClientSecret,
-			proxy,
-		), nil
-	}
-
-	return p.httpProxyCache.Add(
-		id,
-		"",
-		"",
-		"",
-		proxy,
-	), nil
-}
-
-func (p *proxy) handleAuthHeaders(r *http.Request, cacheObj *proxycache.Proxy) (*http.Request, apperrors.AppError) {
-	kymaAuthorization := handleKymaAuthorization(r)
-
-	if !kymaAuthorization && cacheObj.OauthUrl != "" {
-		err := p.addCredentials(r, cacheObj.OauthUrl, cacheObj.ClientId, cacheObj.ClientSecret)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return r, nil
-}
-
-func (p *proxy) addCredentials(r *http.Request, oauthUrl, clientId, clientSecret string) apperrors.AppError {
-	token, err := p.oauthClient.GetToken(clientId, clientSecret, oauthUrl)
 	if err != nil {
-		log.Errorf("failed to get token : '%s'", err)
-		return err
+		return nil, err
 	}
 
-	r.Header.Set(httpconsts.HeaderAuthorization, token)
-	log.Infof("OAuth token fetched. Adding Authorization header: %s", r.Header.Get(httpconsts.HeaderAuthorization))
+	authorizationStrategy := p.newAuthorizationStrategy(serviceApi.Credentials)
 
-	return nil
+	return p.cache.Put(id, proxy, authorizationStrategy), nil
 }
 
-func (p *proxy) invalidateAndHandleAuthHeaders(r *http.Request, cacheObj *proxycache.Proxy) (*http.Request, apperrors.AppError) {
-	kymaAuthorization := handleKymaAuthorization(r)
-
-	if !kymaAuthorization && cacheObj.OauthUrl != "" {
-		err := p.invalidateAndAddCredentials(r, cacheObj.OauthUrl, cacheObj.ClientId, cacheObj.ClientSecret)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return r, nil
+func (p *proxy) newAuthorizationStrategy(credentials *metadatamodel.Credentials) authorization.Strategy {
+	return p.authorizationStrategyFactory.Create(credentials)
 }
 
-func (p *proxy) invalidateAndAddCredentials(r *http.Request, oauthUrl, clientId, clientSecret string) apperrors.AppError {
-	token, err := p.oauthClient.InvalidateAndRetry(clientId, clientSecret, oauthUrl)
-	if err != nil {
-		log.Errorf("failed to get token : '%s'", err)
-		return err
+func (p *proxy) prepareRequest(r *http.Request, cacheEntry *CacheEntry) (*http.Request, context.CancelFunc) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(p.proxyTimeout)*time.Second)
+	newRequest := r.WithContext(ctx)
+
+	return newRequest, cancel
+}
+
+func (p *proxy) addAuthorizationHeader(r *http.Request, cacheEntry *CacheEntry) apperrors.AppError {
+	return cacheEntry.AuthorizationStrategy.AddAuthorizationHeader(r)
+}
+
+func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry *CacheEntry) {
+	cacheEntry.Proxy.ModifyResponse = p.createModifyResponseFunction(id, r)
+}
+
+func (p *proxy) createModifyResponseFunction(id string, r *http.Request) func(*http.Response) error {
+	// Handle the case when credentials has been changed or OAuth token has expired
+	return func(response *http.Response) error {
+		retrier := newUnathorizedResponseRetrier(id, r, p.proxyTimeout, p.createCacheEntry)
+
+		return retrier.RetryIfFailedToAuthorize(response)
 	}
+}
 
-	r.Header.Set(httpconsts.HeaderAuthorization, token)
-	log.Infof("OAuth token fetched. Adding Authorization header: %s", r.Header.Get("Authorization"))
+func (p *proxy) executeRequest(w http.ResponseWriter, r *http.Request, cacheEntry *CacheEntry) {
+	cacheEntry.Proxy.ServeHTTP(w, r)
+}
 
-	return nil
+func handleErrors(w http.ResponseWriter, apperr apperrors.AppError) {
+	code, body := httperrors.AppErrorToResponse(apperr)
+	respondWithBody(w, code, body)
 }
 
 func respondWithBody(w http.ResponseWriter, code int, body httperrors.ErrorResponse) {
@@ -160,24 +146,4 @@ func respondWithBody(w http.ResponseWriter, code int, body httperrors.ErrorRespo
 	w.WriteHeader(code)
 
 	json.NewEncoder(w).Encode(body)
-}
-
-func handleErrors(w http.ResponseWriter, apperr apperrors.AppError) {
-	code, body := httperrors.AppErrorToResponse(apperr)
-	respondWithBody(w, code, body)
-}
-
-func oauthCredentialsProvided(credentials *serviceapi.Credentials) bool {
-	return credentials != nil && credentials.Oauth.ClientID != "" && credentials.Oauth.ClientSecret != ""
-}
-
-func handleKymaAuthorization(r *http.Request) bool {
-	kymaAuthorization := r.Header.Get(httpconsts.HeaderAccessToken)
-	if kymaAuthorization != "" {
-		r.Header.Del(httpconsts.HeaderAccessToken)
-		r.Header.Set(httpconsts.HeaderAuthorization, kymaAuthorization)
-		return true
-	}
-
-	return false
 }
