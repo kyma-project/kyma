@@ -7,5 +7,5 @@ metadata:
     app: knative-installer
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
-  SERVING_URL: https://github.com/knative/serving/releases/download/v0.2.1/release-lite.yaml
+  SERVING_URL: https://github.com/knative/serving/releases/download/v0.2.1/release-no-mon.yaml
   EVENTING_URL: https://github.com/knative/eventing/releases/download/v0.2.0/release.yaml
