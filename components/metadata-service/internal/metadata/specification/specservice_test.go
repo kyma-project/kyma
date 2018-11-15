@@ -61,6 +61,23 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		minioSvc.AssertExpectations(t)
 	})
 
+	t.Run("should not modify spec if ApiType set to oData", func(t *testing.T) {
+		// given
+		specData := defaultSpecDataWithAPI(&serviceapi.API{Spec: swaggerApiSpec, ApiType: oDataSpecType})
+
+		minioSvc := &mocks.Service{}
+		minioSvc.On("Put", serviceId, baseDocs, swaggerApiSpec, baseEventSpec).Return(nil)
+
+		specService := NewSpecService(minioSvc)
+
+		// when
+		err := specService.SaveServiceSpecs(specData)
+
+		// then
+		require.NoError(t, err)
+		minioSvc.AssertExpectations(t)
+	})
+
 	t.Run("should fetch and save spec", func(t *testing.T) {
 		// given
 		specServer := newSpecServer(baseApiSpec, func(req *http.Request) {

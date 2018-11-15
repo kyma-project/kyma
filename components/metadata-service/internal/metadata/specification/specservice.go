@@ -88,9 +88,13 @@ func processAPISpecification(api *serviceapi.API, gatewayUrl string) ([]byte, ap
 		}
 	}
 
-	apiSpec, err = modifyAPISpec(apiSpec, gatewayUrl)
-	if err != nil {
-		return nil, apperrors.Internal("Modifying API spec failed, %s", err.Error())
+	api.ApiType = strings.ToLower(api.ApiType)
+
+	if api.ApiType != oDataSpecType {
+		apiSpec, err = modifyAPISpec(apiSpec, gatewayUrl)
+		if err != nil {
+			return nil, apperrors.Internal("Modifying API spec failed, %s", err.Error())
+		}
 	}
 
 	return apiSpec, nil
