@@ -73,14 +73,6 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 		stepName := "Processing component " + component.GetReleaseName()
 		steps.statusManager.InProgress(stepName)
 
-		overridesForComponent, _ := overrides.ToYaml(overrideData.ForComponent(component.GetReleaseName()))
-		log.Println("Overrides used for", component.GetReleaseName())
-		if overridesForComponent == "" {
-			log.Println("no overrides found")
-		} else {
-			log.Println(overridesForComponent)
-		}
-
 		step := stepsFactory.NewStep(component)
 		steps.PrintStep(stepName)
 
