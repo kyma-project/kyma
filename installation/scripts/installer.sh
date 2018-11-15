@@ -69,7 +69,7 @@ fi
 
 echo -e "\nApplying installation combo yaml"
 bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} ${FEATURE_GATES_CONFIG} \
-| sed 's/__FEATURES__/'${FEATURE_GATES}'/g' \
+| sed 's/__FEATURE_GATES__/'${FEATURE_GATES}'/g' \
 | kubectl apply -f -
 
 echo -e "\nTriggering installation"
