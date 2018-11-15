@@ -192,7 +192,7 @@ function start() {
             --extra-config=controller-manager.cluster-signing-cert-file="/var/lib/localkube/certs/ca.crt" \
             --extra-config=controller-manager.cluster-signing-key-file="/var/lib/localkube/certs/ca.key" \
             --kubernetes-version=v1.10.0 \
-            --vm-driver=hyperkit \
+            --vm-driver=$VM_DRIVER \
             --disk-size=$DISK_SIZE \
             --feature-gates="MountPropagation=false"
     else
@@ -206,7 +206,7 @@ function start() {
             --extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
             --extra-config=apiserver.admission-control="LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota" \
             --kubernetes-version=v$KUBERNETES_VERSION \
-            --vm-driver=hyperkit \
+            --vm-driver=$VM_DRIVER \
             --disk-size=$DISK_SIZE \
             --feature-gates="MountPropagation=false"
     fi
