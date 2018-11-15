@@ -1,6 +1,7 @@
 package installation
 
 import (
+	"github.com/kyma-project/kyma/components/installer/pkg/features"
 	"log"
 	"time"
 
@@ -178,6 +179,11 @@ func (c *Controller) syncHandler(key string) error {
 		return overridesErr
 	}
 
+	featuresProvider, err := features.New(c.kubeClientset)
+	if err != nil {
+		return err
+	}
+
 	if installation.ShouldInstall() {
 
 		err = c.conditionManager.InstallStart()
@@ -185,7 +191,7 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 
-		err = c.kymaSteps.InstallKyma(installationData, overrideProvider)
+		err = c.kymaSteps.InstallKyma(installationData, overrideProvider, featuresProvider)
 		if err != nil {
 			c.conditionManager.InstallError()
 

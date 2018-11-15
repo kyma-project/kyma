@@ -1,6 +1,7 @@
 package steps
 
 import (
+	"github.com/kyma-project/kyma/components/installer/pkg/features"
 	"log"
 
 	actionmanager "github.com/kyma-project/kyma/components/installer/pkg/actionmanager"
@@ -51,7 +52,7 @@ func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientse
 }
 
 //InstallKyma .
-func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
+func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData, featureData features.FeatureData) error {
 
 	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
 	if downloadKymaErr != nil {
@@ -65,6 +66,11 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 	log.Println("Processing Kyma components")
 
 	for _, component := range installationData.Components {
+
+		if component.Feature != "" && !featureData.IsEnabled(component.Feature) {
+			log.Println("Skipping " + component.GetReleaseName() + ": feature '" + component.Feature + " is not enabled")
+			continue
+		}
 
 		stepName := "Processing component " + component.GetReleaseName()
 		steps.statusManager.InProgress(stepName)
