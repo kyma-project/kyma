@@ -29,6 +29,8 @@ podTemplate(label: label) {
                 timeout(time:20, unit:"MINUTES") {
                     ansiColor('xterm') {
                         stage("setup") {
+                            slaveDiagnostics()
+                            
                             checkout scm
 
                             if(dockerImageTag == "") {
@@ -41,50 +43,70 @@ podTemplate(label: label) {
                         }
 
                         stage("install dependencies $application") {
+                            slaveDiagnostics()
+
                             execute("/", "make resolve")
                         }
 
                         stage("code quality") {
+                            slaveDiagnostics()
+
                             execute("/", "gometalinter --skip=generated --vendor --deadline=2m --disable-all "
                             + "--enable=vet "
                             + "./...")
                         }
 
                         stage("build - event-bus-publish") {
+                            slaveDiagnostics()
+
                             execute("/cmd/event-bus-publish", "make clean compile")
                         }
 
                         stage("build - event-bus-push") {
+                            slaveDiagnostics()
+
                             execute("/cmd/event-bus-push", "make clean compile")
                         }
 
                         stage("build - event-bus-sub-validator") {
+                            slaveDiagnostics()
+
                             execute("/cmd/event-bus-sv", "make clean compile")
                         }
 
                         stage("test - event-bus") {
+                            slaveDiagnostics()
+
                             execute("/", "make test")
                         }
 
                         stage("build image - event-bus-publish") {
+                            slaveDiagnostics()
+
                             dir(env.APP_FOLDER + '/cmd/event-bus-publish') {
                                 sh "./dockerBuild.sh event-bus-publish ${dockerImageTag} ${application}"
                             }
                         }
 
                         stage("build image - event-bus-push") {
+                            slaveDiagnostics()
+
                             dir(env.APP_FOLDER + '/cmd/event-bus-push') {
                                 sh "./dockerBuild.sh event-bus-push ${dockerImageTag} ${application}"
                             }
                         }
 
                         stage("build image - event-bus-sub-validator") {
+                            slaveDiagnostics()
+
                             dir(env.APP_FOLDER + '/cmd/event-bus-sv') {
                                 sh "./dockerBuild.sh event-bus-sub-validator ${dockerImageTag} ${application}"
                             }
                         }
 
                         stage("push image - event-bus-publish") {
+                            slaveDiagnostics()
+
                             def imageName = "${dockerPushRoot}${imageNamePublish}:${dockerImageTag}"
                             sh "docker tag event-bus-publish:${dockerImageTag} ${imageName}"
                             sh "docker push ${imageName}"
@@ -98,6 +120,8 @@ podTemplate(label: label) {
                         }
 
                         stage("push image - event-bus-push") {
+                            slaveDiagnostics()
+
                             def imageName = "${dockerPushRoot}${imageNamePush}:${dockerImageTag}"
                             sh "docker tag event-bus-push:${dockerImageTag} ${imageName}"
                             sh "docker push ${imageName}"
@@ -111,6 +135,8 @@ podTemplate(label: label) {
                         }
 
                         stage("push image - event-bus-sub-validator") {
+                            slaveDiagnostics()
+
                             def imageName = "${dockerPushRoot}${imageNameSubValidator}:${dockerImageTag}"
                             sh "docker tag event-bus-sub-validator:${dockerImageTag} ${imageName}"
                             sh "docker push ${imageName}"
@@ -126,6 +152,8 @@ podTemplate(label: label) {
                 }
             }
         } catch (ex) {
+            slaveDiagnostics()
+
             echo "Got exception: ${ex}"
             currentBuild.result = "FAILURE"
             def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${params.GIT_BRANCH}. See details: ${env.BUILD_URL}"
@@ -140,4 +168,11 @@ def execute(workPath, command, envs = '') {
     def envText = envs=='' ? '' : "--env $envs"
     workDir = pwd()
     sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/$repositoryName/ -w /go/src/github.com/kyma-project/$repositoryName/$env.APP_FOLDER$workPath $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
+}
+
+def slaveDiagnostics() {
+    sh "whoami"
+    sh "pwd"
+    sh "df -h"
+    sh "mount"
 }

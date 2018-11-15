@@ -27,6 +27,8 @@ podTemplate(label: label) {
                 timeout(time:20, unit:"MINUTES") {
                     ansiColor('xterm') {
                         stage("setup") {
+                            slaveDiagnostics()
+                            
                             checkout scm
 
                             if(dockerImageTag == "") {
@@ -39,36 +41,50 @@ podTemplate(label: label) {
                         }
 
                         stage("install dependencies $application") {
+                            slaveDiagnostics()
+
                             execute("/", "make resolve")
                         }
 
                         stage("code quality") {
+                            slaveDiagnostics()
+
                             execute("/", "gometalinter --skip=generated --vendor --deadline=2m --disable-all "
                             + "--enable=vet "
                             + "./...")
                         }
 
                         stage("build and test - event-bus-e2e-tester") {
+                            slaveDiagnostics()
+
                             execute("/e2e-tester/", "make clean build")
                         }
 
                         stage("build image - event-bus-e2e-tester") {
+                            slaveDiagnostics()
+
                             dir(env.APP_FOLDER + '/e2e-tester/') {
                                 sh "./dockerBuild.sh event-bus-e2e-tester ${dockerImageTag} ${application}"
                             }
                         }
 
                         stage("build and test - event-bus-e2e-subscriber") {
+                            slaveDiagnostics()
+
                             execute("/e2e-subscriber/", "make clean build")
                         }
 
                         stage("build image - event-bus-e2e-subscriber") {
+                            slaveDiagnostics()
+
                             dir(env.APP_FOLDER + '/e2e-subscriber/') {
                                 sh "./dockerBuild.sh event-bus-e2e-subscriber ${dockerImageTag} ${application}"
                             }
                         }
 
                         stage("push image - event-bus-e2e-tester") {
+                            slaveDiagnostics()
+
                             def imageName = "${dockerPushRoot}${imageNameTester}:${dockerImageTag}"
                             sh "docker tag event-bus-e2e-tester:${dockerImageTag} ${imageName}"
                             sh "docker push ${imageName}"
@@ -82,6 +98,8 @@ podTemplate(label: label) {
                         }
 
                         stage("push image - event-bus-e2e-subscriber") {
+                            slaveDiagnostics()
+
                             def imageName = "${dockerPushRoot}${imageNameSubscriber}:${dockerImageTag}"
                             sh "docker tag event-bus-e2e-subscriber:${dockerImageTag} ${imageName}"
                             sh "docker push ${imageName}"
@@ -98,6 +116,8 @@ podTemplate(label: label) {
                 }
             }
         } catch (ex) {
+            slaveDiagnostics()
+
             echo "Got exception: ${ex}"
             currentBuild.result = "FAILURE"
             def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${params.GIT_BRANCH}. See details: ${env.BUILD_URL}"
@@ -112,4 +132,11 @@ def execute(workPath, command, envs = '') {
     def envText = envs=='' ? '' : "--env $envs"
     workDir = pwd()
     sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/$repositoryName/ -w /go/src/github.com/kyma-project/$repositoryName/$env.APP_FOLDER$workPath $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
+}
+
+def slaveDiagnostics() {
+    sh "whoami"
+    sh "pwd"
+    sh "df -h"
+    sh "mount"
 }

@@ -36,16 +36,12 @@ podTemplate(label: label) {
                             withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS, passwordVariable: 'pwd', usernameVariable: 'uname')]) {
                                 sh "docker login -u $uname -p '$pwd' $env.DOCKER_REGISTRY"
                             }
-
-                            slaveDiagnostics()
                         }
 
                         stage("install dependencies $application") {
                             slaveDiagnostics()
 
                             execute("make resolve")
-
-                            slaveDiagnostics()
                         }
 
                         stage("code quality $application") {
@@ -55,16 +51,12 @@ podTemplate(label: label) {
                             + "--enable=vet "
                             + "--skip=\$(go list ./... | grep \"/fake\") "
                             + "./...")
-
-                            slaveDiagnostics()
                         }
 
                         stage("build $application") {
                             slaveDiagnostics()
 
                             execute("CGO_ENABLED=0 go build -o bin/app cmd/controller/main.go")
-
-                            slaveDiagnostics()
                         }
 
                         stage("test $application") {
@@ -72,8 +64,6 @@ podTemplate(label: label) {
 
                             execute("2>&1 go test -short -v ./... | go2xunit -fail -output unit-tests.xml")
                             junit '**/unit-tests.xml'
-
-                            slaveDiagnostics()
                         }
 
                         stage("build image $application") {
@@ -82,8 +72,6 @@ podTemplate(label: label) {
                             dir(env.APP_FOLDER){
                                 sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
                             }
-
-                            slaveDiagnostics()
                         }
 
                         stage("push image $application") {
@@ -94,15 +82,13 @@ podTemplate(label: label) {
                             if (params.GIT_BRANCH == 'master') {
                                 sh "docker push ${dockerPushRoot}${application}:latest"
                             }
-
-                            slaveDiagnostics()
                         }
                     }
                 }
             }
         } catch (ex) {
             slaveDiagnostics()
-            
+
             echo "Got exception: ${ex}"
             currentBuild.result = "FAILURE"
             def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${params.GIT_BRANCH}. See details: ${env.BUILD_URL}"

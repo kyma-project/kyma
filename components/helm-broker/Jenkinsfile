@@ -26,6 +26,8 @@ podTemplate(label: label) {
                 ansiColor('xterm') {
                     timeout(time: 20, unit: "MINUTES") {
                         stage("setup") {
+                            slaveDiagnostics()
+                            
                             checkout scm
 
                             if(dockerImageTag == ""){
@@ -38,10 +40,14 @@ podTemplate(label: label) {
                         }
 
                         stage("build and test $application") {
+                            slaveDiagnostics()
+
                             execute "./before-commit.sh ci"
                         }
 
                         stage("build image $application") {
+                            slaveDiagnostics()
+
                             dir(env.APP_FOLDER){
                                 sh "cp ./broker deploy/broker/helm-broker"
                                 sh "cp ./indexbuilder deploy/tools/indexbuilder"
@@ -53,6 +59,8 @@ podTemplate(label: label) {
                         }
 
                         stage("push image $application") {
+                            slaveDiagnostics()
+
                             sh "docker tag ${dockerPushRoot}helm-broker:latest ${dockerPushRoot}helm-broker:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}helm-broker:${dockerImageTag}"
 
@@ -69,6 +77,8 @@ podTemplate(label: label) {
                 }
             }
         } catch (ex) {
+            slaveDiagnostics()
+
             echo "Got exception: ${ex}"
             currentBuild.result = "FAILURE"
             def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${params.GIT_BRANCH}. See details: ${env.BUILD_URL}"
@@ -82,4 +92,11 @@ def execute(command, envs = '') {
     def envText = envs=='' ? '' : "--env $envs"
     workDir = pwd()
     sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/kyma/ -w /go/src/github.com/kyma-project/kyma/$env.APP_FOLDER $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
+}
+
+def slaveDiagnostics() {
+    sh "whoami"
+    sh "pwd"
+    sh "df -h"
+    sh "mount"
 }

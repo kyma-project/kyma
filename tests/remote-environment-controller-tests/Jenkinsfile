@@ -28,6 +28,8 @@ podTemplate(label: label) {
                             echo "Incorrect dependencies in Dep manifest"
                         }
                         stage("setup") {
+                            slaveDiagnostics()
+                            
                             checkout scm
 
                             if(dockerImageTag == ""){
@@ -40,24 +42,34 @@ podTemplate(label: label) {
                         }
 
                         stage("install dependencies $application") {
+                            slaveDiagnostics()
+
                             execute("dep ensure -vendor-only -v")
                         }
 
                         stage("code quality") {
+                            slaveDiagnostics()
+
                             execute("gometalinter --vendor --deadline=2m --disable-all --enable=vet --exclude=vendor ./...")
                         }
 
                         stage("compile tests") {
+                            slaveDiagnostics()
+
                             execute("go test -c ./test/controllertests")
                         }
 
                         stage("build image $application") {
+                            slaveDiagnostics()
+
                             dir(env.APP_FOLDER){
                             sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
                             }
                         }
 
                         stage("push image $application") {
+                            slaveDiagnostics()
+
                             sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
                             if (params.GIT_BRANCH == 'master') {
@@ -68,6 +80,8 @@ podTemplate(label: label) {
                 }
             }
         } catch (ex) {
+            slaveDiagnostics()
+
             echo "Got exception: ${ex}"
             currentBuild.result = "FAILURE"
             def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${params.GIT_BRANCH}. See details: ${env.BUILD_URL}"
@@ -82,4 +96,11 @@ def execute(command, envs = '') {
     def envText = envs=='' ? '' : "--env $envs"
     workDir = pwd()
     sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/$repositoryName/ -w /go/src/github.com/kyma-project/$repositoryName/$env.APP_FOLDER $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
+}
+
+def slaveDiagnostics() {
+    sh "whoami"
+    sh "pwd"
+    sh "df -h"
+    sh "mount"
 }

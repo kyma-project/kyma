@@ -25,6 +25,8 @@ podTemplate(label: label) {
                 timeout(time:20, unit:"MINUTES") {
                     ansiColor('xterm') {
                         stage("setup") {
+                            slaveDiagnostics()
+                            
                             checkout scm
 
                             if(dockerImageTag == ""){
@@ -37,22 +39,32 @@ podTemplate(label: label) {
                         }
 
                         stage("install dependencies $application") {
+                            slaveDiagnostics()
+
                             execute("make resolve")
                         }
 
                         stage("code quality $application") {
+                            slaveDiagnostics()
+
                             execute("gometalinter --vendor --deadline=2m --disable-all --enable=vet --exclude=vendor ./...")
                         }
 
                         stage("build $application") {
+                            slaveDiagnostics()
+
                             execute("CGO_ENABLED=0 go build ./cmd/eventservice")
                         }
 
                         stage("test $application") {
+                            slaveDiagnostics()
+
                             execute("go test `go list ./internal/... ./cmd/...`")
                         }
 
                         stage("build image $application") {
+                            slaveDiagnostics()
+
                             dir(env.APP_FOLDER){
                             sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
                             }
@@ -60,6 +72,8 @@ podTemplate(label: label) {
 
 
                         stage("push image $application") {
+                            slaveDiagnostics()
+
                             sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
                             if (params.GIT_BRANCH == 'master') {
@@ -70,6 +84,8 @@ podTemplate(label: label) {
                 }
             }
         } catch (ex) {
+            slaveDiagnostics()
+
             echo "Got exception: ${ex}"
             currentBuild.result = "FAILURE"
             def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${params.GIT_BRANCH}. See details: ${env.BUILD_URL}"
@@ -86,3 +102,9 @@ def execute(command, envs = '') {
     sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/$repositoryName/ -w /go/src/github.com/kyma-project/$repositoryName/$env.APP_FOLDER $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
 }
 
+def slaveDiagnostics() {
+    sh "whoami"
+    sh "pwd"
+    sh "df -h"
+    sh "mount"
+}
