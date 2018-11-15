@@ -1,7 +1,7 @@
 package steps
 
 import (
-	"github.com/kyma-project/kyma/components/installer/pkg/features"
+	"github.com/kyma-project/kyma/components/installer/pkg/feature_gates"
 	"log"
 
 	actionmanager "github.com/kyma-project/kyma/components/installer/pkg/actionmanager"
@@ -52,7 +52,7 @@ func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientse
 }
 
 //InstallKyma .
-func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData, featureData features.FeatureData) error {
+func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData, featureData feature_gates.Data) error {
 
 	currentPackage, downloadKymaErr := steps.EnsureKymaSources(installationData)
 	if downloadKymaErr != nil {

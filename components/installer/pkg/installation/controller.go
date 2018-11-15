@@ -1,7 +1,7 @@
 package installation
 
 import (
-	"github.com/kyma-project/kyma/components/installer/pkg/features"
+	"github.com/kyma-project/kyma/components/installer/pkg/feature_gates"
 	"log"
 	"time"
 
@@ -199,7 +199,7 @@ func (c *Controller) syncHandler(key string) error {
 			return overridesErr
 		}
     
-    	featuresProvider, err := features.New(c.kubeClientset)
+    	featuresProvider, err := feature_gates.New(c.kubeClientset)
       if c.errorHandlers.CheckError("Error while building feature gates: ", overridesErr)  {
         return err
       }

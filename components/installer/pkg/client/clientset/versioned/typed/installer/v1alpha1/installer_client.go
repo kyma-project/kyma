@@ -14,7 +14,7 @@ type InstallerV1alpha1Interface interface {
 	InstallationsGetter
 }
 
-// InstallerV1alpha1Client is used to interact with features provided by the installer.kyma-project.io group.
+// InstallerV1alpha1Client is used to interact with feature_gates provided by the installer.kyma-project.io group.
 type InstallerV1alpha1Client struct {
 	restClient rest.Interface
 }
