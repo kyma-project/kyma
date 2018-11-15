@@ -104,8 +104,8 @@ type Entry struct {
 	// AccessLabel is not required for Events, 'omitempty' is needed because of regexp validation
 	AccessLabel      string      `json:"accessLabel,omitempty"`
 	TargetUrl        string      `json:"targetUrl"`
-	SpecificationUrl string      `json:"specificationUrl"`
-	ApiType          string      `json:"apiType"`
+	SpecificationUrl string      `json:"specificationUrl,omitempty"`
+	ApiType          string      `json:"apiType,omitempty"`
 	Credentials      Credentials `json:"credentials,omitempty"`
 }
 
