@@ -68,3 +68,6 @@ credentials:
     ###
     ## For GCP/GKE please set:
     # cloud:
+
+prometheus:
+  serviceMonitorNamespace: kyma-system
