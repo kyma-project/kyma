@@ -36,18 +36,9 @@ do
             shift
             shift
         ;;
-        --serving-url)
-            KN_SERVING_URL="$2"
+        --feature-gates)
+            FEATURE_GATES="$2"
             shift
-            shift
-        ;;
-        --eventing-url)
-            KN_EVENTING_URL="$2"
-            shift
-            shift
-        ;;
-        --knative)
-            KNATIVE=1
             shift
         ;;
         *)    # unknown option
@@ -60,7 +51,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 
 MINIKUBE_ARGS="--domain \"${DOMAIN}\" --vm-driver \"${VM_DRIVER}\""
 
-if [[ $KNATIVE ]]; then
+if [[ $(grep "knative" <<<${FEATURE_GATES}) ]]; then
     MINIKUBE_ARGS="${MINIKUBE_ARGS} --kubeadm --disk-size 30g"
 fi
 
@@ -82,5 +73,7 @@ if [ -z "$CR_PATH" ]; then
 
 fi
 
-bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}"
+FEATURE_GATES=${FEATURE_GATES:-","}
+
+bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}" --feature-gates "${FEATURE_GATES}"
 rm -rf $TMPDIR
