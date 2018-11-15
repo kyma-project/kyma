@@ -277,8 +277,8 @@ func TestCertificateValidation(t *testing.T) {
 
 	gatewayUrlFormat := config.GatewayUrl + "/%s/v1/metadata/services"
 
-	remoteEnvName := "ec-default"
-	forbiddenRemoteEnvName := "hmc-default"
+	remoteEnvName := "dummy-re-1"
+	forbiddenRemoteEnvName := "dummy-re-2"
 
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
 	require.NoError(t, err)
