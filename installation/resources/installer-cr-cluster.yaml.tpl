@@ -12,6 +12,9 @@ spec:
       namespace: "kyma-system"
     - name: "istio"
       namespace: "istio-system"
+    - name: "knative-installer"
+      namespace: "knative-installer"
+      feature: knative
     - name: "istio-kyma-patch"
       namespace: "istio-system"
     - name: "prometheus-operator"
