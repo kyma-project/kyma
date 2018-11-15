@@ -7,4 +7,4 @@ metadata:
   labels:
     installer: feature-gates
 data:
-  features: "__FEATURES__"
+  features: "__FEATURE_GATES__"
