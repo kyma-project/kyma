@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/scheme"
 	"github.com/pkg/errors"
@@ -58,17 +57,6 @@ func main() {
 	re, err := reClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Get("ec-prod", metav1.GetOptions{})
 	if err != nil {
 		panic(errors.Wrap(err, "on getting remote environment"))
-	}
-
-	re.Status.Conditions = append(re.Status.Conditions, v1alpha1.ReCondition{
-		Status:  v1alpha1.ConditionTrue,
-		Type:    v1alpha1.Stage1Done,
-		Message: "Message contains additional information",
-		Reason:  "OneWordCamelCase",
-	})
-	_, err = reClient.ApplicationconnectorV1alpha1().RemoteEnvironments().UpdateStatus(re)
-	if err != nil {
-		panic(errors.Wrap(err, "while updating status"))
 	}
 
 	ref, err := reference.GetReference(scheme.Scheme, re)
