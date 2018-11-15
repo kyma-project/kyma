@@ -26,10 +26,6 @@ ${DIR}/is-ready.sh knative-serving app activator
 ${DIR}/is-ready.sh knative-serving app autoscaler
 ${DIR}/is-ready.sh knative-serving app controller
 ${DIR}/is-ready.sh knative-serving app webhook
-${DIR}/is-ready.sh knative-monitoring app grafana
-${DIR}/is-ready.sh knative-monitoring app kube-state-metrics
-${DIR}/is-ready.sh knative-monitoring app node-exporter
-${DIR}/is-ready.sh knative-monitoring app prometheus
 
 echo "Knative build and serving installation verified"
 
