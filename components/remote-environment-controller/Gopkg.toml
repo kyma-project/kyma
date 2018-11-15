@@ -235,11 +235,9 @@ revision="f53464b8b84b4507805a0b033a8377b225163fea"
 name = "k8s.io/helm"
 version = "v2.10.0"
 
-# TODO - change revision after merging PR
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  source = "github.com/Szymongib/kyma"
-  branch = "add-status-to-re"
+  revision = "eb72254409611fb6840d22d87bc64e4bd1237c76"
 
 # For dependency below: Refer to issue https://github.com/golang/dep/issues/1799
 [[override]]
