@@ -3,7 +3,7 @@ title: Identity Provider Presets
 type: Custom Resource
 ---
 
-The `idppresets.authentication.kyma-project.io` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format that represents presets of the Identity Provider configuration used to secure API through the Console UI. Presets are a convenient way to configure the **authentication** section in the API Custom Resource.
+The `idppresets.authentication.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format that represents presets of the Identity Provider configuration used to secure API through the Console UI. Presets are a convenient way to configure the **authentication** section in the API custom resource.
 
 To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
@@ -11,7 +11,7 @@ To get the up-to-date CRD and show the output in the `yaml` format, run this com
 kubectl get crd idppresets.authentication.kyma-project.io -o yaml
 ```
 
-## Sample Custom Resource
+## Sample custom resource
 
 This is a sample CR used to create an IDPPreset:
 
