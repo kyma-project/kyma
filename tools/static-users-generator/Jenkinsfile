@@ -25,8 +25,6 @@ podTemplate(label: label) {
                 timeout(time:20, unit:"MINUTES") {
                     ansiColor('xterm') {
                         stage("setup") {
-                            slaveDiagnostics()
-                            
                             checkout scm
 
                             if(dockerImageTag == ""){
@@ -39,16 +37,12 @@ podTemplate(label: label) {
                         }
 
                         stage("build image $application") {
-                            slaveDiagnostics()
-
                             dir(env.APP_FOLDER){
                                 sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
                             }
                         }
 
                         stage("push image $application") {
-                            slaveDiagnostics()
-
                             sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
                             if (params.GIT_BRANCH == 'master') {

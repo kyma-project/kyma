@@ -3,6 +3,14 @@ def label = "kyma-${UUID.randomUUID().toString()}"
 def application = 'proxy-service'
 def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
 def dockerImageTag = params.APP_VERSION
+def registry = env.DOCKER_REGISTRY
+def buildpack = 'golang-buildpack:0.0.9'
+def appFolder = env.APP_FOLDER
+def repositoryName = 'kyma'
+
+def workDir = ""
+def checkoutDir = ""
+def componentDir = ""
 
 echo """
 ********************************
@@ -18,16 +26,25 @@ FULL_BUILD=${params.FULL_BUILD}
 ********************************
 """
 
-podTemplate(label: label) {
+podTemplate(label: label, 
+    containers: [
+        containerTemplate(name: "golang-buildpack", image: "${registry}${buildpack}", ttyEnabled: true, command: 'cat'),
+    ]) {
+
     node(label) {
         try {
             timestamps {
                 timeout(time:20, unit:"MINUTES") {
                     ansiColor('xterm') {
                         stage("setup") {
-                            slaveDiagnostics()
-                            
-                            checkout scm
+
+                            workDir = pwd()
+                            checkoutDir = "src/github.com/kyma-project/$repositoryName"
+                            componentDir = "$checkoutDir/$appFolder"
+
+                            dir(checkoutDir) {
+                                checkout scm
+                            }
 
                             if(dockerImageTag == ""){
                                error("No version for docker tag defined, please set APP_VERSION parameter for master branch or GIT_BRANCH parameter for any branch")
@@ -39,40 +56,28 @@ podTemplate(label: label) {
                         }
 
                         stage("install dependencies $application") {
-                            slaveDiagnostics()
-
-                            execute("dep ensure -vendor-only -v")
+                            execute("dep ensure -vendor-only -v", workDir, componentDir)
                         }
 
                         stage("code quality $application") {
-                            slaveDiagnostics()
-
-                            execute("gometalinter --vendor --deadline=2m --disable-all --enable=vet --exclude=vendor ./...")
+                            execute("gometalinter --vendor --deadline=2m --disable-all --enable=vet --exclude=vendor ./...", workDir, componentDir)
                         }
 
                         stage("build $application") {
-                            slaveDiagnostics()
-
-                            execute("CGO_ENABLED=0 go build ./cmd/proxyservice")
+                            execute("CGO_ENABLED=0 go build ./cmd/proxyservice", workDir, componentDir)
                         }
 
                         stage("test $application") {
-                            slaveDiagnostics()
-
-                            execute("go test `go list ./internal/... ./cmd/...`")
+                            execute("go test `go list ./internal/... ./cmd/...`", workDir, componentDir)
                         }
 
                         stage("build image $application") {
-                            slaveDiagnostics()
-
-                            dir(env.APP_FOLDER){
-                            sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
+                            dir(componentDir){
+                                sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
                             }
                         }
 
                         stage("push image $application") {
-                            slaveDiagnostics()
-
                             sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
                             if (params.GIT_BRANCH == 'master') {
@@ -84,6 +89,7 @@ podTemplate(label: label) {
             }
         } catch (ex) {
             slaveDiagnostics()
+            execute("df -h", workDir, componentDir)
 
             echo "Got exception: ${ex}"
             currentBuild.result = "FAILURE"
@@ -93,12 +99,14 @@ podTemplate(label: label) {
     }
 }
 
-def execute(command, envs = '') {
-    def buildpack = 'golang-buildpack:0.0.9'
-    def repositoryName = 'kyma'
-    def envText = envs=='' ? '' : "--env $envs"
-    workDir = pwd()
-    sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/$repositoryName/ -w /go/src/github.com/kyma-project/$repositoryName/$env.APP_FOLDER $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
+def execute(command, workDir, componentDir) {
+    container("golang-buildpack") {
+        sh """
+            export GOPATH=$workDir
+            cd $workDir/$componentDir
+            bash -c '$command'
+        """
+    }
 }
 
 def slaveDiagnostics() {
