@@ -137,5 +137,5 @@ func (hc *Client) PrintOverrides(overrides string, releaseName string) {
 		log.Println("No overrides found")
 		return
 	}
-	log.Println(overrides)
+	log.Println("\n", overrides)
 }
