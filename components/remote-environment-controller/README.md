@@ -18,7 +18,7 @@ Remote Environment Controller performs different operations as a result of the f
  
  The Remote Environment Controller has the following parameters:
  - **appName** - This is the name used in controller registration. The default value is `remote-environment-controller`.
- - **domainName** - Domain name of the cluster. Default domain name is `kyma.local`.
+ - **domainName** - Domain name of the cluster. The default domain name is `kyma.local`.
  - **namespace** - Namespace where the Remote Environment charts will be deployed. The default namespace is `kyma-integration`.
  - **tillerUrl** - Tiller release server url. The default is `tiller-deploy.kube-system.svc.cluster.local:44134`.
  - **syncPeriod** - Time period between resyncing existing resources. The default value is `30` seconds.
