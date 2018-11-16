@@ -24,5 +24,5 @@ Remote Environment Controller performs different operations as a result of the f
  - **syncPeriod** - Time period between resyncing existing resources. The default value is `30` seconds.
  - **installationTimeout** - Time after the release installation will time out. The default value is `240` seconds.
  - **proxyServiceImage** - Proxy Service image version to be used in the Remote Environment chart.
- - **eventServiceImage** - The image of the Event Service that will be used in Remote Environment Chart.
+ - **eventServiceImage** - Event Service image version to be used in the Remote Environment chart.
  - **eventServiceTestsImage** - The image of the Event Service Tests that will be used in Remote Environment Chart.
