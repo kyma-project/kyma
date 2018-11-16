@@ -23,6 +23,6 @@ Remote Environment Controller performs different operations as a result of the f
  - **tillerUrl** - Tiller release server URL. The default is `tiller-deploy.kube-system.svc.cluster.local:44134`.
  - **syncPeriod** - Time period between resyncing existing resources. The default value is `30` seconds.
  - **installationTimeout** - Time after the release installation will time out. The default value is `240` seconds.
- - **proxyServiceImage** - The image of the Proxy Service that will be used in Remote Environment Chart.
+ - **proxyServiceImage** - Proxy Service image version to be used in the Remote Environment chart.
  - **eventServiceImage** - The image of the Event Service that will be used in Remote Environment Chart.
  - **eventServiceTestsImage** - The image of the Event Service Tests that will be used in Remote Environment Chart.
