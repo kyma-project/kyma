@@ -66,7 +66,7 @@ func TestServiceCatalogContainsREBServiceClasses(t *testing.T) {
 	}
 	var brokerServices []v2.Service
 
-	t.Logf("Creating RemoteEnvironment")
+	t.Log("Creating RemoteEnvironment")
 	re, err := reClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Create(fixRE)
 	require.NoError(t, err)
 
@@ -84,6 +84,7 @@ func TestServiceCatalogContainsREBServiceClasses(t *testing.T) {
 	}()
 
 	// when
+	t.Log("Creating EnvironmentMapping")
 	_, err = reClient.ApplicationconnectorV1alpha1().EnvironmentMappings(broker.namespace).Create(fixEnvironmentMapping())
 	require.NoError(t, err)
 
@@ -100,7 +101,8 @@ func TestServiceCatalogContainsREBServiceClasses(t *testing.T) {
 		}
 		return fmt.Errorf("%s catalog response should contains service with ID: %s", broker, fixRE.Spec.Services[0].ID)
 	}, time.Second*90)
-	awaitCatalogContainsServiceClasses(t, broker.namespace, time.Minute, brokerServices)
+
+	awaitCatalogContainsServiceClasses(t, broker.namespace, timeoutPerAssert, brokerServices)
 }
 
 type brokerURL struct {
