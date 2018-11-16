@@ -20,17 +20,17 @@ global:
     dir: develop/
     version: 6e0a7fe2
   proxy_service:
-    dir: pr/
-    version: PR-1519
+    dir: develop/
+    version: aab48c3
   gateway_tests:
     dir: develop/
     version: cb19afea
   metadata_service:
-    dir: pr/
-    version: PR-1526
+    dir: develop/
+    version: aab48c3
   metadata_service_tests:
-    dir: pr/
-    version: PR-1526
+    dir: develop/
+    version: aab48c3
   remote_environment_controller:
     dir: develop/
     version: cb19afea
