@@ -1,17 +1,13 @@
 package specification
 
-import "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
-
-// Events contains specification for events.
-type Events struct {
-	// Spec contains data of events specification.
-	Spec []byte
-}
+import (
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
+)
 
 type SpecData struct {
 	Id         string
-	API        *serviceapi.API
-	Events     *Events
+	API        *model.API
+	Events     *model.Events
 	GatewayUrl string
 	Docs       []byte
 }

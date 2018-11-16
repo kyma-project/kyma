@@ -42,13 +42,13 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 		docs := []byte("documentation")
 		serviceDefinition := model.ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Api:         serviceAPI,
-			Labels:      &map[string]string{"connected-app": "re"},
-			Identifier:  "Some cool external identifier",
-			Events: events,
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Api:           serviceAPI,
+			Labels:        &map[string]string{"connected-app": "re"},
+			Identifier:    "Some cool external identifier",
+			Events:        events,
 			Documentation: docs,
 		}
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
@@ -106,11 +106,11 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 		docs := []byte("documentation")
 		serviceDefinition := model.ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Api:         nil,
-			Events: events,
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Api:           nil,
+			Events:        events,
 			Documentation: docs,
 		}
 
@@ -736,12 +736,12 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		docs := []byte("documentation")
 
 		serviceDefinition := model.ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Identifier:  "Identifier",
-			Api:         serviceAPI,
-			Events: events,
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Identifier:    "Identifier",
+			Api:           serviceAPI,
+			Events:        events,
 			Documentation: docs,
 		}
 
@@ -812,10 +812,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceDefinition := model.ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Api:         serviceAPI,
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Api:           serviceAPI,
 			Documentation: []byte("documentation"),
 		}
 
@@ -861,12 +861,12 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		docs := []byte("documentation")
 
 		serviceDefinition := model.ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Identifier:  "Identifier",
-			Api:         nil,
-			Events: events,
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Identifier:    "Identifier",
+			Api:           nil,
+			Events:        events,
 			Documentation: docs,
 		}
 
@@ -913,19 +913,19 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 	t.Run("should preserve a service identifier", func(t *testing.T) {
 		// given
-		events :=&model.Events{
+		events := &model.Events{
 			Spec: []byte("events spec"),
 		}
 
 		docs := []byte("documentation")
 
 		serviceDefinition := model.ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Identifier:  "DifferentIdentifier",
-			Api:         nil,
-			Events: events,
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Identifier:    "DifferentIdentifier",
+			Api:           nil,
+			Events:        events,
 			Documentation: []byte("documentation"),
 		}
 
@@ -1100,7 +1100,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 	t.Run("should return an error if spec update failed", func(t *testing.T) {
 		// given
-		events:=&model.Events{
+		events := &model.Events{
 			Spec: []byte("events spec"),
 		}
 		docs := []byte("documentation")
@@ -1118,12 +1118,12 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceDefinition := model.ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Identifier:  "Identifier",
-			Api:         serviceAPI,
-			Events: events,
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Identifier:    "Identifier",
+			Api:           serviceAPI,
+			Events:        events,
 			Documentation: docs,
 		}
 
@@ -1189,12 +1189,12 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceDefinition := model.ServiceDefinition{
-			Name:        "Some service",
-			Description: "Some cool service",
-			Provider:    "Service Provider",
-			Identifier:  "Identifier",
-			Api:         serviceAPI,
-			Events: events,
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Identifier:    "Identifier",
+			Api:           serviceAPI,
+			Events:        events,
 			Documentation: docs,
 		}
 

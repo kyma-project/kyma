@@ -76,9 +76,9 @@ func (sas defaultService) New(remoteEnvironment, id string, api *model.API) (*re
 
 func (sas defaultService) Read(remoteEnvironment string, remoteenvAPI *remoteenv.ServiceAPI) (*model.API, apperrors.AppError) {
 	api := &model.API{
-		TargetUrl: remoteenvAPI.TargetUrl,
+		TargetUrl:        remoteenvAPI.TargetUrl,
 		SpecificationUrl: remoteenvAPI.SpecificationUrl,
-		ApiType: remoteenvAPI.ApiType,
+		ApiType:          remoteenvAPI.ApiType,
 	}
 
 	if remoteenvAPI.Credentials.Type != "" {

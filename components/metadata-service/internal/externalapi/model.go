@@ -162,7 +162,7 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 
 	if serviceDetails.Api != nil {
 		serviceDefinition.Api = &model.API{
-			TargetUrl: serviceDetails.Api.TargetUrl,
+			TargetUrl:        serviceDetails.Api.TargetUrl,
 			SpecificationUrl: serviceDetails.Api.SpecificationUrl,
 			ApiType:          serviceDetails.Api.ApiType,
 		}

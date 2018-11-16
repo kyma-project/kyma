@@ -2,7 +2,7 @@ package specification
 
 import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification/minio/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -29,7 +29,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 
 	t.Run("should save inline spec", func(t *testing.T) {
 		// given
-		specData := defaultSpecDataWithAPI(&serviceapi.API{Spec: baseApiSpec})
+		specData := defaultSpecDataWithAPI(&model.API{Spec: baseApiSpec})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
@@ -46,7 +46,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 
 	t.Run("should modify and save inline swagger spec", func(t *testing.T) {
 		// given
-		specData := defaultSpecDataWithAPI(&serviceapi.API{Spec: swaggerApiSpec})
+		specData := defaultSpecDataWithAPI(&model.API{Spec: swaggerApiSpec})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
@@ -63,7 +63,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 
 	t.Run("should not modify spec if ApiType set to oData", func(t *testing.T) {
 		// given
-		specData := defaultSpecDataWithAPI(&serviceapi.API{Spec: swaggerApiSpec, ApiType: oDataSpecType})
+		specData := defaultSpecDataWithAPI(&model.API{Spec: swaggerApiSpec, ApiType: oDataSpecType})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, swaggerApiSpec, baseEventSpec).Return(nil)
@@ -85,7 +85,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 			assert.Equal(t, "/path", req.URL.Path)
 		})
 
-		specData := defaultSpecDataWithAPI(&serviceapi.API{SpecificationUrl: specServer.URL + "/path"})
+		specData := defaultSpecDataWithAPI(&model.API{SpecificationUrl: specServer.URL + "/path"})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
@@ -107,7 +107,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 			assert.Equal(t, "/path", req.URL.Path)
 		})
 
-		specData := defaultSpecDataWithAPI(&serviceapi.API{SpecificationUrl: specServer.URL + "/path"})
+		specData := defaultSpecDataWithAPI(&model.API{SpecificationUrl: specServer.URL + "/path"})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
@@ -126,7 +126,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		// given
 		specServer := new404server()
 
-		specData := defaultSpecDataWithAPI(&serviceapi.API{SpecificationUrl: specServer.URL})
+		specData := defaultSpecDataWithAPI(&model.API{SpecificationUrl: specServer.URL})
 
 		minioSvc := &mocks.Service{}
 
@@ -147,7 +147,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 			assert.Equal(t, "/$metadata", req.URL.Path)
 		})
 
-		specData := defaultSpecDataWithAPI(&serviceapi.API{TargetUrl: specServer.URL})
+		specData := defaultSpecDataWithAPI(&model.API{TargetUrl: specServer.URL})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
@@ -164,7 +164,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 
 	t.Run("should return error when saving to Minio failed", func(t *testing.T) {
 		// given
-		specData := defaultSpecDataWithAPI(&serviceapi.API{Spec: baseApiSpec})
+		specData := defaultSpecDataWithAPI(&model.API{Spec: baseApiSpec})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(apperrors.Internal("Error"))
@@ -251,11 +251,11 @@ func TestSpecService_RemoveSpec(t *testing.T) {
 	})
 }
 
-func defaultSpecDataWithAPI(api *serviceapi.API) SpecData {
+func defaultSpecDataWithAPI(api *model.API) SpecData {
 	return SpecData{
 		Id:         serviceId,
 		API:        api,
-		Events:     &Events{Spec: baseEventSpec},
+		Events:     &model.Events{Spec: baseEventSpec},
 		Docs:       baseDocs,
 		GatewayUrl: gatewayUrl,
 	}

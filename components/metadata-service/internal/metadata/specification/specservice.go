@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/go-openapi/spec"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification/minio"
 	"io/ioutil"
 	"net/http"
@@ -61,7 +61,7 @@ func (svc *specService) SaveServiceSpecs(specData SpecData) apperrors.AppError {
 	return svc.insertSpecs(specData.Id, specData.Docs, apiSpec, specData.Events)
 }
 
-func (svc *specService) insertSpecs(id string, docs []byte, apiSpec []byte, events *Events) apperrors.AppError {
+func (svc *specService) insertSpecs(id string, docs []byte, apiSpec []byte, events *model.Events) apperrors.AppError {
 	var eventsSpec []byte
 
 	if events != nil {
@@ -76,7 +76,7 @@ func (svc *specService) insertSpecs(id string, docs []byte, apiSpec []byte, even
 	return nil
 }
 
-func processAPISpecification(api *serviceapi.API, gatewayUrl string) ([]byte, apperrors.AppError) {
+func processAPISpecification(api *model.API, gatewayUrl string) ([]byte, apperrors.AppError) {
 	apiSpec := api.Spec
 
 	var err apperrors.AppError
@@ -100,7 +100,7 @@ func processAPISpecification(api *serviceapi.API, gatewayUrl string) ([]byte, ap
 	return apiSpec, nil
 }
 
-func fetchSpec(api *serviceapi.API) ([]byte, apperrors.AppError) {
+func fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
 	specUrl, err := url.Parse(api.SpecificationUrl)
 	if err != nil || api.SpecificationUrl == "" {
 		targetUrl := strings.TrimSuffix(api.TargetUrl, "/")
