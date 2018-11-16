@@ -44,7 +44,7 @@ To get the NodePort, run this command:
 kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
 ```
 
-- Create a new service 
+- Create a new service
 
 ```sh
 curl -X POST https://gateway.kyma.local:{NODE_PORT}/ec-default/v1/metadata/services --cert ec-default.crt --key ec-default.key -k \
@@ -97,7 +97,7 @@ This section explains the development process.
 
 ### Rapid development with Telepresence
 
-The Metadata Service stores its state in the Kubernetes Custom Resource, therefore it's dependent on Kubernetes. You cannot mock the dependency. You cannot develop locally. Manual deployment on every change is a mundane task.
+The Metadata Service stores its state in the Kubernetes custom resource, therefore it's dependent on Kubernetes. You cannot mock the dependency. You cannot develop locally. Manual deployment on every change is a mundane task.
 
 You can, however, leverage [Telepresence](https://www.telepresence.io/). This works by replacing a container in a specified Pod, opening up a new local shell or a pre-configured bash, and proxying the network traffic from the local shell through the Pod.
 
