@@ -196,12 +196,15 @@ func respond(w http.ResponseWriter, statusCode int) {
 }
 
 func (mh *metadataHandler) respondWithBody(w http.ResponseWriter, statusCode int, responseBody interface{}) apperrors.AppError {
-	err := json.NewEncoder(w).Encode(responseBody)
+	var b bytes.Buffer
+
+	err := json.NewEncoder(&b).Encode(responseBody)
 	if err != nil {
 		return apperrors.Internal("Failed to marshall body, %s", err.Error())
 	}
 
 	respond(w, statusCode)
+	w.Write(b.Bytes())
 	return nil
 }
 

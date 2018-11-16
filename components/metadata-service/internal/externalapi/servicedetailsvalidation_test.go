@@ -404,6 +404,41 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 	})
 }
 
+func TestServiceDetailsValidatorFunc_API_Credentials(t *testing.T) {
+
+	t.Run("should not accept credentials with both OAuth and BasicAuth", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				Credentials: &Credentials{
+					Basic: &BasicAuth{
+						Username: "username",
+						Password: "password",
+					},
+					Oauth: &Oauth{
+						URL:          "http://test.com/token",
+						ClientID:     "client",
+						ClientSecret: "secret",
+					},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	})
+}
+
 func TestServiceDetailsValidator_Events(t *testing.T) {
 	t.Run("should not accept events spec other than json object", func(t *testing.T) {
 		// given

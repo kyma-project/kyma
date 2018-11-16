@@ -49,6 +49,8 @@ func (sas defaultService) New(remoteEnvironment, id string, api *model.API) (*re
 
 	serviceAPI := &remoteenv.ServiceAPI{}
 	serviceAPI.TargetUrl = api.TargetUrl
+	serviceAPI.SpecificationUrl = api.SpecificationUrl
+	serviceAPI.ApiType = api.ApiType
 	serviceAPI.GatewayURL = gatewayUrl
 	serviceAPI.AccessLabel = resourceName
 
@@ -120,6 +122,8 @@ func (sas defaultService) Update(remoteEnvironment, id string, api *model.API) (
 
 	serviceAPI := &remoteenv.ServiceAPI{}
 	serviceAPI.TargetUrl = api.TargetUrl
+	serviceAPI.SpecificationUrl = api.SpecificationUrl
+	serviceAPI.ApiType = api.ApiType
 	serviceAPI.GatewayURL = gatewayUrl
 	serviceAPI.AccessLabel = resourceName
 

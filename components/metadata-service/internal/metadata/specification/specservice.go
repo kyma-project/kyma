@@ -88,9 +88,7 @@ func processAPISpecification(api *model.API, gatewayUrl string) ([]byte, apperro
 		}
 	}
 
-	api.ApiType = strings.ToLower(api.ApiType)
-
-	if api.ApiType != oDataSpecType {
+	if strings.ToLower(api.ApiType) != oDataSpecType {
 		apiSpec, err = modifyAPISpec(apiSpec, gatewayUrl)
 		if err != nil {
 			return nil, apperrors.Internal("Modifying API spec failed, %s", err.Error())
@@ -108,7 +106,6 @@ func fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
 		if err != nil {
 			return nil, apperrors.Internal("Parsing OData spec url failed, %s", err.Error())
 		}
-		api.ApiType = oDataSpecType
 	}
 
 	response, apperr := requestAPISpec(specUrl.String())
@@ -116,12 +113,12 @@ func fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
 		return nil, apperr
 	}
 
-	spec, err := ioutil.ReadAll(response.Body)
+	apiSpec, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, apperrors.Internal("Reading API spec response body failed, %s", err.Error())
 	}
 
-	return spec, nil
+	return apiSpec, nil
 }
 
 func isNilOrEmpty(array []byte) bool {
