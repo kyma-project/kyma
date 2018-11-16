@@ -24,12 +24,12 @@ func TestRepository_Get(t *testing.T) {
 		secretsManagerMock.On("Get", "new-secret", metav1.GetOptions{}).Return(secret, nil)
 
 		// when
-		clientId, clientSecret, err := repository.Get("new-secret")
+		secrets, err := repository.Get("new-secret")
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, "CLIENT_ID", clientId)
-		assert.Equal(t, "CLIENT_SECRET", clientSecret)
+		assert.NotNil(t, secrets["clientId"])
+		assert.NotNil(t, secrets["clientSecret"])
 
 		secretsManagerMock.AssertExpectations(t)
 	})
@@ -44,15 +44,13 @@ func TestRepository_Get(t *testing.T) {
 			errors.New("some error"))
 
 		// when
-		clientId, clientSecret, err := repository.Get("secret-name")
+		cacheData, err := repository.Get("secret-name")
 
 		// then
 		assert.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.NotEmpty(t, err.Error())
-
-		assert.Equal(t, "", clientId)
-		assert.Equal(t, "", clientSecret)
+		assert.Nil(t, cacheData)
 
 		secretsManagerMock.AssertExpectations(t)
 	})
@@ -68,24 +66,22 @@ func TestRepository_Get(t *testing.T) {
 				""))
 
 		// when
-		clientId, clientSecret, err := repository.Get("secret-name")
+		secrets, err := repository.Get("secret-name")
 
 		// then
 		assert.Error(t, err)
 		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 		assert.NotEmpty(t, err.Error())
 
-		assert.Equal(t, "", clientId)
-		assert.Equal(t, "", clientSecret)
-
+		assert.Nil(t, secrets)
 		secretsManagerMock.AssertExpectations(t)
 	})
 }
 
 func makeSecret(name, clientID, clientSecret, serviceID, remoteEnvironment string) *v1.Secret {
 	secretMap := make(map[string][]byte)
-	secretMap[ClientIDKey] = []byte(clientID)
-	secretMap[ClientSecretKey] = []byte(clientSecret)
+	secretMap["clientId"] = []byte(clientID)
+	secretMap["clientSecret"] = []byte(clientSecret)
 
 	return &v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{

@@ -2,10 +2,22 @@
 
 
 [[projects]]
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  revision = "611bd93c6d74b0575c569d7c3a13de46f65840ff"
+  version = "1.0.2"
+
+[[projects]]
   name = "github.com/ghodss/yaml"
   packages = ["."]
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/go-test/deep"
+  packages = ["."]
+  revision = "6592d9cc0a499ad2d5f574fde80a2b5c5cc3b4f5"
+  version = "v1.0.1"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -31,8 +43,8 @@
     "ptypes/duration",
     "ptypes/timestamp"
   ]
-  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
-  version = "v1.1.0"
+  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
@@ -54,7 +66,7 @@
   branch = "master"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
-  revision = "0892b62f0d9fb5857760c3cfca837207185117ee"
+  revision = "d547d1d9531ed93dbdebcbff7f83e7c876a1e0ee"
 
 [[projects]]
   branch = "master"
@@ -65,32 +77,46 @@
 [[projects]]
   name = "github.com/imdario/mergo"
   packages = ["."]
-  revision = "9316a62528ac99aaecb4e47eadd6dc8aa6533d58"
-  version = "v0.3.5"
+  revision = "9f23e2d6bd2a77f959b2bf6acdbefd708a83a4a4"
+  version = "v0.3.6"
 
 [[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
-  revision = "ab8a2e0c74be9d3be70b3184d9acc634935ded82"
-  version = "1.1.4"
+  revision = "1624edc4454b8682399def8740d46db5e4362ba4"
+  version = "v1.1.5"
 
 [[projects]]
   name = "github.com/jtolds/gls"
   packages = ["."]
-  revision = "77f18212c9c7edc9bd6a33d383a7b545ce62f064"
-  version = "v4.2.1"
+  revision = "b4936e06046bbecbb94cae9c18127ebe510a2cb9"
+  version = "v4.20"
+
+[[projects]]
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
+  version = "v1.0.1"
 
 [[projects]]
   branch = "master"
   name = "github.com/kyma-project/kyma"
   packages = [
-    "components/api-controller/pkg/apis/gateway.kyma.cx/meta/v1",
-    "components/api-controller/pkg/apis/gateway.kyma.cx/v1alpha2",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned/scheme",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned/typed/gateway.kyma.cx/v1alpha2"
+    "components/api-controller/pkg/apis/authentication.istio.io/v1alpha1",
+    "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
+    "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
+    "components/api-controller/pkg/apis/networking.istio.io/v1alpha3",
+    "components/api-controller/pkg/clients/authentication.istio.io/clientset/versioned",
+    "components/api-controller/pkg/clients/authentication.istio.io/clientset/versioned/scheme",
+    "components/api-controller/pkg/clients/authentication.istio.io/clientset/versioned/typed/authentication.istio.io/v1alpha1",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
+    "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned",
+    "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/scheme",
+    "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3"
   ]
-  revision = "e22316a37f7ed482fedcd934ee55d6cd3131e814"
+  revision = "8c274255cc4e4ecebb438bc8f9057ba7afb82e31"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -107,8 +133,8 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
-  version = "v1.0.6"
+  revision = "bcd833dfe83d3cebad139e4a29ed79cb2318bf95"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/smartystreets/assertions"
@@ -133,26 +159,25 @@
 [[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
-  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
-  version = "v1.0.1"
+  revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
+  version = "v1.0.3"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
+  revision = "3d3f9f413869b949e48070b5bc593aa22cc2b8f2"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = [
-    "context",
     "http/httpguts",
     "http2",
     "http2/hpack",
     "idna"
   ]
-  revision = "3673e40ba22529d22c3fd7c93e97b0ce50fa7bdd"
+  revision = "03003ca0c849e57b6ea29a4bab8d3cb6e4d568fe"
 
 [[projects]]
   branch = "master"
@@ -161,7 +186,7 @@
     "unix",
     "windows"
   ]
-  revision = "e072cadbbdc8dd3d3ffa82b8b4b9304c261d9311"
+  revision = "66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -188,7 +213,7 @@
   branch = "master"
   name = "golang.org/x/time"
   packages = ["rate"]
-  revision = "fbb02b2291d28baffd63558aa44b4b56f178d650"
+  revision = "85acf8d2951cb2a3bde7632f9ff273ef0379bcbd"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -338,6 +363,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9a47da305a715366c996815e64b9de1f8494ed9701f31dc4e1c8e6f94255e2c5"
+  inputs-digest = "20431aa45f3bfcdd12b47ad623d15146bc1519692b91102d934fb4e8c0a9c998"
   solver-name = "gps-cdcl"
   solver-version = 1

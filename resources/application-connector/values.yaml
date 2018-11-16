@@ -27,7 +27,7 @@ global:
     version: cb19afea
   metadata_service:
     dir: develop/
-    version: cb19afea
+    version: 32dda397
   metadata_service_tests:
     dir: develop/
     version: 16a332c1
@@ -39,4 +39,4 @@ global:
     version: cb19afea
   remote_environment_broker:
     dir: develop/
-    version: 1423f8ce
+    version: 0d408e11

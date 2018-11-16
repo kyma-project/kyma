@@ -31,7 +31,7 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "c98f6e13a1beca119c634814c423df90d3aa8ad7"
+  revision = "6c7a2b94471fe1b29a35e62bd19bc65fdf944f84"
 
 [prune]
   go-tests = true

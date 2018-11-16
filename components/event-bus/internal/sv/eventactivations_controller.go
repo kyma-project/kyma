@@ -4,9 +4,9 @@ import (
 	"log"
 
 	eaclientset "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
-	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/generated/ea/informers/externalversions/applicationconnector.kyma.cx/v1alpha1"
+	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/generated/ea/informers/externalversions/applicationconnector.kyma-project.io/v1alpha1"
 	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
-	eaApis "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma.cx/v1alpha1"
+	eaApis "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/sv/opts"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
