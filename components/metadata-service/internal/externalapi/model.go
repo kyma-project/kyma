@@ -225,6 +225,7 @@ func (api API) MarshalJSON() ([]byte, error) {
 	if err == nil {
 		return bytes, nil
 	}
+
 	bytes, err = json.Marshal(&struct {
 		TargetUrl        string       `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
 		Credentials      *Credentials `json:"credentials,omitempty"`
@@ -241,5 +242,6 @@ func (api API) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return bytes, nil
 }

@@ -4,9 +4,6 @@ import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 	"testing"
 
-	"bytes"
-	"encoding/json"
-
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	remoteenvmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv/mocks"
@@ -359,7 +356,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 	})
-	// TODO -check
+
 	t.Run("should return error when saving spec fails", func(t *testing.T) {
 		// given
 		events := &model.Events{
@@ -1325,7 +1322,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		serviceRepository.AssertExpectations(t)
 	})
 
-	t.Run("should return an error if Minio data deletion failed", func(t *testing.T) {
+	t.Run("should return an error if spec deletion failed", func(t *testing.T) {
 		// given
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Delete", "re", "uuid-1").Return(nil)
@@ -1448,15 +1445,6 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.Contains(t, err.Error(), "some error")
 	})
-}
-
-func compact(src []byte) []byte {
-	buffer := new(bytes.Buffer)
-	err := json.Compact(buffer, src)
-	if err != nil {
-		return src
-	}
-	return buffer.Bytes()
 }
 
 func newSpecData(id string, api *model.API, events *model.Events, docs []byte, gatewayUrl string) specification.SpecData {
