@@ -3,7 +3,7 @@ title: RemoteEnvironment
 type: Custom Resource
 ---
 
-The `remoteenvironments.applicationconnector.kyma-project.io` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format used to register a Remote Environment (RE) in Kyma. The `RemoteEnvironment` Custom Resource defines the APIs that the RE offers. After creating a new Custom Resource for a given RE, the RE is mapped to appropriate ServiceClasses in the Service Catalog. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `remoteenvironments.applicationconnector.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to register a Remote Environment (RE) in Kyma. The `RemoteEnvironment` custom resource defines the APIs that the RE offers. After creating a new custom resource for a given RE, the RE is mapped to appropriate ServiceClasses in the Service Catalog. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```
 kubectl get crd remoteenvironments.applicationconnector.kyma-project.io -o yaml

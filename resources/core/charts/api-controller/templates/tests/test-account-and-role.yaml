@@ -16,8 +16,8 @@ metadata:
   labels:
     helm-chart-test: "true"
 rules:
-  - apiGroups: [ "", "apps", "gateway.kyma.cx"]
-    resources: ["deployments", "services", "apis"]
+  - apiGroups: [ "", "apps", "gateway.kyma-project.io", "networking.istio.io", "authentication.istio.io"]
+    resources: ["deployments", "services", "apis", "virtualservices", "policies"]
     verbs: ["*"]
 ---
 kind: ClusterRoleBinding

@@ -2,14 +2,15 @@ package integration
 
 import (
 	"context"
-	subApi "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
+	"time"
+
+	subApi "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/event-bus/generated/push/informers/externalversions"
 	"github.com/satori/go.uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
-	"time"
 )
 
 var (

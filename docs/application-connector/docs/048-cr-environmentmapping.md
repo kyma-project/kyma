@@ -3,7 +3,7 @@ title: EnvironmentMapping
 type: Custom Resource
 ---
 
-The `environmentmappings.remoteenvironment.kyma.cx` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format used to enable APIs and Events from a Remote Environment as a ServiceClass in a given Namespace. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `environmentmappings.remoteenvironment.kyma.cx` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to enable APIs and Events from a Remote Environment as a ServiceClass in a given Namespace. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```
 kubectl get crd environmentmappings.applicationconnector.kyma-project.io -o yaml

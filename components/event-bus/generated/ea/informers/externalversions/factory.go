@@ -8,7 +8,7 @@ import (
 	time "time"
 
 	versioned "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
-	applicationconnectorkymacx "github.com/kyma-project/kyma/components/event-bus/generated/ea/informers/externalversions/applicationconnector.kyma.cx"
+	applicationconnectorkymaprojectio "github.com/kyma-project/kyma/components/event-bus/generated/ea/informers/externalversions/applicationconnector.kyma-project.io"
 	internalinterfaces "github.com/kyma-project/kyma/components/event-bus/generated/ea/informers/externalversions/internalinterfaces"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
@@ -107,9 +107,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Applicationconnector() applicationconnectorkymacx.Interface
+	Applicationconnector() applicationconnectorkymaprojectio.Interface
 }
 
-func (f *sharedInformerFactory) Applicationconnector() applicationconnectorkymacx.Interface {
-	return applicationconnectorkymacx.New(f, f.namespace, f.tweakListOptions)
+func (f *sharedInformerFactory) Applicationconnector() applicationconnectorkymaprojectio.Interface {
+	return applicationconnectorkymaprojectio.New(f, f.namespace, f.tweakListOptions)
 }

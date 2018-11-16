@@ -18,6 +18,8 @@ spec:
       namespace: "kyma-system"
     - name: "dex"
       namespace: "kyma-system"
+    - name: "service-catalog"
+      namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
     - name: "application-connector"

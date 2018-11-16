@@ -170,15 +170,15 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
-	t.Run("should not accept empty API credentials", func(t *testing.T) {
+	t.Run("should not accept API spec other than json object", func(t *testing.T) {
 		// given
 		serviceDetails := ServiceDetails{
 			Name:        "name",
 			Provider:    "provider",
 			Description: "description",
 			Api: &API{
-				TargetUrl:   "http://target.com",
-				Credentials: &Credentials{},
+				TargetUrl: "http://target.com",
+				Spec:      []byte("\"{\\\"wrong_string_json_object\\\":true}\""),
 			},
 		}
 
@@ -192,7 +192,7 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
 	})
 
-	t.Run("should not accept API spec other than json object", func(t *testing.T) {
+	t.Run("should not accept API spec with more than 1 type of auth", func(t *testing.T) {
 		// given
 		serviceDetails := ServiceDetails{
 			Name:        "name",
@@ -200,7 +200,10 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 			Description: "description",
 			Api: &API{
 				TargetUrl: "http://target.com",
-				Spec:      []byte("\"{\\\"wrong_string_json_object\\\":true}\""),
+				Credentials: &Credentials{
+					Oauth: &Oauth{},
+					Basic: &BasicAuth{},
+				},
 			},
 		}
 
@@ -225,7 +228,7 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Api: &API{
 				TargetUrl: "http://target.com",
 				Credentials: &Credentials{
-					Oauth: Oauth{
+					Oauth: &Oauth{
 						URL:          "http://test.com/token",
 						ClientID:     "client",
 						ClientSecret: "secret",
@@ -252,7 +255,7 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Api: &API{
 				TargetUrl: "http://target.com",
 				Credentials: &Credentials{
-					Oauth: Oauth{},
+					Oauth: &Oauth{},
 				},
 			},
 		}
@@ -276,7 +279,7 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Api: &API{
 				TargetUrl: "http://target.com",
 				Credentials: &Credentials{
-					Oauth: Oauth{
+					Oauth: &Oauth{
 						URL:      "http://test.com/token",
 						ClientID: "client",
 					},
@@ -303,10 +306,88 @@ func TestServiceDetailsValidator_API_OAuth(t *testing.T) {
 			Api: &API{
 				TargetUrl: "http://target.com",
 				Credentials: &Credentials{
-					Oauth: Oauth{
+					Oauth: &Oauth{
 						URL:          "test_com/token",
 						ClientID:     "client",
 						ClientSecret: "secret",
+					},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	})
+}
+
+func TestServiceDetailsValidator_API_Basic(t *testing.T) {
+	t.Run("should accept Basic Auth credentials", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				Credentials: &Credentials{
+					Basic: &BasicAuth{
+						Username: "username",
+						Password: "password",
+					},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.NoError(t, err)
+	})
+
+	t.Run("should not accept Basic Auth credentials with empty basic", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				Credentials: &Credentials{
+					Basic: &BasicAuth{},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+	})
+
+	t.Run("should not accept Basic Auth credentials with incomplete basic", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				Credentials: &Credentials{
+					Basic: &BasicAuth{
+						Username: "username",
 					},
 				},
 			},

@@ -196,18 +196,18 @@
 [[projects]]
   name = "github.com/kyma-project/kyma"
   packages = [
-    "components/api-controller/pkg/apis/gateway.kyma.cx/meta/v1",
-    "components/api-controller/pkg/apis/gateway.kyma.cx/v1alpha2",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned/fake",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned/scheme",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned/typed/gateway.kyma.cx/v1alpha2",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned/typed/gateway.kyma.cx/v1alpha2/fake",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/informers/externalversions",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/informers/externalversions/gateway.kyma.cx",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/informers/externalversions/gateway.kyma.cx/v1alpha2",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/informers/externalversions/internalinterfaces",
-    "components/api-controller/pkg/clients/gateway.kyma.cx/listers/gateway.kyma.cx/v1alpha2",
+    "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
+    "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/fake",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2/fake",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions/gateway.kyma-project.io",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions/gateway.kyma-project.io/v1alpha2",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions/internalinterfaces",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/listers/gateway.kyma-project.io/v1alpha2",
     "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/binding-usage-controller/pkg/apis/settings/v1alpha1",
     "components/binding-usage-controller/pkg/client/clientset/versioned",
@@ -248,7 +248,7 @@
     "components/remote-environment-broker/pkg/client/informers/externalversions/internalinterfaces",
     "components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
   ]
-  revision = "19bd8876363a9b27c68344898a3c0220fbf03c11"
+  revision = "343d311bb9f41f217ff66869cb7398b2d8d7ae43"
 
 [[projects]]
   name = "github.com/magiconair/properties"
@@ -463,7 +463,6 @@
   version = "v2.2.1"
 
 [[projects]]
-  branch = "release-1.11"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
@@ -497,6 +496,7 @@
     "storage/v1beta1"
   ]
   revision = "4e7be11eab3ffcfc1876898b8272df53785a9504"
+  version = "kubernetes-1.11.3"
 
 [[projects]]
   name = "k8s.io/apimachinery"
@@ -718,6 +718,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "51fa319a90c13a60a3b343acc703f0c0557792eaac3ceeb1cc882f1d02c098d3"
+  inputs-digest = "0978688f584720b5202d3d68141d6cbd6b3f5864f654818602e2b08c9e24249f"
   solver-name = "gps-cdcl"
   solver-version = 1

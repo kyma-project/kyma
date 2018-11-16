@@ -26,13 +26,18 @@ type repository struct {
 	reManager Manager
 }
 
+type Credentials struct {
+	Type       string
+	SecretName string
+	Url        string
+}
+
 // ServiceAPI stores information needed to call an API
 type ServiceAPI struct {
-	GatewayURL            string
-	AccessLabel           string
-	TargetUrl             string
-	OauthUrl              string
-	CredentialsSecretName string
+	GatewayURL  string
+	AccessLabel string
+	TargetUrl   string
+	Credentials *Credentials
 }
 
 // Service represents a service stored in Remote Environment RE
@@ -98,3 +103,50 @@ func (r *repository) getRemoteEnvironment() (*v1alpha1.RemoteEnvironment, apperr
 
 	return re, nil
 }
+
+func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) {
+	var api *ServiceAPI
+	var events bool
+	{
+		for _, entry := range service.Entries {
+			if entry.Type == specAPIType {
+				api = &ServiceAPI{
+					GatewayURL:  entry.GatewayUrl,
+					AccessLabel: entry.AccessLabel,
+					TargetUrl:   entry.TargetUrl,
+					Credentials: convertCredentialsFromK8sType(entry.Credentials),
+				}
+			} else if entry.Type == specEventsType {
+				events = true
+			} else {
+				message := fmt.Sprintf("incorrect type of entry '%s' in Remote Environment Service definition", entry.Type)
+				log.Error(message)
+				return Service{}, apperrors.Internal(message)
+			}
+		}
+	}
+
+	return Service{
+		ID:                  service.ID,
+		DisplayName:         service.DisplayName,
+		LongDescription:     service.LongDescription,
+		ProviderDisplayName: service.ProviderDisplayName,
+		Tags:                service.Tags,
+		API:                 api,
+		Events:              events,
+	}, nil
+}
+
+func convertCredentialsFromK8sType(credentials v1alpha1.Credentials) *Credentials {
+	emptyCredentials := v1alpha1.Credentials{}
+	if credentials == emptyCredentials {
+		return nil
+	}
+
+	return &Credentials{
+		Type:       credentials.Type,
+		SecretName: credentials.SecretName,
+		Url:        credentials.AuthenticationUrl,
+	}
+}
+

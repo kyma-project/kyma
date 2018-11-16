@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	kymaMeta "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma.cx/meta/v1"
+	kymaMeta "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1"
 	istioAuth "github.com/kyma-project/kyma/components/api-controller/pkg/clients/authentication.istio.io/clientset/versioned"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/controller/meta"
 	"k8s.io/client-go/tools/clientcmd"
