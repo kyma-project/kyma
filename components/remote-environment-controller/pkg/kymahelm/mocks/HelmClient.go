@@ -77,3 +77,26 @@ func (_m *HelmClient) ListReleases() (*services.ListReleasesResponse, error) {
 
 	return r0, r1
 }
+
+// ReleaseStatus provides a mock function with given fields: rlsName
+func (_m *HelmClient) ReleaseStatus(rlsName string) (*services.GetReleaseStatusResponse, error) {
+	ret := _m.Called(rlsName)
+
+	var r0 *services.GetReleaseStatusResponse
+	if rf, ok := ret.Get(0).(func(string) *services.GetReleaseStatusResponse); ok {
+		r0 = rf(rlsName)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*services.GetReleaseStatusResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(rlsName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
