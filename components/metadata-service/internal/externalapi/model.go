@@ -37,7 +37,7 @@ type API struct {
 	Credentials      *Credentials    `json:"credentials,omitempty"`
 	Spec             json.RawMessage `json:"spec,omitempty"`
 	SpecificationUrl string          `json:"specificationUrl,omitempty"`
-	ApiType          string          `json:"apiType"`
+	ApiType          string          `json:"apiType,omitempty"`
 }
 
 type Credentials struct {
@@ -214,7 +214,7 @@ func (api API) MarshalJSON() ([]byte, error) {
 		Credentials      *Credentials    `json:"credentials,omitempty"`
 		Spec             json.RawMessage `json:"spec,omitempty"`
 		SpecificationUrl string          `json:"specificationUrl,omitempty"`
-		ApiType          string          `json:"apiType"`
+		ApiType          string          `json:"apiType,omitempty"`
 	}{
 		api.TargetUrl,
 		api.Credentials,
@@ -231,7 +231,7 @@ func (api API) MarshalJSON() ([]byte, error) {
 		Credentials      *Credentials `json:"credentials,omitempty"`
 		Spec             string       `json:"spec,omitempty"`
 		SpecificationUrl string       `json:"specificationUrl,omitempty"`
-		ApiType          string       `json:"apiType"`
+		ApiType          string       `json:"apiType,omitempty"`
 	}{
 		api.TargetUrl,
 		api.Credentials,

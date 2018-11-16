@@ -79,7 +79,7 @@
   version = "1.1.3"
 
 [[projects]]
-  digest = "1:a250ba7d21cded2e99783f76b2ae67dcb5982de84d990c6fd5e52ded1bc23dd3"
+  digest = "1:8ad53a5ec17ba4b1938647cb935ec561872a58ed6ded2a733743a170ddede972"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/metadata-service/pkg/apis/istio/v1alpha2",
@@ -92,7 +92,7 @@
     "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "6c7a2b94471fe1b29a35e62bd19bc65fdf944f84"
+  revision = "e676280679a6b87474c1b48e1b5b1930406bac87"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
