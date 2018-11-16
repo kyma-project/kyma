@@ -10,5 +10,6 @@ This service has the following parameters:
 - **externalAPIPort** - This port exposes the metadata API to an external system. The default port is `8081`.
 - **minioURL** - The URL of a Minio service which stores specifications and documentation.
 - **namespace** - The Namespace to which you deploy the Proxy Service. The default Namespace is `kyma-integration`.
-- **requestTimeout** - A time-out for requests sent through the Proxy Service. Provide it in seconds. The default time-out is `1`.
+- **requestTimeout** - A time-out for requests sent through the Proxy Service. Provide it in seconds. The default time-out is `10`.
 - **requestLogging** - The flag to enable logging of incoming requests. The default value is `false`.
+- **detailedErrorResponse** - A flag for showing detailed internal error messages in response bodies. The default value is `false` and all internal server error messages are shortened to `Internal error`, while all other error messages are shown as usual.
