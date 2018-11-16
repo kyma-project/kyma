@@ -25,4 +25,4 @@ Remote Environment Controller performs different operations as a result of the f
  - **installationTimeout** - Time after the release installation will time out. The default value is `240` seconds.
  - **proxyServiceImage** - Proxy Service image version to be used in the Remote Environment chart.
  - **eventServiceImage** - Event Service image version to be used in the Remote Environment chart.
- - **eventServiceTestsImage** - The image of the Event Service Tests that will be used in Remote Environment Chart.
+ - **eventServiceTestsImage** - Event Service Tests image version to be used in the Remote Environment chart.
