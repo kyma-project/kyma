@@ -26,11 +26,6 @@ do
             shift # past argument
             shift # past value
         ;;
-        --crtpl_path)
-            CRTPL_PATH="$2"
-            shift
-            shift
-        ;;
         --vm-driver)
             VM_DRIVER="$2"
             shift
