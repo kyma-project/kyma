@@ -35,8 +35,8 @@ To register an API secured with OAuth, add a `credentials.oauth` object to the `
 | Field   |  Description |
 |:----------:|:------|
 | **url** |  OAuth token exchange endpoint of the service. |
-| **clientId** | OAuth client ID of the service. |
-| **clientSecret** | OAuth client Secret of the service. |    
+| **clientId** | OAuth client ID. |
+| **clientSecret** | OAuth client Secret. |    
 
 This is an example of the `api` section of the request body for an API secured with OAuth:
 
@@ -46,8 +46,8 @@ This is an example of the `api` section of the request body for an API secured w
         "credentials": {
             "oauth": {
                 "url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
-                "clientId": "cID",
-                "clientSecret": "cSecret"
+                "clientId": "{CLIENT_ID}",
+                "clientSecret": "{CLIENT_SECRET}"
             },
         }  
 ```
