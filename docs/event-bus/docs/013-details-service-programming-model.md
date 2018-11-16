@@ -3,7 +3,7 @@ title: Service Programming Model
 type: Details
 ---
 
-You can configure a microservice deployed in Kyma to receive Events from the Event Bus by creating a subscription custom resource. Find various configuration options in the Consume Events section.
+You can configure a microservice deployed in Kyma to receive Events from the Event Bus by creating a Subscription custom resource. Find various configuration options in the Consume Events section.
 
 ## Event Delivery
 

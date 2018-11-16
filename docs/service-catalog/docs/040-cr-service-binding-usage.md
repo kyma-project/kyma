@@ -3,7 +3,7 @@ title: ServiceBindingUsage
 type: Custom Resource
 ---
 
-The `servicebindingusages.servicecatalog.kyma.cx` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format used to inject Secrets to the application. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `servicebindingusages.servicecatalog.kyma.cx` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to inject Secrets to the application. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```
 kubectl get crd servicebindingusages.servicecatalog.kyma.cx -o yaml
