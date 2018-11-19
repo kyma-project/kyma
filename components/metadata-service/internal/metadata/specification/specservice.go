@@ -81,14 +81,14 @@ func processAPISpecification(api *model.API, gatewayUrl string) ([]byte, apperro
 
 	var err apperrors.AppError
 
-	if isNilOrEmpty(apiSpec) {
+	if shouldFetchSpec(api) {
 		apiSpec, err = fetchSpec(api)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if strings.ToLower(api.ApiType) != oDataSpecType {
+	if shouldModifySpec(apiSpec, api.ApiType) {
 		apiSpec, err = modifyAPISpec(apiSpec, gatewayUrl)
 		if err != nil {
 			return nil, apperrors.Internal("Modifying API spec failed, %s", err.Error())
@@ -98,13 +98,28 @@ func processAPISpecification(api *model.API, gatewayUrl string) ([]byte, apperro
 	return apiSpec, nil
 }
 
+func shouldFetchSpec(api *model.API) bool {
+	return isNilOrEmpty(api.Spec) && (api.SpecificationUrl != "" || strings.ToLower(api.ApiType) == oDataSpecType)
+}
+
+func shouldModifySpec(apiSpec []byte, apiType string) bool {
+	return !isNilOrEmpty(apiSpec) && strings.ToLower(apiType) != oDataSpecType
+}
+
 func fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
-	specUrl, err := url.Parse(api.SpecificationUrl)
-	if err != nil || api.SpecificationUrl == "" {
+	var specUrl *url.URL
+	var err error
+
+	if api.SpecificationUrl != "" {
+		specUrl, err = url.Parse(api.SpecificationUrl)
+		if err != nil {
+			return nil, apperrors.Internal("Parsing specification url failed, %s", err.Error())
+		}
+	} else {
 		targetUrl := strings.TrimSuffix(api.TargetUrl, "/")
 		specUrl, err = url.Parse(fmt.Sprintf(oDataSpecFormat, targetUrl))
 		if err != nil {
-			return nil, apperrors.Internal("Parsing OData spec url failed, %s", err.Error())
+			return nil, apperrors.Internal("Parsing OData specification url failed, %s", err.Error())
 		}
 	}
 

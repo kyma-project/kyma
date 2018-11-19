@@ -140,17 +140,34 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		assert.Equal(t, apperrors.CodeUpstreamServerCallFailed, err.Code())
 	})
 
-	t.Run("should fetch spec from /$metadata when no url provided", func(t *testing.T) {
+	t.Run("should fetch OData spec from /$metadata when no url provided", func(t *testing.T) {
 		// given
 		specServer := newSpecServer(baseApiSpec, func(req *http.Request) {
 			assert.Equal(t, http.MethodGet, req.Method)
 			assert.Equal(t, "/$metadata", req.URL.Path)
 		})
 
-		specData := defaultSpecDataWithAPI(&model.API{TargetUrl: specServer.URL})
+		specData := defaultSpecDataWithAPI(&model.API{TargetUrl: specServer.URL, ApiType: oDataSpecType})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
+
+		specService := NewSpecService(minioSvc)
+
+		// when
+		err := specService.SaveServiceSpecs(specData)
+
+		// then
+		require.NoError(t, err)
+		minioSvc.AssertExpectations(t)
+	})
+
+	t.Run("should save empty spec when no spec url provided and api type is not OData", func(t *testing.T) {
+		// given
+		specData := defaultSpecDataWithAPI(&model.API{})
+
+		minioSvc := &mocks.Service{}
+		minioSvc.On("Put", serviceId, baseDocs, []byte(nil), baseEventSpec).Return(nil)
 
 		specService := NewSpecService(minioSvc)
 
