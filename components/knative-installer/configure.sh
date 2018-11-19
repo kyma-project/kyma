@@ -21,7 +21,8 @@ KYMA_GW=$(jq '
 kubectl apply -f - <<<"$KYMA_GW"
 
 # Change ingressgateway to knative's
-# Somehow I cannot get it to work with the above. istio selector still exists next to knative
+# Somehow I cannot get it to work in one shot with the above. If selector is changed in JSON above resulting selector
+# contains both knative and istio fields.
 kubectl patch gateway -n kyma-system kyma-gateway --type=json -p '[
     {
         "op": "replace",
