@@ -23,16 +23,16 @@ Follow these steps to disable SSL certificate verification for communication bet
   3. Find the **skipVerify** parameter and change its value to `true`.
   4. Select `esc`, type `:wq`, and select `enter` to write and quit.
 
-## Override API security scheme
+## Override API security type
 
 The Metadata Service allows you to register APIs:
 - secured with Basic Authentication
 - secured with OAuth
 - not secured
 
-Based on the security type specified in the API registration process, the Proxy Service calls the registered API using the appropriate authentication scheme.
+The Proxy Service calls the registered APIs accordingly, basing on the security type specified in the API registration process.
 
-The Proxy Service overrides these authentication schemes if it gets a request which contains the `Access-Token` header. In such case, the Proxy Service rewrites the token from the `Access-Token` header into an OAuth-compliant `Authorization` header and forwards it to the target API.
+The Proxy Service overrides the registered APIs security type if it gets a request which contains the `Access-Token` header. In such case, the Proxy Service rewrites the token from the `Access-Token` header into an OAuth-compliant `Authorization` header and forwards it to the target API.
 
 This mechanism is suited for implementations, in which an external application handles user authentication.
 
