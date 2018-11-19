@@ -32,8 +32,8 @@ global:
     dir: develop/
     version: 16a332c1
   remote_environment_controller:
-    dir: pr/
-    version: PR-1497
+    dir: develop/
+    version: 4b19d36e
   remote_environment_controller_tests:
     dir: develop/
     version: cb19afea
