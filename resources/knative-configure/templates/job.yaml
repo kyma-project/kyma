@@ -14,7 +14,11 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: knative-configure
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.knative_installer.dir }}knative-configure:{{ .Values.global.knative_installer.version }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.knative_installer.dir }}knative-installer:{{ .Values.global.knative_installer.version }}
         env:
         - name: ACTION
           value: configure
+        {{ if .Values.global.isLocalEnv }}
+        - name: IS_LOCAL_ENV
+          value: "true"
+        {{ end }}
