@@ -8,64 +8,37 @@ metadata:
     release: {{ .Release.Name }}
     app: {{ template "ark.name" . }}
 data:
-  ark-config.yaml: |
+  ark-bsl.yaml: |
     apiVersion: ark.heptio.com/v1
-    kind: Config
+    kind: BackupStorageLocation
     metadata:
       name: default
-{{ with .Values.configuration }}
-  {{- with .persistentVolumeProvider }}
-    persistentVolumeProvider:
-      name: {{ .name  }}
-    {{ with .config }}
+    spec:
+      provider: {{ .Values.backupStorageLocation.provider }}
+      objectStorage:
+        bucket: {{ .Values.backupStorageLocation.objectStorage.bucket }}
+      {{ with .Values.backupStorageLocation.config }}
       config:
-      {{- with .region }}
-        region: {{ . }}
+        {{ with .resourceGroup }}
+        resourceGroup: {{ . }}
+        {{- end }}
+        {{ with .storageAccount }}
+        storageAccount: {{ . }}
+        {{- end }}
       {{- end }}
-      {{- with .apiTimeout }}
+  ark-vsl.yaml: |
+    apiVersion: ark.heptio.com/v1
+    kind: VolumeSnapshotLocation
+    metadata:
+      name: {{ .Values.volumeSnapshotLocation.provider }}-default
+    spec:
+      provider: {{ .Values.volumeSnapshotLocation.provider }}
+      {{ with .Values.volumeSnapshotLocation.config }}
+      config:
+        {{ with .apiTimeout }}
         apiTimeout: {{ . }}
+        {{- end }}
+        {{ with .resourceGroup }}
+        resourceGroup: {{ . }}
+        {{- end }}
       {{- end }}
-    {{- end }}
-  {{- end }}
-  {{- with .backupStorageProvider }}
-    backupStorageProvider:
-      name: {{ .name }}
-      bucket: {{ .bucket  }}
-    {{- with .config }}
-      config:
-      {{- with .region }}
-        region: {{ . }}
-      {{- end }}
-      {{- with .s3ForcePathStyle }}
-        s3ForcePathStyle: {{ . | quote }}
-      {{- end }}
-      {{- with .s3Url }}
-        s3Url: {{ . }}
-      {{- end }}
-      {{- with .kmsKeyId }}
-        kmsKeyId: {{ . }}
-      {{- end }}
-    {{- end }}
-  {{- end }}
-    backupSyncPeriod: {{ .backupSyncPeriod }}
-    gcSyncPeriod: {{ .gcSyncPeriod }}
-    scheduleSyncPeriod: {{ .scheduleSyncPeriod }}
-    restoreOnlyMode: {{ .restoreOnlyMode }}
-    resourcePriorities:
-    - namespaces
-    - persistentvolumes
-    - persistentvolumeclaims
-    - remoteenvironments # added
-    - environmentmappings #
-    - servicebrokers #
-    - serviceclasses #
-    - serviceinstances #
-    - servicebindings #
-    - secrets
-    - configmaps
-    - serviceaccounts
-    - limitranges
-    - podpresets # added
-    - pods
-    - replicaset
-{{- end }}
