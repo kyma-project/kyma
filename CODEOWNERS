@@ -269,6 +269,9 @@
 # kubeless-integration tests directory 
 /tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
+# kubeless tests
+/tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+
 # Event Bus Tests
 /tests/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
