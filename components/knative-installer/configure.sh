@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -e
+set -x
+
 KYMA_GW=$(kubectl get gateway -n kyma-system kyma-gateway -o json)
 
 # Prefix port names with "kyma-" to avoid port name duplicates
