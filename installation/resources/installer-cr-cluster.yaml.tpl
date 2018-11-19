@@ -12,8 +12,8 @@ spec:
       namespace: "kyma-system"
     - name: "istio"
       namespace: "istio-system"
-    - name: "knative-installer"
-      namespace: "knative-installer"
+    - name: "knative-install"
+      namespace: "knative-install"
       feature: knative
     - name: "istio-kyma-patch"
       namespace: "istio-system"
@@ -23,6 +23,9 @@ spec:
       namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
+    - name: "knative-configure"
+      namespace: "knative-configure"
+      feature: knative
     - name: "application-connector"
       namespace: "kyma-system"
     - name: "remote-environments"

@@ -10,6 +10,6 @@ RUN apk --no-cache upgrade \
 
 COPY . /app
 
-RUN apk add bash
+RUN apk add bash jq
 
 ENTRYPOINT /app/install.sh

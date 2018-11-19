@@ -1,28 +1,30 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: knative-installer
+  name: knative-install
   annotations:
     "helm.sh/hook": post-install
 spec:
   backoffLimit: 1
   template:
     metadata:
-      name: knative-installer
+      name: knative-install
     spec:
-      serviceAccountName: knative-installer
+      serviceAccountName: knative-install
       restartPolicy: OnFailure
       containers:
-      - name: knative-installer
+      - name: knative-install
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.knative_installer.dir }}knative-installer:{{ .Values.global.knative_installer.version }}
         env:
+        - name: ACTION
+          value: install
         - name: SERVING_URL
           valueFrom:
             configMapKeyRef:
-              name: knative-installer-config
+              name: knative-install-config
               key: SERVING_URL
         - name: EVENTING_URL
           valueFrom:
             configMapKeyRef:
-              name: knative-installer-config
+              name: knative-install-config
               key: EVENTING_URL

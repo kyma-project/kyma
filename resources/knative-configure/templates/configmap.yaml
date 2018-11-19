@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: knative-installer-config
+  name: knative-configure-config
   namespace: {{ .Release.Namespace }}
   labels:
-    app: knative-installer
+    app: knative-configure
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
   SERVING_URL: https://github.com/knative/serving/releases/download/v0.2.1/release-no-mon.yaml

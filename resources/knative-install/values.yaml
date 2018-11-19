@@ -1,0 +1,6 @@
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  knative_installer:
+    dir: pr/
+    version: PR-1664
