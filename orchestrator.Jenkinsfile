@@ -52,6 +52,7 @@ projects = [
     "tools/etcd-backup": "etcd-backup",
     "tools/etcd-tls-setup": "etcd-tls-setup",
     "tools/static-users-generator": "static-users-generator",
+    "tools/ark-plugins": "ark-plugins",
     "tests/test-logging-monitoring": "test-logging-monitoring",
     "tests/logging": "test-logging",
     "tests/acceptance": "acceptance-tests",
