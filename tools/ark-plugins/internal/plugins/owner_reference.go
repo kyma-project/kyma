@@ -43,12 +43,16 @@ func (p *SetOwnerReference) Execute(item runtime.Unstructured, restore *v1.Resto
 		return nil, nil, errors.Wrap(err, "while creating ServiceCatalog client")
 	}
 
+	// Secret's name and service binding's name are not always equal (they are when created in kyma's console, but can be different when created by from yaml's)
+	// Searching service binding by name is a workaround before https://github.com/heptio/ark/issues/965 will be resolved
 	sb, err := scClient.ServiceBindings(metadata.GetNamespace()).Get(metadata.GetName(), metav1.GetOptions{})
-	if err != nil {
-		if apierrors.IsNotFound(err) {
-			p.Log.Infof("Couldn't get SB %s: %v", metadata.GetName(), err)
-			return item, nil, nil // there's no servicebinding with such name so the secret should not have ownerReference set
-		}
+	switch {
+	case err == nil:
+	case apierrors.IsNotFound(err):
+		// there's no servicebinding with such name so the secret should not have ownerReference set
+		p.Log.Infof("Couldn't get SB %s: %v", metadata.GetName(), err)
+		return item, nil, nil
+	default:
 		return item, err, nil
 	}
 
