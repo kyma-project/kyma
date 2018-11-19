@@ -15,7 +15,7 @@ Using the same example service, this guide explains how to build a Docker image 
 
 The `http-db-service` example used in this guide provides you with the `Dockerfile` necessary for building Docker images. Examine the `Dockerfile` to learn how it looks and how it uses the Docker Multistaging feature, but do not use it one-to-one for production. There might be custom `LABEL` attributes with values to override.
 
-1. In your terminal, go to the `examples/http-db-service` directory. If you did not follow the **Sample service deployment on local** guide and you do not have this directory locally, get the `http-db-service` example from the `examples` repository.
+1. In your terminal, go to the `examples/http-db-service` directory. If you did not follow the **Sample service deployment on local** guide and you do not have this directory locally, get the `http-db-service` example from the [`examples`](https://github.com/kyma-project/examples) repository.
 2. Run the build with `./build.sh`.
 
 >**NOTE:** Ensure that the new image builds and is available in your local Docker registry by calling `docker images`. Find an image called `example-http-db-service` and tagged as `latest`.
