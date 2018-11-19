@@ -28,16 +28,16 @@ Before each commit, use the `before-commit.sh` script, which tests your changes.
 
 | Name | Required | Default | Description |
 |-----|---------|--------|------------|
-|**APP_PORT** | NO | `8080` | The port on which the HTTP server listens | 
+|**APP_PORT** | NO | `8080` | The port on which the HTTP server listens |
 |**APP_BROKER_RELIST_DURATION_WINDOW** | YES | - | Time period after which the REB synchronizes with the Service Catalog if a new Remote Environment is added. In case more than one Remote Environment is added, synchronization is performed only once. |
 | **APP_UNIQUE_SELECTOR_LABEL_KEY** | YES | - | Defined label key selector which allows uniquely identify REB pod's |
 | **APP_UNIQUE_SELECTOR_LABEL_VALUE** | YES | - | Defined label value selector which allows uniquely identify REB pod's |
 | **NAMESPACE** | YES | - | REB working Namespace |
-  
- 
+
+
 ## Code generation
 
-Structs related to Custom Resource Definitions are defined in `pkg/apis/remoteenvironment/v1alpha1/types.go` and registered in `pkg/apis/remoteenvironment/v1alpha1/`. After making any changes there, please run:
+Structs related to CustomResourceDefinitions are defined in `pkg/apis/remoteenvironment/v1alpha1/types.go` and registered in `pkg/apis/remoteenvironment/v1alpha1/`. After making any changes there, please run:
 ```bash
 ./hack/update-codegen.sh
 ```

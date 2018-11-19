@@ -14,23 +14,23 @@ global:
     dir: develop/
     version: 4ea83ddd
   connector_service_tests:
-    dir: develop/
-    version: 1bc49b46
+    dir: pr/
+    version: PR-1584
   event_service:
     dir: develop/
     version: 6e0a7fe2
   proxy_service:
     dir: develop/
-    version: cb19afea
+    version: aab48c35
   gateway_tests:
     dir: develop/
     version: cb19afea
   metadata_service:
     dir: develop/
-    version: 32dda397
+    version: aab48c35
   metadata_service_tests:
     dir: develop/
-    version: 16a332c1
+    version: aab48c35
   remote_environment_controller:
     dir: develop/
     version: cb19afea

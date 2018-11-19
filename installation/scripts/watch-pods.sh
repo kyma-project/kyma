@@ -7,7 +7,7 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 WORKING_NAMESPACE="kyma-system"
 
 echo "Run stability test..."
-kubectl create configmap pod-watch-config -n ${WORKING_NAMESPACE} --from-literal="ARGS=-maxWaitingPeriod=10m -ignorePodsPattern=core-azure-broker-docs-*|kyma-release-adder-*|core-catalog-etcd-stateful-backup-*" >/dev/null
+kubectl create configmap pod-watch-config -n ${WORKING_NAMESPACE} --from-literal="ARGS=-maxWaitingPeriod=10m -ignorePodsPattern=core-azure-broker-docs-*|kyma-release-adder-*" >/dev/null
 kubectl apply -f ${CURRENT_DIR}/../resources/watch-pods.yaml >/dev/null
 ${CURRENT_DIR}/../scripts/is-ready.sh ${WORKING_NAMESPACE} app watch-pods
 
