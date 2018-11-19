@@ -27,25 +27,27 @@ To generate a `CHANGELOG.md` file for all released Kyma versions, follow these s
 1. Create a `CHANGELOG.md` file under the specified absolute path to the repository. Use this command:
 
 ```bash
-docker run --rm -v {absolutePathToRepository}:/repository -w /repository -e LATEST_VERSION={applicationVersion} -e GITHUB_AUTH={githubToken} -e SSH_FILE={sshFilePath} changelog-generator sh /app/generate-full-changelog.sh --configure-git
+docker run --rm -v {absolutePathToRepository}:/repository -w /repository -e NEW_RELEASE_TITLE={releaseTitle} -e GITHUB_AUTH={githubToken} -e SSH_FILE={sshFilePath} -e CONFIG_FILE={configFilePath} -e SKIP_REMOVING_LATEST={skipRemovingLatest} changelog-generator sh /app/generate-full-changelog.sh --configure-git
 ```
 
 Replace values in curly braces with proper details, where:
 - `{absolutePathToRepository}` is the absolute path to the repository.
-- `{applicationVersion}` is the currently released application version.
+- `{releaseTitle}` is the currently released application title which specifies the release version.
 - `{githubToken}` is the GitHub API token with the read-only access to the repository.
 - `{sshFilePath}` is the path to the SSH file used for Git to authenticate with the repository.
+- `{configFilePath}` is a path to the `package.json` file used by the `lerna-changelog` tool.
+- `{skipRemovingLatest}` if set to true, removing the `latest` tag functionality is skipped.
 
 2. Commit and push the `CHANGELOG.md` file. Use this command:
 
 ```bash
-docker run --rm -v {absolutePathToRepository}:/repository -w /repository -e BRANCH={currentBranch} -e LATEST_VERSION={applicationVersion} -e SSH_FILE={sshFilePath} changelog-generator sh /app/push-full-changelog.sh --configure-git
+docker run --rm -v {absolutePathToRepository}:/repository -w /repository -e BRANCH={currentBranch} -e NEW_RELEASE_TITLE={releaseTitle} -e SSH_FILE={sshFilePath} changelog-generator sh /app/push-full-changelog.sh --configure-git
 ```
 
 Replace values in curly braces with proper details, where:
 - `{absolutePathToRepository}` is the absolute path to the repository.
 - `{currentBranch}` is the current Git branch name.
-- `{applicationVersion}` is the currently released application version.
+- `{releaseTitle}` is the currently released application title which specifies the release version.
 - `{sshFilePath}` is the path to the SSH file used for Git to authenticate with the repository.
 
 ### Generate the latest release changelog
@@ -53,14 +55,18 @@ Replace values in curly braces with proper details, where:
 To generate a changelog for a single release that contains merged pull requests for the latest Kyma version, run this command:
 
 ```bash
-docker run --rm -v /path/to/repository/:/repository -w /repository -e LATEST_VERSION={applicationVersion} -e GITHUB_AUTH={githubToken} -e SSH_FILE={sshFile} changelog-generator sh /app/generate-release-changelog.sh --configure-git
+docker run --rm -v {absolutePathToRepository}:/repository -w /repository -e FROM_TAG={previousTag} -e TO_TAG={latestTag} -e NEW_RELEASE_TITLE={releaseTitle} -e GITHUB_AUTH={githubToken} -e SSH_FILE={sshFile} -e CONFIG_FILE={configFilePath} -e SKIP_REMOVING_LATEST={skipRemovingLatest} changelog-generator sh /app/generate-release-changelog.sh --configure-git
 ```
 
 Replace values in curly braces with proper details, where:
 - `{absolutePathToRepository}` is the absolute path to the repository.
-- `{applicationVersion}` is the currently released application version.
+- `{previousTag}` specifies the first tag which is included in the changelog. If not provided, the changelog is generated from the tag which precedes the latest tag used.
+- `{latestTag}` specifies the last tag which is included in the changelog. If not provided, the changelog is generated to the latest tag used.
+- `{releaseTitle}` is the currently released application title which specifies the release version.
 - `{githubToken}` is the GitHub API token with the read-only access to the repository.
 - `{sshFilePath}` is the path to the SSH file used for Git to authenticate with the repository.
+- `{configFilePath}` is a path to the `package.json` file used by the `lerna-changelog` tool.
+- `{skipRemovingLatest}` if set to true, removing the `latest` tag functionality is skipped.
 
 The script generates a new `./.changelog/release-changelog.md` file under the specified absolute path to the repository.
 

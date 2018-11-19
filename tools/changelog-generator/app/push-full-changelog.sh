@@ -8,7 +8,7 @@ if [ "$CONFIGURE_GIT" = "--configure-git" ]; then
 fi
 
 git add ${FULL_CHANGELOG_FILE_PATH}
-git commit -m "Update CHANGELOG.md for version ${LATEST_VERSION}"
+git commit -m "Update CHANGELOG.md for version ${NEW_RELEASE_TITLE}"
 
 # Commit changelog also on master
 if [ $BRANCH != "master" ]; then

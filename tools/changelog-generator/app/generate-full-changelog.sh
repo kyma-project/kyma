@@ -12,7 +12,7 @@ source ${APP_PATH}/config-setup.sh
 if [ ! -f $FULL_CHANGELOG_FILE_PATH ]; then
     FIRST_COMMIT=$(git rev-list --max-parents=0 HEAD)
     echo "Generating changelog starting from first commit '${FIRST_COMMIT}'..."
-    lerna-changelog --from=${FIRST_COMMIT} | sed -e "s/## Unreleased/## ${LATEST_VERSION}/g" > ${FULL_CHANGELOG_FILE_PATH}
+    lerna-changelog --from=${FIRST_COMMIT} | sed -e "s/## Unreleased/## ${NEW_RELEASE_TITLE}/g" > ${FULL_CHANGELOG_FILE_PATH}
 else
     echo "Generating release changelog and prepending it to the CHANGELOG.md file..."
     if [ ! -f $RELEASE_CHANGELOG_FILE_PATH ]; then

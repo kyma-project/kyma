@@ -8,6 +8,7 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
   name: {{ template "ark.fullname" . }}
+  namespace: {{ .Values.prometheus.serviceMonitorNamespace }}
 spec:
   endpoints:
   - interval: 30s

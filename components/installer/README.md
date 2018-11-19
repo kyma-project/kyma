@@ -40,7 +40,7 @@ This environment variable is used to trigger shell scripts located in Kyma.
 
 It will run Minikube, set up the installer, and install Kyma from local sources. If Minikube was started before, it will be restarted.
 
-See the [Custom Resource file](#custom-resource-file) section in this document to learn how to generate a Custom Resource file.
+See the [Custom resource file](#custom-resource-file) section in this document to learn how to generate a custom resource file.
 
 To track progress of the installation, run:
 
@@ -89,9 +89,9 @@ Run the following command to completely uninstall Kyma:
 kubectl label installation/kyma-installation action=uninstall
 ```
 
-### Custom Resource file
+### Custom resource file
 
-The Custom Resource file for installer provides the basic information for Kyma installation.
+The custom resource file for installer provides the basic information for Kyma installation.
 
 The required properties iclude:
 
@@ -100,11 +100,11 @@ The required properties iclude:
 - `components` which is the list of Kyma components.
 
 
-### Generate the Custom Resource file for installer
+### Generate the custom resource file for installer
 
-Generate a Custom Resource file using the [create-cr.sh](../../installation/scripts/create-cr.sh) script. It accepts the following arguments:
+Generate a custom resource file using the [create-cr.sh](../../installation/scripts/create-cr.sh) script. It accepts the following arguments:
 
-- `--output` is a mandatory parameter which indicates the location of the Custom Resource output file.
+- `--output` is a mandatory parameter which indicates the location of the custom resource output file.
 - `--url` is the URL to the Kyma package.
 - `--version` is the version of Kyma.
 

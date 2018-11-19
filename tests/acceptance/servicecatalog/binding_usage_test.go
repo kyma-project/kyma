@@ -32,8 +32,9 @@ import (
 )
 
 const (
-	timeoutPerStep = time.Minute
-	baseEnvName    = "GATEWAY_URL"
+	timeoutPerStep   = time.Minute
+	timeoutPerAssert = 2 * time.Minute
+	baseEnvName      = "GATEWAY_URL"
 )
 
 // Config contains all configurations for Service Binding Usage Acceptance tests
@@ -72,8 +73,8 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	ts.createBindingUsageForInstanceBWithPrefix()
 
 	// then
-	ts.assertInjectedEnvVariable(baseEnvName, ts.gatewayUrl, timeoutPerStep)
-	ts.assertInjectedEnvVariable(ts.envPrefix+baseEnvName, ts.gatewayUrl, timeoutPerStep)
+	ts.assertInjectedEnvVariable(baseEnvName, ts.gatewayUrl, timeoutPerAssert)
+	ts.assertInjectedEnvVariable(ts.envPrefix+baseEnvName, ts.gatewayUrl, timeoutPerAssert)
 }
 
 func NewTestSuite(t *testing.T) *TestSuite {

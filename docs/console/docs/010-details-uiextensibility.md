@@ -11,7 +11,7 @@ When rendering the navigation, the Kyma Console UI calls a dedicated API endpoin
 
 ## Micro front-end
 
-A micro front-end is a standalone web application which is developed, tested and deployed independently from the Kyma Console application. It uses the Luigi Client library to ensure proper communication with the Console application. When you implement and deploy a micro front-end, you can plug it to the Kyma Console as a UI extension using dedicated Custom Resource Definitions. 
+A micro front-end is a standalone web application which is developed, tested and deployed independently from the Kyma Console application. It uses the Luigi Client library to ensure proper communication with the Console application. When you implement and deploy a micro front-end, you can plug it to the Kyma Console as a UI extension using dedicated CustomResourceDefinitions.
 
 ### Luigi Client
 
@@ -21,7 +21,7 @@ Include [Luigi Client](https://www.npmjs.com/package/@kyma-project/luigi-client)
 ```
 npm i @kyma-project/luigi-client
 ```
-It helps to read the context data that is sent by the Console when the user activates the micro front-end in the UI. 
+It helps to read the context data that is sent by the Console when the user activates the micro front-end in the UI.
 Use the following example to read the context data:
 
 ```
@@ -41,7 +41,7 @@ For API details, see [Luigi Client API documentation](https://github.com/kyma-pr
 
 ## Add a micro front-end
 
-Use the Custom Resource Definitions to extend the Console functionality and configure different scopes for your micro front-ends.
+Use the CustomResourceDefinitions to extend the Console functionality and configure different scopes for your micro front-ends.
 
 ### Micro front-end for a specific Environment
 
@@ -56,7 +56,7 @@ Using this yaml file in your Kyma cluster results in a **Tractors Overview** mic
 ### Cluster-wide micro front-end
 You can define a cluster-wide micro front-end available for all Environments in the side navigation.
 
-[Here](assets/cmf-environment.yaml) you can find a sample ClusterMicroFrontend entity using the `environment` value for the **placement** attribute to make the micro front-end available for all Environments in the cluster. 
+[Here](assets/cmf-environment.yaml) you can find a sample ClusterMicroFrontend entity using the `environment` value for the **placement** attribute to make the micro front-end available for all Environments in the cluster.
 
 Using this yaml file in your Kyma cluster results in a **Tractors Overview** micro front-end navigation node displayed under the **Hardware** category. It is available **for every** Environment in your cluster.
 
@@ -66,4 +66,3 @@ You can define a cluster micro front-end visible in the **Administration** secti
 [Here](assets/cmf-cluster.yaml) you can find a sample of such ClusterMicroFrontend entity using the `cluster` value for placement  **attribute** to ensure the micro front-end is visible in the **Administration** section.
 
 ![CMF-admin-section](assets/cmf-admin-section.png)
-

@@ -274,8 +274,8 @@ components:
       properties:
         oauth:
           $ref: '#/components/schemas/OAuth'
-      required:
-        - oauth
+        basic:
+          $ref: '#/components/schemas/Basic'
     OAuth:
       type: 'object'
       properties:
@@ -290,6 +290,13 @@ components:
         - url
         - clientId
         - clientSecret
+    Basic:
+      type: 'object'
+      properties:
+        username:
+          type: 'string'
+        password:
+          type: 'string'
     MetadataErrorResponse:
       type: 'object'
       properties:

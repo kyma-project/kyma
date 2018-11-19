@@ -14,7 +14,8 @@ import (
 func makeProxy(targetUrl string, id string, skipVerify bool) (*httputil.ReverseProxy, apperrors.AppError) {
 	target, err := url.Parse(targetUrl)
 	if err != nil {
-		return nil, apperrors.Internal("failed to parse target url '%s'", target)
+		log.Errorf("failed to parse target url '%s': '%s'", targetUrl, err.Error())
+		return nil, apperrors.Internal("failed to parse target url '%s': '%s'", targetUrl, err.Error())
 	}
 
 	targetQuery := target.RawQuery
@@ -39,10 +40,8 @@ func makeProxy(targetUrl string, id string, skipVerify bool) (*httputil.ReverseP
 	}
 	newProxy := &httputil.ReverseProxy{Director: director}
 
-	if skipVerify {
-		newProxy.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
-	}
-
+	newProxy.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify}}
+	
 	return newProxy, nil
 }
 

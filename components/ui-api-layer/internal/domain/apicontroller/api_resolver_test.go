@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma.cx/v1alpha2"
+	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/apicontroller/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"

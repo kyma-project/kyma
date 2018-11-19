@@ -39,8 +39,19 @@ data:
   global.alertTools.credentials.victorOps.apikey: "__VICTOR_OPS_API_KEY_VALUE__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
-  service-catalog.etcd-stateful.replicaCount: "3"
+  etcd-stateful.replicaCount: "3"
   acceptanceTest.remoteEnvironment.disabled: "true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: connector-service-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: application-connector
+data:
+  connector-service.tests.skipSslVerify: "__SKIP_SSL_VERIFY__"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -58,30 +69,6 @@ data:
   minio.secretKey: "topSecretKey"
   minio.resources.limits.memory: 128Mi
   minio.resources.limits.cpu: 250m
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ec-default-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: ec-default
-data:
-  deployment.args.sourceType: commerce
-  service.externalapi.nodePort: "32001"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: hmc-default-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: hmc-default
-data:
-  deployment.args.sourceType: marketing
-  service.externalapi.nodePort: "32000"
 ---
 apiVersion: v1
 kind: ConfigMap

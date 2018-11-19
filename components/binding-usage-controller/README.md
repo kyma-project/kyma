@@ -36,4 +36,4 @@ Use the following environment variables to configure the application:
 
 ## Development
 
-Use the `before-commit.sh` script to test your changes before each commit.
+Use the `before-commit.sh` script or the `make build` command to test your changes before each commit.
