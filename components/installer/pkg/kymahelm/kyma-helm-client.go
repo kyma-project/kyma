@@ -58,7 +58,7 @@ func (hc *Client) InstallReleaseFromChart(chartdir, ns, releaseName, overrides s
 		return nil, err
 	}
 
-	hc.PrintOverrides(overrides, releaseName)
+	hc.PrintOverrides(overrides, releaseName, "installation")
 
 	return hc.helm.InstallReleaseFromChart(
 		chart,
@@ -72,7 +72,7 @@ func (hc *Client) InstallReleaseFromChart(chartdir, ns, releaseName, overrides s
 
 // InstallRelease .
 func (hc *Client) InstallRelease(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error) {
-	hc.PrintOverrides(overrides, releasename)
+	hc.PrintOverrides(overrides, releasename, "installation")
 
 	return hc.helm.InstallRelease(
 		chartdir,
@@ -86,7 +86,7 @@ func (hc *Client) InstallRelease(chartdir, ns, releasename, overrides string) (*
 
 // InstallReleaseWithoutWait .
 func (hc *Client) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides string) (*rls.InstallReleaseResponse, error) {
-	hc.PrintOverrides(overrides, releasename)
+	hc.PrintOverrides(overrides, releasename, "installation")
 
 	return hc.helm.InstallRelease(
 		chartdir,
@@ -100,7 +100,7 @@ func (hc *Client) InstallReleaseWithoutWait(chartdir, ns, releasename, overrides
 
 // UpgradeRelease .
 func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error) {
-	hc.PrintOverrides(overrides, releaseName)
+	hc.PrintOverrides(overrides, releaseName, "update")
 
 	return hc.helm.UpdateRelease(
 		releaseName,
@@ -130,8 +130,8 @@ func (hc *Client) PrintRelease(release *release.Release) {
 }
 
 // PrintOverrides .
-func (hc *Client) PrintOverrides(overrides string, releaseName string) {
-	log.Println("Overrides used for", releaseName)
+func (hc *Client) PrintOverrides(overrides string, releaseName string, action string) {
+	log.Println("Overrides used for", action, "of component", releaseName)
 
 	if overrides == "" {
 		log.Println("No overrides found")
