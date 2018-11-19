@@ -8,9 +8,9 @@ def buildpack = 'golang-buildpack:0.0.9'
 def appFolder = env.APP_FOLDER
 def repositoryName = 'kyma'
 
+def checkoutDir = "src/github.com/kyma-project/$repositoryName"
+def componentDir = "$checkoutDir/$appFolder"
 def workDir = ""
-def checkoutDir = ""
-def componentDir = ""
 
 echo """
 ********************************
@@ -37,9 +37,8 @@ podTemplate(label: label,
                 timeout(time:20, unit:"MINUTES") {
                     ansiColor('xterm') {
                         stage("setup") {
+                            
                             workDir = pwd()
-                            checkoutDir = "src/github.com/kyma-project/$repositoryName"
-                            componentDir = "$checkoutDir/$appFolder"
 
                             dir(checkoutDir) {
                                 checkout scm
