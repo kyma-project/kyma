@@ -1,7 +1,6 @@
 package specification
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/go-openapi/spec"
@@ -146,11 +145,11 @@ func requestAPISpec(specUrl string) (*http.Response, apperrors.AppError) {
 		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), specRequestTimeout)
-	defer cancel()
-	reqWithTimeout := req.WithContext(ctx)
+	httpClient := http.Client{
+		Timeout: specRequestTimeout,
+	}
 
-	response, err := http.DefaultClient.Do(reqWithTimeout)
+	response, err := httpClient.Do(req)
 	if err != nil {
 		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed, %s", specUrl, err.Error())
 	}
