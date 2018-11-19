@@ -266,8 +266,8 @@
 # The tools/ark-plugins directory
 /tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
-# kubeless-test-client tests
-/tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+# kubeless-integration tests directory 
+/tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
 # Event Bus Tests
 /tests/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
