@@ -9,6 +9,7 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   replicas: {{ .Values.apiserver.replicas }}
+  minReadySeconds: {{ .Values.apiserver.minReadySeconds }}
   selector:
     matchLabels:
       app: {{ template "fullname" . }}-apiserver

@@ -11,6 +11,7 @@ useAggregator: true
 rbacEnable: true
 apiserver:
   replicas: 1
+  minReadySeconds: 1
   # annotations is a collection of annotations to add to the apiserver pods.
   annotations: {}
   # nodeSelector to apply to the apiserver pods

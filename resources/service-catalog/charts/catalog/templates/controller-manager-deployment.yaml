@@ -9,6 +9,7 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   replicas: {{ .Values.controllerManager.replicas }}
+  minReadySeconds: {{ .Values.apiserver.minReadySeconds }}
   selector:
     matchLabels:
       app: {{ template "fullname" . }}-controller-manager
