@@ -131,7 +131,7 @@ func (hc *Client) PrintRelease(release *release.Release) {
 
 // PrintOverrides .
 func (hc *Client) PrintOverrides(overrides string, releaseName string, action string) {
-	log.Println("Overrides used for", action, "of component", releaseName)
+	log.Printf("Overrides used for %s of component %s", action, releaseName)
 
 	if overrides == "" {
 		log.Println("No overrides found")
