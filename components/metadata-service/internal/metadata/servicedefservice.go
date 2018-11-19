@@ -151,7 +151,10 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 
 	err = sds.specService.SaveServiceSpecs(specData)
 	if err != nil {
-		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, inserting specification to Minio failed, %s", id, err.Error())
+		if err.Code() == apperrors.CodeUpstreamServerCallFailed {
+			return model.ServiceDefinition{}, apperrors.UpstreamServerCallFailed("Updating %s service failed, saving specification failed, %s", id, err.Error())
+		}
+		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, saving specification failed, %s", id, err.Error())
 	}
 
 	err = sds.remoteEnvironmentRepository.Update(remoteEnvironment, *service)
