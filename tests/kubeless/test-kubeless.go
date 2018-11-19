@@ -237,7 +237,7 @@ func cleanup(namespace, functionName string) {
 }
 
 func main() {
-	const namespace = "kubeless-test"
+	const namespace = "kubeless-unit"
 	const functionName = "test-hello"
 	testID := randomString(8)
 
@@ -245,7 +245,7 @@ func main() {
 
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	log.Println("Starting test")
+	log.Println("Starting kubeless unit test")
 
 	log.Printf("Creating namespace: %v\n", namespace)
 	deployK8s("ns.yaml")
@@ -260,5 +260,5 @@ func main() {
 	ensureOutputIsCorrect(host, expectedOutput, testID, namespace, functionName)
 
 	cleanup(namespace, functionName)
-	log.Println("Kubeless-test is successful")
+	log.Println("Kubeless unit test is successful")
 }
