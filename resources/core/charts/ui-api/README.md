@@ -18,7 +18,7 @@ The Envoy filter extracts security-related attributes from GraphQL queries. Thes
 
 - **kyma-graphql-resources** - this header contains the names of the queried resources. The names are comma-separated and sorted in alphabetical order. The list is enclosed with curly braces.
 
-The Envoy filter is registered with the use of EnvoyFilter CR. The source code of the Envoy filter, in the form of a LUA script, is located in [this](./templates/scripts) directory.
+The Envoy filter is registered with the use of EnvoyFilter CR. The source code of the Envoy filter, in the form of a LUA script, is located in [this](./scripts) directory.
 
 ### Authorization
 
