@@ -1,4 +1,4 @@
-{{- if .Values.configuration.backupStorageProvider.name -}}
+{{- if .Values.backupStorageLocation.objectStorage.bucket -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
