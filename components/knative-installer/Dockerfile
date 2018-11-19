@@ -12,4 +12,4 @@ COPY . /app
 
 RUN apk add bash jq
 
-ENTRYPOINT /app/install.sh
+ENTRYPOINT /app/run.sh
