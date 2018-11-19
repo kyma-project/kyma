@@ -82,7 +82,7 @@
     "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
     "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
   ]
-  revision = "7400291c88b0dde7d2b674f02a40efc5eb1934e5"
+  revision = "b1c1b45147a676528c5617af811aec688896702e"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -385,6 +385,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c283d8d225658ec3815ce630a06fa53f4ea781580437293d508af341a22207b6"
+  inputs-digest = "9fccc70939c7ed7745bdb36790b2d93ee226f68611fc2e31a36f68b14e310108"
   solver-name = "gps-cdcl"
   solver-version = 1

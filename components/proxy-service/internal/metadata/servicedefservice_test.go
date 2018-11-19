@@ -4,16 +4,12 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv"
 	remoteenvmocks "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv/mocks"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
 	serviceapimocks "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-)
-
-var (
-	empty []byte
 )
 
 func TestServiceDefinitionService_GetAPI(t *testing.T) {
@@ -22,7 +18,7 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 		// given
 		remoteEnvServiceAPI := &remoteenv.ServiceAPI{}
 		remoteEnvService := remoteenv.Service{API: remoteEnvServiceAPI}
-		serviceAPI := &serviceapi.API{}
+		serviceAPI := &model.API{}
 
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Get", "uuid-1").Return(remoteEnvService, nil)

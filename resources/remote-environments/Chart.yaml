@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Default Remote Environments helm chart for Kubernetes
-name: default-remote-environmetns
-version: 0.0.1

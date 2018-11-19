@@ -12,13 +12,13 @@ The Authentication Policy is defined in [this](./templates/authentication.yaml) 
 
 ### Custom Envoy filter
 
-The Envoy filter extracts security-related attributes from GraphQL queries. These attributes are added to the request as additional headers and are sent to the target service. These are the additional request headers:
+The Envoy filter extracts security-related attributes from GraphQL queries. These attributes are added to the request as additional headers and sent to the target service. These are the additional request headers:
 
 - **kyma-graphql-parsed** - this header is set if the filter parsed the query.
 
 - **kyma-graphql-resources** - this header contains the names of the queried resources. The names are comma-separated and sorted in alphabetical order. The list is enclosed with curly braces.
 
-The Envoy filter is registered with the use of EnvoyFilter CR. The source code of the Envoy filter, in the form of a LUA script, is located in [this](./scripts) directory.
+The Envoy filter is registered using the EnvoyFilter custom resource. The source code of the Envoy filter, in the form of a LUA script, is located in [this](./scripts) directory.
 
 ### Authorization
 
@@ -39,9 +39,9 @@ RBAC in Istio is based on these concepts:
 
   - **spec.rules[0].methods** indicates the secured HTTP methods. As a minimum you must secure the `POST` method.
 
-  - **spec.rules[0].constraints** allows to specify additional conditions which can be found [here](https://istio.io/docs/reference/config/authorization/constraints-and-properties/#constraints). The one, crucial for GraphQL use case, is specifying the query by use of custom header described in the [Custom Envoy filter section](##custom-envoy-filter):
+  - **spec.rules[0].constraints** allows to specify additional conditions described in [this](https://istio.io/docs/reference/config/authorization/constraints-and-properties/#constraints) document.
 
-    - **request.headers[kyma-graphql-resources]** - The value should contain the names of the queried resources. List the resources in alphabetical order. Enclose the list in curly brackets.
+    - **request.headers[kyma-graphql-resources]** - Allows to specify the query by using a custom header as described in the **Custom Envoy filter** section. Include the names of the queried resources. List the resources in alphabetical order. Enclose the list in curly brackets.
   
   For example, to define a role for access to the query with `remoteEnvironments` resource you must define the following Service Role:
    ```yaml	
@@ -118,7 +118,7 @@ query GetApis {
 }
 ```
 
-To create the role for the query, use the following command:
+To create a role for the query, use the following command:
 
 ```bash
 cat <<EOF | kubectl create -f -

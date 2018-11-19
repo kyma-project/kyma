@@ -23,8 +23,17 @@ function require_istio_version() {
 }
 
 function require_istio_system() {
-    kubectl get namespace istio-system
+    kubectl get namespace istio-system >/dev/null
 }
+
+function require_mtls_disabled() {
+    local mTLS=$(kubectl get meshpolicy default -o jsonpath='{.spec.peers}' --ignore-not-found=true | grep "mtls")
+    if [[ ${mTLS} != "" ]]; then
+        echo "mTLS must be disabled"
+        exit 1
+    fi
+}
+
 
 function run_all_patches() {
   echo "--> Patch resources"
@@ -84,7 +93,7 @@ function check_requirements() {
   while read crd; do
     echo "    Require CRD crd $crd"
     kubectl get crd ${crd}
-    if [ $? -ne 0 ]; then
+    if [[ $? -ne 0 ]]; then
         echo "Cannot find required CRD $crd"
     fi
   done <${CONFIG_DIR}/required-crds
@@ -92,6 +101,7 @@ function check_requirements() {
 
 require_istio_system
 require_istio_version
+require_mtls_disabled
 check_requirements
 configure_sidecar_injector
 run_all_patches

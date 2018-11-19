@@ -11,8 +11,10 @@ import (
 )
 
 const (
-	specAPIType    = "API"
-	specEventsType = "Events"
+	specAPIType          = "API"
+	specEventsType       = "Events"
+	CredentialsOAuthType = "OAuth"
+	CredentialsBasicType = "Basic"
 )
 
 // Manager contains operations for managing Remote Environment CRD
@@ -27,11 +29,16 @@ type repository struct {
 
 // ServiceAPI stores information needed to call an API
 type ServiceAPI struct {
-	GatewayURL            string
-	AccessLabel           string
-	TargetUrl             string
-	OauthUrl              string
-	CredentialsSecretName string
+	GatewayURL  string
+	AccessLabel string
+	TargetUrl   string
+	Credentials Credentials
+}
+
+type Credentials struct {
+	Type              string
+	SecretName        string
+	AuthenticationUrl string
 }
 
 // Service represents a service stored in Remote Environment RE

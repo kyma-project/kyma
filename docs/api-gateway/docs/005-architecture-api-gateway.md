@@ -6,9 +6,9 @@ This diagram illustrates the workflow that leads to exposing a service in Kyma:
 
 ![service-exposure-flow](assets/001-service-exposure-flow.png)
 
-- **API Controller** is a component responsible for exposing services. The API Controller is an application deployed in the `kyma-system` Namespace, implemented according to the [Kubernetes Operator](https://coreos.com/blog/introducing-operators.html) principles. The API Controller listens for newly created Custom Resources (CR) that follow the set `api.gateway.kyma.cx` Custom Resource Definition (CRD), which describes the details of exposing services in Kyma.
+- **API Controller** is a component responsible for exposing services. The API Controller is an application deployed in the `kyma-system` Namespace, implemented according to the [Kubernetes Operator](https://coreos.com/blog/introducing-operators.html) principles. The API Controller listens for newly created custom resources (CR) that follow the set `api.gateway.kyma-project.io` CustomResourceDefinition (CRD), which describes the details of exposing services in Kyma.
 
-- **Istio Virtual Service** is used to specify the services that are visible outside the cluster. The API Controller creates a Virtual Service for the hostname defined in the `api.gateway.kyma.cx` CRD. The convention is to create a hostname using the name of the service as the subdomain, and the domain of the Kyma cluster. To learn more about the Istio Virtual Service concept, read this [Istio documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/).
+- **Istio Virtual Service** is used to specify the services that are visible outside the cluster. The API Controller creates a Virtual Service for the hostname defined in the `api.gateway.kyma-project.io` CRD. The convention is to create a hostname using the name of the service as the subdomain, and the domain of the Kyma cluster. To learn more about the Istio Virtual Service concept, read this [Istio documentation](https://kubernetes.io/docs/concepts/services-networking/ingress/).
 To get the list of Virtual Services in Kyma, run:
 ```
 kubectl get virtualservices.networking.istio.io --all-namespaces

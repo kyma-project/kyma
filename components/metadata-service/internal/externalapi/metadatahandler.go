@@ -3,6 +3,7 @@ package externalapi
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -142,22 +143,22 @@ func (mh *metadataHandler) DeleteService(w http.ResponseWriter, r *http.Request)
 	contextLogger.Infof("Service deleted successfully.")
 }
 
-func (mh *metadataHandler) prepareServiceDefinition(body io.ReadCloser) (metadata.ServiceDefinition, apperrors.AppError) {
+func (mh *metadataHandler) prepareServiceDefinition(body io.ReadCloser) (model.ServiceDefinition, apperrors.AppError) {
 	b, err := ioutil.ReadAll(body)
 	if err != nil {
-		return metadata.ServiceDefinition{}, apperrors.WrongInput("Failed to read request body, %s", err.Error())
+		return model.ServiceDefinition{}, apperrors.WrongInput("Failed to read request body, %s", err.Error())
 	}
 	defer body.Close()
 
 	var serviceDetails ServiceDetails
 	err = json.Unmarshal(b, &serviceDetails)
 	if err != nil {
-		return metadata.ServiceDefinition{}, apperrors.WrongInput("Failed to unmarshal request body, %s", err.Error())
+		return model.ServiceDefinition{}, apperrors.WrongInput("Failed to unmarshal request body, %s", err.Error())
 	}
 
 	appErr := mh.validator.Validate(serviceDetails)
 	if appErr != nil {
-		return metadata.ServiceDefinition{}, apperrors.WrongInput("Failed to validate request body, %s", appErr.Error())
+		return model.ServiceDefinition{}, apperrors.WrongInput("Failed to validate request body, %s", appErr.Error())
 	}
 
 	return serviceDetailsToServiceDefinition(serviceDetails)
