@@ -33,7 +33,7 @@ global:
     version: aab48c35
   remote_environment_controller:
     dir: develop/
-    version: cb19afea
+    version: 4b19d36e
   remote_environment_controller_tests:
     dir: develop/
     version: cb19afea
