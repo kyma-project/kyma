@@ -185,6 +185,10 @@ echo "- Testing Logging components..."
 helm test logging
 loggingTestErr=$?
 
+echo "- Testing Monitoring components..."
+helm test monitoring
+loggingTestErr=$?
+
 checkAndCleanupTest kyma-system
 testCheckKymaCore=$?
 
