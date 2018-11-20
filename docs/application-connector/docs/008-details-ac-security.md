@@ -26,9 +26,9 @@ Follow these steps to disable SSL certificate verification for communication bet
 ## Override the API security type
 
 The Metadata Service allows you to register APIs:
-- secured with Basic Authentication
-- secured with OAuth
-- not secured
+- Secured with Basic Authentication.
+- Secured with OAuth.
+- Not secured.
 
 The Proxy Service calls the registered APIs accordingly, basing on the security type specified in the API registration process.
 
