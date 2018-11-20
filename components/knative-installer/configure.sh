@@ -15,23 +15,11 @@ KYMA_GW=$(jq '
             else .
             end
         )
-    )
+    ) |
+    .spec.selector = {"knative": "ingressgateway"}
 ' <<<"$KYMA_GW")
 
-kubectl apply -f - <<<"$KYMA_GW"
-
-# Change ingressgateway to knative's
-# Somehow I cannot get it to work in one shot with the above. If selector is changed in JSON above resulting selector
-# contains both knative and istio fields.
-kubectl patch gateway -n kyma-system kyma-gateway --type=json -p '[
-    {
-        "op": "replace",
-        "path": "/spec/selector",
-        "value": {
-            "knative": "ingressgateway"
-        }
-    }
-]'
+kubectl replace -f - <<<"$KYMA_GW"
 
 if [[ -n "$IS_LOCAL_ENV" ]]; then
     # Disable hostPorts on istio-ingressgateway in local environment
@@ -41,10 +29,11 @@ if [[ -n "$IS_LOCAL_ENV" ]]; then
             .spec.template.spec.containers[0].ports | map(
                 del(.hostPort)
             )
-        )
+        ) |
+        del(.status)
     ' <<<"$ISTIO_INGRESSGW")
 
-    kubectl apply -f - <<<"$ISTIO_INGRESSGW"
+    kubectl replace -f - <<<"$ISTIO_INGRESSGW"
 
     # Enable hostPorts on knative-ingressgateway in local environment
     KNATIVE_INGRESSGW=$(kubectl get deployment -n istio-system knative-ingressgateway -o json)
@@ -56,8 +45,9 @@ if [[ -n "$IS_LOCAL_ENV" ]]; then
                 else .
                 end
             )
-        )
+        ) |
+        del(.status)
     ' <<<"$KNATIVE_INGRESSGW")
 
-    kubectl apply -f - <<<"$KNATIVE_INGRESSGW"
+    kubectl replace -f - <<<"$KNATIVE_INGRESSGW"
 fi
