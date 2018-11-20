@@ -180,6 +180,14 @@ components:
           type: 'string'
         description:
           type: 'string'
+        shortDescription:
+          type: 'string'
+        identifier:
+          type: 'string'
+        labels:
+          type: 'object'
+          additionalProperties:
+            type: 'string'
         api:
           $ref: '#/components/schemas/Api'
         events:
@@ -202,6 +210,12 @@ components:
           type: 'string'
         description:
           type: 'string'
+        identifier:
+          type: 'string'
+        labels:
+          type: 'object'
+          additionalProperties:
+            type: 'string'
     Api:
       type: 'object'
       properties:
@@ -224,15 +238,15 @@ components:
     Documentation:
       type: 'object'
       properties:
-        displayName:
+        displayName: 
           type: 'string'
-        description:
+        description: 
           type: 'string'
         type:
           type: 'string'
         tags:
           type: 'array'
-          items:
+          items: 
             type: 'string'
         docs:
           type: 'array'
@@ -260,8 +274,8 @@ components:
       properties:
         oauth:
           $ref: '#/components/schemas/OAuth'
-      required:
-        - oauth
+        basic:
+          $ref: '#/components/schemas/Basic'
     OAuth:
       type: 'object'
       properties:
@@ -276,6 +290,13 @@ components:
         - url
         - clientId
         - clientSecret
+    Basic:
+      type: 'object'
+      properties:
+        username:
+          type: 'string'
+        password:
+          type: 'string'
     MetadataErrorResponse:
       type: 'object'
       properties:

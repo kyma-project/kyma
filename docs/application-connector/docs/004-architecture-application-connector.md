@@ -24,7 +24,7 @@ The Connector Service:
 The Metadata Service stores all registered APIs and Event Catalog exposed by a connected external solution. The APIs and Event catalogs metadata are stored in RemoteEnvironment custom resource.
 The system creates a new Kubernetes service for each registered API. Additionally, a new Service Classes is registered in the Service Catalog.
 
->**NOTE:** Using the Metadata Service, you can register an API along with its OAuth credentials. The credentials are stored in a Kubernetes Secret.
+>**NOTE:** Using the Metadata Service, you can register an API along with its OAuth or Basic Authentication credentials. The credentials are stored in a Kubernetes Secret.
 
 ## Event Service
 
@@ -45,7 +45,7 @@ The controller listens for creating or deleting the RemoteEnvironment custom res
 
 ## Proxy Service
 
-The Proxy Service is an intermediary component between a lambda function or a service and an external API registered with the Metadata Service. It acts as a proxy and can acquire OAuth tokens.
+The Proxy Service is an intermediary component between a lambda function or a service and an external API registered with the Metadata Service. It can call services secured with the [Basic Authentication](https://tools.ietf.org/html/rfc7617) mechanism, acquire OAuth tokens, and call OAuth-secured APIs.  
 
 ## Access Service
 
