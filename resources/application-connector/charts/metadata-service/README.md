@@ -1,4 +1,4 @@
-### Metadata service
+# Metadata service
 
 ## Overview
 Metadata service is a global component responsible for managing metadata of remote APIs.
