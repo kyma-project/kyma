@@ -199,10 +199,10 @@ func (c *Controller) syncHandler(key string) error {
 			return overridesErr
 		}
     
-    	featuresProvider, err := feature_gates.New(c.kubeClientset)
-      if c.errorHandlers.CheckError("Error while building feature gates: ", overridesErr)  {
-        return err
-      }
+		featuresProvider, err := feature_gates.New(c.kubeClientset)
+		if c.errorHandlers.CheckError("Error while building feature gates: ", overridesErr)  {
+			return err
+		}
 
 		err = c.conditionManager.InstallStart()
 		if c.errorHandlers.CheckError("Error starting install/update: ", err) {

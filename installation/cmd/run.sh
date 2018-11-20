@@ -26,11 +26,6 @@ do
             shift # past argument
             shift # past value
         ;;
-        --crtpl_path)
-            CRTPL_PATH="$2"
-            shift
-            shift
-        ;;
         --vm-driver)
             VM_DRIVER="$2"
             shift
@@ -63,17 +58,17 @@ bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver ${VM_DRIVER}
 
 bash ${CURRENT_DIR}/../scripts/generate-local-config.sh
 
-CRTPL_PATH=${CRTPL_PATH:-"$CURRENT_DIR/../resources/installer-cr.yaml.tpl"}
-
-if [ -z "$CR_PATH" ]; then
+if [[ -z "$CR_PATH" ]]; then
 
     TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
     CR_PATH="${TMPDIR}/installer-cr-local.yaml"
-    bash ${CURRENT_DIR}/../scripts/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}" --crtpl_path "${CRTPL_PATH}"
+    bash ${CURRENT_DIR}/../scripts/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}"
 
 fi
 
-FEATURE_GATES=${FEATURE_GATES:-","}
+if [[ -n "${FEATURE_GATES}" ]]; then
+    FEATURE_GATES_ARG="--feature-gates ${FEATURE_GATES}"
+fi
 
-bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}" --feature-gates "${FEATURE_GATES}"
+bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}" "${FEATURE_GATES_ARG}"
 rm -rf $TMPDIR
