@@ -59,7 +59,7 @@ projects = [
     "tests/ui-api-layer-acceptance-tests": "ui-api-layer-acceptance-tests",
     "tests/gateway-tests": "gateway-acceptance-tests",
     "tests/test-environments": "test-environments",
-    "tests/kubeless-test-client": "kubeless-test-client",
+    "tests/kubeless-integration": "kubeless-integration",
     "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
     "tests/connector-service-tests": "connector-service-tests",
     "tests/metadata-service-tests": "metadata-service-tests",
