@@ -11,32 +11,22 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   connector_service:
-    dir: rc/
-    version: 0.5-rc2
+    version: 0.5.0
   connector_service_tests:
-    dir: rc/
-    version: 0.5-rc2
+    version: 0.5.0
   event_service:
-    dir: rc/
-    version: 0.5-rc2
+    version: 0.5.0
   proxy_service:
-    dir: rc/
-    version: 0.5-rc2
+    version: 0.5.0
   gateway_tests:
-    dir: rc/
-    version: 0.5-rc2
+    version: 0.5.0
   metadata_service:
-    dir: rc/
-    version: 0.5-rc2
+    version: 0.5.0
   metadata_service_tests:
-    dir: rc/
-    version: 0.5-rc2
+    version: 0.5.0
   remote_environment_controller:
-    dir: rc/
-    version: 0.5-rc2
+    version: 0.5.0
   remote_environment_controller_tests:
-    dir: rc/
-    version: 0.5-rc2
+    version: 0.5.0
   remote_environment_broker:
-    dir: rc/
-    version: 0.5-rc2
+    version: 0.5.0

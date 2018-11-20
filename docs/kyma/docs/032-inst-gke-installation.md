@@ -99,9 +99,9 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 2. Create a cluster in the `europe-west1` region. Run:
     ```
-    gcloud beta container --project "$PROJECT" clusters \
+    gcloud container --project "$PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "latest" --machine-type "n1-standard-2" \
+    --cluster-version "1.10.7" --machine-type "n1-standard-2" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
     ```
 

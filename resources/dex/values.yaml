@@ -15,7 +15,6 @@ global:
   gateway:
     name: kyma-gateway
   static_users_generator:
-    dir: rc/
-    version: 0.5-rc2
+    version: 0.5.0
   containerRegistry:
     path: eu.gcr.io/kyma-project
