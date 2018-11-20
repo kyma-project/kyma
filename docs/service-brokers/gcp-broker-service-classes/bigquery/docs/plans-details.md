@@ -45,6 +45,6 @@ These are the binding parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `createServiceAccount` | `boolean` | Create a new service account for BigQuery binding. | NO | false |
-| `roles` | `array` | The list of BigQuery roles for this binding. Affects the level of access granted to the service account. These are the possible values of this parameter: "roles/bigquery.dataOwner", "roles/bigquery.dataEditor", "roles/bigquery.dataViewer", "roles/bigquery.user", "roles/bigquery.jobUser", "roles/bigquery.admin". The items in the roles array must be unique, which means that you can specify a given role only once. | YES | - |
+| `createServiceAccount` | `boolean` | Create a new service account for BigQuery binding. | NO | `false` |
+| `roles` | `array` | The list of BigQuery roles for this binding. Affects the level of access granted to the service account. These are the possible values of this parameter: `roles/bigquery.dataOwner`, `roles/bigquery.dataEditor`, `roles/bigquery.dataViewer`, `roles/bigquery.user`, `roles/bigquery.jobUser`, `roles/bigquery.admin`. The items in the roles array must be unique, which means that you can specify a given role only once. | YES | - |
 | `serviceAccount` | `string` | The GCP service account to which access is granted. | YES | - |
