@@ -203,6 +203,14 @@ echo "- Testing Core components..."
 helm test core --timeout 600
 coreTestErr=$?
 
+# execute monitoring tests if 'monitoring' is installed
+helm list | grep -q monitoring
+if [ $? -eq 0 ]
+then
+echo "- Montitoring module is intalled. Running tests for same"
+helm test monitoring --timeout 600
+fi
+
 checkAndCleanupTest kyma-system
 testCheckCore=$?
 
