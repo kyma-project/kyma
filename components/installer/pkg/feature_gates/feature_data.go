@@ -14,6 +14,7 @@ const (
 
 type Data interface {
 	IsEnabled(feature string) bool
+	Enabled() []string
 }
 
 func New(client *kubernetes.Clientset) (Data, error) {
@@ -33,6 +34,10 @@ func New(client *kubernetes.Clientset) (Data, error) {
 
 type featureData struct {
 	features []string
+}
+
+func (d *featureData) Enabled() []string {
+	return d.features
 }
 
 func (d *featureData) IsEnabled(feature string) bool {

@@ -1,6 +1,7 @@
 package overrides
 
 import (
+	"github.com/kyma-project/kyma/components/installer/pkg/feature_gates"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -49,10 +50,11 @@ func (o *Provider) ForRelease(releaseName string) (string, error) {
 }
 
 //New returns new Data instance.
-func New(client *kubernetes.Clientset) (OverrideData, error) {
+func New(client *kubernetes.Clientset, featureData feature_gates.Data) (OverrideData, error) {
 
 	r := &reader{
 		client: client,
+		featureData: featureData,
 	}
 
 	versionsMap, err := versionOverrides()

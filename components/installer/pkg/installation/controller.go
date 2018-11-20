@@ -194,14 +194,14 @@ func (c *Controller) syncHandler(key string) error {
 
 		c.installBackoff.step()
 
-		overrideProvider, overridesErr := overrides.New(c.kubeClientset)
+		featuresData, err := feature_gates.New(c.kubeClientset)
+		if c.errorHandlers.CheckError("Error while building feature gates: ", err)  {
+			return err
+		}
+
+		overrideProvider, overridesErr := overrides.New(c.kubeClientset, featuresData)
 		if c.errorHandlers.CheckError("Error while building overrides: ", overridesErr) {
 			return overridesErr
-		}
-    
-		featuresProvider, err := feature_gates.New(c.kubeClientset)
-		if c.errorHandlers.CheckError("Error while building feature gates: ", overridesErr)  {
-			return err
 		}
 
 		err = c.conditionManager.InstallStart()
@@ -209,7 +209,7 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 
-		err = c.kymaSteps.InstallKyma(installationData, overrideProvider, featuresProvider)
+		err = c.kymaSteps.InstallKyma(installationData, overrideProvider, featuresData)
 		if c.errorHandlers.CheckError("Error during install/update: ", err) {
 			c.conditionManager.InstallError()
 			return err

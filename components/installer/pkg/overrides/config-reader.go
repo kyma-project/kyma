@@ -1,6 +1,7 @@
 package overrides
 
 import (
+	"github.com/kyma-project/kyma/components/installer/pkg/feature_gates"
 	"strings"
 
 	core "k8s.io/api/core/v1"
@@ -19,7 +20,8 @@ var commonListOpts = metav1.ListOptions{LabelSelector: concatLabels(overridesLab
 var componentListOpts = metav1.ListOptions{LabelSelector: concatLabels(overridesLabelSelector, componentLabelSelector)}
 
 type reader struct {
-	client *kubernetes.Clientset
+	client      *kubernetes.Clientset
+	featureData feature_gates.Data
 }
 
 //Input overrides data (from ConfigMaps/Secrets)
@@ -34,7 +36,8 @@ type component struct {
 // Returned slice may contain several components with the same name!
 func (r reader) readComponentOverrides() ([]component, error) {
 
-	var components = []component{}
+	components := []component{}
+	featureOverrides := map[string][]component{}
 
 	configmaps, err := r.getLabeledConfigMaps(componentListOpts)
 	if err != nil {
@@ -51,7 +54,12 @@ func (r reader) readComponentOverrides() ([]component, error) {
 			name:      cMap.Labels["component"],
 			overrides: cMap.Data,
 		}
-		components = append(components, comp)
+		if feature, ok := cMap.ObjectMeta.Labels["feature"]; !ok {
+			components = append(components, comp)
+		} else if r.featureData.IsEnabled(feature) {
+			featureOverrides[feature] = append(featureOverrides[feature], comp)
+		}
+
 	}
 
 	for _, sec := range secrets {
@@ -59,7 +67,15 @@ func (r reader) readComponentOverrides() ([]component, error) {
 			name:      sec.Labels["component"],
 			overrides: toInputMap(sec.Data),
 		}
-		components = append(components, comp)
+		if feature, ok := sec.ObjectMeta.Labels["feature"]; !ok {
+			components = append(components, comp)
+		} else if r.featureData.IsEnabled(feature) {
+			featureOverrides[feature] = append(featureOverrides[feature], comp)
+		}
+	}
+
+	for _, f := range r.featureData.Enabled() {
+		components = append(components, featureOverrides[f]...)
 	}
 
 	return components, nil
@@ -68,6 +84,7 @@ func (r reader) readComponentOverrides() ([]component, error) {
 func (r reader) readCommonOverrides() ([]inputMap, error) {
 
 	res := []inputMap{}
+	featureOverrides := map[string][]inputMap{}
 
 	configmaps, err := r.getLabeledConfigMaps(commonListOpts)
 	if err != nil {
@@ -80,11 +97,19 @@ func (r reader) readCommonOverrides() ([]inputMap, error) {
 	}
 
 	for _, cMap := range configmaps {
-		res = append(res, cMap.Data)
+		if feature, ok := cMap.ObjectMeta.Labels["feature"]; !ok {
+			res = append(res, cMap.Data)
+		} else if r.featureData.IsEnabled(feature) {
+			featureOverrides[feature] = append(featureOverrides[feature], cMap.Data)
+		}
 	}
 
 	for _, sec := range secrets {
-		res = append(res, toInputMap(sec.Data))
+		if feature, ok := sec.ObjectMeta.Labels["feature"]; !ok {
+			res = append(res, toInputMap(sec.Data))
+		} else if r.featureData.IsEnabled(feature) {
+			featureOverrides[feature] = append(featureOverrides[feature], toInputMap(sec.Data))
+		}
 	}
 
 	return res, nil
