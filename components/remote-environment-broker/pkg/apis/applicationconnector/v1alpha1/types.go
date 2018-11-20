@@ -58,9 +58,11 @@ type Entry struct {
 	Type       string `json:"type"`
 	GatewayUrl string `json:"gatewayUrl"`
 	// AccessLabel is not required for Events, 'omitempty' is needed because of regexp validation
-	AccessLabel string      `json:"accessLabel,omitempty"`
-	TargetUrl   string      `json:"targetUrl"`
-	Credentials Credentials `json:"credentials,omitempty"`
+	AccessLabel      string      `json:"accessLabel,omitempty"`
+	TargetUrl        string      `json:"targetUrl"`
+	SpecificationUrl string      `json:"specificationUrl,omitempty"`
+	ApiType          string      `json:"apiType,omitempty"`
+	Credentials      Credentials `json:"credentials,omitempty"`
 }
 
 // Credentials defines type of authentication and where the credentials are stored

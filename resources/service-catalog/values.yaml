@@ -1,0 +1,15 @@
+etcd-stateful:
+  replicaCount: 1
+
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  istio:
+    gateway:
+      name: kyma-gateway
+  etcdBackup:
+    enabled: false
+    secretName: etcd-backup-abs-credentials
+  etcd_backup:
+    dir: develop/
+    version: 6e0a7fe2

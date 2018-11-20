@@ -139,13 +139,13 @@ func newServiceDefinitionService(minioURL, namespace string, proxyPort int, name
 	}
 
 	accessServiceManager := newAccessServiceManager(coreClientset, namespace, proxyPort)
-	secretsRepository := newSecretsRepository(coreClientset, namespace)
+	secretsService := newSecretsRepository(coreClientset, nameResolver, namespace)
 
 	uuidGenerator := metauuid.GeneratorFunc(func() string {
 		return uuid.NewV4().String()
 	})
 
-	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, secretsRepository, istioService)
+	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, secretsService, istioService)
 
 	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, remoteEnvironmentServiceRepository, minioService), nil
 }
@@ -171,10 +171,11 @@ func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace stri
 	return accessservice.NewAccessServiceManager(si, config)
 }
 
-func newSecretsRepository(coreClientset *kubernetes.Clientset, namespace string) secrets.Repository {
+func newSecretsRepository(coreClientset *kubernetes.Clientset, nameResolver k8sconsts.NameResolver, namespace string) secrets.Service {
 	sei := coreClientset.CoreV1().Secrets(namespace)
+	repository := secrets.NewRepository(sei)
 
-	return secrets.NewRepository(sei)
+	return secrets.NewService(repository, nameResolver)
 }
 
 func newIstioService(config *restclient.Config, namespace string) (istio.Service, apperrors.AppError) {

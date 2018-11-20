@@ -5,8 +5,6 @@
 kubectl delete installation/kyma-installation
 kubectl delete ns kyma-installer
 
-helm del --purge ec-default
-helm del --purge hmc-default
 helm del --purge dex
 helm del --purge core
 helm del --purge istio

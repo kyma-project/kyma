@@ -1,6 +1,6 @@
 image:
   repository: gcr.io/heptio-images/ark
-  tag: v0.9.9
+  tag: v0.10.0
   pullPolicy: IfNotPresent
 
 # A docker image with kubectl installed
@@ -29,29 +29,22 @@ tolerations: []
 
 nodeSelector: {}
 
-## Parameters for the ' default' Config resource
-## See https://heptio.github.io/ark/v0.9.0/config-definition
-configuration:
-  persistentVolumeProvider: 
-    name: 
-    config:
-      region:
-      apiTimeout:
+server:
+  resourcePriorities: namespaces,persistentvolumes,persistentvolumeclaims,remoteenvironments,environmentmappings,servicebrokers,serviceclasses,serviceinstances,servicebindings,secrets,configmaps,serviceaccounts,limitranges,podpresets,pods,replicaset
 
-  backupStorageProvider:
-    name: gcp
-    bucket: # required, if unset the deployment will be set to 0 replicas
-    config: {}
-    #  region:
-    #  s3ForcePathStyle:
-    #  s3Url:
-    #  kmsKeyId:
+backupStorageLocation:
+  provider: gcp
+  objectStorage:
+    bucket:
+  config:
+    resourceGroup: # Only for Azure
+    storageAccount: # Only for Azure
 
-  backupSyncPeriod: 60m
-  gcSyncPeriod: 60m
-  scheduleSyncPeriod: 1m
-  resourcePriorities: []
-  restoreOnlyMode: false
+volumeSnapshotLocation:
+  provider:
+  config:
+    apiTimeout: # Only for Azure
+    resourceGroup: # Only for Azure
 
 # Credentials for different cloud providers
 credentials:
@@ -68,3 +61,6 @@ credentials:
     ###
     ## For GCP/GKE please set:
     # cloud:
+
+prometheus:
+  serviceMonitorNamespace: kyma-system

@@ -1334,7 +1334,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_gc_duration_seconds{service=\"core-catalog-apiserver\"}",
+          "expr": "go_gc_duration_seconds{service=\"service-catalog-apiserver\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{quantile}}",
@@ -1509,7 +1509,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_threads{service=\"core-catalog-apiserver\"}",
+          "expr": "go_threads{service=\"service-catalog-apiserver\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{pod}}",
@@ -1717,7 +1717,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_goroutines{service=\"core-catalog-apiserver\"}",
+          "expr": "go_goroutines{service=\"service-catalog-apiserver\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{pod}}",
@@ -1772,8 +1772,8 @@
     "list": [
       {
         "current": {
-          "text": "core-catalog-apiserver",
-          "value": "core-catalog-apiserver"
+          "text": "service-catalog-apiserver",
+          "value": "service-catalog-apiserver"
         },
         "hide": 2,
         "label": null,
@@ -1781,17 +1781,17 @@
         "options": [
           {
             "selected": true,
-            "text": "core-catalog-apiserver",
-            "value": "core-catalog-apiserver"
+            "text": "service-catalog-apiserver",
+            "value": "service-catalog-apiserver"
           }
         ],
-        "query": "core-catalog-apiserver",
+        "query": "service-catalog-apiserver",
         "type": "constant"
       },
       {
         "current": {
-          "text": "core-catalog-controller-manager",
-          "value": "core-catalog-controller-manager"
+          "text": "service-catalog-controller-manager",
+          "value": "service-catalog-controller-manager"
         },
         "hide": 2,
         "label": null,
@@ -1799,17 +1799,17 @@
         "options": [
           {
             "selected": true,
-            "text": "core-catalog-controller-manager",
-            "value": "core-catalog-controller-manager"
+            "text": "service-catalog-controller-manager",
+            "value": "service-catalog-controller-manager"
           }
         ],
-        "query": "core-catalog-controller-manager",
+        "query": "service-catalog-controller-manager",
         "type": "constant"
       },
       {
         "current": {
-          "text": "core-catalog-etcd-stateful-client",
-          "value": "core-catalog-etcd-stateful-client"
+          "text": "service-catalog-etcd-stateful-client",
+          "value": "service-catalog-etcd-stateful-client"
         },
         "hide": 2,
         "label": null,
@@ -1817,17 +1817,17 @@
         "options": [
           {
             "selected": true,
-            "text": "core-catalog-etcd-stateful-client",
-            "value": "core-catalog-etcd-stateful-client"
+            "text": "service-catalog-etcd-stateful-client",
+            "value": "service-catalog-etcd-stateful-client"
           }
         ],
-        "query": "core-catalog-etcd-stateful-client",
+        "query": "service-catalog-etcd-stateful-client",
         "type": "constant"
       },
       {
         "current": {
-          "text": "core-catalog-etcd-stateful",
-          "value": "core-catalog-etcd-stateful"
+          "text": "service-catalog-etcd-stateful",
+          "value": "service-catalog-etcd-stateful"
         },
         "hide": 2,
         "label": null,
@@ -1835,11 +1835,11 @@
         "options": [
           {
             "selected": true,
-            "text": "core-catalog-etcd-stateful",
-            "value": "core-catalog-etcd-stateful"
+            "text": "service-catalog-etcd-stateful",
+            "value": "service-catalog-etcd-stateful"
           }
         ],
-        "query": "core-catalog-etcd-stateful",
+        "query": "service-catalog-etcd-stateful",
         "type": "constant"
       }
     ]

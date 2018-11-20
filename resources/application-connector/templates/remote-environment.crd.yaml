@@ -69,10 +69,18 @@ spec:
                           pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
                         targetUrl:
                           type: string
-                        oauthUrl:
-                          type: string
-                        credentialsSecretName:
-                          type: string
+                        credentials:
+                          type: object
+                          required:
+                          - "type"
+                          - "secretName"
+                          properties:
+                            type:
+                              type: string
+                            secretName:
+                              type: string
+                            authenticationUrl:
+                              type: string
                   tags:
                     type: array
                     items:
