@@ -14,7 +14,7 @@ data:
         "path": "/spec/template/spec/containers/0/args/15",
         "value": "zipkin.kyma-system:9411"
       }
-      {{ if .Values.global.isLocalEnv }}
+      {{ if .Values.global.isLocalEnv and .Values.exposeHostPorts }}
       ,{
         "op": "add",
         "path": "/spec/template/spec/containers/0/ports/0/hostPort",

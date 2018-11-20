@@ -34,9 +34,11 @@ type component struct {
 
 // Returns overrides for components
 // Returned slice may contain several components with the same name!
+// Overrides labeled with 'feature' are added at the end of result slice
+// in order of their appearance in feature gates list
 func (r reader) readComponentOverrides() ([]component, error) {
 
-	components := []component{}
+	var components []component
 	featureOverrides := map[string][]component{}
 
 	configmaps, err := r.getLabeledConfigMaps(componentListOpts)
@@ -67,10 +69,10 @@ func (r reader) readComponentOverrides() ([]component, error) {
 			name:      sec.Labels["component"],
 			overrides: toInputMap(sec.Data),
 		}
-		if feature, ok := sec.ObjectMeta.Labels["feature"]; !ok {
+		if f, ok := sec.ObjectMeta.Labels["feature"]; !ok {
 			components = append(components, comp)
-		} else if r.featureData.IsEnabled(feature) {
-			featureOverrides[feature] = append(featureOverrides[feature], comp)
+		} else if r.featureData.IsEnabled(f) {
+			featureOverrides[f] = append(featureOverrides[f], comp)
 		}
 	}
 
@@ -85,10 +87,10 @@ func (r reader) readComponentOverrides() ([]component, error) {
 
 func (r reader) readCommonOverrides() ([]inputMap, error) {
 
-	res := []inputMap{}
+	var res []inputMap
 	featureOverrides := map[string][]inputMap{}
 
-	configmaps, err := r.getLabeledConfigMaps(commonListOpts)
+	configMaps, err := r.getLabeledConfigMaps(commonListOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +100,7 @@ func (r reader) readCommonOverrides() ([]inputMap, error) {
 		return nil, err
 	}
 
-	for _, cMap := range configmaps {
+	for _, cMap := range configMaps {
 		if feature, ok := cMap.ObjectMeta.Labels["feature"]; !ok {
 			res = append(res, cMap.Data)
 		} else if r.featureData.IsEnabled(feature) {
@@ -125,11 +127,11 @@ func (r reader) readCommonOverrides() ([]inputMap, error) {
 
 func (r reader) getLabeledConfigMaps(opts metav1.ListOptions) ([]core.ConfigMap, error) {
 
-	configmaps, err := r.client.CoreV1().ConfigMaps(namespace).List(opts)
+	configMaps, err := r.client.CoreV1().ConfigMaps(namespace).List(opts)
 	if err != nil {
 		return nil, err
 	}
-	return configmaps.Items, nil
+	return configMaps.Items, nil
 }
 
 func (r reader) getLabeledSecrets(opts metav1.ListOptions) ([]core.Secret, error) {

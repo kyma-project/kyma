@@ -5,11 +5,11 @@ metadata:
   namespace: {{.Release.Namespace }}  
 spec:
   selector:
-    istio: ingressgateway # use istio default ingress gateway
+{{ toYaml .Values.selector | indent 4 }}
   servers:
   - port:
       number: 443
-      name: https
+      name: {{ .Values.portNamePrefix }}https
       protocol: HTTPS
     tls:
       mode: SIMPLE
@@ -19,7 +19,7 @@ spec:
     - "*.{{.Values.global.domainName}}"
   - port:
       number: 80
-      name: http
+      name: {{ .Values.portNamePrefix }}http
       protocol: HTTP
     tls:
       httpsRedirect: true # automatic 301 redirect from http to https

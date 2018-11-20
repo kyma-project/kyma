@@ -48,8 +48,8 @@ metadata:
   name: connector-service-overrides
   namespace: kyma-installer
   labels:
-  installer: overrides
-  component: application-connector
+    installer: overrides
+    component: application-connector
 data:
   connector-service.tests.skipSslVerify: "true"
 ---
@@ -59,8 +59,8 @@ metadata:
   name: core-overrides
   namespace: kyma-installer
   labels:
-  installer: overrides
-  component: core
+    installer: overrides
+    component: core
 data:
   console.cluster.headerLogoUrl: "assets/logo.svg"
   console.cluster.headerTitle: ""
@@ -72,8 +72,8 @@ metadata:
   name: istio-overrides
   namespace: kyma-installer
   labels:
-  installer: overrides
-  component: istio
+    installer: overrides
+    component: istio
 data:
   global.proxy.includeIPRanges: "10.0.0.1/8"
 
@@ -89,14 +89,3 @@ data:
 
   mixer.resources.limits.memory: 256Mi
   mixer.resources.requests.memory: 128Mi
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: knative-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    feature: knative
-data:
-  global.ingressgateway.serviceName: "knative-ingressgateway"

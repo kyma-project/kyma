@@ -14,7 +14,10 @@ global:
     path: eu.gcr.io/kyma-project
   istio:
     gateway:
+      selector:
+        istio: ingressgateway # use istio default ingress gateway
       name: kyma-gateway
+      portNamePrefix: ""
   etcdBackup:
     enabled: false
     secretName: etcd-backup-abs-credentials

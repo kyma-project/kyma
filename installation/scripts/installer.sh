@@ -7,6 +7,7 @@ RESOURCES_DIR="${CURRENT_DIR}/../resources"
 INSTALLER="${RESOURCES_DIR}/installer.yaml"
 INSTALLER_CONFIG=""
 FEATURE_GATES_CONFIG="${RESOURCES_DIR}/installer-feature-gates.yaml.tpl"
+KNATIVE_CONFIG="${RESOURCES_DIR}/isntaller-config-knative.yaml.tpl"
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -68,7 +69,7 @@ fi
 
 
 echo -e "\nApplying installation combo yaml"
-bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} | kubectl apply -f -
+bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} ${KNATIVE_CONFIG} | kubectl apply -f -
 
 echo -e "\nEnabled feature gates: $FEATURE_GATES"
 cat ${FEATURE_GATES_CONFIG} | sed 's/__FEATURE_GATES__/'${FEATURE_GATES}'/g' | kubectl apply -f -
