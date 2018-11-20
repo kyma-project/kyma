@@ -37,6 +37,7 @@ data:
   global.alertTools.credentials.slack.channel: ""
   global.alertTools.credentials.victorOps.routingkey: ""
   global.alertTools.credentials.victorOps.apikey: ""
+  global.ingressgateway.namespace: "istio-system"
   nginx-ingress.controller.service.loadBalancerIP: ""
   cluster-users.users.adminGroup: ""
 ---
@@ -75,7 +76,7 @@ metadata:
 data:
   deployment.args.sourceType: commerce
   service.externalapi.nodePort: "32001"
----  
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -111,3 +112,14 @@ data:
 
   mixer.resources.limits.memory: 256Mi
   mixer.resources.requests.memory: 128Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    feature: knative
+data:
+  global.ingressgateway.serviceName: "knative-ingressgateway"

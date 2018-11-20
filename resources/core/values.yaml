@@ -32,8 +32,8 @@ global:
     dir: develop/
     version: 8c274255
   api_controller_acceptance_tests:
-    dir: develop/
-    version: 488696a0
+    dir: pr/
+    version: PR-1709
   apiserver_proxy:
     dir: develop/
     version: 6e0a7fe2
