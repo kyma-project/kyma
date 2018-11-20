@@ -21,7 +21,7 @@ KYMA_GW=$(jq '
 kubectl replace -f - <<<"$KYMA_GW"
 
 # Enable TLS in knative gateway
-KNATIVE_GW=$(kubectl get gateway -n kyma-system kyma-gateway -o json)
+KNATIVE_GW=$(kubectl get gateway -n knative-serving knative-shared-gateway -o json)
 KNATIVE_GW=$(jq '
     .spec.servers = (
         .spec.servers | map (
@@ -36,8 +36,8 @@ KNATIVE_GW=$(jq '
         )
     ) |
     .spec.selector = {"knative": "ingressgateway"}
-' <<<"KNATIVE_GW")
-kubectl replace -f - <<<"KNATIVE_GW"
+' <<<"$KNATIVE_GW")
+kubectl replace -f - <<<"$KNATIVE_GW"
 
 if [[ -n "$IS_LOCAL_ENV" ]]; then
 
@@ -67,5 +67,5 @@ if [[ -n "$IS_LOCAL_ENV" ]]; then
         del(.status)
     ' <<<"$KNATIVE_INGRESSGW")
     kubectl replace -f - <<<"$KNATIVE_INGRESSGW"
-    
+
 fi
