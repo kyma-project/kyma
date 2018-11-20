@@ -115,17 +115,24 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 ### Using the latest GitHub release
 
-1. Download the `kyma-config-cluster` file from the [0.5.0 release](https://github.com/kyma-project/kyma/releases/tag/0.5.0). Run:
+1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use. 
+
+2. Export the version you chose as an environment variable. Run: 
+    ```
+    export LATEST={KYMA_RELEASE_VERSION}
+    ```
+
+3. Download the `kyma-config-cluster` file from the release you chose. Run:
    ```
-   wget https://github.com/kyma-project/kyma/releases/download/0.5.0/kyma-config-cluster.yaml
+   wget https://github.com/kyma-project/kyma/releases/download/${LATEST}/kyma-config-cluster.yaml
    ```
 
-2. Update the file with the values from your environment variables. Run:
+4. Update the file with the values from your environment variables. Run:
     ```
     cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g"|sed -e "s/__.*__//g"  >my-kyma.yaml
     ```
 
-3. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
+5. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
 
 
 ### Using your own image
