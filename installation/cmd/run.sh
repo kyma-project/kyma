@@ -36,6 +36,11 @@ do
             shift
             shift
         ;;
+        --installer-version)
+            INSTALLER_VERSION="--installer-version $2"
+            shift
+            shift
+            ;;
         *)    # unknown option
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
@@ -54,7 +59,7 @@ if [[ ! ${SKIP_MINIKUBE_START} ]]; then
     bash ${CURRENT_DIR}/../scripts/minikube.sh ${MINIKUBE_ARGS}
 fi
 
-bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver ${VM_DRIVER}
+bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver ${VM_DRIVER} ${INSTALLER_VERSION}
 
 bash ${CURRENT_DIR}/../scripts/generate-local-config.sh
 
