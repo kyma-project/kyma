@@ -38,6 +38,7 @@ data:
   global.alertTools.credentials.victorOps.routingkey: ""
   global.alertTools.credentials.victorOps.apikey: ""
   global.ingressgateway.namespace: "istio-system"
+  global.ingressgateway.serviceName: "istio-ingressgateway"
   nginx-ingress.controller.service.loadBalancerIP: ""
   cluster-users.users.adminGroup: ""
 ---
@@ -47,8 +48,8 @@ metadata:
   name: connector-service-overrides
   namespace: kyma-installer
   labels:
-    installer: overrides
-    component: application-connector
+  installer: overrides
+  component: application-connector
 data:
   connector-service.tests.skipSslVerify: "true"
 ---
@@ -58,8 +59,8 @@ metadata:
   name: core-overrides
   namespace: kyma-installer
   labels:
-    installer: overrides
-    component: core
+  installer: overrides
+  component: core
 data:
   console.cluster.headerLogoUrl: "assets/logo.svg"
   console.cluster.headerTitle: ""
@@ -71,8 +72,8 @@ metadata:
   name: istio-overrides
   namespace: kyma-installer
   labels:
-    installer: overrides
-    component: istio
+  installer: overrides
+  component: istio
 data:
   global.proxy.includeIPRanges: "10.0.0.1/8"
 

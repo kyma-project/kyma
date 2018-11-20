@@ -75,7 +75,9 @@ func (r reader) readComponentOverrides() ([]component, error) {
 	}
 
 	for _, f := range r.featureData.Enabled() {
-		components = append(components, featureOverrides[f]...)
+		if _, ok := featureOverrides[f]; ok {
+			components = append(components, featureOverrides[f]...)
+		}
 	}
 
 	return components, nil
@@ -109,6 +111,12 @@ func (r reader) readCommonOverrides() ([]inputMap, error) {
 			res = append(res, toInputMap(sec.Data))
 		} else if r.featureData.IsEnabled(feature) {
 			featureOverrides[feature] = append(featureOverrides[feature], toInputMap(sec.Data))
+		}
+	}
+
+	for _, f := range r.featureData.Enabled() {
+		if _, ok := featureOverrides[f]; ok {
+			res = append(res, featureOverrides[f]...)
 		}
 	}
 
