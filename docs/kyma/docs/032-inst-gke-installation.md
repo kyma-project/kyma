@@ -99,9 +99,9 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 2. Create a cluster in the `europe-west1` region. Run:
     ```
-    gcloud beta container --project "$PROJECT" clusters \
+    gcloud container --project "$PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.10.7-gke.11" --machine-type "n1-standard-2" \
+    --cluster-version "1.10.7" --machine-type "n1-standard-2" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
     ```
 
@@ -115,10 +115,9 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 ### Using the latest GitHub release
 
-1. Download the `kyma-config-cluster` file bundled with the latest Kyma [release](https://github.com/kyma-project/kyma/releases/). Run:
+1. Download the `kyma-config-cluster` file from the [0.5.0 release](https://github.com/kyma-project/kyma/releases/tag/0.5.0). Run:
    ```
-   LATEST=$(curl https://github.com/kyma-project/kyma/releases/latest -I|grep Location:| rev | cut -d'/' -f1 | rev|tr -d '\r')
-   wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-cluster.yaml
+   wget https://github.com/kyma-project/kyma/releases/download/0.5.0/kyma-config-cluster.yaml
    ```
 
 2. Update the file with the values from your environment variables. Run:
