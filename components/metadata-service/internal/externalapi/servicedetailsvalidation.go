@@ -34,6 +34,11 @@ func NewServiceDetailsValidator() ServiceDetailsValidator {
 			return apperr
 		}
 
+		apperr = validateApiCredentials(details.Api)
+		if err != nil {
+			return apperr
+		}
+
 		apperr = validateEventsSpec(details.Events)
 		if apperr != nil {
 			return apperr
@@ -59,6 +64,16 @@ func validateEventsSpec(events *Events) apperrors.AppError {
 		err := validateSpec(events.Spec)
 		if err != nil {
 			return apperrors.WrongInput("events.Spec is not a proper json object, %s", err.Error())
+		}
+	}
+
+	return nil
+}
+
+func validateApiCredentials(api *API) apperrors.AppError {
+	if api != nil && api.Credentials != nil {
+		if api.Credentials.Basic != nil && api.Credentials.Oauth != nil {
+			return apperrors.WrongInput("api.Credentials is invalid: both basic and oauth credentials provided")
 		}
 	}
 

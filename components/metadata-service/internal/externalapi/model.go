@@ -2,10 +2,9 @@ package externalapi
 
 import (
 	"encoding/json"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
 )
 
 type Service struct {
@@ -40,13 +39,19 @@ type API struct {
 }
 
 type Credentials struct {
-	Oauth Oauth `json:"oauth" valid:"required~oauth field cannot be empty"`
+	Oauth *Oauth     `json:"oauth,omitempty"`
+	Basic *BasicAuth `json:"basic,omitempty"`
 }
 
 type Oauth struct {
 	URL          string `json:"url" valid:"url,required~oauth url field cannot be empty"`
 	ClientID     string `json:"clientId" valid:"required~oauth clientId field cannot be empty"`
 	ClientSecret string `json:"clientSecret" valid:"required~oauth clientSecret cannot be empty"`
+}
+
+type BasicAuth struct {
+	Username string `json:"username" valid:"required~basic auth username field cannot be empty"`
+	Password string `json:"password" valid:"required~basic auth password field cannot be empty"`
 }
 
 type Events struct {
@@ -69,7 +74,7 @@ type DocsObject struct {
 
 const stars = "********"
 
-func serviceDefinitionToService(serviceDefinition metadata.ServiceDefinition) Service {
+func serviceDefinitionToService(serviceDefinition model.ServiceDefinition) Service {
 	return Service{
 		ID:          serviceDefinition.ID,
 		Name:        serviceDefinition.Name,
@@ -80,7 +85,7 @@ func serviceDefinitionToService(serviceDefinition metadata.ServiceDefinition) Se
 	}
 }
 
-func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinition) (ServiceDetails, apperrors.AppError) {
+func serviceDefinitionToServiceDetails(serviceDefinition model.ServiceDefinition) (ServiceDetails, apperrors.AppError) {
 	serviceDetails := ServiceDetails{
 		Provider:         serviceDefinition.Provider,
 		Name:             serviceDefinition.Name,
@@ -100,12 +105,23 @@ func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinit
 		}
 
 		if serviceDefinition.Api.Credentials != nil {
-			serviceDetails.Api.Credentials = &Credentials{
-				Oauth: Oauth{
-					ClientID:     stars,
-					ClientSecret: stars,
-					URL:          serviceDefinition.Api.Credentials.Oauth.URL,
-				},
+			if serviceDefinition.Api.Credentials.Oauth != nil {
+				serviceDetails.Api.Credentials = &Credentials{
+					Oauth: &Oauth{
+						ClientID:     stars,
+						ClientSecret: stars,
+						URL:          serviceDefinition.Api.Credentials.Oauth.URL,
+					},
+				}
+			}
+
+			if serviceDefinition.Api.Credentials.Basic != nil {
+				serviceDetails.Api.Credentials = &Credentials{
+					Basic: &BasicAuth{
+						Username: stars,
+						Password: stars,
+					},
+				}
 			}
 		}
 	}
@@ -127,8 +143,8 @@ func serviceDefinitionToServiceDetails(serviceDefinition metadata.ServiceDefinit
 	return serviceDetails, nil
 }
 
-func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (metadata.ServiceDefinition, apperrors.AppError) {
-	serviceDefinition := metadata.ServiceDefinition{
+func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.ServiceDefinition, apperrors.AppError) {
+	serviceDefinition := model.ServiceDefinition{
 		Provider:         serviceDetails.Provider,
 		Name:             serviceDetails.Name,
 		Description:      serviceDetails.Description,
@@ -141,16 +157,27 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (metadata.
 	}
 
 	if serviceDetails.Api != nil {
-		serviceDefinition.Api = &serviceapi.API{
+		serviceDefinition.Api = &model.API{
 			TargetUrl: serviceDetails.Api.TargetUrl,
 		}
 		if serviceDetails.Api.Credentials != nil {
-			serviceDefinition.Api.Credentials = &serviceapi.Credentials{
-				Oauth: serviceapi.Oauth{
-					ClientID:     serviceDetails.Api.Credentials.Oauth.ClientID,
-					ClientSecret: serviceDetails.Api.Credentials.Oauth.ClientSecret,
-					URL:          serviceDetails.Api.Credentials.Oauth.URL,
-				},
+			if serviceDetails.Api.Credentials.Oauth != nil {
+				serviceDefinition.Api.Credentials = &model.Credentials{
+					Oauth: &model.Oauth{
+						ClientID:     serviceDetails.Api.Credentials.Oauth.ClientID,
+						ClientSecret: serviceDetails.Api.Credentials.Oauth.ClientSecret,
+						URL:          serviceDetails.Api.Credentials.Oauth.URL,
+					},
+				}
+			}
+
+			if serviceDetails.Api.Credentials.Basic != nil {
+				serviceDefinition.Api.Credentials = &model.Credentials{
+					Basic: &model.Basic{
+						Username: serviceDetails.Api.Credentials.Basic.Username,
+						Password: serviceDetails.Api.Credentials.Basic.Password,
+					},
+				}
 			}
 		}
 		if serviceDetails.Api.Spec != nil {
@@ -159,7 +186,7 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (metadata.
 	}
 
 	if serviceDetails.Events != nil && serviceDetails.Events.Spec != nil {
-		serviceDefinition.Events = &metadata.Events{
+		serviceDefinition.Events = &model.Events{
 			Spec: compact(serviceDetails.Events.Spec),
 		}
 	}

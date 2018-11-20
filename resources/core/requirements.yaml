@@ -3,8 +3,6 @@ dependencies:
     condition: apiserver-proxy.enabled
   - name: monitoring
     condition: monitoring.enabled
-  - name: service-catalog
-    condition: service-catalog.enabled
   - name: console
     condition: console.enabled
   - name: helm-broker

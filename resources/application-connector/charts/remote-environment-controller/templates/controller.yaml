@@ -29,6 +29,8 @@ spec:
         - "--proxyServiceImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.proxy_service.dir }}proxy-service:{{ .Values.global.proxy_service.version }}"
         - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service.dir }}event-service:{{ .Values.global.event_service.version }}"
         - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.gateway_tests.dir }}gateway-acceptance-tests:{{ .Values.global.gateway_tests.version }}"
+        - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
+        - "--installationTimeout={{ .Values.controller.args.installationTimeout }}"
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.remote_environment_controller.dir }}remote-environment-controller:{{ .Values.global.remote_environment_controller.version }}
         imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
         resources:

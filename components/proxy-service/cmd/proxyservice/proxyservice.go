@@ -7,16 +7,14 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/authorization"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httptools"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/secrets"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/proxycache"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy/tokencache"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
@@ -34,11 +32,6 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
-	proxyCache := proxycache.NewProxyCache(options.skipVerify, options.proxyCacheTTL)
-	tokenCache := tokencache.NewTokenCache()
-
-	nameResolver := k8sconsts.NewNameResolver(options.remoteEnvironment, options.namespace)
-
 	serviceDefinitionService, err := newServiceDefinitionService(
 		options.namespace,
 		options.remoteEnvironment,
@@ -48,7 +41,7 @@ func main() {
 		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
 	}
 
-	internalHandler := newInternalHandler(serviceDefinitionService, nameResolver, proxyCache, tokenCache, options.skipVerify, options.proxyTimeout)
+	internalHandler := newInternalHandler(serviceDefinitionService, options)
 	externalHandler := externalapi.NewHandler()
 
 	if options.requestLogging {
@@ -84,14 +77,24 @@ func main() {
 	wg.Wait()
 }
 
-func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, nameResolver k8sconsts.NameResolver,
-	httpProxyCache proxycache.HTTPProxyCache, tokenCache tokencache.TokenCache, skipVerify bool, proxyTimeout int) http.Handler {
+func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
 	if serviceDefinitionService != nil {
-		oauthClient := proxy.NewOauthClient(proxyTimeout, tokenCache)
-
-		return proxy.New(nameResolver, serviceDefinitionService, oauthClient, httpProxyCache, skipVerify, proxyTimeout)
+		authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
+		proxyConfig := proxy.Config{
+			SkipVerify:        options.skipVerify,
+			ProxyTimeout:      options.proxyTimeout,
+			RemoteEnvironment: options.remoteEnvironment,
+			ProxyCacheTTL:     options.proxyCacheTTL,
+		}
+		return proxy.New(serviceDefinitionService, authStrategyFactory, proxyConfig)
 	}
 	return proxy.NewInvalidStateHandler("Proxy Service is not initialized properly")
+}
+
+func newAuthenticationStrategyFactory(oauthClientTimeout int) authorization.StrategyFactory {
+	return authorization.NewStrategyFactory(authorization.FactoryConfiguration{
+		OAuthClientTimeout: oauthClientTimeout,
+	})
 }
 
 func newServiceDefinitionService(namespace string, remoteEnvironment string) (metadata.ServiceDefinitionService, apperrors.AppError) {

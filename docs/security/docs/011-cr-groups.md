@@ -3,13 +3,13 @@ title: Group
 type: Custom Resource
 ---
 
-The `groups.authentication.kyma-project.io` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format that represents user groups available in the ID provider in the Kyma cluster. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `groups.authentication.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format that represents user groups available in the ID provider in the Kyma cluster. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```
 kubectl get crd groups.authentication.kyma-project.io -o yaml
 ```
 
-## Sample Custom Resource
+## Sample custom resource
 
 This is a sample CR that represents an user group available in the ID provider in the Kyma cluster.
 

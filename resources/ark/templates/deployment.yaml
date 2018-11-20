@@ -1,5 +1,5 @@
-{{- if .Values.configuration.backupStorageProvider.name -}}
-{{- $provider := .Values.configuration.backupStorageProvider.name -}}
+{{- if .Values.backupStorageLocation.provider -}}
+{{- $provider := .Values.backupStorageLocation.provider -}}
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -10,7 +10,7 @@ metadata:
     chart: {{ template "ark.chart" . }}
     heritage: {{ .Release.Service }}
 spec:
-  {{- if .Values.configuration.backupStorageProvider.bucket }}
+  {{- if .Values.backupStorageLocation.objectStorage.bucket }}
   replicas: 1
   {{- else }}
   replicas: 0
@@ -42,6 +42,10 @@ spec:
             - /ark
           args:
             - server
+            {{ if .Values.server.resourcePriorities}}
+            - --restore-resource-priorities
+            - {{ .Values.server.resourcePriorities }}
+            {{- end }}
           {{- if eq $provider "azure" }}
           envFrom:
             - secretRef:

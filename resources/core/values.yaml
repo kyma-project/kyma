@@ -2,10 +2,6 @@ dex:
   tls:
     createSecret: false
 
-service-catalog:
-  etcd-stateful:
-    replicaCount: 1
-
 minio:
   service:
     type: NodePort
@@ -24,7 +20,7 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: 3d71d245
+    version: eb722544
   alpine_net:
     dir: develop/
     version: ed568f0f
@@ -45,7 +41,7 @@ global:
     version: 4a23580f
   docs:
     dir: develop/
-    version: 8c274255
+    version: 1ecf2683
   environments:
     dir: develop/
     version: 6e0a7fe2

@@ -45,7 +45,7 @@ export BACKUP_FILE_NAME=/path/to/downloaded/file
 ```bash
 for i in {0..2};
 do
-kubectl cp ./$BACKUP_FILE_NAME kyma-system/core-catalog-etcd-stateful-$i:/$BACKUP_FILE_NAME
+kubectl cp ./$BACKUP_FILE_NAME kyma-system/service-catalog-etcd-stateful-$i:/$BACKUP_FILE_NAME
 done
 ```
 
@@ -55,25 +55,25 @@ done
 for i in {0..2};
 do
   remoteCommand="etcdctl snapshot restore /$BACKUP_FILE_NAME "
-  remoteCommand+="--name core-catalog-etcd-stateful-$i --initial-cluster "
-  remoteCommand+="core-catalog-etcd-stateful-0=https://core-catalog-etcd-stateful-0.core-catalog-etcd-stateful.kyma-system.svc.cluster.local:2380,"
-  remoteCommand+="core-catalog-etcd-stateful-1=https://core-catalog-etcd-stateful-1.core-catalog-etcd-stateful.kyma-system.svc.cluster.local:2380,"
-  remoteCommand+="core-catalog-etcd-stateful-2=https://core-catalog-etcd-stateful-2.core-catalog-etcd-stateful.kyma-system.svc.cluster.local:2380 "
+  remoteCommand+="--name service-catalog-etcd-stateful-$i --initial-cluster "
+  remoteCommand+="service-catalog-etcd-stateful-0=https://service-catalog-etcd-stateful-0.service-catalog-etcd-stateful.kyma-system.svc.cluster.local:2380,"
+  remoteCommand+="service-catalog-etcd-stateful-1=https://service-catalog-etcd-stateful-1.service-catalog-etcd-stateful.kyma-system.svc.cluster.local:2380,"
+  remoteCommand+="service-catalog-etcd-stateful-2=https://service-catalog-etcd-stateful-2.service-catalog-etcd-stateful.kyma-system.svc.cluster.local:2380 "
   remoteCommand+="--initial-cluster-token etcd-cluster-1 "
-  remoteCommand+="--initial-advertise-peer-urls https://core-catalog-etcd-stateful-$i.core-catalog-etcd-stateful.kyma-system.svc.cluster.local:2380"
+  remoteCommand+="--initial-advertise-peer-urls https://service-catalog-etcd-stateful-$i.service-catalog-etcd-stateful.kyma-system.svc.cluster.local:2380"
 
-  kubectl exec core-catalog-etcd-stateful-$i -n kyma-system -- sh -c "rm -rf core-catalog-etcd-stateful-$i.etcd"
-  kubectl exec core-catalog-etcd-stateful-$i -n kyma-system -- sh -c "rm -rf /var/run/etcd/backup.etcd"
-  kubectl exec core-catalog-etcd-stateful-$i -n kyma-system -- sh -c "$remoteCommand"
-  kubectl exec core-catalog-etcd-stateful-$i -n kyma-system -- sh -c "mv -f core-catalog-etcd-stateful-$i.etcd /var/run/etcd/backup.etcd"
-  kubectl exec core-catalog-etcd-stateful-$i -n kyma-system -- sh -c "rm $BACKUP_FILE_NAME"
+  kubectl exec service-catalog-etcd-stateful-$i -n kyma-system -- sh -c "rm -rf service-catalog-etcd-stateful-$i.etcd"
+  kubectl exec service-catalog-etcd-stateful-$i -n kyma-system -- sh -c "rm -rf /var/run/etcd/backup.etcd"
+  kubectl exec service-catalog-etcd-stateful-$i -n kyma-system -- sh -c "$remoteCommand"
+  kubectl exec service-catalog-etcd-stateful-$i -n kyma-system -- sh -c "mv -f service-catalog-etcd-stateful-$i.etcd /var/run/etcd/backup.etcd"
+  kubectl exec service-catalog-etcd-stateful-$i -n kyma-system -- sh -c "rm $BACKUP_FILE_NAME"
 done
 ```
 
 5. Delete old Pods.
 
 ```bash
-kubectl delete pod core-catalog-etcd-stateful-0 core-catalog-etcd-stateful-1 core-catalog-etcd-stateful-2 -n kyma-system
+kubectl delete pod service-catalog-etcd-stateful-0 service-catalog-etcd-stateful-1 service-catalog-etcd-stateful-2 -n kyma-system
 ```
 
 [etcd-backup-operator]:https://github.com/coreos/etcd-operator/blob/master/doc/user/walkthrough/backup-operator.md
@@ -81,8 +81,8 @@ kubectl delete pod core-catalog-etcd-stateful-0 core-catalog-etcd-stateful-1 cor
 <!-- These absolute paths should be replaced with the relative links after adding this functionality to Kyma -->
 [az-cli]:https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest
 
-[sc-etcd-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd-stateful/templates
-[sc-backup-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd-stateful/templates/05-backup-job.yaml
+[sc-etcd-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/etcd-stateful/templates
+[sc-backup-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/etcd-stateful/templates/05-backup-job.yaml
 [etcd-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator
 [etcd-backup-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator/templates/backup-deployment.yaml
 [core-chart-values]:https://github.com/kyma-project/kyma/blob/master/resources/core/values.yaml

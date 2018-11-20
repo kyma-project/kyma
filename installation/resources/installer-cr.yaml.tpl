@@ -21,6 +21,8 @@ spec:
       namespace: "kyma-system"
     - name: "dex"
       namespace: "kyma-system"
+    - name: "service-catalog"
+      namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
     - name: "knative-configure"
@@ -28,6 +30,3 @@ spec:
       feature: knative
     - name: "application-connector"
       namespace: "kyma-system"
-    - name: "remote-environments"
-      namespace: "kyma-integration"
-      release: "default-remote-environments"
