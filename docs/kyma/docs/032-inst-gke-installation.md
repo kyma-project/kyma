@@ -124,7 +124,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 3. Download the `kyma-config-cluster` file from the release you chose. Run:
    ```
-   wget https://github.com/kyma-project/kyma/releases/download/${LATEST}/kyma-config-cluster.yaml
+   wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-cluster.yaml
    ```
 
 4. Update the file with the values from your environment variables. Run:

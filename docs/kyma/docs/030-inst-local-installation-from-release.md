@@ -70,17 +70,24 @@ $ kubectl apply -f ./resources/default-sa-rbac-role.yaml
 $ ./scripts/install-tiller.sh
 ```
 
-5. Configure the Kyma installation using the local configuration file from the 0.5.0 release:
+5. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use. 
+
+6. Export the version you chose as an environment variable. Run: 
 ```
-$ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/0.5.0/kyma-config-local.yaml
+$ export LATEST={KYMA_RELEASE_VERSION}
 ```
 
-6. To trigger the installation process, label the `kyma-installation` custom resource:
+7. Configure the Kyma installation using the local configuration file from the $LATEST release:
+```
+$ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml
+```
+
+8. To trigger the installation process, label the `kyma-installation` custom resource:
 ```
 $ kubectl label installation/kyma-installation action=install
 ```
 
-7. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
+9. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
 ```
 $ ./scripts/is-installed.sh
 ```
