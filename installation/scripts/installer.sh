@@ -68,9 +68,10 @@ fi
 
 
 echo -e "\nApplying installation combo yaml"
-bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} ${FEATURE_GATES_CONFIG} \
-| sed 's/__FEATURE_GATES__/'${FEATURE_GATES}'/g' \
-| kubectl apply -f -
+bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} | kubectl apply -f -
+
+echo -e "\nEnabled feature gates: $FEATURE_GATES"
+cat ${FEATURE_GATES_CONFIG} | sed 's/__FEATURE_GATES__/'${FEATURE_GATES}'/g' | kubectl apply -f -
 
 echo -e "\nTriggering installation"
 kubectl label installation/kyma-installation action=install

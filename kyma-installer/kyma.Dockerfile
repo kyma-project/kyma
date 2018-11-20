@@ -1,5 +1,6 @@
 ARG INSTALLER_VERSION=7bd3337d
-FROM eu.gcr.io/kyma-project/develop/installer:$INSTALLER_VERSION
+ARG INSTALLER_DIR=develop
+FROM eu.gcr.io/kyma-project/$INSTALLER_DIR/installer:$INSTALLER_VERSION
 
 LABEL source="git@github.com:kyma-project/kyma.git"
 

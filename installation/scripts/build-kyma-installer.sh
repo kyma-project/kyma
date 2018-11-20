@@ -25,7 +25,12 @@ do
             shift # past value
             ;;
         --installer-version)
-            BUILD_ARG="--build-arg INSTALLER_VERSION=$2"
+            BUILD_ARG="$BUILD_ARG --build-arg INSTALLER_VERSION=$2"
+            shift
+            shift
+            ;;
+        --installer-dir)
+            BUILD_ARG="$BUILD_ARG --build-arg INSTALLER_DIR=$2"
             shift
             shift
             ;;

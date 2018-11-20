@@ -32,12 +32,17 @@ do
             shift
         ;;
         --feature-gates)
-            FEATURE_GATES="$2"
+            FEATURE_GATES="--feature-gates $2"
             shift
             shift
         ;;
         --installer-version)
             INSTALLER_VERSION="--installer-version $2"
+            shift
+            shift
+            ;;
+        --installer-dir)
+            INSTALLER_DIR="--installer-dir $2"
             shift
             shift
             ;;
@@ -59,7 +64,7 @@ if [[ ! ${SKIP_MINIKUBE_START} ]]; then
     bash ${CURRENT_DIR}/../scripts/minikube.sh ${MINIKUBE_ARGS}
 fi
 
-bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver ${VM_DRIVER} ${INSTALLER_VERSION}
+bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver ${VM_DRIVER} ${INSTALLER_VERSION} ${INSTALLER_DIR}
 
 bash ${CURRENT_DIR}/../scripts/generate-local-config.sh
 
@@ -71,9 +76,5 @@ if [[ -z "$CR_PATH" ]]; then
 
 fi
 
-if [[ -n "${FEATURE_GATES}" ]]; then
-    FEATURE_GATES_ARG="--feature-gates ${FEATURE_GATES}"
-fi
-
-bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}" "${FEATURE_GATES_ARG}"
+bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}" ${FEATURE_GATES}
 rm -rf $TMPDIR
