@@ -17,8 +17,6 @@ dependencies:
     condition: event-bus.enabled
   - name: kubeless
     condition: kubeless.enabled
-  - name: jaeger
-    condition: jaeger.enabled
   - name: ui-api
     condition: ui-api.enabled
   - name: docs
