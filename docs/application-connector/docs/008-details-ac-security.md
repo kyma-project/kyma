@@ -23,7 +23,7 @@ Follow these steps to disable SSL certificate verification for communication bet
   3. Find the **skipVerify** parameter and change its value to `true`.
   4. Select `esc`, type `:wq`, and select `enter` to write and quit.
 
-## Override API security type
+## Override the API security type
 
 The Metadata Service allows you to register APIs:
 - secured with Basic Authentication
@@ -32,8 +32,8 @@ The Metadata Service allows you to register APIs:
 
 The Proxy Service calls the registered APIs accordingly, basing on the security type specified in the API registration process.
 
-The Proxy Service overrides the registered APIs security type if it gets a request which contains the `Access-Token` header. In such case, the Proxy Service rewrites the token from the `Access-Token` header into an OAuth-compliant `Authorization` header and forwards it to the target API.
+The Proxy Service overrides the registered APIs security type if it gets a request which contains the **Access-Token** header. In such a case, the Proxy Service rewrites the token from the **Access-Token** header into an OAuth-compliant **Authorization** header and forwards it to the target API.
 
-This mechanism is suited for implementations, in which an external application handles user authentication.
+This mechanism is suited for implementations in which an external application handles user authentication.
 
-See [this](https://github.com/kyma-project/examples/tree/master/call-ec) example to see such implementation in action.
+See [this](https://github.com/kyma-project/examples/tree/master/call-ec) example to see such an implementation in action.

@@ -11,7 +11,7 @@ Valid certificate signed by the Kyma Certificate Authority.
 
 ## Register a service
 
-To register a service with an API secured with Basic Authentication, follow this template to prepare the request body:
+To register a service with a Basic Authentication-secured API, follow this template to prepare the request body:
 
 ```
 {
