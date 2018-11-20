@@ -7,14 +7,14 @@ metadata:
     app: istio-kyma-patch
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
-  istio-ingressgateway.deployment.patch.json: |
+  "{{ .Values.global.ingressgateway.serviceName }}.deployment.patch.json": |
     [
       {
         "op": "replace",
         "path": "/spec/template/spec/containers/0/args/15",
         "value": "zipkin.kyma-system:9411"
       }
-      {{ if .Values.global.isLocalEnv and .Values.exposeHostPorts }}
+      {{ if .Values.global.isLocalEnv }}
       ,{
         "op": "add",
         "path": "/spec/template/spec/containers/0/ports/0/hostPort",

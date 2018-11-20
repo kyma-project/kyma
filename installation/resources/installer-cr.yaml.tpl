@@ -25,8 +25,5 @@ spec:
       namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
-    - name: "knative-configure"
-      namespace: "knative-installer"
-      feature: knative
     - name: "application-connector"
       namespace: "kyma-system"

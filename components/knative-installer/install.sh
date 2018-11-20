@@ -27,6 +27,25 @@ ${DIR}/is-ready.sh knative-serving app autoscaler
 ${DIR}/is-ready.sh knative-serving app controller
 ${DIR}/is-ready.sh knative-serving app webhook
 
+# Enable TLS in knative gateway
+KNATIVE_GW=$(kubectl get gateway -n knative-serving knative-shared-gateway -o json)
+KNATIVE_GW=$(jq '
+    .spec.servers = (
+        .spec.servers | map (
+            if .port.number == 443
+            then (
+                .tls.mode = "SIMPLE"
+                | .tls.privateKey = "/etc/istio/ingressgateway-certs/tls.key"
+                | .tls.serverCertificate = "/etc/istio/ingressgateway-certs/tls.crt"
+            )
+            else .
+            end
+        )
+    ) |
+    .spec.selector = {"knative": "ingressgateway"}
+' <<<"$KNATIVE_GW")
+kubectl replace -f - <<<"$KNATIVE_GW"
+
 echo "Knative build and serving installation verified"
 
 echo "Installing Knative eventing..."
@@ -39,3 +58,4 @@ ${DIR}/is-ready.sh knative-eventing app eventing-controller
 ${DIR}/is-ready.sh knative-eventing app webhook
 
 echo "Knative eventing installation verified"
+

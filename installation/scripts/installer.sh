@@ -7,7 +7,7 @@ RESOURCES_DIR="${CURRENT_DIR}/../resources"
 INSTALLER="${RESOURCES_DIR}/installer.yaml"
 INSTALLER_CONFIG=""
 FEATURE_GATES_CONFIG="${RESOURCES_DIR}/installer-feature-gates.yaml.tpl"
-KNATIVE_CONFIG="${RESOURCES_DIR}/isntaller-config-knative.yaml.tpl"
+KNATIVE_CONFIG="${RESOURCES_DIR}/installer-config-knative.yaml.tpl"
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
