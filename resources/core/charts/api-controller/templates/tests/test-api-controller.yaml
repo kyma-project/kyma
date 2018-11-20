@@ -17,7 +17,7 @@ spec:
     - name: DOMAIN_NAME
       value: {{ .Values.global.domainName }}
     - name: INGRESS_GATEWAY_CONTROLLER_SERVICE_URL
-      value: {{ .Values.global.ingressgateway.serviceName }}.{ .Values.global.ingressgateway.namespace }}.svc.cluster.local
+      value: {{ .Values.global.ingressgateway.serviceName }}.{{ .Values.global.ingressgateway.namespace }}.svc.cluster.local
   restartPolicy: Never
 ---
 {{ end }}
