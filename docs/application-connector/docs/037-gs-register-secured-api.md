@@ -1,6 +1,6 @@
 ---
 title: Register a secured API
-type: Getting Started
+type: Details
 ---
 
 The Metadata Service allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617) and [OAuth](https://tools.ietf.org/html/rfc6750).
