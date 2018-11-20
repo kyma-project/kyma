@@ -8,8 +8,8 @@ build:
 	./before-commit.sh ci
 
 .PHONY: build-image
-build-image: buc.bin
-	cp buc.bin deploy/controller/buc.bin
+build-image:
+	cp $(binary) deploy/controller/$(binary)
 	docker build -t $(APP_NAME):latest deploy/controller
 
 .PHONY: push-image
