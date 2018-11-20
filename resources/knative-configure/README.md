@@ -1,4 +1,0 @@
-# Istio Kyma patch
-
-## Overview
-

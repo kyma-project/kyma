@@ -12,7 +12,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: knative-overrides
+  name: knative-core-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
@@ -22,15 +22,3 @@ data:
   gateway.portNamePrefix: "kyma_"
   gateway.selector: |
     knative: ingressgateway
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: knative-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: istio-kyma-patch
-    feature: knative
-data:
-  exposeHostPorts: "false"
