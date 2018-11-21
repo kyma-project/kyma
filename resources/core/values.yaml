@@ -58,8 +58,8 @@ global:
     dir: develop/
     version: 0d1ffe15
   kubeless_test_client:
-    dir: develop/
-    version: c3c08515
+    dir: pr/
+    version: PR-1709
   test_environments:
     dir: develop/
     version: '84359277'
