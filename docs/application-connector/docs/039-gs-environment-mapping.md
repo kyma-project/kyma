@@ -3,7 +3,7 @@ title: Bind a Remote Environment to an Environment
 type: Getting Started
 ---
 
-This guide shows you how to bind a Remote Environment (RE) to an Environment in Kyma. To execute the binding, create an EnvironmentMapping Custom Resource in the cluster. Follow the instructions to bind your Remote Environment to the `production` Environment.
+This guide shows you how to bind a Remote Environment (RE) to an Environment in Kyma. To execute the binding, create an EnvironmentMapping custom resource in the cluster. Follow the instructions to bind your Remote Environment to the `production` Environment.
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ To complete this guide, your cluster must have at least one Remote Environment c
   kubectl get em -n production
   ```
 
-2. Bind a RE to an Environment. Run this command to create  EnvironmentMapping Custom Resource (CR) and apply it to the cluster:
+2. Bind a RE to an Environment. Run this command to create an EnvironmentMapping custom resource and apply it to the cluster:
 
   ```
   cat <<EOF | kubectl apply -f -
@@ -30,5 +30,5 @@ To complete this guide, your cluster must have at least one Remote Environment c
 
 3. Check if the operation is successful. List all Environments to which your RE is bound:
   ```
-  kubectl get em --all-namespaces -o jsonpath='{range .items[?(@.metadata.name=="{NAME_OF_YOUR_RE}")]}{@.metadata.namespace}{"\n"}{end}'
+  kubectl get em --all-namespaces -o jsonpath='{range .items[?(@.metadata.name=="{NAME_OF_YOUR_RE}")]}{@.metadata.namespace}{""}{end}'
   ```

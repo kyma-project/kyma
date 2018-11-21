@@ -8,6 +8,6 @@ import (
 
 type unbindService struct{}
 
-func (svc *unbindService) Unbind(ctx context.Context, osbCtx osbContext, req *osb.UnbindRequest) (*osb.UnbindResponse, error) {
+func (svc *unbindService) Unbind(ctx context.Context, osbCtx OsbContext, req *osb.UnbindRequest) (*osb.UnbindResponse, error) {
 	return nil, nil
 }

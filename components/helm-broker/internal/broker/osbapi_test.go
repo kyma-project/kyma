@@ -19,11 +19,12 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/platform/ptr"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker/automock"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/platform/logger/spy"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybind"
 )
 
 func newOSBAPITestSuite(t *testing.T) *osbapiTestSuite {
@@ -54,7 +55,9 @@ func newOSBAPITestSuite(t *testing.T) *osbapiTestSuite {
 		sFact.InstanceBindData(),
 		&fakeBindTmplRenderer{},
 		&fakeBindTmplResolver{},
-		ts.HelmClient, logSink.Logger, ts.OperationIDProvider)
+		ts.HelmClient,
+		bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), logSink.Logger),
+		logSink.Logger, ts.OperationIDProvider)
 
 	return ts
 }
@@ -81,12 +84,15 @@ func (ts *osbapiTestSuite) ServerRun() {
 	ctx, cancel := context.WithCancel(context.Background())
 	ts.serverWg.Add(1)
 
+	startedCh := make(chan struct{})
+
 	go func() {
-		assert.Equal(ts.t, http.ErrServerClosed, ts.BrokerServer.Run(ctx, ":0"))
+		assert.Equal(ts.t, http.ErrServerClosed, ts.BrokerServer.Run(ctx, ":0", startedCh))
 		ts.serverWg.Done()
 	}()
 
 	// TODO: wrap in timeout
+	<-startedCh
 	ts.ServerAddr = ts.BrokerServer.Addr()
 	ts.serverCancel = cancel
 }
@@ -516,12 +522,12 @@ func TestOSBAPIBindFailureWithDisallowedParametersFieldInReq(t *testing.T) {
 
 type fakeBindTmplRenderer struct{}
 
-func (fakeBindTmplRenderer) Render(bindTemplate internal.BundlePlanBindTemplate, resp *rls.InstallReleaseResponse) (ybind.RenderedBindYAML, error) {
+func (fakeBindTmplRenderer) Render(bindTemplate internal.BundlePlanBindTemplate, resp *rls.InstallReleaseResponse) (bind.RenderedBindYAML, error) {
 	return []byte(`fake`), nil
 }
 
 type fakeBindTmplResolver struct{}
 
-func (fakeBindTmplResolver) Resolve(bindYAML ybind.RenderedBindYAML, ns internal.Namespace) (*ybind.ResolveOutput, error) {
-	return &ybind.ResolveOutput{}, nil
+func (fakeBindTmplResolver) Resolve(bindYAML bind.RenderedBindYAML, ns internal.Namespace) (*bind.ResolveOutput, error) {
+	return &bind.ResolveOutput{}, nil
 }

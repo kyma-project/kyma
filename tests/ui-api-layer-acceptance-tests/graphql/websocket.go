@@ -1,12 +1,10 @@
 package graphql
 
 import (
-	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"time"
 
@@ -32,11 +30,10 @@ type operationMessage struct {
 	Type    string          `json:"type"`
 }
 
-func newWebsocket(endpoint, token string, headers http.Header, dialContext func(ctx context.Context, network, addr string) (net.Conn, error)) (*clusterWebsocket, error) {
+func newWebsocket(endpoint, token string, headers http.Header) (*clusterWebsocket, error) {
 	headers.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	dialer := websocket.Dialer{
 		HandshakeTimeout: websocket.DefaultDialer.HandshakeTimeout,
-		NetDialContext:   dialContext,
 		TLSClientConfig:  &tls.Config{InsecureSkipVerify: true},
 	}
 

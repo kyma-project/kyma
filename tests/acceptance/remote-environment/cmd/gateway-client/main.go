@@ -28,6 +28,8 @@ const (
 
 	namespaceEnvName = "NAMESPACE"
 
+	sleepTimeBetweenCalls = 3 * time.Second
+
 	envInjectedKey   = "envInjected"
 	callSucceededKey = "callSucceeded"
 	callForbiddenKey = "callForbidden"
@@ -125,7 +127,7 @@ func main() {
 				}
 			}
 
-			time.Sleep(time.Second)
+			time.Sleep(sleepTimeBetweenCalls)
 		}
 	}()
 

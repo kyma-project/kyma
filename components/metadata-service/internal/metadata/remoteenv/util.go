@@ -20,16 +20,19 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 		for _, entry := range service.Entries {
 			if entry.Type == specAPIType {
 				api = &ServiceAPI{
-					GatewayURL:            entry.GatewayUrl,
-					AccessLabel:           entry.AccessLabel,
-					TargetUrl:             entry.TargetUrl,
-					OauthUrl:              entry.OauthUrl,
-					CredentialsSecretName: entry.CredentialsSecretName,
+					GatewayURL:  entry.GatewayUrl,
+					AccessLabel: entry.AccessLabel,
+					TargetUrl:   entry.TargetUrl,
+					Credentials: Credentials{
+						AuthenticationUrl: entry.Credentials.AuthenticationUrl,
+						SecretName:        entry.Credentials.SecretName,
+						Type:              entry.Credentials.Type,
+					},
 				}
 			} else if entry.Type == specEventsType {
 				events = true
 			} else {
-				message := fmt.Sprintf("incorrect type of entry '%s' in Remote Environment Service definition", entry.Type)
+				message := fmt.Sprintf("Entry %s in Remote Environment Service definition has incorrect type. Type %s needed", entry.Type, specEventsType)
 				log.Error(message)
 				return Service{}, apperrors.Internal(message)
 			}
@@ -54,12 +57,15 @@ func convertToK8sType(service Service) v1alpha1.Service {
 	var serviceEntries = make([]v1alpha1.Entry, 0, 2)
 	if service.API != nil {
 		apiEntry := v1alpha1.Entry{
-			Type:                  specAPIType,
-			GatewayUrl:            service.API.GatewayURL,
-			AccessLabel:           service.API.AccessLabel,
-			TargetUrl:             service.API.TargetUrl,
-			OauthUrl:              service.API.OauthUrl,
-			CredentialsSecretName: service.API.CredentialsSecretName,
+			Type:        specAPIType,
+			GatewayUrl:  service.API.GatewayURL,
+			AccessLabel: service.API.AccessLabel,
+			TargetUrl:   service.API.TargetUrl,
+			Credentials: v1alpha1.Credentials{
+				AuthenticationUrl: service.API.Credentials.AuthenticationUrl,
+				SecretName:        service.API.Credentials.SecretName,
+				Type:              service.API.Credentials.Type,
+			},
 		}
 		serviceEntries = append(serviceEntries, apiEntry)
 	}
@@ -103,7 +109,7 @@ func replaceService(id string, re *v1alpha1.RemoteEnvironment, service v1alpha1.
 
 func ensureServiceExists(id string, re *v1alpha1.RemoteEnvironment) apperrors.AppError {
 	if !serviceExists(id, re) {
-		message := fmt.Sprintf("Service with ID %s doesn't exist.", id)
+		message := fmt.Sprintf("Service with ID %s does not exist", id)
 
 		return apperrors.NotFound(message)
 	}
@@ -113,7 +119,7 @@ func ensureServiceExists(id string, re *v1alpha1.RemoteEnvironment) apperrors.Ap
 
 func ensureServiceNotExists(id string, re *v1alpha1.RemoteEnvironment) apperrors.AppError {
 	if serviceExists(id, re) {
-		message := fmt.Sprintf("Service with ID %s already exists.", id)
+		message := fmt.Sprintf("Service with ID %s already exists", id)
 
 		return apperrors.AlreadyExists(message)
 	}

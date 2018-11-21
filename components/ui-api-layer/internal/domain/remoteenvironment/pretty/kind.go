@@ -11,6 +11,7 @@ const (
 	ConnectorService
 	Environment
 	Environments
+	EnvironmentMapping
 )
 
 func (k Kind) String() string {
@@ -31,6 +32,8 @@ func (k Kind) String() string {
 		return "Environment"
 	case Environments:
 		return "Environments"
+	case EnvironmentMapping:
+		return "EnvironmentMapping"
 	default:
 		return ""
 	}

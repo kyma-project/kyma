@@ -1,26 +1,21 @@
 package graphql
 
 import (
-	"context"
 	"crypto/tls"
 	"fmt"
-	"net"
 	"net/http"
 	"time"
 )
-
-const ingressGatewayControllerServiceURL = "istio-ingressgateway.istio-system.svc.cluster.local"
 
 type authenticatedTransport struct {
 	http.Transport
 	token string
 }
 
-func newAuthorizedClient(token string, dialContext func(ctx context.Context, network, addr string) (net.Conn, error)) *http.Client {
+func newAuthorizedClient(token string) *http.Client {
 	transport := &authenticatedTransport{
 		Transport: http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-			DialContext:     dialContext,
 		},
 		token: token,
 	}

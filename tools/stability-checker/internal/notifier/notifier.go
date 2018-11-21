@@ -3,6 +3,7 @@ package notifier
 import (
 	"context"
 	"encoding/json"
+	"sort"
 	"strconv"
 	"time"
 
@@ -92,6 +93,7 @@ func (s *SlackNotifier) Run(ctx context.Context) {
 				s.log.Errorf("Cannot get test summary for execution IDs [%v], got error: %v", execIDs, err)
 				continue
 			}
+			sort.Sort(summary.ByMostFailures(testStats))
 		}
 
 		header, body, footer, err := s.testRenderer.RenderTestSummary(RenderTestSummaryInput{

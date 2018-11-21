@@ -223,16 +223,11 @@
   version = "1.1.5"
 
 [[projects]]
-  digest = "1:6de3e15e3db624ed0bb0308cccd1c2ba4f08d86177760b6b362a55b8fc4f347b"
+  digest = "1:28b28e00ef6f1db3603dda2312559a1926e7cdbda62d2164b0195999d749aa6a"
   name = "github.com/kyma-project/kyma"
-  packages = [
-    "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
-    "components/remote-environment-broker/pkg/client/clientset/versioned",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-  ]
+  packages = ["components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"]
   pruneopts = "NUT"
-  revision = "7400291c88b0dde7d2b674f02a40efc5eb1934e5"
+  revision = "e676280679a6b87474c1b48e1b5b1930406bac87"
 
 [[projects]]
   digest = "1:24608ad934c247c3903eeaccb58ab7d6360a9bccafe1a6393756d0820f9950f9"
@@ -989,9 +984,9 @@
   input-imports = [
     "github.com/emicklei/go-restful",
     "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
+    "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/mock",
@@ -1001,7 +996,7 @@
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/types",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
-    "k8s.io/client-go/rest",
+    "k8s.io/client-go/util/retry",
     "k8s.io/code-generator/cmd/deepcopy-gen",
     "k8s.io/helm/pkg/helm",
     "k8s.io/helm/pkg/proto/hapi/release",

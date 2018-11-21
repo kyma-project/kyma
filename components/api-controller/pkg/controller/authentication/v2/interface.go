@@ -3,7 +3,7 @@ package v2
 import (
 	"fmt"
 
-	kymaMeta "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma.cx/meta/v1"
+	kymaMeta "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/controller/meta"
 )
 

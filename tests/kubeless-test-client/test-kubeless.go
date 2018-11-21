@@ -27,25 +27,51 @@ func deployK8s(yamlFile string) {
 }
 
 func deleteK8s(yamlFile string) {
-	cmd := exec.Command("kubectl", "delete", "-f", yamlFile)
+	cmd := exec.Command("kubectl", "delete", "-f", yamlFile, "--grace-period=0", "--force", "--ignore-not-found")
 	stdoutStderr, err := cmd.CombinedOutput()
 	output := string(stdoutStderr)
-	if err != nil && !strings.Contains(output, "NotFound") {
+	if err != nil {
 		log.Fatal("Unable to delete:\n", output)
 	}
+}
+
+func printContentsOfNamespace(namespace string) {
+	getResourcesCmd := exec.Command("kubectl", "-n", namespace, "get", "all,serviceinstance,servicebinding,servicebindingusage,function,subscription,api,eventactivation")
+	stdoutStderr, err := getResourcesCmd.CombinedOutput()
+	output := string(stdoutStderr)
+	if err != nil {
+		log.Fatal("Unable to get all,serviceinstance,servicebinding,servicebindingusage,function,subscription,api,eventactivation:\n", output)
+	}
+	log.Printf("Current contents of the ns:%s is:\n %v", namespace, output)
 }
 
 func deleteNamespace(namespace string) {
 	timeout := time.After(6 * time.Minute)
 	tick := time.Tick(1 * time.Second)
+
+	deleteCmd := exec.Command("kubectl", "delete", "ns", namespace, "--grace-period=0", "--force", "--ignore-not-found")
+	stdoutStderr, err := deleteCmd.CombinedOutput()
+
+	if err != nil && !strings.Contains(string(stdoutStderr), "No resources found") && !strings.Contains(string(stdoutStderr), "Error from server (Conflict): Operation cannot be fulfilled on namespaces") {
+		log.Fatalf("Error while deleting namespace: %s, to be deleted\n Output:\n%s", namespace, string(stdoutStderr))
+	}
+
+	log.Printf("Current state of the ns:%s is:\n %v", namespace, string(stdoutStderr))
+
 	for {
+		cmd := exec.Command("kubectl", "get", "ns", namespace, "-oyaml")
 		select {
 		case <-timeout:
-			log.Fatal("Timed out waiting for namespace ", namespace, " to be deleted\n")
-		case <-tick:
-			cmd := exec.Command("kubectl", "delete", "ns", namespace, "--grace-period=0", "--force")
 			stdoutStderr, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Fatal("Unable to get ns:\n", string(stdoutStderr))
+			}
+			log.Printf("Current state of the ns:%s is:\n %v", namespace, string(stdoutStderr))
 
+			printContentsOfNamespace(namespace)
+			log.Fatal("Timed out waiting for namespace: ", namespace, " to be deleted\n")
+		case <-tick:
+			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil && strings.Contains(string(stdoutStderr), "NotFound") {
 				return
 			}
@@ -153,16 +179,27 @@ func printLogsFunctionPodContainers(namespace, name string) {
 
 	functionContainerLog, _ := functionContainerLogCmd.CombinedOutput()
 	log.Printf("Logs from %s container in pod %s:\n%s\n", name, string(functionPodName), string(functionContainerLog))
+
+	envoyLogsCmd := exec.Command("kubectl", "-n", namespace, "log", "-l", string(functionPodName), "-c", "istio-proxy")
+
+	envoyLogsCmdStdErr, _ := envoyLogsCmd.CombinedOutput()
+	log.Printf("Envoy Logs are:\n%s\n", string(envoyLogsCmdStdErr))
 }
 
 func printDebugLogsAPIServiceFailed(namespace, name string) {
 	functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name)
-
 	functionPodsStdOutStdErr, err := functionPodsCmd.CombinedOutput()
 	if err != nil {
 		log.Fatalf("Error while fetching pods for function: %v\n", err)
 	}
 	log.Printf("Function pods status:\n%s\n", string(functionPodsStdOutStdErr))
+
+	functionSvcCmd := exec.Command("kubectl", "-n", namespace, "get", "svc", "-l", "function="+name)
+	functionSvcCmdStdOutStdErr, err := functionSvcCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching service for function: %v\n", err)
+	}
+	log.Printf("Function service status:\n%s\n", string(functionSvcCmdStdOutStdErr))
 
 	apiListCmd := exec.Command("kubectl", "-n", namespace, "get", "api", "-l", "function="+name)
 	apiListStdOutErr, err := apiListCmd.CombinedOutput()
@@ -186,7 +223,6 @@ func printDebugLogsAPIServiceFailed(namespace, name string) {
 		log.Fatalf("Error while fetching logs for API Controller: %v\n", string(apiControllerLogsCmdOutErr))
 	}
 	log.Printf("Logs from API Controller:\n%s\n", string(apiControllerLogsCmdOutErr))
-
 }
 
 func printDebugLogsSvcBindingUsageFailed(namespace, name string) {
@@ -217,12 +253,43 @@ func printDebugLogsSvcBindingUsageFailed(namespace, name string) {
 
 }
 
+func connectUsingK8sService(namespace, name string) {
+	log.Printf("[%v] Trying to curl using local kubernetes service", name)
+	url := "http://" + name + "." + namespace + ":8080"
+	cmd := exec.Command("curl", "-v", url)
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("[%v] Unable to curl to function using internal kubernetes service: %v", name, string(stdoutStderr))
+		return
+	}
+	log.Printf("[%v] Result of curl request is: %v", name, string(stdoutStderr))
+	return
+}
+
+func printDebugLogsForEvents() {
+	controllerNamespace := os.Getenv("KUBELESS_NAMESPACE")
+
+	eventsPodCmd := exec.Command("kubectl", "-n", controllerNamespace, "logs", "-l", "app=push", "-c", "push")
+
+	eventsPodStdErr, err := eventsPodCmd.CombinedOutput()
+	if err != nil {
+		log.Fatalf("Error while fetching logs for core-push: %v\n", string(eventsPodStdErr))
+	}
+	log.Printf("Event logs from 'Push' podare:\n%s\n", string(eventsPodStdErr))
+}
+
 func deleteFun(namespace, name string) {
 	cmd := exec.Command("kubeless", "-n", namespace, "function", "delete", name)
 	stdoutStderr, err := cmd.CombinedOutput()
 	output := string(stdoutStderr)
 	if err != nil && !strings.Contains(output, "not found") {
 		log.Fatal("Unable to delete function ", name, ":\n", output)
+	}
+
+	cmd = exec.Command("kubectl", "-n", namespace, "delete", "pod", "-l", "function="+name, "--grace-period=0", "--force")
+	stdoutStderr, err = cmd.CombinedOutput()
+	if err != nil && !strings.Contains(string(stdoutStderr), "No resources found") && !strings.Contains(string(stdoutStderr), "warning: Immediate deletion does not wait for confirmation that the running resource has been terminated") {
+		log.Fatal("Unable to delete function pod:\n", string(stdoutStderr))
 	}
 
 	timeout := time.After(2 * time.Minute)
@@ -232,7 +299,7 @@ func deleteFun(namespace, name string) {
 		case <-timeout:
 			log.Fatal("Timed out waiting for ", name, " pod to be deleted\n")
 		case <-tick:
-			cmd = exec.Command("kubectl", "-n", namespace, "delete", "pod", "-l", "function="+name)
+			cmd = exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name)
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err == nil && strings.Contains(string(stdoutStderr), "No resources found") {
 				return
@@ -280,7 +347,11 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 			select {
 			case <-timeout:
 				log.Printf("[%v] Timeout: Check if Virtual Service has been created", testName)
+
 				printDebugLogsAPIServiceFailed(namespace, testName)
+				connectUsingK8sService(namespace, testName)
+				printLogsFunctionPodContainers(namespace, testName)
+
 				cmd := exec.Command("kubectl", "-n", namespace, "get", "virtualservices.networking.istio.io", "-l", "apiName="+testName)
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
@@ -318,6 +389,13 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 					}
 					log.Printf("[%v] Name of the Failed Pod is: %v", testName, string(functionPodName))
 					log.Fatalf("[%v] Response is not equal to expected output: %v != %v", testName, string(bodyBytes), expectedOutput)
+				} else {
+					log.Printf("[%v] Tick: Response code is: %v", testName, resp.StatusCode)
+					bodyBytes, err := ioutil.ReadAll(resp.Body)
+					if err != nil {
+						log.Printf("[%v] Tick: Unable to get response: %v", testName, err)
+					}
+					log.Printf("[%v] Tick: Response body is: %v", testName, string(bodyBytes))
 				}
 			}
 		}
@@ -365,6 +443,10 @@ func ensureCorrectLog(namespace, funName string, pattern *regexp.Regexp, match s
 		log.Printf("Checking logs for pods: %v", pod)
 		select {
 		case <-timeout:
+			log.Printf("[%s] Timeout printing debug logs", funName)
+			if !serviceBinding {
+				printDebugLogsForEvents()
+			}
 			cmd := exec.Command("kubectl", "-n", namespace, "logs", pod, "-c", funName)
 			stdoutStderr, _ := cmd.CombinedOutput()
 			log.Fatal("Timed out getting the correct log for ", funName, ":\n", string(stdoutStderr))
@@ -400,7 +482,7 @@ func ensureSvcInstanceIsDeployed(namespace, svcInstance string) {
 			cmd := exec.Command("kubectl", "-n", namespace, "get", "serviceinstance", svcInstance, "-o=jsonpath={.items[*]}{.status.conditions[*].reason}")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Fatalf("Error fetching service instance %v: %v", svcInstance, err)
+				log.Printf("Error fetching service instance %v: %v", svcInstance, string(stdoutStderr))
 			}
 			if string(stdoutStderr) == "ProvisionedSuccessfully" {
 				return
@@ -468,10 +550,17 @@ var testDataRegex = regexp.MustCompile(`(?m)^OK ([a-z0-9]{8})$`)
 
 func main() {
 	cleanup()
+	time.Sleep(10 * time.Second)
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	log.Println("Starting test")
 	log.Printf("Domain Name is: %v", os.Getenv("DOMAIN_NAME"))
+
+	if os.Getenv("DOMAIN_NAME") == "kyma.local" {
+		log.Printf("We dont run this test on Minikube!!")
+		os.Exit(0)
+	}
+
 	testID := randomString(8)
 	deployK8s("ns.yaml")
 	deployK8s("k8syaml/k8s.yaml")
@@ -491,6 +580,7 @@ func main() {
 	go func() {
 		log.Println("Deploying test-event function")
 		deployFun("kubeless-test", "test-event", "nodejs6", "event.js", "event.handler")
+		time.Sleep(2 * time.Minute) // Sometimes subsctiptions take long time. So lambda might not get the events
 		log.Println("Publishing event to function test-event")
 		publishEvent(testID)
 		log.Println("Verifying correct event processing for test-event")

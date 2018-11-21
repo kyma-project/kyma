@@ -7,20 +7,4 @@ Read the [Application Connector documentation](../../../../docs/application-conn
 
 ## Details
 
-This directory contains the Remote Environment Helm chart that creates a new RE. Additionally, the chart installs the Gateway Service and all of the Ingresses required to access Application Connector services in the context of the created RE. A single RE allows to connect a single external solution to Kyma.
-
-### Customize the Gateway Service installation
-
-Edit the [`values`](./values.yaml) file to customize the installation of the Gateway Service.
-You can adjust these parameters:
-
-- **proxyPort** - This port proxies calls from services and lambdas to an external solution. The default port is `8080`.
-- **externalAPIPort** - This port exposes the Gateway API to an external solution. The default port is `8081`.
-- **eventsTargetURL** - The URL to proxy incoming events. The default URL is `http://localhost:9000`.
-- **remoteEnvironment** - The RE to read and write information about the services. The default RE is `default-ec`.
-- **namespace** - The Namespace to which you deploy the Gateway. The default Namespace is `kyma-system`.
-- **requestTimeout** - A time-out for requests sent through the Gateway. Provide it in seconds. The default time-out is `1`.
-- **skipVerify** - The flag to skip the verification of certificates for the proxy targets. The default value is `false`.
-
-Additionally, you can adjust the parameters used in the communication with the Event Service:
-- **sourceId** - The Remote Environment name is used as the source id.
+This directory contains the Remote Environment Helm chart that installs all components required to access Application Connector's services in the context of the created RE. 

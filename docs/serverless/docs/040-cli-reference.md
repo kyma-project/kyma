@@ -2,13 +2,13 @@
 title: CLI reference
 ---
 
-This section provides you with useful command line examples used in Kyma.
+This section provides you with helpful command line examples used in Kyma.
 
 ## Prerequisites
 
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.10.0
 
-To develop, deploy, or run functions directly download these tools additionally:
+To develop, deploy, or run functions directly, download these tools additionally:
 
 * [Kubeless CLI](https://github.com/kubeless/kubeless/releases)
 * [Node.js, version 6 or 8](https://nodejs.org/en/download/)
@@ -17,7 +17,7 @@ To develop, deploy, or run functions directly download these tools additionally:
 
 The commands throughout this guide use URLs that require you to provide the domain of the cluster which you are using. To complete this configuration, set the variable `yourClusterDomain` to the domain of your cluster.
 
-For example if your cluster's domain is 'demo.cluster.kyma.cx' then run the following command:
+For example, if your cluster's domain is `demo.cluster.kyma.cx`, run the following command:
 
    ```bash
    export yourClusterDomain='demo.cluster.kyma.cx'
@@ -65,14 +65,14 @@ $ kubectl apply -f https://minio.$yourClusterDomain/content/components/serverles
 
 ### Expose a function with authentication enabled
 
-If your function is deployed to a cluster run:
+If your function is deployed to a cluster, run:
 
 ```bash
  curl -k https://minio.$yourClusterDomain/content/components/serverless/assets/api-with-auth.yaml | sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -f -
 ```
 
 
-If Kyma is running locally, add `hello.kyma.local` mapped to `minikube ip` to `/etc/hosts`
+If Kyma is running locally, add `hello.kyma.local` mapped to `minikube ip` to `/etc/hosts`.
 
 ```bash
 $ echo "$(minikube ip) hello.kyma.local" | sudo tee -a /etc/hosts
@@ -85,4 +85,4 @@ kubectl apply -f https://minio.$yourClusterDomain/content/components/serverless/
 ```
 
 ### Bind a function to events
-You can bind the function to Kyma and to third-party services. For details, refer to the [Service Catalog](../../service-catalog/docs/001-overview-service-catalog.md) documentation.
+You can bind the function to Kyma and to third-party services. For details, refer to the Service Catalog-related documentation.

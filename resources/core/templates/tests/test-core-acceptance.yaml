@@ -14,12 +14,22 @@ spec:
       env:
       - name: HELM_BROKER_URL
         value: http://{{.Release.Name }}-helm-broker.{{ .Release.Namespace }}.svc.cluster.local
-      - name: REMOTE_ENVIRONMENT_BROKER_URL
-        value: http://{{.Release.Name }}-remote-environment-broker.{{ .Release.Namespace }}.svc.cluster.local
+      - name: RELEASE_NAMESPACE
+        value: {{ .Values.test.acceptance.core.remoteEnvironment.brokerNamespace }}
       - name: KYMA_DOMAIN
         value: {{ .Values.global.domainName }}
       - name: IS_LOCAL_ENV
         value: {{ .Values.global.isLocalEnv | toString | quote }}
+      - name: DEX_USER_EMAIL
+        valueFrom:
+          secretKeyRef:
+            name: admin-user
+            key: email
+      - name: DEX_USER_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: admin-user
+            key: password
       - name: INGRESSGATEWAY_FQDN
         value: istio-ingressgateway.istio-system.svc.cluster.local
       - name: STUBS_DOCKER_IMAGE
@@ -32,4 +42,6 @@ spec:
         value: "false"
       - name: REMOTE_ENVIRONMENT_DISABLED
         value: {{ .Values.test.acceptance.core.remoteEnvironment.disabled | quote }}
+      - name: TEAR_DOWN_TIMEOUT_PER_STEP
+        value: {{ .Values.test.acceptance.core.remoteEnvironment.tearDownTimeoutPerStep | quote }}
   restartPolicy: Never

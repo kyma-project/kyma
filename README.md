@@ -1,6 +1,8 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/kyma-project/kyma/master/logo.png" width="235">
+ <img src="https://raw.githubusercontent.com/kyma-project/kyma/master/logo.png" width="235">
 </p>
+
+[![Go Report Card](https://goreportcard.com/badge/kyma-project/kyma)](https://goreportcard.com/report/github.com/kyma-project/kyma)
 
 ## Overview
 
@@ -10,7 +12,7 @@ Go to the [Kyma project website](https://kyma-project.io/) to learn more about t
 
 ## Installation
 
-Install Kyma [locally](https://kyma-project.io/docs/latest/root/kyma#getting-started-local-kyma-installation) and on a [cluster](https://kyma-project.io/docs/latest/root/kyma#getting-started-install-kyma-on-a-gke-cluster).
+Install Kyma [locally](https://kyma-project.io/docs/root/kyma#getting-started-local-kyma-installation) and on a [cluster](https://kyma-project.io/docs/root/kyma#getting-started-cluster-kyma-installation).
 
 ## Usage
 

@@ -27,6 +27,7 @@ const (
 	Internal
 	NotFound
 	AlreadyExists
+	Invalid
 )
 
 func (r Status) String() string {
@@ -37,6 +38,8 @@ func (r Status) String() string {
 		return "already exists"
 	case Internal:
 		return "internal error"
+	case Invalid:
+		return "invalid"
 	default:
 		return "unknown"
 	}
@@ -60,6 +63,8 @@ func New(err error, kind fmt.Stringer, opts ...Option) error {
 		return NewNotFound(kind, opts...)
 	case apierrors.IsAlreadyExists(err):
 		return NewAlreadyExists(kind, opts...)
+	case apierrors.IsInvalid(err):
+		return NewInvalid(err.Error(), kind, opts...)
 	default:
 		return NewInternal(opts...)
 	}
@@ -101,6 +106,11 @@ func NewAlreadyExists(kind fmt.Stringer, opts ...Option) error {
 	return buildError(kind, AlreadyExists, opts...)
 }
 
+func NewInvalid(err string, kind fmt.Stringer, opts ...Option) error {
+	opts = append(opts, WithDetails(err))
+	return buildError(kind, Invalid, opts...)
+}
+
 func IsNotFound(err error) bool {
 	return statusForError(err) == NotFound
 }
@@ -111,6 +121,10 @@ func IsAlreadyExists(err error) bool {
 
 func IsInternal(err error) bool {
 	return statusForError(err) == Internal
+}
+
+func IsInvalid(err error) bool {
+	return statusForError(err) == Invalid
 }
 
 func statusForError(err error) Status {
@@ -144,7 +158,7 @@ func buildMessage(err *GQLError) string {
 
 	message += fmt.Sprintf("%s", err.status)
 
-	if len(err.arguments) > 0 {
+	if len(err.arguments) > 0 && !IsInvalid(err) {
 		message += fmt.Sprintf(" [%s]", buildArguments(err.arguments))
 	}
 

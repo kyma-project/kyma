@@ -10,7 +10,7 @@ spec:
   hostNetwork: true
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
-      image: {{ .Values.global.containerRegistry.path }}/ui-tests:0.1.205
+      image: {{ .Values.global.containerRegistry.path }}/ui-tests:2510cf47
       imagePullPolicy: IfNotPresent
       resources:
          requests:
@@ -23,9 +23,15 @@ spec:
         - name: DOMAIN
           value: {{ .Values.global.domainName }}
         - name: LOGIN
-          value: {{ .Values.test.auth.username }}
+          valueFrom:
+            secretKeyRef:
+              name: admin-user
+              key: email
         - name: PASSWORD
-          value: {{ .Values.test.auth.password }}
+          valueFrom:
+            secretKeyRef:
+              name: admin-user
+              key: password
         - name: DEX_CONFIG
           value: /etc/dex/cfg/config.yaml
       volumeMounts:

@@ -1,13 +1,12 @@
 package apicontroller
 
 import (
-	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx/clientset/versioned"
-	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma.cx/informers/externalversions"
-	"k8s.io/client-go/rest"
-
 	"time"
 
+	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions"
 	"github.com/pkg/errors"
+	"k8s.io/client-go/rest"
 )
 
 type Resolver struct {

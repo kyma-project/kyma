@@ -9,10 +9,19 @@ fi
 
 source ${APP_PATH}/config-setup.sh
 
-REVISION=$(git rev-list --tags --max-count=1)
-LAST_VERSION_TAG=$(git describe --tags ${REVISION})
-echo "Getting new changes starting from the '${LAST_VERSION_TAG}' tag..."
+if [ -z "$FROM_TAG" ]; then
+    REVISION=$(git rev-list --tags --max-count=1)
+    FROM_TAG=$(git describe --tags ${REVISION});
+fi
+
+TO_ARGUMENT=""
+if [ -n "$TO_TAG" ]; then
+    TO_ARGUMENT="--to=${TO_TAG}"
+    TO_ARGUMENT_MSG="to '${TO_TAG}' tag"
+fi
+
 mkdir -p ${RELEASE_CHANGELOG_FILE_DIRECTORY}
-lerna-changelog --from=${LAST_VERSION_TAG} | sed -e "s/## Unreleased/## ${LATEST_VERSION}/g" > ${RELEASE_CHANGELOG_FILE_PATH}
+echo "Getting new changes starting from the '${FROM_TAG}' tag ${TO_ARGUMENT_MSG}..."
+eval "lerna-changelog --from=${FROM_TAG} ${TO_ARGUMENT}" | sed -e "s/## Unreleased/## ${NEW_RELEASE_TITLE}/g" > ${RELEASE_CHANGELOG_FILE_PATH}
 
 source ${APP_PATH}/config-cleanup.sh

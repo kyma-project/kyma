@@ -35,23 +35,25 @@ projects = [
     "components/binding-usage-controller": "binding-usage-controller",
     "components/configurations-generator": "configurations-generator",
     "components/environments": "environments",
-    "components/istio-webhook": "istio-webhook",
     "components/istio-kyma-patch": "istio-kyma-patch",
     "components/helm-broker": "helm-broker",
     "components/remote-environment-broker": "remote-environment-broker",
     "components/remote-environment-controller": "remote-environment-controller",
     "components/metadata-service": "metadata-service",
-    "components/gateway": "gateway",
     "components/installer": "installer",
     "components/connector-service": "connector-service",
     "components/ui-api-layer": "ui-api-layer",
     "components/event-bus": "event-bus-publish",
     "components/event-service": "event-service",
+    "components/proxy-service": "proxy-service",
+    "components/k8s-dashboard-proxy": "k8s-dashboard-proxy",
     "tools/alpine-net": "alpine-net",
     "tools/watch-pods": "watch-pods",
     "tools/stability-checker": "stability-checker",
     "tools/etcd-backup": "etcd-backup",
     "tools/etcd-tls-setup": "etcd-tls-setup",
+    "tools/static-users-generator": "static-users-generator",
+    "tools/ark-plugins": "ark-plugins",
     "tests/test-logging-monitoring": "test-logging-monitoring",
     "tests/logging": "test-logging",
     "tests/acceptance": "acceptance-tests",
@@ -79,7 +81,7 @@ jobs = [:]
 
 /*
     If true, Kyma integration will run at the end.
-    NOTE: This is set automaticlly based on the changes detected.
+    NOTE: This is set automatically based on the changes detected.
 */
 runIntegration = false
 
@@ -213,7 +215,7 @@ String[] changedProjects() {
                 res.add(allProjects[i])
                 break // already found a change in the current project, no need to continue iterating the changeset
             }
-            if (allProjects[i] == "governance" && allChanges[j].endsWith(".md") && !res.contains(allProjects[i])) {
+            if (env.BRANCH_NAME != 'master' && allProjects[i] == "governance" && allChanges[j].endsWith(".md") && !res.contains(allProjects[i])) {
                 res.add(allProjects[i])
                 break // already found a change in one of the .md files, no need to continue iterating the changeset
             }
@@ -233,7 +235,7 @@ boolean changeIsValidFileType(String change, String project){
 @NonCPS
 String changeset() {
     // on branch get changeset comparing with master
-    if (env.BRANCH_NAME != "master") {
+    if (env.BRANCH_NAME != 'master') {
         echo "Fetching changes between origin/${env.BRANCH_NAME} and origin/master."
         return sh (script: "git --no-pager diff --name-only origin/master...origin/${env.BRANCH_NAME} | grep -v 'vendor\\|node_modules' || echo ''", returnStdout: true)
     }

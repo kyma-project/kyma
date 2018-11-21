@@ -21,10 +21,10 @@ The Connector Service:
 
 ## Metadata Service
 
-The Metadata Service stores all registered APIs and Event Catalog exposed by a connected external solution. The APIs and Event catalogs metadata are stored in RemoteEnvironment Custom Resource.
+The Metadata Service stores all registered APIs and Event Catalog exposed by a connected external solution. The APIs and Event catalogs metadata are stored in RemoteEnvironment custom resource.
 The system creates a new Kubernetes service for each registered API. Additionally, a new Service Classes is registered in the Service Catalog.
 
->**NOTE:** Using the Metadata Service, you can register an API along with its OAuth credentials. The credentials are stored in a Kubernetes Secret.
+>**NOTE:** Using the Metadata Service, you can register an API along with its OAuth or Basic Authentication credentials. The credentials are stored in a Kubernetes Secret.
 
 ## Event Service
 
@@ -35,17 +35,17 @@ This allows to route the events to Lambda functions and Services based on their 
 
 A Remote Environment (RE) represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or the Event Bus.
 Using the components of the Application Connector, the RE creates a coherent identity for a connected external solution and ensures its separation.
-All REs are created through the RemoteEnvironment Custom Resource, which also stores all of the relevant metadata. You can map a RE to many Kyma Environments and use the APIs and the Event Catalogs of the connected external solution within their context.
+All REs are created through the RemoteEnvironment custom resource, which also stores all of the relevant metadata. You can map a RE to many Kyma Environments and use the APIs and the Event Catalogs of the connected external solution within their context.
 
 ## Remote Environment controller
 
-The controller listens for creating or deleting the RemoteEnvironment Custom Resources and acts accordingly, either provisioning or de-provisioning an instance of Proxy Service and Event Service for every Custom Resource.         
+The controller listens for creating or deleting the RemoteEnvironment custom resources and acts accordingly, either provisioning or de-provisioning an instance of Proxy Service and Event Service for every custom resource.         
 
->**NOTE:** Every RemoteEnvironment Custom Resource corresponds to a single RE to which you can connect an external solution.
+>**NOTE:** Every RemoteEnvironment custom resource corresponds to a single RE to which you can connect an external solution.
 
 ## Proxy Service
 
-The Proxy Service is an intermediary component between a lambda function or a service and an external API registered with the Metadata Service. It acts as a proxy and can acquire OAuth tokens.
+The Proxy Service is an intermediary component between a lambda function or a service and an external API registered with the Metadata Service. It can call services secured with the [Basic Authentication](https://tools.ietf.org/html/rfc7617) mechanism, acquire OAuth tokens, and call OAuth-secured APIs.  
 
 ## Access Service
 

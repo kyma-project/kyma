@@ -7,6 +7,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
+	v1alpha12 "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,21 +17,29 @@ func (ts *TestSuite) createRemoteEnvironmentResources() {
 
 	displayName := fmt.Sprintf("acc-test-re-name-%s", ts.TestID)
 	rei := client.ApplicationconnectorV1alpha1().RemoteEnvironments()
-	_, err = rei.Create(fixRemoteEnvironment(ts.remoteEnvironmentName, ts.accessLabel, ts.osbServiceId, ts.gatewayUrl, displayName))
+	_, err = createRemoteEnvironment(rei, ts.remoteEnvironmentName, ts.accessLabel, ts.osbServiceId, ts.gatewayUrl, displayName)
 	require.NoError(ts.t, err)
 
 	emi := client.ApplicationconnectorV1alpha1().EnvironmentMappings(ts.namespace)
-	_, err = emi.Create(fixEnvironmentMapping(ts.remoteEnvironmentName))
+	_, err = createEnvironmentMapping(emi, ts.remoteEnvironmentName)
 	require.NoError(ts.t, err)
 }
 
 func (ts *TestSuite) deleteRemoteEnvironment() {
 	client, err := versioned.NewForConfig(ts.config)
 	require.NoError(ts.t, err)
-
 	rei := client.ApplicationconnectorV1alpha1().RemoteEnvironments()
+
 	err = rei.Delete(ts.remoteEnvironmentName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
+}
+
+func createRemoteEnvironment(rei v1alpha12.RemoteEnvironmentInterface, reName, accessLabel, serviceId, gatewayUrl, displayName string) (*v1alpha1.RemoteEnvironment, error) {
+	return rei.Create(fixRemoteEnvironment(reName, accessLabel, serviceId, gatewayUrl, displayName))
+}
+
+func createEnvironmentMapping(emi v1alpha12.EnvironmentMappingInterface, reName string) (*v1alpha1.EnvironmentMapping, error) {
+	return emi.Create(fixEnvironmentMapping(reName))
 }
 
 func fixEnvironmentMapping(name string) *v1alpha1.EnvironmentMapping {

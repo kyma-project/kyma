@@ -5,12 +5,14 @@ import (
 	"io/ioutil"
 	"os"
 
+	"strings"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/ghodss/yaml"
 	"github.com/imdario/mergo"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybundle"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
 	"github.com/mcuadros/go-defaults"
 	"github.com/pkg/errors"
@@ -26,13 +28,28 @@ import (
 // Example of valid tag: `valid:"alphanum,required"`
 // Combining many tags: tags have to be separated by WHITESPACE: `json:"port" default:"8080" valid:"required"`
 type Config struct {
-	Logger logger.Config
+	Logger         logger.Config
+	KubeconfigPath string `envconfig:"optional"`
 	// TmpDir defines temporary directory path where bundles .tgz files will be extracted
-	TmpDir     string
-	Port       int              `default:"8080"`
-	Storage    []storage.Config `valid:"required"`
-	Repository ybundle.RepositoryConfig
-	Helm       helm.Config `valid:"required"`
+	TmpDir                   string
+	Port                     int              `default:"8080"`
+	Storage                  []storage.Config `valid:"required"`
+	Helm                     helm.Config      `valid:"required"`
+	RepositoryURLs           string           `envconfig:"APP_REPOSITORY_URLS"`
+	ClusterServiceBrokerName string
+	HelmBrokerURL            string
+}
+
+// RepositoryConfigs returns repository configurations.
+func (c *Config) RepositoryConfigs() []bundle.RepositoryConfig {
+	var cfgs []bundle.RepositoryConfig
+	for _, url := range strings.Split(c.RepositoryURLs, ";") {
+		cfgs = append(cfgs, bundle.RepositoryConfig{
+			URL: url,
+		})
+	}
+
+	return cfgs
 }
 
 // Load method has following strategy:

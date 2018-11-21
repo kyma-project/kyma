@@ -72,6 +72,18 @@
   revision = "a0a7cfed7b2a54080888fd2b3d4a3ec14562c86c"
 
 [[projects]]
+  name = "github.com/hashicorp/errwrap"
+  packages = ["."]
+  revision = "8a6fb523712970c966eefc6b39ed2c5e74880354"
+  version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/hashicorp/go-multierror"
+  packages = ["."]
+  revision = "886a7fbe3eb1c874d46f623bfa70af45f425b3d1"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
   revision = "f7279a603edee96fe7764d3de9c6ff8cf9970994"
@@ -93,10 +105,18 @@
     "pkg/client/clientset_generated/clientset",
     "pkg/client/clientset_generated/clientset/scheme",
     "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
-    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1"
+    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1",
+    "pkg/filter",
+    "pkg/svcat/service-catalog"
   ]
-  revision = "98af5889bb75a9472313e288ed5c06c591a19a19"
-  version = "v0.1.11"
+  revision = "0aaf02aba556b945a357fce4e82f62122d158f2a"
+  version = "v0.1.28"
+
+[[projects]]
+  name = "github.com/kubernetes/client-go"
+  packages = ["kubernetes/typed/core/v1"]
+  revision = "1638f8970cefaa404ff3a62950f88b08292b2696"
+  version = "v9.0.0"
 
 [[projects]]
   name = "github.com/kyma-project/kyma"
@@ -115,10 +135,10 @@
   revision = "7400291c88b0dde7d2b674f02a40efc5eb1934e5"
 
 [[projects]]
-  name = "github.com/pborman/uuid"
+  name = "github.com/pkg/errors"
   packages = ["."]
-  revision = "e790cca94e6cc75c7064b1332e63811d4aae1a53"
-  version = "v1.1"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
 
 [[projects]]
   name = "github.com/pmezard/go-difflib"
@@ -319,7 +339,6 @@
     "pkg/util/rand",
     "pkg/util/runtime",
     "pkg/util/sets",
-    "pkg/util/uuid",
     "pkg/util/validation",
     "pkg/util/validation/field",
     "pkg/util/wait",
@@ -386,6 +405,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a64381af7274815f1355db86f2063d69cc5042da0f3494f2350b62e6ccb86f60"
+  inputs-digest = "4418768e976ba789285f021a3274f5bf693b6fb76e48b13945f196fb8d344fd7"
   solver-name = "gps-cdcl"
   solver-version = 1

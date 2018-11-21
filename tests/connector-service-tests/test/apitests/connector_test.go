@@ -4,16 +4,23 @@ import (
 	"crypto/rsa"
 	"crypto/tls"
 	"fmt"
-	"net/http"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	. "net/http"
 	"net/url"
 	"testing"
+	"time"
 
 	"io/ioutil"
 
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 
 	"github.com/kyma-project/kyma/tests/connector-service-tests/test/testkit"
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	retryWaitTimeSeconds = 5 * time.Second
+	retryCount           = 20
 )
 
 func TestConnector(t *testing.T) {
@@ -21,9 +28,15 @@ func TestConnector(t *testing.T) {
 	config, err := testkit.ReadConfig()
 	require.NoError(t, err)
 
-	remoteEnvName := "ec-default"
+	remoteEnvName := "dummy-re"
 
-	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl)
+	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
+	require.NoError(t, err)
+	_, e := k8sResourcesClient.CreateDummyRemoteEnvironment(remoteEnvName, "")
+
+	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
+
+	require.NoError(t, e)
 
 	clientKey := testkit.CreateKey(t)
 
@@ -97,8 +110,8 @@ func TestConnector(t *testing.T) {
 
 		// then
 		require.NotNil(t, err)
-		require.Equal(t, http.StatusBadRequest, err.StatusCode)
-		require.Equal(t, http.StatusBadRequest, err.ErrorResponse.Code)
+		require.Equal(t, StatusBadRequest, err.StatusCode)
+		require.Equal(t, StatusBadRequest, err.ErrorResponse.Code)
 		require.Equal(t, "CSR: Invalid CName provided.", err.ErrorResponse.Error)
 	})
 
@@ -122,7 +135,7 @@ func TestConnector(t *testing.T) {
 
 		// then
 		require.Nil(t, infoResponse)
-		require.Equal(t, http.StatusForbidden, errorResponse.StatusCode)
+		require.Equal(t, StatusForbidden, errorResponse.StatusCode)
 
 		// when
 		infoResponse2, errorResponse2 := client.GetInfo(t, tokenResponse2.URL)
@@ -148,8 +161,8 @@ func TestConnector(t *testing.T) {
 
 		// then
 		require.NotNil(t, err)
-		require.Equal(t, http.StatusForbidden, err.StatusCode)
-		require.Equal(t, http.StatusForbidden, err.ErrorResponse.Code)
+		require.Equal(t, StatusForbidden, err.StatusCode)
+		require.Equal(t, StatusForbidden, err.ErrorResponse.Code)
 		require.Equal(t, "Invalid token.", err.ErrorResponse.Error)
 	})
 
@@ -180,8 +193,8 @@ func TestConnector(t *testing.T) {
 
 		// then
 		require.NotNil(t, err)
-		require.Equal(t, http.StatusForbidden, err.StatusCode)
-		require.Equal(t, http.StatusForbidden, err.ErrorResponse.Code)
+		require.Equal(t, StatusForbidden, err.StatusCode)
+		require.Equal(t, StatusForbidden, err.ErrorResponse.Code)
 		require.Equal(t, "Invalid token.", err.ErrorResponse.Error)
 	})
 
@@ -206,10 +219,11 @@ func TestConnector(t *testing.T) {
 
 		// then
 		require.NotNil(t, err)
-		require.Equal(t, http.StatusBadRequest, err.StatusCode)
-		require.Equal(t, http.StatusBadRequest, err.ErrorResponse.Code)
+		require.Equal(t, StatusBadRequest, err.StatusCode)
+		require.Equal(t, StatusBadRequest, err.ErrorResponse.Code)
 		require.Equal(t, "There was an error while parsing the base64 content. An incorrect value was provided.", err.ErrorResponse.Error)
 	})
+	k8sResourcesClient.DeleteRemoteEnvironment(remoteEnvName, &v1.DeleteOptions{})
 }
 
 func TestApiSpec(t *testing.T) {
@@ -219,13 +233,15 @@ func TestApiSpec(t *testing.T) {
 	config, err := testkit.ReadConfig()
 	require.NoError(t, err)
 
+	hc := testkit.NewHttpClient(config.SkipSslVerify)
+
 	t.Run("should receive api spec", func(t *testing.T) {
 		// when
-		response, err := http.Get(config.ExternalAPIUrl + apiSpecPath)
+		response, err := hc.Get(config.ExternalAPIUrl + apiSpecPath)
 
 		// then
 		require.NoError(t, err)
-		require.Equal(t, http.StatusOK, response.StatusCode)
+		require.Equal(t, StatusOK, response.StatusCode)
 
 		// when
 		body, err := ioutil.ReadAll(response.Body)
@@ -240,19 +256,17 @@ func TestApiSpec(t *testing.T) {
 
 	t.Run("should receive 301 when accessing base path", func(t *testing.T) {
 		// given
-		client := &http.Client{
-			CheckRedirect: func(req *http.Request, via []*http.Request) error {
-				require.Equal(t, apiSpecPath, req.URL.Path)
-				return http.ErrUseLastResponse
-			},
+		hc.CheckRedirect = func(req *Request, via []*Request) error {
+			require.Equal(t, apiSpecPath, req.URL.Path)
+			return ErrUseLastResponse
 		}
 
 		// when
-		response, err := client.Get(config.ExternalAPIUrl + "/v1")
+		response, err := hc.Get(config.ExternalAPIUrl + "/v1")
 
 		// then
 		require.NoError(t, err)
-		require.Equal(t, http.StatusMovedPermanently, response.StatusCode)
+		require.Equal(t, StatusMovedPermanently, response.StatusCode)
 	})
 }
 
@@ -263,36 +277,55 @@ func TestCertificateValidation(t *testing.T) {
 
 	gatewayUrlFormat := config.GatewayUrl + "/%s/v1/metadata/services"
 
-	remoteEnvName := "ec-default"
-	forbiddenRemoteEnvName := "hmc-default"
+	remoteEnvName := "dummy-re-1"
+	forbiddenRemoteEnvName := "dummy-re-2"
 
-	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl)
+	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
+	require.NoError(t, err)
+	_, e := k8sResourcesClient.CreateDummyRemoteEnvironment(remoteEnvName, "")
+	require.NoError(t, e)
+	_, e = k8sResourcesClient.CreateDummyRemoteEnvironment(forbiddenRemoteEnvName, "")
+	require.NoError(t, e)
+
+	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
 
 	clientKey := testkit.CreateKey(t)
+	tlsClient := createTLSClientWithCert(t, client, clientKey, config.SkipSslVerify)
 
 	t.Run("should access remote environment", func(t *testing.T) {
-		// given
-		tlsClient := createTLSClientWithCert(t, client, clientKey)
-
 		// when
-		response, err := tlsClient.Get(fmt.Sprintf(gatewayUrlFormat, remoteEnvName))
+		response, err := repeatUntilIngressIsCreated(tlsClient, gatewayUrlFormat, remoteEnvName)
 
 		// then
 		require.NoError(t, err)
-		require.Equal(t, http.StatusOK, response.StatusCode)
+		require.Equal(t, StatusOK, response.StatusCode)
 	})
 
 	t.Run("should receive 403 when accessing RE with invalid CN", func(t *testing.T) {
-		// given
-		tlsClient := createTLSClientWithCert(t, client, clientKey)
-
 		// when
-		response, err := tlsClient.Get(fmt.Sprintf(gatewayUrlFormat, forbiddenRemoteEnvName))
+		response, err := repeatUntilIngressIsCreated(tlsClient, gatewayUrlFormat, forbiddenRemoteEnvName)
 
 		// then
 		require.NoError(t, err)
-		require.Equal(t, http.StatusForbidden, response.StatusCode)
+		require.Equal(t, StatusForbidden, response.StatusCode)
 	})
+
+	k8sResourcesClient.DeleteRemoteEnvironment(remoteEnvName, &v1.DeleteOptions{})
+	k8sResourcesClient.DeleteRemoteEnvironment(forbiddenRemoteEnvName, &v1.DeleteOptions{})
+}
+
+func repeatUntilIngressIsCreated(tlsClient *Client, gatewayUrlFormat string, remoteEnvName string) (*Response, error) {
+	var response *Response
+	var err error
+	for i := 0; (shouldRetry(response, err)) && i < retryCount; i++ {
+		response, err = tlsClient.Get(fmt.Sprintf(gatewayUrlFormat, remoteEnvName))
+		time.Sleep(retryWaitTimeSeconds)
+	}
+	return response, err
+}
+
+func shouldRetry(response *Response, err error) bool {
+	return response == nil || StatusNotFound == response.StatusCode || err != nil
 }
 
 func createCertificateChain(t *testing.T, connectorClient testkit.ConnectorClient, key *rsa.PrivateKey) (*testkit.CrtResponse, *testkit.InfoResponse) {
@@ -324,7 +357,7 @@ func createCertificateChain(t *testing.T, connectorClient testkit.ConnectorClien
 	return crtResponse, infoResponse
 }
 
-func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, key *rsa.PrivateKey) *http.Client {
+func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, key *rsa.PrivateKey, skipVerify bool) *Client {
 	crtResponse, _ := createCertificateChain(t, client, key)
 	require.NotEmpty(t, crtResponse.Crt)
 	clientCertBytes, _ := testkit.CrtResponseToPemBytes(t, crtResponse)
@@ -335,15 +368,16 @@ func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, key *
 	}
 
 	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{tlsCert},
-		ClientAuth:   tls.RequireAndVerifyClientCert,
+		Certificates:       []tls.Certificate{tlsCert},
+		ClientAuth:         tls.RequireAndVerifyClientCert,
+		InsecureSkipVerify: skipVerify,
 	}
 
-	transport := &http.Transport{
+	transport := &Transport{
 		TLSClientConfig: tlsConfig,
 	}
 
-	return &http.Client{
+	return &Client{
 		Transport: transport,
 	}
 }

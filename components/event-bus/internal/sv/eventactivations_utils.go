@@ -3,7 +3,7 @@ package ea
 import (
 	"log"
 
-	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
+	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eaclientset "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

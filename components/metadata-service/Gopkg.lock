@@ -186,7 +186,7 @@
   version = "1.1.4"
 
 [[projects]]
-  digest = "1:2373c8ae7a786f9bfa6e48d873a83f2a8bbe1c1e429e75975dd100efef178f24"
+  digest = "1:cbd7818a4f9a1951bd0d921dab8dd6b275d51b131350ed5b5875130d92b77a65"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
@@ -195,7 +195,7 @@
     "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "c98f6e13a1beca119c634814c423df90d3aa8ad7"
+  revision = "6c7a2b94471fe1b29a35e62bd19bc65fdf944f84"
 
 [[projects]]
   branch = "master"
@@ -676,6 +676,7 @@
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/cache",
     "k8s.io/client-go/util/flowcontrol",
+    "k8s.io/client-go/util/retry",
     "k8s.io/code-generator/cmd/client-gen",
     "k8s.io/code-generator/cmd/deepcopy-gen",
     "k8s.io/code-generator/cmd/defaulter-gen",

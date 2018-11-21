@@ -53,14 +53,18 @@ func New(helmClient kymahelm.ClientInterface, kubeClientset *kubernetes.Clientse
 //InstallKyma .
 func (steps *InstallationSteps) InstallKyma(installationData *config.InstallationData, overrideData overrides.OverrideData) error {
 
-	currentPackage, downloadKymaErr := steps.DownloadKyma(installationData)
+	currentPackage, downloadKymaErr := steps.EnsureKymaSources(installationData)
 	if downloadKymaErr != nil {
 		return downloadKymaErr
 	}
-
 	steps.currentPackage = currentPackage
 
-	stepsFactory := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrideData)
+	steps.statusManager.InProgress("Verify installed components")
+	stepsFactory, factoryErr := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrideData)
+	if factoryErr != nil {
+		steps.statusManager.Error("Verify installed components")
+		return factoryErr
+	}
 
 	log.Println("Processing Kyma components")
 
@@ -101,7 +105,7 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 func (steps *InstallationSteps) UninstallKyma(installationData *config.InstallationData) error {
 	err := steps.DeprovisionAzureResources(DefaultDeprovisionConfig(), installationData.Context)
 	steps.errorHandlers.LogError("An error during deprovisioning: ", err)
-	steps.RemoveKymaComponents()
+	steps.RemoveKymaComponents(installationData)
 
 	err = steps.actionManager.RemoveActionLabel(installationData.Context.Name, installationData.Context.Namespace, "action")
 	if steps.errorHandlers.CheckError("Error on removing label: ", err) {

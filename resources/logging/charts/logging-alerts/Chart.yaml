@@ -1,0 +1,7 @@
+apiVersion: v1
+description: Alert rules for OKLog
+name: logging-alerts
+version: 0.1.0
+keywords:
+- logging
+- kyma

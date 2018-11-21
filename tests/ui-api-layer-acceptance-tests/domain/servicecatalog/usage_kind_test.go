@@ -4,12 +4,14 @@ package servicecatalog
 
 import (
 	"testing"
+	"time"
 
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	appv1 "k8s.io/api/apps/v1beta1"
@@ -79,12 +81,15 @@ func TestUsageKind(t *testing.T) {
 		assert.NoError(t, err)
 	}()
 
-	var usageKindsResponse usageKindsResponse
 	t.Log("Querying for usageKinds...")
-	err = c.Do(fixUsageKindsQuery(), &usageKindsResponse)
-
-	require.NoError(t, err)
-	assert.Contains(t, usageKindsResponse.UsageKinds, fixUsageKindResponse())
+	var usageKindsResponse usageKindsResponse
+	waiter.WaitAtMost(func() (bool, error) {
+		err = c.Do(fixUsageKindsQuery(), &usageKindsResponse)
+		if err != nil {
+			return false, err
+		}
+		return usageKindExists(usageKindsResponse.UsageKinds, fixUsageKindResponse()), nil
+	}, time.Second*5)
 
 	t.Log("Creating resource for UsageKind...")
 	_, err = deployClient.Deployments(usageKindNamespace).Create(fixDeployment())
@@ -94,13 +99,21 @@ func TestUsageKind(t *testing.T) {
 	_, err = deployClient.Deployments(usageKindNamespace).Create(fixDeploymentWithOwnerReference())
 	require.NoError(t, err)
 
-	var usageKindResourcesResponse usageKindResourcesResponse
 	t.Log("Querying for usageKindResources...")
-	err = c.Do(fixUsageKindsResourcesQuery(), &usageKindResourcesResponse)
-
-	require.NoError(t, err)
-	assert.Contains(t, usageKindResourcesResponse.UsageKindResources, fixUsageKindResourceResponse())
-	assert.NotContains(t, usageKindResourcesResponse.UsageKindResources, fixUsageKindResourcesShouldNotContainResponse())
+	var usageKindResourcesResponse usageKindResourcesResponse
+	waiter.WaitAtMost(func() (bool, error) {
+		err = c.Do(fixUsageKindsResourcesQuery(), &usageKindResourcesResponse)
+		if err != nil {
+			return false, err
+		}
+		if !usageKindResourceExists(usageKindResourcesResponse.UsageKindResources, fixUsageKindResourceResponse()) {
+			return false, nil
+		}
+		if usageKindResourceExists(usageKindResourcesResponse.UsageKindResources, fixUsageKindResourcesShouldNotContainResponse()) {
+			return false, nil
+		}
+		return true, nil
+	}, time.Second*5)
 }
 
 func fixUsageKindsQuery() *graphql.Request {
@@ -249,4 +262,22 @@ func fixUsageKindResourcesShouldNotContainResponse() usageKindResource {
 		Name:      "usage-kind-fix-b",
 		Namespace: usageKindNamespace,
 	}
+}
+
+func usageKindExists(items []usageKind, expected usageKind) bool {
+	for _, item := range items {
+		if item == expected {
+			return true
+		}
+	}
+	return false
+}
+
+func usageKindResourceExists(items []usageKindResource, expected usageKindResource) bool {
+	for _, item := range items {
+		if item == expected {
+			return true
+		}
+	}
+	return false
 }

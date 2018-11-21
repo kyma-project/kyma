@@ -128,7 +128,7 @@ components:
       properties:
         url:
           type: 'string'
-          example: 'https://cert-service.kyma.cluster.cx/v1/remoteenvironments/ec-default/info?token=1edfc34g'
+          example: 'https://cert-service.kyma.cluster.cx/v1/remoteenvironments/{remote-environment-name}/info?token=1edfc34g'
         token:
           type: 'string'
           example: '1edfc34g'
@@ -137,7 +137,7 @@ components:
       properties:
         subject:
           type: 'string'
-          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN=ec-default'
+          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={remote-environment-name}'
         extensions:
           type: 'string'
         key-algorithm:
@@ -148,19 +148,19 @@ components:
       properties:
         metadataUrl:
           type: 'string'
-          example: 'gateway.wormhole.kyma.cluster.cx/ec-default/v1/metadata/services'
+          example: 'gateway.wormhole.kyma.cluster.cx/{remote-environment-name}/v1/metadata/services'
         eventsUrl:
           type: 'string'
-          example: 'gateway.wormhole.kyma.cluster.cx/ec-default/v1/events'
+          example: 'gateway.wormhole.kyma.cluster.cx/{remote-environment-name}/v1/events'
         certificatesUrl:
           type: 'string'
-          example: 'certificate-service.kyma.cluster.cx/v1/remoteenvironments/ec-default'
+          example: 'certificate-service.kyma.cluster.cx/v1/remoteenvironments/{remote-environment-name}'
     infoResponse:
       type: 'object'
       properties:
         url:
           type: 'string'
-          example: 'https://cert-service.kyma.cluster.cx/v1/remoteenvironments/ec-default/client-certs?token=1edfc34g'
+          example: 'https://cert-service.kyma.cluster.cx/v1/remoteenvironments/{remote-environment-name}/client-certs?token=1edfc34g'
         api:
           $ref: '#/components/schemas/apiURLs'
         certificate:
@@ -184,5 +184,5 @@ components:
       properties:
         crt:
           type: 'string'
-          description: 'Base64 encoded certificate file.'
-          example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tDQpBTllfQ0VSVElGSUNBVEVfRklMRV9USElTX0lTX0pVU1RfQU5fRVhBTVBMRQ0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ0K'
+          description: 'Base64 encoded certificates chain.'
+          example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkNMSUVOVCBDRVJUSUZJQ0FURSBGSUxFIChUSElTIElTIEpVU1QgQU4gRVhBTVBMRSkKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KU0VSVkVSIENFUlRJRklDQVRFIEZJTEUgKFRISVMgSVMgSlVTVCBBTiBFWEFNUExFKQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t'

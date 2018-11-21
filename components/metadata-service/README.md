@@ -33,20 +33,21 @@ The Metadata Service has the following parameters:
 - **namespace** - Namespace where Metadata Service is deployed. The default Namespace is `kyma-system`.
 - **requestTimeout** - A time-out for requests sent through the Metadata Service. It is provided in seconds. The default time-out is `1`.
 - **requestLogging** - A flag for logging incoming requests. The default value is `false`.
+- **detailedErrorResponse** - A flag for showing detailed internal error messages in response bodies. The default value is `false` and all internal server error messages are shortened to `Internal error`, while all other error messages are shown as usual.
 
 ### Sample calls
 
-To access the Metadata Service on Minikube you need the NodePort of `core-nginx-ingress-controller`.
+To access the Metadata Service on Minikube you need the NodePort of `application-connector-nginx-ingress-controller`.
 To get the NodePort, run this command:
 
 ```
-kubectl -n kyma-system get svc core-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
+kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
 ```
 
-- Create a new service 
+- Create a new service
 
 ```sh
-curl -X POST https://gateway.kyma.local:{NODE_PORT}/ec-default/v1/metadata/services --cert ec-default.crt --key ec-default.key -k \
+curl -X POST https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/metadata/services --cert {CER_NAME}.crt --key {CERT_KEY}.key -k \
   -d '{"name": "Some EC",
   "provider": "kyma",
   "description": "This is some EC!",
@@ -87,7 +88,7 @@ curl -X POST https://gateway.kyma.local:{NODE_PORT}/ec-default/v1/metadata/servi
 - Fetch all services
 
 ```
-curl https://gateway.kyma.local:{NODE_PORT}/ec-default/v1/metadata/services --cert ec-default.crt --key ec-default.key -k
+curl https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/metadata/services --cert {CERT_NAME}.crt --key {KEY_NAME}.key -k
 ```
 
 ## Development
@@ -96,7 +97,7 @@ This section explains the development process.
 
 ### Rapid development with Telepresence
 
-The Metadata Service stores its state in the Kubernetes Custom Resource, therefore it's dependent on Kubernetes. You cannot mock the dependency. You cannot develop locally. Manual deployment on every change is a mundane task.
+The Metadata Service stores its state in the Kubernetes custom resource, therefore it's dependent on Kubernetes. You cannot mock the dependency. You cannot develop locally. Manual deployment on every change is a mundane task.
 
 You can, however, leverage [Telepresence](https://www.telepresence.io/). This works by replacing a container in a specified Pod, opening up a new local shell or a pre-configured bash, and proxying the network traffic from the local shell through the Pod.
 

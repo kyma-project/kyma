@@ -6,14 +6,16 @@ import (
 	"sort"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	appsv1beta1 "k8s.io/api/apps/v1beta1"
 	apiv1 "k8s.io/api/core/v1"
+	authV1 "k8s.io/api/rbac/v1beta1"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
-
-	authV1 "k8s.io/api/rbac/v1beta1"
 )
 
 const (
@@ -35,7 +37,7 @@ func (ts *TestSuite) createKubernetesResources() {
 	require.NoError(ts.t, err)
 
 	nsClient := clientset.CoreV1().Namespaces()
-	_, err = nsClient.Create(fixNamespace(ts.namespace))
+	_, err = nsClient.Create(fixEnvironment(ts.namespace))
 	require.NoError(ts.t, err)
 
 	deploymentClient := clientset.AppsV1beta1().Deployments(ts.namespace)
@@ -104,6 +106,30 @@ func fixServiceAccount() *apiv1.ServiceAccount {
 			Name: "acceptance-test",
 		},
 	}
+}
+
+func (ts *TestSuite) ensureNamespaceIsDeleted(timeout time.Duration) {
+	clientset, err := kubernetes.NewForConfig(ts.config)
+	require.NoError(ts.t, err)
+
+	nsClient := clientset.CoreV1().Namespaces()
+
+	err = nsClient.Delete(ts.namespace, &metav1.DeleteOptions{})
+	require.NoError(ts.t, err)
+
+	waitForNsTermination := func() error {
+		ns, err := nsClient.Get(ts.namespace, metav1.GetOptions{})
+		switch {
+		case err == nil:
+			return fmt.Errorf("namespace %q still exists [phase: %q]", ts.namespace, ns.Status.Phase)
+		case apiErrors.IsNotFound(err):
+			return nil
+		default:
+			return errors.Wrap(err, "while getting namespace")
+		}
+	}
+
+	repeat.FuncAtMost(ts.t, waitForNsTermination, timeout)
 }
 
 func (ts *TestSuite) deleteNamespace() {
@@ -240,11 +266,19 @@ func (ts *TestSuite) podLogs(clientset *kubernetes.Clientset, pod *apiv1.Pod, co
 	return fmt.Sprintf("Logs from pod %s (created at %v):\n%s", pod.Name, pod.CreationTimestamp.Format("15:04:05"), string(logs))
 }
 
-func fixNamespace(name string) *apiv1.Namespace {
+func fixEnvironment(name string) *apiv1.Namespace {
 	return &apiv1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
 			Labels: map[string]string{"env": "true", "istio-injection": "enabled"},
+		},
+	}
+}
+
+func fixNamespace(name string) *apiv1.Namespace {
+	return &apiv1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
 		},
 	}
 }

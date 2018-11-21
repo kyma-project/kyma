@@ -8,8 +8,8 @@ import (
 	rls "k8s.io/helm/pkg/proto/hapi/services"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/platform/idprovider"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/ybind"
 )
 
 // be aware that after regenerating mocks, manual steps are required
@@ -129,17 +129,17 @@ type (
 	}
 
 	bindTemplateRenderer interface {
-		Render(bindTemplate internal.BundlePlanBindTemplate, resp *rls.InstallReleaseResponse) (ybind.RenderedBindYAML, error)
+		Render(bindTemplate internal.BundlePlanBindTemplate, resp *rls.InstallReleaseResponse) (bind.RenderedBindYAML, error)
 	}
 
 	bindTemplateResolver interface {
-		Resolve(bindYAML ybind.RenderedBindYAML, ns internal.Namespace) (*ybind.ResolveOutput, error)
+		Resolve(bindYAML bind.RenderedBindYAML, ns internal.Namespace) (*bind.ResolveOutput, error)
 	}
 )
 
 // New creates instance of broker.
 func New(bs bundleStorage, cs chartStorage, os operationStorage, is instanceStorage, ibd instanceBindDataStorage,
-	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver, hc helmClient, log *logrus.Entry) *Server {
+	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver, hc helmClient, syncer syncer, log *logrus.Entry) *Server {
 	idpRaw := idprovider.New()
 	idp := func() (internal.OperationID, error) {
 		idRaw, err := idpRaw()
@@ -149,17 +149,17 @@ func New(bs bundleStorage, cs chartStorage, os operationStorage, is instanceStor
 		return internal.OperationID(idRaw), nil
 	}
 
-	return newWithIDProvider(bs, cs, os, is, ibd, bindTmplRenderer, bindTmplResolver, hc, log, idp)
+	return newWithIDProvider(bs, cs, os, is, ibd, bindTmplRenderer, bindTmplResolver, hc, syncer, log, idp)
 }
 
 func newWithIDProvider(bs bundleStorage, cs chartStorage, os operationStorage, is instanceStorage, ibd instanceBindDataStorage,
-	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver, hc helmClient,
+	bindTmplRenderer bindTemplateRenderer, bindTmplResolver bindTemplateResolver, hc helmClient, syncer syncer,
 	log *logrus.Entry, idp func() (internal.OperationID, error)) *Server {
 	return &Server{
-		catalogGetter: &catalogService{
+		catalogGetter: newCatalogSyncerService(&catalogService{
 			finder: bs,
 			conv:   &bundleToServiceConverter{},
-		},
+		}, syncer),
 		provisioner: &provisionService{
 			bundleIDGetter:   bs,
 			chartGetter:      cs,

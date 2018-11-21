@@ -1,0 +1,59 @@
+{
+  "id": "bundleID",
+  "name": "bundleName",
+  "description": "bundleDescription",
+  "tags": [
+    "awesome-tag"
+  ],
+  "bindable": true,
+  "plans": [
+    {
+      "id": "planID",
+      "name": "planName",
+      "description": "planDescription",
+      "bindable": true,
+      "metadata": {
+        "displayName": "displayName-1"
+      },
+      "schemas": {
+        "service_instance": {
+          "create": {
+            "parameters": {
+              "$schema": "http://json-schema.org/draft-04/schema#",
+              "type": "string",
+              "title": "ProvisionSchema"
+            }
+          },
+          "update": {
+            "parameters": {
+              "$schema": "http://json-schema.org/draft-04/schema#",
+              "type": "string",
+              "title": "UpdateSchema"
+            }
+          }
+        },
+        "service_binding": {
+          "create": {
+            "parameters": {
+              "$schema": "http://json-schema.org/draft-04/schema#",
+              "type": "string",
+              "title": "BindSchema"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "displayName": "DisplayName",
+    "documentationUrl": "DocumentationURL",
+    "imageUrl": "ImageURL",
+    "labels": {
+      "local": "true",
+      "testing": "true"
+    },
+    "longDescription": "LongDescription",
+    "providerDisplayName": "ProviderDisplayName",
+    "supportUrl": "SupportURL"
+  }
+}

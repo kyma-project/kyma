@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma.cx/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/kyma-project/kyma/components/event-bus/internal/push/handlers"
 	"github.com/kyma-project/kyma/components/event-bus/internal/push/opts"
@@ -23,6 +23,7 @@ type subscriptionCRWithNATSStreamingSubscription struct {
 const (
 	actionChannelSize                       = 16
 	retryConnectionAndSubscriptionsInterval = 30 * time.Second
+	durableNameDelimiter                    = "-"
 )
 
 type action func()
@@ -149,7 +150,7 @@ func (s *SubscriptionsSupervisor) StartSubscriptionReq(sub *v1alpha1.Subscriptio
 // StopSubscriptionReq message models the request to stop handling EventBus subscription
 func (s *SubscriptionsSupervisor) StopSubscriptionReq(sub *v1alpha1.Subscription) {
 	s.actionChan <- func() {
-		log.Printf("handling EventBus Subscription %s stop request", sub.Name)
+		log.Printf("handling EventBus stop request for subscription %s in namespace %s", getSubscriptionDurableName(sub), sub.Namespace)
 		if val, present := s.subscriptions[sub.UID]; present {
 			if val.natsStreamingSubscription != nil {
 				s.stopSubscription(sub)
@@ -158,7 +159,7 @@ func (s *SubscriptionsSupervisor) StopSubscriptionReq(sub *v1alpha1.Subscription
 			// cleanup references
 			delete(s.subscriptions, sub.UID)
 		} else {
-			log.Printf("there was no subscription %s", sub.Name)
+			log.Printf("there was no subscription %s in namespace %s", getSubscriptionDurableName(sub), sub.Namespace)
 		}
 	}
 }
@@ -174,7 +175,7 @@ func (s *SubscriptionsSupervisor) retryNATSStreamingSubscriptions(requestProvide
 }
 
 func (s *SubscriptionsSupervisor) stopSubscription(sub *v1alpha1.Subscription) {
-	log.Printf("Stopping handling EventBus subscription %s", sub.Name)
+	log.Printf("Stopping handling EventBus subscription %s in namespace %s", getSubscriptionDurableName(sub), sub.Namespace)
 	// Close NATS Streaming subscription for the EventBus subscription being stopped
 	subscriptionCRWithNATSStreamingSubscription := s.subscriptions[sub.UID]
 	if err := (*subscriptionCRWithNATSStreamingSubscription.natsStreamingSubscription).Unsubscribe(); err != nil {
@@ -183,14 +184,15 @@ func (s *SubscriptionsSupervisor) stopSubscription(sub *v1alpha1.Subscription) {
 }
 
 func (s *SubscriptionsSupervisor) handleSubscription(sub *v1alpha1.Subscription, requestProvider common.RequestProvider) {
-	log.Printf("attempting establishing NATS Streaming subscription for %s", sub.Name)
+	log.Printf("attempting establishing NATS Streaming subscription %s in namespace %s", getSubscriptionDurableName(sub), sub.Namespace)
 
 	msgHandler := s.mhf.NewMsgHandler(sub, s.opts, requestProvider)
 	topic := common.FromSubscriptionSpec(sub.SubscriptionSpec).Encode()
+	subscriptionName := getSubscriptionDurableName(sub)
 
 	natsStreamingSub, err := (*s.stanConn).QueueSubscribe(
 		topic, s.opts.QueueGroup, msgHandler,
-		stan.DurableName(sub.Name),
+		stan.DurableName(subscriptionName),
 		stan.SetManualAckMode(),
 		stan.AckWait(s.opts.AckWait),
 		stan.MaxInflight(sub.SubscriptionSpec.MaxInflight))
@@ -201,4 +203,8 @@ func (s *SubscriptionsSupervisor) handleSubscription(sub *v1alpha1.Subscription,
 		s.subscriptions[sub.UID].natsStreamingSubscription = &natsStreamingSub
 		log.Print("established NATS Streaming subscription")
 	}
+}
+
+func getSubscriptionDurableName(sub *v1alpha1.Subscription) string {
+	return sub.Namespace + durableNameDelimiter + sub.Name
 }

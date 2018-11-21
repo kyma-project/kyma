@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	sc_fake "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake"
@@ -12,6 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/internal/nsbroker/automock"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	core_v1 "k8s.io/api/core/v1"
 	k8s_errors "k8s.io/apimachinery/pkg/api/errors"
@@ -29,25 +31,44 @@ func TestNsBrokerCreateHappyPath(t *testing.T) {
 	k8sFakeClientset := k8s_fake.NewSimpleClientset()
 	mockServiceNameProvider := &automock.ServiceNameProvider{}
 	defer mockServiceNameProvider.AssertExpectations(t)
+	mockServiceChecker := &automock.ServiceChecker{}
+	defer mockServiceChecker.AssertExpectations(t)
+	mockBrokerSyncer := &automock.BrokerSyncer{}
+	defer mockBrokerSyncer.AssertExpectations(t)
 
 	serviceName := "reb-ns-for-stage"
 	mockServiceNameProvider.On("GetServiceNameForNsBroker", "stage").Return("reb-ns-for-stage")
+	done := make(chan struct{})
+	svcURL := fmt.Sprintf("http://%s.%s.svc.cluster.local", serviceName, fixWorkingNs())
+	mockServiceChecker.On("WaitUntilIsAvailable", fmt.Sprintf("%s/statusz", svcURL), mock.Anything).Once()
+	mockBrokerSyncer.On("SyncBroker", "stage").Run(func(args mock.Arguments) {
+		close(done)
+	}).Once().Return(nil)
 
-	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientset.CoreV1(), mockServiceNameProvider, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), spy.NewLogDummy())
+	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientset.CoreV1(), mockServiceNameProvider, mockBrokerSyncer, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), spy.NewLogDummy())
+	sut = sut.WithServiceChecker(mockServiceChecker)
 	// WHEN
 	err := sut.Create(fixDestNs())
+
 	// THEN
 	require.NoError(t, err)
 	actualBroker, err := scFakeClientset.Servicecatalog().ServiceBrokers(fixDestNs()).Get("remote-env-broker", v1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, "true", actualBroker.Labels["namespaced-remote-env-broker"])
-	assert.Equal(t, fmt.Sprintf("http://%s.%s.svc.cluster.local", serviceName, fixWorkingNs()), actualBroker.Spec.URL)
+	assert.Equal(t, svcURL, actualBroker.Spec.URL)
 
 	actualService, err := k8sFakeClientset.CoreV1().Services(fixWorkingNs()).Get(serviceName, v1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, fixRebSelectorValue(), actualService.Spec.Selector[fixRebSelectorKey()])
 	require.Len(t, actualService.Spec.Ports, 1)
 	assert.Equal(t, fixTargetPort(), actualService.Spec.Ports[0].TargetPort.IntVal)
+
+	// wait for SyncBroker
+	select {
+	case <-done:
+	case <-time.After(100 * time.Millisecond):
+		assert.Fail(t, "SyncBroker was not called")
+	}
 }
 
 func TestNsBrokerCreateErrorsHandlingOnBrokerCreation(t *testing.T) {
@@ -56,11 +77,16 @@ func TestNsBrokerCreateErrorsHandlingOnBrokerCreation(t *testing.T) {
 	k8sFakeClientset := k8s_fake.NewSimpleClientset()
 	mockServiceNameProvider := &automock.ServiceNameProvider{}
 	defer mockServiceNameProvider.AssertExpectations(t)
+	mockServiceChecker := &automock.ServiceChecker{}
+	defer mockServiceChecker.AssertExpectations(t)
+	mockBrokerSyncer := &automock.BrokerSyncer{}
+	defer mockBrokerSyncer.AssertExpectations(t)
+
 	mockServiceNameProvider.On("GetServiceNameForNsBroker", "stage").Return("reb-ns-for-stage")
 
 	scFakeClientset.PrependReactor("create", "servicebrokers", failingReactor(fixError()))
 	logSink := spy.NewLogSink()
-	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientset.CoreV1(), mockServiceNameProvider, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), logSink.Logger)
+	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientset.CoreV1(), mockServiceNameProvider, mockBrokerSyncer, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), logSink.Logger)
 	// WHEN
 	err := sut.Create(fixDestNs())
 	// THEN
@@ -76,11 +102,16 @@ func TestNsBrokerCreateErrorsHandlingOnServiceCreation(t *testing.T) {
 	k8sFakeClientset := k8s_fake.NewSimpleClientset()
 	mockServiceNameProvider := &automock.ServiceNameProvider{}
 	defer mockServiceNameProvider.AssertExpectations(t)
+	mockServiceChecker := &automock.ServiceChecker{}
+	defer mockServiceChecker.AssertExpectations(t)
+	mockBrokerSyncer := &automock.BrokerSyncer{}
+	defer mockBrokerSyncer.AssertExpectations(t)
+
 	mockServiceNameProvider.On("GetServiceNameForNsBroker", "stage").Return("reb-ns-for-stage")
 
 	logSink := spy.NewLogSink()
 	k8sFakeClientset.PrependReactor("create", "services", failingReactor(fixError()))
-	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientset.CoreV1(), mockServiceNameProvider, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), logSink.Logger)
+	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientset.CoreV1(), mockServiceNameProvider, mockBrokerSyncer, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), logSink.Logger)
 	// WHEN
 	err := sut.Create(fixDestNs())
 	// THEN
@@ -95,12 +126,17 @@ func TestNsBrokerCreateAlreadyExistErrorsIgnored(t *testing.T) {
 	k8sFakeClientSet := k8s_fake.NewSimpleClientset()
 	mockServiceNameProvider := &automock.ServiceNameProvider{}
 	defer mockServiceNameProvider.AssertExpectations(t)
+	mockServiceChecker := &automock.ServiceChecker{}
+	defer mockServiceChecker.AssertExpectations(t)
+	mockBrokerSyncer := &automock.BrokerSyncer{}
+	defer mockBrokerSyncer.AssertExpectations(t)
+
 	mockServiceNameProvider.On("GetServiceNameForNsBroker", "stage").Return("reb-ns-for-stage")
 
 	logSink := spy.NewLogSink()
 	k8sFakeClientSet.PrependReactor("create", "services", failingReactor(fixAlreadyExistError()))
 	scFakeClientset.PrependReactor("create", "servicebrokers", failingReactor(fixAlreadyExistError()))
-	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientSet.CoreV1(), mockServiceNameProvider, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), logSink.Logger)
+	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientSet.CoreV1(), mockServiceNameProvider, mockBrokerSyncer, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), logSink.Logger)
 	// WHEN
 	err := sut.Create(fixDestNs())
 	assert.NoError(t, err)
@@ -118,7 +154,7 @@ func TestNsBrokerDeleteHappyPath(t *testing.T) {
 
 	mockServiceNameProvider.On("GetServiceNameForNsBroker", "stage").Return("reb-ns-for-stage")
 
-	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientSet.CoreV1(), mockServiceNameProvider, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), spy.NewLogDummy())
+	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientSet.CoreV1(), mockServiceNameProvider, nil, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), spy.NewLogDummy())
 	// WHEN
 	err := sut.Delete(fixDestNs())
 	// THEN
@@ -142,7 +178,7 @@ func TestNsBrokerDeleteErrorOnRemovingService(t *testing.T) {
 	k8sFakeClientSet.PrependReactor("delete", "services", failingReactor(fixError()))
 	logSink := spy.NewLogSink()
 
-	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientSet.CoreV1(), mockServiceNameProvider, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), logSink.Logger)
+	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientSet.CoreV1(), mockServiceNameProvider, nil, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), logSink.Logger)
 	// WHEN
 	err := sut.Delete(fixDestNs())
 	// THEN
@@ -166,7 +202,7 @@ func TestNsBrokerDeleteErrorOnRemovingBroker(t *testing.T) {
 	scFakeClientset.PrependReactor("delete", "servicebrokers", failingReactor(fixError()))
 	logSink := spy.NewLogSink()
 
-	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientSet.CoreV1(), mockServiceNameProvider, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), logSink.Logger)
+	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientSet.CoreV1(), mockServiceNameProvider, nil, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), logSink.Logger)
 	// WHEN
 	err := sut.Delete(fixDestNs())
 	// THEN
@@ -184,7 +220,7 @@ func TestNsBrokerDeleteNotFoundErrorsIgnored(t *testing.T) {
 
 	mockServiceNameProvider.On("GetServiceNameForNsBroker", "stage").Return("reb-ns-for-stage")
 	logSink := spy.NewLogSink()
-	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientSet.CoreV1(), mockServiceNameProvider, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), logSink.Logger)
+	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientSet.CoreV1(), mockServiceNameProvider, nil, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), logSink.Logger)
 	// WHEN
 	err := sut.Delete(fixDestNs())
 	// THEN
@@ -196,7 +232,7 @@ func TestNsBrokerDeleteNotFoundErrorsIgnored(t *testing.T) {
 func TestNsBrokerDoesNotExist(t *testing.T) {
 	// GIVEN
 	scFakeClientset := sc_fake.NewSimpleClientset()
-	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), nil, nil, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), spy.NewLogDummy())
+	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), nil, nil, nil, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), spy.NewLogDummy())
 	// WHEN
 	ex, err := sut.Exist(fixDestNs())
 	// THEN
@@ -218,7 +254,7 @@ func TestNsBrokerDoesNotExistIfOnlyServiceIsAbsent(t *testing.T) {
 
 	mockServiceNameProvider.On("GetServiceNameForNsBroker", "stage").Return("reb-ns-for-stage")
 
-	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientset.CoreV1(), mockServiceNameProvider, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), spy.NewLogDummy())
+	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientset.CoreV1(), mockServiceNameProvider, nil, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), spy.NewLogDummy())
 	// WHEN
 	ex, err := sut.Exist(fixDestNs())
 	// THEN
@@ -247,7 +283,7 @@ func TestNsBrokerExist(t *testing.T) {
 
 	mockServiceNameProvider.On("GetServiceNameForNsBroker", "stage").Return("reb-ns-for-stage")
 
-	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientset.CoreV1(), mockServiceNameProvider, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), spy.NewLogDummy())
+	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientset.CoreV1(), mockServiceNameProvider, nil, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), spy.NewLogDummy())
 	// WHEN
 	ex, err := sut.Exist(fixDestNs())
 	// THEN
@@ -259,7 +295,7 @@ func TestNsBrokerExistOnError(t *testing.T) {
 	// GIVEN
 	scFakeClientset := sc_fake.NewSimpleClientset()
 	scFakeClientset.PrependReactor("get", "servicebrokers", failingReactor(fixError()))
-	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), nil, nil, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), spy.NewLogDummy())
+	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), nil, nil, nil, fixWorkingNs(), fixRebSelectorKey(), fixRebSelectorValue(), fixTargetPort(), spy.NewLogDummy())
 	// WHEN
 	_, err := sut.Exist(fixDestNs())
 	// THEN

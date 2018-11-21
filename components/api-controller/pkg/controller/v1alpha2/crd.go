@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	kymaApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma.cx/v1alpha2"
+	kymaApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	k8sApiExtensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

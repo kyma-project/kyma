@@ -3,7 +3,7 @@ title: ServiceBindingUsage
 type: Custom Resource
 ---
 
-The `servicebindingusages.servicecatalog.kyma.cx` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format used to inject Secrets to the application. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `servicebindingusages.servicecatalog.kyma.cx` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to inject Secrets to the application. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```
 kubectl get crd servicebindingusages.servicecatalog.kyma.cx -o yaml
@@ -19,6 +19,14 @@ kind: ServiceBindingUsage
 metadata:
  name: redis-client-binding-usage
  namespace: production
+ "ownerReferences": [
+    {
+       "apiVersion": "servicecatalog.k8s.io/v1beta1",
+       "kind": "ServiceBinding",
+       "name": "redis-instance-binding",
+       "uid": "65cc140a-db6a-11e8-abe7-0242ac110023"
+    }
+ ],
 spec:
  serviceBindingRef:
    name: redis-instance-binding
@@ -45,6 +53,7 @@ This table lists all the possible parameters of a given resource together with t
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is created. |
+| **metadata.ownerReferences** |    **YES**   | Contains an ownerReference to the binding specified at **spec.serviceBindingRef.name** field if the binding exist. |
 | **spec.serviceBindingRef.name** |    **YES**   | Specifies the name of the ServiceBinding. |
 | **spec.usedBy** |    **YES**   | Specifies the application into which the Secret is injected. |
 | **spec.usedBy.kind** |    **YES**   | Specifies the name of the UsageKind custom resource. |
