@@ -7,8 +7,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_logging_monitoring:
-    dir: develop/
-    version: 6e0a7fe2
+    dir: pr/
+    version: PR-1752
   istio:
     tls:
       secretName: istio-ingress-certs

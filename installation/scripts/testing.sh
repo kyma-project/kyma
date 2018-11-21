@@ -211,6 +211,15 @@ echo "- Montitoring module is intalled. Running tests for same"
 helm test monitoring --timeout 600
 fi
 
+# execute logging tests if 'logging' is installed
+helm list | grep -q logging
+if [ $? -eq 0 ]
+then
+echo "- Logging module is intalled. Running tests for same"
+helm test logging --timeout 600
+loggingTestErr=$?
+fi
+
 checkAndCleanupTest kyma-system
 testCheckCore=$?
 
@@ -231,7 +240,7 @@ testCheckGateway=$?
 printImagesWithLatestTag
 latestTagsErr=$?
 
-if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${acTestErr} -ne 0 ]
+if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${acTestErr} -ne 0 ] || [ ${loggingTestErr} -ne 0 ] || [ ${monitoringTestErr} -ne 0 ]
 then
     exit 1
 else
