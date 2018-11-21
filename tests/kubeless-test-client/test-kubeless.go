@@ -550,10 +550,17 @@ var testDataRegex = regexp.MustCompile(`(?m)^OK ([a-z0-9]{8})$`)
 
 func main() {
 	cleanup()
+	time.Sleep(10 * time.Second)
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	log.Println("Starting test")
 	log.Printf("Domain Name is: %v", os.Getenv("DOMAIN_NAME"))
+
+	if os.Getenv("DOMAIN_NAME") == "kyma.local" {
+		log.Printf("We dont run this test on Minikube!!")
+		os.Exit(0)
+	}
+
 	testID := randomString(8)
 	deployK8s("ns.yaml")
 	deployK8s("k8syaml/k8s.yaml")
@@ -573,7 +580,7 @@ func main() {
 	go func() {
 		log.Println("Deploying test-event function")
 		deployFun("kubeless-test", "test-event", "nodejs6", "event.js", "event.handler")
-		time.Sleep(10 * time.Second) // Sometimes subsctiptions take long time. So lambda might not get the events
+		time.Sleep(2 * time.Minute) // Sometimes subsctiptions take long time. So lambda might not get the events
 		log.Println("Publishing event to function test-event")
 		publishEvent(testID)
 		log.Println("Verifying correct event processing for test-event")

@@ -2,10 +2,6 @@ dex:
   tls:
     createSecret: false
 
-service-catalog:
-  etcd-stateful:
-    replicaCount: 1
-
 minio:
   service:
     type: NodePort
@@ -24,28 +20,28 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: 3d71d245
+    version: 1469bef3
   alpine_net:
     dir: develop/
     version: ed568f0f
   api_controller:
     dir: develop/
-    version: 2df5bbfd
+    version: 8c274255
   api_controller_acceptance_tests:
     dir: develop/
-    version: 6e0a7fe2
+    version: 488696a0
   apiserver_proxy:
     dir: develop/
     version: 6e0a7fe2
   binding_usage_controller:
     dir: develop/
-    version: b7683312
+    version: 83692fd8
   configurations_generator:
     dir: develop/
     version: 4a23580f
   docs:
     dir: develop/
-    version: f53cec45
+    version: fce4f51f
   environments:
     dir: develop/
     version: 6e0a7fe2
@@ -60,10 +56,10 @@ global:
     version: 1daa11b7
   helm_broker:
     dir: develop/
-    version: 70ba3ce9
+    version: 0d1ffe15
   kubeless_test_client:
     dir: develop/
-    version: b1248e73
+    version: c3c08515
   test_environments:
     dir: develop/
     version: '84359277'
@@ -72,10 +68,10 @@ global:
     version: 6e0a7fe2
   ui_api_layer:
     dir: develop/
-    version: a84b8f6e
+    version: 8c274255
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: a84b8f6e
+    version: 6be9cda2
 
 test:
   acceptance:

@@ -61,19 +61,19 @@
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/event-bus/api/publish",
-    "components/event-bus/api/push/eventing.kyma.cx",
-    "components/event-bus/api/push/eventing.kyma.cx/v1alpha1",
+    "components/event-bus/api/push/eventing.kyma-project.io",
+    "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
     "components/event-bus/generated/ea/clientset/versioned",
     "components/event-bus/generated/ea/clientset/versioned/scheme",
-    "components/event-bus/generated/ea/clientset/versioned/typed/applicationconnector.kyma.cx/v1alpha1",
+    "components/event-bus/generated/ea/clientset/versioned/typed/applicationconnector.kyma-project.io/v1alpha1",
     "components/event-bus/generated/push/clientset/versioned",
     "components/event-bus/generated/push/clientset/versioned/scheme",
-    "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma.cx/v1alpha1",
-    "components/event-bus/internal/ea/apis/applicationconnector.kyma.cx",
-    "components/event-bus/internal/ea/apis/applicationconnector.kyma.cx/v1alpha1",
+    "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
+    "components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io",
+    "components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1",
     "components/event-bus/test/util"
   ]
-  revision = "a76117d66d3acb52ff19fe4a333ad19970f24c21"
+  revision = "488696a02facc05f4b90dfc902983d9b543d2cd2"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -96,26 +96,25 @@
 [[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
-  revision = "9a97c102cda95a86cec2345a6f09f55a939babf5"
-  version = "v1.0.2"
+  revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
+  version = "v1.0.3"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
+  revision = "3d3f9f413869b949e48070b5bc593aa22cc2b8f2"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = [
-    "context",
     "http/httpguts",
     "http2",
     "http2/hpack",
     "idna"
   ]
-  revision = "2f5d2388922f370f4355f327fcf4cfe9f5583908"
+  revision = "88d92db4c548972d942ac2a3531a8a9a34c82ca6"
 
 [[projects]]
   branch = "master"
@@ -124,7 +123,7 @@
     "unix",
     "windows"
   ]
-  revision = "d641721ec2dead6fe5ca284096fe4b1fcd49e427"
+  revision = "66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -151,7 +150,7 @@
   branch = "master"
   name = "golang.org/x/time"
   packages = ["rate"]
-  revision = "fbb02b2291d28baffd63558aa44b4b56f178d650"
+  revision = "85acf8d2951cb2a3bde7632f9ff273ef0379bcbd"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -198,7 +197,7 @@
     "storage/v1alpha1",
     "storage/v1beta1"
   ]
-  revision = "f456898a08e4bbc5891694118f3819f324de12ff"
+  revision = "a33c8200050fc0751848276811abf3fc029b3133"
 
 [[projects]]
   name = "k8s.io/apimachinery"
@@ -240,7 +239,7 @@
     "third_party/forked/golang/reflect"
   ]
   revision = "302974c03f7e50f16561ba237db776ab93594ef6"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.10.0"
 
 [[projects]]
   name = "k8s.io/client-go"

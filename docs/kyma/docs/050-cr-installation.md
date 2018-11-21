@@ -3,16 +3,16 @@ title: Installation
 type: Custom Resource
 ---
 
-The `installations.installer.kyma-project.io` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format used to control the Kyma Installer, a proprietary solution based on the
+The `installations.installer.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to control the Kyma Installer, a proprietary solution based on the
 [Kubernetes operator](https://coreos.com/operators/) principles. To get the up-to-date CRD and show the output in the `yaml` format, run this command:  
 
 ```
 kubectl get crd installations.installer.kyma-project.io -o yaml
 ```
 
-## Sample Custom Resource
+## Sample custom resource
 
-This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma. The  **name** and **namespace**  fields in the `components` array define which components you install and Namespaces in which you install them. This example shows that you install the `hmc-default` release of the `remote-environments` component in the `kyma-integration` Namespace. 
+This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma. The  **name** and **namespace**  fields in the `components` array define which components you install and Namespaces in which you install them. This example shows that you install the `hmc-default` release of the `remote-environments` component in the `kyma-integration` Namespace.
 
 >**NOTE:** See the `installer-cr.yaml.tpl` file in the `/installation/resources` directory for the complete list of Kyma components.
 
@@ -28,7 +28,7 @@ metadata:
 spec:
   version: "1.0.0"
   url: "https://sample.url.com/kyma_release.tar.gz"
-  components: 
+  components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
     - name: "istio"
@@ -40,12 +40,6 @@ spec:
       namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
-    - name: "remote-environments"
-      namespace: "kyma-integration"
-      release: "ec-default"
-    - name: "remote-environments"
-      namespace: "kyma-integration"
-      release: "hmc-default"
 ```
 
 ## Custom resource parameters

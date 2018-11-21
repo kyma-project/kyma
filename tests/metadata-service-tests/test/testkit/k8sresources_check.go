@@ -35,12 +35,22 @@ func CheckK8sService(t *testing.T, service *v1core.Service, name string, labels 
 	checkLabels(t, labels, service.Labels)
 }
 
-func CheckK8sSecret(t *testing.T, secret *v1core.Secret, name string, labels Labels, clientId, clientSecret string) {
+func CheckK8sOAuthSecret(t *testing.T, secret *v1core.Secret, name string, labels Labels, clientId, clientSecret string) {
 	require.Equal(t, name, secret.Name)
 
 	secretData := secret.Data
 	require.Equal(t, clientId, string(secretData["clientId"]))
 	require.Equal(t, clientSecret, string(secretData["clientSecret"]))
+
+	checkLabels(t, labels, secret.Labels)
+}
+
+func CheckK8sBasicAuthSecret(t *testing.T, secret *v1core.Secret, name string, labels Labels, username, password string) {
+	require.Equal(t, name, secret.Name)
+
+	secretData := secret.Data
+	require.Equal(t, username, string(secretData["username"]))
+	require.Equal(t, password, string(secretData["password"]))
 
 	checkLabels(t, labels, secret.Labels)
 }
@@ -90,7 +100,7 @@ func CheckK8sRemoteEnvironment(t *testing.T, re *remoteenv.RemoteEnvironment, na
 		require.NotNil(t, apiEntry)
 
 		require.Equal(t, expectedServiceData.TargetUrl, apiEntry.TargetUrl)
-		require.Equal(t, expectedServiceData.OauthUrl, apiEntry.OauthUrl)
+		require.Equal(t, expectedServiceData.OauthUrl, apiEntry.Credentials.AuthenticationUrl)
 		require.Equal(t, expectedServiceData.GatewayUrl, apiEntry.GatewayUrl)
 		require.Equal(t, expectedServiceData.AccessLabel, apiEntry.AccessLabel)
 	}

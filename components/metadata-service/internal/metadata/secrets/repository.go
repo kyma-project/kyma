@@ -9,17 +9,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	ClientIDKey     = "clientId"
-	ClientSecretKey = "clientSecret"
-)
-
 // Repository contains operations for managing client credentials
 type Repository interface {
-	Create(remoteEnvironment, name, clientID, clientSecret, serviceID string) apperrors.AppError
-	Get(remoteEnvironment, name string) (string, string, apperrors.AppError)
+	Create(remoteEnvironment, name, serviceID string, data map[string][]byte) apperrors.AppError
+	Get(remoteEnvironment, name string) (map[string][]byte, apperrors.AppError)
 	Delete(name string) apperrors.AppError
-	Upsert(remoteEnvironment, name, clientID, clientSecret, secretID string) apperrors.AppError
+	Upsert(remoteEnvironment, name, secretID string, data map[string][]byte) apperrors.AppError
 }
 
 type repository struct {
@@ -42,21 +37,21 @@ func NewRepository(secretsManager Manager) Repository {
 }
 
 // Create adds a new secret with one entry containing specified clientId and clientSecret
-func (r *repository) Create(remoteEnvironment, name, clientID, clientSecret, serviceID string) apperrors.AppError {
-	secret := makeSecret(name, clientID, clientSecret, serviceID, remoteEnvironment)
+func (r *repository) Create(remoteEnvironment, name, serviceID string, data map[string][]byte) apperrors.AppError {
+	secret := makeSecret(name, serviceID, remoteEnvironment, data)
 	return r.create(remoteEnvironment, secret, name)
 }
 
-func (r *repository) Get(remoteEnvironment, name string) (clientId string, clientSecret string, error apperrors.AppError) {
+func (r *repository) Get(remoteEnvironment, name string) (data map[string][]byte, error apperrors.AppError) {
 	secret, err := r.secretsManager.Get(name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			return "", "", apperrors.NotFound("Secret %s not found", name)
+			return map[string][]byte{}, apperrors.NotFound("Secret %s not found", name)
 		}
-		return "", "", apperrors.Internal("Getting %s secret failed, %s", name, err.Error())
+		return map[string][]byte{}, apperrors.Internal("Getting %s secret failed, %s", name, err.Error())
 	}
 
-	return string(secret.Data[ClientIDKey]), string(secret.Data[ClientSecretKey]), nil
+	return secret.Data, nil
 }
 
 func (r *repository) Delete(name string) apperrors.AppError {
@@ -67,8 +62,8 @@ func (r *repository) Delete(name string) apperrors.AppError {
 	return nil
 }
 
-func (r *repository) Upsert(remoteEnvironment, name, clientID, clientSecret, serviceID string) apperrors.AppError {
-	secret := makeSecret(name, clientID, clientSecret, serviceID, remoteEnvironment)
+func (r *repository) Upsert(remoteEnvironment, name, serviceID string, data map[string][]byte) apperrors.AppError {
+	secret := makeSecret(name, serviceID, remoteEnvironment, data)
 
 	_, err := r.secretsManager.Update(secret)
 	if err != nil {
@@ -91,11 +86,7 @@ func (r *repository) create(remoteEnvironment string, secret *v1.Secret, name st
 	return nil
 }
 
-func makeSecret(name, clientID, clientSecret, serviceID, remoteEnvironment string) *v1.Secret {
-	secretMap := make(map[string][]byte)
-	secretMap[ClientIDKey] = []byte(clientID)
-	secretMap[ClientSecretKey] = []byte(clientSecret)
-
+func makeSecret(name, serviceID, remoteEnvironment string, data map[string][]byte) *v1.Secret {
 	return &v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -104,6 +95,6 @@ func makeSecret(name, clientID, clientSecret, serviceID, remoteEnvironment strin
 				k8sconsts.LabelServiceId:         serviceID,
 			},
 		},
-		Data: secretMap,
+		Data: data,
 	}
 }

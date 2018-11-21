@@ -70,17 +70,24 @@ $ kubectl apply -f ./resources/default-sa-rbac-role.yaml
 $ ./scripts/install-tiller.sh
 ```
 
-5. Configure the Kyma installation using the local configuration file from the 0.4.3 release:
+5. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use. 
+
+6. Export the version you chose as an environment variable. Run: 
 ```
-$ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/0.4.3/kyma-config-local.yaml
+$ export LATEST={KYMA_RELEASE_VERSION}
 ```
 
-6. To trigger the installation process, label the `kyma-installation` custom resource:
+7. Configure the Kyma installation using the local configuration file from the $LATEST release:
+```
+$ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml
+```
+
+8. To trigger the installation process, label the `kyma-installation` custom resource:
 ```
 $ kubectl label installation/kyma-installation action=install
 ```
 
-7. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
+9. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
 ```
 $ ./scripts/is-installed.sh
 ```
@@ -133,6 +140,26 @@ See the example of the website address:
 ```
 http://192.168.64.44:30000
 ```
+
+## Enable Horizontal Pod Autoscaler (HPA)
+
+By default, the Horizontal Pod Autoscaler is not enabled in your local Kyma installation, so you need to enable it manually.
+
+Kyma uses the autoscaling/v1 stable version, which only provides support for CPU autoscaling. Once enabled, HPA automatically scales the number of lambda function Pods based on observed CPU utilization.
+
+>**NOTE:** The autoscaling/v1 version does not support custom metrics. To use such metrics, you need the autoscaling/v2beta2 version.
+
+To enable Horizontal Pod Autoscaler, follow these steps:
+
+1. Enable the metrics server for resource metrics by running the following command:
+    ```
+    $ minikube addons enable metrics-server
+    ```
+
+2. Verify if the metrics server is active by checking the list of addons:
+    ```
+    $ minikube addons list
+    ```
 
 ## Troubleshooting
 

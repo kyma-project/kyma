@@ -7,11 +7,14 @@ import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/util/retry"
 )
 
 const (
-	specAPIType    = "API"
-	specEventsType = "Events"
+	specAPIType          = "API"
+	specEventsType       = "Events"
+	CredentialsOAuthType = "OAuth"
+	CredentialsBasicType = "Basic"
 )
 
 // Manager contains operations for managing Remote Environment CRD
@@ -26,11 +29,16 @@ type repository struct {
 
 // ServiceAPI stores information needed to call an API
 type ServiceAPI struct {
-	GatewayURL            string
-	AccessLabel           string
-	TargetUrl             string
-	OauthUrl              string
-	CredentialsSecretName string
+	GatewayURL  string
+	AccessLabel string
+	TargetUrl   string
+	Credentials Credentials
+}
+
+type Credentials struct {
+	Type              string
+	SecretName        string
+	AuthenticationUrl string
 }
 
 // Service represents a service stored in Remote Environment RE
@@ -87,7 +95,7 @@ func (r *repository) Create(remoteEnvironment string, service Service) apperrors
 
 	re.Spec.Services = append(re.Spec.Services, convertToK8sType(service))
 
-	_, e := r.reManager.Update(re)
+	e := r.updateRemoteEnvironment(re)
 	if e != nil {
 		return apperrors.Internal(fmt.Sprintf("Creating service failed, %s", e.Error()))
 	}
@@ -144,7 +152,7 @@ func (r *repository) Update(remoteEnvironment string, service Service) apperrors
 
 	replaceService(service.ID, re, convertToK8sType(service))
 
-	_, e := r.reManager.Update(re)
+	e := r.updateRemoteEnvironment(re)
 	if e != nil {
 		return apperrors.Internal(fmt.Sprintf("Updating service failed, %s", e.Error()))
 	}
@@ -165,7 +173,7 @@ func (r *repository) Delete(remoteEnvironment, id string) apperrors.AppError {
 
 	removeService(id, re)
 
-	_, e := r.reManager.Update(re)
+	e := r.updateRemoteEnvironment(re)
 	if e != nil {
 		return apperrors.Internal(fmt.Sprintf("Deleting service failed, %s", e.Error()))
 	}
@@ -186,4 +194,11 @@ func (r *repository) getRemoteEnvironment(remoteEnvironment string) (*v1alpha1.R
 	}
 
 	return re, nil
+}
+
+func (r *repository) updateRemoteEnvironment(re *v1alpha1.RemoteEnvironment) error {
+	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		_, e := r.reManager.Update(re)
+		return e
+	})
 }

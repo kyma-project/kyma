@@ -88,8 +88,8 @@ func TestUsageKind(t *testing.T) {
 		if err != nil {
 			return false, err
 		}
-		return assert.Contains(t, usageKindsResponse.UsageKinds, fixUsageKindResponse()), nil
-	}, time.Second*3)
+		return usageKindExists(usageKindsResponse.UsageKinds, fixUsageKindResponse()), nil
+	}, time.Second*5)
 
 	t.Log("Creating resource for UsageKind...")
 	_, err = deployClient.Deployments(usageKindNamespace).Create(fixDeployment())
@@ -106,14 +106,14 @@ func TestUsageKind(t *testing.T) {
 		if err != nil {
 			return false, err
 		}
-		if !assert.Contains(t, usageKindResourcesResponse.UsageKindResources, fixUsageKindResourceResponse()) {
+		if !usageKindResourceExists(usageKindResourcesResponse.UsageKindResources, fixUsageKindResourceResponse()) {
 			return false, nil
 		}
-		if !assert.NotContains(t, usageKindResourcesResponse.UsageKindResources, fixUsageKindResourcesShouldNotContainResponse()) {
+		if usageKindResourceExists(usageKindResourcesResponse.UsageKindResources, fixUsageKindResourcesShouldNotContainResponse()) {
 			return false, nil
 		}
 		return true, nil
-	}, time.Second*3)
+	}, time.Second*5)
 }
 
 func fixUsageKindsQuery() *graphql.Request {
@@ -262,4 +262,22 @@ func fixUsageKindResourcesShouldNotContainResponse() usageKindResource {
 		Name:      "usage-kind-fix-b",
 		Namespace: usageKindNamespace,
 	}
+}
+
+func usageKindExists(items []usageKind, expected usageKind) bool {
+	for _, item := range items {
+		if item == expected {
+			return true
+		}
+	}
+	return false
+}
+
+func usageKindResourceExists(items []usageKindResource, expected usageKindResource) bool {
+	for _, item := range items {
+		if item == expected {
+			return true
+		}
+	}
+	return false
 }

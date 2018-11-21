@@ -6,16 +6,12 @@ import (
 	"k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-const (
-	ClientIDKey     = "clientId"
-	ClientSecretKey = "clientSecret"
+	log "github.com/sirupsen/logrus"
 )
 
 // Repository contains operations for managing client credentials
 type Repository interface {
-	Get(name string) (string, string, apperrors.AppError)
+	Get(name string) (map[string][]byte, apperrors.AppError)
 }
 
 type repository struct {
@@ -36,14 +32,15 @@ func NewRepository(secretsManager Manager, remoteEnvironment string) Repository 
 	}
 }
 
-func (r *repository) Get(name string) (clientId string, clientSecret string, error apperrors.AppError) {
+func (r *repository) Get(name string) (map[string][]byte, apperrors.AppError) {
 	secret, err := r.secretsManager.Get(name, metav1.GetOptions{})
 	if err != nil {
+		log.Errorf("failed to read secret '%s': %s", name, err.Error())
 		if k8serrors.IsNotFound(err) {
-			return "", "", apperrors.NotFound("secret %s not found", name)
+			return nil, apperrors.NotFound("secret '%s' not found", name)
 		}
-		return "", "", apperrors.Internal("failed to get %s secret, %s", name, err)
+		return nil, apperrors.Internal("failed to get '%s' secret, %s", name, err)
 	}
 
-	return string(secret.Data[ClientIDKey]), string(secret.Data[ClientSecretKey]), nil
+	return secret.Data, nil
 }

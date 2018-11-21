@@ -25,7 +25,7 @@ Before each commit, use the `before-commit.sh` script, which tests your changes.
 
 ## Code generation
 
-Structs related to Custom Resource Definitions are defined in `pkg/apis/authentication/v1alpha1/types.go` and registered in `pkg/apis/authentication/v1alpha1/`. After making any changes there, please run:
+Structs related to CustomResourceDefinitions are defined in `pkg/apis/authentication/v1alpha1/types.go` and registered in `pkg/apis/authentication/v1alpha1/`. After making any changes there, please run:
 ```bash
 ./hack/update-codegen.sh
 ```

@@ -11,7 +11,8 @@ Valid certificate signed by the Kyma Certificate Authority.
 
 ## Register a service
 
-To register a service, follow this template to prepare the request body:
+To register a service with a Basic Authentication-secured API, follow this template to prepare the request body:
+
 ```
 {
   "provider": "example-provider",
@@ -23,7 +24,12 @@ To register a service, follow this template to prepare the request body:
   },
   "api": {
     "targetUrl": "https://httpbin.org/",
-    "spec": {}
+    "spec": {},
+    "credentials": {
+      "basic": {
+        "username": "{USERNAME}",
+        "password": "{PASSWORD}"
+      }
   },
   "events": {
     "spec": {

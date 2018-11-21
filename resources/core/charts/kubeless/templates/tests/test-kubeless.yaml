@@ -31,7 +31,7 @@ rules:
 - apiGroups: ["eventing.kyma.cx"]
   resources: ["subscriptions"]
   verbs: ["create", "delete", "get", "list"]
-- apiGroups: ["gateway.kyma.cx"]
+- apiGroups: ["gateway.kyma-project.io"]
   resources: ["apis"]
   verbs: ["create", "delete", "get", "list"]
 - apiGroups: ["applicationconnector.kyma-project.io"]

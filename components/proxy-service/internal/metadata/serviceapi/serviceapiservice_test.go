@@ -15,13 +15,21 @@ func TestDefaultService_Read(t *testing.T) {
 	t.Run("should read API with oauth credentials", func(t *testing.T) {
 		// given
 		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com",
-			CredentialsSecretName: "secret-name",
+			TargetUrl: "http://target.com",
+			Credentials: &remoteenv.Credentials{
+				Type:       "OAuth",
+				SecretName: "secret-name",
+				Url:        "http://oauth.com",
+			},
+		}
+
+		secret := map[string][]byte{
+			ClientIDKey:     []byte("clientId"),
+			ClientSecretKey: []byte("clientSecret"),
 		}
 
 		secretsRepository := new(secretsmocks.Repository)
-		secretsRepository.On("Get", "secret-name").Return("clientId", "clientSecret", nil)
+		secretsRepository.On("Get", "secret-name").Return(secret, nil)
 
 		service := NewService(secretsRepository)
 
@@ -31,9 +39,9 @@ func TestDefaultService_Read(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, "http://target.com", api.TargetUrl)
-		assert.Equal(t, "http://oauth.com", api.Credentials.Oauth.URL)
-		assert.Equal(t, "clientId", api.Credentials.Oauth.ClientID)
-		assert.Equal(t, "clientSecret", api.Credentials.Oauth.ClientSecret)
+		assert.Equal(t, "http://oauth.com", api.Credentials.OAuth.URL)
+		assert.Equal(t, "clientId", api.Credentials.OAuth.ClientID)
+		assert.Equal(t, "clientSecret", api.Credentials.OAuth.ClientSecret)
 		assert.Nil(t, api.Spec)
 
 		secretsRepository.AssertExpectations(t)
@@ -60,14 +68,17 @@ func TestDefaultService_Read(t *testing.T) {
 	t.Run("should return error when reading secret fails", func(t *testing.T) {
 		// given
 		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
-			TargetUrl:             "http://target.com",
-			OauthUrl:              "http://oauth.com",
-			CredentialsSecretName: "secret-name",
+			TargetUrl: "http://target.com",
+			Credentials: &remoteenv.Credentials{
+				Type:       "OAuth",
+				SecretName: "secret-name",
+				Url:        "http://oauth.com",
+			},
 		}
 
 		secretsRepository := new(secretsmocks.Repository)
 		secretsRepository.On("Get", "secret-name").
-			Return("", "", apperrors.Internal("secret error"))
+			Return(nil, apperrors.Internal("secret error"))
 
 		service := NewService(secretsRepository)
 

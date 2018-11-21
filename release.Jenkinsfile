@@ -16,7 +16,6 @@ Monorepo releaser: This Jenkinsfile runs the Jenkinsfiles of all subprojects bas
 def label = "kyma-${UUID.randomUUID().toString()}"
 def registry = 'eu.gcr.io/kyma-project'
 def acsImageName = 'acs-installer:0.0.4'
-def changelogGeneratorPath = "tools/changelog-generator"
 
 semVerRegex = /^([0-9]+\.[0-9]+\.[0-9]+)$/ // semVer format: 1.2.3
 releaseBranchRegex = /^release\-([0-9]+\.[0-9]+)$/ // release branch format: release-1.5
@@ -38,18 +37,17 @@ projects = [
     "components/binding-usage-controller",
     "components/configurations-generator",
     "components/environments",
-    "components/istio-webhook",
     "components/istio-kyma-patch",
     "components/helm-broker",
     "components/remote-environment-broker",
     "components/remote-environment-controller",
     "components/metadata-service",
-    "components/gateway",
     "components/installer",
     "components/connector-service",
     "components/ui-api-layer",
     "components/event-bus",
     "components/event-service",
+    "components/proxy-service",
     "tools/alpine-net",
     "tools/watch-pods",
     "tools/stability-checker",
@@ -80,7 +78,7 @@ try {
         node(label) {
             timestamps {
                 ansiColor('xterm') {
-                    stage("setup") {
+                    stage("Setup") {
                         checkout scm
 
                         // validate parameters
@@ -95,87 +93,55 @@ try {
                         configureBuilds()
                     }
 
-                    stage('collect projects') {
+                    stage('Collect projects') {
                         for (int i=0; i < projects.size(); i++) {
                             def index = i
                             jobs["${projects[index]}"] = { ->
                                     build job: "kyma/"+projects[index]+"-release",
-                                            wait: true,
-                                            parameters: [
-                                                string(name:'GIT_REVISION', value: "$commitID"),
-                                                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-                                                string(name:'APP_VERSION', value: "$appVersion"),
-                                                string(name:'PUSH_DIR', value: "$dockerPushRoot"),
-                                                booleanParam(name:'FULL_BUILD', value: true)
-                                            ]
+                                        wait: true,
+                                        parameters: [
+                                            string(name:'GIT_REVISION', value: "$commitID"),
+                                            string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+                                            string(name:'APP_VERSION', value: "$appVersion"),
+                                            string(name:'PUSH_DIR', value: "$dockerPushRoot"),
+                                            booleanParam(name:'FULL_BUILD', value: true)
+                                        ]
                             }
                         }
                     }
-                }
-            }
-        }
-    }
 
-    // build components
-    stage('build projects') {
-        parallel jobs
-    }
-
-    // test the release
-    stage('launch Kyma integration') {
-        build job: 'kyma/integration-release',
-            wait: true,
-            parameters: [
-                string(name:'GIT_REVISION', value: "$commitID"),
-                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
-                string(name:'APP_VERSION', value: "$appVersion")
-            ]
-    }
-
-    // publish release artifacts
-    podTemplate(label: label) {
-        node(label) {
-            timestamps {
-                ansiColor('xterm') {
-                    stage("setup") {
-                        checkout scm
+                    // build components
+                    stage('Build projects') {
+                        parallel jobs
                     }
 
-                    stage("Publish ${isRelease ? 'Release' : 'Prerelease'} ${appVersion}") {
-                        def zip = "${appVersion}.tar.gz"
-                        
-                        // create release zip                        
-                        sh "tar -czf ${zip} ./installation ./resources"
+                    // build kyma-installer
+                    stage('Build kyma-installer') {
+                        build job: 'kyma/kyma-installer',
+                            wait: true,
+                            parameters: [
+                                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+                                string(name:'PUSH_DIR', value: "$dockerPushRoot"),
+                                string(name:'APP_VERSION', value: "$appVersion")
+                            ]
+                    }
 
-                        // create release on github
-                        withCredentials(
-                                [string(credentialsId: 'public-github-token', variable: 'token'),
-                                sshUserPrivateKey(credentialsId: "bitbucket-rw", keyFileVariable: 'sshfile')
-                            ]) {
-                            
-                            // Build changelog generator
-                            dir(changelogGeneratorPath) {
-                                sh "docker build -t changelog-generator ."
-                            }   
-                            
-                            // Generate release changelog
-                            changelogGenerator('/app/generate-release-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}"])
+                    // generate kyma-installer artifacts
+                    def kymaInstallerArtifactsBuild = null
+                    stage('Generate kyma-installer artifacts') {
+                        kymaInstallerArtifactsBuild = build job: 'kyma/kyma-installer-artifacts',
+                            wait: true,
+                            parameters: [
+                                string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
+                                string(name:'KYMA_INSTALLER_PUSH_DIR', value: "$dockerPushRoot"),
+                                string(name:'KYMA_INSTALLER_VERSION', value: "$appVersion")
+                            ]
+                    }
 
-                            // Generate CHANGELOG.md
-                            changelogGenerator('/app/generate-full-changelog.sh --configure-git', ["LATEST_VERSION=${appVersion}", "GITHUB_AUTH=${token}", "SSH_FILE=${sshfile}"])
-                            sh "BRANCH=${params.RELEASE_BRANCH} LATEST_VERSION=${appVersion} SSH_FILE=${sshfile} APP_PATH=./tools/changelog-generator/app ./tools/changelog-generator/app/push-full-changelog.sh --configure-git"
-                            commitID = sh (script: "git rev-parse HEAD", returnStdout: true).trim()
-
-                            def releaseChangelog = readFile "./.changelog/release-changelog.md"
-                            def body = releaseChangelog.replaceAll("(\\r|\\n|\\r\\n)+", "\\\\n")
-                            def data = "'{\"tag_name\": \"${appVersion}\",\"target_commitish\": \"${commitID}\",\"name\": \"${appVersion}\",\"body\": \"${body}\",\"draft\": false,\"prerelease\": ${isRelease ? 'false' : 'true'}}'"
-                            echo "Creating a new release using GitHub API..."
-                            def json = sh (script: "curl --data ${data} -H \"Authorization: token $token\" https://api.github.com/repos/kyma-project/kyma/releases", returnStdout: true)
-                            echo "Response: ${json}"
-                            def releaseID = getGithubReleaseID(json)
-                            // upload zip file
-                            sh "curl --data-binary @$zip -H \"Authorization: token $token\" -H \"Content-Type: application/zip\" https://uploads.github.com/repos/kyma-project/kyma/releases/${releaseID}/assets?name=${zip}"                          
-                        }
+                    stage('Copy kyma-installer artifacts') {
+                        copyArtifacts projectName: 'kyma/kyma-installer-artifacts',
+                            selector: specific("${kymaInstallerArtifactsBuild.number}"),
+                            target: "kyma-installer-artifacts"
                     }
                 }
             }
@@ -204,27 +170,4 @@ def configureBuilds() {
         dockerPushRoot = "rc/"
         appVersion = "${(params.RELEASE_BRANCH =~ /([0-9]+\.[0-9]+)$/)[0][1]}-rc" // release branch number + '-rc' suffix (e.g. 1.0-rc)
     }   
-}
-
-/**
- * Obtain the github release ID from its JSON data.
- * More info: https://developer.github.com/v3/repos/releases 
- */
-@NonCPS
-def getGithubReleaseID(releaseJson) {
-    def slurper = new JsonSlurperClassic()
-    return slurper.parseText(releaseJson).id
-}
-
-def changelogGenerator(command, envs = []) {
-    def repositoryName = 'kyma'
-    def image = 'changelog-generator'
-    def envText = ''
-    for (it in envs) {
-        envText = "$envText --env $it"
-    }
-    workDir = pwd()
-
-    def dockerRegistry = env.DOCKER_REGISTRY
-    sh "docker run --rm -v $workDir:/$repositoryName -w /$repositoryName $envText $image sh $command"
 }
