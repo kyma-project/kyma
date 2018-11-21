@@ -90,6 +90,8 @@ spec:
     - name: k8syaml
       mountPath: /k8syaml
     env:
+    - name: INGRESSGATEWAY_FQDN
+      value: {{ .Values.global.ingressgateway.serviceName }}.{{ .Values.global.ingressgateway.namespace }}.svc.cluster.local
     - name: KUBELESS_NAMESPACE
       value: kyma-system
     - name: KUBELESS_CONFIG
