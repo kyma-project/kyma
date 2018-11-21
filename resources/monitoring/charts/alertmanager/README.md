@@ -69,7 +69,7 @@ receivers:
   victorops_configs:
   - api_key: {{ .Values.global.alertTools.credentials.victorOps.apikey | quote }}
     send_resolved: true
-    api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
+    api_url: <victor-ops-url>
     routing_key: {{ .Values.global.alertTools.credentials.victorOps.routingkey | quote }}
     state_message: 'Alert: {{`{{ .CommonLabels.alertname }}`}}. Summary:{{`{{ .CommonAnnotations.summary }}`}}. RawData: {{`{{ .CommonLabels }}`}}'
 - name: "slack"
