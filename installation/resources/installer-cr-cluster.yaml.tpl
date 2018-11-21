@@ -20,8 +20,6 @@ spec:
       namespace: "kyma-system"
     - name: "service-catalog"
       namespace: "kyma-system"
-    - name: "prometheus-operator"
-      namespace: "kyma-system"
     - name: "monitoring"
       namespace: "kyma-system"
     - name: "core"

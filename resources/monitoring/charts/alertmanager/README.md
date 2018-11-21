@@ -97,7 +97,7 @@ In order to enable alert notifications for the receivers, configure these four p
 **channel** refers to the Slack channel which receives the alerts notifications.
 **api_url** is the URL endpoint which sends the alerts.
 
-Only a part of the configuration is located in this chart. All of the four parameters' values are taken from the `{{ .Values.global.alertTools.credentials... }}` template. These values are configured in [this](../../../../values.yaml) file. For example:
+Only a part of the configuration is located in this chart. All of the four parameters' values are taken from the `{{ .Values.global.alertTools.credentials... }}` template. These values are configured in [this](../../../core/values.yaml) file. For example:
 
 ```yaml
 global:
