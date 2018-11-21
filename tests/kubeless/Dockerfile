@@ -1,8 +1,8 @@
-FROM alpine:latest
+FROM alpine:3.8
 
 LABEL source="git@github.com:kyma-project/kyma.git"
 
-RUN apk add --no-cache curl
+RUN apk --no-cache upgrade && apk --no-cache add curl
 
 RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.10.0/bin/linux/amd64/kubectl && chmod +x /usr/bin/kubectl
 
@@ -16,6 +16,6 @@ RUN curl -Lo /tmp/kubeless.zip https://github.com/kubeless/kubeless/releases/dow
 
 RUN mkdir -p /root/.kube && touch /root/.kube/config
 COPY ns.yaml hello.js package.json /
-COPY bin/app /test-kubeless
+COPY bin/app /kubeless-tests
 
-CMD ["/test-kubeless"]
+CMD ["/kubeless-tests"]
