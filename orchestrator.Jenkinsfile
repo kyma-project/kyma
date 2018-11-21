@@ -42,6 +42,7 @@ projects = [
     "components/metadata-service": "metadata-service",
     "components/installer": "installer",
     "components/connector-service": "connector-service",
+    "components/connector-service-token-request": "connector-service-token-request",
     "components/ui-api-layer": "ui-api-layer",
     "components/event-bus": "event-bus-publish",
     "components/event-service": "event-service",
