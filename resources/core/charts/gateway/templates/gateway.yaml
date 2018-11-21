@@ -4,8 +4,7 @@ metadata:
   name: {{ .Values.global.istio.gateway.name }}
   namespace: {{.Release.Namespace }}  
 spec:
-  selector:
-{{ toYaml .Values.selector | indent 4 }}
+  selector: {{ toYaml .Values.selector }}
   servers:
   - port:
       number: 443

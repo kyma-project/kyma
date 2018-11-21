@@ -93,3 +93,28 @@ data:
 
   mixer.resources.limits.memory: 1Gi
   mixer.resources.requests.memory: 256Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-istio-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: istio
+    feature: knative
+data:
+  gateways.istio-ingressgateway.loadBalancerIP: ""
+  gateways.istio-ingressgateway.type: "NodePort"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-istio-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: knative-install
+    feature: knative
+data:
+  loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"

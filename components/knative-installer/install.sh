@@ -5,11 +5,13 @@ echo "Installing Knative build and serving ..."
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
-curl -L ${SERVING_URL} \
-| sed 's/LoadBalancer/NodePort/' \
-| tee knative-serving.yaml \
-| kubectl apply -f -
+# Leave LoadBalancer if external ip is set
+SERVING_YAML=$(curl -L ${SERVING_URL})
+if [[ -z ${LOAD_BALANCER_IP} ]]; then
+    SERVING_YAML=$(sed 's/LoadBalancer/NodePort/' <<<"${SERVING_YAML}")
+fi
 
+tee knative-serving.yaml <<<"$SERVING_YAML" | kubectl apply -f -
 
 echo "Verifying Knative build and serving installation..."
 sleep 2
@@ -46,6 +48,15 @@ KNATIVE_GW=$(jq '
 ' <<<"$KNATIVE_GW")
 kubectl replace -f - <<<"$KNATIVE_GW"
 
+# Set external ip on service if available
+if [[ -n ${LOAD_BALANCER_IP} ]]; then
+    KNATIVE_SVC=$(kubectl get service -n istio-system knative-ingressgateway -o json)
+    KNATIVE_SVC=$(jq '
+        .spec.loadBalancerIP = '${LOAD_BALANCER_IP}'
+    ' <<<"$KNATIVE_SVC")
+    kubectl replace -f - <<<"$KNATIVE_SVC"
+fi
+
 echo "Knative build and serving installation verified"
 
 echo "Installing Knative eventing..."
@@ -58,4 +69,3 @@ ${DIR}/is-ready.sh knative-eventing app eventing-controller
 ${DIR}/is-ready.sh knative-eventing app webhook
 
 echo "Knative eventing installation verified"
-

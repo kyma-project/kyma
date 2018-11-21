@@ -1,4 +1,3 @@
 gateway:
-  selector:
-    istio: ingressgateway
+  selector: {istio: ingressgateway}
   portNamePrefix: ""

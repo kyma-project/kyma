@@ -20,5 +20,4 @@ metadata:
     feature: knative
 data:
   gateway.portNamePrefix: "kyma_"
-  gateway.selector: |
-    knative: ingressgateway
+  gateway.selector: "{knative: ingressgateway}"

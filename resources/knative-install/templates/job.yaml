@@ -16,8 +16,8 @@ spec:
       - name: knative-install
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.knative_installer.dir }}knative-installer:{{ .Values.global.knative_installer.version }}
         env:
-        - name: ACTION
-          value: install
+        - name: LOAD_BALANCER_IP
+          value: {{ .Values.loadBalancerIP }}
         - name: SERVING_URL
           valueFrom:
             configMapKeyRef:
