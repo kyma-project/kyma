@@ -22,7 +22,7 @@ You need the following tools to set up the project:
 
 ## Development
 
-Before each commit, use the `before-commit.sh` script, which tests your changes.
+Before each commit, use the `before-commit.sh` or the `make build` command to test your changes before each commit.
 
 ### Use environment variables
 
