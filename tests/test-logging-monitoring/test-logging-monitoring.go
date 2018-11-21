@@ -54,8 +54,8 @@ type Metric struct {
 	Service   string `json:"service"`
 }
 
-const prometheusURL string = "http://core-prometheus.kyma-system:9090"
-const grafanaURL string = "http://core-grafana.kyma-system"
+const prometheusURL string = "http://monitoring-prometheus.kyma-system:9090"
+const grafanaURL string = "http://monitoring-grafana.kyma-system"
 const namespace = "kyma-system"
 const expectedAlertManagers = 1
 const expectedPrometheusInstances = 1
@@ -135,11 +135,11 @@ func testQueryTargets(url string) {
 				if val, ok := respObj.DataTargets.ActiveTargets[index].Labels["job"]; ok {
 					switch val {
 					case "alertmanager":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "alertmanager-core-0") {
+						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "alertmanager-monitoring-0") {
 							actualAlertManagers += 1
 						}
 					case "prometheus":
-						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "prometheus-core-0") {
+						if isHealthy(respObj.DataTargets.ActiveTargets[index]) && (respObj.DataTargets.ActiveTargets[index].Labels["pod"] == "prometheus-monitoring-0") {
 							actualPrometheusInstances += 1
 						}
 					case "node-exporter":
@@ -196,7 +196,7 @@ func testPodsAreReady() {
 			}
 
 		case <-tick:
-			cmd := exec.Command("kubectl", "get", "pods", "-l", "app in (alertmanager,prometheus,core-grafana,core-exporter-node,core-exporter-kube-state)", "-n", namespace, "--no-headers")
+			cmd := exec.Command("kubectl", "get", "pods", "-l", "app in (alertmanager,prometheus,monitoring-grafana,monitoring-exporter-node,monitoring-exporter-kube-state)", "-n", namespace, "--no-headers")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Fatalf("Error while kubectl get: %s ", err)
