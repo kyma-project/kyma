@@ -6,6 +6,7 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCES_DIR="${CURRENT_DIR}/../resources"
 INSTALLER="${RESOURCES_DIR}/installer.yaml"
 INSTALLER_CONFIG=""
+FEATURE_GATES_CONFIG="${RESOURCES_DIR}/installer-feature-gates.yaml.tpl"
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -15,6 +16,11 @@ do
     case ${key} in
         --local)
             LOCAL=1
+            shift
+            ;;
+        --feature-gates)
+            FEATURE_GATES="$2"
+            shift
             shift
             ;;
         --cr)
@@ -60,8 +66,11 @@ if [ $CR_PATH ]; then
 
 fi
 
+
 echo -e "\nApplying installation combo yaml"
-bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} | kubectl apply -f -
+bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} ${FEATURE_GATES_CONFIG} \
+| sed 's/__FEATURE_GATES__/'${FEATURE_GATES}'/g' \
+| kubectl apply -f -
 
 echo -e "\nTriggering installation"
 kubectl label installation/kyma-installation action=install

@@ -31,6 +31,11 @@ do
             shift
             shift
         ;;
+        --feature-gates)
+            FEATURE_GATES="$2"
+            shift
+            shift
+        ;;
         *)    # unknown option
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
@@ -39,15 +44,21 @@ do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-if [[ ! ${SKIP_MINIKUBE_START} ]]; then
-    bash ${CURRENT_DIR}/../scripts/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}"
+MINIKUBE_ARGS="--domain ${DOMAIN} --vm-driver ${VM_DRIVER}"
+
+if [[ $(grep "knative" <<<${FEATURE_GATES}) ]]; then
+    MINIKUBE_ARGS="${MINIKUBE_ARGS} --disk-size 30g --memory 10240"
 fi
 
-bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
+if [[ ! ${SKIP_MINIKUBE_START} ]]; then
+    bash ${CURRENT_DIR}/../scripts/minikube.sh ${MINIKUBE_ARGS}
+fi
+
+bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver ${VM_DRIVER}
 
 bash ${CURRENT_DIR}/../scripts/generate-local-config.sh
 
-if [ -z "$CR_PATH" ]; then
+if [[ -z "$CR_PATH" ]]; then
 
     TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
     CR_PATH="${TMPDIR}/installer-cr-local.yaml"
@@ -55,5 +66,9 @@ if [ -z "$CR_PATH" ]; then
 
 fi
 
-bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}"
+if [[ -n "${FEATURE_GATES}" ]]; then
+    FEATURE_GATES_ARG="--feature-gates ${FEATURE_GATES}"
+fi
+
+bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}" "${FEATURE_GATES_ARG}"
 rm -rf $TMPDIR
