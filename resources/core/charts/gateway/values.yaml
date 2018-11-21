@@ -1,0 +1,4 @@
+gateway:
+  selector:
+    istio: ingressgateway
+  portNamePrefix: ""

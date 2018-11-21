@@ -37,6 +37,8 @@ data:
   global.alertTools.credentials.slack.channel: "__SLACK_CHANNEL_VALUE__"
   global.alertTools.credentials.victorOps.routingkey: "__VICTOR_OPS_ROUTING_KEY_VALUE__"
   global.alertTools.credentials.victorOps.apikey: "__VICTOR_OPS_API_KEY_VALUE__"
+  global.ingressgateway.namespace: "istio-system"
+  global.ingressgateway.serviceName: "istio-ingressgateway"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
   etcd-stateful.replicaCount: "3"
