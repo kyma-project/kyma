@@ -47,7 +47,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 MINIKUBE_ARGS="--domain ${DOMAIN} --vm-driver ${VM_DRIVER}"
 
 if [[ $(grep "knative" <<<${FEATURE_GATES}) ]]; then
-    MINIKUBE_ARGS="${MINIKUBE_ARGS} --disk-size 30g"
+    MINIKUBE_ARGS="${MINIKUBE_ARGS} --disk-size 30g --memory 10240"
 fi
 
 if [[ ! ${SKIP_MINIKUBE_START} ]]; then

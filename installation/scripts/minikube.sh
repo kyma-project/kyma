@@ -10,6 +10,7 @@ KUBERNETES_VERSION=1.10.0
 KUBECTL_CLI_VERSION=1.10.0
 VM_DRIVER=hyperkit
 DISK_SIZE=20g
+MEMORY=8192
 
 source $CURRENT_DIR/utils.sh
 
@@ -28,6 +29,11 @@ do
             VM_DRIVER="$2"
             shift # past argument
             shift # past value
+            ;;
+        --memory)
+            MEMORY=$2
+            shift
+            shift
             ;;
         --domain)
             MINIKUBE_DOMAIN="$2"
@@ -177,7 +183,7 @@ function start() {
     fi
 
     minikube start \
-        --memory 8192 \
+        --memory $MEMORY \
         --cpus 4 \
         --bootstrapper=localkube \
         --extra-config=apiserver.Authorization.Mode=RBAC \
