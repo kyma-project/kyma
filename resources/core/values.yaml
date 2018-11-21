@@ -35,7 +35,7 @@ global:
     version: 6e0a7fe2
   k8s_dashboard_proxy:
     dir: develop/
-    version: 0.1.0
+    version: aa3a192c
   binding_usage_controller:
     dir: develop/
     version: 83692fd8
