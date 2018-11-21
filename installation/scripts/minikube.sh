@@ -45,6 +45,8 @@ echo "
 function initializeMinikubeConfig() {
     # Disable default nginx ingress controller
     minikube config unset ingress
+    # Enable heapster addon
+    minikube addons enable heapster
 }
 
 #TODO refactor to use minikube status!
