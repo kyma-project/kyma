@@ -83,6 +83,7 @@ type KymaComponent struct {
 	Name        string `json:"name"`
 	ReleaseName string `json:"release"`
 	Namespace   string `json:"namespace"`
+	Feature	    string `json:"feature"`
 }
 
 // GetReleaseName returns release name for component
