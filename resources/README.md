@@ -12,7 +12,7 @@ Resources currently include, but are not limited to, the following:
 
 
 ## Installation
-The monitoring and logging charts are not installed by default when you install Kyma on minikube. They are present by default for cluster installations.
+Monitoring and Logging charts are not installed by default when you install Kyma on Minikube. They are available by default for cluster installations.
 
 To install monitoring chart on the minikube cluster, run the following command inside resources directory:
 
