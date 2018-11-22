@@ -201,8 +201,15 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 			Api: &API{
 				TargetUrl: "http://target.com",
 				Credentials: &Credentials{
-					Oauth: &Oauth{},
-					Basic: &BasicAuth{},
+					Basic: &BasicAuth{
+						Username: "username",
+						Password: "password",
+					},
+					Oauth: &Oauth{
+						URL:          "http://test.com/token",
+						ClientID:     "client",
+						ClientSecret: "secret",
+					},
 				},
 			},
 		}
@@ -388,41 +395,6 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 				Credentials: &Credentials{
 					Basic: &BasicAuth{
 						Username: "username",
-					},
-				},
-			},
-		}
-
-		validator := NewServiceDetailsValidator()
-
-		// when
-		err := validator.Validate(serviceDetails)
-
-		// then
-		assert.Error(t, err)
-		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
-	})
-}
-
-func TestServiceDetailsValidatorFunc_API_Credentials(t *testing.T) {
-
-	t.Run("should not accept credentials with both OAuth and BasicAuth", func(t *testing.T) {
-		// given
-		serviceDetails := ServiceDetails{
-			Name:        "name",
-			Provider:    "provider",
-			Description: "description",
-			Api: &API{
-				TargetUrl: "http://target.com",
-				Credentials: &Credentials{
-					Basic: &BasicAuth{
-						Username: "username",
-						Password: "password",
-					},
-					Oauth: &Oauth{
-						URL:          "http://test.com/token",
-						ClientID:     "client",
-						ClientSecret: "secret",
 					},
 				},
 			},

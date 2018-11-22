@@ -209,7 +209,21 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 }
 
 func (api API) MarshalJSON() ([]byte, error) {
-	bytes, err := json.Marshal(&struct {
+	bytes, err := api.marshalWithJSONSpec()
+	if err == nil {
+		return bytes, nil
+	}
+
+	bytes, err = api.marshalWithNonJSONSpec()
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
+}
+
+func (api API) marshalWithJSONSpec() ([]byte, error) {
+	return json.Marshal(&struct {
 		TargetUrl        string          `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
 		Credentials      *Credentials    `json:"credentials,omitempty"`
 		Spec             json.RawMessage `json:"spec,omitempty"`
@@ -222,11 +236,10 @@ func (api API) MarshalJSON() ([]byte, error) {
 		api.SpecificationUrl,
 		api.ApiType,
 	})
-	if err == nil {
-		return bytes, nil
-	}
+}
 
-	bytes, err = json.Marshal(&struct {
+func (api API) marshalWithNonJSONSpec() ([]byte, error) {
+	return json.Marshal(&struct {
 		TargetUrl        string       `json:"targetUrl" valid:"url,required~targetUrl field cannot be empty."`
 		Credentials      *Credentials `json:"credentials,omitempty"`
 		Spec             string       `json:"spec,omitempty"`
@@ -239,9 +252,4 @@ func (api API) MarshalJSON() ([]byte, error) {
 		api.SpecificationUrl,
 		api.ApiType,
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	return bytes, nil
 }

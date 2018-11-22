@@ -39,11 +39,11 @@ type serviceDefinitionService struct {
 	uuidGenerator               uuid.Generator
 	serviceAPIService           serviceapi.Service
 	remoteEnvironmentRepository remoteenv.ServiceRepository
-	specService                 specification.SpecService
+	specService                 specification.Service
 }
 
 // NewServiceDefinitionService creates new ServiceDefinitionService with provided dependencies.
-func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService serviceapi.Service, remoteEnvironmentRepository remoteenv.ServiceRepository, specService specification.SpecService) ServiceDefinitionService {
+func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService serviceapi.Service, remoteEnvironmentRepository remoteenv.ServiceRepository, specService specification.Service) ServiceDefinitionService {
 	return &serviceDefinitionService{
 		uuidGenerator:               uuidGenerator,
 		serviceAPIService:           serviceAPIService,
@@ -64,7 +64,7 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 	id := sds.uuidGenerator.NewUUID()
 	service := initService(serviceDef, id, serviceDef.Identifier, remoteEnvironment)
 
-	specData := prepareSpecData(id, serviceDef)
+	var gatewayUrl string
 
 	if apiDefined(serviceDef) {
 		serviceAPI, err := sds.serviceAPIService.New(remoteEnvironment, id, serviceDef.Api)
@@ -73,10 +73,10 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 		}
 
 		service.API = serviceAPI
-		specData.GatewayUrl = serviceAPI.GatewayURL
+		gatewayUrl = serviceAPI.GatewayURL
 	}
 
-	err := sds.specService.SaveServiceSpecs(specData)
+	err := sds.specService.PutSpec(serviceDef, gatewayUrl)
 	if err != nil {
 		if err.Code() == apperrors.CodeUpstreamServerCallFailed {
 			return "", apperrors.UpstreamServerCallFailed("Determining API spec for service with ID %s failed, %s", id, err.Error())
@@ -133,7 +133,7 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 
 	service := initService(serviceDef, id, existingSvc.Identifier, remoteEnvironment)
 
-	specData := prepareSpecData(id, serviceDef)
+	var gatewayUrl string
 
 	if !apiDefined(serviceDef) {
 		err = sds.serviceAPIService.Delete(remoteEnvironment, id)
@@ -146,10 +146,10 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 			return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, updating API failed, %s", id, err.Error())
 		}
 
-		specData.GatewayUrl = service.API.GatewayURL
+		gatewayUrl = service.API.GatewayURL
 	}
 
-	err = sds.specService.SaveServiceSpecs(specData)
+	err = sds.specService.PutSpec(serviceDef, gatewayUrl)
 	if err != nil {
 		if err.Code() == apperrors.CodeUpstreamServerCallFailed {
 			return model.ServiceDefinition{}, apperrors.UpstreamServerCallFailed("Updating %s service failed, saving specification failed, %s", id, err.Error())
@@ -302,13 +302,4 @@ func overrideLabels(remoteEnvironment string, labels map[string]string) map[stri
 	}
 
 	return labels
-}
-
-func prepareSpecData(id string, serviceDef *model.ServiceDefinition) specification.SpecData {
-	return specification.SpecData{
-		Id:     id,
-		API:    serviceDef.Api,
-		Events: serviceDef.Events,
-		Docs:   serviceDef.Documentation,
-	}
 }

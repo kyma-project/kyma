@@ -25,11 +25,11 @@ var (
 	modifiedSwaggerSpec = []byte("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"re-1234.io\",\"paths\":null}")
 )
 
-func TestSpecService_SaveServiceSpecs(t *testing.T) {
+func TestSpecService_PutSpec(t *testing.T) {
 
 	t.Run("should save inline spec", func(t *testing.T) {
 		// given
-		specData := defaultSpecDataWithAPI(&model.API{Spec: baseApiSpec})
+		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: baseApiSpec})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
@@ -37,7 +37,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		specService := NewSpecService(minioSvc)
 
 		// when
-		err := specService.SaveServiceSpecs(specData)
+		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -46,7 +46,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 
 	t.Run("should modify and save inline swagger spec", func(t *testing.T) {
 		// given
-		specData := defaultSpecDataWithAPI(&model.API{Spec: swaggerApiSpec})
+		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: swaggerApiSpec})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
@@ -54,7 +54,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		specService := NewSpecService(minioSvc)
 
 		// when
-		err := specService.SaveServiceSpecs(specData)
+		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -63,7 +63,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 
 	t.Run("should not modify spec if ApiType set to oData", func(t *testing.T) {
 		// given
-		specData := defaultSpecDataWithAPI(&model.API{Spec: swaggerApiSpec, ApiType: oDataSpecType})
+		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: swaggerApiSpec, ApiType: oDataSpecType})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, swaggerApiSpec, baseEventSpec).Return(nil)
@@ -71,7 +71,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		specService := NewSpecService(minioSvc)
 
 		// when
-		err := specService.SaveServiceSpecs(specData)
+		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -85,7 +85,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 			assert.Equal(t, "/path", req.URL.Path)
 		})
 
-		specData := defaultSpecDataWithAPI(&model.API{SpecificationUrl: specServer.URL + "/path"})
+		serviceDef := defaultServiceDefWithAPI(&model.API{SpecificationUrl: specServer.URL + "/path"})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
@@ -93,7 +93,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		specService := NewSpecService(minioSvc)
 
 		// when
-		err := specService.SaveServiceSpecs(specData)
+		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -107,7 +107,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 			assert.Equal(t, "/path", req.URL.Path)
 		})
 
-		specData := defaultSpecDataWithAPI(&model.API{SpecificationUrl: specServer.URL + "/path"})
+		serviceDef := defaultServiceDefWithAPI(&model.API{SpecificationUrl: specServer.URL + "/path"})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
@@ -115,7 +115,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		specService := NewSpecService(minioSvc)
 
 		// when
-		err := specService.SaveServiceSpecs(specData)
+		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -126,14 +126,14 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		// given
 		specServer := new404server()
 
-		specData := defaultSpecDataWithAPI(&model.API{SpecificationUrl: specServer.URL})
+		serviceDef := defaultServiceDefWithAPI(&model.API{SpecificationUrl: specServer.URL})
 
 		minioSvc := &mocks.Service{}
 
 		specService := NewSpecService(minioSvc)
 
 		// when
-		err := specService.SaveServiceSpecs(specData)
+		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.Error(t, err)
@@ -147,7 +147,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 			assert.Equal(t, "/$metadata", req.URL.Path)
 		})
 
-		specData := defaultSpecDataWithAPI(&model.API{TargetUrl: specServer.URL, ApiType: oDataSpecType})
+		serviceDef := defaultServiceDefWithAPI(&model.API{TargetUrl: specServer.URL, ApiType: oDataSpecType})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
@@ -155,7 +155,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		specService := NewSpecService(minioSvc)
 
 		// when
-		err := specService.SaveServiceSpecs(specData)
+		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -164,7 +164,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 
 	t.Run("should save empty spec when no spec url provided and api type is not OData", func(t *testing.T) {
 		// given
-		specData := defaultSpecDataWithAPI(&model.API{})
+		serviceDef := defaultServiceDefWithAPI(&model.API{})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, []byte(nil), baseEventSpec).Return(nil)
@@ -172,7 +172,24 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		specService := NewSpecService(minioSvc)
 
 		// when
-		err := specService.SaveServiceSpecs(specData)
+		err := specService.PutSpec(serviceDef, gatewayUrl)
+
+		// then
+		require.NoError(t, err)
+		minioSvc.AssertExpectations(t)
+	})
+
+	t.Run("should skip processing api spec if api not specified", func(t *testing.T) {
+		// given
+		serviceDef := defaultServiceDefWithAPI(nil)
+
+		minioSvc := &mocks.Service{}
+		minioSvc.On("Put", serviceId, baseDocs, []byte(nil), baseEventSpec).Return(nil)
+
+		specService := NewSpecService(minioSvc)
+
+		// when
+		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -181,7 +198,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 
 	t.Run("should return error when saving to Minio failed", func(t *testing.T) {
 		// given
-		specData := defaultSpecDataWithAPI(&model.API{Spec: baseApiSpec})
+		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: baseApiSpec})
 
 		minioSvc := &mocks.Service{}
 		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(apperrors.Internal("Error"))
@@ -189,7 +206,7 @@ func TestSpecService_SaveServiceSpecs(t *testing.T) {
 		specService := NewSpecService(minioSvc)
 
 		// when
-		err := specService.SaveServiceSpecs(specData)
+		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.Error(t, err)
@@ -268,13 +285,15 @@ func TestSpecService_RemoveSpec(t *testing.T) {
 	})
 }
 
-func defaultSpecDataWithAPI(api *model.API) SpecData {
-	return SpecData{
-		Id:         serviceId,
-		API:        api,
-		Events:     &model.Events{Spec: baseEventSpec},
-		Docs:       baseDocs,
-		GatewayUrl: gatewayUrl,
+func defaultServiceDefWithAPI(api *model.API) *model.ServiceDefinition {
+	return &model.ServiceDefinition{
+		ID:            serviceId,
+		Identifier:    "identifier",
+		Provider:      "provider",
+		Description:   "description",
+		Api:           api,
+		Events:        &model.Events{Spec: baseEventSpec},
+		Documentation: baseDocs,
 	}
 }
 

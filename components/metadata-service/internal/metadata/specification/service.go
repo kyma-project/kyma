@@ -22,17 +22,17 @@ const (
 	specRequestTimeout = time.Duration(5 * time.Second)
 )
 
-type SpecService interface {
+type Service interface {
 	GetSpec(id string) ([]byte, []byte, []byte, apperrors.AppError)
 	RemoveSpec(id string) apperrors.AppError
-	SaveServiceSpecs(specData SpecData) apperrors.AppError
+	PutSpec(serviceDef *model.ServiceDefinition, gatewayUrl string) apperrors.AppError
 }
 
 type specService struct {
 	minioService minio.Service
 }
 
-func NewSpecService(minioService minio.Service) SpecService {
+func NewSpecService(minioService minio.Service) Service {
 	return &specService{
 		minioService: minioService,
 	}
@@ -46,18 +46,18 @@ func (svc *specService) RemoveSpec(id string) apperrors.AppError {
 	return svc.minioService.Remove(id)
 }
 
-func (svc *specService) SaveServiceSpecs(specData SpecData) apperrors.AppError {
+func (svc *specService) PutSpec(serviceDef *model.ServiceDefinition, gatewayUrl string) apperrors.AppError {
 	var apiSpec []byte
 	var err apperrors.AppError
 
-	if specData.API != nil {
-		apiSpec, err = processAPISpecification(specData.API, specData.GatewayUrl)
+	if serviceDef.Api != nil {
+		apiSpec, err = processAPISpecification(serviceDef.Api, gatewayUrl)
 		if err != nil {
 			return err
 		}
 	}
 
-	return svc.insertSpecs(specData.Id, specData.Docs, apiSpec, specData.Events)
+	return svc.insertSpecs(serviceDef.ID, serviceDef.Documentation, apiSpec, serviceDef.Events)
 }
 
 func (svc *specService) insertSpecs(id string, docs []byte, apiSpec []byte, events *model.Events) apperrors.AppError {
@@ -105,24 +105,17 @@ func shouldModifySpec(apiSpec []byte, apiType string) bool {
 	return !isNilOrEmpty(apiSpec) && strings.ToLower(apiType) != oDataSpecType
 }
 
-func fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
-	var specUrl *url.URL
-	var err error
+func isNilOrEmpty(array []byte) bool {
+	return array == nil || len(array) == 0
+}
 
-	if api.SpecificationUrl != "" {
-		specUrl, err = url.Parse(api.SpecificationUrl)
-		if err != nil {
-			return nil, apperrors.Internal("Parsing specification url failed, %s", err.Error())
-		}
-	} else {
-		targetUrl := strings.TrimSuffix(api.TargetUrl, "/")
-		specUrl, err = url.Parse(fmt.Sprintf(oDataSpecFormat, targetUrl))
-		if err != nil {
-			return nil, apperrors.Internal("Parsing OData specification url failed, %s", err.Error())
-		}
+func fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
+	specUrl, apperr := determineSpecUrl(api)
+	if apperr != nil {
+		return nil, apperr
 	}
 
-	response, apperr := requestAPISpec(specUrl.String())
+	response, apperr := requestAPISpec(specUrl)
 	if apperr != nil {
 		return nil, apperr
 	}
@@ -135,8 +128,24 @@ func fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
 	return apiSpec, nil
 }
 
-func isNilOrEmpty(array []byte) bool {
-	return array == nil || len(array) == 0
+func determineSpecUrl(api *model.API) (string, apperrors.AppError) {
+	var specUrl *url.URL
+	var err error
+
+	if api.SpecificationUrl != "" {
+		specUrl, err = url.Parse(api.SpecificationUrl)
+		if err != nil {
+			return "", apperrors.Internal("Parsing specification url failed, %s", err.Error())
+		}
+	} else {
+		targetUrl := strings.TrimSuffix(api.TargetUrl, "/")
+		specUrl, err = url.Parse(fmt.Sprintf(oDataSpecFormat, targetUrl))
+		if err != nil {
+			return "", apperrors.Internal("Parsing OData specification url failed, %s", err.Error())
+		}
+	}
+
+	return specUrl.String(), nil
 }
 
 func requestAPISpec(specUrl string) (*http.Response, apperrors.AppError) {
