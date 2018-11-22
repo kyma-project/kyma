@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `kubeless-test-client` contains the following:
+The `kubeless-integration` folder contains tests for Kubeless integration with other Kyma resources. It contains the following:
 * A [Dockerfile](Dockerfile) for the image used in Kyma Kubeless tests
 * A [Go program](test-kubeless.go), which executes the tests for the Kubeless chart
 * The [ns.yaml](ns.yaml) file, which specifies the `kubeless-test` namespace
