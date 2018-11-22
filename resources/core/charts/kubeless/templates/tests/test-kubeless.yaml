@@ -73,6 +73,7 @@ subjects:
   name: test-{{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
 ---
+{{- if not .Values.global.isLocalEnv }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -106,3 +107,4 @@ spec:
           - key: svcBindLambdaYaml
             path: svcbind-lambda.yaml
   restartPolicy: Never
+{{- end }}
