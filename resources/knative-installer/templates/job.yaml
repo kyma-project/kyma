@@ -15,14 +15,3 @@ spec:
       containers:
       - name: knative-installer
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.knative_installer.dir }}knative-installer:{{ .Values.global.knative_installer.version }}
-        env:
-        - name: SERVING_URL
-          valueFrom:
-            configMapKeyRef:
-              name: knative-installer-config
-              key: SERVING_URL
-        - name: EVENTING_URL
-          valueFrom:
-            configMapKeyRef:
-              name: knative-installer-config
-              key: EVENTING_URL
