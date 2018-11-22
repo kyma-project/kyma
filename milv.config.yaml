@@ -1,4 +1,4 @@
-white-list-external: ["localhost", "kyma.local", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "https://kyma-project.io", "orders.com"]
+white-list-external: ["localhost", "kyma.local", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com"]
 black-list: ["/vendor/"]
 timeout: 60
 request-repeats: 5
