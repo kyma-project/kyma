@@ -55,9 +55,9 @@ func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService
 // Create adds new ServiceDefinition. Based on ServiceDefinition a new service is added to RemoteEnvironment.
 func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef *model.ServiceDefinition) (string, apperrors.AppError) {
 	if serviceDef.Identifier != "" {
-		err := sds.ensureUniqueIdentifier(serviceDef.Identifier, remoteEnvironment)
-		if err != nil {
-			return "", err
+		apperr := sds.ensureUniqueIdentifier(serviceDef.Identifier, remoteEnvironment)
+		if apperr != nil {
+			return "", apperr
 		}
 	}
 
@@ -67,26 +67,23 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 	var gatewayUrl string
 
 	if apiDefined(serviceDef) {
-		serviceAPI, err := sds.serviceAPIService.New(remoteEnvironment, serviceDef.ID, serviceDef.Api)
-		if err != nil {
-			return "", apperrors.Internal("Adding new API failed, %s", err.Error())
+		serviceAPI, apperr := sds.serviceAPIService.New(remoteEnvironment, serviceDef.ID, serviceDef.Api)
+		if apperr != nil {
+			return "", apperr.Append("Adding new API failed")
 		}
 
 		service.API = serviceAPI
 		gatewayUrl = serviceAPI.GatewayURL
 	}
 
-	err := sds.specService.PutSpec(serviceDef, gatewayUrl)
-	if err != nil {
-		if err.Code() == apperrors.CodeUpstreamServerCallFailed {
-			return "", apperrors.UpstreamServerCallFailed("Determining API spec for service with ID %s failed, %s", serviceDef.ID, err.Error())
-		}
-		return "", apperrors.Internal("Determining API spec for service with ID %s failed, %s", serviceDef.ID, err.Error())
+	apperr := sds.specService.PutSpec(serviceDef, gatewayUrl)
+	if apperr != nil {
+		return "", apperr.Append("Determining API spec for service with ID %s failed", serviceDef.ID)
 	}
 
-	err = sds.remoteEnvironmentRepository.Create(remoteEnvironment, *service)
-	if err != nil {
-		return "", apperrors.Internal("Creating service in Remote Environment failed, %s", err.Error())
+	apperr = sds.remoteEnvironmentRepository.Create(remoteEnvironment, *service)
+	if apperr != nil {
+		return "", apperr.Append("Creating service in Remote Environment failed")
 	}
 
 	return serviceDef.ID, nil
@@ -94,12 +91,9 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 
 // GetByID returns ServiceDefinition with provided ID.
 func (sds *serviceDefinitionService) GetByID(remoteEnvironment, id string) (model.ServiceDefinition, apperrors.AppError) {
-	service, err := sds.remoteEnvironmentRepository.Get(remoteEnvironment, id)
-	if err != nil {
-		if err.Code() == apperrors.CodeNotFound {
-			return model.ServiceDefinition{}, apperrors.NotFound("Service with ID %s not found", id)
-		}
-		return model.ServiceDefinition{}, apperrors.Internal("Reading service with ID %s failed, %s", id, err.Error())
+	service, apperr := sds.remoteEnvironmentRepository.Get(remoteEnvironment, id)
+	if apperr != nil {
+		return model.ServiceDefinition{}, apperr.Append("Reading service with ID %s failed", id)
 	}
 
 	return sds.readService(remoteEnvironment, service)
@@ -107,9 +101,9 @@ func (sds *serviceDefinitionService) GetByID(remoteEnvironment, id string) (mode
 
 // GetAll returns all ServiceDefinitions.
 func (sds *serviceDefinitionService) GetAll(remoteEnvironment string) ([]model.ServiceDefinition, apperrors.AppError) {
-	services, err := sds.remoteEnvironmentRepository.GetAll(remoteEnvironment)
-	if err != nil {
-		return nil, apperrors.Internal("Reading services from Remote Environment failed, %s", err.Error())
+	services, apperr := sds.remoteEnvironmentRepository.GetAll(remoteEnvironment)
+	if apperr != nil {
+		return nil, apperr.Append("Reading services from Remote Environment failed")
 	}
 
 	res := make([]model.ServiceDefinition, 0)
@@ -122,12 +116,9 @@ func (sds *serviceDefinitionService) GetAll(remoteEnvironment string) ([]model.S
 
 // Update updates a service with provided ID.
 func (sds *serviceDefinitionService) Update(remoteEnvironment string, serviceDef *model.ServiceDefinition) (model.ServiceDefinition, apperrors.AppError) {
-	existingSvc, err := sds.GetByID(remoteEnvironment, serviceDef.ID)
-	if err != nil {
-		if err.Code() == apperrors.CodeNotFound {
-			return model.ServiceDefinition{}, apperrors.NotFound("Updating %s service failed, %s", serviceDef.ID, err.Error())
-		}
-		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, %s", serviceDef.ID, err.Error())
+	existingSvc, apperr := sds.GetByID(remoteEnvironment, serviceDef.ID)
+	if apperr != nil {
+		return model.ServiceDefinition{}, apperr.Append("Updating %s service failed", serviceDef.ID)
 	}
 
 	service := initService(serviceDef, existingSvc.Identifier, remoteEnvironment)
@@ -135,30 +126,27 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment string, serviceDef
 	var gatewayUrl string
 
 	if !apiDefined(serviceDef) {
-		err = sds.serviceAPIService.Delete(remoteEnvironment, serviceDef.ID)
-		if err != nil {
-			return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, deleting API failed, %s", serviceDef.ID, err.Error())
+		apperr = sds.serviceAPIService.Delete(remoteEnvironment, serviceDef.ID)
+		if apperr != nil {
+			return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, deleting API failed", serviceDef.ID)
 		}
 	} else {
-		service.API, err = sds.serviceAPIService.Update(remoteEnvironment, serviceDef.ID, serviceDef.Api)
-		if err != nil {
-			return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, updating API failed, %s", serviceDef.ID, err.Error())
+		service.API, apperr = sds.serviceAPIService.Update(remoteEnvironment, serviceDef.ID, serviceDef.Api)
+		if apperr != nil {
+			return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, updating API failed", serviceDef.ID)
 		}
 
 		gatewayUrl = service.API.GatewayURL
 	}
 
-	err = sds.specService.PutSpec(serviceDef, gatewayUrl)
-	if err != nil {
-		if err.Code() == apperrors.CodeUpstreamServerCallFailed {
-			return model.ServiceDefinition{}, apperrors.UpstreamServerCallFailed("Updating %s service failed, saving specification failed, %s", serviceDef.ID, err.Error())
-		}
-		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, saving specification failed, %s", serviceDef.ID, err.Error())
+	apperr = sds.specService.PutSpec(serviceDef, gatewayUrl)
+	if apperr != nil {
+		return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, saving specification failed", serviceDef.ID)
 	}
 
-	err = sds.remoteEnvironmentRepository.Update(remoteEnvironment, *service)
-	if err != nil {
-		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, updating service in Remote Environment repository failed, %s", serviceDef.ID, err.Error())
+	apperr = sds.remoteEnvironmentRepository.Update(remoteEnvironment, *service)
+	if apperr != nil {
+		return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, updating service in Remote Environment repository failed", serviceDef.ID)
 	}
 
 	return convertServiceBaseInfo(*service), nil
@@ -166,19 +154,19 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment string, serviceDef
 
 // Delete deletes a service with given id.
 func (sds *serviceDefinitionService) Delete(remoteEnvironment, id string) apperrors.AppError {
-	err := sds.serviceAPIService.Delete(remoteEnvironment, id)
-	if err != nil {
-		return apperrors.Internal("Deleting service failed, %s", err.Error())
+	apperr := sds.serviceAPIService.Delete(remoteEnvironment, id)
+	if apperr != nil {
+		return apperr.Append("Deleting service failed")
 	}
 
-	err = sds.remoteEnvironmentRepository.Delete(remoteEnvironment, id)
-	if err != nil {
-		return apperrors.Internal("Deleting service from Remote Environment repository failed, %s", err.Error())
+	apperr = sds.remoteEnvironmentRepository.Delete(remoteEnvironment, id)
+	if apperr != nil {
+		return apperr.Append("Deleting service from Remote Environment repository failed")
 	}
 
-	err = sds.specService.RemoveSpec(id)
-	if err != nil {
-		return apperrors.Internal("Deleting service specification failed, %s", err.Error())
+	apperr = sds.specService.RemoveSpec(id)
+	if apperr != nil {
+		return apperr.Append("Deleting service specification failed")
 	}
 
 	return nil
@@ -186,21 +174,18 @@ func (sds *serviceDefinitionService) Delete(remoteEnvironment, id string) apperr
 
 // GetAPI gets API of a service with given ID
 func (sds *serviceDefinitionService) GetAPI(remoteEnvironment, serviceId string) (*model.API, apperrors.AppError) {
-	service, err := sds.remoteEnvironmentRepository.Get(remoteEnvironment, serviceId)
-	if err != nil {
-		if err.Code() == apperrors.CodeNotFound {
-			return nil, apperrors.NotFound("Service with ID %s not found", serviceId)
-		}
-		return nil, apperrors.Internal("Reading %s service failed, %s", serviceId, err.Error())
+	service, apperr := sds.remoteEnvironmentRepository.Get(remoteEnvironment, serviceId)
+	if apperr != nil {
+		return nil, apperr.Append("Reading %s service failed", serviceId)
 	}
 
 	if service.API == nil {
 		return nil, apperrors.WrongInput("Service with ID %s has no API", service.ID)
 	}
 
-	api, err := sds.serviceAPIService.Read(remoteEnvironment, service.API)
-	if err != nil {
-		return nil, apperrors.Internal("Reading API for %s service failed, %s", serviceId, err.Error())
+	api, apperr := sds.serviceAPIService.Read(remoteEnvironment, service.API)
+	if apperr != nil {
+		return nil, apperr.Append("Reading API for %s service failed", serviceId)
 	}
 	return api, nil
 }
@@ -244,9 +229,9 @@ func convertServiceBaseInfo(service remoteenv.Service) model.ServiceDefinition {
 }
 
 func (sds *serviceDefinitionService) ensureUniqueIdentifier(identifier, remoteEnvironment string) apperrors.AppError {
-	services, err := sds.GetAll(remoteEnvironment)
-	if err != nil {
-		return err
+	services, apperr := sds.GetAll(remoteEnvironment)
+	if apperr != nil {
+		return apperr
 	}
 
 	for _, service := range services {
@@ -261,15 +246,15 @@ func (sds *serviceDefinitionService) ensureUniqueIdentifier(identifier, remoteEn
 func (sds *serviceDefinitionService) readService(remoteEnvironment string, service remoteenv.Service) (model.ServiceDefinition, apperrors.AppError) {
 	serviceDef := convertServiceBaseInfo(service)
 
-	documentation, apiSpec, eventsSpec, err := sds.specService.GetSpec(service.ID)
-	if err != nil {
-		return model.ServiceDefinition{}, apperrors.Internal("Reading specs failed, %s", err.Error())
+	documentation, apiSpec, eventsSpec, apperr := sds.specService.GetSpec(service.ID)
+	if apperr != nil {
+		return model.ServiceDefinition{}, apperr.Append("Reading specs failed")
 	}
 
 	if service.API != nil {
-		api, err := sds.serviceAPIService.Read(remoteEnvironment, service.API)
-		if err != nil {
-			return model.ServiceDefinition{}, apperrors.Internal("Reading API failed, %s", err.Error())
+		api, apperr := sds.serviceAPIService.Read(remoteEnvironment, service.API)
+		if apperr != nil {
+			return model.ServiceDefinition{}, apperr.Append("Reading API failed")
 		}
 		serviceDef.Api = api
 

@@ -11,6 +11,7 @@ const (
 )
 
 type AppError interface {
+	Append(string, ...interface{}) AppError
 	Code() int
 	Error() string
 }
@@ -40,8 +41,14 @@ func WrongInput(format string, a ...interface{}) AppError {
 	return errorf(CodeWrongInput, format, a...)
 }
 
+
 func UpstreamServerCallFailed(format string, a ...interface{}) AppError {
 	return errorf(CodeUpstreamServerCallFailed, format, a...)
+}
+
+func (ae appError) Append(additionalFormat string, a ...interface{}) AppError {
+	format := additionalFormat + ", " + ae.message
+	return errorf(ae.code, format, a...)
 }
 
 func (ae appError) Code() int {
