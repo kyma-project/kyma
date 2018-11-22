@@ -5,15 +5,14 @@ echo "Installing Knative build and serving ..."
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
-curl -L ${SERVING_URL} \
-| sed 's/LoadBalancer/NodePort/' \
+sed 's/LoadBalancer/NodePort/' </serving.yaml \
 | tee knative-serving.yaml \
 | kubectl apply -f -
 
 
 echo "Verifying Knative build and serving installation..."
 sleep 2
-until kubectl get -f ${SERVING_URL} > /dev/null 2>&1
+until kubectl get -f /serving.yaml > /dev/null 2>&1
 do
     echo "Knative CRDs not yet synced, re-applying..."
     kubectl apply -f knative-serving.yaml
@@ -31,7 +30,7 @@ echo "Knative build and serving installation verified"
 
 echo "Installing Knative eventing..."
 
-kubectl apply -f ${EVENTING_URL}
+kubectl apply -f /eventing.yaml
 
 echo "Verifying Knative eventing installation..."
 
