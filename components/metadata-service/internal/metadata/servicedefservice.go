@@ -61,13 +61,13 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 		}
 	}
 
-	id := sds.uuidGenerator.NewUUID()
-	service := initService(serviceDef, id, serviceDef.Identifier, remoteEnvironment)
+	serviceDef.ID = sds.uuidGenerator.NewUUID()
+	service := initService(serviceDef, serviceDef.Identifier, remoteEnvironment)
 
 	var gatewayUrl string
 
 	if apiDefined(serviceDef) {
-		serviceAPI, err := sds.serviceAPIService.New(remoteEnvironment, id, serviceDef.Api)
+		serviceAPI, err := sds.serviceAPIService.New(remoteEnvironment, serviceDef.ID, serviceDef.Api)
 		if err != nil {
 			return "", apperrors.Internal("Adding new API failed, %s", err.Error())
 		}
@@ -79,9 +79,9 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 	err := sds.specService.PutSpec(serviceDef, gatewayUrl)
 	if err != nil {
 		if err.Code() == apperrors.CodeUpstreamServerCallFailed {
-			return "", apperrors.UpstreamServerCallFailed("Determining API spec for service with ID %s failed, %s", id, err.Error())
+			return "", apperrors.UpstreamServerCallFailed("Determining API spec for service with ID %s failed, %s", serviceDef.ID, err.Error())
 		}
-		return "", apperrors.Internal("Determining API spec for service with ID %s failed, %s", id, err.Error())
+		return "", apperrors.Internal("Determining API spec for service with ID %s failed, %s", serviceDef.ID, err.Error())
 	}
 
 	err = sds.remoteEnvironmentRepository.Create(remoteEnvironment, *service)
@@ -89,8 +89,7 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 		return "", apperrors.Internal("Creating service in Remote Environment failed, %s", err.Error())
 	}
 
-	serviceDef.ID = id
-	return id, nil
+	return serviceDef.ID, nil
 }
 
 // GetByID returns ServiceDefinition with provided ID.
@@ -131,7 +130,8 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, %s", id, err.Error())
 	}
 
-	service := initService(serviceDef, id, existingSvc.Identifier, remoteEnvironment)
+	serviceDef.ID = id
+	service := initService(serviceDef, existingSvc.Identifier, remoteEnvironment)
 
 	var gatewayUrl string
 
@@ -162,7 +162,6 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, updating service in Remote Environment repository failed, %s", id, err.Error())
 	}
 
-	serviceDef.ID = id
 	return convertServiceBaseInfo(*service), nil
 }
 
@@ -207,9 +206,9 @@ func (sds *serviceDefinitionService) GetAPI(remoteEnvironment, serviceId string)
 	return api, nil
 }
 
-func initService(serviceDef *model.ServiceDefinition, id, identifier, remoteEnvironment string) *remoteenv.Service {
+func initService(serviceDef *model.ServiceDefinition, identifier, remoteEnvironment string) *remoteenv.Service {
 	service := remoteenv.Service{
-		ID:                  id,
+		ID:                  serviceDef.ID,
 		Identifier:          identifier,
 		DisplayName:         serviceDef.Name,
 		LongDescription:     serviceDef.Description,
