@@ -61,6 +61,7 @@ projects = [
     "tests/gateway-tests": "gateway-acceptance-tests",
     "tests/test-environments": "test-environments",
     "tests/kubeless-integration": "kubeless-integration-tests",
+    "tests/kubeless": "kubeless-tests",
     "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
     "tests/connector-service-tests": "connector-service-tests",
     "tests/metadata-service-tests": "metadata-service-tests",
