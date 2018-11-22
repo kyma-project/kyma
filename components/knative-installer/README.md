@@ -2,8 +2,8 @@
 
 ## Overview
 
-Knative is distributes as single YAML file with resources definitions. `knative-installer` containerizes the process to make it possible to install Knative with Kyma's installer.
+Knative is distributed as a single YAML file containing resource definitions. The Knative installer containerizes the process to allow the installation of Knative using the Kyma installer.
 
 ## Prerequisites
 
-Knative requires istio in `istio-system` namespace. It must be installed before `isito-kyma-patch`.
+Knative requires running Istio in the `istio-system` Namespace. It must be installed before `isito-kyma-patch` is applied.
