@@ -38,6 +38,7 @@ projects = [
     "components/configurations-generator",
     "components/environments",
     "components/istio-kyma-patch",
+    "components/knative-installer",
     "components/helm-broker",
     "components/remote-environment-broker",
     "components/remote-environment-controller",
