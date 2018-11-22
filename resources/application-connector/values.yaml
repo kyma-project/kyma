@@ -17,7 +17,7 @@ global:
     dir: develop/
     version: 1ecf2683
   connector_service_token_request:
-    dir: develop/
+    dir: pr/
     version: PR-1742
   event_service:
     dir: develop/
