@@ -713,6 +713,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceDefinition := model.ServiceDefinition{
+			ID:          "uuid-1",
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
@@ -755,17 +756,14 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 		serviceRepository.On("Update", "re", remoteEnvService).Return(nil)
 
-		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
-
 		specService := new(specmocks.Service)
 		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
+		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
 		// when
-		_, err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", &serviceDefinition)
 
 		// then
 		assert.NoError(t, err)
@@ -790,6 +788,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceDefinition := model.ServiceDefinition{
+			ID:            "uuid-1",
 			Name:          "Some service",
 			Description:   "Some cool service",
 			Provider:      "Service Provider",
@@ -814,16 +813,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteenv.Service{}, apperrors.NotFound("missing"))
 
-		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
-
 		specService := new(specmocks.Service)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
+		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
 		// when
-		_, err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)
@@ -833,6 +829,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 	t.Run("should update a service when no API was given", func(t *testing.T) {
 		// given
 		serviceDefinition := model.ServiceDefinition{
+			ID:          "uuid-1",
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
@@ -864,17 +861,14 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 		serviceRepository.On("Update", "re", remoteEnvService).Return(nil)
 
-		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
-
 		specService := new(specmocks.Service)
 		specService.On("PutSpec", &serviceDefinition, "").Return(nil)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
+		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
 		// when
-		_, err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", &serviceDefinition)
 
 		// then
 		assert.NoError(t, err)
@@ -887,6 +881,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 	t.Run("should preserve a service identifier", func(t *testing.T) {
 		// given
 		serviceDefinition := model.ServiceDefinition{
+			ID:          "uuid-1",
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
@@ -918,17 +913,14 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 		serviceRepository.On("Update", "re", remoteEnvService).Return(nil)
 
-		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
-
 		specService := new(specmocks.Service)
 		specService.On("PutSpec", &serviceDefinition, "").Return(nil)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
+		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
 		// when
-		_, err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", &serviceDefinition)
 
 		// then
 		assert.NoError(t, err)
@@ -953,6 +945,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceDefinition := model.ServiceDefinition{
+			ID:          "uuid-1",
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
@@ -983,16 +976,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 
-		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
-
 		specService := new(specmocks.Service)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
+		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
 		// when
-		_, err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)
@@ -1017,6 +1007,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceDefinition := model.ServiceDefinition{
+			ID:          "uuid-1",
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
@@ -1047,16 +1038,13 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 
-		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
-
 		specService := new(specmocks.Service)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
+		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
 		// when
-		_, err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)
@@ -1081,6 +1069,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceDefinition := model.ServiceDefinition{
+			ID:          "uuid-1",
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
@@ -1111,17 +1100,14 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 
-		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
-
 		specService := new(specmocks.Service)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 		specService.On("PutSpec", &serviceDefinition, "").Return(apperrors.Internal("Error"))
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
+		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
 		// when
-		_, err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)
@@ -1147,6 +1133,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceDefinition := model.ServiceDefinition{
+			ID:          "uuid-1",
 			Name:        "Some service",
 			Description: "Some cool service",
 			Provider:    "Service Provider",
@@ -1189,17 +1176,14 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 		serviceRepository.On("Update", "re", remoteEnvService).Return(apperrors.Internal("an error"))
 
-		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
-
 		specService := new(specmocks.Service)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
+		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, specService)
 
 		// when
-		_, err := service.Update("re", "uuid-1", &serviceDefinition)
+		_, err := service.Update("re", &serviceDefinition)
 
 		// then
 		assert.Error(t, err)

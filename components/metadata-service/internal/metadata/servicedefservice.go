@@ -26,7 +26,7 @@ type ServiceDefinitionService interface {
 	GetAll(remoteEnvironment string) (serviceDefinitions []model.ServiceDefinition, err apperrors.AppError)
 
 	// Update updates a service definition with provided ID.
-	Update(remoteEnvironment, id string, serviceDef *model.ServiceDefinition) (model.ServiceDefinition, apperrors.AppError)
+	Update(remoteEnvironment string, serviceDef *model.ServiceDefinition) (model.ServiceDefinition, apperrors.AppError)
 
 	// Delete deletes a ServiceDefinition.
 	Delete(remoteEnvironment, id string) apperrors.AppError
@@ -121,29 +121,28 @@ func (sds *serviceDefinitionService) GetAll(remoteEnvironment string) ([]model.S
 }
 
 // Update updates a service with provided ID.
-func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, serviceDef *model.ServiceDefinition) (model.ServiceDefinition, apperrors.AppError) {
-	existingSvc, err := sds.GetByID(remoteEnvironment, id)
+func (sds *serviceDefinitionService) Update(remoteEnvironment string, serviceDef *model.ServiceDefinition) (model.ServiceDefinition, apperrors.AppError) {
+	existingSvc, err := sds.GetByID(remoteEnvironment, serviceDef.ID)
 	if err != nil {
 		if err.Code() == apperrors.CodeNotFound {
-			return model.ServiceDefinition{}, apperrors.NotFound("Updating %s service failed, %s", id, err.Error())
+			return model.ServiceDefinition{}, apperrors.NotFound("Updating %s service failed, %s", serviceDef.ID, err.Error())
 		}
-		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, %s", id, err.Error())
+		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, %s", serviceDef.ID, err.Error())
 	}
 
-	serviceDef.ID = id
 	service := initService(serviceDef, existingSvc.Identifier, remoteEnvironment)
 
 	var gatewayUrl string
 
 	if !apiDefined(serviceDef) {
-		err = sds.serviceAPIService.Delete(remoteEnvironment, id)
+		err = sds.serviceAPIService.Delete(remoteEnvironment, serviceDef.ID)
 		if err != nil {
-			return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, deleting API failed, %s", id, err.Error())
+			return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, deleting API failed, %s", serviceDef.ID, err.Error())
 		}
 	} else {
-		service.API, err = sds.serviceAPIService.Update(remoteEnvironment, id, serviceDef.Api)
+		service.API, err = sds.serviceAPIService.Update(remoteEnvironment, serviceDef.ID, serviceDef.Api)
 		if err != nil {
-			return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, updating API failed, %s", id, err.Error())
+			return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, updating API failed, %s", serviceDef.ID, err.Error())
 		}
 
 		gatewayUrl = service.API.GatewayURL
@@ -152,14 +151,14 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment, id string, servic
 	err = sds.specService.PutSpec(serviceDef, gatewayUrl)
 	if err != nil {
 		if err.Code() == apperrors.CodeUpstreamServerCallFailed {
-			return model.ServiceDefinition{}, apperrors.UpstreamServerCallFailed("Updating %s service failed, saving specification failed, %s", id, err.Error())
+			return model.ServiceDefinition{}, apperrors.UpstreamServerCallFailed("Updating %s service failed, saving specification failed, %s", serviceDef.ID, err.Error())
 		}
-		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, saving specification failed, %s", id, err.Error())
+		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, saving specification failed, %s", serviceDef.ID, err.Error())
 	}
 
 	err = sds.remoteEnvironmentRepository.Update(remoteEnvironment, *service)
 	if err != nil {
-		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, updating service in Remote Environment repository failed, %s", id, err.Error())
+		return model.ServiceDefinition{}, apperrors.Internal("Updating %s service failed, updating service in Remote Environment repository failed, %s", serviceDef.ID, err.Error())
 	}
 
 	return convertServiceBaseInfo(*service), nil

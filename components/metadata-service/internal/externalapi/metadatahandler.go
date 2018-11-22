@@ -121,8 +121,9 @@ func (mh *metadataHandler) UpdateService(w http.ResponseWriter, r *http.Request)
 		mh.handleErrors(w, apperr)
 		return
 	}
+	serviceDefinition.ID = vars["serviceId"]
 
-	svc, apperr := mh.ServiceDefinitionService.Update(vars["remoteEnvironment"], vars["serviceId"], &serviceDefinition)
+	svc, apperr := mh.ServiceDefinitionService.Update(vars["remoteEnvironment"], &serviceDefinition)
 	if apperr != nil {
 		contextLogger.Errorf("Updating service failed, %s", apperr.Error())
 		mh.handleErrors(w, apperr)

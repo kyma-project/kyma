@@ -809,7 +809,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", serviceDefinition).Return(*serviceDefinition, nil)
+		serviceDefinitionService.On("Update", "re", serviceDefinitionWithID(serviceDefinition, "1234")).Return(*serviceDefinition, nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -903,7 +903,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", serviceDefinition).Return(*serviceDefinition, nil)
+		serviceDefinitionService.On("Update", "re", serviceDefinitionWithID(serviceDefinition, "1234")).Return(*serviceDefinition, nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -994,7 +994,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", mock.Anything).Return(model.ServiceDefinition{}, apperrors.Internal(""))
+		serviceDefinitionService.On("Update", "re", mock.Anything).Return(model.ServiceDefinition{}, apperrors.Internal(""))
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -1042,7 +1042,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		})
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "654321", serviceDefinition).Return(model.ServiceDefinition{}, apperrors.NotFound(""))
+		serviceDefinitionService.On("Update", "re", serviceDefinitionWithID(serviceDefinition, "654321")).Return(model.ServiceDefinition{}, apperrors.NotFound(""))
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -1120,4 +1120,9 @@ func raw2Json(t *testing.T, rawMsg json.RawMessage) testSpec {
 	err := json.Unmarshal(rawMsg, &spec)
 	require.NoError(t, err)
 	return spec
+}
+
+func serviceDefinitionWithID(serviceDef *model.ServiceDefinition, id string) *model.ServiceDefinition {
+	serviceDef.ID = id
+	return serviceDef
 }
