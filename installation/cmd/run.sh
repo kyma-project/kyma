@@ -47,12 +47,12 @@ MINIKUBE_EXTRA_ARGS=""
 CREATE_CR_EXTRA_ARGS=""
 
 if [[ -n "$KNATIVE" ]]; then
-    MINIKUBE_ARGS="${MINIKUBE_ARGS} --memory 10240 --disk-size 30g"
+    MINIKUBE_EXTRA_ARGS="${MINIKUBE_EXTRA_ARGS} --memory 10240 --disk-size 30g"
     CREATE_CR_EXTRA_ARGS="${CREATE_CR_EXTRA_ARGS} --crtpl_path $CURRENT_DIR/../resources/installer-cr-knative.yaml.tpl"
-fi.
+fi
 
 if [[ ! ${SKIP_MINIKUBE_START} ]]; then
-    bash ${CURRENT_DIR}/../scripts/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}" ${MINIKUBE_ARGS}
+    bash ${CURRENT_DIR}/../scripts/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}" ${MINIKUBE_EXTRA_ARGS}
 fi
 
 bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
