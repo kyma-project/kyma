@@ -26,8 +26,7 @@ if [ $(echo ${#fmtResult}) != 0 ]
 	else echo -e "${GREEN}√ go fmt${NC}"
 fi
 
-goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/")
-
+goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "/vendor")
 ##
 # GO IMPORTS & FMT
 ##
@@ -50,14 +49,14 @@ fi
 ##
 # GO VET
 ##
-packagesToVet=("./dex/..." "./servicecatalog/..." "./remote-environment/...")
-
-for vPackage in "${packagesToVet[@]}"; do
-	vetResult=$(go vet ${vPackage})
+packagesToVet=$(find . -type d -maxdepth 1 | egrep -v "/vendor|/pkg" | egrep "./")
+packagesArray=(${packagesToVet//\\n/})
+for vPackage in "${packagesArray[@]}"; do
+	vetResult=$(go vet "${vPackage}/...")
 	if [ $(echo ${#vetResult}) != 0 ]; then
-		echo -e "${RED}✗ go vet ${vPackage} ${NC}\n$vetResult${NC}"
+		echo -e "${RED}✗ go vet ${vPackage}/... ${NC}\n$vetResult${NC}"
 		exit 1
-	else echo -e "${GREEN}√ go vet ${vPackage} ${NC}"
+	else echo -e "${GREEN}√ go vet ${vPackage}/... ${NC}"
 	fi
 done
 
