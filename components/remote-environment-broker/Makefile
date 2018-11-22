@@ -1,4 +1,4 @@
-APP_NAME = binding-usage-controller
+APP_NAME = remote-environment-broker
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 binary=$(APP_NAME)
@@ -9,8 +9,8 @@ build:
 
 .PHONY: build-image
 build-image:
-	cp $(binary) deploy/controller/$(binary)
-	docker build -t $(APP_NAME):latest deploy/controller
+	cp $(binary) deploy/broker/$(binary)
+	docker build -t $(APP_NAME):latest deploy/broker
 
 .PHONY: push-image
 push-image:
