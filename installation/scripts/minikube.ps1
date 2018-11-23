@@ -1,7 +1,7 @@
 param (
     [string]$VM_DRIVER = "hyperv",
-    [string]$DOMAIN = "kyma.local"
-    [string]$DISK_SIZE = "20g"
+    [string]$DOMAIN = "kyma.local",
+    [string]$DISK_SIZE = "20g",
     [string]$MEMORY = "8196"
 )
 
