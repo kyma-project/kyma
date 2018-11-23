@@ -45,7 +45,7 @@ function StartMinikube() {
         + " --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList='.*'"`
         + " --extra-config=controller-manager.ClusterSigningCertFile='/var/lib/localkube/certs/ca.crt'"`
         + " --extra-config=controller-manager.ClusterSigningKeyFile='/var/lib/localkube/certs/ca.key'"`
-        + " --extra-config=apiserver.Admission.PluginNames='LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota'"`
+        + " --extra-config=apiserver.admission-control='LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota'"`
         + " --kubernetes-version=v${KUBERNETES_VERSION}"`
         + " --feature-gates='MountPropagation=false'"`
         + " --disk-size=${DISK_SIZE}"`
