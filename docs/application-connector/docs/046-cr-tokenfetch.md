@@ -3,7 +3,7 @@ title: TokenFetch
 type: Custom Resource
 ---
 
-The `tokenfetch.remoteenvironment.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to request token from the Connecto Service. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `tokenfetch.connectorservice.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to request token for RemoteEnvironment from the Connector Service. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```
 kubectl get crd tokenrequest.connectorservice.kyma-project.io -o yaml
@@ -28,12 +28,3 @@ This table lists all the possible parameters of a given resource together with t
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR and the Remote Environment to fetch token for. |
-
-
-## Related resources and components
-
-These are the resources related to this CR:
-
-| Custom resource   |   Description |
-|:----------:|:------|
-| RemoteEnvironment |  Uses this CR to fetch token for RemoteEnvironment. |
