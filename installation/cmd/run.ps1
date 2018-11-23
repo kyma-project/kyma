@@ -16,7 +16,6 @@ if ($KNATIVE -eq $false) {
     $CREATE_CR_EXTRA_ARGS = "${CREATE_CR_EXTRA_ARGS} -crtpl_path ${CURRENT_DIR}/../resources/installer-cr-knative.yaml.tpl"
 }
 
-if ($SKIP_MINIKUBE_START -eq $false) {
 
 if ($SKIP_MINIKUBE_START -eq $false) {
     Invoke-Expression -Command "${SCRIPTS_DIR}\minikube.ps1 -vm_driver ${VM_DRIVER} -domain ${DOMAIN} ${MINIKUBE_ARGS}"
