@@ -55,8 +55,8 @@
 # The `connector-service` subchart
 /resources/application-connector/charts/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# The `connector-service-token-request` subchart
-/resources/application-connector/charts/connector-service-token-request/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+# The `connection-token-handler` subchart
+/resources/application-connector/charts/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `metadata-service` subchart
 /resources/application-connector/charts/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -192,7 +192,7 @@
 /components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Connector Service Token Request Component
-/components/connector-service-token-request/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+/components/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Metadata Service Component
 /components/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
