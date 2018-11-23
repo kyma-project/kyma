@@ -11,8 +11,9 @@ type OverrideData interface {
 }
 
 type Provider struct {
-	common     Map
-	components map[string]Map
+	common       Map
+	components   map[string]Map
+	configReader reader
 }
 
 //Common returns overrides common for all components
@@ -40,6 +41,8 @@ func (o *Provider) ForComponent(componentName string) Map {
 
 //ForRelease returns overrides for release
 func (o *Provider) ForRelease(releaseName string) (string, error) {
+
+	refreshStore(o)
 	allOverrides := Map{}
 
 	MergeMaps(allOverrides, o.Common())
@@ -49,20 +52,29 @@ func (o *Provider) ForRelease(releaseName string) (string, error) {
 }
 
 //New returns new Data instance.
-func New(client *kubernetes.Clientset) (OverrideData, error) {
+func New(client *kubernetes.Clientset) OverrideData {
 
-	r := &reader{
+	configReader := &reader{
 		client: client,
 	}
 
-	versionsMap, err := versionOverrides()
-	if err != nil {
-		return nil, err
+	res := Provider{
+		configReader: *configReader,
 	}
 
-	commonOverridesData, err := r.readCommonOverrides()
+	return &res
+}
+
+func refreshStore(p *Provider) error {
+
+	versionsMap, err := versionOverrides()
 	if err != nil {
-		return nil, err
+		return err
+	}
+
+	commonOverridesData, err := p.configReader.readCommonOverrides()
+	if err != nil {
+		return err
 	}
 
 	commonOverrides := UnflattenToMap(joinOverridesMap(commonOverridesData...))
@@ -70,19 +82,17 @@ func New(client *kubernetes.Clientset) (OverrideData, error) {
 	MergeMaps(commonOverridesMap, versionsMap)
 	MergeMaps(commonOverridesMap, commonOverrides)
 
-	componentsOverridesData, err := r.readComponentOverrides()
+	componentsOverridesData, err := p.configReader.readComponentOverrides()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	componentsMap := unflattenComponentOverrides(joinComponentOverrides(componentsOverridesData...))
 
-	res := Provider{
-		common:     commonOverridesMap,
-		components: componentsMap,
-	}
+	p.common = commonOverridesMap
+	p.components = componentsMap
 
-	return &res, nil
+	return nil
 }
 
 //versionOverrides reads overrides for component versions (versions.yaml)
