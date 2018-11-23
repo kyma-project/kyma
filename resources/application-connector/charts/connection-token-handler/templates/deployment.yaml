@@ -21,5 +21,5 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connector_service_token_request.dir }}connector-service-token-request:{{ .Values.global.connector_service_token_request.version }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connection_token_handler.dir }}connection-token-handler:{{ .Values.global.connection_token_handler.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}

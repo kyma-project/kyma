@@ -1,0 +1,7 @@
+apiVersion: v1
+description: Connection Token Handler
+name: connection-token-handler
+version: 0.0.1
+keywords:
+  - connector-service
+  - connection-token-handler

@@ -1,7 +1,0 @@
-apiVersion: v1
-description: Connector Service Token Request
-name: connector-service-token-request
-version: 0.0.1
-keywords:
-  - connector-service
-  - connector-service-token-request

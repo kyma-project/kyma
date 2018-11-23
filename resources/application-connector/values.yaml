@@ -16,7 +16,7 @@ global:
   connector_service_tests:
     dir: develop/
     version: 1ecf2683
-  connector_service_token_request:
+  connection_token_handler:
     dir: pr/
     version: PR-1742
   event_service:
