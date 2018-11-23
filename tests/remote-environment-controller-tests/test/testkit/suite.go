@@ -12,7 +12,10 @@ import (
 )
 
 const (
-	testReName = "re-ctrl-test-%s"
+	testReName           = "re-ctrl-test-%s"
+	defaultCheckInterval = 2 * time.Second
+	installationTimeout  = 180 * time.Second // TODO - better names
+	provisioningTimeout  = 10 * time.Second
 )
 
 type TestSuite struct {
@@ -24,9 +27,6 @@ type TestSuite struct {
 	helmClient HelmClient
 	k8sClient  K8sResourcesClient
 	k8sChecker *K8sResourceChecker
-
-	installationTimeout       time.Duration
-	installationCheckInterval time.Duration
 }
 
 func NewTestSuite(t *testing.T) *TestSuite {
@@ -49,14 +49,11 @@ func NewTestSuite(t *testing.T) *TestSuite {
 		helmClient: helmClient,
 		k8sClient:  k8sResourcesClient,
 		k8sChecker: k8sResourcesChecker,
-
-		installationTimeout:       180 * time.Second,
-		installationCheckInterval: 2 * time.Second,
 	}
 }
 
-func (ts *TestSuite) CreateRemoteEnvironment() {
-	remoteEnv, err := ts.k8sClient.CreateDummyRemoteEnvironment(ts.remoteEnvironment, "", false)
+func (ts *TestSuite) CreateRemoteEnvironment(accessLabel string, skipInstallation bool) {
+	remoteEnv, err := ts.k8sClient.CreateDummyRemoteEnvironment(ts.remoteEnvironment, accessLabel, skipInstallation)
 	require.NoError(ts.t, err)
 	require.NotNil(ts.t, remoteEnv)
 }
@@ -66,6 +63,12 @@ func (ts *TestSuite) DeleteRemoteEnvironment() {
 	require.NoError(ts.t, err)
 }
 
+func (ts *TestSuite) CheckAccessLabel() {
+	remoteEnv, err := ts.k8sClient.GetRemoteEnvironment(ts.remoteEnvironment, metav1.GetOptions{})
+	require.NoError(ts.t, err)
+	require.Equal(ts.t, ts.remoteEnvironment, remoteEnv.Spec.AccessLabel)
+}
+
 func (ts *TestSuite) CleanUp() {
 	// Do not handle error as RE may already be removed
 	ts.k8sClient.DeleteRemoteEnvironment(ts.remoteEnvironment, &metav1.DeleteOptions{})
@@ -73,23 +76,30 @@ func (ts *TestSuite) CleanUp() {
 
 func (ts *TestSuite) WaitForReleaseToInstall() {
 	msg := fmt.Sprintf("Timeout waiting for %s release installation", ts.remoteEnvironment)
-	ts.waitForFunction(ts.helmReleaseInstalled, msg)
+	ts.waitForFunction(ts.helmReleaseInstalled, msg, installationTimeout)
 }
 
 func (ts *TestSuite) WaitForReleaseToUninstall() {
 	msg := fmt.Sprintf("Timeout waiting for %s release to uninstall", ts.remoteEnvironment)
-	ts.waitForFunction(ts.helmReleaseRemoved, msg)
+	ts.waitForFunction(ts.helmReleaseNotExist, msg, installationTimeout)
+}
+
+func (ts *TestSuite) EnsureReleaseNotInstalling() {
+	//msg := fmt.Sprintf("Timeout waiting for %s release to uninstall", ts.remoteEnvironment)
+	ts.shouldLastFor(ts.helmReleaseNotExist, "", provisioningTimeout)
 }
 
 func (ts *TestSuite) WaitForK8sResourcesToDeploy() {
 	ts.waitForFunctions(
 		ts.k8sChecker.getResourceCheckFunctions(checkResourceDeployed),
+		installationTimeout,
 	)
 }
 
 func (ts *TestSuite) WaitForK8sResourceToDelete() {
 	ts.waitForFunctions(
 		ts.k8sChecker.getResourceCheckFunctions(checkResourceRemoved),
+		installationTimeout,
 	)
 }
 
@@ -98,7 +108,7 @@ func (ts *TestSuite) helmReleaseInstalled() bool {
 	return err == nil && status.Info.Status.Code == hapi_4.Status_DEPLOYED
 }
 
-func (ts *TestSuite) helmReleaseRemoved() bool {
+func (ts *TestSuite) helmReleaseNotExist() bool {
 	exists, err := ts.helmClient.CheckReleaseExistence(ts.remoteEnvironment)
 	return err == nil && exists == false
 }
@@ -109,10 +119,8 @@ func checkResourceDeployed(resource interface{}, err error) func() bool {
 	}
 }
 
-func checkResourceRemoved(resource interface{}, err error) func() bool {
+func checkResourceRemoved(_ interface{}, err error) func() bool {
 	return func() bool {
-		fmt.Println(err)
-		fmt.Println(k8serrors.IsNotFound(err))
 		return err != nil && k8serrors.IsNotFound(err)
 	}
 }

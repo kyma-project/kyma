@@ -122,7 +122,8 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:6de3e15e3db624ed0bb0308cccd1c2ba4f08d86177760b6b362a55b8fc4f347b"
+  branch = "skip-re-installation"
+  digest = "1:7aefe50c42c303150a50d3d3b0588027b1e48fc03c44c3d9ca7c9ed351888328"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
@@ -131,7 +132,8 @@
     "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "7400291c88b0dde7d2b674f02a40efc5eb1934e5"
+  revision = "d37cd219ae475ce0c0ebd78c3b51630f612ec280"
+  source = "github.com/Szymongib/kyma"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"

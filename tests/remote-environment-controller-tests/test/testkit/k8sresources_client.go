@@ -77,17 +77,19 @@ func (c *k8sResourcesClient) GetService(name string, options v1.GetOptions) (int
 }
 
 func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, accessLabel string, skipInstallation bool) (*v1alpha1.RemoteEnvironment, error) {
-	labels := map[string]string{
-		skipInstallationLabel: "true",
+	spec := v1alpha1.RemoteEnvironmentSpec{
+		Services:    []v1alpha1.Service{},
+		AccessLabel: accessLabel,
+	}
+
+	if skipInstallation {
+		spec.SkipProvisioning = true
 	}
 
 	dummyRe := &v1alpha1.RemoteEnvironment{
 		TypeMeta:   v1.TypeMeta{Kind: "RemoteEnvironment", APIVersion: v1alpha1.SchemeGroupVersion.String()},
-		ObjectMeta: v1.ObjectMeta{Name: name, Namespace: c.namespace, Labels: labels},
-		Spec: v1alpha1.RemoteEnvironmentSpec{
-			Services:    []v1alpha1.Service{},
-			AccessLabel: accessLabel,
-		},
+		ObjectMeta: v1.ObjectMeta{Name: name, Namespace: c.namespace},
+		Spec:       spec,
 	}
 
 	return c.remoteEnvironmentClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Create(dummyRe)

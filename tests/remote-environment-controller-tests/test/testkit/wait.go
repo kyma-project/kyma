@@ -11,8 +11,8 @@ type conditionFunction struct {
 	failMessage string
 }
 
-func (ts *TestSuite) waitForFunction(conditionalFunc func() bool, message string) {
-	done := time.After(ts.installationTimeout)
+func (ts *TestSuite) waitForFunction(conditionalFunc func() bool, message string, timeout time.Duration) {
+	done := time.After(timeout)
 
 	for {
 		if conditionalFunc() {
@@ -23,13 +23,13 @@ func (ts *TestSuite) waitForFunction(conditionalFunc func() bool, message string
 		case <-done:
 			require.Fail(ts.t, message)
 		default:
-			time.Sleep(ts.installationCheckInterval)
+			time.Sleep(defaultCheckInterval)
 		}
 	}
 }
 
-func (ts *TestSuite) waitForFunctions(conditionalFuncs []conditionFunction) {
-	done := time.After(ts.installationTimeout)
+func (ts *TestSuite) waitForFunctions(conditionalFuncs []conditionFunction, timeout time.Duration) {
+	done := time.After(timeout)
 
 	for {
 		success := true
@@ -53,7 +53,32 @@ func (ts *TestSuite) waitForFunctions(conditionalFuncs []conditionFunction) {
 			failMessage := strings.Join(failMessages, "\n")
 			require.Fail(ts.t, failMessage)
 		default:
-			time.Sleep(ts.installationCheckInterval)
+			time.Sleep(defaultCheckInterval)
 		}
 	}
+}
+
+func (ts *TestSuite) shouldLastFor(conditionalFunc func() bool, message string, timeout time.Duration) {
+	done := time.After(timeout)
+
+	for {
+		if !conditionalFunc() {
+			ts.logAndFail(message)
+		}
+
+		select {
+		case <-done:
+			if !conditionalFunc() {
+				ts.logAndFail(message)
+			}
+			return
+		default:
+			time.Sleep(defaultCheckInterval)
+		}
+	}
+}
+
+func (ts *TestSuite) logAndFail(message string) {
+	ts.t.Log(message)
+	ts.t.Fail()
 }
