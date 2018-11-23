@@ -207,13 +207,21 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 	}
 	defer c.queue.Done(key)
 
-	err := c.syncServiceBindingUsage(key.(string))
+	namespace, name, err := cache.SplitMetaNamespaceKey(key.(string))
+	if err != nil {
+		c.log.Errorf("Error processing %q (splitting meta namespace key failed): %v", key, err)
+		c.queue.Forget(key)
+		return true
+	}
+
+	retry := c.queue.NumRequeues(key)
+	usageStatus, err := c.syncServiceBindingUsage(namespace, name)
 	switch {
 	case err == nil:
 		c.queue.Forget(key)
 
-	case c.queue.NumRequeues(key) < c.maxRetires:
-		c.log.Debugf("Error processing %q (will retry - it's %d of %d): %v", key, c.queue.NumRequeues(key), c.maxRetires, err)
+	case retry < c.maxRetires:
+		c.log.Debugf("Error processing %q (will retry - it's %d of %d): %v", key, retry, c.maxRetires, err)
 		c.queue.AddRateLimited(key)
 
 	default: // err != nil and too many retries
@@ -221,57 +229,54 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 		c.queue.Forget(key)
 	}
 
+	// set ServiceBindingUsage status if ServiceBindingUsage and his status exist
+	if usageStatus != nil {
+		usageStatus.wrapMessageForFailed(fmt.Sprintf("Process error during %d attempts from %d", retry, c.maxRetires))
+
+		bindingUsage, _ := c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
+		condition := sbuStatus.NewUsageCondition(usageStatus.sbuType, usageStatus.condition, usageStatus.reason, usageStatus.message)
+		if err := c.updateStatus(bindingUsage, *condition); err != nil {
+			c.log.Errorf("Error processing %q while updating sbu status with condition %+v", key, condition)
+		}
+	}
+
 	return true
 }
 
-func (c *ServiceBindingUsageController) syncServiceBindingUsage(key string) error {
-	namespace, name, err := cache.SplitMetaNamespaceKey(key)
-	if err != nil {
-		return errors.Wrap(err, "while splitting meta namespace key")
-	}
-
+func (c *ServiceBindingUsageController) syncServiceBindingUsage(namespace string, name string) (*bindingUsageStatus, error) {
 	// holds the latest ServiceBindingUsage info from apiserver
 	bindingUsage, err := c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
+	bindingUsageStatus := newBindingUsageStatus()
 
 	switch {
 	case err == nil:
+		bindingUsageStatus.condition = sbuTypes.ConditionTrue
 	case apiErrors.IsNotFound(err):
 		// absence in store means watcher caught the deletion
-		c.log.Debugf("Starting deletion process of ServiceBindingUsage %q", key)
+		c.log.Debugf("Starting deletion process of ServiceBindingUsage %q", pretty.KeyItem(namespace, name))
 		if err := c.reconcileServiceBindingUsageDelete(namespace, name); err != nil {
 			// TODO(adding finalizer): add a status update in case of error
 			// in the same way as we have for `reconcileServiceBindingUsageAdd`
-			return errors.Wrapf(err, "while deleting ServiceBidingUsage %q", key)
+			return nil, errors.Wrapf(err, "while deleting ServiceBidingUsage %q", pretty.KeyItem(namespace, name))
 		}
-		c.log.Debugf("ServiceBindingUsage %q was successfully deleted", key)
-		return nil
+		c.log.Debugf("ServiceBindingUsage %q was successfully deleted", pretty.KeyItem(namespace, name))
+		return nil, nil
 	default:
-		return errors.Wrapf(err, "while getting ServiceBindingUsage %q", key)
+		return nil, errors.Wrap(err, "while getting ServiceBindingUsage")
 	}
 
 	c.log.Debugf("Starting reconcile ServiceBindingUsage add process of %s", pretty.ServiceBindingUsageName(bindingUsage))
-	defer c.log.Debugf("Reconcile ServiceBindingUsage add process of %s completed", key)
+	defer c.log.Debugf("Reconcile ServiceBindingUsage add process of %s completed", pretty.KeyItem(namespace, name))
 
 	if err := c.reconcileServiceBindingUsageAdd(bindingUsage); err != nil {
-		condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, err.Reason, err.Message)
-		if updateErr := c.updateStatus(bindingUsage, *condition); updateErr != nil {
-			return errors.Wrapf(updateErr, "while updating sbu status with condition %+v", condition)
-		}
-		return errors.Wrapf(err, "while processing %s", pretty.ServiceBindingUsageName(bindingUsage))
+		bindingUsageStatus.condition = sbuTypes.ConditionFalse
+		bindingUsageStatus.reason = err.Reason
+		bindingUsageStatus.message = err.Message
+
+		return bindingUsageStatus, errors.Wrapf(err, "while processing %s", pretty.ServiceBindingUsageName(bindingUsage))
 	}
 
-	// retrieves the latest ServiceBindingUsage info from apiserver
-	bindingUsage, err = c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
-	if err != nil {
-		return errors.Wrapf(err, "while getting ServiceBindingUsage %s", name)
-	}
-
-	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionTrue, "", "")
-	if err := c.updateStatus(bindingUsage, *condition); err != nil {
-		return errors.Wrapf(err, "while updating sbu status with condition %+v", condition)
-	}
-
-	return nil
+	return bindingUsageStatus, nil
 }
 
 func (c *ServiceBindingUsageController) reconcileServiceBindingUsageAdd(newUsage *sbuTypes.ServiceBindingUsage) *processBindingUsageError {
