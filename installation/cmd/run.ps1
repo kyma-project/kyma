@@ -11,12 +11,10 @@ $DOMAIN = "kyma.local"
 $MINIKUBE_EXTRA_ARGS = ""
 $CREATE_CR_EXTRA_ARGS = ""
 
-if ($KNATIVE -eq $false) {
+if ($KNATIVE -eq $true) {
     $MINIKUBE_EXTRA_ARGS = "${MINIKUBE_ARGS} -memory 10240 -disk_size 30g"
     $CREATE_CR_EXTRA_ARGS = "${CREATE_CR_EXTRA_ARGS} -crtpl_path ${CURRENT_DIR}/../resources/installer-cr-knative.yaml.tpl"
 }
-
-if ($SKIP_MINIKUBE_START -eq $false) {
 
 if ($SKIP_MINIKUBE_START -eq $false) {
     Invoke-Expression -Command "${SCRIPTS_DIR}\minikube.ps1 -vm_driver ${VM_DRIVER} -domain ${DOMAIN} ${MINIKUBE_ARGS}"
