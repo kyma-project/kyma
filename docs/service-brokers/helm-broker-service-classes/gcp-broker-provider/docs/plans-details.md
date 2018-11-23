@@ -36,20 +36,33 @@ Please note that you have to create a secret in every namespace where the GCP Br
 ### Installation
 
 In the Service Catalog view click **Google Cloud Platform Service Broker Provider**.
-Provisioning of this class adds GCP Service Broker classes to the Service Catalog.
+Provisioning of this class adds GCP Service Broker classes to the Service Catalog in a given namespace.
 
 ![GCP Broker Classes](assets/gcp-broker-classes.png)
 
 
-### Details
+## Details
 
 The service account key created by user is used to 
 generate service account keys used by brokers installed in different namespaces.
-The generate service account key has a **roles/servicebroker.operator** role and is 
+The generated service account key has a **roles/servicebroker.operator** role and is 
 used during provisioning/deprovisioning/binding/unbinding actions.
 
-
 ![](assets/gcp-broker-key-management.svg)
+
+### Provisioning
+
+Flow of the provisioning process is described by following diagram
+
+![GCP Broker Provisioning](assets/gcp-broker-provisioning.svg)
+
+
+### Deprovisioning
+
+Flow of the deprovisioning process is described by following diagram
+
+
+![GCP Broker Deprovisioning](assets/gcp-broker-deprovisioning.svg)
 
 ### Credentials
 
