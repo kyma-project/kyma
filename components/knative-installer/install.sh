@@ -12,7 +12,7 @@ sed 's/LoadBalancer/NodePort/' </serving.yaml \
 
 echo "Verifying Knative build and serving installation..."
 sleep 2
-until kubectl get -f /serving.yaml > /dev/null 2>&1
+until kubectl get -f knative-serving.yaml > /dev/null 2>&1
 do
     echo "Knative CRDs not yet synced, re-applying..."
     kubectl apply -f knative-serving.yaml
