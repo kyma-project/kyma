@@ -14,7 +14,6 @@ import (
 )
 
 const (
-	skipInstallationLabel     = "skip-installation"
 	installationSkippedStatus = "INSTALLATION_SKIPPED"
 )
 
@@ -104,17 +103,7 @@ func (r *remoteEnvironmentReconciler) manageInstallation(remoteEnv *v1alpha1.Rem
 }
 
 func shouldSkipInstallation(remoteEnv *v1alpha1.RemoteEnvironment) bool {
-	for key, val := range remoteEnv.Labels {
-		if key == skipInstallationLabel {
-			if val == "true" {
-				return true
-			}
-
-			return false
-		}
-	}
-
-	return false
+	return remoteEnv.Spec.SkipProvisioning == true
 }
 
 func (r *remoteEnvironmentReconciler) installRemoteEnvironment(remoteEnv *v1alpha1.RemoteEnvironment) (string, string, error) {

@@ -96,7 +96,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		managerClient := &mocks.RemoteEnvironmentManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
-			Run(setupREWithSkipInstallationLabel).Return(nil)
+			Run(setupREWhichIsNotProvisioned).Return(nil)
 		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(skippedChecker.checkStatus).Return(nil)
 
@@ -161,7 +161,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		managerClient := &mocks.RemoteEnvironmentManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
-			Run(setupREWithSkipInstallationLabel).Return(nil)
+			Run(setupREWhichIsNotProvisioned).Return(nil)
 		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(statusChecker.checkStatus).Return(nil)
 
@@ -383,11 +383,9 @@ func setupREInstance(args mock.Arguments) {
 	reInstance.Spec.AccessLabel = reName
 }
 
-func setupREWithSkipInstallationLabel(args mock.Arguments) {
+func setupREWhichIsNotProvisioned(args mock.Arguments) {
 	reInstance := getREFromArgs(args)
-	reInstance.Labels = map[string]string{
-		skipInstallationLabel: "true",
-	}
+	reInstance.Spec.SkipProvisioning = true
 }
 
 func setupREWithoutAccessLabel(args mock.Arguments) {
