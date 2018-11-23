@@ -356,7 +356,7 @@
   revision = "d65f4428c04f2d28f924a47d1d2177d0cbf45a16"
 
 [[projects]]
-  digest = "1:d856690e4a8588de76dda562c43a3db8eb4300bf18c0e15af579fd1efd6da5ff"
+  digest = "1:11db0d58ca8bd50bcea785710bbc8e4613e6762c6ebc743980af326bb617e43a"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -389,6 +389,7 @@
     "pkg/util/intstr",
     "pkg/util/json",
     "pkg/util/net",
+    "pkg/util/rand",
     "pkg/util/runtime",
     "pkg/util/sets",
     "pkg/util/validation",
@@ -574,15 +575,14 @@
     "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned",
     "github.com/stretchr/testify/require",
-    "k8s.io/api/apps/v1",
-    "k8s.io/api/core/v1",
-    "k8s.io/api/extensions/v1beta1",
-    "k8s.io/api/rbac/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/util/rand",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/rest",
     "k8s.io/helm/pkg/helm",
+    "k8s.io/helm/pkg/proto/hapi/release",
+    "k8s.io/helm/pkg/proto/hapi/services",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
