@@ -13,7 +13,7 @@ This guide shows you how to get the client certificate.
 
 ## Get the configuration URL with a token
 
-Get the configuration URL with a token which allows you to get Kyma CSR configuration and URLs in Kyma required to connect your external solution to a created Remote Environment.
+Get the configuration URL with a token which allows you to get Kyma CSR configuration and URLs in Kyma required to connect your external solution to a created Remote Environment. After successful request for token the CR status is updated with token details. Each token is valid for 5 minutes, after that time the CR is deleted.
 Follow this steps to get it using the CLI:
 
 - Create `CustomResource` of kind `TokenRequest`
