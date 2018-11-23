@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/minio/mocks"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification/minio/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

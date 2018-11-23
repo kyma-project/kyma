@@ -201,8 +201,15 @@ func TestServiceDetailsValidator_API(t *testing.T) {
 			Api: &API{
 				TargetUrl: "http://target.com",
 				Credentials: &Credentials{
-					Oauth: &Oauth{},
-					Basic: &BasicAuth{},
+					Basic: &BasicAuth{
+						Username: "username",
+						Password: "password",
+					},
+					Oauth: &Oauth{
+						URL:          "http://test.com/token",
+						ClientID:     "client",
+						ClientSecret: "secret",
+					},
 				},
 			},
 		}
