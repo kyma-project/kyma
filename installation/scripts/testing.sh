@@ -194,6 +194,9 @@ then
     exit 1
 fi
 
+monitoringTestErr=0
+loggingTestErr=0
+
 echo "----------------------------"
 echo "- Testing Kyma..."
 echo "----------------------------"
@@ -204,19 +207,15 @@ helm test core --timeout 600
 coreTestErr=$?
 
 # execute monitoring tests if 'monitoring' is installed
-helm list | grep -q monitoring
-if [ $? -eq 0 ]
-then
-echo "- Montitoring module is intalled. Running tests for same"
+if helm list | grep -q "monitoring"; then
+echo "- Montitoring module is installed. Running tests for same"
 helm test monitoring --timeout 600
 monitoringTestErr=$?
 fi
 
 # execute logging tests if 'logging' is installed
-helm list | grep -q logging
-if [ $? -eq 0 ]
-then
-echo "- Logging module is intalled. Running tests for same"
+if helm list | grep -q "logging"; then
+echo "- Logging module is installed. Running tests for same"
 helm test logging --timeout 600
 loggingTestErr=$?
 fi
