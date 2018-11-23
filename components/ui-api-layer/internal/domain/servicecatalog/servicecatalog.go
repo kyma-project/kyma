@@ -95,6 +95,19 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, asyncApiSp
 	}, nil
 }
 
+//func (r *Resolver) Enable() {
+//
+//}
+//func (r *Resolver) Disable() {
+//
+//}
+//func (r *Resolver) IsEnabled() bool {
+//
+//}
+//func (r *Resolver) Name() string {
+//
+//}
+
 func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.informerFactory.Start(stopCh)
 	r.informerFactory.WaitForCacheSync(stopCh)

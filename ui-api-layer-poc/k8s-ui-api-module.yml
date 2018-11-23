@@ -1,0 +1,4 @@
+apiVersion: uiapi.kyma-project.io/v1alpha1
+kind: Module
+metadata:
+  name: k8s

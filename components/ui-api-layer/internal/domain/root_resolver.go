@@ -2,6 +2,8 @@ package domain
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/generated/informers/externalversions"
 	"time"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/apicontroller"
@@ -17,16 +19,25 @@ import (
 )
 
 type RootResolver struct {
-	k8s       *k8s.Resolver
+	k8s       *k8s.PluggableResolver
 	kubeless  *kubeless.Resolver
 	sc        *servicecatalog.Resolver
 	re        *remoteenvironment.Resolver
 	content   *content.Resolver
 	ac        *apicontroller.Resolver
 	idpPreset *authentication.Resolver
+	modulesInformerFactory externalversions.SharedInformerFactory
 }
 
 func New(restConfig *rest.Config, contentCfg content.Config, reCfg remoteenvironment.Config, informerResyncPeriod time.Duration) (*RootResolver, error) {
+	// Prepare modules
+	modulesInformerFactory, err := module.NewInformerFactory(restConfig, informerResyncPeriod)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing Module Informer")
+	}
+	modulesInformer := modulesInformerFactory.Uiapi().V1alpha1().Modules().Informer()
+	makePluggable := module.MakePluggableFunc(modulesInformer)
+
 	contentContainer, err := content.New(contentCfg)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Content resolver")
@@ -42,10 +53,16 @@ func New(restConfig *rest.Config, contentCfg content.Config, reCfg remoteenviron
 		return nil, errors.Wrap(err, "while initializing RemoteEnvironment resolver")
 	}
 
+	// ----- PLUGGABLE START ----------------------------
+
 	k8sResolver, err := k8s.New(restConfig, reContainer.RELister, informerResyncPeriod, scContainer.ServiceBindingUsageLister, scContainer.ServiceBindingGetter)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
+
+	makePluggable(k8sResolver)
+
+	// ----- PLUGGABLE STOP ----------------------------
 
 	kubelessResolver, err := kubeless.New(restConfig, informerResyncPeriod)
 	if err != nil {
@@ -70,14 +87,21 @@ func New(restConfig *rest.Config, contentCfg content.Config, reCfg remoteenviron
 		content:   contentContainer.Resolver,
 		ac:        acResolver,
 		idpPreset: idpPresetResolver,
+		modulesInformerFactory: modulesInformerFactory,
 	}, nil
 }
 
 // WaitForCacheSync waits for caches to populate. This is blocking operation.
 func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
+	r.modulesInformerFactory.Start(stopCh)
+	r.modulesInformerFactory.WaitForCacheSync(stopCh)
+
+	// MODULES
+	r.k8s.CloseOnKillSignal(stopCh)
+
+	// OLD
 	r.re.WaitForCacheSync(stopCh)
 	r.sc.WaitForCacheSync(stopCh)
-	r.k8s.WaitForCacheSync(stopCh)
 	r.kubeless.WaitForCacheSync(stopCh)
 	r.ac.WaitForCacheSync(stopCh)
 	r.idpPreset.WaitForCacheSync(stopCh)
@@ -379,7 +403,7 @@ func (r *serviceInstanceResolver) ServiceBindingUsages(ctx context.Context, obj 
 // Service Binding
 
 type serviceBindingResolver struct {
-	k8s *k8s.Resolver
+	k8s *k8s.PluggableResolver
 }
 
 func (r *serviceBindingResolver) Secret(ctx context.Context, serviceBinding *gqlschema.ServiceBinding) (*gqlschema.Secret, error) {
@@ -413,7 +437,7 @@ func (r *reResolver) Status(ctx context.Context, obj *gqlschema.RemoteEnvironmen
 // Deployment
 
 type deploymentResolver struct {
-	k8s *k8s.Resolver
+	k8s *k8s.PluggableResolver
 }
 
 func (r *deploymentResolver) BoundServiceInstanceNames(ctx context.Context, deployment *gqlschema.Deployment) ([]string, error) {
