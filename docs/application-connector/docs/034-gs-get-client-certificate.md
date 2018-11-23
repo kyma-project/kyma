@@ -16,22 +16,33 @@ This guide shows you how to get the client certificate.
 Get the configuration URL with a token which allows you to get Kyma CSR configuration and URLs in Kyma required to connect your external solution to a created Remote Environment.
 Follow this steps to get it using the CLI:
 
-- Expose the Connector Service outside of Kubernetes using `kubectl port-forward`:
+- Create `CustomResource` of kind `TokenRequest`
   ```
-  kubectl -n=kyma-integration port-forward svc/connector-service-internal-api 8080:8080
+  cat <<EOF | kubectl apply -f -
+  apiVersion: connectorservice.kyma-project.io/v1alpha1
+  kind: TokenRequest
+  metadata:
+    name: test
+  EOF
   ```
 
-- Make a POST request to the `tokens` endpoint:
+- Give some time to the controller handling `TokenRequest` object and review status of previously created `CustomResource`:
   ```
-  curl -X POST http://localhost:8080/v1/remoteenvironments/{RE_NAME}/tokens
+  kubectl get tokenrequest.connectorservice.kyma-project.io test -o yaml'
   ```
 
 A successful call returns the following response:
   ```
-  {
-    "url":"{CONFIGURATION_URL_WITH_TOKEN}",
-    "token":"example-token-123"
-  }
+  apiVersion: connectorservice.kyma-project.io/v1alpha1
+  kind: TokenRequest
+  metadata:
+    name: test
+  status:
+    expireAfter: 2018-11-22T18:38:44Z
+    remoteEnvironment: test
+    state: OK
+    token: h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
+    url: https://connector-service.kyma.local/v1/remoteenvironments/test/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
   ```
 
 ## Get the CSR information and configuration details from Kyma
