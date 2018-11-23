@@ -214,15 +214,14 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 		return true
 	}
 
-	retry := c.maxRetires
+	retry := c.queue.NumRequeues(key)
 	usageStatus, err := c.syncServiceBindingUsage(namespace, name)
 	switch {
 	case err == nil:
 		c.queue.Forget(key)
 
-	case c.queue.NumRequeues(key) < c.maxRetires:
-		retry = c.queue.NumRequeues(key)
-		c.log.Debugf("Error processing %q (will retry - it's %d of %d): %v", key, c.queue.NumRequeues(key), c.maxRetires, err)
+	case retry < c.maxRetires:
+		c.log.Debugf("Error processing %q (will retry - it's %d of %d): %v", key, retry, c.maxRetires, err)
 		c.queue.AddRateLimited(key)
 
 	default: // err != nil and too many retries
