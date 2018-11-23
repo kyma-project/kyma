@@ -12,7 +12,7 @@ Go to the [Kyma project website](https://kyma-project.io/) to learn more about t
 
 ## Installation
 
-Install Kyma [locally](https://kyma-project.io/docs/root/kyma#getting-started-local-kyma-installation) and on a [cluster](https://kyma-project.io/docs/root/kyma#getting-started-cluster-kyma-installation).
+Install Kyma locally or on a cluster. See the [Installation guides](https://kyma-project.io/docs/root/kyma#installation-installation) for details.
 
 ## Usage
 
@@ -53,9 +53,9 @@ Every project runs differently. Follow instructions in the main `README.md` docu
 5. Create a branch and start to develop.
 
 Do not forget about creating unit and acceptance tests if needed. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. For the details concerning the acceptance tests, go to the corresponding directory inside the `tests` directory.
-Find the information on how to run changes on the cluster without a Docker image in the [Develop a service locally without using Docker](https://kyma-project.io/docs/latest/root/kyma#getting-started-develop-a-service-locally-without-using-docker) document.
+Find the information on how to run changes on the cluster without a Docker image in the [Develop a service locally without using Docker](https://kyma-project.io/docs/root/kyma#getting-started-develop-a-service-locally-without-using-docker) document.
 
->**NOTE:** For more details about testing, go to the [Testing Kyma](https://kyma-project.io/docs/latest/root/kyma#details-testing-kyma) document.
+>**NOTE:** For more details about testing, go to the [Testing Kyma](https://kyma-project.io/docs/root/kyma#details-testing-kyma) document.
 
 6. Test your changes.
 
