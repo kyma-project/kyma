@@ -3,6 +3,7 @@ package k8stests
 import (
 	"github.com/stretchr/testify/require"
 	v1core "k8s.io/api/core/v1"
+	"time"
 
 	"net/http"
 	"testing"
@@ -11,6 +12,8 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+const crPropagationWaitTime = 10
 
 func TestK8sResources(t *testing.T) {
 
@@ -53,6 +56,8 @@ func TestK8sResources(t *testing.T) {
 		resourceName := "re-" + dummyRE.Name + "-" + serviceId
 
 		expectedLabels := map[string]string{"re": dummyRE.Name, "serviceId": serviceId}
+
+		time.Sleep(crPropagationWaitTime * time.Second)
 
 		// tests
 		t.Run("should create k8s service", func(t *testing.T) {
@@ -142,6 +147,8 @@ func TestK8sResources(t *testing.T) {
 
 		expectedLabels := map[string]string{"re": dummyRE.Name, "serviceId": serviceId}
 
+		time.Sleep(crPropagationWaitTime * time.Second)
+
 		// tests
 		t.Run("should create k8s service", func(t *testing.T) {
 			k8sService, err := k8sResourcesClient.GetService(resourceName, v1.GetOptions{})
@@ -220,6 +227,8 @@ func TestK8sResources(t *testing.T) {
 
 		serviceId := postResponseData.ID
 		resourceName := "re-" + dummyRE.Name + "-" + serviceId
+
+		time.Sleep(crPropagationWaitTime * time.Second)
 
 		// tests
 		t.Run("should not create k8s service", func(t *testing.T) {
@@ -325,6 +334,8 @@ func TestK8sResources(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, statusCode)
 
+		time.Sleep(crPropagationWaitTime * time.Second)
+
 		// tests
 		t.Run("should preserve k8s service", func(t *testing.T) {
 			k8sService, err := k8sResourcesClient.GetService(resourceName, v1.GetOptions{})
@@ -425,6 +436,8 @@ func TestK8sResources(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, statusCode)
 
+		time.Sleep(crPropagationWaitTime * time.Second)
+
 		// tests
 		t.Run("should remove k8s service", func(t *testing.T) {
 			_, err := k8sResourcesClient.GetService(resourceName, v1.GetOptions{})
@@ -517,6 +530,8 @@ func TestK8sResources(t *testing.T) {
 		statusCode, err = metadataServiceClient.UpdateService(t, serviceId, updatedServiceDefinition)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, statusCode)
+
+		time.Sleep(crPropagationWaitTime * time.Second)
 
 		// tests
 		t.Run("should create k8s service", func(t *testing.T) {
@@ -619,6 +634,8 @@ func TestK8sResources(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, statusCode)
 
+		time.Sleep(crPropagationWaitTime * time.Second)
+
 		// tests
 		t.Run("should create k8s service", func(t *testing.T) {
 			k8sService, err := k8sResourcesClient.GetService(resourceName, v1.GetOptions{})
@@ -712,6 +729,8 @@ func TestK8sResources(t *testing.T) {
 		statusCode, err = metadataServiceClient.DeleteService(t, serviceId)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusNoContent, statusCode)
+
+		time.Sleep(crPropagationWaitTime * time.Second)
 
 		// tests
 		t.Run("should remove k8s service", func(t *testing.T) {
