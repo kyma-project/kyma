@@ -86,13 +86,13 @@
 /resources/core/charts/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `monitoring` subchart
-/resources/core/charts/monitoring/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+/resources/monitoring/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
 # The `kubeless` subchart
 /resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
 # The `logging` subchart
-/resources/core/charts/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+/resources/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
 # The `minio` subchart
 /resources/core/charts/minio/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
