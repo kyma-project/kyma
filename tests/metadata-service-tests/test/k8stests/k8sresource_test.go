@@ -13,6 +13,8 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const crPropagationWaitTime = 10
+
 func TestK8sResources(t *testing.T) {
 
 	config, err := testkit.ReadConfig()
@@ -55,8 +57,7 @@ func TestK8sResources(t *testing.T) {
 
 		expectedLabels := map[string]string{"re": dummyRE.Name, "serviceId": serviceId}
 
-		// wait for changes to propagate in the CR
-		time.Sleep(10 * time.Second)
+		time.Sleep(crPropagationWaitTime * time.Second)
 
 		// tests
 		t.Run("should create k8s service", func(t *testing.T) {
@@ -146,8 +147,7 @@ func TestK8sResources(t *testing.T) {
 
 		expectedLabels := map[string]string{"re": dummyRE.Name, "serviceId": serviceId}
 
-		// wait for changes to propagate in the CR
-		time.Sleep(10 * time.Second)
+		time.Sleep(crPropagationWaitTime * time.Second)
 
 		// tests
 		t.Run("should create k8s service", func(t *testing.T) {
@@ -228,8 +228,7 @@ func TestK8sResources(t *testing.T) {
 		serviceId := postResponseData.ID
 		resourceName := "re-" + dummyRE.Name + "-" + serviceId
 
-		// wait for changes to propagate in the CR
-		time.Sleep(10 * time.Second)
+		time.Sleep(crPropagationWaitTime * time.Second)
 
 		// tests
 		t.Run("should not create k8s service", func(t *testing.T) {
@@ -335,8 +334,7 @@ func TestK8sResources(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, statusCode)
 
-		// wait for changes to propagate in the CR
-		time.Sleep(10 * time.Second)
+		time.Sleep(crPropagationWaitTime * time.Second)
 
 		// tests
 		t.Run("should preserve k8s service", func(t *testing.T) {
@@ -438,8 +436,7 @@ func TestK8sResources(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, statusCode)
 
-		// wait for changes to propagate in the CR
-		time.Sleep(10 * time.Second)
+		time.Sleep(crPropagationWaitTime * time.Second)
 
 		// tests
 		t.Run("should remove k8s service", func(t *testing.T) {
@@ -534,8 +531,7 @@ func TestK8sResources(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, statusCode)
 
-		// wait for changes to propagate in the CR
-		time.Sleep(10 * time.Second)
+		time.Sleep(crPropagationWaitTime * time.Second)
 
 		// tests
 		t.Run("should create k8s service", func(t *testing.T) {
@@ -638,8 +634,7 @@ func TestK8sResources(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, statusCode)
 
-		// wait for changes to propagate in the CR
-		time.Sleep(10 * time.Second)
+		time.Sleep(crPropagationWaitTime * time.Second)
 
 		// tests
 		t.Run("should create k8s service", func(t *testing.T) {
@@ -735,8 +730,7 @@ func TestK8sResources(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, http.StatusNoContent, statusCode)
 
-		// wait for changes to propagate in the CR
-		time.Sleep(10 * time.Second)
+		time.Sleep(crPropagationWaitTime * time.Second)
 
 		// tests
 		t.Run("should remove k8s service", func(t *testing.T) {
