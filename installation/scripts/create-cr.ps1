@@ -1,7 +1,7 @@
 param (
     [string]$URL = "",
     [string]$OUTPUT = "",
-    [string]$VERSION = "0.0.1"
+    [string]$VERSION = "0.0.1",
     [string]$CRTPL_PATH = ""
 )
 
