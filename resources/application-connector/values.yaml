@@ -30,7 +30,7 @@ global:
     version: aab48c35
   metadata_service_tests:
     dir: develop/
-    version: aab48c35
+    version: 03298dea
   remote_environment_controller:
     dir: develop/
     version: 4b19d36e
