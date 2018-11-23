@@ -5,7 +5,7 @@ type: Details
 
 ## Service description
 
-The `bigtable` service provides the following plan names and descriptions:
+The service provides the following plan names and descriptions:
 
 | Plan Name | Description |
 |-----------|-------------|
@@ -13,7 +13,7 @@ The `bigtable` service provides the following plan names and descriptions:
 
 ## Provisioning parameters
 
-Provisioning an instance creates a new Cloud Bigtable cluster and instance. Binding grants the provided service account the access to the Cloud Bigtable instance. Optionally, a new service account can be created with an access to the Cloud Bigtable instance. These are the input parameters to create a Bigtable instance:
+Provisioning an instance creates a new Cloud Bigtable cluster and instance. These are the input parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -57,7 +57,7 @@ The update parameters are the same as the provisioning parameters.
 
 ## Binding parameters:
 
-These are the binding parameters:
+Binding grants the provided service account the access to the Cloud Bigtable instance. Optionally, a new service account can be created with an access to the Cloud Bigtable instance. These are the binding parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
