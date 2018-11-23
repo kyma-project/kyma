@@ -209,6 +209,7 @@ if [ $? -eq 0 ]
 then
 echo "- Montitoring module is intalled. Running tests for same"
 helm test monitoring --timeout 600
+monitoringTestErr=$?
 fi
 
 # execute logging tests if 'logging' is installed
