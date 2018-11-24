@@ -1,6 +1,8 @@
 param (
     [string]$VM_DRIVER = "hyperv",
-    [string]$DOMAIN = "kyma.local"
+    [string]$DOMAIN = "kyma.local",
+    [string]$DISK_SIZE = "20g",
+    [string]$MEMORY = "8196"
 )
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
@@ -40,15 +42,16 @@ function InitializeMinikubeConfig () {
 
 function StartMinikube() {
     $cmd = "minikube start"`
-        + " --memory 8192"`
+        + " --memory ${MEMORY}"`
         + " --cpus 4"`
         + " --extra-config=apiserver.Authorization.Mode=RBAC"`
         + " --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList='.*'"`
         + " --extra-config=controller-manager.ClusterSigningCertFile='/var/lib/localkube/certs/ca.crt'"`
         + " --extra-config=controller-manager.ClusterSigningKeyFile='/var/lib/localkube/certs/ca.key'"`
-        + " --extra-config=apiserver.Admission.PluginNames='LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota'"`
+        + " --extra-config=apiserver.admission-control='LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota'"`
         + " --kubernetes-version=v${KUBERNETES_VERSION}"`
         + " --feature-gates='MountPropagation=false'"`
+        + " --disk-size=${DISK_SIZE}"`
         + " --vm-driver=${VM_DRIVER}"`
         + " -b=localkube"
 
