@@ -13,7 +13,7 @@ This guide shows you how to get the client certificate.
 
 ## Get the configuration URL with a token
 
-To get the configuration URL which allows you to fetch the required configuration details, create a TokenRequest custom resource (CR). The controller which handles this CR kind adds the `status` section to the created CR. The `status` section contains the required configuration details.
+To get the configuration URL which allows you to fetch the required configuration details, create a TokenRequest custom resource (CR). The controller which handles this CR kind adds the **status** section to the created CR. The **status** section contains the required configuration details.
 
 - Create a TokenRequest CR. Run: 
   ```
@@ -25,11 +25,11 @@ To get the configuration URL which allows you to fetch the required configuratio
   EOF
   ```
 
-- Fetch the TokenRequest CR you created to get the configuration details from the `status` section. Run: 
+- Fetch the TokenRequest CR you created to get the configuration details from the **status** section. Run: 
   ```
-  kubectl get tokenrequest.connectorservice.kyma-project.io test -o yaml'
+  kubectl get tokenrequest.connectorservice.kyma-project.io test -o yaml
   ```
-  >**NOTE:** If the response doesn't contain the `status` section, wait for a few moments and fetch the CR again.
+  >**NOTE:** If the response doesn't contain the **status** section, wait for a few moments and fetch the CR again.
 
 A successful call returns the following response:
   ```
