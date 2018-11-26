@@ -145,8 +145,8 @@
 # The `istio-kyma-patch` chart
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @sjanota
 
-# The `knative-installer` chart
-/resources/knative-installer/ @piotrmsc @kubadz @sjanota
+# The `knative` chart
+/resources/knative/ @piotrmsc @kubadz @sjanota @Abd4llA @montaro @marcobebway @radufa
 
 # The `jaeger` charts
 /resources/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
