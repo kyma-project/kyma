@@ -8,7 +8,7 @@ import (
 func TestRemoteEnvironmentController(t *testing.T) {
 	testSuite := testkit.NewTestSuite(t)
 
-	t.Run("Remote Environment Controller full installation test", func(t *testing.T) {
+	t.Run("Remote Environment Controller RE lifecycle test", func(t *testing.T) {
 		t.Log("Creating Remote Environment without access label")
 		testSuite.CreateRemoteEnvironment("", false)
 
@@ -16,7 +16,7 @@ func TestRemoteEnvironmentController(t *testing.T) {
 		testSuite.WaitForReleaseToInstall()
 
 		t.Log("Checking if k8s resource deployed")
-		testSuite.WaitForK8sResourcesToDeploy()
+		testSuite.CheckK8sResourcesDeployed()
 
 		t.Log("Checking access label")
 		testSuite.CheckAccessLabel()
@@ -28,7 +28,7 @@ func TestRemoteEnvironmentController(t *testing.T) {
 		testSuite.WaitForReleaseToUninstall()
 
 		t.Log("Checking if k8s resources removed")
-		testSuite.WaitForK8sResourceToDelete()
+		testSuite.CheckK8sResourceRemoved()
 	})
 
 	testSuite.CleanUp()
@@ -37,7 +37,7 @@ func TestRemoteEnvironmentController(t *testing.T) {
 func TestRemoteEnvironmentController_SkipProvisioning(t *testing.T) {
 	testSuite := testkit.NewTestSuite(t)
 
-	t.Run("Remote Environment Controller test", func(t *testing.T) {
+	t.Run("Remote Environment Controller skip provisioning test", func(t *testing.T) {
 		t.Log("Creating Remote Environment without access label")
 		testSuite.CreateRemoteEnvironment("", true)
 

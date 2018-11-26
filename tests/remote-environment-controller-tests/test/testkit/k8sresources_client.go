@@ -8,10 +8,6 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
-const (
-	skipInstallationLabel = "skip-installation"
-)
-
 type K8sResourcesClient interface {
 	GetDeployment(name string, options v1.GetOptions) (interface{}, error)
 	GetService(name string, options v1.GetOptions) (interface{}, error)

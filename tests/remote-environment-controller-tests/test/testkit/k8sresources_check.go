@@ -21,13 +21,6 @@ type k8sResource struct {
 	getFunction func(string, v1.GetOptions) (interface{}, error)
 }
 
-func (r k8sResource) toConditionFunction(checkFunc func(interface{}, error) func() bool) conditionFunction {
-	return conditionFunction{
-		condition:   checkFunc(r.getFunction(r.name, v1.GetOptions{})),
-		failMessage: fmt.Sprintf("Timeout waiting for %s %s", r.kind, r.name),
-	}
-}
-
 func newResource(name string, kind string, getFunc func(string, v1.GetOptions) (interface{}, error)) k8sResource {
 	return k8sResource{
 		name:        name,
@@ -61,12 +54,10 @@ func NewK8sChecker(client K8sResourcesClient, reName string) *K8sResourceChecker
 	}
 }
 
-func (c *K8sResourceChecker) getResourceCheckFunctions(checkFunc func(resource interface{}, err error) func() bool) []conditionFunction {
-	condFuncs := make([]conditionFunction, len(c.resources))
-
-	for i, r := range c.resources {
-		condFuncs[i] = r.toConditionFunction(checkFunc)
+func (c *K8sResourceChecker) checkK8sResources(checkFunc func(resource interface{}, err error, failMessage string)) {
+	for _, r := range c.resources {
+		failMessage := fmt.Sprintf("%s resource %s not handled properly", r.kind, r.name)
+		resource, err := r.getFunction(r.name, v1.GetOptions{})
+		checkFunc(resource, err, failMessage)
 	}
-
-	return condFuncs
 }

@@ -14,8 +14,10 @@ import (
 const (
 	testReName           = "re-ctrl-test-%s"
 	defaultCheckInterval = 2 * time.Second
-	installationTimeout  = 180 * time.Second // TODO - better names
-	provisioningTimeout  = 10 * time.Second
+	// TODO - consider extracting to chart
+	installationTimeout = 180 * time.Second // TODO - better names
+	provisioningTimeout = 10 * time.Second
+	waitBeforeCheck     = 2 * time.Second
 )
 
 type TestSuite struct {
@@ -85,22 +87,18 @@ func (ts *TestSuite) WaitForReleaseToUninstall() {
 }
 
 func (ts *TestSuite) EnsureReleaseNotInstalling() {
-	//msg := fmt.Sprintf("Timeout waiting for %s release to uninstall", ts.remoteEnvironment)
-	ts.shouldLastFor(ts.helmReleaseNotExist, "", provisioningTimeout)
+	msg := fmt.Sprintf("Release for %s Remote Environment installing when shouldn't", ts.remoteEnvironment)
+	ts.shouldLastFor(ts.helmReleaseNotExist, msg, provisioningTimeout)
 }
 
-func (ts *TestSuite) WaitForK8sResourcesToDeploy() {
-	ts.waitForFunctions(
-		ts.k8sChecker.getResourceCheckFunctions(checkResourceDeployed),
-		installationTimeout,
-	)
+func (ts *TestSuite) CheckK8sResourcesDeployed() {
+	time.Sleep(waitBeforeCheck)
+	ts.k8sChecker.checkK8sResources(ts.checkResourceDeployed)
 }
 
-func (ts *TestSuite) WaitForK8sResourceToDelete() {
-	ts.waitForFunctions(
-		ts.k8sChecker.getResourceCheckFunctions(checkResourceRemoved),
-		installationTimeout,
-	)
+func (ts *TestSuite) CheckK8sResourceRemoved() {
+	time.Sleep(waitBeforeCheck)
+	ts.k8sChecker.checkK8sResources(ts.checkResourceRemoved)
 }
 
 func (ts *TestSuite) helmReleaseInstalled() bool {
@@ -113,14 +111,11 @@ func (ts *TestSuite) helmReleaseNotExist() bool {
 	return err == nil && exists == false
 }
 
-func checkResourceDeployed(resource interface{}, err error) func() bool {
-	return func() bool {
-		return err == nil && resource != nil
-	}
+func (ts *TestSuite) checkResourceDeployed(resource interface{}, err error, failMessage string) {
+	require.NoError(ts.t, err, failMessage)
 }
 
-func checkResourceRemoved(_ interface{}, err error) func() bool {
-	return func() bool {
-		return err != nil && k8serrors.IsNotFound(err)
-	}
+func (ts *TestSuite) checkResourceRemoved(_ interface{}, err error, failMessage string) {
+	require.Error(ts.t, err, failMessage)
+	require.True(ts.t, k8serrors.IsNotFound(err), failMessage)
 }
