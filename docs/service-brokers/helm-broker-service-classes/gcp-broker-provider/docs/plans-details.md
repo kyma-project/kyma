@@ -5,7 +5,7 @@ type: Details
 
 ## Service description
 
-This service is named `gcp-broker-provider` with the following plan names and descriptions:
+The `gcp-broker-provider` service provides the following plan names and descriptions:
 
 | Plan Name | Description |
 |-----------|-------------|
