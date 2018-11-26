@@ -13,7 +13,7 @@ spec:
     - name: "istio"
       namespace: "istio-system"
     - name: "knative"
-      namespace: "istio-system"
+      namespace: "istio-system" # Namespace is required so its better to pick existing one
     - name: "istio-kyma-patch"
       namespace: "istio-system"
     - name: "prometheus-operator"
