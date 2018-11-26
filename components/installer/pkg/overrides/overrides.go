@@ -4,10 +4,12 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+//OverrideData exposes methods to fetch release-specific overrides
 type OverrideData interface {
 	ForRelease(releaseName string) (string, error)
 }
 
+//Provider implements storage for all overrides
 type Provider struct {
 	common       Map
 	components   map[string]Map
