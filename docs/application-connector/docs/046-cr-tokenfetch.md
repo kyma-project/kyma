@@ -11,7 +11,7 @@ kubectl get crd tokenrequests.connectorservice.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample resource in which the `TokenRequest` requests for the token for `test` Remote Environment:
+This is a sample custom resource (CR) which allows to get the configuration required to connect an external solution with a `test` Kyma Remote Environment.
 
 ```
 apiVersion: connectorservice.kyma-project.io/v1alpha1
@@ -24,14 +24,14 @@ metadata:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR and the Remote Environment to request token for. |
 
+
 ## Additional information
 
-When you fetch an existing `TokenRequest` CR, the system adds the **status** section which describes the status of the request. This table lists the fields of the **status** section.
+When you fetch an existing TokenRequest CR, the system adds the **status** section which describes the status of the request and lists the configuration details. This table lists the fields of the **status** section.
 
 | Field   |  Description |
 |:----------:|:-------------:|
