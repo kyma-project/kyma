@@ -5,8 +5,6 @@ import (
 )
 
 type OverrideData interface {
-	Common() Map
-	ForComponent(componentName string) Map
 	ForRelease(releaseName string) (string, error)
 }
 
@@ -16,37 +14,14 @@ type Provider struct {
 	configReader reader
 }
 
-//Common returns overrides common for all components
-func (o *Provider) Common() Map {
-	res := o.common
-
-	if res == nil {
-		return Map{}
-	}
-
-	return res
-}
-
-//ForComponent returns overrides defined only for specified component
-func (o *Provider) ForComponent(componentName string) Map {
-
-	res := o.components[componentName]
-
-	if res == nil {
-		return Map{}
-	}
-
-	return res
-}
-
 //ForRelease returns overrides for release
 func (o *Provider) ForRelease(releaseName string) (string, error) {
 
 	refreshStore(o)
 	allOverrides := Map{}
 
-	MergeMaps(allOverrides, o.Common())
-	MergeMaps(allOverrides, o.ForComponent(releaseName))
+	MergeMaps(allOverrides, o.common)
+	MergeMaps(allOverrides, o.components[releaseName])
 
 	return ToYaml(allOverrides)
 }
