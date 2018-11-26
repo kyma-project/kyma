@@ -19,7 +19,7 @@ type Provider struct {
 //ForRelease returns overrides for release
 func (o *Provider) ForRelease(releaseName string) (string, error) {
 
-	refreshStore(o)
+	o.refreshStore()
 	allOverrides := Map{}
 
 	MergeMaps(allOverrides, o.common)
@@ -42,14 +42,14 @@ func New(client *kubernetes.Clientset) OverrideData {
 	return &res
 }
 
-func refreshStore(p *Provider) error {
+func (o *Provider) refreshStore() error {
 
 	versionsMap, err := versionOverrides()
 	if err != nil {
 		return err
 	}
 
-	commonOverridesData, err := p.configReader.readCommonOverrides()
+	commonOverridesData, err := o.configReader.readCommonOverrides()
 	if err != nil {
 		return err
 	}
@@ -59,15 +59,15 @@ func refreshStore(p *Provider) error {
 	MergeMaps(commonOverridesMap, versionsMap)
 	MergeMaps(commonOverridesMap, commonOverrides)
 
-	componentsOverridesData, err := p.configReader.readComponentOverrides()
+	componentsOverridesData, err := o.configReader.readComponentOverrides()
 	if err != nil {
 		return err
 	}
 
 	componentsMap := unflattenComponentOverrides(joinComponentOverrides(componentsOverridesData...))
 
-	p.common = commonOverridesMap
-	p.components = componentsMap
+	o.common = commonOverridesMap
+	o.components = componentsMap
 
 	return nil
 }
