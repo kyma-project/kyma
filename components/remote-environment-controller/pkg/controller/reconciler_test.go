@@ -85,7 +85,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		// given
 		skippedChecker := reChecker{
 			t:                   t,
-			expectedStatus:      installationSkippedStatus,
+			expectedStatus:      provisioningSkippedStatus,
 			expectedDescription: "Installation will not be performed",
 		}
 
