@@ -11,7 +11,7 @@ The `gcp-broker-provider` service provides the following plan names and descript
 |-----------|-------------|
 | `Default` | Installs the Google Cloud Platform (GCP) Service Broker in a default configuration. |
 
->**Note:** There can be only one instance of the GCP Service Broker Provider in every namespace.
+>**NOTE:** You can provision only one instance of the GCP Service Broker Provider in each Namespace.
 
 ## Provision
 
