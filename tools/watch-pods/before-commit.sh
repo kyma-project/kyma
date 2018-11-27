@@ -33,7 +33,3 @@ golint -set_exit_status ./internal/...
 echo -e "${GREEN}Run gofmt ${NC}"
 gofmt -l -w main.go
 gofmt -l -w ./internal/
-
-echo -e "${GREEN}Build image${NC}"
-docker build -t watch-pods:latest .
-

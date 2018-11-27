@@ -53,21 +53,8 @@ podTemplate(label: label,
                             }
                         }
 
-                        stage("install dependencies $application") {
-                            execute("make resolve", workDir, componentDir)
-                        }
-
-                        stage("code quality $application") {
-                            execute("make validate", workDir, componentDir)
-                        }
-
-                        stage("build $application") {
-                            execute("make build", workDir, componentDir)
-                        }
-
-                        stage("test $application") {
-                            execute("make test-report", workDir, componentDir)
-                            junit '**/unit-tests.xml'
+                        stage("build and test $application") {
+                            execute("./before-commit.sh ci", workDir, componentDir)
                         }
 
                         stage("build image $application") {
