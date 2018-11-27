@@ -14,6 +14,17 @@ echo "GOPATH:" + $GOPATH
 echo -e "${NC}"
 
 ##
+# DEP ENSURE
+##
+dep ensure -v --vendor-only
+ensureResult=$?
+if [ ${ensureResult} != 0 ]; then
+	echo -e "${RED}✗ dep ensure -v --vendor-only${NC}\n$ensureResult${NC}"
+	exit 1
+else echo -e "${GREEN}√ dep ensure -v --vendor-only${NC}"
+fi
+
+##
 # GO BUILD
 ##
 buildEnv=""
@@ -59,6 +70,7 @@ goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "/vendor")
 ##
 # GO IMPORTS & FMT
 ##
+dep ensure -add golang.org/x/tools/cmd/goimports
 go build -o goimports-vendored ./vendor/golang.org/x/tools/cmd/goimports
 buildGoImportResult=$?
 if [ ${buildGoImportResult} != 0 ]; then
