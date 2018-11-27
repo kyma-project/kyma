@@ -188,7 +188,7 @@ func (r *repository) getRemoteEnvironment(remoteEnvironment string) (*v1alpha1.R
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			message := fmt.Sprintf("Remote Environment %s not found", remoteEnvironment)
-			return nil, apperrors.Internal(message)
+			return nil, apperrors.NotFound(message)
 		}
 
 		message := fmt.Sprintf("Getting Remote Environment %s failed, %s", remoteEnvironment, err.Error())
