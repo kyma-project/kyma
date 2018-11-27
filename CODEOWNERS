@@ -263,6 +263,9 @@
 # The etcd-tls-setup directory
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
 
+# The gcp-broker-provider directory
+/tools/gcp-broker-provider/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
+
 # The changelog-generator directory
 /tools/changelog-generator/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
