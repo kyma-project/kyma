@@ -80,11 +80,6 @@ func TestApiMetadata(t *testing.T) {
 		Spec:      testkit.SwaggerApiSpec,
 	}
 
-	invalidSpecUrlAPI := &testkit.API{
-		TargetUrl:        "http://service.com",
-		SpecificationUrl: "http://invalid-url-wit-spec.kyma.project.io/invalid",
-	}
-
 	t.Run("registration API", func(t *testing.T) {
 		t.Run("should register a service with OAuth credentials (with API, Events catalog, Documentation)", func(t *testing.T) {
 			// when
@@ -309,17 +304,6 @@ func TestApiMetadata(t *testing.T) {
 			initialServiceDefinition.Labels = map[string]string{}
 
 			require.Equal(t, http.StatusNoContent, statusCode)
-		})
-
-		t.Run("should return 502 when failed to fetch API spec", func(t *testing.T) {
-			// when
-			initialServiceDefinition := prepareServiceDetails("service-identifier-7", map[string]string{"connected-app": "dummy-re"}).WithAPI(invalidSpecUrlAPI)
-
-			statusCode, _, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
-			require.NoError(t, err)
-
-			// then
-			require.Equal(t, http.StatusBadGateway, statusCode)
 		})
 
 		t.Run("should update service with OAuth credentials (with API, Events catalog, Documentation)", func(t *testing.T) {
