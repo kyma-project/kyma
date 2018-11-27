@@ -53,3 +53,13 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.services.entries.targetUrl** |    **NO**   | Specifies the URL of a given API. This field is required for the API entry type. Parameter provided by the Metadata Service, do not edit. |
 | **spec.services.entries.oauthUrl** |    **NO**   | Specifies the URL used to authorize with a given API. This field is required for the API entry type. Parameter provided by the Metadata Service, do not edit. |
 | **spec.services.entries.credentialsSecretName** |    **NO**   | Specifies the name of the Secret which allows you to call a given API. This field is required if the **spec.services.entries.oauthUrl** is specified. Parameter provided by the Metadata Service, do not edit. |
+
+## Additional information
+
+When you fetch an existing RemoteEnvironment CR, the system adds the **status** section which describes the status of the RE installation. This table lists the fields of the **status** section.
+
+| Field   |  Description |
+|:----------:|:-------------:|
+| **status.installationStatus** | Describes the status of the RE installation. |
+| **status.installationStatus.description** | Provides a longer description of the installation status. |
+| **status.installationStatus.status** | RE installation status. This field can have one of two values: DEPLOYED or FAILED. |
