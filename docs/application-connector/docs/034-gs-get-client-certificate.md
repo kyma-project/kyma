@@ -52,7 +52,7 @@ Use the link you got in the previous step to fetch the CSR information and confi
 ```
 curl {CONFIGURATION_URL_WITH_TOKEN}
 ```
->**NOTE:** The URL you call in this step contains a token that is valid for a single call. If you need to get the configuration details once again, generate a new configuration URL with a valid token and call it again. You get a code `403` error if you call the same configuration URL more than once.
+>**NOTE:** The URL you call in this step contains a token that is valid for 5 minutes or for a single call. You get a code `403` error if you call the same configuration URL more than once, or if you call an URL with an expired token.
 
 A successful call returns the following response:
 ```
