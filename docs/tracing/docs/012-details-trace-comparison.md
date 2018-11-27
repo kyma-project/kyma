@@ -1,5 +1,5 @@
 ---
-title: Trace Comparison
+title: Trace comparison
 type: Details
 ---
 
