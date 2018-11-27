@@ -1,4 +1,4 @@
-APP_NAME = "etcd-backup"
+APP_NAME = etcd-backup
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 binary=$(APP_NAME)
