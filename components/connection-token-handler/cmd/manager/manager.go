@@ -44,7 +44,7 @@ func main() {
 
 	log.Info("setting up scheme")
 	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "unable add APIs to scheme")
+		log.Error(err, "unable to add APIs to scheme")
 		os.Exit(1)
 	}
 
