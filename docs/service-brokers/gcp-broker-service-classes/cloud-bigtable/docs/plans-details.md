@@ -53,11 +53,11 @@ These are the **Tables** properties:
 | **initialSplits.key** | `string` |  Row key to use as an initial tablet boundary. | NO | - |
 
 
-## Update parameters:
+## Update parameters
 
 The update parameters are the same as the provisioning parameters.
 
-## Binding parameters:
+## Binding parameters
 
 Binding grants the provided service account access to the Cloud Bigtable instance. Optionally, a new service account can be created with an access to the Cloud Bigtable instance. These are the binding parameters:
 

@@ -108,11 +108,11 @@ These are the **IpConfiguration** properties:
 | **ipv4Enabled** | `boolean` | Whether the instance should be assigned an IP address or not. | NO | - |
 | **requireSsl** | `boolean` | Indicates whether SSL connections over IP should be enforced or not. | NO | - |
 
-## Update parameters:
+## Update parameters
 
 The update parameters are the same as the provisioning parameters.
 
-## Binding parameters:
+## Binding parameters
 
 Binding grants one of the available IAM roles on the Cloud SQL instance to the specified service account. Optionally, a new service account can be created and given access to the MySQL instance. These are the binding parameters:
 

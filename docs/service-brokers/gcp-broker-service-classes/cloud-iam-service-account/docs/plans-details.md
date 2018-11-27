@@ -20,7 +20,7 @@ Provisioning an instance creates a new Cloud IAM Service Account. These are the 
 | **accountId** | `string` | A user-specified ID, which is the unique name of a GCP Service Account. Must start with a lower case letter, followed by lower case alphanumeric characters separated by hyphens. Must be 6-30 characters long. | YES | - |
 | **displayName** | `string` | Optionally add a descriptive name of the Service Account. The maximal length is 100. | NO | - |
 
-## Update parameters:
+## Update parameters
 
 The update parameters are the same as the provisioning parameters.
 

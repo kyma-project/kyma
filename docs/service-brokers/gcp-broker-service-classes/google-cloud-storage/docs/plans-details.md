@@ -70,11 +70,11 @@ These are the properties of the **Lifecycle** parameter:
 | **rule.condition.numNewerVersions** | `integer` | Relevant only for versioned objects. If the value is `N`, this condition is satisfied when there are at least N versions, including the live version, newer than this version of the object. | NO | - |
 
 
-## Update parameters:
+## Update parameters
 
 The update parameters are the same as the provisioning parameters.
 
-## Binding parameters:
+## Binding parameters
 
 Binding grants the provided service account access to the Cloud Storage Bucket. Optionally, a new service account can be created and given access to the Cloud Storage Bucket. These are the binding parameters:
 

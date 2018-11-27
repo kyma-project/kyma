@@ -25,11 +25,11 @@ Provisioning an instance creates a new BigQuery dataset. The provisioning parame
 | **location** | `string` | The geographic location where the BigQuery dataset resides. The value can be either `US` or `EU`. | NO | `US` |
 
 
-## Update parameters:
+## Update parameters
 
 The update parameters are the same as the provisioning parameters.
 
-## Binding parameters:
+## Binding parameters
 
 Binding to an instance grants the provided service account the access to the dataset or project. Optionally, a new service account can be created and given access to the Cloud Spanner instance. These are the binding parameters:
 

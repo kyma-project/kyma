@@ -19,11 +19,11 @@ Provisioning an instance creates a new Pub/Sub topic. These are the input parame
 |----------------|------|-------------|----------|---------------|
 | **topicId** | `string` | A user-specified Pub/Sub topic ID. Must be 3-255 characters long, start with an alphanumeric character, and contain only the following characters: letters, numbers, dashes, periods, underscores, tildes, percents or plus signs. Cannot start with `goog`. | YES | - |
 
-## Update parameters:
+## Update parameters
 
 The update parameters are the same as the provisioning parameters.
 
-## Binding parameters:
+## Binding parameters
 
 Binding grants the provided service account access to the Pub/Sub topic. Optionally, a new service account can be created and given access to the Pub/Sub topic. These are the binding parameters:
 

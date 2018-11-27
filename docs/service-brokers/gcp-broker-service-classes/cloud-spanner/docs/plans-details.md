@@ -23,11 +23,11 @@ Provisioning an instance creates a new Cloud Spanner instance. These are the inp
 | **labels** | `object` | To organize your project, add arbitrary labels as key/value pairs to Cloud Spanner. Use labels to indicate different elements, such as environments, services, or teams. | NO | - |
 | **nodeCount** | `integer` | Number of Cloud Spanner Nodes. Add Nodes to increase data throughput and queries per second (QPS). Affects billing. Must contain minimum 1 Node. | YES | `1` |
 
-## Update parameters:
+## Update parameters
 
 The update parameters are the same as the provisioning parameters.
 
-## Binding parameters:
+## Binding parameters
 
 Binding to an instance grants the provided service account access to the Cloud Spanner instance. Optionally, a new service account can be created and given access to the Cloud Spanner instance. These are the binding parameters:
 
