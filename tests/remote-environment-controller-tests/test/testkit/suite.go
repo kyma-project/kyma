@@ -14,8 +14,8 @@ import (
 const (
 	testReName               = "re-ctrl-test-%s"
 	defaultCheckInterval     = 2 * time.Second
-	provisioningTimeout      = 180 * time.Second // TODO - consider extracting to chart
-	provisioningStartTimeout = 10 * time.Second
+	installationTimeout      = 180 * time.Second
+	installationStartTimeout = 10 * time.Second
 	waitBeforeCheck          = 2 * time.Second
 )
 
@@ -77,17 +77,17 @@ func (ts *TestSuite) CleanUp() {
 
 func (ts *TestSuite) WaitForReleaseToInstall() {
 	msg := fmt.Sprintf("Timeout waiting for %s release installation", ts.remoteEnvironment)
-	ts.waitForFunction(ts.helmReleaseInstalled, msg, provisioningTimeout)
+	ts.waitForFunction(ts.helmReleaseInstalled, msg, installationTimeout)
 }
 
 func (ts *TestSuite) WaitForReleaseToUninstall() {
 	msg := fmt.Sprintf("Timeout waiting for %s release to uninstall", ts.remoteEnvironment)
-	ts.waitForFunction(ts.helmReleaseNotExist, msg, provisioningTimeout)
+	ts.waitForFunction(ts.helmReleaseNotExist, msg, installationTimeout)
 }
 
 func (ts *TestSuite) EnsureReleaseNotInstalling() {
 	msg := fmt.Sprintf("Release for %s Remote Environment installing when shouldn't", ts.remoteEnvironment)
-	ts.shouldLastFor(ts.helmReleaseNotExist, msg, provisioningStartTimeout)
+	ts.shouldLastFor(ts.helmReleaseNotExist, msg, installationStartTimeout)
 }
 
 func (ts *TestSuite) CheckK8sResourcesDeployed() {

@@ -85,7 +85,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		// given
 		skippedChecker := reChecker{
 			t:                   t,
-			expectedStatus:      provisioningSkippedStatus,
+			expectedStatus:      installationSkippedStatus,
 			expectedDescription: "Installation will not be performed",
 		}
 
@@ -96,7 +96,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		managerClient := &mocks.RemoteEnvironmentManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
-			Run(setupREWhichIsNotProvisioned).Return(nil)
+			Run(setupREWhichIsNotInstalled).Return(nil)
 		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(skippedChecker.checkStatus).Return(nil)
 
@@ -161,7 +161,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 		managerClient := &mocks.RemoteEnvironmentManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
-			Run(setupREWhichIsNotProvisioned).Return(nil)
+			Run(setupREWhichIsNotInstalled).Return(nil)
 		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(statusChecker.checkStatus).Return(nil)
 
@@ -383,9 +383,9 @@ func setupREInstance(args mock.Arguments) {
 	reInstance.Spec.AccessLabel = reName
 }
 
-func setupREWhichIsNotProvisioned(args mock.Arguments) {
+func setupREWhichIsNotInstalled(args mock.Arguments) {
 	reInstance := getREFromArgs(args)
-	reInstance.Spec.SkipProvisioning = true
+	reInstance.Spec.SkipInstallation = true
 }
 
 func setupREWithoutAccessLabel(args mock.Arguments) {

@@ -49,8 +49,6 @@
   name = "k8s.io/kubernetes"
   branch = "release-1.10"
 
-# TODO - change after merging
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  source = "github.com/Szymongib/kyma"
-  branch = "skip-re-installation"
+  revision = "4e1170ed9101dcbb98d450278a86c6ceecc1cb62"

@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	provisioningSkippedStatus = "PROVISIONING_SKIPPED"
+	installationSkippedStatus = "INSTALLATION_SKIPPED"
 )
 
 type RemoteEnvironmentManagerClient interface {
@@ -92,8 +92,8 @@ func (r *remoteEnvironmentReconciler) manageInstallation(remoteEnv *v1alpha1.Rem
 	}
 
 	if !releaseExist {
-		if shouldSkipProvisioning(remoteEnv) {
-			return provisioningSkippedStatus, "Installation will not be performed", nil
+		if shouldSkipInstallation(remoteEnv) {
+			return installationSkippedStatus, "Installation will not be performed", nil
 		}
 
 		return r.installRemoteEnvironment(remoteEnv)
@@ -102,8 +102,8 @@ func (r *remoteEnvironmentReconciler) manageInstallation(remoteEnv *v1alpha1.Rem
 	}
 }
 
-func shouldSkipProvisioning(remoteEnv *v1alpha1.RemoteEnvironment) bool {
-	return remoteEnv.Spec.SkipProvisioning == true
+func shouldSkipInstallation(remoteEnv *v1alpha1.RemoteEnvironment) bool {
+	return remoteEnv.Spec.SkipInstallation == true
 }
 
 func (r *remoteEnvironmentReconciler) installRemoteEnvironment(remoteEnv *v1alpha1.RemoteEnvironment) (string, string, error) {

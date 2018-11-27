@@ -79,7 +79,7 @@ func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, accessLab
 	}
 
 	if skipInstallation {
-		spec.SkipProvisioning = true
+		spec.SkipInstallation = true
 	}
 
 	dummyRe := &v1alpha1.RemoteEnvironment{
