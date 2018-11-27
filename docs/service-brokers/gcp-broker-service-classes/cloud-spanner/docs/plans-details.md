@@ -29,10 +29,21 @@ The update parameters are the same as the provisioning parameters.
 
 ## Binding parameters:
 
-Binding to an instance grants the provided service account with access on the Cloud Spanner instance. Optionally, a new service account can be created and given access to the Cloud Spanner instance. These are the binding parameters:
+Binding to an instance grants the provided service account access to the Cloud Spanner instance. Optionally, a new service account can be created and given access to the Cloud Spanner instance. These are the binding parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
 | **createServiceAccount** | `boolean` | Creates a new service account for Spanner binding. | NO | `false` |
 | **roles** | `array` | The list of Cloud Spanner roles for the binding. Affects the level of access granted to the service account. These are the possible values of this parameter: `roles/spanner.admin`, `roles/spanner.viewer`, `roles/spanner.databaseAdmin`, `roles/spanner.databaseUser`, `roles/spanner.databaseReader`. The items in the roles array must be unique, which means that you can specify a given role only once. | YES | - |
 | **serviceAccount** | `string` | The GCP service account to which access is granted. | YES | - |
+
+### Credentials
+
+Binding returns the following connection details and credentials:
+
+| Parameter Name | Type | Description |
+|----------------|------|-------------|
+| **instanceId** | `string` | The ID of the instance. |
+| **privateKeyData** | `JSON Object` | The service account OAuth information. |
+| **projectId** | `string` | The ID of the project. |
+| **serviceAccount** | `string` | The GCP service account to which access is granted. |
