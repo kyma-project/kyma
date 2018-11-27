@@ -56,6 +56,9 @@ Flow of the provisioning process is described by following diagram
 
 ![GCP Broker Provisioning](assets/gcp-broker-provisioning.svg)
 
+1. User triggers provision action
+2. During the provisioning process new service account and access key are created in **Google Cloud Platform**
+3. After the provisioning process is over the post install job is triggered.
 
 ### Deprovisioning
 
@@ -63,6 +66,9 @@ Flow of the deprovisioning process is described by following diagram
 
 
 ![GCP Broker Deprovisioning](assets/gcp-broker-deprovisioning.svg)
+
+1. User triggers deprovision action
+2. If secret is present access keys are removed from **Google Cloud Platform**
 
 ### Credentials
 
