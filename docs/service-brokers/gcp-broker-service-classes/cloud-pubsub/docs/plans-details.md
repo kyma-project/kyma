@@ -36,6 +36,8 @@ Binding grants the provided service account access to the Pub/Sub topic. Optiona
 
 ### Subscription properties
 
+These are the **Subscription** properties:
+
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
 | **ackDeadlineSeconds** | `integer` | This value is the maximum time after a subscriber receives or acknowledges the message. After that time, or before the acknowledgement, the message is outstanding and is not delivered. For pull subscriptions, this value is used as the initial value for the **ackDeadline**. To override this value for a given message, call **ModifyAckDeadline** with the corresponding **ack_id**, if you use a non-streaming pull, or send the **ack_id** in a **StreamingModifyAckDeadlineRequest** if you use a streaming pull. The minimum custom deadline you can specify is `10` seconds and the maximum is `600` seconds. For push delivery, this value is also used to set the request timeout for the call to the push endpoint. If the subscriber never acknowledges the message, the Pub/Sub system eventually redelivers the message. | NO | `10` |
