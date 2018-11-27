@@ -13,7 +13,7 @@ This guide shows you how to get the client certificate.
 
 ## Get the configuration URL with a token
 
-Get the configuration URL with a token which allows you to get Kyma CSR configuration and URLs in Kyma required to connect your external solution to a created Remote Environment. Token is one time use and is valid for 5 minutes, after that time you must request for a new token.
+Get the configuration URL with a token which allows you to get Kyma CSR configuration and URLs in Kyma required to connect your external solution to a created Remote Environment.
 Follow this steps to get it using the CLI:
 
 - Expose the Connector Service outside of Kubernetes using `kubectl port-forward`:
