@@ -41,7 +41,6 @@ func WrongInput(format string, a ...interface{}) AppError {
 	return errorf(CodeWrongInput, format, a...)
 }
 
-
 func UpstreamServerCallFailed(format string, a ...interface{}) AppError {
 	return errorf(CodeUpstreamServerCallFailed, format, a...)
 }

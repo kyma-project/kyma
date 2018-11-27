@@ -57,7 +57,7 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 	if serviceDef.Identifier != "" {
 		apperr := sds.ensureUniqueIdentifier(serviceDef.Identifier, remoteEnvironment)
 		if apperr != nil {
-			return "", apperr
+			return "", apperr.Append("Creating service failed")
 		}
 	}
 
@@ -231,7 +231,7 @@ func convertServiceBaseInfo(service remoteenv.Service) model.ServiceDefinition {
 func (sds *serviceDefinitionService) ensureUniqueIdentifier(identifier, remoteEnvironment string) apperrors.AppError {
 	services, apperr := sds.GetAll(remoteEnvironment)
 	if apperr != nil {
-		return apperr
+		return apperr.Append("Checking identifier failed")
 	}
 
 	for _, service := range services {

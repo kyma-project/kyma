@@ -1317,16 +1317,13 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 
 	t.Run("should return an error if API deletion failed", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Delete", "re", "uuid-1").Return(nil)
-
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Delete", "re", "uuid-1").Return(apperrors.Internal("an error"))
 
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 
-		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, nil)
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, nil, nil)
 
 		// when
 		err := service.Delete("re", "uuid-1")
