@@ -38,6 +38,15 @@
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
+  branch = "travis-1.9"
+  name = "github.com/golang/lint"
+  packages = [
+    ".",
+    "golint"
+  ]
+  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
+
+[[projects]]
   branch = "master"
   name = "github.com/golang/protobuf"
   packages = [
@@ -72,18 +81,6 @@
   revision = "a0a7cfed7b2a54080888fd2b3d4a3ec14562c86c"
 
 [[projects]]
-  name = "github.com/hashicorp/errwrap"
-  packages = ["."]
-  revision = "8a6fb523712970c966eefc6b39ed2c5e74880354"
-  version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/hashicorp/go-multierror"
-  packages = ["."]
-  revision = "886a7fbe3eb1c874d46f623bfa70af45f425b3d1"
-  version = "v1.0.0"
-
-[[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
   revision = "f7279a603edee96fe7764d3de9c6ff8cf9970994"
@@ -106,8 +103,7 @@
     "pkg/client/clientset_generated/clientset/scheme",
     "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1",
-    "pkg/filter",
-    "pkg/svcat/service-catalog"
+    "pkg/filter"
   ]
   revision = "0aaf02aba556b945a357fce4e82f62122d158f2a"
   version = "v0.1.28"
@@ -261,6 +257,21 @@
   revision = "fbb02b2291d28baffd63558aa44b4b56f178d650"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/tools"
+  packages = [
+    "cmd/goimports",
+    "go/ast/astutil",
+    "go/gcexportdata",
+    "go/internal/gcimporter",
+    "go/types/typeutil",
+    "imports",
+    "internal/fastwalk",
+    "internal/gopathwalk"
+  ]
+  revision = "91f80e683c10fea00e7f965a1a7cac482ce52541"
+
+[[projects]]
   name = "gopkg.in/inf.v0"
   packages = ["."]
   revision = "3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4"
@@ -405,6 +416,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4418768e976ba789285f021a3274f5bf693b6fb76e48b13945f196fb8d344fd7"
+  inputs-digest = "ea6d57bd47cac850f33416277d458d575446d089d8abb01c9176d6a904781eae"
   solver-name = "gps-cdcl"
   solver-version = 1

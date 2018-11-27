@@ -20,6 +20,10 @@
 #  name = "github.com/x/y"
 #  version = "2.4.0"
 
+required = [
+  "github.com/golang/lint/golint",
+  "golang.org/x/tools/cmd/goimports",
+]
 
 [prune]
   unused-packages = true
