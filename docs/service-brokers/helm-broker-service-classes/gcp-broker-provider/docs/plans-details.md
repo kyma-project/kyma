@@ -11,14 +11,12 @@ The `gcp-broker-provider` service provides the following plan names and descript
 |-----------|-------------|
 | `Default` | Installs the Google Cloud Platform (GCP) Service Broker in a default configuration. |
 
->**NOTE:** You can provision only one instance of the GCP Service Broker Provider in each Namespace.
+## Provisioning
 
-## Provision
+>**NOTE:** You can provision only one instance of the GCP Service Broker Provider in each Namespace.
 
 To add GCP Broker Provider to your namespace you first need to prepare a service account and a 
 JSON access key. 
-
-### Prerequisites
 
 To create a Kubernetes Secret entry containing JSON access key perform the following steps:
 1. Open https://console.cloud.google.com/ and select your project.
@@ -29,19 +27,14 @@ To create a Kubernetes Secret entry containing JSON access key perform the follo
 6. Save file to a known location.
 7. Create a secret from the JSON file:
 
-   ```kubectl create secret generic gcp-broker-data --from-file=sa-key={filename} --from-literal=project-name=kyma-project --namespace {namespace}```
+```
+kubectl create secret generic gcp-broker-data --from-file=sa-key={filename} --from-literal=project-name=kyma-project --namespace {namespace}
+```
 
 Please note that you have to create a secret in every namespace where the GCP Broker Provider class is provisioned.
 
-### Installation
-
 In the Service Catalog view click **Google Cloud Platform Service Broker Provider**.
 Provisioning of this class adds GCP Service Broker classes to the Service Catalog in a given namespace.
-
-![GCP Broker Classes](assets/gcp-broker-classes.png)
-
-
-## Details
 
 The service account key created by user is used to 
 generate service account keys used by brokers installed in different namespaces.
@@ -49,8 +42,6 @@ The generated service account key has a **roles/servicebroker.operator** role an
 used during provisioning/deprovisioning/binding/unbinding actions.
 
 ![](assets/gcp-broker-key-management.svg)
-
-### Provisioning
 
 Flow of the provisioning process is described by following diagram
 
@@ -60,7 +51,11 @@ Flow of the provisioning process is described by following diagram
 2. During the provisioning process new service account and access key are created in **Google Cloud Platform**
 3. After the provisioning process is over the post install job is triggered.
 
-### Deprovisioning
+## Binding
+
+Binding to this Service Class is disabled.
+
+## Deprovisioning
 
 Flow of the deprovisioning process is described by following diagram
 
@@ -70,7 +65,4 @@ Flow of the deprovisioning process is described by following diagram
 1. User triggers deprovision action
 2. If secret is present access keys are removed from **Google Cloud Platform**
 
-### Credentials
-
->**Note:** Binding to this service class is disabled
 
