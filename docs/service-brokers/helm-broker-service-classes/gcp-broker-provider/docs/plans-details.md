@@ -33,9 +33,6 @@ kubectl create secret generic gcp-broker-data --from-file=sa-key={filename} --fr
 
 >**NOTE:** You must create a Secret in every Namespace where you provision the GCP Broker Provider class.
 
-In the Service Catalog view, click **Google Cloud Platform Service Broker Provider**.
-Provisioning of this class adds GCP Service Broker classes to the Service Catalog in a given Namespace.
-
 The service account key is used to 
 generate service account keys used by brokers installed in different Namespaces.
 The generated service account key has a **roles/servicebroker.operator** role and is 
@@ -44,12 +41,16 @@ used during provisioning, deprovisioning, binding, and unbinding actions.
 ![](assets/gcp-broker-key-management.svg)
 
 The provisioning process flow looks as follows:
-
-![GCP Broker Provisioning](assets/gcp-broker-provisioning.svg)
-
 1. The user triggers the provisioning action.
 2. During the provisioning process, new service account and access key are created in the Google Cloud Platform.
 3. After the provisioning process, the post-install job is triggered.
+
+
+![GCP Broker Provisioning](assets/gcp-broker-provisioning.svg)
+
+
+In the Service Catalog view, click **Google Cloud Platform Service Broker Provider**.
+Provisioning of this class adds GCP Service Broker classes to the Service Catalog in a given Namespace.
 
 ## Binding
 
@@ -58,11 +59,10 @@ Binding to this Service Class is disabled.
 ## Deprovisioning
 
 The deprovisioning process flow looks as follows:
-
+1. The user triggers the deprovisioning action.
+2. If the Secret is present, access keys are removed from the Google Cloud Platform.
 
 ![GCP Broker Deprovisioning](assets/gcp-broker-deprovisioning.svg)
 
-1. The user triggers the deprovisioning action.
-2. If the Secret is present, access keys are removed from the Google Cloud Platform.
 
 
