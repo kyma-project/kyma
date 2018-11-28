@@ -39,7 +39,7 @@ Provisioning of this class adds GCP Service Broker classes to the Service Catalo
 The service account key created by user is used to 
 generate service account keys used by brokers installed in different Namespaces.
 The generated service account key has a **roles/servicebroker.operator** role and is 
-used during provisioning/deprovisioning/binding/unbinding actions.
+used during provisioning, deprovisioning, binding, and unbinding actions.
 
 ![](assets/gcp-broker-key-management.svg)
 
