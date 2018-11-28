@@ -37,7 +37,7 @@ In the Service Catalog view click **Google Cloud Platform Service Broker Provide
 Provisioning of this class adds GCP Service Broker classes to the Service Catalog in a given namespace.
 
 The service account key created by user is used to 
-generate service account keys used by brokers installed in different namespaces.
+generate service account keys used by brokers installed in different Namespaces.
 The generated service account key has a **roles/servicebroker.operator** role and is 
 used during provisioning/deprovisioning/binding/unbinding actions.
 
