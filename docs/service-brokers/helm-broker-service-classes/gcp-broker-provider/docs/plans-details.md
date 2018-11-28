@@ -33,7 +33,7 @@ kubectl create secret generic gcp-broker-data --from-file=sa-key={filename} --fr
 
 >**NOTE:** You must create a Secret in every Namespace where you provision the GCP Broker Provider class.
 
-In the Service Catalog view click **Google Cloud Platform Service Broker Provider**.
+In the Service Catalog view, click **Google Cloud Platform Service Broker Provider**.
 Provisioning of this class adds GCP Service Broker classes to the Service Catalog in a given namespace.
 
 The service account key created by user is used to 
