@@ -36,7 +36,7 @@ kubectl create secret generic gcp-broker-data --from-file=sa-key={filename} --fr
 In the Service Catalog view, click **Google Cloud Platform Service Broker Provider**.
 Provisioning of this class adds GCP Service Broker classes to the Service Catalog in a given Namespace.
 
-The service account key created by user is used to 
+The service account key is used to 
 generate service account keys used by brokers installed in different Namespaces.
 The generated service account key has a **roles/servicebroker.operator** role and is 
 used during provisioning, deprovisioning, binding, and unbinding actions.
