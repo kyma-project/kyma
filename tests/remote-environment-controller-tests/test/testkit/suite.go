@@ -14,7 +14,6 @@ import (
 const (
 	testReName               = "re-ctrl-test-%s"
 	defaultCheckInterval     = 2 * time.Second
-	installationTimeout      = 180 * time.Second
 	installationStartTimeout = 10 * time.Second
 	waitBeforeCheck          = 2 * time.Second
 )
@@ -28,6 +27,8 @@ type TestSuite struct {
 	helmClient HelmClient
 	k8sClient  K8sResourcesClient
 	k8sChecker *K8sResourceChecker
+
+	installationTimeout time.Duration
 }
 
 func NewTestSuite(t *testing.T) *TestSuite {
@@ -46,10 +47,11 @@ func NewTestSuite(t *testing.T) *TestSuite {
 		t:                 t,
 		remoteEnvironment: re,
 
-		config:     config,
-		helmClient: helmClient,
-		k8sClient:  k8sResourcesClient,
-		k8sChecker: k8sResourcesChecker,
+		config:              config,
+		helmClient:          helmClient,
+		k8sClient:           k8sResourcesClient,
+		k8sChecker:          k8sResourcesChecker,
+		installationTimeout: time.Second * time.Duration(config.ProvisioningTimeout),
 	}
 }
 
@@ -77,12 +79,12 @@ func (ts *TestSuite) CleanUp() {
 
 func (ts *TestSuite) WaitForReleaseToInstall() {
 	msg := fmt.Sprintf("Timeout waiting for %s release installation", ts.remoteEnvironment)
-	ts.waitForFunction(ts.helmReleaseInstalled, msg, installationTimeout)
+	ts.waitForFunction(ts.helmReleaseInstalled, msg, ts.installationTimeout)
 }
 
 func (ts *TestSuite) WaitForReleaseToUninstall() {
 	msg := fmt.Sprintf("Timeout waiting for %s release to uninstall", ts.remoteEnvironment)
-	ts.waitForFunction(ts.helmReleaseNotExist, msg, installationTimeout)
+	ts.waitForFunction(ts.helmReleaseNotExist, msg, ts.installationTimeout)
 }
 
 func (ts *TestSuite) EnsureReleaseNotInstalling() {

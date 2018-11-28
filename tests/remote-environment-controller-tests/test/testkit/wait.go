@@ -14,7 +14,7 @@ func (ts *TestSuite) waitForFunction(conditionalFunc func() bool, message string
 
 		select {
 		case <-done:
-			ts.logAndFail(message)
+			ts.t.Errorf(message)
 		default:
 			time.Sleep(defaultCheckInterval)
 		}
@@ -26,22 +26,17 @@ func (ts *TestSuite) shouldLastFor(conditionalFunc func() bool, message string, 
 
 	for {
 		if !conditionalFunc() {
-			ts.logAndFail(message)
+			ts.t.Errorf(message)
 		}
 
 		select {
 		case <-done:
 			if !conditionalFunc() {
-				ts.logAndFail(message)
+				ts.t.Errorf(message)
 			}
 			return
 		default:
 			time.Sleep(defaultCheckInterval)
 		}
 	}
-}
-
-func (ts *TestSuite) logAndFail(message string) {
-	ts.t.Log(message)
-	ts.t.Fail()
 }
