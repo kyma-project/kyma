@@ -49,7 +49,7 @@ Flow of the provisioning process is described by following diagram
 
 1. User triggers provision action
 2. During the provisioning process new service account and access key are created in **Google Cloud Platform**
-3. After the provisioning process is over the post install job is triggered.
+3. After the provisioning process, the post-install job is triggered.
 
 ## Binding
 
