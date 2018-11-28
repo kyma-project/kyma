@@ -31,7 +31,7 @@ Follow these steps to create a Kubernetes Secret which contains a JSON access ke
 kubectl create secret generic gcp-broker-data --from-file=sa-key={filename} --from-literal=project-name=kyma-project --namespace {namespace}
 ```
 
-Please note that you have to create a secret in every namespace where the GCP Broker Provider class is provisioned.
+>**NOTE:** You must create a Secret in every Namespace where you provision the GCP Broker Provider class.
 
 In the Service Catalog view click **Google Cloud Platform Service Broker Provider**.
 Provisioning of this class adds GCP Service Broker classes to the Service Catalog in a given namespace.
