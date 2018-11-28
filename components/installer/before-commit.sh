@@ -35,7 +35,7 @@ if [ "$1" == "$CI_FLAG" ]; then
 	buildEnv="env CGO_ENABLED=0"
 fi
 
-${buildEnv} go build -ldflags \"-X main.gitCommitHash=${gitCommitHash}\" -o installer ./cmd/operator
+${buildEnv} go build -ldflags "-X main.gitCommitHash=${gitCommitHash}" -o installer ./cmd/operator
 
 goBuildResult=$?
 if [ ${goBuildResult} != 0 ]; then
