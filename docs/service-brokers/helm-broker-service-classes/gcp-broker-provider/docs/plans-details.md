@@ -62,7 +62,7 @@ Flow of the deprovisioning process is described by following diagram
 
 ![GCP Broker Deprovisioning](assets/gcp-broker-deprovisioning.svg)
 
-1. User triggers deprovision action
+1. The user triggers the deprovisioning action.
 2. If secret is present access keys are removed from **Google Cloud Platform**
 
 
