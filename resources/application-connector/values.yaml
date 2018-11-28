@@ -16,6 +16,9 @@ global:
   connector_service_tests:
     dir: develop/
     version: 1ecf2683
+  connection_token_handler:
+    dir: develop/
+    version: e8d279fa
   event_service:
     dir: develop/
     version: 6e0a7fe2
