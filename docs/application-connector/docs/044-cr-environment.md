@@ -56,10 +56,10 @@ This table lists all the possible parameters of a given resource together with t
 
 ## Additional information
 
-When you fetch an existing RemoteEnvironment CR, the system adds the **status** section which describes the status of the RE installation. This table lists the fields of the **status** section.
+The Remote Environment controller adds the **status** section which describes the status of the RE installation to the created CR periodically. This table lists the fields of the **status** section.
 
 | Field   |  Description |
 |:----------:|:-------------:|
 | **status.installationStatus** | Describes the status of the RE installation. |
 | **status.installationStatus.description** | Provides a longer description of the installation status. |
-| **status.installationStatus.status** | RE installation status. This field can have one of two values: DEPLOYED or FAILED. |
+| **status.installationStatus.status** | Provides a short, human-readable description of the installation status. |
