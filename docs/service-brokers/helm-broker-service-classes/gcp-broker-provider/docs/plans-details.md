@@ -57,7 +57,7 @@ Binding to this Service Class is disabled.
 
 ## Deprovisioning
 
-Flow of the deprovisioning process is described by following diagram
+The deprovisioning process flow looks as follows:
 
 
 ![GCP Broker Deprovisioning](assets/gcp-broker-deprovisioning.svg)
