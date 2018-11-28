@@ -43,7 +43,7 @@ used during provisioning, deprovisioning, binding, and unbinding actions.
 
 ![](assets/gcp-broker-key-management.svg)
 
-Flow of the provisioning process is described by following diagram
+The provisioning process flow looks as follows:
 
 ![GCP Broker Provisioning](assets/gcp-broker-provisioning.svg)
 
