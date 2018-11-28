@@ -18,7 +18,7 @@ The `gcp-broker-provider` service provides the following plan names and descript
 To add GCP Broker Provider to your Namespace, you must prepare a service account and a 
 JSON access key. 
 
-To create a Kubernetes Secret entry containing JSON access key perform the following steps:
+Follow these steps to create a Kubernetes Secret which contains a JSON access key:
 1. Open https://console.cloud.google.com/ and select your project.
 2. Go to **IAM & admin** -> **Service accounts**.
 3. Click **Create service account**.
