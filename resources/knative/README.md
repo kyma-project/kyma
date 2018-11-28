@@ -11,4 +11,5 @@ Included releases:
 Our changes:
  * Every CRD have annotation `"helm.sh/hook": "crd-install"` so Helm installs it before rest of resources.
  * There is duplicated CRD `images.caching.internal.knative.dev` in serving release. One copy is removed.
- * If `isLocalEnv` variable is set `knative-ingressgateway` Service's `type` is changed to `NodePort`.
+ * `knative-ingressgateway` Service's `type` is changed to `NodePort`.
+ * `knative-shared-gateway` Gateway have TLS enabled

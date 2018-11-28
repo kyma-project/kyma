@@ -705,7 +705,9 @@ spec:
       number: 443
       protocol: HTTPS
     tls:
-      mode: PASSTHROUGH
+      mode: SIMPLE
+      privateKey: /etc/istio/ingressgateway-certs/tls.key
+      serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
 ---
 apiVersion: v1
 kind: Service
@@ -749,12 +751,7 @@ spec:
   selector:
     app: knative-ingressgateway
     knative: ingressgateway
-  {{ if .Values.global.isLocalEnv }}
   type: NodePort
-  {{ else }}
-  type: LoadBalancer
-  loadBalancerIP: {{ .Values.loadBalancerIP }}
-  {{ end }}
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment

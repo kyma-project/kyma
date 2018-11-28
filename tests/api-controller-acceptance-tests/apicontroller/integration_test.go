@@ -285,12 +285,18 @@ func (tctx integrationTestContext) newHttpClient(testId, domainName string) (*ht
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	ingressGatewayControllerAddr, err := net.LookupHost(ingressGatewayControllerServiceURL)
-	if err != nil {
-		log.Warnf("Unable to resolve host '%s' (if you are running this test from outside of Kyma ignore this log). Root cause: %v", ingressGatewayControllerServiceURL, err)
+	ingressGatewayControllerServiceURL := os.Getenv(ingressGatewayControllerServiceURLEnv)
+	var ingressGatewayControllerAddr []string
+	if ingressGatewayControllerServiceURL != "" {
+		var err error
+		ingressGatewayControllerAddr, err = net.LookupHost(ingressGatewayControllerServiceURL)
+		if err != nil {
+			return nil, err
+		}
+	} else {
 		minikubeIp := tctx.tryToGetMinikubeIp()
 		if minikubeIp == "" {
-			return nil, err
+			return nil, fmt.Errorf("ingressgateway address is not set. Set '%s' variable", ingressGatewayControllerServiceURLEnv)
 		}
 		ingressGatewayControllerAddr = []string{minikubeIp}
 	}

@@ -1,5 +1,9 @@
 # NOTE: The Role, ServiceAccount, and RoleBinding are created once during installation and not removed after (or recreated before) each test. This is a limitation of Helm: it can only create a Pod during testing.
 # (This applies to Helm 2.7.2.)
+{{- $serviceName := "istio-ingressgateway" -}}
+{{ if .Values.global.knative }}
+  {{- $serviceName := "knative-ingressgateway" -}}
+{{ end }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -169,6 +173,8 @@ spec:
     - name: k8syaml
       mountPath: /k8syaml
     env:
+    - name: INGRESSGATEWAY_FQDN
+      value: {{ $serviceName }}.istio-system.svc.cluster.local
     - name: KUBELESS_NAMESPACE
       value: kyma-system
     - name: KUBELESS_CONFIG

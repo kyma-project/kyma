@@ -1,3 +1,7 @@
+{{- $serviceName := "istio-ingressgateway" -}}
+{{ if .Values.global.knative }}
+  {{- $serviceName := "knative-ingressgateway" -}}
+{{ end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,7 +11,7 @@ metadata:
     app: istio-kyma-patch
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
-  istio-ingressgateway.deployment.patch.json: |
+  {{ $serviceName }}.deployment.patch.json: |
     [
       {
         "op": "replace",
@@ -26,7 +30,20 @@ data:
       }
       {{ end }}
     ]
-    
+
+  {{ $serviceName }}.service.patch.json: |
+    [
+      {
+        "op": "add",
+        "path": "/spec/loadBalancerIP",
+        "value": "{{ .Values.loadBalancerIP }}"
+      },{
+        "op": "replace",
+        "path": "/spec/type",
+        "type": "LoadBalancer"
+      }
+    ]
+
   istio-egressgateway.deployment.patch.json: |
     [
       {

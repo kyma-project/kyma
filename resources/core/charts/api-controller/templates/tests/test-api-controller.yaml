@@ -1,4 +1,9 @@
 {{ if .Values.tests.enabled }}
+{{- $serviceName := "istio-ingressgateway" -}}
+{{ if .Values.global.knative }}
+  {{- $serviceName := "knative-ingressgateway" -}}
+{{ end }}
+
 ---
 apiVersion: v1
 kind: Pod
@@ -16,6 +21,8 @@ spec:
     env:
     - name: DOMAIN_NAME
       value: {{ .Values.global.domainName }}
+    - name: INGRESSGATEWAY_FQDN
+      value: {{ $serviceName }}.istio-system.svc.cluster.local
   restartPolicy: Never
 ---
 {{ end }}

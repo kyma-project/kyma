@@ -14,15 +14,15 @@ import (
 )
 
 const (
-	namespace                                      = "kyma-system"
-	ingressGatewayControllerServiceURL             = "istio-ingressgateway.istio-system.svc.cluster.local"
-	testIdLength                                   = 8
-	maxRetries                                     = 1000
-	minimalNumberOfCorrectResults                  = 5
-	retrySleep                                     = 2 * time.Second
-	domainNameEnv                                  = "DOMAIN_NAME"
-	apiSecurityDisabled                ApiSecurity = false
-	apiSecurityEnabled                 ApiSecurity = true
+	namespace                                         = "kyma-system"
+	ingressGatewayControllerServiceURLEnv             = "INGRESSGATEWAY_FQDN"
+	testIdLength                                      = 8
+	maxRetries                                        = 1000
+	minimalNumberOfCorrectResults                     = 5
+	retrySleep                                        = 2 * time.Second
+	domainNameEnv                                     = "DOMAIN_NAME"
+	apiSecurityDisabled                   ApiSecurity = false
+	apiSecurityEnabled                    ApiSecurity = true
 )
 
 type ApiSecurity bool
