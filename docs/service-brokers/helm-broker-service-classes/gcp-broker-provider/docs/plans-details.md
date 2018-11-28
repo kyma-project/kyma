@@ -25,7 +25,7 @@ Follow these steps to create a Kubernetes Secret which contains a JSON access ke
 4. Set the `Project Owner` role.
 5. Click **Create key** and choose `JSON` as a key type.
 6. Save the `JSON` file.
-7. Create a secret from the JSON file:
+7. Create a Secret from the JSON file by running this command:
 
 ```
 kubectl create secret generic gcp-broker-data --from-file=sa-key={filename} --from-literal=project-name=kyma-project --namespace {namespace}
