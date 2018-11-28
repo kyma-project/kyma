@@ -15,7 +15,7 @@ The `gcp-broker-provider` service provides the following plan names and descript
 
 >**NOTE:** You can provision only one instance of the GCP Service Broker Provider in each Namespace.
 
-To add GCP Broker Provider to your namespace you first need to prepare a service account and a 
+To add GCP Broker Provider to your Namespace, you must prepare a service account and a 
 JSON access key. 
 
 To create a Kubernetes Secret entry containing JSON access key perform the following steps:
