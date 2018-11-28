@@ -48,7 +48,7 @@ The provisioning process flow looks as follows:
 ![GCP Broker Provisioning](assets/gcp-broker-provisioning.svg)
 
 1. The user triggers the provisioning action.
-2. During the provisioning process new service account and access key are created in **Google Cloud Platform**
+2. During the provisioning process, new service account and access key are created in the Google Cloud Platform.
 3. After the provisioning process, the post-install job is triggered.
 
 ## Binding
