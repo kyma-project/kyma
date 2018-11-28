@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 def label = "kyma-${UUID.randomUUID().toString()}"
-def application = 'kubeless-test-client'
+def application = 'knative-installer'
 def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
 def dockerImageTag = params.APP_VERSION
 
@@ -36,19 +36,12 @@ podTemplate(label: label) {
                             }
                         }
 
-                        stage("code quality $application") {
-                            execute("make validate")
-                        }
-
-                        stage("build $application") {
-                            execute("make build")
-                        }
-
                         stage("build image $application") {
                             dir(env.APP_FOLDER){
                             sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
                             }
                         }
+
 
                         stage("push image $application") {
                             sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
@@ -67,12 +60,4 @@ podTemplate(label: label) {
             emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
         }
     }
-}
-
-def execute(command, envs = []) {
-    def buildpack = 'golang-buildpack:0.0.9'
-    def repositoryName = 'kyma'
-    def envText = envs=='' ? '' : "--env $envs"
-    workDir = pwd()
-    sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/$repositoryName/ -w /go/src/github.com/kyma-project/$repositoryName/$env.APP_FOLDER $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
 }

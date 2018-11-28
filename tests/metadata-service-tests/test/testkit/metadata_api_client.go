@@ -19,8 +19,8 @@ import (
 
 const (
 	retryCount             = 3
-	requestTimeout         = 5 * time.Second
-	retryDelay             = 2 * time.Second
+	requestTimeout         = 7 * time.Second
+	retryDelay             = 1 * time.Second
 	modifyIdentifierFormat = "%s-%d"
 )
 

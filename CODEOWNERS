@@ -139,11 +139,14 @@
 # The `helm-broker-repo` subdirectory
 /resources/helm-broker-repo/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The `istio` subdirectory
+# The `istio` chart
 /resources/istio/ @piotrmsc @kubadz @sjanota
 
-# The `istio-kyma-patch` subdirectory
+# The `istio-kyma-patch` chart
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @sjanota
+
+# The `knative-installer` chart
+/resources/knative-installer/ @piotrmsc @kubadz @sjanota
 
 # The `jaeger` charts
 /resources/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
@@ -178,6 +181,9 @@
 
 # Istio Extensions Component
 /components/istio-kyma-patch/ @piotrmsc @sjanota @kubadz
+
+# Knative Installer Component
+/components/knative-installer/ @piotrmsc @sjanota @kubadz
 
 # Remote environment controller Component
 /components/remote-environment-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -266,8 +272,11 @@
 # The tools/ark-plugins directory
 /tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
-# kubeless-test-client tests
-/tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+# kubeless-integration tests directory 
+/tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+
+# kubeless tests
+/tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
 # Event Bus Tests
 /tests/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic

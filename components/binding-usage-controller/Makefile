@@ -1,4 +1,4 @@
-APP_NAME = "binding-usage-controller"
+APP_NAME = binding-usage-controller
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 binary=$(APP_NAME)
