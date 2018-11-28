@@ -22,7 +22,7 @@ Follow these steps to create a Kubernetes Secret which contains a JSON access ke
 1. Open https://console.cloud.google.com/ and select your project.
 2. Go to **IAM & admin** -> **Service accounts**.
 3. Click **Create service account**, name your account, and click **Create**.
-4. Assign `Project Owner` role.
+4. Set the `Project Owner` role.
 5. Click **Create key** and choose `JSON` as key type.
 6. Save file to a known location.
 7. Create a secret from the JSON file:
