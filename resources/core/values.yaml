@@ -29,7 +29,7 @@ global:
     version: 8c274255
   api_controller_acceptance_tests:
     dir: pr/
-    version: PR-1709
+    version: PR-1845
   apiserver_proxy:
     dir: develop/
     version: 6e0a7fe2
@@ -58,8 +58,8 @@ global:
     dir: develop/
     version: 0d1ffe15
   kubeless_integration_tests:
-    dir: develop/
-    version: 80eda510
+    dir: pr/
+    version: PR-1845
   kubeless_tests:
     dir: develop/
     version: b3616bfa
