@@ -58,7 +58,7 @@ podTemplate(label: label,
                         }
 
                         stage("install dependencies $application") {
-                            execute("make resolve", workDir, componentDir)
+                            execute("dep ensure -vendor-only -v", workDir, componentDir)
                         }
 
                         stage("code quality $application") {
@@ -70,7 +70,7 @@ podTemplate(label: label,
                         }
 
                         stage("test $application") {
-                            execute("make test-report", workDir, componentDir)
+                            execute("2>&1 go test -v ./... | go2xunit -fail -output unit-tests.xml", workDir, componentDir)
                             junit '**/unit-tests.xml'
                         }
 
