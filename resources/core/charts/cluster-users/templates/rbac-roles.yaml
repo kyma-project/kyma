@@ -30,7 +30,7 @@ metadata:
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
-- apiGroups: ["", "apps", "authentication.kyma-project.io", "extensions", "gateway.kyma-project.io", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma.cx", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma.cx", "ui.kyma.cx", "ui.kyma-project.io", "metrics.k8s.io", "networking.istio.io"]
+- apiGroups: ["", "apps", "authentication.kyma-project.io", "extensions", "gateway.kyma-project.io", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma.cx", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma-project.io", "ui.kyma.cx", "ui.kyma-project.io", "metrics.k8s.io", "networking.istio.io"]
   resources: ["*"]
   verbs: ["get", "list"]
 - nonResourceURLs: ["*"] #give access to all non resource urls
@@ -75,7 +75,11 @@ metadata:
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
+<<<<<<< HEAD
 - apiGroups: ["", "apps", "authentication.kyma-project.io", "connectorservice.kyma-project.io", "extensions", "gateway.kyma-project.io", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma.cx", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma.cx", "ui.kyma.cx", "ui.kyma-project.io", "metrics.k8s.io", "networking.istio.io", "batch", "extensions", "autoscaling"]
+=======
+- apiGroups: ["", "apps", "authentication.kyma-project.io", "connectorservice.kyma-project.io", "extensions", "gateway.kyma-project.io", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma.cx", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma-project.io", "ui.kyma.cx", "ui.kyma-project.io", "metrics.k8s.io", "batch", "extensions", "autoscaling"]
+>>>>>>> 738ce69a... adjust domain of subscriptions.eventing CRD to kyma-project.io
   resources: ["*"]
   verbs: ["*"]
 - apiGroups: ["apiextensions.k8s.io"]
