@@ -2,12 +2,14 @@ package testkit
 
 import (
 	"k8s.io/helm/pkg/helm"
+	"k8s.io/helm/pkg/proto/hapi/release"
+	rls "k8s.io/helm/pkg/proto/hapi/services"
 	"time"
 )
 
 type HelmClient interface {
-	ExistWhenShould(releaseName string) (bool, error)
-	ExistWhenShouldNot(releaseName string) (bool, error)
+	CheckReleaseStatus(rlsName string) (*rls.GetReleaseStatusResponse, error)
+	CheckReleaseExistence(name string) (bool, error)
 }
 
 type helmClient struct {
@@ -16,51 +18,33 @@ type helmClient struct {
 	retryWaitTime time.Duration
 }
 
-func NewHelmClient(host string, retryCount int, retryWaitTime time.Duration) HelmClient {
+func NewHelmClient(host string) HelmClient {
 	return &helmClient{
-		helm:          helm.NewClient(helm.Host(host)),
-		retryCount:    retryCount,
-		retryWaitTime: retryWaitTime,
+		helm: helm.NewClient(helm.Host(host)),
 	}
 }
 
-func (hc *helmClient) ExistWhenShould(releaseName string) (bool, error) {
-	return hc.checkExistenceWithRetriesIf(releaseName, shouldRetryIfNotExist)
+func (hc *helmClient) CheckReleaseStatus(rlsName string) (*rls.GetReleaseStatusResponse, error) {
+	return hc.helm.ReleaseStatus(rlsName)
 }
 
-func (hc *helmClient) ExistWhenShouldNot(releaseName string) (bool, error) {
-	return hc.checkExistenceWithRetriesIf(releaseName, shouldRetryIfExists)
-}
-
-func (hc *helmClient) checkExistenceWithRetriesIf(releaseName string, shouldRetry func(releaseExists bool, err error) bool) (bool, error) {
-	var exists bool
-	var err error
-
-	for i := 0; i < hc.retryCount && shouldRetry(exists, err); i++ {
-		exists, err = hc.checkReleaseExistence(releaseName)
-		if shouldRetry(exists, err) {
-			time.Sleep(hc.retryWaitTime)
-		}
-	}
-
-	return exists, err
-}
-
-func shouldRetryIfNotExist(releaseExists bool, err error) bool {
-	return err != nil || releaseExists == false
-}
-
-func shouldRetryIfExists(releaseExists bool, err error) bool {
-	return err != nil || releaseExists == true
-}
-
-func (hc *helmClient) checkReleaseExistence(name string) (bool, error) {
-	listResponse, err := hc.helm.ListReleases()
+func (hc *helmClient) CheckReleaseExistence(name string) (bool, error) {
+	listResponse, err := hc.helm.ListReleases(helm.ReleaseListStatuses([]release.Status_Code{
+		release.Status_DELETED,
+		release.Status_DELETING,
+		release.Status_DEPLOYED,
+		release.Status_FAILED,
+		release.Status_PENDING_INSTALL,
+		release.Status_PENDING_ROLLBACK,
+		release.Status_PENDING_UPGRADE,
+		release.Status_SUPERSEDED,
+		release.Status_UNKNOWN,
+	}))
 	if err != nil {
 		return false, err
 	}
-	releases := listResponse.Releases
-	for _, rel := range releases {
+
+	for _, rel := range listResponse.Releases {
 		if rel.Name == name {
 			return true, nil
 		}
