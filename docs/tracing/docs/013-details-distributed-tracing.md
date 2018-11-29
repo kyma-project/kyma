@@ -1,5 +1,5 @@
 ---
-title: Distributed tracing
+title: Benefits of distributed tracing
 type: Details
 ---
 
