@@ -1,7 +1,6 @@
 APP_NAME = alpine-net
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
-binary=$(APP_NAME)
 
 .PHONY: build-image
 build-image:
@@ -20,8 +19,3 @@ ci-master: build-image push-image
 
 .PHONY: ci-release
 ci-release: build-image push-image
-
-.PHONY: clean
-clean:
-	rm -f $(binary)
-
