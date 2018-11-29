@@ -36,10 +36,10 @@ global:
     version: 1a6aedce
   remote_environment_controller:
     dir: develop/
-    version: 4b19d36e
+    version: 56c0498f
   remote_environment_controller_tests:
     dir: develop/
-    version: cb19afea
+    version: 56c0498f
   remote_environment_broker:
     dir: develop/
     version: 0d408e11
