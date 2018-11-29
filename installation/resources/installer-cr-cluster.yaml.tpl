@@ -28,3 +28,5 @@ spec:
       namespace: "heptio-ark"
     - name: "logging"
       namespace: "kyma-system"
+    - name: "jaeger"
+      namespace: "kyma-system"

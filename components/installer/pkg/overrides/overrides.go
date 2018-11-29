@@ -4,65 +4,54 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+//OverrideData exposes methods to fetch release-specific overrides
 type OverrideData interface {
-	Common() Map
-	ForComponent(componentName string) Map
 	ForRelease(releaseName string) (string, error)
 }
 
+//Provider implements storage for all overrides
 type Provider struct {
-	common     Map
-	components map[string]Map
-}
-
-//Common returns overrides common for all components
-func (o *Provider) Common() Map {
-	res := o.common
-
-	if res == nil {
-		return Map{}
-	}
-
-	return res
-}
-
-//ForComponent returns overrides defined only for specified component
-func (o *Provider) ForComponent(componentName string) Map {
-
-	res := o.components[componentName]
-
-	if res == nil {
-		return Map{}
-	}
-
-	return res
+	common       Map
+	components   map[string]Map
+	configReader reader
 }
 
 //ForRelease returns overrides for release
 func (o *Provider) ForRelease(releaseName string) (string, error) {
+
+	o.refreshStore()
 	allOverrides := Map{}
 
-	MergeMaps(allOverrides, o.Common())
-	MergeMaps(allOverrides, o.ForComponent(releaseName))
+	MergeMaps(allOverrides, o.common)
+	MergeMaps(allOverrides, o.components[releaseName])
 
 	return ToYaml(allOverrides)
 }
 
 //New returns new Data instance.
-func New(client *kubernetes.Clientset) (OverrideData, error) {
+func New(client *kubernetes.Clientset) OverrideData {
 
-	r := &reader{
+	configReader := &reader{
 		client: client,
 	}
 
-	versionsMap, err := versionOverrides()
-	if err != nil {
-		return nil, err
+	res := Provider{
+		configReader: *configReader,
 	}
 
-	commonOverridesData, err := r.readCommonOverrides()
+	return &res
+}
+
+func (o *Provider) refreshStore() error {
+
+	versionsMap, err := versionOverrides()
 	if err != nil {
-		return nil, err
+		return err
+	}
+
+	commonOverridesData, err := o.configReader.readCommonOverrides()
+	if err != nil {
+		return err
 	}
 
 	commonOverrides := UnflattenToMap(joinOverridesMap(commonOverridesData...))
@@ -70,19 +59,17 @@ func New(client *kubernetes.Clientset) (OverrideData, error) {
 	MergeMaps(commonOverridesMap, versionsMap)
 	MergeMaps(commonOverridesMap, commonOverrides)
 
-	componentsOverridesData, err := r.readComponentOverrides()
+	componentsOverridesData, err := o.configReader.readComponentOverrides()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	componentsMap := unflattenComponentOverrides(joinComponentOverrides(componentsOverridesData...))
 
-	res := Provider{
-		common:     commonOverridesMap,
-		components: componentsMap,
-	}
+	o.common = commonOverridesMap
+	o.components = componentsMap
 
-	return &res, nil
+	return nil
 }
 
 //versionOverrides reads overrides for component versions (versions.yaml)

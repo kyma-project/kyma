@@ -149,7 +149,7 @@ func TestControllerRunDeleteOwnerReferencesToBinding(t *testing.T) {
 	expSBU := fixSBU.DeepCopy()
 	expSBU.OwnerReferences = []metaV1.OwnerReference{}
 	failedSBU := expSBU.DeepCopy()
-	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.ServiceBindingGetErrorReason, "while getting ServiceBinding \"wrong\" from namespace \"production\": servicebinding.servicecatalog.k8s.io \"wrong\" not found")
+	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.ServiceBindingGetErrorReason, "Process error during 0 attempts from 0; while getting ServiceBinding \"wrong\" from namespace \"production\": servicebinding.servicecatalog.k8s.io \"wrong\" not found")
 	failedSBU.Status.Conditions = []sbuTypes.ServiceBindingUsageCondition{*condition}
 
 	usageCli := sbuFake.NewSimpleClientset(fixSBU)
@@ -224,7 +224,7 @@ func TestControllerRunErrorOnDeleteOwnerReferences(t *testing.T) {
 	expSBU := fixSBU.DeepCopy()
 	expSBU.OwnerReferences = []metaV1.OwnerReference{}
 	failedSBU := expSBU.DeepCopy()
-	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.ServiceBindingGetErrorReason, "while getting ServiceBinding \"wrong\" from namespace \"production\": servicebinding.servicecatalog.k8s.io \"wrong\" not found")
+	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.ServiceBindingGetErrorReason, "Process error during 0 attempts from 0; while getting ServiceBinding \"wrong\" from namespace \"production\": servicebinding.servicecatalog.k8s.io \"wrong\" not found")
 	failedSBU.Status.Conditions = []sbuTypes.ServiceBindingUsageCondition{*condition}
 
 	usageCli := sbuFake.NewSimpleClientset(fixSBU)
@@ -294,7 +294,7 @@ func TestControllerRunAddFailOnFetchingLabels(t *testing.T) {
 		Name:       "redis-client",
 	})
 	failedSBU := expSBU.DeepCopy()
-	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.FetchBindingLabelsErrorReason, "while fetching bindings labels for binding [ServiceBinding \"production/redis-client\"]: cannot fetch labels")
+	condition := sbuStatus.NewUsageCondition(sbuTypes.ServiceBindingUsageReady, sbuTypes.ConditionFalse, sbuStatus.FetchBindingLabelsErrorReason, "Process error during 0 attempts from 0; while fetching bindings labels for binding [ServiceBinding \"production/redis-client\"]: cannot fetch labels")
 	failedSBU.Status.Conditions = []sbuTypes.ServiceBindingUsageCondition{*condition}
 
 	usageCli := sbuFake.NewSimpleClientset(fixSBU)

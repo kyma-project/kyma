@@ -49,6 +49,8 @@ func (sas defaultService) New(remoteEnvironment, id string, api *model.API) (*re
 
 	serviceAPI := &remoteenv.ServiceAPI{}
 	serviceAPI.TargetUrl = api.TargetUrl
+	serviceAPI.SpecificationUrl = api.SpecificationUrl
+	serviceAPI.ApiType = api.ApiType
 	serviceAPI.GatewayURL = gatewayUrl
 	serviceAPI.AccessLabel = resourceName
 
@@ -75,8 +77,11 @@ func (sas defaultService) New(remoteEnvironment, id string, api *model.API) (*re
 }
 
 func (sas defaultService) Read(remoteEnvironment string, remoteenvAPI *remoteenv.ServiceAPI) (*model.API, apperrors.AppError) {
-	api := &model.API{}
-	api.TargetUrl = remoteenvAPI.TargetUrl
+	api := &model.API{
+		TargetUrl:        remoteenvAPI.TargetUrl,
+		SpecificationUrl: remoteenvAPI.SpecificationUrl,
+		ApiType:          remoteenvAPI.ApiType,
+	}
 
 	if remoteenvAPI.Credentials.Type != "" {
 		credentials, err := sas.secretsService.Get(remoteEnvironment, remoteenvAPI.Credentials)
@@ -117,6 +122,8 @@ func (sas defaultService) Update(remoteEnvironment, id string, api *model.API) (
 
 	serviceAPI := &remoteenv.ServiceAPI{}
 	serviceAPI.TargetUrl = api.TargetUrl
+	serviceAPI.SpecificationUrl = api.SpecificationUrl
+	serviceAPI.ApiType = api.ApiType
 	serviceAPI.GatewayURL = gatewayUrl
 	serviceAPI.AccessLabel = resourceName
 

@@ -71,4 +71,17 @@ func TestHttpErrors_AppErrorToResponse(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, status)
 		assert.Equal(t, message, body.Error)
 	})
+
+	t.Run("should print normal bad gateway error", func(t *testing.T) {
+		//given
+		message := "normal non internal error message"
+		err := apperrors.UpstreamServerCallFailed(message)
+
+		//when
+		status, body := AppErrorToResponse(err, false)
+
+		//then
+		assert.Equal(t, http.StatusBadGateway, status)
+		assert.Equal(t, message, body.Error)
+	})
 }

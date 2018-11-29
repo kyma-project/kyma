@@ -55,6 +55,9 @@
 # The `connector-service` subchart
 /resources/application-connector/charts/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
+# The `connection-token-handler` subchart
+/resources/application-connector/charts/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
 # The `metadata-service` subchart
 /resources/application-connector/charts/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
@@ -100,20 +103,23 @@
 # The `event-bus` subchart
 /resources/core/charts/event-bus/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
+# The `k8s-dashboard-proxy` subchart
+/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+
 # The `remote-environment-broker` subchart
 /resources/application-connector/charts/remote-environment-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The `service-catalog` subchart
-/resources/core/charts/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+# The `service-catalog-addons` subchart
+/resources/core/charts/service-catalog-addons/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `binding-usage-controller` subchart
-/resources/core/charts/service-catalog/charts/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/resources/core/charts/service-catalog-addons/charts/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `catalog-ui` subchart
-/resources/core/charts/service-catalog/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
+/resources/core/charts/service-catalog-addons/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The `instances-ui` subchart
-/resources/core/charts/service-catalog/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
+/resources/core/charts/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The `docs` subchart
 /resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
@@ -136,20 +142,26 @@
 # The `helm-broker-repo` subdirectory
 /resources/helm-broker-repo/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The `istio` subdirectory
+# The `istio` chart
 /resources/istio/ @piotrmsc @kubadz @sjanota
 
-# The `istio-kyma-patch` subdirectory
+# The `istio-kyma-patch` chart
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @sjanota
 
+# The `knative-installer` chart
+/resources/knative-installer/ @piotrmsc @kubadz @sjanota
+
 # The `jaeger` charts
-/resources/core/charts/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+/resources/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
 # The `prometheus-operator` chart
 /resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
 # The `remote environment` chart
 /resources/remote-environments/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
+# The `service-catalog` chart
+/resources/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Components
 #API server proxy Component
@@ -173,6 +185,9 @@
 # Istio Extensions Component
 /components/istio-kyma-patch/ @piotrmsc @sjanota @kubadz
 
+# Knative Installer Component
+/components/knative-installer/ @piotrmsc @sjanota @kubadz
+
 # Remote environment controller Component
 /components/remote-environment-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
@@ -188,6 +203,9 @@
 # Connector Service Component
 /components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
+# Connector Service Token Request Component
+/components/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
 # Metadata Service Component
 /components/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
@@ -199,6 +217,9 @@
 
 # Event Bus Component
 /components/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+
+# K8s Dashboard Proxy Component
+/components/k8s-dashboard-proxy/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
 # Event Service Component
 /components/event-service/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
@@ -248,6 +269,9 @@
 # The etcd-tls-setup directory
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
 
+# The gcp-broker-provider directory
+/tools/gcp-broker-provider/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
+
 # The changelog-generator directory
 /tools/changelog-generator/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
@@ -257,8 +281,11 @@
 # The tools/ark-plugins directory
 /tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
-# kubeless-test-client tests
-/tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+# kubeless-integration tests directory 
+/tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+
+# kubeless tests
+/tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
 
 # Event Bus Tests
 /tests/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic

@@ -1,4 +1,4 @@
-APP_NAME = "binding-usage-controller"
+APP_NAME = binding-usage-controller
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 binary=$(APP_NAME)
@@ -8,8 +8,8 @@ build:
 	./before-commit.sh ci
 
 .PHONY: build-image
-build-image: buc.bin
-	cp buc.bin deploy/controller/buc.bin
+build-image:
+	cp $(binary) deploy/controller/$(binary)
 	docker build -t $(APP_NAME):latest deploy/controller
 
 .PHONY: push-image

@@ -81,8 +81,8 @@ kubectl delete pod service-catalog-etcd-stateful-0 service-catalog-etcd-stateful
 <!-- These absolute paths should be replaced with the relative links after adding this functionality to Kyma -->
 [az-cli]:https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest
 
-[sc-etcd-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd-stateful/templates
-[sc-backup-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/service-catalog/charts/etcd-stateful/templates/05-backup-job.yaml
+[sc-etcd-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/etcd-stateful/templates
+[sc-backup-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/etcd-stateful/templates/05-backup-job.yaml
 [etcd-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator
 [etcd-backup-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator/templates/backup-deployment.yaml
 [core-chart-values]:https://github.com/kyma-project/kyma/blob/master/resources/core/values.yaml

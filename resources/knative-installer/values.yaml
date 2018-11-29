@@ -1,0 +1,6 @@
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  knative_installer:
+    dir: develop/
+    version: ebd415d3
