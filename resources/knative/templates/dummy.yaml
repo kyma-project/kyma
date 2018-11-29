@@ -1,0 +1,10 @@
+{{ if not .Values.global.knative }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-dummy
+  namespace: {{ .Release.Namespace }}
+data:
+  dummy: "dummy"
+{{ end }}

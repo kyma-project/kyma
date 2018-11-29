@@ -1,7 +1,4 @@
-{{- $serviceName := "istio-ingressgateway" -}}
-{{ if .Values.global.knative }}
-  {{- $serviceName := "knative-ingressgateway" -}}
-{{ end }}
+{{- $serviceName := .Values.global.knative | ternary "knative-ingressgateway" "istio-ingressgateway" -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -31,6 +28,7 @@ data:
       {{ end }}
     ]
 
+  {{ if .Values.loadBalancerIP }}
   {{ $serviceName }}.service.patch.json: |
     [
       {
@@ -43,6 +41,7 @@ data:
         "type": "LoadBalancer"
       }
     ]
+  {{ end }}
 
   istio-egressgateway.deployment.patch.json: |
     [
@@ -94,7 +93,7 @@ data:
     service jaeger-query
     service jaeger-agent
     service jaeger-collector
-    pod -lapp=istio-ingressgateway
+    pod -lapp={{ $serviceName }}
 
   required-crds: |
     policies.authentication.istio.io

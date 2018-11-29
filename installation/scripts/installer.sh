@@ -22,6 +22,10 @@ do
             shift # past argument
             shift # past value
             ;;
+        --knative)
+            KNATIVE=true
+            shift
+            ;;
         *) # unknown option
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
@@ -60,8 +64,12 @@ if [ $CR_PATH ]; then
 
 fi
 
+if [ $KNATIVE ]; then
+    EXTRA_CONFIGS="${EXTRA_CONFIGS} ${RESOURCES_DIR}/installer-config-knative.yaml.tpl"
+fi
+
 echo -e "\nApplying installation combo yaml"
-bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} | kubectl apply -f -
+bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} ${EXTRA_CONFIGS} | kubectl apply -f -
 
 echo -e "\nTriggering installation"
 kubectl label installation/kyma-installation action=install

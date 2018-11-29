@@ -1,9 +1,4 @@
-{{ if .Values.tests.enabled }}
-{{- $serviceName := "istio-ingressgateway" -}}
-{{ if .Values.global.knative }}
-  {{- $serviceName := "knative-ingressgateway" -}}
-{{ end }}
-
+{{- $serviceName := .Values.global.knative | ternary "knative-ingressgateway" "istio-ingressgateway" -}}
 ---
 apiVersion: v1
 kind: Pod
@@ -25,4 +20,3 @@ spec:
       value: {{ $serviceName }}.istio-system.svc.cluster.local
   restartPolicy: Never
 ---
-{{ end }}

@@ -1,7 +1,4 @@
-{{- $serviceName := "istio-ingressgateway" -}}
-{{ if .Values.global.knative }}
-  {{- $serviceName := "knative-ingressgateway" -}}
-{{ end }}
+{{ $serviceName := .Values.global.knative | ternary "knative-ingressgateway" "istio-ingressgateway" }}
 apiVersion: v1
 kind: Pod
 metadata:

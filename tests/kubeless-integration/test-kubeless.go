@@ -2,13 +2,11 @@ package main
 
 import (
 	"bytes"
-	"context"
-	"crypto/tls"
 	"fmt"
+	"github.com/kyma-project/kyma/tests/tools/ingressgateway"
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -308,48 +306,14 @@ func deleteFun(namespace, name string) {
 	}
 }
 
-func getMinikubeIP() string {
-	mipCmd := exec.Command("minikube", "ip")
-	if mipOut, err := mipCmd.Output(); err != nil {
-		log.Fatalf("Error while getting minikube IP. Root cause: %s", err)
-		return ""
-	} else {
-		return strings.Trim(string(mipOut), "\n")
-	}
-}
-
 func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName string) {
 	timeout := time.After(2 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 
-	dialer := &net.Dialer{
-		Timeout: 30 * time.Second,
+	ingressClient, err := ingressgateway.Client()
+	if err != nil {
+		log.Fatalf("Cannot get ingressgateway address: %s", err)
 	}
-	ingressGatewayControllerServiceURLEnv := "INGRESSGATEWAY_FQDN"
-	ingressGatewayControllerServiceURL := os.Getenv(ingressGatewayControllerServiceURLEnv)
-	var ingressGatewayControllerAddr []string
-
-	if ingressGatewayControllerServiceURL != "" {
-		var err error
-		ingressGatewayControllerAddr, err = net.LookupHost(ingressGatewayControllerServiceURL)
-		if err != nil {
-			log.Fatalf("[%v] Unable to lookup host %s: %s", testName, ingressGatewayControllerServiceURL, err)
-		}
-	} else {
-		minikubeIP := getMinikubeIP()
-		if minikubeIP == "" {
-			log.Fatalf("[%v] Cannot get minikube IP", testName)
-		}
-		ingressGatewayControllerAddr = []string{minikubeIP}
-	}
-
-	log.Printf("[%v] Ingress controller address: '%s'", testName, ingressGatewayControllerAddr[0])
-
-	http.DefaultTransport.(*http.Transport).DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
-		addr = ingressGatewayControllerAddr[0] + ":443"
-		return dialer.DialContext(ctx, network, addr)
-	}
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	for {
 		select {
@@ -368,14 +332,14 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 			log.Printf("[%v] Timeout: Getting Virtual Service: '%v' and result is: %v", testName, testName, string(stdoutStderr))
 
 			log.Printf("[%v] Timeout: Check http Get one last time", testName)
-			resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
+			resp, err := ingressClient.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
 			if err != nil {
 				log.Fatalf("[%v] Timeout: Unable to call host: %v. Because of following error: %v ", testName, host, err)
 			}
 			log.Fatalf("[%v] Timeout: Response is: %v", testName, resp)
 
 		case <-tick:
-			resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
+			resp, err := ingressClient.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
 			if err != nil {
 				log.Fatalf("[%v] Unable to call host: %v. Because of following error: %v", testName, host, err)
 			}
