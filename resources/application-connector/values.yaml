@@ -12,7 +12,7 @@ global:
     path: eu.gcr.io/kyma-project
   connector_service:
     dir: develop/
-    version: 1ecf2683
+    version: b723b5b6
   connector_service_tests:
     dir: develop/
     version: 1ecf2683
