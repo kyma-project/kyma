@@ -3,22 +3,18 @@ package testkit
 import (
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
-	v1apps "k8s.io/api/apps/v1"
-	v1core "k8s.io/api/core/v1"
-	v1extensions "k8s.io/api/extensions/v1beta1"
-	v1rbac "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 )
 
 type K8sResourcesClient interface {
-	GetDeployment(name string, options v1.GetOptions) (*v1apps.Deployment, error)
-	GetService(name string, options v1.GetOptions) (*v1core.Service, error)
-	GetIngress(name string, options v1.GetOptions) (*v1extensions.Ingress, error)
-	GetRole(name string, options v1.GetOptions) (*v1rbac.Role, error)
-	GetRoleBinding(name string, options v1.GetOptions) (*v1rbac.RoleBinding, error)
-	CreateDummyRemoteEnvironment(name string, accessLabel string) (*v1alpha1.RemoteEnvironment, error)
+	GetDeployment(name string, options v1.GetOptions) (interface{}, error)
+	GetService(name string, options v1.GetOptions) (interface{}, error)
+	GetIngress(name string, options v1.GetOptions) (interface{}, error)
+	GetRole(name string, options v1.GetOptions) (interface{}, error)
+	GetRoleBinding(name string, options v1.GetOptions) (interface{}, error)
+	CreateDummyRemoteEnvironment(name string, accessLabel string, skipInstallation bool) (*v1alpha1.RemoteEnvironment, error)
 	DeleteRemoteEnvironment(name string, options *v1.DeleteOptions) error
 	GetRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error)
 }
@@ -56,34 +52,40 @@ func initClient(k8sConfig *restclient.Config, namespace string) (K8sResourcesCli
 	}, nil
 }
 
-func (c *k8sResourcesClient) GetDeployment(name string, options v1.GetOptions) (*v1apps.Deployment, error) {
+func (c *k8sResourcesClient) GetDeployment(name string, options v1.GetOptions) (interface{}, error) {
 	return c.coreClient.AppsV1().Deployments(c.namespace).Get(name, options)
 }
 
-func (c *k8sResourcesClient) GetIngress(name string, options v1.GetOptions) (*v1extensions.Ingress, error) {
+func (c *k8sResourcesClient) GetIngress(name string, options v1.GetOptions) (interface{}, error) {
 	return c.coreClient.ExtensionsV1beta1().Ingresses(c.namespace).Get(name, options)
 }
 
-func (c *k8sResourcesClient) GetRole(name string, options v1.GetOptions) (*v1rbac.Role, error) {
+func (c *k8sResourcesClient) GetRole(name string, options v1.GetOptions) (interface{}, error) {
 	return c.coreClient.RbacV1().Roles(c.namespace).Get(name, options)
 }
 
-func (c *k8sResourcesClient) GetRoleBinding(name string, options v1.GetOptions) (*v1rbac.RoleBinding, error) {
+func (c *k8sResourcesClient) GetRoleBinding(name string, options v1.GetOptions) (interface{}, error) {
 	return c.coreClient.RbacV1().RoleBindings(c.namespace).Get(name, options)
 }
 
-func (c *k8sResourcesClient) GetService(name string, options v1.GetOptions) (*v1core.Service, error) {
+func (c *k8sResourcesClient) GetService(name string, options v1.GetOptions) (interface{}, error) {
 	return c.coreClient.CoreV1().Services(c.namespace).Get(name, options)
 }
 
-func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, accessLabel string) (*v1alpha1.RemoteEnvironment, error) {
+func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, accessLabel string, skipInstallation bool) (*v1alpha1.RemoteEnvironment, error) {
+	spec := v1alpha1.RemoteEnvironmentSpec{
+		Services:    []v1alpha1.Service{},
+		AccessLabel: accessLabel,
+	}
+
+	if skipInstallation {
+		spec.SkipInstallation = true
+	}
+
 	dummyRe := &v1alpha1.RemoteEnvironment{
 		TypeMeta:   v1.TypeMeta{Kind: "RemoteEnvironment", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: name, Namespace: c.namespace},
-		Spec: v1alpha1.RemoteEnvironmentSpec{
-			Services:    []v1alpha1.Service{},
-			AccessLabel: accessLabel,
-		},
+		Spec:       spec,
 	}
 
 	return c.remoteEnvironmentClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Create(dummyRe)
