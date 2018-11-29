@@ -1,6 +1,5 @@
 -- Called on the request path.
 function envoy_on_request(request_handle)
-  request_handle:logInfo("Hello World")
   GraphQlAuthPlugin_OnRequest(request_handle)
 end
 
@@ -9,9 +8,6 @@ function envoy_on_response(response_handle)
 end
 
 function GraphQlAuthPlugin_OnRequest(request_handle)
-  -- it does not work - i'm not able to read host header
-  -- local authority = request_handle:headers():get(":authority")
-  -- if (authority == "core-ui-api.kyma-system.svc.cluster.local") then
   local path = request_handle:headers():get(":path")
   if (path ~= nil) and (path == "/graphql") then
 
