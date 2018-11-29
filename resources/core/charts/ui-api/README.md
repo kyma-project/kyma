@@ -73,7 +73,7 @@ RBAC in Istio is based on these concepts:
   spec:
     subjects:
     - properties:
-      request.auth.claims[email]: `USER_EMAIL`
+        request.auth.claims[email]: 'USER_EMAIL'
     roleRef:
       kind: ServiceRole
       name: "SERVICE_ROLE_REQUIRED_TO_ACCESS_QUERY"
@@ -134,9 +134,9 @@ spec:
     paths: ["/graphql"]
     methods: ["*"]
     constraints:
-      - key: request.headers[kyma-graphql-resources]
-        values:
-        - '{apis}'
+    - key: request.headers[kyma-graphql-resources]
+      values:
+      - '{apis}'
 EOF
 ```
 
@@ -153,8 +153,8 @@ metadata:
   namespace: kyma-system
 spec:
   subjects:
-    - properties:
-      request.auth.claims[email]: `admin@kyma.cx`
+  - properties:
+      request.auth.claims[email]: 'admin@kyma.cx'
   roleRef:
     kind: ServiceRole
     name: "graphql-groups-read"
