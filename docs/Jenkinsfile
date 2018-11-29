@@ -14,12 +14,12 @@ def azure_redis_cache = "azure-redis-cache"
 def azure_sql = "azure-sql"
 def azure_classes_docs_dir = "$service_brokers/azure-broker-service-classes"
 def gcp_bigquery = "bigquery"
-def gcp_cloud-bigtable = "cloud-bigtable"
-def gcp_cloud-iam-service-account = "cloud-iam-service-account"
-def gcp_cloud-pubsub = "cloud-pubsub"
-def gcp_cloud-spanner = "cloud-spanner"
-def gcp_cloud-sql-mysql = "cloud-sql-mysql"
-def gcp_google-cloud-storage = "google-cloud-storage"
+def gcp_cloud_bigtable = "cloud-bigtable"
+def gcp_cloud_iam_service_account = "cloud-iam-service-account"
+def gcp_cloud_pubsub = "cloud-pubsub"
+def gcp_cloud_spanner = "cloud-spanner"
+def gcp_cloud_sql_mysql = "cloud-sql-mysql"
+def gcp_google_cloud_storage = "google-cloud-storage"
 def gcp_broker_img_prefix = "gcp-"
 def gcp_classes_docs_dir = "$service_brokers/gcp-broker-service-classes"
 def api_gateway = "api-gateway"
@@ -100,28 +100,28 @@ podTemplate(label: label) {
                                 sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_bigquery-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
 
-                            dir("$docs_image_suffix/$gcp_classes_docs_dir/$gcp_cloud-bigtable") {
-                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_cloud-bigtable-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                            dir("$docs_image_suffix/$gcp_classes_docs_dir/$gcp_cloud_bigtable") {
+                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_cloud_bigtable-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
 
-                            dir("$docs_image_suffix/$gcp_classes_docs_dir/$gcp_cloud-iam-service-account") {
-                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_cloud-iam-service-account-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                            dir("$docs_image_suffix/$gcp_classes_docs_dir/$gcp_cloud_iam_service_account") {
+                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_cloud_iam_service_account-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
 
-                            dir("$docs_image_suffix/$gcp_classes_docs_dir/$gcp_cloud-pubsub") {
-                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_cloud-pubsub-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                            dir("$docs_image_suffix/$gcp_classes_docs_dir/$gcp_cloud_pubsub") {
+                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_cloud_pubsub-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
 
-                            dir("$docs_image_suffix/$gcp_classes_docs_dir/$gcp_cloud-spanner") {
-                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_cloud-spanner-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                            dir("$docs_image_suffix/$gcp_classes_docs_dir/$gcp_cloud_spanner") {
+                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_cloud_spanner-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
 
-                            dir("$docs_image_suffix/$gcp_classes_docs_dir/$gcp_cloud-sql-mysql") {
-                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_cloud-sql-mysql-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                            dir("$docs_image_suffix/$gcp_classes_docs_dir/$gcp_cloud_sql_mysql") {
+                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_cloud_sql_mysql-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
 
-                            dir("$docs_image_suffix/$gcp_classes_docs_dir/$gcp_google-cloud-storage") {
-                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_google-cloud-storage-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
+                            dir("$docs_image_suffix/$gcp_classes_docs_dir/$gcp_google_cloud_storage") {
+                                sh "cat ../../../Dockerfile | docker build -f - . -t ${dockerPushRoot}$gcp_broker_img_prefix$gcp_google_cloud_storage-$docs_image_suffix:latest --label version=${dockerImageTag} --label component=${docs_image_suffix}"
                             }
 
                             dir("$docs_image_suffix/$api_gateway") {
@@ -179,23 +179,23 @@ podTemplate(label: label) {
                             sh "docker tag ${dockerPushRoot}$gcp_bigquery-$docs_image_suffix:latest ${dockerPushRoot}$gcp_bigquery-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$gcp_bigquery-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag ${dockerPushRoot}$gcp_cloud-bigtable-$docs_image_suffix:latest ${dockerPushRoot}$gcp_cloud-bigtable-$docs_image_suffix:$dockerImageTag"
-                            sh "docker push ${dockerPushRoot}$gcp_cloud-bigtable-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$gcp_cloud_bigtable-$docs_image_suffix:latest ${dockerPushRoot}$gcp_cloud_bigtable-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$gcp_cloud_bigtable-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag ${dockerPushRoot}$gcp_cloud-iam-service-account-$docs_image_suffix:latest ${dockerPushRoot}$gcp_cloud-iam-service-account-$docs_image_suffix:$dockerImageTag"
-                            sh "docker push ${dockerPushRoot}$gcp_cloud-iam-service-account-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$gcp_cloud_iam_service_account-$docs_image_suffix:latest ${dockerPushRoot}$gcp_cloud_iam_service_account-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$gcp_cloud_iam_service_account-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag ${dockerPushRoot}$gcp_cloud-pubsub-$docs_image_suffix:latest ${dockerPushRoot}$gcp_cloud-pubsub-$docs_image_suffix:$dockerImageTag"
-                            sh "docker push ${dockerPushRoot}$gcp_cloud-pubsub-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$gcp_cloud_pubsub-$docs_image_suffix:latest ${dockerPushRoot}$gcp_cloud_pubsub-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$gcp_cloud_pubsub-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag ${dockerPushRoot}$gcp_cloud-spanner-$docs_image_suffix:latest ${dockerPushRoot}$gcp_cloud-spanner-$docs_image_suffix:$dockerImageTag"
-                            sh "docker push ${dockerPushRoot}$gcp_cloud-spanner-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$gcp_cloud_spanner-$docs_image_suffix:latest ${dockerPushRoot}$gcp_cloud_spanner-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$gcp_cloud_spanner-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag ${dockerPushRoot}$gcp_cloud-sql-mysql-$docs_image_suffix:latest ${dockerPushRoot}$gcp_cloud-sql-mysql-$docs_image_suffix:$dockerImageTag"
-                            sh "docker push ${dockerPushRoot}$gcp_cloud-sql-mysql-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$gcp_cloud_sql_mysql-$docs_image_suffix:latest ${dockerPushRoot}$gcp_cloud_sql_mysql-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$gcp_cloud_sql_mysql-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag ${dockerPushRoot}$gcp_google-cloud-storage-$docs_image_suffix:latest ${dockerPushRoot}$gcp_google-cloud-storage-$docs_image_suffix:$dockerImageTag"
-                            sh "docker push ${dockerPushRoot}$gcp_google-cloud-storage-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$gcp_google_cloud_storage-$docs_image_suffix:latest ${dockerPushRoot}$gcp_google_cloud_storage-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$gcp_google_cloud_storage-$docs_image_suffix:$dockerImageTag"
 
                             sh "docker tag ${dockerPushRoot}$api_gateway-$docs_image_suffix:latest ${dockerPushRoot}$api_gateway-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$api_gateway-$docs_image_suffix:$dockerImageTag"
