@@ -15,7 +15,7 @@ global:
     version: b723b5b6
   connector_service_tests:
     dir: develop/
-    version: f01c8848
+    version: 1ecf2683
   connection_token_handler:
     dir: develop/
     version: e8d279fa
