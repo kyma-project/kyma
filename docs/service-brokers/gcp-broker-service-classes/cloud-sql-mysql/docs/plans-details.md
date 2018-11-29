@@ -66,7 +66,7 @@ These are the **Settings** properties:
 | **dataDiskSizeGb** | `string` | The size of data disk in `GB`. The data disk size minimum is `10GB`. Applies only to Second Generation instances. | NO | - |
 | **dataDiskType** | `string` | The type of data disk. The possible values are `PD_SSD`, `PD_HDD`. Applies only to Second Generation instances. | NO | `PD_SSD` |
 | **databaseFlags** | `array` | The database flags passed to the instance at startup. | NO | - |
-| **databaseFlags.name** | `string` | The name of the flag. These flags are passed at instance startup, so include both MySQL server options and MySQL system variables. Flags should be specified with underscores, not hyphens. For more information, see **Configuring MySQL Flags** in the Google Cloud SQL documentation, as well as the official MySQL documentation for server options and system variables. | NO | - |
+| **databaseFlags.name** | `string` | The name of the flag. These flags are passed at instance startup, so include both MySQL server options and MySQL system variables. Flags should be specified with underscores, not hyphens. | NO | - |
 | **databaseFlags.value** | `string` | The value of the flag. Booleans should be set to `on` for `true` and `off` for `false`. This field must be omitted if the flag does not take a value. | NO | - |
 | **databaseReplicationEnabled** | `boolean` | Configuration specific to read replica instances. Indicates whether replication is enabled or not. | NO | - |
 | **ipConfiguration** | `object` | The settings for IP Management. This allows to enable or disable the instance IP and manage which external networks can connect to the instance. The IPv4 address cannot be disabled for Second Generation instances. For more information, go to the **IpConfiguration properties** section. | NO | - |
@@ -75,7 +75,7 @@ These are the **Settings** properties:
 | **locationPreference.zone** | `string` | The preferred Compute Engine zone. | NO | - |
 | **maintenanceWindow** | `object` | The maintenance window for this instance. This specifies when the instance may be restarted for maintenance purposes. Applies only to Second Generation instances. | NO | - |
 | **maintenanceWindow.day** | `integer` | Day of week (1-7), starting on Monday. | NO | - |
-| **maintenanceWindow.hour** | `integer` | The hour of day  (0-23). | NO | - |
+| **maintenanceWindow.hour** | `integer` | The hour of the day  (0-23). | NO | - |
 | **maintenanceWindow.updateTrack** | `string` | Maintenance timing setting: canary or stable. | NO | - |
 | **pricingPlan** | `string` | The pricing plan for this instance. The value can be either `PER_USE` or `PACKAGE`. Only `PER_USE` is supported for Second Generation instances. | NO | `PER_USE` |
 | **replicationType** | `string` | The type of replication this instance uses. This can be either `ASYNCHRONOUS` or `SYNCHRONOUS`. This property is only applicable to First Generation instances. | NO | - |
@@ -105,7 +105,7 @@ These are the **IpConfiguration** properties:
 | **authorizedNetworks.expirationTime** | `string` | The time in the RFC 3339 format when this access control entry expires. | NO | - |
 | **authorizedNetworks.name** | `string` | An optional label to identify this entry. | NO | - |
 | **authorizedNetworks.value** | `string` | The whitelisted value for the access control list. | NO | - |
-| **ipv4Enabled** | `boolean` | Whether the instance should be assigned an IP address or not. | NO | - |
+| **ipv4Enabled** | `boolean` | Indicates whether the instance should be assigned an IP address or not. | NO | - |
 | **requireSsl** | `boolean` | Indicates whether SSL connections over IP should be enforced or not. | NO | - |
 
 ## Update parameters
@@ -114,7 +114,7 @@ The update parameters are the same as the provisioning parameters.
 
 ## Binding parameters
 
-Binding grants one of the available IAM roles on the Cloud SQL instance to the specified service account. Optionally, a new service account can be created and given access to the MySQL instance. These are the binding parameters:
+Binding grants one of the available IAM roles on the Cloud SQL instance to the specified service account. Optionally, you can create a new service account and add the access to the MySQL instance. These are the binding parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|

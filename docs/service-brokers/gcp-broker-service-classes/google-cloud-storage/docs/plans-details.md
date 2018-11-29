@@ -60,8 +60,8 @@ These are the properties of the **Lifecycle** parameter:
 |----------------|------|-------------|----------|---------------|
 | **rule** | `object` | A lifecycle management rule, which consists of an action to take and the condition(s) under which the action is taken. | NO | - |
 | **rule.action** | `object` | The action to take. | NO | - |
-| **rule.action.storageClass** | `string` | Target storage class. Required if the type of the action is `SetStorageClass`. | NO | - |
-| **rule.action.type** | `string` | Type of the action. Currently, only `Delete` and `SetStorageClass` are supported. | NO | - |
+| **rule.action.storageClass** | `string` | The target storage class. Required if the type of the action is `SetStorageClass`. | NO | - |
+| **rule.action.type** | `string` | The action type. Currently, only `Delete` and `SetStorageClass` are supported. | NO | - |
 | **rule.condition** | `object` | The condition(s) under which the action is taken. | NO | - |
 | **rule.condition.age** | `integer` | Age of an object in days. This condition is satisfied when an object reaches the specified age. | NO | - |
 | **rule.condition.createdBefore** | `string` | A date in RFC 3339 format. This condition is satisfied when an object is created before midnight of the specified date in UTC. | NO | - |
@@ -76,7 +76,7 @@ The update parameters are the same as the provisioning parameters.
 
 ## Binding parameters
 
-Binding grants the provided service account access to the Cloud Storage Bucket. Optionally, a new service account can be created and given access to the Cloud Storage Bucket. These are the binding parameters:
+Binding grants the provided service account access to the Cloud Storage Bucket. Optionally, you can create a new service account and add the access to the Cloud Storage Bucket. These are the binding parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|

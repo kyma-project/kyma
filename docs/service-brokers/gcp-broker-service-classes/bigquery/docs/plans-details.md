@@ -18,7 +18,7 @@ Provisioning an instance creates a new BigQuery dataset. The provisioning parame
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
 | **datasetId** | `string` | A user-specified, unique ID for the BigQuery dataset. Must be 1-1024 characters long. Must contain only letters, numbers, or underscores. | YES | - |
-| **defaultTableExpirationMs** | `string` | The default lifetime of all tables in the dataset in milliseconds. The minimum value is `3600000` milliseconds per one hour. Once this property is set, all newly-created tables in the dataset have the **expirationTime** property set to the creation time plus the value in this property. Changing the value only affects new tables, not existing ones. When a given table reaches the **expirationTime**, that table is deleted automatically. If you modify or remove the table's **expirationTime** before the table expires, or if you provide an explicit **expirationTime** when creating a table, that value takes precedence over the default expiration time indicated by this property. | NO |  `3600000` |
+| **defaultTableExpirationMs** | `string` | The default lifetime of all tables in the dataset in milliseconds. The minimum value is `3600000` milliseconds per one hour. Once this property is set, all newly-created tables in the dataset have the **expirationTime** property set to the creation time plus the value in the **defaultTableExpirationMs** parameter. Changing the value only affects new tables, not existing ones. When a given table reaches the **expirationTime**, that table is deleted automatically. If you modify or remove the table's **expirationTime** before the table expires, or if you provide an explicit **expirationTime** when creating a table, that value takes precedence over the default expiration time indicated by this property. | NO |  `3600000` |
 | **description** | `string` | A user-friendly description of the BigQuery dataset. | NO | - |
 | **friendlyName** | `string` | A descriptive name for the BigQuery dataset. | NO | - |
 | **labels** | `object` | To organize your project, add arbitrary labels as key/value pairs to the BigQuery dataset. Use labels to indicate different elements, such as environments, services, or teams. | NO | - |
@@ -31,7 +31,7 @@ The update parameters are the same as the provisioning parameters.
 
 ## Binding parameters
 
-Binding to an instance grants the provided service account the access to the dataset or project. Optionally, a new service account can be created and given access to the Cloud Spanner instance. These are the binding parameters:
+Binding to an instance grants the provided service account the access to the dataset or project. Optionally, you can create a new service account and add the access to the Cloud Spanner instance. These are the binding parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|

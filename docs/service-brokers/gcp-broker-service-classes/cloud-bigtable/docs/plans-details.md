@@ -48,7 +48,7 @@ These are the **Tables** properties:
 | **ColumnFamily.gcRule** | `object` |  Rule used to determine which cells to delete during garbage collection. Must serialize to at most 500 bytes. | NO | - |
 | **ColumnFamily.gcRule.maxAge** | `string` |  Deletes cells in a column older than a given age. Values must be at least one millisecond, and are truncated to microsecond granularity. | NO | - |
 | **ColumnFamily.gcRule.maxNumVersions** | `integer` |  Deletes all cells in a column, except the most recent. | NO | - |
-| **granularity** | `string` |  The granularity at which timestamps are stored in this table. Timestamps not matching the granularity are rejected. The value of this parameter is `MILLIS`. | NO | `MILLIS` |
+| **granularity** | `string` |  The granularity at which timestamps are stored in this table. Timestamps not matching the granularity are rejected. | NO | `MILLIS` |
 | **initialSplits** | `array` |  The optional list of row keys that are used to initially split the table into several tablets. | NO | - |
 | **initialSplits.key** | `string` |  Row key to use as an initial tablet boundary. | NO | - |
 
@@ -59,7 +59,7 @@ The update parameters are the same as the provisioning parameters.
 
 ## Binding parameters
 
-Binding grants the provided service account access to the Cloud Bigtable instance. Optionally, a new service account can be created with an access to the Cloud Bigtable instance. These are the binding parameters:
+Binding grants the provided service account access to the Cloud Bigtable instance. Optionally, you can create a new service account and add the access to the Cloud Bigtable instance. These are the binding parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|

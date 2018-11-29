@@ -29,7 +29,7 @@ The update parameters are the same as the provisioning parameters.
 
 ## Binding parameters
 
-Binding to an instance grants the provided service account access to the Cloud Spanner instance. Optionally, a new service account can be created and given access to the Cloud Spanner instance. These are the binding parameters:
+Binding to an instance grants the provided service account access to the Cloud Spanner instance. Optionally, you can create a new service account and add the access to the Cloud Spanner instance. These are the binding parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
