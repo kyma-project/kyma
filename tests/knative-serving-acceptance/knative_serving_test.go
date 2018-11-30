@@ -23,22 +23,25 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 		t.Fatalf("Unexpected error when creating ingressgateway client: %s", err)
 	}
 
+
 	err = retry.Do(func() error {
+		t.Logf("Calling: %s", testServiceURL)
 		resp, err := ingressClient.Get(testServiceURL)
 		if err != nil {
 			return err
-		}
-
-		if resp.StatusCode != http.StatusOK {
-			return fmt.Errorf("unexpected status code: %v", resp.StatusCode)
 		}
 
 		bytes, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}
-
 		msg := string(bytes)
+
+		t.Logf("Received %v: '%s'", resp.StatusCode, msg)
+
+		if resp.StatusCode != http.StatusOK {
+			return fmt.Errorf("unexpected status code: %v", resp.StatusCode)
+		}
 		if msg != "Test Target" {
 			return fmt.Errorf("unexpected response: '%s'", msg)
 		}
