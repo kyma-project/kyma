@@ -26,10 +26,11 @@ Follow these steps to create a Kubernetes Secret which contains a JSON access ke
 5. Click **Create key** and choose `JSON` as a key type.
 6. Save the `JSON` file.
 7. Create a Secret from the JSON file by running this command:
+    ```
+    kubectl create secret generic gcp-broker-data --from-file=sa-key={filename} --from-literal=project-name={gcp-project} --namespace {namespace}
+    ```
 
-```
-kubectl create secret generic gcp-broker-data --from-file=sa-key={filename} --from-literal=project-name=kyma-project --namespace {namespace}
-```
+8. Click **Done**
 
 >**NOTE:** You must create a Secret in every Namespace where you provision the GCP Broker Provider class.
 
@@ -40,10 +41,15 @@ used during provisioning, deprovisioning, binding, and unbinding actions.
 
 ![](assets/gcp-broker-key-management.svg)
 
+Provisioning and deprovisioning processes use the [GCP Broker Provider](https://github.com/kyma-project/kyma/tree/master/tools/gcp-broker-provider) tool.
+
 The provisioning process flow looks as follows:
 1. The user triggers the provisioning action.
-2. During the provisioning process, new service account and access key are created in the Google Cloud Platform.
-3. After the provisioning process, the post-install job is triggered.
+2. Provisioning script checks if secret exists in a given namespace and downloads it.
+3. gcloud CLI is configured based on values from secret.
+4. [sc](https://github.com/kyma-incubator/k8s-service-catalog) CLI is used to add GCP Broker to Kyma cluster 
+5. `sc` CLI creates service account and access key on the Google Cloud Platform.
+6. After the provisioning process, the post-install job is triggered.
 
 
 ![GCP Broker Provisioning](assets/gcp-broker-provisioning.svg)
@@ -60,7 +66,11 @@ Binding to this Service Class is disabled.
 
 The deprovisioning process flow looks as follows:
 1. The user triggers the deprovisioning action.
-2. If the Secret is present, access keys are removed from the Google Cloud Platform.
+2. Provisioning script checks if secret exists in a given namespace and downloads it. 
+   If secret does not exist the `sc` CLI is executed with the `--skip-gcp-integration` parameter (step 6) 
+3. gcloud CLI is configured based on values from secret.
+4. [sc](https://github.com/kyma-incubator/k8s-service-catalog) CLI is used to remove GCP Broker from Kyma cluster.
+5. `sc` CLI removes access keys from the Google Cloud Platform.
 
 ![GCP Broker Deprovisioning](assets/gcp-broker-deprovisioning.svg)
 
