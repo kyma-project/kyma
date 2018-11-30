@@ -13,4 +13,3 @@ Our changes:
  * There is duplicated CRD `images.caching.internal.knative.dev` in serving release. One copy is removed.
  * `knative-ingressgateway` Service's `type` is changed to `NodePort`.
  * `knative-shared-gateway` Gateway have TLS enabled
- * KNative resources are created only if variable `global.knative` is true

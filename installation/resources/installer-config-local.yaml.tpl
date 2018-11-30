@@ -30,6 +30,7 @@ metadata:
     installer: overrides
 data:
   global.isLocalEnv: "true"
+  global.knative: "false"
   global.domainName: "kyma.local"
   global.etcdBackup.containerName: ""
   global.etcdBackup.enabled: "false"

@@ -1,4 +1,3 @@
-{{ if .Values.global.knative }}
 ---
 # eventing.yaml
 ---
@@ -353,4 +352,3 @@ spec:
         image: gcr.io/knative-releases/github.com/knative/eventing/cmd/fanoutsidecar@sha256:b57a317067d9a4299f08f6b05f161e50c8ac9b5e2cca812c41a938ad8b12ab38
         name: dispatcher
       serviceAccountName: in-memory-channel-dispatcher
-{{ end }}

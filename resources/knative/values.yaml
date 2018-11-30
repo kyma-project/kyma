@@ -1,0 +1,7 @@
+knative:
+  ingressgateway:
+    service:
+      type: NodePort
+  gateway:
+    tls:
+      enabled: true

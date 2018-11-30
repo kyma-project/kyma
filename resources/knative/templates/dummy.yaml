@@ -1,13 +1,6 @@
-{{ if not .Values.global.knative }}
-# This chart is required for helm when knative is disabled.
-# Helm is failing if there is a chart without any resource
-# so we need to add dummy object.
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: knative-dummy
-  namespace: {{ .Release.Namespace }}
 data:
   dummy: "dummy"
-{{ end }}
