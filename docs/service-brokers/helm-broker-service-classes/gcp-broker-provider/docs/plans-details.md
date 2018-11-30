@@ -30,7 +30,7 @@ Follow these steps to create a Kubernetes Secret which contains a JSON access ke
     kubectl create secret generic gcp-broker-data --from-file=sa-key={filename} --from-literal=project-name={gcp-project} --namespace {namespace}
     ```
 
-8. Click **Done**
+8. Click **Done**.
 
 >**NOTE:** You must create a Secret in every Namespace where you provision the GCP Broker Provider class.
 
