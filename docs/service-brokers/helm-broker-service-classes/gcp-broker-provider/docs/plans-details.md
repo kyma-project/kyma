@@ -45,7 +45,7 @@ Provisioning and deprovisioning processes use the [GCP Broker Provider](https://
 
 The provisioning process flow looks as follows:
 1. The user triggers the provisioning action.
-2. Provisioning script checks if secret exists in a given namespace and downloads it.
+2. The provisioning script checks if Secret exists in a given Namespace and downloads it.
 3. gcloud CLI is configured based on values from secret.
 4. [sc](https://github.com/kyma-incubator/k8s-service-catalog) CLI is used to add GCP Broker to Kyma cluster 
 5. `sc` CLI creates service account and access key on the Google Cloud Platform.
