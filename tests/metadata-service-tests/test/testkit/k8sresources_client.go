@@ -91,7 +91,7 @@ func (c *k8sResourcesClient) GetRemoteEnvironmentServices(name string, options v
 func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error) {
 	dummyRe := &v1alpha1.RemoteEnvironment{
 		TypeMeta:   v1.TypeMeta{Kind: "RemoteEnvironment", APIVersion: v1alpha1.SchemeGroupVersion.String()},
-		ObjectMeta: v1.ObjectMeta{Name: name, Namespace: c.namespace},
+		ObjectMeta: v1.ObjectMeta{Name: name},
 		Spec: v1alpha1.RemoteEnvironmentSpec{
 			Services: []v1alpha1.Service{},
 		},

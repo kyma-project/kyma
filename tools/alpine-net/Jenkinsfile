@@ -25,6 +25,7 @@ podTemplate(label: label) {
                 timeout(time:20, unit:"MINUTES") {
                     ansiColor('xterm') {
                         stage("setup") {
+                            
                             checkout scm
 
                             if(dockerImageTag == ""){
@@ -38,7 +39,7 @@ podTemplate(label: label) {
 
                         stage("build image $application") {
                             dir(env.APP_FOLDER){
-                            sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
+                                sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
                             }
                         }
 
@@ -57,6 +58,8 @@ podTemplate(label: label) {
                 }
             }
         } catch (ex) {
+            slaveDiagnostics()
+
             echo "Got exception: ${ex}"
             currentBuild.result = "FAILURE"
             def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${params.GIT_BRANCH}. See details: ${env.BUILD_URL}"
@@ -64,3 +67,11 @@ podTemplate(label: label) {
         }
     }
 }
+
+def slaveDiagnostics() {
+    sh "whoami"
+    sh "pwd"
+    sh "df -h"
+    sh "mount"
+}
+

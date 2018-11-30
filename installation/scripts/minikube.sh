@@ -8,7 +8,9 @@ MINIKUBE_DOMAIN=""
 MINIKUBE_VERSION=0.28.2
 KUBERNETES_VERSION=1.10.0
 KUBECTL_CLI_VERSION=1.10.0
-VM_DRIVER="hyperkit"
+VM_DRIVER=hyperkit
+DISK_SIZE=20g
+MEMORY=8192
 
 source $CURRENT_DIR/utils.sh
 
@@ -18,10 +20,20 @@ do
     key="$1"
 
     case ${key} in
+        --disk-size)
+            DISK_SIZE=$2
+            shift
+            shift
+            ;;
         --vm-driver)
             VM_DRIVER="$2"
             shift # past argument
             shift # past value
+            ;;
+        --memory)
+            MEMORY=$2
+            shift
+            shift
             ;;
         --domain)
             MINIKUBE_DOMAIN="$2"
@@ -173,15 +185,16 @@ function start() {
     fi
 
     minikube start \
-    --memory 8192 \
+    --memory $MEMORY \
     --cpus 4 \
     --extra-config=apiserver.Authorization.Mode=RBAC \
     --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList=".*" \
     --extra-config=controller-manager.ClusterSigningCertFile="/var/lib/localkube/certs/ca.crt" \
-	--extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
-    --extra-config=apiserver.Admission.PluginNames="LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota" \
+    --extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
+    --extra-config=apiserver.admission-control="LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota" \
     --kubernetes-version=v$KUBERNETES_VERSION \
     --vm-driver=$VM_DRIVER \
+    --disk-size=$DISK_SIZE \
     --feature-gates="MountPropagation=false" \
     -b=localkube
 

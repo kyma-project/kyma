@@ -5,7 +5,7 @@ deployment:
     internalAPIPort: &internalAPIPort 8080
     externalAPIPort: &externalAPIPort 8081
     tokenLength: 64
-    tokenExpirationMinutes: 60
+    tokenExpirationMinutes: 5
   envvars:
     country: DE
     organization: Organization

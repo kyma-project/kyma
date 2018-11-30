@@ -1,7 +1,8 @@
+{{- if not .Values.global.isLocalEnv }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "test-{{ template "fullname" . }}-config"
+  name: "test-{{ template "fullname" . }}-config-int"
   labels:
     helm-chart-test: "true"
 data:
@@ -9,3 +10,4 @@ data:
     {{- include "k8s.yaml.tpl" . | indent 4}}
   svcBindLambdaYaml: |-
     {{- include "svcbind-lambda.yaml.tpl" . | indent 4}}
+{{- end }}

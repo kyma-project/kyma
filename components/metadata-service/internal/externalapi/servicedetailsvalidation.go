@@ -35,7 +35,7 @@ func NewServiceDetailsValidator() ServiceDetailsValidator {
 		}
 
 		apperr = validateApiCredentials(details.Api)
-		if err != nil {
+		if apperr != nil {
 			return apperr
 		}
 

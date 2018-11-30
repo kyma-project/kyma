@@ -26,6 +26,8 @@ func errorCodeToHttpStatus(code int) int {
 		return http.StatusConflict
 	case apperrors.CodeWrongInput:
 		return http.StatusBadRequest
+	case apperrors.CodeUpstreamServerCallFailed:
+		return http.StatusBadGateway
 	default:
 		return http.StatusInternalServerError
 	}

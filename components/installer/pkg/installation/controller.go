@@ -193,10 +193,7 @@ func (c *Controller) syncHandler(key string) error {
 
 		c.installBackoff.step()
 
-		overrideProvider, overridesErr := overrides.New(c.kubeClientset)
-		if c.errorHandlers.CheckError("Error while building overrides: ", overridesErr) {
-			return overridesErr
-		}
+		overrideProvider := overrides.New(c.kubeClientset)
 
 		err = c.conditionManager.InstallStart()
 		if c.errorHandlers.CheckError("Error starting install/update: ", err) {
