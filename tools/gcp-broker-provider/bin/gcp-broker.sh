@@ -16,13 +16,13 @@ readonly GCP_SECRET_NAME="gcp-broker-data"
 function discoveredUnsetVar() {
     local discoveredUnsetVar=false
     for e in WORKING_NAMESPACE; do
-        if [ -z "${!e}" ] ; then
+        if [[ -z "${!e}" ]] ; then
             echo "ERROR: ${e} is not set"
             discoveredUnsetVar=true
         fi
     done
 
-    if [ "${discoveredUnsetVar}" = true ] ; then
+    if [[ "${discoveredUnsetVar}" = true ]] ; then
         exit 1
     fi
 }
@@ -31,18 +31,18 @@ function configureGCloud() {
     if kubectl get secrets -n ${WORKING_NAMESPACE} | grep -q "${GCP_SECRET_NAME}"; then
         export GOOGLE_APPLICATION_CREDENTIALS=${CURRENT_DIR}"/sa-key.json"
 
-        projectName=$(kubectl get secret gcp-broker-data -o jsonpath='{ .data.project-name }' | base64 --decode)
-        saKey=$(kubectl get secret gcp-broker-data -o jsonpath='{ .data.sa-key }' | base64 --decode)
+        projectName=$(kubectl get secret -n ${WORKING_NAMESPACE} ${GCP_SECRET_NAME} -o jsonpath='{ .data.project-name }' | base64 --decode)
+        saKey=$(kubectl get secret -n ${WORKING_NAMESPACE} ${GCP_SECRET_NAME} -o jsonpath='{ .data.sa-key }' | base64 --decode)
 
         local discoveredUnsetVar=false
         for e in projectName saKey; do
-            if [ -z "${!e}" ] ; then
+            if [[ -z "${!e}" ]] ; then
                 echo "ERROR: Value for ${e} in Secret ${GCP_SECRET_NAME} cannot be empty."
                 discoveredUnsetVar=true
             fi
         done
 
-        if [ "${discoveredUnsetVar}" = true ] ; then
+        if [[ "${discoveredUnsetVar}" = true ]] ; then
             exit 1
         fi
 
@@ -81,7 +81,7 @@ function cleanupAllReleaseJobs() {
     kubectl delete jobs -n ${WORKING_NAMESPACE} -l release=${RELEASE_NAME}
 
     deleteErr=$?
-    if [ ${deleteErr} -ne 0 ]
+    if [[ ${deleteErr} -ne 0 ]]
     then
       printf "FAILED cleaning Jobs.\n"
       return 1
@@ -119,7 +119,7 @@ case "${OPERATION}" in
             cfgErr=$?
         set -o errexit
 
-        if [ ${cfgErr} -ne 0 ]
+        if [[ ${cfgErr} -ne 0 ]]
         then
             echo "The gcloud tool cannot be configured. The secret ${GCP_SECRET_NAME} was not found in namespace ${WORKING_NAMESPACE}"
             exit 1
@@ -138,7 +138,7 @@ case "${OPERATION}" in
             cfgErr=$?
         set -o errexit
 
-        if [ ${cfgErr} -ne 0 ]
+        if [[ ${cfgErr} -ne 0 ]]
         then
             flags=${flags}" --skip-gcp-integration"
         fi
