@@ -203,8 +203,8 @@ podTemplate(label: label) {
                             sh "docker tag ${dockerPushRoot}$gcp_broker_img_prefix$gcp_google_cloud_storage-$docs_image_suffix:latest ${dockerPushRoot}$gcp_broker_img_prefix$gcp_google_cloud_storage-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$gcp_broker_img_prefix$gcp_google_cloud_storage-$docs_image_suffix:$dockerImageTag"
 
-                            sh "docker tag ${dockerPushRoot}$helm_broker_classes_docs_dir-$docs_image_suffix:latest ${dockerPushRoot}$helm_broker_classes_docs_dir-$docs_image_suffix:$dockerImageTag"
-                            sh "docker push ${dockerPushRoot}$helm_broker_classes_docs_dir-$docs_image_suffix:$dockerImageTag"
+                            sh "docker tag ${dockerPushRoot}$helm_broker_gcp_broker_provider-$docs_image_suffix:latest ${dockerPushRoot}$helm_broker_gcp_broker_provider-$docs_image_suffix:$dockerImageTag"
+                            sh "docker push ${dockerPushRoot}$helm_broker_gcp_broker_provider-$docs_image_suffix:$dockerImageTag"
 
                             sh "docker tag ${dockerPushRoot}$api_gateway-$docs_image_suffix:latest ${dockerPushRoot}$api_gateway-$docs_image_suffix:$dockerImageTag"
                             sh "docker push ${dockerPushRoot}$api_gateway-$docs_image_suffix:$dockerImageTag"
@@ -238,7 +238,7 @@ podTemplate(label: label) {
                                 sh "docker push ${dockerPushRoot}$gcp_broker_img_prefix$gcp_cloud_spanner-$docs_image_suffix:latest"
                                 sh "docker push ${dockerPushRoot}$gcp_broker_img_prefix$gcp_cloud_sql_mysql-$docs_image_suffix:latest"
                                 sh "docker push ${dockerPushRoot}$gcp_broker_img_prefix$gcp_google_cloud_storage-$docs_image_suffix:latest"
-                                sh "docker push ${dockerPushRoot}$helm_broker_classes_docs_dir-$docs_image_suffix:latest"
+                                sh "docker push ${dockerPushRoot}$helm_broker_gcp_broker_provider-$docs_image_suffix:latest"
                                 sh "docker push ${dockerPushRoot}$api_gateway-$docs_image_suffix:latest"
                                 sh "docker push ${dockerPushRoot}$security-$docs_image_suffix:latest"
                                 sh "docker push ${dockerPushRoot}$logging-$docs_image_suffix:latest"
