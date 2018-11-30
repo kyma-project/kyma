@@ -47,7 +47,7 @@ The provisioning process flow looks as follows:
 1. The user triggers the provisioning action.
 2. The provisioning script checks if Secret exists in a given Namespace and downloads it.
 3. The script configures gcloud CLI basing on values from the Secret.
-4. [sc](https://github.com/kyma-incubator/k8s-service-catalog) CLI is used to add GCP Broker to Kyma cluster 
+4. The script uses the [sc](https://github.com/kyma-incubator/k8s-service-catalog) CLI to add the GCP Broker to the Kyma cluster.
 5. `sc` CLI creates service account and access key on the Google Cloud Platform.
 6. After the provisioning process, the post-install job is triggered.
 
