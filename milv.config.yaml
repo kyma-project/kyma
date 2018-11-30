@@ -25,3 +25,6 @@ files:
   - path: "./kyma/docs/service-brokers/docs/011-configuration-helm-broker.md"
     config:
       white-list-external: ["custom.bundles-repository"]
+  - path: "./examples/tracing/README.md"
+    config:
+      white-list-external: ["https://jaeger.{YOUR_CLUSTER_DOMAIN}"]
