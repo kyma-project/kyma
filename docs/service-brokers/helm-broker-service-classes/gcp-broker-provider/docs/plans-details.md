@@ -66,7 +66,7 @@ Binding to this Service Class is disabled.
 
 The deprovisioning process flow looks as follows:
 1. The user triggers the deprovisioning action.
-2. Provisioning script checks if secret exists in a given namespace and downloads it. 
+2. The provisioning script checks if Secret exists in a given Namespace and downloads it. 
    If secret does not exist the `sc` CLI is executed with the `--skip-gcp-integration` parameter (step 6) 
 3. gcloud CLI is configured based on values from secret.
 4. [sc](https://github.com/kyma-incubator/k8s-service-catalog) CLI is used to remove GCP Broker from Kyma cluster.
