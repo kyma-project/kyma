@@ -1,0 +1,16 @@
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: ServiceRoleBinding
+metadata:
+  name: graphql-admin-view-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+spec:
+  subjects:
+  - properties:
+      request.auth.claims[email]: 'admin@kyma.cx' # TODO: Pass email from global variables
+  roleRef:
+    kind: ServiceRole
+    name: "graphql-admin-view"
