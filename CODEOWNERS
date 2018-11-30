@@ -122,7 +122,7 @@
 /resources/core/charts/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The `docs` subchart
-/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
+/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `ui-api` subchart
 /resources/core/charts/ui-api/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
