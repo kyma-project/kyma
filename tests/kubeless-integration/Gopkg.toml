@@ -1,0 +1,4 @@
+[[constraint]]
+  name = "github.com/kyma-project/kyma"
+  source = "https://github.com/sjanota/kyma"
+  branch = "kyma-on-knative"
