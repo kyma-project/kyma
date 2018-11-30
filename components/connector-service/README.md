@@ -35,3 +35,12 @@ Connector Service also uses following environmental variables for CSR - related 
 - **ORGANIZATIONALUNIT**
 - **LOCALITY**
 - **PROVINCE**
+
+## Testing on local deployment
+
+When you develop the Application Connector components, you can test the changes you introduced on a local Kyma deployment before you push them to a production cluster.
+To test the component you modified, run the `run-with-local-tests.sh` script located in the `scripts` directory.
+
+Running the script builds the Docker image of the component, pushes it to the Minikube registry, and updates the component deployment in the Minikube cluster. It then triggers the `run-local-tests.sh` script, which builds the image of the acceptance tests to the Minikube registry, creates a Pod with the tests, and fetches the logs from that Pod.
+
+Alternatively, you can run only the `run-local-tests.sh` script for the given component to build the image of the component's acceptance tests to the Minikube registry, create a Pod with the tests, and fetch the logs from that Pod.
