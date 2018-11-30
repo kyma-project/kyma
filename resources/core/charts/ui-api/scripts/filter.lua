@@ -9,10 +9,13 @@ end
 
 function GraphQlAuthPlugin_OnRequest(request_handle)
   local path = request_handle:headers():get(":path")
-  if (path ~= nil) and (path == "/graphql") then
-
+  if (path == nil) then
+    request_handle:logWarn("request path empty")
+  elseif (path == "/graphql") then
     local method = request_handle:headers():get(":method")
-    if (method ~= nil) and (method == "POST") then
+    if (method == nil) then
+      request_handle:logWarn("request method empty")
+    elseif (method == "POST") then
       request_handle:headers():replace("kyma-graphql-parsed", "true")
 
       local body = request_handle:body()
