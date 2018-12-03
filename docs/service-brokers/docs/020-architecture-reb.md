@@ -26,7 +26,7 @@ This ServiceClass has a **bindable** flag set to `true` which means that you hav
 4. The service or lambda calls the API through the Application Connector. The Application Connector verifies the label to check if you have the authorization to access this API.
 5. After verifying the label, the Application Connector allows you to access the remote environment API.
 
-![API Service Class](assets/003-REB-API-service-class.png)
+![API Service Class](assets/020-REB-API-service-class.png)
 
 ### Provisioning and binding for an Event ServiceClass
 
@@ -39,7 +39,7 @@ This ServiceClass has a **bindable** flag set to `false` which means that after 
 6. The Application Connector sends an Event to the lambda through the Event Bus.
 
 
-![Event Service Class](assets/004-REB-event-service-class.png)
+![Event Service Class](assets/020-REB-event-service-class.png)
 
 ### Provisioning and binding for both the API and Event ServiceClass
 
