@@ -5,6 +5,7 @@ import (
 	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/tests/tools/ingressgateway"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"testing"
@@ -15,7 +16,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 	domainName := MustGetenv(t, "DOMAIN_NAME")
 	target := MustGetenv(t, "TARGET")
 
-	testServiceURL := fmt.Sprintf("https://test-service.kantive-serving.%s", domainName)
+	testServiceURL := fmt.Sprintf("https://test-service.knative-serving.%s", domainName)
 
 	ingressClient, err := ingressgateway.Client()
 	if err != nil {
@@ -35,7 +36,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 		}
 		msg := string(bytes)
 
-		t.Logf("Received %v: '%s'", resp.StatusCode, msg)
+		log.Println("Received %v: '%s'", resp.StatusCode, msg)
 
 		if resp.StatusCode != http.StatusOK {
 			return fmt.Errorf("unexpected status code: %v", resp.StatusCode)
@@ -45,7 +46,13 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 		}
 
 		return nil
-	}, retry.Attempts(20), retry.Delay(5*time.Second))
+	},
+		retry.Attempts(10),
+		retry.Delay(5*time.Second),
+		retry.OnRetry(func(n uint, err error) {
+			log.Printf("[%v] try failed: %s", n, err)
+		}),
+	)
 
 	if err != nil {
 		t.Fatalf("cannot get test service response: %s", err)

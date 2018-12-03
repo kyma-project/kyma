@@ -2,7 +2,7 @@ apiVersion: serving.knative.dev/v1alpha1
 kind: Service
 metadata:
   name: test-service
-  namespace: default
+  namespace: knative-serving
 spec:
   runLatest:
     configuration:
