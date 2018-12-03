@@ -8,8 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
-	"time"
 )
 
 func TestKnativeServing_Acceptance(t *testing.T) {
@@ -23,6 +23,9 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 		t.Fatalf("Unexpected error when creating ingressgateway client: %s", err)
 	}
 
+	s, err := ingressgateway.ServiceAddress()
+	log.Println("ingress-service:", s)
+
 	err = retry.Do(func() error {
 		t.Logf("Calling: %s", testServiceURL)
 		resp, err := ingressClient.Get(testServiceURL)
@@ -34,25 +37,21 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 		if err != nil {
 			return err
 		}
-		msg := string(bytes)
-
+		msg := strings.TrimSpace(string(bytes))
+		expectedMsg := fmt.Sprintf("Hello %s!", target)
 		log.Printf("Received %v: '%s'", resp.StatusCode, msg)
 
 		if resp.StatusCode != http.StatusOK {
 			return fmt.Errorf("unexpected status code: %v", resp.StatusCode)
 		}
-		if msg != target {
+		if msg != expectedMsg {
 			return fmt.Errorf("unexpected response: '%s'", msg)
 		}
 
 		return nil
-	},
-		retry.Attempts(10),
-		retry.Delay(5*time.Second),
-		retry.OnRetry(func(n uint, err error) {
-			log.Printf("[%v] try failed: %s", n, err)
-		}),
-	)
+	}, retry.OnRetry(func(n uint, err error) {
+		log.Printf("[%v] try failed: %s", n, err)
+	}))
 
 	if err != nil {
 		t.Fatalf("cannot get test service response: %s", err)
