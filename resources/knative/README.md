@@ -8,7 +8,7 @@ Included releases:
  * https://github.com/knative/serving/releases/download/v0.2.1/release-no-mon.yaml
  * https://github.com/knative/eventing/releases/download/v0.2.0/release.yaml
 
-Our changes:
- * Every CRD have annotation `"helm.sh/hook": "crd-install"` so Helm installs it before rest of resources.
- * There is duplicated CRD `images.caching.internal.knative.dev` in serving release. One copy is removed.
- * If `isLocalEnv` variable is set `knative-ingressgateway` Service's `type` is changed to `NodePort`.
+Kyma-specific changes:
+ * Every CRD has the `helm.sh/hook: crd-install` annotation set. This forces Helm to install the CRDs before other resources.
+ * The duplicate of the `images.caching.internal.knative.dev` CRD is removed from the serving release.
+ * If the **isLocalEnv** variable is set to `knative-ingressgateway`, the Service's type automatically changes to `NodePort`.
