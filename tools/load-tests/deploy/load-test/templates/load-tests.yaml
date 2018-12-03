@@ -1,0 +1,88 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "load-test.fullname" . }}
+  labels:
+    helm-chart-test: "true"
+rules:
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["delete", "get", "list"]
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["create", "delete", "get", "list", "patch"]
+- apiGroups: [""]
+  resources: ["services", "services/proxy", "configmaps", "pods/log", "replicationcontrollers"]
+  verbs: ["get", "list"]
+- apiGroups: ["kubeless.io"]
+  resources: ["functions"]
+  verbs: ["create", "delete", "get", "list"]
+- apiGroups: ["apps"]
+  resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
+  verbs: ["get", "list"]
+- apiGroups: ["batch"]
+  resources: ["cronjobs"]
+  verbs: ["get", "list"]
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["get", "list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "load-test.fullname" . }}
+  labels:
+    helm-chart-test: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "load-test.fullname" . }}
+  labels:
+    helm-chart-test: "true"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "load-test.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "load-test.fullname" . }}
+  namespace: kyma-system
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ template "load-test.fullname" . }}
+  labels:
+    labels:
+    app: {{ template "load-test.name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+  annotations:
+    helm.sh/hook: test-success
+spec:
+  serviceAccount: {{ template "load-test.fullname" . }}
+  containers:
+  - name: load-test
+    image: load-test
+    imagePullPolicy: IfNotPresent
+    env:
+    - name: KUBELESS_CONFIG
+      value: {{ .Values.env.kubelessConfig }}
+    - name: KUBELESS_NAMESPACE
+      value: {{ .Values.env.kubelessNamespace }}
+    - name: LOAD_TEST_SLACK_ENDPOINT
+      value: {{ .Values.slackClientWebhookUrl }}
+    - name: LOAD_TEST_SLACK_CHANNEL
+      value: {{ .Values.slackClientChannelId }}
+#    command:
+#      - "/bin/sh"
+#      - "-c"
+#      - "sleep 36000"
+  restartPolicy: Never
