@@ -97,7 +97,7 @@ func TestGetServices(t *testing.T) {
 
 		// then
 		require.Nil(t, services)
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 
 		// when
 		service, err := repository.Get("not_existent", "id1")
@@ -105,7 +105,7 @@ func TestGetServices(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Equal(t, remoteenv.Service{}, service)
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
 
 	t.Run("should get service by id", func(t *testing.T) {
@@ -254,7 +254,7 @@ func TestCreateServices(t *testing.T) {
 		err := repository.Update("production", newService)
 
 		// then
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
 }
 
@@ -335,7 +335,7 @@ func TestDeleteServices(t *testing.T) {
 		err := repository.Delete("production", "id1")
 
 		// then
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
 }
 

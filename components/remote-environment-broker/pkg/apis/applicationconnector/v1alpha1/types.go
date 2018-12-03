@@ -46,8 +46,9 @@ func (pw *RemoteEnvironment) GetObjectKind() schema.ObjectKind {
 
 // RemoteEnvironmentSpec defines spec section of the RemoteEnvironment custom resource
 type RemoteEnvironmentSpec struct {
-	Description string    `json:"description"`
-	Services    []Service `json:"services"`
+	Description      string    `json:"description"`
+	SkipInstallation bool      `json:"skipInstallation,omitempty"`
+	Services         []Service `json:"services"`
 	// AccessLabel is not required, 'omitempty' is needed because of regexp validation
 	AccessLabel string            `json:"accessLabel,omitempty"`
 	Labels      map[string]string `json:"labels"`

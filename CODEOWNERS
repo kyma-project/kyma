@@ -55,6 +55,9 @@
 # The `connector-service` subchart
 /resources/application-connector/charts/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
+# The `connection-token-handler` subchart
+/resources/application-connector/charts/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
 # The `metadata-service` subchart
 /resources/application-connector/charts/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
@@ -119,7 +122,7 @@
 /resources/core/charts/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The `docs` subchart
-/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
+/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `ui-api` subchart
 /resources/core/charts/ui-api/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -197,6 +200,9 @@
 # Connector Service Component
 /components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
+# Connector Service Token Request Component
+/components/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
 # Metadata Service Component
 /components/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
@@ -259,6 +265,9 @@
 
 # The etcd-tls-setup directory
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
+
+# The gcp-broker-provider directory
+/tools/gcp-broker-provider/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
 
 # The changelog-generator directory
 /tools/changelog-generator/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
