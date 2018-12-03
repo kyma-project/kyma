@@ -48,6 +48,8 @@ You can install Kyma either with all core subcomponents or only with the selecte
 
 > **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube.
 
+> **NOTE:** Logging and Monitoring subcomponents are not included by default when you install Kyma on Minikube. You can install them using the instructions provided [here](../../../resources/README.md).
+
 To install Kyma, follow these steps:
 
 1. Change the working directory to `installation`:

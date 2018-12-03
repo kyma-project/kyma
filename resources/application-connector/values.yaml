@@ -12,10 +12,13 @@ global:
     path: eu.gcr.io/kyma-project
   connector_service:
     dir: develop/
-    version: 1ecf2683
+    version: b723b5b6
   connector_service_tests:
     dir: develop/
     version: 1ecf2683
+  connection_token_handler:
+    dir: develop/
+    version: e8d279fa
   event_service:
     dir: develop/
     version: 6e0a7fe2
@@ -27,16 +30,16 @@ global:
     version: cb19afea
   metadata_service:
     dir: develop/
-    version: aab48c35
+    version: 1a6aedce
   metadata_service_tests:
     dir: develop/
-    version: aab48c35
+    version: 1a6aedce
   remote_environment_controller:
     dir: develop/
-    version: 4b19d36e
+    version: 56c0498f
   remote_environment_controller_tests:
     dir: develop/
-    version: cb19afea
+    version: 56c0498f
   remote_environment_broker:
     dir: develop/
     version: 0d408e11

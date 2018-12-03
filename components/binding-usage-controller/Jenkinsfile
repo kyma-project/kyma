@@ -1,9 +1,16 @@
 #!/usr/bin/env groovy
-
 def label = "kyma-${UUID.randomUUID().toString()}"
 def application = "binding-usage-controller"
 def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
 def dockerImageTag = params.APP_VERSION
+def registry = env.DOCKER_REGISTRY
+def buildpack = 'golang-buildpack:0.0.9'
+def appFolder = env.APP_FOLDER
+def repositoryName = 'kyma'
+
+def checkoutDir = "src/github.com/kyma-project/$repositoryName"
+def componentDir = "$checkoutDir/$appFolder"
+def workDir = ""
 
 echo """
 ********************************
@@ -19,14 +26,23 @@ FULL_BUILD=${params.FULL_BUILD}
 ********************************
 """
 
-podTemplate(label: label) {
+podTemplate(label: label, 
+    containers: [
+        containerTemplate(name: "golang-buildpack", image: "${registry}${buildpack}", ttyEnabled: true, command: 'cat'),
+    ]) {
+
     node(label) {
         try {
             timestamps {
                 ansiColor('xterm') {
                     timeout(time: 20, unit: "MINUTES") {
                         stage("setup") {
-                            checkout scm
+
+                            workDir = pwd()
+
+                            dir(checkoutDir) {
+                                checkout scm
+                            }
 
                             if(dockerImageTag == ""){
                                 error("No version for docker tag defined, please set APP_VERSION parameter for master branch or GIT_BRANCH parameter for any branch")
@@ -38,11 +54,11 @@ podTemplate(label: label) {
                         }
 
                         stage("build and test $application") {
-                            execute "./before-commit.sh ci"
+                            execute("./before-commit.sh ci", workDir, componentDir)
                         }
 
                         stage("build image $application") {
-                            dir(env.APP_FOLDER){
+                            dir(componentDir){
                                 sh "cp $application deploy/controller/$application"
                                 sh "docker build -t ${dockerPushRoot}${application}:latest deploy/controller --label version=${dockerImageTag} --label component=${application}"
                             }
@@ -59,6 +75,9 @@ podTemplate(label: label) {
                 }
             }
         } catch (ex) {
+            slaveDiagnostics()
+            execute("df -h", workDir, componentDir)
+
             echo "Got exception: ${ex}"
             currentBuild.result = "FAILURE"
             def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${params.GIT_BRANCH}. See details: ${env.BUILD_URL}"
@@ -67,10 +86,19 @@ podTemplate(label: label) {
     }
 }
 
-def execute(command, envs = '') {
-    def buildpack = 'golang-buildpack:0.0.9'
-    def repositoryName = 'kyma'
-    def envText = envs=='' ? '' : "--env $envs"
-    workDir = pwd()
-    sh "docker run --rm -v $workDir:/go/src/github.com/kyma-project/$repositoryName/ -w /go/src/github.com/kyma-project/$repositoryName/$env.APP_FOLDER $envText ${env.DOCKER_REGISTRY}$buildpack /bin/bash -c '$command'"
+def execute(command, workDir, componentDir) {
+    container("golang-buildpack") {
+        sh """
+            export GOPATH=$workDir
+            cd $workDir/$componentDir
+            bash -c '$command'
+        """
+    }
+}
+
+def slaveDiagnostics() {
+    sh "whoami"
+    sh "pwd"
+    sh "df -h"
+    sh "mount"
 }

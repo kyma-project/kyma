@@ -12,8 +12,10 @@ import (
 )
 
 var (
-	ApiRawSpec    = compact([]byte("{\"name\":\"api\"}"))
-	EventsRawSpec = compact([]byte("{\"name\":\"events\"}"))
+	ApiRawSpec    = Compact([]byte("{\"name\":\"api\"}"))
+	EventsRawSpec = Compact([]byte("{\"name\":\"events\"}"))
+
+	SwaggerApiSpec = Compact([]byte("{\"swagger\":\"2.0\"}"))
 )
 
 type Service struct {
@@ -48,9 +50,11 @@ type ErrorResponse struct {
 }
 
 type API struct {
-	TargetUrl   string          `json:"targetUrl"`
-	Credentials *Credentials    `json:"credentials,omitempty"`
-	Spec        json.RawMessage `json:"spec,omitempty"`
+	TargetUrl        string          `json:"targetUrl"`
+	Credentials      *Credentials    `json:"credentials,omitempty"`
+	Spec             json.RawMessage `json:"spec,omitempty"`
+	SpecificationUrl string          `json:"specificationUrl,omitempty"`
+	ApiType          string          `json:"apiType"`
 }
 
 type Credentials struct {
@@ -87,11 +91,16 @@ type DocsObject struct {
 	Source string `json:"source"`
 }
 
-func compact(src []byte) []byte {
+func Compact(src []byte) []byte {
 	buffer := new(bytes.Buffer)
 	err := json.Compact(buffer, src)
 	if err != nil {
 		return src
 	}
 	return buffer.Bytes()
+}
+
+func (sd ServiceDetails) WithAPI(api *API) ServiceDetails {
+	sd.Api = api
+	return sd
 }

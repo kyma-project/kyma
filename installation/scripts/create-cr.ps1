@@ -1,11 +1,15 @@
 param (
     [string]$URL = "",
     [string]$OUTPUT = "",
-    [string]$VERSION = "0.0.1"
+    [string]$VERSION = "0.0.1",
+    [string]$CRTPL_PATH = ""
 )
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
-$CRTPL_PATH = "${CURRENT_DIR}\..\resources\installer-cr.yaml.tpl"
+
+if ($CRTPL_PATH -eq "") {
+    $CRTPL_PATH = "${CURRENT_DIR}\..\resources\installer-cr.yaml.tpl"
+}
 
 Copy-Item -Path $CRTPL_PATH -Destination $OUTPUT
 

@@ -1,0 +1,40 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: tokenrequests.connectorservice.kyma-project.io
+spec:
+  group: connectorservice.kyma-project.io
+  version: v1alpha1
+  names:
+    kind: TokenRequest
+    plural: tokenrequests
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
+        status:
+          properties:
+            expireAfter:
+              format: date-time
+              type: string
+            remoteEnvironment:
+              type: string
+            state:
+              type: string
+            token:
+              type: string
+            url:
+              type: string
+          required:
+          - token
+          - url
+          - expireAfter
+          - remoteEnvironment
+          - state
+          type: object

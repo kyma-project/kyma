@@ -99,8 +99,11 @@ func CheckK8sRemoteEnvironment(t *testing.T, re *remoteenv.RemoteEnvironment, na
 		apiEntry := findEntryOfType(reService.Entries, "API")
 		require.NotNil(t, apiEntry)
 
+		if apiEntry.Type == "OAuth" {
+			require.Equal(t, expectedServiceData.OauthUrl, apiEntry.Credentials.AuthenticationUrl)
+		}
+
 		require.Equal(t, expectedServiceData.TargetUrl, apiEntry.TargetUrl)
-		require.Equal(t, expectedServiceData.OauthUrl, apiEntry.Credentials.AuthenticationUrl)
 		require.Equal(t, expectedServiceData.GatewayUrl, apiEntry.GatewayUrl)
 		require.Equal(t, expectedServiceData.AccessLabel, apiEntry.AccessLabel)
 	}

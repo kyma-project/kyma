@@ -1,4 +1,6 @@
 required = [
+  "golang.org/x/tools/cmd/goimports",
+
   "k8s.io/code-generator/cmd/defaulter-gen",
   "k8s.io/code-generator/cmd/deepcopy-gen",
   "k8s.io/code-generator/cmd/conversion-gen",
