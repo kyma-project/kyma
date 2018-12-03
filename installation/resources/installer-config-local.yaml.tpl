@@ -33,10 +33,6 @@ data:
   global.domainName: "kyma.local"
   global.etcdBackup.containerName: ""
   global.etcdBackup.enabled: "false"
-  global.alertTools.credentials.slack.apiurl: ""
-  global.alertTools.credentials.slack.channel: ""
-  global.alertTools.credentials.victorOps.routingkey: ""
-  global.alertTools.credentials.victorOps.apikey: ""
   nginx-ingress.controller.service.loadBalancerIP: ""
   cluster-users.users.adminGroup: ""
 ---
