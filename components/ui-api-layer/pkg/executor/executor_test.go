@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -8,15 +9,11 @@ import (
 )
 
 func TestPeriodic(t *testing.T) {
-	/*
-		This test is very simple - it has hardcoded time.Sleep. Running it at machine with high load may cause the test fail.
-		The best way is to modify executor_test (and adapt executor) to not rely on time.Sleep.
-	*/
-
 	// GIVEN
-	called := 0
+	var called int32 = 0
+
 	worker := func(stopCh <-chan struct{}) {
-		called = called + 1
+		atomic.AddInt32(&called, 1)
 	}
 	stopCh := make(chan struct{})
 	svc := NewPeriodic(50*time.Millisecond, worker)
@@ -28,5 +25,5 @@ func TestPeriodic(t *testing.T) {
 
 	// THEN
 	// expecting 3 calls, first at after 0ms, second - after 10ms, third after 20ms
-	assert.Equal(t, 3, called)
+	assert.Equal(t, int32(3), atomic.LoadInt32(&called))
 }
