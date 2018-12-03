@@ -131,3 +131,15 @@ Binding returns the following connection details and credentials:
 | **connectionName** | `string` | The SQL instance name. |
 | **privateKeyData** | `JSON Object` | The service account OAuth information. |
 | **serviceAccount** | `string` | The GCP service account to which access is granted. |
+
+### Usage
+
+To connect your business application to your Cloud SQL instance, use the [Cloud SQL proxy](https://github.com/GoogleCloudPlatform/cloudsql-proxy) configured with the **connectionName** and **serviceAccount** parameters. If your business application is written in Go, you can use that library directly in your code. Otherwise, run it as a standalone container so your business application can reach the Cloud SQL instance by calling the proxy. In the official [tutorial](https://github.com/GoogleCloudPlatform/kubernetes-engine-samples/tree/master/service-catalog/cloud-sql-mysql), find the example on how to use the Cloud SQL Proxy with [Deployment](https://github.com/GoogleCloudPlatform/kubernetes-engine-samples/blob/master/service-catalog/cloud-sql-mysql/manifests/user-deployment.yaml#L46-L66). Unfortunately, the ServiceBindingUsage does not support the mounting volume functionality. To make it work, replace proxy container under the **spec.template.spec.containers** property with such entry:
+
+```yaml
+    - name: cloudsql-proxy
+      image: gcr.io/cloudsql-docker/gce-proxy:1.11
+      env:
+      command: ["bin/sh"]
+      args: ["-c", "echo $privateKeyData > /token; /cloud_sql_proxy -instances=$(connectionName)=tcp:3306 -credential_file=/token"]
+``` 
