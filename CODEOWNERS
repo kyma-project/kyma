@@ -146,7 +146,7 @@
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @sjanota
 
 # The `knative` chart
-/resources/knative/ @piotrmsc @kubadz @sjanota @Abd4llA @montaro @marcobebway @radufa @abbi-gaurav
+/resources/knative/ @kyma-project/wg-knative
 
 # The `jaeger` charts
 /resources/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
