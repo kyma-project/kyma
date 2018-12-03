@@ -36,7 +36,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 		}
 		msg := string(bytes)
 
-		log.Println("Received %v: '%s'", resp.StatusCode, msg)
+		log.Printf("Received %v: '%s'", resp.StatusCode, msg)
 
 		if resp.StatusCode != http.StatusOK {
 			return fmt.Errorf("unexpected status code: %v", resp.StatusCode)
