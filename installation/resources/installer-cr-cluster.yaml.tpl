@@ -22,6 +22,8 @@ spec:
       namespace: "kyma-system"
     - name: "service-catalog"
       namespace: "kyma-system"
+    - name: "monitoring"
+      namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
     - name: "application-connector"

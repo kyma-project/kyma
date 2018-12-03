@@ -34,14 +34,24 @@ data:
   global.domainName: "__DOMAIN__"
   global.etcdBackup.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
-  global.alertTools.credentials.slack.apiurl: "__SLACK_API_URL_VALUE__"
-  global.alertTools.credentials.slack.channel: "__SLACK_CHANNEL_VALUE__"
-  global.alertTools.credentials.victorOps.routingkey: "__VICTOR_OPS_ROUTING_KEY_VALUE__"
-  global.alertTools.credentials.victorOps.apikey: "__VICTOR_OPS_API_KEY_VALUE__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
   etcd-stateful.replicaCount: "3"
   acceptanceTest.remoteEnvironment.disabled: "true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-config-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: monitoring
+data:
+  global.alertTools.credentials.slack.apiurl: "__SLACK_API_URL_VALUE__"
+  global.alertTools.credentials.slack.channel: "__SLACK_CHANNEL_VALUE__"
+  global.alertTools.credentials.victorOps.routingkey: "__VICTOR_OPS_ROUTING_KEY_VALUE__"
+  global.alertTools.credentials.victorOps.apikey: "__VICTOR_OPS_API_KEY_VALUE__"
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -197,6 +197,9 @@ then
     exit 1
 fi
 
+monitoringTestErr=0
+loggingTestErr=0
+
 echo "----------------------------"
 echo "- Testing Kyma..."
 echo "----------------------------"
@@ -205,6 +208,20 @@ echo "- Testing Core components..."
 # timeout set to 10 minutes
 helm test core --timeout 600
 coreTestErr=$?
+
+# execute monitoring tests if 'monitoring' is installed
+if helm list | grep -q "monitoring"; then
+echo "- Montitoring module is installed. Running tests for same"
+helm test monitoring --timeout 600
+monitoringTestErr=$?
+fi
+
+# execute logging tests if 'logging' is installed
+if helm list | grep -q "logging"; then
+echo "- Logging module is installed. Running tests for same"
+helm test logging --timeout 600
+loggingTestErr=$?
+fi
 
 checkAndCleanupTest kyma-system
 testCheckCore=$?
@@ -233,7 +250,7 @@ testCheckGateway=$?
 printImagesWithLatestTag
 latestTagsErr=$?
 
-if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${knativeTestErr} -ne 0 ] || [ ${acTestErr} -ne 0 ]
+if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${acTestErr} -ne 0 ] || [ ${loggingTestErr} -ne 0 ] || [ ${monitoringTestErr} -ne 0 ] || [ ${knativeTestErr} -ne 0 ]
 then
     exit 1
 else
