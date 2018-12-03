@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 def label = "kyma-${UUID.randomUUID().toString()}"
-def application = 'knative-serving-acceptance'
+def application = 'knative-serving-acceptance-tests'
 def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
 def dockerImageTag = params.APP_VERSION
 def registry = env.DOCKER_REGISTRY

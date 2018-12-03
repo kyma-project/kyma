@@ -5,3 +5,13 @@ knative:
   gateway:
     tls:
       enabled: true
+
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  test_knative_serving_acceptance:
+    dir: pr/
+    version: PR-1845
+
+test:
+  target: "Test Target"

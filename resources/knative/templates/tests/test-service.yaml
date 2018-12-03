@@ -9,7 +9,7 @@ spec:
       revisionTemplate:
         spec:
           container:
-            image: docker.io/sjanota/helloworld-go
+            image: gcr.io/knative-samples/helloworld-go
             env:
-              - name: TARGET
-                value: "Test Target"
+            - name: TARGET
+              value: {{ .Values.test.target }}

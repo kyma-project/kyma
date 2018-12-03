@@ -705,7 +705,7 @@ spec:
       number: 443
       protocol: HTTPS
     tls:
-      {{ if .gateway.tls.enabled }}
+      {{ if .Values.gateway.tls.enabled }}
       mode: SIMPLE
       privateKey: /etc/istio/ingressgateway-certs/tls.key
       serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
@@ -755,7 +755,7 @@ spec:
   selector:
     app: knative-ingressgateway
     knative: ingressgateway
-  type: {{ .ingressgateway.service.type }}
+  type: {{ .Values.ingressgateway.service.type }}
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment

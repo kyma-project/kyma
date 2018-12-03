@@ -8,13 +8,12 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestKnativeServing_Acceptance(t *testing.T) {
-	domainName := os.Getenv("DOMAIN_NAME")
-	if domainName == "" {
-		t.Fatal("Missing 'DOMAIN_NAME' variable")
-	}
+	domainName := MustGetenv(t, "DOMAIN_NAME")
+	target := MustGetenv(t, "TARGET")
 
 	testServiceURL := fmt.Sprintf("https://test-service.kantive-serving.%s", domainName)
 
@@ -22,7 +21,6 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected error when creating ingressgateway client: %s", err)
 	}
-
 
 	err = retry.Do(func() error {
 		t.Logf("Calling: %s", testServiceURL)
@@ -42,14 +40,22 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 		if resp.StatusCode != http.StatusOK {
 			return fmt.Errorf("unexpected status code: %v", resp.StatusCode)
 		}
-		if msg != "Test Target" {
+		if msg != target {
 			return fmt.Errorf("unexpected response: '%s'", msg)
 		}
 
 		return nil
-	})
+	}, retry.Attempts(20), retry.Delay(5*time.Second))
 
 	if err != nil {
 		t.Fatalf("cannot get test service response: %s", err)
 	}
+}
+
+func MustGetenv(t *testing.T, name string) string {
+	env := os.Getenv(name)
+	if env == "" {
+		t.Fatalf("Missing '%s' variable", name)
+	}
+	return env
 }
