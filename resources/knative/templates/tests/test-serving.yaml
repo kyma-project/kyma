@@ -1,4 +1,4 @@
-{{ if. .Values.global.knative }}
+{{ if .Values.global.knative }}
   {{- $serviceName := .Values.global.knative | ternary "knative-ingressgateway" "istio-ingressgateway" -}}
 ---
 apiVersion: v1

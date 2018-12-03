@@ -23,9 +23,6 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 		t.Fatalf("Unexpected error when creating ingressgateway client: %s", err)
 	}
 
-	s, err := ingressgateway.ServiceAddress()
-	log.Println("ingress-service:", s)
-
 	err = retry.Do(func() error {
 		t.Logf("Calling: %s", testServiceURL)
 		resp, err := ingressClient.Get(testServiceURL)
