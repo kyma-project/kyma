@@ -2,7 +2,6 @@
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-INVERTED='\033[7m'
 NC='\033[0m' # No Color
 
 set -e #terminate script immediately in case of errors
@@ -18,6 +17,9 @@ if [ ${ensureResult} != 0 ]; then
 else echo -e "${GREEN}√ dep ensure -v --vendor-only${NC}"
 fi
 
+##
+# GO FMT
+##
 fmtResult=$(go fmt ./...)
 if [ $(echo ${#fmtResult}) != 0 ]
 	then
@@ -26,10 +28,10 @@ if [ $(echo ${#fmtResult}) != 0 ]
 	else echo -e "${GREEN}√ go fmt${NC}"
 fi
 
+##
+# GO IMPORTS
+##
 goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "/vendor")
-##
-# GO IMPORTS & FMT
-##
 go build -o goimports-vendored ./vendor/golang.org/x/tools/cmd/goimports
 buildGoImportResult=$?
 if [ ${buildGoImportResult} != 0 ]; then
