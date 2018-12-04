@@ -72,9 +72,6 @@ metadata:
     installer: overrides
     component: core
 data:
-  console.cluster.headerLogoUrl: "assets/logo.svg"
-  console.cluster.headerTitle: ""
-  console.cluster.faviconUrl: "favicon.ico"
   minio.accessKey: "admin"
   minio.secretKey: "topSecretKey"
   minio.resources.limits.memory: 128Mi
