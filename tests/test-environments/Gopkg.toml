@@ -24,9 +24,6 @@
 #   go-tests = true
 #   unused-packages = true
 
-required = [
-  "golang.org/x/tools/cmd/goimports"
-]
 
 [[constraint]]
   branch = "master"
