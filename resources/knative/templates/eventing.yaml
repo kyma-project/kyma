@@ -1,0 +1,354 @@
+---
+# eventing.yaml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: knative-eventing
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eventing-controller
+  namespace: knative-eventing
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: eventing-controller-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: eventing-controller
+  namespace: knative-eventing
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: channels.eventing.knative.dev
+  annotations:
+    "helm.sh/hook": "crd-install"
+spec:
+  group: eventing.knative.dev
+  names:
+    categories:
+    - all
+    - knative
+    - eventing
+    kind: Channel
+    plural: channels
+    shortNames:
+    - chan
+    singular: channel
+  scope: Namespaced
+  version: v1alpha1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: clusterchannelprovisioners.eventing.knative.dev
+  annotations:
+    "helm.sh/hook": "crd-install"
+spec:
+  group: eventing.knative.dev
+  names:
+    categories:
+    - all
+    - knative
+    - eventing
+    kind: ClusterChannelProvisioner
+    plural: clusterchannelprovisioners
+    shortNames:
+    - ccp
+    singular: clusterchannelprovisioner
+  scope: Cluster
+  version: v1alpha1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: subscriptions.eventing.knative.dev
+  annotations:
+    "helm.sh/hook": "crd-install"
+spec:
+  group: eventing.knative.dev
+  names:
+    categories:
+    - all
+    - knative
+    - eventing
+    kind: Subscription
+    plural: subscriptions
+    shortNames:
+    - sub
+    singular: subscription
+  scope: Namespaced
+  version: v1alpha1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    role: webhook
+  name: webhook
+  namespace: knative-eventing
+spec:
+  ports:
+  - port: 443
+    targetPort: 443
+  selector:
+    role: webhook
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: eventing-controller
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: eventing-controller
+    spec:
+      containers:
+      - args:
+        - -logtostderr
+        - -stderrthreshold
+        - INFO
+        - --experimentalControllers=subscription.eventing.knative.dev
+        image: gcr.io/knative-releases/github.com/knative/eventing/cmd/controller@sha256:bfb8bf951f2ccead13e5d999f3c8e44a5c815f89eef03391aa061e19407bcd9b
+        name: eventing-controller
+        terminationMessagePolicy: FallbackToLogsOnError
+        volumeMounts:
+        - mountPath: /etc/config-logging
+          name: config-logging
+      serviceAccountName: eventing-controller
+      volumes:
+      - configMap:
+          name: config-logging
+        name: config-logging
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: webhook
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: webhook
+        role: webhook
+    spec:
+      containers:
+      - image: gcr.io/knative-releases/github.com/knative/eventing/cmd/webhook@sha256:0c8e6180481663045088cebea41cfbf92ef590da748b92bed77a8c0dc2539bff
+        name: webhook
+        terminationMessagePolicy: FallbackToLogsOnError
+        volumeMounts:
+        - mountPath: /etc/config-logging
+          name: config-logging
+      serviceAccountName: eventing-controller
+      volumes:
+      - configMap:
+          name: config-logging
+        name: config-logging
+---
+apiVersion: v1
+data:
+  loglevel.controller: info
+  loglevel.webhook: info
+  zap-logger-config: |
+    {
+      "level": "info",
+      "development": false,
+      "outputPaths": ["stdout"],
+      "errorOutputPaths": ["stderr"],
+      "encoding": "json",
+      "encoderConfig": {
+        "timeKey": "ts",
+        "levelKey": "level",
+        "nameKey": "logger",
+        "callerKey": "caller",
+        "messageKey": "msg",
+        "stacktraceKey": "stacktrace",
+        "lineEnding": "",
+        "levelEncoder": "",
+        "timeEncoder": "iso8601",
+        "durationEncoder": "",
+        "callerEncoder": ""
+      }
+    }
+kind: ConfigMap
+metadata:
+  name: config-logging
+  namespace: knative-eventing
+---
+# in-memory-channel.yaml
+---
+apiVersion: eventing.knative.dev/v1alpha1
+kind: ClusterChannelProvisioner
+metadata:
+  name: in-memory-channel
+spec: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: in-memory-channel-controller
+  namespace: knative-eventing
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: in-memory-channel-controller
+rules:
+- apiGroups:
+  - eventing.knative.dev
+  resources:
+  - channels
+  - clusterchannelprovisioners
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+- apiGroups:
+  - eventing.knative.dev
+  resources:
+  - channels/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+- apiGroups:
+  - ""
+  resourceNames:
+  - in-memory-channel-dispatcher-config-map
+  resources:
+  - configmaps
+  verbs:
+  - update
+- apiGroups:
+  - networking.istio.io
+  resources:
+  - virtualservices
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: in-memory-channel-controller
+  namespace: knative-eventing
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: in-memory-channel-controller
+subjects:
+- kind: ServiceAccount
+  name: in-memory-channel-controller
+  namespace: knative-eventing
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: in-memory-channel-controller
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      clusterChannelProvisioner: in-memory-channel
+      role: controller
+  template:
+    metadata:
+      labels:
+        clusterChannelProvisioner: in-memory-channel
+        role: controller
+    spec:
+      containers:
+      - image: gcr.io/knative-releases/github.com/knative/eventing/pkg/controller/eventing/inmemory/controller@sha256:cbc86e2faa593cdd34c2ed54fd171fcbed4bfa26017c1e7db554c584162a8846
+        name: controller
+      serviceAccountName: in-memory-channel-controller
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: in-memory-channel-dispatcher
+  namespace: knative-eventing
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: in-memory-channel-dispatcher
+  namespace: knative-eventing
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: in-memory-channel-dispatcher
+  namespace: knative-eventing
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: in-memory-channel-dispatcher
+subjects:
+- kind: ServiceAccount
+  name: in-memory-channel-dispatcher
+  namespace: knative-eventing
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: in-memory-channel-dispatcher
+  namespace: knative-eventing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      clusterChannelProvisioner: in-memory-channel
+      role: dispatcher
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        clusterChannelProvisioner: in-memory-channel
+        role: dispatcher
+    spec:
+      containers:
+      - args:
+        - --sidecar_port=8080
+        - --config_map_noticer=watcher
+        - --config_map_namespace=knative-eventing
+        - --config_map_name=in-memory-channel-dispatcher-config-map
+        image: gcr.io/knative-releases/github.com/knative/eventing/cmd/fanoutsidecar@sha256:b57a317067d9a4299f08f6b05f161e50c8ac9b5e2cca812c41a938ad8b12ab38
+        name: dispatcher
+      serviceAccountName: in-memory-channel-dispatcher
