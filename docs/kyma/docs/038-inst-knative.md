@@ -5,7 +5,7 @@ type: Installation
 
 You can install Kyma with [Knative](https://cloud.google.com/knative/) and use its solutions for handling events and serverless functions.
 
-## Knative with local deployment from resources
+## Knative with local deployment from sources
 
 When you install Kyma locally from sources, add the `--knative` argument to the `run.sh` script. Run:
 
@@ -13,7 +13,7 @@ When you install Kyma locally from sources, add the `--knative` argument to the 
 ./run.sh --knative
 ```
 
-## Knative with a GKE cluster deployment from resources
+## Knative with a GKE cluster deployment from sources
 
 To install Kyma with Knative when deploying on a GKE cluster from sources, follow the instructions outlined in the **Install Kyma on a GKE cluster** installation guide.
 
