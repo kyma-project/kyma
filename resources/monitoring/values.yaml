@@ -1,0 +1,17 @@
+# test monitoring configuration
+
+test:
+  image:
+    name: test-logging-monitoring
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  test_logging_monitoring:
+    dir: develop/
+    version: a568ffb2
+  istio:
+    tls:
+      secretName: istio-ingress-certs
+    gateway:
+      name: kyma-gateway
+      namespace: kyma-system

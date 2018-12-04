@@ -2,10 +2,11 @@ package servicecatalog_test
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/pkg/errors"
 
 	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"

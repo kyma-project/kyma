@@ -31,6 +31,13 @@ spec:
     spec:
       restartPolicy: Always
       serviceAccountName: {{ template "ark.serverServiceAccount" . }}
+      initContainers:
+        - image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.ark_plugin.dir }}ark-plugins:{{ .Values.global.ark_plugin.version }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: ark-plugins
+          volumeMounts:
+          - mountPath: /target
+            name: plugins
       containers:
         - name: ark
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

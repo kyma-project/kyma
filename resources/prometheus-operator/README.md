@@ -6,4 +6,4 @@ This chart installs the Prometheus operator which is a prerequisite for the `mon
 
 `prometheus-operator` installs in the `kyma-system` namespace.
 
-For more details on Prometheus, see the [monitoring](../core/charts/monitoring/README.md) document.
+For more details on Prometheus, see the [monitoring](../monitoring/README.md) document.

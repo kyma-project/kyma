@@ -13,6 +13,19 @@ echo "PATH: " + $PATH
 echo "GOPATH:" + $GOPATH
 echo -e "${NC}"
 
+gitCommitHash=$(bash ./scripts/extract-commit-hash.sh)
+
+##
+# DEP ENSURE
+##
+dep ensure -v --vendor-only
+ensureResult=$?
+if [ ${ensureResult} != 0 ]; then
+	echo -e "${RED}✗ dep ensure -v --vendor-only${NC}\n$ensureResult${NC}"
+	exit 1
+else echo -e "${GREEN}√ dep ensure -v --vendor-only${NC}"
+fi
+
 ##
 # GO BUILD
 ##
@@ -22,7 +35,7 @@ if [ "$1" == "$CI_FLAG" ]; then
 	buildEnv="env CGO_ENABLED=0"
 fi
 
-${buildEnv} go build -o installer ./cmd/operator
+${buildEnv} go build -ldflags "-X main.gitCommitHash=${gitCommitHash}" -o installer ./cmd/operator
 
 goBuildResult=$?
 if [ ${goBuildResult} != 0 ]; then

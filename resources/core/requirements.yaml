@@ -1,8 +1,6 @@
 dependencies:
   - name: apiserver-proxy
     condition: apiserver-proxy.enabled
-  - name: monitoring
-    condition: monitoring.enabled
   - name: console
     condition: console.enabled
   - name: helm-broker

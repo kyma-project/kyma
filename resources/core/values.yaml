@@ -35,13 +35,13 @@ global:
     version: 6e0a7fe2
   binding_usage_controller:
     dir: develop/
-    version: 83692fd8
+    version: 46804e33
   configurations_generator:
     dir: develop/
     version: 4a23580f
   docs:
     dir: develop/
-    version: fce4f51f
+    version: 43ca4fb6
   environments:
     dir: develop/
     version: 6e0a7fe2

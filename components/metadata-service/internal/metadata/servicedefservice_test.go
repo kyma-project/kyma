@@ -339,9 +339,9 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceID, err := service.Create("re", &serviceDefinition)
 
 		// then
-		assert.Empty(t, serviceID)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "some error")
+		assert.Empty(t, serviceID)
 
 		serviceAPIService.AssertExpectations(t)
 	})
@@ -376,7 +376,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		specService.AssertExpectations(t)
 	})
 
-	t.Run("should return error when creating service in remote environment fails", func(t *testing.T) {
+	t.Run("should return internal error when creating service in remote environment fails", func(t *testing.T) {
 		// given
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
@@ -423,9 +423,67 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceID, err := service.Create("re", &serviceDefinition)
 
 		// then
-		assert.Empty(t, serviceID)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "some error")
+		assert.Equal(t, err.Code(), apperrors.CodeInternal)
+		assert.Empty(t, serviceID)
+
+		uuidGenerator.AssertExpectations(t)
+		serviceAPIService.AssertExpectations(t)
+		serviceRepository.AssertExpectations(t)
+		specService.AssertExpectations(t)
+	})
+
+	t.Run("should return not found error when creating service in remote environment that not exists", func(t *testing.T) {
+		// given
+		serviceAPI := &model.API{
+			TargetUrl: "http://target.com",
+		}
+		serviceDefinition := model.ServiceDefinition{
+			Name:        "Some service",
+			Description: "Some cool service",
+			Provider:    "Service Provider",
+			Api:         serviceAPI,
+		}
+		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
+			TargetUrl:   "http://target.com",
+			AccessLabel: "access-label",
+			GatewayURL:  "gateway-url",
+			Credentials: remoteenv.Credentials{
+				AuthenticationUrl: "",
+				SecretName:        "",
+			},
+		}
+		remoteEnvService := remoteenv.Service{
+			ID:                  "uuid-1",
+			DisplayName:         "Some service",
+			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
+			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "re"},
+			Tags:                make([]string, 0),
+			API:                 remoteEnvServiceAPI,
+			Events:              false,
+		}
+		uuidGenerator := new(uuidmocks.Generator)
+		uuidGenerator.On("NewUUID").Return("uuid-1")
+		serviceAPIService := new(serviceapimocks.Service)
+		serviceAPIService.On("New", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("Create", "re", remoteEnvService).Return(apperrors.NotFound("some error"))
+		specService := new(specmocks.Service)
+		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, specService)
+
+		// when
+		serviceID, err := service.Create("re", &serviceDefinition)
+
+		// then
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "some error")
+		assert.Equal(t, err.Code(), apperrors.CodeNotFound)
+		assert.Empty(t, serviceID)
 
 		uuidGenerator.AssertExpectations(t)
 		serviceAPIService.AssertExpectations(t)
@@ -466,9 +524,9 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceID, err := service.Create("re", &serviceDefinition)
 
 		// then
-		require.Empty(t, serviceID)
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeAlreadyExists, err.Code())
+		assert.Empty(t, serviceID)
 
 		serviceRepository.AssertExpectations(t)
 	})
@@ -511,9 +569,9 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 
 		// when
 		result, err := service.GetAll("re")
-		require.NoError(t, err)
 
 		// then
+		require.NoError(t, err)
 		assert.Len(t, result, 2)
 		assert.Contains(t, result, model.ServiceDefinition{
 			ID:          "uuid-1",
@@ -540,10 +598,25 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 
 		// when
 		result, err := service.GetAll("re")
-		require.NoError(t, err)
 
 		// then
+		require.NoError(t, err)
 		assert.Len(t, result, 0)
+	})
+
+	t.Run("should return not found error if cannot find Remote Environment", func(t *testing.T) {
+		// given
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("GetAll", "re").Return(nil, apperrors.NotFound("Remote Environment re not found"))
+
+		service := NewServiceDefinitionService(nil, nil, serviceRepository, nil)
+
+		// when
+		_, err := service.GetAll("re")
+
+		//then
+		require.Error(t, err)
+		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
 }
 
@@ -593,9 +666,9 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 
 		// when
 		result, err := service.GetByID("re", "uuid-1")
-		require.NoError(t, err)
 
 		// then
+		require.NoError(t, err)
 		assert.Equal(t, "uuid-1", result.ID)
 		assert.Equal(t, "Some service", result.Name)
 		assert.Equal(t, "Some cool service", result.Description)
@@ -611,7 +684,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		specService.AssertExpectations(t)
 	})
 
-	t.Run("should return error when getting service from remote environment fails", func(t *testing.T) {
+	t.Run("should return internal error when getting service from remote environment fails", func(t *testing.T) {
 		// given
 		serviceRepository := new(remoteenvmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteenv.Service{}, apperrors.Internal("get error"))
@@ -622,8 +695,25 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		_, err := service.GetByID("re", "uuid-1")
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "get error")
+		assert.Equal(t, err.Code(), apperrors.CodeInternal)
+	})
+
+	t.Run("should return not found error when getting service from remote environment that not exists", func(t *testing.T) {
+		// given
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("Get", "re", "uuid-1").Return(remoteenv.Service{}, apperrors.NotFound("get error"))
+
+		service := NewServiceDefinitionService(nil, nil, serviceRepository, nil)
+
+		// when
+		_, err := service.GetByID("re", "uuid-1")
+
+		// then
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "get error")
+		assert.Equal(t, err.Code(), apperrors.CodeNotFound)
 	})
 
 	t.Run("should return error when reading API fails", func(t *testing.T) {
@@ -661,7 +751,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		_, err := service.GetByID("re", "uuid-1")
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "api error")
 	})
 
@@ -688,7 +778,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		_, err := service.GetByID("re", "uuid-1")
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "error")
 
 		serviceRepository.AssertExpectations(t)
@@ -766,7 +856,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		_, err := service.Update("re", &serviceDefinition)
 
 		// then
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
@@ -822,7 +912,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		_, err := service.Update("re", &serviceDefinition)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
 
@@ -871,7 +961,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		_, err := service.Update("re", &serviceDefinition)
 
 		// then
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
@@ -923,7 +1013,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		_, err := service.Update("re", &serviceDefinition)
 
 		// then
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
@@ -985,7 +1075,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		_, err := service.Update("re", &serviceDefinition)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.NotEmpty(t, err.Error())
 
@@ -1047,7 +1137,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		_, err := service.Update("re", &serviceDefinition)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.NotEmpty(t, err.Error())
 
@@ -1110,7 +1200,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		_, err := service.Update("re", &serviceDefinition)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.NotEmpty(t, err.Error())
 
@@ -1186,7 +1276,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		_, err := service.Update("re", &serviceDefinition)
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.NotEmpty(t, err.Error())
 
@@ -1218,7 +1308,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		err := service.Delete("re", "uuid-1")
 
 		// then
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
@@ -1239,11 +1329,33 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		err := service.Delete("re", "uuid-1")
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.NotEmpty(t, err.Error())
 
 		serviceAPIService.AssertExpectations(t)
+	})
+
+	t.Run("should return an error when trying to delete service, but RE is not found", func(t *testing.T) {
+		// given
+		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository.On("Delete", "re", "uuid-1").Return(apperrors.NotFound("A not found error"))
+
+		serviceAPIService := new(serviceapimocks.Service)
+		serviceAPIService.On("Delete", "re", "uuid-1").Return(nil)
+
+		uuidGenerator := new(uuidmocks.Generator)
+		uuidGenerator.On("NewUUID").Return("uuid-1")
+
+		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, nil)
+
+		// when
+		err := service.Delete("re", "uuid-1")
+
+		// then
+		require.Error(t, err)
+		assert.Equal(t, apperrors.CodeNotFound, err.Code())
+		assert.NotEmpty(t, err.Error())
 	})
 
 	t.Run("should return an error if remoteenv delete failed", func(t *testing.T) {
@@ -1285,7 +1397,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		err := service.Delete("re", "uuid-1")
 
 		// then
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.NotEmpty(t, err.Error())
 
@@ -1316,7 +1428,6 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-
 		assert.Equal(t, serviceAPI, result)
 	})
 
@@ -1331,9 +1442,9 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 		result, err := service.GetAPI("re", "uuid-1")
 
 		// then
-		assert.Error(t, err)
-		assert.Nil(t, result)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeNotFound, err.Code())
+		assert.Nil(t, result)
 	})
 
 	t.Run("should return internal error if service does not exist", func(t *testing.T) {
@@ -1347,10 +1458,10 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 		result, err := service.GetAPI("re", "uuid-1")
 
 		// then
-		assert.Error(t, err)
-		assert.Nil(t, result)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.Contains(t, err.Error(), "some error")
+		assert.Nil(t, result)
 	})
 
 	t.Run("should return bad request if service does not have API", func(t *testing.T) {
@@ -1364,9 +1475,9 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 		result, err := service.GetAPI("re", "uuid-1")
 
 		// then
-		assert.Error(t, err)
-		assert.Nil(t, result)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
+		assert.Nil(t, result)
 	})
 
 	t.Run("should return internal error if reading service API fails", func(t *testing.T) {
@@ -1386,9 +1497,9 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 		result, err := service.GetAPI("re", "uuid-1")
 
 		// then
-		assert.Error(t, err)
-		assert.Nil(t, result)
+		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		assert.Contains(t, err.Error(), "some error")
+		assert.Nil(t, result)
 	})
 }

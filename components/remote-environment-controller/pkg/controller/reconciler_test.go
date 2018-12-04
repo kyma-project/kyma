@@ -21,7 +21,7 @@ const (
 
 type reChecker struct {
 	t                   *testing.T
-	expectedStatus      hapi_4.Status_Code
+	expectedStatus      string
 	expectedDescription string
 }
 
@@ -34,7 +34,7 @@ func (checker reChecker) checkAccessLabel(args mock.Arguments) {
 func (checker reChecker) checkStatus(args mock.Arguments) {
 	reInstance := args.Get(1).(*v1alpha1.RemoteEnvironment)
 
-	assert.Equal(checker.t, checker.expectedStatus.String(), reInstance.Status.InstallationStatus.Status)
+	assert.Equal(checker.t, checker.expectedStatus, reInstance.Status.InstallationStatus.Status)
 	assert.Equal(checker.t, checker.expectedDescription, reInstance.Status.InstallationStatus.Description)
 }
 
@@ -42,9 +42,9 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 	releaseStatus := hapi_4.Status_DEPLOYED
 	statusDescription := "Deployed"
 
-	reChecker := reChecker{
+	statusChecker := reChecker{
 		t:                   t,
-		expectedStatus:      releaseStatus,
+		expectedStatus:      releaseStatus.String(),
 		expectedDescription: statusDescription,
 	}
 
@@ -59,11 +59,49 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREInstance).Return(nil)
 		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
-			Run(reChecker.checkStatus).Return(nil)
+			Run(statusChecker.checkStatus).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", reName).Return(false, nil)
 		releaseManager.On("InstallNewREChart", reName).Return(releaseStatus, statusDescription, nil)
+
+		reReconciler := NewReconciler(managerClient, releaseManager)
+
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
+
+		// when
+		result, err := reReconciler.Reconcile(request)
+
+		// then
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		managerClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
+	})
+
+	t.Run("should skip chart installation when skip-installation label set to true", func(t *testing.T) {
+		// given
+		skippedChecker := reChecker{
+			t:                   t,
+			expectedStatus:      installationSkippedStatus,
+			expectedDescription: "Installation will not be performed",
+		}
+
+		namespacedName := types.NamespacedName{
+			Name: reName,
+		}
+
+		managerClient := &mocks.RemoteEnvironmentManagerClient{}
+		managerClient.On(
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			Run(setupREWhichIsNotInstalled).Return(nil)
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			Run(skippedChecker.checkStatus).Return(nil)
+
+		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("CheckReleaseExistence", reName).Return(false, nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
@@ -92,11 +130,44 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREWithoutAccessLabel).Return(nil)
 		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
-			Run(reChecker.checkAccessLabel).Return(nil)
+			Run(statusChecker.checkAccessLabel).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", reName).Return(false, nil)
 		releaseManager.On("InstallNewREChart", reName).Return(releaseStatus, statusDescription, nil)
+
+		reReconciler := NewReconciler(managerClient, releaseManager)
+
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
+
+		// when
+		result, err := reReconciler.Reconcile(request)
+
+		// then
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		managerClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
+	})
+
+	t.Run("should check status if chart exist despite skip-installation label set to true", func(t *testing.T) {
+		// given
+		namespacedName := types.NamespacedName{
+			Name: reName,
+		}
+
+		managerClient := &mocks.RemoteEnvironmentManagerClient{}
+		managerClient.On(
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			Run(setupREWhichIsNotInstalled).Return(nil)
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			Run(statusChecker.checkStatus).Return(nil)
+
+		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("CheckReleaseExistence", reName).Return(true, nil)
+		releaseManager.On("CheckReleaseStatus", reName).Return(releaseStatus, statusDescription, nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
@@ -155,7 +226,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREInstance).Return(nil)
 		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
-			Run(reChecker.checkStatus).Return(nil)
+			Run(statusChecker.checkStatus).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", reName).Return(true, nil)
@@ -188,7 +259,7 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
 			Run(setupREWithWrongAccessLabel).Return(nil)
 		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
-			Run(reChecker.checkStatus).Return(nil)
+			Run(statusChecker.checkStatus).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", reName).Return(true, nil)
@@ -310,6 +381,11 @@ func getREFromArgs(args mock.Arguments) *v1alpha1.RemoteEnvironment {
 func setupREInstance(args mock.Arguments) {
 	reInstance := getREFromArgs(args)
 	reInstance.Spec.AccessLabel = reName
+}
+
+func setupREWhichIsNotInstalled(args mock.Arguments) {
+	reInstance := getREFromArgs(args)
+	reInstance.Spec.SkipInstallation = true
 }
 
 func setupREWithoutAccessLabel(args mock.Arguments) {
