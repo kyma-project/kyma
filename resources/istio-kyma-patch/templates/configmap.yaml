@@ -38,7 +38,7 @@ data:
       },{
         "op": "replace",
         "path": "/spec/type",
-        "type": "LoadBalancer"
+        "value": "LoadBalancer"
       }
     ]
   {{ end }}
