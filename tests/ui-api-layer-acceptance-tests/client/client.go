@@ -1,4 +1,4 @@
-package k8s
+package client
 
 import (
 	scClientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"

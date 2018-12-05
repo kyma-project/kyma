@@ -11,7 +11,7 @@ import (
 
 	clientset "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -25,7 +25,7 @@ const (
 	reReadyTimeout = time.Second * 45
 )
 
-type RemoteEnvironment struct {
+type remoteEnvironment struct {
 	Name        string            `json:"name"`
 	Description string            `json:"description"`
 	Labels      map[string]string `json:"labels"`
@@ -36,20 +36,20 @@ type reDeleteMutation struct {
 }
 
 type reCreateMutationResponse struct {
-	ReCreateMutation RemoteEnvironment `json:"createRemoteEnvironment"`
+	ReCreateMutation remoteEnvironment `json:"createRemoteEnvironment"`
 }
 
 type reUpdateMutationResponse struct {
-	ReUpdateMutation RemoteEnvironment `json:"updateRemoteEnvironment"`
+	ReUpdateMutation remoteEnvironment `json:"updateRemoteEnvironment"`
 }
 
 type reDeleteMutationResponse struct {
 	ReDeleteMutation reDeleteMutation `json:"deleteRemoteEnvironment"`
 }
 
-type RemoteEnvironmentEvent struct {
+type remoteEnvironmentEvent struct {
 	Type              string
-	RemoteEnvironment RemoteEnvironment
+	RemoteEnvironment remoteEnvironment
 }
 
 func TestRemoteEnvironmentMutations(t *testing.T) {
@@ -59,55 +59,55 @@ func TestRemoteEnvironmentMutations(t *testing.T) {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
-	reCli, _, err := k8s.NewREClientWithConfig()
+	reCli, _, err := client.NewREClientWithConfig()
 	require.NoError(t, err)
 
-	t.Log("Remote Environment Events Subscription")
+	t.Log("Subscribe On Remote Environments")
 	subscription := subscribeREEvent(c)
 	defer subscription.Close()
 
 	const fixName = "test-ui-api-re"
-	fixREResponse := RemoteEnvironment{
-		Name:        fixName,
-		Description: "fix-desc1",
-		Labels: map[string]string{
-			"fix": "lab",
-		},
-	}
+	fixedRE := createREStruct(fixName, "fix-desc1", map[string]string{"fix": "lab"})
 
 	waitForREReady(fixName, reCli)
 
-	t.Log("Create RemoteEnvironment")
-	resp, err := createRE(c, fixREResponse)
+	t.Log("Create Remote Environment")
+	resp, err := createRE(c, fixedRE)
 	require.NoError(t, err)
-	assert.Equal(t, fixREResponse, resp.ReCreateMutation)
+	assert.Equal(t, fixedRE, resp.ReCreateMutation)
 
-	t.Log("Check Remote Environment Event")
-	expectedEvent := remoteEnvironmentEvent("ADD", fixREResponse)
-	event, err := readRemoteEnvironmentEvent(subscription)
+	t.Log("Check Subscription Event")
+	expectedEvent := createREEventStruct("ADD", fixedRE)
+	event, err := readREEvent(subscription)
 	assert.NoError(t, err)
 	checkREEvent(t, expectedEvent, event)
 
 	defer func() {
-		t.Log("Delete RemoteEnvironment")
+		t.Log("Delete Remote Environment")
 		deleteResp, err := deleteRE(c, fixName)
 		require.NoError(t, err)
 		assert.Equal(t, fixName, deleteResp.ReDeleteMutation.Name)
 	}()
 
-	t.Log("Update RemoteEnvironment")
-	fixREResponse.Description = "desc2"
-	fixREResponse.Labels = map[string]string{
-		"lab": "fix",
-	}
-	updateResp, err := updateRE(c, fixREResponse)
+	t.Log("Update Remote Environment")
+	fixedRE = createREStruct(fixName, "desc2", map[string]string{"lab": "fix"})
+
+	updateResp, err := updateRE(c, fixedRE)
 	require.NoError(t, err)
-	assert.Equal(t, fixREResponse, updateResp.ReUpdateMutation)
+	assert.Equal(t, fixedRE, updateResp.ReUpdateMutation)
 }
 
-func readRemoteEnvironmentEvent(sub *graphql.Subscription) (RemoteEnvironmentEvent, error) {
+func createREStruct(name string, desc string, labels map[string]string) remoteEnvironment {
+	return remoteEnvironment{
+		Name:        name,
+		Description: desc,
+		Labels:      labels,
+	}
+}
+
+func readREEvent(sub *graphql.Subscription) (remoteEnvironmentEvent, error) {
 	type Response struct {
-		RemoteEnvironmentEvent RemoteEnvironmentEvent
+		RemoteEnvironmentEvent remoteEnvironmentEvent
 	}
 	var reEvent Response
 	err := sub.Next(&reEvent, tester.DefaultSubscriptionTimeout)
@@ -120,21 +120,27 @@ func subscribeREEvent(c *graphql.Client) *graphql.Subscription {
 			subscription {
 				%s
 			}
-		`, remoteEnvironmentEventFields())
+		`, reEventFields())
 	req := graphql.NewRequest(query)
 	return c.Subscribe(req)
 }
 
-func remoteEnvironmentEventFields() string {
-	return `
+func reEventFields() string {
+	return fmt.Sprintf(`
         remoteEnvironmentEvent {
 			type
     		remoteEnvironment{
-				name
-				description
-				labels
+				%s
 			}
         }
+    `, reFields())
+}
+
+func reFields() string {
+	return `
+		name
+		description
+		labels
     `
 }
 
@@ -156,28 +162,27 @@ func waitForREReady(environment string, reCli *clientset.Clientset) error {
 	}, reReadyTimeout)
 }
 
-func checkREEvent(t *testing.T, expected, actual RemoteEnvironmentEvent) {
+func checkREEvent(t *testing.T, expected, actual remoteEnvironmentEvent) {
 	assert.Equal(t, expected.Type, actual.Type)
 	assert.Equal(t, expected.RemoteEnvironment.Name, actual.RemoteEnvironment.Name)
 }
 
-func remoteEnvironmentEvent(eventType string, re RemoteEnvironment) RemoteEnvironmentEvent {
-	return RemoteEnvironmentEvent{
+func createREEventStruct(eventType string, re remoteEnvironment) remoteEnvironmentEvent {
+	return remoteEnvironmentEvent{
 		Type:              eventType,
 		RemoteEnvironment: re,
 	}
 }
 
-func createRE(c *graphql.Client, given RemoteEnvironment) (reCreateMutationResponse, error) {
-	query := `
+func createRE(c *graphql.Client, given remoteEnvironment) (reCreateMutationResponse, error) {
+	query := fmt.Sprintf(`
 			mutation ($name: String!, $description: String!, $labels: Labels!) {
 				createRemoteEnvironment(name: $name, description: $description, labels: $labels) {
-					name
-					description
-					labels
+					%s
 				}
 			}
-	`
+	`, reFields())
+
 	req := graphql.NewRequest(query)
 	req.SetVar("name", given.Name)
 	req.SetVar("description", given.Description)
@@ -188,16 +193,15 @@ func createRE(c *graphql.Client, given RemoteEnvironment) (reCreateMutationRespo
 	return response, err
 }
 
-func updateRE(c *graphql.Client, given RemoteEnvironment) (reUpdateMutationResponse, error) {
-	query := `
+func updateRE(c *graphql.Client, given remoteEnvironment) (reUpdateMutationResponse, error) {
+	query := fmt.Sprintf(`
 			mutation ($name: String!, $description: String!, $labels: Labels!) {
 				updateRemoteEnvironment(name: $name, description: $description, labels: $labels) {
-					name
-					description
-					labels
+					%s
 				}
 			}
-	`
+	`, reFields())
+
 	req := graphql.NewRequest(query)
 	req.SetVar("name", given.Name)
 	req.SetVar("description", given.Description)
