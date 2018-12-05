@@ -7,7 +7,7 @@ You can install Kyma with [Knative](https://cloud.google.com/knative/) and use i
 
 ## Knative with local deployment from sources
 
-When you install Kyma locally from sources, add the `--knative` argument to the `run.sh` script. Run:
+When you install Kyma locally from sources, add the `--knative` argument to the `run.sh` script. Run this command:
 
 ```
 ./run.sh --knative
