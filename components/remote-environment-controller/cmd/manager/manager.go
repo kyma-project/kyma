@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/api"
 	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/controller"
 	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm"
 	reReleases "github.com/kyma-project/kyma/components/remote-environment-controller/pkg/kymahelm/remoteenvironemnts"
 	log "github.com/sirupsen/logrus"
+	"k8s.io/client-go/pkg/apis/clientauthentication/v1alpha1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -42,7 +42,7 @@ func main() {
 	log.Printf("Registering Components:")
 
 	log.Printf("Setting up scheme.")
-	if err := api.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Fatal(err)
 	}
 

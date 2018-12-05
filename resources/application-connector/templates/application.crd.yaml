@@ -1,7 +1,7 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: remoteenvironments.applicationconnector.kyma-project.io
+  name: applications.applicationconnector.kyma-project.io
   annotations:
     "helm.sh/hook": crd-install
 spec:
@@ -9,9 +9,9 @@ spec:
   version: v1alpha1
   scope: Cluster
   names:
-    plural: remoteenvironments
-    singular: remoteenvironment
-    kind: RemoteEnvironment
+    plural: applications
+    singular: application
+    kind: Application
     shortNames:
     - re
   validation:
