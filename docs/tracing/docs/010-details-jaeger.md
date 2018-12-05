@@ -7,11 +7,11 @@ type: Details
 [Jaeger](http://jaeger.readthedocs.io/en/latest/) is a monitoring and tracing tool for microservice-based distributed systems.
 It is used for monitoring and troubleshooting microservice-based distributed systems, including:
 
-- Distributed context propagation
-- Distributed transaction monitoring
-- Root cause analysis
-- Service dependency analysis
-- Performance and latency optimization
+- Distributed context propagation.
+- Distributed transaction monitoring.
+- Root cause analysis.
+- Service dependency analysis.
+- Performance and latency optimization.
 
 ## Usage 
 
@@ -19,10 +19,10 @@ The Envoy sidecar uses Jaeger to trace the request flow in the Istio service mes
 
 For more details, see [Istio Distributed Tracing](https://istio.io/docs/tasks/telemetry/distributed-tracing.html).
 
-## Install Jaeger
-Jaeger installation is optional, and not available to use locally by default. You can install Jaeger on a Kyma instance and run it locally using Helm.
+## Install Jaeger locally
+While Jager installs automatically during cluster installation, local Jaeger installation is optional. You can install Jaeger on a Kyma instance and run it locally using Helm.
 
-To install Jaeger, go to the `~/go/src/github.com/kyma-project/kyma/resources/` directory and run the following command:
+To install Jaeger locally, go to the `~/go/src/github.com/kyma-project/kyma/resources/` directory and run the following command:
 ```bash
 $ helm install -n jaeger -f jaeger/values.yaml --namespace kyma-system --set-string global.domainName=kyma.local --set-string global.isLocalEnv=true jaeger/
 ```
