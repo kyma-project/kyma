@@ -19,7 +19,6 @@ type ImageBuildConfig struct {
 }
 
 func Build(cfg *ImageBuildConfig) (string, error) {
-
 	buildCommand := fmt.Sprintf(`cat %s | docker build -f - . -t %s %s`, cfg.DockerfilePath, cfg.Name, cfg.AdditionalBuildArgs)
 	out, err := sh.RunInDir(buildCommand, cfg.BuildDirectory)
 	if err != nil {
