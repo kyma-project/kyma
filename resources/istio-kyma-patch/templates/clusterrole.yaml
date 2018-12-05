@@ -9,6 +9,6 @@ rules:
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
   verbs: ["get", "list", "watch"]
-- apiGRoups: ["authentication.istio.io"]
+- apiGroups: ["authentication.istio.io"]
   resources: ["meshpolicies"]
   verbs: ["get", "list", "watch"]
