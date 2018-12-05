@@ -13,9 +13,6 @@
 # The `installation` PowerShell scripts
 /installation/**/*.ps1 @crabtree @venturasr
 
-# The `kyma-installer` directory
-/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek @jasiu001 @adamwalach
-
 # The `prow` directory
 /prow/ @aszecowka @strekm @suleymanakbas91 @crabtree @michal-hudy @pbochynski
 
@@ -277,6 +274,9 @@
 
 # The tools/ark-plugins directory
 /tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+
+# The tools/kyma-installer directory
+/tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek @jasiu001 @adamwalach
 
 # kubeless-integration tests directory 
 /tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
