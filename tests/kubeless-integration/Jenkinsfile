@@ -53,6 +53,10 @@ podTemplate(label: label,
                             }
                         }
 
+                        stage("install dependencies $application") {
+                            execute("make resolve", workDir, componentDir)
+                        }
+
                         stage("code quality $application") {
                             execute("make validate", workDir, componentDir)
                         }
