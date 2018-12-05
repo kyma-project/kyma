@@ -14,14 +14,14 @@ Resources currently include, but are not limited to, the following:
 ## Installation
 Monitoring and Logging charts are not installed by default when you install Kyma on Minikube. They are available by default for cluster installations.
 
-To install Monitoring chart on the Minikube cluster, run the following command inside resources directory:
+To install Monitoring chart on the Minikube cluster, run the following command inside the `resources` directory:
 
 ```bash
-helm install monitoring --set global.isLocalEnv=true --set global.alertTools.credentials.victorOps.apikey="" --set global.alertTools.credentials.victorOps.routingkey="" --set global.alertTools.credentials.slack.channel="" --set global.alertTools.credentials.slack.apiurl="" -n kyma-system
+helm install monitoring --set global.isLocalEnv=true --set global.alertTools.credentials.victorOps.apikey="" --set global.alertTools.credentials.victorOps.routingkey="" --set global.alertTools.credentials.slack.channel="" --set global.alertTools.credentials.slack.apiurl="" --set global.domainName=kyma.local --namespace=kyma-system --name=monitoring
 ```
 
 To install Logging chart on the Minikube cluster, run the following command inside resources directory:
 
 ```bash
-helm install logging --set global.isLocalEnv=true
+helm install logging --set global.isLocalEnv=true --namespace=kyma-system --name=logging
 ```
