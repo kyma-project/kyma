@@ -10,6 +10,14 @@
   version = "v0.8.0"
 
 [[projects]]
+  digest = "1:1b8282c02f3cbf27de019d739246eaf8231f5dbcaaf9d0d7c7524184ee7b2d24"
+  name = "github.com/vrischmann/envconfig"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7a443243d539c9595dd8aa7f03a6f68707b80e66"
+  version = "v1.1.0"
+
+[[projects]]
   digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -22,6 +30,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/pkg/errors",
+    "github.com/vrischmann/envconfig",
     "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"

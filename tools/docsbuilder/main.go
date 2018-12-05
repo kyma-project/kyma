@@ -2,83 +2,87 @@ package main
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/tools/docsbuilder/internal/sh"
+	"github.com/kyma-project/kyma/tools/docsbuilder/internal/content"
+	"github.com/kyma-project/kyma/tools/docsbuilder/internal/docker"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
+	"github.com/vrischmann/envconfig"
 	"io/ioutil"
 	"log"
 )
 
-type Doc struct {
-	Name      string `yaml:"name"`
-	Directory string `yaml:"directory"`
+type config struct {
+	DocsDir       string `envconfig:"default=../../docs"`
+	DocsBuildFile string `envconfig:"default=../../docs/docs-build.yaml"`
+	Docker        dockerConfig
+}
+
+type dockerConfig struct {
+	DockerfilePath string `envconfig:"default=../../docs/Dockerfile,DOCKERFILE_PATH"`
+	ImageTag       string `envconfig:"default=latest"`
+	ImageSuffix    string `envconfig:"default=-docs"`
+	PushRoot       string `envconfig:"optional"`
 }
 
 func main() {
+	cfg, err := loadConfig("APP")
 
-	//TODO: ENVs
-	const dockerPushRoot = "test-"
-	const dockerImageTag = "latest"
-	const dockerImageSuffix = "docs"
-	const docsDir = "../../docs"
-
-	docsBuildPath := fmt.Sprintf("%s/docs-build.yaml", docsDir)
-	dockerfilePath := fmt.Sprintf("%s/Dockerfile", docsDir)
-
-	docs, err := readDocs(docsBuildPath)
+	docs, err := content.Read(cfg.DocsBuildFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	dockerImageComponentLabel := "component=docs"
-	dockerImageVersionLabel := fmt.Sprintf("version=%s", dockerImageTag)
-	imageLabels := fmt.Sprintf("--label %s --label %s", dockerImageVersionLabel, dockerImageComponentLabel)
+	additionalBuildArgs := fmt.Sprintf("--label version=%s --label component=docs", cfg.Docker.ImageTag)
+
+	//dockerfile, err := loadTextFile(cfg.Docker.DockerfilePath)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 
 	for _, doc := range docs {
-		imageName := fmt.Sprintf("%s%s-%s:%s", dockerPushRoot, doc.Name, dockerImageSuffix, dockerImageTag)
-		buildCommand := fmt.Sprintf("cat %s | docker build -f - . -t %s %s", dockerfilePath, imageName, imageLabels)
+		imageName := fmt.Sprintf("%s%s-%s:%s", cfg.Docker.PushRoot, doc.Name, cfg.Docker.ImageSuffix, cfg.Docker.ImageTag)
 
-		// build image
-		log.Printf("> Building image %s...\n\n", imageName)
-
-		docDir := doc.Name
-		if doc.Directory != "" {
-			docDir = doc.Directory
+		imageCfg := &docker.ImageBuildConfig{
+			Name:                imageName,
+			BuildDirectory:      content.ConstructPath(doc, cfg.DocsDir),
+			DockerfilePath:      cfg.Docker.DockerfilePath,
+			AdditionalBuildArgs: additionalBuildArgs,
 		}
 
-		dir := fmt.Sprintf("%s/%s", docsDir, docDir)
-
-		out, err := sh.RunInDir(buildCommand, dir)
-		fmt.Print(out)
+		log.Printf("\n>>> Building image %s in %s...\n\n", imageCfg.Name, imageCfg.BuildDirectory)
+		buildOut, err := docker.Build(imageCfg)
+		fmt.Print(buildOut)
 		if err != nil {
-			log.Fatal(errors.Wrapf(err, "while executing %s", buildCommand))
+			log.Fatal(err)
 		}
 
+		if cfg.Docker.PushRoot == "" {
+			log.Println("Empty 'PushRoot' config property. Skipping pushing image...")
+			continue
+		}
 
-		// push image
-
-		log.Printf("> Pushing image %s...\n\n", imageName)
-		pushCommand := fmt.Sprintf("docker push %s", imageName)
-		pushOut, err := sh.Run(pushCommand)
+		log.Printf("\n>>> Pushing image %s...\n\n", imageCfg.Name)
+		pushOut, err := docker.Push(imageCfg.Name)
 		fmt.Print(pushOut)
-
 		if err != nil {
-			log.Fatal(errors.Wrapf(err, "while executing %s", buildCommand))
+			log.Fatal(err)
 		}
 	}
 }
 
-func readDocs(path string) ([]Doc, error) {
-	yamlFile, err := ioutil.ReadFile(path)
+func loadConfig(prefix string) (config, error) {
+	cfg := config{}
+	err := envconfig.InitWithPrefix(&cfg, prefix)
+	return cfg, err
+}
+
+func loadTextFile(path string) (string, error) {
+	file, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while reading file %s", path)
+		return "", errors.Wrapf(err, "while reading file %s", path)
 	}
 
-	var docs []Doc
-	err = yaml.Unmarshal(yamlFile, &docs)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while unmarshalling content of the file %s", path)
-	}
+	//regExp := regexp.MustCompile(`\r?\n`)
+	//return regExp.ReplaceAllString(string(file), " "), nil
 
-	return docs, nil
+	return string(file), nil
 }

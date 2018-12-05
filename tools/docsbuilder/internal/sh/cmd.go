@@ -18,10 +18,6 @@ func execCommand(command string) *exec.Cmd {
 }
 
 func strOutput(cmd *exec.Cmd) (string, error) {
-	out, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-
-	return string(out), nil
+	out, err := cmd.CombinedOutput()
+	return string(out), err
 }
