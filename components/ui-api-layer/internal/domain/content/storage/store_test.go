@@ -2,13 +2,14 @@ package storage_test
 
 import (
 	"bytes"
+	"io/ioutil"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
-	"testing"
 )
 
 func TestStore_ApiSpec(t *testing.T) {
