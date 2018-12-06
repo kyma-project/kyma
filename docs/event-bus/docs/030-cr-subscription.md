@@ -3,7 +3,7 @@ title: Subscription
 type: Custom Resource
 ---
 
-The `subscriptions.eventing.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to create an event trigger for lambda or microservice in Kyma. After creating a new custom resource, the event trigger is registered in the event bus and events are delivered to the endpoint specified in the custom resource.
+The `subscriptions.eventing.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to create an Event trigger for a lambda or microservice in Kyma. After creating a new custom resource, the Event trigger is registered in the Event Bus and Events are delivered to the endpoint specified in the custom resource.
 
 To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
