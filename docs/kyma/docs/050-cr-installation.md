@@ -65,4 +65,4 @@ These components use this CR:
 
 | Component   |   Description |
 |:----------:|:------|
-| Installer  |  CR triggers installation/update/deletion of the provided components |
+| Installer  |  The CR triggers the installer to install, update or delete of the specified components. |
