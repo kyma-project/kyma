@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"path/filepath"
+
 	"github.com/kyma-project/kyma/tools/docsbuilder/internal/content"
 	"github.com/kyma-project/kyma/tools/docsbuilder/internal/docker"
 	"github.com/vrischmann/envconfig"
-	"log"
-	"path/filepath"
 )
 
 type config struct {

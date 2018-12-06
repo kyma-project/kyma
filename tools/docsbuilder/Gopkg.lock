@@ -2,36 +2,38 @@
 
 
 [[projects]]
-  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
   name = "github.com/pkg/errors"
   packages = ["."]
-  pruneopts = "UT"
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
 
 [[projects]]
-  digest = "1:1b8282c02f3cbf27de019d739246eaf8231f5dbcaaf9d0d7c7524184ee7b2d24"
   name = "github.com/vrischmann/envconfig"
   packages = ["."]
-  pruneopts = "UT"
   revision = "7a443243d539c9595dd8aa7f03a6f68707b80e66"
   version = "v1.1.0"
 
 [[projects]]
-  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
+  branch = "master"
+  name = "golang.org/x/tools"
+  packages = [
+    "cmd/goimports",
+    "go/ast/astutil",
+    "imports",
+    "internal/fastwalk",
+    "internal/gopathwalk"
+  ]
+  revision = "3576414c54a492fc48cd913814eb209914c717f0"
+
+[[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  pruneopts = "UT"
   revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
   version = "v2.2.2"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/pkg/errors",
-    "github.com/vrischmann/envconfig",
-    "gopkg.in/yaml.v2",
-  ]
+  inputs-digest = "1cfc006f591800108e247d7e0f5f822cd058134cf432396c9b15985e07b2494c"
   solver-name = "gps-cdcl"
   solver-version = 1
