@@ -1,12 +1,16 @@
 package apicontroller
 
 import (
+	"context"
+	"crypto/tls"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/tools/ingressgateway"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -35,9 +39,9 @@ func TestIntegrationSpec(t *testing.T) {
 
 	log.Infof("Running test: %s", testId)
 
-	httpClient, err := ingressgateway.Client()
+	httpClient, err := ctx.newHttpClient(testId, domainName)
 	if err != nil {
-		t.Fatalf("Cannot get ingressgateway client: %s", err)
+		t.Fatalf("Error while creating HTTP client. Root cause: %v", err)
 	}
 
 	kubeConfig := ctx.defaultConfigOrExit()
@@ -275,4 +279,49 @@ func (integrationTestContext) generateTestId(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+func (tctx integrationTestContext) newHttpClient(testId, domainName string) (*http.Client, error) {
+
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
+	ingressGatewayControllerAddr, err := net.LookupHost(ingressGatewayControllerServiceURL)
+	if err != nil {
+		log.Warnf("Unable to resolve host '%s' (if you are running this test from outside of Kyma ignore this log). Root cause: %v", ingressGatewayControllerServiceURL, err)
+		minikubeIp := tctx.tryToGetMinikubeIp()
+		if minikubeIp == "" {
+			return nil, err
+		}
+		ingressGatewayControllerAddr = []string{minikubeIp}
+	}
+	log.Infof("Ingress controller address: '%s'", ingressGatewayControllerAddr)
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			// Changes request destination address to ingressGateway internal cluster address for requests to sample app service.
+			hostname := tctx.hostnameFor(testId, domainName, true)
+			if strings.HasPrefix(addr, hostname) {
+				addr = strings.Replace(addr, hostname, ingressGatewayControllerAddr[0], 1)
+			}
+			dialer := net.Dialer{}
+			return dialer.DialContext(ctx, network, addr)
+		},
+	}
+	client := &http.Client{
+		Transport: tr,
+		Timeout:   time.Second * 10,
+	}
+
+	return client, nil
+}
+
+func (integrationTestContext) tryToGetMinikubeIp() string {
+	mipCmd := exec.Command("minikube", "ip")
+	if mipOut, err := mipCmd.Output(); err != nil {
+		log.Warnf("Error while getting minikube IP (ignore this message if you are running this test inside Kyma). Root cause: %s", err)
+		return ""
+	} else {
+		return strings.Trim(string(mipOut), "\n")
+	}
 }

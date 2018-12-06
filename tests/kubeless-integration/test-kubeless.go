@@ -2,11 +2,13 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"crypto/tls"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/tools/ingressgateway"
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -306,68 +308,95 @@ func deleteFun(namespace, name string) {
 	}
 }
 
+func getMinikubeIP() string {
+	mipCmd := exec.Command("minikube", "ip")
+	if mipOut, err := mipCmd.Output(); err != nil {
+		log.Fatalf("Error while getting minikube IP. Root cause: %s", err)
+		return ""
+	} else {
+		return strings.Trim(string(mipOut), "\n")
+	}
+}
+
 func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName string) {
 	timeout := time.After(2 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 
-	ingressClient, err := ingressgateway.Client()
-	if err != nil {
-		log.Fatalf("Cannot get ingressgateway address: %s", err)
+	dialer := &net.Dialer{
+		Timeout: 30 * time.Second,
 	}
+	ingressGatewayControllerServiceURL := "istio-ingressgateway.istio-system.svc.cluster.local"
 
-	for {
-		select {
-		case <-timeout:
-			log.Printf("[%v] Timeout: Check if Virtual Service has been created", testName)
+	ingressGatewayControllerAddr, err := net.LookupHost(ingressGatewayControllerServiceURL)
+	if err != nil {
+		log.Printf("[%v] Unable to resolve host '%s'. Root cause: %v", testName, ingressGatewayControllerServiceURL, err)
+		if minikubeIP := getMinikubeIP(); minikubeIP != "" {
+			ingressGatewayControllerAddr = []string{minikubeIP}
+		}
+	}
+	if len(ingressGatewayControllerAddr) > 0 {
+		log.Printf("[%v] Ingress controller address: '%s'", testName, ingressGatewayControllerAddr[0])
 
-			printDebugLogsAPIServiceFailed(namespace, testName)
-			connectUsingK8sService(namespace, testName)
-			printLogsFunctionPodContainers(namespace, testName)
+		http.DefaultTransport.(*http.Transport).DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			addr = ingressGatewayControllerAddr[0] + ":443"
+			return dialer.DialContext(ctx, network, addr)
+		}
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-			cmd := exec.Command("kubectl", "-n", namespace, "get", "virtualservices.networking.istio.io", "-l", "apiName="+testName)
-			stdoutStderr, err := cmd.CombinedOutput()
-			if err != nil {
-				log.Fatalf("[%v] Unable to fetch Virtual Service for: %v. Because of following error: %v", testName, testName, string(stdoutStderr))
-			}
-			log.Printf("[%v] Timeout: Getting Virtual Service: '%v' and result is: %v", testName, testName, string(stdoutStderr))
+		for {
+			select {
+			case <-timeout:
+				log.Printf("[%v] Timeout: Check if Virtual Service has been created", testName)
 
-			log.Printf("[%v] Timeout: Check http Get one last time", testName)
-			resp, err := ingressClient.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
-			if err != nil {
-				log.Fatalf("[%v] Timeout: Unable to call host: %v. Because of following error: %v ", testName, host, err)
-			}
-			log.Fatalf("[%v] Timeout: Response is: %v", testName, resp)
+				printDebugLogsAPIServiceFailed(namespace, testName)
+				connectUsingK8sService(namespace, testName)
+				printLogsFunctionPodContainers(namespace, testName)
 
-		case <-tick:
-			resp, err := ingressClient.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
-			if err != nil {
-				log.Fatalf("[%v] Unable to call host: %v. Because of following error: %v", testName, host, err)
-			}
-			if resp.StatusCode == http.StatusOK {
-				bodyBytes, err := ioutil.ReadAll(resp.Body)
+				cmd := exec.Command("kubectl", "-n", namespace, "get", "virtualservices.networking.istio.io", "-l", "apiName="+testName)
+				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
-					log.Fatalf("[%v] Unable to get response: %v", testName, err)
+					log.Fatalf("[%v] Unable to fetch Virtual Service for: %v. Because of following error: %v", testName, testName, string(stdoutStderr))
 				}
+				log.Printf("[%v] Timeout: Getting Virtual Service: '%v' and result is: %v", testName, testName, string(stdoutStderr))
 
-				functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+testName, "-ojsonpath={.items[0].metadata.name}")
-				functionPodName, err := functionPodsCmd.CombinedOutput()
+				log.Printf("[%v] Timeout: Check http Get one last time", testName)
+				resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
 				if err != nil {
-					log.Printf("[%v] Error is fetch function pod when verifying correct output: %v", testName, string(functionPodName))
+					log.Fatalf("[%v] Timeout: Unable to call host: %v. Because of following error: %v ", testName, host, err)
 				}
-				if string(bodyBytes) == expectedOutput {
-					log.Printf("[%v] Response is equal to expected output: %v == %v", testName, string(bodyBytes), expectedOutput)
-					log.Printf("[%v] Name of the Successful Pod is: %v", testName, string(functionPodName))
-					return
-				}
-				log.Printf("[%v] Name of the Failed Pod is: %v", testName, string(functionPodName))
-				log.Fatalf("[%v] Response is not equal to expected output: %v != %v", testName, string(bodyBytes), expectedOutput)
-			} else {
-				log.Printf("[%v] Tick: Response code is: %v", testName, resp.StatusCode)
-				bodyBytes, err := ioutil.ReadAll(resp.Body)
+				log.Fatalf("[%v] Timeout: Response is: %v", testName, resp)
+
+			case <-tick:
+				resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
 				if err != nil {
-					log.Printf("[%v] Tick: Unable to get response: %v", testName, err)
+					log.Fatalf("[%v] Unable to call host: %v. Because of following error: %v", testName, host, err)
 				}
-				log.Printf("[%v] Tick: Response body is: %v", testName, string(bodyBytes))
+				if resp.StatusCode == http.StatusOK {
+					bodyBytes, err := ioutil.ReadAll(resp.Body)
+					if err != nil {
+						log.Fatalf("[%v] Unable to get response: %v", testName, err)
+					}
+
+					functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+testName, "-ojsonpath={.items[0].metadata.name}")
+					functionPodName, err := functionPodsCmd.CombinedOutput()
+					if err != nil {
+						log.Printf("[%v] Error is fetch function pod when verifying correct output: %v", testName, string(functionPodName))
+					}
+					if string(bodyBytes) == expectedOutput {
+						log.Printf("[%v] Response is equal to expected output: %v == %v", testName, string(bodyBytes), expectedOutput)
+						log.Printf("[%v] Name of the Successful Pod is: %v", testName, string(functionPodName))
+						return
+					}
+					log.Printf("[%v] Name of the Failed Pod is: %v", testName, string(functionPodName))
+					log.Fatalf("[%v] Response is not equal to expected output: %v != %v", testName, string(bodyBytes), expectedOutput)
+				} else {
+					log.Printf("[%v] Tick: Response code is: %v", testName, resp.StatusCode)
+					bodyBytes, err := ioutil.ReadAll(resp.Body)
+					if err != nil {
+						log.Printf("[%v] Tick: Unable to get response: %v", testName, err)
+					}
+					log.Printf("[%v] Tick: Response body is: %v", testName, string(bodyBytes))
+				}
 			}
 		}
 	}
