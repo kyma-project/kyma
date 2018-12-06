@@ -1,4 +1,4 @@
-package remoteenv
+package applications
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 			} else if entry.Type == specEventsType {
 				events = true
 			} else {
-				message := fmt.Sprintf("Entry %s in Remote Environment Service definition has incorrect type. Type %s needed", entry.Type, specEventsType)
+				message := fmt.Sprintf("Entry %s in Application Service definition has incorrect type. Type %s needed", entry.Type, specEventsType)
 				log.Error(message)
 				return Service{}, apperrors.Internal(message)
 			}

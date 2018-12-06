@@ -3,8 +3,8 @@ package secrets
 import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	k8smocks "github.com/kyma-project/kyma/components/metadata-service/internal/k8sconsts/mocks"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/secrets/mocks"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -44,7 +44,7 @@ func TestService_Create(t *testing.T) {
 		// then
 		assert.NoError(t, err)
 		assert.Equal(t, "http://oauth.com", res.AuthenticationUrl)
-		assert.Equal(t, remoteenv.CredentialsOAuthType, res.Type)
+		assert.Equal(t, applications.CredentialsOAuthType, res.Type)
 		assert.Equal(t, "resourceName", res.SecretName)
 
 		repositoryMock.AssertExpectations(t)
@@ -83,7 +83,7 @@ func TestService_Create(t *testing.T) {
 		// then
 		assert.NoError(t, err)
 		assert.Equal(t, "", res.AuthenticationUrl)
-		assert.Equal(t, remoteenv.CredentialsBasicType, res.Type)
+		assert.Equal(t, applications.CredentialsBasicType, res.Type)
 		assert.Equal(t, "resourceName", res.SecretName)
 
 		repositoryMock.AssertExpectations(t)
@@ -203,8 +203,8 @@ func TestService_Get(t *testing.T) {
 			nil,
 		)
 
-		credentials := remoteenv.Credentials{
-			Type:       remoteenv.CredentialsOAuthType,
+		credentials := applications.Credentials{
+			Type:       applications.CredentialsOAuthType,
 			SecretName: "name",
 		}
 
@@ -230,8 +230,8 @@ func TestService_Get(t *testing.T) {
 			nil,
 		)
 
-		credentials := remoteenv.Credentials{
-			Type:       remoteenv.CredentialsBasicType,
+		credentials := applications.Credentials{
+			Type:       applications.CredentialsBasicType,
 			SecretName: "name",
 		}
 
@@ -256,8 +256,8 @@ func TestService_Get(t *testing.T) {
 			apperrors.NotFound("Secret not found."),
 		)
 
-		credentials := remoteenv.Credentials{
-			Type:       remoteenv.CredentialsOAuthType,
+		credentials := applications.Credentials{
+			Type:       applications.CredentialsOAuthType,
 			SecretName: "name",
 		}
 
@@ -282,8 +282,8 @@ func TestService_Get(t *testing.T) {
 			apperrors.Internal("Internal error."),
 		)
 
-		credentials := remoteenv.Credentials{
-			Type:       remoteenv.CredentialsOAuthType,
+		credentials := applications.Credentials{
+			Type:       applications.CredentialsOAuthType,
 			SecretName: "name",
 		}
 
@@ -333,7 +333,7 @@ func TestService_Update(t *testing.T) {
 		// then
 		assert.NoError(t, err)
 		assert.Equal(t, "http://oauth.com", res.AuthenticationUrl)
-		assert.Equal(t, remoteenv.CredentialsOAuthType, res.Type)
+		assert.Equal(t, applications.CredentialsOAuthType, res.Type)
 
 		repositoryMock.AssertExpectations(t)
 		nameResolverMock.AssertExpectations(t)
@@ -370,7 +370,7 @@ func TestService_Update(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		assert.Equal(t, remoteenv.CredentialsBasicType, res.Type)
+		assert.Equal(t, applications.CredentialsBasicType, res.Type)
 
 		repositoryMock.AssertExpectations(t)
 		nameResolverMock.AssertExpectations(t)

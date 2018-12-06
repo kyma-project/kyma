@@ -16,11 +16,11 @@ const (
 // NameResolver provides names for Kubernetes resources
 type NameResolver interface {
 	// GetResourceName returns resource name with given ID
-	GetResourceName(remoteEnvironment, id string) string
+	GetResourceName(applicaton, id string) string
 	// GetGatewayUrl return gateway url with given ID
-	GetGatewayUrl(remoteEnvironment, id string) string
+	GetGatewayUrl(applicaton, id string) string
 	// ExtractServiceId extracts service ID from given host
-	ExtractServiceId(remoteEnvironment, host string) string
+	ExtractServiceId(applicaton, host string) string
 }
 
 type nameResolver struct {
@@ -35,36 +35,36 @@ func NewNameResolver(namespace string) NameResolver {
 }
 
 // GetResourceName returns resource name with given ID
-func (resolver nameResolver) GetResourceName(remoteEnvironment, id string) string {
-	return getResourceNamePrefix(remoteEnvironment) + id
+func (resolver nameResolver) GetResourceName(applicaton, id string) string {
+	return getResourceNamePrefix(applicaton) + id
 }
 
 // GetGatewayUrl return gateway url with given ID
-func (resolver nameResolver) GetGatewayUrl(remoteEnvironment, id string) string {
-	return fmt.Sprintf(metadataUrlFormat, resolver.GetResourceName(remoteEnvironment, id), resolver.namespace)
+func (resolver nameResolver) GetGatewayUrl(applicaton, id string) string {
+	return fmt.Sprintf(metadataUrlFormat, resolver.GetResourceName(applicaton, id), resolver.namespace)
 }
 
 // ExtractServiceId extracts service ID from given host
-func (resolver nameResolver) ExtractServiceId(remoteEnvironment, host string) string {
+func (resolver nameResolver) ExtractServiceId(applicaton, host string) string {
 	resourceName := strings.Split(host, ".")[0]
-	return strings.TrimPrefix(resourceName, getResourceNamePrefix(remoteEnvironment))
+	return strings.TrimPrefix(resourceName, getResourceNamePrefix(applicaton))
 }
 
-func getResourceNamePrefix(remoteEnvironment string) string {
-	truncatedRemoteEnvironment := truncateRemoteEnvironment(remoteEnvironment)
-	return fmt.Sprintf(resourceNamePrefixFormat, truncatedRemoteEnvironment)
+func getResourceNamePrefix(applicaton string) string {
+	truncatedapplicaton := truncateapplicaton(applicaton)
+	return fmt.Sprintf(resourceNamePrefixFormat, truncatedapplicaton)
 }
 
-func truncateRemoteEnvironment(remoteEnvironment string) string {
+func truncateapplicaton(applicaton string) string {
 	maxResourceNamePrefixLength := maxResourceNameLength - uuidLength
-	testResourceNamePrefix := fmt.Sprintf(resourceNamePrefixFormat, remoteEnvironment)
+	testResourceNamePrefix := fmt.Sprintf(resourceNamePrefixFormat, applicaton)
 	testResourceNamePrefixLength := len(testResourceNamePrefix)
 
 	overflowLength := testResourceNamePrefixLength - maxResourceNamePrefixLength
 
 	if overflowLength > 0 {
-		newRemoteEnvironmentLength := len(remoteEnvironment) - overflowLength
-		return remoteEnvironment[0:newRemoteEnvironmentLength]
+		newapplicatonLength := len(applicaton) - overflowLength
+		return applicaton[0:newapplicatonLength]
 	}
-	return remoteEnvironment
+	return applicaton
 }

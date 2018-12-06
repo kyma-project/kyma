@@ -24,8 +24,8 @@ func TestRepository_Create(t *testing.T) {
 			ObjectMeta: v1.ObjectMeta{
 				Name: "re-test-uuid1",
 				Labels: map[string]string{
-					k8sconsts.LabelRemoteEnvironment: "re",
-					k8sconsts.LabelServiceId:         "sid",
+					k8sconsts.LabelApplication: "re",
+					k8sconsts.LabelServiceId:   "sid",
 				},
 			},
 			Spec: &v1alpha2.DenierSpec{
@@ -71,8 +71,8 @@ func TestRepository_Create(t *testing.T) {
 			ObjectMeta: v1.ObjectMeta{
 				Name: "re-test-uuid1",
 				Labels: map[string]string{
-					k8sconsts.LabelRemoteEnvironment: "re",
-					k8sconsts.LabelServiceId:         "sid",
+					k8sconsts.LabelApplication: "re",
+					k8sconsts.LabelServiceId:   "sid",
 				},
 			},
 		}
@@ -112,8 +112,8 @@ func TestRepository_Create(t *testing.T) {
 			ObjectMeta: v1.ObjectMeta{
 				Name: "re-test-uuid1",
 				Labels: map[string]string{
-					k8sconsts.LabelRemoteEnvironment: "re",
-					k8sconsts.LabelServiceId:         "sid",
+					k8sconsts.LabelApplication: "re",
+					k8sconsts.LabelServiceId:   "sid",
 				},
 			},
 			Spec: &v1alpha2.RuleSpec{
@@ -163,8 +163,8 @@ func TestRepository_Upsert(t *testing.T) {
 			ObjectMeta: v1.ObjectMeta{
 				Name: "re-test-uuid1",
 				Labels: map[string]string{
-					k8sconsts.LabelRemoteEnvironment: "re",
-					k8sconsts.LabelServiceId:         "sid",
+					k8sconsts.LabelApplication: "re",
+					k8sconsts.LabelServiceId:   "sid",
 				},
 			},
 			Spec: &v1alpha2.DenierSpec{
@@ -226,8 +226,8 @@ func TestRepository_Upsert(t *testing.T) {
 			ObjectMeta: v1.ObjectMeta{
 				Name: "re-test-uuid1",
 				Labels: map[string]string{
-					k8sconsts.LabelRemoteEnvironment: "re",
-					k8sconsts.LabelServiceId:         "sid",
+					k8sconsts.LabelApplication: "re",
+					k8sconsts.LabelServiceId:   "sid",
 				},
 			},
 		}
@@ -283,8 +283,8 @@ func TestRepository_Upsert(t *testing.T) {
 			ObjectMeta: v1.ObjectMeta{
 				Name: "re-test-uuid1",
 				Labels: map[string]string{
-					k8sconsts.LabelRemoteEnvironment: "re",
-					k8sconsts.LabelServiceId:         "sid",
+					k8sconsts.LabelApplication: "re",
+					k8sconsts.LabelServiceId:   "sid",
 				},
 			},
 			Spec: &v1alpha2.RuleSpec{
