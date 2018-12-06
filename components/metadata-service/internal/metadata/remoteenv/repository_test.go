@@ -7,7 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv/mocks"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -19,12 +19,12 @@ import (
 func TestGetServices(t *testing.T) {
 	t.Run("should get all services", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+		application := createApplication("production")
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+			Return(application, nil)
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -68,11 +68,11 @@ func TestGetServices(t *testing.T) {
 
 	t.Run("should fail if unable to read RE", func(t *testing.T) {
 		// given
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "re", metav1.GetOptions{}).
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "re", metav1.GetOptions{}).
 			Return(nil, errors.New("failed to get RE"))
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -85,11 +85,11 @@ func TestGetServices(t *testing.T) {
 
 	t.Run("should fail if RE doesn't exist", func(t *testing.T) {
 		// given
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "not_existent", metav1.GetOptions{}).
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "not_existent", metav1.GetOptions{}).
 			Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -110,12 +110,12 @@ func TestGetServices(t *testing.T) {
 
 	t.Run("should get service by id", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+		application := createApplication("production")
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+			Return(application, nil)
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -141,12 +141,12 @@ func TestGetServices(t *testing.T) {
 
 	t.Run("should return not found error if service doesn't exist", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+		application := createApplication("production")
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+			Return(application, nil)
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -161,19 +161,20 @@ func TestGetServices(t *testing.T) {
 func TestCreateServices(t *testing.T) {
 	t.Run("should create service", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
+		remoteEnvironment := createApplication("production")
+
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(remoteEnvironment, nil)
 
 		service1 := createK8sService()
 		newServices := append(remoteEnvironment.Spec.Services, service1)
-		newRE := remoteEnvironment.DeepCopy()
+		newApp := remoteEnvironment.DeepCopy()
 
-		newRE.Spec.Services = newServices
-		reManagerMock.On("Update", newRE).Return(newRE, nil)
+		newApp.Spec.Services = newServices
+		appManagerMock.On("Update", newApp).Return(newApp, nil)
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		newService1 := createService()
@@ -183,19 +184,19 @@ func TestCreateServices(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		reManagerMock.AssertExpectations(t)
+		appManagerMock.AssertExpectations(t)
 	})
 
 	t.Run("should fail if failed to update RE", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+		application := createApplication("production")
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+			Return(application, nil)
 
-		reManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(nil, errors.New("failed to update RE"))
+		appManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.Application")).Return(nil, errors.New("failed to update Application"))
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		newService1 := createService()
@@ -206,17 +207,17 @@ func TestCreateServices(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
-		reManagerMock.AssertExpectations(t)
+		appManagerMock.AssertExpectations(t)
 	})
 
 	t.Run("should not allow to create service if service with the same id already exists", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+		application := createApplication("production")
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+			Return(application, nil)
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		newService := remoteenv.Service{
@@ -236,11 +237,11 @@ func TestCreateServices(t *testing.T) {
 
 	t.Run("should fail if RE doesn't exist", func(t *testing.T) {
 		// given
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -262,17 +263,17 @@ func TestDeleteServices(t *testing.T) {
 
 	t.Run("should delete service", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+		application := createApplication("production")
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+			Return(application, nil)
 
-		newRE := remoteEnvironment.DeepCopy()
+		newApp := application.DeepCopy()
 
-		newRE.Spec.Services = remoteEnvironment.Spec.Services[1:]
-		reManagerMock.On("Update", newRE).Return(newRE, nil)
+		newApp.Spec.Services = application.Spec.Services[1:]
+		appManagerMock.On("Update", newApp).Return(newApp, nil)
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -280,17 +281,17 @@ func TestDeleteServices(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		reManagerMock.AssertExpectations(t)
+		appManagerMock.AssertExpectations(t)
 	})
 
 	t.Run("should ignore not found error if service doesn't exist", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+		application := createApplication("production")
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+			Return(application, nil)
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -298,19 +299,19 @@ func TestDeleteServices(t *testing.T) {
 
 		// then
 		assert.NoError(t, err)
-		reManagerMock.AssertExpectations(t)
+		appManagerMock.AssertExpectations(t)
 	})
 
 	t.Run("should fail if failed to update RE", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+		application := createApplication("production")
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+			Return(application, nil)
 
-		reManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(nil, errors.New("failed to update RE"))
+		appManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.Application")).Return(nil, errors.New("failed to update RE"))
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -319,16 +320,16 @@ func TestDeleteServices(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
-		reManagerMock.AssertExpectations(t)
+		appManagerMock.AssertExpectations(t)
 	})
 
 	t.Run("should return not found error if RE doesn't exist", func(t *testing.T) {
 		// given
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -342,10 +343,10 @@ func TestDeleteServices(t *testing.T) {
 func TestUpdateServices(t *testing.T) {
 	t.Run("should update service", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+		application := createApplication("production")
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+			Return(application, nil)
 
 		reEntry1 := v1alpha1.Entry{
 			Type:        "API",
@@ -362,17 +363,17 @@ func TestUpdateServices(t *testing.T) {
 			Type: "Events",
 		}
 
-		newRE := remoteEnvironment.DeepCopy()
-		newRE.Spec.Services[0].Name = "promotions-api-4e89d"
-		newRE.Spec.Services[0].DisplayName = "Promotions API"
-		newRE.Spec.Services[0].ProviderDisplayName = "SAP Labs Poland"
-		newRE.Spec.Services[0].LongDescription = "This is Promotions API"
-		newRE.Spec.Services[0].Tags = []string{"promotions"}
-		newRE.Spec.Services[0].Entries = []v1alpha1.Entry{reEntry1, reEntry2}
+		newApp := application.DeepCopy()
+		newApp.Spec.Services[0].Name = "promotions-api-4e89d"
+		newApp.Spec.Services[0].DisplayName = "Promotions API"
+		newApp.Spec.Services[0].ProviderDisplayName = "SAP Labs Poland"
+		newApp.Spec.Services[0].LongDescription = "This is Promotions API"
+		newApp.Spec.Services[0].Tags = []string{"promotions"}
+		newApp.Spec.Services[0].Entries = []v1alpha1.Entry{reEntry1, reEntry2}
 
-		reManagerMock.On("Update", newRE).Return(newRE, nil)
+		appManagerMock.On("Update", newApp).Return(newApp, nil)
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		service := remoteenv.Service{
@@ -399,17 +400,17 @@ func TestUpdateServices(t *testing.T) {
 
 		// then
 		require.NoError(t, err)
-		reManagerMock.AssertExpectations(t)
+		appManagerMock.AssertExpectations(t)
 	})
 
 	t.Run("should return not found error if RE doesn't exist", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
-		reManagerMock := &mocks.RemoteEnvironmentManager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+		application := createApplication("production")
+		appManagerMock := &mocks.ApplicationManager{}
+		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+			Return(application, nil)
 
-		repository := remoteenv.NewServiceRepository(reManagerMock)
+		repository := remoteenv.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -423,7 +424,7 @@ func TestUpdateServices(t *testing.T) {
 	})
 }
 
-func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
+func createApplication(name string) *v1alpha1.Application {
 
 	reService1Entry := v1alpha1.Entry{
 		Type:        "API",
@@ -464,7 +465,7 @@ func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
 		Entries:             []v1alpha1.Entry{reService2Entry},
 	}
 
-	reSpec1 := v1alpha1.RemoteEnvironmentSpec{
+	reSpec1 := v1alpha1.ApplicationSpec{
 		Description: "test_1",
 		Services: []v1alpha1.Service{
 			reService1,
@@ -472,7 +473,7 @@ func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
 		},
 	}
 
-	return &v1alpha1.RemoteEnvironment{
+	return &v1alpha1.Application{
 		ObjectMeta: metav1.ObjectMeta{Name: name},
 		Spec:       reSpec1,
 	}

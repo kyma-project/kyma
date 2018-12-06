@@ -22,7 +22,7 @@ import (
 	metauuid "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/monitoring"
 	istioclient "github.com/kyma-project/kyma/components/metadata-service/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/client/clientset/versioned"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
@@ -131,7 +131,7 @@ func newServiceDefinitionService(minioURL, namespace string, proxyPort int, name
 
 	specificationService := specification.NewSpecService(minioService)
 
-	remoteEnvironmentServiceRepository, apperror := newRemoteEnvironmentRepository(k8sConfig)
+	applicationServiceRepository, apperror := newApplicationRepository(k8sConfig)
 	if apperror != nil {
 		return nil, apperror
 	}
@@ -150,16 +150,16 @@ func newServiceDefinitionService(minioURL, namespace string, proxyPort int, name
 
 	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, secretsService, istioService)
 
-	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, remoteEnvironmentServiceRepository, specificationService), nil
+	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService), nil
 }
 
-func newRemoteEnvironmentRepository(config *restclient.Config) (remoteenv.ServiceRepository, apperrors.AppError) {
-	remoteEnvironmentClientset, err := versioned.NewForConfig(config)
+func newApplicationRepository(config *restclient.Config) (remoteenv.ServiceRepository, apperrors.AppError) {
+	applicationEnvironmentClientset, err := versioned.NewForConfig(config)
 	if err != nil {
-		return nil, apperrors.Internal("Failed to create k8s remote environment client, %s", err)
+		return nil, apperrors.Internal("Failed to create k8s application client, %s", err)
 	}
 
-	rei := remoteEnvironmentClientset.ApplicationconnectorV1alpha1().RemoteEnvironments()
+	rei := applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications()
 
 	return remoteenv.NewServiceRepository(rei), nil
 }
