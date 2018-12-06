@@ -6,7 +6,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/apis/applicationconnector/v1alpha1"
 	log "github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
@@ -93,7 +93,7 @@ func convertToK8sType(service Service) v1alpha1.Service {
 	}
 }
 
-func removeService(id string, re *v1alpha1.RemoteEnvironment) {
+func removeService(id string, re *v1alpha1.Application) {
 	serviceIndex := getServiceIndex(id, re)
 
 	if serviceIndex != -1 {
@@ -103,7 +103,7 @@ func removeService(id string, re *v1alpha1.RemoteEnvironment) {
 	}
 }
 
-func replaceService(id string, re *v1alpha1.RemoteEnvironment, service v1alpha1.Service) {
+func replaceService(id string, re *v1alpha1.Application, service v1alpha1.Service) {
 	serviceIndex := getServiceIndex(id, re)
 
 	if serviceIndex != -1 {
@@ -111,7 +111,7 @@ func replaceService(id string, re *v1alpha1.RemoteEnvironment, service v1alpha1.
 	}
 }
 
-func ensureServiceExists(id string, re *v1alpha1.RemoteEnvironment) apperrors.AppError {
+func ensureServiceExists(id string, re *v1alpha1.Application) apperrors.AppError {
 	if !serviceExists(id, re) {
 		message := fmt.Sprintf("Service with ID %s does not exist", id)
 
@@ -121,7 +121,7 @@ func ensureServiceExists(id string, re *v1alpha1.RemoteEnvironment) apperrors.Ap
 	return nil
 }
 
-func ensureServiceNotExists(id string, re *v1alpha1.RemoteEnvironment) apperrors.AppError {
+func ensureServiceNotExists(id string, re *v1alpha1.Application) apperrors.AppError {
 	if serviceExists(id, re) {
 		message := fmt.Sprintf("Service with ID %s already exists", id)
 
@@ -131,11 +131,11 @@ func ensureServiceNotExists(id string, re *v1alpha1.RemoteEnvironment) apperrors
 	return nil
 }
 
-func serviceExists(id string, re *v1alpha1.RemoteEnvironment) bool {
+func serviceExists(id string, re *v1alpha1.Application) bool {
 	return getServiceIndex(id, re) != -1
 }
 
-func getServiceIndex(id string, re *v1alpha1.RemoteEnvironment) int {
+func getServiceIndex(id string, re *v1alpha1.Application) int {
 	for i, service := range re.Spec.Services {
 		if service.ID == id {
 			return i
@@ -147,7 +147,7 @@ func getServiceIndex(id string, re *v1alpha1.RemoteEnvironment) int {
 
 var nonAlphaNumeric = regexp.MustCompile("[^A-Za-z0-9]+")
 
-// createServiceName creates the OSB Service Name for given RemoteEnvironment Service.
+// createServiceName creates the OSB Service Name for given Application Service.
 // The OSB Service Name is used in the Service Catalog as the clusterServiceClassExternalName, so it need to be normalized.
 //
 // Normalization rules:

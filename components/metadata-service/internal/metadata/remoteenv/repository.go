@@ -1,10 +1,10 @@
-// Package remoteenv contains components for accessing/modifying Remote Environment CRD
+// Package remoteenv contains components for accessing/modifying Application CRD
 package remoteenv
 
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/apis/applicationconnector/v1alpha1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
@@ -17,10 +17,10 @@ const (
 	CredentialsBasicType = "Basic"
 )
 
-// Manager contains operations for managing Remote Environment CRD
+// Manager contains operations for managing Application CRD
 type Manager interface {
-	Update(*v1alpha1.RemoteEnvironment) (*v1alpha1.RemoteEnvironment, error)
-	Get(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error)
+	Update(application *v1alpha1.Application) (*v1alpha1.Application, error)
+	Get(name string, options v1.GetOptions) (*v1alpha1.Application, error)
 }
 
 type repository struct {
@@ -43,25 +43,25 @@ type Credentials struct {
 	AuthenticationUrl string
 }
 
-// Service represents a service stored in Remote Environment RE
+// Service represents a service stored in Application RE
 type Service struct {
-	// Mapped to id in Remote Environment CRD
+	// Mapped to id in Application CRD
 	ID string
-	// Mapped to identifier in Remote Environment CRD
+	// Mapped to identifier in Application CRD
 	Identifier string
-	// Mapped to displayName in Remote Environment CRD
+	// Mapped to displayName in Application CRD
 	DisplayName string
-	// Mapped to name in Remote Environment CRD
+	// Mapped to name in Application CRD
 	Name string
-	// Mapped to shortDescription in Remote Environment CRD
+	// Mapped to shortDescription in Application CRD
 	ShortDescription string
-	// Mapped to longDescription in Remote Environment CRD
+	// Mapped to longDescription in Application CRD
 	LongDescription string
-	// Mapped to labels in Remote Environment CRD
+	// Mapped to labels in Application CRD
 	Labels map[string]string
-	// Mapped to providerDisplayName in Remote Environment CRD
+	// Mapped to providerDisplayName in Application CRD
 	ProviderDisplayName string
-	// Mapped to tags in Remote Environment CRD
+	// Mapped to tags in Application CRD
 	Tags []string
 	// Mapped to type property under entries element (type: API)
 	API *ServiceAPI
@@ -69,7 +69,7 @@ type Service struct {
 	Events bool
 }
 
-// ServiceRepository contains operations for managing services stored in Remote Environment CRD
+// ServiceRepository contains operations for managing services stored in Application CRD
 type ServiceRepository interface {
 	Create(remoteEnvironment string, service Service) apperrors.AppError
 	Get(remoteEnvironment, id string) (Service, apperrors.AppError)
@@ -83,7 +83,7 @@ func NewServiceRepository(reManager Manager) ServiceRepository {
 	return &repository{reManager: reManager}
 }
 
-// Create adds a new Service in Remote Environment
+// Create adds a new Service in Application
 func (r *repository) Create(remoteEnvironment string, service Service) apperrors.AppError {
 	re, err := r.getRemoteEnvironment(remoteEnvironment)
 	if err != nil {
@@ -105,7 +105,7 @@ func (r *repository) Create(remoteEnvironment string, service Service) apperrors
 	return nil
 }
 
-// Get reads Service from Remote Environment by service id
+// Get reads Service from Application by service id
 func (r *repository) Get(remoteEnvironment, id string) (Service, apperrors.AppError) {
 	re, err := r.getRemoteEnvironment(remoteEnvironment)
 	if err != nil {
@@ -121,7 +121,7 @@ func (r *repository) Get(remoteEnvironment, id string) (Service, apperrors.AppEr
 	return Service{}, apperrors.NotFound(fmt.Sprintf("Service with ID %s not found", id))
 }
 
-// GetAll gets slice of services defined in Remote Environment
+// GetAll gets slice of services defined in Application
 func (r *repository) GetAll(remoteEnvironment string) ([]Service, apperrors.AppError) {
 	re, err := r.getRemoteEnvironment(remoteEnvironment)
 	if err != nil {
@@ -140,7 +140,7 @@ func (r *repository) GetAll(remoteEnvironment string) ([]Service, apperrors.AppE
 	return services, nil
 }
 
-// Update updates a given service defined in Remote Environment
+// Update updates a given service defined in Application
 func (r *repository) Update(remoteEnvironment string, service Service) apperrors.AppError {
 	re, err := r.getRemoteEnvironment(remoteEnvironment)
 	if err != nil {
@@ -162,7 +162,7 @@ func (r *repository) Update(remoteEnvironment string, service Service) apperrors
 	return nil
 }
 
-// Delete deletes a given service defined in Remote Environment
+// Delete deletes a given service defined in Application
 func (r *repository) Delete(remoteEnvironment, id string) apperrors.AppError {
 	re, err := r.getRemoteEnvironment(remoteEnvironment)
 	if err != nil {
@@ -183,22 +183,22 @@ func (r *repository) Delete(remoteEnvironment, id string) apperrors.AppError {
 	return nil
 }
 
-func (r *repository) getRemoteEnvironment(remoteEnvironment string) (*v1alpha1.RemoteEnvironment, apperrors.AppError) {
+func (r *repository) getRemoteEnvironment(remoteEnvironment string) (*v1alpha1.Application, apperrors.AppError) {
 	re, err := r.reManager.Get(remoteEnvironment, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			message := fmt.Sprintf("Remote Environment %s not found", remoteEnvironment)
+			message := fmt.Sprintf("Application %s not found", remoteEnvironment)
 			return nil, apperrors.NotFound(message)
 		}
 
-		message := fmt.Sprintf("Getting Remote Environment %s failed, %s", remoteEnvironment, err.Error())
+		message := fmt.Sprintf("Getting Application %s failed, %s", remoteEnvironment, err.Error())
 		return nil, apperrors.Internal(message)
 	}
 
 	return re, nil
 }
 
-func (r *repository) updateRemoteEnvironment(re *v1alpha1.RemoteEnvironment) error {
+func (r *repository) updateRemoteEnvironment(re *v1alpha1.Application) error {
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		_, e := r.reManager.Update(re)
 		return e
