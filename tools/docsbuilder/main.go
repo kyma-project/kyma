@@ -19,7 +19,8 @@ type dockerConfig struct {
 	DockerfilePath string `envconfig:"default=../../docs/Dockerfile,DOCKERFILE_PATH"`
 	ImageTag       string `envconfig:"default=latest"`
 	ImageSuffix    string `envconfig:"default=docs"`
-	PushRoot       string `envconfig:"optional"`
+	ImagePrefix    string `envconfig:"optional"`
+	PushImages     bool   `envconfig:"default=true"`
 }
 
 func main() {
@@ -40,7 +41,7 @@ func main() {
 	additionalBuildArgs := fmt.Sprintf("--label version=%s --label component=docs", cfg.Docker.ImageTag)
 
 	for _, doc := range docs {
-		imageName := fmt.Sprintf("%s%s-%s:%s", cfg.Docker.PushRoot, doc.Name, cfg.Docker.ImageSuffix, cfg.Docker.ImageTag)
+		imageName := fmt.Sprintf("%s%s-%s:%s", cfg.Docker.ImagePrefix, doc.Name, cfg.Docker.ImageSuffix, cfg.Docker.ImageTag)
 
 		imageCfg := &docker.ImageBuildConfig{
 			Name:                imageName,
@@ -56,8 +57,8 @@ func main() {
 			log.Fatal(err)
 		}
 
-		if cfg.Docker.PushRoot == "" {
-			log.Println("Empty 'PushRoot' config property. Skipping pushing image...")
+		if !cfg.Docker.PushImages {
+			log.Println("Skipping pushing image...")
 			continue
 		}
 
@@ -67,6 +68,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 	}
 }
 
