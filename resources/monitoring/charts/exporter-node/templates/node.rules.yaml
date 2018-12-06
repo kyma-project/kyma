@@ -38,7 +38,7 @@ groups:
         full within the next 24 hours (mounted at {{`{{$labels.mountpoint}}`}})
       summary: Node disk is running full within 24 hours
   - alert: NodeDiskRunningFull
-    expr: (node:node_filesystem_usage: > 0.85) and (predict_linear(node:node_filesystem_free:[30m], 3600 * 2) < 0)
+    expr: (((node_filesystem_size-node_filesystem_free)/node_filesystem_size) > 0.85 ) AND (predict_linear(node_filesystem_free[30m], 3600 * 2) < 0)
     for: 10m
     labels:
       severity: critical
