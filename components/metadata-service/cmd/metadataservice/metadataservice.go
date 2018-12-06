@@ -153,7 +153,11 @@ func newServiceDefinitionService(minioURL, namespace string, proxyPort int, name
 	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService), nil
 }
 
+<<<<<<< HEAD
 func newApplicationRepository(config *restclient.Config) (applications.ServiceRepository, apperrors.AppError) {
+=======
+func newApplicationRepository(config *restclient.Config) (remoteenv.ServiceRepository, apperrors.AppError) {
+>>>>>>> Renaming Remote Environment to Application - Metadata Service
 	applicationEnvironmentClientset, err := versioned.NewForConfig(config)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to create k8s application client, %s", err)

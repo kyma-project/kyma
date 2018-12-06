@@ -5,12 +5,13 @@ import (
 
 	"crypto/sha1"
 	"encoding/hex"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	log "github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
+	log "github.com/sirupsen/logrus"
 )
 
 func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) {
