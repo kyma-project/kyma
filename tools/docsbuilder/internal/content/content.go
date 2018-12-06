@@ -28,12 +28,12 @@ func Read(path string) ([]Content, error) {
 	return contentSlice, nil
 }
 
-func ConstructPath(content Content, contentsDirPath string) string {
+func ConstructPath(content Content, contentDirPath string) string {
 	contentDir := content.Name
 	if content.Directory != "" {
 		contentDir = content.Directory
 	}
 
-	dir := fmt.Sprintf("%s/%s", contentsDirPath, contentDir)
+	dir := fmt.Sprintf("%s/%s", contentDirPath, contentDir)
 	return dir
 }

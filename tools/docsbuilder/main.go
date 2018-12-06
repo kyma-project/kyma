@@ -13,15 +13,7 @@ import (
 type config struct {
 	DocsDir       string `envconfig:"default=../../docs"`
 	DocsBuildFile string `envconfig:"default=../../docs/docs-build.yaml"`
-	Docker        dockerConfig
-}
-
-type dockerConfig struct {
-	DockerfilePath string `envconfig:"default=../../docs/Dockerfile,DOCKERFILE_PATH"`
-	ImageTag       string `envconfig:"default=latest"`
-	ImageSuffix    string `envconfig:"default=docs"`
-	ImagePrefix    string `envconfig:"optional"`
-	PushImages     bool   `envconfig:"default=true"`
+	Docker        docker.Config
 }
 
 func main() {
@@ -42,10 +34,8 @@ func main() {
 	additionalBuildArgs := fmt.Sprintf("--label version=%s --label component=docs", cfg.Docker.ImageTag)
 
 	for _, doc := range docs {
-		imageName := fmt.Sprintf("%s%s-%s:%s", cfg.Docker.ImagePrefix, doc.Name, cfg.Docker.ImageSuffix, cfg.Docker.ImageTag)
-
 		imageCfg := &docker.ImageBuildConfig{
-			Name:                imageName,
+			Name:                docker.ImageName(doc.Name, cfg.Docker),
 			BuildDirectory:      content.ConstructPath(doc, cfg.DocsDir),
 			DockerfilePath:      dockerfilePath,
 			AdditionalBuildArgs: additionalBuildArgs,
