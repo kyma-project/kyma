@@ -121,7 +121,7 @@ try {
 
                     // build kyma-installer
                     stage('Build kyma-installer') {
-                        build job: 'kyma/tools/kyma-installer',
+                        build job: 'kyma/kyma-installer',
                             wait: true,
                             parameters: [
                                 string(name:'GIT_BRANCH', value: "${params.RELEASE_BRANCH}"),
