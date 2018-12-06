@@ -3,8 +3,8 @@ package secrets
 import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/k8sconsts"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 )
 
 const (
@@ -16,9 +16,9 @@ const (
 )
 
 type Service interface {
-	Get(remoteEnvironment string, credentials remoteenv.Credentials) (model.Credentials, apperrors.AppError)
-	Create(remoteEnvironment, serviceID string, credentials *model.Credentials) (remoteenv.Credentials, apperrors.AppError)
-	Update(remoteEnvironment, serviceID string, credentials *model.Credentials) (remoteenv.Credentials, apperrors.AppError)
+	Get(application string, credentials applications.Credentials) (model.Credentials, apperrors.AppError)
+	Create(application, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError)
+	Update(application, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError)
 	Delete(name string) apperrors.AppError
 }
 
@@ -34,30 +34,30 @@ func NewService(repository Repository, nameResolver k8sconsts.NameResolver) Serv
 	}
 }
 
-func (s *service) Create(remoteEnvironment, serviceID string, credentials *model.Credentials) (remoteenv.Credentials, apperrors.AppError) {
+func (s *service) Create(application, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError) {
 	if credentials == nil {
-		return remoteenv.Credentials{}, nil
+		return applications.Credentials{}, nil
 	}
 
 	if basicCredentialsProvided(credentials) && oauthCredentialsProvided(credentials) {
-		return remoteenv.Credentials{}, apperrors.WrongInput("Creating access service failed: Multiple authentication methods provided.")
+		return applications.Credentials{}, apperrors.WrongInput("Creating access service failed: Multiple authentication methods provided.")
 	}
 
-	name := s.nameResolver.GetResourceName(remoteEnvironment, serviceID)
+	name := s.nameResolver.GetResourceName(application, serviceID)
 
-	err := s.createCredentialsSecret(remoteEnvironment, serviceID, name, credentials)
+	err := s.createCredentialsSecret(application, serviceID, name, credentials)
 	if err != nil {
-		return remoteenv.Credentials{}, err
+		return applications.Credentials{}, err
 	}
 
-	remoteEnvCredentials := s.modelToRemoteEnvCredentials(credentials, remoteEnvironment, serviceID)
+	remoteEnvCredentials := s.modelToRemoteEnvCredentials(credentials, application, serviceID)
 
 	return remoteEnvCredentials, nil
 }
 
-func (s *service) Get(remoteEnvironment string, credentials remoteenv.Credentials) (model.Credentials, apperrors.AppError) {
-	if credentials.Type == remoteenv.CredentialsOAuthType {
-		data, err := s.repository.Get(remoteEnvironment, credentials.SecretName)
+func (s *service) Get(application string, credentials applications.Credentials) (model.Credentials, apperrors.AppError) {
+	if credentials.Type == applications.CredentialsOAuthType {
+		data, err := s.repository.Get(application, credentials.SecretName)
 		if err != nil {
 			return model.Credentials{}, err
 		}
@@ -73,8 +73,8 @@ func (s *service) Get(remoteEnvironment string, credentials remoteenv.Credential
 		}, nil
 	}
 
-	if credentials.Type == remoteenv.CredentialsBasicType {
-		data, err := s.repository.Get(remoteEnvironment, credentials.SecretName)
+	if credentials.Type == applications.CredentialsBasicType {
+		data, err := s.repository.Get(application, credentials.SecretName)
 		if err != nil {
 			return model.Credentials{}, err
 		}
@@ -92,23 +92,23 @@ func (s *service) Get(remoteEnvironment string, credentials remoteenv.Credential
 	return model.Credentials{}, nil
 }
 
-func (s *service) Update(remoteEnvironment, serviceID string, credentials *model.Credentials) (remoteenv.Credentials, apperrors.AppError) {
+func (s *service) Update(application, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError) {
 	if credentials == nil {
-		return remoteenv.Credentials{}, nil
+		return applications.Credentials{}, nil
 	}
 
 	if basicCredentialsProvided(credentials) && oauthCredentialsProvided(credentials) {
-		return remoteenv.Credentials{}, apperrors.WrongInput("Creating access service failed: Multiple authentication methods provided.")
+		return applications.Credentials{}, apperrors.WrongInput("Creating access service failed: Multiple authentication methods provided.")
 	}
 
-	name := s.nameResolver.GetResourceName(remoteEnvironment, serviceID)
+	name := s.nameResolver.GetResourceName(application, serviceID)
 
-	err := s.updateCredentialsSecret(remoteEnvironment, serviceID, name, credentials)
+	err := s.updateCredentialsSecret(application, serviceID, name, credentials)
 	if err != nil {
-		return remoteenv.Credentials{}, err
+		return applications.Credentials{}, err
 	}
 
-	remoteEnvCredentials := s.modelToRemoteEnvCredentials(credentials, remoteEnvironment, serviceID)
+	remoteEnvCredentials := s.modelToRemoteEnvCredentials(credentials, application, serviceID)
 
 	return remoteEnvCredentials, nil
 }
@@ -117,10 +117,10 @@ func (s *service) Delete(name string) apperrors.AppError {
 	return s.repository.Delete(name)
 }
 
-func (s *service) createCredentialsSecret(remoteEnvironment, id, name string, credentials *model.Credentials) apperrors.AppError {
+func (s *service) createCredentialsSecret(application, id, name string, credentials *model.Credentials) apperrors.AppError {
 	if oauthCredentialsProvided(credentials) {
 		return s.createOauthSecret(
-			remoteEnvironment,
+			application,
 			name,
 			credentials.Oauth.ClientID,
 			credentials.Oauth.ClientSecret,
@@ -129,7 +129,7 @@ func (s *service) createCredentialsSecret(remoteEnvironment, id, name string, cr
 	}
 
 	if basicCredentialsProvided(credentials) {
-		return s.createBasicAuthSecret(remoteEnvironment,
+		return s.createBasicAuthSecret(application,
 			name,
 			credentials.Basic.Username,
 			credentials.Basic.Password,
@@ -140,10 +140,10 @@ func (s *service) createCredentialsSecret(remoteEnvironment, id, name string, cr
 	return nil
 }
 
-func (s *service) updateCredentialsSecret(remoteEnvironment, id, name string, credentials *model.Credentials) apperrors.AppError {
+func (s *service) updateCredentialsSecret(application, id, name string, credentials *model.Credentials) apperrors.AppError {
 	if oauthCredentialsProvided(credentials) {
 		return s.updateOauthSecret(
-			remoteEnvironment,
+			application,
 			name,
 			credentials.Oauth.ClientID,
 			credentials.Oauth.ClientSecret,
@@ -152,7 +152,7 @@ func (s *service) updateCredentialsSecret(remoteEnvironment, id, name string, cr
 	}
 
 	if basicCredentialsProvided(credentials) {
-		return s.updateBasicAuthSecret(remoteEnvironment,
+		return s.updateBasicAuthSecret(application,
 			name,
 			credentials.Basic.Username,
 			credentials.Basic.Password,
@@ -163,18 +163,18 @@ func (s *service) updateCredentialsSecret(remoteEnvironment, id, name string, cr
 	return nil
 }
 
-func (s *service) createOauthSecret(remoteEnvironment, name, clientID, clientSecret, serviceID string) apperrors.AppError {
-	err := verifySecretData(remoteEnvironment, name, serviceID)
+func (s *service) createOauthSecret(application, name, clientID, clientSecret, serviceID string) apperrors.AppError {
+	err := verifySecretData(application, name, serviceID)
 	if err != nil {
 		return err
 	}
 
 	data := makeOauthMap(clientID, clientSecret)
-	return s.repository.Create(remoteEnvironment, name, serviceID, data)
+	return s.repository.Create(application, name, serviceID, data)
 }
 
-func (s *service) getOauthSecret(remoteEnvironment, name string) (string, string, apperrors.AppError) {
-	data, err := s.repository.Get(remoteEnvironment, name)
+func (s *service) getOauthSecret(application, name string) (string, string, apperrors.AppError) {
+	data, err := s.repository.Get(application, name)
 	if err != nil {
 		return "", "", err
 	}
@@ -183,28 +183,28 @@ func (s *service) getOauthSecret(remoteEnvironment, name string) (string, string
 	return clientId, clientSecret, nil
 }
 
-func (s *service) updateOauthSecret(remoteEnvironment, name, clientID, clientSecret, serviceID string) apperrors.AppError {
-	err := verifySecretData(remoteEnvironment, name, serviceID)
+func (s *service) updateOauthSecret(application, name, clientID, clientSecret, serviceID string) apperrors.AppError {
+	err := verifySecretData(application, name, serviceID)
 	if err != nil {
 		return err
 	}
 
 	data := makeOauthMap(clientID, clientSecret)
-	return s.repository.Upsert(remoteEnvironment, name, serviceID, data)
+	return s.repository.Upsert(application, name, serviceID, data)
 }
 
-func (s *service) createBasicAuthSecret(remoteEnvironment, name, username, password, serviceID string) apperrors.AppError {
-	err := verifySecretData(remoteEnvironment, name, serviceID)
+func (s *service) createBasicAuthSecret(application, name, username, password, serviceID string) apperrors.AppError {
+	err := verifySecretData(application, name, serviceID)
 	if err != nil {
 		return err
 	}
 
 	data := makeBasicAuthMap(username, password)
-	return s.repository.Create(remoteEnvironment, name, serviceID, data)
+	return s.repository.Create(application, name, serviceID, data)
 }
 
-func (s *service) getBasicAuthSecret(remoteEnvironment, name string) (string, string, apperrors.AppError) {
-	data, err := s.repository.Get(remoteEnvironment, name)
+func (s *service) getBasicAuthSecret(application, name string) (string, string, apperrors.AppError) {
+	data, err := s.repository.Get(application, name)
 	if err != nil {
 		return "", "", err
 	}
@@ -213,29 +213,29 @@ func (s *service) getBasicAuthSecret(remoteEnvironment, name string) (string, st
 	return username, password, nil
 }
 
-func (s *service) updateBasicAuthSecret(remoteEnvironment, name, username, password, serviceID string) apperrors.AppError {
-	err := verifySecretData(remoteEnvironment, name, serviceID)
+func (s *service) updateBasicAuthSecret(application, name, username, password, serviceID string) apperrors.AppError {
+	err := verifySecretData(application, name, serviceID)
 	if err != nil {
 		return err
 	}
 
 	data := makeBasicAuthMap(username, password)
-	return s.repository.Upsert(remoteEnvironment, name, serviceID, data)
+	return s.repository.Upsert(application, name, serviceID, data)
 }
 
-func (s *service) modelToRemoteEnvCredentials(credentials *model.Credentials, remoteEnvironment, serviceID string) remoteenv.Credentials {
-	remoteEnvCredentials := remoteenv.Credentials{}
+func (s *service) modelToRemoteEnvCredentials(credentials *model.Credentials, application, serviceID string) applications.Credentials {
+	remoteEnvCredentials := applications.Credentials{}
 
 	if oauthCredentialsProvided(credentials) {
 		remoteEnvCredentials.AuthenticationUrl = credentials.Oauth.URL
-		remoteEnvCredentials.Type = remoteenv.CredentialsOAuthType
+		remoteEnvCredentials.Type = applications.CredentialsOAuthType
 	}
 
 	if basicCredentialsProvided(credentials) {
-		remoteEnvCredentials.Type = remoteenv.CredentialsBasicType
+		remoteEnvCredentials.Type = applications.CredentialsBasicType
 	}
 
-	remoteEnvCredentials.SecretName = s.nameResolver.GetResourceName(remoteEnvironment, serviceID)
+	remoteEnvCredentials.SecretName = s.nameResolver.GetResourceName(application, serviceID)
 
 	return remoteEnvCredentials
 }
@@ -248,8 +248,8 @@ func basicCredentialsProvided(credentials *model.Credentials) bool {
 	return credentials != nil && credentials.Basic != nil && credentials.Basic.Username != "" && credentials.Basic.Password != ""
 }
 
-func verifySecretData(remoteEnvironment, name, serviceID string) apperrors.AppError {
-	if remoteEnvironment == "" || name == "" || serviceID == "" {
+func verifySecretData(application, name, serviceID string) apperrors.AppError {
+	if application == "" || name == "" || serviceID == "" {
 		return apperrors.Internal("Incomplete secret data.")
 	}
 

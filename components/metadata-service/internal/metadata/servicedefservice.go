@@ -3,8 +3,8 @@ package metadata
 
 import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid"
@@ -17,57 +17,57 @@ const (
 // ServiceDefinitionService is a service that manages ServiceDefinition objects.
 type ServiceDefinitionService interface {
 	// Create adds new ServiceDefinition.
-	Create(remoteEnvironment string, serviceDefinition *model.ServiceDefinition) (id string, err apperrors.AppError)
+	Create(application string, serviceDefinition *model.ServiceDefinition) (id string, err apperrors.AppError)
 
 	// GetByID returns ServiceDefinition with provided ID.
-	GetByID(remoteEnvironment, id string) (serviceDefinition model.ServiceDefinition, err apperrors.AppError)
+	GetByID(application, id string) (serviceDefinition model.ServiceDefinition, err apperrors.AppError)
 
 	// GetAll returns all ServiceDefinitions.
-	GetAll(remoteEnvironment string) (serviceDefinitions []model.ServiceDefinition, err apperrors.AppError)
+	GetAll(application string) (serviceDefinitions []model.ServiceDefinition, err apperrors.AppError)
 
 	// Update updates a service definition with provided ID.
-	Update(remoteEnvironment string, serviceDef *model.ServiceDefinition) (model.ServiceDefinition, apperrors.AppError)
+	Update(application string, serviceDef *model.ServiceDefinition) (model.ServiceDefinition, apperrors.AppError)
 
 	// Delete deletes a ServiceDefinition.
-	Delete(remoteEnvironment, id string) apperrors.AppError
+	Delete(application, id string) apperrors.AppError
 
 	// GetAPI gets API of a service with given ID
-	GetAPI(remoteEnvironment, serviceId string) (*model.API, apperrors.AppError)
+	GetAPI(application, serviceId string) (*model.API, apperrors.AppError)
 }
 
 type serviceDefinitionService struct {
-	uuidGenerator               uuid.Generator
-	serviceAPIService           serviceapi.Service
-	remoteEnvironmentRepository remoteenv.ServiceRepository
-	specService                 specification.Service
+	uuidGenerator         uuid.Generator
+	serviceAPIService     serviceapi.Service
+	applicationRepository applications.ServiceRepository
+	specService           specification.Service
 }
 
 // NewServiceDefinitionService creates new ServiceDefinitionService with provided dependencies.
-func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService serviceapi.Service, remoteEnvironmentRepository remoteenv.ServiceRepository, specService specification.Service) ServiceDefinitionService {
+func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService serviceapi.Service, applicationRepository applications.ServiceRepository, specService specification.Service) ServiceDefinitionService {
 	return &serviceDefinitionService{
-		uuidGenerator:               uuidGenerator,
-		serviceAPIService:           serviceAPIService,
-		remoteEnvironmentRepository: remoteEnvironmentRepository,
-		specService:                 specService,
+		uuidGenerator:         uuidGenerator,
+		serviceAPIService:     serviceAPIService,
+		applicationRepository: applicationRepository,
+		specService:           specService,
 	}
 }
 
-// Create adds new ServiceDefinition. Based on ServiceDefinition a new service is added to RemoteEnvironment.
-func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef *model.ServiceDefinition) (string, apperrors.AppError) {
+// Create adds new ServiceDefinition. Based on ServiceDefinition a new service is added to application.
+func (sds *serviceDefinitionService) Create(application string, serviceDef *model.ServiceDefinition) (string, apperrors.AppError) {
 	if serviceDef.Identifier != "" {
-		apperr := sds.ensureUniqueIdentifier(serviceDef.Identifier, remoteEnvironment)
+		apperr := sds.ensureUniqueIdentifier(serviceDef.Identifier, application)
 		if apperr != nil {
 			return "", apperr.Append("Creating service failed")
 		}
 	}
 
 	serviceDef.ID = sds.uuidGenerator.NewUUID()
-	service := initService(serviceDef, serviceDef.Identifier, remoteEnvironment)
+	service := initService(serviceDef, serviceDef.Identifier, application)
 
 	var gatewayUrl string
 
 	if apiDefined(serviceDef) {
-		serviceAPI, apperr := sds.serviceAPIService.New(remoteEnvironment, serviceDef.ID, serviceDef.Api)
+		serviceAPI, apperr := sds.serviceAPIService.New(application, serviceDef.ID, serviceDef.Api)
 		if apperr != nil {
 			return "", apperr.Append("Adding new API failed")
 		}
@@ -81,7 +81,7 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 		return "", apperr.Append("Determining API spec for service with ID %s failed", serviceDef.ID)
 	}
 
-	apperr = sds.remoteEnvironmentRepository.Create(remoteEnvironment, *service)
+	apperr = sds.applicationRepository.Create(application, *service)
 	if apperr != nil {
 		return "", apperr.Append("Creating service in Remote Environment failed")
 	}
@@ -90,18 +90,18 @@ func (sds *serviceDefinitionService) Create(remoteEnvironment string, serviceDef
 }
 
 // GetByID returns ServiceDefinition with provided ID.
-func (sds *serviceDefinitionService) GetByID(remoteEnvironment, id string) (model.ServiceDefinition, apperrors.AppError) {
-	service, apperr := sds.remoteEnvironmentRepository.Get(remoteEnvironment, id)
+func (sds *serviceDefinitionService) GetByID(application, id string) (model.ServiceDefinition, apperrors.AppError) {
+	service, apperr := sds.applicationRepository.Get(application, id)
 	if apperr != nil {
 		return model.ServiceDefinition{}, apperr.Append("Reading service with ID %s failed", id)
 	}
 
-	return sds.readService(remoteEnvironment, service)
+	return sds.readService(application, service)
 }
 
 // GetAll returns all ServiceDefinitions.
-func (sds *serviceDefinitionService) GetAll(remoteEnvironment string) ([]model.ServiceDefinition, apperrors.AppError) {
-	services, apperr := sds.remoteEnvironmentRepository.GetAll(remoteEnvironment)
+func (sds *serviceDefinitionService) GetAll(application string) ([]model.ServiceDefinition, apperrors.AppError) {
+	services, apperr := sds.applicationRepository.GetAll(application)
 	if apperr != nil {
 		return nil, apperr.Append("Reading services from Remote Environment failed")
 	}
@@ -115,23 +115,23 @@ func (sds *serviceDefinitionService) GetAll(remoteEnvironment string) ([]model.S
 }
 
 // Update updates a service with provided ID.
-func (sds *serviceDefinitionService) Update(remoteEnvironment string, serviceDef *model.ServiceDefinition) (model.ServiceDefinition, apperrors.AppError) {
-	existingSvc, apperr := sds.GetByID(remoteEnvironment, serviceDef.ID)
+func (sds *serviceDefinitionService) Update(application string, serviceDef *model.ServiceDefinition) (model.ServiceDefinition, apperrors.AppError) {
+	existingSvc, apperr := sds.GetByID(application, serviceDef.ID)
 	if apperr != nil {
 		return model.ServiceDefinition{}, apperr.Append("Updating %s service failed", serviceDef.ID)
 	}
 
-	service := initService(serviceDef, existingSvc.Identifier, remoteEnvironment)
+	service := initService(serviceDef, existingSvc.Identifier, application)
 
 	var gatewayUrl string
 
 	if !apiDefined(serviceDef) {
-		apperr = sds.serviceAPIService.Delete(remoteEnvironment, serviceDef.ID)
+		apperr = sds.serviceAPIService.Delete(application, serviceDef.ID)
 		if apperr != nil {
 			return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, deleting API failed", serviceDef.ID)
 		}
 	} else {
-		service.API, apperr = sds.serviceAPIService.Update(remoteEnvironment, serviceDef.ID, serviceDef.Api)
+		service.API, apperr = sds.serviceAPIService.Update(application, serviceDef.ID, serviceDef.Api)
 		if apperr != nil {
 			return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, updating API failed", serviceDef.ID)
 		}
@@ -144,7 +144,7 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment string, serviceDef
 		return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, saving specification failed", serviceDef.ID)
 	}
 
-	apperr = sds.remoteEnvironmentRepository.Update(remoteEnvironment, *service)
+	apperr = sds.applicationRepository.Update(application, *service)
 	if apperr != nil {
 		return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, updating service in Remote Environment repository failed", serviceDef.ID)
 	}
@@ -153,13 +153,13 @@ func (sds *serviceDefinitionService) Update(remoteEnvironment string, serviceDef
 }
 
 // Delete deletes a service with given id.
-func (sds *serviceDefinitionService) Delete(remoteEnvironment, id string) apperrors.AppError {
-	apperr := sds.serviceAPIService.Delete(remoteEnvironment, id)
+func (sds *serviceDefinitionService) Delete(application, id string) apperrors.AppError {
+	apperr := sds.serviceAPIService.Delete(application, id)
 	if apperr != nil {
 		return apperr.Append("Deleting service failed")
 	}
 
-	apperr = sds.remoteEnvironmentRepository.Delete(remoteEnvironment, id)
+	apperr = sds.applicationRepository.Delete(application, id)
 	if apperr != nil {
 		return apperr.Append("Deleting service from Remote Environment repository failed")
 	}
@@ -173,8 +173,8 @@ func (sds *serviceDefinitionService) Delete(remoteEnvironment, id string) apperr
 }
 
 // GetAPI gets API of a service with given ID
-func (sds *serviceDefinitionService) GetAPI(remoteEnvironment, serviceId string) (*model.API, apperrors.AppError) {
-	service, apperr := sds.remoteEnvironmentRepository.Get(remoteEnvironment, serviceId)
+func (sds *serviceDefinitionService) GetAPI(application, serviceId string) (*model.API, apperrors.AppError) {
+	service, apperr := sds.applicationRepository.Get(application, serviceId)
 	if apperr != nil {
 		return nil, apperr.Append("Reading %s service failed", serviceId)
 	}
@@ -183,15 +183,15 @@ func (sds *serviceDefinitionService) GetAPI(remoteEnvironment, serviceId string)
 		return nil, apperrors.WrongInput("Service with ID %s has no API", service.ID)
 	}
 
-	api, apperr := sds.serviceAPIService.Read(remoteEnvironment, service.API)
+	api, apperr := sds.serviceAPIService.Read(application, service.API)
 	if apperr != nil {
 		return nil, apperr.Append("Reading API for %s service failed", serviceId)
 	}
 	return api, nil
 }
 
-func initService(serviceDef *model.ServiceDefinition, identifier, remoteEnvironment string) *remoteenv.Service {
-	service := remoteenv.Service{
+func initService(serviceDef *model.ServiceDefinition, identifier, application string) *applications.Service {
+	service := applications.Service{
 		ID:                  serviceDef.ID,
 		Identifier:          identifier,
 		DisplayName:         serviceDef.Name,
@@ -209,15 +209,15 @@ func initService(serviceDef *model.ServiceDefinition, identifier, remoteEnvironm
 	}
 
 	if serviceDef.Labels != nil {
-		service.Labels = overrideLabels(remoteEnvironment, *serviceDef.Labels)
+		service.Labels = overrideLabels(application, *serviceDef.Labels)
 	} else {
-		service.Labels = map[string]string{connectedApp: remoteEnvironment}
+		service.Labels = map[string]string{connectedApp: application}
 	}
 
 	return &service
 }
 
-func convertServiceBaseInfo(service remoteenv.Service) model.ServiceDefinition {
+func convertServiceBaseInfo(service applications.Service) model.ServiceDefinition {
 	return model.ServiceDefinition{
 		ID:          service.ID,
 		Name:        service.DisplayName,
@@ -228,8 +228,8 @@ func convertServiceBaseInfo(service remoteenv.Service) model.ServiceDefinition {
 	}
 }
 
-func (sds *serviceDefinitionService) ensureUniqueIdentifier(identifier, remoteEnvironment string) apperrors.AppError {
-	services, apperr := sds.GetAll(remoteEnvironment)
+func (sds *serviceDefinitionService) ensureUniqueIdentifier(identifier, application string) apperrors.AppError {
+	services, apperr := sds.GetAll(application)
 	if apperr != nil {
 		return apperr.Append("Checking identifier failed")
 	}
@@ -243,7 +243,7 @@ func (sds *serviceDefinitionService) ensureUniqueIdentifier(identifier, remoteEn
 	return nil
 }
 
-func (sds *serviceDefinitionService) readService(remoteEnvironment string, service remoteenv.Service) (model.ServiceDefinition, apperrors.AppError) {
+func (sds *serviceDefinitionService) readService(application string, service applications.Service) (model.ServiceDefinition, apperrors.AppError) {
 	serviceDef := convertServiceBaseInfo(service)
 
 	documentation, apiSpec, eventsSpec, apperr := sds.specService.GetSpec(service.ID)
@@ -252,7 +252,7 @@ func (sds *serviceDefinitionService) readService(remoteEnvironment string, servi
 	}
 
 	if service.API != nil {
-		api, apperr := sds.serviceAPIService.Read(remoteEnvironment, service.API)
+		api, apperr := sds.serviceAPIService.Read(application, service.API)
 		if apperr != nil {
 			return model.ServiceDefinition{}, apperr.Append("Reading API failed")
 		}
@@ -278,10 +278,10 @@ func apiDefined(serviceDefinition *model.ServiceDefinition) bool {
 	return serviceDefinition.Api != nil
 }
 
-func overrideLabels(remoteEnvironment string, labels map[string]string) map[string]string {
+func overrideLabels(application string, labels map[string]string) map[string]string {
 	_, found := labels[connectedApp]
 	if found {
-		labels[connectedApp] = remoteEnvironment
+		labels[connectedApp] = application
 	}
 
 	return labels

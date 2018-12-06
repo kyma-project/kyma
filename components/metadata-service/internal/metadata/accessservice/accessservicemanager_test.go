@@ -172,8 +172,8 @@ func mockService(remoteEnvironment, serviceId, serviceName string, targetPort in
 		ObjectMeta: metav1.ObjectMeta{
 			Name: serviceName,
 			Labels: map[string]string{
-				k8sconsts.LabelRemoteEnvironment: remoteEnvironment,
-				k8sconsts.LabelServiceId:         serviceId,
+				k8sconsts.LabelApplication: remoteEnvironment,
+				k8sconsts.LabelServiceId:   serviceId,
 			},
 		},
 		Spec: corev1.ServiceSpec{

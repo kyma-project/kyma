@@ -13,8 +13,8 @@ import (
 	"github.com/kyma-project/kyma/components/metadata-service/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/accessservice"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/istio"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/secrets"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification"
@@ -153,7 +153,7 @@ func newServiceDefinitionService(minioURL, namespace string, proxyPort int, name
 	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService), nil
 }
 
-func newApplicationRepository(config *restclient.Config) (remoteenv.ServiceRepository, apperrors.AppError) {
+func newApplicationRepository(config *restclient.Config) (applications.ServiceRepository, apperrors.AppError) {
 	applicationEnvironmentClientset, err := versioned.NewForConfig(config)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to create k8s application client, %s", err)
@@ -161,7 +161,7 @@ func newApplicationRepository(config *restclient.Config) (remoteenv.ServiceRepos
 
 	rei := applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications()
 
-	return remoteenv.NewServiceRepository(rei), nil
+	return applications.NewServiceRepository(rei), nil
 }
 
 func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace string, proxyPort int) accessservice.AccessServiceManager {

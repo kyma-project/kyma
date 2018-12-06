@@ -1,5 +1,5 @@
-// Package remoteenv contains components for accessing/modifying Application CRD
-package remoteenv
+// Package applications contains components for accessing/modifying Application CRD
+package applications
 
 import (
 	"fmt"
@@ -71,21 +71,21 @@ type Service struct {
 
 // ServiceRepository contains operations for managing services stored in Application CRD
 type ServiceRepository interface {
-	Create(remoteEnvironment string, service Service) apperrors.AppError
-	Get(remoteEnvironment, id string) (Service, apperrors.AppError)
-	GetAll(remoteEnvironment string) ([]Service, apperrors.AppError)
-	Update(remoteEnvironment string, service Service) apperrors.AppError
-	Delete(remoteEnvironment, id string) apperrors.AppError
+	Create(application string, service Service) apperrors.AppError
+	Get(application, id string) (Service, apperrors.AppError)
+	GetAll(application string) ([]Service, apperrors.AppError)
+	Update(application string, service Service) apperrors.AppError
+	Delete(application, id string) apperrors.AppError
 }
 
-// NewServiceRepository creates a new RemoteEnvironmentServiceRepository
+// NewServiceRepository creates a new ApplicationServiceRepository
 func NewServiceRepository(reManager Manager) ServiceRepository {
 	return &repository{reManager: reManager}
 }
 
 // Create adds a new Service in Application
-func (r *repository) Create(remoteEnvironment string, service Service) apperrors.AppError {
-	re, err := r.getRemoteEnvironment(remoteEnvironment)
+func (r *repository) Create(application string, service Service) apperrors.AppError {
+	re, err := r.getApplication(application)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (r *repository) Create(remoteEnvironment string, service Service) apperrors
 
 	re.Spec.Services = append(re.Spec.Services, convertToK8sType(service))
 
-	e := r.updateRemoteEnvironment(re)
+	e := r.updateApplication(re)
 	if e != nil {
 		return apperrors.Internal(fmt.Sprintf("Creating service failed, %s", e.Error()))
 	}
@@ -106,8 +106,8 @@ func (r *repository) Create(remoteEnvironment string, service Service) apperrors
 }
 
 // Get reads Service from Application by service id
-func (r *repository) Get(remoteEnvironment, id string) (Service, apperrors.AppError) {
-	re, err := r.getRemoteEnvironment(remoteEnvironment)
+func (r *repository) Get(application, id string) (Service, apperrors.AppError) {
+	re, err := r.getApplication(application)
 	if err != nil {
 		return Service{}, err
 	}
@@ -122,8 +122,8 @@ func (r *repository) Get(remoteEnvironment, id string) (Service, apperrors.AppEr
 }
 
 // GetAll gets slice of services defined in Application
-func (r *repository) GetAll(remoteEnvironment string) ([]Service, apperrors.AppError) {
-	re, err := r.getRemoteEnvironment(remoteEnvironment)
+func (r *repository) GetAll(application string) ([]Service, apperrors.AppError) {
+	re, err := r.getApplication(application)
 	if err != nil {
 		return nil, err
 	}
@@ -141,8 +141,8 @@ func (r *repository) GetAll(remoteEnvironment string) ([]Service, apperrors.AppE
 }
 
 // Update updates a given service defined in Application
-func (r *repository) Update(remoteEnvironment string, service Service) apperrors.AppError {
-	re, err := r.getRemoteEnvironment(remoteEnvironment)
+func (r *repository) Update(application string, service Service) apperrors.AppError {
+	re, err := r.getApplication(application)
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (r *repository) Update(remoteEnvironment string, service Service) apperrors
 
 	replaceService(service.ID, re, convertToK8sType(service))
 
-	e := r.updateRemoteEnvironment(re)
+	e := r.updateApplication(re)
 	if e != nil {
 		return apperrors.Internal(fmt.Sprintf("Updating service failed, %s", e.Error()))
 	}
@@ -163,8 +163,8 @@ func (r *repository) Update(remoteEnvironment string, service Service) apperrors
 }
 
 // Delete deletes a given service defined in Application
-func (r *repository) Delete(remoteEnvironment, id string) apperrors.AppError {
-	re, err := r.getRemoteEnvironment(remoteEnvironment)
+func (r *repository) Delete(application, id string) apperrors.AppError {
+	re, err := r.getApplication(application)
 	if err != nil {
 		return err
 	}
@@ -175,7 +175,7 @@ func (r *repository) Delete(remoteEnvironment, id string) apperrors.AppError {
 
 	removeService(id, re)
 
-	e := r.updateRemoteEnvironment(re)
+	e := r.updateApplication(re)
 	if e != nil {
 		return apperrors.Internal(fmt.Sprintf("Deleting service failed, %s", e.Error()))
 	}
@@ -183,22 +183,22 @@ func (r *repository) Delete(remoteEnvironment, id string) apperrors.AppError {
 	return nil
 }
 
-func (r *repository) getRemoteEnvironment(remoteEnvironment string) (*v1alpha1.Application, apperrors.AppError) {
-	re, err := r.reManager.Get(remoteEnvironment, v1.GetOptions{})
+func (r *repository) getApplication(application string) (*v1alpha1.Application, apperrors.AppError) {
+	re, err := r.reManager.Get(application, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			message := fmt.Sprintf("Application %s not found", remoteEnvironment)
+			message := fmt.Sprintf("Application %s not found", application)
 			return nil, apperrors.NotFound(message)
 		}
 
-		message := fmt.Sprintf("Getting Application %s failed, %s", remoteEnvironment, err.Error())
+		message := fmt.Sprintf("Getting Application %s failed, %s", application, err.Error())
 		return nil, apperrors.Internal(message)
 	}
 
 	return re, nil
 }
 
-func (r *repository) updateRemoteEnvironment(re *v1alpha1.Application) error {
+func (r *repository) updateApplication(re *v1alpha1.Application) error {
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		_, e := r.reManager.Update(re)
 		return e

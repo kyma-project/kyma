@@ -76,8 +76,8 @@ func (m *accessServiceManager) create(remoteEnvironment, serviceId, serviceName 
 		ObjectMeta: metav1.ObjectMeta{
 			Name: serviceName,
 			Labels: map[string]string{
-				k8sconsts.LabelRemoteEnvironment: remoteEnvironment,
-				k8sconsts.LabelServiceId:         serviceId,
+				k8sconsts.LabelApplication: remoteEnvironment,
+				k8sconsts.LabelServiceId:   serviceId,
 			},
 		},
 		Spec: corev1.ServiceSpec{

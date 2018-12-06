@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
-	remoteenvmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv/mocks"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/applications"
+	applicationsmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/applications/mocks"
 	serviceapimocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/serviceapi/mocks"
 	specmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/specification/mocks"
 	uuidmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid/mocks"
@@ -46,16 +46,16 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			},
 			Documentation: []byte("documentation"),
 		}
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPI := &applications.ServiceAPI{
 			TargetUrl:   "http://target.com",
 			AccessLabel: "access-label",
 			GatewayURL:  "gateway-url",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
 			},
 		}
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -72,7 +72,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("New", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
 		serviceRepository.On("GetAll", "re").Return(nil, nil)
 		specService := new(specmocks.Service)
@@ -106,7 +106,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -120,7 +120,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
 		specService := new(specmocks.Service)
 		specService.On("PutSpec", &serviceDefinition, "").Return(nil)
@@ -150,7 +150,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -164,7 +164,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
 		specService := new(specmocks.Service)
 		specService.On("PutSpec", &serviceDefinition, "").Return(nil)
@@ -194,7 +194,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Documentation: nil,
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -208,7 +208,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
 		specService := new(specmocks.Service)
 		specService.On("PutSpec", &serviceDefinition, "").Return(nil)
@@ -239,7 +239,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Documentation: nil,
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -253,7 +253,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
 		specService := new(specmocks.Service)
 		specService.On("PutSpec", &serviceDefinition, "").Return(nil)
@@ -283,7 +283,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Documentation: nil,
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -297,7 +297,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1")
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(nil)
 		specService := new(specmocks.Service)
 		specService.On("PutSpec", &serviceDefinition, "").Return(nil)
@@ -387,16 +387,16 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Provider:    "Service Provider",
 			Api:         serviceAPI,
 		}
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPI := &applications.ServiceAPI{
 			TargetUrl:   "http://target.com",
 			AccessLabel: "access-label",
 			GatewayURL:  "gateway-url",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "",
 				SecretName:        "",
 			},
 		}
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -412,7 +412,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("New", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(apperrors.Internal("some error"))
 		specService := new(specmocks.Service)
 		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
@@ -445,16 +445,16 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Provider:    "Service Provider",
 			Api:         serviceAPI,
 		}
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPI := &applications.ServiceAPI{
 			TargetUrl:   "http://target.com",
 			AccessLabel: "access-label",
 			GatewayURL:  "gateway-url",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "",
 				SecretName:        "",
 			},
 		}
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -469,7 +469,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.On("NewUUID").Return("uuid-1")
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("New", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "re", remoteEnvService).Return(apperrors.NotFound("some error"))
 		specService := new(specmocks.Service)
 		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
@@ -503,7 +503,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Documentation: nil,
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -515,8 +515,8 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			API:                 nil,
 			Events:              false,
 		}
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("GetAll", "re").Return([]remoteenv.Service{remoteEnvService}, nil)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
+		serviceRepository.On("GetAll", "re").Return([]applications.Service{remoteEnvService}, nil)
 
 		service := NewServiceDefinitionService(nil, nil, serviceRepository, nil)
 
@@ -536,8 +536,8 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 
 	t.Run("should get all services", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("GetAll", "re").Return([]remoteenv.Service{
+		serviceRepository := new(applicationsmocks.ServiceRepository)
+		serviceRepository.On("GetAll", "re").Return([]applications.Service{
 			{
 				ID:                  "uuid-1",
 				DisplayName:         "Service1",
@@ -545,9 +545,9 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 				ProviderDisplayName: "Service1 Provider",
 				Labels:              map[string]string{"connected-app": "re"},
 				Tags:                nil,
-				API: &remoteenv.ServiceAPI{
+				API: &applications.ServiceAPI{
 					TargetUrl: "http://service1.com",
-					Credentials: remoteenv.Credentials{
+					Credentials: applications.Credentials{
 						SecretName: "testSecret1",
 					},
 				},
@@ -591,8 +591,8 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 
 	t.Run("should get empty list", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("GetAll", "re").Return([]remoteenv.Service{}, nil)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
+		serviceRepository.On("GetAll", "re").Return([]applications.Service{}, nil)
 
 		service := NewServiceDefinitionService(nil, nil, serviceRepository, nil)
 
@@ -606,7 +606,7 @@ func TestServiceDefinitionService_GetAll(t *testing.T) {
 
 	t.Run("should return not found error if cannot find Remote Environment", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("GetAll", "re").Return(nil, apperrors.NotFound("Remote Environment re not found"))
 
 		service := NewServiceDefinitionService(nil, nil, serviceRepository, nil)
@@ -635,17 +635,17 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 			},
 		}
 
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPI := &applications.ServiceAPI{
 			TargetUrl:   "http://target.com",
 			AccessLabel: "access-label",
 			GatewayURL:  "gateway-url",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
 			},
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -657,7 +657,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Read", "re", remoteEnvServiceAPI).Return(serviceAPI, nil)
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 		specService := new(specmocks.Service)
 		specService.On("GetSpec", "uuid-1").Return(empty, empty, empty, nil)
@@ -686,8 +686,8 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 
 	t.Run("should return internal error when getting service from remote environment fails", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Get", "re", "uuid-1").Return(remoteenv.Service{}, apperrors.Internal("get error"))
+		serviceRepository := new(applicationsmocks.ServiceRepository)
+		serviceRepository.On("Get", "re", "uuid-1").Return(applications.Service{}, apperrors.Internal("get error"))
 
 		service := NewServiceDefinitionService(nil, nil, serviceRepository, nil)
 
@@ -702,8 +702,8 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 
 	t.Run("should return not found error when getting service from remote environment that not exists", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Get", "re", "uuid-1").Return(remoteenv.Service{}, apperrors.NotFound("get error"))
+		serviceRepository := new(applicationsmocks.ServiceRepository)
+		serviceRepository.On("Get", "re", "uuid-1").Return(applications.Service{}, apperrors.NotFound("get error"))
 
 		service := NewServiceDefinitionService(nil, nil, serviceRepository, nil)
 
@@ -718,17 +718,17 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 
 	t.Run("should return error when reading API fails", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPI := &applications.ServiceAPI{
 			TargetUrl:   "http://target.com",
 			AccessLabel: "access-label",
 			GatewayURL:  "gateway-url",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
 			},
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -740,7 +740,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Read", "re", remoteEnvServiceAPI).Return(nil, apperrors.Internal("api error"))
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 		specService := new(specmocks.Service)
 		specService.On("GetSpec", "uuid-1").Return(empty, empty, empty, nil)
@@ -757,7 +757,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 
 	t.Run("should return error when reading specs fails", func(t *testing.T) {
 		// given
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -767,7 +767,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 			Events:              false,
 		}
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 		specService := new(specmocks.Service)
 		specService.On("GetSpec", "uuid-1").Return(empty, empty, empty, apperrors.Internal("error"))
@@ -815,17 +815,17 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPI := &applications.ServiceAPI{
 			TargetUrl:   "http://target.com",
 			AccessLabel: "access-label",
 			GatewayURL:  "gateway-url",
 
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				SecretName: "secret-name",
 			},
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			Identifier:          "Identifier",
 			DisplayName:         "Some service",
@@ -842,7 +842,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
 		serviceAPIService.On("Read", "re", remoteEnvServiceAPI).Return(serviceAPI, nil)
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 		serviceRepository.On("Update", "re", remoteEnvService).Return(nil)
 
@@ -886,11 +886,11 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPI := &applications.ServiceAPI{
 			TargetUrl:   "http://target.com",
 			AccessLabel: "access-label",
 			GatewayURL:  "gateway-url",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
 			},
@@ -900,8 +900,8 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
 		serviceAPIService.On("Read", "re", remoteEnvServiceAPI).Return(serviceAPI, nil)
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Get", "re", "uuid-1").Return(remoteenv.Service{}, apperrors.NotFound("missing"))
+		serviceRepository := new(applicationsmocks.ServiceRepository)
+		serviceRepository.On("Get", "re", "uuid-1").Return(applications.Service{}, apperrors.NotFound("missing"))
 
 		specService := new(specmocks.Service)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
@@ -931,7 +931,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			Identifier:          "Identifier",
 			DisplayName:         "Some service",
@@ -947,7 +947,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Delete", "re", "uuid-1").Return(nil)
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 		serviceRepository.On("Update", "re", remoteEnvService).Return(nil)
 
@@ -983,7 +983,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			DisplayName:         "Some service",
 			LongDescription:     "Some cool service",
@@ -999,7 +999,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Delete", "re", "uuid-1").Return(nil)
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 		serviceRepository.On("Update", "re", remoteEnvService).Return(nil)
 
@@ -1047,7 +1047,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			Identifier:          "Identifier",
 			DisplayName:         "Some service",
@@ -1061,9 +1061,9 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(&remoteenv.ServiceAPI{}, apperrors.Internal("an error"))
+		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(&applications.ServiceAPI{}, apperrors.Internal("an error"))
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 
 		specService := new(specmocks.Service)
@@ -1109,7 +1109,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			Identifier:          "Identifier",
 			DisplayName:         "Some service",
@@ -1123,9 +1123,9 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(&remoteenv.ServiceAPI{}, apperrors.Internal("an error"))
+		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(&applications.ServiceAPI{}, apperrors.Internal("an error"))
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 
 		specService := new(specmocks.Service)
@@ -1171,7 +1171,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			Identifier:          "Identifier",
 			DisplayName:         "Some service",
@@ -1185,9 +1185,9 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(&remoteenv.ServiceAPI{}, nil)
+		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(&applications.ServiceAPI{}, nil)
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 
 		specService := new(specmocks.Service)
@@ -1208,7 +1208,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		specService.AssertExpectations(t)
 	})
 
-	t.Run("should return an error if remoteenv update failed", func(t *testing.T) {
+	t.Run("should return an error if applications update failed", func(t *testing.T) {
 		// given
 		serviceAPI := &model.API{
 			TargetUrl: "http://target.com",
@@ -1235,17 +1235,17 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPI := &applications.ServiceAPI{
 			TargetUrl:   "http://target.com",
 			AccessLabel: "access-label",
 			GatewayURL:  "gateway-url",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
 			},
 		}
 
-		remoteEnvService := remoteenv.Service{
+		remoteEnvService := applications.Service{
 			ID:                  "uuid-1",
 			Identifier:          "Identifier",
 			DisplayName:         "Some service",
@@ -1262,7 +1262,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceAPIService.On("Update", "re", "uuid-1", serviceAPI).Return(remoteEnvServiceAPI, nil)
 		serviceAPIService.On("Read", "re", remoteEnvServiceAPI).Return(serviceAPI, nil)
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 		serviceRepository.On("Update", "re", remoteEnvService).Return(apperrors.Internal("an error"))
 
@@ -1293,7 +1293,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Delete", "re", "uuid-1").Return(nil)
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Delete", "re", "uuid-1").Return(nil)
 
 		uuidGenerator := new(uuidmocks.Generator)
@@ -1338,7 +1338,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 
 	t.Run("should return an error when trying to delete service, but RE is not found", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Delete", "re", "uuid-1").Return(apperrors.NotFound("A not found error"))
 
 		serviceAPIService := new(serviceapimocks.Service)
@@ -1358,12 +1358,12 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		assert.NotEmpty(t, err.Error())
 	})
 
-	t.Run("should return an error if remoteenv delete failed", func(t *testing.T) {
+	t.Run("should return an error if applications delete failed", func(t *testing.T) {
 		// given
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Delete", "re", "uuid-1").Return(nil)
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Delete", "re", "uuid-1").Return(apperrors.Internal("an error"))
 
 		service := NewServiceDefinitionService(nil, serviceAPIService, serviceRepository, nil)
@@ -1385,7 +1385,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("Delete", "re", "uuid-1").Return(nil)
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Delete", "re", "uuid-1").Return(nil)
 
 		specService := new(specmocks.Service)
@@ -1411,11 +1411,11 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 
 	t.Run("should get API", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{}
-		remoteEnvService := remoteenv.Service{API: remoteEnvServiceAPI}
+		remoteEnvServiceAPI := &applications.ServiceAPI{}
+		remoteEnvService := applications.Service{API: remoteEnvServiceAPI}
 		serviceAPI := &model.API{}
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 
 		serviceAPIService := new(serviceapimocks.Service)
@@ -1433,8 +1433,8 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 
 	t.Run("should return not found error if service does not exist", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Get", "re", "uuid-1").Return(remoteenv.Service{}, apperrors.NotFound("missing"))
+		serviceRepository := new(applicationsmocks.ServiceRepository)
+		serviceRepository.On("Get", "re", "uuid-1").Return(applications.Service{}, apperrors.NotFound("missing"))
 
 		service := NewServiceDefinitionService(nil, nil, serviceRepository, nil)
 
@@ -1449,8 +1449,8 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 
 	t.Run("should return internal error if service does not exist", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Get", "re", "uuid-1").Return(remoteenv.Service{}, apperrors.Internal("some error"))
+		serviceRepository := new(applicationsmocks.ServiceRepository)
+		serviceRepository.On("Get", "re", "uuid-1").Return(applications.Service{}, apperrors.Internal("some error"))
 
 		service := NewServiceDefinitionService(nil, nil, serviceRepository, nil)
 
@@ -1466,8 +1466,8 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 
 	t.Run("should return bad request if service does not have API", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Get", "re", "uuid-1").Return(remoteenv.Service{}, nil)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
+		serviceRepository.On("Get", "re", "uuid-1").Return(applications.Service{}, nil)
 
 		service := NewServiceDefinitionService(nil, nil, serviceRepository, nil)
 
@@ -1482,10 +1482,10 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 
 	t.Run("should return internal error if reading service API fails", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{}
-		remoteEnvService := remoteenv.Service{API: remoteEnvServiceAPI}
+		remoteEnvServiceAPI := &applications.ServiceAPI{}
+		remoteEnvService := applications.Service{API: remoteEnvServiceAPI}
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
+		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "re", "uuid-1").Return(remoteEnvService, nil)
 
 		serviceAPIService := new(serviceapimocks.Service)

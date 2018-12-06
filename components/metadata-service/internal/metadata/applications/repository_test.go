@@ -1,12 +1,12 @@
-package remoteenv_test
+package applications_test
 
 import (
 	"errors"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv/mocks"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/applications"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/applications/mocks"
 	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -24,7 +24,7 @@ func TestGetServices(t *testing.T) {
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(application, nil)
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -40,11 +40,11 @@ func TestGetServices(t *testing.T) {
 		assert.Equal(t, s1.ProviderDisplayName, "SAP Hybris")
 		assert.Equal(t, s1.DisplayName, "Orders API")
 		assert.Equal(t, s1.LongDescription, "This is Orders API")
-		assert.Equal(t, s1.API, &remoteenv.ServiceAPI{
+		assert.Equal(t, s1.API, &applications.ServiceAPI{
 			GatewayURL:  "https://orders-gateway.production.svc.cluster.local/",
 			AccessLabel: "access-label-1",
 			TargetUrl:   "https://192.168.1.2",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "https://192.168.1.3/token",
 				SecretName:        "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
 			},
@@ -55,11 +55,11 @@ func TestGetServices(t *testing.T) {
 		assert.Equal(t, s2.ProviderDisplayName, "SAP Hybris")
 		assert.Equal(t, s2.DisplayName, "Products API")
 		assert.Equal(t, s2.LongDescription, "This is Products API")
-		assert.Equal(t, s2.API, &remoteenv.ServiceAPI{
+		assert.Equal(t, s2.API, &applications.ServiceAPI{
 			GatewayURL:  "https://products-gateway.production.svc.cluster.local/",
 			AccessLabel: "access-label-2",
 			TargetUrl:   "https://192.168.1.3",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "https://192.168.1.4/token",
 				SecretName:        "re-bc031e8c-9aa4-4cb7-8999-0d358726ffab",
 			},
@@ -72,7 +72,7 @@ func TestGetServices(t *testing.T) {
 		appManagerMock.On("Get", "re", metav1.GetOptions{}).
 			Return(nil, errors.New("failed to get RE"))
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -89,7 +89,7 @@ func TestGetServices(t *testing.T) {
 		appManagerMock.On("Get", "not_existent", metav1.GetOptions{}).
 			Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -104,7 +104,7 @@ func TestGetServices(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, remoteenv.Service{}, service)
+		assert.Equal(t, applications.Service{}, service)
 		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
 
@@ -115,7 +115,7 @@ func TestGetServices(t *testing.T) {
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(application, nil)
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -128,11 +128,11 @@ func TestGetServices(t *testing.T) {
 		assert.Equal(t, service.ProviderDisplayName, "SAP Hybris")
 		assert.Equal(t, service.DisplayName, "Orders API")
 		assert.Equal(t, service.LongDescription, "This is Orders API")
-		assert.Equal(t, service.API, &remoteenv.ServiceAPI{
+		assert.Equal(t, service.API, &applications.ServiceAPI{
 			GatewayURL:  "https://orders-gateway.production.svc.cluster.local/",
 			AccessLabel: "access-label-1",
 			TargetUrl:   "https://192.168.1.2",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "https://192.168.1.3/token",
 				SecretName:        "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
 			},
@@ -146,14 +146,14 @@ func TestGetServices(t *testing.T) {
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(application, nil)
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
 		service, err := repository.Get("production", "not-existent")
 
 		// then
-		assert.Equal(t, remoteenv.Service{}, service)
+		assert.Equal(t, applications.Service{}, service)
 		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
 }
@@ -161,20 +161,20 @@ func TestGetServices(t *testing.T) {
 func TestCreateServices(t *testing.T) {
 	t.Run("should create service", func(t *testing.T) {
 		// given
-		remoteEnvironment := createApplication("production")
+		application := createApplication("production")
 
 		appManagerMock := &mocks.ApplicationManager{}
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+			Return(application, nil)
 
 		service1 := createK8sService()
-		newServices := append(remoteEnvironment.Spec.Services, service1)
-		newApp := remoteEnvironment.DeepCopy()
+		newServices := append(application.Spec.Services, service1)
+		newApp := application.DeepCopy()
 
 		newApp.Spec.Services = newServices
 		appManagerMock.On("Update", newApp).Return(newApp, nil)
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		newService1 := createService()
@@ -196,7 +196,7 @@ func TestCreateServices(t *testing.T) {
 
 		appManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.Application")).Return(nil, errors.New("failed to update Application"))
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		newService1 := createService()
@@ -217,10 +217,10 @@ func TestCreateServices(t *testing.T) {
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(application, nil)
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
-		newService := remoteenv.Service{
+		newService := applications.Service{
 			ID:              "id1",
 			Name:            "promotions-api-c48fe",
 			DisplayName:     "Promotions API",
@@ -241,11 +241,11 @@ func TestCreateServices(t *testing.T) {
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
-		newService := remoteenv.Service{
+		newService := applications.Service{
 			ID:              "id1",
 			DisplayName:     "Promotions API",
 			LongDescription: "This is Promotions API",
@@ -273,7 +273,7 @@ func TestDeleteServices(t *testing.T) {
 		newApp.Spec.Services = application.Spec.Services[1:]
 		appManagerMock.On("Update", newApp).Return(newApp, nil)
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -291,7 +291,7 @@ func TestDeleteServices(t *testing.T) {
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(application, nil)
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -311,7 +311,7 @@ func TestDeleteServices(t *testing.T) {
 
 		appManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.Application")).Return(nil, errors.New("failed to update RE"))
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -329,7 +329,7 @@ func TestDeleteServices(t *testing.T) {
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -373,21 +373,21 @@ func TestUpdateServices(t *testing.T) {
 
 		appManagerMock.On("Update", newApp).Return(newApp, nil)
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
-		service := remoteenv.Service{
+		service := applications.Service{
 			ID:                  "id1",
 			Name:                "promotions-api-4e89d",
 			DisplayName:         "Promotions API",
 			LongDescription:     "This is Promotions API",
 			ProviderDisplayName: "SAP Labs Poland",
 			Tags:                []string{"promotions"},
-			API: &remoteenv.ServiceAPI{
+			API: &applications.ServiceAPI{
 				GatewayURL:  "https://promotions-gateway.production.svc.cluster.local/",
 				AccessLabel: "access-label-3",
 				TargetUrl:   "https://192.168.10.10",
-				Credentials: remoteenv.Credentials{
+				Credentials: applications.Credentials{
 					AuthenticationUrl: "https://192.168.10.10/token",
 					SecretName:        "new_secret",
 				},
@@ -410,11 +410,11 @@ func TestUpdateServices(t *testing.T) {
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(application, nil)
 
-		repository := remoteenv.NewServiceRepository(appManagerMock)
+		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
-		service := remoteenv.Service{
+		service := applications.Service{
 			ID: "not-existent",
 		}
 		err := repository.Update("production", service)
@@ -479,18 +479,18 @@ func createApplication(name string) *v1alpha1.Application {
 	}
 }
 
-func createService() remoteenv.Service {
-	return remoteenv.Service{
+func createService() applications.Service {
+	return applications.Service{
 		ID:                  "id3",
 		DisplayName:         "Promotions API",
 		LongDescription:     "This is Promotions API",
 		ProviderDisplayName: "SAP Hybris",
 		Tags:                []string{"promotions"},
-		API: &remoteenv.ServiceAPI{
+		API: &applications.ServiceAPI{
 			GatewayURL:  "https://promotions-gateway.production.svc.cluster.local/",
 			AccessLabel: "access-label-1",
 			TargetUrl:   "https://192.168.1.2",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "https://192.168.1.3/token",
 				SecretName:        "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
 			},

@@ -10,7 +10,7 @@ import (
 	secretsmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/secrets/mocks"
 
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/remoteenv"
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/applications"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -34,8 +34,8 @@ func TestNewService(t *testing.T) {
 			},
 		}
 
-		remoteEnvCredentials := remoteenv.Credentials{
-			Type:              remoteenv.CredentialsOAuthType,
+		remoteEnvCredentials := applications.Credentials{
+			Type:              applications.CredentialsOAuthType,
 			SecretName:        resourceName,
 			AuthenticationUrl: api.Credentials.Oauth.URL,
 		}
@@ -89,8 +89,8 @@ func TestNewService(t *testing.T) {
 			},
 		}
 
-		remoteEnvCredentials := remoteenv.Credentials{
-			Type:       remoteenv.CredentialsBasicType,
+		remoteEnvCredentials := applications.Credentials{
+			Type:       applications.CredentialsBasicType,
 			SecretName: resourceName,
 		}
 
@@ -222,7 +222,7 @@ func TestNewService(t *testing.T) {
 			"re",
 			"uuid-1",
 			api.Credentials,
-		).Return(remoteenv.Credentials{}, apperrors.Internal("some error"))
+		).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
@@ -263,7 +263,7 @@ func TestNewService(t *testing.T) {
 			"re",
 			"uuid-1",
 			api.Credentials,
-		).Return(remoteenv.Credentials{}, apperrors.Internal("some error"))
+		).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
@@ -305,7 +305,7 @@ func TestNewService(t *testing.T) {
 			"re",
 			"uuid-1",
 			api.Credentials,
-		).Return(remoteenv.Credentials{}, nil)
+		).Return(applications.Credentials{}, nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Create", "re", "uuid-1", resourceName).Return(apperrors.Internal("some error"))
@@ -329,12 +329,12 @@ func TestNewService(t *testing.T) {
 func TestDefaultService_Read(t *testing.T) {
 	t.Run("should read API with OAuth credentials", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPi := &applications.ServiceAPI{
 			TargetUrl: "http://target.com",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com",
 				SecretName:        "secret-name",
-				Type:              remoteenv.CredentialsOAuthType,
+				Type:              applications.CredentialsOAuthType,
 			},
 		}
 
@@ -367,11 +367,11 @@ func TestDefaultService_Read(t *testing.T) {
 
 	t.Run("should read API with BasicAuth credentials", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPi := &applications.ServiceAPI{
 			TargetUrl: "http://target.com",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				SecretName: "secret-name",
-				Type:       remoteenv.CredentialsBasicType,
+				Type:       applications.CredentialsBasicType,
 			},
 		}
 
@@ -402,7 +402,7 @@ func TestDefaultService_Read(t *testing.T) {
 
 	t.Run("should read API without credentials", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPi := &applications.ServiceAPI{
 			TargetUrl: "http://target.com",
 		}
 
@@ -420,12 +420,12 @@ func TestDefaultService_Read(t *testing.T) {
 
 	t.Run("should return error when reading OAuth secret fails", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPi := &applications.ServiceAPI{
 			TargetUrl: "http://target.com",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com",
 				SecretName:        "secret-name",
-				Type:              remoteenv.CredentialsOAuthType,
+				Type:              applications.CredentialsOAuthType,
 			},
 		}
 
@@ -448,12 +448,12 @@ func TestDefaultService_Read(t *testing.T) {
 
 	t.Run("should return error when reading BasicAuth secret fails", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
+		remoteEnvServiceAPi := &applications.ServiceAPI{
 			TargetUrl: "http://target.com",
-			Credentials: remoteenv.Credentials{
+			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com",
 				SecretName:        "secret-name",
-				Type:              remoteenv.CredentialsBasicType,
+				Type:              applications.CredentialsBasicType,
 			},
 		}
 
@@ -597,8 +597,8 @@ func TestDefaultService_Update(t *testing.T) {
 			},
 		}
 
-		remoteEnvCredentials := remoteenv.Credentials{
-			Type:              remoteenv.CredentialsOAuthType,
+		remoteEnvCredentials := applications.Credentials{
+			Type:              applications.CredentialsOAuthType,
 			SecretName:        resourceName,
 			AuthenticationUrl: api.Credentials.Oauth.URL,
 		}
@@ -653,8 +653,8 @@ func TestDefaultService_Update(t *testing.T) {
 			},
 		}
 
-		remoteEnvCredentials := remoteenv.Credentials{
-			Type:       remoteenv.CredentialsBasicType,
+		remoteEnvCredentials := applications.Credentials{
+			Type:       applications.CredentialsBasicType,
 			SecretName: resourceName,
 		}
 
@@ -801,7 +801,7 @@ func TestDefaultService_Update(t *testing.T) {
 			"re",
 			"uuid-1",
 			api.Credentials,
-		).Return(remoteenv.Credentials{}, apperrors.Internal("some error"))
+		).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
@@ -844,7 +844,7 @@ func TestDefaultService_Update(t *testing.T) {
 			"re",
 			"uuid-1",
 			api.Credentials,
-		).Return(remoteenv.Credentials{}, apperrors.Internal("some error"))
+		).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
@@ -921,7 +921,7 @@ func TestDefaultService_Update(t *testing.T) {
 			"re",
 			"uuid-1",
 			api.Credentials,
-		).Return(remoteenv.Credentials{}, nil)
+		).Return(applications.Credentials{}, nil)
 
 		istioService := new(istiomocks.Service)
 		istioService.On("Upsert", "re", "uuid-1", resourceName).Return(apperrors.Internal("some error"))
