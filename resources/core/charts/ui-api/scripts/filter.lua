@@ -24,6 +24,7 @@ function GraphQlAuthPlugin_OnRequest(request_handle)
         local queryItems = parseGraphQlQuery(query)
         if (queryItems.resources ~= "") then
           request_handle:headers():replace("kyma-graphql-resources", queryItems.resources)
+          request_handle:logInfo("query resources: " .. queryItems.resources)
         end
       end
     end
@@ -46,7 +47,7 @@ function parseGraphQlQuery(payload)
 
     local newPayload = string.gsub(payload, "\\n", " ")
 
-    for query in string.gmatch(newPayload, 'query .+') do
+    for query in string.gmatch(newPayload, "query .+") do
 
       local handleFunc = handleQueryStatement
       for w in string.gmatch(query, "[%w,{,},(,)]+") do
@@ -57,8 +58,8 @@ function parseGraphQlQuery(payload)
       end
     end
 
-    for mutation in string.gmatch(newPayload, 'mutation .+') do
-
+    for mutation in string.gmatch(newPayload, "mutation .+") do
+      
       local handleFunc = handleMutationStatement
       for w in string.gmatch(mutation, "[%w,{,},(,)]+") do
 
@@ -151,7 +152,7 @@ function handleQueryResource(item, queryItems)
 
     local resourceName = item:sub(0, fieldsStart-1)
 
-    if(resourceName ~= nil and (resourceName:len() > 0)) then
+    if (resourceName ~= nil and (resourceName:len() > 0)) then
       table.insert(queryItems.resourcesArr, resourceName)
     end
 
@@ -177,7 +178,7 @@ end
 function skipQueryBlockFunc(nextFunc, queryItems)
 
   local function skipQueryBlock(item)
-
+    
     local endIndex = item:find("^}$")
     if (endIndex ~= nil) then
 
