@@ -1,13 +1,11 @@
-APP_NAME = k8s-dashboard-proxy
+APP_NAME = event-service
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
-binary = reverseproxy
+binary = eventservice
 
-.PHONY: compile
-compile:
-	mkdir -p ./bin
-	go build ./cmd/reverseproxy
-	mv ./reverseproxy ./bin
+.PHONY: resolve
+resolve:
+	dep ensure -vendor-only -v
 
 .PHONY: build
 build:
@@ -33,5 +31,4 @@ ci-release: build build-image push-image
 
 .PHONY: clean
 clean:
-	rm -rf docker/
 	rm -f $(binary)
