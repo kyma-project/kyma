@@ -32,7 +32,7 @@
 /resources/application-connector/values.yaml @kyma-project/developers
 
 # The `heptio ark` chart
-/resources/ark/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+/resources/ark/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @sjanota
@@ -89,13 +89,13 @@
 /resources/core/charts/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `monitoring` subchart
-/resources/monitoring/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+/resources/monitoring/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The `kubeless` subchart
-/resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+/resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The `logging` subchart
-/resources/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+/resources/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # The `minio` subchart
 /resources/core/charts/minio/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
@@ -155,7 +155,7 @@
 /resources/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
 # The `prometheus-operator` chart
-/resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+/resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The `remote environment` chart
 /resources/remote-environments/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -230,10 +230,10 @@
 /tests/test-environemnts/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
 
 # test-logging-monitoring tests
-/tests/test-logging-monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+/tests/test-logging-monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # test-logging tests
-/tests/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+/tests/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # api-controller acceptance tests
 /tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @sjanota
@@ -276,13 +276,13 @@
 /tools/static-users-generator/ @piotrmsc @sjanota @kubadz 
 
 # The tools/ark-plugins directory
-/tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+/tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # kubeless-integration tests directory 
-/tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+/tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # kubeless tests
-/tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+/tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # Event Bus Tests
 /tests/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
