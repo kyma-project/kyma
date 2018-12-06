@@ -2,17 +2,6 @@
 
 
 [[projects]]
-  branch = "kyma-on-knative"
-  name = "github.com/kyma-project/kyma"
-  packages = ["tests/tools/ingressgateway"]
-  revision = "d746e195474240789af452ff2ecc8ea954504cb3"
-  source = "https://github.com/sjanota/kyma"
-
-[[projects]]
-  branch = "master"
-  name = "golang.org/x/net"
-  packages = ["context"]
-  revision = "fae4c4e3ad76c295c3d6d259f898136b4bf833a8"
   branch = "travis-1.9"
   name = "github.com/golang/lint"
   packages = [
@@ -20,6 +9,19 @@
     "golint"
   ]
   revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
+
+[[projects]]
+  branch = "test-ingressgateway"
+  name = "github.com/kyma-project/kyma"
+  packages = ["tests/tools/ingressgateway"]
+  revision = "9abe7795a66d3cdd031205b91251a96921fcc94c"
+  source = "https://github.com/sjanota/kyma"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["context"]
+  revision = "351d144fa1fc0bd934e2408202be0c29f25e35a0"
 
 [[projects]]
   branch = "master"
@@ -30,11 +32,11 @@
     "go/internal/gcimporter",
     "go/types/typeutil"
   ]
-  revision = "22934f0fdb6201c132a3dc6120150dcb1646d74c"
+  revision = "3576414c54a492fc48cd913814eb209914c717f0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "eac9aff91777620e36bab609338e0127d29380e8cd3dca17c081e30625590f64"
+  inputs-digest = "01730d6ab11a5c7ec5d6a60d0ad6bc55deb2d0389054b2c5eeded2115a7ef174"
   solver-name = "gps-cdcl"
   solver-version = 1
