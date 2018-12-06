@@ -135,15 +135,6 @@
   revision = "66deaeb636dff1ac7d938ce666d090556056a4b0"
 
 [[projects]]
-  branch = "travis-1.9"
-  name = "github.com/golang/lint"
-  packages = [
-    ".",
-    "golint"
-  ]
-  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
-
-[[projects]]
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -469,9 +460,6 @@
   packages = [
     "cmd/goimports",
     "go/ast/astutil",
-    "go/gcexportdata",
-    "go/internal/gcimporter",
-    "go/types/typeutil",
     "imports",
     "internal/fastwalk"
   ]
@@ -667,6 +655,7 @@
   name = "k8s.io/client-go"
   packages = [
     "discovery",
+    "discovery/fake",
     "dynamic",
     "kubernetes",
     "kubernetes/scheme",
@@ -705,6 +694,7 @@
     "plugin/pkg/client/auth/gcp",
     "rest",
     "rest/watch",
+    "testing",
     "third_party/forked/golang/template",
     "tools/auth",
     "tools/cache",
@@ -929,6 +919,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5ca6bbf755d489c9962fd9316b9090772449aacec7a2da90ef3fe5f1d8484e5e"
+  inputs-digest = "a392b15ee12560640b4862430aa940ca945c5b0d8a675f7be46a8606b73215b5"
   solver-name = "gps-cdcl"
   solver-version = 1
