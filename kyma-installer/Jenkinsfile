@@ -35,7 +35,7 @@ podTemplate(label: label) {
                         }
 
                         stage("build image $application") {
-                            sh "docker build -t ${dockerPushRoot}${application}:latest -f tools/${application}/kyma.Dockerfile . --label version=${dockerImageTag} --label component=${application}"
+                            sh "docker build -t ${dockerPushRoot}${application}:latest -f ${application}/kyma.Dockerfile . --label version=${dockerImageTag} --label component=${application}"
                         }
 
                         stage("push image") {
