@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// RequestLogger creates an http.Handler function with a default info logger
 func RequestLogger(label string, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		lw := newLoggingResponseWriter(w)
