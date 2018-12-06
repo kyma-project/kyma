@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/accessservice/mocks"

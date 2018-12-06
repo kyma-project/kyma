@@ -1,8 +1,9 @@
 package metadata
 
 import (
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/applications"

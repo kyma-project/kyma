@@ -1,8 +1,9 @@
 package serviceapi
 
 import (
-	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/metadata-service/internal/metadata/model"
 
 	k8smocks "github.com/kyma-project/kyma/components/metadata-service/internal/k8sconsts/mocks"
 	asmocks "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/accessservice/mocks"

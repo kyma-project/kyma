@@ -2,6 +2,7 @@ package accessservice
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/k8sconsts"
 	corev1 "k8s.io/api/core/v1"
