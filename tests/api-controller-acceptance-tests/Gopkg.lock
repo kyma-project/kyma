@@ -99,7 +99,7 @@
   version = "v1.0.1"
 
 [[projects]]
-  branch = "master"
+  branch = "kyma-on-knative"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/api-controller/pkg/apis/authentication.istio.io/v1alpha1",
@@ -114,9 +114,11 @@
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned",
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/scheme",
-    "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3"
+    "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3",
+    "tests/tools/ingressgateway"
   ]
-  revision = "8c274255cc4e4ecebb438bc8f9057ba7afb82e31"
+  revision = "d746e195474240789af452ff2ecc8ea954504cb3"
+  source = "https://github.com/sjanota/kyma"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -172,6 +174,7 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = [
+    "context",
     "http/httpguts",
     "http2",
     "http2/hpack",
@@ -363,6 +366,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "20431aa45f3bfcdd12b47ad623d15146bc1519692b91102d934fb4e8c0a9c998"
+  inputs-digest = "1388b86adbfe2882a55898507481118666b4553f21472e50bb7af419a263fffe"
   solver-name = "gps-cdcl"
   solver-version = 1

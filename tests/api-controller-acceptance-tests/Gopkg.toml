@@ -42,7 +42,8 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  branch = "master"
+  source = "https://github.com/sjanota/kyma"
+  branch = "kyma-on-knative"
 
 [[constraint]]
   name = "github.com/go-test/deep"
