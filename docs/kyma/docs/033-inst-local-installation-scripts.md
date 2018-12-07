@@ -49,7 +49,7 @@ The Installer is an application based on a [Kubernetes operator](https://coreos.
 
 The `installation/scripts/build-kyma-installer.sh` script extracts the Kyma-Installer image name from the `installer.yaml` deployment file and uses it to build a Docker image inside Minikube. This image contains local Kyma sources from the `resources` folder.
 
->**NOTE:** For the Kyma-Installer Docker image details, refer to the `kyma-installer/kyma.Dockerfile` file.
+>**NOTE:** For the Kyma-Installer Docker image details, refer to the `tools/kyma-installer/kyma.Dockerfile` file.
 
 ## The generate-local-config.sh script
 
