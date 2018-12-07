@@ -269,6 +269,9 @@
 # The changelog-generator directory
 /tools/changelog-generator/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
+# The docsbuilder directory
+/tools/docsbuilder/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
+
 # The static-users-generator directory
 /tools/static-users-generator/ @piotrmsc @sjanota @kubadz 
 
