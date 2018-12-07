@@ -26,9 +26,27 @@ const (
 )
 
 type remoteEnvironment struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
-	Labels      map[string]string `json:"labels"`
+	Name                  string
+	Description           string
+	Labels                map[string]string
+	Services              remoteEnvironmentService
+	EnabledInEnvironments string
+	Status                string
+}
+
+type remoteEnvironmentService struct {
+	Id                  string
+	DisplayName         string
+	LongDescription     string
+	ProviderDisplayName string
+	Tags                string
+	Entries             remoteEnvironmentEntry
+}
+
+type remoteEnvironmentEntry struct {
+	Type        string
+	GatewayUrl  string
+	AccessLabel string
 }
 
 type reDeleteMutation struct {
@@ -142,6 +160,26 @@ func reFields() string {
 		description
 		labels
     `
+}
+
+func reAllFields() string {
+	return fmt.Sprintf(`
+		%s
+		enabledInEnvironments
+		status               
+		services {
+			id                 
+			displayName        
+			longDescription    
+			providerDisplayName
+			tags               
+			entries {
+				type       
+				gatewayUrl 
+				accessLabel
+			}         
+		}          
+    `, reFields())
 }
 
 func waitForREReady(environment string, reCli *clientset.Clientset) error {
