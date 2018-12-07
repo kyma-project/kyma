@@ -92,7 +92,7 @@ func TestRemoteEnvironmentMutations(t *testing.T) {
 	t.Log("Create Remote Environment")
 	resp, err := createRE(c, fixedRE)
 	require.NoError(t, err)
-	assert.Equal(t, fixedRE, resp.ReCreateMutation)
+	assert.Equal(t, *fixedRE, resp.ReCreateMutation)
 
 	t.Log("Check Subscription Event")
 	expectedEvent := createREEventStruct("ADD", fixedRE)
@@ -112,11 +112,11 @@ func TestRemoteEnvironmentMutations(t *testing.T) {
 
 	updateResp, err := updateRE(c, fixedRE)
 	require.NoError(t, err)
-	assert.Equal(t, fixedRE, updateResp.ReUpdateMutation)
+	assert.Equal(t, *fixedRE, updateResp.ReUpdateMutation)
 }
 
-func createREStruct(name string, desc string, labels map[string]string) remoteEnvironment {
-	return remoteEnvironment{
+func createREStruct(name string, desc string, labels map[string]string) *remoteEnvironment {
+	return &remoteEnvironment{
 		Name:        name,
 		Description: desc,
 		Labels:      labels,
@@ -205,14 +205,14 @@ func checkREEvent(t *testing.T, expected, actual remoteEnvironmentEvent) {
 	assert.Equal(t, expected.RemoteEnvironment.Name, actual.RemoteEnvironment.Name)
 }
 
-func createREEventStruct(eventType string, re remoteEnvironment) remoteEnvironmentEvent {
+func createREEventStruct(eventType string, re *remoteEnvironment) remoteEnvironmentEvent {
 	return remoteEnvironmentEvent{
 		Type:              eventType,
-		RemoteEnvironment: re,
+		RemoteEnvironment: *re,
 	}
 }
 
-func createRE(c *graphql.Client, given remoteEnvironment) (reCreateMutationResponse, error) {
+func createRE(c *graphql.Client, given *remoteEnvironment) (reCreateMutationResponse, error) {
 	query := fmt.Sprintf(`
 			mutation ($name: String!, $description: String!, $labels: Labels!) {
 				createRemoteEnvironment(name: $name, description: $description, labels: $labels) {
@@ -231,7 +231,7 @@ func createRE(c *graphql.Client, given remoteEnvironment) (reCreateMutationRespo
 	return response, err
 }
 
-func updateRE(c *graphql.Client, given remoteEnvironment) (reUpdateMutationResponse, error) {
+func updateRE(c *graphql.Client, given *remoteEnvironment) (reUpdateMutationResponse, error) {
 	query := fmt.Sprintf(`
 			mutation ($name: String!, $description: String!, $labels: Labels!) {
 				updateRemoteEnvironment(name: $name, description: $description, labels: $labels) {
