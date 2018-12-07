@@ -1,9 +1,10 @@
 package k8stests
 
 import (
+	"time"
+
 	"github.com/stretchr/testify/require"
 	v1core "k8s.io/api/core/v1"
-	"time"
 
 	"net/http"
 	"testing"
