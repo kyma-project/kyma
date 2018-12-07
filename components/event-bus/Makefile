@@ -11,7 +11,7 @@ IMG_PUSH = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME_PUSH)
 BINARY_PUSH = $(APP_NAME_PUSH)
 
 # event-bus-sv
-APP_NAME_SV = event-bus-sv
+APP_NAME_SV = event-bus-sub-validator
 IMG_SV = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME_SV)
 BINARY_SV = $(APP_NAME_SV)
 
@@ -21,7 +21,7 @@ build:
 	#./before-commit.sh ci
 	dep ensure -vendor-only -v
 	curl https://raw.githubusercontent.com/alecthomas/gometalinter/master/scripts/install.sh | sh -s v2.0.8
-	./bin/gometalinter --skip=generated --vendor --deadline=2m --disable-all --enable=vet ./...
+	./bin/gometalinter --skip=generated --vendor --deadline=2m --disable-all ./...
 
 .PHONY: build-image
 build-image:
