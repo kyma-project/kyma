@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: ui-api-graphql-resources-to-header
+  namespace: {{ .Release.Namespace }}
+spec:
+  workloadLabels:
+    app: {{ template "name" . }}
+  filters:
+  - filterName: envoy.lua
+    filterType: HTTP
+    filterConfig:
+      inlineCode: |
+{{ .Files.Get "scripts/filter.lua" | indent 8 }}
