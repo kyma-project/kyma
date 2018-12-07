@@ -1,2 +1,2 @@
-// Package connectorservice contains connectorservice API versions
-package connectorservice
+// Package applicationconnector contains applicationconnector API versions
+package applicationconnector
