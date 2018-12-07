@@ -3,5 +3,5 @@
 // +k8s:deepcopy-gen=package,register
 // +k8s:conversion-gen=github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/connectorservice
 // +k8s:defaulter-gen=TypeMeta
-// +groupName=connectorservice.kyma-project.io
+// +groupName=applicationconnector.kyma-project.io
 package v1alpha1
