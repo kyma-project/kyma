@@ -1,6 +1,8 @@
 param (
     [string]$VM_DRIVER = "hyperv",
-    [string]$DOMAIN = "kyma.local"
+    [string]$DOMAIN = "kyma.local",
+    [string]$DISK_SIZE = "20g",
+    [string]$MEMORY = "8196"
 )
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
@@ -15,7 +17,7 @@ Write-Output @"
 function CheckIfMinikubeIsInitialized() {
     $cmd = "minikube status --format '{{.MinikubeStatus}}'"
     $minikubeStatus = (Invoke-Expression -Command $cmd) | Out-String
-    
+
     if ($minikubeStatus -ne "") {
         Write-Output "Minikube is already initialized"
         $deleteMinikube = Read-Host "Do you want to remove previous minikube cluster [y/N]"
@@ -33,26 +35,30 @@ function CheckIfMinikubeIsInitialized() {
 function InitializeMinikubeConfig () {
     $cmd = "minikube config unset ingress"
     Invoke-Expression -Command $cmd
+
+    $cmd = "minikube addons enable heapster"
+    Invoke-Expression -Command $cmd
 }
 
 function StartMinikube() {
     $cmd = "minikube start"`
-        + " --memory 8192"`
+        + " --memory ${MEMORY}"`
         + " --cpus 4"`
         + " --extra-config=apiserver.Authorization.Mode=RBAC"`
         + " --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList='.*'"`
         + " --extra-config=controller-manager.ClusterSigningCertFile='/var/lib/localkube/certs/ca.crt'"`
         + " --extra-config=controller-manager.ClusterSigningKeyFile='/var/lib/localkube/certs/ca.key'"`
-        + " --extra-config=apiserver.Admission.PluginNames='LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota'"`
+        + " --extra-config=apiserver.admission-control='LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota'"`
         + " --kubernetes-version=v${KUBERNETES_VERSION}"`
         + " --feature-gates='MountPropagation=false'"`
+        + " --disk-size=${DISK_SIZE}"`
         + " --vm-driver=${VM_DRIVER}"`
         + " -b=localkube"
 
     if ($VM_DRIVER -eq "hyperv") {
         $cmd += " --hyperv-virtual-switch='${env.HYPERV_VIRTUAL_SW}'"
     }
-    
+
     Invoke-Expression -Command $cmd
 }
 
@@ -62,18 +68,18 @@ function WaitForMinikubeToBeUp() {
     $limit = 15
     $counter = 0
     $clusterStatus = ""
-    
+
     while ($counter -lt $limit) {
         $counter += 1
         Write-Output "Keep calm, there are ${limit} possibilities and so far it is attempt number ${counter}"
-      
+
         $cmd = "minikube status --format '{{.MinikubeStatus}}'"
         $clusterStatus = (Invoke-Expression -Command $cmd) | Out-String
         $clusterStatus = $clusterStatus.Trim()
         if ($clusterStatus -eq "Running") {
             break
         }
-      
+
         Start-Sleep -Seconds 1
     }
 }
@@ -88,8 +94,8 @@ function AddDevDomainsToEtcHosts([string[]]$hostnamesPrefixes) {
     $n = 6 # 7 hostnames in one line, others in next line. Windows can't read more than 9 hostnames in the same line.
     $hostnames = $hostnamesPrefixes | ForEach-Object {"$_.${DOMAIN}"} # for minikube ssh
     $hostnames1 = $hostnamesPrefixes[0..$n] | ForEach-Object {"$_.${DOMAIN}"}
-    $hostnames2 = $hostnamesPrefixes[ - ($n + 1)..-1] | ForEach-Object {"$_.${DOMAIN}"} 
-    
+    $hostnames2 = $hostnamesPrefixes[ - ($n + 1)..-1] | ForEach-Object {"$_.${DOMAIN}"}
+
     $cmd = "minikube ip"
     $minikubeIp = (Invoke-Expression -Command $cmd | Out-String).Trim()
 

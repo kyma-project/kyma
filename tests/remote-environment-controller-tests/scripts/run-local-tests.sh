@@ -39,6 +39,8 @@ spec:
       value: tiller-deploy.kube-system.svc.cluster.local:44134
     - name: NAMESPACE
       value: kyma-integration
+    - name: INSTALLATION_TIMEOUT
+      value: "180"
   restartPolicy: Never
 EOF
 

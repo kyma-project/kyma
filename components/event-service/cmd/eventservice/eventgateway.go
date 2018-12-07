@@ -23,7 +23,7 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
-	bus.Init(options.sourceId, options.eventsTargetURL)
+	bus.Init(options.sourceID, options.eventsTargetURL)
 
 	externalHandler := externalapi.NewHandler()
 

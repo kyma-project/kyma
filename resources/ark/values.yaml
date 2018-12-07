@@ -64,3 +64,10 @@ credentials:
 
 prometheus:
   serviceMonitorNamespace: kyma-system
+
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  ark_plugin:
+    dir: develop/
+    version: "52070221"

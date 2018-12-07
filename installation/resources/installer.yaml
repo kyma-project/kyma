@@ -35,7 +35,7 @@ spec:
     requests.memory: 384Mi
 
     # The sum of all pod memory limit must not exceed this value.
-    limits.memory: 512Gi
+    limits.memory: 512Mi
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -85,7 +85,7 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/develop/installer:7bd3337d
+        image: eu.gcr.io/kyma-project/develop/installer:cb19df90
         imagePullPolicy: IfNotPresent
 ---
 kind: ClusterRole

@@ -44,3 +44,8 @@ func PodPresetName(obj *svcatSettings.PodPreset) string {
 func UnstructuredName(obj *unstructured.Unstructured) string {
 	return fmt.Sprintf(`Unstructured object "%s/%s"`, obj.GetName(), obj.GetNamespace())
 }
+
+// KeyItem returns string with queue item key, made from namespace and name
+func KeyItem(namespace string, name string) string {
+	return fmt.Sprintf(`"%s/%s"`, namespace, name)
+}

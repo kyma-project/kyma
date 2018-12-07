@@ -57,3 +57,12 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.components.name** | **YES** | Specifies the name of the component which is the same as the name of the component subdirectory in the `resources` directory. |
 | **spec.components.namespace** | **YES** | Defines the Namespace in which you want the Installer to install, or update the component. |
 | **spec.components.release** | **NO** | Provides the name of the Helm release. The default parameter is the component name. |
+
+
+## Related resources and components
+
+These components use this CR:
+
+| Component   |   Description |
+|:----------:|:------|
+| Installer  |  The CR triggers the installer to install, update or delete of the specified components. |

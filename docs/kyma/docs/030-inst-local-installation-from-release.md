@@ -48,6 +48,8 @@ You can install Kyma either with all core subcomponents or only with the selecte
 
 > **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube.
 
+> **NOTE:** Logging and Monitoring subcomponents are not included by default when you install Kyma on Minikube. You can install them using the instructions provided [here](../../../resources/README.md).
+
 To install Kyma, follow these steps:
 
 1. Change the working directory to `installation`:
@@ -140,6 +142,26 @@ See the example of the website address:
 ```
 http://192.168.64.44:30000
 ```
+
+## Enable Horizontal Pod Autoscaler (HPA)
+
+By default, the Horizontal Pod Autoscaler is not enabled in your local Kyma installation, so you need to enable it manually.
+
+Kyma uses the autoscaling/v1 stable version, which only provides support for CPU autoscaling. Once enabled, HPA automatically scales the number of lambda function Pods based on observed CPU utilization.
+
+>**NOTE:** The autoscaling/v1 version does not support custom metrics. To use such metrics, you need the autoscaling/v2beta2 version.
+
+To enable Horizontal Pod Autoscaler, follow these steps:
+
+1. Enable the metrics server for resource metrics by running the following command:
+    ```
+    $ minikube addons enable metrics-server
+    ```
+
+2. Verify if the metrics server is active by checking the list of addons:
+    ```
+    $ minikube addons list
+    ```
 
 ## Troubleshooting
 

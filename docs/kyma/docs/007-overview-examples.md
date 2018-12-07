@@ -18,4 +18,4 @@ Follow the links to example code and content sources, and try them on your own.
 | [Alert Rules](https://github.com/kyma-project/examples/blob/master/monitoring-alert-rules/README.md) | Configure alert rules in Kyma.  | Prometheus |
 | [Custom Metrics in Kyma](https://github.com/kyma-project/examples/blob/master/monitoring-custom-metrics/README.md) | Expose custom metrics in Kyma.  | Go, Prometheus |
 | [Event Email Service](https://github.com/kyma-project/examples/blob/master/event-email-service/README.md) | Send an automated email upon receiving an Event.  | NodeJS |
-| [Tracing](https://github.com/kyma-project/examples/blob/master/example-tracing/README.md) | Configure tracing for a service in Kyma. | Go |
+| [Tracing](https://github.com/kyma-project/examples/blob/master/tracing/README.md) | Configure tracing for a service in Kyma. | Go |
