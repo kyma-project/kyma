@@ -43,7 +43,7 @@ func main() {
 
 		log.Printf("\n>>> Building image %s in %s...\n\n", imageCfg.Name, imageCfg.BuildDirectory)
 		buildOut, err := docker.Build(imageCfg)
-		fmt.Print(buildOut)
+		log.Print(buildOut)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -55,7 +55,7 @@ func main() {
 
 		log.Printf("\n>>> Pushing image %s...\n\n", imageCfg.Name)
 		pushOut, err := docker.Push(imageCfg.Name)
-		fmt.Print(pushOut)
+		log.Print(pushOut)
 		if err != nil {
 			log.Fatal(err)
 		}

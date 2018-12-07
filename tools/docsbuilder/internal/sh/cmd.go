@@ -2,12 +2,14 @@ package sh
 
 import "os/exec"
 
+// RunInDir runs given command in shell in specific directory
 func RunInDir(command, dir string) (string, error) {
 	cmd := execCommand(command)
 	cmd.Dir = dir
 	return strOutput(cmd)
 }
 
+// Run runs given command in shell
 func Run(command string) (string, error) {
 	cmd := execCommand(command)
 	return strOutput(cmd)

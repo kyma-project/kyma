@@ -2,9 +2,9 @@
 
 ## Overview
 
-This project is used for building and pushing documentation-related Docker images. They are built from sources (`/docs` directory on this repository).
+This project is used for building and pushing documentation-related Docker images. The images are built from documentation sources which are located in the `docs` directory in this repository.
 
-> **Note:** This is a temporary solution, before migration to the new Documentation Delivery concept. 
+> **NOTE:** This is a temporary solution, before the migration to the new Documentation Delivery concept. 
 
 ## Prerequisites
 
@@ -23,6 +23,7 @@ dep ensure -vendor-only
 ```
 
 ### Run
+To run this tool, run the following command:
 
 ```bash
 

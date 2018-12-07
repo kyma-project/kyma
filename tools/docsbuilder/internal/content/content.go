@@ -8,11 +8,13 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// Content represents a single document topic
 type Content struct {
 	Name      string `yaml:"name"`
 	Directory string `yaml:"directory"`
 }
 
+// Read reads documents from yaml file
 func Read(path string) ([]Content, error) {
 	yamlFile, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -28,6 +30,7 @@ func Read(path string) ([]Content, error) {
 	return contentSlice, nil
 }
 
+// ConstructPath constructs path for a single document topic
 func ConstructPath(content Content, contentDirPath string) string {
 	contentDir := content.Name
 	if content.Directory != "" {

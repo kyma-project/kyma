@@ -2,16 +2,13 @@ IMG_DIR = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/
 TAG = $(DOCKER_TAG)
 DOCS_BUILDER_PATH=../tools/docsbuilder
 
-ci-pr: resolve-tool validate-tool build-and-push-images
-ci-master: resolve-tool validate-tool build-and-push-images
-ci-release: resolve-tool validate-tool build-and-push-images
+ci-pr: resolve-tool build-and-push-images
+ci-master: resolve-tool build-and-push-images
+ci-release: resolve-tool build-and-push-images
 
 resolve-tool:
 	cd ${DOCS_BUILDER_PATH} && \
 	dep ensure -v -vendor-only
-validate-tool:
-	cd ${DOCS_BUILDER_PATH} && \
-	./before-commit.sh ci
 build-and-push-images:
 	cd ${DOCS_BUILDER_PATH} && \
 	APP_DOCKER_IMAGE_PREFIX=${IMG_DIR} \
