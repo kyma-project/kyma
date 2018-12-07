@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	istio "github.com/kyma-project/kyma/components/metadata-service/pkg/apis/istio/v1alpha2"
-	remoteenv "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	application "github.com/kyma-project/kyma/components/remote-environment-controller/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/require"
 	v1core "k8s.io/api/core/v1"
 )
@@ -84,10 +84,10 @@ func CheckK8sChecknothing(t *testing.T, checknothing *istio.Checknothing, name s
 	checkLabels(t, labels, checknothing.Labels)
 }
 
-func CheckK8sRemoteEnvironment(t *testing.T, re *remoteenv.RemoteEnvironment, name string, expectedServiceData ServiceData) {
+func CheckK8sApplication(t *testing.T, re *application.Application, name string, expectedServiceData ServiceData) {
 	require.Equal(t, name, re.Name)
 
-	reService := findServiceInRemoteEnv(re.Spec.Services, expectedServiceData.ServiceId)
+	reService := findServiceInApp(re.Spec.Services, expectedServiceData.ServiceId)
 	require.NotNil(t, reService)
 
 	require.Equal(t, expectedServiceData.ServiceId, reService.ID)
@@ -114,8 +114,8 @@ func CheckK8sRemoteEnvironment(t *testing.T, re *remoteenv.RemoteEnvironment, na
 	}
 }
 
-func CheckK8sRemoteEnvironmentNotContainsService(t *testing.T, re *remoteenv.RemoteEnvironment, serviceId string) {
-	reService := findServiceInRemoteEnv(re.Spec.Services, serviceId)
+func CheckK8sApplicationNotContainsService(t *testing.T, re *application.Application, serviceId string) {
+	reService := findServiceInApp(re.Spec.Services, serviceId)
 	require.Nil(t, reService)
 }
 
@@ -129,7 +129,7 @@ func makeMatchExpression(name, namespace string) string {
 	return `(destination.service.host == "` + name + "." + namespace + `.svc.cluster.local") && (source.labels["` + name + `"] != "true")`
 }
 
-func findServiceInRemoteEnv(reServices []remoteenv.Service, searchedID string) *remoteenv.Service {
+func findServiceInApp(reServices []application.Service, searchedID string) *application.Service {
 	for _, e := range reServices {
 		if e.ID == searchedID {
 			return &e
@@ -138,7 +138,7 @@ func findServiceInRemoteEnv(reServices []remoteenv.Service, searchedID string) *
 	return nil
 }
 
-func findEntryOfType(entries []remoteenv.Entry, typeName string) *remoteenv.Entry {
+func findEntryOfType(entries []application.Entry, typeName string) *application.Entry {
 	for _, e := range entries {
 		if e.Type == typeName {
 			return &e
