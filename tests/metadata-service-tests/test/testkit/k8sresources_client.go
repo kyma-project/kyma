@@ -3,8 +3,8 @@ package testkit
 import (
 	"github.com/kyma-project/kyma/components/metadata-service/pkg/apis/istio/v1alpha2"
 	istioclient "github.com/kyma-project/kyma/components/metadata-service/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/client/clientset/versioned"
 	v1core "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -18,17 +18,17 @@ type K8sResourcesClient interface {
 	GetDenier(name string, options v1.GetOptions) (*v1alpha2.Denier, error)
 	GetRule(name string, options v1.GetOptions) (*v1alpha2.Rule, error)
 	GetChecknothing(name string, options v1.GetOptions) (*v1alpha2.Checknothing, error)
-	GetRemoteEnvironmentServices(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error)
-	CreateDummyRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error)
-	DeleteRemoteEnvironment(name string, options *v1.DeleteOptions) error
+	GetApplicationServices(name string, options v1.GetOptions) (*v1alpha1.Application, error)
+	CreateDummyApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error)
+	DeleteApplication(name string, options *v1.DeleteOptions) error
 }
 
 type k8sResourcesClient struct {
-	coreClient              *kubernetes.Clientset
-	istioClient             *istioclient.Clientset
-	remoteEnvironmentClient *versioned.Clientset
-	namespace               string
-	remoteEnvironmentName   string
+	coreClient        *kubernetes.Clientset
+	istioClient       *istioclient.Clientset
+	applicationClient *versioned.Clientset
+	namespace         string
+	applicationName   string
 }
 
 func NewK8sInClusterResourcesClient(namespace string) (K8sResourcesClient, error) {
@@ -46,7 +46,7 @@ func initClient(k8sConfig *restclient.Config, namespace string) (K8sResourcesCli
 		return nil, err
 	}
 
-	remoteEnvironmentClientset, err := versioned.NewForConfig(k8sConfig)
+	applicationClientset, err := versioned.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -57,10 +57,10 @@ func initClient(k8sConfig *restclient.Config, namespace string) (K8sResourcesCli
 	}
 
 	return &k8sResourcesClient{
-		coreClient:              coreClientset,
-		istioClient:             istioClientset,
-		remoteEnvironmentClient: remoteEnvironmentClientset,
-		namespace:               namespace,
+		coreClient:        coreClientset,
+		istioClient:       istioClientset,
+		applicationClient: applicationClientset,
+		namespace:         namespace,
 	}, nil
 }
 
@@ -84,22 +84,22 @@ func (c *k8sResourcesClient) GetChecknothing(name string, options v1.GetOptions)
 	return c.istioClient.IstioV1alpha2().Checknothings(c.namespace).Get(name, options)
 }
 
-func (c *k8sResourcesClient) GetRemoteEnvironmentServices(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error) {
-	return c.remoteEnvironmentClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Get(name, options)
+func (c *k8sResourcesClient) GetApplicationServices(name string, options v1.GetOptions) (*v1alpha1.Application, error) {
+	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Get(name, options)
 }
 
-func (c *k8sResourcesClient) CreateDummyRemoteEnvironment(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error) {
-	dummyRe := &v1alpha1.RemoteEnvironment{
+func (c *k8sResourcesClient) CreateDummyApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error) {
+	dummyApp := &v1alpha1.Application{
 		TypeMeta:   v1.TypeMeta{Kind: "RemoteEnvironment", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: name},
-		Spec: v1alpha1.RemoteEnvironmentSpec{
+		Spec: v1alpha1.ApplicationSpec{
 			Services: []v1alpha1.Service{},
 		},
 	}
 
-	return c.remoteEnvironmentClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Create(dummyRe)
+	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Create(dummyApp)
 }
 
-func (c *k8sResourcesClient) DeleteRemoteEnvironment(name string, options *v1.DeleteOptions) error {
-	return c.remoteEnvironmentClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Delete(name, options)
+func (c *k8sResourcesClient) DeleteApplication(name string, options *v1.DeleteOptions) error {
+	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Delete(name, options)
 }

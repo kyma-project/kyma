@@ -23,10 +23,10 @@ func TestK8sResources(t *testing.T) {
 	k8sResourcesClient, err := testkit.NewK8sInClusterResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	dummyRE, err := k8sResourcesClient.CreateDummyRemoteEnvironment("dummy-re", v1.GetOptions{})
+	dummyApp, err := k8sResourcesClient.CreateDummyApplication("dummy-app", v1.GetOptions{})
 	require.NoError(t, err)
 
-	metadataServiceClient := testkit.NewMetadataServiceClient(config.MetadataServiceUrl + "/" + dummyRE.Name + "/v1/metadata/services")
+	metadataServiceClient := testkit.NewMetadataServiceClient(config.MetadataServiceUrl + "/" + dummyApp.Name + "/v1/metadata/services")
 
 	t.Run("when creating service only with OAuth API", func(t *testing.T) {
 
@@ -53,9 +53,9 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyRE.Name + "-" + serviceId
+		resourceName := "re-" + dummyApp.Name + "-" + serviceId
 
-		expectedLabels := map[string]string{"re": dummyRE.Name, "serviceId": serviceId}
+		expectedLabels := map[string]string{"re": dummyApp.Name, "serviceId": serviceId}
 
 		time.Sleep(crPropagationWaitTime * time.Second)
 
@@ -95,8 +95,8 @@ func TestK8sResources(t *testing.T) {
 			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
 		})
 
-		t.Run("should add service to remote environment custom resource", func(t *testing.T) {
-			remoteEnvironment, err := k8sResourcesClient.GetRemoteEnvironmentServices(dummyRE.Name, v1.GetOptions{})
+		t.Run("should add service to application custom resource", func(t *testing.T) {
+			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
 
 			expectedServiceData := testkit.ServiceData{
@@ -112,7 +112,7 @@ func TestK8sResources(t *testing.T) {
 				HasEvents:           false,
 			}
 
-			testkit.CheckK8sRemoteEnvironment(t, remoteEnvironment, dummyRE.Name, expectedServiceData)
+			testkit.CheckK8sApplication(t, application, dummyApp.Name, expectedServiceData)
 		})
 
 		// clean up
@@ -143,9 +143,9 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyRE.Name + "-" + serviceId
+		resourceName := "re-" + dummyApp.Name + "-" + serviceId
 
-		expectedLabels := map[string]string{"re": dummyRE.Name, "serviceId": serviceId}
+		expectedLabels := map[string]string{"re": dummyApp.Name, "serviceId": serviceId}
 
 		time.Sleep(crPropagationWaitTime * time.Second)
 
@@ -185,8 +185,8 @@ func TestK8sResources(t *testing.T) {
 			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
 		})
 
-		t.Run("should add service to remote environment custom resource", func(t *testing.T) {
-			remoteEnvironment, err := k8sResourcesClient.GetRemoteEnvironmentServices(dummyRE.Name, v1.GetOptions{})
+		t.Run("should add service to application custom resource", func(t *testing.T) {
+			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
 
 			expectedServiceData := testkit.ServiceData{
@@ -202,7 +202,7 @@ func TestK8sResources(t *testing.T) {
 				HasEvents:           false,
 			}
 
-			testkit.CheckK8sRemoteEnvironment(t, remoteEnvironment, dummyRE.Name, expectedServiceData)
+			testkit.CheckK8sApplication(t, application, dummyApp.Name, expectedServiceData)
 		})
 
 		// clean up
@@ -226,7 +226,7 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyRE.Name + "-" + serviceId
+		resourceName := "re-" + dummyApp.Name + "-" + serviceId
 
 		time.Sleep(crPropagationWaitTime * time.Second)
 
@@ -261,8 +261,8 @@ func TestK8sResources(t *testing.T) {
 			require.True(t, k8serrors.IsNotFound(err))
 		})
 
-		t.Run("should add service to remote environment custom resource", func(t *testing.T) {
-			remoteEnvironment, err := k8sResourcesClient.GetRemoteEnvironmentServices(dummyRE.Name, v1.GetOptions{})
+		t.Run("should add service to application custom resource", func(t *testing.T) {
+			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
 
 			expectedServiceData := testkit.ServiceData{
@@ -274,7 +274,7 @@ func TestK8sResources(t *testing.T) {
 				HasEvents:           true,
 			}
 
-			testkit.CheckK8sRemoteEnvironment(t, remoteEnvironment, dummyRE.Name, expectedServiceData)
+			testkit.CheckK8sApplication(t, application, dummyApp.Name, expectedServiceData)
 		})
 
 		// clean up
@@ -306,9 +306,9 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyRE.Name + "-" + serviceId
+		resourceName := "re-" + dummyApp.Name + "-" + serviceId
 
-		expectedLabels := map[string]string{"re": dummyRE.Name, "serviceId": serviceId}
+		expectedLabels := map[string]string{"re": dummyApp.Name, "serviceId": serviceId}
 
 		updatedServiceDefinition := testkit.ServiceDetails{
 			Name:        "updated test service",
@@ -372,8 +372,8 @@ func TestK8sResources(t *testing.T) {
 			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
 		})
 
-		t.Run("should update service inside remote environment custom resource", func(t *testing.T) {
-			remoteEnvironment, err := k8sResourcesClient.GetRemoteEnvironmentServices(dummyRE.Name, v1.GetOptions{})
+		t.Run("should update service inside application custom resource", func(t *testing.T) {
+			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
 
 			expectedServiceData := testkit.ServiceData{
@@ -389,7 +389,7 @@ func TestK8sResources(t *testing.T) {
 				HasEvents:           true,
 			}
 
-			testkit.CheckK8sRemoteEnvironment(t, remoteEnvironment, dummyRE.Name, expectedServiceData)
+			testkit.CheckK8sApplication(t, application, dummyApp.Name, expectedServiceData)
 		})
 
 		// clean up
@@ -421,7 +421,7 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyRE.Name + "-" + serviceId
+		resourceName := "re-" + dummyApp.Name + "-" + serviceId
 
 		updatedServiceDefinition := testkit.ServiceDetails{
 			Name:        "updated test service",
@@ -469,8 +469,8 @@ func TestK8sResources(t *testing.T) {
 			require.True(t, k8serrors.IsNotFound(err))
 		})
 
-		t.Run("should update service inside remote environment custom resource", func(t *testing.T) {
-			remoteEnvironment, err := k8sResourcesClient.GetRemoteEnvironmentServices(dummyRE.Name, v1.GetOptions{})
+		t.Run("should update service inside application custom resource", func(t *testing.T) {
+			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
 
 			expectedServiceData := testkit.ServiceData{
@@ -482,7 +482,7 @@ func TestK8sResources(t *testing.T) {
 				HasEvents:           true,
 			}
 
-			testkit.CheckK8sRemoteEnvironment(t, remoteEnvironment, dummyRE.Name, expectedServiceData)
+			testkit.CheckK8sApplication(t, application, dummyApp.Name, expectedServiceData)
 		})
 
 		// clean up
@@ -506,9 +506,9 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyRE.Name + "-" + serviceId
+		resourceName := "re-" + dummyApp.Name + "-" + serviceId
 
-		expectedLabels := map[string]string{"re": dummyRE.Name, "serviceId": serviceId}
+		expectedLabels := map[string]string{"re": dummyApp.Name, "serviceId": serviceId}
 
 		updatedServiceDefinition := testkit.ServiceDetails{
 			Name:        "updated test service",
@@ -569,8 +569,8 @@ func TestK8sResources(t *testing.T) {
 			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
 		})
 
-		t.Run("should update service inside remote environment custom resource", func(t *testing.T) {
-			remoteEnvironment, err := k8sResourcesClient.GetRemoteEnvironmentServices(dummyRE.Name, v1.GetOptions{})
+		t.Run("should update service inside application custom resource", func(t *testing.T) {
+			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
 
 			expectedServiceData := testkit.ServiceData{
@@ -586,7 +586,7 @@ func TestK8sResources(t *testing.T) {
 				HasEvents:           false,
 			}
 
-			testkit.CheckK8sRemoteEnvironment(t, remoteEnvironment, dummyRE.Name, expectedServiceData)
+			testkit.CheckK8sApplication(t, application, dummyApp.Name, expectedServiceData)
 		})
 
 		// clean up
@@ -610,9 +610,9 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyRE.Name + "-" + serviceId
+		resourceName := "re-" + dummyApp.Name + "-" + serviceId
 
-		expectedLabels := map[string]string{"re": dummyRE.Name, "serviceId": serviceId}
+		expectedLabels := map[string]string{"re": dummyApp.Name, "serviceId": serviceId}
 
 		updatedServiceDefinition := testkit.ServiceDetails{
 			Name:        "updated test service",
@@ -672,8 +672,8 @@ func TestK8sResources(t *testing.T) {
 			testkit.CheckK8sChecknothing(t, checknothing, resourceName, expectedLabels)
 		})
 
-		t.Run("should update service inside remote environment custom resource", func(t *testing.T) {
-			remoteEnvironment, err := k8sResourcesClient.GetRemoteEnvironmentServices(dummyRE.Name, v1.GetOptions{})
+		t.Run("should update service inside application custom resource", func(t *testing.T) {
+			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
 
 			expectedServiceData := testkit.ServiceData{
@@ -689,7 +689,7 @@ func TestK8sResources(t *testing.T) {
 				HasEvents:           false,
 			}
 
-			testkit.CheckK8sRemoteEnvironment(t, remoteEnvironment, dummyRE.Name, expectedServiceData)
+			testkit.CheckK8sApplication(t, application, dummyApp.Name, expectedServiceData)
 		})
 
 		// clean up
@@ -724,7 +724,7 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyRE.Name + "-" + serviceId
+		resourceName := "re-" + dummyApp.Name + "-" + serviceId
 
 		statusCode, err = metadataServiceClient.DeleteService(t, serviceId)
 		require.NoError(t, err)
@@ -763,13 +763,13 @@ func TestK8sResources(t *testing.T) {
 			require.True(t, k8serrors.IsNotFound(err))
 		})
 
-		t.Run("should remove service from remote environment custom resource", func(t *testing.T) {
-			remoteEnvironment, err := k8sResourcesClient.GetRemoteEnvironmentServices(dummyRE.Name, v1.GetOptions{})
+		t.Run("should remove service from application custom resource", func(t *testing.T) {
+			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
-			testkit.CheckK8sRemoteEnvironmentNotContainsService(t, remoteEnvironment, serviceId)
+			testkit.CheckK8sApplicationNotContainsService(t, application, serviceId)
 		})
 	})
 
-	err = k8sResourcesClient.DeleteRemoteEnvironment(dummyRE.Name, &v1.DeleteOptions{})
+	err = k8sResourcesClient.DeleteApplication(dummyApp.Name, &v1.DeleteOptions{})
 	require.NoError(t, err)
 }
