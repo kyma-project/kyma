@@ -137,6 +137,7 @@ spec:
                 --initial-cluster-token etcd-cluster-1 \
                 --initial-cluster ${PEERS} \
                 --initial-cluster-state ${STATE} \
+                --snapshot-count=10000 \
                 --listen-metrics-urls http://${IP}:2381 \
                 --data-dir /var/run/etcd/default.etcd
             else
@@ -149,6 +150,7 @@ spec:
                 --initial-cluster-token etcd-cluster-1 \
                 --initial-cluster ${PEERS} \
                 --initial-cluster-state ${STATE} \
+                --snapshot-count=10000 \
                 --data-dir /var/run/etcd/default.etcd
             fi
 
