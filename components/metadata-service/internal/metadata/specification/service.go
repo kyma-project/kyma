@@ -30,11 +30,15 @@ type Service interface {
 
 type specService struct {
 	minioService minio.Service
+	httpClient   http.Client
 }
 
 func NewSpecService(minioService minio.Service) Service {
 	return &specService{
 		minioService: minioService,
+		httpClient: http.Client{
+			Timeout: specRequestTimeout,
+		},
 	}
 }
 
@@ -51,7 +55,7 @@ func (svc *specService) PutSpec(serviceDef *model.ServiceDefinition, gatewayUrl 
 	var err apperrors.AppError
 
 	if serviceDef.Api != nil {
-		apiSpec, err = processAPISpecification(serviceDef.Api, gatewayUrl)
+		apiSpec, err = svc.processAPISpecification(serviceDef.Api, gatewayUrl)
 		if err != nil {
 			return err
 		}
@@ -75,13 +79,13 @@ func (svc *specService) insertSpecs(id string, docs []byte, apiSpec []byte, even
 	return nil
 }
 
-func processAPISpecification(api *model.API, gatewayUrl string) ([]byte, apperrors.AppError) {
+func (svc *specService) processAPISpecification(api *model.API, gatewayUrl string) ([]byte, apperrors.AppError) {
 	apiSpec := api.Spec
 
 	var err apperrors.AppError
 
 	if shouldFetchSpec(api) {
-		apiSpec, err = fetchSpec(api)
+		apiSpec, err = svc.fetchSpec(api)
 		if err != nil {
 			return nil, err
 		}
@@ -109,13 +113,13 @@ func isNilOrEmpty(array []byte) bool {
 	return array == nil || len(array) == 0
 }
 
-func fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
+func (svc *specService) fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
 	specUrl, apperr := determineSpecUrl(api)
 	if apperr != nil {
 		return nil, apperr
 	}
 
-	response, apperr := requestAPISpec(specUrl)
+	response, apperr := svc.requestAPISpec(specUrl)
 	if apperr != nil {
 		return nil, apperr
 	}
@@ -148,17 +152,13 @@ func determineSpecUrl(api *model.API) (string, apperrors.AppError) {
 	return specUrl.String(), nil
 }
 
-func requestAPISpec(specUrl string) (*http.Response, apperrors.AppError) {
+func (svc *specService) requestAPISpec(specUrl string) (*http.Response, apperrors.AppError) {
 	req, err := http.NewRequest(http.MethodGet, specUrl, nil)
 	if err != nil {
 		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())
 	}
 
-	httpClient := http.Client{
-		Timeout: specRequestTimeout,
-	}
-
-	response, err := httpClient.Do(req)
+	response, err := svc.httpClient.Do(req)
 	if err != nil {
 		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed, %s", specUrl, err.Error())
 	}
