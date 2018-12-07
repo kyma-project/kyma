@@ -36,7 +36,7 @@ metadata:
 spec:
   sourceId: "dummy"
 ---
-apiVersion: eventing.kyma-project.io/v1alpha1
+apiVersion: eventing.kyma.cx/v1alpha1
 kind: Subscription
 metadata:
   namespace: kubeless-test
