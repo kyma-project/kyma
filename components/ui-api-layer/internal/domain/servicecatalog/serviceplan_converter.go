@@ -4,11 +4,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
+	"bytes"
+
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/resource"
 	"github.com/pkg/errors"
-	"bytes"
 )
 
 type servicePlanConverter struct{}

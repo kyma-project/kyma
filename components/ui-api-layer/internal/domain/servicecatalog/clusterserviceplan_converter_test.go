@@ -76,7 +76,20 @@ func TestClusterServicePlanConverter_ToGQL(t *testing.T) {
 		assert.Equal(t, &expected, result)
 	})
 
-	t.Run("CreateParameterSchema with empty ref", func(t *testing.T) {
+	t.Run("Empty", func(t *testing.T) {
+		converter := &clusterServicePlanConverter{}
+		_, err := converter.ToGQL(&v1beta1.ClusterServicePlan{})
+		require.NoError(t, err)
+	})
+
+	t.Run("Nil", func(t *testing.T) {
+		converter := &clusterServicePlanConverter{}
+		item, err := converter.ToGQL(nil)
+		require.NoError(t, err)
+		assert.Nil(t, item)
+	})
+
+	t.Run("CreateParameterSchema with properties", func(t *testing.T) {
 		converter := &clusterServicePlanConverter{}
 		parameterSchema := map[string]interface{}{
 			"additionalProperties": false,
@@ -93,11 +106,39 @@ func TestClusterServicePlanConverter_ToGQL(t *testing.T) {
 		displayName := "ExampleDisplayName"
 		expected := gqlschema.ClusterServicePlan{
 			Name: "ExampleName",
-			RelatedClusterServiceClassName:       "serviceClassRef",
-			DisplayName:                   &displayName,
-			ExternalName:                  "ExampleExternalName",
-			InstanceCreateParameterSchema: parameterSchemaJSON,
-			BindingCreateParameterSchema:  parameterSchemaJSON,
+			RelatedClusterServiceClassName: "serviceClassRef",
+			DisplayName:                    &displayName,
+			ExternalName:                   "ExampleExternalName",
+			InstanceCreateParameterSchema:  parameterSchemaJSON,
+			BindingCreateParameterSchema:   parameterSchemaJSON,
+		}
+
+		result, err := converter.ToGQL(clusterServicePlan)
+		assert.Nil(t, err)
+
+		assert.Equal(t, &expected, result)
+	})
+
+	t.Run("CreateParameterSchema with ref", func(t *testing.T) {
+		converter := &clusterServicePlanConverter{}
+		parameterSchema := map[string]interface{}{
+			"additionalProperties": false,
+			"$ref":                 "reference",
+		}
+
+		parameterSchemaJSON := new(gqlschema.JSON)
+		err := parameterSchemaJSON.UnmarshalGQL(parameterSchema)
+		assert.Nil(t, err)
+
+		clusterServicePlan := fixClusterServicePlan(t, parameterSchema)
+		displayName := "ExampleDisplayName"
+		expected := gqlschema.ClusterServicePlan{
+			Name: "ExampleName",
+			RelatedClusterServiceClassName: "serviceClassRef",
+			DisplayName:                    &displayName,
+			ExternalName:                   "ExampleExternalName",
+			InstanceCreateParameterSchema:  parameterSchemaJSON,
+			BindingCreateParameterSchema:   parameterSchemaJSON,
 		}
 
 		result, err := converter.ToGQL(clusterServicePlan)
@@ -110,7 +151,7 @@ func TestClusterServicePlanConverter_ToGQL(t *testing.T) {
 		converter := &clusterServicePlanConverter{}
 		parameterSchema := map[string]interface{}{
 			"additionalProperties": false,
-			"$ref": "reference",
+			"properties":           map[string]interface{}{},
 		}
 
 		parameterSchemaJSON := new(gqlschema.JSON)
@@ -121,11 +162,39 @@ func TestClusterServicePlanConverter_ToGQL(t *testing.T) {
 		displayName := "ExampleDisplayName"
 		expected := gqlschema.ClusterServicePlan{
 			Name: "ExampleName",
-			RelatedClusterServiceClassName:       "serviceClassRef",
-			DisplayName:                   &displayName,
-			ExternalName:                  "ExampleExternalName",
-			InstanceCreateParameterSchema: parameterSchemaJSON,
-			BindingCreateParameterSchema:  parameterSchemaJSON,
+			RelatedClusterServiceClassName: "serviceClassRef",
+			DisplayName:                    &displayName,
+			ExternalName:                   "ExampleExternalName",
+			InstanceCreateParameterSchema:  nil,
+			BindingCreateParameterSchema:   nil,
+		}
+
+		result, err := converter.ToGQL(clusterServicePlan)
+		assert.Nil(t, err)
+
+		assert.Equal(t, &expected, result)
+	})
+
+	t.Run("CreateParameterSchema with empty ref", func(t *testing.T) {
+		converter := &clusterServicePlanConverter{}
+		parameterSchema := map[string]interface{}{
+			"additionalProperties": false,
+			"$ref":                 "",
+		}
+
+		parameterSchemaJSON := new(gqlschema.JSON)
+		err := parameterSchemaJSON.UnmarshalGQL(parameterSchema)
+		assert.Nil(t, err)
+
+		clusterServicePlan := fixClusterServicePlan(t, parameterSchema)
+		displayName := "ExampleDisplayName"
+		expected := gqlschema.ClusterServicePlan{
+			Name: "ExampleName",
+			RelatedClusterServiceClassName: "serviceClassRef",
+			DisplayName:                    &displayName,
+			ExternalName:                   "ExampleExternalName",
+			InstanceCreateParameterSchema:  nil,
+			BindingCreateParameterSchema:   nil,
 		}
 
 		result, err := converter.ToGQL(clusterServicePlan)
@@ -138,8 +207,8 @@ func TestClusterServicePlanConverter_ToGQL(t *testing.T) {
 		converter := &clusterServicePlanConverter{}
 		parameterSchema := map[string]interface{}{
 			"additionalProperties": false,
-			"properties": map[string]interface{}{},
-			"$ref": "",
+			"properties":           map[string]interface{}{},
+			"$ref":                 "",
 		}
 
 		parameterSchemaJSON := new(gqlschema.JSON)
@@ -150,30 +219,17 @@ func TestClusterServicePlanConverter_ToGQL(t *testing.T) {
 		displayName := "ExampleDisplayName"
 		expected := gqlschema.ClusterServicePlan{
 			Name: "ExampleName",
-			RelatedClusterServiceClassName:       "serviceClassRef",
-			DisplayName:                   &displayName,
-			ExternalName:                  "ExampleExternalName",
-			InstanceCreateParameterSchema: nil,
-			BindingCreateParameterSchema:  nil,
+			RelatedClusterServiceClassName: "serviceClassRef",
+			DisplayName:                    &displayName,
+			ExternalName:                   "ExampleExternalName",
+			InstanceCreateParameterSchema:  nil,
+			BindingCreateParameterSchema:   nil,
 		}
 
 		result, err := converter.ToGQL(clusterServicePlan)
 		assert.Nil(t, err)
 
 		assert.Equal(t, &expected, result)
-	})
-
-	t.Run("Empty", func(t *testing.T) {
-		converter := &clusterServicePlanConverter{}
-		_, err := converter.ToGQL(&v1beta1.ClusterServicePlan{})
-		require.NoError(t, err)
-	})
-
-	t.Run("Nil", func(t *testing.T) {
-		converter := &clusterServicePlanConverter{}
-		item, err := converter.ToGQL(nil)
-		require.NoError(t, err)
-		assert.Nil(t, item)
 	})
 }
 
