@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/resource"
 	"github.com/pkg/errors"
+	"bytes"
 )
 
 type servicePlanConverter struct{}
@@ -32,7 +33,9 @@ func (p *servicePlanConverter) ToGQL(item *v1beta1.ServicePlan) (*gqlschema.Serv
 		if err != nil {
 			return nil, errors.Wrapf(err, "while unpacking service instance create parameter schema from ServicePlan [%s]", item.Name)
 		}
-		instanceCreateParameterSchema = &unpackedSchema
+		if unpackedSchema != nil && len(unpackedSchema) != 0 {
+			instanceCreateParameterSchema = &unpackedSchema
+		}
 	}
 	var bindingCreateParameterSchema *gqlschema.JSON
 	if item.Spec.ServiceBindingCreateParameterSchema != nil {
@@ -40,7 +43,9 @@ func (p *servicePlanConverter) ToGQL(item *v1beta1.ServicePlan) (*gqlschema.Serv
 		if err != nil {
 			return nil, errors.Wrapf(err, "while unpacking service binding create parameter schema from ServicePlan [%s]", item.Name)
 		}
-		bindingCreateParameterSchema = &unpackedSchema
+		if unpackedSchema != nil && len(unpackedSchema) != 0 {
+			bindingCreateParameterSchema = &unpackedSchema
+		}
 	}
 
 	displayName := resource.ToStringPtr(externalMetadata["displayName"])
@@ -92,12 +97,28 @@ func (p *servicePlanConverter) unpackCreateParameterSchema(raw []byte) (gqlschem
 }
 
 func (p *servicePlanConverter) extractCreateSchema(raw []byte) (map[string]interface{}, error) {
+	raw = bytes.Trim(raw, "\x00")
 	extracted := make(map[string]interface{})
 
 	err := json.Unmarshal(raw, &extracted)
 	if err != nil {
 		return nil, errors.Wrap(err, "while extracting creation parameter schema")
 	}
+	if p.isEmptyCreateParameterSchema(extracted) {
+		return nil, nil
+	}
 
 	return extracted, nil
+}
+
+func (p *servicePlanConverter) isEmptyCreateParameterSchema(schema map[string]interface{}) bool {
+	properties := schema["properties"]
+	if properties != nil && len(properties.(map[string]interface{})) != 0 {
+		return false
+	}
+	ref := schema["$ref"]
+	if ref != nil && ref.(string) != "" {
+		return false
+	}
+	return true
 }
