@@ -91,14 +91,16 @@ func (p *servicePlanConverter) unpackCreateParameterSchema(raw []byte) (gqlschem
 	decoded := make([]byte, base64.StdEncoding.DecodedLen(len(raw)))
 	_, err := base64.StdEncoding.Decode(decoded, raw)
 	if err != nil {
-		return p.extractCreateSchema(raw)
+		return p.extractCreateParameterSchema(raw)
 	}
 
-	return p.extractCreateSchema(decoded)
+	// We need to trim all null characters, because json.Unmarshal is failing when we give
+	// data of undesirable length to base64.StdEncoding.DecodedLen function
+	decoded = bytes.Trim(decoded, "\x00")
+	return p.extractCreateParameterSchema(decoded)
 }
 
-func (p *servicePlanConverter) extractCreateSchema(raw []byte) (map[string]interface{}, error) {
-	raw = bytes.Trim(raw, "\x00")
+func (p *servicePlanConverter) extractCreateParameterSchema(raw []byte) (map[string]interface{}, error) {
 	extracted := make(map[string]interface{})
 
 	err := json.Unmarshal(raw, &extracted)
@@ -113,13 +115,15 @@ func (p *servicePlanConverter) extractCreateSchema(raw []byte) (map[string]inter
 }
 
 func (p *servicePlanConverter) isEmptyCreateParameterSchema(schema map[string]interface{}) bool {
-	properties := schema["properties"]
-	if properties != nil && len(properties.(map[string]interface{})) != 0 {
-		return false
+	if schema["properties"] != nil {
+		if properties, ok := schema["properties"].(map[string]interface{}); ok && len(properties) != 0 {
+			return false
+		}
 	}
-	ref := schema["$ref"]
-	if ref != nil && ref.(string) != "" {
-		return false
+	if schema["$ref"] != nil {
+		if ref, ok := schema["$ref"].(string); ok && ref != "" {
+			return false
+		}
 	}
 	return true
 }
