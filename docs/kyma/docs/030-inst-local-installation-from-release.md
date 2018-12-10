@@ -165,7 +165,7 @@ To enable Horizontal Pod Autoscaler, follow these steps:
 
 ## Troubleshooting
 
-If the installer does not respond as expected, check the installation status using the `is-installed.sh` script with the `--verbose` flag added. Run:
+If the Installer does not respond as expected, check the installation status using the `is-installed.sh` script with the `--verbose` flag added. Run:
 ```
 scripts/is-installed.sh --verbose
 ```
