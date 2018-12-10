@@ -10,7 +10,7 @@ metadata:
 spec:
   subjects:
   - properties:
-      request.auth.claims[email]: 'admin@kyma.cx' # TODO: Pass email from global variables
+      request.auth.token[groups]: 'kyma-admin'
   roleRef:
     kind: ServiceRole
     name: "graphql-admin-view"

@@ -41,3 +41,12 @@ spec:
       - '{topics}'
       - '{eventActivations}'
       - '{limitRanges}'
+      # Ugly workarounds for a HUGE number of filter bugs
+      - '{topics,typename}' # docs
+      - '{clusterServiceClasses,serviceClasses}' # catalog
+      - '{clusterServiceClass,typename}' # catalog
+      - '{serviceClass,typename}' # catalog
+      - '{serviceBrokers,typename}' # brokers
+      - '{default,defaultRequest,limitRanges}' # resources
+      - '{requests,resourceQuotas}' # resources
+      - '{}'
