@@ -15,7 +15,7 @@ Kyma comes configured with default Namespaces dedicated for system-related purpo
 
 - `kyma-system` - This Namespace contains all of the Kyma Core components.
 - `kyma-integration` - This Namespace contains all of the Application Connector components responsible for the integration of Kyma and external solutions.
-- `kyma-installer` - This Namespace contains all of the Kyma installer components, objects, and Secrets.
+- `kyma-installer` - This Namespace contains all of the Kyma Installer components, objects, and Secrets.
 - `istio-system` - This Namespace contains all of the Istio-related components.
 
 ## Environments in Kyma

@@ -72,9 +72,9 @@ $ kubectl apply -f ./resources/default-sa-rbac-role.yaml
 $ ./scripts/install-tiller.sh
 ```
 
-5. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use. 
+5. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
 
-6. Export the version you chose as an environment variable. Run: 
+6. Export the version you chose as an environment variable. Run:
 ```
 $ export LATEST={KYMA_RELEASE_VERSION}
 ```
@@ -165,7 +165,7 @@ To enable Horizontal Pod Autoscaler, follow these steps:
 
 ## Troubleshooting
 
-If the installer does not respond as expected, check the installation status using the `is-installed.sh` script with the `--verbose` flag added. Run:
+If the Installer does not respond as expected, check the installation status using the `is-installed.sh` script with the `--verbose` flag added. Run:
 ```
 scripts/is-installed.sh --verbose
 ```
