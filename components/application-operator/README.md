@@ -17,7 +17,7 @@ Application Operator performs different operations as a result of the following 
 ## Usage
 
  The Application Operator has the following parameters:
- - **appName** - This is the name used in controller registration. The default value is `remote-environment-controller`.
+ - **appName** - This is the name used in controller registration. The default value is `application-operator`.
  - **domainName** - Domain name of the cluster. The default domain name is `kyma.local`.
  - **namespace** - Namespace where the Remote Environment charts will be deployed. The default namespace is `kyma-integration`.
  - **tillerUrl** - Tiller release server URL. The default is `tiller-deploy.kube-system.svc.cluster.local:44134`.
