@@ -1,7 +1,7 @@
 apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRoleBinding
 metadata:
-  name: graphql-admin-view-binding
+  name: graphql-admin-binding
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "name" . }}
@@ -10,7 +10,7 @@ metadata:
 spec:
   subjects:
   - properties:
-      request.auth.token[groups]: 'kyma-admin'
+      request.auth.token[groups]: 'kyma-admin' #TODO: Change with proper rule
   roleRef:
     kind: ServiceRole
-    name: "graphql-admin-view"
+    name: "graphql-admin"

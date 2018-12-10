@@ -11,7 +11,10 @@ spec:
   rules:
   - services: [ '{{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local' ]
     paths: ["/graphql"]
-    methods: ["*"]
+    methods: ["GET"]
+  - services: [ '{{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local' ]
+    paths: ["/graphql"]
+    methods: ["POST"]
     constraints:
     - key: request.headers[kyma-graphql-resources]
       values:
@@ -41,7 +44,7 @@ spec:
       - '{topics}'
       - '{eventActivations}'
       - '{limitRanges}'
-      # Ugly workarounds for a HUGE number of filter bugs
+      # Ugly workarounds for Envoy filter bugs
       - '{topics,typename}' # docs
       - '{clusterServiceClasses,serviceClasses}' # catalog
       - '{clusterServiceClass,typename}' # catalog
@@ -49,4 +52,4 @@ spec:
       - '{serviceBrokers,typename}' # brokers
       - '{default,defaultRequest,limitRanges}' # resources
       - '{requests,resourceQuotas}' # resources
-      - '{}'
+      - '{}' # mutations
