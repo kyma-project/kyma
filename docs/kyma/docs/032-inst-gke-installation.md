@@ -115,9 +115,9 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 ### Using the latest GitHub release
 
-1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use. 
+1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
 
-2. Export the version you chose as an environment variable. Run: 
+2. Export the version you chose as an environment variable. Run:
     ```
     export LATEST={KYMA_RELEASE_VERSION}
     ```
@@ -139,7 +139,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 1. Checkout [kyma-project](https://github.com/kyma-project/kyma) and enter the root folder.
 
-2. Build an image that is based on the current installer image and includes the current installation and resources charts. Run:
+2. Build an image that is based on the current Installer image and includes the current installation and resources charts. Run:
 
     ```
     docker build -t kyma-installer:latest -f tools/kyma-installer/kyma.Dockerfile . --build-arg INSTALLER_VERSION=63484523
@@ -164,7 +164,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 ## Deploy Kyma
 
-1. Configure kubectl to use your new cluster. Run:  add yourself as the cluster admin, and deploy Kyma installer with your configuration.
+1. Configure kubectl to use your new cluster. Run:  add yourself as the cluster admin, and deploy Kyma Installer with your configuration.
     ```
     gcloud container clusters get-credentials $CLUSTER_NAME --zone europe-west1-b --project $PROJECT
     ```
@@ -176,7 +176,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
     ```
     kubectl apply -f my-kyma.yaml
     ```
-4. Check if the Pods of Tiller and the Kyma installer are running:
+4. Check if the Pods of Tiller and the Kyma Installer are running:
     ```
     kubectl get pods --all-namespaces
     ```
