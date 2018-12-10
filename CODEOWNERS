@@ -32,19 +32,19 @@
 /resources/ark/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The `api-controller` subchart
-/resources/core/charts/api-controller/ @piotrmsc @kubadz @sjanota
+/resources/core/charts/api-controller/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `apiserver-proxy` subchart
-/resources/core/charts/apiserver-proxy/ @piotrmsc @kubadz @sjanota
+/resources/core/charts/apiserver-proxy/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `azure-broker` subchart
-/resources/core/charts/azure-broker/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
+/resources/core/charts/azure-broker/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
 
 # The `cluster-users` subchart
-/resources/core/charts/cluster-users/ @piotrmsc @kubadz @sjanota
+/resources/core/charts/cluster-users/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `configurations-generator` subchart
-/resources/core/charts/configurations-generator @piotrmsc @kubadz @sjanota
+/resources/core/charts/configurations-generator @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `application-connector` chart
 /resources/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -68,19 +68,19 @@
 /resources/core/charts/console/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
 
 # The `dex` subchart
-/resources/dex/ @piotrmsc @kubadz @sjanota
+/resources/dex/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `istio-rbac` subchart
-/resources/core/charts/istio-rbac/ @piotrmsc @kubadz @sjanota
+/resources/core/charts/istio-rbac/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `environments` subchart
-/resources/core/charts/environments/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
+/resources/core/charts/environments/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
 
 # The `etcd-operator` subchart
 /resources/core/charts/etcd-operator/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
 
 # The 'gateway' subchart
-/resources/core/charts/gateway/ @piotrmsc @kubadz @sjanota
+/resources/core/charts/gateway/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `helm-broker` subchart
 /resources/core/charts/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -140,10 +140,10 @@
 /resources/helm-broker-repo/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `istio` chart
-/resources/istio/ @piotrmsc @kubadz @sjanota
+/resources/istio/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `istio-kyma-patch` chart
-/resources/istio-kyma-patch/ @piotrmsc @kubadz @sjanota
+/resources/istio-kyma-patch/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `knative` chart
 /resources/knative/ @kyma-project/wg-knative
@@ -162,25 +162,25 @@
 
 # Components
 #API server proxy Component
-/components/apiserver-proxy/ @piotrmsc @kubadz @sjanota
+/components/apiserver-proxy/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # Api controller Component
-/components/api-controller/ @piotrmsc @kubadz @sjanota
+/components/api-controller/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # Binding usage controller Component
 /components/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Installer Component
-/components/installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
+/components/installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
 
 # Configurations Generator Component
-/components/configurations-generator/ @piotrmsc @kubadz @sjanota
+/components/configurations-generator/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # Environments controller Component
-/components/environments/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
+/components/environments/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
 
 # Istio Extensions Component
-/components/istio-kyma-patch/ @piotrmsc @sjanota @kubadz
+/components/istio-kyma-patch/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # Remote environment controller Component
 /components/remote-environment-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -221,10 +221,10 @@
 # Tests
 # acceptance tests
 /tests/acceptance/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85 @jasiu001 @adamwalach
-/tests/acceptance/dex @sjanota @piotrmsc @kubadz
+/tests/acceptance/dex @sjanota @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # test-environments
-/tests/test-environemnts/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
+/tests/test-environemnts/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
 
 # test-logging-monitoring tests
 /tests/test-logging-monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
@@ -233,7 +233,7 @@
 /tests/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # api-controller acceptance tests
-/tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @sjanota
+/tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # UI API Layer acceptance tests
 /tests/ui-api-layer-acceptance-tests/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -273,13 +273,13 @@
 /tools/docsbuilder/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The static-users-generator directory
-/tools/static-users-generator/ @piotrmsc @sjanota @kubadz 
+/tools/static-users-generator/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The tools/ark-plugins directory
 /tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The tools/kyma-installer directory
-/tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek @jasiu001 @adamwalach
+/tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek @jasiu001 @adamwalach @kubadz @sjanota @kfurgol @Demonsthere
 
 # kubeless-integration tests directory 
 /tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
