@@ -31,7 +31,8 @@ type operationMessage struct {
 }
 
 func newWebsocket(endpoint, token string, headers http.Header) (*clusterWebsocket, error) {
-	headers.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	headers.Set("Sec-WebSocket-Protocol", fmt.Sprintf("graphql-ws, %s", token))
+
 	dialer := websocket.Dialer{
 		HandshakeTimeout: websocket.DefaultDialer.HandshakeTimeout,
 		TLSClientConfig:  &tls.Config{InsecureSkipVerify: true},
