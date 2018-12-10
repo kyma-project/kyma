@@ -111,4 +111,4 @@ metadata:
     installer: overrides
     component: service-catalog
 data:
-  etcd.resources.limits.memory: 512Mi
+  etcd-stateful.etcd.resources.limits.memory: 512Mi
