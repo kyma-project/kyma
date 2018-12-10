@@ -1,12 +1,12 @@
-package remoteenv_test
+package applications_test
 
 import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv/mocks"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/applications"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/applications/mocks"
+	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,12 +16,12 @@ func TestGetServices(t *testing.T) {
 
 	t.Run("should get service by id", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
-		reManagerMock := &mocks.Manager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+		app := createApplication("production")
+		managerMock := &mocks.Manager{}
+		managerMock.On("Get", "production", metav1.GetOptions{}).
+			Return(app, nil)
 
-		repository := remoteenv.NewServiceRepository("production", reManagerMock)
+		repository := applications.NewServiceRepository("production", managerMock)
 		require.NotNil(t, repository)
 
 		// when
@@ -34,11 +34,11 @@ func TestGetServices(t *testing.T) {
 		assert.Equal(t, service.ProviderDisplayName, "SAP Hybris")
 		assert.Equal(t, service.DisplayName, "Orders API")
 		assert.Equal(t, service.LongDescription, "This is Orders API")
-		assert.Equal(t, service.API, &remoteenv.ServiceAPI{
+		assert.Equal(t, service.API, &applications.ServiceAPI{
 			GatewayURL:  "http://re-ec-default-4862c1fb-a047-4add-94e3-c4ff594b3514.kyma-integration.svc.cluster.local",
 			AccessLabel: "access-label-1",
 			TargetUrl:   "https://192.168.1.2",
-			Credentials: &remoteenv.Credentials{
+			Credentials: &applications.Credentials{
 				Type:       "OAuth",
 				SecretName: "SecretName",
 				Url:        "www.example.com/token",
@@ -48,24 +48,24 @@ func TestGetServices(t *testing.T) {
 
 	t.Run("should return not found error if service doesn't exist", func(t *testing.T) {
 		// given
-		remoteEnvironment := createRemoteEnvironment("production")
+		app := createApplication("production")
 		reManagerMock := &mocks.Manager{}
 		reManagerMock.On("Get", "production", metav1.GetOptions{}).
-			Return(remoteEnvironment, nil)
+			Return(app, nil)
 
-		repository := remoteenv.NewServiceRepository("production", reManagerMock)
+		repository := applications.NewServiceRepository("production", reManagerMock)
 		require.NotNil(t, repository)
 
 		// when
 		service, err := repository.Get("not-existent")
 
 		// then
-		assert.Equal(t, remoteenv.Service{}, service)
+		assert.Equal(t, applications.Service{}, service)
 		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
 }
 
-func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
+func createApplication(name string) *v1alpha1.Application {
 
 	reService1Entry := v1alpha1.Entry{
 		Type:        "API",
@@ -108,7 +108,7 @@ func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
 		Entries:             []v1alpha1.Entry{reService2Entry},
 	}
 
-	reSpec1 := v1alpha1.RemoteEnvironmentSpec{
+	reSpec1 := v1alpha1.ApplicationSpec{
 		Description: "test_1",
 		Services: []v1alpha1.Service{
 			reService1,
@@ -116,7 +116,7 @@ func createRemoteEnvironment(name string) *v1alpha1.RemoteEnvironment {
 		},
 	}
 
-	return &v1alpha1.RemoteEnvironment{
+	return &v1alpha1.Application{
 		ObjectMeta: metav1.ObjectMeta{Name: name},
 		Spec:       reSpec1,
 	}

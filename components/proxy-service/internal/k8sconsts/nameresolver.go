@@ -24,10 +24,10 @@ type nameResolver struct {
 	resourceNamePrefix string
 }
 
-// NewNameResolver creates NameResolver that uses remote environment name and namespace.
-func NewNameResolver(remoteEnvironment string) NameResolver {
+// NewNameResolver creates NameResolver that uses application name and namespace.
+func NewNameResolver(application string) NameResolver {
 	return nameResolver{
-		resourceNamePrefix: getResourceNamePrefix(remoteEnvironment),
+		resourceNamePrefix: getResourceNamePrefix(application),
 	}
 }
 
@@ -42,21 +42,21 @@ func (resolver nameResolver) ExtractServiceId(host string) string {
 	return strings.TrimPrefix(resourceName, resolver.resourceNamePrefix)
 }
 
-func getResourceNamePrefix(remoteEnvironment string) string {
-	truncatedRemoteEnvironment := truncateRemoteEnvironment(remoteEnvironment)
-	return fmt.Sprintf(resourceNamePrefixFormat, truncatedRemoteEnvironment)
+func getResourceNamePrefix(application string) string {
+	truncatedApplication := truncateApplication(application)
+	return fmt.Sprintf(resourceNamePrefixFormat, truncatedApplication)
 }
 
-func truncateRemoteEnvironment(remoteEnvironment string) string {
+func truncateApplication(application string) string {
 	maxResourceNamePrefixLength := maxResourceNameLength - uuidLength
-	testResourceNamePrefix := fmt.Sprintf(resourceNamePrefixFormat, remoteEnvironment)
+	testResourceNamePrefix := fmt.Sprintf(resourceNamePrefixFormat, application)
 	testResourceNamePrefixLength := len(testResourceNamePrefix)
 
 	overflowLength := testResourceNamePrefixLength - maxResourceNamePrefixLength
 
 	if overflowLength > 0 {
-		newRemoteEnvironmentLength := len(remoteEnvironment) - overflowLength
-		return remoteEnvironment[0:newRemoteEnvironmentLength]
+		newApplicationLength := len(application) - overflowLength
+		return application[0:newApplicationLength]
 	}
-	return remoteEnvironment
+	return application
 }

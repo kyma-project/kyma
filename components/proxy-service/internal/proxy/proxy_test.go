@@ -319,10 +319,10 @@ func NewTestServerForRetryTest(status int, check func(req *http.Request)) *httpt
 
 func createProxyConfig(proxyTimeout int) Config {
 	return Config{
-		SkipVerify:        true,
-		ProxyTimeout:      proxyTimeout,
-		RemoteEnvironment: "test",
-		ProxyCacheTTL:     proxyTimeout,
+		SkipVerify:    true,
+		ProxyTimeout:  proxyTimeout,
+		Application:   "test",
+		ProxyCacheTTL: proxyTimeout,
 	}
 }
 
