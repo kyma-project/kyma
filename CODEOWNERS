@@ -28,9 +28,6 @@
 # The `values.yaml` file for `core` chart
 /resources/core/values.yaml @kyma-project/developers
 
-# The `values.yaml` file for `application-connector` chart
-/resources/application-connector/values.yaml @kyma-project/developers
-
 # The `heptio ark` chart
 /resources/ark/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
@@ -52,6 +49,9 @@
 # The `application-connector` chart
 /resources/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
+# The `values.yaml` file for `application-connector` chart
+/resources/application-connector/values.yaml @kyma-project/developers
+
 # The `connector-service` subchart
 /resources/application-connector/charts/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
@@ -61,8 +61,8 @@
 # The `metadata-service` subchart
 /resources/application-connector/charts/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# The `remote-environment-controller` subchart
-/resources/application-connector/charts/remote-environment-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+# The `application-operator` subchart
+/resources/application-connector/charts/application-operator/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `nginx-ingress` subchart
 /resources/application-connector/charts/nginx-ingress/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -157,9 +157,6 @@
 # The `prometheus-operator` chart
 /resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
 
-# The `remote environment` chart
-/resources/remote-environments/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
-
 # The `service-catalog` chart
 /resources/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
@@ -206,8 +203,8 @@
 # Metadata Service Component
 /components/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# Remote Environment Controller Component
-/components/remote-environment-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+# Application Operator Component
+/components/application-operator/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Proxy Service Component
 /components/proxy-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -247,8 +244,8 @@
 # Metadata Service Tests
 /tests/metadata-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# Remote Environment Controller Tests
-/tests/remote-environment-controller-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+# Application Operator Tests
+/tests/application-operator-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Tools
 # Stability Checker Component
