@@ -41,7 +41,7 @@ global:
     version: 4a23580f
   docs:
     dir: develop/
-    version: f5849169
+    version: 7dc06fb1
   environments:
     dir: develop/
     version: 6e0a7fe2
@@ -50,10 +50,10 @@ global:
     version: 6e0a7fe2
   event_bus:
     dir: develop/
-    version: f9df7d26
+    version: f01c8848
   event_bus_tests:
     dir: develop/
-    version: 1daa11b7
+    version: f01c8848
   helm_broker:
     dir: develop/
     version: 0d1ffe15

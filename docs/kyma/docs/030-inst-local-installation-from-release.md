@@ -72,9 +72,9 @@ $ kubectl apply -f ./resources/default-sa-rbac-role.yaml
 $ ./scripts/install-tiller.sh
 ```
 
-5. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use. 
+5. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
 
-6. Export the version you chose as an environment variable. Run: 
+6. Export the version you chose as an environment variable. Run:
 ```
 $ export LATEST={KYMA_RELEASE_VERSION}
 ```
@@ -116,7 +116,7 @@ The command retrieves all Pods from all Namespaces, the status of the Pods, and 
 
 Access your local Kyma instance through [this](https://console.kyma.local/) link.
 
-* Click **Login with Email** and sign in with the `admin@kyma.cx` email address. Use the password contained in the  `admin-user` Secret located in the `kyma-system` Namespace. To get the password, run:
+* Click **Login with Email** and sign in with the **admin@kyma.cx** email address. Use the password contained in the  `admin-user` Secret located in the `kyma-system` Namespace. To get the password, run:
 
 ``` bash
 kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D
@@ -165,7 +165,7 @@ To enable Horizontal Pod Autoscaler, follow these steps:
 
 ## Troubleshooting
 
-If the installer does not respond as expected, check the installation status using the `is-installed.sh` script with the `--verbose` flag added. Run:
+If the Installer does not respond as expected, check the installation status using the `is-installed.sh` script with the `--verbose` flag added. Run:
 ```
 scripts/is-installed.sh --verbose
 ```

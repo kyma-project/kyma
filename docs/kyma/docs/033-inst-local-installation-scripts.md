@@ -73,7 +73,7 @@ The `installation/scripts/create-cr.sh` script prepares the Installation custom 
 
 The `installation/scripts/installer.sh` script creates the default RBAC role, installs [Tiller](https://docs.helm.sh/), and deploys the Kyma-Installer component.
 
->**NOTE:** For the Kyma-Installer deployment details, refer to the `installation/resources/installer.yaml` file.
+>**NOTE:** For the Kyma Installer deployment details, refer to the `installation/resources/installer.yaml` file.
 
 The script applies the Installation custom resource and marks it with the `action=install` label, which triggers the Kyma installation.
 

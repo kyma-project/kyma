@@ -33,7 +33,7 @@ The following examples show how to create new Subscriptions, list them, and obta
 
 ```
    cat <<EOF | kubectl create -f -
-   apiVersion: eventing.kyma.cx/v1alpha1
+   apiVersion: eventing.kyma-project.io/v1alpha1
    kind: Subscription
    metadata:
      name: my-subscription
