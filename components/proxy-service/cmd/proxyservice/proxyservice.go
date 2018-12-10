@@ -11,11 +11,11 @@ import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/httptools"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/secrets"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/proxy"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/client/clientset/versioned"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -81,10 +81,10 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 	if serviceDefinitionService != nil {
 		authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
 		proxyConfig := proxy.Config{
-			SkipVerify:        options.skipVerify,
-			ProxyTimeout:      options.proxyTimeout,
-			RemoteEnvironment: options.remoteEnvironment,
-			ProxyCacheTTL:     options.proxyCacheTTL,
+			SkipVerify:    options.skipVerify,
+			ProxyTimeout:  options.proxyTimeout,
+			Application:   options.remoteEnvironment,
+			ProxyCacheTTL: options.proxyCacheTTL,
 		}
 		return proxy.New(serviceDefinitionService, authStrategyFactory, proxyConfig)
 	}
@@ -97,7 +97,7 @@ func newAuthenticationStrategyFactory(oauthClientTimeout int) authorization.Stra
 	})
 }
 
-func newServiceDefinitionService(namespace string, remoteEnvironment string) (metadata.ServiceDefinitionService, apperrors.AppError) {
+func newServiceDefinitionService(namespace string, application string) (metadata.ServiceDefinitionService, apperrors.AppError) {
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
 		return nil, apperrors.Internal("failed to read k8s in-cluster configuration, %s", err)
@@ -108,31 +108,31 @@ func newServiceDefinitionService(namespace string, remoteEnvironment string) (me
 		return nil, apperrors.Internal("failed to create k8s core client, %s", err)
 	}
 
-	remoteEnvironmentServiceRepository, apperror := newRemoteEnvironmentRepository(k8sConfig, remoteEnvironment)
+	applicationServiceRepository, apperror := newApplicationRepository(k8sConfig, application)
 	if apperror != nil {
 		return nil, apperror
 	}
 
-	secretsRepository := newSecretsRepository(coreClientset, namespace, remoteEnvironment)
+	secretsRepository := newSecretsRepository(coreClientset, namespace, application)
 
 	serviceAPIService := serviceapi.NewService(secretsRepository)
 
-	return metadata.NewServiceDefinitionService(serviceAPIService, remoteEnvironmentServiceRepository), nil
+	return metadata.NewServiceDefinitionService(serviceAPIService, applicationServiceRepository), nil
 }
 
-func newRemoteEnvironmentRepository(config *restclient.Config, name string) (remoteenv.ServiceRepository, apperrors.AppError) {
-	remoteEnvironmentClientset, err := versioned.NewForConfig(config)
+func newApplicationRepository(config *restclient.Config, name string) (applications.ServiceRepository, apperrors.AppError) {
+	applicationClientset, err := versioned.NewForConfig(config)
 	if err != nil {
-		return nil, apperrors.Internal("failed to create k8s remote environment client, %s", err)
+		return nil, apperrors.Internal("failed to create k8s application client, %s", err)
 	}
 
-	rei := remoteEnvironmentClientset.ApplicationconnectorV1alpha1().RemoteEnvironments()
+	rei := applicationClientset.ApplicationconnectorV1alpha1().Applications()
 
-	return remoteenv.NewServiceRepository(name, rei), nil
+	return applications.NewServiceRepository(name, rei), nil
 }
 
-func newSecretsRepository(coreClientset *kubernetes.Clientset, namespace, remoteEnvironment string) secrets.Repository {
+func newSecretsRepository(coreClientset *kubernetes.Clientset, namespace, application string) secrets.Repository {
 	sei := coreClientset.CoreV1().Secrets(namespace)
 
-	return secrets.NewRepository(sei, remoteEnvironment)
+	return secrets.NewRepository(sei, application)
 }

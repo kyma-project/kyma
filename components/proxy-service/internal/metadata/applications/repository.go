@@ -1,11 +1,11 @@
-// Package remoteenv contains components for accessing/modifying Remote Environment CRD
-package remoteenv
+// Package application contains components for accessing/modifying Application CRD
+package applications
 
 import (
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/apis/applicationconnector/v1alpha1"
 	log "github.com/sirupsen/logrus"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,14 +16,14 @@ const (
 	specEventsType = "Events"
 )
 
-// Manager contains operations for managing Remote Environment CRD
+// Manager contains operations for managing Application CRD
 type Manager interface {
-	Get(name string, options v1.GetOptions) (*v1alpha1.RemoteEnvironment, error)
+	Get(name string, options v1.GetOptions) (*v1alpha1.Application, error)
 }
 
 type repository struct {
-	name      string
-	reManager Manager
+	name       string
+	appManager Manager
 }
 
 type Credentials struct {
@@ -40,17 +40,17 @@ type ServiceAPI struct {
 	Credentials *Credentials
 }
 
-// Service represents a service stored in Remote Environment RE
+// Service represents a service stored in Application
 type Service struct {
-	// Mapped to id in Remote Environment CRD
+	// Mapped to id in Application CRD
 	ID string
-	// Mapped to displayName in Remote Environment CRD
+	// Mapped to displayName in Application CRD
 	DisplayName string
-	// Mapped to longDescription in Remote Environment CRD
+	// Mapped to longDescription in Application CRD
 	LongDescription string
-	// Mapped to providerDisplayName in Remote Environment CRD
+	// Mapped to providerDisplayName in Application CRD
 	ProviderDisplayName string
-	// Mapped to tags in Remote Environment CRD
+	// Mapped to tags in Application CRD
 	Tags []string
 	// Mapped to type property under entries element (type: API)
 	API *ServiceAPI
@@ -58,24 +58,24 @@ type Service struct {
 	Events bool
 }
 
-// ServiceRepository contains operations for managing services stored in Remote Environment CRD
+// ServiceRepository contains operations for managing services stored in Application CRD
 type ServiceRepository interface {
 	Get(id string) (Service, apperrors.AppError)
 }
 
-// NewServiceRepository creates a new RemoteEnvironmentServiceRepository
-func NewServiceRepository(name string, reManager Manager) ServiceRepository {
-	return &repository{name: name, reManager: reManager}
+// NewServiceRepository creates a new ApplicationServiceRepository
+func NewServiceRepository(name string, appManager Manager) ServiceRepository {
+	return &repository{name: name, appManager: appManager}
 }
 
-// Get reads Service from Remote Environment by service id
+// Get reads Service from Application by service id
 func (r *repository) Get(id string) (Service, apperrors.AppError) {
-	re, err := r.getRemoteEnvironment()
+	app, err := r.getApplication()
 	if err != nil {
 		return Service{}, err
 	}
 
-	for _, service := range re.Spec.Services {
+	for _, service := range app.Spec.Services {
 		if service.ID == id {
 			return convertFromK8sType(service)
 		}
@@ -87,21 +87,21 @@ func (r *repository) Get(id string) (Service, apperrors.AppError) {
 	return Service{}, apperrors.NotFound(message)
 }
 
-func (r *repository) getRemoteEnvironment() (*v1alpha1.RemoteEnvironment, apperrors.AppError) {
-	re, err := r.reManager.Get(r.name, v1.GetOptions{})
+func (r *repository) getApplication() (*v1alpha1.Application, apperrors.AppError) {
+	app, err := r.appManager.Get(r.name, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			message := fmt.Sprintf("Remote environment: %s not found.", r.name)
+			message := fmt.Sprintf("Application: %s not found.", r.name)
 			log.Warn(message)
 			return nil, apperrors.Internal(message)
 		}
 
-		message := fmt.Sprintf("failed to get remote environment '%s' : %s", r.name, err.Error())
+		message := fmt.Sprintf("failed to get Application '%s' : %s", r.name, err.Error())
 		log.Error(message)
 		return nil, apperrors.Internal(message)
 	}
 
-	return re, nil
+	return app, nil
 }
 
 func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) {
@@ -119,7 +119,7 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 			} else if entry.Type == specEventsType {
 				events = true
 			} else {
-				message := fmt.Sprintf("incorrect type of entry '%s' in Remote Environment Service definition", entry.Type)
+				message := fmt.Sprintf("incorrect type of entry '%s' in Application Service definition", entry.Type)
 				log.Error(message)
 				return Service{}, apperrors.Internal(message)
 			}
@@ -149,4 +149,3 @@ func convertCredentialsFromK8sType(credentials v1alpha1.Credentials) *Credential
 		Url:        credentials.AuthenticationUrl,
 	}
 }
-

@@ -3,10 +3,10 @@ package secrets
 
 import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	log "github.com/sirupsen/logrus"
 )
 
 // Repository contains operations for managing client credentials
@@ -15,8 +15,8 @@ type Repository interface {
 }
 
 type repository struct {
-	secretsManager    Manager
-	remoteEnvironment string
+	secretsManager Manager
+	application    string
 }
 
 // Manager contains operations for managing k8s secrets
@@ -25,10 +25,10 @@ type Manager interface {
 }
 
 // NewRepository creates a new secrets repository
-func NewRepository(secretsManager Manager, remoteEnvironment string) Repository {
+func NewRepository(secretsManager Manager, application string) Repository {
 	return &repository{
-		secretsManager:    secretsManager,
-		remoteEnvironment: remoteEnvironment,
+		secretsManager: secretsManager,
+		application:    application,
 	}
 }
 
