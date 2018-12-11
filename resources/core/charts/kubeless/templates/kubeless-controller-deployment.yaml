@@ -2,7 +2,7 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-controller-manager
+  name: {{ template "fullname" . }}-function-controller
   labels:
 {{ include "labels.standard" . | indent 4 }}
     kubeless: controller
@@ -41,5 +41,5 @@ spec:
           value: {{ template "fullname" . }}-config
         image: "{{ .Values.controller.deployment.image }}"
         imagePullPolicy: {{ .Values.controller.deployment.pullPolicy }}
-        name: {{ template "fullname" . }}-controller-manager
+        name: {{ template "fullname" . }}-function-controller
       serviceAccountName: {{ template "fullname" . }}-controller-acct
