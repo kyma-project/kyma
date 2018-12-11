@@ -18,17 +18,17 @@ type ConnectorClient interface {
 }
 
 type connectorClient struct {
-	remoteEnv      string
+	application    string
 	internalAPIUrl string
 	externalAPIUrl string
 	httpClient     *http.Client
 }
 
-func NewConnectorClient(remoteEnv, internalAPIUrl, externalAPIUrl string, skipVerify bool) ConnectorClient {
+func NewConnectorClient(application, internalAPIUrl, externalAPIUrl string, skipVerify bool) ConnectorClient {
 	client := NewHttpClient(skipVerify)
 
 	return connectorClient{
-		remoteEnv:      remoteEnv,
+		application:    application,
 		internalAPIUrl: internalAPIUrl,
 		externalAPIUrl: externalAPIUrl,
 		httpClient:     client,
@@ -44,7 +44,7 @@ func NewHttpClient(skipVerify bool) *http.Client {
 }
 
 func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
-	url := cc.internalAPIUrl + "/v1/remoteenvironments/" + cc.remoteEnv + "/tokens"
+	url := cc.internalAPIUrl + "/v1/applications/" + cc.application + "/tokens"
 
 	request, err := http.NewRequest(http.MethodPost, url, nil)
 	require.NoError(t, err)
