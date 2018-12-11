@@ -15,29 +15,29 @@ func TestNameResolver(t *testing.T) {
 		host         string
 	}{
 		{
-			remotEnv:     "short_remoteenv",
+			remotEnv:     "short_application",
 			id:           "c687e68a-9038-4f38-845b-9c61592e59e6",
-			resourceName: "re-short_remoteenv-c687e68a-9038-4f38-845b-9c61592e59e6",
-			metadataUrl:  "http://re-short_remoteenv-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
-			host:         "re-short_remoteenv-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			resourceName: "re-short_application-c687e68a-9038-4f38-845b-9c61592e59e6",
+			metadataUrl:  "http://re-short_application-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			host:         "re-short_application-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 		},
 		{
-			remotEnv:     "max_remoteenv_aaaaaaaaa",
+			remotEnv:     "max_application_aaaaaaaaa",
 			id:           "c687e68a-9038-4f38-845b-9c61592e59e6",
-			resourceName: "re-max_remoteenv_aaaaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6",
-			metadataUrl:  "http://re-max_remoteenv_aaaaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
-			host:         "re-max_remoteenv_aaaaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			resourceName: "re-max_application_aaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6",
+			metadataUrl:  "http://re-max_application_aaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			host:         "re-max_application_aaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 		},
 		{
-			remotEnv:     "toolong_remoteenv_aaaaaxxxx",
+			remotEnv:     "toolong_application_aaaaaxxxx",
 			id:           "c687e68a-9038-4f38-845b-9c61592e59e6",
-			resourceName: "re-toolong_remoteenv_aaaaa-c687e68a-9038-4f38-845b-9c61592e59e6",
-			metadataUrl:  "http://re-toolong_remoteenv_aaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
-			host:         "re-toolong_remoteenv_aaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			resourceName: "re-toolong_application_aaa-c687e68a-9038-4f38-845b-9c61592e59e6",
+			metadataUrl:  "http://re-toolong_application_aaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			host:         "re-toolong_application_aaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 		},
 	}
 
-	t.Run("should get resource name with truncated remote environment name if needed", func(t *testing.T) {
+	t.Run("should get resource name with truncated application name if needed", func(t *testing.T) {
 		for _, testCase := range testCases {
 			resolver := NewNameResolver("namespace")
 
@@ -47,7 +47,7 @@ func TestNameResolver(t *testing.T) {
 		}
 	})
 
-	t.Run("should get gateway url with truncated remote environment name if needed", func(t *testing.T) {
+	t.Run("should get gateway url with truncated application name if needed", func(t *testing.T) {
 		for _, testCase := range testCases {
 			resolver := NewNameResolver("namespace")
 

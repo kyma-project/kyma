@@ -27,7 +27,7 @@ type nameResolver struct {
 	namespace string
 }
 
-// NewNameResolver creates NameResolver that uses remote environment name and namespace.
+// NewNameResolver creates NameResolver that uses application name and namespace.
 func NewNameResolver(namespace string) NameResolver {
 	return nameResolver{
 		namespace: namespace,

@@ -24,7 +24,7 @@ func getTestHandler() http.HandlerFunc {
 func TestCodeMiddleware_Handle(t *testing.T) {
 	t.Run("should observe status", func(t *testing.T) {
 		// given
-		path := "/v1/remoteenvironments/ec-default/tokens"
+		path := "/v1/applications/ec-default/tokens"
 		collector := &mocks.Collector{}
 		collector.On("AddObservation", float64(1), path, "200", http.MethodPost).Return()
 		codeMiddleware := NewCodeMiddleware(collector)

@@ -9,13 +9,13 @@ type NameResolver struct {
 	mock.Mock
 }
 
-// ExtractServiceId provides a mock function with given fields: remoteEnvironment, host
-func (_m *NameResolver) ExtractServiceId(remoteEnvironment string, host string) string {
-	ret := _m.Called(remoteEnvironment, host)
+// ExtractServiceId provides a mock function with given fields: applicaton, host
+func (_m *NameResolver) ExtractServiceId(applicaton string, host string) string {
+	ret := _m.Called(applicaton, host)
 
 	var r0 string
 	if rf, ok := ret.Get(0).(func(string, string) string); ok {
-		r0 = rf(remoteEnvironment, host)
+		r0 = rf(applicaton, host)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
@@ -23,13 +23,13 @@ func (_m *NameResolver) ExtractServiceId(remoteEnvironment string, host string) 
 	return r0
 }
 
-// GetGatewayUrl provides a mock function with given fields: remoteEnvironment, id
-func (_m *NameResolver) GetGatewayUrl(remoteEnvironment string, id string) string {
-	ret := _m.Called(remoteEnvironment, id)
+// GetGatewayUrl provides a mock function with given fields: applicaton, id
+func (_m *NameResolver) GetGatewayUrl(applicaton string, id string) string {
+	ret := _m.Called(applicaton, id)
 
 	var r0 string
 	if rf, ok := ret.Get(0).(func(string, string) string); ok {
-		r0 = rf(remoteEnvironment, id)
+		r0 = rf(applicaton, id)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
@@ -37,13 +37,13 @@ func (_m *NameResolver) GetGatewayUrl(remoteEnvironment string, id string) strin
 	return r0
 }
 
-// GetResourceName provides a mock function with given fields: remoteEnvironment, id
-func (_m *NameResolver) GetResourceName(remoteEnvironment string, id string) string {
-	ret := _m.Called(remoteEnvironment, id)
+// GetResourceName provides a mock function with given fields: applicaton, id
+func (_m *NameResolver) GetResourceName(applicaton string, id string) string {
+	ret := _m.Called(applicaton, id)
 
 	var r0 string
 	if rf, ok := ret.Get(0).(func(string, string) string); ok {
-		r0 = rf(remoteEnvironment, id)
+		r0 = rf(applicaton, id)
 	} else {
 		r0 = ret.Get(0).(string)
 	}

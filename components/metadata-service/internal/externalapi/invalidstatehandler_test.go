@@ -23,7 +23,7 @@ func TestInvalidStateHandler_HandleRequest(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/1234", nil)
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "1234"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "1234"})
 		rr := httptest.NewRecorder()
 
 		// when

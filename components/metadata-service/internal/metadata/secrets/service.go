@@ -50,9 +50,9 @@ func (s *service) Create(application, serviceID string, credentials *model.Crede
 		return applications.Credentials{}, err
 	}
 
-	remoteEnvCredentials := s.modelToRemoteEnvCredentials(credentials, application, serviceID)
+	applicationCredentials := s.modelToApplicationCredentials(credentials, application, serviceID)
 
-	return remoteEnvCredentials, nil
+	return applicationCredentials, nil
 }
 
 func (s *service) Get(application string, credentials applications.Credentials) (model.Credentials, apperrors.AppError) {
@@ -108,9 +108,9 @@ func (s *service) Update(application, serviceID string, credentials *model.Crede
 		return applications.Credentials{}, err
 	}
 
-	remoteEnvCredentials := s.modelToRemoteEnvCredentials(credentials, application, serviceID)
+	applicationCredentials := s.modelToApplicationCredentials(credentials, application, serviceID)
 
-	return remoteEnvCredentials, nil
+	return applicationCredentials, nil
 }
 
 func (s *service) Delete(name string) apperrors.AppError {
@@ -223,21 +223,21 @@ func (s *service) updateBasicAuthSecret(application, name, username, password, s
 	return s.repository.Upsert(application, name, serviceID, data)
 }
 
-func (s *service) modelToRemoteEnvCredentials(credentials *model.Credentials, application, serviceID string) applications.Credentials {
-	remoteEnvCredentials := applications.Credentials{}
+func (s *service) modelToApplicationCredentials(credentials *model.Credentials, application, serviceID string) applications.Credentials {
+	applicationCredentials := applications.Credentials{}
 
 	if oauthCredentialsProvided(credentials) {
-		remoteEnvCredentials.AuthenticationUrl = credentials.Oauth.URL
-		remoteEnvCredentials.Type = applications.CredentialsOAuthType
+		applicationCredentials.AuthenticationUrl = credentials.Oauth.URL
+		applicationCredentials.Type = applications.CredentialsOAuthType
 	}
 
 	if basicCredentialsProvided(credentials) {
-		remoteEnvCredentials.Type = applications.CredentialsBasicType
+		applicationCredentials.Type = applications.CredentialsBasicType
 	}
 
-	remoteEnvCredentials.SecretName = s.nameResolver.GetResourceName(application, serviceID)
+	applicationCredentials.SecretName = s.nameResolver.GetResourceName(application, serviceID)
 
-	return remoteEnvCredentials
+	return applicationCredentials
 }
 
 func oauthCredentialsProvided(credentials *model.Credentials) bool {

@@ -20,11 +20,11 @@ func TestService_Create(t *testing.T) {
 
 		data := makeOauthMap("clientID", "clientSecret")
 
-		repositoryMock.On("Create", "re", "resourceName", "serviceID", data).Return(
+		repositoryMock.On("Create", "app", "resourceName", "serviceID", data).Return(
 			nil,
 		)
 
-		nameResolverMock.On("GetResourceName", "re", "serviceID").Return("resourceName")
+		nameResolverMock.On("GetResourceName", "app", "serviceID").Return("resourceName")
 
 		credentials := &model.Credentials{
 			Oauth: &model.Oauth{
@@ -36,7 +36,7 @@ func TestService_Create(t *testing.T) {
 
 		// when
 		res, err := service.Create(
-			"re",
+			"app",
 			"serviceID",
 			credentials,
 		)
@@ -60,11 +60,11 @@ func TestService_Create(t *testing.T) {
 
 		data := makeBasicAuthMap("username", "password")
 
-		repositoryMock.On("Create", "re", "resourceName", "serviceID", data).Return(
+		repositoryMock.On("Create", "app", "resourceName", "serviceID", data).Return(
 			nil,
 		)
 
-		nameResolverMock.On("GetResourceName", "re", "serviceID").Return("resourceName")
+		nameResolverMock.On("GetResourceName", "app", "serviceID").Return("resourceName")
 
 		credentials := &model.Credentials{
 			Basic: &model.Basic{
@@ -75,7 +75,7 @@ func TestService_Create(t *testing.T) {
 
 		// when
 		res, err := service.Create(
-			"re",
+			"app",
 			"serviceID",
 			credentials,
 		)
@@ -125,7 +125,7 @@ func TestService_Create(t *testing.T) {
 
 		service := NewService(&repositoryMock, &nameResolverMock)
 
-		nameResolverMock.On("GetResourceName", "re", "serviceID").Return("resourceName")
+		nameResolverMock.On("GetResourceName", "app", "serviceID").Return("resourceName")
 
 		credentials := &model.Credentials{
 			Basic: &model.Basic{
@@ -135,13 +135,13 @@ func TestService_Create(t *testing.T) {
 		}
 
 		secretData := makeBasicAuthMap("username", "password")
-		repositoryMock.On("Create", "re", "resourceName", "serviceID", secretData).Return(
+		repositoryMock.On("Create", "app", "resourceName", "serviceID", secretData).Return(
 			apperrors.AlreadyExists("Secret already exists."),
 		)
 
 		// when
 		_, err := service.Create(
-			"re",
+			"app",
 			"serviceID",
 			credentials,
 		)
@@ -161,10 +161,10 @@ func TestService_Create(t *testing.T) {
 
 		service := NewService(&repositoryMock, &nameResolverMock)
 
-		nameResolverMock.On("GetResourceName", "re", "serviceID").Return("resourceName")
+		nameResolverMock.On("GetResourceName", "app", "serviceID").Return("resourceName")
 
 		secretData := makeBasicAuthMap("username", "password")
-		repositoryMock.On("Create", "re", "resourceName", "serviceID", secretData).Return(
+		repositoryMock.On("Create", "app", "resourceName", "serviceID", secretData).Return(
 			apperrors.Internal("Internal error."),
 		)
 
@@ -177,7 +177,7 @@ func TestService_Create(t *testing.T) {
 
 		// when
 		_, err := service.Create(
-			"re",
+			"app",
 			"serviceID",
 			credentials,
 		)
@@ -198,7 +198,7 @@ func TestService_Get(t *testing.T) {
 		service := NewService(&repositoryMock, nil)
 
 		secretData := makeOauthMap("testID", "testSecret")
-		repositoryMock.On("Get", "re", "name").Return(
+		repositoryMock.On("Get", "app", "name").Return(
 			secretData,
 			nil,
 		)
@@ -209,7 +209,7 @@ func TestService_Get(t *testing.T) {
 		}
 
 		// when
-		res, err := service.Get("re", credentials)
+		res, err := service.Get("app", credentials)
 
 		// then
 		assert.NoError(t, err)
@@ -225,7 +225,7 @@ func TestService_Get(t *testing.T) {
 		service := NewService(&repositoryMock, nil)
 
 		secretData := makeBasicAuthMap("username", "password")
-		repositoryMock.On("Get", "re", "name").Return(
+		repositoryMock.On("Get", "app", "name").Return(
 			secretData,
 			nil,
 		)
@@ -236,7 +236,7 @@ func TestService_Get(t *testing.T) {
 		}
 
 		// when
-		res, err := service.Get("re", credentials)
+		res, err := service.Get("app", credentials)
 
 		// then
 		assert.NoError(t, err)
@@ -251,7 +251,7 @@ func TestService_Get(t *testing.T) {
 		repositoryMock := mocks.Repository{}
 		service := NewService(&repositoryMock, nil)
 
-		repositoryMock.On("Get", "re", "name").Return(
+		repositoryMock.On("Get", "app", "name").Return(
 			map[string][]byte{},
 			apperrors.NotFound("Secret not found."),
 		)
@@ -262,7 +262,7 @@ func TestService_Get(t *testing.T) {
 		}
 
 		// when
-		_, err := service.Get("re", credentials)
+		_, err := service.Get("app", credentials)
 
 		// then
 		assert.Error(t, err)
@@ -277,7 +277,7 @@ func TestService_Get(t *testing.T) {
 		repositoryMock := mocks.Repository{}
 		service := NewService(&repositoryMock, nil)
 
-		repositoryMock.On("Get", "re", "name").Return(
+		repositoryMock.On("Get", "app", "name").Return(
 			map[string][]byte{},
 			apperrors.Internal("Internal error."),
 		)
@@ -288,7 +288,7 @@ func TestService_Get(t *testing.T) {
 		}
 
 		// when
-		_, err := service.Get("re", credentials)
+		_, err := service.Get("app", credentials)
 
 		// then
 		assert.Error(t, err)
@@ -309,11 +309,11 @@ func TestService_Update(t *testing.T) {
 
 		data := makeOauthMap("clientID", "clientSecret")
 
-		repositoryMock.On("Upsert", "re", "resourceName", "serviceID", data).Return(
+		repositoryMock.On("Upsert", "app", "resourceName", "serviceID", data).Return(
 			nil,
 		)
 
-		nameResolverMock.On("GetResourceName", "re", "serviceID").Return("resourceName")
+		nameResolverMock.On("GetResourceName", "app", "serviceID").Return("resourceName")
 
 		credentials := &model.Credentials{
 			Oauth: &model.Oauth{
@@ -325,7 +325,7 @@ func TestService_Update(t *testing.T) {
 
 		// when
 		res, err := service.Update(
-			"re",
+			"app",
 			"serviceID",
 			credentials,
 		)
@@ -348,11 +348,11 @@ func TestService_Update(t *testing.T) {
 
 		data := makeBasicAuthMap("username", "password")
 
-		repositoryMock.On("Upsert", "re", "resourceName", "serviceID", data).Return(
+		repositoryMock.On("Upsert", "app", "resourceName", "serviceID", data).Return(
 			nil,
 		)
 
-		nameResolverMock.On("GetResourceName", "re", "serviceID").Return("resourceName")
+		nameResolverMock.On("GetResourceName", "app", "serviceID").Return("resourceName")
 
 		credentials := &model.Credentials{
 			Basic: &model.Basic{
@@ -363,7 +363,7 @@ func TestService_Update(t *testing.T) {
 
 		// when
 		res, err := service.Update(
-			"re",
+			"app",
 			"serviceID",
 			credentials,
 		)
@@ -411,11 +411,11 @@ func TestService_Update(t *testing.T) {
 		service := NewService(&repositoryMock, &nameResolverMock)
 
 		secretData := makeBasicAuthMap("username", "password")
-		repositoryMock.On("Upsert", "re", "resourceName", "serviceID", secretData).Return(
+		repositoryMock.On("Upsert", "app", "resourceName", "serviceID", secretData).Return(
 			apperrors.Internal("Internal error."),
 		)
 
-		nameResolverMock.On("GetResourceName", "re", "serviceID").Return("resourceName")
+		nameResolverMock.On("GetResourceName", "app", "serviceID").Return("resourceName")
 
 		credentials := &model.Credentials{
 			Basic: &model.Basic{
@@ -426,7 +426,7 @@ func TestService_Update(t *testing.T) {
 
 		// when
 		_, err := service.Update(
-			"re",
+			"app",
 			"serviceID",
 			credentials,
 		)

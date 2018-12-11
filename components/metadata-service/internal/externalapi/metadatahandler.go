@@ -41,7 +41,7 @@ func (mh *metadataHandler) CreateService(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	serviceId, apperr := mh.ServiceDefinitionService.Create(mux.Vars(r)["remoteEnvironment"], &serviceDefinition)
+	serviceId, apperr := mh.ServiceDefinitionService.Create(mux.Vars(r)["application"], &serviceDefinition)
 	if apperr != nil {
 		contextLogger.Errorf("Creating new service failed, %s", apperr.Error())
 		mh.handleErrors(w, apperr)
@@ -62,7 +62,7 @@ func (mh *metadataHandler) GetService(w http.ResponseWriter, r *http.Request) {
 	contextLogger := httptools.ContextLoggerWithId(r)
 	httptools.DumpRequestToLog(r, contextLogger)
 
-	service, apperr := mh.ServiceDefinitionService.GetByID(mux.Vars(r)["remoteEnvironment"], mux.Vars(r)["serviceId"])
+	service, apperr := mh.ServiceDefinitionService.GetByID(mux.Vars(r)["application"], mux.Vars(r)["serviceId"])
 	if apperr != nil {
 		contextLogger.Errorf("Getting service by ID failed, %s", apperr.Error())
 		mh.handleErrors(w, apperr)
@@ -89,7 +89,7 @@ func (mh *metadataHandler) GetServices(w http.ResponseWriter, r *http.Request) {
 	contextLogger := httptools.ContextLogger(r)
 	httptools.DumpRequestToLog(r, contextLogger)
 
-	services, apperr := mh.ServiceDefinitionService.GetAll(mux.Vars(r)["remoteEnvironment"])
+	services, apperr := mh.ServiceDefinitionService.GetAll(mux.Vars(r)["application"])
 	if apperr != nil {
 		contextLogger.Errorf("Getting all services failed, %s", apperr.Error())
 		mh.handleErrors(w, apperr)
@@ -123,7 +123,7 @@ func (mh *metadataHandler) UpdateService(w http.ResponseWriter, r *http.Request)
 	}
 	serviceDefinition.ID = vars["serviceId"]
 
-	svc, apperr := mh.ServiceDefinitionService.Update(vars["remoteEnvironment"], &serviceDefinition)
+	svc, apperr := mh.ServiceDefinitionService.Update(vars["application"], &serviceDefinition)
 	if apperr != nil {
 		contextLogger.Errorf("Updating service failed, %s", apperr.Error())
 		mh.handleErrors(w, apperr)
@@ -152,7 +152,7 @@ func (mh *metadataHandler) DeleteService(w http.ResponseWriter, r *http.Request)
 
 	vars := mux.Vars(r)
 
-	apperr := mh.ServiceDefinitionService.Delete(vars["remoteEnvironment"], vars["serviceId"])
+	apperr := mh.ServiceDefinitionService.Delete(vars["application"], vars["serviceId"])
 	if apperr != nil {
 		contextLogger.Errorf("Deleting service failed, %s", apperr.Error())
 		mh.handleErrors(w, apperr)

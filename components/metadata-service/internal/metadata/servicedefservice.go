@@ -1,4 +1,4 @@
-// Package metadata contains components for accessing Kyma storage (Remote Environments, Minio)
+// Package metadata contains components for accessing Kyma storage (Applications, Minio)
 package metadata
 
 import (
@@ -83,7 +83,7 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 
 	apperr = sds.applicationRepository.Create(application, *service)
 	if apperr != nil {
-		return "", apperr.Append("Creating service in Remote Environment failed")
+		return "", apperr.Append("Creating service in Application failed")
 	}
 
 	return serviceDef.ID, nil
@@ -103,7 +103,7 @@ func (sds *serviceDefinitionService) GetByID(application, id string) (model.Serv
 func (sds *serviceDefinitionService) GetAll(application string) ([]model.ServiceDefinition, apperrors.AppError) {
 	services, apperr := sds.applicationRepository.GetAll(application)
 	if apperr != nil {
-		return nil, apperr.Append("Reading services from Remote Environment failed")
+		return nil, apperr.Append("Reading services from Application failed")
 	}
 
 	res := make([]model.ServiceDefinition, 0)
@@ -146,7 +146,7 @@ func (sds *serviceDefinitionService) Update(application string, serviceDef *mode
 
 	apperr = sds.applicationRepository.Update(application, *service)
 	if apperr != nil {
-		return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, updating service in Remote Environment repository failed", serviceDef.ID)
+		return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, updating service in Application repository failed", serviceDef.ID)
 	}
 
 	return convertServiceBaseInfo(*service), nil
@@ -161,7 +161,7 @@ func (sds *serviceDefinitionService) Delete(application, id string) apperrors.Ap
 
 	apperr = sds.applicationRepository.Delete(application, id)
 	if apperr != nil {
-		return apperr.Append("Deleting service from Remote Environment repository failed")
+		return apperr.Append("Deleting service from Application repository failed")
 	}
 
 	apperr = sds.specService.RemoveSpec(id)

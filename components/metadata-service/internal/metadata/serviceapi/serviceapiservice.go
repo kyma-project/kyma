@@ -14,7 +14,7 @@ import (
 type Service interface {
 	// New handles a new API. It creates all requires resources.
 	New(application, id string, api *model.API) (*applications.ServiceAPI, apperrors.AppError)
-	// Read reads API from Remote Environment API definition. It also reads all additional information.
+	// Read reads API from Application API definition. It also reads all additional information.
 	Read(application string, serviceApi *applications.ServiceAPI) (*model.API, apperrors.AppError)
 	// Delete removes API with given id.
 	Delete(application, id string) apperrors.AppError
@@ -76,15 +76,15 @@ func (sas defaultService) New(application, id string, api *model.API) (*applicat
 	return serviceAPI, nil
 }
 
-func (sas defaultService) Read(application string, remoteenvAPI *applications.ServiceAPI) (*model.API, apperrors.AppError) {
+func (sas defaultService) Read(application string, applicationAPI *applications.ServiceAPI) (*model.API, apperrors.AppError) {
 	api := &model.API{
-		TargetUrl:        remoteenvAPI.TargetUrl,
-		SpecificationUrl: remoteenvAPI.SpecificationUrl,
-		ApiType:          remoteenvAPI.ApiType,
+		TargetUrl:        applicationAPI.TargetUrl,
+		SpecificationUrl: applicationAPI.SpecificationUrl,
+		ApiType:          applicationAPI.ApiType,
 	}
 
-	if remoteenvAPI.Credentials.Type != "" {
-		credentials, err := sas.secretsService.Get(application, remoteenvAPI.Credentials)
+	if applicationAPI.Credentials.Type != "" {
+		credentials, err := sas.secretsService.Get(application, applicationAPI.Credentials)
 		if err != nil {
 			return nil, err
 		}
