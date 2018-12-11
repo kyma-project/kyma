@@ -3,10 +3,10 @@ package applications_test
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/applications/mocks"
-	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
