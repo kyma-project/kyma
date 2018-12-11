@@ -29,8 +29,8 @@ type remoteEnvironment struct {
 	Name                  string
 	Description           string
 	Labels                map[string]string
-	Services              remoteEnvironmentService
-	EnabledInEnvironments string
+	Services              []remoteEnvironmentService
+	EnabledInEnvironments []string
 	Status                string
 }
 
@@ -147,14 +147,14 @@ func reEventFields() string {
 	return fmt.Sprintf(`
         remoteEnvironmentEvent {
 			type
-    		remoteEnvironment{
+			remoteEnvironment{
 				%s
 			}
         }
     `, reFields())
 }
 
-func reFields() string {
+func reMutationOutputFields() string {
 	return `
 		name
 		description
@@ -162,9 +162,11 @@ func reFields() string {
     `
 }
 
-func reAllFields() string {
-	return fmt.Sprintf(`
-		%s
+func reFields() string {
+	return `
+		name
+		description
+		labels
 		enabledInEnvironments
 		status               
 		services {
@@ -179,7 +181,7 @@ func reAllFields() string {
 				accessLabel
 			}         
 		}          
-    `, reFields())
+    `
 }
 
 func waitForREReady(environment string, reCli *clientset.Clientset) error {
@@ -219,7 +221,7 @@ func createRE(c *graphql.Client, given *remoteEnvironment) (reCreateMutationResp
 					%s
 				}
 			}
-	`, reFields())
+	`, reMutationOutputFields())
 
 	req := graphql.NewRequest(query)
 	req.SetVar("name", given.Name)
@@ -238,7 +240,7 @@ func updateRE(c *graphql.Client, given *remoteEnvironment) (reUpdateMutationResp
 					%s
 				}
 			}
-	`, reFields())
+	`, reMutationOutputFields())
 
 	req := graphql.NewRequest(query)
 	req.SetVar("name", given.Name)
