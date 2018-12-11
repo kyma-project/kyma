@@ -17,7 +17,7 @@ func NewRequest(q string) *Request {
 	query := strings.Replace(q, "\t", " ", -1)
 	return &Request{
 		query: query,
-		req:   graphql.NewRequest(q),
+		req:   graphql.NewRequest(query),
 		vars:  make(map[string]interface{}),
 	}
 }
@@ -31,7 +31,7 @@ func (r *Request) AddHeader(key, value string) {
 	r.req.Header.Add(key, value)
 }
 
-func (r *Request) Json() ([]byte, error) {
+func (r *Request) JSON() ([]byte, error) {
 	requestBodyObj := struct {
 		Query     string                 `json:"query"`
 		Variables map[string]interface{} `json:"variables"`
