@@ -56,6 +56,7 @@ projects = [
     "tools/gcp-broker-provider": "gcp-broker-provider",
     "tools/static-users-generator": "static-users-generator",
     "tools/ark-plugins": "ark-plugins",
+    "tools/load-test": "load-test",
     "tests/test-logging-monitoring": "test-logging-monitoring",
     "tests/logging": "test-logging",
     "tests/acceptance": "acceptance-tests",
