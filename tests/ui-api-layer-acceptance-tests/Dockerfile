@@ -11,7 +11,7 @@ COPY ./dex/ ${BASE_APP_DIR}/dex/
 COPY ./domain/ ${BASE_APP_DIR}/domain/
 COPY ./graphql/ ${BASE_APP_DIR}/graphql/
 COPY ./installer/ ${BASE_APP_DIR}/installer/
-COPY ./k8s/ ${BASE_APP_DIR}/k8s/
+COPY ./client ${BASE_APP_DIR}/client/
 COPY ./waiter/ ${BASE_APP_DIR}/waiter/
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./upsbroker/ ${BASE_APP_DIR}/upsbroker/
