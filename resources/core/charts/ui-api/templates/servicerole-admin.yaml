@@ -11,8 +11,7 @@ spec:
  rules:
  - services: [ '{{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local' ]
    paths: ["/graphql"]
-   methods: ["POST
-   "]
+   methods: ["POST"]
    constraints:
    - key: request.headers[kyma-graphql-resources]
      values:
