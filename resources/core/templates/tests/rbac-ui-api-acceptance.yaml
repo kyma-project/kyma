@@ -38,6 +38,7 @@ rules:
   - apiGroups: ["authentication.kyma-project.io"]
     resources: ["idppresets"]
     verbs: ["get"]
+
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
