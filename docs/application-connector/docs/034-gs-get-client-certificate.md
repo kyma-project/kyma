@@ -3,7 +3,7 @@ title: Get the client certificate
 type: Getting Started
 ---
 
-After you create a Remote Environment (RE), connect it to an external solution to consume the solution's APIs and Event catalogs in Kyma. To accomplish this, get the client certificate for the external solution and register its services.
+After you create an Application (App), connect it to an external solution to consume the solution's APIs and Event catalogs in Kyma. To accomplish this, get the client certificate for the external solution and register its services.
 
 This guide shows you how to get the client certificate.
 
@@ -15,19 +15,19 @@ This guide shows you how to get the client certificate.
 
 To get the configuration URL which allows you to fetch the required configuration details, create a TokenRequest custom resource (CR). The controller which handles this CR kind adds the **status** section to the created CR. The **status** section contains the required configuration details.
 
-- Create a TokenRequest CR. The CR name must match the name of the RE for which you want to get the configuration details. Run: 
+- Create a TokenRequest CR. The CR name must match the name of the App for which you want to get the configuration details. Run:
   ```
   cat <<EOF | kubectl apply -f -
   apiVersion: connectorservice.kyma-project.io/v1alpha1
   kind: TokenRequest
   metadata:
-    name: {RE_NAME}
+    name: {APP_NAME}
   EOF
   ```
 
-- Fetch the TokenRequest CR you created to get the configuration details from the **status** section. Run: 
+- Fetch the TokenRequest CR you created to get the configuration details from the **status** section. Run:
   ```
-  kubectl get tokenrequest.connectorservice.kyma-project.io {RE_NAME} -o yaml
+  kubectl get tokenrequest.connectorservice.kyma-project.io {APP_NAME} -o yaml
   ```
   >**NOTE:** If the response doesn't contain the **status** section, wait for a few moments and fetch the CR again.
 
@@ -36,10 +36,10 @@ A successful call returns the following response:
   apiVersion: connectorservice.kyma-project.io/v1alpha1
   kind: TokenRequest
   metadata:
-    name: {RE_NAME}
+    name: {APP_NAME}
   status:
     expireAfter: 2018-11-22T18:38:44Z
-    remoteEnvironment: {RE_NAME}
+    remoteEnvironment: {APP_NAME}
     state: OK
     token: h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
     url: https://connector-service.kyma.local/v1/remoteenvironments/test/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
@@ -59,12 +59,12 @@ A successful call returns the following response:
 {
     "csrUrl": "{CSR_SIGNING_URL_WITH_TOKEN}",
     "api":{
-        "metadataUrl":      "https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/metadata/services",
-        "eventsUrl":        "https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/events",
-        "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/remoteenvironments/{RE_NAME}",
+        "metadataUrl":      "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
+        "eventsUrl":        "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events",
+        "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/remoteenvironments/{APP_NAME}",
     },
     "certificate":{
-        "subject":"OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={RE_NAME}",
+        "subject":"OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}",
         "extensions": "",
         "key-algorithm": "rsa2048",
     }
@@ -79,10 +79,10 @@ When you connect an external solution to a local Kyma deployment, you must set t
   ```
 - Set it for the Metadata Service and the Event Service using these calls:
   ```
-  curl https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+  curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
   ```
   ```
-  curl https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/events --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+  curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/events --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
   ```
 
 ## Generate a CSR and send it to Kyma
@@ -90,14 +90,14 @@ When you connect an external solution to a local Kyma deployment, you must set t
 Generate a CSR using the values obtained in the previous step:
 ```
 openssl genrsa -out generated.key 2048
-openssl req -new -sha256 -out generated.csr -key generated.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN={RE_NAME}"
+openssl req -new -sha256 -out generated.csr -key generated.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN={APP_NAME}"
 openssl base64 -in generated.csr
 ```
 
 Send the encoded CSR to Kyma. Run:
 
 ```
-curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' https://connector-service.{CLUSTER_DOMAIN}/v1/remoteenvironments/{RE_NAME}/client-certs?token=example-token-456
+curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' https://connector-service.{CLUSTER_DOMAIN}/v1/remoteenvironments/{APP_NAME}/client-certs?token=example-token-456
 ```
 
 The response contains a valid client certificate signed by the Kyma Certificate Authority:

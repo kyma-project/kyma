@@ -5,15 +5,15 @@ type: Details
 
 ## Client certificates
 
-To provide maximum security, the Application Connector uses TLS protocol with Client Authentication enabled. As a result, whoever wants to connect to the Application Connector must present a valid client certificate, which is dedicated to a specific Remote Environment. In this way, the traffic is fully encrypted and the client has a valid identity.
+To provide maximum security, the Application Connector uses TLS protocol with Client Authentication enabled. As a result, whoever wants to connect to the Application Connector must present a valid client certificate, which is dedicated to a specific Application (App). In this way, the traffic is fully encrypted and the client has a valid identity.
 
 ## Disable SSL certificate verification
 
-You can disable the SSL certificate verification in the communication between Kyma and a Remote Environment to allow Kyma to send requests and data to an unsecured Remote Environment. Disabling the certificate verification can be useful in certain testing scenarios.
+You can disable the SSL certificate verification in the communication between Kyma and an App to allow Kyma to send requests and data to an unsecured App. Disabling the certificate verification can be useful in certain testing scenarios.
 
->**NOTE:** By default, the SSL certificate verification is enabled when sending data and requests to every Remote Environment.
+>**NOTE:** By default, the SSL certificate verification is enabled when sending data and requests to every App.
 
-Follow these steps to disable SSL certificate verification for communication between Kyma and an existing Remote Environment:
+Follow these steps to disable SSL certificate verification for communication between Kyma and an existing App:
 
   1. Edit the `{RE_NAME}-proxy-service` Deployment in the `kyma-integration` Namespace. Run:
     ```

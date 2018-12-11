@@ -3,12 +3,12 @@ info:
   version: '1.0.0'
   title: 'Kyma Connector API'
 paths:
-  /v1/remoteenvironments/{remoteEnvName}/tokens:
+  /v1/applications/{APP_NAME}/tokens:
     post:
       parameters:
       - in: path
-        name: remoteEnvName
-        description: 'Name of remote environment.'
+        name: APP_NAME
+        description: 'Name of the Application.'
         required: true
         schema:
           type: string
@@ -28,12 +28,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/appError'
-  /v1/remoteenvironments/{remoteEnvName}/info:
+  /v1/applications/{APP_NAME}/info:
     get:
       parameters:
       - in: path
-        name: remoteEnvName
-        description: 'Name of remote environment.'
+        name: APP_NAME
+        description: 'Name of the Application.'
         required: true
         schema:
           type: string
@@ -65,12 +65,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/appError'
-  /v1/remoteenvironments/{remoteEnvName}/client-certs:
+  /v1/applications/{APP_NAME}/client-certs:
     post:
       parameters:
       - in: path
-        name: remoteEnvName
-        description: 'Name of remote environment.'
+        name: APP_NAME
+        description: 'Name of the Application.'
         required: true
         schema:
           type: string
@@ -128,7 +128,7 @@ components:
       properties:
         url:
           type: 'string'
-          example: 'https://cert-service.kyma.cluster.cx/v1/remoteenvironments/{remote-environment-name}/info?token=1edfc34g'
+          example: 'https://cert-service.kyma.cluster.cx/v1/applications/{APP_NAME}/info?token=1edfc34g'
         token:
           type: 'string'
           example: '1edfc34g'
@@ -137,7 +137,7 @@ components:
       properties:
         subject:
           type: 'string'
-          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={remote-environment-name}'
+          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}'
         extensions:
           type: 'string'
         key-algorithm:
@@ -148,19 +148,19 @@ components:
       properties:
         metadataUrl:
           type: 'string'
-          example: 'gateway.wormhole.kyma.cluster.cx/{remote-environment-name}/v1/metadata/services'
+          example: 'gateway.wormhole.kyma.cluster.cx/{APP_NAME}/v1/metadata/services'
         eventsUrl:
           type: 'string'
-          example: 'gateway.wormhole.kyma.cluster.cx/{remote-environment-name}/v1/events'
+          example: 'gateway.wormhole.kyma.cluster.cx/{APP_NAME}/v1/events'
         certificatesUrl:
           type: 'string'
-          example: 'certificate-service.kyma.cluster.cx/v1/remoteenvironments/{remote-environment-name}'
+          example: 'certificate-service.kyma.cluster.cx/v1/applications/{APP_NAME}'
     infoResponse:
       type: 'object'
       properties:
         url:
           type: 'string'
-          example: 'https://cert-service.kyma.cluster.cx/v1/remoteenvironments/{remote-environment-name}/client-certs?token=1edfc34g'
+          example: 'https://cert-service.kyma.cluster.cx/v1/applications/{APP_NAME}/client-certs?token=1edfc34g'
         api:
           $ref: '#/components/schemas/apiURLs'
         certificate:

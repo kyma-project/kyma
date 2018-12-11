@@ -8,13 +8,13 @@ This guide shows how to create a simple lambda function and trigger it with an e
 
 ## Prerequisites
 
-- A Remote Environment (RE) bound to the `production` Environment
-- Client certificates generated for the connected RE.
+- An Application (App) bound to the `production` Environment
+- Client certificates generated for the connected App.
 
 
 ## Steps
 
-1. Register a service with the following specification to the desired Remote Environment.
+1. Register a service with the following specification to the desired App.
 >**NOTE:** To learn how to register a service, see the **Register a service** Getting Started Guide.
 ```json
 {
@@ -115,7 +115,7 @@ spec:
             const options = {
                 url: url,
             };
-              
+
             sendReq(url, resolve, reject)
         })
     } }
@@ -166,14 +166,14 @@ spec:
   include_subscription_name_header: true
   max_inflight: 400
   push_request_timeout_ms: 2000
-  source_id: {RE_NAME}
+  source_id: {APP_NAME}
 EOF
 ```
 
 6. Send an event to trigger the created lambda.
   - On a cluster:
     ```
-    curl -X POST https://gateway.{CLUSTER_DOMAIN}/{RE_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+    curl -X POST https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
     '{
         "event-type": "exampleEvent",
         "event-type-version": "v1",
@@ -184,7 +184,7 @@ EOF
     ```
   - On a local deployment:
     ```
-    curl -X POST https://gateway.kyma.local:{NODE_PORT}/{RE_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
+    curl -X POST https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/events -k --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -d \
     '{
         "event-type": "exampleEvent",
         "event-type-version": "v1",

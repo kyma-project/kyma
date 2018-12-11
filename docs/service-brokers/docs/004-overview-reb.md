@@ -1,10 +1,10 @@
 ---
-title: Remote Environment Broker
+title: Application Broker
 type: Overview
 ---
 
-The Remote Environment Broker (REB) provides remote environments in the Service Catalog. A remote environment represents the environment connected to the Kyma instance. The Remote Environment Broker enables the integration of independent remote environments within Kyma. It also allows you to extend the functionality of existing systems.
+The Application Broker (APB) provides Applications in the Service Catalog. An Application represents an external solution connected to the Kyma instance. The APB enables the integration of independent Applications within Kyma. It also allows you to extend the functionality of existing systems.
 
-The REB observes all the remote environment custom resources and exposes their APIs and/or Events as ServiceClasses to the Service Catalog. When the list of remote environments' ServiceClasses is available in the Service Catalog, you can create an EnvironmentMapping, provision those ServiceClasses, and enable them for Kyma services.
+The APB observes all the Application custom resources and exposes their APIs and Events as ServiceClasses to the Service Catalog. When the list of remote the ServiceClasses of an Application is available in the Service Catalog, you can create an ApplicationMapping, provision those ServiceClasses, and enable them for Kyma services.
 
-The REB implements the Service Broker API. For more details about the Service Brokers, see the Service Brokers **Overview** documentation.
+The APB implements the [Open Service Broker API](https://www.openservicebrokerapi.org/). For more details about the Service Brokers, see the Service Brokers **Overview** documentation.

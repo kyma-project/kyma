@@ -10,7 +10,7 @@ type: Architecture
 
 The Nginx Ingress Controller exposes the Application Connector by assigning a public IP address and a DNS name to it.
 The DNS name of the Ingress is cluster-dependant and follows the `gateway.{cluster-dns}` format, for example `gateway.servicemanager.cluster.kyma.cx`.
-You can access every exposed Remote Environment through its Gateway by using the assigned path. For example, to reach the Gateway for the `ec-default` Remote Environment, use this URL: `gateway.servicemanager.cluster.kyma.cx/ec-default`. The Nginx Ingress Controller secures the endpoint with certificate validation. Each call must include a valid client certificate which is Remote Environment-specific.
+You can access every exposed Application (App) through its Gateway by using the assigned path. For example, to reach the Gateway for the `user-custom` App, use this URL: `gateway.servicemanager.cluster.kyma.cx/user-custom`. The Nginx Ingress Controller secures the endpoint with certificate validation. Each call must include a valid client certificate which is App-specific.
 
 ## Connector Service
 
@@ -28,20 +28,20 @@ The system creates a new Kubernetes service for each registered API. Additionall
 
 ## Event Service
 
-The Event Service sends Events to the Kyma Event Bus and enriches the events with metadata that indicates the source of the Event.
-This allows to route the Events to lambda functions and services based on their source Remote Environment.
+The Event Service sends Events to the Kyma Event Bus and enriches the Events with metadata that indicates the source of the Event.
+This allows to route the Events to Lambda functions and Services based on their source App.
 
-## Remote Environment
+## Application
 
-A Remote Environment (RE) represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or the Event Bus.
-Using the components of the Application Connector, the RE creates a coherent identity for a connected external solution and ensures its separation.
-All REs are created through the RemoteEnvironment custom resource, which also stores all of the relevant metadata. You can map a RE to many Kyma Environments and use the APIs and the Event Catalogs of the connected external solution within their context.
+An App represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or the Event Bus.
+Using the components of the Application Connector, the App creates a coherent identity for a connected external solution and ensures its separation.
+All Apps are created through the Application custom resource, which also stores all of the relevant metadata. You can map an App to many Kyma Environments and use the APIs and the Event Catalogs of the connected external solution within their context.
 
 ## Application Operator
 
-The operator listens for creating or deleting the RemoteEnvironment custom resources and acts accordingly, either provisioning or de-provisioning an instance of Proxy Service and Event Service for every custom resource.         
+The operator listens for creating or deleting the Application custom resources and acts accordingly, either provisioning or de-provisioning an instance of Proxy Service and Event Service for every custom resource.         
 
->**NOTE:** Every RemoteEnvironment custom resource corresponds to a single RE to which you can connect an external solution.
+>**NOTE:** Every Application custom resource corresponds to a single App to which you can connect an external solution.
 
 ## Proxy Service
 

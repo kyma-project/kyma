@@ -1,37 +1,37 @@
 ---
-title: Create a new Remote Environment
+title: Create a new Application
 type: Getting Started
 ---
 
-The Application Operator listens for the creation of Remote Environment custom resources. It provisions and de-provisions the necessary deployments for every created Remote Environment (RE).
+The Application Operator listens for the creation of Application custom resources. It provisions and de-provisions the necessary deployments for every created Application (App).
 
->**NOTE:** A Remote Environment represents a single connected external solution.
+>**NOTE:** An App represents a single connected external solution.
 
-To create a new RE, run this command:
+To create a new App, run this command:
 
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: RemoteEnvironment
 metadata:
-  name: {RE_NAME}
+  name: {APP_NAME}
 spec:
-  description: {RE_DESCRIPTION}
+  description: {APP_DESCRIPTION}
   labels:
     region: us
     kind: production
 EOF
 ```
 
-## Check the RE status
+## Check the APP status
 
-To check the status of the created RE and show the output in the `yaml` format, run this command:
+To check the status of the created APP and show the output in the `yaml` format, run this command:
 ```
-kubectl get re {RE_NAME} -o yaml
+kubectl get re {APP_NAME} -o yaml
 ```
 
-A successful response returns the RemoteEnvironment custom resource with the specified name. The custom resource has the **status** section added.
-This is an example response: 
+A successful response returns the Application custom resource with the specified name. The custom resource has the **status** section added.
+This is an example response:
 
 ```
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
@@ -46,8 +46,8 @@ metadata:
   selfLink: /apis/applicationconnector.kyma-project.io/v1alpha1/remoteenvironments/test1
   uid: f8ca5595-ee5d-11e8-acb2-000d3a443243
 spec:
-  accessLabel: {RE_NAME}
-  description: {RE_DESCRIPTION}
+  accessLabel: {APP_NAME}
+  description: {APP_DESCRIPTION}
   labels: {}
   services: []
 status:
