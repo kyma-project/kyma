@@ -1,0 +1,22 @@
+{{ if .Values.tests.enabled }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .Chart.Name }}-tests
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+    "helm-chart-test": "true"
+spec:
+  containers:
+    - name: {{ .Chart.Name }}-tests
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_operator_tests.dir }}application-operator-tests:{{ .Values.global.application_operator_tests.version }}
+      imagePullPolicy: {{ .Values.tests.pullPolicy }}
+      env:
+      - name: NAMESPACE
+        value: {{ .Values.global.namespace }}
+      - name: TILLER_HOST
+        value: {{ .Values.controller.args.tillerUrl }}
+  restartPolicy: Never
+{{ end }}

@@ -37,9 +37,9 @@ A Remote Environment (RE) represents an external solution connected to Kyma. It 
 Using the components of the Application Connector, the RE creates a coherent identity for a connected external solution and ensures its separation.
 All REs are created through the RemoteEnvironment custom resource, which also stores all of the relevant metadata. You can map a RE to many Kyma Environments and use the APIs and the Event Catalogs of the connected external solution within their context.
 
-## Remote Environment controller
+## Application Operator
 
-The controller listens for creating or deleting the RemoteEnvironment custom resources and acts accordingly, either provisioning or de-provisioning an instance of Proxy Service and Event Service for every custom resource.         
+The operator listens for creating or deleting the RemoteEnvironment custom resources and acts accordingly, either provisioning or de-provisioning an instance of Proxy Service and Event Service for every custom resource.         
 
 >**NOTE:** Every RemoteEnvironment custom resource corresponds to a single RE to which you can connect an external solution.
 
