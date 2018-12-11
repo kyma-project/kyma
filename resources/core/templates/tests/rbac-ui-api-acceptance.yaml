@@ -38,6 +38,9 @@ rules:
   - apiGroups: ["authentication.kyma-project.io"]
     resources: ["idppresets"]
     verbs: ["get"]
+  - apiGroups: ["applicationconnector.kyma-project.io"]
+    resources: ["remoteenvironments"]
+    verbs: ["create", "update", "delete"]
 
 ---
 kind: ClusterRoleBinding

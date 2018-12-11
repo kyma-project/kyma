@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/machinebox/graphql"
 )
@@ -13,8 +14,9 @@ type Request struct {
 }
 
 func NewRequest(q string) *Request {
+	query := strings.Replace(q, "\t", " ", -1)
 	return &Request{
-		query: q,
+		query: query,
 		req:   graphql.NewRequest(q),
 		vars:  make(map[string]interface{}),
 	}
