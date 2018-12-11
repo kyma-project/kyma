@@ -65,7 +65,6 @@ if [ $? != 0 ]; then
 else echo -e "${GREEN}√ go test${NC}"
 fi
 
-goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "/vendor")
 
 ##
 # GO IMPORTS & FMT
@@ -77,6 +76,7 @@ if [ ${buildGoImportResult} != 0 ]; then
 	exit 1
 fi
 
+goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "/vendor")
 goImportsResult=$(echo "${goFilesToCheck}" | xargs -L1 ./goimports-vendored -w -l)
 rm goimports-vendored
 
