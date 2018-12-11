@@ -233,7 +233,12 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 	if usageStatus != nil {
 		usageStatus.wrapMessageForFailed(fmt.Sprintf("Process error during %d attempts from %d", retry, c.maxRetires))
 
-		bindingUsage, _ := c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
+		bindingUsage, err := c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
+		if err != nil {
+			c.log.Errorf("Cannot get ServiceBindingUsage %s/%s, got error: %v", namespace, name, err)
+			return true
+		}
+
 		condition := sbuStatus.NewUsageCondition(usageStatus.sbuType, usageStatus.condition, usageStatus.reason, usageStatus.message)
 		if err := c.updateStatus(bindingUsage, *condition); err != nil {
 			c.log.Errorf("Error processing %q while updating sbu status with condition %+v", key, condition)
