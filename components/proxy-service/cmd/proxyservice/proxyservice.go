@@ -34,7 +34,7 @@ func main() {
 
 	serviceDefinitionService, err := newServiceDefinitionService(
 		options.namespace,
-		options.remoteEnvironment,
+		options.application,
 	)
 
 	if err != nil {
@@ -83,7 +83,7 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 		proxyConfig := proxy.Config{
 			SkipVerify:    options.skipVerify,
 			ProxyTimeout:  options.proxyTimeout,
-			Application:   options.remoteEnvironment,
+			Application:   options.application,
 			ProxyCacheTTL: options.proxyCacheTTL,
 		}
 		return proxy.New(serviceDefinitionService, authStrategyFactory, proxyConfig)
