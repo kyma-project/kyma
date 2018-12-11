@@ -71,8 +71,8 @@
 [[projects]]
   name = "github.com/imdario/mergo"
   packages = ["."]
-  revision = "9d5f1277e9a8ed20c3684bda8fde67c05628518c"
-  version = "v0.3.4"
+  revision = "9f23e2d6bd2a77f959b2bf6acdbefd708a83a4a4"
+  version = "v0.3.6"
 
 [[projects]]
   name = "github.com/json-iterator/go"
@@ -108,7 +108,11 @@
     "components/idppreset/pkg/apis/authentication/v1alpha1",
     "components/idppreset/pkg/client/clientset/versioned",
     "components/idppreset/pkg/client/clientset/versioned/scheme",
-    "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1"
+    "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1",
+    "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
+    "components/remote-environment-broker/pkg/client/clientset/versioned",
+    "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
+    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
   ]
   revision = "01af467a7485d695790da907f60d0e617ad65120"
 
@@ -354,6 +358,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0d3835c358fcd271ab4611b48bc5822c39311cdca5a7d3508e11491ccdde097f"
+  inputs-digest = "ace491ba8c78a2cf0b6f1dd1f524fa89c6f7ab8724dedd6219b37841ad249d0d"
   solver-name = "gps-cdcl"
   solver-version = 1
