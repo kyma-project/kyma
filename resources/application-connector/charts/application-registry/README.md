@@ -1,7 +1,7 @@
-# Metadata service
+# Application Registry
 
 ## Overview
-Metadata service is a global component responsible for managing metadata of remote APIs.
+Application Registry is a global component responsible for managing metadata of remote APIs.
 
 ## Configuration
 This service has the following parameters:

@@ -1,7 +1,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: metadata-service-metrics
+  name: application-registry-metrics
   namespace: kyma-system
   labels:
     prometheus: core

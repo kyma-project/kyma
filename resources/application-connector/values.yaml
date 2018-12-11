@@ -12,10 +12,10 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir: pr/
-    version: PR-2019
+    version: PR-1993
   application_operator_tests:
     dir: pr/
-    version: PR-2019
+    version: PR-1993
   connector_service:
     dir: pr/
     version: PR-2005
@@ -28,18 +28,18 @@ global:
   event_service:
     dir: develop/
     version: 6e0a7fe2
-  proxy_service:
+  application_proxy:
     dir: pr/
-    version: PR-1996
+    version: PR-1993
   gateway_tests:
     dir: pr/
     version: PR-2019
-  metadata_service:
+  application_registry:
     dir: pr/
-    version: PR-1996
-  metadata_service_tests:
+    version: PR-1993
+  application_registry_tests:
     dir: pr/
-    version: PR-1996
+    version: PR-1993
   application_broker:
     dir: pr/
     version: PR-2040
