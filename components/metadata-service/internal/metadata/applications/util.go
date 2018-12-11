@@ -5,8 +5,8 @@ import (
 
 	"crypto/sha1"
 	"encoding/hex"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/apis/applicationconnector/v1alpha1"
 	log "github.com/sirupsen/logrus"
 	"regexp"
 	"strings"

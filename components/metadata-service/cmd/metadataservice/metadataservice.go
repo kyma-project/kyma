@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/httptools"
@@ -22,7 +23,6 @@ import (
 	metauuid "github.com/kyma-project/kyma/components/metadata-service/internal/metadata/uuid"
 	"github.com/kyma-project/kyma/components/metadata-service/internal/monitoring"
 	istioclient "github.com/kyma-project/kyma/components/metadata-service/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/components/remote-environment-controller/pkg/client/clientset/versioned"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
