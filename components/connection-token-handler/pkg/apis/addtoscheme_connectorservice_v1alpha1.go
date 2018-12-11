@@ -1,7 +1,7 @@
 package apis
 
 import (
-	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/connectorservice/v1alpha1"
+	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 )
 
 func init() {

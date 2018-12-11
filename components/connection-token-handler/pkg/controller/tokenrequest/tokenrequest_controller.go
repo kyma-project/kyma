@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	connectorservicev1alpha1 "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/connectorservice/v1alpha1"
+	connectorservicev1alpha1 "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
