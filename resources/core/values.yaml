@@ -73,8 +73,9 @@ global:
     dir: develop/
     version: 3ea08e78
   ui_api_layer_acceptance_tests:
-    dir: develop/
-    version: 6be9cda2
+  #TODO: Update with proper values
+    dir: pr/
+    version: PR-2002
 
 test:
   acceptance:

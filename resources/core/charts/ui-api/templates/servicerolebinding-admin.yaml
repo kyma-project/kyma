@@ -10,7 +10,7 @@ metadata:
 spec:
   subjects:
   - properties:
-      request.auth.token[groups]: 'kyma-admin' #TODO: Change with proper rule
+      request.auth.claims[email]: 'admin@kyma.cx' #TODO: Change with proper rule that works on cluster and local machine
   roleRef:
     kind: ServiceRole
     name: "graphql-admin"
