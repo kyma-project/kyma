@@ -2,10 +2,10 @@ package v1alpha2
 
 import "testing"
 
-var fixHostnameTestCases = []struct{
-	hostname string
+var fixHostnameTestCases = []struct {
+	hostname   string
 	domainName string
-	expected string
+	expected   string
 }{
 	{"my-service", "kyma.local", "my-service.kyma.local"},
 	{"my-service.kyma.local", "kyma.local", "my-service.kyma.local"},

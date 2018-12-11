@@ -1,0 +1,8 @@
+{
+    "spec": {
+      "displayName": "Cloud Bigtable",
+      "description": "Documentation for Cloud Bigtable",
+      "id": "b1de7f2f-1e84-44ae-b4f0-2dcb613c17c9",
+      "type":"Service Class"
+    }
+}

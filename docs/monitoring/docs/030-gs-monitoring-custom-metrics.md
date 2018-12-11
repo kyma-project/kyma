@@ -85,10 +85,10 @@ Find the source code for the sample application [here](https://github.com/kyma-p
 
 ### Access the exposed metrics in Prometheus
 
- Run the `port-forward` command on the `core-prometheus` service:
+ Run the `port-forward` command on the `monitoring-prometheus` service:
 
 ```bash
-kubectl port-forward svc/core-prometheus -n kyma-system 9090:9090
+kubectl port-forward svc/monitoring-prometheus -n kyma-system 9090:9090
 Forwarding from 127.0.0.1:9090 -> 9090
 Forwarding from [::1]:9090 -> 9090
 ```
@@ -115,14 +115,14 @@ In Kyma, the Prometheus server discovers all ServiceMonitors through the **servi
 
 In this example, the ServiceMonitor selects a **selector** with all services matching the `k8s-app: metrics` label. Find the complete yaml [here](https://github.com/kyma-project/examples/blob/master/monitoring-custom-metrics/deployment/service-monitor.yaml).
 
-In Kyma, there is a [template](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/monitoring/charts/prometheus/templates/servicemonitors.yaml) which serves to discover a list of ServiceMonitors.
+In Kyma, there is a [template](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/charts/prometheus/templates/servicemonitors.yaml) which serves to discover a list of ServiceMonitors.
 
 ### Add a Custom Dashboard in Grafana
 
 Out of the box, Kyma includes a set of dashboards. The users can create their own **Grafana Dashboard** by using the Grafana UI. The dashboards persist even after the Pod restarts.
 
 For details on how to create dashboards in Grafana, see the following documents:
-- [Grafana in Kyma](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/monitoring/charts/grafana/README.md)
+- [Grafana in Kyma](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/charts/grafana/README.md)
 - [Grafana - Getting started](http://docs.grafana.org/guides/getting_started/)
 - [Export and Import dashboards](http://docs.grafana.org/reference/export_import/)
 - [Grafana - Dashboard API](http://docs.grafana.org/http_api/dashboard/)

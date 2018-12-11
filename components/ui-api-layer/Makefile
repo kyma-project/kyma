@@ -2,6 +2,8 @@ IMG_NAME = ui-api-layer
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(IMG_NAME)
 TAG = $(DOCKER_TAG)
 
+.PHONY: ci-pr ci-master ci-release resolve build-and-test build-image push-image
+
 ci-pr: resolve build-and-test build-image push-image
 ci-master: resolve build-and-test build-image push-image
 ci-release: resolve build-and-test build-image push-image

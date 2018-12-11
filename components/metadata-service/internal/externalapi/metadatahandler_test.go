@@ -397,8 +397,8 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		assert.Equal(t, "http://oauth.com", serviceDetails.Api.Credentials.Oauth.URL)
 		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientID)
 		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientSecret)
-		assert.Equal(t, apiSpec, raw2Json(t, serviceDetails.Api.Spec))
-		assert.Equal(t, eventsSpec, raw2Json(t, serviceDetails.Events.Spec))
+		assert.Equal(t, apiSpec, raw2Json(t, json.RawMessage(serviceDetails.Api.Spec)))
+		assert.Equal(t, eventsSpec, raw2Json(t, json.RawMessage(serviceDetails.Events.Spec)))
 		assert.Equal(t, "documentation name", serviceDetails.Documentation.DisplayName)
 		assert.Equal(t, "documentation description", serviceDetails.Documentation.Description)
 		assert.Equal(t, "documentation type", serviceDetails.Documentation.Type)
@@ -521,7 +521,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		assert.Equal(t, "http://oauth.com", serviceDetails.Api.Credentials.Oauth.URL)
 		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientID)
 		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientSecret)
-		assert.Equal(t, apiSpec, raw2Json(t, serviceDetails.Api.Spec))
+		assert.Equal(t, apiSpec, raw2Json(t, json.RawMessage(serviceDetails.Api.Spec)))
 		assert.Nil(t, serviceDetails.Events)
 		assert.Nil(t, serviceDetails.Documentation)
 		assert.Equal(t, http.StatusOK, rr.Code)
@@ -695,6 +695,64 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		serviceDefinitionService.AssertExpectations(t)
 	})
+
+	t.Run("should return requested service with non json API spec", func(t *testing.T) {
+		// given
+		nonJsonApiSpec := []byte("non json api spec")
+
+		serviceDefinition := model.ServiceDefinition{
+			Name:        "service name",
+			Provider:    "service provider",
+			Description: "service description",
+			Api: &model.API{
+				TargetUrl: "http://service.com",
+				Credentials: &model.Credentials{
+					Oauth: &model.Oauth{
+						URL:          "http://oauth.com",
+						ClientID:     "clientId",
+						ClientSecret: "clientSecret",
+					},
+				},
+				Spec: nonJsonApiSpec,
+			},
+		}
+
+		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
+		serviceDefinitionService.On("GetByID", "re", "123456").Return(serviceDefinition, nil)
+		detailedErrorResponse := false
+
+		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
+
+		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/123456", nil)
+		require.NoError(t, err)
+
+		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "123456"})
+		rr := httptest.NewRecorder()
+
+		// when
+		metadataHandler.GetService(rr, req)
+
+		// then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var serviceDetails ServiceDetails
+		err = json.Unmarshal(responseBody, &serviceDetails)
+
+		require.NoError(t, err)
+		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
+		assert.Equal(t, "service name", serviceDetails.Name)
+		assert.Equal(t, "service provider", serviceDetails.Provider)
+		assert.Equal(t, "service description", serviceDetails.Description)
+		assert.Equal(t, "http://service.com", serviceDetails.Api.TargetUrl)
+		assert.Equal(t, "http://oauth.com", serviceDetails.Api.Credentials.Oauth.URL)
+		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientID)
+		assert.Equal(t, stars, serviceDetails.Api.Credentials.Oauth.ClientSecret)
+		assert.Equal(t, []byte("\"non json api spec\""), []byte(serviceDetails.Api.Spec))
+		assert.Nil(t, serviceDetails.Events)
+		assert.Nil(t, serviceDetails.Documentation)
+		assert.Equal(t, http.StatusOK, rr.Code)
+	})
 }
 
 func TestMetadataHandler_UpdateService(t *testing.T) {
@@ -751,7 +809,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", serviceDefinition).Return(*serviceDefinition, nil)
+		serviceDefinitionService.On("Update", "re", serviceDefinitionWithID(serviceDefinition, "1234")).Return(*serviceDefinition, nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -845,7 +903,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", serviceDefinition).Return(*serviceDefinition, nil)
+		serviceDefinitionService.On("Update", "re", serviceDefinitionWithID(serviceDefinition, "1234")).Return(*serviceDefinition, nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -936,7 +994,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "1234", mock.Anything).Return(model.ServiceDefinition{}, apperrors.Internal(""))
+		serviceDefinitionService.On("Update", "re", mock.Anything).Return(model.ServiceDefinition{}, apperrors.Internal(""))
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -984,7 +1042,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		})
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", "654321", serviceDefinition).Return(model.ServiceDefinition{}, apperrors.NotFound(""))
+		serviceDefinitionService.On("Update", "re", serviceDefinitionWithID(serviceDefinition, "654321")).Return(model.ServiceDefinition{}, apperrors.NotFound(""))
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -1062,4 +1120,9 @@ func raw2Json(t *testing.T, rawMsg json.RawMessage) testSpec {
 	err := json.Unmarshal(rawMsg, &spec)
 	require.NoError(t, err)
 	return spec
+}
+
+func serviceDefinitionWithID(serviceDef *model.ServiceDefinition, id string) *model.ServiceDefinition {
+	serviceDef.ID = id
+	return serviceDef
 }

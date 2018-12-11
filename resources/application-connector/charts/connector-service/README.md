@@ -10,7 +10,7 @@ The Connector Service has the following parameters, that can be set through the 
 - **internalAPIPort** - This port exposes the Connector Service within Kubernetes cluster. The default port is `8080`.
 - **namespace** - Namespace where Connector Service is deployed. The default Namespace is `kyma-integration`.
 - **tokenLength** - Length of registration tokens. The default value is `64`.
-- **tokenExpirationMinutes** - Time after which tokens expire and are no longer valid. The default value is `60` minutes.
+- **tokenExpirationMinutes** - Time after which tokens expire and are no longer valid. The default value is `5` minutes.
 - **domainName** - Domain name of the cluster, used for generating URL. Default domain name is `.wormhole.cluster.kyma.cx`.
 - **certificateServiceHost** - Host at which this service is accessible, used for generating URL. Default host is `cert-service.wormhole.cluster.kyma.cx`.
 

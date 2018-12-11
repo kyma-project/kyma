@@ -13,9 +13,6 @@
 # The `installation` PowerShell scripts
 /installation/**/*.ps1 @crabtree @venturasr
 
-# The `kyma-installer` directory
-/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek @jasiu001 @adamwalach
-
 # The `prow` directory
 /prow/ @aszecowka @strekm @suleymanakbas91 @crabtree @michal-hudy @pbochynski
 
@@ -32,7 +29,7 @@
 /resources/application-connector/values.yaml @kyma-project/developers
 
 # The `heptio ark` chart
-/resources/ark/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+/resources/ark/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @sjanota
@@ -54,6 +51,9 @@
 
 # The `connector-service` subchart
 /resources/application-connector/charts/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
+# The `connection-token-handler` subchart
+/resources/application-connector/charts/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `metadata-service` subchart
 /resources/application-connector/charts/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -86,13 +86,13 @@
 /resources/core/charts/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `monitoring` subchart
-/resources/core/charts/monitoring/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+/resources/monitoring/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The `kubeless` subchart
-/resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+/resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The `logging` subchart
-/resources/core/charts/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+/resources/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # The `minio` subchart
 /resources/core/charts/minio/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
@@ -119,7 +119,7 @@
 /resources/core/charts/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The `docs` subchart
-/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
+/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `ui-api` subchart
 /resources/core/charts/ui-api/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -139,17 +139,20 @@
 # The `helm-broker-repo` subdirectory
 /resources/helm-broker-repo/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The `istio` subdirectory
+# The `istio` chart
 /resources/istio/ @piotrmsc @kubadz @sjanota
 
-# The `istio-kyma-patch` subdirectory
+# The `istio-kyma-patch` chart
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @sjanota
+
+# The `knative` chart
+/resources/knative/ @kyma-project/wg-knative
 
 # The `jaeger` charts
 /resources/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
 
 # The `prometheus-operator` chart
-/resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+/resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The `remote environment` chart
 /resources/remote-environments/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -194,6 +197,9 @@
 # Connector Service Component
 /components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
+# Connector Service Token Request Component
+/components/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
 # Metadata Service Component
 /components/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
@@ -221,10 +227,10 @@
 /tests/test-environemnts/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree
 
 # test-logging-monitoring tests
-/tests/test-logging-monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+/tests/test-logging-monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # test-logging tests
-/tests/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+/tests/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # api-controller acceptance tests
 /tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @sjanota
@@ -257,17 +263,29 @@
 # The etcd-tls-setup directory
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
 
+# The gcp-broker-provider directory
+/tools/gcp-broker-provider/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
+
 # The changelog-generator directory
 /tools/changelog-generator/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
+
+# The docsbuilder directory
+/tools/docsbuilder/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The static-users-generator directory
 /tools/static-users-generator/ @piotrmsc @sjanota @kubadz 
 
 # The tools/ark-plugins directory
-/tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh
+/tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
-# kubeless-test-client tests
-/tests/kubeless-test-client/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh
+# The tools/kyma-installer directory
+/tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek @jasiu001 @adamwalach
+
+# kubeless-integration tests directory 
+/tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+
+# kubeless tests
+/tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # Event Bus Tests
 /tests/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic

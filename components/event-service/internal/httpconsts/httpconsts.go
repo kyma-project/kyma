@@ -1,12 +1,14 @@
 package httpconsts
 
+// HTTP Header constants
 const (
 	HeaderXForwardedFor = "X-Forwarded-For"
 	HeaderConnection    = "Connection"
 	HeaderContentType   = "Content-Type"
 )
 
+// HTTP ContentType constants
 const (
-	ContentTypeApplicationJsonWithCharset = "application/json;charset=UTF-8"
-	ContentTypeApplicationJson            = "application/json"
+	ContentTypeApplicationJSONWithCharset = "application/json;charset=UTF-8"
+	ContentTypeApplicationJSON            = "application/json"
 )

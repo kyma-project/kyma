@@ -1,5 +1,0 @@
-# test monitoring configuration
-
-test:
-  image:
-    name: test-logging-monitoring

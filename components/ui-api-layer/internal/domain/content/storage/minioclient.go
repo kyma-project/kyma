@@ -20,7 +20,7 @@ func newMinioClient(client Minio) *minioClient {
 	}
 }
 
-func (mc *minioClient) Object(bucketName, objectName string) (io.Reader, error) {
+func (mc *minioClient) Object(bucketName, objectName string) (io.ReadCloser, error) {
 	return mc.client.GetObject(bucketName, objectName, minio.GetObjectOptions{})
 }
 

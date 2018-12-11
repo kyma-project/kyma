@@ -49,7 +49,7 @@ The Installer is an application based on a [Kubernetes operator](https://coreos.
 
 The `installation/scripts/build-kyma-installer.sh` script extracts the Kyma-Installer image name from the `installer.yaml` deployment file and uses it to build a Docker image inside Minikube. This image contains local Kyma sources from the `resources` folder.
 
->**NOTE:** For the Kyma-Installer Docker image details, refer to the `kyma-installer/kyma.Dockerfile` file.
+>**NOTE:** For the Kyma-Installer Docker image details, refer to the `tools/kyma-installer/kyma.Dockerfile` file.
 
 ## The generate-local-config.sh script
 
@@ -73,7 +73,7 @@ The `installation/scripts/create-cr.sh` script prepares the Installation custom 
 
 The `installation/scripts/installer.sh` script creates the default RBAC role, installs [Tiller](https://docs.helm.sh/), and deploys the Kyma-Installer component.
 
->**NOTE:** For the Kyma-Installer deployment details, refer to the `installation/resources/installer.yaml` file.
+>**NOTE:** For the Kyma Installer deployment details, refer to the `installation/resources/installer.yaml` file.
 
 The script applies the Installation custom resource and marks it with the `action=install` label, which triggers the Kyma installation.
 

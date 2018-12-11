@@ -31,7 +31,7 @@ func parseArgs() *options {
 	internalAPIPort := flag.Int("internalAPIPort", 8080, "Internal API port.")
 	namespace := flag.String("namespace", "kyma-integration", "Namespace used by Certificate Service")
 	tokenLength := flag.Int("tokenLength", 64, "Length of a registration tokens.")
-	tokenExpirationMinutes := flag.Int("tokenExpirationMinutes", 60, "Time to Live of tokens expressed in minutes.")
+	tokenExpirationMinutes := flag.Int("tokenExpirationMinutes", 5, "Time to Live of tokens expressed in minutes.")
 	domainName := flag.String("domainName", ".wormhole.cluster.kyma.cx", "Domain name used for URL generation.")
 	connectorServiceHost := flag.String("connectorServiceHost", "cert-service.wormhole.cluster.kyma.cx", "Host at which this service is accessible.")
 

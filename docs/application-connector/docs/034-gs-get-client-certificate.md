@@ -3,7 +3,7 @@ title: Get the client certificate
 type: Getting Started
 ---
 
-After you create a Remote Environment (RE) in Kyma, it's time to connect it with an external solution, which allows to consume external APIs and Event catalogs of this solution. To accomplish this you must get the client certificate for the external solution and register its services.
+After you create a Remote Environment (RE), connect it to an external solution to consume the solution's APIs and Event catalogs in Kyma. To accomplish this, get the client certificate for the external solution and register its services.
 
 This guide shows you how to get the client certificate.
 
@@ -13,25 +13,36 @@ This guide shows you how to get the client certificate.
 
 ## Get the configuration URL with a token
 
-Get the configuration URL with a token which allows you to get Kyma CSR configuration and URLs in Kyma required to connect your external solution to a created Remote Environment.
-Follow this steps to get it using the CLI:
+To get the configuration URL which allows you to fetch the required configuration details, create a TokenRequest custom resource (CR). The controller which handles this CR kind adds the **status** section to the created CR. The **status** section contains the required configuration details.
 
-- Expose the Connector Service outside of Kubernetes using `kubectl port-forward`:
+- Create a TokenRequest CR. The CR name must match the name of the RE for which you want to get the configuration details. Run: 
   ```
-  kubectl -n=kyma-integration port-forward svc/connector-service-internal-api 8080:8080
+  cat <<EOF | kubectl apply -f -
+  apiVersion: connectorservice.kyma-project.io/v1alpha1
+  kind: TokenRequest
+  metadata:
+    name: {RE_NAME}
+  EOF
   ```
 
-- Make a POST request to the `tokens` endpoint:
+- Fetch the TokenRequest CR you created to get the configuration details from the **status** section. Run: 
   ```
-  curl -X POST http://localhost:8080/v1/remoteenvironments/{RE_NAME}/tokens
+  kubectl get tokenrequest.connectorservice.kyma-project.io {RE_NAME} -o yaml
   ```
+  >**NOTE:** If the response doesn't contain the **status** section, wait for a few moments and fetch the CR again.
 
 A successful call returns the following response:
   ```
-  {
-    "url":"{CONFIGURATION_URL_WITH_TOKEN}",
-    "token":"example-token-123"
-  }
+  apiVersion: connectorservice.kyma-project.io/v1alpha1
+  kind: TokenRequest
+  metadata:
+    name: {RE_NAME}
+  status:
+    expireAfter: 2018-11-22T18:38:44Z
+    remoteEnvironment: {RE_NAME}
+    state: OK
+    token: h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
+    url: https://connector-service.kyma.local/v1/remoteenvironments/test/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
   ```
 
 ## Get the CSR information and configuration details from Kyma
@@ -41,7 +52,7 @@ Use the link you got in the previous step to fetch the CSR information and confi
 ```
 curl {CONFIGURATION_URL_WITH_TOKEN}
 ```
->**NOTE:** The URL you call in this step contains a token that is valid for a single call. If you need to get the configuration details once again, generate a new configuration URL with a valid token and call it again. You get a code `403` error if you call the same configuration URL more than once.
+>**NOTE:** The URL you call in this step contains a token that is valid for 5 minutes or for a single call. You get a code `403` error if you call the same configuration URL more than once, or if you call an URL with an expired token.
 
 A successful call returns the following response:
 ```
