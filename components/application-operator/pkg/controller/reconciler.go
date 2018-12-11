@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+
 	reReleases "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/remoteenvironemnts"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
@@ -62,11 +63,20 @@ func (r *remoteEnvironmentReconciler) Reconcile(request reconcile.Request) (reco
 func (r *remoteEnvironmentReconciler) handleErrorWhileGettingInstance(err error, request reconcile.Request) (reconcile.Result, error) {
 	if k8sErrors.IsNotFound(err) {
 		log.Infof("Remote Environment %s deleted", request.Name)
-		err = r.releaseManager.DeleteREChart(request.Name)
+
+		releaseExist, err := r.releaseManager.CheckReleaseExistence(request.Name)
 		if err != nil {
-			return reconcile.Result{}, logAndError(err, "Error while deleting release for %s RE: %s", request.Name, err.Error())
+			return reconcile.Result{}, logAndError(err, "Error while checking release existence for %s RE: %s", request.Name, err.Error())
 		}
-		log.Infof("Release %s successfully deleted", request.Name)
+
+		if releaseExist {
+			err = r.releaseManager.DeleteREChart(request.Name)
+			if err != nil {
+				return reconcile.Result{}, logAndError(err, "Error while deleting release for %s RE: %s", request.Name, err.Error())
+			}
+			log.Infof("Release %s successfully deleted", request.Name)
+		}
+
 		return reconcile.Result{}, nil
 	}
 	return reconcile.Result{}, logAndError(err, "Error getting %s Remote Environment: %s", request.Name, err.Error())

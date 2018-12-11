@@ -8,6 +8,6 @@ controller:
     installationTimeout: 240
 
 tests:
-  enabled: true
+  enabled: false
   image:
     pullPolicy: IfNotPresent
