@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/controller/mocks"
 	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/remoteenvironemnts/mocks"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
@@ -12,7 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"testing"
 )
 
 const (
@@ -197,7 +198,38 @@ func TestRemoteEnvironmentReconciler_Reconcile(t *testing.T) {
 			Return(errors.NewNotFound(schema.GroupResource{}, reName))
 
 		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("CheckReleaseExistence", reName).Return(true, nil)
 		releaseManager.On("DeleteREChart", reName).Return(nil)
+
+		reReconciler := NewReconciler(managerClient, releaseManager)
+
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
+
+		// when
+		result, err := reReconciler.Reconcile(request)
+
+		// then
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		managerClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
+	})
+
+	t.Run("should not delete chart when RE is deleted and release does not exist", func(t *testing.T) {
+		// given
+		namespacedName := types.NamespacedName{
+			Name: reName,
+		}
+
+		managerClient := &mocks.RemoteEnvironmentManagerClient{}
+		managerClient.On(
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			Return(errors.NewNotFound(schema.GroupResource{}, reName))
+
+		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("CheckReleaseExistence", reName).Return(false, nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
