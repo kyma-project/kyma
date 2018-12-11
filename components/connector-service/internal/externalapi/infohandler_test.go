@@ -24,14 +24,14 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 	t.Run("should get info", func(t *testing.T) {
 		// given
 		newToken := "newToken"
-		url := fmt.Sprintf("/v1/remoteenvironments/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
 
-		expectedSignUrl := fmt.Sprintf("https://%s/v1/remoteenvironments/%s/client-certs?token=%s", host, reName, newToken)
+		expectedSignUrl := fmt.Sprintf("https://%s/v1/applications/%s/client-certs?token=%s", host, reName, newToken)
 
 		expectedApi := api{
 			MetadataURL:     fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", domain, reName),
 			EventsURL:       fmt.Sprintf("https://gateway.%s/%s/v1/events", domain, reName),
-			CertificatesUrl: fmt.Sprintf("https://%s/v1/remoteenvironments/%s", host, reName),
+			CertificatesUrl: fmt.Sprintf("https://%s/v1/applications/%s", host, reName),
 		}
 
 		expectedCertInfo := certInfo{
@@ -60,7 +60,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"reName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": reName})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -81,7 +81,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 403 when token not provided", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/remoteenvironments/%s/client-cert", reName)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert", reName)
 
 		tokenCache := &tokenCacheMocks.TokenCache{}
 		tokenGenerator := &tokenMocks.TokenGenerator{}
@@ -100,7 +100,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"reName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": reName})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -119,7 +119,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 403 when token not found", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/remoteenvironments/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
 
 		tokenCache := &tokenCacheMocks.TokenCache{}
 		tokenCache.On("Get", reName).Return("", false)
@@ -140,7 +140,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"reName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": reName})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -159,7 +159,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 403 when wrong token provided", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/remoteenvironments/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
 
 		tokenCache := &tokenCacheMocks.TokenCache{}
 		tokenCache.On("Get", reName).Return("differentToken", true)
@@ -180,7 +180,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"reName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": reName})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -199,7 +199,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 500 when failed to generate new token", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/remoteenvironments/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
 
 		tokenCache := &tokenCacheMocks.TokenCache{}
 		tokenCache.On("Get", reName).Return(token, true)
@@ -221,7 +221,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"reName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": reName})
 
 		// when
 		infoHandler.GetInfo(rr, req)

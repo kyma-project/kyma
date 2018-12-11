@@ -26,10 +26,10 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should create token", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/remoteenvironments/%s/tokens", reName)
+		url := fmt.Sprintf("/v1/applications/%s/tokens", reName)
 
 		expectedTokenResponse := tokenResponse{
-			URL:   fmt.Sprintf("https://%s/v1/remoteenvironments/%s/info?token=%s", host, reName, token),
+			URL:   fmt.Sprintf("https://%s/v1/applications/%s/info?token=%s", host, reName, token),
 			Token: token,
 		}
 
@@ -61,7 +61,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should return 500 when failed to generate token", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/remoteenvironments/%s/tokens", reName)
+		url := fmt.Sprintf("/v1/applications/%s/tokens", reName)
 
 		tokenGenerator := &mocks.TokenGenerator{}
 		tokenGenerator.On("NewToken", reName).Return("", apperrors.Internal("error"))

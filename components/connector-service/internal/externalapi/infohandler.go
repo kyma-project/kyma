@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	CertUrl = "https://%s/v1/remoteenvironments/%s"
-	SignUrl = "https://%s/v1/remoteenvironments/%s/client-certs?token=%s"
+	CertUrl = "https://%s/v1/applications/%s"
+	SignUrl = "https://%s/v1/applications/%s/client-certs?token=%s"
 	APIUrl  = "https://gateway.%s/%s/v1/"
 )
 
@@ -44,7 +44,7 @@ func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reName := mux.Vars(r)["reName"]
+	reName := mux.Vars(r)["appName"]
 
 	cachedToken, found := ih.tokenCache.Get(reName)
 

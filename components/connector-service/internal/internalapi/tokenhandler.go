@@ -12,7 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 )
 
-const TokenURL = "https://%s/v1/remoteenvironments/%s/info?token=%s"
+const TokenURL = "https://%s/v1/applications/%s/info?token=%s"
 
 type tokenHandler struct {
 	tokenGenerator tokens.TokenGenerator
