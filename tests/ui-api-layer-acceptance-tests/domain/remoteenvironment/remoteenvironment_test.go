@@ -25,6 +25,12 @@ const (
 	reReadyTimeout = time.Second * 45
 )
 
+type remoteEnvironmentMutationOutput struct {
+	Name        string
+	Description string
+	Labels      map[string]string
+}
+
 type remoteEnvironment struct {
 	Name                  string
 	Description           string
@@ -54,15 +60,15 @@ type reDeleteMutation struct {
 }
 
 type reCreateMutationResponse struct {
-	ReCreateMutation remoteEnvironment `json:"createRemoteEnvironment"`
+	ReCreateMutation remoteEnvironmentMutationOutput `json:"createRemoteEnvironment"`
 }
 
 type reUpdateMutationResponse struct {
-	ReUpdateMutation remoteEnvironment `json:"updateRemoteEnvironment"`
+	ReUpdateMutation remoteEnvironmentMutationOutput `json:"updateRemoteEnvironment"`
 }
 
 type reDeleteMutationResponse struct {
-	ReDeleteMutation reDeleteMutation `json:"deleteRemoteEnvironment"`
+	ReDeleteMutation remoteEnvironmentMutationOutput `json:"deleteRemoteEnvironment"`
 }
 
 type remoteEnvironmentEvent struct {
@@ -90,9 +96,9 @@ func TestRemoteEnvironmentMutations(t *testing.T) {
 	waitForREReady(fixName, reCli)
 
 	t.Log("Create Remote Environment")
-	resp, err := createRE(c, fixedRE)
+	resp, err := createREMutation(c, fixedRE)
 	require.NoError(t, err)
-	assert.Equal(t, *fixedRE, resp.ReCreateMutation)
+	checkREMutationOutput(t, fixedRE, resp.ReCreateMutation)
 
 	t.Log("Check Subscription Event")
 	expectedEvent := createREEventStruct("ADD", fixedRE)
@@ -102,7 +108,7 @@ func TestRemoteEnvironmentMutations(t *testing.T) {
 
 	defer func() {
 		t.Log("Delete Remote Environment")
-		deleteResp, err := deleteRE(c, fixName)
+		deleteResp, err := deleteREMutation(c, fixName)
 		require.NoError(t, err)
 		assert.Equal(t, fixName, deleteResp.ReDeleteMutation.Name)
 	}()
@@ -110,9 +116,9 @@ func TestRemoteEnvironmentMutations(t *testing.T) {
 	t.Log("Update Remote Environment")
 	fixedRE = createREStruct(fixName, "desc2", map[string]string{"lab": "fix"})
 
-	updateResp, err := updateRE(c, fixedRE)
+	updateResp, err := updateREMutation(c, fixedRE)
 	require.NoError(t, err)
-	assert.Equal(t, *fixedRE, updateResp.ReUpdateMutation)
+	checkREMutationOutput(t, fixedRE, updateResp.ReUpdateMutation)
 }
 
 func createREStruct(name string, desc string, labels map[string]string) *remoteEnvironment {
@@ -207,6 +213,12 @@ func checkREEvent(t *testing.T, expected, actual remoteEnvironmentEvent) {
 	assert.Equal(t, expected.RemoteEnvironment.Name, actual.RemoteEnvironment.Name)
 }
 
+func checkREMutationOutput(t *testing.T, re *remoteEnvironment, reMutation remoteEnvironmentMutationOutput) {
+	assert.Equal(t, re.Name, reMutation.Name)
+	assert.Equal(t, re.Description, reMutation.Description)
+	assert.Equal(t, re.Labels, reMutation.Labels)
+}
+
 func createREEventStruct(eventType string, re *remoteEnvironment) remoteEnvironmentEvent {
 	return remoteEnvironmentEvent{
 		Type:              eventType,
@@ -214,7 +226,7 @@ func createREEventStruct(eventType string, re *remoteEnvironment) remoteEnvironm
 	}
 }
 
-func createRE(c *graphql.Client, given *remoteEnvironment) (reCreateMutationResponse, error) {
+func createREMutation(c *graphql.Client, given *remoteEnvironment) (reCreateMutationResponse, error) {
 	query := fmt.Sprintf(`
 			mutation ($name: String!, $description: String!, $labels: Labels!) {
 				createRemoteEnvironment(name: $name, description: $description, labels: $labels) {
@@ -233,7 +245,7 @@ func createRE(c *graphql.Client, given *remoteEnvironment) (reCreateMutationResp
 	return response, err
 }
 
-func updateRE(c *graphql.Client, given *remoteEnvironment) (reUpdateMutationResponse, error) {
+func updateREMutation(c *graphql.Client, given *remoteEnvironment) (reUpdateMutationResponse, error) {
 	query := fmt.Sprintf(`
 			mutation ($name: String!, $description: String!, $labels: Labels!) {
 				updateRemoteEnvironment(name: $name, description: $description, labels: $labels) {
@@ -252,7 +264,7 @@ func updateRE(c *graphql.Client, given *remoteEnvironment) (reUpdateMutationResp
 	return response, err
 }
 
-func deleteRE(c *graphql.Client, reName string) (reDeleteMutationResponse, error) {
+func deleteREMutation(c *graphql.Client, reName string) (reDeleteMutationResponse, error) {
 	query := `
 			mutation ($name: String!) {
 				deleteRemoteEnvironment(name: $name) {
