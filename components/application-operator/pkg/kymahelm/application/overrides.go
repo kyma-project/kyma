@@ -1,4 +1,4 @@
-package remoteenvironemnts
+package application
 
 const (
 	OverridesTemplate = `global:

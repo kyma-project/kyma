@@ -14,6 +14,6 @@ FROM alpine
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-operator/manager .
 
 # Copy RE chart
-COPY ./charts/remote-environments   remote-environments/
+COPY charts/application   application/
 
 CMD ["/manager"]

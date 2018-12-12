@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 
-	reReleases "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/remoteenvironemnts"
+	reReleases "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
 	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -18,31 +18,31 @@ const (
 	installationSkippedStatus = "INSTALLATION_SKIPPED"
 )
 
-type RemoteEnvironmentManagerClient interface {
+type ApplicationManagerClient interface {
 	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
 	Update(ctx context.Context, obj runtime.Object) error
 }
 
-type RemoteEnvironmentReconciler interface {
+type ApplicationReconciler interface {
 	Reconcile(request reconcile.Request) (reconcile.Result, error)
 }
 
-type remoteEnvironmentReconciler struct {
-	reMgrClient    RemoteEnvironmentManagerClient
-	releaseManager reReleases.ReleaseManager
+type applicationReconciler struct {
+	applicationMgrClient ApplicationManagerClient
+	releaseManager       reReleases.ReleaseManager
 }
 
-func NewReconciler(reMgrClient RemoteEnvironmentManagerClient, releaseManager reReleases.ReleaseManager) RemoteEnvironmentReconciler {
-	return &remoteEnvironmentReconciler{
-		reMgrClient:    reMgrClient,
-		releaseManager: releaseManager,
+func NewReconciler(reMgrClient ApplicationManagerClient, releaseManager reReleases.ReleaseManager) ApplicationReconciler {
+	return &applicationReconciler{
+		applicationMgrClient: reMgrClient,
+		releaseManager:       releaseManager,
 	}
 }
 
-func (r *remoteEnvironmentReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *applicationReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	instance := &v1alpha1.RemoteEnvironment{}
 
-	err := r.reMgrClient.Get(context.Background(), request.NamespacedName, instance)
+	err := r.applicationMgrClient.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
 		return r.handleErrorWhileGettingInstance(err, request)
 	}
@@ -52,7 +52,7 @@ func (r *remoteEnvironmentReconciler) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, err
 	}
 
-	err = r.updateRemoteEnv(instance)
+	err = r.updateApplication(instance)
 	if err != nil {
 		return reconcile.Result{}, logAndError(err, "Error while updating RE %s: %s", instance.Name, err.Error())
 	}
@@ -60,9 +60,9 @@ func (r *remoteEnvironmentReconciler) Reconcile(request reconcile.Request) (reco
 	return reconcile.Result{}, nil
 }
 
-func (r *remoteEnvironmentReconciler) handleErrorWhileGettingInstance(err error, request reconcile.Request) (reconcile.Result, error) {
+func (r *applicationReconciler) handleErrorWhileGettingInstance(err error, request reconcile.Request) (reconcile.Result, error) {
 	if k8sErrors.IsNotFound(err) {
-		log.Infof("Remote Environment %s deleted", request.Name)
+		log.Infof("Application %s deleted", request.Name)
 
 		releaseExist, err := r.releaseManager.CheckReleaseExistence(request.Name)
 		if err != nil {
@@ -70,7 +70,7 @@ func (r *remoteEnvironmentReconciler) handleErrorWhileGettingInstance(err error,
 		}
 
 		if releaseExist {
-			err = r.releaseManager.DeleteREChart(request.Name)
+			err = r.releaseManager.DeleteChart(request.Name)
 			if err != nil {
 				return reconcile.Result{}, logAndError(err, "Error while deleting release for %s RE: %s", request.Name, err.Error())
 			}
@@ -79,70 +79,70 @@ func (r *remoteEnvironmentReconciler) handleErrorWhileGettingInstance(err error,
 
 		return reconcile.Result{}, nil
 	}
-	return reconcile.Result{}, logAndError(err, "Error getting %s Remote Environment: %s", request.Name, err.Error())
+	return reconcile.Result{}, logAndError(err, "Error getting %s Application: %s", request.Name, err.Error())
 }
 
-func (r *remoteEnvironmentReconciler) enforceDesiredState(remoteEnv *v1alpha1.RemoteEnvironment) error {
-	reStatus, statusDescription, err := r.manageInstallation(remoteEnv)
+func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.RemoteEnvironment) error {
+	appStatus, statusDescription, err := r.manageInstallation(application)
 	if err != nil {
 		return logAndError(err, "Error managing Helm release: %s", err.Error())
 	}
-	log.Infof("Release status for %s Remote Environment: %s", remoteEnv.Name, reStatus)
+	log.Infof("Release status for %s Application: %s", application.Name, appStatus)
 
-	r.ensureAccessLabel(remoteEnv)
-	r.setCurrentStatus(remoteEnv, reStatus, statusDescription)
+	r.ensureAccessLabel(application)
+	r.setCurrentStatus(application, appStatus, statusDescription)
 
 	return nil
 }
 
-func (r *remoteEnvironmentReconciler) manageInstallation(remoteEnv *v1alpha1.RemoteEnvironment) (string, string, error) {
-	releaseExist, err := r.releaseManager.CheckReleaseExistence(remoteEnv.Name)
+func (r *applicationReconciler) manageInstallation(application *v1alpha1.RemoteEnvironment) (string, string, error) {
+	releaseExist, err := r.releaseManager.CheckReleaseExistence(application.Name)
 	if err != nil {
 		return "", "", err
 	}
 
 	if !releaseExist {
-		if shouldSkipInstallation(remoteEnv) {
+		if shouldSkipInstallation(application) {
 			return installationSkippedStatus, "Installation will not be performed", nil
 		}
 
-		return r.installRemoteEnvironment(remoteEnv)
+		return r.installApplication(application)
 	} else {
-		return r.checkRemoteEnvironmentStatus(remoteEnv)
+		return r.checkApplicationStatus(application)
 	}
 }
 
-func shouldSkipInstallation(remoteEnv *v1alpha1.RemoteEnvironment) bool {
-	return remoteEnv.Spec.SkipInstallation == true
+func shouldSkipInstallation(application *v1alpha1.RemoteEnvironment) bool {
+	return application.Spec.SkipInstallation == true
 }
 
-func (r *remoteEnvironmentReconciler) installRemoteEnvironment(remoteEnv *v1alpha1.RemoteEnvironment) (string, string, error) {
-	log.Infof("Installing release for %s Remote Environment...", remoteEnv.Name)
-	status, description, err := r.releaseManager.InstallNewREChart(remoteEnv.Name)
+func (r *applicationReconciler) installApplication(application *v1alpha1.RemoteEnvironment) (string, string, error) {
+	log.Infof("Installing release for %s Application...", application.Name)
+	status, description, err := r.releaseManager.InstallChart(application.Name)
 	if err != nil {
-		return "", "", errors.Wrapf(err, "Error installing release for %s RE, %s", remoteEnv.Name, err.Error())
+		return "", "", errors.Wrapf(err, "Error installing release for %s RE, %s", application.Name, err.Error())
 	}
-	log.Infof("Release for %s Remote Environment, installed successfully", remoteEnv.Name)
+	log.Infof("Release for %s Application, installed successfully", application.Name)
 
 	return status.String(), description, nil
 }
 
-func (r *remoteEnvironmentReconciler) checkRemoteEnvironmentStatus(remoteEnv *v1alpha1.RemoteEnvironment) (string, string, error) {
-	status, description, err := r.releaseManager.CheckReleaseStatus(remoteEnv.Name)
+func (r *applicationReconciler) checkApplicationStatus(application *v1alpha1.RemoteEnvironment) (string, string, error) {
+	status, description, err := r.releaseManager.CheckReleaseStatus(application.Name)
 	if err != nil {
-		return "", "", errors.Wrapf(err, "Error checking release status for %s RE, %s", remoteEnv.Name, err.Error())
+		return "", "", errors.Wrapf(err, "Error checking release status for %s RE, %s", application.Name, err.Error())
 	}
 
 	return status.String(), description, err
 }
 
-func (r *remoteEnvironmentReconciler) updateRemoteEnv(remoteEnv *v1alpha1.RemoteEnvironment) error {
-	if remoteEnv.Spec.Services == nil {
-		remoteEnv.Spec.Services = []v1alpha1.Service{}
+func (r *applicationReconciler) updateApplication(application *v1alpha1.RemoteEnvironment) error {
+	if application.Spec.Services == nil {
+		application.Spec.Services = []v1alpha1.Service{}
 	}
 
 	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		return r.reMgrClient.Update(context.Background(), remoteEnv)
+		return r.applicationMgrClient.Update(context.Background(), application)
 	})
 	if err != nil {
 		return err
@@ -151,19 +151,19 @@ func (r *remoteEnvironmentReconciler) updateRemoteEnv(remoteEnv *v1alpha1.Remote
 	return nil
 }
 
-func (r *remoteEnvironmentReconciler) setCurrentStatus(remoteEnv *v1alpha1.RemoteEnvironment, status string, description string) {
+func (r *applicationReconciler) setCurrentStatus(application *v1alpha1.RemoteEnvironment, status string, description string) {
 	installationStatus := v1alpha1.InstallationStatus{
 		Status:      status,
 		Description: description,
 	}
 
-	remoteEnv.Status.InstallationStatus = installationStatus
+	application.Status.InstallationStatus = installationStatus
 }
 
-func (r *remoteEnvironmentReconciler) ensureAccessLabel(remoteEnv *v1alpha1.RemoteEnvironment) {
-	if remoteEnv.Spec.AccessLabel != remoteEnv.Name {
-		log.Infof("Invalid access-label, setting access-label to %s", remoteEnv.Name)
-		remoteEnv.Spec.AccessLabel = remoteEnv.Name
+func (r *applicationReconciler) ensureAccessLabel(application *v1alpha1.RemoteEnvironment) {
+	if application.Spec.AccessLabel != application.Name {
+		log.Infof("Invalid access-label, setting access-label to %s", application.Name)
+		application.Spec.AccessLabel = application.Name
 	}
 }
 
