@@ -66,7 +66,7 @@ podTemplate(label: label,
                         }
 
                         stage("test $application") {
-                            execute("2>&1 go test -short -v ./... | go2xunit -fail -output unit-tests.xml", workDir, componentDir)
+                            execute("2>&1 go test -v ./... | go2xunit -fail -output unit-tests.xml", workDir, componentDir)
                             junit '**/unit-tests.xml'
                         }
 
