@@ -3,7 +3,7 @@ title: Application
 type: Custom Resource
 ---
 
-The `remoteenvironments.applicationconnector.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to register an Application (App) in Kyma. The `Application` custom resource defines the APIs that the App offers. After creating a new custom resource for a given App, the App is mapped to appropriate ServiceClasses in the Service Catalog. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `applications.applicationconnector.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to register an Application (App) in Kyma. The `Application` custom resource defines the APIs that the App offers. After creating a new custom resource for a given App, the App is mapped to appropriate ServiceClasses in the Service Catalog. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```
 kubectl get crd applications.applicationconnector.kyma-project.io -o yaml

@@ -3,7 +3,7 @@ title: The Application Broker architecture
 type: Architecture
 ---
 
-The Application Broker (APB) workflow consists of the following steps:
+The Application Broker (AB) workflow consists of the following steps:
 
 1. The Application Broker watches for Applications (Apps) in the cluster and ApplicationMappings (APMs) in all Namespaces.
 2. The user creates an ApplicationMapping custom resource in a given Environment. The APM activates services offered by an App. The APM must have the same name as the App.
@@ -11,7 +11,7 @@ The Application Broker (APB) workflow consists of the following steps:
 4. The Service Catalog fetches services that the `application-broker` Service Broker exposes.
 5. The Service Catalog creates a ServiceClass for each service received from the Service Broker.
 
-![APB architecture](assets/001-REB-architecture.svg)
+![AB architecture](assets/001-AB-architecture.svg)
 
 When this process is complete, you can provision and bind your services.
 
@@ -26,7 +26,7 @@ This ServiceClass has a **bindable** flag set to `true` which means that you hav
 4. The service or lambda calls the API through the Application Connector. The Application Connector verifies the label to check if you have the authorization to access this API.
 5. After verifying the label, the Application Connector allows you to access the Application API.
 
-![API Service Class](assets/020-REB-API-service-class.png)
+![API Service Class](assets/020-AB-API-service-class.png)
 
 ## Provisioning and binding for an Event ServiceClass
 
@@ -39,7 +39,7 @@ This ServiceClass has a **bindable** flag set to `false` which means that after 
 6. The Application Connector sends an Event to the lambda through the Event Bus.
 
 
-![Event Service Class](assets/020-REB-event-service-class.png)
+![Event Service Class](assets/020-AB-event-service-class.png)
 
 ## Provisioning and binding for both the API and Event ServiceClass
 
