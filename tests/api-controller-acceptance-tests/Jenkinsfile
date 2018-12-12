@@ -53,12 +53,8 @@ podTemplate(label: label,
                             }
                         }
 
-                        stage("install dependencies $application") {
-                            execute("dep ensure --vendor-only -v", workDir, componentDir)
-                        }
-
-                        stage("code quality $application") {
-                            execute("gometalinter --vendor --deadline=2m --disable-all --enable=vet --exclude=vendor ./...", workDir, componentDir)
+                        stage("install dependencies and check code quality $application") {
+                            execute("./before-commit.sh", workDir, componentDir)
                         }
 
                         stage("build image $application") {
