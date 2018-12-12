@@ -130,4 +130,4 @@ APP_APPLIED_SBU_CONFIG_MAP_NAME=binding-usage-controller-process-sbu-spec APP_LO
 kubectl apply -f usage-kind/deployment.yaml
 ```
 
-3. Follow the steps under the steps **Use the bindings on a Deployment** or **Use the bindings on a Function**
+3. Follow the steps under the steps **Use bindings on a Deployment** or **Use bindings on a Function**
