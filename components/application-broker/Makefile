@@ -1,4 +1,4 @@
-APP_NAME = remote-environment-broker
+APP_NAME = application-broker
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 binary=$(APP_NAME)
