@@ -21,7 +21,7 @@ podTemplate(label: label) {
         try {
             timestamps {
                 ansiColor('xterm') {
-                    timeout(time:60, unit:"MINUTES") {
+                    timeout(time:80, unit:"MINUTES") {
                             stage("cleanup") {
                                 cleanup()
                             }
