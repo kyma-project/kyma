@@ -49,13 +49,13 @@ func TestServiceBrokerQueries(t *testing.T) {
 		name
 		environment
 		creationTimestamp
+		url
+		labels
 		status {
 			ready
 			reason
 			message
 		}
-		url
-		labels
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {

@@ -235,7 +235,6 @@ func deleteREMutation(c *graphql.Client, reName string) (reDeleteMutationRespons
 	return response, err
 }
 
-
 func fixRE(name string, desc string, labels map[string]string) *remoteEnvironment {
 	return &remoteEnvironment{
 		Name:        name,
