@@ -28,8 +28,8 @@ spec:
       serviceAccountName: {{ .Chart.Name }}
 
       containers:
-      - name: reb
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.remote_environment_broker.dir }}remote-environment-broker:{{ .Values.global.remote_environment_broker.version }}"
+      - name: ctrl
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_broker.dir }}application-broker:{{ .Values.global.application_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
           - name: APP_PORT
