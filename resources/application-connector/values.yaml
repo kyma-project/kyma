@@ -42,4 +42,4 @@ global:
     version: 1a6aedce
   remote_environment_broker:
     dir: develop/
-    version: 0d408e11
+    version: e12dec35
