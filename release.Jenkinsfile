@@ -40,7 +40,7 @@ projects = [
     "components/istio-kyma-patch",
     "components/helm-broker",
     "components/remote-environment-broker",
-    "components/remote-environment-controller",
+    "components/application-operator",
     "components/metadata-service",
     "components/installer",
     "components/connector-service",
@@ -66,7 +66,7 @@ projects = [
     "tests/api-controller-acceptance-tests",
     "tests/connector-service-tests",
     "tests/metadata-service-tests",
-    "tests/remote-environment-controller-tests",
+    "tests/application-operator-tests",
     "tests/event-bus"
 ]
 

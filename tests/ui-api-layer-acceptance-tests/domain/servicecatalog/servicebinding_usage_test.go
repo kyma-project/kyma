@@ -13,9 +13,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
 )
 
 type ServiceBindingUsage struct {
@@ -121,7 +121,7 @@ func TestServiceBindingUsageMutationsAndQueries(t *testing.T) {
 func newBindingUsageSuite(t *testing.T) *bindingUsageTestSuite {
 	c, err := graphql.New()
 	require.NoError(t, err)
-	svcatCli, _, err := k8s.NewServiceCatalogClientWithConfig()
+	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
 	require.NoError(t, err)
 
 	return &bindingUsageTestSuite{

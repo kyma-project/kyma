@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	timeout = 3 * time.Second
+	timeout = 10 * time.Second
 )
 
 type Client struct {

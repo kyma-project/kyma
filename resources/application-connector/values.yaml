@@ -10,6 +10,12 @@ global:
       namespace: kyma-system
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  application_operator:
+    dir: develop/
+    version: f126db6f
+  application_operator_tests:
+    dir: develop/
+    version: f126db6f
   connector_service:
     dir: develop/
     version: b723b5b6
@@ -34,12 +40,6 @@ global:
   metadata_service_tests:
     dir: develop/
     version: 1a6aedce
-  remote_environment_controller:
-    dir: develop/
-    version: 56c0498f
-  remote_environment_controller_tests:
-    dir: develop/
-    version: 56c0498f
   remote_environment_broker:
     dir: develop/
     version: 0d408e11
