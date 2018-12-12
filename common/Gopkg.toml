@@ -1,0 +1,7 @@
+required = [
+  "golang.org/x/tools/cmd/goimports"
+]
+
+[prune]
+  go-tests = true
+  unused-packages = true
