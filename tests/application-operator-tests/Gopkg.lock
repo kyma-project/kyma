@@ -100,12 +100,12 @@
 [[projects]]
   name = "github.com/kyma-project/kyma"
   packages = [
-    "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
-    "components/remote-environment-broker/pkg/client/clientset/versioned",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+    "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/clientset/versioned",
+    "components/application-operator/pkg/client/clientset/versioned/scheme",
+    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
   ]
-  revision = "4e1170ed9101dcbb98d450278a86c6ceecc1cb62"
+  revision = "d6ba814ef8b42b4c7c65f478e51f46f01387e1df"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -501,6 +501,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5073126746bac4396f8c5a35ea4dcc1d865e349216d202811b414c875164db15"
+  inputs-digest = "676b841df18e6007b5792a3aec5c69454baff32078727599d462b246ae0ef465"
   solver-name = "gps-cdcl"
   solver-version = 1

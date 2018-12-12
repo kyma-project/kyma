@@ -21,7 +21,7 @@ const (
 type TestSuite struct {
 	t *testing.T
 
-	remoteEnvironment string
+	application string
 
 	config     TestConfig
 	helmClient HelmClient
@@ -35,17 +35,17 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	config, err := ReadConfig()
 	require.NoError(t, err)
 
-	re := fmt.Sprintf(testReName, rand.String(5))
+	app := fmt.Sprintf(testReName, rand.String(5))
 
 	k8sResourcesClient, err := NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
 	helmClient := NewHelmClient(config.TillerHost)
-	k8sResourcesChecker := NewK8sChecker(k8sResourcesClient, re)
+	k8sResourcesChecker := NewK8sChecker(k8sResourcesClient, app)
 
 	return &TestSuite{
-		t:                 t,
-		remoteEnvironment: re,
+		t:           t,
+		application: app,
 
 		config:              config,
 		helmClient:          helmClient,
@@ -55,40 +55,40 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	}
 }
 
-func (ts *TestSuite) CreateRemoteEnvironment(accessLabel string, skipInstallation bool) {
-	remoteEnv, err := ts.k8sClient.CreateDummyRemoteEnvironment(ts.remoteEnvironment, accessLabel, skipInstallation)
+func (ts *TestSuite) CreateApplication(accessLabel string, skipInstallation bool) {
+	application, err := ts.k8sClient.CreateDummyApplication(ts.application, accessLabel, skipInstallation)
 	require.NoError(ts.t, err)
-	require.NotNil(ts.t, remoteEnv)
+	require.NotNil(ts.t, application)
 }
 
-func (ts *TestSuite) DeleteRemoteEnvironment() {
-	err := ts.k8sClient.DeleteRemoteEnvironment(ts.remoteEnvironment, &metav1.DeleteOptions{})
+func (ts *TestSuite) DeleteApplication() {
+	err := ts.k8sClient.DeleteApplication(ts.application, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 }
 
 func (ts *TestSuite) CheckAccessLabel() {
-	remoteEnv, err := ts.k8sClient.GetRemoteEnvironment(ts.remoteEnvironment, metav1.GetOptions{})
+	application, err := ts.k8sClient.GetApplication(ts.application, metav1.GetOptions{})
 	require.NoError(ts.t, err)
-	require.Equal(ts.t, ts.remoteEnvironment, remoteEnv.Spec.AccessLabel)
+	require.Equal(ts.t, ts.application, application.Spec.AccessLabel)
 }
 
 func (ts *TestSuite) CleanUp() {
 	// Do not handle error as RE may already be removed
-	ts.k8sClient.DeleteRemoteEnvironment(ts.remoteEnvironment, &metav1.DeleteOptions{})
+	ts.k8sClient.DeleteApplication(ts.application, &metav1.DeleteOptions{})
 }
 
 func (ts *TestSuite) WaitForReleaseToInstall() {
-	msg := fmt.Sprintf("Timeout waiting for %s release installation", ts.remoteEnvironment)
+	msg := fmt.Sprintf("Timeout waiting for %s release installation", ts.application)
 	ts.waitForFunction(ts.helmReleaseInstalled, msg, ts.installationTimeout)
 }
 
 func (ts *TestSuite) WaitForReleaseToUninstall() {
-	msg := fmt.Sprintf("Timeout waiting for %s release to uninstall", ts.remoteEnvironment)
+	msg := fmt.Sprintf("Timeout waiting for %s release to uninstall", ts.application)
 	ts.waitForFunction(ts.helmReleaseNotExist, msg, ts.installationTimeout)
 }
 
 func (ts *TestSuite) EnsureReleaseNotInstalling() {
-	msg := fmt.Sprintf("Release for %s Remote Environment installing when shouldn't", ts.remoteEnvironment)
+	msg := fmt.Sprintf("Release for %s Application installing when shouldn't", ts.application)
 	ts.shouldLastFor(ts.helmReleaseNotExist, msg, installationStartTimeout)
 }
 
@@ -103,12 +103,12 @@ func (ts *TestSuite) CheckK8sResourceRemoved() {
 }
 
 func (ts *TestSuite) helmReleaseInstalled() bool {
-	status, err := ts.helmClient.CheckReleaseStatus(ts.remoteEnvironment)
+	status, err := ts.helmClient.CheckReleaseStatus(ts.application)
 	return err == nil && status.Info.Status.Code == hapi_4.Status_DEPLOYED
 }
 
 func (ts *TestSuite) helmReleaseNotExist() bool {
-	exists, err := ts.helmClient.CheckReleaseExistence(ts.remoteEnvironment)
+	exists, err := ts.helmClient.CheckReleaseExistence(ts.application)
 	return err == nil && exists == false
 }
 
