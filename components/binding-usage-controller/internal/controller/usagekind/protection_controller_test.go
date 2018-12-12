@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/usagekind"
@@ -17,7 +18,7 @@ import (
 
 func TestProtectionControllerAddsFinalizer(t *testing.T) {
 	// GIVEN
-	tc := newProtectionControllerTestCase()
+	tc := newProtectionControllerTestCase(t)
 	defer tc.TearDown()
 	tc.RunController()
 
@@ -40,7 +41,7 @@ func TestProtectionControllerAddsFinalizer(t *testing.T) {
 
 func TestProtectionControllerProtectsUsageKindUsedBySBU(t *testing.T) {
 	// GIVEN
-	tc := newProtectionControllerTestCase()
+	tc := newProtectionControllerTestCase(t)
 	defer tc.TearDown()
 	tc.RunController()
 
@@ -96,7 +97,7 @@ type protectionTestCase struct {
 	processDeletionOpDone chan struct{}
 }
 
-func newProtectionControllerTestCase() *protectionTestCase {
+func newProtectionControllerTestCase(t *testing.T) *protectionTestCase {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 
 	addFinalizerDone := make(chan struct{})
@@ -112,11 +113,13 @@ func newProtectionControllerTestCase() *protectionTestCase {
 	cs := fake.NewSimpleClientset()
 	informersFactory := informers.NewSharedInformerFactory(cs, 0)
 
-	ctrl := usagekind.NewProtectionController(informersFactory.Servicecatalog().V1alpha1().UsageKinds(),
+	ctrl, err := usagekind.NewProtectionController(informersFactory.Servicecatalog().V1alpha1().UsageKinds(),
 		informersFactory.Servicecatalog().V1alpha1().ServiceBindingUsages(),
 		cs.ServicecatalogV1alpha1(),
-		spy.NewLogSink().Logger).
-		WithTestHookOnAsyncOpDone(addFinalizerOpHook, processDeletionOpHook)
+		spy.NewLogSink().Logger)
+	require.NoError(t, err)
+
+	ctrl.WithTestHookOnAsyncOpDone(addFinalizerOpHook, processDeletionOpHook)
 
 	informersFactory.Start(ctx.Done())
 
@@ -134,9 +137,9 @@ func newProtectionControllerTestCase() *protectionTestCase {
 
 func (tc *protectionTestCase) MarkRemoval(t *testing.T, name string) {
 	uk := tc.GetUsageKind(t, name)
-	copy := uk.DeepCopy()
-	copy.DeletionTimestamp = &metaV1.Time{Time: time.Now()}
-	tc.UpdateUsageKind(t, copy)
+	ukCopy := uk.DeepCopy()
+	ukCopy.DeletionTimestamp = &metaV1.Time{Time: time.Now()}
+	tc.UpdateUsageKind(t, ukCopy)
 }
 
 func (tc *protectionTestCase) WaitForAddFinalizer(t *testing.T, timeout time.Duration) {

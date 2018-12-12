@@ -118,3 +118,22 @@ for vPackage in "${packagesToVet[@]}"; do
 	else echo -e "${GREEN}√ go vet ${vPackage} ${NC}"
 	fi
 done
+
+##
+# ERRCHECK
+##
+go build -o errcheck-vendored ./vendor/github.com/kisielk/errcheck
+buildErrCheckResult=$?
+if [[ ${buildErrCheckResult} != 0 ]]; then
+	echo -e "${RED}✗ go build errcheck${NC}\n${buildErrCheckResult}${NC}"
+	exit 1
+fi
+
+errCheckResult=$(./errcheck-vendored -ignoretests -blank -ignoregenerated ./...)
+rm errcheck-vendored
+
+if [[ $(echo ${#errCheckResult}) != 0 ]]; then
+	echo -e "${RED}✗ [errcheck] uncheck error in:${NC}\n${errCheckResult}${NC}"
+	exit 1
+else echo -e "${GREEN}√ errcheck ${NC}"
+fi
