@@ -52,4 +52,6 @@ spec:
       - '{serviceBrokers,typename}' # brokers
       - '{default,defaultRequest,limitRanges}' # resources
       - '{requests,resourceQuotas}' # resources
+      - '{serviceBinding,status}' # ui api acceptance tests
+      - '{serviceInstance,status}' # ui api acceptance tests
       - '{}' # mutations
