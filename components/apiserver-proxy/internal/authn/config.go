@@ -14,7 +14,7 @@ type AuthnHeaderConfig struct {
 	GroupSeparator string
 }
 
-// AuthnConfig holds all configurations related to authentication options 
+// AuthnConfig holds all configurations related to authentication options
 type AuthnConfig struct {
 	X509   *X509Config
 	Header *AuthnHeaderConfig
