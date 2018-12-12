@@ -27,13 +27,9 @@ func NewHandler(sHandler SignatureHandler, iHandler InfoHandler, middlewares []m
 	router.Path("/v1").Handler(http.RedirectHandler("/v1/api.yaml", http.StatusMovedPermanently)).Methods(http.MethodGet)
 	router.Path("/v1/api.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
 
-	registrationRouterRE := router.PathPrefix("/v1/remoteenvironments").Subrouter()
-	registrationRouterRE.HandleFunc("/{appName}/client-certs", sHandler.SignCSR).Methods(http.MethodPost)
-	registrationRouterRE.HandleFunc("/{appName}/info", iHandler.GetInfo).Methods(http.MethodGet)
-
-	registrationRouterAPP := router.PathPrefix("/v1/applications").Subrouter()
-	registrationRouterAPP.HandleFunc("/{appName}/client-certs", sHandler.SignCSR).Methods(http.MethodPost)
-	registrationRouterAPP.HandleFunc("/{appName}/info", iHandler.GetInfo).Methods(http.MethodGet)
+	registrationRouter := router.PathPrefix("/v1/applications").Subrouter()
+	registrationRouter.HandleFunc("/{appName}/client-certs", sHandler.SignCSR).Methods(http.MethodPost)
+	registrationRouter.HandleFunc("/{appName}/info", iHandler.GetInfo).Methods(http.MethodGet)
 
 	router.NotFoundHandler = errorhandler.NewErrorHandler(404, "Requested resource could not be found.")
 	router.MethodNotAllowedHandler = errorhandler.NewErrorHandler(405, "Method not allowed.")
