@@ -2,6 +2,14 @@
 
 package v1alpha1
 
+// ApplicationMappingListerExpansion allows custom methods to be added to
+// ApplicationMappingLister.
+type ApplicationMappingListerExpansion interface{}
+
+// ApplicationMappingNamespaceListerExpansion allows custom methods to be added to
+// ApplicationMappingNamespaceLister.
+type ApplicationMappingNamespaceListerExpansion interface{}
+
 // EnvironmentMappingListerExpansion allows custom methods to be added to
 // EnvironmentMappingLister.
 type EnvironmentMappingListerExpansion interface{}

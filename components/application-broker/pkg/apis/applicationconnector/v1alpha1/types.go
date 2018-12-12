@@ -20,6 +20,19 @@ func (rem *EnvironmentMapping) GetObjectKind() schema.ObjectKind {
 }
 
 // +genclient
+// +genclient:noStatus
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type ApplicationMapping struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata"`
+}
+
+func (am *ApplicationMapping) GetObjectKind() schema.ObjectKind {
+	return &ApplicationMapping{}
+}
+
+// +genclient
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -119,6 +132,15 @@ type EnvironmentMappingList struct {
 	metav1.ListMeta `json:"metadata"`
 
 	Items []EnvironmentMapping `json:"items"`
+}
+
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+type ApplicationMappingList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata"`
+
+	Items []ApplicationMapping `json:"items"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
