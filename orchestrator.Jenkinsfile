@@ -37,7 +37,7 @@ projects = [
     "components/environments": "environments",
     "components/istio-kyma-patch": "istio-kyma-patch",
     "components/helm-broker": "helm-broker",
-    "components/remote-environment-broker": "remote-environment-broker",
+    "components/application-broker": "application-broker",
     "components/application-operator": "application-operator",
     "components/metadata-service": "metadata-service",
     "components/installer": "installer",
