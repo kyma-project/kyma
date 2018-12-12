@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -10,14 +11,14 @@ import (
 const envLabelSelector = "env=true"
 
 type environmentService struct {
-	reLister    RemoteEnvironmentLister
+	appLister   ApplicationLister
 	nsInterface corev1.NamespaceInterface
 }
 
-func newEnvironmentService(nsInterface corev1.NamespaceInterface, reLister RemoteEnvironmentLister) *environmentService {
+func newEnvironmentService(nsInterface corev1.NamespaceInterface, appLister ApplicationLister) *environmentService {
 	return &environmentService{
 		nsInterface: nsInterface,
-		reLister:    reLister,
+		appLister:   appLister,
 	}
 }
 
@@ -26,48 +27,48 @@ func (svc *environmentService) List() ([]gqlschema.Environment, error) {
 		LabelSelector: envLabelSelector, // namespaces with label env=true are treated as environments
 	})
 	if err != nil {
-		return []gqlschema.Environment{}, errors.Wrap(err, "while listing environment mappings")
+		return []gqlschema.Environment{}, errors.Wrapf(err, "while listing %s", pretty.ApplicationMapping)
 	}
 
 	result := make([]gqlschema.Environment, 0)
 	for _, ns := range list.Items {
-		res, err := svc.reLister.ListInEnvironment(ns.Name)
+		items, err := svc.appLister.ListInEnvironment(ns.Name)
 		if err != nil {
-			return []gqlschema.Environment{}, errors.Wrap(err, "while listing remote envs for env")
+			return []gqlschema.Environment{}, errors.Wrapf(err, "while listing %s for env", pretty.Application)
 		}
-		reNames := make([]string, 0)
-		for _, re := range res {
-			reNames = append(reNames, re.Name)
+		appNames := make([]string, 0)
+		for _, app := range items {
+			appNames = append(appNames, app.Name)
 		}
 
 		result = append(result, gqlschema.Environment{
-			Name:               ns.Name,
-			RemoteEnvironments: reNames,
+			Name:         ns.Name,
+			Applications: appNames,
 		})
 	}
 
 	return result, nil
 }
 
-func (svc *environmentService) ListForRemoteEnvironment(reName string) ([]gqlschema.Environment, error) {
-	namespaces, err := svc.reLister.ListNamespacesFor(reName)
+func (svc *environmentService) ListForApplication(appName string) ([]gqlschema.Environment, error) {
+	namespaces, err := svc.appLister.ListNamespacesFor(appName)
 	if err != nil {
 		return []gqlschema.Environment{}, errors.Wrap(err, "while listing namespaces")
 	}
 
 	result := make([]gqlschema.Environment, 0)
 	for _, ns := range namespaces {
-		res, err := svc.reLister.ListInEnvironment(ns)
+		items, err := svc.appLister.ListInEnvironment(ns)
 		if err != nil {
-			return []gqlschema.Environment{}, errors.Wrap(err, "while listing remote envs")
+			return []gqlschema.Environment{}, errors.Wrapf(err, "while listing %s", pretty.Application)
 		}
-		remoteEnvNames := make([]string, 0)
-		for _, re := range res {
-			remoteEnvNames = append(remoteEnvNames, re.Name)
+		appNames := make([]string, 0)
+		for _, app := range items {
+			appNames = append(appNames, app.Name)
 		}
 		result = append(result, gqlschema.Environment{
-			Name:               ns,
-			RemoteEnvironments: remoteEnvNames,
+			Name:         ns,
+			Applications: appNames,
 		})
 	}
 	return result, nil

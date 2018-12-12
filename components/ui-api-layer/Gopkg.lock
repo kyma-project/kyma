@@ -208,6 +208,28 @@
     "components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions/gateway.kyma-project.io/v1alpha2",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions/internalinterfaces",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/listers/gateway.kyma-project.io/v1alpha2",
+    "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/clientset/versioned",
+    "components/application-broker/pkg/client/clientset/versioned/fake",
+    "components/application-broker/pkg/client/clientset/versioned/scheme",
+    "components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1/fake",
+    "components/application-broker/pkg/client/informers/externalversions",
+    "components/application-broker/pkg/client/informers/externalversions/applicationconnector",
+    "components/application-broker/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/informers/externalversions/internalinterfaces",
+    "components/application-broker/pkg/client/listers/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/clientset/versioned",
+    "components/application-operator/pkg/client/clientset/versioned/fake",
+    "components/application-operator/pkg/client/clientset/versioned/scheme",
+    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1/fake",
+    "components/application-operator/pkg/client/informers/externalversions",
+    "components/application-operator/pkg/client/informers/externalversions/applicationconnector",
+    "components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/informers/externalversions/internalinterfaces",
+    "components/application-operator/pkg/client/listers/applicationconnector/v1alpha1",
     "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/binding-usage-controller/pkg/apis/settings/v1alpha1",
     "components/binding-usage-controller/pkg/client/clientset/versioned",
@@ -235,20 +257,9 @@
     "components/idppreset/pkg/client/informers/externalversions/authentication",
     "components/idppreset/pkg/client/informers/externalversions/authentication/v1alpha1",
     "components/idppreset/pkg/client/informers/externalversions/internalinterfaces",
-    "components/idppreset/pkg/client/listers/authentication/v1alpha1",
-    "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
-    "components/remote-environment-broker/pkg/client/clientset/versioned",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/fake",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1/fake",
-    "components/remote-environment-broker/pkg/client/informers/externalversions",
-    "components/remote-environment-broker/pkg/client/informers/externalversions/applicationconnector",
-    "components/remote-environment-broker/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
-    "components/remote-environment-broker/pkg/client/informers/externalversions/internalinterfaces",
-    "components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
+    "components/idppreset/pkg/client/listers/authentication/v1alpha1"
   ]
-  revision = "343d311bb9f41f217ff66869cb7398b2d8d7ae43"
+  revision = "13b304807b79a47889deba5c527a4db107b2b382"
 
 [[projects]]
   name = "github.com/magiconair/properties"
@@ -718,6 +729,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0978688f584720b5202d3d68141d6cbd6b3f5864f654818602e2b08c9e24249f"
+  inputs-digest = "5138eab7745bd5c6952ac84f02dc035386f1aa4513804de9941df06945a8eba1"
   solver-name = "gps-cdcl"
   solver-version = 1

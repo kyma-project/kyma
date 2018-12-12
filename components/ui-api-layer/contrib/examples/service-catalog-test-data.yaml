@@ -1,13 +1,13 @@
 # This file defines objects which allows to make more complicated queries for ServiceBinding, ServiceBindingUsage.
 # All objects are created in the `mordor` namespace.
-# BEWARE: there is assumption that RemoteEnvironment `ec-prod` already exists.
+# BEWARE: there is assumption that Application `ec-prod` already exists.
 
-apiVersion: remoteenvironment.kyma.cx/v1alpha1
-kind: EnvironmentMapping
+apiVersion: applicationconnector.kyma-project.io
+kind: ApplicationMapping
 metadata:
-  # Instance of the EnvrionmentMapping enables
-  # Remote Environment in the given namespace.
-  # The name must be the same as the name of RemoteEnvironment.
+  # Instance of the Applicationapping enables
+  # Application in the given namespace.
+  # The name must be the same as the name of Application.
   name: ec-prod
   namespace: mordor
 

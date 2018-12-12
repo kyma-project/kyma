@@ -65,8 +65,8 @@ models:
         resolver: true
       content:
         resolver: true
-  RemoteEnvironment:
-    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.RemoteEnvironment"
+  Application:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Application"
     fields:
       enabledInEnvironments:
         resolver: true

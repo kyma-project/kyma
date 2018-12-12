@@ -42,7 +42,7 @@ func (r *serviceBindingResolver) CreateServiceBindingMutation(ctx context.Contex
 	if parameters != nil {
 		byteArray, err := json.Marshal(parameters)
 		if err != nil {
-			glog.Error(errors.Wrapf(err, "while marshalling parameters %s `%s` parameters: %+v", pretty.ServiceBinding, serviceBindingName, parameters))
+			glog.Error(errors.Wrapf(err, "while marshalling parameters %s `%s` parameters: %+v", pretty.ServiceBinding, name.EmptyIfNil(serviceBindingName), parameters))
 			return nil, gqlerror.New(err, pretty.ServiceBinding, gqlerror.WithName(name.EmptyIfNil(serviceBindingName)), gqlerror.WithEnvironment(env))
 		}
 		sbToCreate.Spec.Parameters = &runtime.RawExtension{
@@ -52,7 +52,7 @@ func (r *serviceBindingResolver) CreateServiceBindingMutation(ctx context.Contex
 
 	sb, err := r.operations.Create(env, sbToCreate)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.ServiceBinding, serviceBindingName))
+		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.ServiceBinding, name.EmptyIfNil(serviceBindingName)))
 		return nil, gqlerror.New(err, pretty.ServiceBinding, gqlerror.WithName(name.EmptyIfNil(serviceBindingName)), gqlerror.WithEnvironment(env))
 	}
 

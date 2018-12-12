@@ -63,7 +63,7 @@ func TestServicePlanConverter_ToGQL(t *testing.T) {
 		}
 		displayName := "ExampleDisplayName"
 		expected := gqlschema.ServicePlan{
-			Name: "ExampleName",
+			Name:                          "ExampleName",
 			RelatedServiceClassName:       "serviceClassRef",
 			DisplayName:                   &displayName,
 			ExternalName:                  "ExampleExternalName",

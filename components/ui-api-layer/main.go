@@ -19,8 +19,8 @@ import (
 	"github.com/99designs/gqlgen/handler"
 	"github.com/gorilla/websocket"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/origin"
 )
@@ -34,7 +34,7 @@ type config struct {
 	Content              content.Config
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
-	RemoteEnvironment    remoteenvironment.Config
+	Application          application.Config
 }
 
 func main() {
@@ -45,7 +45,7 @@ func main() {
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	exitOnError(err, "Error while initializing REST client config")
 
-	resolvers, err := domain.New(k8sConfig, cfg.Content, cfg.RemoteEnvironment, cfg.InformerResyncPeriod)
+	resolvers, err := domain.New(k8sConfig, cfg.Content, cfg.Application, cfg.InformerResyncPeriod)
 	exitOnError(err, "Error while creating resolvers")
 
 	stopCh := signal.SetupChannel()

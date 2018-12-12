@@ -393,64 +393,64 @@ type ExceededQuota {
     affectedResources: [String!]!
 }
 
-# Remote Environments
+# Applications
 
 type Environment {
     name: String!
-    remoteEnvironments: [String!]!
+    applications: [String!]!
 }
 
-type RemoteEnvironment {
+type Application {
     name: String!
     description: String!
     labels: Labels!
-    services: [RemoteEnvironmentService!]!
+    services: [ApplicationService!]!
     enabledInEnvironments: [String!]!
-    status: RemoteEnvironmentStatus!
+    status: ApplicationStatus!
 }
 
 type ConnectorService {
     url: String!
 }
 
-type EnvironmentMapping {
+type ApplicationMapping {
     environment: String!
-    remoteEnvironment: String!
+    application: String!
 }
 
-type RemoteEnvironmentService {
+type ApplicationService {
     id: String!
     displayName: String!
     longDescription: String!
     providerDisplayName: String!
     tags: [String!]!
-    entries: [RemoteEnvironmentEntry!]!
+    entries: [ApplicationEntry!]!
 }
 
-type RemoteEnvironmentEntry {
+type ApplicationEntry {
     type: String!
     gatewayUrl: String
     accessLabel: String
 }
 
-enum RemoteEnvironmentStatus {
+enum ApplicationStatus {
     SERVING
     NOT_SERVING
     GATEWAY_NOT_CONFIGURED
 }
 
-type RemoteEnvironmentEvent {
+type ApplicationEvent {
     type: SubscriptionEventType!
-    remoteEnvironment: RemoteEnvironment!
+    application: Application!
 }
 
-type RemoteEnvironmentMutationOutput {
+type ApplicationMutationOutput {
     name: String!
     description: String!
     labels: Labels!
 }
 
-type DeleteRemoteEnvironmentOutput {
+type DeleteApplicationOutput {
     name: String!
 }
 
@@ -562,11 +562,11 @@ type Query {
 
     apis(environment: String!, serviceName: String, hostname: String): [API!]!
 
-    remoteEnvironment(name: String!): RemoteEnvironment
-    remoteEnvironments(environment: String, first: Int, offset: Int): [RemoteEnvironment!]!
-    connectorService(remoteEnvironment: String!): ConnectorService!
+    application(name: String!): Application
+    applications(environment: String, first: Int, offset: Int): [Application!]!
+    connectorService(application: String!): ConnectorService!
 
-    environments(remoteEnvironment: String): [Environment!]!
+    environments(application: String): [Environment!]!
     deployments(environment: String!, excludeFunctions: Boolean): [Deployment!]!
     resourceQuotas(environment: String!): [ResourceQuota!]!
     resourceQuotasStatus(environment: String!): ResourceQuotasStatus!
@@ -593,12 +593,12 @@ type Mutation {
     createServiceBindingUsage(createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage
     deleteServiceBindingUsage(serviceBindingUsageName: String!, environment: String!): DeleteServiceBindingUsageOutput
 
-    createRemoteEnvironment(name: String!, description: String, labels: Labels): RemoteEnvironmentMutationOutput!
-    updateRemoteEnvironment(name: String!, description: String, labels: Labels): RemoteEnvironmentMutationOutput!
-    deleteRemoteEnvironment(name: String!): DeleteRemoteEnvironmentOutput!
+    createApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput!
+    updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput!
+    deleteApplication(name: String!): DeleteApplicationOutput!
 
-    enableRemoteEnvironment(remoteEnvironment: String!, environment: String!): EnvironmentMapping
-    disableRemoteEnvironment(remoteEnvironment: String!, environment: String!): EnvironmentMapping
+    enableApplication(application: String!, environment: String!): ApplicationMapping
+    disableApplication(application: String!, environment: String!): ApplicationMapping
 
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
     deleteIDPPreset(name: String!): IDPPreset
@@ -612,7 +612,7 @@ type Subscription {
     serviceBindingUsageEvent(environment: String!): ServiceBindingUsageEvent!
     serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
-    remoteEnvironmentEvent: RemoteEnvironmentEvent!,
+    applicationEvent: ApplicationEvent!,
 }
 
 # Schema

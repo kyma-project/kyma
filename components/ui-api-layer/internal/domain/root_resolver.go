@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/apicontroller"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/kubeless"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/remoteenvironment"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
@@ -20,13 +20,13 @@ type RootResolver struct {
 	k8s       *k8s.Resolver
 	kubeless  *kubeless.Resolver
 	sc        *servicecatalog.Resolver
-	re        *remoteenvironment.Resolver
+	app       *application.Resolver
 	content   *content.Resolver
 	ac        *apicontroller.Resolver
 	idpPreset *authentication.Resolver
 }
 
-func New(restConfig *rest.Config, contentCfg content.Config, reCfg remoteenvironment.Config, informerResyncPeriod time.Duration) (*RootResolver, error) {
+func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.Config, informerResyncPeriod time.Duration) (*RootResolver, error) {
 	contentContainer, err := content.New(contentCfg)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Content resolver")
@@ -37,12 +37,12 @@ func New(restConfig *rest.Config, contentCfg content.Config, reCfg remoteenviron
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
 	}
 
-	reContainer, err := remoteenvironment.New(restConfig, reCfg, informerResyncPeriod, contentContainer.AsyncApiSpecGetter)
+	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod, contentContainer.AsyncApiSpecGetter)
 	if err != nil {
-		return nil, errors.Wrap(err, "while initializing RemoteEnvironment resolver")
+		return nil, errors.Wrap(err, "while initializing Application resolver")
 	}
 
-	k8sResolver, err := k8s.New(restConfig, reContainer.RELister, informerResyncPeriod, scContainer.ServiceBindingUsageLister, scContainer.ServiceBindingGetter)
+	k8sResolver, err := k8s.New(restConfig, appContainer.AppLister, informerResyncPeriod, scContainer.ServiceBindingUsageLister, scContainer.ServiceBindingGetter)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
@@ -65,7 +65,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, reCfg remoteenviron
 	return &RootResolver{
 		k8s:       k8sResolver,
 		kubeless:  kubelessResolver,
-		re:        reContainer.Resolver,
+		app:       appContainer.Resolver,
 		sc:        scContainer.Resolver,
 		content:   contentContainer.Resolver,
 		ac:        acResolver,
@@ -75,7 +75,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, reCfg remoteenviron
 
 // WaitForCacheSync waits for caches to populate. This is blocking operation.
 func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
-	r.re.WaitForCacheSync(stopCh)
+	r.app.WaitForCacheSync(stopCh)
 	r.sc.WaitForCacheSync(stopCh)
 	r.k8s.WaitForCacheSync(stopCh)
 	r.kubeless.WaitForCacheSync(stopCh)
@@ -89,11 +89,11 @@ func (r *RootResolver) Deployment() gqlschema.DeploymentResolver {
 }
 
 func (r *RootResolver) EventActivation() gqlschema.EventActivationResolver {
-	return &eventActivationResolver{r.re}
+	return &eventActivationResolver{r.app}
 }
 
-func (r *RootResolver) RemoteEnvironment() gqlschema.RemoteEnvironmentResolver {
-	return &reResolver{r.re}
+func (r *RootResolver) Application() gqlschema.ApplicationResolver {
+	return &appResolver{r.app}
 }
 
 func (r *RootResolver) ServiceBinding() gqlschema.ServiceBindingResolver {
@@ -158,12 +158,12 @@ func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, servic
 	return r.sc.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, env)
 }
 
-func (r *mutationResolver) EnableRemoteEnvironment(ctx context.Context, remoteEnvironment string, environment string) (*gqlschema.EnvironmentMapping, error) {
-	return r.re.EnableRemoteEnvironmentMutation(ctx, remoteEnvironment, environment)
+func (r *mutationResolver) EnableApplication(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error) {
+	return r.app.EnableApplicationMutation(ctx, application, environment)
 }
 
-func (r *mutationResolver) DisableRemoteEnvironment(ctx context.Context, remoteEnvironment string, environment string) (*gqlschema.EnvironmentMapping, error) {
-	return r.re.DisableRemoteEnvironmentMutation(ctx, remoteEnvironment, environment)
+func (r *mutationResolver) DisableApplication(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error) {
+	return r.app.DisableApplicationMutation(ctx, application, environment)
 }
 
 func (r *mutationResolver) CreateIDPPreset(ctx context.Context, name string, issuer string, jwksURI string) (*gqlschema.IDPPreset, error) {
@@ -174,16 +174,16 @@ func (r *mutationResolver) DeleteIDPPreset(ctx context.Context, name string) (*g
 	return r.idpPreset.DeleteIDPPresetMutation(ctx, name)
 }
 
-func (r *mutationResolver) CreateRemoteEnvironment(ctx context.Context, name string, description *string, labels *gqlschema.Labels) (gqlschema.RemoteEnvironmentMutationOutput, error) {
-	return r.re.CreateRemoteEnvironment(ctx, name, description, labels)
+func (r *mutationResolver) CreateApplication(ctx context.Context, name string, description *string, labels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error) {
+	return r.app.CreateApplication(ctx, name, description, labels)
 }
 
-func (r *mutationResolver) UpdateRemoteEnvironment(ctx context.Context, name string, description *string, labels *gqlschema.Labels) (gqlschema.RemoteEnvironmentMutationOutput, error) {
-	return r.re.UpdateRemoteEnvironment(ctx, name, description, labels)
+func (r *mutationResolver) UpdateApplication(ctx context.Context, name string, description *string, labels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error) {
+	return r.app.UpdateApplication(ctx, name, description, labels)
 }
 
-func (r *mutationResolver) DeleteRemoteEnvironment(ctx context.Context, name string) (gqlschema.DeleteRemoteEnvironmentOutput, error) {
-	return r.re.DeleteRemoteEnvironment(ctx, name)
+func (r *mutationResolver) DeleteApplication(ctx context.Context, name string) (gqlschema.DeleteApplicationOutput, error) {
+	return r.app.DeleteApplication(ctx, name)
 }
 
 // Queries
@@ -192,8 +192,8 @@ type queryResolver struct {
 	*RootResolver
 }
 
-func (r *queryResolver) Environments(ctx context.Context, remoteEnvironment *string) ([]gqlschema.Environment, error) {
-	return r.k8s.EnvironmentsQuery(ctx, remoteEnvironment)
+func (r *queryResolver) Environments(ctx context.Context, application *string) ([]gqlschema.Environment, error) {
+	return r.k8s.EnvironmentsQuery(ctx, application)
 }
 
 func (r *queryResolver) Deployments(ctx context.Context, environment string, excludeFunctions *bool) ([]gqlschema.Deployment, error) {
@@ -284,20 +284,20 @@ func (r *queryResolver) Topics(ctx context.Context, input []gqlschema.InputTopic
 	return r.content.TopicsQuery(ctx, input, internal)
 }
 
-func (r *queryResolver) RemoteEnvironment(ctx context.Context, name string) (*gqlschema.RemoteEnvironment, error) {
-	return r.re.RemoteEnvironmentQuery(ctx, name)
+func (r *queryResolver) Application(ctx context.Context, name string) (*gqlschema.Application, error) {
+	return r.app.ApplicationQuery(ctx, name)
 }
 
-func (r *queryResolver) RemoteEnvironments(ctx context.Context, environment *string, first *int, offset *int) ([]gqlschema.RemoteEnvironment, error) {
-	return r.re.RemoteEnvironmentsQuery(ctx, environment, first, offset)
+func (r *queryResolver) Applications(ctx context.Context, environment *string, first *int, offset *int) ([]gqlschema.Application, error) {
+	return r.app.ApplicationsQuery(ctx, environment, first, offset)
 }
 
-func (r *queryResolver) ConnectorService(ctx context.Context, remoteEnvironment string) (gqlschema.ConnectorService, error) {
-	return r.re.ConnectorServiceQuery(ctx, remoteEnvironment)
+func (r *queryResolver) ConnectorService(ctx context.Context, application string) (gqlschema.ConnectorService, error) {
+	return r.app.ConnectorServiceQuery(ctx, application)
 }
 
 func (r *queryResolver) EventActivations(ctx context.Context, environment string) ([]gqlschema.EventActivation, error) {
-	return r.re.EventActivationsQuery(ctx, environment)
+	return r.app.EventActivationsQuery(ctx, environment)
 }
 
 func (r *queryResolver) Apis(ctx context.Context, environment string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
@@ -338,8 +338,8 @@ func (r *subscriptionResolver) ClusterServiceBrokerEvent(ctx context.Context) (<
 	return r.sc.ClusterServiceBrokerEventSubscription(ctx)
 }
 
-func (r *subscriptionResolver) RemoteEnvironmentEvent(ctx context.Context) (<-chan gqlschema.RemoteEnvironmentEvent, error) {
-	return r.re.RemoteEnvironmentEventSubscription(ctx)
+func (r *subscriptionResolver) ApplicationEvent(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error) {
+	return r.app.ApplicationEventSubscription(ctx)
 }
 
 // Service Instance
@@ -396,18 +396,18 @@ func (r *serviceBindingUsageResolver) ServiceBinding(ctx context.Context, obj *g
 	return r.sc.ServiceBindingQuery(ctx, obj.ServiceBindingName, obj.Environment)
 }
 
-// Remote Environment
+// Application
 
-type reResolver struct {
-	re *remoteenvironment.Resolver
+type appResolver struct {
+	app *application.Resolver
 }
 
-func (r *reResolver) EnabledInEnvironments(ctx context.Context, obj *gqlschema.RemoteEnvironment) ([]string, error) {
-	return r.re.RemoteEnvironmentEnabledInEnvironmentsField(ctx, obj)
+func (r *appResolver) EnabledInEnvironments(ctx context.Context, obj *gqlschema.Application) ([]string, error) {
+	return r.app.ApplicationEnabledInEnvironmentsField(ctx, obj)
 }
 
-func (r *reResolver) Status(ctx context.Context, obj *gqlschema.RemoteEnvironment) (gqlschema.RemoteEnvironmentStatus, error) {
-	return r.re.RemoteEnvironmentStatusField(ctx, obj)
+func (r *appResolver) Status(ctx context.Context, obj *gqlschema.Application) (gqlschema.ApplicationStatus, error) {
+	return r.app.ApplicationStatusField(ctx, obj)
 }
 
 // Deployment
@@ -423,7 +423,7 @@ func (r *deploymentResolver) BoundServiceInstanceNames(ctx context.Context, depl
 // Event Activation
 
 type eventActivationResolver struct {
-	re *remoteenvironment.Resolver
+	re *application.Resolver
 }
 
 func (r *eventActivationResolver) Events(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error) {
