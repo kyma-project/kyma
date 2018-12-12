@@ -8,6 +8,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
+	// ApplicationMappings returns a ApplicationMappingInformer.
+	ApplicationMappings() ApplicationMappingInformer
 	// EnvironmentMappings returns a EnvironmentMappingInformer.
 	EnvironmentMappings() EnvironmentMappingInformer
 	// EventActivations returns a EventActivationInformer.
@@ -25,6 +27,11 @@ type version struct {
 // New returns a new Interface.
 func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) Interface {
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
+}
+
+// ApplicationMappings returns a ApplicationMappingInformer.
+func (v *version) ApplicationMappings() ApplicationMappingInformer {
+	return &applicationMappingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // EnvironmentMappings returns a EnvironmentMappingInformer.
