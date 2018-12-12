@@ -1,4 +1,4 @@
 apiVersion: v1
-description: Remote Environment helm chart for Kubernetes
-name: remote-environment
+description: Application helm chart for Kubernetes
+name: application
 version: 0.0.1

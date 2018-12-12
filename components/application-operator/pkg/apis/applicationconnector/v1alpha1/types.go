@@ -18,7 +18,7 @@ type Application struct {
 }
 
 type ApplicationStatus struct {
-	// Represents the status of Remote Environment release installation
+	// Represents the status of Application release installation
 	InstallationStatus InstallationStatus `json:"installationStatus"`
 }
 

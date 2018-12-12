@@ -43,7 +43,8 @@ func main() {
 	log.Printf("Registering Components:")
 
 	log.Printf("Setting up scheme.")
-	if err := apis.AddREToScheme(mgr.GetScheme()); err != nil {
+	
+	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Fatal(err)
 	}
 

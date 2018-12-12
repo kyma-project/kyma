@@ -6,7 +6,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/controller/mocks"
 	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -27,13 +27,13 @@ type applicationChecker struct {
 }
 
 func (checker applicationChecker) checkAccessLabel(args mock.Arguments) {
-	appInstance := args.Get(1).(*v1alpha1.RemoteEnvironment)
+	appInstance := args.Get(1).(*v1alpha1.Application)
 
 	assert.Equal(checker.t, applicationName, appInstance.Spec.AccessLabel)
 }
 
 func (checker applicationChecker) checkStatus(args mock.Arguments) {
-	appInstance := args.Get(1).(*v1alpha1.RemoteEnvironment)
+	appInstance := args.Get(1).(*v1alpha1.Application)
 
 	assert.Equal(checker.t, checker.expectedStatus, appInstance.Status.InstallationStatus.Status)
 	assert.Equal(checker.t, checker.expectedDescription, appInstance.Status.InstallationStatus.Description)
@@ -57,9 +57,9 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
-			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
 			Run(setupAppInstance).Return(nil)
-		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
 			Run(statusChecker.checkStatus).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
@@ -96,9 +96,9 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
-			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
 			Run(setupAppWhichIsNotInstalled).Return(nil)
-		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
 			Run(skippedChecker.checkStatus).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
@@ -128,9 +128,9 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
-			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
 			Run(setupAppWithoutAccessLabel).Return(nil)
-		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
 			Run(statusChecker.checkAccessLabel).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
@@ -161,9 +161,9 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
-			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
 			Run(setupAppWhichIsNotInstalled).Return(nil)
-		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
 			Run(statusChecker.checkStatus).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
@@ -194,7 +194,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
-			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
 			Return(errors.NewNotFound(schema.GroupResource{}, applicationName))
 
 		releaseManager := &helmmocks.ReleaseManager{}
@@ -225,7 +225,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
-			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
 			Return(errors.NewNotFound(schema.GroupResource{}, applicationName))
 
 		releaseManager := &helmmocks.ReleaseManager{}
@@ -255,9 +255,9 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
-			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
 			Run(setupAppInstance).Return(nil)
-		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
 			Run(statusChecker.checkStatus).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
@@ -288,9 +288,9 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
-			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
 			Run(setupAppWithWrongAccessLabel).Return(nil)
-		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
 			Run(statusChecker.checkStatus).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
@@ -321,7 +321,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
-			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
 			Return(errors.NewResourceExpired("error"))
 
 		releaseManager := &helmmocks.ReleaseManager{}
@@ -350,7 +350,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
-			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
 			Run(setupAppInstance).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
@@ -379,9 +379,9 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
-			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
 			Run(setupAppWithWrongAccessLabel).Return(nil)
-		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.RemoteEnvironment")).Return(errors.NewBadRequest("Error"))
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).Return(errors.NewBadRequest("Error"))
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
@@ -404,8 +404,8 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 	})
 }
 
-func getAppFromArgs(args mock.Arguments) *v1alpha1.RemoteEnvironment {
-	appInstance := args.Get(2).(*v1alpha1.RemoteEnvironment)
+func getAppFromArgs(args mock.Arguments) *v1alpha1.Application {
+	appInstance := args.Get(2).(*v1alpha1.Application)
 	appInstance.Name = applicationName
 	return appInstance
 }

@@ -16,7 +16,7 @@ spec:
         value: http://{{.Release.Name }}-event-service-external-api.{{ .Release.Namespace }}.svc.cluster.local:8081
       - name: NAMESPACE
         value: {{ .Release.Namespace }}
-      - name: REMOTE_ENVIRONMENT
+      - name: APPLICATION
         value: {{ .Release.Name }}
   restartPolicy: Never
   

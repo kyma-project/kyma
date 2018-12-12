@@ -1,10 +1,13 @@
 package apis
 
 import (
-	remoteenvs "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
-	"k8s.io/apimachinery/pkg/runtime"
+"k8s.io/apimachinery/pkg/runtime"
 )
 
-func AddREToScheme(s *runtime.Scheme) error {
-	return remoteenvs.SchemeBuilder.AddToScheme(s)
+// AddToSchemes may be used to add all resources defined in the project to a Scheme
+var AddToSchemes runtime.SchemeBuilder
+
+// AddToScheme adds all Resources to the Scheme
+func AddToScheme(s *runtime.Scheme) error {
+	return AddToSchemes.AddToScheme(s)
 }
