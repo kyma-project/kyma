@@ -35,7 +35,7 @@ rules:
     verbs: ["get", "delete", "create", "list"]
     nonResourceURLs: []
   - apiGroups: ["applicationconnector.kyma-project.io"]
-    resources: ["remoteenvironments", "environmentmappings"]
+    resources: ["remoteenvironments", "applicationmappings"]
     verbs: ["create", "delete"]
     nonResourceURLs: []
   - apiGroups: ["apps"]

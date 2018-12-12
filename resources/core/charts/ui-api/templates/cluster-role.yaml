@@ -24,7 +24,7 @@ rules:
     resources: ["usagekinds"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["applicationconnector.kyma-project.io"]
-    resources: ["remoteenvironments", "environmentmappings", "eventactivations"]
+    resources: ["remoteenvironments", "applicationmappings", "eventactivations"]
     verbs: ["get", "list", "watch", "create", "delete", "update"]
   - apiGroups: ["kubeless.io"]
     resources: ["functions"]

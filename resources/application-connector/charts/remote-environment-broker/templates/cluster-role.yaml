@@ -9,7 +9,7 @@ metadata:
     heritage: "{{ .Release.Service }}"
 rules:
 - apiGroups: ["applicationconnector.kyma-project.io"]
-  resources: ["remoteenvironments","environmentmappings"]
+  resources: ["remoteenvironments","applicationmappings"]
   verbs: ["get", "list", "watch"]
 - apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["eventactivations"]

@@ -30,7 +30,7 @@ tolerations: []
 nodeSelector: {}
 
 server:
-  resourcePriorities: namespaces,persistentvolumes,persistentvolumeclaims,remoteenvironments,environmentmappings,servicebrokers,serviceclasses,serviceinstances,servicebindings,secrets,configmaps,serviceaccounts,limitranges,podpresets,pods,replicaset
+  resourcePriorities: namespaces,persistentvolumes,persistentvolumeclaims,remoteenvironments,applicationmappings,servicebrokers,serviceclasses,serviceinstances,servicebindings,secrets,configmaps,serviceaccounts,limitranges,podpresets,pods,replicaset
 
 backupStorageLocation:
   provider: gcp
