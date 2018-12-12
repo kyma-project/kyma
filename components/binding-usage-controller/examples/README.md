@@ -9,7 +9,7 @@ Execute all commands from the examples in the `examples` directory.
 ## Usage
 
 This section shows how to use bindings both on a Deployment and a Function.
-The [Function](#use-the-bindings-on-a-function) scenario uses the prefixing functionality for the injected environment variable.  
+The [Function](#use-bindings-on-a-function) scenario uses the prefixing functionality for the injected environment variable.  
 
 ### Use bindings on a Deployment
 
