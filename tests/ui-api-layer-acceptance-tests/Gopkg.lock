@@ -108,11 +108,7 @@
     "components/idppreset/pkg/apis/authentication/v1alpha1",
     "components/idppreset/pkg/client/clientset/versioned",
     "components/idppreset/pkg/client/clientset/versioned/scheme",
-    "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1",
-    "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
-    "components/remote-environment-broker/pkg/client/clientset/versioned",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+    "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1"
   ]
   revision = "01af467a7485d695790da907f60d0e617ad65120"
 
@@ -358,6 +354,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ace491ba8c78a2cf0b6f1dd1f524fa89c6f7ab8724dedd6219b37841ad249d0d"
+  inputs-digest = "0d3835c358fcd271ab4611b48bc5822c39311cdca5a7d3508e11491ccdde097f"
   solver-name = "gps-cdcl"
   solver-version = 1
