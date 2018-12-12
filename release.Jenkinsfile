@@ -41,14 +41,14 @@ projects = [
     "components/helm-broker",
     "components/application-broker",
     "components/application-operator",
-    "components/metadata-service",
+    "components/application-registry",
     "components/installer",
     "components/connector-service",
     "components/connection-token-handler",
     "components/ui-api-layer",
     "components/event-bus",
     "components/event-service",
-    "components/proxy-service",
+    "components/application-proxy",
     "tools/alpine-net",
     "tools/watch-pods",
     "tools/stability-checker",
@@ -65,8 +65,8 @@ projects = [
     "tests/kubeless",
     "tests/api-controller-acceptance-tests",
     "tests/connector-service-tests",
-    "tests/metadata-service-tests",
     "tests/application-operator-tests",
+    "tests/application-registry-tests",
     "tests/event-bus"
 ]
 
