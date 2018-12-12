@@ -114,3 +114,5 @@ commitMsg=$(git show -s --pretty=%s)
 commitDate=$(git log -1 --format=%cd)
 printf "{\n\t\"author\": \"""$author""\",\n\t\"commit\": \""$commit"\",\n\t\"branch\": \""$branch"\",\n\t\"commitDate\":\"""$commitDate""\",\n\t\"commitMessage\":\"""$commitMsg""\",\n\t\"deployDate\": \"""$(date)""\"\n}" >info.json
 echo -e "${GREEN}√ info.json ${NC}" $(cat info.json)
+
+#TODO: REMOVE
