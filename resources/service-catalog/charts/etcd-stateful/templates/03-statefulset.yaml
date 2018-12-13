@@ -120,6 +120,10 @@ spec:
             # --client-cert-auth=true \
             # --trusted-ca-file=/etc/etcdtls/server/server-ca.crt \
 
+            # SNAPSHOT_COUNT parameter was introducet to mitigate the "out of memory" issue.
+            # More information here: https://github.com/kyma-project/kyma/issues/1802
+            SNAPSHOT_COUNT=10000
+
             if [ $(ETCD_TLS) = "true" ]; then
               exec etcd --name ${HOSTNAME} \
                 --listen-peer-urls https://${IP}:2380 \
@@ -137,6 +141,7 @@ spec:
                 --initial-cluster-token etcd-cluster-1 \
                 --initial-cluster ${PEERS} \
                 --initial-cluster-state ${STATE} \
+                --snapshot-count=${SNAPSHOT_COUNT} \
                 --listen-metrics-urls http://${IP}:2381 \
                 --data-dir /var/run/etcd/default.etcd
             else
@@ -149,6 +154,7 @@ spec:
                 --initial-cluster-token etcd-cluster-1 \
                 --initial-cluster ${PEERS} \
                 --initial-cluster-state ${STATE} \
+                --snapshot-count=${SNAPSHOT_COUNT} \
                 --data-dir /var/run/etcd/default.etcd
             fi
 
