@@ -27,7 +27,7 @@ EOF
 
 To check the status of the created APP and show the output in the `yaml` format, run this command:
 ```
-kubectl get re {APP_NAME} -o yaml
+kubectl get app {APP_NAME} -o yaml
 ```
 
 A successful response returns the Application custom resource with the specified name. The custom resource has the **status** section added.
