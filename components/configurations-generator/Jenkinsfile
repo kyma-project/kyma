@@ -58,7 +58,7 @@ podTemplate(label: label,
                         }
 
                         stage("code quality $application") {
-                            execute("gometalinter --vendor --deadline=2m --disable-all --enable=vet --skip=\$(go list ./... | grep \"/fake\") ./...", workDir, componentDir)
+                            execute("gometalinter --vendor --deadline=2m --disable-all --enable=vet", workDir, componentDir)
                         }
 
                         stage("build $application") {
