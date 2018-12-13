@@ -37,8 +37,8 @@ projects = [
     "components/environments": "environments",
     "components/istio-kyma-patch": "istio-kyma-patch",
     "components/helm-broker": "helm-broker",
-    "components/remote-environment-broker": "remote-environment-broker",
-    "components/remote-environment-controller": "remote-environment-controller",
+    "components/application-broker": "application-broker",
+    "components/application-operator": "application-operator",
     "components/metadata-service": "metadata-service",
     "components/installer": "installer",
     "components/connector-service": "connector-service",
@@ -67,7 +67,7 @@ projects = [
     "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
     "tests/connector-service-tests": "connector-service-tests",
     "tests/metadata-service-tests": "metadata-service-tests",
-    "tests/remote-environment-controller-tests": "remote-environment-controller-tests",
+    "tests/application-operator-tests": "application-operator-tests",
     "tests/event-bus": "event-bus-e2e-tester",
     "governance": null
 ]

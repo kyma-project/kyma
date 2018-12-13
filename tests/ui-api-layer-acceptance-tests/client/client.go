@@ -3,7 +3,6 @@ package client
 import (
 	scClientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
-	reClientset "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
@@ -49,18 +48,4 @@ func NewIDPPresetClientWithConfig() (*idpClientset.Clientset, *rest.Config, erro
 	}
 
 	return idpCli, k8sConfig, nil
-}
-
-func NewREClientWithConfig() (*reClientset.Clientset, *rest.Config, error) {
-	k8sConfig, err := NewRestClientConfigFromEnv()
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "while creating new client with config")
-	}
-
-	reCli, err := reClientset.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "while creating new client with config")
-	}
-
-	return reCli, k8sConfig, nil
 }

@@ -27,6 +27,7 @@
 required = [
   "github.com/golang/lint/golint",
   "golang.org/x/tools/cmd/goimports",
+  "github.com/kisielk/errcheck",
 
   "k8s.io/code-generator/cmd/defaulter-gen",
   "k8s.io/code-generator/cmd/deepcopy-gen",
@@ -41,6 +42,10 @@ required = [
 [prune]
   unused-packages = true
   go-tests = true
+
+[[constraint]]
+  name = "github.com/kisielk/errcheck"
+  revision = "1787c4bee836470bf45018cfbc783650db3c6501"
 
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"

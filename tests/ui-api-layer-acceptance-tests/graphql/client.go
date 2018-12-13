@@ -88,7 +88,7 @@ func (c *Client) Subscribe(req *Request) *Subscription {
 		return errorSubscription(err)
 	}
 
-	js, err := req.Json()
+	js, err := req.JSON()
 	if err != nil {
 		return errorSubscription(errors.Wrapf(err, "while converting request to json"))
 	}

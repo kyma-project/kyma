@@ -326,6 +326,9 @@ func instanceDetailsFields() string {
 		name
 		environment
 		planSpec
+		bindable
+		creationTimestamp
+		labels
 		classReference {
 			name
 			displayName
@@ -336,9 +339,6 @@ func instanceDetailsFields() string {
 			displayName
 			clusterWide
 		}
-		bindable
-		creationTimestamp
-		labels
 		status {
 			type
 			reason
@@ -374,7 +374,7 @@ func instanceDetailsFields() string {
 			relatedServiceClassName
 			instanceCreateParameterSchema
 			bindingCreateParameterSchema
-		}
+		 }
 		 serviceClass {
 			name
 			environment
