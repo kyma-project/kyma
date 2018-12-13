@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	resourceNamePrefixFormat = "re-%s-"
+	resourceNamePrefixFormat = "app-%s-"
 	metadataUrlFormat        = "http://%s.%s.svc.cluster.local"
 
 	maxResourceNameLength = 63 // Kubernetes limit for services

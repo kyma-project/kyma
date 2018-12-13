@@ -13,7 +13,7 @@ import (
 
 const (
 	serviceId  = "1234"
-	gatewayUrl = "http://re-1234.io"
+	gatewayUrl = "http://app-1234.io"
 )
 
 var (
@@ -22,7 +22,7 @@ var (
 	baseDocs      = []byte("{\"baseDocs\":\"baseDocs\"}")
 
 	swaggerApiSpec      = []byte("{\"swagger\":\"2.0\"}")
-	modifiedSwaggerSpec = []byte("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"re-1234.io\",\"paths\":null}")
+	modifiedSwaggerSpec = []byte("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"app-1234.io\",\"paths\":null}")
 )
 
 func TestSpecService_PutSpec(t *testing.T) {

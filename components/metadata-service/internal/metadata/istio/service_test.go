@@ -14,14 +14,14 @@ func TestService_Create(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("CreateDenier", "re", "sid", "testsvc").Return(nil)
-		repository.On("CreateCheckNothing", "re", "sid", "testsvc").Return(nil)
-		repository.On("CreateRule", "re", "sid", "testsvc").Return(nil)
+		repository.On("CreateDenier", "app", "sid", "testsvc").Return(nil)
+		repository.On("CreateCheckNothing", "app", "sid", "testsvc").Return(nil)
+		repository.On("CreateRule", "app", "sid", "testsvc").Return(nil)
 
 		service := NewService(repository)
 
 		// when
-		err := service.Create("re", "sid", "testsvc")
+		err := service.Create("app", "sid", "testsvc")
 
 		// then
 		assert.NoError(t, err)
@@ -32,12 +32,12 @@ func TestService_Create(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("CreateDenier", "re", "sid", "testsvc").Return(apperrors.Internal(""))
+		repository.On("CreateDenier", "app", "sid", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
 
 		// when
-		err := service.Create("re", "sid", "testsvc")
+		err := service.Create("app", "sid", "testsvc")
 
 		// then
 		assert.Error(t, err)
@@ -49,13 +49,13 @@ func TestService_Create(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("CreateDenier", "re", "sid", "testsvc").Return(nil)
-		repository.On("CreateCheckNothing", "re", "sid", "testsvc").Return(apperrors.Internal(""))
+		repository.On("CreateDenier", "app", "sid", "testsvc").Return(nil)
+		repository.On("CreateCheckNothing", "app", "sid", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
 
 		// when
-		err := service.Create("re", "sid", "testsvc")
+		err := service.Create("app", "sid", "testsvc")
 
 		// then
 		assert.Error(t, err)
@@ -67,14 +67,14 @@ func TestService_Create(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("CreateDenier", "re", "sid", "testsvc").Return(nil)
-		repository.On("CreateCheckNothing", "re", "sid", "testsvc").Return(nil)
-		repository.On("CreateRule", "re", "sid", "testsvc").Return(apperrors.Internal(""))
+		repository.On("CreateDenier", "app", "sid", "testsvc").Return(nil)
+		repository.On("CreateCheckNothing", "app", "sid", "testsvc").Return(nil)
+		repository.On("CreateRule", "app", "sid", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
 
 		// when
-		err := service.Create("re", "sid", "testsvc")
+		err := service.Create("app", "sid", "testsvc")
 
 		// then
 		assert.Error(t, err)
@@ -89,14 +89,14 @@ func TestService_Upsert(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("UpsertDenier", "re", "sid", "testsvc").Return(nil)
-		repository.On("UpsertCheckNothing", "re", "sid", "testsvc").Return(nil)
-		repository.On("UpsertRule", "re", "sid", "testsvc").Return(nil)
+		repository.On("UpsertDenier", "app", "sid", "testsvc").Return(nil)
+		repository.On("UpsertCheckNothing", "app", "sid", "testsvc").Return(nil)
+		repository.On("UpsertRule", "app", "sid", "testsvc").Return(nil)
 
 		service := NewService(repository)
 
 		// when
-		err := service.Upsert("re", "sid", "testsvc")
+		err := service.Upsert("app", "sid", "testsvc")
 
 		// then
 		assert.NoError(t, err)
@@ -107,12 +107,12 @@ func TestService_Upsert(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("UpsertDenier", "re", "sid", "testsvc").Return(apperrors.Internal(""))
+		repository.On("UpsertDenier", "app", "sid", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
 
 		// when
-		err := service.Upsert("re", "sid", "testsvc")
+		err := service.Upsert("app", "sid", "testsvc")
 
 		// then
 		assert.Error(t, err)
@@ -124,13 +124,13 @@ func TestService_Upsert(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("UpsertDenier", "re", "sid", "testsvc").Return(nil)
-		repository.On("UpsertCheckNothing", "re", "sid", "testsvc").Return(apperrors.Internal(""))
+		repository.On("UpsertDenier", "app", "sid", "testsvc").Return(nil)
+		repository.On("UpsertCheckNothing", "app", "sid", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
 
 		// when
-		err := service.Upsert("re", "sid", "testsvc")
+		err := service.Upsert("app", "sid", "testsvc")
 
 		// then
 		assert.Error(t, err)
@@ -142,14 +142,14 @@ func TestService_Upsert(t *testing.T) {
 		// given
 		repository := &mocks.Repository{}
 
-		repository.On("UpsertDenier", "re", "sid", "testsvc").Return(nil)
-		repository.On("UpsertCheckNothing", "re", "sid", "testsvc").Return(nil)
-		repository.On("UpsertRule", "re", "sid", "testsvc").Return(apperrors.Internal(""))
+		repository.On("UpsertDenier", "app", "sid", "testsvc").Return(nil)
+		repository.On("UpsertCheckNothing", "app", "sid", "testsvc").Return(nil)
+		repository.On("UpsertRule", "app", "sid", "testsvc").Return(apperrors.Internal(""))
 
 		service := NewService(repository)
 
 		// when
-		err := service.Upsert("re", "sid", "testsvc")
+		err := service.Upsert("app", "sid", "testsvc")
 
 		// then
 		assert.Error(t, err)

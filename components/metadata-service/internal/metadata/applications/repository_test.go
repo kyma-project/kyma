@@ -46,7 +46,7 @@ func TestGetServices(t *testing.T) {
 			TargetUrl:   "https://192.168.1.2",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "https://192.168.1.3/token",
-				SecretName:        "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
+				SecretName:        "app-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
 			},
 		})
 
@@ -61,29 +61,29 @@ func TestGetServices(t *testing.T) {
 			TargetUrl:   "https://192.168.1.3",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "https://192.168.1.4/token",
-				SecretName:        "re-bc031e8c-9aa4-4cb7-8999-0d358726ffab",
+				SecretName:        "app-bc031e8c-9aa4-4cb7-8999-0d358726ffab",
 			},
 		})
 	})
 
-	t.Run("should fail if unable to read RE", func(t *testing.T) {
+	t.Run("should fail if unable to read App", func(t *testing.T) {
 		// given
 		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "re", metav1.GetOptions{}).
-			Return(nil, errors.New("failed to get RE"))
+		appManagerMock.On("Get", "app", metav1.GetOptions{}).
+			Return(nil, errors.New("failed to get App"))
 
 		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
 
 		// when
-		services, err := repository.GetAll("re")
+		services, err := repository.GetAll("app")
 
 		// then
 		require.Nil(t, services)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 	})
 
-	t.Run("should fail if RE doesn't exist", func(t *testing.T) {
+	t.Run("should fail if App doesn't exist", func(t *testing.T) {
 		// given
 		appManagerMock := &mocks.ApplicationManager{}
 		appManagerMock.On("Get", "not_existent", metav1.GetOptions{}).
@@ -134,7 +134,7 @@ func TestGetServices(t *testing.T) {
 			TargetUrl:   "https://192.168.1.2",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "https://192.168.1.3/token",
-				SecretName:        "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
+				SecretName:        "app-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
 			},
 		})
 	})
@@ -187,7 +187,7 @@ func TestCreateServices(t *testing.T) {
 		appManagerMock.AssertExpectations(t)
 	})
 
-	t.Run("should fail if failed to update RE", func(t *testing.T) {
+	t.Run("should fail if failed to update App", func(t *testing.T) {
 		// given
 		application := createApplication("production")
 		appManagerMock := &mocks.ApplicationManager{}
@@ -235,7 +235,7 @@ func TestCreateServices(t *testing.T) {
 		assert.Equal(t, apperrors.CodeAlreadyExists, err.Code())
 	})
 
-	t.Run("should fail if RE doesn't exist", func(t *testing.T) {
+	t.Run("should fail if App doesn't exist", func(t *testing.T) {
 		// given
 		appManagerMock := &mocks.ApplicationManager{}
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
@@ -302,14 +302,14 @@ func TestDeleteServices(t *testing.T) {
 		appManagerMock.AssertExpectations(t)
 	})
 
-	t.Run("should fail if failed to update RE", func(t *testing.T) {
+	t.Run("should fail if failed to update App", func(t *testing.T) {
 		// given
 		application := createApplication("production")
 		appManagerMock := &mocks.ApplicationManager{}
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
 			Return(application, nil)
 
-		appManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.Application")).Return(nil, errors.New("failed to update RE"))
+		appManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.Application")).Return(nil, errors.New("failed to update App"))
 
 		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
@@ -323,7 +323,7 @@ func TestDeleteServices(t *testing.T) {
 		appManagerMock.AssertExpectations(t)
 	})
 
-	t.Run("should return not found error if RE doesn't exist", func(t *testing.T) {
+	t.Run("should return not found error if App doesn't exist", func(t *testing.T) {
 		// given
 		appManagerMock := &mocks.ApplicationManager{}
 		appManagerMock.On("Get", "production", metav1.GetOptions{}).
@@ -403,7 +403,7 @@ func TestUpdateServices(t *testing.T) {
 		appManagerMock.AssertExpectations(t)
 	})
 
-	t.Run("should return not found error if RE doesn't exist", func(t *testing.T) {
+	t.Run("should return not found error if App doesn't exist", func(t *testing.T) {
 		// given
 		application := createApplication("production")
 		appManagerMock := &mocks.ApplicationManager{}
@@ -433,7 +433,7 @@ func createApplication(name string) *v1alpha1.Application {
 		TargetUrl:   "https://192.168.1.2",
 		Credentials: v1alpha1.Credentials{
 			AuthenticationUrl: "https://192.168.1.3/token",
-			SecretName:        "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
+			SecretName:        "app-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
 		},
 	}
 	reService1 := v1alpha1.Service{
@@ -452,7 +452,7 @@ func createApplication(name string) *v1alpha1.Application {
 		TargetUrl:   "https://192.168.1.3",
 		Credentials: v1alpha1.Credentials{
 			AuthenticationUrl: "https://192.168.1.4/token",
-			SecretName:        "re-bc031e8c-9aa4-4cb7-8999-0d358726ffab",
+			SecretName:        "app-bc031e8c-9aa4-4cb7-8999-0d358726ffab",
 		},
 	}
 
@@ -492,7 +492,7 @@ func createService() applications.Service {
 			TargetUrl:   "https://192.168.1.2",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "https://192.168.1.3/token",
-				SecretName:        "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
+				SecretName:        "app-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
 			},
 		},
 		Events: true,
@@ -507,7 +507,7 @@ func createK8sService() v1alpha1.Service {
 		TargetUrl:   "https://192.168.1.2",
 		Credentials: v1alpha1.Credentials{
 			AuthenticationUrl: "https://192.168.1.3/token",
-			SecretName:        "re-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
+			SecretName:        "app-ac031e8c-9aa4-4cb7-8999-0d358726ffaa",
 		},
 	}
 	serviceEntry2 := v1alpha1.Entry{

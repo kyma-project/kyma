@@ -1,7 +1,7 @@
 package k8sconsts
 
 const (
-	LabelApplication = "re"
+	LabelApplication = "app"
 	LabelServiceId   = "serviceId"
 	LabelApp         = "app"
 )

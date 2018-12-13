@@ -22,9 +22,9 @@ func TestRepository_Create(t *testing.T) {
 		// given
 		expected := &v1alpha2.Denier{
 			ObjectMeta: v1.ObjectMeta{
-				Name: "re-test-uuid1",
+				Name: "app-test-uuid1",
 				Labels: map[string]string{
-					k8sconsts.LabelApplication: "re",
+					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
 			},
@@ -42,7 +42,7 @@ func TestRepository_Create(t *testing.T) {
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.CreateDenier("re", "sid", "re-test-uuid1")
+		err := repository.CreateDenier("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -58,7 +58,7 @@ func TestRepository_Create(t *testing.T) {
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.CreateDenier("re", "sid", "re-test-uuid1")
+		err := repository.CreateDenier("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -69,9 +69,9 @@ func TestRepository_Create(t *testing.T) {
 		// given
 		expected := &v1alpha2.Checknothing{
 			ObjectMeta: v1.ObjectMeta{
-				Name: "re-test-uuid1",
+				Name: "app-test-uuid1",
 				Labels: map[string]string{
-					k8sconsts.LabelApplication: "re",
+					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
 			},
@@ -83,7 +83,7 @@ func TestRepository_Create(t *testing.T) {
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.CreateCheckNothing("re", "sid", "re-test-uuid1")
+		err := repository.CreateCheckNothing("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -99,7 +99,7 @@ func TestRepository_Create(t *testing.T) {
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.CreateCheckNothing("re", "sid", "re-test-uuid1")
+		err := repository.CreateCheckNothing("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -110,17 +110,17 @@ func TestRepository_Create(t *testing.T) {
 		// given
 		expected := &v1alpha2.Rule{
 			ObjectMeta: v1.ObjectMeta{
-				Name: "re-test-uuid1",
+				Name: "app-test-uuid1",
 				Labels: map[string]string{
-					k8sconsts.LabelApplication: "re",
+					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
 			},
 			Spec: &v1alpha2.RuleSpec{
-				Match: `(destination.service.host == "re-test-uuid1.testns.svc.cluster.local") && (source.labels["re-test-uuid1"] != "true")`,
+				Match: `(destination.service.host == "app-test-uuid1.testns.svc.cluster.local") && (source.labels["app-test-uuid1"] != "true")`,
 				Actions: []v1alpha2.RuleAction{{
-					Handler:   "re-test-uuid1.denier",
-					Instances: []string{"re-test-uuid1.checknothing"},
+					Handler:   "app-test-uuid1.denier",
+					Instances: []string{"app-test-uuid1.checknothing"},
 				}},
 			},
 		}
@@ -131,7 +131,7 @@ func TestRepository_Create(t *testing.T) {
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.CreateRule("re", "sid", "re-test-uuid1")
+		err := repository.CreateRule("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -147,7 +147,7 @@ func TestRepository_Create(t *testing.T) {
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.CreateRule("re", "sid", "re-test-uuid1")
+		err := repository.CreateRule("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -161,9 +161,9 @@ func TestRepository_Upsert(t *testing.T) {
 		// given
 		expected := &v1alpha2.Denier{
 			ObjectMeta: v1.ObjectMeta{
-				Name: "re-test-uuid1",
+				Name: "app-test-uuid1",
 				Labels: map[string]string{
-					k8sconsts.LabelApplication: "re",
+					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
 			},
@@ -181,7 +181,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.UpsertDenier("re", "sid", "re-test-uuid1")
+		err := repository.UpsertDenier("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -197,7 +197,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.UpsertDenier("re", "sid", "re-test-uuid1")
+		err := repository.UpsertDenier("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -213,7 +213,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.UpsertDenier("re", "sid", "re-test-uuid1")
+		err := repository.UpsertDenier("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -224,9 +224,9 @@ func TestRepository_Upsert(t *testing.T) {
 		// given
 		expected := &v1alpha2.Checknothing{
 			ObjectMeta: v1.ObjectMeta{
-				Name: "re-test-uuid1",
+				Name: "app-test-uuid1",
 				Labels: map[string]string{
-					k8sconsts.LabelApplication: "re",
+					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
 			},
@@ -238,7 +238,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.UpsertCheckNothing("re", "sid", "re-test-uuid1")
+		err := repository.UpsertCheckNothing("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -254,7 +254,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.UpsertCheckNothing("re", "sid", "re-test-uuid1")
+		err := repository.UpsertCheckNothing("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -270,7 +270,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.UpsertCheckNothing("re", "sid", "re-test-uuid1")
+		err := repository.UpsertCheckNothing("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -281,17 +281,17 @@ func TestRepository_Upsert(t *testing.T) {
 		// given
 		expected := &v1alpha2.Rule{
 			ObjectMeta: v1.ObjectMeta{
-				Name: "re-test-uuid1",
+				Name: "app-test-uuid1",
 				Labels: map[string]string{
-					k8sconsts.LabelApplication: "re",
+					k8sconsts.LabelApplication: "app",
 					k8sconsts.LabelServiceId:   "sid",
 				},
 			},
 			Spec: &v1alpha2.RuleSpec{
-				Match: `(destination.service.host == "re-test-uuid1.testns.svc.cluster.local") && (source.labels["re-test-uuid1"] != "true")`,
+				Match: `(destination.service.host == "app-test-uuid1.testns.svc.cluster.local") && (source.labels["app-test-uuid1"] != "true")`,
 				Actions: []v1alpha2.RuleAction{{
-					Handler:   "re-test-uuid1.denier",
-					Instances: []string{"re-test-uuid1.checknothing"},
+					Handler:   "app-test-uuid1.denier",
+					Instances: []string{"app-test-uuid1.checknothing"},
 				}},
 			},
 		}
@@ -302,7 +302,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.UpsertRule("re", "sid", "re-test-uuid1")
+		err := repository.UpsertRule("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -318,7 +318,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.UpsertRule("re", "sid", "re-test-uuid1")
+		err := repository.UpsertRule("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -334,7 +334,7 @@ func TestRepository_Upsert(t *testing.T) {
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.UpsertRule("re", "sid", "re-test-uuid1")
+		err := repository.UpsertRule("app", "sid", "app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -347,12 +347,12 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should delete denier", func(t *testing.T) {
 		// given
 		denierInterface := new(mocks.DenierInterface)
-		denierInterface.On("Delete", "re-test-uuid1", (*v1.DeleteOptions)(nil)).Return(nil)
+		denierInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).Return(nil)
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.DeleteDenier("re-test-uuid1")
+		err := repository.DeleteDenier("app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -362,13 +362,13 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should handle error when deleting denier", func(t *testing.T) {
 		// given
 		denierInterface := new(mocks.DenierInterface)
-		denierInterface.On("Delete", "re-test-uuid1", (*v1.DeleteOptions)(nil)).
+		denierInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
 			Return(errors.New("some error"))
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.DeleteDenier("re-test-uuid1")
+		err := repository.DeleteDenier("app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -378,13 +378,13 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should ignore not found error when deleting denier", func(t *testing.T) {
 		// given
 		denierInterface := new(mocks.DenierInterface)
-		denierInterface.On("Delete", "re-test-uuid1", (*v1.DeleteOptions)(nil)).
+		denierInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
 			Return(k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		repository := NewRepository(nil, nil, denierInterface, config)
 
 		// when
-		err := repository.DeleteDenier("re-test-uuid1")
+		err := repository.DeleteDenier("app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -393,12 +393,12 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should delete checknothing", func(t *testing.T) {
 		// given
 		checknothingInterface := new(mocks.ChecknothingInterface)
-		checknothingInterface.On("Delete", "re-test-uuid1", (*v1.DeleteOptions)(nil)).Return(nil)
+		checknothingInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).Return(nil)
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.DeleteCheckNothing("re-test-uuid1")
+		err := repository.DeleteCheckNothing("app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -408,13 +408,13 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should handle error when deleting checknothing", func(t *testing.T) {
 		// given
 		checknothingInterface := new(mocks.ChecknothingInterface)
-		checknothingInterface.On("Delete", "re-test-uuid1", (*v1.DeleteOptions)(nil)).
+		checknothingInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
 			Return(errors.New("some error"))
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.DeleteCheckNothing("re-test-uuid1")
+		err := repository.DeleteCheckNothing("app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -424,13 +424,13 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should ignore not found error when deleting checknothing", func(t *testing.T) {
 		// given
 		checknothingInterface := new(mocks.ChecknothingInterface)
-		checknothingInterface.On("Delete", "re-test-uuid1", (*v1.DeleteOptions)(nil)).
+		checknothingInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
 			Return(k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		repository := NewRepository(nil, checknothingInterface, nil, config)
 
 		// when
-		err := repository.DeleteCheckNothing("re-test-uuid1")
+		err := repository.DeleteCheckNothing("app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -439,12 +439,12 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should delete rule", func(t *testing.T) {
 		// given
 		ruleInterface := new(mocks.RuleInterface)
-		ruleInterface.On("Delete", "re-test-uuid1", (*v1.DeleteOptions)(nil)).Return(nil)
+		ruleInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).Return(nil)
 
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.DeleteRule("re-test-uuid1")
+		err := repository.DeleteRule("app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
@@ -454,13 +454,13 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should handle error when deleting rule", func(t *testing.T) {
 		// given
 		ruleInterface := new(mocks.RuleInterface)
-		ruleInterface.On("Delete", "re-test-uuid1", (*v1.DeleteOptions)(nil)).
+		ruleInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
 			Return(errors.New("some error"))
 
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.DeleteRule("re-test-uuid1")
+		err := repository.DeleteRule("app-test-uuid1")
 
 		// then
 		assert.Error(t, err)
@@ -470,13 +470,13 @@ func TestRepository_Delete(t *testing.T) {
 	t.Run("should ignore not found error when deleting rule", func(t *testing.T) {
 		// given
 		ruleInterface := new(mocks.RuleInterface)
-		ruleInterface.On("Delete", "re-test-uuid1", (*v1.DeleteOptions)(nil)).
+		ruleInterface.On("Delete", "app-test-uuid1", (*v1.DeleteOptions)(nil)).
 			Return(k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		repository := NewRepository(ruleInterface, nil, nil, config)
 
 		// when
-		err := repository.DeleteRule("re-test-uuid1")
+		err := repository.DeleteRule("app-test-uuid1")
 
 		// then
 		assert.NoError(t, err)
