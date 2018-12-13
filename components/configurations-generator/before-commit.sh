@@ -33,7 +33,7 @@ if [ "$1" == "$CI_FLAG" ]; then
 	buildEnv="env CGO_ENABLED=0"
 fi
 
-${buildEnv} go build -o generator ./cmd/generator/
+${buildEnv} go build -o bin/app ./cmd/generator/
 
 goBuildResult=$?
 if [ ${goBuildResult} != 0 ]; then

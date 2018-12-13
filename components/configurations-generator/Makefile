@@ -26,4 +26,4 @@ ci-release: build build-image push-image
 
 .PHONY: clean
 clean:
-	rm -rf generator
+	rm -rf bin/
