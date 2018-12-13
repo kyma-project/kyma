@@ -3,7 +3,7 @@ title: Compare traces
 type: Details
 ---
 
-Trace comparison allows you to compare the structure of two traces, rendered as a tree of connected services and operations. The colors help you to distinguish the comparison differences between two traces.
+Trace comparison allows you to compare the structure of two traces, rendered as a tree of connected services and operations. The colors help you to distinguish the differences between two traces.
 
 Compare the traces using the **Jaeger** user interface.
 

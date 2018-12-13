@@ -8,7 +8,7 @@ The diagram presents the tracing flow including the details of requesting and st
 
 
 The Jaeger Deployment is the central element of the tracing architecture.
-It serves both as a target of all query requests sent from the Jaeger UI, and the space for storing and processing the spans and traces created by Envoy, Istio and Kyma services. 
+It serves as a target of all query requests sent from the Jaeger UI. It is also the space for storing and processing the spans and traces created by Envoy, Istio, and Kyma services. 
 
 ## Request traces
 
