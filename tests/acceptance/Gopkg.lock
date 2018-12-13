@@ -362,6 +362,12 @@
   version = "kubernetes-1.10.1"
 
 [[projects]]
+  branch = "master"
+  name = "k8s.io/cli-runtime"
+  packages = ["pkg/genericclioptions/printers"]
+  revision = "2f0d1d0a58f22eae7a0ec3d6cf01f4a122a57dae"
+
+[[projects]]
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -408,11 +414,9 @@
     "transport",
     "util/cert",
     "util/flowcontrol",
-    "util/integer"
   ]
   revision = "989be4278f353e42f26c416c53757d16fcff77db"
   version = "kubernetes-1.10.1"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1

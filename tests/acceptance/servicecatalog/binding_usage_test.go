@@ -20,6 +20,7 @@ import (
 	reInterface "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/report"
 	"github.com/stretchr/testify/require"
 	"github.com/vrischmann/envconfig"
 	appsTypes "k8s.io/api/apps/v1beta1"
@@ -52,7 +53,8 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 
 	defer func() {
 		if t.Failed() {
-			ts.dumpTestNamespace()
+			namespaceReport := report.NewReport(t, ts.k8sClientCfg)
+			namespaceReport.PrintJsonReport(ts.namespace)
 		}
 		ts.cleanup()
 	}()
@@ -282,10 +284,13 @@ func (ts *TestSuite) deleteServiceBinding(bindingName string, timeout time.Durat
 	require.NoError(ts.t, err)
 
 	repeat.FuncAtMost(ts.t, func() error {
-		_, err := siClient.Get(bindingName, metav1.GetOptions{})
+		binding, err := siClient.Get(bindingName, metav1.GetOptions{})
 		switch {
 		case err == nil:
-			return fmt.Errorf("ServiceBiding %q still exists", bindingName)
+			return fmt.Errorf(
+				"ServiceBiding %q still exists. [%s].",
+				bindingName,
+				prettyBindingResourceStatus(binding.Status.Conditions))
 		case apiErrors.IsNotFound(err):
 			return nil
 		default:
@@ -409,10 +414,13 @@ func (ts *TestSuite) deleteServiceInstance(instanceName string, timeout time.Dur
 	require.NoError(ts.t, err)
 
 	repeat.FuncAtMost(ts.t, func() error {
-		_, err := siClient.Get(instanceName, metav1.GetOptions{})
+		instance, err := siClient.Get(instanceName, metav1.GetOptions{})
 		switch {
 		case err == nil:
-			return fmt.Errorf("ServiceInstance %q still exists", instanceName)
+			return fmt.Errorf(
+				"ServiceInstance %q still exists. [%s].",
+				instanceName,
+				prettyInstanceResourceStatus(instance.Status.Conditions))
 		case apiErrors.IsNotFound(err):
 			return nil
 		default:
@@ -505,51 +513,6 @@ func (ts *TestSuite) cleanup() {
 	ts.deleteRemoteEnvironment()
 }
 
-func (ts *TestSuite) dumpTestNamespace() {
-	clientSet, err := scClient.NewForConfig(ts.k8sClientCfg)
-	require.NoError(ts.t, err)
-
-	// AC dump
-	re, err := ts.remoteEnvironmentClient().Get(ts.remoteEnvironmentName, metav1.GetOptions{})
-	if err != nil {
-		ts.t.Logf("Error: %v\n", err)
-	}
-	ts.t.Logf("RemoteEnvironment: %v\n", re)
-
-	// SC dump
-	sb, err := clientSet.ServicecatalogV1beta1().ServiceBindings(ts.namespace).List(metav1.ListOptions{})
-	if err != nil {
-		ts.t.Logf("Error: %v\n", err)
-	}
-	ts.t.Logf("ServiceBindings: %v\n", sb.Items)
-
-	si, err := clientSet.ServicecatalogV1beta1().ServiceInstances(ts.namespace).List(metav1.ListOptions{})
-	if err != nil {
-		ts.t.Logf("Error: %v\n", err)
-	}
-	ts.t.Logf("ServiceInstances: %v\n", si.Items)
-
-	sc, err := clientSet.ServicecatalogV1beta1().ServiceClasses(ts.namespace).List(metav1.ListOptions{})
-	if err != nil {
-		ts.t.Logf("Error: %v\n", err)
-	}
-	ts.t.Logf("ServiceClasses: %v\n", sc.Items)
-
-	sbr, err := clientSet.ServicecatalogV1beta1().ServiceBrokers(ts.namespace).List(metav1.ListOptions{})
-	if err != nil {
-		ts.t.Logf("Error: %v\n", err)
-	}
-	ts.t.Logf("ServiceBrokers: %v\n", sbr.Items)
-
-	// SBU dump
-	sbu, err := ts.bindingUsageClient().List(metav1.ListOptions{})
-	if err != nil {
-		ts.t.Logf("Error: %v\n", err)
-	}
-	ts.t.Logf("ServiceBindingUsages: %v\n", sbu.Items)
-
-}
-
 // Deployment helpers
 func (ts *TestSuite) createTesterDeploymentAndService() {
 	clientset, err := kubernetes.NewForConfig(ts.k8sClientCfg)
@@ -627,10 +590,20 @@ func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.De
 }
 
 func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, timeout time.Duration) {
-	req := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs?name=%s&value=%s", ts.namespace, envName, envValue)
+	url := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs?name=%s&value=%s", ts.namespace, envName, envValue)
 
 	repeat.FuncAtMost(ts.t, func() error {
-		resp, err := http.Get(req)
+		client := http.Client{
+			Transport: &http.Transport{
+				DisableKeepAlives: true,
+			},
+		}
+		req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
+		if err != nil {
+			return err
+		}
+
+		resp, err := client.Do(req)
 		if err != nil {
 			return err
 		}
@@ -638,6 +611,32 @@ func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, 
 		if resp.StatusCode != http.StatusOK {
 			return fmt.Errorf("while checking if proper env is injected, received unexpected status code [got: %d, expected: %d]", resp.StatusCode, http.StatusOK)
 		}
+
+		err = resp.Body.Close()
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}, timeout)
+}
+
+func prettyBindingResourceStatus(conditions []scTypes.ServiceBindingCondition) string {
+	var response string
+
+	for _, condition := range conditions {
+		response += fmt.Sprintf("Status: %q, Reason: %q, Message: %q", condition.Status, condition.Reason, condition.Message)
+	}
+
+	return response
+}
+
+func prettyInstanceResourceStatus(conditions []scTypes.ServiceInstanceCondition) string {
+	var response string
+
+	for _, condition := range conditions {
+		response += fmt.Sprintf("Status: %q, Reason: %q, Message: %q", condition.Status, condition.Reason, condition.Message)
+	}
+
+	return response
 }
