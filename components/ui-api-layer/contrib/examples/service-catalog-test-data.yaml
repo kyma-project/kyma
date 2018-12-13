@@ -5,7 +5,7 @@
 apiVersion: applicationconnector.kyma-project.io
 kind: ApplicationMapping
 metadata:
-  # Instance of the Applicationapping enables
+  # Instance of the ApplicationMapping enables
   # Application in the given namespace.
   # The name must be the same as the name of Application.
   name: ec-prod

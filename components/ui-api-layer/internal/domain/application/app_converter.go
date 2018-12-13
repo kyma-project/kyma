@@ -12,7 +12,7 @@ func (c *applicationConverter) ToGQL(in *v1alpha1.Application) gqlschema.Applica
 		return gqlschema.Application{}
 	}
 
-	var reServices []gqlschema.ApplicationService
+	var appServices []gqlschema.ApplicationService
 
 	for _, svc := range in.Spec.Services {
 		dmSvc := gqlschema.ApplicationService{
@@ -24,14 +24,14 @@ func (c *applicationConverter) ToGQL(in *v1alpha1.Application) gqlschema.Applica
 			Entries:             c.mapEntriesCRToDTO(svc.Entries),
 		}
 
-		reServices = append(reServices, dmSvc)
+		appServices = append(appServices, dmSvc)
 	}
 
 	dto := gqlschema.Application{
 		Name:        in.Name,
 		Labels:      in.Spec.Labels,
 		Description: in.Spec.Description,
-		Services:    reServices,
+		Services:    appServices,
 	}
 
 	return dto
