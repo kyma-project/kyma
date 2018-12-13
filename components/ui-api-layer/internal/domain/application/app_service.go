@@ -236,8 +236,7 @@ func (svc *applicationService) GetConnectionURL(appName string) (string, error) 
 	if ok := svc.appNameRegex.MatchString(appName); !ok {
 		return "", fmt.Errorf("%s name %q does not match regex: %s", pretty.Application, appName, appNameRegex)
 	}
-	// TODO: Discuss with framefrog team the new name for tokens endpoint
-	reqURL := fmt.Sprintf("%s/v1/remoteenvironments/%s/tokens", svc.connectorSvcURL, appName)
+	reqURL := fmt.Sprintf("%s/v1/applications/%s/tokens", svc.connectorSvcURL, appName)
 
 	req, err := http.NewRequest(http.MethodPost, reqURL, nil)
 	if err != nil {

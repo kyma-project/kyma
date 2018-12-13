@@ -88,11 +88,11 @@ func TestServiceFindApplicationSuccess(t *testing.T) {
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, aInformer)
 
 	// when
-	re, err := svc.Find(appName)
+	app, err := svc.Find(appName)
 
 	// then
 	require.NoError(t, err)
-	assert.Equal(t, fixApp, re)
+	assert.Equal(t, fixApp, app)
 }
 
 func TestServiceFindApplicationFail(t *testing.T) {
@@ -118,11 +118,11 @@ func TestServiceFindApplicationFail(t *testing.T) {
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, aInformer)
 
 	// when
-	re, err := svc.Find(appName)
+	app, err := svc.Find(appName)
 
 	// then
 	require.NoError(t, err)
-	assert.Nil(t, re)
+	assert.Nil(t, app)
 }
 
 func TestServiceListAllApplicationsSuccess(t *testing.T) {
@@ -300,13 +300,13 @@ func TestApplicationService_Create(t *testing.T) {
 	require.NoError(t, err)
 
 	// WHEN
-	re, err := svc.Create(fixName, fixDesc, fixLabels)
+	app, err := svc.Create(fixName, fixDesc, fixLabels)
 
 	// THEN
 	require.NoError(t, err)
-	assert.Equal(t, re.Name, fixName)
-	assert.Equal(t, re.Spec.Description, fixDesc)
-	assert.Equal(t, re.Spec.Labels, fixLabels)
+	assert.Equal(t, app.Name, fixName)
+	assert.Equal(t, app.Spec.Description, fixDesc)
+	assert.Equal(t, app.Spec.Labels, fixLabels)
 }
 
 func TestApplicationService_Delete(t *testing.T) {
@@ -346,12 +346,12 @@ func TestApplicationService_Update(t *testing.T) {
 	require.NoError(t, err)
 
 	// WHEN
-	re, err := svc.Update(fixName, fixDesc, fixLabels)
+	app, err := svc.Update(fixName, fixDesc, fixLabels)
 
 	// THEN
 	require.NoError(t, err)
-	assert.Equal(t, fixLabels, re.Spec.Labels)
-	assert.Equal(t, fixDesc, re.Spec.Description)
+	assert.Equal(t, fixLabels, app.Spec.Labels)
+	assert.Equal(t, fixDesc, app.Spec.Description)
 }
 
 func TestApplicationService_Update_ErrorInRetryLoop(t *testing.T) {
@@ -411,12 +411,12 @@ func TestApplicationService_Update_SuccessAfterRetry(t *testing.T) {
 	require.NoError(t, err)
 
 	// WHEN
-	re, err := svc.Update(fixName, fixDesc, fixLabels)
+	app, err := svc.Update(fixName, fixDesc, fixLabels)
 
 	// THEN
 	require.NoError(t, err)
-	assert.Equal(t, fixLabels, re.Spec.Labels)
-	assert.Equal(t, fixDesc, re.Spec.Description)
+	assert.Equal(t, fixLabels, app.Spec.Labels)
+	assert.Equal(t, fixDesc, app.Spec.Description)
 }
 
 func TestApplicationService_Subscribe(t *testing.T) {

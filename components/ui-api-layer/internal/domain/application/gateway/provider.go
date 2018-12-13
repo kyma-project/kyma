@@ -18,9 +18,8 @@ import (
 )
 
 const (
-	// TODO: Discuss with framefrog team the new name for the label key,
 	// NOTE: if you are not familiar with the concept then please read contract described in comment below
-	applicationLabelName = "remoteEnvironment"
+	applicationLabelName = "application"
 	externalAPIPortName  = "http-api-port"
 )
 

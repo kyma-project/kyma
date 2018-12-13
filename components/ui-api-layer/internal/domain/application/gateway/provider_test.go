@@ -78,7 +78,7 @@ func fixAppService(name, namespace, appName string) *apiv1.Service {
 			Name:      name,
 			Namespace: namespace,
 			Labels: map[string]string{
-				"remoteEnvironment": appName,
+				"application": appName,
 			},
 		},
 		Spec: apiv1.ServiceSpec{
