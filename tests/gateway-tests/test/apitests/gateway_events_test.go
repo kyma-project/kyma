@@ -27,7 +27,7 @@ type PublishResponse struct {
 	EventId string `json:"event-id,omitempty"`
 }
 
-const remoteEnvironment = "any"
+const application = "any"
 
 func TestGatewayEvents(t *testing.T) {
 
@@ -46,7 +46,7 @@ func TestGatewayEvents(t *testing.T) {
 		publishRequestEncoded, err := json.Marshal(publishRequest)
 		require.NoError(t, err)
 
-		url := config.EventServiceUrl + "/" + remoteEnvironment + "/v1/events"
+		url := config.EventServiceUrl + "/" + application + "/v1/events"
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(publishRequestEncoded))
 		require.NoError(t, err)

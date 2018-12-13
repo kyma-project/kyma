@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 
-	reReleases "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
+	appReleases "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -29,12 +29,12 @@ type ApplicationReconciler interface {
 
 type applicationReconciler struct {
 	applicationMgrClient ApplicationManagerClient
-	releaseManager       reReleases.ReleaseManager
+	releaseManager       appReleases.ReleaseManager
 }
 
-func NewReconciler(reMgrClient ApplicationManagerClient, releaseManager reReleases.ReleaseManager) ApplicationReconciler {
+func NewReconciler(appMgrClient ApplicationManagerClient, releaseManager appReleases.ReleaseManager) ApplicationReconciler {
 	return &applicationReconciler{
-		applicationMgrClient: reMgrClient,
+		applicationMgrClient: appMgrClient,
 		releaseManager:       releaseManager,
 	}
 }

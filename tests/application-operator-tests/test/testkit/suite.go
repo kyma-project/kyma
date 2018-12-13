@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	testReName               = "re-ctrl-test-%s"
+	testAppName              = "app-ctrl-test-%s"
 	defaultCheckInterval     = 2 * time.Second
 	installationStartTimeout = 10 * time.Second
 	waitBeforeCheck          = 2 * time.Second
@@ -35,7 +35,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	config, err := ReadConfig()
 	require.NoError(t, err)
 
-	app := fmt.Sprintf(testReName, rand.String(5))
+	app := fmt.Sprintf(testAppName, rand.String(5))
 
 	k8sResourcesClient, err := NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)

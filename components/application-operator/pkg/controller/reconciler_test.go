@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	applicationName = "re-name"
+	applicationName = "app-name"
 )
 
 type applicationChecker struct {

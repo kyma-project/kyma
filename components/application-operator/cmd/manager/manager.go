@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/scheme"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/controller"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	appRelease "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
@@ -44,9 +44,7 @@ func main() {
 
 	log.Printf("Setting up scheme.")
 	
-	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Fatal(err)
-	}
+	scheme.AddToScheme(mgr.GetScheme())
 
 	log.Printf("Preparing Release Manager.")
 
