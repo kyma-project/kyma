@@ -17,23 +17,23 @@ func TestNameResolver(t *testing.T) {
 		{
 			application:  "short_application",
 			id:           "c687e68a-9038-4f38-845b-9c61592e59e6",
-			resourceName: "re-short_application-c687e68a-9038-4f38-845b-9c61592e59e6",
-			gatewayUrl:   "http://re-short_application-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
-			host:         "re-short_application-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			resourceName: "app-short_application-c687e68a-9038-4f38-845b-9c61592e59e6",
+			gatewayUrl:   "http://app-short_application-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			host:         "app-short_application-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 		},
 		{
 			application:  "max_application_aaaaaaa",
 			id:           "c687e68a-9038-4f38-845b-9c61592e59e6",
-			resourceName: "re-max_application_aaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6",
-			gatewayUrl:   "http://re-max_application_aaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
-			host:         "re-max_application_aaaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			resourceName: "app-max_application_aaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6",
+			gatewayUrl:   "http://app-max_application_aaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			host:         "app-max_application_aaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 		},
 		{
 			application:  "toolong_application_aaaaaxxxx",
 			id:           "c687e68a-9038-4f38-845b-9c61592e59e6",
-			resourceName: "re-toolong_application_aaa-c687e68a-9038-4f38-845b-9c61592e59e6",
-			gatewayUrl:   "http://re-toolong_application_aaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
-			host:         "re-toolong_application_aaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			resourceName: "app-toolong_application_aa-c687e68a-9038-4f38-845b-9c61592e59e6",
+			gatewayUrl:   "http://app-toolong_application_aaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
+			host:         "app-toolong_application_aa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 		},
 	}
 
