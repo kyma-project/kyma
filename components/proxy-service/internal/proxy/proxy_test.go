@@ -30,7 +30,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(nil).Twice()
@@ -55,7 +55,7 @@ func TestProxy(t *testing.T) {
 
 		// given
 		nextReq, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		nextReq.Host = "re-test-uuid-1.namespace.svc.cluster.local"
+		nextReq.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 		rr = httptest.NewRecorder()
 
 		//when
@@ -85,7 +85,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(nil)
@@ -129,7 +129,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(nil)
@@ -172,7 +172,7 @@ func TestProxy(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(apperrors.UpstreamServerCallFailed("failed"))
@@ -208,7 +208,7 @@ func TestProxy(t *testing.T) {
 		// given
 		req, err := http.NewRequest(http.MethodGet, "/", nil)
 		require.NoError(t, err)
-		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 		rr := httptest.NewRecorder()
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
@@ -239,7 +239,7 @@ func TestProxy(t *testing.T) {
 		defer tsf.Close()
 
 		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
-		req.Host = "re-test-uuid-1.namespace.svc.cluster.local"
+		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
