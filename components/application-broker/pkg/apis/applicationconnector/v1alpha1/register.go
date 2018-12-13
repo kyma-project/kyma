@@ -35,6 +35,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&RemoteEnvironmentList{},
 		&EnvironmentMapping{},
 		&EnvironmentMappingList{},
+		&ApplicationMapping{},
+		&ApplicationMappingList{},
 		&EventActivation{},
 		&EventActivationList{},
 	)
