@@ -90,7 +90,7 @@ func (c *k8sResourcesClient) GetApplicationServices(name string, options v1.GetO
 
 func (c *k8sResourcesClient) CreateDummyApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error) {
 	dummyApp := &v1alpha1.Application{
-		TypeMeta:   v1.TypeMeta{Kind: "RemoteEnvironment", APIVersion: v1alpha1.SchemeGroupVersion.String()},
+		TypeMeta:   v1.TypeMeta{Kind: "Application", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: name},
 		Spec: v1alpha1.ApplicationSpec{
 			Services: []v1alpha1.Service{},
