@@ -11,4 +11,4 @@ If the user is already authenticated to the service deployed on Kyma, the access
 
 ## Example
 
-Find the example of passing the EC access token to the Application Connector using Lambda in the [`examples`](https://github.com/kyma-project/examples/tree/master/call-ec) repository.
+Find the example of passing the EC access token to the Application Connector using lambda in the [`examples`](https://github.com/kyma-project/examples/tree/master/call-ec) repository.

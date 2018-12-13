@@ -4,7 +4,7 @@ title: Overview
 
 Lambdas or lambda functions are small functions that run in Kyma in a cost-efficient and scalable way using JavaScript in Node.js. As the following diagram shows, these functions enable the linking of a wide range of functionalities using Kyma.
 
-![Kyma connected to other products through Lambda functions](assets/kyma_connected.png)
+![Kyma connected to other products through lambda functions](assets/kyma_connected.png)
 
 
 This is an example lambda function:
