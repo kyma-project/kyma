@@ -2,6 +2,7 @@
 def label = "kyma-${UUID.randomUUID().toString()}"
 def application = 'common'
 def buildpack = 'golang-buildpack:0.0.9'
+def registry = env.DOCKER_REGISTRY
 def appFolder = env.APP_FOLDER
 def repositoryName = 'kyma'
 
