@@ -34,6 +34,13 @@ podTemplate(label: label,
             timestamps {
                 timeout(time:20, unit:"MINUTES") {
                     ansiColor('xterm') {
+                        stage("setup") {
+                            workDir = pwd()
+
+                            dir(checkoutDir) {
+                                checkout scm
+                            }
+                        }
                         stage("install dependencies $application") {
                             execute("dep ensure --vendor-only -v", workDir, componentDir)
                         }
