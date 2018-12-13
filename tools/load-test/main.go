@@ -27,17 +27,17 @@ const (
 )
 
 var (
-	slackToken       = "gZJI7risPpW67frP3EiDrPV0"
-	slackChaneel     = "c4-xf-load-test"
-	endpoint         = fmt.Sprintf("http://%s.%s:8080", functionName, namespace)
-	slackEndpoint    = "https://sap-cx.slack.com/services/hooks/jenkins-ci/"
-	client           = getHttpClient(true)
-	slack            *Slack
-	testResult       *TestResult
-	timeout = time.After(time.Duration(5) * time.Minute)
-	durationtime = 5
-	stopping = false
-    mutex sync.RWMutex
+	slackToken    = "gZJI7risPpW67frP3EiDrPV0"
+	slackChaneel  = "c4-xf-load-test"
+	endpoint      = fmt.Sprintf("http://%s.%s:8080", functionName, namespace)
+	slackEndpoint = "https://sap-cx.slack.com/services/hooks/jenkins-ci/"
+	client        = getHttpClient(true)
+	slack         *Slack
+	testResult    *TestResult
+	timeout       = time.After(time.Duration(5) * time.Minute)
+	durationtime  = 5
+	stopping      = false
+	mutex         sync.RWMutex
 )
 
 type Slack struct {
@@ -101,7 +101,7 @@ func main() {
 		case <-doneCh:
 			closingTest(start)
 			log.Println("done Channel closed")
-		    break
+			break
 		}
 	}
 
@@ -164,7 +164,7 @@ func deployFun() {
 func ensureFunctionIsRunning() {
 	timeout := time.After(10 * time.Minute)
 	tick := time.Tick(1 * time.Second)
-	log.Println("10 minutes timeout for this operation.\n")
+	log.Println("10 minutes timeout for this operation.")
 	for {
 		select {
 		case <-timeout:
@@ -198,7 +198,7 @@ func ensureFunctionIsRunning() {
 func ensureOutputIsCorrect() {
 	timeout := time.After(10 * time.Minute)
 	tick := time.Tick(5 * time.Second)
-	log.Println("10 minutes timeout for this operation.\n")
+	log.Println("10 minutes timeout for this operation.")
 	for {
 		select {
 		case <-timeout:
