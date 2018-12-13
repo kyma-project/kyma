@@ -55,10 +55,9 @@ required = [
   name = "github.com/moby/moby"
   version = "v1.13.1"
 
-# TODO: Update revision after merging: https://github.com/kyma-project/kyma/pull/2028, this will fix failing tests
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "13b304807b79a47889deba5c527a4db107b2b382"
+  revision = "46be4bf9ea1d63216d644240036909ce0b50c7eb"
 
 [[override]]
   name = "k8s.io/api"
