@@ -52,7 +52,6 @@ subjects:
 - kind: ServiceAccount
   name: {{ template "load-test.fullname" . }}
   namespace: kyma-system
-
 ---
 apiVersion: v1
 kind: Pod
@@ -64,13 +63,11 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
-  annotations:
-    helm.sh/hook: test-success
 spec:
   serviceAccount: {{ template "load-test.fullname" . }}
   containers:
   - name: load-test
-    image: load-test
+    image: eu.gcr.io/kyma-project/pr/load-test:PR-2009
     imagePullPolicy: IfNotPresent
     env:
     - name: KUBELESS_CONFIG
@@ -82,9 +79,5 @@ spec:
     - name: LOAD_TEST_SLACK_CHANNEL
       value: {{ .Values.slackClientChannelId }}
     - name: LOAD_TEST_EXECUTION_TIMEOUT
-      value:  {{ .Values.loadTestExecutionTimeout }}
-#    command:
-#      - "/bin/sh"
-#      - "-c"
-#      - "sleep 36000"
+      value:  {{ .Values.loadTestExecutionTimeout | quote }}
   restartPolicy: Never
