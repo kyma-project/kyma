@@ -23,10 +23,10 @@ func TestApiMetadata(t *testing.T) {
 	k8sResourcesClient, err := testkit.NewK8sInClusterResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	dummyRE, err := k8sResourcesClient.CreateDummyApplication("dummy-app", v1.GetOptions{})
+	dummyApp, err := k8sResourcesClient.CreateDummyApplication("dummy-app", v1.GetOptions{})
 	require.NoError(t, err)
 
-	metadataServiceClient := testkit.NewMetadataServiceClient(config.MetadataServiceUrl + "/" + dummyRE.Name + "/v1/metadata/services")
+	metadataServiceClient := testkit.NewMetadataServiceClient(config.MetadataServiceUrl + "/" + dummyApp.Name + "/v1/metadata/services")
 
 	expectedLabels := map[string]string{connectedApp: "dummy-app"}
 
@@ -234,7 +234,7 @@ func TestApiMetadata(t *testing.T) {
 			statusCode, receivedServiceDefinition, err := metadataServiceClient.GetService(t, postResponseData.ID)
 			require.NoError(t, err)
 			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, receivedServiceDefinition.Identifier)
-			expectedServiceDefinition.Api.Spec = modifiedSwaggerSpec(dummyRE.Name, postResponseData.ID, config.Namespace)
+			expectedServiceDefinition.Api.Spec = modifiedSwaggerSpec(dummyApp.Name, postResponseData.ID, config.Namespace)
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
@@ -605,7 +605,7 @@ func TestApiMetadata(t *testing.T) {
 
 	})
 
-	err = k8sResourcesClient.DeleteApplication(dummyRE.Name, &v1.DeleteOptions{})
+	err = k8sResourcesClient.DeleteApplication(dummyApp.Name, &v1.DeleteOptions{})
 	require.NoError(t, err)
 }
 
@@ -646,7 +646,7 @@ func getExpectedDefinition(initialDefinition testkit.ServiceDetails, expectedLab
 
 func modifiedSwaggerSpec(reName string, serviceId string, namespace string) []byte {
 	return testkit.Compact([]byte(
-		fmt.Sprintf("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"re-%s-%s.%s.svc.cluster.local\",\"paths\":null}", reName, serviceId, namespace)),
+		fmt.Sprintf("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"app-%s-%s.%s.svc.cluster.local\",\"paths\":null}", reName, serviceId, namespace)),
 	)
 }
 

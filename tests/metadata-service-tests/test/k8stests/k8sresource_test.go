@@ -53,9 +53,9 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyApp.Name + "-" + serviceId
+		resourceName := "app-" + dummyApp.Name + "-" + serviceId
 
-		expectedLabels := map[string]string{"re": dummyApp.Name, "serviceId": serviceId}
+		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
 		time.Sleep(crPropagationWaitTime * time.Second)
 
@@ -143,9 +143,9 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyApp.Name + "-" + serviceId
+		resourceName := "app-" + dummyApp.Name + "-" + serviceId
 
-		expectedLabels := map[string]string{"re": dummyApp.Name, "serviceId": serviceId}
+		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
 		time.Sleep(crPropagationWaitTime * time.Second)
 
@@ -226,7 +226,7 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyApp.Name + "-" + serviceId
+		resourceName := "app-" + dummyApp.Name + "-" + serviceId
 
 		time.Sleep(crPropagationWaitTime * time.Second)
 
@@ -306,9 +306,9 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyApp.Name + "-" + serviceId
+		resourceName := "app-" + dummyApp.Name + "-" + serviceId
 
-		expectedLabels := map[string]string{"re": dummyApp.Name, "serviceId": serviceId}
+		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
 		updatedServiceDefinition := testkit.ServiceDetails{
 			Name:        "updated test service",
@@ -421,7 +421,7 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyApp.Name + "-" + serviceId
+		resourceName := "app-" + dummyApp.Name + "-" + serviceId
 
 		updatedServiceDefinition := testkit.ServiceDetails{
 			Name:        "updated test service",
@@ -506,9 +506,9 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyApp.Name + "-" + serviceId
+		resourceName := "app-" + dummyApp.Name + "-" + serviceId
 
-		expectedLabels := map[string]string{"re": dummyApp.Name, "serviceId": serviceId}
+		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
 		updatedServiceDefinition := testkit.ServiceDetails{
 			Name:        "updated test service",
@@ -610,9 +610,9 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyApp.Name + "-" + serviceId
+		resourceName := "app-" + dummyApp.Name + "-" + serviceId
 
-		expectedLabels := map[string]string{"re": dummyApp.Name, "serviceId": serviceId}
+		expectedLabels := map[string]string{"app": dummyApp.Name, "serviceId": serviceId}
 
 		updatedServiceDefinition := testkit.ServiceDetails{
 			Name:        "updated test service",
@@ -724,7 +724,7 @@ func TestK8sResources(t *testing.T) {
 		require.Equal(t, http.StatusOK, statusCode)
 
 		serviceId := postResponseData.ID
-		resourceName := "re-" + dummyApp.Name + "-" + serviceId
+		resourceName := "app-" + dummyApp.Name + "-" + serviceId
 
 		statusCode, err = metadataServiceClient.DeleteService(t, serviceId)
 		require.NoError(t, err)
