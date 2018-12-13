@@ -12,7 +12,7 @@ To create a new App, run this command:
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: RemoteEnvironment
+kind: Application
 metadata:
   name: {APP_NAME}
 spec:
@@ -23,7 +23,7 @@ spec:
 EOF
 ```
 
-## Check the APP status
+## Check the App status
 
 To check the status of the created APP and show the output in the `yaml` format, run this command:
 ```
@@ -35,7 +35,7 @@ This is an example response:
 
 ```
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: RemoteEnvironment
+kind: Application
 metadata:
   clusterName: ""
   creationTimestamp: 2018-11-22T13:53:20Z
@@ -43,7 +43,7 @@ metadata:
   name: test1
   namespace: ""
   resourceVersion: "30728"
-  selfLink: /apis/applicationconnector.kyma-project.io/v1alpha1/remoteenvironments/test1
+  selfLink: /apis/applicationconnector.kyma-project.io/v1alpha1/applications/test1
   uid: f8ca5595-ee5d-11e8-acb2-000d3a443243
 spec:
   accessLabel: {APP_NAME}

@@ -3,7 +3,7 @@ title: Bind an Application to an Environment
 type: Getting Started
 ---
 
-This guide shows you how to bind an Application (App) to an Environment in Kyma. To execute the binding, create an EnvironmentMapping custom resource in the cluster. Follow the instructions to bind your App to the `production` Environment.
+This guide shows you how to bind an Application (App) to an Environment in Kyma. To execute the binding, create an ApplicationMapping custom resource in the cluster. Follow the instructions to bind your App to the `production` Environment.
 
 ## Prerequisites
 
@@ -16,12 +16,12 @@ To complete this guide, your cluster must have at least one App created.
   kubectl get em -n production
   ```
 
-2. Bind an App to an Environment. Run this command to create an EnvironmentMapping custom resource and apply it to the cluster:
+2. Bind an App to an Environment. Run this command to create an ApplicationMapping custom resource and apply it to the cluster:
 
   ```
   cat <<EOF | kubectl apply -f -
   apiVersion: applicationconnector.kyma-project.io/v1alpha1
-  kind: EnvironmentMapping
+  kind: ApplicationMapping
   metadata:
     name: {NAME_OF_APP_TO_BIND}
     namespace: production
@@ -30,5 +30,5 @@ To complete this guide, your cluster must have at least one App created.
 
 3. Check if the operation is successful. List all Environments to which your App is bound:
   ```
-  kubectl get em --all-namespaces -o jsonpath='{range .items[?(@.metadata.name=="{NAME_OF_YOUR_RE}")]}{@.metadata.namespace}{""}{end}'
+  kubectl get em --all-namespaces -o jsonpath='{range .items[?(@.metadata.name=="{NAME_OF_YOUR_APP}")]}{@.metadata.namespace}{""}{end}'
   ```

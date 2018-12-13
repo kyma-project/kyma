@@ -42,7 +42,7 @@ A successful call returns the following response:
     remoteEnvironment: {APP_NAME}
     state: OK
     token: h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
-    url: https://connector-service.kyma.local/v1/remoteenvironments/test/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
+    url: https://connector-service.kyma.local/v1/applications/test/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
   ```
 
 ## Get the CSR information and configuration details from Kyma
@@ -61,7 +61,7 @@ A successful call returns the following response:
     "api":{
         "metadataUrl":      "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
         "eventsUrl":        "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events",
-        "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/remoteenvironments/{APP_NAME}",
+        "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/applications/{APP_NAME}",
     },
     "certificate":{
         "subject":"OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}",
@@ -97,7 +97,7 @@ openssl base64 -in generated.csr
 Send the encoded CSR to Kyma. Run:
 
 ```
-curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' https://connector-service.{CLUSTER_DOMAIN}/v1/remoteenvironments/{APP_NAME}/client-certs?token=example-token-456
+curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' https://connector-service.{CLUSTER_DOMAIN}/v1/applications/{APP_NAME}/client-certs?token=example-token-456
 ```
 
 The response contains a valid client certificate signed by the Kyma Certificate Authority:

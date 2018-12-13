@@ -1,6 +1,6 @@
 apiVersion: applicationconnector.kyma-project.io
-kind: EnvironmentMapping
+kind: ApplicationMapping
 metadata:
-  # Remote Environment "ec-prod" is enabled in "production" environment
-  name: ec-prod
+  # Application "user-app" is enabled in "production" environment
+  name: user-app
   namespace: production
