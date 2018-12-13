@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	connectorservicev1alpha1 "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
+	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -43,7 +43,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &connectorservicev1alpha1.TokenRequest{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &applicationconnectorv1alpha1.TokenRequest{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ type ReconcileTokenRequest struct {
 func (r *ReconcileTokenRequest) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	log.Printf("Processing TokenRequest %s", request.NamespacedName)
 
-	instance := &connectorservicev1alpha1.TokenRequest{}
+	instance := &applicationconnectorv1alpha1.TokenRequest{}
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -89,11 +89,11 @@ func (r *ReconcileTokenRequest) Reconcile(request reconcile.Request) (reconcile.
 		if err != nil {
 			log.Printf("Fetching token for TokenRequest %s failed", request.NamespacedName)
 
-			instance.Status.State = connectorservicev1alpha1.TokenRequestStateERR
+			instance.Status.State = applicationconnectorv1alpha1.TokenRequestStateERR
 		} else {
 			log.Printf("Token for TokenRequest %s fetched", request.NamespacedName)
 
-			instance.Status.State = connectorservicev1alpha1.TokenRequestStateOK
+			instance.Status.State = applicationconnectorv1alpha1.TokenRequestStateOK
 			instance.Status.Token = tokenDto.Token
 			instance.Status.URL = tokenDto.URL
 			instance.Status.ExpireAfter = metav1.NewTime(metav1.Now().Add(time.Second * time.Duration(r.options.TokenTTL)))
@@ -113,14 +113,14 @@ func (r *ReconcileTokenRequest) Reconcile(request reconcile.Request) (reconcile.
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileTokenRequest) updateTokenRequest(tokenRequest *connectorservicev1alpha1.TokenRequest) error {
+func (r *ReconcileTokenRequest) updateTokenRequest(tokenRequest *applicationconnectorv1alpha1.TokenRequest) error {
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		return r.Update(context.Background(), tokenRequest)
 
 	})
 }
 
-func (r *ReconcileTokenRequest) deleteTokenRequest(tokenRequest *connectorservicev1alpha1.TokenRequest) error {
+func (r *ReconcileTokenRequest) deleteTokenRequest(tokenRequest *applicationconnectorv1alpha1.TokenRequest) error {
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		return r.Delete(context.TODO(), tokenRequest)
 	})
