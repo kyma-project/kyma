@@ -14,14 +14,14 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestEnvironmentMappingService_IsRemoteEnvironmentEnabled(t *testing.T) {
+func TestApplicationMappingService_IsApplicationEnabled(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		givenMappings  []runtime.Object
 		namespace      string
 		name           string
 		expectedResult bool
 	}{
-		"EnvironmentMapping exists": {
+		"ApplicationMapping exists": {
 			givenMappings: []runtime.Object{
 				fixEnvMapping("prod", "ec"),
 			},
@@ -29,7 +29,7 @@ func TestEnvironmentMappingService_IsRemoteEnvironmentEnabled(t *testing.T) {
 			name:           "ec",
 			expectedResult: true,
 		},
-		"EnvironmentMapping does not exists": {
+		"ApplicationMapping does not exists": {
 			givenMappings: []runtime.Object{
 				fixEnvMapping("prod", "ec"),
 				fixEnvMapping("stage", "marketing"),
@@ -44,7 +44,7 @@ func TestEnvironmentMappingService_IsRemoteEnvironmentEnabled(t *testing.T) {
 			cs := fake.NewSimpleClientset(tc.givenMappings...)
 			informerFactory := informers.NewSharedInformerFactory(cs, time.Hour)
 
-			svc := NewEnvironmentMappingService(informerFactory.Applicationconnector().V1alpha1().EnvironmentMappings().Lister())
+			svc := NewApplicationMappingService(informerFactory.Applicationconnector().V1alpha1().ApplicationMappings().Lister())
 
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 			defer cancel()
@@ -52,7 +52,7 @@ func TestEnvironmentMappingService_IsRemoteEnvironmentEnabled(t *testing.T) {
 			informerFactory.WaitForCacheSync(ctx.Done())
 
 			// WHEN
-			result, err := svc.IsRemoteEnvironmentEnabled(tc.namespace, tc.name)
+			result, err := svc.IsApplicationEnabled(tc.namespace, tc.name)
 
 			// THEN
 			require.NoError(t, err)
@@ -62,8 +62,8 @@ func TestEnvironmentMappingService_IsRemoteEnvironmentEnabled(t *testing.T) {
 	}
 }
 
-func fixEnvMapping(namespace, name string) *v1alpha1.EnvironmentMapping {
-	return &v1alpha1.EnvironmentMapping{
+func fixEnvMapping(namespace, name string) *v1alpha1.ApplicationMapping {
+	return &v1alpha1.ApplicationMapping{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,

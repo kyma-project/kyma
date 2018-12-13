@@ -13,7 +13,7 @@ import (
 
 // ProvisionChecker define methods for checking if provision can succeed
 type ProvisionChecker interface {
-	CanProvision(iID internal.InstanceID, rsID internal.RemoteServiceID, namespace internal.Namespace, maxWaitTime time.Duration) (CanProvisionOutput, error)
+	CanProvision(iID internal.InstanceID, rsID internal.ApplicationServiceID, namespace internal.Namespace, maxWaitTime time.Duration) (CanProvisionOutput, error)
 }
 
 // CanProvisionOutput aggregates following information: if provision can be performed and reason
@@ -23,9 +23,9 @@ type CanProvisionOutput struct {
 }
 
 // New creates new aggregated checker
-func New(reFinder remoteEnvironmentFinder, reInterface versioned.ApplicationconnectorV1alpha1Interface, iFind instanceFinder) *AggregatedChecker {
+func New(appFinder applicationFinder, appInterface versioned.ApplicationconnectorV1alpha1Interface, iFind instanceFinder) *AggregatedChecker {
 	return &AggregatedChecker{
-		mappingExistsProvisionChecker: NewMappingExistsProvisionChecker(reFinder, reInterface),
+		mappingExistsProvisionChecker: NewMappingExistsProvisionChecker(appFinder, appInterface),
 		uniquenessProvisionChecker:    NewUniquenessProvisionChecker(iFind),
 	}
 }
@@ -34,15 +34,15 @@ func New(reFinder remoteEnvironmentFinder, reInterface versioned.Applicationconn
 // All checks are performed sequentially. First failed check stops further ones.
 type AggregatedChecker struct {
 	mappingExistsProvisionChecker interface {
-		CanProvision(rsID internal.RemoteServiceID, ns internal.Namespace, maxWaitTime time.Duration) (CanProvisionOutput, error)
+		CanProvision(rsID internal.ApplicationServiceID, ns internal.Namespace, maxWaitTime time.Duration) (CanProvisionOutput, error)
 	}
 	uniquenessProvisionChecker interface {
-		CanProvision(iID internal.InstanceID, rsID internal.RemoteServiceID, ns internal.Namespace) (CanProvisionOutput, error)
+		CanProvision(iID internal.InstanceID, rsID internal.ApplicationServiceID, ns internal.Namespace) (CanProvisionOutput, error)
 	}
 }
 
 // CanProvision performs actual check
-func (c *AggregatedChecker) CanProvision(iID internal.InstanceID, rsID internal.RemoteServiceID, ns internal.Namespace, maxWaitTime time.Duration) (CanProvisionOutput, error) {
+func (c *AggregatedChecker) CanProvision(iID internal.InstanceID, rsID internal.ApplicationServiceID, ns internal.Namespace, maxWaitTime time.Duration) (CanProvisionOutput, error) {
 	res, err := c.mappingExistsProvisionChecker.CanProvision(rsID, ns, maxWaitTime)
 	if err != nil {
 		return CanProvisionOutput{}, errors.Wrap(err, "while calling mappingExistsProvisionChecker")

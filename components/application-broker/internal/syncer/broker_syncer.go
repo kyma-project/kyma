@@ -80,7 +80,7 @@ func (r *ServiceBrokerSync) Sync(labelSelector string, maxSyncRetries int) error
 	return resultErr
 }
 
-// SyncBroker syncing the default REB ns-broker in the given namespace
+// SyncBroker syncing the default AB ns-broker in the given namespace
 func (r *ServiceBrokerSync) SyncBroker(namespace string) error {
 	brokerClient := r.serviceBrokerGetter.ServiceBrokers(namespace)
 	name := nsbroker.NamespacedBrokerName

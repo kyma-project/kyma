@@ -59,9 +59,9 @@ func main() {
 	cancelOnInterrupt(ctx, stopCh, cancelFunc)
 
 	/* protection controller */
-	protectionController := NewProtectionController(v1alpha1Interface.RemoteEnvironments(),
-		reClient.ApplicationconnectorV1alpha1().EnvironmentMappings("default"),
-		reClient.ApplicationconnectorV1alpha1().RemoteEnvironments(), log)
+	protectionController := NewProtectionController(v1alpha1Interface.Applications(),
+		reClient.ApplicationconnectorV1alpha1().ApplicationMappings("default"),
+		reClient.ApplicationconnectorV1alpha1().Applications(), log)
 	protectionController.Run(1, stopCh)
 
 	informerFactory.Start(stopCh)

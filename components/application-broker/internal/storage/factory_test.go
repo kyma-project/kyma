@@ -11,12 +11,12 @@ import (
 
 func TestNewFactory(t *testing.T) {
 	for s, tc := range map[string]struct {
-		cfgGen               func() storage.ConfigList
-		expRemoteEnvironment interface{}
+		cfgGen         func() storage.ConfigList
+		expApplication interface{}
 	}{
-		"MemorySingleAll":        {testdata.GoldenConfigMemorySingleAll, &memory.RemoteEnvironment{}},
-		"MemorySingleSeparate":   {testdata.GoldenConfigMemorySingleSeparate, &memory.RemoteEnvironment{}},
-		"MemoryMultipleSeparate": {testdata.GoldenConfigMemoryMultipleSeparate, &memory.RemoteEnvironment{}},
+		"MemorySingleAll":        {testdata.GoldenConfigMemorySingleAll, &memory.Application{}},
+		"MemorySingleSeparate":   {testdata.GoldenConfigMemorySingleSeparate, &memory.Application{}},
+		"MemoryMultipleSeparate": {testdata.GoldenConfigMemoryMultipleSeparate, &memory.Application{}},
 	} {
 		t.Run(s, func(t *testing.T) {
 			// GIVEN:
@@ -28,7 +28,7 @@ func TestNewFactory(t *testing.T) {
 			// THEN:
 			assert.NoError(t, err)
 
-			assert.IsType(t, tc.expRemoteEnvironment, got.RemoteEnvironment())
+			assert.IsType(t, tc.expApplication, got.Application())
 		})
 	}
 }

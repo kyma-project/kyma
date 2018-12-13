@@ -4,13 +4,13 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 )
 
-// RemoteEnvironment is an interface that describe storage layer operations for Charts
-type RemoteEnvironment interface {
-	Upsert(re *internal.RemoteEnvironment) (bool, error)
-	Get(name internal.RemoteEnvironmentName) (*internal.RemoteEnvironment, error)
-	FindAll() ([]*internal.RemoteEnvironment, error)
-	FindOneByServiceID(id internal.RemoteServiceID) (*internal.RemoteEnvironment, error)
-	Remove(name internal.RemoteEnvironmentName) error
+// Application is an interface that describe storage layer operations for Charts
+type Application interface {
+	Upsert(app *internal.Application) (bool, error)
+	Get(name internal.ApplicationName) (*internal.Application, error)
+	FindAll() ([]*internal.Application, error)
+	FindOneByServiceID(id internal.ApplicationServiceID) (*internal.Application, error)
+	Remove(name internal.ApplicationName) error
 }
 
 // Instance is an interface that describe storage layer operations for Instances

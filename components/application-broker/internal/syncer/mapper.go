@@ -12,13 +12,13 @@ const (
 	events = "Events"
 )
 
-// ToModel produces RemoteEnvironment domain model from RemoteEnvironment custom resource
-func (re *reCRMapper) ToModel(dto *v1alpha1.RemoteEnvironment) *internal.RemoteEnvironment {
+// ToModel produces Application domain model from Application custom resource
+func (app *reCRMapper) ToModel(dto *v1alpha1.Application) *internal.Application {
 	var reServices []internal.Service
 
 	for _, svc := range dto.Spec.Services {
 		dmSvc := internal.Service{
-			ID:                  internal.RemoteServiceID(svc.ID),
+			ID:                  internal.ApplicationServiceID(svc.ID),
 			Name:                svc.Name,
 			DisplayName:         svc.DisplayName,
 			Description:         svc.Description,
@@ -26,15 +26,15 @@ func (re *reCRMapper) ToModel(dto *v1alpha1.RemoteEnvironment) *internal.RemoteE
 			ProviderDisplayName: svc.ProviderDisplayName,
 			Tags:                svc.Tags,
 			Labels:              svc.Labels,
-			APIEntry:            re.extractAPIEntryAsModel(svc.Entries),
-			EventProvider:       re.extractEventEntryAsModel(svc.Entries),
+			APIEntry:            app.extractAPIEntryAsModel(svc.Entries),
+			EventProvider:       app.extractEventEntryAsModel(svc.Entries),
 		}
 
 		reServices = append(reServices, dmSvc)
 	}
 
-	dm := &internal.RemoteEnvironment{
-		Name:        internal.RemoteEnvironmentName(dto.Name),
+	dm := &internal.Application{
+		Name:        internal.ApplicationName(dto.Name),
 		Description: dto.Spec.Description,
 		Services:    reServices,
 		AccessLabel: dto.Spec.AccessLabel,

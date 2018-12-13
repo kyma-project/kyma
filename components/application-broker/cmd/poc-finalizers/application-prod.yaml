@@ -1,9 +1,9 @@
-apiVersion: remoteenvironment.kyma.io/v1alpha1
-kind: RemoteEnvironment
+apiVersion: application.kyma.io/v1alpha1
+kind: Application
 metadata:
   name: ec-prod
 spec:
-  # source identifies remote environment in the cluster
+  # source identifies application in the cluster
   source:
     environment: "prod"
     type: "commerce"
@@ -41,7 +41,7 @@ spec:
         accessLabel: "access-label-1"
       - type: Events
 
-    # second service provided by remote environment
+    # second service provided by application
     - id: "48ab05bf-9aa4-4cb7-8999-0d3587265ac3"
       displayName: "Orders"
       longDescription: "Orders API"

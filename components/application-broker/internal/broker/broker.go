@@ -11,20 +11,20 @@ import (
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore
-//go:generate mockery -name=reFinder -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=appFinder -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=instanceGetter -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=serviceInstanceGetter -output=automock -outpkg=automock -case=underscore
 
 type (
-	remoteEnvironmentFinder interface {
-		FindAll() ([]*internal.RemoteEnvironment, error)
-		Get(name internal.RemoteEnvironmentName) (*internal.RemoteEnvironment, error)
+	applicationFinder interface {
+		FindAll() ([]*internal.Application, error)
+		Get(name internal.ApplicationName) (*internal.Application, error)
 	}
 	reSvcFinder interface {
-		FindOneByServiceID(id internal.RemoteServiceID) (*internal.RemoteEnvironment, error)
+		FindOneByServiceID(id internal.ApplicationServiceID) (*internal.Application, error)
 	}
-	reFinder interface {
-		remoteEnvironmentFinder
+	appFinder interface {
+		applicationFinder
 		reSvcFinder
 	}
 	operationInserter interface {
@@ -95,13 +95,13 @@ type (
 )
 
 // New creates instance of broker server.
-func New(remoteEnvironmentFinder reFinder,
+func New(applicationFinder appFinder,
 	instStorage instanceStorage,
 	opStorage operationStorage,
 	accessChecker access.ProvisionChecker,
 	reClient v1alpha1.ApplicationconnectorV1alpha1Interface,
 	serviceInstanceGetter serviceInstanceGetter,
-	emLister listers.EnvironmentMappingLister,
+	emLister listers.ApplicationMappingLister,
 	brokerService *NsBrokerService,
 	log *logrus.Entry) *Server {
 
@@ -114,19 +114,19 @@ func New(remoteEnvironmentFinder reFinder,
 		return internal.OperationID(idRaw), nil
 	}
 
-	enabledChecker := access.NewEnvironmentMappingService(emLister)
+	enabledChecker := access.NewApplicationMappingService(emLister)
 
 	stateService := &instanceStateService{operationCollectionGetter: opStorage}
 	return &Server{
 		catalogGetter: &catalogService{
-			finder:           remoteEnvironmentFinder,
+			finder:           applicationFinder,
 			conv:             &reToServiceConverter{},
 			reEnabledChecker: enabledChecker,
 		},
-		provisioner:   NewProvisioner(instStorage, stateService, opStorage, opStorage, accessChecker, remoteEnvironmentFinder, serviceInstanceGetter, reClient, instStorage, idp, log),
+		provisioner:   NewProvisioner(instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder, serviceInstanceGetter, reClient, instStorage, idp, log),
 		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, log),
 		binder: &bindService{
-			reSvcFinder: remoteEnvironmentFinder,
+			reSvcFinder: applicationFinder,
 		},
 		lastOpGetter: &getLastOperationService{
 			getter: opStorage,

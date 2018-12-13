@@ -38,7 +38,7 @@ func TestProvisionAsync(t *testing.T) {
 
 	for _, tc := range []testCase{
 		{
-			name: "success",
+			name:                           "success",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: true},
 			expectedOpState:                internal.OperationStateSucceeded,
 			expectedOpDesc:                 "provisioning succeeded",
@@ -46,15 +46,15 @@ func TestProvisionAsync(t *testing.T) {
 			expectedInstanceState:          internal.InstanceStateSucceeded,
 		},
 		{
-			name: "cannot provision",
+			name:                           "cannot provision",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: false, Reason: "very important reason"},
 			expectedOpState:                internal.OperationStateFailed,
-			expectedOpDesc:                 "Forbidden provisioning instance [inst-123] for remote environment [name: ec-prod, id: service-id] in namespace: [example-namesapce]. Reason: [very important reason]",
+			expectedOpDesc:                 "Forbidden provisioning instance [inst-123] for application [name: ec-prod, id: service-id] in namespace: [example-namesapce]. Reason: [very important reason]",
 			expectedEventActivationCreated: false,
 			expectedInstanceState:          internal.InstanceStateFailed,
 		},
 		{
-			name: "error on access checking",
+			name:                           "error on access checking",
 			givenCanProvisionError:         errors.New("some error"),
 			expectedOpState:                internal.OperationStateFailed,
 			expectedOpDesc:                 "provisioning failed on error: some error",
@@ -100,10 +100,10 @@ func TestProvisionAsync(t *testing.T) {
 			mockInstanceStorage.On("Insert", fixNewInstance()).
 				Return(nil)
 
-			mockAccessChecker.On("CanProvision", fixInstanceID(), internal.RemoteServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
+			mockAccessChecker.On("CanProvision", fixInstanceID(), internal.ApplicationServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
 				Return(tc.givenCanProvisionOutput, tc.givenCanProvisionError)
 
-			mockReFinder.On("FindOneByServiceID", internal.RemoteServiceID(fixServiceID())).
+			mockReFinder.On("FindOneByServiceID", internal.ApplicationServiceID(fixServiceID())).
 				Return(fixRe(), nil).
 				Once()
 
@@ -259,11 +259,11 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 			mockInstanceStorage.On("Insert", fixNewInstance()).
 				Return(nil)
 
-			mockReFinder.On("FindOneByServiceID", internal.RemoteServiceID(fixServiceID())).
+			mockReFinder.On("FindOneByServiceID", internal.ApplicationServiceID(fixServiceID())).
 				Return(fixRe(), nil).
 				Once()
 
-			mockAccessChecker.On("CanProvision", fixInstanceID(), internal.RemoteServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
+			mockAccessChecker.On("CanProvision", fixInstanceID(), internal.ApplicationServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
 				Return(access.CanProvisionOutput{Allowed: true}, nil)
 
 			mockServiceInstanceGetter.On("GetByNamespaceAndExternalID", fixNs(), string(fixInstanceID())).Return(FixServiceInstance(), nil)
@@ -334,11 +334,11 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 	mockInstanceStorage.On("Insert", fixNewInstance()).
 		Return(nil)
 
-	mockReFinder.On("FindOneByServiceID", internal.RemoteServiceID(fixServiceID())).
+	mockReFinder.On("FindOneByServiceID", internal.ApplicationServiceID(fixServiceID())).
 		Return(fixRe(), nil).
 		Once()
 
-	mockAccessChecker.On("CanProvision", fixInstanceID(), internal.RemoteServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
+	mockAccessChecker.On("CanProvision", fixInstanceID(), internal.ApplicationServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
 		Return(access.CanProvisionOutput{Allowed: true}, nil)
 
 	mockServiceInstanceGetter.On("GetByNamespaceAndExternalID", fixNs(), string(fixInstanceID())).Return(nil, errors.New("custom error"))
@@ -491,7 +491,7 @@ func TestProvisionErrorOnInsertingInstance(t *testing.T) {
 
 	mockInstanceStorage.On("Insert", fixNewInstance()).Return(fixError())
 
-	mockReFinder.On("FindOneByServiceID", internal.RemoteServiceID(fixServiceID())).
+	mockReFinder.On("FindOneByServiceID", internal.ApplicationServiceID(fixServiceID())).
 		Return(fixRe(), nil).
 		Once()
 

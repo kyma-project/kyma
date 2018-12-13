@@ -16,35 +16,35 @@ import (
 )
 
 const (
-	// maxRemoteEnvironmentProcessRetries is the number of times a remote environment CR will be retried before it is dropped out of the queue.
+	// maxApplicationProcessRetries is the number of times a application CR will be retried before it is dropped out of the queue.
 	// With the current rate-limiter in use (5ms*2^(maxRetries-1)) the following numbers represent the times
 	// a deployment is going to be requeued:
 	//
 	// 5ms, 10ms, 20ms, 40ms, 80ms
-	maxRemoteEnvironmentProcessRetries = 5
+	maxApplicationProcessRetries = 5
 )
 
-//go:generate mockery -name=remoteEnvironmentUpserter -output=automock -outpkg=automock -case=underscore
-//go:generate mockery -name=remoteEnvironmentRemover -output=automock -outpkg=automock -case=underscore
-//go:generate mockery -name=remoteEnvironmentCRValidator -output=automock -outpkg=automock -case=underscore
-//go:generate mockery -name=remoteEnvironmentCRMapper -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=applicationUpserter -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=applicationRemover -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=applicationCRValidator -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=applicationCRMapper -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=scRelistRequester -output=automock -outpkg=automock -case=underscore
 
 type (
-	remoteEnvironmentUpserter interface {
-		Upsert(re *internal.RemoteEnvironment) (bool, error)
+	applicationUpserter interface {
+		Upsert(app *internal.Application) (bool, error)
 	}
 
-	remoteEnvironmentRemover interface {
-		Remove(name internal.RemoteEnvironmentName) error
+	applicationRemover interface {
+		Remove(name internal.ApplicationName) error
 	}
 
-	remoteEnvironmentCRValidator interface {
-		Validate(dto *re_type_v1alpha1.RemoteEnvironment) error
+	applicationCRValidator interface {
+		Validate(dto *re_type_v1alpha1.Application) error
 	}
 
-	remoteEnvironmentCRMapper interface {
-		ToModel(dto *re_type_v1alpha1.RemoteEnvironment) *internal.RemoteEnvironment
+	applicationCRMapper interface {
+		ToModel(dto *re_type_v1alpha1.Application) *internal.Application
 	}
 
 	scRelistRequester interface {
@@ -52,22 +52,22 @@ type (
 	}
 )
 
-// Controller populates local storage with all RemoteEnvironment custom resources created in k8s cluster.
+// Controller populates local storage with all Application custom resources created in k8s cluster.
 type Controller struct {
 	log               logrus.FieldLogger
 	queue             workqueue.RateLimitingInterface
-	informer          informers.RemoteEnvironmentInformer
-	reUpserter        remoteEnvironmentUpserter
-	reRemover         remoteEnvironmentRemover
-	reCRValidator     remoteEnvironmentCRValidator
-	reCRMapper        remoteEnvironmentCRMapper
+	informer          informers.ApplicationInformer
+	reUpserter        applicationUpserter
+	reRemover         applicationRemover
+	reCRValidator     applicationCRValidator
+	reCRMapper        applicationCRMapper
 	scRelistRequester scRelistRequester
 }
 
-// New creates new remote environment controller
-func New(remoteEnvironmentInformer informers.RemoteEnvironmentInformer, reUpserter remoteEnvironmentUpserter, reRemover remoteEnvironmentRemover, scRelistRequester scRelistRequester, log logrus.FieldLogger) *Controller {
+// New creates new application controller
+func New(applicationInformer informers.ApplicationInformer, reUpserter applicationUpserter, reRemover applicationRemover, scRelistRequester scRelistRequester, log logrus.FieldLogger) *Controller {
 	c := &Controller{
-		informer:          remoteEnvironmentInformer,
+		informer:          applicationInformer,
 		reUpserter:        reUpserter,
 		reRemover:         reRemover,
 		scRelistRequester: scRelistRequester,
@@ -79,7 +79,7 @@ func New(remoteEnvironmentInformer informers.RemoteEnvironmentInformer, reUpsert
 		reCRMapper:    &reCRMapper{},
 	}
 
-	remoteEnvironmentInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	applicationInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    c.addRE,
 		DeleteFunc: c.deleteRE,
 		UpdateFunc: c.updateRE,
@@ -91,7 +91,7 @@ func New(remoteEnvironmentInformer informers.RemoteEnvironmentInformer, reUpsert
 func (c *Controller) addRE(obj interface{}) {
 	key, err := cache.MetaNamespaceKeyFunc(obj)
 	if err != nil {
-		c.log.Errorf("while handling adding event: while adding new remote environment custom resource to queue: couldn't get key: %v", err)
+		c.log.Errorf("while handling adding event: while adding new application custom resource to queue: couldn't get key: %v", err)
 		return
 	}
 
@@ -101,7 +101,7 @@ func (c *Controller) addRE(obj interface{}) {
 func (c *Controller) deleteRE(obj interface{}) {
 	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 	if err != nil {
-		c.log.Errorf("while handling deletion event: while adding new remote environment custom resource to queue: couldn't get key: %v", err)
+		c.log.Errorf("while handling deletion event: while adding new application custom resource to queue: couldn't get key: %v", err)
 		return
 	}
 
@@ -111,7 +111,7 @@ func (c *Controller) deleteRE(obj interface{}) {
 func (c *Controller) updateRE(old, cur interface{}) {
 	key, err := cache.MetaNamespaceKeyFunc(cur)
 	if err != nil {
-		c.log.Errorf("while handling update event: while adding new remote environment custom resource to queue: couldn't get key: %v", err)
+		c.log.Errorf("while handling update event: while adding new application custom resource to queue: couldn't get key: %v", err)
 		return
 	}
 
@@ -122,8 +122,8 @@ func (c *Controller) updateRE(old, cur interface{}) {
 func (c *Controller) Run(stopCh <-chan struct{}) {
 	go c.shutdownQueueOnStop(stopCh)
 
-	c.log.Info("Starting remote environment CR sync-controller")
-	defer c.log.Infof("Shutting down remote environment CR sync-controller")
+	c.log.Info("Starting application CR sync-controller")
+	defer c.log.Infof("Shutting down application CR sync-controller")
 
 	if !cache.WaitForCacheSync(stopCh, c.informer.Informer().HasSynced) {
 		c.log.Error("Timeout occurred on waiting for caches to sync. Shutdown the controller.")
@@ -163,7 +163,7 @@ func (c *Controller) processNextItem() bool {
 		c.scRelistRequester.RequestRelist()
 		c.log.Infof("Relist requested after successful processing of the %q", strKey)
 
-	case isTemporaryError(err) && c.queue.NumRequeues(key) < maxRemoteEnvironmentProcessRetries:
+	case isTemporaryError(err) && c.queue.NumRequeues(key) < maxApplicationProcessRetries:
 		c.log.Errorf("Error processing %q (will retry): %v", key, err)
 		c.queue.AddRateLimited(key)
 
@@ -187,30 +187,30 @@ func (c *Controller) processItem(key string) error {
 	}
 
 	if !exists {
-		err := c.reRemover.Remove(internal.RemoteEnvironmentName(key))
+		err := c.reRemover.Remove(internal.ApplicationName(key))
 		if err != nil {
-			return errors.Wrapf(err, "while removing remote environment with name %q from storage", key)
+			return errors.Wrapf(err, "while removing application with name %q from storage", key)
 		}
-		c.log.Infof("Remote Environment %q was removed from storage", key)
+		c.log.Infof("Application %q was removed from storage", key)
 		return nil
 	}
 
-	reObj, ok := obj.(*re_type_v1alpha1.RemoteEnvironment)
+	reObj, ok := obj.(*re_type_v1alpha1.Application)
 	if !ok {
-		return errors.New("cannot cast received object to v1alpha1.RemoteEnvironment type")
+		return errors.New("cannot cast received object to v1alpha1.Application type")
 	}
 
 	if err := c.reCRValidator.Validate(reObj); err != nil {
-		return errors.Wrapf(err, "while validating remote environment %q", key)
+		return errors.Wrapf(err, "while validating application %q", key)
 	}
 
 	dm := c.reCRMapper.ToModel(reObj)
 	replaced, err := c.reUpserter.Upsert(dm)
 	if err != nil {
-		return errors.Wrapf(err, "while upserting remote environment with name %q into storage", key)
+		return errors.Wrapf(err, "while upserting application with name %q into storage", key)
 	}
 
-	c.log.Infof("Remote Environment %q was added into storage (replaced: %v)", key, replaced)
+	c.log.Infof("Application %q was added into storage (replaced: %v)", key, replaced)
 	return nil
 }
 

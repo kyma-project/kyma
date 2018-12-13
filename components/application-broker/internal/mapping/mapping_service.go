@@ -7,7 +7,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-// mappingService provides services for EnvironmentMappings
+// mappingService provides services for ApplicationMappings
 type mappingService struct {
 	emInformer cache.SharedIndexInformer
 }
@@ -18,17 +18,17 @@ func newMappingService(informer cache.SharedIndexInformer) *mappingService {
 	}
 }
 
-// ListEnvironmentMappings lists EnvironmentMappings in the given Namespace
-func (svc *mappingService) ListEnvironmentMappings(environment string) ([]*v1alpha1.EnvironmentMapping, error) {
+// ListApplicationMappings lists ApplicationMappings in the given Namespace
+func (svc *mappingService) ListApplicationMappings(environment string) ([]*v1alpha1.ApplicationMapping, error) {
 	items, err := svc.emInformer.GetIndexer().ByIndex(cache.NamespaceIndex, environment)
 	if err != nil {
-		return []*v1alpha1.EnvironmentMapping{}, err
+		return []*v1alpha1.ApplicationMapping{}, err
 	}
-	var result []*v1alpha1.EnvironmentMapping
+	var result []*v1alpha1.ApplicationMapping
 	for _, item := range items {
-		em, ok := item.(*v1alpha1.EnvironmentMapping)
+		em, ok := item.(*v1alpha1.ApplicationMapping)
 		if !ok {
-			return nil, fmt.Errorf("unexpected item type: %T, should be *v1alpha1.EnvironmentMapping", item)
+			return nil, fmt.Errorf("unexpected item type: %T, should be *v1alpha1.ApplicationMapping", item)
 		}
 		result = append(result, em)
 	}

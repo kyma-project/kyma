@@ -16,17 +16,17 @@ const fieldNameGatewayURL = "GATEWAY_URL"
 
 func (svc *bindService) Bind(ctx context.Context, osbCtx osbContext, req *osb.BindRequest) (*osb.BindResponse, error) {
 	if len(req.Parameters) > 0 {
-		return nil, errors.New("remote-environment-broker does not support configuration options for the service binding")
+		return nil, errors.New("application-broker does not support configuration options for the service binding")
 	}
 
-	re, err := svc.reSvcFinder.FindOneByServiceID(internal.RemoteServiceID(req.ServiceID))
+	app, err := svc.reSvcFinder.FindOneByServiceID(internal.ApplicationServiceID(req.ServiceID))
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot get RemoteEnvironment: %s", req.ServiceID)
+		return nil, errors.Wrapf(err, "cannot get Application: %s", req.ServiceID)
 	}
 
-	creds, err := svc.getCredentials(internal.RemoteServiceID(req.ServiceID), re)
+	creds, err := svc.getCredentials(internal.ApplicationServiceID(req.ServiceID), app)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get credentials from remote environments")
+		return nil, errors.Wrap(err, "cannot get credentials from applications")
 	}
 
 	return &osb.BindResponse{
@@ -34,13 +34,13 @@ func (svc *bindService) Bind(ctx context.Context, osbCtx osbContext, req *osb.Bi
 	}, nil
 }
 
-func (*bindService) getCredentials(rsID internal.RemoteServiceID, re *internal.RemoteEnvironment) (map[string]interface{}, error) {
+func (*bindService) getCredentials(rsID internal.ApplicationServiceID, app *internal.Application) (map[string]interface{}, error) {
 	creds := make(map[string]interface{})
-	for _, svc := range re.Services {
+	for _, svc := range app.Services {
 		if svc.ID == rsID {
 			creds[fieldNameGatewayURL] = svc.APIEntry.GatewayURL
 			return creds, nil
 		}
 	}
-	return nil, errors.Errorf("cannot get credentials to bind instance with RemoteServiceID: %s, from RemoteEnvironment: %s", rsID, re.Name)
+	return nil, errors.Errorf("cannot get credentials to bind instance with ApplicationServiceID: %s, from Application: %s", rsID, app.Name)
 }

@@ -12,20 +12,16 @@ type FakeApplicationconnectorV1alpha1 struct {
 	*testing.Fake
 }
 
+func (c *FakeApplicationconnectorV1alpha1) Applications() v1alpha1.ApplicationInterface {
+	return &FakeApplications{c}
+}
+
 func (c *FakeApplicationconnectorV1alpha1) ApplicationMappings(namespace string) v1alpha1.ApplicationMappingInterface {
 	return &FakeApplicationMappings{c, namespace}
 }
 
-func (c *FakeApplicationconnectorV1alpha1) EnvironmentMappings(namespace string) v1alpha1.EnvironmentMappingInterface {
-	return &FakeEnvironmentMappings{c, namespace}
-}
-
 func (c *FakeApplicationconnectorV1alpha1) EventActivations(namespace string) v1alpha1.EventActivationInterface {
 	return &FakeEventActivations{c, namespace}
-}
-
-func (c *FakeApplicationconnectorV1alpha1) RemoteEnvironments() v1alpha1.RemoteEnvironmentInterface {
-	return &FakeRemoteEnvironments{c}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

@@ -1,5 +1,5 @@
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: RemoteEnvironment
+kind: Application
 metadata:
   name: ec-prod
 spec:
@@ -38,7 +38,7 @@ spec:
         accessLabel: "access-label-1"
       - type: Events
 
-    # second service provided by remote environment
+    # second service provided by application
     - id: "48ab05bf-9aa4-4cb7-8999-0d3587265ac3"
       name: "orders-48ab05bf"
       displayName: "Orders"

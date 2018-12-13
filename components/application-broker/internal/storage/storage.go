@@ -9,7 +9,7 @@ import (
 // Factory provides access to concrete storage.
 // Multiple calls should to specific storage return the same storage instance.
 type Factory interface {
-	RemoteEnvironment() RemoteEnvironment
+	Application() Application
 	Instance() Instance
 	InstanceOperation() InstanceOperation
 }
@@ -28,8 +28,8 @@ type EntityName string
 const (
 	// EntityAll represents name of all entities
 	EntityAll EntityName = "all"
-	// EntityRemoteEnvironment represents name of remote environment entities
-	EntityRemoteEnvironment EntityName = "remoteenvironment"
+	// EntityApplication represents name of application entities
+	EntityApplication EntityName = "application"
 	// EntityInstance represents name of services instances entities
 	EntityInstance EntityName = "instance"
 	// EntityInstanceOperation represents name of instances operations entities
@@ -70,15 +70,15 @@ func NewFactory(cl *ConfigList) (Factory, error) {
 	for _, cfg := range *cl {
 
 		var (
-			remoteEnvironmentFactory func() (RemoteEnvironment, error)
+			applicationFactory       func() (Application, error)
 			instanceFactory          func() (Instance, error)
 			instanceOperationFactory func() (InstanceOperation, error)
 		)
 
 		switch cfg.Driver {
 		case DriverMemory:
-			remoteEnvironmentFactory = func() (RemoteEnvironment, error) {
-				return memory.NewRemoteEnvironment(), nil
+			applicationFactory = func() (Application, error) {
+				return memory.NewApplication(), nil
 			}
 			instanceFactory = func() (Instance, error) {
 				return memory.NewInstance(), nil
@@ -92,14 +92,14 @@ func NewFactory(cl *ConfigList) (Factory, error) {
 
 		for em := range cfg.Provide {
 			switch em {
-			case EntityRemoteEnvironment:
-				fact.re, _ = remoteEnvironmentFactory()
+			case EntityApplication:
+				fact.app, _ = applicationFactory()
 			case EntityInstance:
 				fact.instance, _ = instanceFactory()
 			case EntityInstanceOperation:
 				fact.op, _ = instanceOperationFactory()
 			case EntityAll:
-				fact.re, _ = remoteEnvironmentFactory()
+				fact.app, _ = applicationFactory()
 				fact.instance, _ = instanceFactory()
 				fact.op, _ = instanceOperationFactory()
 			default:
@@ -111,13 +111,13 @@ func NewFactory(cl *ConfigList) (Factory, error) {
 }
 
 type concreteFactory struct {
-	re       RemoteEnvironment
+	app      Application
 	instance Instance
 	op       InstanceOperation
 }
 
-func (f *concreteFactory) RemoteEnvironment() RemoteEnvironment {
-	return f.re
+func (f *concreteFactory) Application() Application {
+	return f.app
 }
 
 func (f *concreteFactory) Instance() Instance {

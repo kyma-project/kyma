@@ -16,8 +16,8 @@ const (
 	connectedAppLabelKey = "connected-app"
 )
 
-// Validate validates RemoteEnvironment custom resource.
-func (v *reCRValidator) Validate(dto *re_type_v1alpha1.RemoteEnvironment) error {
+// Validate validates Application custom resource.
+func (v *reCRValidator) Validate(dto *re_type_v1alpha1.Application) error {
 	var messages []string
 
 	for _, svc := range dto.Spec.Services {

@@ -20,8 +20,8 @@ import (
 
 func TestControllerRunSuccess(t *testing.T) {
 	// given
-	reCR := mustLoadCRFix("testdata/re-CR-valid.input.yaml")
-	reDM := internal.RemoteEnvironment{
+	reCR := mustLoadCRFix("testdata/app-CR-valid.input.yaml")
+	reDM := internal.Application{
 		Name: "mapped",
 	}
 
@@ -29,7 +29,7 @@ func TestControllerRunSuccess(t *testing.T) {
 
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 	serviceCatalogSharedInformers := informerFactory.Applicationconnector().V1alpha1()
-	reInformer := serviceCatalogSharedInformers.RemoteEnvironments()
+	reInformer := serviceCatalogSharedInformers.Applications()
 
 	expectations := &sync.WaitGroup{}
 	expectations.Add(4)
@@ -37,15 +37,15 @@ func TestControllerRunSuccess(t *testing.T) {
 		expectations.Done()
 	}
 
-	validatorMock := &automock.RemoteEnvironmentCRValidator{}
+	validatorMock := &automock.ApplicationCRValidator{}
 	defer validatorMock.AssertExpectations(t)
 	validatorMock.ExpectOnValidate(&reCR).Run(fulfillExpectation).Once()
 
-	mapperMock := &automock.RemoteEnvironmentCRMapper{}
+	mapperMock := &automock.ApplicationCRMapper{}
 	defer mapperMock.AssertExpectations(t)
 	mapperMock.ExpectOnToModel(&reCR, &reDM).Run(fulfillExpectation).Once()
 
-	upserterMock := &automock.RemoteEnvironmentUpserter{}
+	upserterMock := &automock.ApplicationUpserter{}
 	defer upserterMock.AssertExpectations(t)
 	upserterMock.ExpectOnUpsert(&reDM).Run(fulfillExpectation).Once()
 
@@ -85,17 +85,17 @@ func awaitForSyncGroupAtMost(t *testing.T, wg *sync.WaitGroup, timeout time.Dura
 	}
 }
 
-func mustLoadCRFix(path string) v1alpha1.RemoteEnvironment {
+func mustLoadCRFix(path string) v1alpha1.Application {
 	in, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}
 
-	var remoteEnvironment v1alpha1.RemoteEnvironment
-	err = yaml.Unmarshal(in, &remoteEnvironment)
+	var application v1alpha1.Application
+	err = yaml.Unmarshal(in, &application)
 	if err != nil {
 		panic(err)
 	}
 
-	return remoteEnvironment
+	return application
 }

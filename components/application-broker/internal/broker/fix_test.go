@@ -15,12 +15,12 @@ func fixOperationID() internal.OperationID {
 	return internal.OperationID("op-id-123")
 }
 
-func fixRe() *internal.RemoteEnvironment {
-	return &internal.RemoteEnvironment{
+func fixRe() *internal.Application {
+	return &internal.Application{
 		Name: fixReName(),
 		Services: []internal.Service{
 			{
-				ID:          internal.RemoteServiceID(fixServiceID()),
+				ID:          internal.ApplicationServiceID(fixServiceID()),
 				DisplayName: "Orders",
 				APIEntry: &internal.APIEntry{
 					GatewayURL:  "www.gate.com",
@@ -125,7 +125,7 @@ func fixServiceInstanceUID() types.UID {
 	return types.UID("service-instance-uid-abcd-000")
 }
 
-func fixReName() internal.RemoteEnvironmentName {
+func fixReName() internal.ApplicationName {
 	return "ec-prod"
 }
 func FixServiceInstance() *v1beta1.ServiceInstance {

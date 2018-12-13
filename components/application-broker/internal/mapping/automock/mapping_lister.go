@@ -9,16 +9,16 @@ type MappingLister struct {
 	mock.Mock
 }
 
-// ListEnvironmentMappings provides a mock function with given fields: environment
-func (_m *MappingLister) ListEnvironmentMappings(environment string) ([]*v1alpha1.EnvironmentMapping, error) {
+// ListApplicationMappings provides a mock function with given fields: environment
+func (_m *MappingLister) ListApplicationMappings(environment string) ([]*v1alpha1.ApplicationMapping, error) {
 	ret := _m.Called(environment)
 
-	var r0 []*v1alpha1.EnvironmentMapping
-	if rf, ok := ret.Get(0).(func(string) []*v1alpha1.EnvironmentMapping); ok {
+	var r0 []*v1alpha1.ApplicationMapping
+	if rf, ok := ret.Get(0).(func(string) []*v1alpha1.ApplicationMapping); ok {
 		r0 = rf(environment)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*v1alpha1.EnvironmentMapping)
+			r0 = ret.Get(0).([]*v1alpha1.ApplicationMapping)
 		}
 	}
 

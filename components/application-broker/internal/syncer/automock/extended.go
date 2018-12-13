@@ -6,15 +6,15 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func (_m *RemoteEnvironmentCRMapper) ExpectOnToModel(dto *v1alpha1.RemoteEnvironment, dm *internal.RemoteEnvironment) *mock.Call {
+func (_m *ApplicationCRMapper) ExpectOnToModel(dto *v1alpha1.Application, dm *internal.Application) *mock.Call {
 	return _m.On("ToModel", dto).Return(dm)
 }
 
-func (_m *RemoteEnvironmentCRValidator) ExpectOnValidate(dto *v1alpha1.RemoteEnvironment) *mock.Call {
+func (_m *ApplicationCRValidator) ExpectOnValidate(dto *v1alpha1.Application) *mock.Call {
 	return _m.On("Validate", dto).Return(nil)
 }
 
-func (_m *RemoteEnvironmentUpserter) ExpectOnUpsert(dm *internal.RemoteEnvironment) *mock.Call {
+func (_m *ApplicationUpserter) ExpectOnUpsert(dm *internal.Application) *mock.Call {
 	return _m.On("Upsert", dm).Return(false, nil)
 }
 

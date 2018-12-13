@@ -23,7 +23,7 @@ type UniquenessProvisionChecker struct {
 }
 
 // CanProvision performs actual check
-func (c *UniquenessProvisionChecker) CanProvision(iID internal.InstanceID, rsID internal.RemoteServiceID, ns internal.Namespace) (CanProvisionOutput, error) {
+func (c *UniquenessProvisionChecker) CanProvision(iID internal.InstanceID, rsID internal.ApplicationServiceID, ns internal.Namespace) (CanProvisionOutput, error) {
 	i, err := c.InstanceFinder.FindOne(func(i *internal.Instance) bool {
 		// exclude itself
 		if i.ID == iID {

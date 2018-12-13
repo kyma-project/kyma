@@ -16,7 +16,7 @@ import (
 	"github.com/vrischmann/envconfig"
 )
 
-// Config provide remote environment broker configuration
+// Config provide application broker configuration
 // Supported tags:
 //	- json: 		github.com/ghodss/yaml
 //	- envconfig: 	github.com/vrischmann/envconfig
@@ -29,7 +29,7 @@ type Config struct {
 	Port                       int              `default:"8080"`
 	Storage                    []storage.Config `valid:"required"`
 	BrokerRelistDurationWindow time.Duration    `valid:"required"`
-	// UniqueSelectorLabelKey and UniqueSelectorLabelValue allows unambiguously distinguish REB's pods.
+	// UniqueSelectorLabelKey and UniqueSelectorLabelValue allows unambiguously distinguish AB's pods.
 	UniqueSelectorLabelKey   string `valid:"required"`
 	UniqueSelectorLabelValue string `valid:"required"`
 	Namespace                string `valid:"required"`

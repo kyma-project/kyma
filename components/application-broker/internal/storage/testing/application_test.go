@@ -11,7 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
 )
 
-func TestRemoteEnvironmentGet(t *testing.T) {
+func TestApplicationGet(t *testing.T) {
 	tRunDrivers(t, "Found", func(t *testing.T, sf storage.Factory) {
 		// given
 		ts := newRETestSuite(t, sf)
@@ -19,7 +19,7 @@ func TestRemoteEnvironmentGet(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// when
-		got, err := ts.reStorage.Get(internal.RemoteEnvironmentName(exp.Name))
+		got, err := ts.reStorage.Get(internal.ApplicationName(exp.Name))
 
 		// then
 		assert.NoError(t, err)
@@ -32,7 +32,7 @@ func TestRemoteEnvironmentGet(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// when
-		got, err := ts.reStorage.Get(internal.RemoteEnvironmentName(exp.Name))
+		got, err := ts.reStorage.Get(internal.ApplicationName(exp.Name))
 
 		// then
 		ts.AssertNotFoundError(err)
@@ -40,7 +40,7 @@ func TestRemoteEnvironmentGet(t *testing.T) {
 	})
 }
 
-func TestRemoteEnvironmentFindAll(t *testing.T) {
+func TestApplicationFindAll(t *testing.T) {
 	tRunDrivers(t, "Found", func(t *testing.T, sf storage.Factory) {
 		// given
 		ts := newRETestSuite(t, sf)
@@ -55,7 +55,7 @@ func TestRemoteEnvironmentFindAll(t *testing.T) {
 	})
 }
 
-func TestRemoteEnvironmentFindOneByServiceID(t *testing.T) {
+func TestApplicationFindOneByServiceID(t *testing.T) {
 	tRunDrivers(t, "Found", func(t *testing.T, sf storage.Factory) {
 		// given
 		ts := newRETestSuite(t, sf)
@@ -75,7 +75,7 @@ func TestRemoteEnvironmentFindOneByServiceID(t *testing.T) {
 		ts.PopulateStorage()
 
 		// when
-		got, err := ts.reStorage.FindOneByServiceID(internal.RemoteServiceID("apud"))
+		got, err := ts.reStorage.FindOneByServiceID(internal.ApplicationServiceID("apud"))
 
 		// then
 		assert.NoError(t, err)
@@ -83,7 +83,7 @@ func TestRemoteEnvironmentFindOneByServiceID(t *testing.T) {
 	})
 }
 
-func TestRemoteEnvironmentUpsert(t *testing.T) {
+func TestApplicationUpsert(t *testing.T) {
 	tRunDrivers(t, "Success/New", func(t *testing.T, sf storage.Factory) {
 		// given
 		ts := newRETestSuite(t, sf)
@@ -113,7 +113,7 @@ func TestRemoteEnvironmentUpsert(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, replace)
 
-		got, err := ts.reStorage.Get(internal.RemoteEnvironmentName(fixNew.Name))
+		got, err := ts.reStorage.Get(internal.ApplicationName(fixNew.Name))
 		assert.NoError(t, err)
 		assert.EqualValues(t, fixNew, got)
 	})
@@ -132,7 +132,7 @@ func TestRemoteEnvironmentUpsert(t *testing.T) {
 	})
 }
 
-func TestRemoteEnvironmentRemove(t *testing.T) {
+func TestApplicationRemove(t *testing.T) {
 	tRunDrivers(t, "Found", func(t *testing.T, sf storage.Factory) {
 		// given
 		ts := newRETestSuite(t, sf)
@@ -140,7 +140,7 @@ func TestRemoteEnvironmentRemove(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// when
-		err := ts.reStorage.Remove(internal.RemoteEnvironmentName(exp.Name))
+		err := ts.reStorage.Remove(internal.ApplicationName(exp.Name))
 
 		// then
 		assert.NoError(t, err)
@@ -153,7 +153,7 @@ func TestRemoteEnvironmentRemove(t *testing.T) {
 		exp := ts.MustGetFixture("A1")
 
 		// when
-		err := ts.reStorage.Remove(internal.RemoteEnvironmentName(exp.Name))
+		err := ts.reStorage.Remove(internal.ApplicationName(exp.Name))
 
 		// then
 		ts.AssertNotFoundError(err)
@@ -163,8 +163,8 @@ func TestRemoteEnvironmentRemove(t *testing.T) {
 func newRETestSuite(t *testing.T, sf storage.Factory) *reTestSuite {
 	ts := reTestSuite{
 		t:         t,
-		reStorage: sf.RemoteEnvironment(),
-		fixtures:  make(map[string]*internal.RemoteEnvironment),
+		reStorage: sf.Application(),
+		fixtures:  make(map[string]*internal.Application),
 	}
 
 	ts.generateFixtures()
@@ -174,8 +174,8 @@ func newRETestSuite(t *testing.T, sf storage.Factory) *reTestSuite {
 
 type reTestSuite struct {
 	t         *testing.T
-	reStorage storage.RemoteEnvironment
-	fixtures  map[string]*internal.RemoteEnvironment
+	reStorage storage.Application
+	fixtures  map[string]*internal.Application
 }
 
 func (ts *reTestSuite) generateFixtures() {
@@ -185,12 +185,12 @@ func (ts *reTestSuite) generateFixtures() {
 		"B1": {"name-B1", "service-id-B1", "desc-B1"},
 		"B2": {"name-B2", "service-id-B2", "desc-B2"},
 	} {
-		re := &internal.RemoteEnvironment{
-			Name:        internal.RemoteEnvironmentName(ft.name),
+		app := &internal.Application{
+			Name:        internal.ApplicationName(ft.name),
 			Description: ft.desc,
 			Services: []internal.Service{
 				{
-					ID:          internal.RemoteServiceID(ft.id),
+					ID:          internal.ApplicationServiceID(ft.id),
 					DisplayName: "displayName",
 					APIEntry: &internal.APIEntry{
 						AccessLabel: "access-label",
@@ -204,7 +204,7 @@ func (ts *reTestSuite) generateFixtures() {
 			},
 		}
 
-		ts.fixtures[fs] = re
+		ts.fixtures[fs] = app
 	}
 }
 
@@ -214,7 +214,7 @@ func (ts *reTestSuite) PopulateStorage() {
 	}
 }
 
-func (ts *reTestSuite) MustGetFixture(name string) *internal.RemoteEnvironment {
+func (ts *reTestSuite) MustGetFixture(name string) *internal.Application {
 	fix, found := ts.fixtures[name]
 	if !found {
 		panic(fmt.Sprintf("fixture with name %q not found", name))
@@ -223,13 +223,13 @@ func (ts *reTestSuite) MustGetFixture(name string) *internal.RemoteEnvironment {
 	return ts.MustCopyFixture(fix)
 }
 
-func (ts *reTestSuite) MustCopyFixture(in *internal.RemoteEnvironment) *internal.RemoteEnvironment {
+func (ts *reTestSuite) MustCopyFixture(in *internal.Application) *internal.Application {
 	m, err := json.Marshal(in)
 	if err != nil {
 		panic(fmt.Sprintf("input remote environemnt marchaling failed, err: %s", err))
 	}
 
-	var out internal.RemoteEnvironment
+	var out internal.Application
 	if err := json.Unmarshal(m, &out); err != nil {
 		panic(fmt.Sprintf("input remote environemnt unmarchaling failed, err: %s", err))
 	}
@@ -241,13 +241,13 @@ func (ts *reTestSuite) AssertNotFoundError(err error) bool {
 	return assert.True(ts.t, storage.IsNotFoundError(err), "NotFound error expected")
 }
 
-func (ts *reTestSuite) AssertChartDoesNotExist(exp *internal.RemoteEnvironment) bool {
+func (ts *reTestSuite) AssertChartDoesNotExist(exp *internal.Application) bool {
 	ts.t.Helper()
-	_, err := ts.reStorage.Get(internal.RemoteEnvironmentName(exp.Name))
+	_, err := ts.reStorage.Get(internal.ApplicationName(exp.Name))
 	return assert.True(ts.t, storage.IsNotFoundError(err), "NotFound error expected")
 }
 
-func (ts *reTestSuite) AssertContainsAllFixtures(got []*internal.RemoteEnvironment) {
+func (ts *reTestSuite) AssertContainsAllFixtures(got []*internal.Application) {
 	ts.t.Helper()
 
 	assert.Len(ts.t, got, len(ts.fixtures))

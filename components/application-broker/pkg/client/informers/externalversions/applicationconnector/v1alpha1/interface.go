@@ -8,14 +8,12 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
+	// Applications returns a ApplicationInformer.
+	Applications() ApplicationInformer
 	// ApplicationMappings returns a ApplicationMappingInformer.
 	ApplicationMappings() ApplicationMappingInformer
-	// EnvironmentMappings returns a EnvironmentMappingInformer.
-	EnvironmentMappings() EnvironmentMappingInformer
 	// EventActivations returns a EventActivationInformer.
 	EventActivations() EventActivationInformer
-	// RemoteEnvironments returns a RemoteEnvironmentInformer.
-	RemoteEnvironments() RemoteEnvironmentInformer
 }
 
 type version struct {
@@ -29,22 +27,17 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
+// Applications returns a ApplicationInformer.
+func (v *version) Applications() ApplicationInformer {
+	return &applicationInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
+}
+
 // ApplicationMappings returns a ApplicationMappingInformer.
 func (v *version) ApplicationMappings() ApplicationMappingInformer {
 	return &applicationMappingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// EnvironmentMappings returns a EnvironmentMappingInformer.
-func (v *version) EnvironmentMappings() EnvironmentMappingInformer {
-	return &environmentMappingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
 // EventActivations returns a EventActivationInformer.
 func (v *version) EventActivations() EventActivationInformer {
 	return &eventActivationInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
-// RemoteEnvironments returns a RemoteEnvironmentInformer.
-func (v *version) RemoteEnvironments() RemoteEnvironmentInformer {
-	return &remoteEnvironmentInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }

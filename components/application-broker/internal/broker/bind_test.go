@@ -17,17 +17,17 @@ const fieldNameGatewayURL = "GATEWAY_URL"
 
 func TestBindServiceBindSuccess(t *testing.T) {
 	// given
-	reFinder := &automock.ReFinder{}
-	defer reFinder.AssertExpectations(t)
+	appFinder := &automock.ReFinder{}
+	defer appFinder.AssertExpectations(t)
 
 	fixRE := fixRE()
 
-	reFinder.On("FindOneByServiceID", fixRE.Services[0].ID).
+	appFinder.On("FindOneByServiceID", fixRE.Services[0].ID).
 		Return(&fixRE, nil).
 		Once()
 
 	osbCtx := broker.NewOSBContext("not", "important", "")
-	svc := broker.NewBindService(reFinder)
+	svc := broker.NewBindService(appFinder)
 	// when
 	resp, err := svc.Bind(context.Background(), *osbCtx, fixBindRequest())
 
@@ -47,10 +47,10 @@ func TestBindServiceBindFailure(t *testing.T) {
 		svc := broker.NewBindService(nil)
 
 		// when
-		resp, err := svc.GetCredentials(internal.RemoteServiceID(fixID), &fixRE)
+		resp, err := svc.GetCredentials(internal.ApplicationServiceID(fixID), &fixRE)
 
 		// then
-		assert.EqualErrorf(t, err, err.Error(), "cannot get credentials to bind instance wit RemoteServiceID: %s, from RemoteEnvironment: %s", fixID, fixRE.Name)
+		assert.EqualErrorf(t, err, err.Error(), "cannot get credentials to bind instance wit ApplicationServiceID: %s, from Application: %s", fixID, fixRE.Name)
 		assert.Zero(t, resp)
 	})
 
@@ -68,7 +68,7 @@ func TestBindServiceBindFailure(t *testing.T) {
 		resp, err := svc.Bind(context.Background(), *osbCtx, fixReq)
 
 		// then
-		assert.EqualError(t, err, "remote-environment-broker does not support configuration options for the service binding")
+		assert.EqualError(t, err, "application-broker does not support configuration options for the service binding")
 		assert.Zero(t, resp)
 	})
 }
@@ -80,8 +80,8 @@ func fixBindRequest() *osb.BindRequest {
 		PlanID:     "plan-id",
 	}
 }
-func fixRE() internal.RemoteEnvironment {
-	return internal.RemoteEnvironment{
+func fixRE() internal.Application {
+	return internal.Application{
 		Name: "ec-prod",
 		Services: []internal.Service{
 			{

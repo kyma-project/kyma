@@ -1,15 +1,15 @@
-# Remote Environment Broker
+# Application Broker
 
 ## Overview
 
-The Remote Environment Broker (REB) provides remote environments in the [Service Catalog](../../docs/service-catalog/docs/001-overview-service-catalog.md).
-A remote environment represents the environment connected to the Kyma instance.
-The REB implements the [Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md).
+The Application Broker (AB) provides applications in the [Service Catalog](../../docs/service-catalog/docs/001-overview-service-catalog.md).
+A application represents the environment connected to the Kyma instance.
+The AB implements the [Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md).
 
-The REB fetches all the remote environments' custom resources and exposes their APIs and Events as service classes to the Service Catalog.
-When the remote environments list is available in the Service Catalog, you can provision those service classes and enable Kyma services to use them.
+The AB fetches all the applications' custom resources and exposes their APIs and Events as service classes to the Service Catalog.
+When the applications list is available in the Service Catalog, you can provision those service classes and enable Kyma services to use them.
 
-The REB works as a Namespace-scoped broker which is registered in the specific Namespace when the EnvironmentMapping is created in this Namespace.
+The AB works as a Namespace-scoped broker which is registered in the specific Namespace when the ApplicationMapping is created in this Namespace.
 
 For more details about provisioning, deprovisioning, binding, and unbinding, see the [Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md) documentation.
 
@@ -29,15 +29,15 @@ Before each commit, use the `before-commit.sh` script or the `make build` comman
 | Name | Required | Default | Description |
 |-----|---------|--------|------------|
 |**APP_PORT** | NO | `8080` | The port on which the HTTP server listens |
-|**APP_BROKER_RELIST_DURATION_WINDOW** | YES | - | Time period after which the REB synchronizes with the Service Catalog if a new Remote Environment is added. In case more than one Remote Environment is added, synchronization is performed only once. |
-| **APP_UNIQUE_SELECTOR_LABEL_KEY** | YES | - | Defined label key selector which allows uniquely identify REB pod's |
-| **APP_UNIQUE_SELECTOR_LABEL_VALUE** | YES | - | Defined label value selector which allows uniquely identify REB pod's |
-| **NAMESPACE** | YES | - | REB working Namespace |
+|**APP_BROKER_RELIST_DURATION_WINDOW** | YES | - | Time period after which the AB synchronizes with the Service Catalog if a new Application is added. In case more than one Application is added, synchronization is performed only once. |
+| **APP_UNIQUE_SELECTOR_LABEL_KEY** | YES | - | Defined label key selector which allows uniquely identify AB pod's |
+| **APP_UNIQUE_SELECTOR_LABEL_VALUE** | YES | - | Defined label value selector which allows uniquely identify AB pod's |
+| **NAMESPACE** | YES | - | AB working Namespace |
 
 
 ## Code generation
 
-Structs related to CustomResourceDefinitions are defined in `pkg/apis/remoteenvironment/v1alpha1/types.go` and registered in `pkg/apis/remoteenvironment/v1alpha1/`. After making any changes there, please run:
+Structs related to CustomResourceDefinitions are defined in `pkg/apis/application/v1alpha1/types.go` and registered in `pkg/apis/application/v1alpha1/`. After making any changes there, please run:
 ```bash
 ./hack/update-codegen.sh
 ```

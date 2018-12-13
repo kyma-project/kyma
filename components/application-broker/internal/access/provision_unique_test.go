@@ -49,7 +49,7 @@ func TestUniquenessProvisionChecker(t *testing.T) {
 			sut := access.NewUniquenessProvisionChecker(genStore())
 
 			// WHEN
-			gotCanProvisionOutput, err := sut.CanProvision(internal.InstanceID(tc.iID), internal.RemoteServiceID(tc.rsID), internal.Namespace(tc.ns))
+			gotCanProvisionOutput, err := sut.CanProvision(internal.InstanceID(tc.iID), internal.ApplicationServiceID(tc.rsID), internal.Namespace(tc.ns))
 
 			// THEN
 			assert.NoError(t, err)

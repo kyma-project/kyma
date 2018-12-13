@@ -29,7 +29,7 @@
         },
         "longDescription": "Long description for Promotions APIs",
         "providerDisplayName": "HakunaMatata",
-        "remoteEnvironmentServiceId": "ac031e8c-9aa4-4cb7-8999-0d358726ffaa"
+        "applicationServiceId": "ac031e8c-9aa4-4cb7-8999-0d358726ffaa"
       }
     },
     {
@@ -57,7 +57,7 @@
         },
         "longDescription": "Long description for Orders API",
         "providerDisplayName": "HakunaMatata",
-        "remoteEnvironmentServiceId": "48ab05bf-9aa4-4cb7-8999-0d3587265ac3"
+        "applicationServiceId": "48ab05bf-9aa4-4cb7-8999-0d3587265ac3"
       }
     }
   ]

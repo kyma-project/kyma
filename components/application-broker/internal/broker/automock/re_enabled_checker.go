@@ -8,8 +8,8 @@ type ReEnabledChecker struct {
 	mock.Mock
 }
 
-// IsRemoteEnvironmentEnabled provides a mock function with given fields: namespace, name
-func (_m *ReEnabledChecker) IsRemoteEnvironmentEnabled(namespace string, name string) (bool, error) {
+// IsApplicationEnabled provides a mock function with given fields: namespace, name
+func (_m *ReEnabledChecker) IsApplicationEnabled(namespace string, name string) (bool, error) {
 	ret := _m.Called(namespace, name)
 
 	var r0 bool

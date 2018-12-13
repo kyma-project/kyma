@@ -2,12 +2,12 @@ package broker
 
 import "github.com/kyma-project/kyma/components/application-broker/internal"
 
-func NewBindService(reFinder reFinder) *bindService {
+func NewBindService(appFinder appFinder) *bindService {
 	return &bindService{
-		reSvcFinder: reFinder,
+		reSvcFinder: appFinder,
 	}
 }
 
-func (svc *bindService) GetCredentials(id internal.RemoteServiceID, re *internal.RemoteEnvironment) (map[string]interface{}, error) {
-	return svc.getCredentials(id, re)
+func (svc *bindService) GetCredentials(id internal.ApplicationServiceID, app *internal.Application) (map[string]interface{}, error) {
+	return svc.getCredentials(id, app)
 }

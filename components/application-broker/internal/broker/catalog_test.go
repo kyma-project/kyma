@@ -18,8 +18,8 @@ func TestGetCatalogHappyPath(t *testing.T) {
 	// GIVEN
 	tc := newCatalogTC()
 	defer tc.AssertExpectations(t)
-	tc.finderMock.On("FindAll").Return([]*internal.RemoteEnvironment{tc.fixRE()}, nil).Once()
-	tc.reEnabledCheckerMock.On("IsRemoteEnvironmentEnabled", "stage", string(tc.fixRE().Name)).Return(true, nil)
+	tc.finderMock.On("FindAll").Return([]*internal.Application{tc.fixRE()}, nil).Once()
+	tc.reEnabledCheckerMock.On("IsApplicationEnabled", "stage", string(tc.fixRE().Name)).Return(true, nil)
 	tc.converterMock.On("Convert", tc.fixRE().Name, tc.fixRE().Services[0]).Return(tc.fixService(), nil)
 
 	svc := broker.NewCatalogService(tc.finderMock, tc.reEnabledCheckerMock, tc.converterMock)
@@ -39,8 +39,8 @@ func TestGetCatalogNotEnabled(t *testing.T) {
 	// GIVEN
 	tc := newCatalogTC()
 	defer tc.AssertExpectations(t)
-	tc.finderMock.On("FindAll").Return([]*internal.RemoteEnvironment{tc.fixRE()}, nil).Once()
-	tc.reEnabledCheckerMock.On("IsRemoteEnvironmentEnabled", "stage", string(tc.fixRE().Name)).Return(false, nil)
+	tc.finderMock.On("FindAll").Return([]*internal.Application{tc.fixRE()}, nil).Once()
+	tc.reEnabledCheckerMock.On("IsApplicationEnabled", "stage", string(tc.fixRE().Name)).Return(false, nil)
 
 	svc := broker.NewCatalogService(tc.finderMock, tc.reEnabledCheckerMock, tc.converterMock)
 	osbCtx := broker.NewOSBContext("not", "important", "stage")
@@ -55,7 +55,7 @@ func TestGetCatalogNotEnabled(t *testing.T) {
 }
 
 func TestConvertService(t *testing.T) {
-	const fixReName = "fix-re-name"
+	const fixReName = "fix-app-name"
 
 	for tn, tc := range map[string]struct {
 		givenService func() internal.Service
@@ -96,7 +96,7 @@ func TestFailConvertServiceWhenAccessLabelNotProvided(t *testing.T) {
 	converter := broker.NewConverter()
 
 	// when
-	_, err := converter.Convert("fix-re-name", internal.Service{
+	_, err := converter.Convert("fix-app-name", internal.Service{
 		APIEntry: &internal.APIEntry{},
 	})
 
@@ -110,7 +110,7 @@ func TestIsBindableFalseForEventsBasedService(t *testing.T) {
 	converter := broker.NewConverter()
 
 	// when
-	a, err := converter.Convert("fix-re-name", fixEventsBasedService())
+	a, err := converter.Convert("fix-app-name", fixEventsBasedService())
 
 	// then
 	assert.NoError(t, err)
@@ -122,7 +122,7 @@ func TestIsBindableTrueForAPIBasedService(t *testing.T) {
 	converter := broker.NewConverter()
 
 	// when
-	a, err := converter.Convert("fix-re-name", fixAPIBasedService())
+	a, err := converter.Convert("fix-app-name", fixAPIBasedService())
 
 	// then
 	assert.NoError(t, err)
@@ -131,7 +131,7 @@ func TestIsBindableTrueForAPIBasedService(t *testing.T) {
 
 func fixAPIBasedService() internal.Service {
 	return internal.Service{
-		ID:                  internal.RemoteServiceID("0023-abcd-2098"),
+		ID:                  internal.ApplicationServiceID("0023-abcd-2098"),
 		LongDescription:     "long description",
 		Name:                "servicename",
 		Description:         "short description",
@@ -168,10 +168,10 @@ func fixOsbService() osb.Service {
 		}},
 		Tags: []string{"tag1", "tag2"},
 		Metadata: map[string]interface{}{
-			"providerDisplayName":        "HakunaMatata",
-			"displayName":                "service-name",
-			"longDescription":            "long description",
-			"remoteEnvironmentServiceId": "0023-abcd-2098",
+			"providerDisplayName":  "HakunaMatata",
+			"displayName":          "service-name",
+			"longDescription":      "long description",
+			"applicationServiceId": "0023-abcd-2098",
 			"bindingLabels": map[string]string{
 				"access-label-1": "true",
 			},
@@ -201,8 +201,8 @@ func (tc *catalogTestCase) AssertExpectations(t *testing.T) {
 	tc.converterMock.AssertExpectations(t)
 }
 
-func (tc *catalogTestCase) fixRE() *internal.RemoteEnvironment {
-	return &internal.RemoteEnvironment{
+func (tc *catalogTestCase) fixRE() *internal.Application {
+	return &internal.Application{
 		Name: "ec-prod",
 		Services: []internal.Service{
 			{

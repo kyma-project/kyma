@@ -12,11 +12,11 @@ import (
 
 func TestReCRMapperToModel(t *testing.T) {
 	// given
-	fix := v1alpha1.RemoteEnvironment{
+	fix := v1alpha1.Application{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "re",
+			Name: "app",
 		},
-		Spec: v1alpha1.RemoteEnvironmentSpec{
+		Spec: v1alpha1.ApplicationSpec{
 			Description: "EC description",
 			Services: []v1alpha1.Service{
 				{
@@ -47,7 +47,7 @@ func TestReCRMapperToModel(t *testing.T) {
 
 	// then
 	assert.Equal(t, dm.Description, fix.Spec.Description)
-	assert.Equal(t, dm.Name, internal.RemoteEnvironmentName(fix.Name))
+	assert.Equal(t, dm.Name, internal.ApplicationName(fix.Name))
 
 	require.Len(t, dm.Services, 1)
 	assert.Equal(t, string(dm.Services[0].ID), fix.Spec.Services[0].ID)
@@ -86,9 +86,9 @@ func TestEventProviderFalse(t *testing.T) {
 	assert.Equal(t, false, dmAPI.Services[0].EventProvider)
 }
 
-func fixEventsBasedRE() *v1alpha1.RemoteEnvironment {
-	return &v1alpha1.RemoteEnvironment{
-		Spec: v1alpha1.RemoteEnvironmentSpec{
+func fixEventsBasedRE() *v1alpha1.Application {
+	return &v1alpha1.Application{
+		Spec: v1alpha1.ApplicationSpec{
 			Services: []v1alpha1.Service{
 				{
 					ID: "123",
@@ -103,9 +103,9 @@ func fixEventsBasedRE() *v1alpha1.RemoteEnvironment {
 	}
 }
 
-func fixAPIBasedRE() *v1alpha1.RemoteEnvironment {
-	return &v1alpha1.RemoteEnvironment{
-		Spec: v1alpha1.RemoteEnvironmentSpec{
+func fixAPIBasedRE() *v1alpha1.Application {
+	return &v1alpha1.Application{
+		Spec: v1alpha1.ApplicationSpec{
 			Services: []v1alpha1.Service{
 				{
 					ID: "123",
@@ -122,9 +122,9 @@ func fixAPIBasedRE() *v1alpha1.RemoteEnvironment {
 	}
 }
 
-func fixAPIAndEventsRE() *v1alpha1.RemoteEnvironment {
-	return &v1alpha1.RemoteEnvironment{
-		Spec: v1alpha1.RemoteEnvironmentSpec{
+func fixAPIAndEventsRE() *v1alpha1.Application {
+	return &v1alpha1.Application{
+		Spec: v1alpha1.ApplicationSpec{
 			Services: []v1alpha1.Service{
 				{
 					ID: "123",

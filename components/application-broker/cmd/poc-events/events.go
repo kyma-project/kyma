@@ -54,14 +54,14 @@ func main() {
 	broadcaster.StartRecordingToSink(&typedV1.EventSinkImpl{Interface: clientset.CoreV1().Events(metav1.NamespaceDefault)})
 	eventRecorder := broadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: "Remote-Environment-Broker"})
 
-	re, err := reClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Get("ec-prod", metav1.GetOptions{})
+	app, err := reClient.ApplicationconnectorV1alpha1().Applications().Get("ec-prod", metav1.GetOptions{})
 	if err != nil {
-		panic(errors.Wrap(err, "on getting remote environment"))
+		panic(errors.Wrap(err, "on getting application"))
 	}
 
-	ref, err := reference.GetReference(scheme.Scheme, re)
+	ref, err := reference.GetReference(scheme.Scheme, app)
 	if err != nil {
-		panic(errors.Wrap(err, "on getting reference for Remote Environment"))
+		panic(errors.Wrap(err, "on getting reference for Application"))
 	}
 
 	eventRecorder.Event(ref, v1.EventTypeWarning, "SomeReason", "Some additional message")

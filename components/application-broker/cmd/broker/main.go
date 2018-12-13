@@ -70,7 +70,7 @@ func main() {
 	fatalOnError(err)
 	log.Info("Instance storage populated")
 
-	// RemoteEnvironments
+	// Applications
 	reClient, err := versioned.NewForConfig(k8sConfig)
 	fatalOnError(err)
 	reInformerFactory := externalversions.NewSharedInformerFactory(reClient, informerResyncPeriod)
@@ -80,20 +80,20 @@ func main() {
 	nsBrokerSyncer := syncer.NewServiceBrokerSyncer(scClientSet.ServicecatalogV1beta1())
 	relistRequester := syncer.NewRelistRequester(nsBrokerSyncer, cfg.BrokerRelistDurationWindow, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, log)
 	siFacade := broker.NewServiceInstanceFacade(scInformersGroup.ServiceInstances().Informer())
-	accessChecker := access.New(sFact.RemoteEnvironment(), reClient.ApplicationconnectorV1alpha1(), sFact.Instance())
+	accessChecker := access.New(sFact.Application(), reClient.ApplicationconnectorV1alpha1(), sFact.Instance())
 
-	reSyncCtrl := syncer.New(reInformersGroup.RemoteEnvironments(), sFact.RemoteEnvironment(), sFact.RemoteEnvironment(), relistRequester, log)
+	reSyncCtrl := syncer.New(reInformersGroup.Applications(), sFact.Application(), sFact.Application(), relistRequester, log)
 
 	brokerService, err := broker.NewNsBrokerService()
 	fatalOnError(err)
 
 	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), brokerService, nsBrokerSyncer, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, int32(cfg.Port), log)
 
-	mappingCtrl := mapping.New(reInformersGroup.EnvironmentMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.RemoteEnvironment(), nsBrokerFacade, nsBrokerSyncer, log)
+	mappingCtrl := mapping.New(reInformersGroup.ApplicationMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.Application(), nsBrokerFacade, nsBrokerSyncer, log)
 
 	// create broker
-	srv := broker.New(sFact.RemoteEnvironment(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
-		reClient.ApplicationconnectorV1alpha1(), siFacade, reInformersGroup.EnvironmentMappings().Lister(), brokerService, log)
+	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
+		reClient.ApplicationconnectorV1alpha1(), siFacade, reInformersGroup.ApplicationMappings().Lister(), brokerService, log)
 
 	// setup graceful shutdown signals
 	ctx, cancelFunc := context.WithCancel(context.Background())

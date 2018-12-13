@@ -106,9 +106,9 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 	svcID := internal.ServiceID(req.ServiceID)
 	svcPlanID := internal.ServicePlanID(req.PlanID)
 
-	re, err := svc.reSvcFinder.FindOneByServiceID(internal.RemoteServiceID(req.ServiceID))
+	app, err := svc.reSvcFinder.FindOneByServiceID(internal.ApplicationServiceID(req.ServiceID))
 	if err != nil {
-		return nil, errors.Wrapf(err, "while getting remote environment with id: %s to storage", req.ServiceID)
+		return nil, errors.Wrapf(err, "while getting application with id: %s to storage", req.ServiceID)
 	}
 
 	namespace, err := getNamespaceFromContext(req.Context)
@@ -116,9 +116,9 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 		return nil, errors.Wrap(err, "while getting namespace from context")
 	}
 
-	service, err := getSvcByID(re.Services, internal.RemoteServiceID(req.ServiceID))
+	service, err := getSvcByID(app.Services, internal.ApplicationServiceID(req.ServiceID))
 	if err != nil {
-		return nil, errors.Wrapf(err, "while getting service [%s] from RemoteEnvironment [%s]", req.ServiceID, re.Name)
+		return nil, errors.Wrapf(err, "while getting service [%s] from Application [%s]", req.ServiceID, app.Name)
 	}
 
 	i := internal.Instance{
@@ -140,19 +140,19 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 		Async:        true,
 	}
 
-	svc.doAsync(iID, opID, re.Name, getRemoteServiceID(req), namespace, service.EventProvider, service.DisplayName)
+	svc.doAsync(iID, opID, app.Name, getApplicationServiceID(req), namespace, service.EventProvider, service.DisplayName)
 	return resp, nil
 }
 
-func getRemoteServiceID(req *osb.ProvisionRequest) internal.RemoteServiceID {
-	return internal.RemoteServiceID(req.ServiceID)
+func getApplicationServiceID(req *osb.ProvisionRequest) internal.ApplicationServiceID {
+	return internal.ApplicationServiceID(req.ServiceID)
 }
 
-func (svc *ProvisionService) doAsync(iID internal.InstanceID, opID internal.OperationID, reName internal.RemoteEnvironmentName, reID internal.RemoteServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
+func (svc *ProvisionService) doAsync(iID internal.InstanceID, opID internal.OperationID, reName internal.ApplicationName, reID internal.ApplicationServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
 	go svc.do(iID, opID, reName, reID, ns, eventProvider, displayName)
 }
 
-func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.OperationID, reName internal.RemoteEnvironmentName, reID internal.RemoteServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
+func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.OperationID, reName internal.ApplicationName, reID internal.ApplicationServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
 	if svc.asyncHook != nil {
 		defer svc.asyncHook()
 	}
@@ -170,7 +170,7 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 	} else if !canProvisionOutput.Allowed {
 		instanceState = internal.InstanceStateFailed
 		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("Forbidden provisioning instance [%s] for remote environment [name: %s, id: %s] in namespace: [%s]. Reason: [%s]", iID, reName, reID, ns, canProvisionOutput.Reason)
+		opDesc = fmt.Sprintf("Forbidden provisioning instance [%s] for application [name: %s, id: %s] in namespace: [%s]. Reason: [%s]", iID, reName, reID, ns, canProvisionOutput.Reason)
 	} else {
 		instanceState = internal.InstanceStateSucceeded
 		opState = internal.OperationStateSucceeded
@@ -240,7 +240,7 @@ func getNamespaceFromContext(contextProfile map[string]interface{}) (internal.Na
 	return internal.Namespace(contextProfile["namespace"].(string)), nil
 }
 
-func getSvcByID(services []internal.Service, id internal.RemoteServiceID) (internal.Service, error) {
+func getSvcByID(services []internal.Service, id internal.ApplicationServiceID) (internal.Service, error) {
 	for _, svc := range services {
 		if svc.ID == id {
 			return svc, nil

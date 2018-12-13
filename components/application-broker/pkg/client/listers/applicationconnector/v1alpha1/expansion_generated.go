@@ -2,6 +2,10 @@
 
 package v1alpha1
 
+// ApplicationListerExpansion allows custom methods to be added to
+// ApplicationLister.
+type ApplicationListerExpansion interface{}
+
 // ApplicationMappingListerExpansion allows custom methods to be added to
 // ApplicationMappingLister.
 type ApplicationMappingListerExpansion interface{}
@@ -10,14 +14,6 @@ type ApplicationMappingListerExpansion interface{}
 // ApplicationMappingNamespaceLister.
 type ApplicationMappingNamespaceListerExpansion interface{}
 
-// EnvironmentMappingListerExpansion allows custom methods to be added to
-// EnvironmentMappingLister.
-type EnvironmentMappingListerExpansion interface{}
-
-// EnvironmentMappingNamespaceListerExpansion allows custom methods to be added to
-// EnvironmentMappingNamespaceLister.
-type EnvironmentMappingNamespaceListerExpansion interface{}
-
 // EventActivationListerExpansion allows custom methods to be added to
 // EventActivationLister.
 type EventActivationListerExpansion interface{}
@@ -25,7 +21,3 @@ type EventActivationListerExpansion interface{}
 // EventActivationNamespaceListerExpansion allows custom methods to be added to
 // EventActivationNamespaceLister.
 type EventActivationNamespaceListerExpansion interface{}
-
-// RemoteEnvironmentListerExpansion allows custom methods to be added to
-// RemoteEnvironmentLister.
-type RemoteEnvironmentListerExpansion interface{}

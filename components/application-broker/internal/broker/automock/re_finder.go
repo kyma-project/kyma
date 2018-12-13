@@ -10,15 +10,15 @@ type ReFinder struct {
 }
 
 // FindAll provides a mock function with given fields:
-func (_m *ReFinder) FindAll() ([]*internal.RemoteEnvironment, error) {
+func (_m *ReFinder) FindAll() ([]*internal.Application, error) {
 	ret := _m.Called()
 
-	var r0 []*internal.RemoteEnvironment
-	if rf, ok := ret.Get(0).(func() []*internal.RemoteEnvironment); ok {
+	var r0 []*internal.Application
+	if rf, ok := ret.Get(0).(func() []*internal.Application); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*internal.RemoteEnvironment)
+			r0 = ret.Get(0).([]*internal.Application)
 		}
 	}
 
@@ -33,20 +33,20 @@ func (_m *ReFinder) FindAll() ([]*internal.RemoteEnvironment, error) {
 }
 
 // FindOneByServiceID provides a mock function with given fields: id
-func (_m *ReFinder) FindOneByServiceID(id internal.RemoteServiceID) (*internal.RemoteEnvironment, error) {
+func (_m *ReFinder) FindOneByServiceID(id internal.ApplicationServiceID) (*internal.Application, error) {
 	ret := _m.Called(id)
 
-	var r0 *internal.RemoteEnvironment
-	if rf, ok := ret.Get(0).(func(internal.RemoteServiceID) *internal.RemoteEnvironment); ok {
+	var r0 *internal.Application
+	if rf, ok := ret.Get(0).(func(internal.ApplicationServiceID) *internal.Application); ok {
 		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*internal.RemoteEnvironment)
+			r0 = ret.Get(0).(*internal.Application)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(internal.RemoteServiceID) error); ok {
+	if rf, ok := ret.Get(1).(func(internal.ApplicationServiceID) error); ok {
 		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
@@ -56,20 +56,20 @@ func (_m *ReFinder) FindOneByServiceID(id internal.RemoteServiceID) (*internal.R
 }
 
 // Get provides a mock function with given fields: name
-func (_m *ReFinder) Get(name internal.RemoteEnvironmentName) (*internal.RemoteEnvironment, error) {
+func (_m *ReFinder) Get(name internal.ApplicationName) (*internal.Application, error) {
 	ret := _m.Called(name)
 
-	var r0 *internal.RemoteEnvironment
-	if rf, ok := ret.Get(0).(func(internal.RemoteEnvironmentName) *internal.RemoteEnvironment); ok {
+	var r0 *internal.Application
+	if rf, ok := ret.Get(0).(func(internal.ApplicationName) *internal.Application); ok {
 		r0 = rf(name)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*internal.RemoteEnvironment)
+			r0 = ret.Get(0).(*internal.Application)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(internal.RemoteEnvironmentName) error); ok {
+	if rf, ok := ret.Get(1).(func(internal.ApplicationName) error); ok {
 		r1 = rf(name)
 	} else {
 		r1 = ret.Error(1)

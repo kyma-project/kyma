@@ -42,7 +42,7 @@ type (
 	}
 )
 
-// Server implements HTTP server used to serve OSB API for remote environment broker.
+// Server implements HTTP server used to serve OSB API for application broker.
 type Server struct {
 	catalogGetter catalogGetter
 	provisioner   provisioner

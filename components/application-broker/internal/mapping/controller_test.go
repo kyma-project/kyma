@@ -32,8 +32,8 @@ const (
 
 func TestControllerRunSuccess(t *testing.T) {
 	// given
-	fixEM := fixEnvironmentMappingCR(fixREName, fixNSName)
-	fixRE := fixRemoteEnvironment(fixREName)
+	fixEM := fixApplicationMappingCR(fixREName, fixNSName)
+	fixRE := fixApplication(fixREName)
 	fixNS := fixNamespace(fixNSName)
 
 	expectations := &sync.WaitGroup{}
@@ -56,7 +56,7 @@ func TestControllerRunSuccess(t *testing.T) {
 
 	reGetterMock := &automock.ReGetter{}
 	defer reGetterMock.AssertExpectations(t)
-	reGetterMock.On("Get", internal.RemoteEnvironmentName(fixREName)).
+	reGetterMock.On("Get", internal.ApplicationName(fixREName)).
 		Return(&fixRE, nil).
 		Run(fulfillExpectation).
 		Once()
@@ -86,7 +86,7 @@ func TestControllerRunSuccess(t *testing.T) {
 
 func TestControllerRunSuccessLabelRemove(t *testing.T) {
 	// given
-	fixEM := fixEnvironmentMappingCR(fixREName, fixNSName)
+	fixEM := fixApplicationMappingCR(fixREName, fixNSName)
 	fixNS := fixNamespaceWithAccessLabel(fixNSName)
 	fixExpectedNS := fixNamespace(fixNSName)
 	emInformer := newEmInformerFromFakeClientset(fixEM)
@@ -106,7 +106,7 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 
 func TestControllerRunFailure(t *testing.T) {
 	// given
-	fixEM := fixEnvironmentMappingCR(fixREName, fixNSName)
+	fixEM := fixApplicationMappingCR(fixREName, fixNSName)
 	fixNS := fixNamespace(fixNSName)
 	fixErr := errors.New("fix get err")
 	fixPatchErr := errors.New("fix patch err")
@@ -128,7 +128,7 @@ func TestControllerRunFailure(t *testing.T) {
 
 	reGetter := &automock.ReGetter{}
 	defer reGetter.AssertExpectations(t)
-	reGetter.On("Get", internal.RemoteEnvironmentName(fixREName)).
+	reGetter.On("Get", internal.ApplicationName(fixREName)).
 		Return(nil, fixErr).
 		Run(fulfillExpectation).
 		Once()
@@ -144,7 +144,7 @@ func TestControllerRunFailure(t *testing.T) {
 	// then
 	awaitForSyncGroupAtMost(t, expectations, time.Second)
 	assert.EqualError(t, err2, fmt.Sprintf("failed to delete AccessLabel from the namespace: %q, failed to patch namespace: %q: %v", fixNSName, fixNSName, fixPatchErr.Error()))
-	assert.EqualError(t, err3, fmt.Sprintf("while getting remote environment with name: %q: %v", fixREName, fixErr.Error()))
+	assert.EqualError(t, err3, fmt.Sprintf("while getting application with name: %q: %v", fixREName, fixErr.Error()))
 }
 
 type tcNsBrokersEnabled struct {
@@ -210,8 +210,8 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			// GIVEN
-			fixEM := fixEnvironmentMappingCR(fixREName, fixNSName)
-			fixRE := fixRemoteEnvironment(fixREName)
+			fixEM := fixApplicationMappingCR(fixREName, fixNSName)
+			fixRE := fixApplication(fixREName)
 			fixNS := fixNamespace(fixNSName)
 
 			emInformer := newEmInformerFromFakeClientset(fixEM)
@@ -229,7 +229,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 
 			reGetterMock := &automock.ReGetter{}
 			defer reGetterMock.AssertExpectations(t)
-			reGetterMock.On("Get", internal.RemoteEnvironmentName(fixREName)).
+			reGetterMock.On("Get", internal.ApplicationName(fixREName)).
 				Return(&fixRE, nil).
 				Once()
 
@@ -254,7 +254,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 	for _, tc := range []tcNsBrokersEnabled{
 		{
-			name: "broker will be removed if there is no environment mappings in the namespace",
+			name: "broker will be removed if there is no application mappings in the namespace",
 			prepareNsBrokerFacade: func() *automock.NsBrokerFacade {
 				nsBrokerFacade := &automock.NsBrokerFacade{}
 				nsBrokerFacade.On("Exist", fixNSName).Return(true, nil)
@@ -263,7 +263,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			},
 			prepareMappingSvc: func() *automock.MappingLister {
 				mappingSvc := &automock.MappingLister{}
-				mappingSvc.On("ListEnvironmentMappings", fixNSName).Return([]*v1alpha1.EnvironmentMapping{}, nil)
+				mappingSvc.On("ListApplicationMappings", fixNSName).Return([]*v1alpha1.ApplicationMapping{}, nil)
 				return mappingSvc
 			},
 			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
@@ -295,7 +295,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			},
 			prepareMappingSvc: func() *automock.MappingLister {
 				mappingSvc := &automock.MappingLister{}
-				mappingSvc.On("ListEnvironmentMappings", fixNSName).Return([]*v1alpha1.EnvironmentMapping{}, nil)
+				mappingSvc.On("ListApplicationMappings", fixNSName).Return([]*v1alpha1.ApplicationMapping{}, nil)
 				return mappingSvc
 			},
 			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
@@ -326,7 +326,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			},
 			prepareMappingSvc: func() *automock.MappingLister {
 				mappingSvc := &automock.MappingLister{}
-				mappingSvc.On("ListEnvironmentMappings", fixNSName).Return([]*v1alpha1.EnvironmentMapping{
+				mappingSvc.On("ListApplicationMappings", fixNSName).Return([]*v1alpha1.ApplicationMapping{
 					{
 						ObjectMeta: metav1.ObjectMeta{
 							Name: "fix",
@@ -342,7 +342,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			},
 		},
 		{
-			name: "error while listing environment mappings",
+			name: "error while listing application mappings",
 			prepareNsBrokerFacade: func() *automock.NsBrokerFacade {
 				nsBrokerFacade := &automock.NsBrokerFacade{}
 				nsBrokerFacade.On("Exist", fixNSName).Return(true, nil)
@@ -350,13 +350,13 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			},
 			prepareMappingSvc: func() *automock.MappingLister {
 				mappingSvc := &automock.MappingLister{}
-				mappingSvc.On("ListEnvironmentMappings", fixNSName).Return(nil, errors.New("some error"))
+				mappingSvc.On("ListApplicationMappings", fixNSName).Return(nil, errors.New("some error"))
 				return mappingSvc
 			},
 			prepareNsBrokerSyncer: func() *automock.NsBrokerSyncer {
 				return &automock.NsBrokerSyncer{}
 			},
-			errorMsg: fmt.Sprintf("while listing environment mappings from namespace [%s]: some error", fixNSName),
+			errorMsg: fmt.Sprintf("while listing application mappings from namespace [%s]: some error", fixNSName),
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -434,8 +434,8 @@ func awaitInformerStartAtMost(t *testing.T, timeout time.Duration, informer cach
 	}
 }
 
-func fixEnvironmentMappingCR(name, ns string) *v1alpha1.EnvironmentMapping {
-	return &v1alpha1.EnvironmentMapping{
+func fixApplicationMappingCR(name, ns string) *v1alpha1.ApplicationMapping {
+	return &v1alpha1.ApplicationMapping{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: ns,
@@ -446,9 +446,9 @@ func fixEnvironmentMappingCR(name, ns string) *v1alpha1.EnvironmentMapping {
 	}
 }
 
-func fixRemoteEnvironment(fixREName string) internal.RemoteEnvironment {
-	return internal.RemoteEnvironment{
-		Name:        internal.RemoteEnvironmentName(fixREName),
+func fixApplication(fixREName string) internal.Application {
+	return internal.Application{
+		Name:        internal.ApplicationName(fixREName),
 		AccessLabel: "fix-access-1",
 	}
 }
@@ -478,7 +478,7 @@ func fixNamespaceWithAccessLabel(fixNSName string) *corev1.Namespace {
 	}
 }
 
-func newEmInformerFromFakeClientset(fixEM *v1alpha1.EnvironmentMapping) cache.SharedIndexInformer {
+func newEmInformerFromFakeClientset(fixEM *v1alpha1.ApplicationMapping) cache.SharedIndexInformer {
 	var client *fake.Clientset
 	if fixEM != nil {
 		client = fake.NewSimpleClientset(fixEM)
@@ -486,8 +486,8 @@ func newEmInformerFromFakeClientset(fixEM *v1alpha1.EnvironmentMapping) cache.Sh
 		client = fake.NewSimpleClientset()
 	}
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	remoteEnvironmentSharedInformers := informerFactory.Applicationconnector().V1alpha1()
-	emInformer := remoteEnvironmentSharedInformers.EnvironmentMappings().Informer()
+	applicationSharedInformers := informerFactory.Applicationconnector().V1alpha1()
+	emInformer := applicationSharedInformers.ApplicationMappings().Informer()
 	return emInformer
 }
 

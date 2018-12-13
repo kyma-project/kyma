@@ -15,17 +15,17 @@ import (
 
 func TestMappingExistsProvisionCheckerWhenProvisionAcceptable(t *testing.T) {
 	// GIVEN
-	re := fixRemoteEnv()
+	app := fixRemoteEnv()
 	rm := fixProdMapping()
-	mockClientSet := fake.NewSimpleClientset(re, rm)
+	mockClientSet := fake.NewSimpleClientset(app, rm)
 
-	mockREStorage := &automock.RemoteEnvironmentFinder{}
+	mockREStorage := &automock.ApplicationFinder{}
 	defer mockREStorage.AssertExpectations(t)
-	mockREStorage.On("FindOneByServiceID", fixRemoteServiceID()).Return(fixRemoteEnvModel(), nil)
+	mockREStorage.On("FindOneByServiceID", fixApplicationServiceID()).Return(fixRemoteEnvModel(), nil)
 
 	sut := access.NewMappingExistsProvisionChecker(mockREStorage, mockClientSet.ApplicationconnectorV1alpha1())
 	// WHEN
-	canProvisionOutput, err := sut.CanProvision(fixRemoteServiceID(), internal.Namespace(fixProdNs()), time.Nanosecond)
+	canProvisionOutput, err := sut.CanProvision(fixApplicationServiceID(), internal.Namespace(fixProdNs()), time.Nanosecond)
 	// THEN
 	assert.NoError(t, err)
 	assert.True(t, canProvisionOutput.Allowed)
@@ -33,42 +33,42 @@ func TestMappingExistsProvisionCheckerWhenProvisionAcceptable(t *testing.T) {
 
 func TestMappingExistsProvisionCheckerWhenProvisionNotAcceptable(t *testing.T) {
 	// GIVEN
-	re := fixRemoteEnv()
+	app := fixRemoteEnv()
 	rm := fixProdMapping()
-	mockClientSet := fake.NewSimpleClientset(re, rm)
+	mockClientSet := fake.NewSimpleClientset(app, rm)
 
-	mockREStorage := &automock.RemoteEnvironmentFinder{}
+	mockREStorage := &automock.ApplicationFinder{}
 	defer mockREStorage.AssertExpectations(t)
-	mockREStorage.On("FindOneByServiceID", fixRemoteServiceID()).Return(fixRemoteEnvModel(), nil)
+	mockREStorage.On("FindOneByServiceID", fixApplicationServiceID()).Return(fixRemoteEnvModel(), nil)
 
 	sut := access.NewMappingExistsProvisionChecker(mockREStorage, mockClientSet.ApplicationconnectorV1alpha1())
 	// WHEN
-	canProvisionOutput, err := sut.CanProvision(fixRemoteServiceID(), internal.Namespace("stage"), time.Nanosecond)
+	canProvisionOutput, err := sut.CanProvision(fixApplicationServiceID(), internal.Namespace("stage"), time.Nanosecond)
 	// THEN
 	assert.NoError(t, err)
 	assert.False(t, canProvisionOutput.Allowed)
-	assert.Equal(t, "EnvironmentMapping does not exist in the [stage] namespace", canProvisionOutput.Reason)
+	assert.Equal(t, "ApplicationMapping does not exist in the [stage] namespace", canProvisionOutput.Reason)
 }
 
 func TestMappingExistsProvisionCheckerReturnsErrorWhenRENotFound(t *testing.T) {
 	// GIVEN
-	mockREStorage := &automock.RemoteEnvironmentFinder{}
+	mockREStorage := &automock.ApplicationFinder{}
 	defer mockREStorage.AssertExpectations(t)
-	mockREStorage.On("FindOneByServiceID", fixRemoteServiceID()).Return(nil, nil)
+	mockREStorage.On("FindOneByServiceID", fixApplicationServiceID()).Return(nil, nil)
 
 	sut := access.NewMappingExistsProvisionChecker(mockREStorage, nil)
 	// WHEN
-	_, err := sut.CanProvision(fixRemoteServiceID(), internal.Namespace("ns"), time.Nanosecond)
+	_, err := sut.CanProvision(fixApplicationServiceID(), internal.Namespace("ns"), time.Nanosecond)
 	// THEN
 	assert.Error(t, err)
 }
 
-func fixRemoteEnv() *v1alpha1.RemoteEnvironment {
-	return &v1alpha1.RemoteEnvironment{
+func fixRemoteEnv() *v1alpha1.Application {
+	return &v1alpha1.Application{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fixREName(),
 		},
-		Spec: v1alpha1.RemoteEnvironmentSpec{
+		Spec: v1alpha1.ApplicationSpec{
 			Services: []v1alpha1.Service{
 				{
 					ID: "service-id",
@@ -78,23 +78,23 @@ func fixRemoteEnv() *v1alpha1.RemoteEnvironment {
 	}
 }
 
-func fixRemoteEnvModel() *internal.RemoteEnvironment {
-	return &internal.RemoteEnvironment{
-		Name: internal.RemoteEnvironmentName(fixREName()),
+func fixRemoteEnvModel() *internal.Application {
+	return &internal.Application{
+		Name: internal.ApplicationName(fixREName()),
 		Services: []internal.Service{
 			{
-				ID: internal.RemoteServiceID("service-id"),
+				ID: internal.ApplicationServiceID("service-id"),
 			},
 		},
 	}
 }
 
-func fixRemoteServiceID() internal.RemoteServiceID {
-	return internal.RemoteServiceID("service-id")
+func fixApplicationServiceID() internal.ApplicationServiceID {
+	return internal.ApplicationServiceID("service-id")
 }
 
-func fixProdMapping() *v1alpha1.EnvironmentMapping {
-	return &v1alpha1.EnvironmentMapping{
+func fixProdMapping() *v1alpha1.ApplicationMapping {
+	return &v1alpha1.ApplicationMapping{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fixREName(),
 			Namespace: fixProdNs(),

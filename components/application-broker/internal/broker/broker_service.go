@@ -9,7 +9,7 @@ import (
 
 const prefix = "reb-ns-for-"
 
-// NsBrokerService provides information about REB brokers
+// NsBrokerService provides information about AB brokers
 type NsBrokerService struct {
 	nsBrokerURLPattern *regexp.Regexp
 }

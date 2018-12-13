@@ -11,18 +11,18 @@ type Converter struct {
 }
 
 // Convert provides a mock function with given fields: name, svc
-func (_m *Converter) Convert(name internal.RemoteEnvironmentName, svc internal.Service) (v2.Service, error) {
+func (_m *Converter) Convert(name internal.ApplicationName, svc internal.Service) (v2.Service, error) {
 	ret := _m.Called(name, svc)
 
 	var r0 v2.Service
-	if rf, ok := ret.Get(0).(func(internal.RemoteEnvironmentName, internal.Service) v2.Service); ok {
+	if rf, ok := ret.Get(0).(func(internal.ApplicationName, internal.Service) v2.Service); ok {
 		r0 = rf(name, svc)
 	} else {
 		r0 = ret.Get(0).(v2.Service)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(internal.RemoteEnvironmentName, internal.Service) error); ok {
+	if rf, ok := ret.Get(1).(func(internal.ApplicationName, internal.Service) error); ok {
 		r1 = rf(name, svc)
 	} else {
 		r1 = ret.Error(1)

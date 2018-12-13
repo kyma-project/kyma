@@ -11,16 +11,16 @@ import (
 
 //go:generate mockery -name=converter -output=automock -outpkg=automock -case=underscore
 type converter interface {
-	Convert(name internal.RemoteEnvironmentName, svc internal.Service) (osb.Service, error)
+	Convert(name internal.ApplicationName, svc internal.Service) (osb.Service, error)
 }
 
 //go:generate mockery -name=reEnabledChecker -output=automock -outpkg=automock -case=underscore
 type reEnabledChecker interface {
-	IsRemoteEnvironmentEnabled(namespace, name string) (bool, error)
+	IsApplicationEnabled(namespace, name string) (bool, error)
 }
 
 type catalogService struct {
-	finder           remoteEnvironmentFinder
+	finder           applicationFinder
 	reEnabledChecker reEnabledChecker
 	conv             converter
 }
@@ -28,13 +28,13 @@ type catalogService struct {
 func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*osb.CatalogResponse, error) {
 	reList, err := svc.finder.FindAll()
 	if err != nil {
-		return nil, errors.Wrap(err, "while finding Remote Environments")
+		return nil, errors.Wrap(err, "while finding Applications")
 	}
 
 	resp := osb.CatalogResponse{}
 	resp.Services = make([]osb.Service, 0)
-	for _, re := range reList {
-		enabled, err := svc.reEnabledChecker.IsRemoteEnvironmentEnabled(osbCtx.BrokerNamespace, string(re.Name))
+	for _, app := range reList {
+		enabled, err := svc.reEnabledChecker.IsApplicationEnabled(osbCtx.BrokerNamespace, string(app.Name))
 		if err != nil {
 			return nil, errors.Wrap(err, "while checking if RE is enabled")
 		}
@@ -42,8 +42,8 @@ func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*
 			continue
 		}
 
-		for _, reSvc := range re.Services {
-			s, err := svc.conv.Convert(re.Name, reSvc)
+		for _, reSvc := range app.Services {
+			s, err := svc.conv.Convert(app.Name, reSvc)
 			if err != nil {
 				return nil, errors.Wrap(err, "while converting bundle to service")
 			}
@@ -62,7 +62,7 @@ const (
 
 type reToServiceConverter struct{}
 
-func (c *reToServiceConverter) Convert(name internal.RemoteEnvironmentName, svc internal.Service) (osb.Service, error) {
+func (c *reToServiceConverter) Convert(name internal.ApplicationName, svc internal.Service) (osb.Service, error) {
 	metadata, err := c.osbMetadata(name, svc)
 	if err != nil {
 		return osb.Service{}, errors.Wrap(err, "while creating the metadata object")
@@ -81,13 +81,13 @@ func (c *reToServiceConverter) Convert(name internal.RemoteEnvironmentName, svc 
 	return osbService, nil
 }
 
-func (c *reToServiceConverter) osbMetadata(name internal.RemoteEnvironmentName, svc internal.Service) (map[string]interface{}, error) {
+func (c *reToServiceConverter) osbMetadata(name internal.ApplicationName, svc internal.Service) (map[string]interface{}, error) {
 	metadata := map[string]interface{}{
-		"displayName":                svc.DisplayName,
-		"providerDisplayName":        svc.ProviderDisplayName,
-		"longDescription":            svc.LongDescription,
-		"remoteEnvironmentServiceId": string(svc.ID),
-		"labels":                     svc.Labels,
+		"displayName":          svc.DisplayName,
+		"providerDisplayName":  svc.ProviderDisplayName,
+		"longDescription":      svc.LongDescription,
+		"applicationServiceId": string(svc.ID),
+		"labels":               svc.Labels,
 	}
 
 	// TODO(entry-simplification): this is an accepted simplification until
@@ -110,7 +110,7 @@ func (*reToServiceConverter) isSvcBindable(svc internal.Service) bool {
 	return svc.APIEntry != nil
 }
 
-func (*reToServiceConverter) osbPlans(svcID internal.RemoteServiceID) []osb.Plan {
+func (*reToServiceConverter) osbPlans(svcID internal.ApplicationServiceID) []osb.Plan {
 	plan := osb.Plan{
 		ID:          fmt.Sprintf("%s-plan", svcID),
 		Name:        defaultPlanName,
