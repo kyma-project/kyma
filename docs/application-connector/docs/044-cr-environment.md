@@ -34,7 +34,7 @@ This table lists all the possible parameters of a given resource together with t
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **spec.source** |    **NO**   | Identifies the Application in the cluster. |
 | **spec.description** |    **NO**   | Describes the connected Application.  |
-| **spec.accessLabel** |    **NO**   | Labels the App when an EnvironmentMapping is created. |
+| **spec.accessLabel** |    **NO**   | Labels the App when an ApplicationMapping is created. |
 | **spec.labels** |    **NO**   | Defines the labels of the App. |
 | **spec.services** |    **NO**   | Contains all services that the Application provides. |
 | **spec.services.id** |    **YES**   | Identifies the service that the Application provides. |

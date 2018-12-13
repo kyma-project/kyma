@@ -5,9 +5,9 @@ type: Architecture
 
 The Application Broker (AB) workflow consists of the following steps:
 
-1. The Application Broker watches for Applications (Apps) in the cluster and ApplicationMappings (APMs) in all Namespaces.
-2. The user creates an ApplicationMapping custom resource in a given Environment. The APM activates services offered by an App. The APM must have the same name as the App.
-3. The Application Broker creates an `application-broker` Service Broker (SB) inside the Environment in which the APM is created. This Service Broker contains data of all services provided by the activated Apllications. There is always only one `application-broker` Service Broker per Environment, even if there are more APMs.
+1. The Application Broker watches for Applications (Apps) in the cluster and ApplicationMappings (AMs) in all Namespaces.
+2. The user creates an ApplicationMapping custom resource in a given Environment. The AM activates services offered by an App. The AM must have the same name as the App.
+3. The Application Broker creates an `application-broker` Service Broker (SB) inside the Environment in which the APM is created. This Service Broker contains data of all services provided by the activated Applications. There is always only one `application-broker` Service Broker per Environment, even if there are more AMs.
 4. The Service Catalog fetches services that the `application-broker` Service Broker exposes.
 5. The Service Catalog creates a ServiceClass for each service received from the Service Broker.
 

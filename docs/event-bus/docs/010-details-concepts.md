@@ -5,7 +5,7 @@ type: Details
 
 The following resources are involved in Event transfer and validation in Kyma:
 
-* **EventActivation** is a custom resource controller that the Application Broker (APB) creates. Its purpose is to define Event availability in a given Environment.
+* **EventActivation** is a custom resource controller that the Application Broker (AB) creates. Its purpose is to define Event availability in a given Environment.
 
 * **NATS Streaming** is an open source, log-based streaming system that serves as a database allowing the Event Bus to store and transfer the Events on a large scale.
 
