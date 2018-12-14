@@ -31,4 +31,4 @@ Follow these basic rules when you add a new document to the official Kyma docume
 3. Make use of the [templates](https://github.com/kyma-project/community/tree/master/guidelines/templates) to structure your documents properly.
 4. Be compliant with the writing [guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to contribute high-quality and standardized content.
 
->**NOTE:** If you add a new documentation topic to the `kyma/docs` folder, you must update the files described in [this](https://github.com/kyma-project/community/blob/master/guidelines/add-new-component-docs.md) document.
+>**NOTE:** If you add a new documentation topic to the `kyma/docs` folder, update the files described in [this](https://github.com/kyma-project/community/blob/master/guidelines/add-new-component-docs.md) document.
