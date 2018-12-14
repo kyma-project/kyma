@@ -31,7 +31,7 @@ func (c *connectorServiceClient) FetchToken(reName string) (*TokenDto, error) {
 		return nil, errors.New("reName cannot be empty")
 	}
 
-	url := fmt.Sprintf("%s/v1/remoteenvironments/%s/tokens", c.connectorServiceURL, reName)
+	url := fmt.Sprintf("%s/v1/applications/%s/tokens", c.connectorServiceURL, reName)
 
 	res, err := c.Post(url, "application/json", nil)
 	if err != nil {

@@ -12,7 +12,7 @@ import (
 func getServerMock(reName, token string) *httptest.Server {
 	return httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path == "/v1/remoteenvironments/"+reName+"/tokens" {
+			if r.URL.Path == "/v1/applications/"+reName+"/tokens" {
 				w.Header().Add("Content-Type", "application/json")
 				w.Write([]byte(fmt.Sprintf(
 					`{"token": "%s", "url": "http://url.with.token?token=%s"}`, token, token)))
@@ -21,7 +21,7 @@ func getServerMock(reName, token string) *httptest.Server {
 	)
 }
 func TestTokenRequestClient_FetchToken(t *testing.T) {
-	reName := "some-re"
+	reName := "some-app"
 	token := "some-long-token-value"
 
 	t.Run("should return TokenDto with valid token", func(t *testing.T) {
