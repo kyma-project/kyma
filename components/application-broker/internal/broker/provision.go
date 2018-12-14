@@ -20,7 +20,7 @@ import (
 const serviceCatalogAPIVersion = "servicecatalog.k8s.io/v1beta1"
 
 // NewProvisioner creates provisioner
-func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, reSvcFinder reSvcFinder, serviceInstanceGetter serviceInstanceGetter, reClient v1client.ApplicationconnectorV1alpha1Interface, iStateUpdater instanceStateUpdater,
+func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, reSvcFinder reSvcFinder, serviceInstanceGetter serviceInstanceGetter, eaClient v1client.ApplicationconnectorV1alpha1Interface, iStateUpdater instanceStateUpdater,
 	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger) *ProvisionService {
 	return &ProvisionService{
 		instanceInserter:      instanceInserter,
@@ -31,7 +31,7 @@ func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter insta
 		operationIDProvider:   operationIDProvider,
 		accessChecker:         accessChecker,
 		reSvcFinder:           reSvcFinder,
-		reClient:              reClient,
+		eaClient:              eaClient,
 		serviceInstanceGetter: serviceInstanceGetter,
 		maxWaitTime:           time.Minute,
 		log:                   log.WithField("service", "provisioner"),
@@ -47,7 +47,7 @@ type ProvisionService struct {
 	instanceStateGetter   instanceStateGetter
 	operationIDProvider   func() (internal.OperationID, error)
 	reSvcFinder           reSvcFinder
-	reClient              v1client.ApplicationconnectorV1alpha1Interface
+	eaClient              v1client.ApplicationconnectorV1alpha1Interface
 	accessChecker         access.ProvisionChecker
 	serviceInstanceGetter serviceInstanceGetter
 
@@ -219,13 +219,13 @@ func (svc *ProvisionService) createEaOnSuccessProvision(reName, reID, ns string,
 			SourceID:    reName,
 		},
 	}
-	_, err = svc.reClient.EventActivations(ns).Create(ea)
+	_, err = svc.eaClient.EventActivations(ns).Create(ea)
 	switch {
 	case err == nil:
 		svc.log.Infof("Created EventActivation: [%s], in namespace: [%s]", reID, ns)
 	case apiErrors.IsAlreadyExists(err):
 		// We perform update action to adjust OwnerReference of the EventActivation after the backup restore.
-		_, err := svc.reClient.EventActivations(ns).Update(ea)
+		_, err := svc.eaClient.EventActivations(ns).Update(ea)
 		if err != nil {
 			return errors.Wrapf(err, "while updating EventActivation with name: %q in namespace: %q", reID, ns)
 		}

@@ -12,10 +12,6 @@ type FakeApplicationconnectorV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeApplicationconnectorV1alpha1) Applications() v1alpha1.ApplicationInterface {
-	return &FakeApplications{c}
-}
-
 func (c *FakeApplicationconnectorV1alpha1) ApplicationMappings(namespace string) v1alpha1.ApplicationMappingInterface {
 	return &FakeApplicationMappings{c, namespace}
 }

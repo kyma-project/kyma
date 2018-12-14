@@ -4,10 +4,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access/automock"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	mV1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,13 +17,12 @@ import (
 
 func TestMappingExistsProvisionCheckerWhenProvisionAcceptable(t *testing.T) {
 	// GIVEN
-	app := fixRemoteEnv()
 	rm := fixProdMapping()
-	mockClientSet := fake.NewSimpleClientset(app, rm)
+	mockClientSet := fake.NewSimpleClientset(rm)
 
 	mockREStorage := &automock.ApplicationFinder{}
 	defer mockREStorage.AssertExpectations(t)
-	mockREStorage.On("FindOneByServiceID", fixApplicationServiceID()).Return(fixRemoteEnvModel(), nil)
+	mockREStorage.On("FindOneByServiceID", fixApplicationServiceID()).Return(fixApplicationModel(), nil)
 
 	sut := access.NewMappingExistsProvisionChecker(mockREStorage, mockClientSet.ApplicationconnectorV1alpha1())
 	// WHEN
@@ -33,13 +34,12 @@ func TestMappingExistsProvisionCheckerWhenProvisionAcceptable(t *testing.T) {
 
 func TestMappingExistsProvisionCheckerWhenProvisionNotAcceptable(t *testing.T) {
 	// GIVEN
-	app := fixRemoteEnv()
 	rm := fixProdMapping()
-	mockClientSet := fake.NewSimpleClientset(app, rm)
+	mockClientSet := fake.NewSimpleClientset(rm)
 
 	mockREStorage := &automock.ApplicationFinder{}
 	defer mockREStorage.AssertExpectations(t)
-	mockREStorage.On("FindOneByServiceID", fixApplicationServiceID()).Return(fixRemoteEnvModel(), nil)
+	mockREStorage.On("FindOneByServiceID", fixApplicationServiceID()).Return(fixApplicationModel(), nil)
 
 	sut := access.NewMappingExistsProvisionChecker(mockREStorage, mockClientSet.ApplicationconnectorV1alpha1())
 	// WHEN
@@ -63,24 +63,9 @@ func TestMappingExistsProvisionCheckerReturnsErrorWhenRENotFound(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func fixRemoteEnv() *v1alpha1.Application {
-	return &v1alpha1.Application{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: fixREName(),
-		},
-		Spec: v1alpha1.ApplicationSpec{
-			Services: []v1alpha1.Service{
-				{
-					ID: "service-id",
-				},
-			},
-		},
-	}
-}
-
-func fixRemoteEnvModel() *internal.Application {
+func fixApplicationModel() *internal.Application {
 	return &internal.Application{
-		Name: internal.ApplicationName(fixREName()),
+		Name: internal.ApplicationName(fixApName()),
 		Services: []internal.Service{
 			{
 				ID: internal.ApplicationServiceID("service-id"),
@@ -93,10 +78,10 @@ func fixApplicationServiceID() internal.ApplicationServiceID {
 	return internal.ApplicationServiceID("service-id")
 }
 
-func fixProdMapping() *v1alpha1.ApplicationMapping {
+func fixProdMapping() *mV1alpha1.ApplicationMapping {
 	return &v1alpha1.ApplicationMapping{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fixREName(),
+			Name:      fixApName(),
 			Namespace: fixProdNs(),
 		},
 	}
@@ -106,6 +91,6 @@ func fixProdNs() string {
 	return "production"
 }
 
-func fixREName() string {
+func fixApName() string {
 	return "ec-prod"
 }

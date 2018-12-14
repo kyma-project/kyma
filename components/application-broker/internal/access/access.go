@@ -23,9 +23,9 @@ type CanProvisionOutput struct {
 }
 
 // New creates new aggregated checker
-func New(appFinder applicationFinder, appInterface versioned.ApplicationconnectorV1alpha1Interface, iFind instanceFinder) *AggregatedChecker {
+func New(appFinder applicationFinder, mappingClient versioned.ApplicationconnectorV1alpha1Interface, iFind instanceFinder) *AggregatedChecker {
 	return &AggregatedChecker{
-		mappingExistsProvisionChecker: NewMappingExistsProvisionChecker(appFinder, appInterface),
+		mappingExistsProvisionChecker: NewMappingExistsProvisionChecker(appFinder, mappingClient),
 		uniquenessProvisionChecker:    NewUniquenessProvisionChecker(iFind),
 	}
 }

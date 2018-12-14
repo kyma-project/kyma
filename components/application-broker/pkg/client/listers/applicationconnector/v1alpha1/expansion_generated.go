@@ -2,10 +2,6 @@
 
 package v1alpha1
 
-// ApplicationListerExpansion allows custom methods to be added to
-// ApplicationLister.
-type ApplicationListerExpansion interface{}
-
 // ApplicationMappingListerExpansion allows custom methods to be added to
 // ApplicationMappingLister.
 type ApplicationMappingListerExpansion interface{}

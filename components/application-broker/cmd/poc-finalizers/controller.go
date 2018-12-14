@@ -10,9 +10,12 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/kubernetes/pkg/controller"
 
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	v1alpha12 "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	informers "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+
+	mV1alpha12 "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	cV1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	informers "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
+
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 )
 
@@ -23,15 +26,15 @@ const FinalizerName = "protection-finalizer"
 type Controller struct {
 	queue        workqueue.RateLimitingInterface
 	reInformer   cache.SharedIndexInformer
-	emInterface  v1alpha12.ApplicationMappingInterface
-	appInterface v1alpha12.ApplicationInterface
+	emInterface  mV1alpha12.ApplicationMappingInterface
+	appInterface cV1alpha12.ApplicationInterface
 	log          *logrus.Entry
 }
 
 // NewProtectionController creates protection controller instance
 func NewProtectionController(applicationInformer informers.ApplicationInformer,
-	emInterface v1alpha12.ApplicationMappingInterface,
-	environmentInterface v1alpha12.ApplicationInterface,
+	emInterface mV1alpha12.ApplicationMappingInterface,
+	environmentInterface cV1alpha12.ApplicationInterface,
 	log *logrus.Entry) *Controller {
 
 	reInformer := applicationInformer.Informer()

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/ghodss/yaml"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
 

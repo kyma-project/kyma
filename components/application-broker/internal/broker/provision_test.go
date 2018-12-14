@@ -144,7 +144,7 @@ func TestProvisionAsync(t *testing.T) {
 			select {
 			case <-asyncFinished:
 				if tc.expectedEventActivationCreated == true {
-					eventActivation, err := sut.reClient.EventActivations(fixNs()).Get(fixServiceID(), v1.GetOptions{})
+					eventActivation, err := sut.eaClient.EventActivations(fixNs()).Get(fixServiceID(), v1.GetOptions{})
 					assert.NoError(t, err)
 					assert.Equal(t, fixEventActivation(), eventActivation)
 				}

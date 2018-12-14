@@ -11,7 +11,6 @@ import (
 
 type ApplicationconnectorV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	ApplicationsGetter
 	ApplicationMappingsGetter
 	EventActivationsGetter
 }
@@ -19,10 +18,6 @@ type ApplicationconnectorV1alpha1Interface interface {
 // ApplicationconnectorV1alpha1Client is used to interact with features provided by the applicationconnector.kyma-project.io group.
 type ApplicationconnectorV1alpha1Client struct {
 	restClient rest.Interface
-}
-
-func (c *ApplicationconnectorV1alpha1Client) Applications() ApplicationInterface {
-	return newApplications(c)
 }
 
 func (c *ApplicationconnectorV1alpha1Client) ApplicationMappings(namespace string) ApplicationMappingInterface {

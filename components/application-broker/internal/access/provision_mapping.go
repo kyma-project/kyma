@@ -21,17 +21,17 @@ type applicationFinder interface {
 }
 
 // NewMappingExistsProvisionChecker creates new access checker
-func NewMappingExistsProvisionChecker(appFinder applicationFinder, appInterface versioned.ApplicationconnectorV1alpha1Interface) *MappingExistsProvisionChecker {
+func NewMappingExistsProvisionChecker(appFinder applicationFinder, mappingClient versioned.ApplicationconnectorV1alpha1Interface) *MappingExistsProvisionChecker {
 	return &MappingExistsProvisionChecker{
-		appInterface: appInterface,
-		appFinder:    appFinder,
+		mappingClient: mappingClient,
+		appFinder:     appFinder,
 	}
 }
 
 // MappingExistsProvisionChecker is a checker which can wait some time for ApplicationMapping before it forbids provisioning
 type MappingExistsProvisionChecker struct {
-	appInterface versioned.ApplicationconnectorV1alpha1Interface
-	appFinder    applicationFinder
+	mappingClient versioned.ApplicationconnectorV1alpha1Interface
+	appFinder     applicationFinder
 }
 
 // CanProvision checks if service instance can be provisioned in the namespace
@@ -48,10 +48,10 @@ func (c *MappingExistsProvisionChecker) CanProvision(serviceID internal.Applicat
 
 	lw := &cache.ListWatch{
 		ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
-			return c.appInterface.ApplicationMappings(string(namespace)).List(options)
+			return c.mappingClient.ApplicationMappings(string(namespace)).List(options)
 		},
 		WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-			return c.appInterface.ApplicationMappings(string(namespace)).Watch(options)
+			return c.mappingClient.ApplicationMappings(string(namespace)).Watch(options)
 		},
 	}
 

@@ -11,10 +11,10 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/syncer"
 	"github.com/kyma-project/kyma/components/application-broker/internal/syncer/automock"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
 	"github.com/stretchr/testify/mock"
 )
 

@@ -10,8 +10,12 @@ import (
 
 	"path/filepath"
 
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
+	//"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	//"github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
+	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
+
 	"github.com/sirupsen/logrus"
 	restclient "k8s.io/client-go/rest"
 
@@ -44,12 +48,15 @@ func main() {
 	// create sync-job
 	k8sConfig := newRestClientConfig(*kubeconfig)
 
-	reClient, err := versioned.NewForConfig(k8sConfig)
+	appClient, err := appCli.NewForConfig(k8sConfig)
+	fatalOnError(err)
+
+	mappingClient, err := mappingCli.NewForConfig(k8sConfig)
 	fatalOnError(err)
 
 	// Always prefer using an informer factory to get a shared informer instead of getting an independent
 	// one. This reduces memory footprint and number of connections to the server.
-	informerFactory := externalversions.NewSharedInformerFactory(reClient, informerResyncPeriod)
+	informerFactory := appInformer.NewSharedInformerFactory(appClient, informerResyncPeriod)
 
 	v1alpha1Interface := informerFactory.Applicationconnector().V1alpha1()
 
@@ -60,8 +67,8 @@ func main() {
 
 	/* protection controller */
 	protectionController := NewProtectionController(v1alpha1Interface.Applications(),
-		reClient.ApplicationconnectorV1alpha1().ApplicationMappings("default"),
-		reClient.ApplicationconnectorV1alpha1().Applications(), log)
+		mappingClient.ApplicationconnectorV1alpha1().ApplicationMappings("default"),
+		appClient.ApplicationconnectorV1alpha1().Applications(), log)
 	protectionController.Run(1, stopCh)
 
 	informerFactory.Start(stopCh)
