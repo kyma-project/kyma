@@ -17,24 +17,24 @@ import (
 )
 
 const (
-	host   = "host"
-	reName = "reName"
-	token  = "token"
+	host    = "host"
+	appName = "appName"
+	token   = "token"
 )
 
 func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should create token", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/tokens", reName)
+		url := fmt.Sprintf("/v1/applications/%s/tokens", appName)
 
 		expectedTokenResponse := tokenResponse{
-			URL:   fmt.Sprintf("https://%s/v1/applications/%s/info?token=%s", host, reName, token),
+			URL:   fmt.Sprintf("https://%s/v1/applications/%s/info?token=%s", host, appName, token),
 			Token: token,
 		}
 
 		tokenGenerator := &mocks.TokenGenerator{}
-		tokenGenerator.On("NewToken", reName).Return(token, nil)
+		tokenGenerator.On("NewToken", appName).Return(token, nil)
 
 		tokenHandler := NewTokenHandler(tokenGenerator, host)
 
@@ -42,7 +42,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"reName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		tokenHandler.CreateToken(rr, req)
@@ -61,10 +61,10 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should return 500 when failed to generate token", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/tokens", reName)
+		url := fmt.Sprintf("/v1/applications/%s/tokens", appName)
 
 		tokenGenerator := &mocks.TokenGenerator{}
-		tokenGenerator.On("NewToken", reName).Return("", apperrors.Internal("error"))
+		tokenGenerator.On("NewToken", appName).Return("", apperrors.Internal("error"))
 
 		tokenHandler := NewTokenHandler(tokenGenerator, host)
 
@@ -72,7 +72,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"reName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		tokenHandler.CreateToken(rr, req)

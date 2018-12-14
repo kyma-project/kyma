@@ -24,7 +24,7 @@ func NewTokenHandler(tokenGenerator tokens.TokenGenerator, host string) TokenHan
 }
 
 func (tg *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
-	reName := mux.Vars(r)["reName"]
+	reName := mux.Vars(r)["appName"]
 	token, err := tg.tokenGenerator.NewToken(reName)
 	if err != nil {
 		respondWithError(w, err)
