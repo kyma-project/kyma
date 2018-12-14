@@ -17,11 +17,11 @@ global:
     dir: pr/
     version: PR-2019
   connector_service:
-    dir: develop/
-    version: b723b5b6
+    dir: pr/
+    version: PR-2005
   connector_service_tests:
-    dir: develop/
-    version: 1ecf2683
+    dir: pr/
+    version: PR-2005
   connection_token_handler:
     dir: develop/
     version: e8d279fa
