@@ -97,7 +97,7 @@ func newKubeRBACProxyAuthorizerAttributesGetter(authzConfig *authz.Config) autho
 }
 
 type krpAuthorizerAttributesGetter struct {
-	authzConfig *authz.Config
+	authzConfig     *authz.Config
 	reqInfoResolver *apirequest.RequestInfoFactory
 }
 
@@ -159,7 +159,7 @@ func (n krpAuthorizerAttributesGetter) GetRequestAttributes(u user.Info, r *http
 			ResourceRequest: true,
 		}
 	} else {
-		// attributes based on request		
+		// attributes based on request
 		reqInfo, err := n.reqInfoResolver.NewRequestInfo(r)
 
 		if err != nil {
