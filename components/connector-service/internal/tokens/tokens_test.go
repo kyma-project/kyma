@@ -12,7 +12,7 @@ import (
 
 const (
 	tokenLength = 10
-	reName      = "reName"
+	reName      = "appName"
 )
 
 func TestTokenGenerator_NewToken(t *testing.T) {

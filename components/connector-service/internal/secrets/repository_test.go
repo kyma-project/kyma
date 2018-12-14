@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	reName = "reName"
+	appName = "appName"
 )
 
 var (
@@ -30,12 +30,12 @@ func TestRepository_Get(t *testing.T) {
 		secretMap["ca.key"] = expectedCaKey
 
 		secretsManager := &mocks.Manager{}
-		secretsManager.On("Get", reName, metav1.GetOptions{}).Return(&v1.Secret{Data: secretMap}, nil)
+		secretsManager.On("Get", appName, metav1.GetOptions{}).Return(&v1.Secret{Data: secretMap}, nil)
 
 		repository := NewRepository(secretsManager)
 
 		// when
-		encodedCrt, encodedKey, err := repository.Get(reName)
+		encodedCrt, encodedKey, err := repository.Get(appName)
 
 		// then
 		require.NoError(t, err)
@@ -50,12 +50,12 @@ func TestRepository_Get(t *testing.T) {
 			ErrStatus: metav1.Status{Reason: metav1.StatusReasonNotFound},
 		}
 		secretsManager := &mocks.Manager{}
-		secretsManager.On("Get", reName, metav1.GetOptions{}).Return(nil, k8sNotFoundError)
+		secretsManager.On("Get", appName, metav1.GetOptions{}).Return(nil, k8sNotFoundError)
 
 		repository := NewRepository(secretsManager)
 
 		// when
-		encodedCrt, encodedKey, err := repository.Get(reName)
+		encodedCrt, encodedKey, err := repository.Get(appName)
 
 		// then
 		require.Error(t, err)
@@ -67,12 +67,12 @@ func TestRepository_Get(t *testing.T) {
 	t.Run("should fail if couldn't get secret", func(t *testing.T) {
 		// given
 		secretsManager := &mocks.Manager{}
-		secretsManager.On("Get", reName, metav1.GetOptions{}).Return(nil, &k8serrors.StatusError{})
+		secretsManager.On("Get", appName, metav1.GetOptions{}).Return(nil, &k8serrors.StatusError{})
 
 		repository := NewRepository(secretsManager)
 
 		// when
-		encodedCrt, encodedKey, err := repository.Get(reName)
+		encodedCrt, encodedKey, err := repository.Get(appName)
 
 		// then
 		require.Error(t, err)

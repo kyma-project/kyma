@@ -24,30 +24,30 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 	t.Run("should get info", func(t *testing.T) {
 		// given
 		newToken := "newToken"
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
-		expectedSignUrl := fmt.Sprintf("https://%s/v1/applications/%s/client-certs?token=%s", host, reName, newToken)
+		expectedSignUrl := fmt.Sprintf("https://%s/v1/applications/%s/client-certs?token=%s", host, appName, newToken)
 
 		expectedApi := api{
-			MetadataURL:     fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", domain, reName),
-			EventsURL:       fmt.Sprintf("https://gateway.%s/%s/v1/events", domain, reName),
-			CertificatesUrl: fmt.Sprintf("https://%s/v1/applications/%s", host, reName),
+			MetadataURL:     fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", domain, appName),
+			EventsURL:       fmt.Sprintf("https://gateway.%s/%s/v1/events", domain, appName),
+			CertificatesUrl: fmt.Sprintf("https://%s/v1/applications/%s", host, appName),
 		}
 
 		expectedCertInfo := certInfo{
-			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, reName),
+			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, appName),
 			Extensions:   "",
 			KeyAlgorithm: "rsa2048",
 		}
 
 		tokenCache := &tokenCacheMocks.TokenCache{}
-		tokenCache.On("Get", reName).Return(token, true)
+		tokenCache.On("Get", appName).Return(token, true)
 
 		tokenGenerator := &tokenMocks.TokenGenerator{}
-		tokenGenerator.On("NewToken", reName).Return(newToken, nil)
+		tokenGenerator.On("NewToken", appName).Return(newToken, nil)
 
 		subjectValues := certificates.CSRSubject{
-			CName:              reName,
+			CName:              appName,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
@@ -60,7 +60,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -81,13 +81,13 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 403 when token not provided", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert", reName)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert", appName)
 
 		tokenCache := &tokenCacheMocks.TokenCache{}
 		tokenGenerator := &tokenMocks.TokenGenerator{}
 
 		subjectValues := certificates.CSRSubject{
-			CName:              reName,
+			CName:              appName,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
@@ -100,7 +100,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -119,15 +119,15 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 403 when token not found", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
 		tokenCache := &tokenCacheMocks.TokenCache{}
-		tokenCache.On("Get", reName).Return("", false)
+		tokenCache.On("Get", appName).Return("", false)
 
 		tokenGenerator := &tokenMocks.TokenGenerator{}
 
 		subjectValues := certificates.CSRSubject{
-			CName:              reName,
+			CName:              appName,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
@@ -140,7 +140,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -159,15 +159,15 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 403 when wrong token provided", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
 		tokenCache := &tokenCacheMocks.TokenCache{}
-		tokenCache.On("Get", reName).Return("differentToken", true)
+		tokenCache.On("Get", appName).Return("differentToken", true)
 
 		tokenGenerator := &tokenMocks.TokenGenerator{}
 
 		subjectValues := certificates.CSRSubject{
-			CName:              reName,
+			CName:              appName,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
@@ -180,7 +180,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -199,16 +199,16 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 500 when failed to generate new token", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
 		tokenCache := &tokenCacheMocks.TokenCache{}
-		tokenCache.On("Get", reName).Return(token, true)
+		tokenCache.On("Get", appName).Return(token, true)
 
 		tokenGenerator := &tokenMocks.TokenGenerator{}
-		tokenGenerator.On("NewToken", reName).Return("", apperrors.Internal("error"))
+		tokenGenerator.On("NewToken", appName).Return("", apperrors.Internal("error"))
 
 		subjectValues := certificates.CSRSubject{
-			CName:              reName,
+			CName:              appName,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
@@ -221,7 +221,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		infoHandler.GetInfo(rr, req)

@@ -27,7 +27,7 @@ import (
 
 const (
 	authSecretName = "nginx-auth-ca"
-	reName         = "reName"
+	appName        = "appName"
 	token          = "token"
 
 	host               = "host"
@@ -55,11 +55,11 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should create certificate", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
 		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", reName).Return(token, true)
-		tokenCache.On("Delete", reName).Return()
+		tokenCache.On("Get", appName).Return(token, true)
+		tokenCache.On("Delete", appName).Return()
 
 		secretsRepository := &secrectsMock.Repository{}
 		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
@@ -70,7 +70,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certUtils.On("LoadCSR", tokenRequest.CSR).Return(csr, nil)
 
 		subjectValues := certificates.CSRSubject{
-			CName:              reName,
+			CName:              appName,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
@@ -86,7 +86,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		registrationHandler.SignCSR(rr, req)
@@ -105,7 +105,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 403 when token not provided", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert", reName)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert", appName)
 
 		tokenCache := &tokensMock.TokenCache{}
 		secretsRepository := &secrectsMock.Repository{}
@@ -134,10 +134,10 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 400 when token not found", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
 		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", reName).Return("", false)
+		tokenCache.On("Get", appName).Return("", false)
 
 		secretsRepository := &secrectsMock.Repository{}
 		certUtils := &certMock.CertificateUtility{}
@@ -148,7 +148,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		registrationHandler.SignCSR(rr, req)
@@ -167,10 +167,10 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 403 when wrong token provided", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
 		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", reName).Return("differentToken", true)
+		tokenCache.On("Get", appName).Return("differentToken", true)
 
 		secretsRepository := &secrectsMock.Repository{}
 		certUtils := &certMock.CertificateUtility{}
@@ -181,7 +181,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		registrationHandler.SignCSR(rr, req)
@@ -200,10 +200,10 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when couldn't unmarshal request body", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
 		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", reName).Return(token, true)
+		tokenCache.On("Get", appName).Return(token, true)
 
 		secretsRepository := &secrectsMock.Repository{}
 		certUtils := &certMock.CertificateUtility{}
@@ -215,7 +215,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		registrationHandler.SignCSR(rr, req)
@@ -234,11 +234,11 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 404 when secret not found", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
 		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", reName).Return(token, true)
-		tokenCache.On("Delete", reName).Return()
+		tokenCache.On("Get", appName).Return(token, true)
+		tokenCache.On("Delete", appName).Return()
 
 		secretNotFoundError := apperrors.NotFound("error")
 		secretsRepository := &secrectsMock.Repository{}
@@ -254,7 +254,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		registrationHandler.SignCSR(rr, req)
@@ -273,10 +273,10 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when couldn't load cert", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
 		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", reName).Return(token, true)
+		tokenCache.On("Get", appName).Return(token, true)
 
 		secretsRepository := &secrectsMock.Repository{}
 		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
@@ -292,7 +292,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		registrationHandler.SignCSR(rr, req)
@@ -312,10 +312,10 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when couldn't load key", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
 		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", reName).Return(token, true)
+		tokenCache.On("Get", appName).Return(token, true)
 
 		secretsRepository := &secrectsMock.Repository{}
 		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
@@ -332,7 +332,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		registrationHandler.SignCSR(rr, req)
@@ -352,10 +352,10 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when couldn't load CSR", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
 		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", reName).Return(token, true)
+		tokenCache.On("Get", appName).Return(token, true)
 
 		secretsRepository := &secrectsMock.Repository{}
 		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
@@ -371,7 +371,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		registrationHandler.SignCSR(rr, req)
@@ -391,10 +391,10 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when failed to check CSR values", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", reName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
 		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", reName).Return(token, true)
+		tokenCache.On("Get", appName).Return(token, true)
 
 		secretsRepository := &secrectsMock.Repository{}
 		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
@@ -405,7 +405,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certUtils.On("LoadCSR", tokenRequest.CSR).Return(csr, nil)
 
 		subjectValues := certificates.CSRSubject{
-			CName:              reName,
+			CName:              appName,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
@@ -420,7 +420,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": reName})
+		req = mux.SetURLVars(req, map[string]string{"appName": appName})
 
 		// when
 		registrationHandler.SignCSR(rr, req)
@@ -441,7 +441,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 func createSignatureHandler(tokenCache tokencache.TokenCache, certUtils certificates.CertificateUtility, secretsRepository secrets.Repository) SignatureHandler {
 	subjectValues := certificates.CSRSubject{
-		CName:              reName,
+		CName:              appName,
 		Country:            country,
 		Organization:       organization,
 		OrganizationalUnit: organizationalUnit,

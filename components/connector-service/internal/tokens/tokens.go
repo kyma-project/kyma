@@ -9,7 +9,7 @@ import (
 )
 
 type TokenGenerator interface {
-	NewToken(re string) (string, apperrors.AppError)
+	NewToken(app string) (string, apperrors.AppError)
 }
 
 type tokenGenerator struct {
@@ -21,13 +21,13 @@ func NewTokenGenerator(tokenLength int, tokenCache tokencache.TokenCache) TokenG
 	return &tokenGenerator{tokenLength: tokenLength, tokenCache: tokenCache}
 }
 
-func (tg *tokenGenerator) NewToken(re string) (string, apperrors.AppError) {
+func (tg *tokenGenerator) NewToken(app string) (string, apperrors.AppError) {
 	token, err := generateRandomString(tg.tokenLength)
 	if err != nil {
 		return "", err
 	}
 
-	tg.tokenCache.Put(re, token)
+	tg.tokenCache.Put(app, token)
 	return token, nil
 }
 
