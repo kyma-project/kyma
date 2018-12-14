@@ -27,8 +27,6 @@ const (
 )
 
 var (
-	slackToken    = "gZJI7risPpW67frP3EiDrPV0"
-	slackChaneel  = "c4-xf-load-test"
 	endpoint      = fmt.Sprintf("http://%s.%s:8080", functionName, namespace)
 	slackEndpoint = "https://sap-cx.slack.com/services/hooks/jenkins-ci/"
 	client        = getHttpClient(true)
@@ -42,7 +40,7 @@ var (
 
 type Slack struct {
 	SlackEndpoint string
-	SlackChaneel  string
+	SlackChannel  string
 }
 type TestResult struct {
 	sync.RWMutex
@@ -54,11 +52,23 @@ type TestResult struct {
 	totalRequests         int
 }
 
-// TODO: testResult is shared among goroutines, need to handle
+func init() {
+	cleanup()
+	log.Printf("create namespace %s \n", namespace)
+	createNS()
+	log.Printf("deploying %s function \n", functionName)
+	deployFun()
+	log.Printf("verifying correct function output for %s \n", functionName)
+	log.Printf("endpoint for the function: %v\n", endpoint)
+	ensureOutputIsCorrect()
+	slack = NewSlack()
+	testResult = NewTestResult()
+}
+
 func main() {
-	log.Println("starting horizontal pod autoscaler test for functions")
+	log.Println("Starting Horizontal Pod Autoscaler test for functions")
 	numCPUs := runtime.GOMAXPROCS(runtime.NumCPU())
-	log.Println("number of logical CPUs: ", runtime.NumCPU())
+	log.Println("Number of logical CPUs: ", runtime.NumCPU())
 	start := time.Now()
 	tick := time.Tick(1 * time.Second)
 	calculateExecutionTime()
@@ -73,9 +83,9 @@ func main() {
 			for r := 0; r < numRequest; r++ {
 				mutex.RLock()
 				if stopping {
-					mutex.RUnlock()
 					break
 				}
+				mutex.RUnlock()
 				makeHttpRequest(respCh)
 			}
 		}()
@@ -97,7 +107,7 @@ func main() {
 			closingTest(start)
 			log.Fatalf("load test timed out!")
 		case <-tick:
-			//log.Println("processing")
+			//Processing the requests
 		case <-doneCh:
 			closingTest(start)
 			log.Println("done Channel closed")
@@ -110,22 +120,9 @@ func main() {
 func closingTest(start time.Time) {
 	checkFunctionAutoscaled()
 	slack.sendNotificationtoSlackChannel(testResult)
-	log.Println("finishing horizontal pod autoscaler test for functions")
+	log.Println("Finishing Horizontal Pod Autoscaler test for functions")
 	log.Printf("%.2fm elapsed\n", time.Since(start).Minutes())
 	cleanup()
-}
-
-func init() {
-	//cleanup()
-	log.Printf("create namespace %s \n", namespace)
-	createNS()
-	log.Printf("deploying %s function \n", functionName)
-	deployFun()
-	log.Printf("verifying correct function output for %s \n", functionName)
-	log.Printf("endpoint for the function: %v\n", endpoint)
-	ensureOutputIsCorrect()
-	slack = NewSlack()
-	testResult = NewTestResult()
 }
 
 func calculateExecutionTime() {
@@ -135,10 +132,6 @@ func calculateExecutionTime() {
 		if err != nil {
 			log.Printf("error on getting env variable for LOAD_TEST_EXECUTION_TIMEOUT: %v", execTimeout)
 			log.Printf("current execution timeout %v", executionTimeOut)
-		}
-		if executionTimeOut > 5 {
-			timeout = time.After(time.Duration(executionTimeOut) * time.Minute)
-			durationtime = executionTimeOut
 		}
 
 	}
@@ -170,25 +163,25 @@ func ensureFunctionIsRunning() {
 		case <-timeout:
 			cmd := exec.Command("kubectl", "-n", namespace, "describe", "pod", "-l", "function="+functionName)
 			stdoutStderr, _ := cmd.CombinedOutput()
-			log.Fatalf("timed out waiting for: %v function pod to be running. Because of following error: %v ", functionName, string(stdoutStderr))
+			log.Fatalf("Timed out waiting for: %v function pod to be running. Because of following error: %v ", functionName, string(stdoutStderr))
 		case <-tick:
 			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+functionName, "-ojsonpath={range .items[*]}{.status.phase}{end}")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Printf("error while fetching the status phase of the function pod when verifying function is running: %v", string(stdoutStderr))
+				log.Printf("Error while fetching the status phase of the function pod when verifying function is running: %v", string(stdoutStderr))
 			}
 			functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+functionName, "-ojsonpath={.items[0].metadata.name}")
 			functionPodName, err := functionPodsCmd.CombinedOutput()
 			if err != nil {
-				log.Printf("error in fetching function pod when verifying function is running: %v", string(functionPodName))
+				log.Printf("Error in fetching function pod when verifying function is running: %v", string(functionPodName))
 			}
 			hpaOutput, err := checkFunctionHpa()
 			if err != nil {
-				log.Printf("error in fetching function hpa when verifying function is running: %v", err)
+				log.Printf("Error in fetching function hpa when verifying function is running: %v", err)
 			}
 			if err == nil && strings.Contains(string(stdoutStderr), "Running") {
-				log.Printf("pod: %v: is running!", string(functionPodName))
-				log.Printf("hpa: %v: is running! \n", string(hpaOutput))
+				log.Printf("Pod: %v: is running!", string(functionPodName))
+				log.Printf("HPA: %v: is running! \n", string(hpaOutput))
 				return
 			}
 		}
@@ -198,41 +191,40 @@ func ensureFunctionIsRunning() {
 func ensureOutputIsCorrect() {
 	timeout := time.After(10 * time.Minute)
 	tick := time.Tick(5 * time.Second)
-	log.Println("10 minutes timeout for this operation.")
 	for {
 		select {
 		case <-timeout:
-			log.Fatalf("timeout: test hpa failed!")
+			log.Fatalf("Function is not ready: Timed out: Test HPA failed!")
 		case <-tick:
 			resp, err := client.Get(endpoint)
 			if err != nil {
-				log.Printf("unable to call host: %v : Error: %v", endpoint, err)
+				log.Printf("Unable to call host: %v : Error: %v", endpoint, err)
 			} else {
 				if resp.StatusCode == http.StatusOK {
 					bodyBytes, err := ioutil.ReadAll(resp.Body)
 					if err != nil {
-						log.Fatalf("unable to get response: %v", err)
+						log.Fatalf("Unable to get response: %v", err)
 					}
-					log.Printf("response from function: %v\n", string(bodyBytes))
+					log.Printf("Response from function: %v\n", string(bodyBytes))
 					functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+functionName, "-ojsonpath={.items[0].metadata.name}")
 					functionPodName, err := functionPodsCmd.CombinedOutput()
 					if err != nil {
-						log.Printf("error in fetch function pod when verifying correct output: %v", string(functionPodName))
+						log.Printf("Error in fetch function pod when verifying correct output: %v", string(functionPodName))
 					}
 					if strings.Contains(string(bodyBytes), expectedOutput) {
-						log.Printf("response contains output: %v == %v", string(bodyBytes), expectedOutput)
-						log.Printf("name of the successful pod is: %v", string(functionPodName))
+						log.Printf("Response contains output: %v == %v", string(bodyBytes), expectedOutput)
+						log.Printf("Name of the successful pod is: %v", string(functionPodName))
 						return
 					}
-					log.Printf("name of the failed pod is: %v", string(functionPodName))
-					log.Fatalf("response is not equal to expected output:\nResponse: %v\nExpected: %v", string(bodyBytes), expectedOutput)
+					log.Printf("Name of the failed pod is: %v", string(functionPodName))
+					log.Fatalf("Response is not equal to expected output:\nResponse: %v\nExpected: %v", string(bodyBytes), expectedOutput)
 				} else {
-					log.Printf("response from function: %v", resp.StatusCode)
+					log.Printf("Response from function: %v", resp.StatusCode)
 					bodyBytes, err := ioutil.ReadAll(resp.Body)
 					if err != nil {
-						log.Printf("unable to get response: %v", err)
+						log.Printf("Unable to get response: %v", err)
 					}
-					log.Printf("response body is: %v", string(bodyBytes))
+					log.Printf("Response body is: %v", string(bodyBytes))
 				}
 			}
 		}
@@ -251,7 +243,7 @@ func printResponse(respCh chan string, doneCh chan bool) {
 		log.Println(resp)
 	}
 	doneCh <- true
-	log.Println("all requests executed!")
+	log.Printf("%v requests were executed!", len(respCh))
 }
 
 const lettersAndNums = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -266,6 +258,7 @@ func randomString(n int) string {
 
 func makeHttpRequest(respCh chan<- string) {
 	testResult.Lock()
+	testResult.totalRequests++
 	start := time.Now()
 	testID := randomString(8)
 	resp, err := http.Post(endpoint, "text/plain", bytes.NewBuffer([]byte(testID)))
@@ -278,20 +271,19 @@ func makeHttpRequest(respCh chan<- string) {
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		testResult.errorResponse = fmt.Sprintf("%.2f elapsed with error Unable to get response [ERROR] %v", secs, err)
+		testResult.errorResponse = fmt.Sprintf("%.2f elapsed with error : unable to read response [ERROR] %v", secs, err)
 		respCh <- testResult.errorResponse
 		testResult.numFailedRequests++
 		return
 	}
 	if resp.StatusCode != http.StatusOK {
-		testResult.errorResponse = fmt.Sprintf("%.2f elapsed with not 200 response. response code: %v endpoint: %s", secs, resp.StatusCode, endpoint)
+		testResult.errorResponse = fmt.Sprintf("%.2f elapsed with no 200 response: response code: %v endpoint: %s", secs, resp.StatusCode, endpoint)
 		respCh <- testResult.errorResponse
 		testResult.numFailedRequests++
 		return
 	}
-	respCh <- fmt.Sprintf("%.2f elapsed with response: %s response code: %v endpoint: %s", secs, string([]byte(body)), resp.StatusCode, endpoint)
+	respCh <- fmt.Sprintf("Response code: HTTP %v, Response: %s, Response time: %.2f secs,  endpoint: %s", resp.StatusCode, string([]byte(body)), secs, endpoint)
 	testResult.numSuccessfulRequests++
-	testResult.totalRequests++
 	testResult.Unlock()
 }
 
@@ -313,14 +305,14 @@ func deleteFun() {
 	stdoutStderr, err := deleteK8s(functionYaml)
 	output := string(stdoutStderr)
 	if err != nil {
-		log.Fatal("unable to delete function ", functionName, ":\n", output)
+		log.Fatal("Unable to delete function ", functionName, ":\n", output)
 	}
-	timeout := time.After(10 * time.Minute)
+	timeout := time.After(15 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 	for {
 		select {
 		case <-timeout:
-			log.Fatal("timed out waiting for ", functionName, " pod to be deleted\n")
+			log.Fatal("Timed out waiting for ", functionName, " pod to be deleted\n")
 		case <-tick:
 			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+functionName)
 			stdoutStderr, err := cmd.CombinedOutput()
@@ -335,20 +327,21 @@ func deleteNamespace() {
 	stdoutStderr, err := deleteK8s(nsYaml)
 	output := string(stdoutStderr)
 	if err != nil && !strings.Contains(output, "not found") {
-		log.Fatal("unable to delete namespace ", namespace, ":\n", output)
+		log.Fatal("Unable to delete namespace ", namespace, ":\n", output)
 	}
-	timeout := time.After(10 * time.Minute)
+	timeout := time.After(20 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 	for {
 		cmd := exec.Command("kubectl", "get", "ns", namespace, "-oyaml")
 		select {
 		case <-timeout:
+			cmd = exec.Command("kubectl", "get", "po,svc,deploy,function,rs,hpa", "-n", namespace, "-oyaml")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Fatalf("unable to get ns: %v\n", string(stdoutStderr))
+				log.Fatalf("Unable to get ns: %v\n", string(stdoutStderr))
 			}
-			log.Printf("current state of the ns: %s is:\n %v", namespace, string(stdoutStderr))
-			log.Fatal("timed out waiting for namespace: ", namespace, " to be deleted\n")
+			log.Printf("Current state of the ns: %s is:\n %v", namespace, string(stdoutStderr))
+			log.Fatal("Timed out waiting for namespace: ", namespace, " to be deleted\n")
 		case <-tick:
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil && strings.Contains(string(stdoutStderr), "NotFound") {
@@ -376,7 +369,7 @@ func checkFunctionAutoscaled() {
 	functionHpaCmd := exec.Command("kubectl", "-n", namespace, "get", "hpa", "-l", "function="+functionName, "-ojsonpath={.items[0].metadata.name} {.items[0].spec.minReplicas} {.items[0].status.currentReplicas} {.items[0].status.currentCPUUtilizationPercentage}")
 	hpaOutput, err := functionHpaCmd.CombinedOutput()
 	if err != nil {
-		testResult.resultMessage = fmt.Sprintf("error in fetching function hpa: %v \n", err)
+		testResult.resultMessage = fmt.Sprintf("Error in fetching function HPA: %v \n", err)
 		log.Printf(testResult.resultMessage)
 	} else {
 		result := "Function autoscale failed"
@@ -408,7 +401,7 @@ func checkFunctionAutoscaled() {
 		testResult.resultMessage = finalStatus
 
 		if testResult.totalRequests > 0 {
-			totalRequests := fmt.Sprintf("Toatl number of requests: %v \n", testResult.totalRequests)
+			totalRequests := fmt.Sprintf("Total number of requests: %v \n", testResult.totalRequests)
 			testResult.resultMessage = fmt.Sprintf("%s %s\n", testResult.resultMessage, strings.TrimSpace(totalRequests))
 		}
 
@@ -429,32 +422,34 @@ func checkFunctionAutoscaled() {
 }
 
 func (slack *Slack) sendNotificationtoSlackChannel(testResult *TestResult) {
-	textMessage := fmt.Sprintf(`{"channel": "%v", "text":"%v"}"`, slack.SlackChaneel, testResult.resultMessage)
+	textMessage := fmt.Sprintf(`{"channel": "%v", "text":"%v"}"`, slack.SlackChannel, testResult.resultMessage)
 	var jsonStr = []byte(textMessage)
 	req, err := http.NewRequest("POST", slack.SlackEndpoint, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("unable to send slack notification to endpoint: %v : Error: %v", slack.SlackChaneel, err)
+		log.Printf("Unable to send slack notification to endpoint: %v : Error: %v", slack.SlackChannel, err)
 	}
 	defer resp.Body.Close()
-	log.Println("slack response status:", resp.Status)
+	log.Println("Slack response status:", resp.Status)
 	body, _ := ioutil.ReadAll(resp.Body)
-	log.Println("slack response response body:", string(body))
+	log.Println("Slack response response body:", string(body))
 }
 
 func NewSlack() *Slack {
-	sUrl := fmt.Sprintf("%s%s", slackEndpoint, os.Getenv("LOAD_TEST_SLACK_TOKEN"))
-	if len(sUrl) == 0 {
-		sUrl = slackEndpoint
+	apiToken := os.Getenv("LOAD_TEST_SLACK_TOKEN")
+	if len(apiToken) == 0 {
+		log.Fatalln("No slack api token provided!")
 	}
+	sUrl := fmt.Sprintf("%s%s", slackEndpoint, apiToken)
+
 	sChannel := os.Getenv("LOAD_TEST_SLACK_CHANNEL")
 	if len(sChannel) == 0 {
-		sChannel = slackChaneel
+		log.Fatalln("No slack channel provided!")
 	}
 	s := &Slack{sUrl, sChannel}
 
-	log.Printf("Slack: %v", s)
+	log.Printf("Slack configuration: %v", s)
 	return s
 }
 
