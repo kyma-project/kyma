@@ -70,11 +70,11 @@ global:
     dir: develop/
     version: 6e0a7fe2
   ui_api_layer:
-    dir: develop/
-    version: 3ea08e78
+    dir: pr/
+    version: PR-2029
   ui_api_layer_acceptance_tests:
-    dir: develop/
-    version: 3d50c56c
+    dir: pr/
+    version: PR-2038
 
 test:
   acceptance:
