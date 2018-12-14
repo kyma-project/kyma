@@ -82,12 +82,13 @@ func main() {
 		aggregator,
 		cp,
 		log)
-	ukProtectionController := usagekind.NewProtectionController(
+	ukProtectionController, err := usagekind.NewProtectionController(
 		bindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds(),
 		sbuInformer,
 		bindingUsageCli.ServicecatalogV1alpha1(),
 		log,
 	)
+	fatalOnError(err)
 
 	labelsFetcher := controller.NewBindingLabelsFetcher(scInformersGroup.ServiceInstances().Lister(),
 		scInformersGroup.ClusterServiceClasses().Lister(),
@@ -124,7 +125,9 @@ func runStatuszHTTPServer(stop <-chan struct{}, addr string, log logrus.FieldLog
 	mux := http.NewServeMux()
 	mux.HandleFunc("/statusz", func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "OK")
+		if _, err := fmt.Fprint(w, "OK"); err != nil {
+			log.Errorf("Cannot write response body, got err: %v ", err)
+		}
 	})
 
 	srv := &http.Server{Addr: addr, Handler: mux}

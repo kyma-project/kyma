@@ -53,12 +53,8 @@ podTemplate(label: label,
                             }
                         }
 
-                        stage("install dependencies $application") {
-                            execute("make resolve", workDir, componentDir)
-                        }
-
-                        stage("code quality $application") {
-                            execute("make validate", workDir, componentDir)
+                        stage("install dependencies and check code quality $application") {
+                            execute("./before-commit.sh", workDir, componentDir)
                         }
 
                         stage("build image $application") {

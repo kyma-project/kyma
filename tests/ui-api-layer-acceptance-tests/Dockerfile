@@ -25,7 +25,7 @@ RUN mkdir -p /app
 RUN cd ${BASE_APP_DIR}/domain && \
     for dir in $(ls -1FA | grep / | tr -d /); do \
     echo "Building test package ${dir}..."; \
-    go test -tags=acceptance ./${dir} -c \
+    go test -tags=acceptance ./${dir} -c || exit 1 \
     ; done
 
 FROM alpine:3.8

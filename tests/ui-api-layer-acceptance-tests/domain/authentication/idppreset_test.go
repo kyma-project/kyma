@@ -173,8 +173,8 @@ func queryMultipleIDPPresets(c *graphql.Client, resourceDetailsQuery string, exp
 
 func multipleResourcesQueryRequest(resourceDetailsQuery string, expectedResource IDPPreset) *graphql.Request {
 	query := fmt.Sprintf(`
-			query () {
-				IDPPresets() {
+			query {
+				IDPPresets {
 					%s
 				}
 			}
