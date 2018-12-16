@@ -1,24 +1,24 @@
-package remote_environment_test
+package application_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/acceptance/remote-environment/suite"
+	"github.com/kyma-project/kyma/tests/acceptance/application/suite"
 	"github.com/vrischmann/envconfig"
 )
 
-// Config contains all configurations for Remote Environment Acceptance tests
+// Config contains all configurations for Application Acceptance tests
 type Config struct {
 	DockerImage            string        `envconfig:"STUBS_DOCKER_IMAGE"`
-	LinkingTimeout         time.Duration `envconfig:"default=3m,REMOTE_ENVIRONMENT_LINKING_TIMEOUT"`
-	UnlinkingTimeout       time.Duration `envconfig:"default=3m,REMOTE_ENVIRONMENT_UNLINKING_TIMEOUT"`
-	KeepTestResources      bool          `envconfig:"REMOTE_ENVIRONMENT_KEEP_RESOURCES"`
-	Disabled               bool          `envconfig:"REMOTE_ENVIRONMENT_DISABLED"`
+	LinkingTimeout         time.Duration `envconfig:"default=3m,APPLICATION_LINKING_TIMEOUT"`
+	UnlinkingTimeout       time.Duration `envconfig:"default=3m,APPLICATION_UNLINKING_TIMEOUT"`
+	KeepTestResources      bool          `envconfig:"APPLICATION_KEEP_RESOURCES"`
+	Disabled               bool          `envconfig:"APPLICATION_DISABLED"`
 	TearDownTimeoutPerStep time.Duration `envconfig:"default=2m,TEAR_DOWN_TIMEOUT_PER_STEP"`
 }
 
-func TestRemoteEnvironmentAPIAccess(t *testing.T) {
+func TestApplicationAPIAccess(t *testing.T) {
 	var cfg Config
 	if err := envconfig.Init(&cfg); err != nil {
 		t.Fatalf(err.Error())
@@ -28,7 +28,7 @@ func TestRemoteEnvironmentAPIAccess(t *testing.T) {
 		t.Skip("Test skipped due to test configuration.")
 	}
 
-	t.Logf("Running Remote Environment Test with config: %+v", cfg)
+	t.Logf("Running Application Test with config: %+v", cfg)
 
 	// GIVEN
 	ts := suite.NewTestSuite(t, cfg.DockerImage, "acceptance-test")

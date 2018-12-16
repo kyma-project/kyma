@@ -13,16 +13,16 @@ set -e #terminate script immediately in case of errors
 eval $(minikube docker-env --shell bash)
 
 echo -e "${GREEN} Building test${NC}"
-GOOS=linux GOARCH=amd64 go test -v -c -o re.test ./remote-environment/re_test.go
+GOOS=linux GOARCH=amd64 go test -v -c -o re.test ./application/re_test.go
 
 echo -e "${GREEN} Building gw${NC}"
-GOOS=linux GOARCH=amd64 go build -o gateway.bin ./remote-environment/cmd/fake-gateway/main.go
+GOOS=linux GOARCH=amd64 go build -o gateway.bin ./application/cmd/fake-gateway/main.go
 
 echo -e "${GREEN} Building tester${NC}"
-GOOS=linux GOARCH=amd64 go build -o client.bin ./remote-environment/cmd/gateway-client/main.go
+GOOS=linux GOARCH=amd64 go build -o client.bin ./application/cmd/gateway-client/main.go
 
 IMAGE_NAME=acceptance-tests-re:${TAG}
-docker build -t ${IMAGE_NAME} -f remote-environment/contrib/Dockerfile .
+docker build -t ${IMAGE_NAME} -f application/contrib/Dockerfile .
 docker tag ${IMAGE_NAME} ${PROJECT}/${IMAGE_NAME}
 
 rm gateway.bin

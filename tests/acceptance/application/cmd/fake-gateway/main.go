@@ -16,8 +16,8 @@ import (
 )
 
 type Config struct {
-	// RemoteEnvironmentServerPort is a port used by this gateway to listen on requests incoming from services.
-	RemoteEnvironmentServerPort int `envconfig:"default=8080"`
+	// ApplicationServerPort is a port used by this gateway to listen on requests incoming from services.
+	ApplicationServerPort int `envconfig:"default=8080"`
 }
 
 type httpHandler struct {
@@ -25,7 +25,7 @@ type httpHandler struct {
 }
 
 func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "remote environment gateway, request URL: \"%s\" request headers: %v\n", r.URL, r.Header)
+	fmt.Fprintf(w, "Application gateway, request URL: \"%s\" request headers: %v\n", r.URL, r.Header)
 }
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 	}
 
 	l := logrus.New()
-	l.Infof("Starting server, port: %d", cfg.RemoteEnvironmentServerPort)
+	l.Infof("Starting server, port: %d", cfg.ApplicationServerPort)
 
 	h := &httpHandler{
 		Cfg: cfg,
@@ -49,7 +49,7 @@ func main() {
 		httplog.DefaultReqResConfig(),
 	)(http.HandlerFunc(mux.ServeHTTP))
 
-	listenOn := fmt.Sprintf(":%d", cfg.RemoteEnvironmentServerPort)
+	listenOn := fmt.Sprintf(":%d", cfg.ApplicationServerPort)
 	httpServer := http.Server{Addr: listenOn, Handler: loggedHandler}
 
 	go func() {

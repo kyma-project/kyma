@@ -1,17 +1,17 @@
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: remoteenv-test
+  name: app-test
   namespace: kyma-system
   labels:
-    app: remoteenv-test
+    app: app-test
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: remoteenv-test
+  name: app-test
   labels:
-    app: remoteenv-test
+    app: app-test
 rules:
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["clusterserviceclasses", "serviceclasses"]
@@ -30,7 +30,7 @@ rules:
     verbs: ["get", "delete", "create", "list"]
     nonResourceURLs: []
   - apiGroups: ["applicationconnector.kyma-project.io"]
-    resources: ["remoteenvironments", "environmentmappings"]
+    resources: ["applications", "applicationmappings"]
     verbs: ["create", "delete"]
     nonResourceURLs: []
   - apiGroups: ["apps"]
@@ -57,25 +57,25 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: remoteenv-test
+  name: app-test
 subjects:
   - kind: ServiceAccount
-    name: remoteenv-test
+    name: app-test
     namespace: kyma-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: remoteenv-test
+  name: app-test
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: remoteenv-test-acceptance-test
+  name: app-test-acceptance-test
 subjects:
   - kind: ServiceAccount
-    name: remoteenv-test
+    name: app-test
     namespace: acceptance-test
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: remoteenv-test
+  name: app-test

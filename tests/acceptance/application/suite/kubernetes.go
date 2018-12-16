@@ -56,7 +56,7 @@ func (ts *TestSuite) createKubernetesResources() {
 	_, err = cfgMapClient.Create(fixConfigMap())
 	require.NoError(ts.t, err)
 
-	_, err = deploymentClient.Create(fixGatewayDeployment(gwSelectorLabels, ts.remoteEnvironmentName, ts.dockerImage))
+	_, err = deploymentClient.Create(fixGatewayDeployment(gwSelectorLabels, ts.applicationName, ts.dockerImage))
 	require.NoError(ts.t, err)
 
 	_, err = deploymentClient.Create(fixGatewayClientDeployment(ts.dockerImage, ts.gwClientSvcDeploymentName, ts.gatewaySvcName))
@@ -303,7 +303,7 @@ func fixService(serviceName string, selectorLabels, annotations map[string]strin
 	}
 }
 
-func fixGatewayDeployment(labels map[string]string, remoteEnvironmentName, image string) *appsv1beta1.Deployment {
+func fixGatewayDeployment(labels map[string]string, applicationName, image string) *appsv1beta1.Deployment {
 	return &appsv1beta1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "fake-gateway",
@@ -331,7 +331,7 @@ func fixGatewayDeployment(labels map[string]string, remoteEnvironmentName, image
 								},
 							},
 							Env: []apiv1.EnvVar{
-								{Name: "REMOTE_ENVIRONMENT_NAME", Value: remoteEnvironmentName},
+								{Name: "APPLICATION_NAME", Value: applicationName},
 							},
 							Command: []string{"/go/bin/gateway.bin"},
 						},

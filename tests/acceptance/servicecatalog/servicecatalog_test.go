@@ -6,9 +6,13 @@ import (
 	"testing"
 	"time"
 
+	appTypes "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+
+	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+
 	corev1 "github.com/kubernetes/client-go/kubernetes/typed/core/v1"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/pkg/errors"
 	"github.com/pmorie/go-open-service-broker-client/v2"
@@ -53,12 +57,14 @@ func TestServiceCatalogContainsREBServiceClasses(t *testing.T) {
 	// given
 	k8sConfig, err := restclient.InClusterConfig()
 	require.NoError(t, err)
-	reClient, err := versioned.NewForConfig(k8sConfig)
+	aClient, err := appClient.NewForConfig(k8sConfig)
+	require.NoError(t, err)
+	mClient, err := mappingClient.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 	k8sClient, err := corev1.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 	releaseNS := os.Getenv(releaseNamespaceEnvName)
-	fixRE := fixRemoteEnvironment()
+	fixApp := fixApplication()
 
 	broker := brokerURL{
 		namespace: fmt.Sprintf("test-acc-ns-broker-%s", rand.String(4)),
@@ -66,8 +72,8 @@ func TestServiceCatalogContainsREBServiceClasses(t *testing.T) {
 	}
 	var brokerServices []v2.Service
 
-	t.Log("Creating RemoteEnvironment")
-	re, err := reClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Create(fixRE)
+	t.Log("Creating Application")
+	app, err := aClient.ApplicationconnectorV1alpha1().Applications().Create(fixApp)
 	require.NoError(t, err)
 
 	t.Logf("Creating Namespace %s", broker.namespace)
@@ -77,15 +83,15 @@ func TestServiceCatalogContainsREBServiceClasses(t *testing.T) {
 	defer func() {
 		err = k8sClient.Namespaces().Delete(broker.namespace, &metav1.DeleteOptions{})
 		assert.NoError(t, err)
-		err = reClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Delete(re.Name, &metav1.DeleteOptions{
+		err = aClient.ApplicationconnectorV1alpha1().Applications().Delete(app.Name, &metav1.DeleteOptions{
 			GracePeriodSeconds: new(int64), // zero
 		})
 		assert.NoError(t, err)
 	}()
 
 	// when
-	t.Log("Creating EnvironmentMapping")
-	_, err = reClient.ApplicationconnectorV1alpha1().EnvironmentMappings(broker.namespace).Create(fixEnvironmentMapping())
+	t.Log("Creating ApplicationMapping")
+	_, err = mClient.ApplicationconnectorV1alpha1().ApplicationMappings(broker.namespace).Create(fixApplicationMapping())
 	require.NoError(t, err)
 
 	// then
@@ -95,11 +101,11 @@ func TestServiceCatalogContainsREBServiceClasses(t *testing.T) {
 			return errors.Wrap(err, "while getting catalog")
 		}
 		for _, svc := range brokerServices {
-			if svc.ID == fixRE.Spec.Services[0].ID {
+			if svc.ID == fixApp.Spec.Services[0].ID {
 				return nil
 			}
 		}
-		return fmt.Errorf("%s catalog response should contains service with ID: %s", broker, fixRE.Spec.Services[0].ID)
+		return fmt.Errorf("%s catalog response should contains service with ID: %s", broker, fixApp.Spec.Services[0].ID)
 	}, time.Second*90)
 
 	awaitCatalogContainsServiceClasses(t, broker.namespace, timeoutPerAssert, brokerServices)
@@ -114,30 +120,30 @@ func (b *brokerURL) buildURL(releaseNS string) string {
 	return fmt.Sprintf("http://%s%s.%s.svc.cluster.local", b.prefix, b.namespace, releaseNS)
 }
 
-func fixRemoteEnvironment() *v1alpha1.RemoteEnvironment {
-	return &v1alpha1.RemoteEnvironment{
+func fixApplication() *appTypes.Application {
+	return &appTypes.Application{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "RemoteEnvironment",
+			Kind:       "Application",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-remote-env",
+			Name: "test-acc-app",
 		},
-		Spec: v1alpha1.RemoteEnvironmentSpec{
-			Description: "Remote Environment used by acceptance test",
+		Spec: appTypes.ApplicationSpec{
+			Description: "Application used by acceptance test",
 			AccessLabel: "fix-access",
-			Services: []v1alpha1.Service{
+			Services: []appTypes.Service{
 				{
 					ID:   "id-00000-1234-test",
 					Name: "provider-4951",
 					Labels: map[string]string{
-						"connected-app": "test-remote-env",
+						"connected-app": "test-acc-app",
 					},
 					ProviderDisplayName: "provider",
-					DisplayName:         "test-remote-env",
-					Description:         "Remote Environment Service Class used by acceptance test",
+					DisplayName:         "test-acc-app",
+					Description:         "Application Service Class used by acceptance test",
 					Tags:                []string{},
-					Entries: []v1alpha1.Entry{
+					Entries: []appTypes.Entry{
 						{
 							Type:        "API",
 							AccessLabel: "acc-label",
@@ -150,14 +156,14 @@ func fixRemoteEnvironment() *v1alpha1.RemoteEnvironment {
 	}
 }
 
-func fixEnvironmentMapping() *v1alpha1.EnvironmentMapping {
-	return &v1alpha1.EnvironmentMapping{
+func fixApplicationMapping() *mappingTypes.ApplicationMapping {
+	return &mappingTypes.ApplicationMapping{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "EnvironmentMapping",
+			Kind:       "ApplicationMapping",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-remote-env",
+			Name: "test-acc-app",
 		},
 	}
 }
