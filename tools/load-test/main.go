@@ -33,7 +33,6 @@ var (
 	slack         *Slack
 	testResult    *TestResult
 	timeout       = time.After(time.Duration(5) * time.Minute)
-	durationtime  = 5
 	stopping      = false
 	mutex         sync.RWMutex
 )
@@ -49,17 +48,18 @@ type TestResult struct {
 	errorRequest          string
 	numFailedRequests     int
 	numSuccessfulRequests int
+	totalRequestsDone     int
 	totalRequests         int
 }
 
 func init() {
 	cleanup()
-	log.Printf("create namespace %s \n", namespace)
+	log.Printf("Creating namespace: %s", namespace)
 	createNS()
-	log.Printf("deploying %s function \n", functionName)
+	log.Printf("Deploying function: %s", functionName)
 	deployFun()
-	log.Printf("verifying correct function output for %s \n", functionName)
-	log.Printf("endpoint for the function: %v\n", endpoint)
+	log.Printf("Verifying correct function output for %s", functionName)
+	log.Printf("HTTP endpoint for the function: %v", endpoint)
 	ensureOutputIsCorrect()
 	slack = NewSlack()
 	testResult = NewTestResult()
@@ -72,11 +72,14 @@ func main() {
 	start := time.Now()
 	tick := time.Tick(1 * time.Second)
 	calculateExecutionTime()
+	premature := true
+	done := false
 
 	respCh := make(chan string)
 	doneCh := make(chan bool)
 	var wg sync.WaitGroup
 	wg.Add(numCPUs)
+	testResult.totalRequests = numCPUs * numRequest
 	for c := 0; c < numCPUs; c++ {
 		go func() {
 			defer wg.Done()
@@ -96,46 +99,56 @@ func main() {
 	go func() {
 		wg.Wait()
 		close(respCh)
+		doneCh <- true
 	}()
-	for {
 
+	for {
 		select {
 		case <-timeout:
 			mutex.Lock()
 			stopping = true
 			mutex.Unlock()
-			closingTest(start)
-			log.Fatalf("load test timed out!")
+			done = true
 		case <-tick:
 			//Processing the requests
 		case <-doneCh:
-			closingTest(start)
-			log.Println("done Channel closed")
+			log.Println("All requests were processed!")
+			premature = false
+			done = true
+			break
+		}
+		if done {
 			break
 		}
 	}
+	closingTest(start, premature)
 
 }
 
-func closingTest(start time.Time) {
+func closingTest(start time.Time, premature bool) {
 	checkFunctionAutoscaled()
 	slack.sendNotificationtoSlackChannel(testResult)
-	log.Println("Finishing Horizontal Pod Autoscaler test for functions")
 	log.Printf("%.2fm elapsed\n", time.Since(start).Minutes())
 	cleanup()
+	if premature {
+		log.Fatalf("Load test timed out!")
+	} else {
+		log.Println("Horizontal Pod Autoscaler test for functions ends!")
+	}
 }
 
 func calculateExecutionTime() {
 	execTimeout := os.Getenv("LOAD_TEST_EXECUTION_TIMEOUT")
+	executionTimeOut := 5
 	if len(execTimeout) > 0 {
 		executionTimeOut, err := strconv.Atoi(execTimeout)
 		if err != nil {
 			log.Printf("error on getting env variable for LOAD_TEST_EXECUTION_TIMEOUT: %v", execTimeout)
 			log.Printf("current execution timeout %v", executionTimeOut)
 		}
-
+		timeout = time.After(time.Duration(executionTimeOut) * time.Minute)
 	}
-	log.Printf("%v minutes timeout are configured for the execution of load-test", durationtime)
+	log.Printf("Configured %v minute(s) timeout for the execution of load-test.", executionTimeOut)
 }
 
 func createNS() {
@@ -150,17 +163,16 @@ func deployFun() {
 	if err != nil {
 		log.Fatal("unable to deploy function ", functionName, ":\n", string(stdoutStderr))
 	}
-	log.Printf("verifying that function %s is correctly deployed.\n", functionName)
+	log.Printf("Verifying that function %s is correctly deployed.\n", functionName)
 	ensureFunctionIsRunning()
 }
 
 func ensureFunctionIsRunning() {
-	timeout := time.After(10 * time.Minute)
+	timeoutFunc := time.After(10 * time.Minute)
 	tick := time.Tick(1 * time.Second)
-	log.Println("10 minutes timeout for this operation.")
 	for {
 		select {
-		case <-timeout:
+		case <-timeoutFunc:
 			cmd := exec.Command("kubectl", "-n", namespace, "describe", "pod", "-l", "function="+functionName)
 			stdoutStderr, _ := cmd.CombinedOutput()
 			log.Fatalf("Timed out waiting for: %v function pod to be running. Because of following error: %v ", functionName, string(stdoutStderr))
@@ -170,7 +182,7 @@ func ensureFunctionIsRunning() {
 			if err != nil {
 				log.Printf("Error while fetching the status phase of the function pod when verifying function is running: %v", string(stdoutStderr))
 			}
-			functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+functionName, "-ojsonpath={.items[0].metadata.name}")
+			functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+functionName, "-ojsonpath={.items[*].metadata.name}")
 			functionPodName, err := functionPodsCmd.CombinedOutput()
 			if err != nil {
 				log.Printf("Error in fetching function pod when verifying function is running: %v", string(functionPodName))
@@ -180,8 +192,8 @@ func ensureFunctionIsRunning() {
 				log.Printf("Error in fetching function hpa when verifying function is running: %v", err)
 			}
 			if err == nil && strings.Contains(string(stdoutStderr), "Running") {
-				log.Printf("Pod: %v: is running!", string(functionPodName))
-				log.Printf("HPA: %v: is running! \n", string(hpaOutput))
+				log.Printf("Pods: %v: is running!", string(functionPodName))
+				log.Printf("HPA is: %v", string(hpaOutput))
 				return
 			}
 		}
@@ -189,11 +201,11 @@ func ensureFunctionIsRunning() {
 }
 
 func ensureOutputIsCorrect() {
-	timeout := time.After(10 * time.Minute)
-	tick := time.Tick(5 * time.Second)
+	timeoutOutput := time.After(10 * time.Minute)
+	tick := time.Tick(1 * time.Second)
 	for {
 		select {
-		case <-timeout:
+		case <-timeoutOutput:
 			log.Fatalf("Function is not ready: Timed out: Test HPA failed!")
 		case <-tick:
 			resp, err := client.Get(endpoint)
@@ -206,7 +218,7 @@ func ensureOutputIsCorrect() {
 						log.Fatalf("Unable to get response: %v", err)
 					}
 					log.Printf("Response from function: %v\n", string(bodyBytes))
-					functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+functionName, "-ojsonpath={.items[0].metadata.name}")
+					functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+functionName, "-ojsonpath={.items[*].metadata.name}")
 					functionPodName, err := functionPodsCmd.CombinedOutput()
 					if err != nil {
 						log.Printf("Error in fetch function pod when verifying correct output: %v", string(functionPodName))
@@ -239,11 +251,8 @@ func deployK8s(yamlFile string) (string, error) {
 }
 
 func printResponse(respCh chan string, doneCh chan bool) {
-	for resp := range respCh {
-		log.Println(resp)
-	}
-	doneCh <- true
-	log.Printf("%v requests were executed!", len(respCh))
+	resp := <-respCh
+	log.Println(resp)
 }
 
 const lettersAndNums = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -258,31 +267,31 @@ func randomString(n int) string {
 
 func makeHttpRequest(respCh chan<- string) {
 	testResult.Lock()
-	testResult.totalRequests++
+	testResult.totalRequestsDone++
 	start := time.Now()
 	testID := randomString(8)
 	resp, err := http.Post(endpoint, "text/plain", bytes.NewBuffer([]byte(testID)))
 	secs := time.Since(start).Seconds()
 	if err != nil {
-		testResult.errorRequest = fmt.Sprintf("%.2f elapsed with error on response [ERROR] %v", secs, err)
+		testResult.errorRequest = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with error on response [ERROR] %v", testID, secs, err)
 		respCh <- testResult.errorRequest
 		testResult.numFailedRequests++
 		return
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		testResult.errorResponse = fmt.Sprintf("%.2f elapsed with error : unable to read response [ERROR] %v", secs, err)
+		testResult.errorResponse = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with error : unable to read response [ERROR] %v", testID, secs, err)
 		respCh <- testResult.errorResponse
 		testResult.numFailedRequests++
 		return
 	}
 	if resp.StatusCode != http.StatusOK {
-		testResult.errorResponse = fmt.Sprintf("%.2f elapsed with no 200 response: response code: %v endpoint: %s", secs, resp.StatusCode, endpoint)
+		testResult.errorResponse = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with no 200 response: response code: %v endpoint: %s", testID, secs, resp.StatusCode, endpoint)
 		respCh <- testResult.errorResponse
 		testResult.numFailedRequests++
 		return
 	}
-	respCh <- fmt.Sprintf("Response code: HTTP %v, Response: %s, Response time: %.2f secs,  endpoint: %s", resp.StatusCode, string([]byte(body)), secs, endpoint)
+	respCh <- fmt.Sprintf("TestId: [%v] Response code: HTTP %v, Response: %s, Response time: %.2f secs,  endpoint: %s", testID, resp.StatusCode, string([]byte(body)), secs, endpoint)
 	testResult.numSuccessfulRequests++
 	testResult.Unlock()
 }
@@ -296,7 +305,7 @@ func getHttpClient(skipVerify bool) *http.Client {
 }
 
 func cleanup() {
-	log.Println("Cleaning up")
+	log.Println("Cleaning up resources")
 	deleteFun()
 	deleteNamespace()
 }
@@ -307,16 +316,17 @@ func deleteFun() {
 	if err != nil {
 		log.Fatal("Unable to delete function ", functionName, ":\n", output)
 	}
-	timeout := time.After(15 * time.Minute)
+	timeoutFuncDelete := time.After(15 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 	for {
 		select {
-		case <-timeout:
+		case <-timeoutFuncDelete:
 			log.Fatal("Timed out waiting for ", functionName, " pod to be deleted\n")
 		case <-tick:
 			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+functionName)
 			stdoutStderr, err := cmd.CombinedOutput()
-			if err == nil && strings.Contains(string(stdoutStderr), "no resources found") {
+			if err == nil && strings.Contains(string(stdoutStderr), "No resources found") {
+				log.Printf("All functions cleaned up!")
 				return
 			}
 		}
@@ -326,15 +336,15 @@ func deleteFun() {
 func deleteNamespace() {
 	stdoutStderr, err := deleteK8s(nsYaml)
 	output := string(stdoutStderr)
-	if err != nil && !strings.Contains(output, "not found") {
+	if err != nil && !strings.Contains(output, "not found") && !strings.Contains(output, "The system is ensuring all content is removed from this namespace") {
 		log.Fatal("Unable to delete namespace ", namespace, ":\n", output)
 	}
-	timeout := time.After(20 * time.Minute)
+	timeoutNSDelete := time.After(20 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 	for {
 		cmd := exec.Command("kubectl", "get", "ns", namespace, "-oyaml")
 		select {
-		case <-timeout:
+		case <-timeoutNSDelete:
 			cmd = exec.Command("kubectl", "get", "po,svc,deploy,function,rs,hpa", "-n", namespace, "-oyaml")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
@@ -344,7 +354,8 @@ func deleteNamespace() {
 			log.Fatal("Timed out waiting for namespace: ", namespace, " to be deleted\n")
 		case <-tick:
 			stdoutStderr, err := cmd.CombinedOutput()
-			if err != nil && strings.Contains(string(stdoutStderr), "NotFound") {
+			if err != nil && strings.Contains(string(stdoutStderr), "not found") {
+				log.Print("No load-test ns exists!")
 				return
 			}
 		}
@@ -369,10 +380,10 @@ func checkFunctionAutoscaled() {
 	functionHpaCmd := exec.Command("kubectl", "-n", namespace, "get", "hpa", "-l", "function="+functionName, "-ojsonpath={.items[0].metadata.name} {.items[0].spec.minReplicas} {.items[0].status.currentReplicas} {.items[0].status.currentCPUUtilizationPercentage}")
 	hpaOutput, err := functionHpaCmd.CombinedOutput()
 	if err != nil {
-		testResult.resultMessage = fmt.Sprintf("Error in fetching function HPA: %v \n", err)
+		testResult.resultMessage = fmt.Sprintf("Error in fetching function HPA: %v \n", string(hpaOutput))
 		log.Printf(testResult.resultMessage)
 	} else {
-		result := "Function autoscale failed"
+		result := "Autoscaling of functions was successful!"
 		status := strings.Split(strings.TrimSpace(string(hpaOutput)), " ")
 		minReplicas, err := strconv.Atoi(status[1])
 		if err != nil {
@@ -403,6 +414,11 @@ func checkFunctionAutoscaled() {
 		if testResult.totalRequests > 0 {
 			totalRequests := fmt.Sprintf("Total number of requests: %v \n", testResult.totalRequests)
 			testResult.resultMessage = fmt.Sprintf("%s %s\n", testResult.resultMessage, strings.TrimSpace(totalRequests))
+		}
+
+		if testResult.totalRequestsDone > 0 {
+			totalRequestsDone := fmt.Sprintf("Total number of requests done: %v \n", testResult.totalRequestsDone)
+			testResult.resultMessage = fmt.Sprintf("%s %s\n", testResult.resultMessage, strings.TrimSpace(totalRequestsDone))
 		}
 
 		if testResult.numSuccessfulRequests > 0 {
