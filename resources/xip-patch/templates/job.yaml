@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: xip-patch
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: xip-patch
+    spec:
+      serviceAccountName: xip-patch
+      restartPolicy: OnFailure
+      containers:
+      - name: xip-patch
+        image: eu.gcr.io/kyma-project/pr/xip-patch:PR-2055

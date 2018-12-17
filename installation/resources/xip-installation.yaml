@@ -1,0 +1,265 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kyma-installer
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: kyma-default
+  namespace: kyma-installer
+spec:
+  limits:
+  - max:
+      memory: 1024Mi # Maximum memory that a container can request
+    default:
+      # If a container does not specify memory limit, this default value will be applied.
+      # If a container tries to allocate more memory, container will be OOM killed.
+      memory: 96Mi
+    defaultRequest:
+      # If a container does not specify memory request, this default value will be applied.
+      # The scheduler considers this value when scheduling a container to a node.
+      # If a node has not enough memory, such pod will not be created.
+      memory: 32Mi
+    type: Container
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: kyma-default
+  namespace: kyma-installer
+spec:
+  hard:
+    # The sum of all pod memory requests must not exceed this value.
+    requests.memory: 384Mi
+
+    # The sum of all pod memory limit must not exceed this value.
+    limits.memory: 512Mi
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+    name: installations.installer.kyma-project.io
+spec:
+  group: installer.kyma-project.io
+  version: v1alpha1
+  scope: Namespaced
+  names:
+    kind: Installation
+    singular: installation
+    plural: installations
+    shortNames: ['installation']
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+    name: releases.release.kyma-project.io
+spec:
+  group: release.kyma-project.io
+  version: v1alpha1
+  scope: Namespaced
+  names:
+    kind: Release
+    singular: release
+    plural: releases
+    shortNames: ['release']
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kyma-installer
+  namespace: kyma-installer
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kyma-installer
+  namespace: kyma-installer
+spec:
+  template:
+    metadata:
+      labels:
+        name: kyma-installer
+    spec:
+      serviceAccountName: kyma-installer
+      containers:
+      - name: kyma-installer-container
+        image: eu.gcr.io/kyma-project/develop/installer:cb19df90
+        imagePullPolicy: IfNotPresent
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: kyma-installer-reader
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: kyma-installer
+subjects:
+- kind: ServiceAccount
+  name: kyma-installer
+  namespace: kyma-installer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-installer-reader
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: remote-env-certificate-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+type: Opaque
+data:
+  global.remoteEnvCa: ""
+  global.remoteEnvCaKey: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-certificate-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+data:
+  global.tlsCrt: ""
+  global.tlsKey: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: installation-config-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+data:
+  global.isLocalEnv: "false"
+  global.domainName: "kyma.example.com"
+  global.etcdBackup.containerName: ""
+  global.etcdBackup.enabled: ""
+  nginx-ingress.controller.service.loadBalancerIP: ""
+  cluster-users.users.adminGroup: ""
+  etcd-stateful.replicaCount: "3"
+  acceptanceTest.remoteEnvironment.disabled: "true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-config-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: monitoring
+data:
+  global.alertTools.credentials.slack.apiurl: ""
+  global.alertTools.credentials.slack.channel: ""
+  global.alertTools.credentials.victorOps.routingkey: ""
+  global.alertTools.credentials.victorOps.apikey: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: connector-service-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: application-connector
+data:
+  connector-service.tests.skipSslVerify: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: core-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: core
+data:
+  console.cluster.headerLogoUrl: "assets/logo.svg"
+  console.cluster.headerTitle: ""
+  console.cluster.faviconUrl: "favicon.ico"
+  minio.accessKey: "admin"
+  minio.secretKey: "topSecretKey"
+  minio.resources.limits.memory: 128Mi
+  minio.resources.limits.cpu: 250m
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: istio
+data:
+  global.proxy.includeIPRanges: "10.0.0.1/8"
+
+  security.enabled: "true"
+
+  gateways.istio-ingressgateway.loadBalancerIP: ""
+  gateways.istio-ingressgateway.type: "LoadBalancer"
+
+  pilot.resources.limits.memory: 2Gi
+  pilot.resources.requests.memory: 512Mi
+
+  mixer.resources.limits.memory: 1Gi
+  mixer.resources.requests.memory: 256Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-catalog-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: service-catalog
+data:
+  etcd-stateful.etcd.resources.limits.memory: 512Mi
+
+---
+apiVersion: "installer.kyma-project.io/v1alpha1"
+kind: Installation
+metadata:
+  name: kyma-installation
+  finalizers:
+    - finalizer.installer.kyma-project.io
+spec:
+  version: ""
+  url: ""
+  components: 
+    - name: "cluster-essentials"
+      namespace: "kyma-system"
+    - name: "istio"
+      namespace: "istio-system"
+    - name: "xip-patch"
+      namespace: "kyma-installer"
+    - name: "istio-kyma-patch"
+      namespace: "istio-system"
+    - name: "prometheus-operator"
+      namespace: "kyma-system"
+    - name: "dex"
+      namespace: "kyma-system"
+    - name: "service-catalog"
+      namespace: "kyma-system"
+    - name: "core"
+      namespace: "kyma-system"
+    - name: "application-connector"
+      namespace: "kyma-system"
+    - name: "ark"
+      namespace: "heptio-ark"
+    - name: "logging"
+      namespace: "kyma-system"
+    - name: "jaeger"
+      namespace: "kyma-system"
+    - name: "monitoring"
+      namespace: "kyma-system"
