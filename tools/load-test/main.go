@@ -27,14 +27,13 @@ const (
 )
 
 var (
-	endpoint      = fmt.Sprintf("http://%s.%s:8080", functionName, namespace)
-	slackEndpoint = "https://sap-cx.slack.com/services/hooks/jenkins-ci/"
-	client        = getHttpClient(true)
-	slack         *Slack
-	testResult    *TestResult
-	timeout       = time.After(time.Duration(5) * time.Minute)
-	stopping      = false
-	mutex         sync.RWMutex
+	endpoint   = fmt.Sprintf("http://%s.%s:8080", functionName, namespace)
+	client     = getHttpClient(true)
+	slack      *Slack
+	testResult *TestResult
+	timeout    = time.After(time.Duration(5) * time.Minute)
+	stopping   = false
+	mutex      sync.RWMutex
 )
 
 type Slack struct {
@@ -80,6 +79,7 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(numCPUs)
 	testResult.totalRequests = numCPUs * numRequest
+	log.Println("Number of requests to be done: ", testResult.totalRequests)
 	for c := 0; c < numCPUs; c++ {
 		go func() {
 			defer wg.Done()
@@ -94,7 +94,9 @@ func main() {
 		}()
 	}
 	go func() {
-		printResponse(respCh, doneCh)
+		for resp := range respCh {
+			log.Println(resp)
+		}
 	}()
 	go func() {
 		wg.Wait()
@@ -125,6 +127,37 @@ func main() {
 
 }
 
+func makeHttpRequest(respCh chan<- string) {
+	testResult.Lock()
+	defer testResult.Unlock()
+	testResult.totalRequestsDone++
+	start := time.Now()
+	testID := randomString(8)
+	resp, err := http.Post(endpoint, "text/plain", bytes.NewBuffer([]byte(testID)))
+	secs := time.Since(start).Seconds()
+	if err != nil {
+		testResult.errorRequest = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with error on response [ERROR] %v", testID, secs, err)
+		respCh <- testResult.errorRequest
+		testResult.numFailedRequests++
+		return
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		testResult.errorResponse = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with error : unable to read response [ERROR] %v", testID, secs, err)
+		respCh <- testResult.errorResponse
+		testResult.numFailedRequests++
+		return
+	}
+	if resp.StatusCode != http.StatusOK {
+		testResult.errorResponse = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with no 200 response: response code: %v endpoint: %s", testID, secs, resp.StatusCode, endpoint)
+		respCh <- testResult.errorResponse
+		testResult.numFailedRequests++
+		return
+	}
+	respCh <- fmt.Sprintf("TestId: [%v] Response code: HTTP %v, Response: %s, Response time: %.2f secs,  endpoint: %s", testID, resp.StatusCode, string([]byte(body)), secs, endpoint)
+	testResult.numSuccessfulRequests++
+}
+
 func closingTest(start time.Time, premature bool) {
 	checkFunctionAutoscaled()
 	slack.sendNotificationtoSlackChannel(testResult)
@@ -139,7 +172,6 @@ func closingTest(start time.Time, premature bool) {
 
 func calculateExecutionTime() {
 	execTimeout := os.Getenv("LOAD_TEST_EXECUTION_TIMEOUT")
-	executionTimeOut := 5
 	if len(execTimeout) > 0 {
 		executionTimeOut, err := strconv.Atoi(execTimeout)
 		if err != nil {
@@ -147,8 +179,8 @@ func calculateExecutionTime() {
 			log.Printf("current execution timeout %v", executionTimeOut)
 		}
 		timeout = time.After(time.Duration(executionTimeOut) * time.Minute)
+		log.Printf("Configured %v minute(s) timeout for the execution of load-test.", executionTimeOut)
 	}
-	log.Printf("Configured %v minute(s) timeout for the execution of load-test.", executionTimeOut)
 }
 
 func createNS() {
@@ -250,11 +282,6 @@ func deployK8s(yamlFile string) (string, error) {
 	return output, err
 }
 
-func printResponse(respCh chan string, doneCh chan bool) {
-	resp := <-respCh
-	log.Println(resp)
-}
-
 const lettersAndNums = "abcdefghijklmnopqrstuvwxyz0123456789"
 
 func randomString(n int) string {
@@ -263,37 +290,6 @@ func randomString(n int) string {
 		b[i] = lettersAndNums[rand.Intn(len(lettersAndNums))]
 	}
 	return string(b)
-}
-
-func makeHttpRequest(respCh chan<- string) {
-	testResult.Lock()
-	testResult.totalRequestsDone++
-	start := time.Now()
-	testID := randomString(8)
-	resp, err := http.Post(endpoint, "text/plain", bytes.NewBuffer([]byte(testID)))
-	secs := time.Since(start).Seconds()
-	if err != nil {
-		testResult.errorRequest = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with error on response [ERROR] %v", testID, secs, err)
-		respCh <- testResult.errorRequest
-		testResult.numFailedRequests++
-		return
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		testResult.errorResponse = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with error : unable to read response [ERROR] %v", testID, secs, err)
-		respCh <- testResult.errorResponse
-		testResult.numFailedRequests++
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		testResult.errorResponse = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with no 200 response: response code: %v endpoint: %s", testID, secs, resp.StatusCode, endpoint)
-		respCh <- testResult.errorResponse
-		testResult.numFailedRequests++
-		return
-	}
-	respCh <- fmt.Sprintf("TestId: [%v] Response code: HTTP %v, Response: %s, Response time: %.2f secs,  endpoint: %s", testID, resp.StatusCode, string([]byte(body)), secs, endpoint)
-	testResult.numSuccessfulRequests++
-	testResult.Unlock()
 }
 
 func getHttpClient(skipVerify bool) *http.Client {
@@ -453,6 +449,11 @@ func (slack *Slack) sendNotificationtoSlackChannel(testResult *TestResult) {
 }
 
 func NewSlack() *Slack {
+	slackEndpoint := os.Getenv("LOAD_TEST_SLACK_ENDPOINT")
+	if len(slackEndpoint) == 0 {
+		log.Fatalln("No slack endpoint provided!")
+	}
+
 	apiToken := os.Getenv("LOAD_TEST_SLACK_TOKEN")
 	if len(apiToken) == 0 {
 		log.Fatalln("No slack api token provided!")

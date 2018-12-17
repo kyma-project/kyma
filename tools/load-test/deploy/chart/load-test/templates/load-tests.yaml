@@ -68,7 +68,7 @@ spec:
   containers:
   - name: load-test
     image: eu.gcr.io/kyma-project/pr/load-test:PR-2009
-    imagePullPolicy: IfNotPresent
+    imagePullPolicy: IfNotPresent #Always
     env:
     - name: KUBELESS_CONFIG
       value: {{ .Values.env.kubelessConfig }}
@@ -78,6 +78,8 @@ spec:
       value: {{ .Values.slackClientToken }}
     - name: LOAD_TEST_SLACK_CHANNEL
       value: {{ .Values.slackClientChannelId }}
+    - name: LOAD_TEST_SLACK_ENDPOINT
+      value: {{ .Values.slackEndpoint }}
     - name: LOAD_TEST_EXECUTION_TIMEOUT
       value:  {{ .Values.loadTestExecutionTimeout | quote }}
   restartPolicy: Never
