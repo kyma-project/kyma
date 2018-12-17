@@ -25,19 +25,19 @@ The configuration needed in oder to execute the **load test**:
 **slackEndpoint** |`-`| A webhook slack url.
 **slackClientToken** |`-`|  A token which will be part of the **slackEndpoint**. 
 **slackClientChannelId** |`#channelId`| ID of the Slach channel.
-**loadTestExecutionTimeout** |`30`| time in which the test will timeout an finishing its execution. All the related metrics to be send to the Slack channel are collected after the timeout.
+**loadTestExecutionTimeout** |`30`| time in which the test will timeout an finishing its execution. All the related metrics to be sent to the Slack channel are collected after the timeout.
 
-Run the **load test** either is a cluster or a local Minikube will need to set the above parameters for the install of the helm chart. However in a cluster it is advisable to have environment variables as it shown above.
+To run the **load test** either in a cluster or a local Minikube you will need to set the above parameters for the installation of the helm chart. However in a cluster it is advisable to have environment variables as it is shown above.
 
 
 ## Development
 
 - **load-test/k8syaml**  contains all the kubernetes resources needed to deploy the function.
 
-- **main.go** All the logic of the **load test** can be found in this file. It can be build as a follow:
+- **main.go** All the logic of the **load test** can be found in this file. It can be built as a follows:
  
  `CGO_ENABLED=0 go build -o ./bin/app`
  
-- **load-test/Dockerfile** Needed to build the docker image. The image can be build as a follow:
+- **load-test/Dockerfile** Needed to build the docker image. The image can be built as a follows:
 
 `docker build -t load-test .`
