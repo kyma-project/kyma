@@ -105,7 +105,7 @@ Follow the guidelines in the subsections to confirm that your Kubernetes API Ser
 
 The `is-installed.sh` script is designed to give you clear information about the Kyma installation. Run it at any point to get the current installation status, or to find out whether the installation is successful.
 
-If the script indicates the installation failed, try installing Kyma again by re-running the `run.sh`.
+If the script indicates the installation failed, try installing Kyma again by re-running the `run.sh` script.
 
 If the installation fails in a reproducible manner, don't hesitate to reach out on the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
 
