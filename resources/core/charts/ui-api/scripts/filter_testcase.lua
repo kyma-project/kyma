@@ -79,29 +79,29 @@ end
 
 -- Tests for real Kyma queries:
 
-function TestParseGraphQlQuery:test_should_parse_get_remote_environments()
+function TestParseGraphQlQuery:test_should_parse_get_applications()
    -- given
-   local input = [[ {"query":"query {\n  remoteEnvironments {\n    name        \n    status\n    enabledInEnvironments\n    source {\n      type\n    }\n  }\n}","variables":null,"operationName":"a"} ]]
-   --local input = [[ {"query":"query {\n      remoteEnvironments{\n        name\n        status\n        enabledInEnvironments\n        source {\n          type\n        }\n      }\n    }"} ]]
+   local input = [[ {"query":"query {\n  applications {\n    name        \n    status\n    enabledInEnvironments\n    source {\n      type\n    }\n  }\n}","variables":null,"operationName":"a"} ]]
+   --local input = [[ {"query":"query {\n      applications{\n        name\n        status\n        enabledInEnvironments\n        source {\n          type\n        }\n      }\n    }"} ]]
    -- when
    local actual = parseGraphQlQuery(input)
    -- then
    local expected = {
        name = "",
-       resources = "{remoteEnvironments}"
+       resources = "{applications}"
    }
    lu.assertEquals(actual, expected)
 end
 
-function TestParseGraphQlQuery:test_should_parse_get_remote_environments_when_name_with_attribs()
+function TestParseGraphQlQuery:test_should_parse_get_applications_when_name_with_attribs()
    -- given
-   local input = [[ {"query":"query RemoteEnvironment($environment: String!){\n      remoteEnvironments(environment: $environment) {\n        name\n      }\n    }","variables":{"environment":"stage"}} ]]
+   local input = [[ {"query":"query Application($environment: String!){\n      applications(environment: $environment) {\n        name\n      }\n    }","variables":{"environment":"stage"}} ]]
    -- when
    local actual = parseGraphQlQuery(input)
    -- then
    local expected = {
-       name = "RemoteEnvironment",
-       resources = "{remoteEnvironments}"
+       name = "Application",
+       resources = "{applications}"
    }
    lu.assertEquals(actual, expected)
 end
