@@ -159,7 +159,7 @@ func makeHttpRequest(respCh chan<- string) {
 }
 
 func closingTest(start time.Time, premature bool) {
-	checkFunctionAutoscaled()
+	checkFunctionAutoscaled(premature)
 	slack.sendNotificationtoSlackChannel(testResult)
 	log.Printf("%.2fm elapsed\n", time.Since(start).Minutes())
 	cleanup()
@@ -371,15 +371,20 @@ func checkFunctionHpa() ([]byte, error) {
 	return hpaOutput, err
 }
 
-func checkFunctionAutoscaled() {
+func checkFunctionAutoscaled(premature bool) {
 	testResult.RLock()
 	functionHpaCmd := exec.Command("kubectl", "-n", namespace, "get", "hpa", "-l", "function="+functionName, "-ojsonpath={.items[0].metadata.name} {.items[0].spec.minReplicas} {.items[0].status.currentReplicas} {.items[0].status.currentCPUUtilizationPercentage}")
 	hpaOutput, err := functionHpaCmd.CombinedOutput()
+	result := ""
 	if err != nil {
 		testResult.resultMessage = fmt.Sprintf("Error in fetching function HPA: %v \n", string(hpaOutput))
 		log.Printf(testResult.resultMessage)
 	} else {
-		result := "Autoscaling of functions was successful!"
+		if premature {
+			result = "@channel HPA test timed out!"
+		} else {
+			result = "Autoscaling of functions was successful!"
+		}
 		status := strings.Split(strings.TrimSpace(string(hpaOutput)), " ")
 		minReplicas, err := strconv.Atoi(status[1])
 		if err != nil {
