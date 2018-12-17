@@ -65,7 +65,7 @@ func TestPopulateInstancesErrorOnInsert(t *testing.T) {
 }
 
 func fixNsREBrokerName() string {
-	return "remote-env-broker"
+	return "application-broker"
 }
 
 func fixAllSCObjects() []runtime.Object {

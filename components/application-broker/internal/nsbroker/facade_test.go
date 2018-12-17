@@ -52,9 +52,9 @@ func TestNsBrokerCreateHappyPath(t *testing.T) {
 
 	// THEN
 	require.NoError(t, err)
-	actualBroker, err := scFakeClientset.Servicecatalog().ServiceBrokers(fixDestNs()).Get("remote-env-broker", v1.GetOptions{})
+	actualBroker, err := scFakeClientset.Servicecatalog().ServiceBrokers(fixDestNs()).Get("application-broker", v1.GetOptions{})
 	require.NoError(t, err)
-	assert.Equal(t, "true", actualBroker.Labels["namespaced-remote-env-broker"])
+	assert.Equal(t, "true", actualBroker.Labels["namespaced-application-broker"])
 	assert.Equal(t, svcURL, actualBroker.Spec.URL)
 
 	actualService, err := k8sFakeClientset.CoreV1().Services(fixWorkingNs()).Get(serviceName, v1.GetOptions{})
@@ -167,7 +167,7 @@ func TestNsBrokerDeleteErrorOnRemovingService(t *testing.T) {
 	// GIVEN
 	scFakeClientset := sc_fake.NewSimpleClientset(&v1beta1.ServiceBroker{
 		ObjectMeta: meta_v1.ObjectMeta{
-			Name:      "remote-env-broker",
+			Name:      "application-broker",
 			Namespace: fixDestNs(),
 		}})
 	k8sFakeClientSet := k8s_fake.NewSimpleClientset()
@@ -244,7 +244,7 @@ func TestNsBrokerDoesNotExistIfOnlyServiceIsAbsent(t *testing.T) {
 	// GIVEN
 	scFakeClientset := sc_fake.NewSimpleClientset(&v1beta1.ServiceBroker{
 		ObjectMeta: meta_v1.ObjectMeta{
-			Name:      "remote-env-broker",
+			Name:      "application-broker",
 			Namespace: fixDestNs(),
 		}})
 
@@ -266,7 +266,7 @@ func TestNsBrokerExist(t *testing.T) {
 	// GIVEN
 	scFakeClientset := sc_fake.NewSimpleClientset(&v1beta1.ServiceBroker{
 		ObjectMeta: meta_v1.ObjectMeta{
-			Name:      "remote-env-broker",
+			Name:      "application-broker",
 			Namespace: fixDestNs(),
 		}})
 
@@ -299,7 +299,7 @@ func TestNsBrokerExistOnError(t *testing.T) {
 	// WHEN
 	_, err := sut.Exist(fixDestNs())
 	// THEN
-	assert.EqualError(t, err, "while checking if ServiceBroker [remote-env-broker] exists in the namespace [stage]: some error")
+	assert.EqualError(t, err, "while checking if ServiceBroker [application-broker] exists in the namespace [stage]: some error")
 
 }
 
