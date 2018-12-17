@@ -107,7 +107,7 @@ The `is-installed.sh` script is designed to give you clear information about the
 
 If the script indicates the installation failed, try installing Kyma again by re-running the `run.sh` script.
 
-If the installation fails in a reproducible manner, don't hesitate to reach out on the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
+If the installation fails in a reproducible manner, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue in the project or reach out on the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
 
 ### Access the Kyma console
 
@@ -173,4 +173,4 @@ kubectl get pods --all-namespaces
 ```
 
 The command retrieves all Pods from all Namespaces, the status of the Pods, and their instance numbers. Check if the STATUS column shows Running for all Pods. If any of the Pods that you require do not start successfully, perform the installation again.
-If the problem persists, don't hesitate to reach out on the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
+If the problem persists, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue or reach out on the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
