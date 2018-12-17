@@ -102,6 +102,6 @@ def execute(command, workDir, componentDir) {
 def slaveDiagnostics() {
     sh "whoami"
     sh "pwd"
-    sh "df -h"
+    sh "df -i"
     sh "mount"
 }
