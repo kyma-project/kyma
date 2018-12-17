@@ -28,8 +28,8 @@ The system creates a new Kubernetes service for each registered API. Additionall
 
 ## Event Service
 
-The Event Service sends events to the Kyma Event Bus and enriches the events with metadata that indicates the source of the Event.
-This allows to route the events to Lambda functions and Services based on their source Remote Environment.
+The Event Service sends Events to the Kyma Event Bus and enriches the events with metadata that indicates the source of the Event.
+This allows to route the Events to lambda functions and services based on their source Remote Environment.
 
 ## Remote Environment
 
@@ -37,9 +37,9 @@ A Remote Environment (RE) represents an external solution connected to Kyma. It 
 Using the components of the Application Connector, the RE creates a coherent identity for a connected external solution and ensures its separation.
 All REs are created through the RemoteEnvironment custom resource, which also stores all of the relevant metadata. You can map a RE to many Kyma Environments and use the APIs and the Event Catalogs of the connected external solution within their context.
 
-## Remote Environment controller
+## Application Operator
 
-The controller listens for creating or deleting the RemoteEnvironment custom resources and acts accordingly, either provisioning or de-provisioning an instance of Proxy Service and Event Service for every custom resource.         
+The operator listens for creating or deleting the RemoteEnvironment custom resources and acts accordingly, either provisioning or de-provisioning an instance of Proxy Service and Event Service for every custom resource.         
 
 >**NOTE:** Every RemoteEnvironment custom resource corresponds to a single RE to which you can connect an external solution.
 
@@ -49,7 +49,7 @@ The Proxy Service is an intermediary component between a lambda function or a se
 
 ## Access Service
 
-The Access Service exposes the Proxy Service and manages the access from the Lambda functions and services deployed in Kyma to the external APIs over the Proxy Service.
+The Access Service exposes the Proxy Service and manages the access from the lambda functions and services deployed in Kyma to the external APIs over the Proxy Service.
 
 ## Minio bucket
 

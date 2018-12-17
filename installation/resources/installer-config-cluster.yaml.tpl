@@ -101,3 +101,14 @@ data:
 
   mixer.resources.limits.memory: 1Gi
   mixer.resources.requests.memory: 256Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-catalog-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: service-catalog
+data:
+  etcd-stateful.etcd.resources.limits.memory: 512Mi
