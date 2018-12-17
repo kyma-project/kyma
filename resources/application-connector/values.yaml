@@ -41,5 +41,5 @@ global:
     dir: pr/
     version: PR-1996
   application_broker:
-    dir: develop/
-    version: 98a2d5b1
+    dir: pr/
+    version: PR-2022

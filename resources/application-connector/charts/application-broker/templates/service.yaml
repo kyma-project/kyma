@@ -16,7 +16,7 @@ spec:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
   ports:
-    - name: http-re-broker
+    - name: http-app-broker
       port: {{ .Values.service.externalPort }}
       targetPort: {{ .Values.service.internalPort }}
       protocol: TCP
