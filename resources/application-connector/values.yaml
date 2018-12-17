@@ -42,4 +42,4 @@ global:
     version: PR-1996
   application_broker:
     dir: pr/
-    version: PR-2022
+    version: PR-2040
