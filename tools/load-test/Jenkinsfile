@@ -80,6 +80,7 @@ podTemplate(label: label,
         } catch (ex) {
             slaveDiagnostics()
             execute("df -h", workDir, componentDir)
+            execute("df -i", workDir, componentDir)
 
             echo "Got exception: ${ex}"
             currentBuild.result = "FAILURE"
@@ -102,6 +103,7 @@ def execute(command, workDir, componentDir) {
 def slaveDiagnostics() {
     sh "whoami"
     sh "pwd"
+    sh "df -h"
     sh "df -i"
     sh "mount"
 }
