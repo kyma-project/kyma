@@ -1,23 +1,24 @@
 # Kyma common package
 
-A set of Go libraries implementing common use cases encountered throughout Kyma components.
+This package is a set of Go libraries that implement common use cases found in different Kyma components.
 
 ## Purpose
 
-The Kyma project was consolidated and now all core projects written in Go are placed in one repository. Unfortunately, all of them are still written in a different way. This makes testing existing code as well as making new contributions a lot harder as you need to approach each and every component in its own special way.
+With the consolidated structure of the Kyma project, all core components written in Go are stored in a single repository. Although all components have the same programming language as a cornerstone, they are written differently. This makes testing the existing code and making new contributions difficult as each component must be approached in a different way.
 
-This package aims to address this problem by providing a set of libraries that developers should prefer over introducing new solution to already solved problem.
+This package aims to address this problem by providing a set of libraries that the developers should use rather than  introduce new solutions to an already solved problem.
 
-## Criteria for adding code here
+## How to add code to this package
 
-In order to be put here a new library must meet those criteria:
+To add a new library to this package, it must meet these criteria:
 
 - It is used by multiple components in Kyma. Do not generalize when it is not necessary as it puts additional overhead in maintenance.
-- It must be well covered with unit tests. Many components may depend on it so avoiding bugs here is even more crucial then anywhere else.
-- It must have open source grade documentation. Many developers will be using the code so it must be easy to understand what it is doing without reaching author.
+- It must be well covered with unit tests. Many components may end up depending on the library you add.
+- It must have open source-grade documentation. The library will be widely used and must be easy to use without the need to contact the author.
 
 ## Testing
 
-To make this package even more bugproof tests must be executed with following flags:
-- `-count 100` - to make sure they are stable
-- `-race` - to make sure the code is safe to use in multi-threaded environment
+To ensure that the common package has no bugs, the tests must be executed with these flags:
+
+- `-count 100` - ensures the stability of tests
+- `-race` - ensures that the code is safe to use in a multi-threaded environment
