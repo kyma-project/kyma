@@ -154,7 +154,7 @@ func makeHttpRequest(respCh chan<- string) {
 		testResult.numFailedRequests++
 		return
 	}
-	respCh <- fmt.Sprintf("TestId: [%v] Response code: HTTP %v, Response: %s, Response time: %.2f secs,  endpoint: %s", testID, resp.StatusCode, string([]byte(body)), secs, endpoint)
+	respCh <- fmt.Sprintf("TestId: [%v] Response code: HTTP %v, Response: %s, Response time: %.2f secs,  endpoint: %s", testID, resp.StatusCode, string([]byte(body)), secs, endpoint)
 	testResult.numSuccessfulRequests++
 }
 
