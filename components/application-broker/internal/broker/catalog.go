@@ -36,7 +36,7 @@ func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*
 	for _, app := range reList {
 		enabled, err := svc.reEnabledChecker.IsApplicationEnabled(osbCtx.BrokerNamespace, string(app.Name))
 		if err != nil {
-			return nil, errors.Wrap(err, "while checking if RE is enabled")
+			return nil, errors.Wrap(err, "while checking if Application is enabled")
 		}
 		if !enabled {
 			continue

@@ -11,5 +11,5 @@ func (c *Controller) DeleteAccessLabelFromNamespace(ns *v1.Namespace) error {
 }
 
 func (c *Controller) GetAccessLabelFromRE(name string) (string, error) {
-	return c.getReAccLabel(name)
+	return c.getAppAccLabel(name)
 }

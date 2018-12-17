@@ -67,7 +67,7 @@ func NewProtectionController(applicationInformer informers.ApplicationInformer,
 func (c *Controller) reAddedUpdated(obj interface{}) {
 	app, ok := obj.(*v1alpha1.Application)
 	if !ok {
-		c.log.Errorf("RE informer returned non-Application object: %#v", obj)
+		c.log.Errorf("Application informer returned non-Application object: %#v", obj)
 		return
 	}
 	key, err := cache.MetaNamespaceKeyFunc(app)

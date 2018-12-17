@@ -130,7 +130,7 @@ func (c *Controller) Run(stopCh <-chan struct{}) {
 		return
 	}
 
-	c.log.Info("RE controller synced and ready")
+	c.log.Info("Application controller synced and ready")
 
 	wait.Until(c.runWorker, time.Second, stopCh)
 }
