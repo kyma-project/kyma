@@ -59,10 +59,10 @@ global:
     version: 0d1ffe15
   kubeless_integration_tests:
     dir: develop/
-    version: 80eda510
+    version: a9bfa9fc
   kubeless_tests:
     dir: develop/
-    version: b3616bfa
+    version: a9bfa9fc
   test_environments:
     dir: develop/
     version: '84359277'
@@ -71,7 +71,7 @@ global:
     version: 6e0a7fe2
   ui_api_layer:
     dir: develop/
-    version: 3ea08e78
+    version: e29125ab
   ui_api_layer_acceptance_tests:
     dir: develop/
     version: 3d50c56c

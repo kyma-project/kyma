@@ -276,6 +276,18 @@
   revision = "b19bf474d317b857955b12035d2c5acb57ce8b01"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/tools"
+  packages = [
+    "cmd/goimports",
+    "go/ast/astutil",
+    "imports",
+    "internal/fastwalk",
+    "internal/gopathwalk"
+  ]
+  revision = "59cd96f77e7ec4d6e1fc7489f61915a82879680d"
+
+[[projects]]
   name = "google.golang.org/appengine"
   packages = [
     "internal",
@@ -505,6 +517,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f6c0113c1f44b208252edb1ed2e522c9016a70b56fbc0d45269d489cc2ad1f6d"
+  inputs-digest = "afdedb62e1a87f15aeedfc57450cb69a07640a52a1908730260fb401da0fcf9d"
   solver-name = "gps-cdcl"
   solver-version = 1
