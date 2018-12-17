@@ -12,9 +12,9 @@ This package aims to address this problem by providing a set of libraries that d
 
 In order to be put here a new library must meet those criteria:
 
-- It is used by multiple components in Kyma. Do not generalize when its not necessary as it puts additional overhead in maintenance.
+- It is used by multiple components in Kyma. Do not generalize when it is not necessary as it puts additional overhead in maintenance.
 - It must be well covered with unit tests. Many components may depend on it so avoiding bugs here is even more crucial then anywhere else.
-- It must have open source grade documentation. Many developers will be using the code so it must be easy to understand what it's doing without reaching author.
+- It must have open source grade documentation. Many developers will be using the code so it must be easy to understand what it is doing without reaching author.
 
 To make this package even more bugproof tests are executed with following flags:
 - `-count 100` - to make sure they are stable
