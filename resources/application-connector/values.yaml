@@ -32,8 +32,8 @@ global:
     dir: pr/
     version: PR-1996
   gateway_tests:
-    dir: develop/
-    version: cb19afea
+    dir: pr/
+    version: PR-2019
   metadata_service:
     dir: pr/
     version: PR-1996
