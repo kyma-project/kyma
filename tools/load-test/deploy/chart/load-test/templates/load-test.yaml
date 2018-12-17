@@ -76,9 +76,9 @@ spec:
     - name: KUBELESS_NAMESPACE
       value: {{ .Values.env.kubelessNamespace }}
     - name: LOAD_TEST_SLACK_TOKEN
-      value: {{ .Values.slackClientToken }}
+      value: {{ .Values.slackClientToken | quote }}
     - name: LOAD_TEST_SLACK_CHANNEL
-      value: {{ .Values.slackClientChannelId }}
+      value: {{ .Values.slackClientChannelId | quote }}
     - name: LOAD_TEST_SLACK_ENDPOINT
       value: {{ .Values.slackEndpoint }}
     - name: LOAD_TEST_EXECUTION_TIMEOUT
