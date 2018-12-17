@@ -67,6 +67,7 @@ spec:
   serviceAccount: {{ template "load-test.fullname" . }}
   containers:
   - name: load-test
+    # image: {{ .Values.containerRegistry.path }}/develop/load-test:{{ .Values.image.tag }}
     image: eu.gcr.io/kyma-project/pr/load-test:PR-2009
     imagePullPolicy: IfNotPresent #Always
     env:
