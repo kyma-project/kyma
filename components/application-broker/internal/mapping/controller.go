@@ -47,7 +47,7 @@ type nsBrokerFacade interface {
 
 //go:generate mockery -name=mappingLister -output=automock -outpkg=automock -case=underscore
 type mappingLister interface {
-	ListApplicationMappings(environment string) ([]*v1alpha1.ApplicationMapping, error)
+	ListApplicationMappings(application string) ([]*v1alpha1.ApplicationMapping, error)
 }
 
 //go:generate mockery -name=nsBrokerSyncer -output=automock -outpkg=automock -case=underscore

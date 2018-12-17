@@ -3,7 +3,7 @@
 ## Overview
 
 The Application Broker (AB) provides applications in the [Service Catalog](../../docs/service-catalog/docs/001-overview-service-catalog.md).
-A application represents the environment connected to the Kyma instance.
+An Application represents a remote application connected to the Kyma instance.
 The AB implements the [Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md).
 
 The AB fetches all the applications' custom resources and exposes their APIs and Events as service classes to the Service Catalog.

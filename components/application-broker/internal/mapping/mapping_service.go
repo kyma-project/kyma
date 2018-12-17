@@ -19,8 +19,8 @@ func newMappingService(informer cache.SharedIndexInformer) *mappingService {
 }
 
 // ListApplicationMappings lists ApplicationMappings in the given Namespace
-func (svc *mappingService) ListApplicationMappings(environment string) ([]*v1alpha1.ApplicationMapping, error) {
-	items, err := svc.emInformer.GetIndexer().ByIndex(cache.NamespaceIndex, environment)
+func (svc *mappingService) ListApplicationMappings(application string) ([]*v1alpha1.ApplicationMapping, error) {
+	items, err := svc.emInformer.GetIndexer().ByIndex(cache.NamespaceIndex, application)
 	if err != nil {
 		return []*v1alpha1.ApplicationMapping{}, err
 	}
