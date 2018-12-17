@@ -16,6 +16,8 @@ In order to be put here a new library must meet those criteria:
 - It must be well covered with unit tests. Many components may depend on it so avoiding bugs here is even more crucial then anywhere else.
 - It must have open source grade documentation. Many developers will be using the code so it must be easy to understand what it is doing without reaching author.
 
-To make this package even more bugproof tests are executed with following flags:
+## Testing
+
+To make this package even more bugproof tests must be executed with following flags:
 - `-count 100` - to make sure they are stable
 - `-race` - to make sure the code is safe to use in multi-threaded environment
