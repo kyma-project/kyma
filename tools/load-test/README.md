@@ -22,7 +22,7 @@ The configuration needed in oder to execute the **load test**:
 
  | Name | Value | Description |
  |------|---------------|-------------|
-**slackEndpoint** |`-`| A weebhook slack url.
+**slackEndpoint** |`-`| A webhook slack url.
 **slackClientToken** |`-`|  A token which will be part of the **slackEndpoint**. 
 **slackClientChannelId** |`#channelId`| ID of the Slach channel.
 **loadTestExecutionTimeout** |`30`| time in which the test will timeout an finishing its execution. All the related metrics to be send to the Slack channel are collected after the timeout.
