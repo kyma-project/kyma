@@ -17,7 +17,7 @@ type TokenDto struct {
 
 // ConnectorServiceClient interface describes client contract to communicate with connector-service
 type ConnectorServiceClient interface {
-	FetchToken(reName string) (*TokenDto, error)
+	FetchToken(appName string) (*TokenDto, error)
 }
 
 type connectorServiceClient struct {
@@ -26,12 +26,12 @@ type connectorServiceClient struct {
 }
 
 // FetchToken method connects to connector-service and fetches new token for remote-environment
-func (c *connectorServiceClient) FetchToken(reName string) (*TokenDto, error) {
-	if strings.TrimSpace(reName) == "" {
-		return nil, errors.New("reName cannot be empty")
+func (c *connectorServiceClient) FetchToken(appName string) (*TokenDto, error) {
+	if strings.TrimSpace(appName) == "" {
+		return nil, errors.New("appName cannot be empty")
 	}
 
-	url := fmt.Sprintf("%s/v1/applications/%s/tokens", c.connectorServiceURL, reName)
+	url := fmt.Sprintf("%s/v1/applications/%s/tokens", c.connectorServiceURL, appName)
 
 	res, err := c.Post(url, "application/json", nil)
 	if err != nil {

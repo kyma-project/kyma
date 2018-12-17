@@ -99,7 +99,7 @@ func (r *ReconcileTokenRequest) Reconcile(request reconcile.Request) (reconcile.
 			instance.Status.ExpireAfter = metav1.NewTime(metav1.Now().Add(time.Second * time.Duration(r.options.TokenTTL)))
 		}
 
-		instance.Status.RemoteEnvironment = instance.ObjectMeta.Name
+		instance.Status.Application = instance.ObjectMeta.Name
 
 		log.Printf("Updating CR for TokenRequest %s", request.NamespacedName)
 

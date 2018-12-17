@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func getServerMock(reName, token string) *httptest.Server {
+func getServerMock(appName, token string) *httptest.Server {
 	return httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path == "/v1/applications/"+reName+"/tokens" {
+			if r.URL.Path == "/v1/applications/"+appName+"/tokens" {
 				w.Header().Add("Content-Type", "application/json")
 				w.Write([]byte(fmt.Sprintf(
 					`{"token": "%s", "url": "http://url.with.token?token=%s"}`, token, token)))
@@ -21,15 +21,15 @@ func getServerMock(reName, token string) *httptest.Server {
 	)
 }
 func TestTokenRequestClient_FetchToken(t *testing.T) {
-	reName := "some-app"
+	appName := "some-app"
 	token := "some-long-token-value"
 
 	t.Run("should return TokenDto with valid token", func(t *testing.T) {
-		srvMock := getServerMock(reName, token)
+		srvMock := getServerMock(appName, token)
 		defer srvMock.Close()
 
 		svcClient := NewConnectorServiceClient(srvMock.URL)
-		tokenDto, err := svcClient.FetchToken(reName)
+		tokenDto, err := svcClient.FetchToken(appName)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, tokenDto)
@@ -37,11 +37,11 @@ func TestTokenRequestClient_FetchToken(t *testing.T) {
 	})
 
 	t.Run("should return error when calling invalid URL", func(t *testing.T) {
-		srvMock := getServerMock(reName, token)
+		srvMock := getServerMock(appName, token)
 		defer srvMock.Close()
 
 		svcClient := NewConnectorServiceClient(srvMock.URL + "/some-text")
-		_, err := svcClient.FetchToken(reName)
+		_, err := svcClient.FetchToken(appName)
 
 		assert.Error(t, err)
 	})
