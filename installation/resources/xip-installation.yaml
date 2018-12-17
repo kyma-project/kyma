@@ -143,7 +143,7 @@ metadata:
     installer: overrides
 data:
   global.isLocalEnv: "false"
-  global.domainName: "kyma.example.com"
+  global.domainName: ""
   global.etcdBackup.containerName: ""
   global.etcdBackup.enabled: ""
   nginx-ingress.controller.service.loadBalancerIP: ""
