@@ -25,7 +25,7 @@ The configuration needed to execute the **load test** is as follows:
 **slackEndpoint** |`-`| A webhook slack url.
 **slackClientToken** |`-`|  A token which will be part of the **slackEndpoint**.
 **slackClientChannelId** |`#channelId`| ID of the Slack channel.
-**loadTestExecutionTimeout** |`30`| time to finish the test otherwise it will timeout its execution. All the related metrics to be sent to the Slack channel are collected after the timeout.
+**loadTestExecutionTimeout** |`30`| Time to finish the test otherwise it will timeout its execution. All the related metrics to be sent to the Slack channel are collected after the timeout.
 
 ### Environment Variables
 
