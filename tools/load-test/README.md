@@ -12,10 +12,10 @@ echo "Installing helm chart..."
 helm install --set slackEndpoint="${SLACK_ENDPOINT}" \
              --set slackClientToken="${SLACK_CLIENT_TOKEN}" \
              --set slackClientChannelId="${SLACK_CLIENT_CHANNEL_ID}" \
-             --set loadTestExecutionTimeout="30" \
-             ${LT_FOLDER}/deploy/chart/load-test \
+             --set loadTestExecutionTimeout="$LT_TIMEOUT" \
+             ${LT_FOLDER_CHART} \
              --namespace=kyma-system \
---name=load-test
+             --name=load-test
 ```
 
 The configuration needed in oder to execute the **load test**:
@@ -27,8 +27,18 @@ The configuration needed in oder to execute the **load test**:
 **slackClientChannelId** |`#channelId`| ID of the Slach channel.
 **loadTestExecutionTimeout** |`30`| time in which the test will timeout an finishing its execution. All the related metrics to be sent to the Slack channel are collected after the timeout.
 
+### Environment Variables
+
 To run the **load test** either in a cluster or a local Minikube you will need to set the above parameters for the installation of the helm chart. However in a cluster it is advisable to have environment variables as it is shown above.
 
+```bash
+### Test config
+# export SLACK_CLIENT_TOKEN='replace by the slack token'
+# export SLACK_CLIENT_CHANNEL_ID='replace by the slack #channel'
+# export SLACK_ENDPOINT='replace by the webhook http endpoint https://endpoint_here'
+# export LT_FOLDER_CHART='HOME_KYMA_PROJECT/kyma/tools/load-test/deploy/chart/load-test'
+# export LT_TIMEOUT=30
+```
 
 ## Development
 
