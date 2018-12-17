@@ -148,16 +148,16 @@ func getApplicationServiceID(req *osb.ProvisionRequest) internal.ApplicationServ
 	return internal.ApplicationServiceID(req.ServiceID)
 }
 
-func (svc *ProvisionService) doAsync(iID internal.InstanceID, opID internal.OperationID, reName internal.ApplicationName, reID internal.ApplicationServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
-	go svc.do(iID, opID, reName, reID, ns, eventProvider, displayName)
+func (svc *ProvisionService) doAsync(iID internal.InstanceID, opID internal.OperationID, appName internal.ApplicationName, appID internal.ApplicationServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
+	go svc.do(iID, opID, appName, appID, ns, eventProvider, displayName)
 }
 
-func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.OperationID, reName internal.ApplicationName, reID internal.ApplicationServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
+func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.OperationID, appName internal.ApplicationName, appID internal.ApplicationServiceID, ns internal.Namespace, eventProvider bool, displayName string) {
 	if svc.asyncHook != nil {
 		defer svc.asyncHook()
 	}
-	canProvisionOutput, err := svc.accessChecker.CanProvision(iID, reID, ns, svc.maxWaitTime)
-	svc.log.Infof("Access checker: canProvisionInstance(reName=[%s], reID=[%s], ns=[%s]) returned: canProvisionOutput=[%+v], error=[%v]", reName, reID, ns, canProvisionOutput, err)
+	canProvisionOutput, err := svc.accessChecker.CanProvision(iID, appID, ns, svc.maxWaitTime)
+	svc.log.Infof("Access checker: canProvisionInstance(appName=[%s], appID=[%s], ns=[%s]) returned: canProvisionOutput=[%+v], error=[%v]", appName, appID, ns, canProvisionOutput, err)
 
 	var instanceState internal.InstanceState
 	var opState internal.OperationState
@@ -170,13 +170,13 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 	} else if !canProvisionOutput.Allowed {
 		instanceState = internal.InstanceStateFailed
 		opState = internal.OperationStateFailed
-		opDesc = fmt.Sprintf("Forbidden provisioning instance [%s] for application [name: %s, id: %s] in namespace: [%s]. Reason: [%s]", iID, reName, reID, ns, canProvisionOutput.Reason)
+		opDesc = fmt.Sprintf("Forbidden provisioning instance [%s] for application [name: %s, id: %s] in namespace: [%s]. Reason: [%s]", iID, appName, appID, ns, canProvisionOutput.Reason)
 	} else {
 		instanceState = internal.InstanceStateSucceeded
 		opState = internal.OperationStateSucceeded
 		opDesc = "provisioning succeeded"
 		if eventProvider {
-			err := svc.createEaOnSuccessProvision(string(reName), string(reID), string(ns), displayName, iID)
+			err := svc.createEaOnSuccessProvision(string(appName), string(appID), string(ns), displayName, iID)
 			if err != nil {
 				instanceState = internal.InstanceStateFailed
 				opState = internal.OperationStateFailed
@@ -195,15 +195,19 @@ func (svc *ProvisionService) do(iID internal.InstanceID, opID internal.Operation
 	}
 }
 
-func (svc *ProvisionService) createEaOnSuccessProvision(reName, reID, ns string, displayName string, iID internal.InstanceID) error {
+func (svc *ProvisionService) createEaOnSuccessProvision(appName, appID, ns string, displayName string, iID internal.InstanceID) error {
 	// instance ID is the serviceInstance.Spec.ExternalID
 	si, err := svc.serviceInstanceGetter.GetByNamespaceAndExternalID(ns, string(iID))
 	if err != nil {
 		return errors.Wrapf(err, "while getting service instance with external id: %q in namespace: %q", iID, ns)
 	}
 	ea := &v1alpha1.EventActivation{
+		TypeMeta: v1.TypeMeta{
+			Kind:       "EventActivation",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
 		ObjectMeta: v1.ObjectMeta{
-			Name:      reID,
+			Name:      appID,
 			Namespace: ns,
 			OwnerReferences: []v1.OwnerReference{
 				{
@@ -216,22 +220,22 @@ func (svc *ProvisionService) createEaOnSuccessProvision(reName, reID, ns string,
 		},
 		Spec: v1alpha1.EventActivationSpec{
 			DisplayName: displayName,
-			SourceID:    reName,
+			SourceID:    appName,
 		},
 	}
 	_, err = svc.eaClient.EventActivations(ns).Create(ea)
 	switch {
 	case err == nil:
-		svc.log.Infof("Created EventActivation: [%s], in namespace: [%s]", reID, ns)
+		svc.log.Infof("Created EventActivation: [%s], in namespace: [%s]", appID, ns)
 	case apiErrors.IsAlreadyExists(err):
 		// We perform update action to adjust OwnerReference of the EventActivation after the backup restore.
 		_, err := svc.eaClient.EventActivations(ns).Update(ea)
 		if err != nil {
-			return errors.Wrapf(err, "while updating EventActivation with name: %q in namespace: %q", reID, ns)
+			return errors.Wrapf(err, "while updating EventActivation with name: %q in namespace: %q", appID, ns)
 		}
-		svc.log.Infof("Updated EventActivation: [%s], in namespace: [%s]", reID, ns)
+		svc.log.Infof("Updated EventActivation: [%s], in namespace: [%s]", appID, ns)
 	default:
-		return errors.Wrapf(err, "while creating EventActivation with name: %q in namespace: %q", reID, ns)
+		return errors.Wrapf(err, "while creating EventActivation with name: %q in namespace: %q", appID, ns)
 	}
 	return nil
 }

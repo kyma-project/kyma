@@ -286,11 +286,11 @@ func (c *Controller) ensureNsNotLabelled(ns *corev1.Namespace) error {
 	return nil
 }
 
-func (c *Controller) ensureNsLabelled(reName string, reNs *corev1.Namespace) error {
+func (c *Controller) ensureNsLabelled(appName string, reNs *corev1.Namespace) error {
 	var label string
-	label, err := c.getAppAccLabel(reName)
+	label, err := c.getAppAccLabel(appName)
 	if err != nil {
-		return errors.Wrapf(err, "cannot get AccessLabel from Application: %q", reName)
+		return errors.Wrapf(err, "cannot get AccessLabel from Application: %q", appName)
 	}
 	err = c.applyNsAccLabel(reNs, label)
 	if err != nil {
@@ -337,15 +337,15 @@ func (c *Controller) patchNs(nsOrig, nsMod *corev1.Namespace) error {
 	return nil
 }
 
-func (c *Controller) getAppAccLabel(reName string) (string, error) {
+func (c *Controller) getAppAccLabel(appName string) (string, error) {
 	// get Application from storage
-	app, err := c.reGetter.Get(internal.ApplicationName(reName))
+	app, err := c.reGetter.Get(internal.ApplicationName(appName))
 	if err != nil {
-		return "", errors.Wrapf(err, "while getting application with name: %q", reName)
+		return "", errors.Wrapf(err, "while getting application with name: %q", appName)
 	}
 
 	if app.AccessLabel == "" {
-		return "", fmt.Errorf("Application %q access label is empty", reName)
+		return "", fmt.Errorf("Application %q access label is empty", appName)
 	}
 
 	return app.AccessLabel, nil

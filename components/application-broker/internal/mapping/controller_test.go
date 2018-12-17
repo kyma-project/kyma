@@ -26,14 +26,14 @@ import (
 )
 
 const (
-	fixNSName = "production"
-	fixREName = "ec-prod"
+	fixNSName  = "production"
+	fixAPPName = "ec-prod"
 )
 
 func TestControllerRunSuccess(t *testing.T) {
 	// given
-	fixEM := fixApplicationMappingCR(fixREName, fixNSName)
-	fixRE := fixApplication(fixREName)
+	fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
+	fixRE := fixApplication(fixAPPName)
 	fixNS := fixNamespace(fixNSName)
 
 	expectations := &sync.WaitGroup{}
@@ -56,7 +56,7 @@ func TestControllerRunSuccess(t *testing.T) {
 
 	reGetterMock := &automock.ReGetter{}
 	defer reGetterMock.AssertExpectations(t)
-	reGetterMock.On("Get", internal.ApplicationName(fixREName)).
+	reGetterMock.On("Get", internal.ApplicationName(fixAPPName)).
 		Return(&fixRE, nil).
 		Run(fulfillExpectation).
 		Once()
@@ -86,7 +86,7 @@ func TestControllerRunSuccess(t *testing.T) {
 
 func TestControllerRunSuccessLabelRemove(t *testing.T) {
 	// given
-	fixEM := fixApplicationMappingCR(fixREName, fixNSName)
+	fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
 	fixNS := fixNamespaceWithAccessLabel(fixNSName)
 	fixExpectedNS := fixNamespace(fixNSName)
 	emInformer := newEmInformerFromFakeClientset(fixEM)
@@ -106,7 +106,7 @@ func TestControllerRunSuccessLabelRemove(t *testing.T) {
 
 func TestControllerRunFailure(t *testing.T) {
 	// given
-	fixEM := fixApplicationMappingCR(fixREName, fixNSName)
+	fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
 	fixNS := fixNamespace(fixNSName)
 	fixErr := errors.New("fix get err")
 	fixPatchErr := errors.New("fix patch err")
@@ -128,7 +128,7 @@ func TestControllerRunFailure(t *testing.T) {
 
 	reGetter := &automock.ReGetter{}
 	defer reGetter.AssertExpectations(t)
-	reGetter.On("Get", internal.ApplicationName(fixREName)).
+	reGetter.On("Get", internal.ApplicationName(fixAPPName)).
 		Return(nil, fixErr).
 		Run(fulfillExpectation).
 		Once()
@@ -139,12 +139,12 @@ func TestControllerRunFailure(t *testing.T) {
 
 	// when
 	err2 := svc.DeleteAccessLabelFromNamespace(fixNS)
-	_, err3 := svc.GetAccessLabelFromRE(fixREName)
+	_, err3 := svc.GetAccessLabelFromRE(fixAPPName)
 
 	// then
 	awaitForSyncGroupAtMost(t, expectations, time.Second)
 	assert.EqualError(t, err2, fmt.Sprintf("failed to delete AccessLabel from the namespace: %q, failed to patch namespace: %q: %v", fixNSName, fixNSName, fixPatchErr.Error()))
-	assert.EqualError(t, err3, fmt.Sprintf("while getting application with name: %q: %v", fixREName, fixErr.Error()))
+	assert.EqualError(t, err3, fmt.Sprintf("while getting application with name: %q: %v", fixAPPName, fixErr.Error()))
 }
 
 type tcNsBrokersEnabled struct {
@@ -210,8 +210,8 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			// GIVEN
-			fixEM := fixApplicationMappingCR(fixREName, fixNSName)
-			fixRE := fixApplication(fixREName)
+			fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
+			fixRE := fixApplication(fixAPPName)
 			fixNS := fixNamespace(fixNSName)
 
 			emInformer := newEmInformerFromFakeClientset(fixEM)
@@ -229,7 +229,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 
 			reGetterMock := &automock.ReGetter{}
 			defer reGetterMock.AssertExpectations(t)
-			reGetterMock.On("Get", internal.ApplicationName(fixREName)).
+			reGetterMock.On("Get", internal.ApplicationName(fixAPPName)).
 				Return(&fixRE, nil).
 				Once()
 
@@ -241,7 +241,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 
 			svc := mapping.New(emInformer, nsInformer, nsClientMock, reGetterMock, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy())
 
-			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixREName))
+			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixAPPName))
 			if tc.errorMsg == "" {
 				assert.NoError(t, err)
 			} else {
@@ -388,7 +388,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			svc := mapping.New(emInformer, nsInformer, nsClientMock, nil, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy()).
 				WithMappingLister(mappingSvc)
 			// WHEN
-			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixREName))
+			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixAPPName))
 			// THEN
 			if tc.errorMsg == "" {
 				assert.NoError(t, err)
@@ -446,9 +446,9 @@ func fixApplicationMappingCR(name, ns string) *v1alpha1.ApplicationMapping {
 	}
 }
 
-func fixApplication(fixREName string) internal.Application {
+func fixApplication(fixAPPName string) internal.Application {
 	return internal.Application{
-		Name:        internal.ApplicationName(fixREName),
+		Name:        internal.ApplicationName(fixAPPName),
 		AccessLabel: "fix-access-1",
 	}
 }

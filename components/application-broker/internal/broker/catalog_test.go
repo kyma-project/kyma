@@ -55,7 +55,7 @@ func TestGetCatalogNotEnabled(t *testing.T) {
 }
 
 func TestConvertService(t *testing.T) {
-	const fixReName = "fix-app-name"
+	const fixAppName = "fix-app-name"
 
 	for tn, tc := range map[string]struct {
 		givenService func() internal.Service
@@ -80,7 +80,7 @@ func TestConvertService(t *testing.T) {
 			converter := broker.NewConverter()
 
 			// when
-			result, err := converter.Convert(fixReName, tc.givenService())
+			result, err := converter.Convert(fixAppName, tc.givenService())
 			require.NoError(t, err)
 
 			// then

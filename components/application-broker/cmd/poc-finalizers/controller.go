@@ -127,12 +127,12 @@ func (c *Controller) processNextWorkItem() bool {
 }
 
 func (c *Controller) processRE(key string) error {
-	_, reName, err := cache.SplitMetaNamespaceKey(key)
+	_, appName, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return err
 	}
 
-	app, err := c.appInterface.Get(reName, v1.GetOptions{})
+	app, err := c.appInterface.Get(appName, v1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (c *Controller) processRE(key string) error {
 
 		// find if application mapping exists
 		for _, item := range items.Items {
-			if item.Name == reName {
+			if item.Name == appName {
 				exists = true
 				break
 			}
