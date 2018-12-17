@@ -51,8 +51,8 @@ func (resolver nameResolver) ExtractServiceId(applicaton, host string) string {
 }
 
 func getResourceNamePrefix(applicaton string) string {
-	truncatedapplicaton := truncateapplicaton(applicaton)
-	return fmt.Sprintf(resourceNamePrefixFormat, truncatedapplicaton)
+	truncatedApplicaton := truncateapplicaton(applicaton)
+	return fmt.Sprintf(resourceNamePrefixFormat, truncatedApplicaton)
 }
 
 func truncateapplicaton(applicaton string) string {
@@ -63,8 +63,8 @@ func truncateapplicaton(applicaton string) string {
 	overflowLength := testResourceNamePrefixLength - maxResourceNamePrefixLength
 
 	if overflowLength > 0 {
-		newapplicatonLength := len(applicaton) - overflowLength
-		return applicaton[0:newapplicatonLength]
+		newApplicationLength := len(applicaton) - overflowLength
+		return applicaton[0:newApplicationLength]
 	}
 	return applicaton
 }

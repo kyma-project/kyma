@@ -8,28 +8,28 @@ import (
 
 func TestNameResolver(t *testing.T) {
 	testCases := []struct {
-		remotEnv     string
+		application  string
 		id           string
 		resourceName string
 		metadataUrl  string
 		host         string
 	}{
 		{
-			remotEnv:     "short_application",
+			application:  "short_application",
 			id:           "c687e68a-9038-4f38-845b-9c61592e59e6",
 			resourceName: "app-short_application-c687e68a-9038-4f38-845b-9c61592e59e6",
 			metadataUrl:  "http://app-short_application-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 			host:         "app-short_application-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 		},
 		{
-			remotEnv:     "max_application_aaaaaaaaa",
+			application:  "max_application_aaaaaaaaa",
 			id:           "c687e68a-9038-4f38-845b-9c61592e59e6",
 			resourceName: "app-max_application_aaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6",
 			metadataUrl:  "http://app-max_application_aaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 			host:         "app-max_application_aaaaaa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
 		},
 		{
-			remotEnv:     "toolong_application_aaaaaxxxx",
+			application:  "toolong_application_aaaaaxxxx",
 			id:           "c687e68a-9038-4f38-845b-9c61592e59e6",
 			resourceName: "app-toolong_application_aa-c687e68a-9038-4f38-845b-9c61592e59e6",
 			metadataUrl:  "http://app-toolong_application_aa-c687e68a-9038-4f38-845b-9c61592e59e6.namespace.svc.cluster.local",
@@ -41,7 +41,7 @@ func TestNameResolver(t *testing.T) {
 		for _, testCase := range testCases {
 			resolver := NewNameResolver("namespace")
 
-			result := resolver.GetResourceName(testCase.remotEnv, testCase.id)
+			result := resolver.GetResourceName(testCase.application, testCase.id)
 
 			assert.Equal(t, testCase.resourceName, result)
 		}
@@ -51,7 +51,7 @@ func TestNameResolver(t *testing.T) {
 		for _, testCase := range testCases {
 			resolver := NewNameResolver("namespace")
 
-			result := resolver.GetGatewayUrl(testCase.remotEnv, testCase.id)
+			result := resolver.GetGatewayUrl(testCase.application, testCase.id)
 
 			assert.Equal(t, testCase.metadataUrl, result)
 		}
@@ -61,7 +61,7 @@ func TestNameResolver(t *testing.T) {
 		for _, testCase := range testCases {
 			resolver := NewNameResolver("namespace")
 
-			result := resolver.ExtractServiceId(testCase.remotEnv, testCase.host)
+			result := resolver.ExtractServiceId(testCase.application, testCase.host)
 
 			assert.Equal(t, testCase.id, result)
 		}
