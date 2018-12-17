@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: remote-env-certificate-overrides
+  name: application-connector-certificate-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
 type: Opaque
 data:
-  global.remoteEnvCa: "__REMOTE_ENV_CA__"
-  global.remoteEnvCaKey: "__REMOTE_ENV_CA_KEY__"
+  global.applicationConnectorCa: "__REMOTE_ENV_CA__"
+  global.applicationConnectorCaKey: "__REMOTE_ENV_CA_KEY__"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -36,7 +36,7 @@ data:
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
   etcd-stateful.replicaCount: "3"
-  acceptanceTest.remoteEnvironment.disabled: "true"
+  acceptanceTest.application.disabled: "true"
 ---
 apiVersion: v1
 kind: ConfigMap

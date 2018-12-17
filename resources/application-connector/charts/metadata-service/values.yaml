@@ -12,7 +12,7 @@ service:
   externalapi:
     port: *externalAPIPort
 
-minioUserSecretName: remoteenvironments-minio-user
+minioUserSecretName: applications-minio-user
 
 tests:
   image:
