@@ -381,7 +381,7 @@ func checkFunctionAutoscaled(premature bool) {
 		log.Printf(testResult.resultMessage)
 	} else {
 		if premature {
-			result = "@channel HPA test timed out!"
+			result = "<!channel>\nHorizontal Pod Autoscaler test timed out!"
 		} else {
 			result = "Autoscaling of functions was successful!"
 		}
