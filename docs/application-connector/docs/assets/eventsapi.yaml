@@ -1,188 +1,168 @@
 openapi: '3.0.0'
 info:
   version: '1.0.0'
-  title: 'Kyma Connector API'
+  title: 'Kyma Events API'
+tags:
+- name: 'Kyma events'
+  description: 'API for publishing events to Kyma.'
 paths:
-  /v1/applications/{appName}/tokens:
-    post:
-      parameters:
-      - in: path
-        name: appName
-        description: 'Name of application.'
-        required: true
-        schema:
-          type: string
-      tags:
-      - internal API
-      summary: 'Creates a token used for certificate signing flow.'
-      responses:
-        '201':
-          description: 'Successful operation.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/tokenResponse'
-        '500':
-          description: 'Server error.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-  /v1/applications/{appName}/info:
+  /v1/health:
     get:
-      parameters:
-      - in: path
-        name: appName
-        description: 'Name of application.'
-        required: true
-        schema:
-          type: string
-      - in: query
-        name: token
-        description: 'Access Token fetched from /tokens endpoint.'
-        required: true
-        schema:
-          type: string
+      summary: 'Returns health of a service'
+      operationId: 'getHealth'
       tags:
-      - external API
-      summary: 'Allows for fetching proper information for future CSR.'
+      - 'health'
       responses:
         '200':
-          description: 'Successful operation.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/infoResponse'
-        '403':
-          description: 'Invalid token'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-        '500':
-          description: 'Server error.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-  /v1/applications/{appName}/client-certs:
+          description: 'The service is in a good health'
+  /v1/events:
     post:
-      parameters:
-      - in: path
-        name: appName
-        description: 'Name of application.'
-        required: true
-        schema:
-          type: string
-      - in: query
-        name: token
-        description: 'Access Token fetched from /tokens endpoint.'
-        required: true
-        schema:
-          type: string
+      summary: 'Publish an event'
+      operationId: 'publishEvent'
       tags:
-      - external API
-      summary: 'Signs CSR.'
+      - 'publish'
       requestBody:
-        description: 'The CSR to be signed'
+        description: 'The event to be published'
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/csrRequest'
+              $ref: '#/components/schemas/PublishRequest'
       responses:
-        '201':
-          description: 'Successful operation.'
+        '200':
+          description: 'The event was successfully published'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/csrResponse'
+                $ref: '#/components/schemas/PublishResponse'
         '400':
-          description: 'Improper subject values or lack of values in CSR.'
+          description: 'Bad Request'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/appError'
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: 'Authentication failure'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
         '403':
-          description: 'Invalid token'
+          description: 'Not authorized'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/appError'
-        '404':
-          description: 'Not found'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
+                $ref: '#/components/schemas/APIError'
         '500':
-          description: 'Server error.'
+          description: 'Server error'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/appError'
+                $ref: '#/components/schemas/APIError'
 components:
   schemas:
-    tokenResponse:
-      type: 'object'
+    PublishRequest:
+      type: object
+      description: A Publish request
       properties:
-        url:
-          type: 'string'
-          example: 'https://cert-service.kyma.cluster.cx/v1/applications/{application-name}/info?token=1edfc34g'
-        token:
-          type: 'string'
-          example: '1edfc34g'
-    cert:
-      type: 'object'
+        event-type:
+          description: Type of the event.
+          type: string
+          format: hostname
+          pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
+          example: 'order.created'
+        event-type-version:
+          description: The version of the event-type. This is applicable to the data payload alone.
+          type: string
+          pattern: '^[a-zA-Z0-9]+$'
+          example: 'v1'
+        event-id:
+          description: Optional publisher provided ID (UUID v4) of the to-be-published event. When omitted, one will be automatically generated.
+          type: string
+          pattern: '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'
+          example: '31109198-4d69-4ae0-972d-76117f3748c8'
+        event-time:
+          description: RFC 3339 timestamp of when the event happened.
+          type: string
+          format: date-time
+          example: '2012-11-01T22:08:41+00:00'
+        data:
+          $ref: '#/components/schemas/AnyValue'
+      required:
+      - event-type
+      - event-type-version
+      - event-time
+      - data
+    PublishResponse:
+      type: object
+      description: A Publish response
       properties:
-        subject:
-          type: 'string'
-          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={application-name}'
-        extensions:
-          type: 'string'
-        key-algorithm:
-          type: 'string'
-          example: 'rsa2048'
-    apiURLs:
-      type: 'object'
+        event-id:
+          type: string
+          description: ID of the published event
+          pattern: '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'
+          example: '31109198-4d69-4ae0-972d-76117f3748c8'
+      required:
+      - event-id
+    AnyValue:
+      nullable: false
+      description: Can be any value but null.
+    APIError:
+      type: object
+      description: API Error response body
       properties:
-        metadataUrl:
-          type: 'string'
-          example: 'gateway.wormhole.kyma.cluster.cx/{application-name}/v1/metadata/services'
-        eventsUrl:
-          type: 'string'
-          example: 'gateway.wormhole.kyma.cluster.cx/{application-name}/v1/events'
-        certificatesUrl:
-          type: 'string'
-          example: 'certificate-service.kyma.cluster.cx/v1/applications/{application-name}'
-    infoResponse:
-      type: 'object'
+        status:
+          type: integer
+          description: >-
+            original HTTP error code, should be consistent with the response HTTP code
+          minimum: 100
+          maximum: 599
+        type:
+          type: string
+          description: >-
+            classification of the error type, lower case with underscore eg
+            validation_failure
+          pattern: '[a-z]+[a-z_]*[a-z]+'
+        message:
+          type: string
+          description: descriptive error message for debugging
+        moreInfo:
+          type: string
+          format: uri
+          description: link to documentation to investigate further and finding support
+        details:
+          type: array
+          description: list of error causes
+          items:
+            $ref: '#/components/schemas/APIErrorDetail'
+      required:
+      - status
+      - type
+    APIErrorDetail:
+      description: schema for specific error detail
+      type: object
       properties:
-        url:
-          type: 'string'
-          example: 'https://cert-service.kyma.cluster.cx/v1/application/{application-name}/client-certs?token=1edfc34g'
-        api:
-          $ref: '#/components/schemas/apiURLs'
-        certificate:
-          $ref: '#/components/schemas/cert'
-    appError:
-      type: 'object'
-      properties:
-        code:
-          type: 'integer'
-        error:
-          type: 'string'
-    csrRequest:
-      type: 'object'
-      properties:
-        csr:
-          type: 'string'
-          description: 'Base64 encoded certificate signing request file.'
-          example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tDQpBTllfQ0VSVElGSUNBVEVfRklMRV9USElTX0lTX0pVU1RfQU5fRVhBTVBMRQ0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ0K'
-    csrResponse:
-      type: 'object'
-      properties:
-        crt:
-          type: 'string'
-          description: 'Base64 encoded certificates chain.'
-          example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkNMSUVOVCBDRVJUSUZJQ0FURSBGSUxFIChUSElTIElTIEpVU1QgQU4gRVhBTVBMRSkKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KU0VSVkVSIENFUlRJRklDQVRFIEZJTEUgKFRISVMgSVMgSlVTVCBBTiBFWEFNUExFKQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t'
+        field:
+          type: string
+          description: >-
+            a bean notation expression specifying the element in request
+            data causing the error, eg product.variants[3].name, this can
+            be empty if violation was not field specific
+        type:
+          type: string
+          description: >-
+            classification of the error detail type, lower case with
+            underscore eg missing_value, this value must be always
+            interpreted in context of the general error type.
+          pattern: '[a-z]+[a-z_]*[a-z]+'
+        message:
+          type: string
+          description: descriptive error detail message for debugging
+        moreInfo:
+          type: string
+          format: uri
+          description: >-
+            link to documentation to investigate further and finding
+            support for error detail
+      required:
+      - type
