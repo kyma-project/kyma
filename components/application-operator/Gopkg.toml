@@ -246,10 +246,6 @@ revision="f53464b8b84b4507805a0b033a8377b225163fea"
 name = "k8s.io/helm"
 version = "v2.10.0"
 
-[[constraint]]
-  name = "github.com/kyma-project/kyma"
-  revision = "4e1170ed9101dcbb98d450278a86c6ceecc1cb62"
-
 # For dependency below: Refer to issue https://github.com/golang/dep/issues/1799
 [[override]]
 name = "gopkg.in/fsnotify.v1"

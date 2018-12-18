@@ -1,4 +1,4 @@
-package remoteenvironemnts
+package application
 
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
@@ -6,12 +6,12 @@ import (
 )
 
 const (
-	reChartDirectory = "remote-environments"
+	applicationChartDirectory = "application"
 )
 
 type ReleaseManager interface {
-	InstallNewREChart(name string) (hapi_4.Status_Code, string, error)
-	DeleteREChart(name string) error
+	InstallChart(name string) (hapi_4.Status_Code, string, error)
+	DeleteChart(name string) error
 	CheckReleaseExistence(name string) (bool, error)
 	CheckReleaseStatus(name string) (hapi_4.Status_Code, string, error)
 }
@@ -30,8 +30,8 @@ func NewReleaseManager(helmClient kymahelm.HelmClient, overrides string, namespa
 	}
 }
 
-func (r *releaseManager) InstallNewREChart(name string) (hapi_4.Status_Code, string, error) {
-	installResponse, err := r.helmClient.InstallReleaseFromChart(reChartDirectory, r.namespace, name, r.overrides)
+func (r *releaseManager) InstallChart(name string) (hapi_4.Status_Code, string, error) {
+	installResponse, err := r.helmClient.InstallReleaseFromChart(applicationChartDirectory, r.namespace, name, r.overrides)
 	if err != nil {
 		return hapi_4.Status_FAILED, "", err
 	}
@@ -39,7 +39,7 @@ func (r *releaseManager) InstallNewREChart(name string) (hapi_4.Status_Code, str
 	return installResponse.Release.Info.Status.Code, installResponse.Release.Info.Description, nil
 }
 
-func (r *releaseManager) DeleteREChart(name string) error {
+func (r *releaseManager) DeleteChart(name string) error {
 	_, err := r.helmClient.DeleteRelease(name)
 	if err != nil {
 		return err

@@ -28,7 +28,7 @@ spec:
           - "/proxyservice"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
-          - "--remoteEnvironment={{ .Release.Name }}"
+          - "--application={{ .Release.Name }}"
           - "--namespace={{ .Release.Namespace }}"
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
           - "--skipVerify={{ .Values.deployment.args.skipVerify }}"

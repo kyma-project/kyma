@@ -5,7 +5,7 @@ metadata:
     "auth.istio.io/{{ .Values.service.externalapi.port }}": NONE
   name: {{ .Release.Name }}-proxy-service-external-api
   labels:
-    remoteEnvironment: {{ .Release.Name }}
+    application: {{ .Release.Name }}
     app: {{ .Release.Name }}-proxy-service
     release: {{ .Release.Name }}-proxy-service
     heritage: {{ .Release.Service }}-proxy-service
@@ -26,7 +26,7 @@ metadata:
     "auth.istio.io/{{ .Values.eventService.service.externalapi.port }}": NONE
   name: {{ .Release.Name }}-event-service-external-api
   labels:
-    remoteEnvironment: {{ .Release.Name }}
+    application: {{ .Release.Name }}
     app: {{ .Release.Name }}-event-service
     release: {{ .Release.Name }}-event-service
     heritage: {{ .Release.Service }}-event-service

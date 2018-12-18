@@ -20,7 +20,7 @@ type options struct {
 func parseArgs() *options {
 	appName := flag.String("appName", "application-operator", "Name used in controller registration")
 	domainName := flag.String("domainName", "kyma.local", "Domain name of the cluster")
-	namespace := flag.String("namespace", "kyma-integration", "Namespace in which the RE chart will be installed")
+	namespace := flag.String("namespace", "kyma-integration", "Namespace in which the Application chart will be installed")
 	tillerUrl := flag.String("tillerUrl", "tiller-deploy.kube-system.svc.cluster.local:44134", "Tiller release server url")
 	syncPeriod := flag.Int("syncPeriod", 30, "Time period between resyncing existing resources")
 	installationTimeout := flag.Int64("installationTimeout", 240, "Time after the release installation will time out")
