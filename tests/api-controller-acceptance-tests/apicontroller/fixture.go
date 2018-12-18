@@ -3,6 +3,8 @@ package apicontroller
 import (
 	"fmt"
 
+	"time"
+
 	log "github.com/sirupsen/logrus"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -10,35 +12,36 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
-	"time"
 )
 
 const (
-	namespace                                      = "kyma-system"
+	namespace                                      = "sampleapp"
 	ingressGatewayControllerServiceURL             = "istio-ingressgateway.istio-system.svc.cluster.local"
-	testIdLength                                   = 8
+	testIDLength                                   = 8
 	maxRetries                                     = 1000
 	minimalNumberOfCorrectResults                  = 5
 	retrySleep                                     = 2 * time.Second
 	domainNameEnv                                  = "DOMAIN_NAME"
-	apiSecurityDisabled                ApiSecurity = false
-	apiSecurityEnabled                 ApiSecurity = true
+	apiSecurityDisabled                APISecurity = false
+	apiSecurityEnabled                 APISecurity = true
 )
 
-type ApiSecurity bool
+//APISecurity Enable/disable security in API
+type APISecurity bool
 
+//Fixture holds objects for test (app controller, deployment, service)
 type Fixture struct {
 	sampleAppCtrl    *sampleAppCtrl
 	SampleAppDepl    *appv1.Deployment
 	SampleAppService *corev1.Service
 }
 
-func setUpOrExit(k8sInterface kubernetes.Interface, namespace string, testId string) *Fixture {
+func setUpOrExit(k8sInterface kubernetes.Interface, namespace string, testID string) *Fixture {
 
 	sampleAppCtrl := &sampleAppCtrl{
 		k8sInterface: k8sInterface,
 		namespace:    namespace,
-		testId:       testId,
+		testID:       testID,
 	}
 
 	sampleAppDepl, deplErr := sampleAppCtrl.createDeployment()
@@ -97,12 +100,12 @@ func (f *Fixture) tearDown() {
 type sampleAppCtrl struct {
 	k8sInterface kubernetes.Interface
 	namespace    string
-	testId       string
+	testID       string
 }
 
 func (c *sampleAppCtrl) createDeployment() (*appv1.Deployment, error) {
 
-	labels := labels(c.testId)
+	labels := labels(c.testID)
 
 	annotations := make(map[string]string)
 	annotations["sidecar.istio.io/inject"] = "true"
@@ -125,7 +128,7 @@ func (c *sampleAppCtrl) createDeployment() (*appv1.Deployment, error) {
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:            fmt.Sprintf("sample-app-cont-%s", c.testId),
+							Name:            fmt.Sprintf("sample-app-cont-%s", c.testID),
 							Image:           "eu.gcr.io/kyma-project/example/http-db-service:0.0.6",
 							ImagePullPolicy: "IfNotPresent",
 							Ports: []corev1.ContainerPort{
@@ -149,7 +152,7 @@ func (c *sampleAppCtrl) getDeployment() (*appv1.Deployment, error) {
 }
 
 func (c *sampleAppCtrl) deplName() string {
-	return fmt.Sprintf("sample-app-depl-%s", c.testId)
+	return fmt.Sprintf("sample-app-depl-%s", c.testID)
 }
 
 func (c *sampleAppCtrl) createService(podTmpl *corev1.PodTemplateSpec) (*corev1.Service, error) {
@@ -161,7 +164,7 @@ func (c *sampleAppCtrl) createService(podTmpl *corev1.PodTemplateSpec) (*corev1.
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      c.svcName(),
 			Namespace: c.namespace,
-			Labels:    labels(c.testId),
+			Labels:    labels(c.testID),
 		},
 		Spec: corev1.ServiceSpec{
 			Selector: selectors,
@@ -184,7 +187,7 @@ func (c *sampleAppCtrl) getService() (*corev1.Service, error) {
 }
 
 func (c *sampleAppCtrl) svcName() string {
-	return fmt.Sprintf("sample-app-svc-%s", c.testId)
+	return fmt.Sprintf("sample-app-svc-%s", c.testID)
 }
 
 func (c *sampleAppCtrl) deleteDeployment(depl *appv1.Deployment) error {
@@ -195,10 +198,10 @@ func (c *sampleAppCtrl) deleteService(service *corev1.Service) error {
 	return c.k8sInterface.CoreV1().Services(c.namespace).Delete(service.Name, &metav1.DeleteOptions{})
 }
 
-func labels(testId string) map[string]string {
+func labels(testID string) map[string]string {
 	labels := make(map[string]string)
 	labels["createdBy"] = "api-controller-acceptance-tests"
-	labels["app"] = fmt.Sprintf("sample-app-%s", testId)
+	labels["app"] = fmt.Sprintf("sample-app-%s", testID)
 	labels["test"] = "true"
 	return labels
 }
