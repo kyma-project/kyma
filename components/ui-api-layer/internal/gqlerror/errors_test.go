@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
+
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
