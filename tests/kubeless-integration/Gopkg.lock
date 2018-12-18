@@ -21,7 +21,7 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context"]
-  revision = "351d144fa1fc0bd934e2408202be0c29f25e35a0"
+  revision = "e147a9138326bc0e9d4e179541ffd8af41cff8a9"
 
 [[projects]]
   branch = "master"
@@ -32,7 +32,7 @@
     "go/internal/gcimporter",
     "go/types/typeutil"
   ]
-  revision = "3576414c54a492fc48cd913814eb209914c717f0"
+  revision = "13ba8ad772dfbf0f451b5dd0679e9c5605afc05d"
 
 [solve-meta]
   analyzer-name = "dep"

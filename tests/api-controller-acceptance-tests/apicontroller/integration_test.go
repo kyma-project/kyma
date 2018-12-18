@@ -35,7 +35,7 @@ func TestIntegrationSpec(t *testing.T) {
 
 	log.Infof("Running test: %s", testId)
 
-	httpClient, err := ingressgateway.Client()
+	httpClient, err := ingressgateway.Default().ClientFromEnv()
 	if err != nil {
 		t.Fatalf("Cannot get ingressgateway client: %s", err)
 	}
