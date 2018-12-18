@@ -99,9 +99,10 @@
   version = "v1.0.1"
 
 [[projects]]
-  branch = "kyma-on-knative"
+  branch = "test-ingressgateway"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "common/ingressgateway",
     "components/api-controller/pkg/apis/authentication.istio.io/v1alpha1",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
@@ -114,10 +115,9 @@
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned",
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/scheme",
-    "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3",
-    "tests/tools/ingressgateway"
+    "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3"
   ]
-  revision = "d746e195474240789af452ff2ecc8ea954504cb3"
+  revision = "98b9d9b30cb9c96299ef367a0e9c26daec88fe50"
   source = "https://github.com/sjanota/kyma"
 
 [[projects]]
@@ -366,6 +366,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1388b86adbfe2882a55898507481118666b4553f21472e50bb7af419a263fffe"
+  inputs-digest = "a1e1489c5a4c169ce74d2c81eb00096f01210446fb2d31f1d1c6f6d3cc1c502e"
   solver-name = "gps-cdcl"
   solver-version = 1

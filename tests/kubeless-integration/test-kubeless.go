@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/tools/ingressgateway"
+	"github.com/kyma-project/kyma/common/ingressgateway"
 	"io/ioutil"
 	"log"
 	"math/rand"
