@@ -2,6 +2,10 @@ required = [
   "golang.org/x/tools/cmd/goimports"
 ]
 
+[[constraint]]
+  name = "github.com/stretchr/testify"
+  version = "1.2.2"
+
 [prune]
   go-tests = true
   unused-packages = true
