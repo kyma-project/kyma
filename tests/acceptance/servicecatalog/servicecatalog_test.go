@@ -53,7 +53,7 @@ func TestServiceCatalogContainsClusterServiceClasses(t *testing.T) {
 	}
 }
 
-func TestServiceCatalogContainsREBServiceClasses(t *testing.T) {
+func TestServiceCatalogContainsABServiceClasses(t *testing.T) {
 	// given
 	k8sConfig, err := restclient.InClusterConfig()
 	require.NoError(t, err)
@@ -68,7 +68,7 @@ func TestServiceCatalogContainsREBServiceClasses(t *testing.T) {
 
 	broker := brokerURL{
 		namespace: fmt.Sprintf("test-acc-ns-broker-%s", rand.String(4)),
-		prefix:    "reb-ns-for-",
+		prefix:    "ab-ns-for-",
 	}
 	var brokerServices []v2.Service
 
