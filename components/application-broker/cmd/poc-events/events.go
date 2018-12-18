@@ -53,7 +53,7 @@ func main() {
 		fmt.Printf(format, args...)
 	})
 	broadcaster.StartRecordingToSink(&typedV1.EventSinkImpl{Interface: clientset.CoreV1().Events(metav1.NamespaceDefault)})
-	eventRecorder := broadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: "Remote-Environment-Broker"})
+	eventRecorder := broadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: "Application-Broker"})
 
 	app, err := appClient.ApplicationconnectorV1alpha1().Applications().Get("ec-prod", metav1.GetOptions{})
 	if err != nil {

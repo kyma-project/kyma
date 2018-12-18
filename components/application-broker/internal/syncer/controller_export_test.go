@@ -1,11 +1,11 @@
 package syncer
 
 func (c *Controller) WithCRValidator(validator applicationCRValidator) *Controller {
-	c.reCRValidator = validator
+	c.appCRValidator = validator
 	return c
 }
 
 func (c *Controller) WithCRMapper(mapper applicationCRMapper) *Controller {
-	c.reCRMapper = mapper
+	c.appCRMapper = mapper
 	return c
 }

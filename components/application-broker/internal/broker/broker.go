@@ -20,12 +20,12 @@ type (
 		FindAll() ([]*internal.Application, error)
 		Get(name internal.ApplicationName) (*internal.Application, error)
 	}
-	reSvcFinder interface {
+	appSvcFinder interface {
 		FindOneByServiceID(id internal.ApplicationServiceID) (*internal.Application, error)
 	}
 	appFinder interface {
 		applicationFinder
-		reSvcFinder
+		appSvcFinder
 	}
 	operationInserter interface {
 		Insert(io *internal.InstanceOperation) error
@@ -119,14 +119,14 @@ func New(applicationFinder appFinder,
 	stateService := &instanceStateService{operationCollectionGetter: opStorage}
 	return &Server{
 		catalogGetter: &catalogService{
-			finder:           applicationFinder,
-			conv:             &reToServiceConverter{},
-			reEnabledChecker: enabledChecker,
+			finder:            applicationFinder,
+			conv:              &appToServiceConverter{},
+			appEnabledChecker: enabledChecker,
 		},
 		provisioner:   NewProvisioner(instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder, serviceInstanceGetter, eaClient, instStorage, idp, log),
 		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, log),
 		binder: &bindService{
-			reSvcFinder: applicationFinder,
+			appSvcFinder: applicationFinder,
 		},
 		lastOpGetter: &getLastOperationService{
 			getter: opStorage,

@@ -5,7 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 )
 
-type reCRMapper struct{}
+type appCRMapper struct{}
 
 const (
 	api    = "API"
@@ -13,8 +13,8 @@ const (
 )
 
 // ToModel produces Application domain model from Application custom resource
-func (app *reCRMapper) ToModel(dto *v1alpha1.Application) *internal.Application {
-	var reServices []internal.Service
+func (app *appCRMapper) ToModel(dto *v1alpha1.Application) *internal.Application {
+	var appSvcs []internal.Service
 
 	for _, svc := range dto.Spec.Services {
 		dmSvc := internal.Service{
@@ -30,20 +30,20 @@ func (app *reCRMapper) ToModel(dto *v1alpha1.Application) *internal.Application 
 			EventProvider:       app.extractEventEntryAsModel(svc.Entries),
 		}
 
-		reServices = append(reServices, dmSvc)
+		appSvcs = append(appSvcs, dmSvc)
 	}
 
 	dm := &internal.Application{
 		Name:        internal.ApplicationName(dto.Name),
 		Description: dto.Spec.Description,
-		Services:    reServices,
+		Services:    appSvcs,
 		AccessLabel: dto.Spec.AccessLabel,
 	}
 
 	return dm
 }
 
-func (*reCRMapper) extractAPIEntryAsModel(entries []v1alpha1.Entry) *internal.APIEntry {
+func (*appCRMapper) extractAPIEntryAsModel(entries []v1alpha1.Entry) *internal.APIEntry {
 	for _, entry := range entries {
 		switch entry.Type {
 		case api:
@@ -61,7 +61,7 @@ func (*reCRMapper) extractAPIEntryAsModel(entries []v1alpha1.Entry) *internal.AP
 	}
 	return nil
 }
-func (*reCRMapper) extractEventEntryAsModel(entries []v1alpha1.Entry) bool {
+func (*appCRMapper) extractEventEntryAsModel(entries []v1alpha1.Entry) bool {
 	for _, entry := range entries {
 		switch entry.Type {
 		case events:

@@ -20,16 +20,16 @@ import (
 
 func TestControllerRunSuccess(t *testing.T) {
 	// given
-	reCR := mustLoadCRFix("testdata/app-CR-valid.input.yaml")
-	reDM := internal.Application{
+	appCR := mustLoadCRFix("testdata/app-CR-valid.input.yaml")
+	appDM := internal.Application{
 		Name: "mapped",
 	}
 
-	client := fake.NewSimpleClientset(&reCR)
+	client := fake.NewSimpleClientset(&appCR)
 
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 	serviceCatalogSharedInformers := informerFactory.Applicationconnector().V1alpha1()
-	reInformer := serviceCatalogSharedInformers.Applications()
+	appInformer := serviceCatalogSharedInformers.Applications()
 
 	expectations := &sync.WaitGroup{}
 	expectations.Add(4)
@@ -39,21 +39,21 @@ func TestControllerRunSuccess(t *testing.T) {
 
 	validatorMock := &automock.ApplicationCRValidator{}
 	defer validatorMock.AssertExpectations(t)
-	validatorMock.ExpectOnValidate(&reCR).Run(fulfillExpectation).Once()
+	validatorMock.ExpectOnValidate(&appCR).Run(fulfillExpectation).Once()
 
 	mapperMock := &automock.ApplicationCRMapper{}
 	defer mapperMock.AssertExpectations(t)
-	mapperMock.ExpectOnToModel(&reCR, &reDM).Run(fulfillExpectation).Once()
+	mapperMock.ExpectOnToModel(&appCR, &appDM).Run(fulfillExpectation).Once()
 
 	upserterMock := &automock.ApplicationUpserter{}
 	defer upserterMock.AssertExpectations(t)
-	upserterMock.ExpectOnUpsert(&reDM).Run(fulfillExpectation).Once()
+	upserterMock.ExpectOnUpsert(&appDM).Run(fulfillExpectation).Once()
 
 	relistRequesterMock := &automock.SCRelistRequester{}
 	defer relistRequesterMock.AssertExpectations(t)
 	relistRequesterMock.ExpectOnRequestRelist().Run(fulfillExpectation).Once()
 
-	syncJob := syncer.New(reInformer, upserterMock, nil, relistRequesterMock, spy.NewLogDummy()).
+	syncJob := syncer.New(appInformer, upserterMock, nil, relistRequesterMock, spy.NewLogDummy()).
 		WithCRValidator(validatorMock).
 		WithCRMapper(mapperMock)
 

@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestReCRValidatorValidateSuccess(t *testing.T) {
+func TestAppCRValidatorValidateSuccess(t *testing.T) {
 	// given
 	application := mustLoadCRFix("testdata/app-CR-valid.input.yaml")
-	validator := &reCRValidator{}
+	validator := &appCRValidator{}
 
 	// when
 	err := validator.Validate(&application)
@@ -21,7 +21,7 @@ func TestReCRValidatorValidateSuccess(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestReCRValidatorValidateFailure(t *testing.T) {
+func TestAppCRValidatorValidateFailure(t *testing.T) {
 	tests := map[string]struct {
 		fixModifier func(*v1alpha1.Application)
 		expErrMsg   []string
@@ -87,7 +87,7 @@ func TestReCRValidatorValidateFailure(t *testing.T) {
 	for tn, tc := range tests {
 		t.Run(tn, func(t *testing.T) {
 			// given
-			validator := &reCRValidator{}
+			validator := &appCRValidator{}
 			fixCR := mustModifyValidCR(tc.fixModifier)
 
 			// when

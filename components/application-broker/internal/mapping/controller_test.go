@@ -33,7 +33,7 @@ const (
 func TestControllerRunSuccess(t *testing.T) {
 	// given
 	fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
-	fixRE := fixApplication(fixAPPName)
+	fixApp := fixApplication(fixAPPName)
 	fixNS := fixNamespace(fixNSName)
 
 	expectations := &sync.WaitGroup{}
@@ -42,7 +42,7 @@ func TestControllerRunSuccess(t *testing.T) {
 		expectations.Done()
 	}
 
-	expectedPatchNS := fmt.Sprintf(`{"metadata":{"labels":{"accessLabel":"%s"}}}`, fixRE.AccessLabel)
+	expectedPatchNS := fmt.Sprintf(`{"metadata":{"labels":{"accessLabel":"%s"}}}`, fixApp.AccessLabel)
 
 	emInformer := newEmInformerFromFakeClientset(fixEM)
 	nsInformer := newNsInformerFromFakeClientset(fixNS)
@@ -54,10 +54,10 @@ func TestControllerRunSuccess(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	reGetterMock := &automock.ReGetter{}
-	defer reGetterMock.AssertExpectations(t)
-	reGetterMock.On("Get", internal.ApplicationName(fixAPPName)).
-		Return(&fixRE, nil).
+	appGetterMock := &automock.AppGetter{}
+	defer appGetterMock.AssertExpectations(t)
+	appGetterMock.On("Get", internal.ApplicationName(fixAPPName)).
+		Return(&fixApp, nil).
 		Run(fulfillExpectation).
 		Once()
 
@@ -68,11 +68,11 @@ func TestControllerRunSuccess(t *testing.T) {
 	brokerFacade.On("Create", fixNSName).Return(nil).
 		Run(fulfillExpectation)
 
-	svc := mapping.New(emInformer, nsInformer, nsClientMock, reGetterMock, brokerFacade, nil, spy.NewLogDummy())
+	svc := mapping.New(emInformer, nsInformer, nsClientMock, appGetterMock, brokerFacade, nil, spy.NewLogDummy())
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 	awaitInformerStartAtMost(t, time.Second, nsInformer)
 
-	ctx, close := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
 
 	// when
 	go svc.Run(ctx.Done())
@@ -81,7 +81,7 @@ func TestControllerRunSuccess(t *testing.T) {
 	awaitForSyncGroupAtMost(t, expectations, time.Second)
 
 	// clean-up - release controller
-	close()
+	cancel()
 }
 
 func TestControllerRunSuccessLabelRemove(t *testing.T) {
@@ -126,20 +126,20 @@ func TestControllerRunFailure(t *testing.T) {
 		Run(fulfillExpectation).
 		Once()
 
-	reGetter := &automock.ReGetter{}
-	defer reGetter.AssertExpectations(t)
-	reGetter.On("Get", internal.ApplicationName(fixAPPName)).
+	appGetter := &automock.AppGetter{}
+	defer appGetter.AssertExpectations(t)
+	appGetter.On("Get", internal.ApplicationName(fixAPPName)).
 		Return(nil, fixErr).
 		Run(fulfillExpectation).
 		Once()
 
-	svc := mapping.New(emInformer, nil, nsClientMock, reGetter, nil, nil, spy.NewLogDummy())
+	svc := mapping.New(emInformer, nil, nsClientMock, appGetter, nil, nil, spy.NewLogDummy())
 
 	awaitInformerStartAtMost(t, time.Second, emInformer)
 
 	// when
 	err2 := svc.DeleteAccessLabelFromNamespace(fixNS)
-	_, err3 := svc.GetAccessLabelFromRE(fixAPPName)
+	_, err3 := svc.GetAccessLabelFromApp(fixAPPName)
 
 	// then
 	awaitForSyncGroupAtMost(t, expectations, time.Second)
@@ -227,9 +227,9 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 				Return(&corev1.Namespace{}, nil).
 				Once()
 
-			reGetterMock := &automock.ReGetter{}
-			defer reGetterMock.AssertExpectations(t)
-			reGetterMock.On("Get", internal.ApplicationName(fixAPPName)).
+			appGetterMock := &automock.AppGetter{}
+			defer appGetterMock.AssertExpectations(t)
+			appGetterMock.On("Get", internal.ApplicationName(fixAPPName)).
 				Return(&fixRE, nil).
 				Once()
 
@@ -239,7 +239,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
 			defer nsBrokerSyncer.AssertExpectations(t)
 
-			svc := mapping.New(emInformer, nsInformer, nsClientMock, reGetterMock, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy())
+			svc := mapping.New(emInformer, nsInformer, nsClientMock, appGetterMock, nsBrokerFacade, nsBrokerSyncer, spy.NewLogDummy())
 
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixAPPName))
 			if tc.errorMsg == "" {

@@ -20,7 +20,7 @@ import (
 const serviceCatalogAPIVersion = "servicecatalog.k8s.io/v1beta1"
 
 // NewProvisioner creates provisioner
-func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, reSvcFinder reSvcFinder, serviceInstanceGetter serviceInstanceGetter, eaClient v1client.ApplicationconnectorV1alpha1Interface, iStateUpdater instanceStateUpdater,
+func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder, serviceInstanceGetter serviceInstanceGetter, eaClient v1client.ApplicationconnectorV1alpha1Interface, iStateUpdater instanceStateUpdater,
 	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger) *ProvisionService {
 	return &ProvisionService{
 		instanceInserter:      instanceInserter,
@@ -30,7 +30,7 @@ func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter insta
 		operationUpdater:      operationUpdater,
 		operationIDProvider:   operationIDProvider,
 		accessChecker:         accessChecker,
-		reSvcFinder:           reSvcFinder,
+		appSvcFinder:          appSvcFinder,
 		eaClient:              eaClient,
 		serviceInstanceGetter: serviceInstanceGetter,
 		maxWaitTime:           time.Minute,
@@ -46,7 +46,7 @@ type ProvisionService struct {
 	operationUpdater      operationUpdater
 	instanceStateGetter   instanceStateGetter
 	operationIDProvider   func() (internal.OperationID, error)
-	reSvcFinder           reSvcFinder
+	appSvcFinder          appSvcFinder
 	eaClient              v1client.ApplicationconnectorV1alpha1Interface
 	accessChecker         access.ProvisionChecker
 	serviceInstanceGetter serviceInstanceGetter
@@ -106,7 +106,7 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 	svcID := internal.ServiceID(req.ServiceID)
 	svcPlanID := internal.ServicePlanID(req.PlanID)
 
-	app, err := svc.reSvcFinder.FindOneByServiceID(internal.ApplicationServiceID(req.ServiceID))
+	app, err := svc.appSvcFinder.FindOneByServiceID(internal.ApplicationServiceID(req.ServiceID))
 	if err != nil {
 		return nil, errors.Wrapf(err, "while getting application with id: %s to storage", req.ServiceID)
 	}

@@ -44,9 +44,9 @@ type Facade struct {
 	servicesGetter      typedCorev1.ServicesGetter
 	serviceNameProvider serviceNameProvider
 	workingNamespace    string
-	rebSelectorKey      string
-	rebSelectorValue    string
-	rebTargetPort       int32
+	abSelectorKey       string
+	abSelectorValue     string
+	abTargetPort        int32
 	log                 logrus.FieldLogger
 
 	serviceChecker serviceChecker
@@ -58,15 +58,15 @@ func NewFacade(brokerGetter scbeta.ServiceBrokersGetter,
 	servicesGetter typedCorev1.ServicesGetter,
 	serviceNameProvider serviceNameProvider,
 	brokerSyncer brokerSyncer,
-	workingNamespace, rebSelectorKey, rebSelectorValue string,
-	rebTargetPort int32, log logrus.FieldLogger) *Facade {
+	workingNamespace, abSelectorKey, abSelectorValue string,
+	abTargetPort int32, log logrus.FieldLogger) *Facade {
 	return &Facade{
 		brokerGetter:        brokerGetter,
 		servicesGetter:      servicesGetter,
 		serviceNameProvider: serviceNameProvider,
-		rebSelectorKey:      rebSelectorKey,
-		rebSelectorValue:    rebSelectorValue,
-		rebTargetPort:       rebTargetPort,
+		abSelectorKey:       abSelectorKey,
+		abSelectorValue:     abSelectorValue,
+		abTargetPort:        abTargetPort,
 		workingNamespace:    workingNamespace,
 		serviceChecker:      newHTTPChecker(log),
 		brokerSyncer:        brokerSyncer,
@@ -86,14 +86,14 @@ func (f *Facade) Create(destinationNs string) error {
 		Spec: corev1.ServiceSpec{
 			Type: corev1.ServiceTypeNodePort,
 			Selector: map[string]string{
-				f.rebSelectorKey: f.rebSelectorValue,
+				f.abSelectorKey: f.abSelectorValue,
 			},
 			Ports: []corev1.ServicePort{
 				{
 					Name: "broker",
 					Port: 80,
 					TargetPort: intstr.IntOrString{
-						IntVal: f.rebTargetPort,
+						IntVal: f.abTargetPort,
 					},
 				},
 			},

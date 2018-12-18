@@ -15,7 +15,7 @@ func fixOperationID() internal.OperationID {
 	return internal.OperationID("op-id-123")
 }
 
-func fixRe() *internal.Application {
+func fixApp() *internal.Application {
 	return &internal.Application{
 		Name: fixAppName(),
 		Services: []internal.Service{

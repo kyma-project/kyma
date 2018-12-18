@@ -4,12 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access/automock"
-	mV1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,11 +18,11 @@ func TestMappingExistsProvisionCheckerWhenProvisionAcceptable(t *testing.T) {
 	rm := fixProdMapping()
 	mockClientSet := fake.NewSimpleClientset(rm)
 
-	mockREStorage := &automock.ApplicationFinder{}
-	defer mockREStorage.AssertExpectations(t)
-	mockREStorage.On("FindOneByServiceID", fixApplicationServiceID()).Return(fixApplicationModel(), nil)
+	mockAppStorage := &automock.ApplicationFinder{}
+	defer mockAppStorage.AssertExpectations(t)
+	mockAppStorage.On("FindOneByServiceID", fixApplicationServiceID()).Return(fixApplicationModel(), nil)
 
-	sut := access.NewMappingExistsProvisionChecker(mockREStorage, mockClientSet.ApplicationconnectorV1alpha1())
+	sut := access.NewMappingExistsProvisionChecker(mockAppStorage, mockClientSet.ApplicationconnectorV1alpha1())
 	// WHEN
 	canProvisionOutput, err := sut.CanProvision(fixApplicationServiceID(), internal.Namespace(fixProdNs()), time.Nanosecond)
 	// THEN
@@ -78,8 +76,8 @@ func fixApplicationServiceID() internal.ApplicationServiceID {
 	return internal.ApplicationServiceID("service-id")
 }
 
-func fixProdMapping() *mV1alpha1.ApplicationMapping {
-	return &v1alpha1.ApplicationMapping{
+func fixProdMapping() *mappingTypes.ApplicationMapping {
+	return &mappingTypes.ApplicationMapping{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fixApName(),
 			Namespace: fixProdNs(),

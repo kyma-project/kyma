@@ -44,7 +44,7 @@ func (c *MappingExistsProvisionChecker) CanProvision(serviceID internal.Applicat
 		return CanProvisionOutput{}, fmt.Errorf("cannot find application which contains service serviceID: [%s]", serviceID)
 
 	}
-	demandedRemoteEnvName := string(app.Name)
+	demandedAppName := string(app.Name)
 
 	lw := &cache.ListWatch{
 		ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
@@ -57,12 +57,12 @@ func (c *MappingExistsProvisionChecker) CanProvision(serviceID internal.Applicat
 
 	_, err = cache.ListWatchUntil(maxWaitTime, lw, func(event watch.Event) (bool, error) {
 		deepCopy := event.Object.DeepCopyObject()
-		envMapping, ok := deepCopy.(*v1alpha1.ApplicationMapping)
+		appMapping, ok := deepCopy.(*v1alpha1.ApplicationMapping)
 		if !ok {
 			return false, fmt.Errorf("cannot covert object [%+v] of type %T to *ApplicationMapping", deepCopy, deepCopy)
 		}
 
-		if envMapping.Name == demandedRemoteEnvName {
+		if appMapping.Name == demandedAppName {
 			return true, nil
 		}
 		return false, nil
@@ -74,7 +74,7 @@ func (c *MappingExistsProvisionChecker) CanProvision(serviceID internal.Applicat
 	case wait.ErrWaitTimeout:
 		return c.responseDeny(namespace), nil
 	default:
-		return CanProvisionOutput{}, errors.Wrapf(err, "while watching for ApplicationMapping with name: [%s] in the namespace [%s]", demandedRemoteEnvName, namespace)
+		return CanProvisionOutput{}, errors.Wrapf(err, "while watching for ApplicationMapping with name: [%s] in the namespace [%s]", demandedAppName, namespace)
 	}
 
 }

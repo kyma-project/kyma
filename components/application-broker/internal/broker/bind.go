@@ -9,7 +9,7 @@ import (
 )
 
 type bindService struct {
-	reSvcFinder reSvcFinder
+	appSvcFinder appSvcFinder
 }
 
 const fieldNameGatewayURL = "GATEWAY_URL"
@@ -19,7 +19,7 @@ func (svc *bindService) Bind(ctx context.Context, osbCtx osbContext, req *osb.Bi
 		return nil, errors.New("application-broker does not support configuration options for the service binding")
 	}
 
-	app, err := svc.reSvcFinder.FindOneByServiceID(internal.ApplicationServiceID(req.ServiceID))
+	app, err := svc.appSvcFinder.FindOneByServiceID(internal.ApplicationServiceID(req.ServiceID))
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot get Application: %s", req.ServiceID)
 	}

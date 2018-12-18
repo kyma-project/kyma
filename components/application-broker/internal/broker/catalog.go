@@ -14,27 +14,27 @@ type converter interface {
 	Convert(name internal.ApplicationName, svc internal.Service) (osb.Service, error)
 }
 
-//go:generate mockery -name=reEnabledChecker -output=automock -outpkg=automock -case=underscore
-type reEnabledChecker interface {
+//go:generate mockery -name=appEnabledChecker -output=automock -outpkg=automock -case=underscore
+type appEnabledChecker interface {
 	IsApplicationEnabled(namespace, name string) (bool, error)
 }
 
 type catalogService struct {
-	finder           applicationFinder
-	reEnabledChecker reEnabledChecker
-	conv             converter
+	finder            applicationFinder
+	appEnabledChecker appEnabledChecker
+	conv              converter
 }
 
 func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*osb.CatalogResponse, error) {
-	reList, err := svc.finder.FindAll()
+	appList, err := svc.finder.FindAll()
 	if err != nil {
 		return nil, errors.Wrap(err, "while finding Applications")
 	}
 
 	resp := osb.CatalogResponse{}
 	resp.Services = make([]osb.Service, 0)
-	for _, app := range reList {
-		enabled, err := svc.reEnabledChecker.IsApplicationEnabled(osbCtx.BrokerNamespace, string(app.Name))
+	for _, app := range appList {
+		enabled, err := svc.appEnabledChecker.IsApplicationEnabled(osbCtx.BrokerNamespace, string(app.Name))
 		if err != nil {
 			return nil, errors.Wrap(err, "while checking if Application is enabled")
 		}
@@ -42,8 +42,8 @@ func (svc *catalogService) GetCatalog(ctx context.Context, osbCtx osbContext) (*
 			continue
 		}
 
-		for _, reSvc := range app.Services {
-			s, err := svc.conv.Convert(app.Name, reSvc)
+		for _, s := range app.Services {
+			s, err := svc.conv.Convert(app.Name, s)
 			if err != nil {
 				return nil, errors.Wrap(err, "while converting bundle to service")
 			}
@@ -60,9 +60,9 @@ const (
 	defaultPlanDescription = "Default plan"
 )
 
-type reToServiceConverter struct{}
+type appToServiceConverter struct{}
 
-func (c *reToServiceConverter) Convert(name internal.ApplicationName, svc internal.Service) (osb.Service, error) {
+func (c *appToServiceConverter) Convert(name internal.ApplicationName, svc internal.Service) (osb.Service, error) {
 	metadata, err := c.osbMetadata(name, svc)
 	if err != nil {
 		return osb.Service{}, errors.Wrap(err, "while creating the metadata object")
@@ -81,7 +81,7 @@ func (c *reToServiceConverter) Convert(name internal.ApplicationName, svc intern
 	return osbService, nil
 }
 
-func (c *reToServiceConverter) osbMetadata(name internal.ApplicationName, svc internal.Service) (map[string]interface{}, error) {
+func (c *appToServiceConverter) osbMetadata(name internal.ApplicationName, svc internal.Service) (map[string]interface{}, error) {
 	metadata := map[string]interface{}{
 		"displayName":          svc.DisplayName,
 		"providerDisplayName":  svc.ProviderDisplayName,
@@ -106,11 +106,11 @@ func (c *reToServiceConverter) osbMetadata(name internal.ApplicationName, svc in
 
 // isSvcBindable checks if service is bindable. If APIEntry is not set then service provides only events,
 // so it is not bindable and false is returned
-func (*reToServiceConverter) isSvcBindable(svc internal.Service) bool {
+func (*appToServiceConverter) isSvcBindable(svc internal.Service) bool {
 	return svc.APIEntry != nil
 }
 
-func (*reToServiceConverter) osbPlans(svcID internal.ApplicationServiceID) []osb.Plan {
+func (*appToServiceConverter) osbPlans(svcID internal.ApplicationServiceID) []osb.Plan {
 	plan := osb.Plan{
 		ID:          fmt.Sprintf("%s-plan", svcID),
 		Name:        defaultPlanName,
@@ -123,7 +123,7 @@ func (*reToServiceConverter) osbPlans(svcID internal.ApplicationServiceID) []osb
 	return []osb.Plan{plan}
 }
 
-func (*reToServiceConverter) buildBindingLabels(accLabel string) (map[string]string, error) {
+func (*appToServiceConverter) buildBindingLabels(accLabel string) (map[string]string, error) {
 	if accLabel == "" {
 		return nil, errors.New("accessLabel field is required to build bindingLabels")
 	}

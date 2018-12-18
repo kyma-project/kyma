@@ -14,12 +14,12 @@ import (
 func TestApplicationGet(t *testing.T) {
 	tRunDrivers(t, "Found", func(t *testing.T, sf storage.Factory) {
 		// given
-		ts := newRETestSuite(t, sf)
+		ts := newAppTestSuite(t, sf)
 		ts.PopulateStorage()
 		exp := ts.MustGetFixture("A1")
 
 		// when
-		got, err := ts.reStorage.Get(internal.ApplicationName(exp.Name))
+		got, err := ts.appStorage.Get(internal.ApplicationName(exp.Name))
 
 		// then
 		assert.NoError(t, err)
@@ -28,11 +28,11 @@ func TestApplicationGet(t *testing.T) {
 
 	tRunDrivers(t, "NotFound", func(t *testing.T, sf storage.Factory) {
 		// given
-		ts := newRETestSuite(t, sf)
+		ts := newAppTestSuite(t, sf)
 		exp := ts.MustGetFixture("A1")
 
 		// when
-		got, err := ts.reStorage.Get(internal.ApplicationName(exp.Name))
+		got, err := ts.appStorage.Get(internal.ApplicationName(exp.Name))
 
 		// then
 		ts.AssertNotFoundError(err)
@@ -43,11 +43,11 @@ func TestApplicationGet(t *testing.T) {
 func TestApplicationFindAll(t *testing.T) {
 	tRunDrivers(t, "Found", func(t *testing.T, sf storage.Factory) {
 		// given
-		ts := newRETestSuite(t, sf)
+		ts := newAppTestSuite(t, sf)
 		ts.PopulateStorage()
 
 		// when
-		got, err := ts.reStorage.FindAll()
+		got, err := ts.appStorage.FindAll()
 
 		// then
 		assert.NoError(t, err)
@@ -58,12 +58,12 @@ func TestApplicationFindAll(t *testing.T) {
 func TestApplicationFindOneByServiceID(t *testing.T) {
 	tRunDrivers(t, "Found", func(t *testing.T, sf storage.Factory) {
 		// given
-		ts := newRETestSuite(t, sf)
+		ts := newAppTestSuite(t, sf)
 		ts.PopulateStorage()
 		exp := ts.MustGetFixture("A1")
 
 		// when
-		got, err := ts.reStorage.FindOneByServiceID(exp.Services[0].ID)
+		got, err := ts.appStorage.FindOneByServiceID(exp.Services[0].ID)
 
 		// then
 		assert.NoError(t, err)
@@ -71,11 +71,11 @@ func TestApplicationFindOneByServiceID(t *testing.T) {
 	})
 	tRunDrivers(t, "NotFound", func(t *testing.T, sf storage.Factory) {
 		// given
-		ts := newRETestSuite(t, sf)
+		ts := newAppTestSuite(t, sf)
 		ts.PopulateStorage()
 
 		// when
-		got, err := ts.reStorage.FindOneByServiceID(internal.ApplicationServiceID("apud"))
+		got, err := ts.appStorage.FindOneByServiceID(internal.ApplicationServiceID("apud"))
 
 		// then
 		assert.NoError(t, err)
@@ -86,11 +86,11 @@ func TestApplicationFindOneByServiceID(t *testing.T) {
 func TestApplicationUpsert(t *testing.T) {
 	tRunDrivers(t, "Success/New", func(t *testing.T, sf storage.Factory) {
 		// given
-		ts := newRETestSuite(t, sf)
+		ts := newAppTestSuite(t, sf)
 		fix := ts.MustGetFixture("A1")
 
 		// when
-		replace, err := ts.reStorage.Upsert(fix)
+		replace, err := ts.appStorage.Upsert(fix)
 
 		// then
 		assert.NoError(t, err)
@@ -100,32 +100,32 @@ func TestApplicationUpsert(t *testing.T) {
 	tRunDrivers(t, "Success/Replace", func(t *testing.T, sf storage.Factory) {
 		// given
 		expDesc := "updated description"
-		ts := newRETestSuite(t, sf)
+		ts := newAppTestSuite(t, sf)
 		fix := ts.MustGetFixture("A1")
-		ts.reStorage.Upsert(fix)
+		ts.appStorage.Upsert(fix)
 
 		// when
 		fixNew := ts.MustCopyFixture(fix)
 		fixNew.Description = expDesc
-		replace, err := ts.reStorage.Upsert(fixNew)
+		replace, err := ts.appStorage.Upsert(fixNew)
 
 		// then
 		assert.NoError(t, err)
 		assert.True(t, replace)
 
-		got, err := ts.reStorage.Get(internal.ApplicationName(fixNew.Name))
+		got, err := ts.appStorage.Get(internal.ApplicationName(fixNew.Name))
 		assert.NoError(t, err)
 		assert.EqualValues(t, fixNew, got)
 	})
 
 	tRunDrivers(t, "Failure/EmptyName", func(t *testing.T, sf storage.Factory) {
 		// given
-		ts := newRETestSuite(t, sf)
+		ts := newAppTestSuite(t, sf)
 		fix := ts.MustGetFixture("A1")
 		fix.Name = ""
 
 		// when
-		_, err := ts.reStorage.Upsert(fix)
+		_, err := ts.appStorage.Upsert(fix)
 
 		// then
 		assert.EqualError(t, err, "name must be set")
@@ -135,12 +135,12 @@ func TestApplicationUpsert(t *testing.T) {
 func TestApplicationRemove(t *testing.T) {
 	tRunDrivers(t, "Found", func(t *testing.T, sf storage.Factory) {
 		// given
-		ts := newRETestSuite(t, sf)
+		ts := newAppTestSuite(t, sf)
 		ts.PopulateStorage()
 		exp := ts.MustGetFixture("A1")
 
 		// when
-		err := ts.reStorage.Remove(internal.ApplicationName(exp.Name))
+		err := ts.appStorage.Remove(internal.ApplicationName(exp.Name))
 
 		// then
 		assert.NoError(t, err)
@@ -149,22 +149,22 @@ func TestApplicationRemove(t *testing.T) {
 
 	tRunDrivers(t, "NotFound", func(t *testing.T, sf storage.Factory) {
 		// given
-		ts := newRETestSuite(t, sf)
+		ts := newAppTestSuite(t, sf)
 		exp := ts.MustGetFixture("A1")
 
 		// when
-		err := ts.reStorage.Remove(internal.ApplicationName(exp.Name))
+		err := ts.appStorage.Remove(internal.ApplicationName(exp.Name))
 
 		// then
 		ts.AssertNotFoundError(err)
 	})
 }
 
-func newRETestSuite(t *testing.T, sf storage.Factory) *reTestSuite {
-	ts := reTestSuite{
-		t:         t,
-		reStorage: sf.Application(),
-		fixtures:  make(map[string]*internal.Application),
+func newAppTestSuite(t *testing.T, sf storage.Factory) *appTestSuite {
+	ts := appTestSuite{
+		t:          t,
+		appStorage: sf.Application(),
+		fixtures:   make(map[string]*internal.Application),
 	}
 
 	ts.generateFixtures()
@@ -172,13 +172,13 @@ func newRETestSuite(t *testing.T, sf storage.Factory) *reTestSuite {
 	return &ts
 }
 
-type reTestSuite struct {
-	t         *testing.T
-	reStorage storage.Application
-	fixtures  map[string]*internal.Application
+type appTestSuite struct {
+	t          *testing.T
+	appStorage storage.Application
+	fixtures   map[string]*internal.Application
 }
 
-func (ts *reTestSuite) generateFixtures() {
+func (ts *appTestSuite) generateFixtures() {
 	for fs, ft := range map[string]struct{ name, id, desc string }{
 		"A1": {"name-A1", "service-id-A1", "desc-A1"},
 		"A2": {"name-A2", "service-id-A2", "desc-A2"},
@@ -208,13 +208,13 @@ func (ts *reTestSuite) generateFixtures() {
 	}
 }
 
-func (ts *reTestSuite) PopulateStorage() {
+func (ts *appTestSuite) PopulateStorage() {
 	for _, fix := range ts.fixtures {
-		ts.reStorage.Upsert(fix)
+		ts.appStorage.Upsert(fix)
 	}
 }
 
-func (ts *reTestSuite) MustGetFixture(name string) *internal.Application {
+func (ts *appTestSuite) MustGetFixture(name string) *internal.Application {
 	fix, found := ts.fixtures[name]
 	if !found {
 		panic(fmt.Sprintf("fixture with name %q not found", name))
@@ -223,31 +223,31 @@ func (ts *reTestSuite) MustGetFixture(name string) *internal.Application {
 	return ts.MustCopyFixture(fix)
 }
 
-func (ts *reTestSuite) MustCopyFixture(in *internal.Application) *internal.Application {
+func (ts *appTestSuite) MustCopyFixture(in *internal.Application) *internal.Application {
 	m, err := json.Marshal(in)
 	if err != nil {
-		panic(fmt.Sprintf("input remote environemnt marchaling failed, err: %s", err))
+		panic(fmt.Sprintf("input application marchaling failed, err: %s", err))
 	}
 
 	var out internal.Application
 	if err := json.Unmarshal(m, &out); err != nil {
-		panic(fmt.Sprintf("input remote environemnt unmarchaling failed, err: %s", err))
+		panic(fmt.Sprintf("input application unmarchaling failed, err: %s", err))
 	}
 
 	return &out
 }
-func (ts *reTestSuite) AssertNotFoundError(err error) bool {
+func (ts *appTestSuite) AssertNotFoundError(err error) bool {
 	ts.t.Helper()
 	return assert.True(ts.t, storage.IsNotFoundError(err), "NotFound error expected")
 }
 
-func (ts *reTestSuite) AssertChartDoesNotExist(exp *internal.Application) bool {
+func (ts *appTestSuite) AssertChartDoesNotExist(exp *internal.Application) bool {
 	ts.t.Helper()
-	_, err := ts.reStorage.Get(internal.ApplicationName(exp.Name))
+	_, err := ts.appStorage.Get(internal.ApplicationName(exp.Name))
 	return assert.True(ts.t, storage.IsNotFoundError(err), "NotFound error expected")
 }
 
-func (ts *reTestSuite) AssertContainsAllFixtures(got []*internal.Application) {
+func (ts *appTestSuite) AssertContainsAllFixtures(got []*internal.Application) {
 	ts.t.Helper()
 
 	assert.Len(ts.t, got, len(ts.fixtures))

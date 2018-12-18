@@ -10,6 +10,6 @@ func (c *Controller) DeleteAccessLabelFromNamespace(ns *v1.Namespace) error {
 	return c.ensureNsNotLabelled(ns)
 }
 
-func (c *Controller) GetAccessLabelFromRE(name string) (string, error) {
+func (c *Controller) GetAccessLabelFromApp(name string) (string, error) {
 	return c.getAppAccLabel(name)
 }

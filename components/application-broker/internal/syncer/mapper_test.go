@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestReCRMapperToModel(t *testing.T) {
+func TestAppCRMapperToModel(t *testing.T) {
 	// given
 	fix := v1alpha1.Application{
 		ObjectMeta: metav1.ObjectMeta{
@@ -40,7 +40,7 @@ func TestReCRMapperToModel(t *testing.T) {
 		},
 	}
 
-	mapper := &reCRMapper{}
+	mapper := &appCRMapper{}
 
 	// when
 	dm := mapper.ToModel(&fix)
@@ -62,14 +62,14 @@ func TestReCRMapperToModel(t *testing.T) {
 }
 
 func TestEventProviderTrue(t *testing.T) {
-	fixEventRE := fixEventsBasedRE()
-	fixAPIEventsRE := fixAPIAndEventsRE()
+	fixEventApp := fixEventsBasedApp()
+	fixAPIEventsApp := fixAPIAndEventsApp()
 
-	mapper := &reCRMapper{}
+	mapper := &appCRMapper{}
 
 	// when
-	dmEvent := mapper.ToModel(fixEventRE)
-	dmAPIEvent := mapper.ToModel(fixAPIEventsRE)
+	dmEvent := mapper.ToModel(fixEventApp)
+	dmAPIEvent := mapper.ToModel(fixAPIEventsApp)
 
 	// then
 	assert.Equal(t, true, dmEvent.Services[0].EventProvider)
@@ -77,16 +77,16 @@ func TestEventProviderTrue(t *testing.T) {
 }
 
 func TestEventProviderFalse(t *testing.T) {
-	mapper := &reCRMapper{}
+	mapper := &appCRMapper{}
 
 	// when
-	dmAPI := mapper.ToModel(fixAPIBasedRE())
+	dmAPI := mapper.ToModel(fixAPIBasedApp())
 
 	// then
 	assert.Equal(t, false, dmAPI.Services[0].EventProvider)
 }
 
-func fixEventsBasedRE() *v1alpha1.Application {
+func fixEventsBasedApp() *v1alpha1.Application {
 	return &v1alpha1.Application{
 		Spec: v1alpha1.ApplicationSpec{
 			Services: []v1alpha1.Service{
@@ -103,7 +103,7 @@ func fixEventsBasedRE() *v1alpha1.Application {
 	}
 }
 
-func fixAPIBasedRE() *v1alpha1.Application {
+func fixAPIBasedApp() *v1alpha1.Application {
 	return &v1alpha1.Application{
 		Spec: v1alpha1.ApplicationSpec{
 			Services: []v1alpha1.Service{
@@ -122,7 +122,7 @@ func fixAPIBasedRE() *v1alpha1.Application {
 	}
 }
 
-func fixAPIAndEventsRE() *v1alpha1.Application {
+func fixAPIAndEventsApp() *v1alpha1.Application {
 	return &v1alpha1.Application{
 		Spec: v1alpha1.ApplicationSpec{
 			Services: []v1alpha1.Service{

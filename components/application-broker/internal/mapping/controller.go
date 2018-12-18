@@ -27,8 +27,8 @@ const (
 	maxApplicationMappingProcessRetries = 15
 )
 
-//go:generate mockery -name=reGetter -output=automock -outpkg=automock -case=underscore
-type reGetter interface {
+//go:generate mockery -name=appGetter -output=automock -outpkg=automock -case=underscore
+type appGetter interface {
 	Get(internal.ApplicationName) (*internal.Application, error)
 }
 
@@ -61,7 +61,7 @@ type Controller struct {
 	emInformer     cache.SharedIndexInformer
 	nsInformer     cache.SharedIndexInformer
 	nsPatcher      nsPatcher
-	reGetter       reGetter
+	appGetter      appGetter
 	nsBrokerFacade nsBrokerFacade
 	nsBrokerSyncer nsBrokerSyncer
 	mappingSvc     mappingLister
@@ -69,14 +69,14 @@ type Controller struct {
 }
 
 // New creates new application mapping controller
-func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, reGetter reGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger) *Controller {
+func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, appGetter appGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger) *Controller {
 	c := &Controller{
 		log:            log.WithField("service", "labeler:controller"),
 		emInformer:     emInformer,
 		nsInformer:     nsInformer,
 		queue:          workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 		nsPatcher:      nsPatcher,
-		reGetter:       reGetter,
+		appGetter:      appGetter,
 		nsBrokerFacade: nsBrokerFacade,
 		nsBrokerSyncer: nsBrokerSyncer,
 		mappingSvc:     newMappingService(emInformer),
@@ -122,8 +122,8 @@ func (c *Controller) deleteEM(obj interface{}) {
 func (c *Controller) Run(stopCh <-chan struct{}) {
 	go c.shutdownQueueOnStop(stopCh)
 
-	c.log.Info("Starting Environment Mappings controller")
-	defer c.log.Infof("Shutting down Environment Mappings controller")
+	c.log.Info("Starting Application Mappings controller")
+	defer c.log.Infof("Shutting down Application Mappings controller")
 
 	if !cache.WaitForCacheSync(stopCh, c.emInformer.HasSynced) {
 		c.log.Error("Timeout occurred on waiting for EM informer caches to sync. Shutdown the controller.")
@@ -191,18 +191,18 @@ func (c *Controller) processItem(key string) error {
 		return errors.Wrapf(err, "while getting name and namespace from key %q", key)
 	}
 
-	reNs, err := c.getNamespace(namespace)
+	appNs, err := c.getNamespace(namespace)
 	if err != nil {
 		return err
 	}
 
 	if !emExist {
-		if err = c.ensureNsNotLabelled(reNs); err != nil {
+		if err = c.ensureNsNotLabelled(appNs); err != nil {
 			return err
 		}
 		return c.ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace)
 	}
-	if err = c.ensureNsLabelled(name, reNs); err != nil {
+	if err = c.ensureNsLabelled(name, appNs); err != nil {
 		return err
 	}
 	envMapping, ok := emObj.(*v1alpha1.ApplicationMapping)
@@ -286,15 +286,15 @@ func (c *Controller) ensureNsNotLabelled(ns *corev1.Namespace) error {
 	return nil
 }
 
-func (c *Controller) ensureNsLabelled(appName string, reNs *corev1.Namespace) error {
+func (c *Controller) ensureNsLabelled(appName string, appNs *corev1.Namespace) error {
 	var label string
 	label, err := c.getAppAccLabel(appName)
 	if err != nil {
 		return errors.Wrapf(err, "cannot get AccessLabel from Application: %q", appName)
 	}
-	err = c.applyNsAccLabel(reNs, label)
+	err = c.applyNsAccLabel(appNs, label)
 	if err != nil {
-		return errors.Wrapf(err, "cannot apply AccessLabel to the namespace: %q", reNs.Name)
+		return errors.Wrapf(err, "cannot apply AccessLabel to the namespace: %q", appNs.Name)
 	}
 	return nil
 }
@@ -339,7 +339,7 @@ func (c *Controller) patchNs(nsOrig, nsMod *corev1.Namespace) error {
 
 func (c *Controller) getAppAccLabel(appName string) (string, error) {
 	// get Application from storage
-	app, err := c.reGetter.Get(internal.ApplicationName(appName))
+	app, err := c.appGetter.Get(internal.ApplicationName(appName))
 	if err != nil {
 		return "", errors.Wrapf(err, "while getting application with name: %q", appName)
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	re_type_v1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	appTypes "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	informers "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -40,11 +40,11 @@ type (
 	}
 
 	applicationCRValidator interface {
-		Validate(dto *re_type_v1alpha1.Application) error
+		Validate(dto *appTypes.Application) error
 	}
 
 	applicationCRMapper interface {
-		ToModel(dto *re_type_v1alpha1.Application) *internal.Application
+		ToModel(dto *appTypes.Application) *internal.Application
 	}
 
 	scRelistRequester interface {
@@ -57,38 +57,38 @@ type Controller struct {
 	log               logrus.FieldLogger
 	queue             workqueue.RateLimitingInterface
 	informer          informers.ApplicationInformer
-	reUpserter        applicationUpserter
-	reRemover         applicationRemover
-	reCRValidator     applicationCRValidator
-	reCRMapper        applicationCRMapper
+	appUpserter       applicationUpserter
+	appRemover        applicationRemover
+	appCRValidator    applicationCRValidator
+	appCRMapper       applicationCRMapper
 	scRelistRequester scRelistRequester
 }
 
 // New creates new application controller
-func New(applicationInformer informers.ApplicationInformer, reUpserter applicationUpserter, reRemover applicationRemover, scRelistRequester scRelistRequester, log logrus.FieldLogger) *Controller {
+func New(applicationInformer informers.ApplicationInformer, appUpserter applicationUpserter, appRemover applicationRemover, scRelistRequester scRelistRequester, log logrus.FieldLogger) *Controller {
 	c := &Controller{
 		informer:          applicationInformer,
-		reUpserter:        reUpserter,
-		reRemover:         reRemover,
+		appUpserter:       appUpserter,
+		appRemover:        appRemover,
 		scRelistRequester: scRelistRequester,
 		log:               log.WithField("service", "syncer:controller"),
 
 		queue: workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 
-		reCRValidator: &reCRValidator{},
-		reCRMapper:    &reCRMapper{},
+		appCRValidator: &appCRValidator{},
+		appCRMapper:    &appCRMapper{},
 	}
 
 	applicationInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc:    c.addRE,
-		DeleteFunc: c.deleteRE,
-		UpdateFunc: c.updateRE,
+		AddFunc:    c.addApp,
+		DeleteFunc: c.deleteApp,
+		UpdateFunc: c.updateApp,
 	})
 
 	return c
 }
 
-func (c *Controller) addRE(obj interface{}) {
+func (c *Controller) addApp(obj interface{}) {
 	key, err := cache.MetaNamespaceKeyFunc(obj)
 	if err != nil {
 		c.log.Errorf("while handling adding event: while adding new application custom resource to queue: couldn't get key: %v", err)
@@ -98,7 +98,7 @@ func (c *Controller) addRE(obj interface{}) {
 	c.queue.Add(key)
 }
 
-func (c *Controller) deleteRE(obj interface{}) {
+func (c *Controller) deleteApp(obj interface{}) {
 	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 	if err != nil {
 		c.log.Errorf("while handling deletion event: while adding new application custom resource to queue: couldn't get key: %v", err)
@@ -108,7 +108,7 @@ func (c *Controller) deleteRE(obj interface{}) {
 	c.queue.Add(key)
 }
 
-func (c *Controller) updateRE(old, cur interface{}) {
+func (c *Controller) updateApp(old, cur interface{}) {
 	key, err := cache.MetaNamespaceKeyFunc(cur)
 	if err != nil {
 		c.log.Errorf("while handling update event: while adding new application custom resource to queue: couldn't get key: %v", err)
@@ -187,7 +187,7 @@ func (c *Controller) processItem(key string) error {
 	}
 
 	if !exists {
-		err := c.reRemover.Remove(internal.ApplicationName(key))
+		err := c.appRemover.Remove(internal.ApplicationName(key))
 		if err != nil {
 			return errors.Wrapf(err, "while removing application with name %q from storage", key)
 		}
@@ -195,17 +195,17 @@ func (c *Controller) processItem(key string) error {
 		return nil
 	}
 
-	reObj, ok := obj.(*re_type_v1alpha1.Application)
+	app, ok := obj.(*appTypes.Application)
 	if !ok {
 		return errors.New("cannot cast received object to v1alpha1.Application type")
 	}
 
-	if err := c.reCRValidator.Validate(reObj); err != nil {
+	if err := c.appCRValidator.Validate(app); err != nil {
 		return errors.Wrapf(err, "while validating application %q", key)
 	}
 
-	dm := c.reCRMapper.ToModel(reObj)
-	replaced, err := c.reUpserter.Upsert(dm)
+	dm := c.appCRMapper.ToModel(app)
+	replaced, err := c.appUpserter.Upsert(dm)
 	if err != nil {
 		return errors.Wrapf(err, "while upserting application with name %q into storage", key)
 	}

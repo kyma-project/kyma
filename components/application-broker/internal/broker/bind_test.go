@@ -17,13 +17,13 @@ const fieldNameGatewayURL = "GATEWAY_URL"
 
 func TestBindServiceBindSuccess(t *testing.T) {
 	// given
-	appFinder := &automock.ReFinder{}
+	appFinder := &automock.AppFinder{}
 	defer appFinder.AssertExpectations(t)
 
-	fixRE := fixRE()
+	fixApp := fixApp()
 
-	appFinder.On("FindOneByServiceID", fixRE.Services[0].ID).
-		Return(&fixRE, nil).
+	appFinder.On("FindOneByServiceID", fixApp.Services[0].ID).
+		Return(&fixApp, nil).
 		Once()
 
 	osbCtx := broker.NewOSBContext("not", "important", "")
@@ -41,16 +41,16 @@ func TestBindServiceBindSuccess(t *testing.T) {
 func TestBindServiceBindFailure(t *testing.T) {
 	t.Run("On credentials get error", func(t *testing.T) {
 		// given
-		fixRE := fixRE()
+		fixApp := fixApp()
 		fixID := fixBindRequest().InstanceID
 
 		svc := broker.NewBindService(nil)
 
 		// when
-		resp, err := svc.GetCredentials(internal.ApplicationServiceID(fixID), &fixRE)
+		resp, err := svc.GetCredentials(internal.ApplicationServiceID(fixID), &fixApp)
 
 		// then
-		assert.EqualErrorf(t, err, err.Error(), "cannot get credentials to bind instance wit ApplicationServiceID: %s, from Application: %s", fixID, fixRE.Name)
+		assert.EqualErrorf(t, err, err.Error(), "cannot get credentials to bind instance wit ApplicationServiceID: %s, from Application: %s", fixID, fixApp.Name)
 		assert.Zero(t, resp)
 	})
 
@@ -80,7 +80,7 @@ func fixBindRequest() *osb.BindRequest {
 		PlanID:     "plan-id",
 	}
 }
-func fixRE() internal.Application {
+func fixApp() internal.Application {
 	return internal.Application{
 		Name: "ec-prod",
 		Services: []internal.Service{

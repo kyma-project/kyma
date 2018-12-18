@@ -10,8 +10,6 @@ import (
 
 	"path/filepath"
 
-	//"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	//"github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"

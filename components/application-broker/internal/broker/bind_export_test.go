@@ -4,7 +4,7 @@ import "github.com/kyma-project/kyma/components/application-broker/internal"
 
 func NewBindService(appFinder appFinder) *bindService {
 	return &bindService{
-		reSvcFinder: appFinder,
+		appSvcFinder: appFinder,
 	}
 }
 

@@ -18,11 +18,11 @@ func TestGetCatalogHappyPath(t *testing.T) {
 	// GIVEN
 	tc := newCatalogTC()
 	defer tc.AssertExpectations(t)
-	tc.finderMock.On("FindAll").Return([]*internal.Application{tc.fixRE()}, nil).Once()
-	tc.reEnabledCheckerMock.On("IsApplicationEnabled", "stage", string(tc.fixRE().Name)).Return(true, nil)
-	tc.converterMock.On("Convert", tc.fixRE().Name, tc.fixRE().Services[0]).Return(tc.fixService(), nil)
+	tc.finderMock.On("FindAll").Return([]*internal.Application{tc.fixApp()}, nil).Once()
+	tc.appEnabledCheckerMock.On("IsApplicationEnabled", "stage", string(tc.fixApp().Name)).Return(true, nil)
+	tc.converterMock.On("Convert", tc.fixApp().Name, tc.fixApp().Services[0]).Return(tc.fixService(), nil)
 
-	svc := broker.NewCatalogService(tc.finderMock, tc.reEnabledCheckerMock, tc.converterMock)
+	svc := broker.NewCatalogService(tc.finderMock, tc.appEnabledCheckerMock, tc.converterMock)
 	osbCtx := broker.NewOSBContext("not", "important", "stage")
 
 	// WHEN
@@ -39,10 +39,10 @@ func TestGetCatalogNotEnabled(t *testing.T) {
 	// GIVEN
 	tc := newCatalogTC()
 	defer tc.AssertExpectations(t)
-	tc.finderMock.On("FindAll").Return([]*internal.Application{tc.fixRE()}, nil).Once()
-	tc.reEnabledCheckerMock.On("IsApplicationEnabled", "stage", string(tc.fixRE().Name)).Return(false, nil)
+	tc.finderMock.On("FindAll").Return([]*internal.Application{tc.fixApp()}, nil).Once()
+	tc.appEnabledCheckerMock.On("IsApplicationEnabled", "stage", string(tc.fixApp().Name)).Return(false, nil)
 
-	svc := broker.NewCatalogService(tc.finderMock, tc.reEnabledCheckerMock, tc.converterMock)
+	svc := broker.NewCatalogService(tc.finderMock, tc.appEnabledCheckerMock, tc.converterMock)
 	osbCtx := broker.NewOSBContext("not", "important", "stage")
 
 	// WHEN
@@ -183,16 +183,16 @@ func fixOsbService() osb.Service {
 }
 
 type catalogTestCase struct {
-	finderMock           *automock.ReFinder
-	converterMock        *automock.Converter
-	reEnabledCheckerMock *automock.ReEnabledChecker
+	finderMock            *automock.AppFinder
+	converterMock         *automock.Converter
+	appEnabledCheckerMock *automock.AppEnabledChecker
 }
 
 func newCatalogTC() *catalogTestCase {
 	return &catalogTestCase{
-		finderMock:           &automock.ReFinder{},
-		converterMock:        &automock.Converter{},
-		reEnabledCheckerMock: &automock.ReEnabledChecker{},
+		finderMock:            &automock.AppFinder{},
+		converterMock:         &automock.Converter{},
+		appEnabledCheckerMock: &automock.AppEnabledChecker{},
 	}
 }
 
@@ -201,7 +201,7 @@ func (tc *catalogTestCase) AssertExpectations(t *testing.T) {
 	tc.converterMock.AssertExpectations(t)
 }
 
-func (tc *catalogTestCase) fixRE() *internal.Application {
+func (tc *catalogTestCase) fixApp() *internal.Application {
 	return &internal.Application{
 		Name: "ec-prod",
 		Services: []internal.Service{
