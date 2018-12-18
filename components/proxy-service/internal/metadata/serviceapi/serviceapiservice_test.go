@@ -6,7 +6,7 @@ import (
 	secretsmocks "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/secrets/mocks"
 
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/applications"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -14,9 +14,9 @@ import (
 func TestDefaultService_Read(t *testing.T) {
 	t.Run("should read API with oauth credentials", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
+		applicationServiceAPI := &applications.ServiceAPI{
 			TargetUrl: "http://target.com",
-			Credentials: &remoteenv.Credentials{
+			Credentials: &applications.Credentials{
 				Type:       "OAuth",
 				SecretName: "secret-name",
 				Url:        "http://oauth.com",
@@ -34,7 +34,7 @@ func TestDefaultService_Read(t *testing.T) {
 		service := NewService(secretsRepository)
 
 		// when
-		api, err := service.Read(remoteEnvServiceAPi)
+		api, err := service.Read(applicationServiceAPI)
 
 		// then
 		require.NoError(t, err)
@@ -49,14 +49,14 @@ func TestDefaultService_Read(t *testing.T) {
 
 	t.Run("should read API without oauth credentials", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
+		applicationServiceAPI := &applications.ServiceAPI{
 			TargetUrl: "http://target.com",
 		}
 
 		service := NewService(nil)
 
 		// when
-		api, err := service.Read(remoteEnvServiceAPi)
+		api, err := service.Read(applicationServiceAPI)
 
 		// then
 		require.NoError(t, err)
@@ -67,9 +67,9 @@ func TestDefaultService_Read(t *testing.T) {
 
 	t.Run("should return error when reading secret fails", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPi := &remoteenv.ServiceAPI{
+		applicationServiceAPI := &applications.ServiceAPI{
 			TargetUrl: "http://target.com",
-			Credentials: &remoteenv.Credentials{
+			Credentials: &applications.Credentials{
 				Type:       "OAuth",
 				SecretName: "secret-name",
 				Url:        "http://oauth.com",
@@ -83,7 +83,7 @@ func TestDefaultService_Read(t *testing.T) {
 		service := NewService(secretsRepository)
 
 		// when
-		api, err := service.Read(remoteEnvServiceAPi)
+		api, err := service.Read(applicationServiceAPI)
 
 		// then
 		assert.Error(t, err)

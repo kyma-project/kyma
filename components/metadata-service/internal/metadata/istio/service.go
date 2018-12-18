@@ -8,10 +8,10 @@ import (
 // Service is responsible for creating Istio resources associated with deniers.
 type Service interface {
 	// Create creates Istio resources associated with deniers.
-	Create(remoteEnvironment, serviceId, resourceName string) apperrors.AppError
+	Create(application, serviceId, resourceName string) apperrors.AppError
 
 	// Upsert updates or creates Istio resources associated with deniers.
-	Upsert(remoteEnvironment, serviceId, resourceName string) apperrors.AppError
+	Upsert(application, serviceId, resourceName string) apperrors.AppError
 
 	// Delete removes Istio resources associated with deniers.
 	Delete(resourceName string) apperrors.AppError
@@ -27,18 +27,18 @@ func NewService(repository Repository) Service {
 }
 
 // Create creates Istio resources associated with deniers.
-func (s *service) Create(remoteEnvironment, serviceId, resourceName string) apperrors.AppError {
-	err := s.repository.CreateDenier(remoteEnvironment, serviceId, resourceName)
+func (s *service) Create(application, serviceId, resourceName string) apperrors.AppError {
+	err := s.repository.CreateDenier(application, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
 
-	err = s.repository.CreateCheckNothing(remoteEnvironment, serviceId, resourceName)
+	err = s.repository.CreateCheckNothing(application, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
 
-	err = s.repository.CreateRule(remoteEnvironment, serviceId, resourceName)
+	err = s.repository.CreateRule(application, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
@@ -47,18 +47,18 @@ func (s *service) Create(remoteEnvironment, serviceId, resourceName string) appe
 }
 
 // Upsert updates or creates Istio resources associated with deniers.
-func (s *service) Upsert(remoteEnvironment, serviceId, resourceName string) apperrors.AppError {
-	err := s.repository.UpsertDenier(remoteEnvironment, serviceId, resourceName)
+func (s *service) Upsert(application, serviceId, resourceName string) apperrors.AppError {
+	err := s.repository.UpsertDenier(application, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
 
-	err = s.repository.UpsertCheckNothing(remoteEnvironment, serviceId, resourceName)
+	err = s.repository.UpsertCheckNothing(application, serviceId, resourceName)
 	if err != nil {
 		return err
 	}
 
-	err = s.repository.UpsertRule(remoteEnvironment, serviceId, resourceName)
+	err = s.repository.UpsertRule(application, serviceId, resourceName)
 	if err != nil {
 		return err
 	}

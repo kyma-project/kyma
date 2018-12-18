@@ -6,21 +6,21 @@ import (
 )
 
 type options struct {
-	externalAPIPort   int
-	proxyPort         int
-	remoteEnvironment string
-	namespace         string
-	requestTimeout    int
-	skipVerify        bool
-	proxyTimeout      int
-	requestLogging    bool
-	proxyCacheTTL     int
+	externalAPIPort int
+	proxyPort       int
+	application     string
+	namespace       string
+	requestTimeout  int
+	skipVerify      bool
+	proxyTimeout    int
+	requestLogging  bool
+	proxyCacheTTL   int
 }
 
 func parseArgs() *options {
 	externalAPIPort := flag.Int("externalAPIPort", 8081, "External API port.")
 	proxyPort := flag.Int("proxyPort", 8080, "Proxy port.")
-	remoteEnvironment := flag.String("remoteEnvironment", "default-ec", "Remote environment name for reading and updating services.")
+	application := flag.String("application", "default-ec", "Application name for reading and updating services.")
 	namespace := flag.String("namespace", "kyma-system", "Namespace used by the Proxy Service")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	skipVerify := flag.Bool("skipVerify", false, "Flag for skipping certificate verification for proxy target.")
@@ -31,21 +31,21 @@ func parseArgs() *options {
 	flag.Parse()
 
 	return &options{
-		externalAPIPort:   *externalAPIPort,
-		proxyPort:         *proxyPort,
-		remoteEnvironment: *remoteEnvironment,
-		namespace:         *namespace,
-		requestTimeout:    *requestTimeout,
-		skipVerify:        *skipVerify,
-		proxyTimeout:      *proxyTimeout,
-		requestLogging:    *requestLogging,
-		proxyCacheTTL:     *proxyCacheTTL,
+		externalAPIPort: *externalAPIPort,
+		proxyPort:       *proxyPort,
+		application:     *application,
+		namespace:       *namespace,
+		requestTimeout:  *requestTimeout,
+		skipVerify:      *skipVerify,
+		proxyTimeout:    *proxyTimeout,
+		requestLogging:  *requestLogging,
+		proxyCacheTTL:   *proxyCacheTTL,
 	}
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --remoteEnvironment=%s --namespace=%s --requestTimeout=%d --skipVerify=%v --proxyTimeout=%d"+
+	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --application=%s --namespace=%s --requestTimeout=%d --skipVerify=%v --proxyTimeout=%d"+
 		" --requestLogging=%t --proxyCacheTTL=%d",
-		o.externalAPIPort, o.proxyPort, o.remoteEnvironment, o.namespace, o.requestTimeout, o.skipVerify, o.proxyTimeout,
+		o.externalAPIPort, o.proxyPort, o.application, o.namespace, o.requestTimeout, o.skipVerify, o.proxyTimeout,
 		o.requestLogging, o.proxyCacheTTL)
 }

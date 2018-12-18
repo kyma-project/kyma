@@ -13,10 +13,10 @@ import (
 func TestRedirectionHandler_Redirect(t *testing.T) {
 	t.Run("should redirect request", func(t *testing.T) {
 		// given
-		redirectionHandler := NewRedirectionHandler("/{remoteEnvironment}/v1/metadata/api.yaml", http.StatusMovedPermanently)
+		redirectionHandler := NewRedirectionHandler("/{application}/v1/metadata/api.yaml", http.StatusMovedPermanently)
 
 		router := mux.NewRouter()
-		router.Path("/{remoteEnvironment}/v1/metadata").HandlerFunc(redirectionHandler.Redirect)
+		router.Path("/{application}/v1/metadata").HandlerFunc(redirectionHandler.Redirect)
 
 		testServer := httptest.NewServer(router)
 		defer testServer.Close()
@@ -25,7 +25,7 @@ func TestRedirectionHandler_Redirect(t *testing.T) {
 		fullUrl := fmt.Sprintf("%s%s", testServer.URL, path)
 		req, err := http.NewRequest(http.MethodGet, fullUrl, nil)
 		require.NoError(t, err)
-		mux.SetURLVars(req, map[string]string{"remoteEnvironment": "ec-default"})
+		mux.SetURLVars(req, map[string]string{"application": "ec-default"})
 
 		client := &http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {

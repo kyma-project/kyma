@@ -25,16 +25,16 @@ type proxy struct {
 }
 
 type Config struct {
-	SkipVerify        bool
-	ProxyTimeout      int
-	RemoteEnvironment string
-	ProxyCacheTTL     int
+	SkipVerify    bool
+	ProxyTimeout  int
+	Application   string
+	ProxyCacheTTL int
 }
 
 // New creates proxy for handling user's services calls
 func New(serviceDefService metadata.ServiceDefinitionService, authorizationStrategyFactory authorization.StrategyFactory, config Config) http.Handler {
 	return &proxy{
-		nameResolver:                 k8sconsts.NewNameResolver(config.RemoteEnvironment),
+		nameResolver:                 k8sconsts.NewNameResolver(config.Application),
 		serviceDefService:            serviceDefService,
 		cache:                        NewCache(config.ProxyCacheTTL),
 		skipVerify:                   config.SkipVerify,

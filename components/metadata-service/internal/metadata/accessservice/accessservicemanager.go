@@ -19,8 +19,8 @@ type ServiceInterface interface {
 }
 
 type AccessServiceManager interface {
-	Create(remoteEnvironment, serviceId, serviceName string) apperrors.AppError
-	Upsert(remoteEnvironment, serviceId, serviceName string) apperrors.AppError
+	Create(application, serviceId, serviceName string) apperrors.AppError
+	Upsert(application, serviceId, serviceName string) apperrors.AppError
 	Delete(serviceName string) apperrors.AppError
 }
 
@@ -40,16 +40,16 @@ func NewAccessServiceManager(serviceInterface ServiceInterface, config AccessSer
 	}
 }
 
-func (m *accessServiceManager) Create(remoteEnvironment, serviceId, serviceName string) apperrors.AppError {
-	_, err := m.create(remoteEnvironment, serviceId, serviceName)
+func (m *accessServiceManager) Create(application, serviceId, serviceName string) apperrors.AppError {
+	_, err := m.create(application, serviceId, serviceName)
 	if err != nil {
 		return apperrors.Internal("Creating service failed, %s", err.Error())
 	}
 	return nil
 }
 
-func (m *accessServiceManager) Upsert(remoteEnvironment, serviceId, serviceName string) apperrors.AppError {
-	_, err := m.create(remoteEnvironment, serviceId, serviceName)
+func (m *accessServiceManager) Upsert(application, serviceId, serviceName string) apperrors.AppError {
+	_, err := m.create(application, serviceId, serviceName)
 	if err != nil {
 		if k8serrors.IsAlreadyExists(err) {
 			return nil
@@ -69,15 +69,15 @@ func (m *accessServiceManager) Delete(serviceName string) apperrors.AppError {
 	return nil
 }
 
-func (m *accessServiceManager) create(remoteEnvironment, serviceId, serviceName string) (*corev1.Service, error) {
-	appName := fmt.Sprintf(appNameLabelFormat, remoteEnvironment)
+func (m *accessServiceManager) create(application, serviceId, serviceName string) (*corev1.Service, error) {
+	appName := fmt.Sprintf(appNameLabelFormat, application)
 
 	service := corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: serviceName,
 			Labels: map[string]string{
-				k8sconsts.LabelRemoteEnvironment: remoteEnvironment,
-				k8sconsts.LabelServiceId:         serviceId,
+				k8sconsts.LabelApplication: application,
+				k8sconsts.LabelServiceId:   serviceId,
 			},
 		},
 		Spec: corev1.ServiceSpec{
