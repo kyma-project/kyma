@@ -28,13 +28,13 @@ func TestConnector(t *testing.T) {
 	config, err := testkit.ReadConfig()
 	require.NoError(t, err)
 
-	remoteEnvName := "dummy-re"
+	appName := "dummy-app"
 
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
 	require.NoError(t, err)
-	_, e := k8sResourcesClient.CreateDummyRemoteEnvironment(remoteEnvName, "")
+	_, e := k8sResourcesClient.CreateDummyApplication(appName, "")
 
-	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
+	client := testkit.NewConnectorClient(appName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
 
 	require.NoError(t, e)
 
@@ -115,7 +115,7 @@ func TestConnector(t *testing.T) {
 		require.Equal(t, "CSR: Invalid CName provided.", err.ErrorResponse.Error)
 	})
 
-	t.Run("should accept only one token per remote environment", func(t *testing.T) {
+	t.Run("should accept only one token per application", func(t *testing.T) {
 		// when
 		tokenResponse := client.CreateToken(t)
 
@@ -223,7 +223,7 @@ func TestConnector(t *testing.T) {
 		require.Equal(t, StatusBadRequest, err.ErrorResponse.Code)
 		require.Equal(t, "There was an error while parsing the base64 content. An incorrect value was provided.", err.ErrorResponse.Error)
 	})
-	k8sResourcesClient.DeleteRemoteEnvironment(remoteEnvName, &v1.DeleteOptions{})
+	k8sResourcesClient.DeleteApplication(appName, &v1.DeleteOptions{})
 }
 
 func TestApiSpec(t *testing.T) {
@@ -277,24 +277,24 @@ func TestCertificateValidation(t *testing.T) {
 
 	gatewayUrlFormat := config.GatewayUrl + "/%s/v1/metadata/services"
 
-	remoteEnvName := "dummy-re-1"
-	forbiddenRemoteEnvName := "dummy-re-2"
+	appName := "dummy-app-1"
+	forbiddenAppName := "dummy-app-2"
 
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
 	require.NoError(t, err)
-	_, e := k8sResourcesClient.CreateDummyRemoteEnvironment(remoteEnvName, "")
+	_, e := k8sResourcesClient.CreateDummyApplication(appName, "")
 	require.NoError(t, e)
-	_, e = k8sResourcesClient.CreateDummyRemoteEnvironment(forbiddenRemoteEnvName, "")
+	_, e = k8sResourcesClient.CreateDummyApplication(forbiddenAppName, "")
 	require.NoError(t, e)
 
-	client := testkit.NewConnectorClient(remoteEnvName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
+	client := testkit.NewConnectorClient(appName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
 
 	clientKey := testkit.CreateKey(t)
 	tlsClient := createTLSClientWithCert(t, client, clientKey, config.SkipSslVerify)
 
-	t.Run("should access remote environment", func(t *testing.T) {
+	t.Run("should access application", func(t *testing.T) {
 		// when
-		response, err := repeatUntilIngressIsCreated(tlsClient, gatewayUrlFormat, remoteEnvName)
+		response, err := repeatUntilIngressIsCreated(tlsClient, gatewayUrlFormat, appName)
 
 		// then
 		require.NoError(t, err)
@@ -303,22 +303,22 @@ func TestCertificateValidation(t *testing.T) {
 
 	t.Run("should receive 403 when accessing RE with invalid CN", func(t *testing.T) {
 		// when
-		response, err := repeatUntilIngressIsCreated(tlsClient, gatewayUrlFormat, forbiddenRemoteEnvName)
+		response, err := repeatUntilIngressIsCreated(tlsClient, gatewayUrlFormat, forbiddenAppName)
 
 		// then
 		require.NoError(t, err)
 		require.Equal(t, StatusForbidden, response.StatusCode)
 	})
 
-	k8sResourcesClient.DeleteRemoteEnvironment(remoteEnvName, &v1.DeleteOptions{})
-	k8sResourcesClient.DeleteRemoteEnvironment(forbiddenRemoteEnvName, &v1.DeleteOptions{})
+	k8sResourcesClient.DeleteApplication(appName, &v1.DeleteOptions{})
+	k8sResourcesClient.DeleteApplication(forbiddenAppName, &v1.DeleteOptions{})
 }
 
-func repeatUntilIngressIsCreated(tlsClient *Client, gatewayUrlFormat string, remoteEnvName string) (*Response, error) {
+func repeatUntilIngressIsCreated(tlsClient *Client, gatewayUrlFormat string, appName string) (*Response, error) {
 	var response *Response
 	var err error
 	for i := 0; (shouldRetry(response, err)) && i < retryCount; i++ {
-		response, err = tlsClient.Get(fmt.Sprintf(gatewayUrlFormat, remoteEnvName))
+		response, err = tlsClient.Get(fmt.Sprintf(gatewayUrlFormat, appName))
 		time.Sleep(retryWaitTimeSeconds)
 	}
 	return response, err

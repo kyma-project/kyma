@@ -16,11 +16,11 @@ const (
 
 // TokenRequestStatus defines the observed state of TokenRequest
 type TokenRequestStatus struct {
-	Token             string            `json:"token"`
-	URL               string            `json:"url"`
-	ExpireAfter       metav1.Time       `json:"expireAfter"`
-	RemoteEnvironment string            `json:"remoteEnvironment"`
-	State             TokenRequestState `json:"state"`
+	Token       string            `json:"token"`
+	URL         string            `json:"url"`
+	ExpireAfter metav1.Time       `json:"expireAfter"`
+	Application string            `json:"application"`
+	State       TokenRequestState `json:"state"`
 }
 
 // +genclient
