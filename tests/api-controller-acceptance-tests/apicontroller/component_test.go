@@ -33,6 +33,11 @@ func TestComponentSpec(t *testing.T) {
 		t.Fatal("Domain name not set.")
 	}
 
+	namespace := os.Getenv(namespaceEnv)
+	if namespace == "" {
+		t.Fatal("Namespace not set.")
+	}
+
 	ctx := componentTestContext{}
 
 	kubeConfig := ctx.defaultConfigOrExit()
@@ -48,21 +53,21 @@ func TestComponentSpec(t *testing.T) {
 
 			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
-			api := ctx.apiFor(testID, domainName, apiSecurityDisabled, true)
+			api := ctx.apiFor(testID, domainName, namespace, apiSecurityDisabled, true)
 
 			lastAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			defer ctx.cleanUpAPI(kymaClient, lastAPI, t, false)
+			defer ctx.cleanUpAPI(kymaClient, lastAPI, t, false, namespace)
 			So(err, ShouldBeNil)
 			So(lastAPI, ShouldNotBeNil)
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 
-			lastAPI, err = ctx.awaitAPIChanged(kymaClient, lastAPI, true, false)
+			lastAPI, err = ctx.awaitAPIChanged(kymaClient, lastAPI, true, false, namespace)
 			So(err, ShouldBeNil)
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 			So(lastAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
 
 			lastVs, err := istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(lastAPI.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
-			expectedVs := ctx.virtualServiceFor(testID, domainName)
+			expectedVs := ctx.virtualServiceFor(testID, domainName, namespace)
 			So(err, ShouldBeNil)
 			So(lastVs.Spec, ctx.ShouldDeepEqual, expectedVs)
 		})
@@ -72,21 +77,21 @@ func TestComponentSpec(t *testing.T) {
 
 			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
-			api := ctx.apiFor(testID, domainName, apiSecurityDisabled, false)
+			api := ctx.apiFor(testID, domainName, namespace, apiSecurityDisabled, false)
 
 			lastAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			defer ctx.cleanUpAPI(kymaClient, lastAPI, t, false)
+			defer ctx.cleanUpAPI(kymaClient, lastAPI, t, false, namespace)
 			So(err, ShouldBeNil)
 			So(lastAPI, ShouldNotBeNil)
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 
-			lastAPI, err = ctx.awaitAPIChanged(kymaClient, lastAPI, true, false)
+			lastAPI, err = ctx.awaitAPIChanged(kymaClient, lastAPI, true, false, namespace)
 			So(err, ShouldBeNil)
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 			So(lastAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
 
 			lastVs, err := istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(lastAPI.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
-			expectedVs := ctx.virtualServiceFor(testID, domainName)
+			expectedVs := ctx.virtualServiceFor(testID, domainName, namespace)
 			So(err, ShouldBeNil)
 			So(lastVs.Spec, ctx.ShouldDeepEqual, expectedVs)
 		})
@@ -96,7 +101,7 @@ func TestComponentSpec(t *testing.T) {
 
 			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
-			api := ctx.apiFor(testID, domainName+"x", apiSecurityDisabled, true)
+			api := ctx.apiFor(testID, domainName+"x", namespace, apiSecurityDisabled, true)
 
 			_, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
 			So(err, ShouldNotBeNil)
@@ -107,23 +112,23 @@ func TestComponentSpec(t *testing.T) {
 
 			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
-			api := ctx.apiFor(testID, domainName, apiSecurityDisabled, true)
+			api := ctx.apiFor(testID, domainName, namespace, apiSecurityDisabled, true)
 			authEnabled := true
 			api.Spec.AuthenticationEnabled = &authEnabled
 
 			lastAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			defer ctx.cleanUpAPI(kymaClient, lastAPI, t, false)
+			defer ctx.cleanUpAPI(kymaClient, lastAPI, t, false, namespace)
 			So(err, ShouldBeNil)
 			So(lastAPI, ShouldNotBeNil)
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 
-			lastAPI, err = ctx.awaitAPIChanged(kymaClient, lastAPI, true, true)
+			lastAPI, err = ctx.awaitAPIChanged(kymaClient, lastAPI, true, true, namespace)
 			So(err, ShouldBeNil)
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 			So(lastAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
 
 			vs, err := istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(lastAPI.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
-			expectedVs := ctx.virtualServiceFor(testID, domainName)
+			expectedVs := ctx.virtualServiceFor(testID, domainName, namespace)
 			So(err, ShouldBeNil)
 			So(vs.Spec, ctx.ShouldDeepEqual, expectedVs)
 
@@ -138,15 +143,15 @@ func TestComponentSpec(t *testing.T) {
 
 			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
-			api := ctx.apiFor(testID, domainName, apiSecurityEnabled, true)
+			api := ctx.apiFor(testID, domainName, namespace, apiSecurityEnabled, true)
 
 			createdAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			defer ctx.cleanUpAPI(kymaClient, createdAPI, t, false)
+			defer ctx.cleanUpAPI(kymaClient, createdAPI, t, false, namespace)
 			So(err, ShouldBeNil)
 			So(createdAPI, ShouldNotBeNil)
 			So(createdAPI.ResourceVersion, ShouldNotBeEmpty)
 
-			createdAPI, err = ctx.awaitAPIChanged(kymaClient, createdAPI, true, true)
+			createdAPI, err = ctx.awaitAPIChanged(kymaClient, createdAPI, true, true, namespace)
 			So(err, ShouldBeNil)
 			So(createdAPI.ResourceVersion, ShouldNotBeEmpty)
 			So(createdAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
@@ -159,7 +164,7 @@ func TestComponentSpec(t *testing.T) {
 			So(updatedAPI, ShouldNotBeNil)
 			So(updatedAPI.ResourceVersion, ShouldNotBeEmpty)
 
-			updatedAPI, err = ctx.awaitAPIChanged(kymaClient, updatedAPI, false, true)
+			updatedAPI, err = ctx.awaitAPIChanged(kymaClient, updatedAPI, false, true, namespace)
 			So(err, ShouldBeNil)
 			So(updatedAPI.ResourceVersion, ShouldNotBeEmpty)
 			So(updatedAPI.Spec, ctx.ShouldDeepEqual, createdAPI.Spec)
@@ -174,16 +179,16 @@ func TestComponentSpec(t *testing.T) {
 
 			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
-			api := ctx.apiFor(testID, domainName, apiSecurityDisabled, true)
+			api := ctx.apiFor(testID, domainName, namespace, apiSecurityDisabled, true)
 			ctx.setCustomJwtAuthenticationConfig(api)
 
 			lastAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			defer ctx.cleanUpAPI(kymaClient, lastAPI, t, false)
+			defer ctx.cleanUpAPI(kymaClient, lastAPI, t, false, namespace)
 			So(err, ShouldBeNil)
 			So(lastAPI, ShouldNotBeNil)
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 
-			lastAPI, err = ctx.awaitAPIChanged(kymaClient, lastAPI, true, true)
+			lastAPI, err = ctx.awaitAPIChanged(kymaClient, lastAPI, true, true, namespace)
 			So(err, ShouldBeNil)
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 			So(lastAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
@@ -199,15 +204,15 @@ func TestComponentSpec(t *testing.T) {
 
 			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
-			api := ctx.apiFor(testID, domainName, apiSecurityEnabled, true)
+			api := ctx.apiFor(testID, domainName, namespace, apiSecurityEnabled, true)
 
 			lastAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			defer ctx.cleanUpAPI(kymaClient, lastAPI, t, true)
+			defer ctx.cleanUpAPI(kymaClient, lastAPI, t, true, namespace)
 			So(err, ShouldBeNil)
 			So(lastAPI, ShouldNotBeNil)
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 
-			lastAPI, err = ctx.awaitAPIChanged(kymaClient, lastAPI, true, true)
+			lastAPI, err = ctx.awaitAPIChanged(kymaClient, lastAPI, true, true, namespace)
 			So(err, ShouldBeNil)
 			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 			So(lastAPI.Spec, ctx.ShouldDeepEqual, api.Spec)
@@ -233,7 +238,7 @@ func TestComponentSpec(t *testing.T) {
 	})
 }
 
-func (ctx componentTestContext) apiFor(testID, domainName string, secured APISecurity, hostWithDomain bool) *kymaApi.Api {
+func (ctx componentTestContext) apiFor(testID string, domainName string, namespace string, secured APISecurity, hostWithDomain bool) *kymaApi.Api {
 
 	return &kymaApi.Api{
 		ObjectMeta: metav1.ObjectMeta{
@@ -252,7 +257,7 @@ func (ctx componentTestContext) apiFor(testID, domainName string, secured APISec
 	}
 }
 
-func (componentTestContext) virtualServiceFor(testID, domainName string) *istioNetApi.VirtualServiceSpec {
+func (componentTestContext) virtualServiceFor(testID string, domainName string, namespace string) *istioNetApi.VirtualServiceSpec {
 	return &istioNetApi.VirtualServiceSpec{
 		Hosts:    []string{testID + "." + domainName},
 		Gateways: []string{"kyma-gateway.kyma-system.svc.cluster.local"},
@@ -324,7 +329,7 @@ func (componentTestContext) hostnameFor(testID, domainName string, hostWithDomai
 	return testID
 }
 
-func (componentTestContext) awaitAPIChanged(iface *kyma.Clientset, api *kymaApi.Api, vsChanged, policyChanged bool) (*kymaApi.Api, error) {
+func (componentTestContext) awaitAPIChanged(iface *kyma.Clientset, api *kymaApi.Api, vsChanged, policyChanged bool, namespace string) (*kymaApi.Api, error) {
 	var result *kymaApi.Api
 	err := retry.Do(func() error {
 		lastAPI, err := iface.GatewayV1alpha2().Apis(namespace).Get(api.Name, metav1.GetOptions{})
@@ -381,7 +386,7 @@ func (componentTestContext) ShouldDeepEqual(actual interface{}, expected ...inte
 	return strings.Join(deep.Equal(actual, expected[0]), "\n")
 }
 
-func (componentTestContext) cleanUpAPI(kymaClient *kyma.Clientset, api *kymaApi.Api, t *testing.T, allowMissing bool) {
+func (componentTestContext) cleanUpAPI(kymaClient *kyma.Clientset, api *kymaApi.Api, t *testing.T, allowMissing bool, namespace string) {
 	if api == nil {
 		return
 	}

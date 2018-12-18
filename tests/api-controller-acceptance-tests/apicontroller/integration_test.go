@@ -34,6 +34,11 @@ func TestIntegrationSpec(t *testing.T) {
 		t.Fatal("Domain name not set.")
 	}
 
+	namespace := os.Getenv(namespaceEnv)
+	if namespace == "" {
+		t.Fatal("Namespace not set.")
+	}
+
 	ctx := integrationTestContext{}
 	testID := ctx.generateTestID(testIDLength)
 
@@ -72,7 +77,7 @@ func TestIntegrationSpec(t *testing.T) {
 
 		Convey("create API with authentication disabled", func() {
 
-			api := ctx.apiFor(testID, domainName, fixture.SampleAppService, apiSecurityDisabled, true)
+			api := ctx.apiFor(testID, domainName, namespace, fixture.SampleAppService, apiSecurityDisabled, true)
 
 			lastAPI, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Create(api)
 			So(err, ShouldBeNil)
@@ -117,7 +122,7 @@ func TestIntegrationSpec(t *testing.T) {
 	})
 }
 
-func (ctx integrationTestContext) apiFor(testID, domainName string, svc *apiv1.Service, secured APISecurity, hostWithDomain bool) *kymaApi.Api {
+func (ctx integrationTestContext) apiFor(testID string, domainName string, namespace string, svc *apiv1.Service, secured APISecurity, hostWithDomain bool) *kymaApi.Api {
 
 	return &kymaApi.Api{
 		ObjectMeta: metav1.ObjectMeta{
