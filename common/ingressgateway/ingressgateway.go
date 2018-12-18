@@ -3,13 +3,14 @@ package ingressgateway
 import (
 	"crypto/tls"
 	"fmt"
-	"golang.org/x/net/context"
 	"net"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	"golang.org/x/net/context"
 )
 
 const (
@@ -24,17 +25,17 @@ type Dialer interface {
 
 // clientCreator abstracts interactions with outside world for easy testing.
 type clientCreator struct {
-	Getenv func(string) string
-	LookupHost func(string) ([]string, error)
+	Getenv        func(string) string
+	LookupHost    func(string) ([]string, error)
 	GetMinikubeIP func() (string, error)
-	Dialer Dialer
+	Dialer        Dialer
 }
 
 // Default returns clientCreator ready for production use.
 func Default() *clientCreator {
 	return &clientCreator{
-		Getenv: os.Getenv,
-		LookupHost: net.LookupHost,
+		Getenv:        os.Getenv,
+		LookupHost:    net.LookupHost,
 		GetMinikubeIP: getMinikubeIP,
 		Dialer: &net.Dialer{
 			Timeout: 30 * time.Second,

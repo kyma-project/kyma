@@ -2,12 +2,13 @@ package ingressgateway
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/net/context"
 	"net"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/context"
 )
 
 const (
@@ -56,7 +57,7 @@ func TestClientFromEnv(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			creator := DefaultClientCreator()
+			creator := Default()
 
 			creator.Getenv = func(s string) string {
 				assert.Equal(t, ServiceNameEnv, s)
