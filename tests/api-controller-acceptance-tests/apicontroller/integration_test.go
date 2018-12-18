@@ -35,7 +35,7 @@ func TestIntegrationSpec(t *testing.T) {
 	}
 
 	ctx := integrationTestContext{}
-	testID := ctx.generatetestID(testIDLength)
+	testID := ctx.generateTestID(testIDLength)
 
 	log.Infof("Running test: %s", testID)
 
@@ -268,7 +268,7 @@ func (integrationTestContext) k8sInterfaceOrExit(kubeConfig *rest.Config) kubern
 	return k8sInterface
 }
 
-func (integrationTestContext) generatetestID(n int) string {
+func (integrationTestContext) generateTestID(n int) string {
 
 	rand.Seed(time.Now().UnixNano())
 

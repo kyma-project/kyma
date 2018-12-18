@@ -46,7 +46,7 @@ func TestComponentSpec(t *testing.T) {
 		Convey("create API with authentication disabled", func() {
 			t.Log("create API with authentication disabled")
 
-			testID := ctx.generatetestID(testIDLength)
+			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
 			api := ctx.apiFor(testID, domainName, apiSecurityDisabled, true)
 
@@ -70,7 +70,7 @@ func TestComponentSpec(t *testing.T) {
 		Convey("create API with hostname without domain", func() {
 			t.Log("create API with hostname without domain")
 
-			testID := ctx.generatetestID(testIDLength)
+			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
 			api := ctx.apiFor(testID, domainName, apiSecurityDisabled, false)
 
@@ -94,7 +94,7 @@ func TestComponentSpec(t *testing.T) {
 		Convey("not create API with wrong domain", func() {
 			t.Log("not create API with wrong domain")
 
-			testID := ctx.generatetestID(testIDLength)
+			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
 			api := ctx.apiFor(testID, domainName+"x", apiSecurityDisabled, true)
 
@@ -105,7 +105,7 @@ func TestComponentSpec(t *testing.T) {
 		Convey("create API with default jwt configuration to enable authentication", func() {
 			t.Log("create API with default jwt configuration to enable authentication")
 
-			testID := ctx.generatetestID(testIDLength)
+			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
 			api := ctx.apiFor(testID, domainName, apiSecurityDisabled, true)
 			authEnabled := true
@@ -136,7 +136,7 @@ func TestComponentSpec(t *testing.T) {
 		Convey("update API to disable authentication", func() {
 			t.Log("update API to disable authentication")
 
-			testID := ctx.generatetestID(testIDLength)
+			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
 			api := ctx.apiFor(testID, domainName, apiSecurityEnabled, true)
 
@@ -172,7 +172,7 @@ func TestComponentSpec(t *testing.T) {
 		Convey("create API with custom jwt configuration", func() {
 			t.Log("create API with custom jwt configuration")
 
-			testID := ctx.generatetestID(testIDLength)
+			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
 			api := ctx.apiFor(testID, domainName, apiSecurityDisabled, true)
 			ctx.setCustomJwtAuthenticationConfig(api)
@@ -197,7 +197,7 @@ func TestComponentSpec(t *testing.T) {
 		Convey("delete API and all its related resources", func() {
 			t.Log("delete API and all its related resources")
 
-			testID := ctx.generatetestID(testIDLength)
+			testID := ctx.generateTestID(testIDLength)
 			t.Logf("Running test: %s", testID)
 			api := ctx.apiFor(testID, domainName, apiSecurityEnabled, true)
 
@@ -364,7 +364,7 @@ func (componentTestContext) defaultConfigOrExit() *rest.Config {
 	return kubeConfig
 }
 
-func (componentTestContext) generatetestID(n int) string {
+func (componentTestContext) generateTestID(n int) string {
 
 	rand.Seed(time.Now().UnixNano())
 
