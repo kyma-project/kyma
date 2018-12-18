@@ -95,7 +95,7 @@ func TestErrorWrongEventTime(t *testing.T) {
 
 func TestErrorWrongEventId(t *testing.T) {
 	s := "{\"event-type\":\"order.created\",\"event-type-version\":\"v1\",\"event-id\":\"31109198\",\"event-time\":\"2012-11-01T22:08:41+00:00\"}"
-	wantErrorDetail := api.ErrorDetail{Field: shared.FieldEventId, Type: shared.ErrorTypeInvalidField, Message: shared.ErrorMessageInvalidField, MoreInfo: ""}
+	wantErrorDetail := api.ErrorDetail{Field: shared.FieldEventID, Type: shared.ErrorTypeInvalidField, Message: shared.ErrorMessageInvalidField, MoreInfo: ""}
 	result, err := sendAndReceiveError(t, &s)
 	if err != nil {
 		t.Errorf("%s", err)

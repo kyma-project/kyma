@@ -3,8 +3,8 @@ groups:
 - name: pod-not-running-rule
   rules:
   - alert: SystemPodNotRunning
-    expr: (kube_pod_container_status_running { namespace=~"kyma-.*|kube-.*|istio-.*", pod!~".*-(docs|backup)-.*" } == 0)
-    for: 30s
+    expr: (kube_pod_container_status_running { namespace=~"kyma-.*|kube-.*|istio-.*", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|(.*-(tests|dummy))" } == 0)
+    for: 60s
     labels:
       severity: critical
     annotations:

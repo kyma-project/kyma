@@ -1,8 +1,9 @@
 package shared
 
+// Allowed patterns for the Event components
 const (
 	AllowedEventTypeVersionChars = `[a-zA-Z0-9]+`
-	AllowedEventIdChars          = `^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$`
+	AllowedEventIDChars          = `^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$`
 )
 
 // Handlers paths
@@ -17,7 +18,7 @@ const (
 	ErrorMessageInvalidField = "Invalid Field"
 )
 
-//Error type definition
+// Error type definition
 const (
 	ErrorTypeBadPayload          = "bad_payload_syntax"
 	ErrorTypeMissingField        = "missing_field"
@@ -27,7 +28,7 @@ const (
 
 // Field definition
 const (
-	FieldEventId          = "event-id"
+	FieldEventID          = "event-id"
 	FieldEventTime        = "event-time"
 	FieldEventType        = "event-type"
 	FieldEventTypeVersion = "event-type-version"

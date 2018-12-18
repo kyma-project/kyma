@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// NewHandler creates http.Handler(s) for the /v1/events and /v1/health endpoints
 func NewHandler() http.Handler {
 	router := mux.NewRouter()
 

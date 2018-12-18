@@ -13,11 +13,12 @@ import (
 )
 
 var (
-	httpClientProvider  = httptools.DefaultHttpClientProvider
-	httpRequestProvider = httptools.DefaultHttpRequestProvider
+	httpClientProvider  = httptools.DefaultHTTPClientProvider
+	httpRequestProvider = httptools.DefaultHTTPRequestProvider
 )
 
-func InitEventSender(clientProvider httptools.HttpClientProvider, requestProvider httptools.HttpRequestProvider) {
+// InitEventSender initializes an internal httpClientProvider and httpRequestProvider
+func InitEventSender(clientProvider httptools.HTTPClientProvider, requestProvider httptools.HTTPRequestProvider) {
 	httpClientProvider = clientProvider
 	httpRequestProvider = requestProvider
 }
@@ -32,7 +33,7 @@ func SendEvent(req *api.SendEventParameters, traceHeaders *map[string]string) (*
 	}
 
 	headers := make(http.Header)
-	headers.Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJsonWithCharset)
+	headers.Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJSONWithCharset)
 	httpReq.Header = headers
 
 	reqURL, err := url.ParseRequestURI(eventsTargetURL)

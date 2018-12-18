@@ -71,8 +71,8 @@
 [[projects]]
   name = "github.com/imdario/mergo"
   packages = ["."]
-  revision = "9d5f1277e9a8ed20c3684bda8fde67c05628518c"
-  version = "v0.3.4"
+  revision = "9f23e2d6bd2a77f959b2bf6acdbefd708a83a4a4"
+  version = "v0.3.6"
 
 [[projects]]
   name = "github.com/json-iterator/go"

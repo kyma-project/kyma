@@ -9,25 +9,26 @@ import (
 	"github.com/kyma-project/kyma/components/event-service/internal/events/api"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
-	log "github.com/sirupsen/logrus"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
 	isValidEventTypeVersion = regexp.MustCompile(shared.AllowedEventTypeVersionChars).MatchString
-	isValidEventId          = regexp.MustCompile(shared.AllowedEventIdChars).MatchString
+	isValidEventID          = regexp.MustCompile(shared.AllowedEventIDChars).MatchString
 	traceHeaderKeys         = []string{"x-request-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid", "x-b3-sampled", "x-b3-flags", "x-ot-span-context"}
 )
 
+// NewEventsHandler creates an http.Handler to handle the events endpoint
 func NewEventsHandler() http.Handler {
 	return http.HandlerFunc(handleEvents)
 }
 
-// EventsHandler handles "/v1/events" requests
+// handleEvents handles "/v1/events" requests
 func handleEvents(w http.ResponseWriter, req *http.Request) {
 	if req.Body == nil || req.ContentLength == 0 {
 		resp := shared.ErrorResponseBadRequest(shared.ErrorMessageBadPayload)
-		writeJsonResponse(w, resp)
+		writeJSONResponse(w, resp)
 		return
 	}
 	var err error
@@ -36,7 +37,7 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	err = decoder.Decode(&parameters.Publishrequest)
 	if err != nil {
 		resp := shared.ErrorResponseBadRequest(err.Error())
-		writeJsonResponse(w, resp)
+		writeJSONResponse(w, resp)
 		return
 	}
 	resp := &api.PublishEventResponses{}
@@ -46,7 +47,7 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	err = handleEvent(parameters, resp, traceHeaders)
 	if err == nil {
 		if resp.Ok != nil || resp.Error != nil {
-			writeJsonResponse(w, resp)
+			writeJSONResponse(w, resp)
 			return
 		}
 		log.Println("Cannot process event")
@@ -98,8 +99,8 @@ func checkParameters(parameters *api.PublishEventParameters) (response *api.Publ
 	if _, err := time.Parse(time.RFC3339, parameters.Publishrequest.EventTime); err != nil {
 		return shared.ErrorResponseWrongEventTime(err)
 	}
-	if len(parameters.Publishrequest.EventId) > 0 && !isValidEventId(parameters.Publishrequest.EventId) {
-		return shared.ErrorResponseWrongEventId()
+	if len(parameters.Publishrequest.EventID) > 0 && !isValidEventID(parameters.Publishrequest.EventID) {
+		return shared.ErrorResponseWrongEventID()
 	}
 	if parameters.Publishrequest.Data == nil {
 		return shared.ErrorResponseMissingFieldData()
@@ -110,9 +111,9 @@ func checkParameters(parameters *api.PublishEventParameters) (response *api.Publ
 	return &api.PublishEventResponses{Ok: nil, Error: nil}
 }
 
-func writeJsonResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
+func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 	encoder := json.NewEncoder(w)
-	w.Header().Set("Content-Type", httpconsts.ContentTypeApplicationJson)
+	w.Header().Set("Content-Type", httpconsts.ContentTypeApplicationJSON)
 	if resp.Error != nil {
 		w.WriteHeader(resp.Error.Status)
 		encoder.Encode(resp.Error)

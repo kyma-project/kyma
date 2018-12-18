@@ -10,9 +10,9 @@ import (
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/installer"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/upsbroker"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -33,10 +33,10 @@ func TestMain(m *testing.M) {
 		return
 	}
 
-	k8sClient, _, err := k8s.NewClientWithConfig()
+	k8sClient, _, err := client.NewClientWithConfig()
 	exitOnError(err, "while initializing K8S Client")
 
-	svcatCli, _, err := k8s.NewServiceCatalogClientWithConfig()
+	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
 	exitOnError(err, "while initializing service catalog client")
 
 	podInstaller := installer.NewPod(tester.ReleaseName, tester.DefaultNamespace)

@@ -18,7 +18,7 @@ type OIDCConfig struct {
 	SupportedSigningAlgs []string
 }
 
-// NewOIDCAuthenticator returns OIDC authenticator 
+// NewOIDCAuthenticator returns OIDC authenticator
 func NewOIDCAuthenticator(config *OIDCConfig) (authenticator.Request, error) {
 	tokenAuthenticator, err := oidc.New(oidc.Options{
 		IssuerURL:            config.IssuerURL,

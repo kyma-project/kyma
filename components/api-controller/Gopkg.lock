@@ -233,6 +233,7 @@
   branch = "master"
   name = "golang.org/x/tools"
   packages = [
+    "cmd/goimports",
     "go/ast/astutil",
     "imports",
     "internal/fastwalk"
@@ -501,6 +502,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c627752055b4a957c7fcc63b0b1dca3ba7cac0bd5beeb0d3332b440c91e0f9a7"
+  inputs-digest = "73fb1575763f4896a4537be0934d4cb00131b575047126bc7316a364a9c019d1"
   solver-name = "gps-cdcl"
   solver-version = 1
