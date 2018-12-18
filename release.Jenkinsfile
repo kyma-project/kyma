@@ -49,6 +49,7 @@ projects = [
     "components/event-bus",
     "components/event-service",
     "components/application-proxy",
+    "components/xip-patch",
     "tools/alpine-net",
     "tools/watch-pods",
     "tools/stability-checker",
