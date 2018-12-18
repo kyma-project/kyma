@@ -35,9 +35,19 @@ func NewClient(host string) *Client {
 	}
 }
 
-// ListReleases .
+// ListReleases lists all releases except for the superseded ones
 func (hc *Client) ListReleases() (*rls.ListReleasesResponse, error) {
-	return hc.helm.ListReleases()
+	statuses := []release.Status_Code{
+		release.Status_DELETED,
+		release.Status_DELETING,
+		release.Status_DEPLOYED,
+		release.Status_FAILED,
+		release.Status_PENDING_INSTALL,
+		release.Status_PENDING_ROLLBACK,
+		release.Status_PENDING_UPGRADE,
+		release.Status_UNKNOWN,
+	}
+	return hc.helm.ListReleases(helm.ReleaseListStatuses(statuses))
 }
 
 //ReleaseStatus returns roughly-formatted Release status (columns are separated with blanks but not adjusted)

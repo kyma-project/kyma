@@ -2,6 +2,7 @@ package kymainstallation
 
 import (
 	"errors"
+	"log"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
@@ -51,8 +52,13 @@ func NewStepFactory(kymaPackage kymasources.KymaPackage, helmClient kymahelm.Cli
 	}
 
 	if relesesRes != nil {
+		log.Println("Helm releases list:")
 		for _, release := range relesesRes.Releases {
-			installedReleases[release.Name] = true
+			statusCode := release.Info.Status.Code
+			log.Printf("%s status: %s", release.Name, statusCode)
+			if statusCode == 1 { // deployed
+				installedReleases[release.Name] = true
+			}
 		}
 	}
 
