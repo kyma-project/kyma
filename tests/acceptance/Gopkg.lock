@@ -408,18 +408,28 @@
     "plugin/pkg/client/auth/exec",
     "rest",
     "rest/watch",
+    "third_party/forked/golang/template",
     "tools/clientcmd/api",
     "tools/metrics",
     "tools/reference",
     "transport",
     "util/cert",
     "util/flowcontrol",
+    "util/integer",
+    "util/jsonpath"
   ]
   revision = "989be4278f353e42f26c416c53757d16fcff77db"
   version = "kubernetes-1.10.1"
+
+[[projects]]
+  name = "sigs.k8s.io/yaml"
+  packages = ["."]
+  revision = "fd68e9863619f6ec2fdd8625fe1f02e7c877e480"
+  version = "v1.1.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ea6d57bd47cac850f33416277d458d575446d089d8abb01c9176d6a904781eae"
+  inputs-digest = "fb599c8229f3f9620f344bbae03f780358636b774f18bbf63d8560a072257dcd"
   solver-name = "gps-cdcl"
   solver-version = 1
