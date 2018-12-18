@@ -3,7 +3,7 @@ etcd-stateful:
 
 global:
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: eu.gcr.io/kyma-project/prow/test
   istio:
     gateway:
       name: kyma-gateway

@@ -9,22 +9,22 @@ global:
       name: kyma-gateway
       namespace: kyma-system
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: eu.gcr.io/kyma-project/prow/test
   application_operator:
     dir: develop/
-    version: f126db6f
+    version: d6ba814e
   application_operator_tests:
     dir: develop/
-    version: f126db6f
+    version: d6ba814e
   connector_service:
     dir: develop/
-    version: b723b5b6
+    version: cc740ddf
   connector_service_tests:
     dir: develop/
     version: 1ecf2683
   connection_token_handler:
     dir: develop/
-    version: e8d279fa
+    version: 703f3d4d
   event_service:
     dir: develop/
     version: 6e0a7fe2
@@ -42,4 +42,4 @@ global:
     version: 1a6aedce
   application_broker:
     dir: develop/
-    version: 98a2d5b1
+    version: 46be4bf9

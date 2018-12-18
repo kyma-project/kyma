@@ -76,7 +76,7 @@ affinity: {}
 
 global:
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: eu.gcr.io/kyma-project/prow/test
   test_logging:
     dir: develop/
     version: fce4f51f

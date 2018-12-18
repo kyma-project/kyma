@@ -5,7 +5,7 @@ test:
     name: test-logging-monitoring
 global:
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: eu.gcr.io/kyma-project/prow/test
   test_logging_monitoring:
     dir: develop/
     version: a568ffb2
