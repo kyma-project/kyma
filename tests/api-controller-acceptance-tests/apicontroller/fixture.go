@@ -15,7 +15,6 @@ import (
 )
 
 const (
-	// namespace                                      = "sampleapp"
 	namespaceEnv                                   = "NAMESPACE"
 	ingressGatewayControllerServiceURL             = "istio-ingressgateway.istio-system.svc.cluster.local"
 	testIDLength                                   = 8
