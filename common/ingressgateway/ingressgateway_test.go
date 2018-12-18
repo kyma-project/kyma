@@ -47,7 +47,7 @@ func TestClientFromEnv(t *testing.T) {
 			expectSuccess:          true,
 		},
 		{
-			name:                   "Ingress gateway FQDN not set and minikube is used",
+			name:                   "Ingress gateway FQDN not set and minikube is not available",
 			fqdnProvided:           false,
 			serviceAddressResolved: false,
 			minikubeAvailable:      false,
