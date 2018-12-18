@@ -23,7 +23,7 @@ spec:
             expireAfter:
               format: date-time
               type: string
-            remoteEnvironment:
+            application:
               type: string
             state:
               type: string
@@ -35,6 +35,6 @@ spec:
           - token
           - url
           - expireAfter
-          - remoteEnvironment
+          - application
           - state
           type: object
