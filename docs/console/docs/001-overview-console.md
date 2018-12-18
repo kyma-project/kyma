@@ -9,5 +9,5 @@ The Console uses the Luigi framework to extend the UI functionality with custom 
 
 Use the following CRs to extend the Console UI:
 
-- The MicroFrontend custom resource allows you to plug in micro front-ends for a specific Environment.
+- The MicroFrontend custom resource allows you to plug in micro front-ends for a specific Namespace.
 - The ClusterMicroFrontend custom resource allows you to plug in micro front-ends for the entire Cluster.

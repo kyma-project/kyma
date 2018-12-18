@@ -7,7 +7,7 @@ The Kyma Console UI uses the [Luigi framework](https://github.com/kyma-project/l
 
 ## Console UI interaction with micro front-ends
 
-When rendering the navigation, the Kyma Console UI calls a dedicated API endpoint to check if there are any micro front-ends defined in the current context. The current context comprises the current Environment and all global cluster micro front-ends. All the defined micro front-ends and cluster micro front-ends are mapped to the navigation model as navigation nodes with remote **viewUrls**. When you click the navigation node, the system loads the content of the micro front-end into the content area of the Console. At the same time, the Console sends the current context data to the micro front-end to ensure it is initialized properly.
+When rendering the navigation, the Kyma Console UI calls a dedicated API endpoint to check if there are any micro front-ends defined in the current context. The current context comprises the current Namespace and all global cluster micro front-ends. All the defined micro front-ends and cluster micro front-ends are mapped to the navigation model as navigation nodes with remote **viewUrls**. When you click the navigation node, the system loads the content of the micro front-end into the content area of the Console. At the same time, the Console sends the current context data to the micro front-end to ensure it is initialized properly.
 
 ## Micro front-end
 
@@ -43,22 +43,22 @@ For API details, see [Luigi Client API documentation](https://github.com/kyma-pr
 
 Use the CustomResourceDefinitions to extend the Console functionality and configure different scopes for your micro front-ends.
 
-### Micro front-end for a specific Environment
+### Micro front-end for a specific Namespace
 
-You can define a micro front-end visible only in the context of a specific Environment (Namespace).
+You can define a micro front-end visible only in the context of a specific Namespace (Namespace).
 
-[Here](https://github.com/kyma-project/kyma/blob/master/docs/console/docs/assets/mf-namespaced.yaml) you can find a sample micro front-end entity using the **namespace** metadata attribute to enable the micro front-end **only** for the production Environment.
+[Here](https://github.com/kyma-project/kyma/blob/master/docs/console/docs/assets/mf-namespaced.yaml) you can find a sample micro front-end entity using the **namespace** metadata attribute to enable the micro front-end **only** for the production Namespace.
 
-Using this yaml file in your Kyma cluster results in a **Tractors Overview** micro front-end navigation node displayed under the **Hardware** category. It is available **only** in the production Environment.
+Using this yaml file in your Kyma cluster results in a **Tractors Overview** micro front-end navigation node displayed under the **Hardware** category. It is available **only** in the production Namespace.
 
-![MF-one-environment](assets/mf-one-namespace.png)
+![MF-one-namespace](assets/mf-one-namespace.png)
 
 ### Cluster-wide micro front-end
-You can define a cluster-wide micro front-end available for all Environments in the side navigation.
+You can define a cluster-wide micro front-end available for all Namespaces in the side navigation.
 
-[Here](https://github.com/kyma-project/kyma/blob/master/docs/console/docs/assets/cmf-environment.yaml) you can find a sample ClusterMicroFrontend entity using the `environment` value for the **placement** attribute to make the micro front-end available for all Environments in the cluster.
+[Here](https://github.com/kyma-project/kyma/blob/master/docs/console/docs/assets/cmf-namespace.yaml) you can find a sample ClusterMicroFrontend entity using the `namespace` value for the **placement** attribute to make the micro front-end available for all Namespaces in the cluster.
 
-Using this yaml file in your Kyma cluster results in a **Tractors Overview** micro front-end navigation node displayed under the **Hardware** category. It is available **for every** Environment in your cluster.
+Using this yaml file in your Kyma cluster results in a **Tractors Overview** micro front-end navigation node displayed under the **Hardware** category. It is available **for every** Namespace in your cluster.
 
 ### Cluster-wide micro front-end for the administration section
 You can define a cluster micro front-end visible in the **Administration** section of the Console.

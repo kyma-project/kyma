@@ -39,7 +39,7 @@ This table lists all the possible parameters of a given resource together with t
 | Field   |      Mandatory?      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** | **YES** | Specifies the name of the CR. |
-| **metadata.namespace** | **YES** | Specifies the target Namespace (Environment) for the CR. |
+| **metadata.namespace** | **YES** | Specifies the target Namespace for the CR. |
 | **spec.version** | **NO** | Specifies the version of the micro front-end. |
 | **spec.category** | **NO** | Specifies the category name under which the micro front-end appears in the navigation. |
 | **spec.viewBaseUrl** | **YES** |  Specifies the address of the micro front-end. The address has to begin with `https://`.  |

@@ -42,7 +42,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.version** | **NO** | Specifies the version of the cluster micro front-end. |
 | **spec.category** | **NO** | Defines the category name under which the cluster micro front-end appears in the navigation. |
 | **spec.viewBaseUrl** | **YES** | Specifies the address of the cluster micro front-end. The address has to begin with `https://`.  |
-| **spec.placement** | **NO** |  Specifies if the cluster micro front-end should be visible in the Environment navigation or settings navigation. The placement value has to be either `environment` or `cluster`. |
+| **spec.placement** | **NO** |  Specifies if the cluster micro front-end should be visible in the Namespace navigation or settings navigation. The placement value has to be either `environment` (namespace) or `cluster`. |
 | **spec.navigationNodes** | **YES** | The list of navigation nodes specified for the cluster micro front-end. |
 | **spec.navigationNodes.label** | **YES** | Specifies the name used to display the cluster micro front-end's node in the Console UI. |
 | **spec.navigationNodes.navigationPath** | **NO** | Specifies the path that is used for routing within the Console. |
