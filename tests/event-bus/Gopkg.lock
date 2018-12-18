@@ -23,6 +23,15 @@
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
+  branch = "travis-1.9"
+  name = "github.com/golang/lint"
+  packages = [
+    ".",
+    "golint"
+  ]
+  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
+
+[[projects]]
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -151,6 +160,21 @@
   name = "golang.org/x/time"
   packages = ["rate"]
   revision = "85acf8d2951cb2a3bde7632f9ff273ef0379bcbd"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/tools"
+  packages = [
+    "cmd/goimports",
+    "go/ast/astutil",
+    "go/gcexportdata",
+    "go/internal/gcimporter",
+    "go/types/typeutil",
+    "imports",
+    "internal/fastwalk",
+    "internal/gopathwalk"
+  ]
+  revision = "3576414c54a492fc48cd913814eb209914c717f0"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -295,6 +319,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f269f3d60beb072874c3fdfb6356b705a2ed5cb80e8a1ea34c75ff4af0fb2d05"
+  inputs-digest = "c5bc73d723e14730958d33d1c11d45f6bbd6d1add1744c2d997c3613641e5ad7"
   solver-name = "gps-cdcl"
   solver-version = 1

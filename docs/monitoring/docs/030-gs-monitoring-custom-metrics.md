@@ -85,10 +85,10 @@ Find the source code for the sample application [here](https://github.com/kyma-p
 
 ### Access the exposed metrics in Prometheus
 
- Run the `port-forward` command on the `core-prometheus` service:
+ Run the `port-forward` command on the `monitoring-prometheus` service:
 
 ```bash
-kubectl port-forward svc/core-prometheus -n kyma-system 9090:9090
+kubectl port-forward svc/monitoring-prometheus -n kyma-system 9090:9090
 Forwarding from 127.0.0.1:9090 -> 9090
 Forwarding from [::1]:9090 -> 9090
 ```

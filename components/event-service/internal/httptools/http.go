@@ -5,17 +5,23 @@ import (
 	"net/http"
 )
 
-type HttpClientProvider func() HttpClient
-type HttpRequestProvider func(method, url string, body io.Reader) (*http.Request, error)
+// An HTTPClientProvider represents a function type that returns an HTTPClient
+type HTTPClientProvider func() HTTPClient
 
-type HttpClient interface {
+// An HTTPRequestProvider represents a function type that returns an http.Request
+type HTTPRequestProvider func(method, url string, body io.Reader) (*http.Request, error)
+
+// An HTTPClient represents an interface type of HTTPClient that encapsulates a 'Do' function which takes an http.Request and returns an http.Response
+type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-func DefaultHttpClientProvider() HttpClient {
+// DefaultHTTPClientProvider returns a default HTTPClient implementation
+func DefaultHTTPClientProvider() HTTPClient {
 	return http.DefaultClient
 }
 
-func DefaultHttpRequestProvider(method, url string, body io.Reader) (*http.Request, error) {
+// DefaultHTTPRequestProvider returns a default http.Request with the given method, url and body
+func DefaultHTTPRequestProvider(method, url string, body io.Reader) (*http.Request, error) {
 	return http.NewRequest(method, url, body)
 }

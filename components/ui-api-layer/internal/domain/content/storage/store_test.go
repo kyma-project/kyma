@@ -2,6 +2,7 @@ package storage_test
 
 import (
 	"bytes"
+	"io/ioutil"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
@@ -17,7 +18,7 @@ func TestStore_ApiSpec(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "not-existing/apiSpec.json").
-			Return(bytes.NewReader([]byte{}), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
 			Return(true)
 
@@ -32,7 +33,7 @@ func TestStore_ApiSpec(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "invalid/apiSpec.json").
-			Return(bytes.NewReader([]byte{}), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
 			Return(false)
 
@@ -47,7 +48,7 @@ func TestStore_ApiSpec(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "client-error/apiSpec.json").
-			Return(bytes.NewReader([]byte{}), errors.New("Random error"))
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), errors.New("Random error"))
 
 		_, exists, err := service.ApiSpec("client-error")
 
@@ -64,7 +65,7 @@ func TestStore_ApiSpec(t *testing.T) {
 		}
 
 		client.On("Object", "test", "valid/apiSpec.json").
-			Return(bytes.NewReader([]byte("{}")), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte("{}"))), nil)
 
 		apiSpec, exists, err := service.ApiSpec("valid")
 
@@ -80,7 +81,7 @@ func TestStore_AsyncApiSpec(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "not-existing/asyncApiSpec.json").
-			Return(bytes.NewReader([]byte{}), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
 			Return(true)
 
@@ -95,7 +96,7 @@ func TestStore_AsyncApiSpec(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "invalid/asyncApiSpec.json").
-			Return(bytes.NewReader([]byte{}), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
 			Return(false)
 
@@ -110,7 +111,7 @@ func TestStore_AsyncApiSpec(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "client-error/asyncApiSpec.json").
-			Return(bytes.NewReader([]byte{}), errors.New("Random error"))
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), errors.New("Random error"))
 
 		_, exists, err := service.AsyncApiSpec("client-error")
 
@@ -131,7 +132,7 @@ func TestStore_AsyncApiSpec(t *testing.T) {
 		}
 
 		client.On("Object", "test", "valid/asyncApiSpec.json").
-			Return(bytes.NewReader([]byte("{\"name\":\"test\",\"other\":\"yhm\"}")), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte("{\"name\":\"test\",\"other\":\"yhm\"}"))), nil)
 
 		apiSpec, exists, err := service.AsyncApiSpec("valid")
 
@@ -147,7 +148,7 @@ func TestStore_Content(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "not-existing/content.json").
-			Return(bytes.NewReader([]byte{}), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
 			Return(true)
 
@@ -162,7 +163,7 @@ func TestStore_Content(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "invalid/content.json").
-			Return(bytes.NewReader([]byte{}), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
 			Return(false)
 
@@ -177,7 +178,7 @@ func TestStore_Content(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "client-error/content.json").
-			Return(bytes.NewReader([]byte{}), errors.New("Random error"))
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), errors.New("Random error"))
 
 		_, exists, err := service.Content("client-error")
 
@@ -190,7 +191,7 @@ func TestStore_Content(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "valid/content.json").
-			Return(bytes.NewReader([]byte(fixContentWithLinksJSON())), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte(fixContentWithLinksJSON()))), nil)
 
 		apiSpec, exists, err := service.Content("valid")
 
@@ -208,7 +209,7 @@ func TestStore_Content(t *testing.T) {
 		}
 
 		client.On("Object", "test", "valid/content.json").
-			Return(bytes.NewReader([]byte("{}")), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte("{}"))), nil)
 
 		apiSpec, exists, err := service.Content("valid")
 

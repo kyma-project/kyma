@@ -18,7 +18,7 @@ func (NotFoundError) NotFound() bool { return true }
 
 // NewNotFoundError returns a new not found error with given message
 func NewNotFoundError(format string, args ...interface{}) NotFoundError {
-	return NotFoundError{msg: fmt.Sprintf(format, args)}
+	return NotFoundError{msg: fmt.Sprintf(format, args...)}
 }
 
 // IsNotFoundError checks if given error is NotFound error

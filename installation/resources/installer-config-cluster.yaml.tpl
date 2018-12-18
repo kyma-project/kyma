@@ -94,6 +94,9 @@ data:
 
   security.enabled: "true"
 
+  gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
+  gateways.istio-ingressgateway.type: "LoadBalancer"
+
   pilot.resources.limits.memory: 2Gi
   pilot.resources.requests.memory: 512Mi
 
@@ -110,3 +113,14 @@ metadata:
     component: istio-kyma-patch
 data:
   loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-catalog-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: service-catalog
+data:
+  etcd-stateful.etcd.resources.limits.memory: 512Mi

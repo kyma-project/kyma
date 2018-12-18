@@ -74,6 +74,7 @@ func TestServiceClassesQueries(t *testing.T) {
 		providerDisplayName
 		tags
 		labels
+		activated
 		plans {
 			name
 			displayName
@@ -83,7 +84,6 @@ func TestServiceClassesQueries(t *testing.T) {
 			instanceCreateParameterSchema
 			bindingCreateParameterSchema
 		}
-		activated
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {

@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/machinebox/graphql"
 )
@@ -13,9 +14,10 @@ type Request struct {
 }
 
 func NewRequest(q string) *Request {
+	query := strings.Replace(q, "\t", " ", -1)
 	return &Request{
-		query: q,
-		req:   graphql.NewRequest(q),
+		query: query,
+		req:   graphql.NewRequest(query),
 		vars:  make(map[string]interface{}),
 	}
 }
@@ -29,7 +31,7 @@ func (r *Request) AddHeader(key, value string) {
 	r.req.Header.Add(key, value)
 }
 
-func (r *Request) Json() ([]byte, error) {
+func (r *Request) JSON() ([]byte, error) {
 	requestBodyObj := struct {
 		Query     string                 `json:"query"`
 		Variables map[string]interface{} `json:"variables"`

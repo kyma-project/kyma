@@ -41,5 +41,5 @@ spec:
           value: {{ template "fullname" . }}-config
         image: "{{ .Values.controller.deployment.image }}"
         imagePullPolicy: {{ .Values.controller.deployment.pullPolicy }}
-        name: {{ template "fullname" . }}-controller-manager
+        name: {{ template "fullname" . }}-function-controller
       serviceAccountName: {{ template "fullname" . }}-controller-acct

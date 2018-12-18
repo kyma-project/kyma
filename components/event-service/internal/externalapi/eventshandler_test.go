@@ -21,7 +21,7 @@ func TestEventOk(t *testing.T) {
 	defer func() { handleEvent = saved }()
 
 	handleEvent = func(parameters *api.PublishEventParameters, response *api.PublishEventResponses, traceHeaders *map[string]string) (err error) {
-		ok := api.PublishResponse{EventId: "responseEventId"}
+		ok := api.PublishResponse{EventID: "responseEventId"}
 		response.Ok = &ok
 		return
 	}
@@ -36,15 +36,15 @@ func TestEventOk(t *testing.T) {
 	if status := recorder.Code; status != http.StatusOK {
 		t.Errorf("Wrong status code: got %v want %v", status, http.StatusOK)
 	}
-	if contentType := recorder.Result().Header.Get("Content-Type"); contentType != httpconsts.ContentTypeApplicationJson {
-		t.Errorf("Wrong Content-Type: got %v want %v", contentType, httpconsts.ContentTypeApplicationJson)
+	if contentType := recorder.Result().Header.Get("Content-Type"); contentType != httpconsts.ContentTypeApplicationJSON {
+		t.Errorf("Wrong Content-Type: got %v want %v", contentType, httpconsts.ContentTypeApplicationJSON)
 	}
 }
 
 // http client mock
-type HttpClientMock struct{}
+type HTTPClientMock struct{}
 
-func (c *HttpClientMock) Do(req *http.Request) (*http.Response, error) {
+func (c *HTTPClientMock) Do(req *http.Request) (*http.Response, error) {
 	response := &http.Response{
 		StatusCode: 200,
 		Body:       ioutil.NopCloser(bytes.NewReader([]byte("{\"event-id\":\"cea54510-8631-47f0-934a-0571495c12d0\"}"))),
@@ -63,17 +63,17 @@ func TestPropagateTraceHeaders(t *testing.T) {
 	}
 
 	// mock the http client provider
-	httpClientProviderMock := func() httptools.HttpClient { return new(HttpClientMock) }
+	httpClientProviderMock := func() httptools.HTTPClient { return new(HTTPClientMock) }
 
 	// init event sender with mocks
 	bus.InitEventSender(httpClientProviderMock, httpRequestProviderMock)
 
 	// reset event sender default http client provider and http request provider
-	defer func() { bus.InitEventSender(httptools.DefaultHttpClientProvider, httptools.DefaultHttpRequestProvider) }()
+	defer func() { bus.InitEventSender(httptools.DefaultHTTPClientProvider, httptools.DefaultHTTPRequestProvider) }()
 
 	// init source config
-	sourceId, targetUrl := "", "http://kyma-domain/v1/events"
-	bus.Init(sourceId, targetUrl)
+	sourceID, targetURL := "", "http://kyma-domain/v1/events"
+	bus.Init(sourceID, targetURL)
 
 	// simulate request from outside of event-service
 	event := "{\"event-type\":\"order.created\",\"event-type-version\":\"v1\",\"event-id\":\"31109198-4d69-4ae0-972d-76117f3748c8\",\"event-time\":\"2012-11-01T22:08:41+00:00\",\"data\":\"{'key':'value'}\"}"

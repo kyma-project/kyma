@@ -49,7 +49,7 @@ RUN mkdir /kyma
 
 COPY /installation /kyma/installation
 COPY /resources /kyma/resources
-COPY /kyma-installer /kyma/kyma-installer
+COPY /tools/kyma-installer /kyma/tools/kyma-installer
 
 ENV IGNORE_TEST_FAIL="true"
 ENV RUN_TESTS="true"

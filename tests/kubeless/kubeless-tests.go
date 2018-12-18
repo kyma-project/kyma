@@ -186,7 +186,7 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, name string)
 		case <-tick:
 			resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testID)))
 			if err != nil {
-				log.Printf("Unable to call host: %v : Error: %v", host, err)
+				log.Printf("Function not yet ready: Unable to call host: %v : Error: %v", host, err)
 			} else {
 				if resp.StatusCode == http.StatusOK {
 					bodyBytes, err := ioutil.ReadAll(resp.Body)

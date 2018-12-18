@@ -32,7 +32,7 @@ Use the command line to create, call, deploy, expose, and bind a function.
 You can use the Kubeless CLI to deploy functions in Kyma.
 
 ```bash
-$ kubectl apply -f https://minio.$yourClusterDomain/content/components/serverless/assets/deployment.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/gateway/lambda/deployment.yaml
 ```
 
 Check if the function is available:
@@ -44,7 +44,7 @@ $ kubeless function list hello
 You can deploy a function using the Kubernetes and Kubeless CLI. See the following example:
 
 ```bash
-$ kubeless function deploy hello --runtime nodejs8 --handler hello.main --from-file https://minio.$yourClusterDomain/content/components/serverless/assets/hello.js --trigger-http
+$ kubeless function deploy hello --runtime nodejs8 --handler hello.main --from-file https://raw.githubusercontent.com/kyma-project/examples/master/event-subscription/lambda/js/hello-with-data.js --trigger-http
 ```
 
 ### Call a function using the CLI
@@ -60,7 +60,7 @@ $ kubeless function call hello
 Use the CLI to create an API for your function:
 
 ```bash
-$ kubectl apply -f https://minio.$yourClusterDomain/content/components/serverless/assets/api-without-auth.yaml
+$ kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/gateway/lambda/api-without-auth.yaml
 ```
 
 ### Expose a function with authentication enabled
@@ -68,7 +68,7 @@ $ kubectl apply -f https://minio.$yourClusterDomain/content/components/serverles
 If your function is deployed to a cluster, run:
 
 ```bash
- curl -k https://minio.$yourClusterDomain/content/components/serverless/assets/api-with-auth.yaml | sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -f -
+ curl -k https://github.com/kyma-project/examples/blob/master/gateway/lambda/api-with-auth.yaml | sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -f -
 ```
 
 
@@ -81,7 +81,7 @@ $ echo "$(minikube ip) hello.kyma.local" | sudo tee -a /etc/hosts
 Create the API for your function:
 
 ```bash
-kubectl apply -f https://minio.$yourClusterDomain/content/components/serverless/assets/api-with-auth.yaml
+kubectl apply -f https://github.com/kyma-project/examples/blob/master/gateway/lambda/api-with-auth.yaml
 ```
 
 ### Bind a function to events

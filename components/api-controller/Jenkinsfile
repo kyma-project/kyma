@@ -54,7 +54,7 @@ podTemplate(label: label,
                         }
 
                         stage("install dependencies $application") {
-                            execute("make resolve", workDir, componentDir)
+                            execute("dep ensure --vendor-only -v", workDir, componentDir)
                         }
 
                         stage("code quality $application") {

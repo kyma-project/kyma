@@ -55,7 +55,7 @@ func (c *BindingLabelsFetcher) Fetch(svcBinding *scTypes.ServiceBinding) (map[st
 
 		labels, err := c.getBindingLabelsFromClassSpec(&svcClass.Spec.CommonServiceClassSpec)
 		if err != nil {
-			return nil, errors.Wrapf(err, "while getting labels from %", pretty.ClusterServiceClassName(svcClass))
+			return nil, errors.Wrapf(err, "while getting labels from %s", pretty.ClusterServiceClassName(svcClass))
 		}
 
 		return labels, nil
@@ -67,7 +67,7 @@ func (c *BindingLabelsFetcher) Fetch(svcBinding *scTypes.ServiceBinding) (map[st
 
 		labels, err := c.getBindingLabelsFromClassSpec(&svcClass.Spec.CommonServiceClassSpec)
 		if err != nil {
-			return nil, errors.Wrapf(err, "while getting labels from %", pretty.ServiceClassName(svcClass))
+			return nil, errors.Wrapf(err, "while getting labels from %s", pretty.ServiceClassName(svcClass))
 		}
 
 		return labels, nil

@@ -3,6 +3,7 @@ package minio
 import (
 	"bytes"
 	"context"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"time"
 
@@ -61,7 +62,13 @@ func (r *repository) Put(bucketName string, objectName string, resource []byte) 
 
 func (r *repository) Get(bucketName string, objectName string) ([]byte, apperrors.AppError) {
 	object, err, cancel := r.getObject(bucketName, objectName)
-	defer cancel()
+	defer func() {
+		cancel()
+		err := object.Close()
+		if err != nil {
+			log.Error("Error closing object: ", err)
+		}
+	}()
 	if err != nil {
 		return nil, err
 	}

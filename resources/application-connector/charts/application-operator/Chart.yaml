@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Application Operator of Kyma
+name: application-operator
+version: 0.0.1

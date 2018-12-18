@@ -7,19 +7,19 @@ import (
 )
 
 type configurationData struct {
-	sourceId string
+	sourceID string
 }
 
 var conf *configurationData
 var eventsTargetURL string
 
 // Init should be used to initialize the "source" related configuration data
-func Init(sourceId string, targetUrl string) {
+func Init(sourceID string, targetURL string) {
 	conf = &configurationData{
-		sourceId: sourceId,
+		sourceID: sourceID,
 	}
 
-	eventsTargetURL = targetUrl
+	eventsTargetURL = targetURL
 }
 
 func checkConf() (err error) {
@@ -36,10 +36,10 @@ func AddSource(parameters *api.PublishEventParameters) (resp *api.SendEventParam
 	}
 
 	sendRequest := api.SendEventParameters{
-		SourceId:         conf.sourceId, // enrich the event with the sourceId
+		SourceID:         conf.sourceID, // enrich the event with the sourceID
 		EventType:        parameters.Publishrequest.EventType,
 		EventTypeVersion: parameters.Publishrequest.EventTypeVersion,
-		EventId:          parameters.Publishrequest.EventId,
+		EventID:          parameters.Publishrequest.EventID,
 		EventTime:        parameters.Publishrequest.EventTime,
 		Data:             parameters.Publishrequest.Data,
 	}

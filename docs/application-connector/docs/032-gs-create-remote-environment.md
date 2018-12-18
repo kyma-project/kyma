@@ -3,7 +3,7 @@ title: Create a new Remote Environment
 type: Getting Started
 ---
 
-The Remote Environment Controller listens for the creation of RemoteEnvironment custom resources. It provisions and de-provisions the necessary deployments for every created Remote Environment (RE).
+The Application Operator listens for the creation of Remote Environment custom resources. It provisions and de-provisions the necessary deployments for every created Remote Environment (RE).
 
 >**NOTE:** A Remote Environment represents a single connected external solution.
 
