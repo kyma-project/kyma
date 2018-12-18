@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/installer/pkg/kymahelm"
 	"github.com/kyma-project/kyma/components/installer/pkg/kymasources"
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
+	rls "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 // StepFactory defines contract for installation steps factory
@@ -56,7 +57,7 @@ func NewStepFactory(kymaPackage kymasources.KymaPackage, helmClient kymahelm.Cli
 		for _, release := range relesesRes.Releases {
 			statusCode := release.Info.Status.Code
 			log.Printf("%s status: %s", release.Name, statusCode)
-			if statusCode == 1 { // deployed
+			if statusCode == rls.Status_DEPLOYED {
 				installedReleases[release.Name] = true
 			}
 		}
