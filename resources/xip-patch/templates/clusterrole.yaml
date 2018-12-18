@@ -3,6 +3,9 @@ kind: ClusterRole
 metadata:
   name: xip-patch
 rules:
-- apiGroups: ["*"]
-  resources: ["configmaps", "services"]
-  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "patch"]
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get"]
