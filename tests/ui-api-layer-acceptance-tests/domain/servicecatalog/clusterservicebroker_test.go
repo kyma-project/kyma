@@ -47,13 +47,13 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 	resourceDetailsQuery := `
 		name
 		creationTimestamp
+    	url
+    	labels
     	status {
 			ready
     		reason
     		message
 		}
-    	url
-    	labels
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {

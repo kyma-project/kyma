@@ -1,0 +1,41 @@
+# General topic
+- name: service-catalog
+- name: service-brokers
+- name: application-connector
+- name: event-bus
+- name: service-mesh
+- name: serverless
+- name: monitoring
+- name: tracing
+- name: api-gateway
+- name: security
+- name: logging
+- name: console
+
+# Azure Broker
+- name: azure-mysql
+  directory: service-brokers/azure-broker-service-classes/azure-mysql
+- name: azure-redis-cache
+  directory: service-brokers/azure-broker-service-classes/azure-redis-cache
+- name: azure-sql
+  directory: service-brokers/azure-broker-service-classes/azure-sql
+
+# GCP Broker
+- name: gcp-bigquery
+  directory: service-brokers/gcp-broker-service-classes/bigquery
+- name: gcp-cloud-bigtable
+  directory: service-brokers/gcp-broker-service-classes/cloud-bigtable
+- name: gcp-cloud-iam-service-account
+  directory: service-brokers/gcp-broker-service-classes/cloud-iam-service-account
+- name: gcp-cloud-pubsub
+  directory: service-brokers/gcp-broker-service-classes/cloud-pubsub
+- name: gcp-cloud-spanner
+  directory: service-brokers/gcp-broker-service-classes/cloud-spanner
+- name: gcp-cloud-sql-mysql
+  directory: service-brokers/gcp-broker-service-classes/cloud-sql-mysql
+- name: gcp-google-cloud-storage
+  directory: service-brokers/gcp-broker-service-classes/google-cloud-storage
+
+# Helm Broker
+- name: gcp-broker-provider
+  directory: service-brokers/helm-broker-service-classes/gcp-broker-provider

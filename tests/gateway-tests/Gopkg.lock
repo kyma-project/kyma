@@ -8,6 +8,21 @@
   version = "v1.1.0"
 
 [[projects]]
+  branch = "travis-1.9"
+  name = "github.com/golang/lint"
+  packages = [
+    ".",
+    "golint"
+  ]
+  revision = "883fe33ffc4344bad1ecd881f61afd5ec5d80e0a"
+
+[[projects]]
+  name = "github.com/kyma-project/kyma"
+  packages = ["tests/gateway-tests/test/testkit"]
+  revision = "3bababa43441d7a2fb9058c88560490f57294d48"
+  version = "0.5.0"
+
+[[projects]]
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
@@ -22,9 +37,20 @@
   revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
   version = "v1.2.1"
 
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/tools"
+  packages = [
+    "go/ast/astutil",
+    "go/gcexportdata",
+    "go/internal/gcimporter",
+    "go/types/typeutil"
+  ]
+  revision = "6a3e9aa2ab7749d72d1006ee484271b4a11f96c2"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fec9dccae0a3e93bbf2fbb3ce89f12d42eb11ff22c31b9edba61edc14faa3ae8"
+  inputs-digest = "c108e96685df449c60bb601a6828e6b30e8dee04c12a810647f6ccf4d53308bf"
   solver-name = "gps-cdcl"
   solver-version = 1

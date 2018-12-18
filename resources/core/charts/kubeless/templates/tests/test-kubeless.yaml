@@ -108,7 +108,7 @@ rules:
 - apiGroups: ["servicecatalog.kyma.cx"]
   resources: ["servicebindingusages"]
   verbs: ["create", "delete", "get", "list"]
-- apiGroups: ["eventing.kyma.cx"]
+- apiGroups: ["eventing.kyma-project.io"]
   resources: ["subscriptions"]
   verbs: ["create", "delete", "get", "list"]
 - apiGroups: ["gateway.kyma-project.io"]

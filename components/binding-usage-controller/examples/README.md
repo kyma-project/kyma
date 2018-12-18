@@ -8,12 +8,12 @@ Execute all commands from the examples in the `examples` directory.
 
 ## Usage
 
-This section shows how to use the bindings both on a Deployment and a Function.
-The [Function](#use-the-bindings-on-a-function) scenario uses the prefixing functionality for the injected environment variable.  
+This section shows how to use bindings both on a Deployment and a Function.
+The [Function](#use-bindings-on-a-function) scenario uses the prefixing functionality for the injected environment variable.  
 
-### Use the bindings on a Deployment
+### Use bindings on a Deployment
 
-To use the bindings on a Deployment, follow these steps:
+To use bindings on a Deployment, follow these steps:
 
 1. Export the name of the Namespace.
 ```bash
@@ -65,9 +65,9 @@ To perform a clean-up, remove the Namespace:
 kubectl delete ns $namespace
 ```
 
-### Use the bindings on a Function
+### Use bindings on a Function
 
-To use the bindings on a Function, follow these steps:
+To use bindings on a Function, follow these steps:
 
 1. Export the name of the Namespace.
 ```bash
@@ -89,7 +89,7 @@ kubectl create -f servicecatalog/redis-instance-binding.yaml -n $namespace
 ```bash
 kubectl get serviceinstance/redis -n $namespace -o jsonpath='{ .status.conditions[0].reason }'
 ```
-6. Create a Lambda.
+6. Create a lambda.
 ```bash
 kubectl create -f function/redis-client.yaml -n $namespace
 ```
@@ -130,4 +130,4 @@ APP_APPLIED_SBU_CONFIG_MAP_NAME=binding-usage-controller-process-sbu-spec APP_LO
 kubectl apply -f usage-kind/deployment.yaml
 ```
 
-3. Follow the steps under the steps **Use the bindings on a Deployment** or **Use the bindings on a Function**
+3. Follow the steps under the steps **Use bindings on a Deployment** or **Use bindings on a Function**

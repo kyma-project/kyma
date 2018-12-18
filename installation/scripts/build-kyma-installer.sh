@@ -43,6 +43,6 @@ if [[ "$VM_DRIVER" != "none" ]]; then
     eval $(minikube docker-env --shell bash)
 fi
 
-docker build -t ${IMAGE_NAME} ${BUILD_ARG} -f ./kyma-installer/kyma.Dockerfile .
+docker build -t ${IMAGE_NAME} ${BUILD_ARG} -f ./tools/kyma-installer/kyma.Dockerfile .
 
 popd 

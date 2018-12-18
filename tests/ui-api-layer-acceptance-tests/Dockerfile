@@ -11,7 +11,7 @@ COPY ./dex/ ${BASE_APP_DIR}/dex/
 COPY ./domain/ ${BASE_APP_DIR}/domain/
 COPY ./graphql/ ${BASE_APP_DIR}/graphql/
 COPY ./installer/ ${BASE_APP_DIR}/installer/
-COPY ./k8s/ ${BASE_APP_DIR}/k8s/
+COPY ./client ${BASE_APP_DIR}/client/
 COPY ./waiter/ ${BASE_APP_DIR}/waiter/
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./upsbroker/ ${BASE_APP_DIR}/upsbroker/
@@ -25,7 +25,7 @@ RUN mkdir -p /app
 RUN cd ${BASE_APP_DIR}/domain && \
     for dir in $(ls -1FA | grep / | tr -d /); do \
     echo "Building test package ${dir}..."; \
-    go test -tags=acceptance ./${dir} -c \
+    go test -tags=acceptance ./${dir} -c || exit 1 \
     ; done
 
 FROM alpine:3.8

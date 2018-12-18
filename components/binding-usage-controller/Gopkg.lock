@@ -144,6 +144,23 @@
   version = "1.1.5"
 
 [[projects]]
+  name = "github.com/kisielk/errcheck"
+  packages = [
+    ".",
+    "internal/errcheck"
+  ]
+  revision = "1787c4bee836470bf45018cfbc783650db3c6501"
+
+[[projects]]
+  name = "github.com/kisielk/gotool"
+  packages = [
+    ".",
+    "internal/load"
+  ]
+  revision = "80517062f582ea3340cd4baf70e86d539ae7d84d"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
     "pkg/apis/servicecatalog",
@@ -318,8 +335,10 @@
   packages = [
     "cmd/goimports",
     "go/ast/astutil",
+    "go/buildutil",
     "go/gcexportdata",
     "go/gcimporter15",
+    "go/loader",
     "go/types/typeutil",
     "imports"
   ]
@@ -577,6 +596,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "29b903989769e09200f6532dab8caa934294fd36f8fa5758338fb7e78fd5f7ee"
+  inputs-digest = "b1726b7efe50f5571394443bed5c5e882724bf4dfa6204aef3e94f7d4702b120"
   solver-name = "gps-cdcl"
   solver-version = 1

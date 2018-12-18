@@ -48,24 +48,23 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	ts := NewTestSuite(t)
 
 	ts.createTestNamespace()
-	defer ts.deleteTestNamespace()
-
 	ts.createRemoteEnvironment()
-	defer ts.deleteRemoteEnvironment()
+
+	defer func() {
+		if t.Failed() {
+			ts.dumpTestNamespace()
+		}
+		ts.cleanup()
+	}()
 
 	ts.enableRemoteEnvironmentInTestNamespace()
-
 	ts.waitForREServiceClasses(time.Second * 90)
 
 	ts.createAndWaitForServiceInstanceA(timeoutPerStep)
-	defer ts.deleteServiceInstanceA(timeoutPerStep)
 	ts.createAndWaitForServiceInstanceB(timeoutPerStep)
-	defer ts.deleteServiceInstanceB(timeoutPerStep)
 
 	ts.createAndWaitForServiceBindingA(timeoutPerStep)
-	defer ts.deleteServiceBindingA(timeoutPerStep)
 	ts.createAndWaitForServiceBindingB(timeoutPerStep)
-	defer ts.deleteServiceBindingB(timeoutPerStep)
 
 	ts.createTesterDeploymentAndService()
 
@@ -495,6 +494,60 @@ func (ts *TestSuite) serviceClassIsAvailableB() func() error {
 		ts.classExternalNameB = class.Spec.ExternalName
 		return nil
 	}
+}
+
+func (ts *TestSuite) cleanup() {
+	ts.deleteServiceBindingA(timeoutPerStep)
+	ts.deleteServiceBindingB(timeoutPerStep)
+	ts.deleteServiceInstanceA(timeoutPerStep)
+	ts.deleteServiceInstanceB(timeoutPerStep)
+	ts.deleteTestNamespace()
+	ts.deleteRemoteEnvironment()
+}
+
+func (ts *TestSuite) dumpTestNamespace() {
+	clientSet, err := scClient.NewForConfig(ts.k8sClientCfg)
+	require.NoError(ts.t, err)
+
+	// AC dump
+	re, err := ts.remoteEnvironmentClient().Get(ts.remoteEnvironmentName, metav1.GetOptions{})
+	if err != nil {
+		ts.t.Logf("Error: %v\n", err)
+	}
+	ts.t.Logf("RemoteEnvironment: %v\n", re)
+
+	// SC dump
+	sb, err := clientSet.ServicecatalogV1beta1().ServiceBindings(ts.namespace).List(metav1.ListOptions{})
+	if err != nil {
+		ts.t.Logf("Error: %v\n", err)
+	}
+	ts.t.Logf("ServiceBindings: %v\n", sb.Items)
+
+	si, err := clientSet.ServicecatalogV1beta1().ServiceInstances(ts.namespace).List(metav1.ListOptions{})
+	if err != nil {
+		ts.t.Logf("Error: %v\n", err)
+	}
+	ts.t.Logf("ServiceInstances: %v\n", si.Items)
+
+	sc, err := clientSet.ServicecatalogV1beta1().ServiceClasses(ts.namespace).List(metav1.ListOptions{})
+	if err != nil {
+		ts.t.Logf("Error: %v\n", err)
+	}
+	ts.t.Logf("ServiceClasses: %v\n", sc.Items)
+
+	sbr, err := clientSet.ServicecatalogV1beta1().ServiceBrokers(ts.namespace).List(metav1.ListOptions{})
+	if err != nil {
+		ts.t.Logf("Error: %v\n", err)
+	}
+	ts.t.Logf("ServiceBrokers: %v\n", sbr.Items)
+
+	// SBU dump
+	sbu, err := ts.bindingUsageClient().List(metav1.ListOptions{})
+	if err != nil {
+		ts.t.Logf("Error: %v\n", err)
+	}
+	ts.t.Logf("ServiceBindingUsages: %v\n", sbu.Items)
+
 }
 
 // Deployment helpers

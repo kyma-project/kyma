@@ -8,9 +8,9 @@ import (
 	"time"
 
 	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/k8s"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/waiter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -49,7 +49,7 @@ func TestIDPPresetQueriesAndMutations(t *testing.T) {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
-	client, _, err := k8s.NewIDPPresetClientWithConfig()
+	client, _, err := client.NewIDPPresetClientWithConfig()
 	require.NoError(t, err)
 
 	expectedResource := idpPreset("test-name", "test-issuer", "https://test-jwksUri")
@@ -173,8 +173,8 @@ func queryMultipleIDPPresets(c *graphql.Client, resourceDetailsQuery string, exp
 
 func multipleResourcesQueryRequest(resourceDetailsQuery string, expectedResource IDPPreset) *graphql.Request {
 	query := fmt.Sprintf(`
-			query () {
-				IDPPresets() {
+			query {
+				IDPPresets {
 					%s
 				}
 			}

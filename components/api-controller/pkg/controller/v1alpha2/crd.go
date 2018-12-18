@@ -101,7 +101,7 @@ func Crd(domainName string) *k8sApiExtensions.CustomResourceDefinition {
 
 const (
 	hostnamePatternFormat = `^([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]{0,62}[A-Za-z0-9])(\.%s)?$`
-	urlPattern      = `^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`
+	urlPattern            = `^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`
 )
 
 func hostnamePattern(domainName string) string {

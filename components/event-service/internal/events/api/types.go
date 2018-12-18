@@ -6,14 +6,14 @@ package api
 type PublishRequest struct {
 	EventType        string   `json:"event-type,omitempty"`
 	EventTypeVersion string   `json:"event-type-version,omitempty"`
-	EventId          string   `json:"event-id,omitempty"`
+	EventID          string   `json:"event-id,omitempty"`
 	EventTime        string   `json:"event-time,omitempty"`
 	Data             AnyValue `json:"data,omitempty"`
 }
 
 // PublishResponse implements the service definition of PublishResponse
 type PublishResponse struct {
-	EventId string `json:"event-id,omitempty"`
+	EventID string `json:"event-id,omitempty"`
 }
 
 // AnyValue implements the service definition of AnyValue
@@ -50,10 +50,10 @@ type PublishEventResponses struct {
 
 // SendEventParameters implements the request to the outbound messaging API
 type SendEventParameters struct {
-	SourceId         string   `json:"source-id,omitempty"`
+	SourceID         string   `json:"source-id,omitempty"`
 	EventType        string   `json:"event-type,omitempty"`
 	EventTypeVersion string   `json:"event-type-version,omitempty"`
-	EventId          string   `json:"event-id,omitempty"`
+	EventID          string   `json:"event-id,omitempty"`
 	EventTime        string   `json:"event-time,omitempty"`
 	Data             AnyValue `json:"data,omitempty"`
 }

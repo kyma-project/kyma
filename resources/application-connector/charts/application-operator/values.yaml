@@ -1,0 +1,13 @@
+controller:
+  image:
+    pullPolicy: IfNotPresent
+  args:
+    appName: application-operator
+    tillerUrl: tiller-deploy.kube-system.svc.cluster.local:44134
+    syncPeriod: 30
+    installationTimeout: 240
+
+tests:
+  enabled: false
+  image:
+    pullPolicy: IfNotPresent

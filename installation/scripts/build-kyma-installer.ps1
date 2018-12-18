@@ -18,7 +18,7 @@ minikube.exe docker-env | Invoke-Expression
 
 Push-Location $ROOT_DIR
 
-$cmd = "docker build -t ${IMAGE_NAME} ${INSTALLER_VERSION_ARG} -f kyma-installer\kyma.Dockerfile ."
+$cmd = "docker build -t ${IMAGE_NAME} ${INSTALLER_VERSION_ARG} -f tools\kyma-installer\kyma.Dockerfile ."
 Write-Output $cmd
 Invoke-Expression -Command $cmd
 

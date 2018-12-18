@@ -70,6 +70,7 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 		providerDisplayName
 		tags
 		labels
+		activated
 		plans {
 			name
 			displayName
@@ -78,7 +79,6 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 			relatedClusterServiceClassName
 			instanceCreateParameterSchema
 		}
-		activated
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {

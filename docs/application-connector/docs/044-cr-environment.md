@@ -56,7 +56,7 @@ This table lists all the possible parameters of a given resource together with t
 
 ## Additional information
 
-The Remote Environment controller adds the **status** section which describes the status of the RE installation to the created CR periodically. This table lists the fields of the **status** section.
+The Application Operator adds the **status** section which describes the status of the RE installation to the created CR periodically. This table lists the fields of the **status** section.
 
 | Field   |  Description |
 |:----------:|:-------------:|

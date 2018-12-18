@@ -6,7 +6,7 @@ type: Installation
 You can use Kyma with a custom deployment of Istio that you installed in the target environment. To enable such implementation, remove Istio from the list of components that install with Kyma.
 The version of your Istio deployment must match the version that Kyma currently supports.
 
-In the installation process, the installer applies a custom patch to every Istio deployment. This is a mandatory step.  
+In the installation process, the Installer applies a custom patch to every Istio deployment. This is a mandatory step.  
 
 >**NOTE:** To learn more, read the **Istio patch** document in the **Service Mesh** documentation topic.
 
