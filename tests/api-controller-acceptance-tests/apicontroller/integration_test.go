@@ -30,10 +30,15 @@ func TestIntegrationSpec(t *testing.T) {
 		t.Fatal("Domain name not set.")
 	}
 
-	ctx := integrationTestContext{}
-	testId := ctx.generateTestId(testIdLength)
+	namespace := os.Getenv(namespaceEnv)
+	if namespace == "" {
+		t.Fatal("Namespace not set.")
+	}
 
-	log.Infof("Running test: %s", testId)
+	ctx := integrationTestContext{}
+	testID := ctx.generateTestID(testIDLength)
+
+	log.Infof("Running test: %s", testID)
 
 	httpClient, err := ingressgateway.FromEnv().Client()
 	if err != nil {
@@ -44,9 +49,9 @@ func TestIntegrationSpec(t *testing.T) {
 	k8sInterface := ctx.k8sInterfaceOrExit(kubeConfig)
 
 	t.Logf("Set up...")
-	fixture := setUpOrExit(k8sInterface, namespace, testId)
+	fixture := setUpOrExit(k8sInterface, namespace, testID)
 
-	var lastApi *kymaApi.Api
+	var lastAPI *kymaApi.Api
 
 	suiteFinished := false
 
@@ -68,60 +73,60 @@ func TestIntegrationSpec(t *testing.T) {
 
 		Convey("create API with authentication disabled", func() {
 
-			api := ctx.apiFor(testId, domainName, fixture.SampleAppService, apiSecurityDisabled, true)
+			api := ctx.apiFor(testID, domainName, namespace, fixture.SampleAppService, apiSecurityDisabled, true)
 
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Create(api)
+			lastAPI, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Create(api)
 			So(err, ShouldBeNil)
-			So(lastApi, ShouldNotBeNil)
-			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+			So(lastAPI, ShouldNotBeNil)
+			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 
-			ctx.validateApiNotSecured(httpClient, lastApi.Spec.Hostname)
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+			ctx.validateAPINotSecured(httpClient, lastAPI.Spec.Hostname)
+			lastAPI, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastAPI.Name, metav1.GetOptions{})
 			So(err, ShouldBeNil)
-			So(lastApi, ShouldNotBeNil)
-			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+			So(lastAPI, ShouldNotBeNil)
+			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 		})
 
 		Convey("update API with custom jwt configuration", func() {
 
-			api := *lastApi
+			api := *lastAPI
 			ctx.setCustomJwtAuthenticationConfig(&api)
 
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
+			lastAPI, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Update(&api)
 			So(err, ShouldBeNil)
-			So(lastApi, ShouldNotBeNil)
-			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+			So(lastAPI, ShouldNotBeNil)
+			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 
-			ctx.validateApiSecured(httpClient, lastApi)
-			lastApi, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+			ctx.validateAPISecured(httpClient, lastAPI)
+			lastAPI, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastAPI.Name, metav1.GetOptions{})
 			So(err, ShouldBeNil)
-			So(lastApi, ShouldNotBeNil)
-			So(lastApi.ResourceVersion, ShouldNotBeEmpty)
+			So(lastAPI, ShouldNotBeNil)
+			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
 		})
 
 		Convey("delete API", func() {
 
 			suiteFinished = true
-			ctx.checkPreconditions(lastApi, t)
+			ctx.checkPreconditions(lastAPI, t)
 
-			err := kymaInterface.GatewayV1alpha2().Apis(namespace).Delete(lastApi.Name, &metav1.DeleteOptions{})
+			err := kymaInterface.GatewayV1alpha2().Apis(namespace).Delete(lastAPI.Name, &metav1.DeleteOptions{})
 			So(err, ShouldBeNil)
 
-			_, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastApi.Name, metav1.GetOptions{})
+			_, err = kymaInterface.GatewayV1alpha2().Apis(namespace).Get(lastAPI.Name, metav1.GetOptions{})
 			So(err, ShouldNotBeNil)
 		})
 	})
 }
 
-func (ctx integrationTestContext) apiFor(testId, domainName string, svc *apiv1.Service, secured ApiSecurity, hostWithDomain bool) *kymaApi.Api {
+func (ctx integrationTestContext) apiFor(testID string, domainName string, namespace string, svc *apiv1.Service, secured APISecurity, hostWithDomain bool) *kymaApi.Api {
 
 	return &kymaApi.Api{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
-			Name:      fmt.Sprintf("sample-app-api-%s", testId),
+			Name:      fmt.Sprintf("sample-app-api-%s", testID),
 		},
 		Spec: kymaApi.ApiSpec{
-			Hostname: ctx.hostnameFor(testId, domainName, hostWithDomain),
+			Hostname: ctx.hostnameFor(testID, domainName, hostWithDomain),
 			Service: kymaApi.Service{
 				Name: svc.Name,
 				Port: int(svc.Spec.Ports[0].Port),
@@ -135,17 +140,17 @@ func (ctx integrationTestContext) apiFor(testId, domainName string, svc *apiv1.S
 func (integrationTestContext) setCustomJwtAuthenticationConfig(api *kymaApi.Api) {
 	// OTHER EXAMPLE OF POSSIBLE VALUES:
 	//issuer := "https://accounts.google.com"
-	//jwksUri := "https://www.googleapis.com/oauth2/v3/certs"
+	//jwksURI := "https://www.googleapis.com/oauth2/v3/certs"
 
 	issuer := "https://accounts.google.com"
-	jwksUri := "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
+	jwksURI := "http://dex-service.kyma-system.svc.cluster.local:5556/keys"
 
 	rules := []kymaApi.AuthenticationRule{
 		{
 			Type: kymaApi.JwtType,
 			Jwt: kymaApi.JwtAuthentication{
 				Issuer:  issuer,
-				JwksUri: jwksUri,
+				JwksUri: jwksURI,
 			},
 		},
 	}
@@ -157,20 +162,20 @@ func (integrationTestContext) setCustomJwtAuthenticationConfig(api *kymaApi.Api)
 	api.Spec.Authentication = rules
 }
 
-func (integrationTestContext) checkPreconditions(lastApi *kymaApi.Api, t *testing.T) {
-	if lastApi == nil {
+func (integrationTestContext) checkPreconditions(lastAPI *kymaApi.Api, t *testing.T) {
+	if lastAPI == nil {
 		t.Fatal("Precondition failed - last API not set")
 	}
 }
 
-func (integrationTestContext) hostnameFor(testId, domainName string, hostWithDomain bool) string {
+func (integrationTestContext) hostnameFor(testID, domainName string, hostWithDomain bool) string {
 	if hostWithDomain {
-		return fmt.Sprintf("%s.%s", testId, domainName)
+		return fmt.Sprintf("%s.%s", testID, domainName)
 	}
-	return testId
+	return testID
 }
 
-func (ctx integrationTestContext) validateApiSecured(httpClient *http.Client, api *kymaApi.Api) {
+func (ctx integrationTestContext) validateAPISecured(httpClient *http.Client, api *kymaApi.Api) {
 
 	response, err := ctx.withRetries(maxRetries, minimalNumberOfCorrectResults, func() (*http.Response, error) {
 		return httpClient.Get(fmt.Sprintf("https://%s", api.Spec.Hostname))
@@ -180,7 +185,7 @@ func (ctx integrationTestContext) validateApiSecured(httpClient *http.Client, ap
 	So(response.StatusCode, ShouldEqual, http.StatusUnauthorized)
 }
 
-func (ctx integrationTestContext) validateApiNotSecured(httpClient *http.Client, hostname string) {
+func (ctx integrationTestContext) validateAPINotSecured(httpClient *http.Client, hostname string) {
 
 	response, err := ctx.withRetries(maxRetries, minimalNumberOfCorrectResults, func() (*http.Response, error) {
 		return httpClient.Get(fmt.Sprintf("https://%s", hostname))
@@ -264,7 +269,7 @@ func (integrationTestContext) k8sInterfaceOrExit(kubeConfig *rest.Config) kubern
 	return k8sInterface
 }
 
-func (integrationTestContext) generateTestId(n int) string {
+func (integrationTestContext) generateTestID(n int) string {
 
 	rand.Seed(time.Now().UnixNano())
 

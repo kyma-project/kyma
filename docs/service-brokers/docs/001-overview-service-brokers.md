@@ -1,6 +1,5 @@
 ---
 title: Overview
-type: Overview
 ---
 
 A Service Broker is a server compatible with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md) specification. A Service Broker manages the lifecycle of one or more services. It advertises a catalog of service offerings and service plans to a platform.
@@ -17,7 +16,7 @@ Kyma provides these Service Brokers to use with the Service Catalog:
 
 * Azure Broker
 * Google Cloud Platform Service Broker (Experimental)
-* Remote Environment Broker
+* Application Broker
 * Helm Broker
 
 Follow the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md) specification to build your own Service Broker.

@@ -10,13 +10,13 @@ type Repository struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: remoteEnvironment, name, secretID, data
-func (_m *Repository) Create(remoteEnvironment string, name string, secretID string, data map[string][]byte) apperrors.AppError {
-	ret := _m.Called(remoteEnvironment, name, secretID, data)
+// Create provides a mock function with given fields: application, name, serviceID, data
+func (_m *Repository) Create(application string, name string, serviceID string, data map[string][]byte) apperrors.AppError {
+	ret := _m.Called(application, name, serviceID, data)
 
 	var r0 apperrors.AppError
 	if rf, ok := ret.Get(0).(func(string, string, string, map[string][]byte) apperrors.AppError); ok {
-		r0 = rf(remoteEnvironment, name, secretID, data)
+		r0 = rf(application, name, serviceID, data)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)
@@ -42,13 +42,13 @@ func (_m *Repository) Delete(name string) apperrors.AppError {
 	return r0
 }
 
-// Get provides a mock function with given fields: remoteEnvironment, name
-func (_m *Repository) Get(remoteEnvironment string, name string) (map[string][]byte, apperrors.AppError) {
-	ret := _m.Called(remoteEnvironment, name)
+// Get provides a mock function with given fields: application, name
+func (_m *Repository) Get(application string, name string) (map[string][]byte, apperrors.AppError) {
+	ret := _m.Called(application, name)
 
 	var r0 map[string][]byte
 	if rf, ok := ret.Get(0).(func(string, string) map[string][]byte); ok {
-		r0 = rf(remoteEnvironment, name)
+		r0 = rf(application, name)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(map[string][]byte)
@@ -57,7 +57,7 @@ func (_m *Repository) Get(remoteEnvironment string, name string) (map[string][]b
 
 	var r1 apperrors.AppError
 	if rf, ok := ret.Get(1).(func(string, string) apperrors.AppError); ok {
-		r1 = rf(remoteEnvironment, name)
+		r1 = rf(application, name)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(apperrors.AppError)
@@ -67,13 +67,13 @@ func (_m *Repository) Get(remoteEnvironment string, name string) (map[string][]b
 	return r0, r1
 }
 
-// Upsert provides a mock function with given fields: remoteEnvironment, name, secretID, data
-func (_m *Repository) Upsert(remoteEnvironment string, name string, secretID string, data map[string][]byte) apperrors.AppError {
-	ret := _m.Called(remoteEnvironment, name, secretID, data)
+// Upsert provides a mock function with given fields: application, name, secretID, data
+func (_m *Repository) Upsert(application string, name string, secretID string, data map[string][]byte) apperrors.AppError {
+	ret := _m.Called(application, name, secretID, data)
 
 	var r0 apperrors.AppError
 	if rf, ok := ret.Get(0).(func(string, string, string, map[string][]byte) apperrors.AppError); ok {
-		r0 = rf(remoteEnvironment, name, secretID, data)
+		r0 = rf(application, name, secretID, data)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)

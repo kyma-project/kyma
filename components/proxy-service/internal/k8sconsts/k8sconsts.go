@@ -1,7 +1,7 @@
 package k8sconsts
 
 const (
-	LabelRemoteEnvironment = "re"
-	LabelServiceId         = "serviceId"
-	LabelApp               = "app"
+	LabelApplication = "app"
+	LabelServiceId   = "serviceId"
+	LabelApp         = "app"
 )

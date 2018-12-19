@@ -78,7 +78,7 @@ func TestRepository_Get(t *testing.T) {
 	})
 }
 
-func makeSecret(name, clientID, clientSecret, serviceID, remoteEnvironment string) *v1.Secret {
+func makeSecret(name, clientID, clientSecret, serviceID, application string) *v1.Secret {
 	secretMap := make(map[string][]byte)
 	secretMap["clientId"] = []byte(clientID)
 	secretMap["clientSecret"] = []byte(clientSecret)
@@ -87,8 +87,8 @@ func makeSecret(name, clientID, clientSecret, serviceID, remoteEnvironment strin
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 			Labels: map[string]string{
-				k8sconsts.LabelRemoteEnvironment: remoteEnvironment,
-				k8sconsts.LabelServiceId:         serviceID,
+				k8sconsts.LabelApplication: application,
+				k8sconsts.LabelServiceId:   serviceID,
 			},
 		},
 		Data: secretMap,

@@ -84,13 +84,13 @@ spec:
               configMapKeyRef:
                 name: core-minio-docs-upload
                 key: APP_ASSETS_FOLDER
-          - name: APP_REMOTE_ENVIRONMENT_GATEWAY_INTEGRATION_NAMESPACE
+          - name: APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE
             value: "kyma-integration"
-          - name: APP_REMOTE_ENVIRONMENT_GATEWAY_STATUS_REFRESH_PERIOD
+          - name: APP_APPLICATION_GATEWAY_STATUS_REFRESH_PERIOD
             value: "15s"
-          - name: APP_REMOTE_ENVIRONMENT_CONNECTOR_URL
+          - name: APP_APPLICATION_CONNECTOR_URL
             value: "http://connector-service-internal-api.kyma-integration.svc.cluster.local:8080"
-          - name: APP_REMOTE_ENVIRONMENT_CONNECTOR_HTTP_CALL_TIMEOUT
+          - name: APP_APPLICATION_CONNECTOR_HTTP_CALL_TIMEOUT
             value: "2s"
         ports:
           - containerPort: {{ .Values.service.internalPort }}

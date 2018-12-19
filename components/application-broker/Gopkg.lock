@@ -211,8 +211,21 @@
 [[projects]]
   branch = "master"
   name = "github.com/kyma-project/kyma"
-  packages = ["components/helm-broker/platform/logger/spy"]
-  revision = "316d1138db90258cd65bc3ff64bba18cb7e0eb31"
+  packages = [
+    "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/clientset/versioned",
+    "components/application-operator/pkg/client/clientset/versioned/fake",
+    "components/application-operator/pkg/client/clientset/versioned/scheme",
+    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1/fake",
+    "components/application-operator/pkg/client/informers/externalversions",
+    "components/application-operator/pkg/client/informers/externalversions/applicationconnector",
+    "components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/informers/externalversions/internalinterfaces",
+    "components/application-operator/pkg/client/listers/applicationconnector/v1alpha1",
+    "components/helm-broker/platform/logger/spy"
+  ]
+  revision = "486e4dd8996ce48ad67a68d4b631296dc48a534a"
 
 [[projects]]
   branch = "master"
@@ -706,6 +719,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5bd7eaa4002eaa45cab00266c616e77be240a7b7aa167b57f834daf5420d6284"
+  inputs-digest = "d0a7dbed62a2c4687ef92b4ba884895830c9cb5c6f03e428b3b286451ad378ae"
   solver-name = "gps-cdcl"
   solver-version = 1

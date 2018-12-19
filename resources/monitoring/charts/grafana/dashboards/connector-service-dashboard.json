@@ -618,10 +618,10 @@
       {
         "allValue": null,
         "current": {
-          "text": "/v1/remoteenvironments/{reName}/info + /v1/remoteenvironments/{reName}/tokens",
+          "text": "/v1/applications/{appName}/info + /v1/applications/{appName}/tokens",
           "value": [
-            "/v1/remoteenvironments/{reName}/info",
-            "/v1/remoteenvironments/{reName}/tokens"
+            "/v1/applications/{appName}/info",
+            "/v1/applications/{appName}/tokens"
           ]
         },
         "datasource": "Prometheus",

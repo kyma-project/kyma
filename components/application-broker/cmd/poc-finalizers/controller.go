@@ -10,38 +10,41 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/kubernetes/pkg/controller"
 
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	v1alpha12 "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	informers "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+
+	mV1alpha12 "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	cV1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	informers "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
+
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 )
 
 // FinalizerName is the protection finalizer name
 const FinalizerName = "protection-finalizer"
 
-// Controller add finalizers logic the RemoteEnvironment resources. Blocks deletion until all connected EnvironmentMapping are removed.
+// Controller add finalizers logic the Application resources. Blocks deletion until all connected ApplicationMapping are removed.
 type Controller struct {
-	queue       workqueue.RateLimitingInterface
-	reInformer  cache.SharedIndexInformer
-	emInterface v1alpha12.EnvironmentMappingInterface
-	reInterface v1alpha12.RemoteEnvironmentInterface
-	log         *logrus.Entry
+	queue        workqueue.RateLimitingInterface
+	reInformer   cache.SharedIndexInformer
+	emInterface  mV1alpha12.ApplicationMappingInterface
+	appInterface cV1alpha12.ApplicationInterface
+	log          *logrus.Entry
 }
 
 // NewProtectionController creates protection controller instance
-func NewProtectionController(remoteEnvironmentInformer informers.RemoteEnvironmentInformer,
-	emInterface v1alpha12.EnvironmentMappingInterface,
-	environmentInterface v1alpha12.RemoteEnvironmentInterface,
+func NewProtectionController(applicationInformer informers.ApplicationInformer,
+	emInterface mV1alpha12.ApplicationMappingInterface,
+	environmentInterface cV1alpha12.ApplicationInterface,
 	log *logrus.Entry) *Controller {
 
-	reInformer := remoteEnvironmentInformer.Informer()
+	reInformer := applicationInformer.Informer()
 
 	c := &Controller{
-		queue:       workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "reprotection"),
-		reInformer:  remoteEnvironmentInformer.Informer(),
-		emInterface: emInterface,
-		log:         log.WithField("service", "re-protection-controller"),
-		reInterface: environmentInterface,
+		queue:        workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "reprotection"),
+		reInformer:   applicationInformer.Informer(),
+		emInterface:  emInterface,
+		log:          log.WithField("service", "app-protection-controller"),
+		appInterface: environmentInterface,
 	}
 
 	reInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -62,19 +65,19 @@ func NewProtectionController(remoteEnvironmentInformer informers.RemoteEnvironme
 }
 
 func (c *Controller) reAddedUpdated(obj interface{}) {
-	re, ok := obj.(*v1alpha1.RemoteEnvironment)
+	app, ok := obj.(*v1alpha1.Application)
 	if !ok {
-		c.log.Errorf("RE informer returned non-RemoteEnvironment object: %#v", obj)
+		c.log.Errorf("Application informer returned non-Application object: %#v", obj)
 		return
 	}
-	key, err := cache.MetaNamespaceKeyFunc(re)
+	key, err := cache.MetaNamespaceKeyFunc(app)
 	if err != nil {
-		c.log.Errorf("couldn't get key for Remote Environment %#v: %v", re, err)
+		c.log.Errorf("couldn't get key for Application %#v: %v", app, err)
 		return
 	}
-	c.log.Infof("Got RemoteEnvironment: %s", key)
+	c.log.Infof("Got Application: %s", key)
 
-	if needToAddFinalizer(re) || isDeletionCandidate(re) {
+	if needToAddFinalizer(app) || isDeletionCandidate(app) {
 		c.queue.AddRateLimited(key)
 	}
 }
@@ -114,7 +117,7 @@ func (c *Controller) processNextWorkItem() bool {
 
 	err := c.processRE(key.(string))
 	if err != nil {
-		c.log.Errorf("Could not process RemoteEnvironment %s: %s", key, err.Error())
+		c.log.Errorf("Could not process Application %s: %s", key, err.Error())
 		c.queue.AddRateLimited(key)
 		return true
 	}
@@ -124,46 +127,46 @@ func (c *Controller) processNextWorkItem() bool {
 }
 
 func (c *Controller) processRE(key string) error {
-	_, reName, err := cache.SplitMetaNamespaceKey(key)
+	_, appName, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		return err
 	}
 
-	re, err := c.reInterface.Get(reName, v1.GetOptions{})
+	app, err := c.appInterface.Get(appName, v1.GetOptions{})
 	if err != nil {
 		return err
 	}
 
-	if needToAddFinalizer(re) {
-		clone := re.DeepCopy()
+	if needToAddFinalizer(app) {
+		clone := app.DeepCopy()
 		clone.ObjectMeta.Finalizers = append(clone.ObjectMeta.Finalizers, FinalizerName)
 		c.log.Info("Adding finalizer")
-		_, err := c.reInterface.Update(clone)
+		_, err := c.appInterface.Update(clone)
 		c.log.Infof("Finalizer added")
 		if err != nil {
 			return err
 		}
 	}
 
-	if isDeletionCandidate(re) {
+	if isDeletionCandidate(app) {
 		items, _ := c.emInterface.List(v1.ListOptions{})
 		exists := false
 
-		// find if environment mapping exists
+		// find if application mapping exists
 		for _, item := range items.Items {
-			if item.Name == reName {
+			if item.Name == appName {
 				exists = true
 				break
 			}
 		}
 
-		// if EnvironmentMapping does not exists - remove finalizer
+		// if ApplicationMapping does not exists - remove finalizer
 		if !exists {
-			clone := re.DeepCopy()
+			clone := app.DeepCopy()
 			clone.ObjectMeta.Finalizers = removeString(clone.ObjectMeta.Finalizers, FinalizerName)
 
 			c.log.Info("Removing finalizer")
-			_, err := c.reInterface.Update(clone)
+			_, err := c.appInterface.Update(clone)
 			c.log.Infof("Finalizer removed")
 			if err != nil {
 				return err
@@ -173,12 +176,12 @@ func (c *Controller) processRE(key string) error {
 	return nil
 }
 
-func isDeletionCandidate(re *v1alpha1.RemoteEnvironment) bool {
-	return re.ObjectMeta.DeletionTimestamp != nil && containsString(re.ObjectMeta.Finalizers, FinalizerName)
+func isDeletionCandidate(app *v1alpha1.Application) bool {
+	return app.ObjectMeta.DeletionTimestamp != nil && containsString(app.ObjectMeta.Finalizers, FinalizerName)
 }
 
-func needToAddFinalizer(re *v1alpha1.RemoteEnvironment) bool {
-	return re.ObjectMeta.DeletionTimestamp == nil && !containsString(re.ObjectMeta.Finalizers, FinalizerName)
+func needToAddFinalizer(app *v1alpha1.Application) bool {
+	return app.ObjectMeta.DeletionTimestamp == nil && !containsString(app.ObjectMeta.Finalizers, FinalizerName)
 }
 
 func removeString(slice []string, s string) []string {
