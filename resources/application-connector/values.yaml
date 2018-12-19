@@ -11,11 +11,11 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    dir: pr/
-    version: PR-1993
+    dir: develop/
+    version: 4b93b792
   application_operator_tests:
-    dir: pr/
-    version: PR-1993
+    dir: develop/
+    version: 4b93b792
   connector_service:
     dir: pr/
     version: PR-2005
@@ -29,17 +29,17 @@ global:
     dir: develop/
     version: 6e0a7fe2
   application_proxy:
-    dir: pr/
-    version: PR-1993
+    dir: develop/
+    version: 4b93b792
   gateway_tests:
     dir: pr/
     version: PR-2019
   application_registry:
-    dir: pr/
-    version: PR-1993
+    dir: develop/
+    version: 4b93b792
   application_registry_tests:
-    dir: pr/
-    version: PR-1993
+    dir: develop/
+    version: 4b93b792
   application_broker:
     dir: pr/
     version: PR-2040
