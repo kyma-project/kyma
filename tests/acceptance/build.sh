@@ -71,10 +71,10 @@ function goBuild() {
 }
 
 echo -e "${GREEN} Building fake-gateway${NC}"
-goBuild gateway.bin ./remote-environment/cmd/fake-gateway/main.go
+goBuild gateway.bin ./application/cmd/fake-gateway/main.go
 
 echo -e "${GREEN} Building gateway-client${NC}"
-goBuild client.bin ./remote-environment/cmd/gateway-client/main.go
+goBuild client.bin ./application/cmd/gateway-client/main.go
 
 echo -e "${GREEN} Building env-tester${NC}"
 goBuild env-tester.bin ./servicecatalog/cmd/env-tester/main.go

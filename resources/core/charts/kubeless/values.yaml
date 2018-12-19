@@ -1,13 +1,13 @@
 controller:
   deployment:
     replicaCount: 1
-    image: bitnami/kubeless-controller-manager:v1.0.0-alpha.7
+    image: kubeless/function-controller:v1.0.0
     pullPolicy: IfNotPresent
 
 config:
   builder:
     enabled: "false"
-    image: kubeless/function-image-builder:v1.0.0-alpha.7
+    image: kubeless/function-image-builder:v1.0.0
     secret: ""
     verifyTls: "true"
   provision:

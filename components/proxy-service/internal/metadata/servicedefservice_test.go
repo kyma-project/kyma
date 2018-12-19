@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/applications"
+	applicationmocks "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/applications/mocks"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv"
-	remoteenvmocks "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv/mocks"
 	serviceapimocks "github.com/kyma-project/kyma/components/proxy-service/internal/metadata/serviceapi/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,15 +16,15 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 
 	t.Run("should get API", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{}
-		remoteEnvService := remoteenv.Service{API: remoteEnvServiceAPI}
+		applicationServiceAPI := &applications.ServiceAPI{}
+		applicationService := applications.Service{API: applicationServiceAPI}
 		serviceAPI := &model.API{}
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Get", "uuid-1").Return(remoteEnvService, nil)
+		serviceRepository := new(applicationmocks.ServiceRepository)
+		serviceRepository.On("Get", "uuid-1").Return(applicationService, nil)
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Read", remoteEnvServiceAPI).Return(serviceAPI, nil)
+		serviceAPIService.On("Read", applicationServiceAPI).Return(serviceAPI, nil)
 
 		service := NewServiceDefinitionService(serviceAPIService, serviceRepository)
 
@@ -39,8 +39,8 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 
 	t.Run("should return not found error if service does not exist", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Get", "uuid-1").Return(remoteenv.Service{}, apperrors.NotFound("missing"))
+		serviceRepository := new(applicationmocks.ServiceRepository)
+		serviceRepository.On("Get", "uuid-1").Return(applications.Service{}, apperrors.NotFound("missing"))
 
 		service := NewServiceDefinitionService(nil, serviceRepository)
 
@@ -55,8 +55,8 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 
 	t.Run("should return internal error if service does not exist", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Get", "uuid-1").Return(remoteenv.Service{}, apperrors.Internal("some error"))
+		serviceRepository := new(applicationmocks.ServiceRepository)
+		serviceRepository.On("Get", "uuid-1").Return(applications.Service{}, apperrors.Internal("some error"))
 
 		service := NewServiceDefinitionService(nil, serviceRepository)
 
@@ -72,8 +72,8 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 
 	t.Run("should return bad request if service does not have API", func(t *testing.T) {
 		// given
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Get", "uuid-1").Return(remoteenv.Service{}, nil)
+		serviceRepository := new(applicationmocks.ServiceRepository)
+		serviceRepository.On("Get", "uuid-1").Return(applications.Service{}, nil)
 
 		service := NewServiceDefinitionService(nil, serviceRepository)
 
@@ -88,14 +88,14 @@ func TestServiceDefinitionService_GetAPI(t *testing.T) {
 
 	t.Run("should return internal error if reading service API fails", func(t *testing.T) {
 		// given
-		remoteEnvServiceAPI := &remoteenv.ServiceAPI{}
-		remoteEnvService := remoteenv.Service{API: remoteEnvServiceAPI}
+		applicationServiceAPI := &applications.ServiceAPI{}
+		applicationService := applications.Service{API: applicationServiceAPI}
 
-		serviceRepository := new(remoteenvmocks.ServiceRepository)
-		serviceRepository.On("Get", "uuid-1").Return(remoteEnvService, nil)
+		serviceRepository := new(applicationmocks.ServiceRepository)
+		serviceRepository.On("Get", "uuid-1").Return(applicationService, nil)
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Read", remoteEnvServiceAPI).Return(nil, apperrors.Internal("some error"))
+		serviceAPIService.On("Read", applicationServiceAPI).Return(nil, apperrors.Internal("some error"))
 
 		service := NewServiceDefinitionService(serviceAPIService, serviceRepository)
 

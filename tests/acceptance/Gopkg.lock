@@ -117,18 +117,22 @@
 [[projects]]
   name = "github.com/kyma-project/kyma"
   packages = [
+    "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/clientset/versioned",
+    "components/application-broker/pkg/client/clientset/versioned/scheme",
+    "components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/clientset/versioned",
+    "components/application-operator/pkg/client/clientset/versioned/scheme",
+    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/binding-usage-controller/pkg/apis/settings/v1alpha1",
     "components/binding-usage-controller/pkg/client/clientset/versioned",
     "components/binding-usage-controller/pkg/client/clientset/versioned/scheme",
     "components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
-    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
-    "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
-    "components/remote-environment-broker/pkg/client/clientset/versioned",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1"
   ]
-  revision = "7400291c88b0dde7d2b674f02a40efc5eb1934e5"
+  revision = "46be4bf9ea1d63216d644240036909ce0b50c7eb"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -416,6 +420,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ea6d57bd47cac850f33416277d458d575446d089d8abb01c9176d6a904781eae"
+  inputs-digest = "31f8c0ab9e18e416bd8a516d2f7e2abded392babfec2f300963191af3f257222"
   solver-name = "gps-cdcl"
   solver-version = 1

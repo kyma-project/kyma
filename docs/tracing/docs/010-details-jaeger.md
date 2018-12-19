@@ -16,7 +16,7 @@ type: Details
 
 The Envoy sidecar uses Jaeger to trace the request flow in the Istio Service Mesh. Jaeger is compatible with the Zipkin protocol, which Istio and Envoy use to communicate with the tracing back end. This allows you to use the Zipkin protocol and clients in Istio, Envoy, and the Kyma services.
 
-For more details, see [Istio's Distributed Tracing](https://istio.io/docs/tasks/telemetry/distributed-tracing.html).
+For details, see [Istio's Distributed Tracing](https://istio.io/docs/tasks/telemetry/distributed-tracing.html).
 
 ## Install Jaeger locally
 While Jager installs automatically during cluster installation, local Jaeger installation is optional. You can install Jaeger on a Kyma instance and run it locally using Helm.

@@ -18,7 +18,7 @@ To get the configuration URL which allows you to fetch the required configuratio
 - Create a TokenRequest CR. The CR name must match the name of the App for which you want to get the configuration details. Run:
   ```
   cat <<EOF | kubectl apply -f -
-  apiVersion: connectorservice.kyma-project.io/v1alpha1
+  apiVersion: applicationconnector.kyma-project.io/v1alpha1
   kind: TokenRequest
   metadata:
     name: {APP_NAME}
@@ -27,13 +27,13 @@ To get the configuration URL which allows you to fetch the required configuratio
 
 - Fetch the TokenRequest CR you created to get the configuration details from the **status** section. Run:
   ```
-  kubectl get tokenrequest.connectorservice.kyma-project.io {APP_NAME} -o yaml
+  kubectl get tokenrequest.applicationconnector.kyma-project.io {APP_NAME} -o yaml
   ```
   >**NOTE:** If the response doesn't contain the **status** section, wait for a few moments and fetch the CR again.
 
 A successful call returns the following response:
   ```
-  apiVersion: connectorservice.kyma-project.io/v1alpha1
+  apiVersion: applicationconnector.kyma-project.io/v1alpha1
   kind: TokenRequest
   metadata:
     name: {APP_NAME}

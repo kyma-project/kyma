@@ -6,27 +6,27 @@ import (
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-// NewEnvironmentMappingService creates new instance of NewEnvironmentMappingService
-func NewEnvironmentMappingService(lister emListers.EnvironmentMappingLister) *EnvironmentMappingService {
-	return &EnvironmentMappingService{
+// NewApplicationMappingService creates new instance of NewApplicationMappingService
+func NewApplicationMappingService(lister emListers.ApplicationMappingLister) *ApplicationMappingService {
+	return &ApplicationMappingService{
 		lister: lister,
 	}
 }
 
-// EnvironmentMappingService provides methods which checks access based on EnvironmentMapping objects.
-type EnvironmentMappingService struct {
-	lister emListers.EnvironmentMappingLister
+// ApplicationMappingService provides methods which checks access based on ApplicationMapping objects.
+type ApplicationMappingService struct {
+	lister emListers.ApplicationMappingLister
 }
 
-// IsRemoteEnvironmentEnabled checks, if EnvironmentMapping with given name in the namespace exists
-func (c *EnvironmentMappingService) IsRemoteEnvironmentEnabled(namespace, name string) (bool, error) {
-	_, err := c.lister.EnvironmentMappings(namespace).Get(name)
+// IsApplicationEnabled checks, if ApplicationMapping with given name in the namespace exists
+func (c *ApplicationMappingService) IsApplicationEnabled(namespace, name string) (bool, error) {
+	_, err := c.lister.ApplicationMappings(namespace).Get(name)
 	switch {
 	case err == nil:
 		return true, nil
 	case k8sErrors.IsNotFound(err):
 		return false, nil
 	default:
-		return false, errors.Wrapf(err, "while getting EnvironmentMapping %s/%s", namespace, name)
+		return false, errors.Wrapf(err, "while getting ApplicationMapping %s/%s", namespace, name)
 	}
 }

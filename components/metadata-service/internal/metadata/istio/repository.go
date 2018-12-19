@@ -35,17 +35,17 @@ type DenierInterface interface {
 // Repository allows to perform various operations for Istio resources
 type Repository interface {
 	// CreateDenier creates Denier
-	CreateDenier(remoteEnvironment, serviceId, name string) apperrors.AppError
+	CreateDenier(application, serviceId, name string) apperrors.AppError
 	// CreateCheckNothing creates CheckNothing
-	CreateCheckNothing(remoteEnvironment, serviceId, name string) apperrors.AppError
+	CreateCheckNothing(application, serviceId, name string) apperrors.AppError
 	// CreateRule creates Rule
-	CreateRule(remoteEnvironment, serviceId, name string) apperrors.AppError
+	CreateRule(application, serviceId, name string) apperrors.AppError
 	// UpserDenier creates or updates Denier
-	UpsertDenier(remoteEnvironment, serviceId, name string) apperrors.AppError
+	UpsertDenier(application, serviceId, name string) apperrors.AppError
 	// UpsertCheckNothing creates or updates CheckNothing
-	UpsertCheckNothing(remoteEnvironment, serviceId, name string) apperrors.AppError
+	UpsertCheckNothing(application, serviceId, name string) apperrors.AppError
 	// UpsertRule creates or updates Rule
-	UpsertRule(remoteEnvironment, serviceId, name string) apperrors.AppError
+	UpsertRule(application, serviceId, name string) apperrors.AppError
 	// DeleteDenier deletes Denier
 	DeleteDenier(name string) apperrors.AppError
 	// DeleteCheckNothing deletes CheckNothing
@@ -76,8 +76,8 @@ func NewRepository(ruleInterface RuleInterface, checknothingInterface Checknothi
 }
 
 // CreateDenier creates Denier
-func (repo *repository) CreateDenier(remoteEnvironment, serviceId, name string) apperrors.AppError {
-	denier := repo.makeDenierObject(remoteEnvironment, serviceId, name)
+func (repo *repository) CreateDenier(application, serviceId, name string) apperrors.AppError {
+	denier := repo.makeDenierObject(application, serviceId, name)
 
 	_, err := repo.denierInterface.Create(denier)
 	if err != nil {
@@ -88,8 +88,8 @@ func (repo *repository) CreateDenier(remoteEnvironment, serviceId, name string) 
 }
 
 // CreateCheckNothing creates CheckNothing
-func (repo *repository) CreateCheckNothing(remoteEnvironment, serviceId, name string) apperrors.AppError {
-	checkNothing := repo.makeCheckNothingObject(remoteEnvironment, serviceId, name)
+func (repo *repository) CreateCheckNothing(application, serviceId, name string) apperrors.AppError {
+	checkNothing := repo.makeCheckNothingObject(application, serviceId, name)
 
 	_, err := repo.checknothingInterface.Create(checkNothing)
 	if err != nil {
@@ -99,8 +99,8 @@ func (repo *repository) CreateCheckNothing(remoteEnvironment, serviceId, name st
 }
 
 // CreateRule creates Rule
-func (repo *repository) CreateRule(remoteEnvironment, serviceId, name string) apperrors.AppError {
-	rule := repo.makeRuleObject(remoteEnvironment, serviceId, name)
+func (repo *repository) CreateRule(application, serviceId, name string) apperrors.AppError {
+	rule := repo.makeRuleObject(application, serviceId, name)
 
 	_, err := repo.ruleInterface.Create(rule)
 	if err != nil {
@@ -110,8 +110,8 @@ func (repo *repository) CreateRule(remoteEnvironment, serviceId, name string) ap
 }
 
 // UpserDenier creates or updates Denier
-func (repo *repository) UpsertDenier(remoteEnvironment, serviceId, name string) apperrors.AppError {
-	denier := repo.makeDenierObject(remoteEnvironment, serviceId, name)
+func (repo *repository) UpsertDenier(application, serviceId, name string) apperrors.AppError {
+	denier := repo.makeDenierObject(application, serviceId, name)
 
 	_, err := repo.denierInterface.Create(denier)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
@@ -121,8 +121,8 @@ func (repo *repository) UpsertDenier(remoteEnvironment, serviceId, name string) 
 }
 
 // UpsertCheckNothing creates or updates CheckNothing
-func (repo *repository) UpsertCheckNothing(remoteEnvironment, serviceId, name string) apperrors.AppError {
-	checkNothing := repo.makeCheckNothingObject(remoteEnvironment, serviceId, name)
+func (repo *repository) UpsertCheckNothing(application, serviceId, name string) apperrors.AppError {
+	checkNothing := repo.makeCheckNothingObject(application, serviceId, name)
 
 	_, err := repo.checknothingInterface.Create(checkNothing)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
@@ -132,8 +132,8 @@ func (repo *repository) UpsertCheckNothing(remoteEnvironment, serviceId, name st
 }
 
 // UpsertRule creates or updates Rule
-func (repo *repository) UpsertRule(remoteEnvironment, serviceId, name string) apperrors.AppError {
-	rule := repo.makeRuleObject(remoteEnvironment, serviceId, name)
+func (repo *repository) UpsertRule(application, serviceId, name string) apperrors.AppError {
+	rule := repo.makeRuleObject(application, serviceId, name)
 
 	_, err := repo.ruleInterface.Create(rule)
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
@@ -169,13 +169,13 @@ func (repo *repository) DeleteRule(name string) apperrors.AppError {
 	return nil
 }
 
-func (repo *repository) makeDenierObject(remoteEnvironment, serviceId, name string) *v1alpha2.Denier {
+func (repo *repository) makeDenierObject(application, serviceId, name string) *v1alpha2.Denier {
 	return &v1alpha2.Denier{
 		ObjectMeta: v1.ObjectMeta{
 			Name: name,
 			Labels: map[string]string{
-				k8sconsts.LabelRemoteEnvironment: remoteEnvironment,
-				k8sconsts.LabelServiceId:         serviceId,
+				k8sconsts.LabelApplication: application,
+				k8sconsts.LabelServiceId:   serviceId,
 			},
 		},
 		Spec: &v1alpha2.DenierSpec{
@@ -187,19 +187,19 @@ func (repo *repository) makeDenierObject(remoteEnvironment, serviceId, name stri
 	}
 }
 
-func (repo *repository) makeCheckNothingObject(remoteEnvironment, serviceId, name string) *v1alpha2.Checknothing {
+func (repo *repository) makeCheckNothingObject(application, serviceId, name string) *v1alpha2.Checknothing {
 	return &v1alpha2.Checknothing{
 		ObjectMeta: v1.ObjectMeta{
 			Name: name,
 			Labels: map[string]string{
-				k8sconsts.LabelRemoteEnvironment: remoteEnvironment,
-				k8sconsts.LabelServiceId:         serviceId,
+				k8sconsts.LabelApplication: application,
+				k8sconsts.LabelServiceId:   serviceId,
 			},
 		},
 	}
 }
 
-func (repo *repository) makeRuleObject(remoteEnvironment, serviceId, name string) *v1alpha2.Rule {
+func (repo *repository) makeRuleObject(application, serviceId, name string) *v1alpha2.Rule {
 	match := repo.matchExpression(name, repo.config.Namespace, name)
 	handlerName := name + ".denier"
 	instanceName := name + ".checknothing"
@@ -208,8 +208,8 @@ func (repo *repository) makeRuleObject(remoteEnvironment, serviceId, name string
 		ObjectMeta: v1.ObjectMeta{
 			Name: name,
 			Labels: map[string]string{
-				k8sconsts.LabelRemoteEnvironment: remoteEnvironment,
-				k8sconsts.LabelServiceId:         serviceId,
+				k8sconsts.LabelApplication: application,
+				k8sconsts.LabelServiceId:   serviceId,
 			},
 		},
 		Spec: &v1alpha2.RuleSpec{

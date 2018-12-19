@@ -1,7 +1,6 @@
 package main
 
-import (	
-	"strings"
+import (
 	"crypto/tls"
 	stdflag "flag"
 	"fmt"
@@ -11,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/golang/glog"
@@ -155,15 +155,15 @@ func main() {
 	proxyForApiserver := strings.Contains(cfg.upstream, proxy.KUBERNETES_SERVICE)
 
 	rp := httputil.NewSingleHostReverseProxy(upstreamURL)
-	
+
 	if proxyForApiserver {
 		t, err := rest.TransportFor(kcfg)
-			if err != nil {
-				glog.Fatalf("unable to set HTTP Transport for the upstream. Details : %s", err.Error())
-			}
+		if err != nil {
+			glog.Fatalf("unable to set HTTP Transport for the upstream. Details : %s", err.Error())
+		}
 		rp.Transport = t
-	}	
-	
+	}
+
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		ok := authProxy.Handle(w, req)
@@ -285,7 +285,7 @@ func main() {
 // Returns intiliazed config, allows local usage (outside cluster) based on provided kubeconfig or in-cluter
 func initKubeConfig(kcLocation string) *rest.Config {
 
-	if kcLocation != "" {		
+	if kcLocation != "" {
 		kubeConfig, err := clientcmd.BuildConfigFromFlags("", kcLocation)
 		if err != nil {
 			glog.Fatalf("unable to build rest config based on provided path to kubeconfig file %s", err.Error())

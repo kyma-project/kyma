@@ -12,7 +12,7 @@ func TestBrokerModeGetNsFromURL(t *testing.T) {
 	sut, err := NewNsBrokerService()
 	require.NoError(t, err)
 	// WHEN
-	actNs, err := sut.GetNsFromBrokerURL("http://reb-ns-for-stage.kyma-system.svc.cluster.local/v2/catalog")
+	actNs, err := sut.GetNsFromBrokerURL("http://ab-ns-for-stage.kyma-system.svc.cluster.local/v2/catalog")
 	// THEN
 	require.NoError(t, err)
 	assert.Equal(t, "stage", actNs)
@@ -24,7 +24,7 @@ func TestBrokerModeErrorOnGetNsFromURL(t *testing.T) {
 	sut, err := NewNsBrokerService()
 	require.NoError(t, err)
 	// WHEN
-	_, err = sut.GetNsFromBrokerURL("https://core-reb.kyma-system.svc.cluster.local/v2/catalog")
+	_, err = sut.GetNsFromBrokerURL("https://core-ab.kyma-system.svc.cluster.local/v2/catalog")
 	// THEN
-	assert.EqualError(t, err, "url:https://core-reb.kyma-system.svc.cluster.local/v2/catalog does not match pattern reb-ns-for-([a-z][a-z0-9-]*)\\.")
+	assert.EqualError(t, err, "url:https://core-ab.kyma-system.svc.cluster.local/v2/catalog does not match pattern ab-ns-for-([a-z][a-z0-9-]*)\\.")
 }

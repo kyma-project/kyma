@@ -26,7 +26,7 @@ FULL_BUILD=${params.FULL_BUILD}
 ********************************
 """
 
-podTemplate(label: label, 
+podTemplate(label: label,
     containers: [
         containerTemplate(name: "golang-buildpack", image: "${registry}${buildpack}", ttyEnabled: true, command: 'cat'),
     ]) {
@@ -54,7 +54,7 @@ podTemplate(label: label,
                         }
 
                         stage("install dependencies $application") {
-                            execute("make resolve", workDir, componentDir)
+                            execute("dep ensure --vendor-only -v", workDir, componentDir)
                         }
 
                         stage("code quality $application") {

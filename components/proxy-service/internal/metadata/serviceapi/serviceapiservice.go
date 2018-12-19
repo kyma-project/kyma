@@ -2,8 +2,8 @@ package serviceapi
 
 import (
 	"github.com/kyma-project/kyma/components/proxy-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/remoteenv"
 	"github.com/kyma-project/kyma/components/proxy-service/internal/metadata/secrets"
 )
 
@@ -18,8 +18,8 @@ const (
 
 // Service manages API definition of a service
 type Service interface {
-	// Read reads API from Remote Environment API definition. It also reads all additional information.
-	Read(*remoteenv.ServiceAPI) (*model.API, apperrors.AppError)
+	// Read reads API from Application API definition. It also reads all additional information.
+	Read(*applications.ServiceAPI) (*model.API, apperrors.AppError)
 }
 
 type defaultService struct {
@@ -33,14 +33,14 @@ func NewService(secretsRepository secrets.Repository) Service {
 	}
 }
 
-func (sas defaultService) Read(remoteenvAPI *remoteenv.ServiceAPI) (*model.API, apperrors.AppError) {
+func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.API, apperrors.AppError) {
 	api := &model.API{
-		TargetUrl: remoteenvAPI.TargetUrl,
+		TargetUrl: applicationAPI.TargetUrl,
 	}
 
-	if remoteenvAPI.Credentials != nil {
-		credentialsSecretName := remoteenvAPI.Credentials.SecretName
-		credentialsType := remoteenvAPI.Credentials.Type
+	if applicationAPI.Credentials != nil {
+		credentialsSecretName := applicationAPI.Credentials.SecretName
+		credentialsType := applicationAPI.Credentials.Type
 
 		secret, err := sas.secretsRepository.Get(credentialsSecretName)
 
@@ -50,7 +50,7 @@ func (sas defaultService) Read(remoteenvAPI *remoteenv.ServiceAPI) (*model.API, 
 
 		if credentialsType == TypeOAuth {
 			api.Credentials = &model.Credentials{
-				OAuth: getOAuthCredentials(secret, remoteenvAPI.Credentials.Url),
+				OAuth: getOAuthCredentials(secret, applicationAPI.Credentials.Url),
 			}
 		} else if credentialsType == TypeBasic {
 			api.Credentials = &model.Credentials{

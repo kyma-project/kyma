@@ -36,7 +36,7 @@ func TestPopulateInstances(t *testing.T) {
 	mockConverter := &automock.InstanceConverter{}
 	defer mockConverter.AssertExpectations(t)
 
-	mockConverter.On("MapServiceInstance", fixRebServiceInstanceFromNsSC()).Return(expectedServiceInstanceFromNsBroker())
+	mockConverter.On("MapServiceInstance", fixABServiceInstanceFromNsSC()).Return(expectedServiceInstanceFromNsBroker())
 	sut := populator.NewInstances(mockClientSet, mockInserter, mockConverter)
 	// WHEN
 	actualErr := sut.Do(context.Background())
@@ -64,29 +64,29 @@ func TestPopulateInstancesErrorOnInsert(t *testing.T) {
 
 }
 
-func fixNsREBrokerName() string {
-	return "remote-env-broker"
+func fixNsAppBrokerName() string {
+	return "application-broker"
 }
 
 func fixAllSCObjects() []runtime.Object {
 	return []runtime.Object{
-		fixRebServiceClass(),
-		fixRebServiceInstanceFromNsSC(),
+		fixABServiceClass(),
+		fixABServiceInstanceFromNsSC(),
 	}
 }
 
-func fixRebServiceClass() *scv1beta1.ServiceClass {
+func fixABServiceClass() *scv1beta1.ServiceClass {
 	return &scv1beta1.ServiceClass{
 		ObjectMeta: v1.ObjectMeta{
-			Name: "ns-service-class-reb",
+			Name: "ns-service-class-ab",
 		},
 		Spec: scv1beta1.ServiceClassSpec{
-			ServiceBrokerName: fixNsREBrokerName(),
+			ServiceBrokerName: fixNsAppBrokerName(),
 		},
 	}
 }
 
-func fixRebServiceInstanceFromNsSC() *scv1beta1.ServiceInstance {
+func fixABServiceInstanceFromNsSC() *scv1beta1.ServiceInstance {
 	return &scv1beta1.ServiceInstance{
 		ObjectMeta: v1.ObjectMeta{
 			Namespace: "stage",
@@ -94,7 +94,7 @@ func fixRebServiceInstanceFromNsSC() *scv1beta1.ServiceInstance {
 		},
 		Spec: scv1beta1.ServiceInstanceSpec{
 			ServiceClassRef: &scv1beta1.LocalObjectReference{
-				Name: "ns-service-class-reb",
+				Name: "ns-service-class-ab",
 			},
 			ExternalID: "promotions-external-id-3",
 			ServicePlanRef: &scv1beta1.LocalObjectReference{
@@ -118,7 +118,7 @@ func expectedServiceInstanceFromNsBroker() *internal.Instance {
 		Namespace:     internal.Namespace("stage"),
 		ParamsHash:    "TODO",
 		ServicePlanID: internal.ServicePlanID("mini"),
-		ServiceID:     internal.ServiceID("ns-service-class-reb"),
+		ServiceID:     internal.ServiceID("ns-service-class-ab"),
 		State:         internal.InstanceStateSucceeded,
 	}
 }

@@ -12,18 +12,18 @@ type ProvisionChecker struct {
 }
 
 // CanProvision provides a mock function with given fields: iID, rsID, namespace, maxWaitTime
-func (_m *ProvisionChecker) CanProvision(iID internal.InstanceID, rsID internal.RemoteServiceID, namespace internal.Namespace, maxWaitTime time.Duration) (access.CanProvisionOutput, error) {
+func (_m *ProvisionChecker) CanProvision(iID internal.InstanceID, rsID internal.ApplicationServiceID, namespace internal.Namespace, maxWaitTime time.Duration) (access.CanProvisionOutput, error) {
 	ret := _m.Called(iID, rsID, namespace, maxWaitTime)
 
 	var r0 access.CanProvisionOutput
-	if rf, ok := ret.Get(0).(func(internal.InstanceID, internal.RemoteServiceID, internal.Namespace, time.Duration) access.CanProvisionOutput); ok {
+	if rf, ok := ret.Get(0).(func(internal.InstanceID, internal.ApplicationServiceID, internal.Namespace, time.Duration) access.CanProvisionOutput); ok {
 		r0 = rf(iID, rsID, namespace, maxWaitTime)
 	} else {
 		r0 = ret.Get(0).(access.CanProvisionOutput)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(internal.InstanceID, internal.RemoteServiceID, internal.Namespace, time.Duration) error); ok {
+	if rf, ok := ret.Get(1).(func(internal.InstanceID, internal.ApplicationServiceID, internal.Namespace, time.Duration) error); ok {
 		r1 = rf(iID, rsID, namespace, maxWaitTime)
 	} else {
 		r1 = ret.Error(1)

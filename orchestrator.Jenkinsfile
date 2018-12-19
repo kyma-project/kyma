@@ -69,6 +69,7 @@ projects = [
     "tests/metadata-service-tests": "metadata-service-tests",
     "tests/application-operator-tests": "application-operator-tests",
     "tests/event-bus": "event-bus-e2e-tester",
+    "common": null,
     "governance": null
 ]
 

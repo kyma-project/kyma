@@ -39,12 +39,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 	// Group=applicationconnector.kyma-project.io, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("applicationmappings"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Applicationconnector().V1alpha1().ApplicationMappings().Informer()}, nil
-	case v1alpha1.SchemeGroupVersion.WithResource("environmentmappings"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Applicationconnector().V1alpha1().EnvironmentMappings().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("eventactivations"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Applicationconnector().V1alpha1().EventActivations().Informer()}, nil
-	case v1alpha1.SchemeGroupVersion.WithResource("remoteenvironments"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Applicationconnector().V1alpha1().RemoteEnvironments().Informer()}, nil
 
 	}
 

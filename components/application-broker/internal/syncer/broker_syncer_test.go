@@ -98,7 +98,7 @@ func TestServiceBrokerSync_ConflictError(t *testing.T) {
 	err := nsBrokerSync.Sync(fixLabelSelector(), maxSyncRetries)
 
 	// then
-	assert.EqualError(t, err, "1 error occurred:\n\n* could not sync ServiceBroker \"remote-env-broker\" [namespace: test], after 5 tries")
+	assert.EqualError(t, err, "1 error occurred:\n\n* could not sync ServiceBroker \"application-broker\" [namespace: test], after 5 tries")
 }
 
 func TestServiceBrokerSync_UpdateError(t *testing.T) {
@@ -185,7 +185,7 @@ func TestServiceBrokerSync_SyncBroker_ConflictError(t *testing.T) {
 	err := nsBrokerSync.SyncBroker("test")
 
 	// then
-	assert.EqualError(t, err, "could not sync service broker (remote-env-broker) after 5 retries")
+	assert.EqualError(t, err, "could not sync service broker (application-broker) after 5 retries")
 }
 
 func fixServiceBroker() *v1beta1.ServiceBroker {

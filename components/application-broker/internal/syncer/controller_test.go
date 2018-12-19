@@ -11,25 +11,25 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/syncer"
 	"github.com/kyma-project/kyma/components/application-broker/internal/syncer/automock"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
 	"github.com/stretchr/testify/mock"
 )
 
 func TestControllerRunSuccess(t *testing.T) {
 	// given
-	reCR := mustLoadCRFix("testdata/re-CR-valid.input.yaml")
-	reDM := internal.RemoteEnvironment{
+	appCR := mustLoadCRFix("testdata/app-CR-valid.input.yaml")
+	appDM := internal.Application{
 		Name: "mapped",
 	}
 
-	client := fake.NewSimpleClientset(&reCR)
+	client := fake.NewSimpleClientset(&appCR)
 
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 	serviceCatalogSharedInformers := informerFactory.Applicationconnector().V1alpha1()
-	reInformer := serviceCatalogSharedInformers.RemoteEnvironments()
+	appInformer := serviceCatalogSharedInformers.Applications()
 
 	expectations := &sync.WaitGroup{}
 	expectations.Add(4)
@@ -37,23 +37,23 @@ func TestControllerRunSuccess(t *testing.T) {
 		expectations.Done()
 	}
 
-	validatorMock := &automock.RemoteEnvironmentCRValidator{}
+	validatorMock := &automock.ApplicationCRValidator{}
 	defer validatorMock.AssertExpectations(t)
-	validatorMock.ExpectOnValidate(&reCR).Run(fulfillExpectation).Once()
+	validatorMock.ExpectOnValidate(&appCR).Run(fulfillExpectation).Once()
 
-	mapperMock := &automock.RemoteEnvironmentCRMapper{}
+	mapperMock := &automock.ApplicationCRMapper{}
 	defer mapperMock.AssertExpectations(t)
-	mapperMock.ExpectOnToModel(&reCR, &reDM).Run(fulfillExpectation).Once()
+	mapperMock.ExpectOnToModel(&appCR, &appDM).Run(fulfillExpectation).Once()
 
-	upserterMock := &automock.RemoteEnvironmentUpserter{}
+	upserterMock := &automock.ApplicationUpserter{}
 	defer upserterMock.AssertExpectations(t)
-	upserterMock.ExpectOnUpsert(&reDM).Run(fulfillExpectation).Once()
+	upserterMock.ExpectOnUpsert(&appDM).Run(fulfillExpectation).Once()
 
 	relistRequesterMock := &automock.SCRelistRequester{}
 	defer relistRequesterMock.AssertExpectations(t)
 	relistRequesterMock.ExpectOnRequestRelist().Run(fulfillExpectation).Once()
 
-	syncJob := syncer.New(reInformer, upserterMock, nil, relistRequesterMock, spy.NewLogDummy()).
+	syncJob := syncer.New(appInformer, upserterMock, nil, relistRequesterMock, spy.NewLogDummy()).
 		WithCRValidator(validatorMock).
 		WithCRMapper(mapperMock)
 
@@ -85,17 +85,17 @@ func awaitForSyncGroupAtMost(t *testing.T, wg *sync.WaitGroup, timeout time.Dura
 	}
 }
 
-func mustLoadCRFix(path string) v1alpha1.RemoteEnvironment {
+func mustLoadCRFix(path string) v1alpha1.Application {
 	in, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}
 
-	var remoteEnvironment v1alpha1.RemoteEnvironment
-	err = yaml.Unmarshal(in, &remoteEnvironment)
+	var application v1alpha1.Application
+	err = yaml.Unmarshal(in, &application)
 	if err != nil {
 		panic(err)
 	}
 
-	return remoteEnvironment
+	return application
 }
