@@ -117,7 +117,7 @@
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/scheme",
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3"
   ]
-  revision = "98b9d9b30cb9c96299ef367a0e9c26daec88fe50"
+  revision = "abcf68b37a2a83b5076ac5a6cc0887ec1d17e8d4"
   source = "https://github.com/sjanota/kyma"
 
 [[projects]]
@@ -189,7 +189,7 @@
     "unix",
     "windows"
   ]
-  revision = "dcdaa6325bcb8d3c07805583fe12153f08a41e2b"
+  revision = "074acd46bca67915925527c07849494d115e7c43"
 
 [[projects]]
   name = "golang.org/x/text"

@@ -310,7 +310,7 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 	timeout := time.After(2 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 
-	ingressClient, err := ingressgateway.Default().ClientFromEnv()
+	ingressClient, err := ingressgateway.FromEnv().Client()
 	if err != nil {
 		log.Fatalf("Cannot get ingressgateway address: %s", err)
 	}

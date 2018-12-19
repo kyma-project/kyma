@@ -14,7 +14,7 @@
   branch = "test-ingressgateway"
   name = "github.com/kyma-project/kyma"
   packages = ["common/ingressgateway"]
-  revision = "98b9d9b30cb9c96299ef367a0e9c26daec88fe50"
+  revision = "abcf68b37a2a83b5076ac5a6cc0887ec1d17e8d4"
   source = "https://github.com/sjanota/kyma"
 
 [[projects]]
@@ -32,7 +32,7 @@
     "go/internal/gcimporter",
     "go/types/typeutil"
   ]
-  revision = "13ba8ad772dfbf0f451b5dd0679e9c5605afc05d"
+  revision = "d4971274fe382404aee0e8c163af974f2bf738e6"
 
 [solve-meta]
   analyzer-name = "dep"
