@@ -6,8 +6,8 @@ image:
 # A docker image with kubectl installed
 kubectl:
   image:
-    repository: eu.gcr.io/kyma-project/prow/test/etcd-tls-setup
-    tag: 0.3.367
+    repository: eu.gcr.io/kyma-project/prow/test/develop/etcd-tls-setup
+    tag: 703f3d4d
     pullPolicy: IfNotPresent
 
 # Only kube2iam: change the AWS_ACCOUNT_ID and HEPTIO_ARK_ROLE_NAME
