@@ -13,7 +13,7 @@ import (
 //go:generate mockery -name=envLister -output=automock -outpkg=automock -case=underscore
 type envLister interface {
 	List() ([]gqlschema.Environment, error)
-	ListForRemoteEnvironment(reName string) ([]gqlschema.Environment, error)
+	ListForApplication(appName string) ([]gqlschema.Environment, error)
 }
 
 type environmentResolver struct {
@@ -26,14 +26,14 @@ func newEnvironmentResolver(envLister envLister) *environmentResolver {
 	}
 }
 
-func (r *environmentResolver) EnvironmentsQuery(ctx context.Context, remoteEnvironment *string) ([]gqlschema.Environment, error) {
+func (r *environmentResolver) EnvironmentsQuery(ctx context.Context, applicationName *string) ([]gqlschema.Environment, error) {
 	var err error
 	var envs []gqlschema.Environment
 
-	if remoteEnvironment == nil {
+	if applicationName == nil {
 		envs, err = r.envLister.List()
 	} else {
-		envs, err = r.envLister.ListForRemoteEnvironment(*remoteEnvironment)
+		envs, err = r.envLister.ListForApplication(*applicationName)
 	}
 
 	if err != nil {

@@ -211,11 +211,6 @@
   version = "1.1.5"
 
 [[projects]]
-  name = "github.com/kyma-project/kyma"
-  packages = ["components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"]
-  revision = "4e1170ed9101dcbb98d450278a86c6ceecc1cb62"
-
-[[projects]]
   branch = "master"
   name = "github.com/mailru/easyjson"
   packages = [
@@ -920,6 +915,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e5f2182e12f0963aac0218108b5b7cad50ee1b9f6dc1f2a4187e040ec5c30b66"
+  inputs-digest = "f0966174b696ecdbcfd291f6280f7e9a7e3dfb9c8b0927f4970dca8c4b2fa07b"
   solver-name = "gps-cdcl"
   solver-version = 1

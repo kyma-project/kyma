@@ -19,17 +19,17 @@ import (
 )
 
 const (
-	// maxEnvironmentMappingProcessRetries is the number of times a environment mapping CR will be retried before it is dropped out of the queue.
+	// maxApplicationMappingProcessRetries is the number of times a application mapping CR will be retried before it is dropped out of the queue.
 	// With the current rate-limiter in use (5ms*2^(maxRetries-1)) the following numbers represent the times
 	// a deployment is going to be requeued:
 	//
 	// 5ms, 10ms, 20ms, 40ms, 80ms
-	maxEnvironmentMappingProcessRetries = 15
+	maxApplicationMappingProcessRetries = 15
 )
 
-//go:generate mockery -name=reGetter -output=automock -outpkg=automock -case=underscore
-type reGetter interface {
-	Get(internal.RemoteEnvironmentName) (*internal.RemoteEnvironment, error)
+//go:generate mockery -name=appGetter -output=automock -outpkg=automock -case=underscore
+type appGetter interface {
+	Get(internal.ApplicationName) (*internal.Application, error)
 }
 
 //go:generate mockery -name=nsPatcher -output=automock -outpkg=automock -case=underscore
@@ -47,7 +47,7 @@ type nsBrokerFacade interface {
 
 //go:generate mockery -name=mappingLister -output=automock -outpkg=automock -case=underscore
 type mappingLister interface {
-	ListEnvironmentMappings(environment string) ([]*v1alpha1.EnvironmentMapping, error)
+	ListApplicationMappings(application string) ([]*v1alpha1.ApplicationMapping, error)
 }
 
 //go:generate mockery -name=nsBrokerSyncer -output=automock -outpkg=automock -case=underscore
@@ -55,34 +55,34 @@ type nsBrokerSyncer interface {
 	SyncBroker(name string) error
 }
 
-// Controller populates local storage with all EnvironmentMapping custom resources created in k8s cluster.
+// Controller populates local storage with all ApplicationMapping custom resources created in k8s cluster.
 type Controller struct {
 	queue          workqueue.RateLimitingInterface
 	emInformer     cache.SharedIndexInformer
 	nsInformer     cache.SharedIndexInformer
 	nsPatcher      nsPatcher
-	reGetter       reGetter
+	appGetter      appGetter
 	nsBrokerFacade nsBrokerFacade
 	nsBrokerSyncer nsBrokerSyncer
 	mappingSvc     mappingLister
 	log            logrus.FieldLogger
 }
 
-// New creates new environment mapping controller
-func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, reGetter reGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger) *Controller {
+// New creates new application mapping controller
+func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInformer, nsPatcher nsPatcher, appGetter appGetter, nsBrokerFacade nsBrokerFacade, nsBrokerSyncer nsBrokerSyncer, log logrus.FieldLogger) *Controller {
 	c := &Controller{
 		log:            log.WithField("service", "labeler:controller"),
 		emInformer:     emInformer,
 		nsInformer:     nsInformer,
 		queue:          workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 		nsPatcher:      nsPatcher,
-		reGetter:       reGetter,
+		appGetter:      appGetter,
 		nsBrokerFacade: nsBrokerFacade,
 		nsBrokerSyncer: nsBrokerSyncer,
 		mappingSvc:     newMappingService(emInformer),
 	}
 
-	// EventHandler reacts every time when we add, update or delete EnvironmentMapping
+	// EventHandler reacts every time when we add, update or delete ApplicationMapping
 	emInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    c.addEM,
 		UpdateFunc: c.updateEM,
@@ -94,7 +94,7 @@ func New(emInformer cache.SharedIndexInformer, nsInformer cache.SharedIndexInfor
 func (c *Controller) addEM(obj interface{}) {
 	key, err := cache.MetaNamespaceKeyFunc(obj)
 	if err != nil {
-		c.log.Errorf("while handling adding event: while adding new environment mapping custom resource to queue: couldn't get key: %v", err)
+		c.log.Errorf("while handling adding event: while adding new application mapping custom resource to queue: couldn't get key: %v", err)
 		return
 	}
 	c.queue.Add(key)
@@ -103,7 +103,7 @@ func (c *Controller) addEM(obj interface{}) {
 func (c *Controller) updateEM(old, cur interface{}) {
 	key, err := cache.MetaNamespaceKeyFunc(cur)
 	if err != nil {
-		c.log.Errorf("while handling update event: while adding new environment mapping custom resource to queue: couldn't get key: %v", err)
+		c.log.Errorf("while handling update event: while adding new application mapping custom resource to queue: couldn't get key: %v", err)
 		return
 	}
 	c.queue.Add(key)
@@ -112,7 +112,7 @@ func (c *Controller) updateEM(old, cur interface{}) {
 func (c *Controller) deleteEM(obj interface{}) {
 	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 	if err != nil {
-		c.log.Errorf("while handling deletion event: while adding new environment mapping custom resource to queue: couldn't get key: %v", err)
+		c.log.Errorf("while handling deletion event: while adding new application mapping custom resource to queue: couldn't get key: %v", err)
 		return
 	}
 	c.queue.Add(key)
@@ -122,8 +122,8 @@ func (c *Controller) deleteEM(obj interface{}) {
 func (c *Controller) Run(stopCh <-chan struct{}) {
 	go c.shutdownQueueOnStop(stopCh)
 
-	c.log.Info("Starting Environment Mappings controller")
-	defer c.log.Infof("Shutting down Environment Mappings controller")
+	c.log.Info("Starting Application Mappings controller")
+	defer c.log.Infof("Shutting down Application Mappings controller")
 
 	if !cache.WaitForCacheSync(stopCh, c.emInformer.HasSynced) {
 		c.log.Error("Timeout occurred on waiting for EM informer caches to sync. Shutdown the controller.")
@@ -163,7 +163,7 @@ func (c *Controller) processNextItem() bool {
 	case err == nil:
 		c.queue.Forget(key)
 
-	case c.queue.NumRequeues(key) < maxEnvironmentMappingProcessRetries:
+	case c.queue.NumRequeues(key) < maxApplicationMappingProcessRetries:
 		c.log.Errorf("Error processing %q (will retry): %v", key, err)
 		c.queue.AddRateLimited(key)
 
@@ -191,23 +191,23 @@ func (c *Controller) processItem(key string) error {
 		return errors.Wrapf(err, "while getting name and namespace from key %q", key)
 	}
 
-	reNs, err := c.getNamespace(namespace)
+	appNs, err := c.getNamespace(namespace)
 	if err != nil {
 		return err
 	}
 
 	if !emExist {
-		if err = c.ensureNsNotLabelled(reNs); err != nil {
+		if err = c.ensureNsNotLabelled(appNs); err != nil {
 			return err
 		}
 		return c.ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace)
 	}
-	if err = c.ensureNsLabelled(name, reNs); err != nil {
+	if err = c.ensureNsLabelled(name, appNs); err != nil {
 		return err
 	}
-	envMapping, ok := emObj.(*v1alpha1.EnvironmentMapping)
+	envMapping, ok := emObj.(*v1alpha1.ApplicationMapping)
 	if !ok {
-		return fmt.Errorf("cannot cast received object to v1alpha1.EnvironmentMapping type, type was [%T]", emObj)
+		return fmt.Errorf("cannot cast received object to v1alpha1.ApplicationMapping type, type was [%T]", emObj)
 	}
 	return c.ensureNsBrokerRegisteredAndSynced(envMapping)
 }
@@ -229,7 +229,7 @@ func (c *Controller) getNamespace(namespace string) (*corev1.Namespace, error) {
 	return reNs, nil
 }
 
-func (c *Controller) ensureNsBrokerRegisteredAndSynced(envMapping *v1alpha1.EnvironmentMapping) error {
+func (c *Controller) ensureNsBrokerRegisteredAndSynced(envMapping *v1alpha1.ApplicationMapping) error {
 	brokerExist, err := c.nsBrokerFacade.Exist(envMapping.Namespace)
 	if err != nil {
 		return errors.Wrapf(err, "while checking if namespaced broker exist in namespace [%s]", envMapping.Namespace)
@@ -255,11 +255,11 @@ func (c *Controller) ensureNsBrokerNotRegisteredIfNoMappingsOrSync(namespace str
 	if !brokerExist {
 		return nil
 	}
-	mappings, err := c.mappingSvc.ListEnvironmentMappings(namespace)
+	mappings, err := c.mappingSvc.ListApplicationMappings(namespace)
 	if err != nil {
-		return errors.Wrapf(err, "while listing environment mappings from namespace [%s]", namespace)
+		return errors.Wrapf(err, "while listing application mappings from namespace [%s]", namespace)
 	}
-	// delete broker only if there're no environment mappings left in the namespace
+	// delete broker only if there'app no application mappings left in the namespace
 	if len(mappings) > 0 {
 		if err = c.nsBrokerSyncer.SyncBroker(namespace); err != nil {
 			return errors.Wrapf(err, "while syncing namespaced broker from namespace [%s]", namespace)
@@ -286,15 +286,15 @@ func (c *Controller) ensureNsNotLabelled(ns *corev1.Namespace) error {
 	return nil
 }
 
-func (c *Controller) ensureNsLabelled(reName string, reNs *corev1.Namespace) error {
+func (c *Controller) ensureNsLabelled(appName string, appNs *corev1.Namespace) error {
 	var label string
-	label, err := c.getReAccLabel(reName)
+	label, err := c.getAppAccLabel(appName)
 	if err != nil {
-		return errors.Wrapf(err, "cannot get AccessLabel from RE: %q", reName)
+		return errors.Wrapf(err, "cannot get AccessLabel from Application: %q", appName)
 	}
-	err = c.applyNsAccLabel(reNs, label)
+	err = c.applyNsAccLabel(appNs, label)
 	if err != nil {
-		return errors.Wrapf(err, "cannot apply AccessLabel to the namespace: %q", reNs.Name)
+		return errors.Wrapf(err, "cannot apply AccessLabel to the namespace: %q", appNs.Name)
 	}
 	return nil
 }
@@ -337,18 +337,18 @@ func (c *Controller) patchNs(nsOrig, nsMod *corev1.Namespace) error {
 	return nil
 }
 
-func (c *Controller) getReAccLabel(reName string) (string, error) {
-	// get RE from storage
-	re, err := c.reGetter.Get(internal.RemoteEnvironmentName(reName))
+func (c *Controller) getAppAccLabel(appName string) (string, error) {
+	// get Application from storage
+	app, err := c.appGetter.Get(internal.ApplicationName(appName))
 	if err != nil {
-		return "", errors.Wrapf(err, "while getting remote environment with name: %q", reName)
+		return "", errors.Wrapf(err, "while getting application with name: %q", appName)
 	}
 
-	if re.AccessLabel == "" {
-		return "", fmt.Errorf("RE %q access label is empty", reName)
+	if app.AccessLabel == "" {
+		return "", fmt.Errorf("Application %q access label is empty", appName)
 	}
 
-	return re.AccessLabel, nil
+	return app.AccessLabel, nil
 }
 
 func (c *Controller) closeChanOnCtxCancellation(ctx context.Context, ch chan<- struct{}) {

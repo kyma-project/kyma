@@ -2,23 +2,23 @@ package syncer
 
 import (
 	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 )
 
-type reCRMapper struct{}
+type appCRMapper struct{}
 
 const (
 	api    = "API"
 	events = "Events"
 )
 
-// ToModel produces RemoteEnvironment domain model from RemoteEnvironment custom resource
-func (re *reCRMapper) ToModel(dto *v1alpha1.RemoteEnvironment) *internal.RemoteEnvironment {
-	var reServices []internal.Service
+// ToModel produces Application domain model from Application custom resource
+func (app *appCRMapper) ToModel(dto *v1alpha1.Application) *internal.Application {
+	var appSvcs []internal.Service
 
 	for _, svc := range dto.Spec.Services {
 		dmSvc := internal.Service{
-			ID:                  internal.RemoteServiceID(svc.ID),
+			ID:                  internal.ApplicationServiceID(svc.ID),
 			Name:                svc.Name,
 			DisplayName:         svc.DisplayName,
 			Description:         svc.Description,
@@ -26,24 +26,24 @@ func (re *reCRMapper) ToModel(dto *v1alpha1.RemoteEnvironment) *internal.RemoteE
 			ProviderDisplayName: svc.ProviderDisplayName,
 			Tags:                svc.Tags,
 			Labels:              svc.Labels,
-			APIEntry:            re.extractAPIEntryAsModel(svc.Entries),
-			EventProvider:       re.extractEventEntryAsModel(svc.Entries),
+			APIEntry:            app.extractAPIEntryAsModel(svc.Entries),
+			EventProvider:       app.extractEventEntryAsModel(svc.Entries),
 		}
 
-		reServices = append(reServices, dmSvc)
+		appSvcs = append(appSvcs, dmSvc)
 	}
 
-	dm := &internal.RemoteEnvironment{
-		Name:        internal.RemoteEnvironmentName(dto.Name),
+	dm := &internal.Application{
+		Name:        internal.ApplicationName(dto.Name),
 		Description: dto.Spec.Description,
-		Services:    reServices,
+		Services:    appSvcs,
 		AccessLabel: dto.Spec.AccessLabel,
 	}
 
 	return dm
 }
 
-func (*reCRMapper) extractAPIEntryAsModel(entries []v1alpha1.Entry) *internal.APIEntry {
+func (*appCRMapper) extractAPIEntryAsModel(entries []v1alpha1.Entry) *internal.APIEntry {
 	for _, entry := range entries {
 		switch entry.Type {
 		case api:
@@ -61,7 +61,7 @@ func (*reCRMapper) extractAPIEntryAsModel(entries []v1alpha1.Entry) *internal.AP
 	}
 	return nil
 }
-func (*reCRMapper) extractEventEntryAsModel(entries []v1alpha1.Entry) bool {
+func (*appCRMapper) extractEventEntryAsModel(entries []v1alpha1.Entry) bool {
 	for _, entry := range entries {
 		switch entry.Type {
 		case events:

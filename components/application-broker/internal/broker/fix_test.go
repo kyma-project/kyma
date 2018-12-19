@@ -15,12 +15,12 @@ func fixOperationID() internal.OperationID {
 	return internal.OperationID("op-id-123")
 }
 
-func fixRe() *internal.RemoteEnvironment {
-	return &internal.RemoteEnvironment{
-		Name: fixReName(),
+func fixApp() *internal.Application {
+	return &internal.Application{
+		Name: fixAppName(),
 		Services: []internal.Service{
 			{
-				ID:          internal.RemoteServiceID(fixServiceID()),
+				ID:          internal.ApplicationServiceID(fixServiceID()),
 				DisplayName: "Orders",
 				APIEntry: &internal.APIEntry{
 					GatewayURL:  "www.gate.com",
@@ -34,6 +34,10 @@ func fixRe() *internal.RemoteEnvironment {
 
 func fixEventActivation() *v1alpha1.EventActivation {
 	return &v1alpha1.EventActivation{
+		TypeMeta: v1.TypeMeta{
+			Kind:       "EventActivation",
+			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
+		},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      fixServiceID(),
 			Namespace: fixNs(),
@@ -48,7 +52,7 @@ func fixEventActivation() *v1alpha1.EventActivation {
 		},
 		Spec: v1alpha1.EventActivationSpec{
 			DisplayName: "Orders",
-			SourceID:    string(fixReName()),
+			SourceID:    string(fixAppName()),
 		},
 	}
 }
@@ -125,7 +129,7 @@ func fixServiceInstanceUID() types.UID {
 	return types.UID("service-instance-uid-abcd-000")
 }
 
-func fixReName() internal.RemoteEnvironmentName {
+func fixAppName() internal.ApplicationName {
 	return "ec-prod"
 }
 func FixServiceInstance() *v1beta1.ServiceInstance {

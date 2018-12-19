@@ -1,14 +1,14 @@
 package broker
 
 //noinspection GoExportedFuncWithUnexportedType
-func NewConverter() reToServiceConverter {
-	return reToServiceConverter{}
+func NewConverter() appToServiceConverter {
+	return appToServiceConverter{}
 }
 
-func NewCatalogService(finder remoteEnvironmentFinder, reEnabledChecker reEnabledChecker, conv converter) *catalogService{
+func NewCatalogService(finder applicationFinder, appEnabledChecker appEnabledChecker, conv converter) *catalogService{
 	return &catalogService{
-		finder:           finder,
-		reEnabledChecker: reEnabledChecker,
-		conv:             conv,
+		finder:            finder,
+		appEnabledChecker: appEnabledChecker,
+		conv:              conv,
 	}
 }
