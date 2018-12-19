@@ -3,7 +3,7 @@ package knative_serving_acceptance
 import (
 	"fmt"
 	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/tools/ingressgateway"
+	"github.com/kyma-project/kyma/common/ingressgateway"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -18,7 +18,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 
 	testServiceURL := fmt.Sprintf("https://test-service.knative-serving.%s", domainName)
 
-	ingressClient, err := ingressgateway.Client()
+	ingressClient, err := ingressgateway.Default().ClientFromEnv()
 	if err != nil {
 		t.Fatalf("Unexpected error when creating ingressgateway client: %s", err)
 	}
