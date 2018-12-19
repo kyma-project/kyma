@@ -165,15 +165,15 @@ func TestAccessServiceManager_Delete(t *testing.T) {
 	})
 }
 
-func mockService(remoteEnvironment, serviceId, serviceName string, targetPort int32) *corev1.Service {
-	appName := fmt.Sprintf(appNameLabelFormat, remoteEnvironment)
+func mockService(application, serviceId, serviceName string, targetPort int32) *corev1.Service {
+	appName := fmt.Sprintf(appNameLabelFormat, application)
 
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: serviceName,
 			Labels: map[string]string{
-				k8sconsts.LabelRemoteEnvironment: remoteEnvironment,
-				k8sconsts.LabelServiceId:         serviceId,
+				k8sconsts.LabelApplication: application,
+				k8sconsts.LabelServiceId:   serviceId,
 			},
 		},
 		Spec: corev1.ServiceSpec{

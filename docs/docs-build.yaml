@@ -1,4 +1,5 @@
 # General topic
+- name: kyma
 - name: service-catalog
 - name: service-brokers
 - name: application-connector

@@ -19,8 +19,8 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
-    dir: develop/
-    version: 1469bef3
+    dir: pr/
+    version: PR-2052
   alpine_net:
     dir: develop/
     version: ed568f0f
@@ -70,17 +70,17 @@ global:
     dir: develop/
     version: 6e0a7fe2
   ui_api_layer:
-    dir: develop/
-    version: e29125ab
+    dir: pr/
+    version: PR-2029
   ui_api_layer_acceptance_tests:
-    dir: develop/
-    version: 3d50c56c
+    dir: pr/
+    version: PR-2038
 
 test:
   acceptance:
     core:
-      # environments used in remote-environment acceptance test
-      remoteEnvironment:
+      # environments used in application acceptance test
+      application:
         disabled: "true"
         brokerNamespace: kyma-integration
         linkingTimeout: 4m

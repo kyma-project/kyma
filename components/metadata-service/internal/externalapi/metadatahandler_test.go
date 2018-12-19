@@ -90,17 +90,17 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Create", "re", serviceDefinition).Return("1", nil)
+		serviceDefinitionService.On("Create", "app", serviceDefinition).Return("1", nil)
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, false)
 
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPost, "/re/v1/metadata/services", bytes.NewReader(serviceDetailsData))
+		req, err := http.NewRequest(http.MethodPost, "/app/v1/metadata/services", bytes.NewReader(serviceDetailsData))
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -175,17 +175,17 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Create", "re", serviceDefinition).Return("1", nil)
+		serviceDefinitionService.On("Create", "app", serviceDefinition).Return("1", nil)
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, false)
 
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPost, "/re/v1/metadata/services", bytes.NewReader(serviceDetailsData))
+		req, err := http.NewRequest(http.MethodPost, "/app/v1/metadata/services", bytes.NewReader(serviceDetailsData))
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -228,7 +228,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Create", "re", serviceDefinition).Return("1", nil)
+		serviceDefinitionService.On("Create", "app", serviceDefinition).Return("1", nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -236,10 +236,10 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPost, "/re/v1/metadata/services", bytes.NewReader(serviceDetailsData))
+		req, err := http.NewRequest(http.MethodPost, "/app/v1/metadata/services", bytes.NewReader(serviceDetailsData))
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -273,10 +273,10 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPost, "/re/v1/metadata/services", bytes.NewReader(serviceDetailsData))
+		req, err := http.NewRequest(http.MethodPost, "/app/v1/metadata/services", bytes.NewReader(serviceDetailsData))
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -292,7 +292,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, errorResponse.Code)
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		serviceDefinitionService.AssertNotCalled(t, "Create", "re", mock.AnythingOfType("*model.ServiceDefinition"))
+		serviceDefinitionService.AssertNotCalled(t, "Create", "app", mock.AnythingOfType("*model.ServiceDefinition"))
 	})
 
 	t.Run("should handle internal errors", func(t *testing.T) {
@@ -311,7 +311,7 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Create", "re", mock.AnythingOfType("*model.ServiceDefinition")).Return(
+		serviceDefinitionService.On("Create", "app", mock.AnythingOfType("*model.ServiceDefinition")).Return(
 			"", apperrors.Internal(""))
 		detailedErrorResponse := false
 
@@ -320,10 +320,10 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPost, "/re/v1/metadata/services", bytes.NewReader(serviceDetailsData))
+		req, err := http.NewRequest(http.MethodPost, "/app/v1/metadata/services", bytes.NewReader(serviceDetailsData))
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -367,15 +367,15 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		}
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("GetByID", "re", "123456").Return(serviceDefinition, nil)
+		serviceDefinitionService.On("GetByID", "app", "123456").Return(serviceDefinition, nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
-		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/123456", nil)
+		req, err := http.NewRequest(http.MethodGet, "/app/v1/metadata/services/123456", nil)
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "123456"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "123456"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -389,7 +389,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		err = json.Unmarshal(responseBody, &serviceDetails)
 
 		require.NoError(t, err)
-		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
+		serviceDefinitionService.AssertCalled(t, "GetByID", "app", "123456")
 		assert.Equal(t, "service name", serviceDetails.Name)
 		assert.Equal(t, "service provider", serviceDetails.Provider)
 		assert.Equal(t, "service description", serviceDetails.Description)
@@ -431,15 +431,15 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		}
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("GetByID", "re", "123456").Return(serviceDefinition, nil)
+		serviceDefinitionService.On("GetByID", "app", "123456").Return(serviceDefinition, nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
-		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/123456", nil)
+		req, err := http.NewRequest(http.MethodGet, "/app/v1/metadata/services/123456", nil)
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "123456"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "123456"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -453,7 +453,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		err = json.Unmarshal(responseBody, &serviceDetails)
 
 		require.NoError(t, err)
-		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
+		serviceDefinitionService.AssertCalled(t, "GetByID", "app", "123456")
 		assert.Equal(t, "service name", serviceDetails.Name)
 		assert.Equal(t, "service provider", serviceDetails.Provider)
 		assert.Equal(t, "service description", serviceDetails.Description)
@@ -491,15 +491,15 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		}
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("GetByID", "re", "123456").Return(serviceDefinition, nil)
+		serviceDefinitionService.On("GetByID", "app", "123456").Return(serviceDefinition, nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
-		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/123456", nil)
+		req, err := http.NewRequest(http.MethodGet, "/app/v1/metadata/services/123456", nil)
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "123456"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "123456"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -513,7 +513,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		err = json.Unmarshal(responseBody, &serviceDetails)
 
 		require.NoError(t, err)
-		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
+		serviceDefinitionService.AssertCalled(t, "GetByID", "app", "123456")
 		assert.Equal(t, "service name", serviceDetails.Name)
 		assert.Equal(t, "service provider", serviceDetails.Provider)
 		assert.Equal(t, "service description", serviceDetails.Description)
@@ -539,15 +539,15 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		}
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("GetByID", "re", "123456").Return(serviceDefinition, nil)
+		serviceDefinitionService.On("GetByID", "app", "123456").Return(serviceDefinition, nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
-		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/123456", nil)
+		req, err := http.NewRequest(http.MethodGet, "/app/v1/metadata/services/123456", nil)
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "123456"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "123456"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -561,7 +561,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		err = json.Unmarshal(responseBody, &serviceDetails)
 
 		require.NoError(t, err)
-		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
+		serviceDefinitionService.AssertCalled(t, "GetByID", "app", "123456")
 		assert.Equal(t, "service name", serviceDetails.Name)
 		assert.Equal(t, "service provider", serviceDetails.Provider)
 		assert.Equal(t, "service description", serviceDetails.Description)
@@ -575,7 +575,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 
 		// given
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("GetByID", "re", "654321").Return(
+		serviceDefinitionService.On("GetByID", "app", "654321").Return(
 			model.ServiceDefinition{},
 			apperrors.NotFound("Service with ID %d not found", 654321),
 		)
@@ -583,17 +583,17 @@ func TestMetadataHandler_GetService(t *testing.T) {
 
 		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
-		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/654321", nil)
+		req, err := http.NewRequest(http.MethodGet, "/app/v1/metadata/services/654321", nil)
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "654321"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "654321"})
 		rr := httptest.NewRecorder()
 
 		// when
 		metadataHandler.GetService(rr, req)
 
 		// then
-		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "654321")
+		serviceDefinitionService.AssertCalled(t, "GetByID", "app", "654321")
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
 }
@@ -602,7 +602,7 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 	t.Run("should return list of available services", func(t *testing.T) {
 		// given
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("GetAll", "re").Return([]model.ServiceDefinition{{
+		serviceDefinitionService.On("GetAll", "app").Return([]model.ServiceDefinition{{
 			Name:        "service name",
 			Provider:    "service provider",
 			Description: "service description",
@@ -611,9 +611,9 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 
 		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
-		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services", nil)
+		req, err := http.NewRequest(http.MethodGet, "/app/v1/metadata/services", nil)
 		require.NoError(t, err)
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -639,15 +639,15 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		// given
 		var empty []model.ServiceDefinition
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("GetAll", "re").Return(empty, nil)
+		serviceDefinitionService.On("GetAll", "app").Return(empty, nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
-		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services", nil)
+		req, err := http.NewRequest(http.MethodGet, "/app/v1/metadata/services", nil)
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -669,15 +669,15 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 	t.Run("should handle internal errors", func(t *testing.T) {
 		// given
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("GetAll", "re").Return(nil, apperrors.Internal(""))
+		serviceDefinitionService.On("GetAll", "app").Return(nil, apperrors.Internal(""))
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
-		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services", nil)
+		req, err := http.NewRequest(http.MethodGet, "/app/v1/metadata/services", nil)
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -718,15 +718,15 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		}
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("GetByID", "re", "123456").Return(serviceDefinition, nil)
+		serviceDefinitionService.On("GetByID", "app", "123456").Return(serviceDefinition, nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
-		req, err := http.NewRequest(http.MethodGet, "/re/v1/metadata/services/123456", nil)
+		req, err := http.NewRequest(http.MethodGet, "/app/v1/metadata/services/123456", nil)
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "123456"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "123456"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -740,7 +740,7 @@ func TestMetadataHandler_GetServices(t *testing.T) {
 		err = json.Unmarshal(responseBody, &serviceDetails)
 
 		require.NoError(t, err)
-		serviceDefinitionService.AssertCalled(t, "GetByID", "re", "123456")
+		serviceDefinitionService.AssertCalled(t, "GetByID", "app", "123456")
 		assert.Equal(t, "service name", serviceDetails.Name)
 		assert.Equal(t, "service provider", serviceDetails.Provider)
 		assert.Equal(t, "service description", serviceDetails.Description)
@@ -809,7 +809,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", serviceDefinitionWithID(serviceDefinition, "1234")).Return(*serviceDefinition, nil)
+		serviceDefinitionService.On("Update", "app", serviceDefinitionWithID(serviceDefinition, "1234")).Return(*serviceDefinition, nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -817,10 +817,10 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPut, "/re/v1/metadata/services/1234", bytes.NewReader(serviceDetailsData))
+		req, err := http.NewRequest(http.MethodPut, "/app/v1/metadata/services/1234", bytes.NewReader(serviceDetailsData))
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "1234"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "1234"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -903,7 +903,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", serviceDefinitionWithID(serviceDefinition, "1234")).Return(*serviceDefinition, nil)
+		serviceDefinitionService.On("Update", "app", serviceDefinitionWithID(serviceDefinition, "1234")).Return(*serviceDefinition, nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -911,10 +911,10 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPut, "/re/v1/metadata/services/1234", bytes.NewReader(serviceDetailsData))
+		req, err := http.NewRequest(http.MethodPut, "/app/v1/metadata/services/1234", bytes.NewReader(serviceDetailsData))
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "1234"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "1234"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -960,10 +960,10 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPut, "/re/v1/metadata/services/1234", bytes.NewReader(serviceDetailsData))
+		req, err := http.NewRequest(http.MethodPut, "/app/v1/metadata/services/1234", bytes.NewReader(serviceDetailsData))
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "1234"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "1234"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -994,7 +994,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 			return nil
 		})
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", mock.Anything).Return(model.ServiceDefinition{}, apperrors.Internal(""))
+		serviceDefinitionService.On("Update", "app", mock.Anything).Return(model.ServiceDefinition{}, apperrors.Internal(""))
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -1002,10 +1002,10 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPut, "/re/v1/metadata/services/1234", bytes.NewReader(serviceDetailsData))
+		req, err := http.NewRequest(http.MethodPut, "/app/v1/metadata/services/1234", bytes.NewReader(serviceDetailsData))
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "1234"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "1234"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -1042,7 +1042,7 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		})
 
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Update", "re", serviceDefinitionWithID(serviceDefinition, "654321")).Return(model.ServiceDefinition{}, apperrors.NotFound(""))
+		serviceDefinitionService.On("Update", "app", serviceDefinitionWithID(serviceDefinition, "654321")).Return(model.ServiceDefinition{}, apperrors.NotFound(""))
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, detailedErrorResponse)
@@ -1050,10 +1050,10 @@ func TestMetadataHandler_UpdateService(t *testing.T) {
 		serviceDetailsData, err := json.Marshal(serviceDetails)
 		require.NoError(t, err)
 
-		req, err := http.NewRequest(http.MethodPut, "/re/v1/metadata/services/1234", bytes.NewReader(serviceDetailsData))
+		req, err := http.NewRequest(http.MethodPut, "/app/v1/metadata/services/1234", bytes.NewReader(serviceDetailsData))
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "654321"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "654321"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -1075,15 +1075,15 @@ func TestMetadataHandler_DeleteService(t *testing.T) {
 	t.Run("should delete service", func(t *testing.T) {
 		// given
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Delete", "re", "1234").Return(nil)
+		serviceDefinitionService.On("Delete", "app", "1234").Return(nil)
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
-		req, err := http.NewRequest(http.MethodDelete, "/re/v1/metadata/services/1234", nil)
+		req, err := http.NewRequest(http.MethodDelete, "/app/v1/metadata/services/1234", nil)
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "1234"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "1234"})
 		rr := httptest.NewRecorder()
 
 		// when
@@ -1096,15 +1096,15 @@ func TestMetadataHandler_DeleteService(t *testing.T) {
 	t.Run("should handle errors when deleting service", func(t *testing.T) {
 		// given
 		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
-		serviceDefinitionService.On("Delete", "re", "1234").Return(apperrors.Internal("error"))
+		serviceDefinitionService.On("Delete", "app", "1234").Return(apperrors.Internal("error"))
 		detailedErrorResponse := false
 
 		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
 
-		req, err := http.NewRequest(http.MethodDelete, "/re/v1/metadata/services/1234", nil)
+		req, err := http.NewRequest(http.MethodDelete, "/app/v1/metadata/services/1234", nil)
 		require.NoError(t, err)
 
-		req = mux.SetURLVars(req, map[string]string{"remoteEnvironment": "re", "serviceId": "1234"})
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "1234"})
 		rr := httptest.NewRecorder()
 
 		// when

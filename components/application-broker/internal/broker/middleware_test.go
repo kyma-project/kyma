@@ -17,9 +17,9 @@ func TestOSBContextForNsScopedBroker(t *testing.T) {
 	// GIVEN
 	mockBrokerService := &automock.BrokerService{}
 	defer mockBrokerService.AssertExpectations(t)
-	url := "http://reb-ns-for-stage.kyma-system.svc.cluster.local/v2/catalog"
+	url := "http://ab-ns-for-stage.kyma-system.svc.cluster.local/v2/catalog"
 
-	mockBrokerService.On("GetNsFromBrokerURL", "reb-ns-for-stage.kyma-system.svc.cluster.local").Return("stage", nil)
+	mockBrokerService.On("GetNsFromBrokerURL", "ab-ns-for-stage.kyma-system.svc.cluster.local").Return("stage", nil)
 
 	sut := NewOsbContextMiddleware(mockBrokerService, spy.NewLogDummy())
 	req := httptest.NewRequest(http.MethodGet, url, nil)
@@ -47,7 +47,7 @@ func TestOsbContextReturnsErrorWhenCannotExtractNamespace(t *testing.T) {
 	mockBrokerService.On("GetNsFromBrokerURL", mock.Anything).Return("", errors.New("some error"))
 	logSink := spy.NewLogSink()
 	sut := NewOsbContextMiddleware(mockBrokerService, logSink.Logger)
-	req := httptest.NewRequest(http.MethodGet, "https://core-reb.kyma-system.svc.cluster.local/v2/catalog", nil)
+	req := httptest.NewRequest(http.MethodGet, "https://core-ab.kyma-system.svc.cluster.local/v2/catalog", nil)
 	rw := httptest.NewRecorder()
 	nextCalled := false
 	// WHEN

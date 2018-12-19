@@ -8,14 +8,14 @@ This guide shows how to call a registered external service from Kyma using a sim
 
 ## Prerequisites
 
-- A Remote Environment (RE) bound to the `production` Environment
-- Client certificates generated for the connected RE.
-- Map the `my-lambda-production.kyma.local` to your Minikube IP to call the lambda function on a local Kyma deployment.
+- An Application (App) bound to the `production` Environment
+- Client certificates generated for the connected App.
+- Map `my-lambda-production.kyma.local` to your Minikube IP to call the lambda function on a local Kyma deployment.
 
 
 ## Steps
 
-1. Register a service with the following specification to the desired Remote Environment.
+1. Register a service with the following specification to the desired Application.
 >**NOTE:** To learn how to register a service, see the **Register a service** Getting Started Guide.
 ```json
 {
@@ -64,12 +64,12 @@ spec:
       template:
         metadata:
           labels:
-            re-{RE_NAME}-{SERVICE_ID}: "true"
+            re-{APP_NAME}-{SERVICE_ID}: "true"
         spec:
           containers:
           - env:
             - name: GATEWAY_URL
-              value: re-{RE_NAME}-{SERVICE_ID}.kyma-integration
+              value: re-{APP_NAME}-{SERVICE_ID}.kyma-integration
   deps: |-
     {
         "name": "example-1",
@@ -87,7 +87,7 @@ spec:
             const options = {
                 url: url,
             };
-              
+
             sendReq(url, resolve, reject)
         })
     } }
@@ -156,7 +156,7 @@ spec:
 EOF
 ```
 
-6. To expose the lambda function outside the cluster create an **Api** custom resource:
+6. To expose the lambda function outside the cluster create an Api custom resource:
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: gateway.kyma-project.io/v1alpha2

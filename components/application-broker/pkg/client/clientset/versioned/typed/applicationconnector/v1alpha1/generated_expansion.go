@@ -4,8 +4,4 @@ package v1alpha1
 
 type ApplicationMappingExpansion interface{}
 
-type EnvironmentMappingExpansion interface{}
-
 type EventActivationExpansion interface{}
-
-type RemoteEnvironmentExpansion interface{}
