@@ -30,6 +30,7 @@ TLS_KEY=$(base64 "${KEY_PATH}" | tr -d '\n')
 kubectl patch configmap installation-config-overrides -p '{"data": {"global.domainName":"'"${DOMAIN}"'"}}' -n kyma-installer
 kubectl patch configmap cluster-certificate-overrides -p '{"data": {"global.tlsCrt":"'"${TLS_CERT}"'"}}' -n kyma-installer
 kubectl patch configmap cluster-certificate-overrides -p '{"data": {"global.tlsKey":"'"${TLS_KEY}"'"}}' -n kyma-installer
+kubectl patch secret ingress-tls-cert -p '{"data": {"tls.crt":"'"${TLS_CERT}"'"}}' -n kyma-system
 
 rm "${CERT_PATH}"
 rm "${KEY_PATH}"
