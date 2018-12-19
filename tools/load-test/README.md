@@ -20,7 +20,7 @@ helm install --set slackEndpoint="${SLACK_ENDPOINT}" \
 
 The configuration needed to execute the **load test** is as follows:
 
- | Name | Value | Description |
+ | Parameter | Value | Description |
  |------|---------------|-------------|
 **slackEndpoint** |`-`| A webhook Slack URL.
 **slackClientToken** |`-`|  A token which will be part of the **slackEndpoint**.
