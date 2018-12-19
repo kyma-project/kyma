@@ -18,7 +18,7 @@ helm install --set slackEndpoint="${SLACK_ENDPOINT}" \
              --name=load-test
 ```
 
-The configuration needed to execute the **load test** is as follows:
+These are the parameters you must configure to execute the load test:
 
  | Parameter | Value | Description |
  |------|---------------|-------------|
