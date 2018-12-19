@@ -20,7 +20,7 @@ helm install --set slackEndpoint="${SLACK_ENDPOINT}" \
              --name=load-test
 ```
 
-To run the load test either on a cluster or on a local Minikube, you must set the Helm chart installation parameters. However, on a cluster it is advisable to have environment variables set to default values.
+To run the load test either on a cluster or on a local Minikube, you must set the Helm chart installation parameters. However, on a cluster it is advisable to have the environment variables set to default values.
 
 These are the parameters you must configure to execute the load test:
 
