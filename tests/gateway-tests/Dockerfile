@@ -14,6 +14,6 @@ FROM alpine
 LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/gateway-tests .
-COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/gateway-tests/scripts/entrypoint.sh .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/gateway-tests/entrypoint.sh .
 
 ENTRYPOINT ./entrypoint.sh
