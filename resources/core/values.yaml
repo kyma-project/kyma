@@ -28,8 +28,8 @@ global:
     dir: develop/
     version: 8c274255
   api_controller_acceptance_tests:
-    dir: pr/
-    version: PR-2057
+    dir: develop/
+    version: 1f513da9
     testNamespace: sampleapp
   apiserver_proxy:
     dir: develop/
