@@ -7,7 +7,7 @@ The load test verifies the execution of the Horizontal Pod Autoscaling of functi
 
 ## Installation
 
-As the load test has been implemented as `helm chart` the script below is the way how the test must be installed.
+As the load test is implemented as a Helm chart, run the following script to install the test:
 
 ```bash
 echo "Installing helm chart..."
@@ -20,6 +20,8 @@ helm install --set slackEndpoint="${SLACK_ENDPOINT}" \
              --name=load-test
 ```
 
+To run the load test either on a cluster or on a local Minikube, you must set the Helm chart installation parameters. However, on a cluster it is advisable to have environment variables set to default values.
+
 These are the parameters you must configure to execute the load test:
 
  | Parameter | Value | Description |
@@ -29,11 +31,7 @@ These are the parameters you must configure to execute the load test:
 **slackClientChannelId** |`#channelId`| ID of the Slack channel.
 **loadTestExecutionTimeout** |`30`| Time after which the test execution timeout occurs. All the related metrics to be sent to the Slack channel are collected after the timeout.
 
-### Environment Variables
-
-To run the load test either on a cluster or on a local Minikube, you must set the Helm chart installation parameters. However, on a cluster it is advisable to have environment variables set to default values.
-
-The `bash` instructions below might be executed in case it is wanted to run the test either locally on miniukube or in a cluster.
+You can also define the values of these parameters by running this command:
 
 ```bash
 ### Test config
@@ -46,14 +44,16 @@ The `bash` instructions below might be executed in case it is wanted to run the 
 
 ## Development
 
-The main components of the load test can be divided into four and developers might be interested in adjust some of them to their requirements, such as the function definition or even the logic of the test itself throught the `.go` file.
+These are the main components of the load test:
 
 - **load-test/k8syaml**  contains all the Kubernetes resources needed to deploy the function.
 
-- **load-test.go** contains all the logic of the load test. You can build it with these commands:
+- *load-test.go** contains all the logic of the load test. You can build it with these commands:
  
- `GOOS=linux GOARCH=amd64 go build -o ./bin/app`(Mac)
- `CGO_ENABLED=0 go build -o ./bin/app`(Linux)
+ ```
+    GOOS=linux GOARCH=amd64 go build -o ./bin/app (Mac)
+    CGO_ENABLED=0 go build -o ./bin/app (Linux)
+ ``` 
  
 - **load-test/Dockerfile** is a file needed to build the Docker image. To build the image, run this command:
 
