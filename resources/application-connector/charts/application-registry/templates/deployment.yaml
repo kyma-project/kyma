@@ -24,10 +24,10 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.metadata_service.dir }}metadata-service:{{ .Values.global.metadata_service.version }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_registry.dir }}application-registry:{{ .Values.global.application_registry.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
-          - "/metadataservice"
+          - "/applicationregistry"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--minioURL={{ .Values.deployment.args.minioURL }}"

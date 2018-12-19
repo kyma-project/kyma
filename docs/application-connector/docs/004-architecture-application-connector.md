@@ -16,15 +16,15 @@ You can access every exposed Application (App) through its Gateway by using the 
 
 The Connector Service:
 - Handles the exchange of client certificates for a given RE.
-- Provides the Metadata Service and Event Service endpoints.
+- Provides the Application Registry and Event Service endpoints.
 - Signs client certificates using the server side certificate stored in Kubernetes Secrets.
 
-## Metadata Service
+## Application Registry
 
-The Metadata Service stores all registered APIs and Event Catalog exposed by a connected external solution. The APIs and Event catalogs metadata are stored in RemoteEnvironment custom resource.
+The Application Registry stores all registered APIs and Event Catalog exposed by a connected external solution. The APIs and Event catalogs metadata are stored in RemoteEnvironment custom resource.
 The system creates a new Kubernetes service for each registered API. Additionally, a new Service Classes is registered in the Service Catalog.
 
->**NOTE:** Using the Metadata Service, you can register an API along with its OAuth or Basic Authentication credentials. The credentials are stored in a Kubernetes Secret.
+>**NOTE:** Using the Application Registry, you can register an API along with its OAuth or Basic Authentication credentials. The credentials are stored in a Kubernetes Secret.
 
 ## Event Service
 
@@ -39,17 +39,17 @@ All Apps are created through the Application custom resource, which also stores 
 
 ## Application Operator
 
-The operator listens for creating or deleting the Application custom resources and acts accordingly, either provisioning or de-provisioning an instance of Proxy Service and Event Service for every custom resource.         
+The operator listens for creating or deleting the Application custom resources and acts accordingly, either provisioning or de-provisioning an instance of Application Proxy and Event Service for every custom resource.         
 
 >**NOTE:** Every Application custom resource corresponds to a single App to which you can connect an external solution.
 
-## Proxy Service
+## Application Proxy
 
-The Proxy Service is an intermediary component between a lambda function or a service and an external API registered with the Metadata Service. It can call services secured with the [Basic Authentication](https://tools.ietf.org/html/rfc7617) mechanism, acquire OAuth tokens, and call OAuth-secured APIs.  
+The Application Proxy is an intermediary component between a lambda function or a service and an external API registered with the Application Registry. It can call services secured with the [Basic Authentication](https://tools.ietf.org/html/rfc7617) mechanism, acquire OAuth tokens, and call OAuth-secured APIs.  
 
 ## Access Service
 
-The Access Service exposes the Proxy Service and manages the access from the lambda functions and services deployed in Kyma to the external APIs over the Proxy Service.
+The Access Service exposes the Application Proxy and manages the access from the Lambda functions and services deployed in Kyma to the external APIs over the Application Proxy.
 
 ## Minio bucket
 

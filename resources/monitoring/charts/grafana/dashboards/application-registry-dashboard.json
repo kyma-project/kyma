@@ -92,7 +92,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"kyma-integration\",pod_name=~\"metadata-service.*\"}[3m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"kyma-integration\",pod_name=~\"application-registry.*\"}[3m]))",
           "format": "time_series",
           "intervalFactor": 2,
           "refId": "A"
@@ -172,7 +172,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(container_memory_usage_bytes{namespace=\"kyma-integration\",pod_name=~\"metadata-service.*\"}) / 1024^3",
+          "expr": "sum(container_memory_usage_bytes{namespace=\"kyma-integration\",pod_name=~\"application-registry.*\"}) / 1024^3",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -252,7 +252,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(rate(container_network_transmit_bytes_total{namespace=\"kyma-integration\",pod_name=~\"metadata-service.*\"}[3m])) + sum(rate(container_network_receive_bytes_total{namespace=\"kyma-integration\",pod_name=~\"metadata-service.*\"}[3m]))",
+          "expr": "sum(rate(container_network_transmit_bytes_total{namespace=\"kyma-integration\",pod_name=~\"application-registry.*\"}[3m])) + sum(rate(container_network_receive_bytes_total{namespace=\"kyma-integration\",pod_name=~\"application-registry.*\"}[3m]))",
           "format": "time_series",
           "intervalFactor": 2,
           "refId": "A"
@@ -308,35 +308,35 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "max(kube_deployment_status_replicas{deployment=\"metadata-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
+          "expr": "max(kube_deployment_status_replicas{deployment=\"application-registry\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "current replicas",
           "refId": "A"
         },
         {
-          "expr": "min(kube_deployment_status_replicas_available{deployment=\"metadata-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
+          "expr": "min(kube_deployment_status_replicas_available{deployment=\"application-registry\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "available",
           "refId": "B"
         },
         {
-          "expr": "max(kube_deployment_status_replicas_unavailable{deployment=\"metadata-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
+          "expr": "max(kube_deployment_status_replicas_unavailable{deployment=\"application-registry\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "unavailable",
           "refId": "C"
         },
         {
-          "expr": "min(kube_deployment_status_replicas_updated{deployment=\"metadata-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
+          "expr": "min(kube_deployment_status_replicas_updated{deployment=\"application-registry\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "updated",
           "refId": "D"
         },
         {
-          "expr": "max(kube_deployment_spec_replicas{deployment=\"metadata-service\",namespace=\"kyma-integration\"}) without (instance, pod)",
+          "expr": "max(kube_deployment_spec_replicas{deployment=\"application-registry\",namespace=\"kyma-integration\"}) without (instance, pod)",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "desired",
@@ -433,7 +433,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "metadata_service_endpoints_duration{exported_endpoint=~\"$endpoint\", quantile=\"0.995\"}",
+          "expr": "application_registry_endpoints_duration{exported_endpoint=~\"$endpoint\", quantile=\"0.995\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ exported_endpoint }}",
@@ -530,7 +530,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(metadata_service_endpoints_responses{exported_endpoint=~\"$endpoint\"}[10m])",
+          "expr": "increase(application_registry_endpoints_responses{exported_endpoint=~\"$endpoint\"}[10m])",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{exported_endpoint}} {{ status }}",
@@ -598,7 +598,7 @@
         "multi": true,
         "name": "endpoint",
         "options": [],
-        "query": "label_values(metadata_service_endpoints_duration ,exported_endpoint)",
+        "query": "label_values(application_registry_endpoints_duration ,exported_endpoint)",
         "refresh": 1,
         "regex": "",
         "sort": 0,
@@ -640,7 +640,7 @@
     ]
   },
   "timezone": "",
-  "title": "Metadata-Service",
+  "title": "Application-Registry",
   "uid": "24yXN4tmk",
   "version": 1
 }
