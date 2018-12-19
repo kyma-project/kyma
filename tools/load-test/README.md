@@ -49,7 +49,7 @@ To run the **load test** either in a cluster or a local Minikube you will need t
  `GOOS=linux GOARCH=amd64 go build -o ./bin/app`(Mac)
  `CGO_ENABLED=0 go build -o ./bin/app`(Linux)
  
-- **load-test/Dockerfile** Needed to build the docker image. The image can be built as a follows:
+- **load-test/Dockerfile** is a file needed to build the Docker image. To build the image, run this command:
 
 `docker build -t load-test .`
 
