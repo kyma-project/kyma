@@ -271,6 +271,9 @@
 # The docsbuilder directory
 /tools/docsbuilder/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
+# The failery directory
+/tools/failery/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
+
 # The static-users-generator directory
 /tools/static-users-generator/ @piotrmsc @sjanota @kubadz 
 

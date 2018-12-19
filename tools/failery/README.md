@@ -5,7 +5,7 @@ This project allows to generate failing mock types for given interfaces.
 
 What is a failing mock type? It is a type that implements an interface, but when any of method returns an error or pointer to it, it will always return an error.
 
-Failery is based on [failery](https://github.com/vektra/failery).
+Failery is based on [mockery](https://github.com/vektra/mockery).
 
 ## Prerequisites
 
@@ -47,7 +47,7 @@ dep ensure -add 'github.com/kyma-project/kyma/tools/failery'
     - `{relativeVendorPath}` is the relative path to the `vendor` directory of the project.
     - `{generationTypeParams}` are additional parameters that specify mock generation type. The `-inpkg` parameter creates file in the same package, and `-output {packageName}` parameter generates the mock in `{packageName}` package.
     
-    For more configuration options, see the Readme of the original project, [failery](https://github.com/vektra/failery).
+    For more configuration options, see the Readme of the original project, [mockery](https://github.com/vektra/mockery).
   
 1. Run the following command in your project root:
 
