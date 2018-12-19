@@ -1,5 +1,4 @@
 {{ if .Values.global.knative }}
-  {{- $serviceName := .Values.global.knative | ternary "knative-ingressgateway" "istio-ingressgateway" -}}
 ---
 apiVersion: v1
 kind: Pod
@@ -16,7 +15,7 @@ spec:
     image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_knative_serving_acceptance.dir }}knative-serving-acceptance-tests:{{ .Values.global.test_knative_serving_acceptance.version }}
     env:
     - name: INGRESSGATEWAY_FQDN
-      value: {{ $serviceName }}.istio-system.svc.cluster.local
+      value: knative-ingressgateway.istio-system.svc.cluster.local
     - name: DOMAIN_NAME
       value: example.com
     - name: TARGET
