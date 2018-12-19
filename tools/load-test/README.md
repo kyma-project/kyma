@@ -23,7 +23,7 @@ These are the parameters you must configure to execute the load test:
  | Parameter | Value | Description |
  |------|---------------|-------------|
 **slackEndpoint** |`-`| A webhook Slack URL.
-**slackClientToken** |`-`|  A token which will be part of the **slackEndpoint**.
+**slackClientToken** |`-`|  A token which is a part of the **slackEndpoint**.
 **slackClientChannelId** |`#channelId`| ID of the Slack channel.
 **loadTestExecutionTimeout** |`30`| Time after which the test execution timeout occurs. All the related metrics to be sent to the Slack channel are collected after the timeout.
 
