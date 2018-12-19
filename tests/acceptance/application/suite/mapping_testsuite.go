@@ -7,7 +7,8 @@ import (
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -23,12 +24,13 @@ type MappingTestSuite struct {
 	// TestID is a short id used as suffix in resource names
 	TestID   string
 	scClient v1beta1.ServicecatalogV1beta1Interface
-	reClient v1alpha1.ApplicationconnectorV1alpha1Interface
+	mClient  mappingCli.ApplicationconnectorV1alpha1Interface
 	nsClient v1.NamespaceInterface
+	aClient  *appCli.ApplicationconnectorV1alpha1Client
 
-	osbServiceId          string
-	remoteEnvironmentName string
-	brokerName            string
+	osbServiceId    string
+	applicationName string
+	brokerName      string
 
 	MappedNs string
 	EmptyNs  string
@@ -41,7 +43,9 @@ func NewMappingTestSuite(t *testing.T) *MappingTestSuite {
 	require.NoError(t, err)
 	scClient, err := clientset.NewForConfig(config)
 	require.NoError(t, err)
-	reClient, err := v1alpha1.NewForConfig(config)
+	mClient, err := mappingCli.NewForConfig(config)
+	require.NoError(t, err)
+	aClient, err := appCli.NewForConfig(config)
 	require.NoError(t, err)
 	k8sClient, err := v1.NewForConfig(config)
 	require.NoError(t, err)
@@ -51,12 +55,13 @@ func NewMappingTestSuite(t *testing.T) *MappingTestSuite {
 		TestID:   id,
 		scClient: scClient.ServicecatalogV1beta1(),
 		nsClient: k8sClient.Namespaces(),
-		reClient: reClient,
+		mClient:  mClient,
+		aClient:  aClient,
 
-		osbServiceId:          fmt.Sprintf("acc-test-osb-serviceid-%s", id),
-		remoteEnvironmentName: fmt.Sprintf("acc-test-re-%s", id),
+		osbServiceId:    fmt.Sprintf("acc-test-osb-serviceid-%s", id),
+		applicationName: fmt.Sprintf("acc-test-app-%s", id),
 
-		brokerName: "remote-env-broker",
+		brokerName: "application-broker",
 
 		MappedNs: fmt.Sprintf("acc-test-mapping-ns-mapped-%s", id),
 		EmptyNs:  fmt.Sprintf("acc-test-mapping-ns-empty-%s", id),
@@ -67,11 +72,11 @@ func NewMappingTestSuite(t *testing.T) *MappingTestSuite {
 
 func (ts *MappingTestSuite) Setup() {
 	ts.createNamespaces()
-	ts.createRemoteEnvironment()
+	ts.createApplication()
 }
 
 func (ts *MappingTestSuite) TearDown() {
-	err := ts.reClient.RemoteEnvironments().Delete(ts.remoteEnvironmentName, &metav1.DeleteOptions{})
+	err := ts.aClient.Applications().Delete(ts.applicationName, &metav1.DeleteOptions{})
 	assert.NoError(ts.t, err)
 	err = ts.nsClient.Delete(ts.MappedNs, &metav1.DeleteOptions{})
 	assert.NoError(ts.t, err)
@@ -122,15 +127,15 @@ func (ts *MappingTestSuite) EnsureServiceBrokerNotExist(namespace string) {
 	assert.True(ts.t, apierrors.IsNotFound(err))
 }
 
-func (ts *MappingTestSuite) CreateEnvironmentMapping() {
-	ts.t.Log("Create EnvironmentMapping")
-	_, err := createEnvironmentMapping(ts.reClient.EnvironmentMappings(ts.MappedNs), ts.remoteEnvironmentName)
+func (ts *MappingTestSuite) CreateApplicationMapping() {
+	ts.t.Log("Create ApplicationMapping")
+	_, err := createApplicationMapping(ts.mClient.ApplicationMappings(ts.MappedNs), ts.applicationName)
 	require.NoError(ts.t, err)
 }
 
-func (ts *MappingTestSuite) DeleteEnvironmentMapping() {
-	ts.t.Log("Delete EnvironmentMapping")
-	err := ts.reClient.EnvironmentMappings(ts.MappedNs).Delete(ts.remoteEnvironmentName, &metav1.DeleteOptions{})
+func (ts *MappingTestSuite) DeleteApplicationMapping() {
+	ts.t.Log("Delete ApplicationMapping")
+	err := ts.mClient.ApplicationMappings(ts.MappedNs).Delete(ts.applicationName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 }
 
@@ -144,9 +149,9 @@ func (ts *MappingTestSuite) createNamespaces() {
 	require.NoError(ts.t, err)
 }
 
-func (ts *MappingTestSuite) createRemoteEnvironment() {
-	ts.t.Log("Create RemoteEnvironment")
+func (ts *MappingTestSuite) createApplication() {
+	ts.t.Log("Create Applcation")
 	displayName := fmt.Sprintf("acc-test-re-name-%s", ts.TestID)
-	_, err := createRemoteEnvironment(ts.reClient.RemoteEnvironments(), ts.remoteEnvironmentName, "dummy", ts.osbServiceId, "dummy", displayName)
+	_, err := createApplication(ts.aClient.Applications(), ts.applicationName, "dummy", ts.osbServiceId, "dummy", displayName)
 	require.NoError(ts.t, err)
 }

@@ -1,19 +1,19 @@
-package remote_environment
+package application
 
 import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/acceptance/remote-environment/suite"
+	"github.com/kyma-project/kyma/tests/acceptance/application/suite"
 	"github.com/vrischmann/envconfig"
 )
 
 type Config struct {
-	KeepTestResources bool `envconfig:"REMOTE_ENVIRONMENT_KEEP_RESOURCES"`
-	Disabled          bool `envconfig:"REMOTE_ENVIRONMENT_DISABLED"`
+	KeepTestResources bool `envconfig:"APPLICATION_KEEP_RESOURCES"`
+	Disabled          bool `envconfig:"APPLICATION_DISABLED"`
 }
 
-func TestEnvironmentMapping_EnsureBrokerAndClassesOnlyWhenMappingExist(t *testing.T) {
+func TestApplicationMapping_EnsureBrokerAndClassesOnlyWhenMappingExist(t *testing.T) {
 	var cfg Config
 	if err := envconfig.Init(&cfg); err != nil {
 		t.Fatalf(err.Error())
@@ -28,11 +28,11 @@ func TestEnvironmentMapping_EnsureBrokerAndClassesOnlyWhenMappingExist(t *testin
 		defer ts.TearDown()
 	}
 
-	// Service Broker and Service Class shouldn't exist without EnvironmentMapping
+	// Service Broker and Service Class shouldn't exist without ApplicationMapping
 	ts.EnsureServiceBrokerNotExist(ts.MappedNs)
 	ts.EnsureServiceClassNotExist(ts.MappedNs)
 
-	ts.CreateEnvironmentMapping()
+	ts.CreateApplicationMapping()
 
 	t.Log("Waiting for service broker")
 	ts.WaitForServiceBrokerWithTimeout(time.Second * 30)
@@ -45,10 +45,10 @@ func TestEnvironmentMapping_EnsureBrokerAndClassesOnlyWhenMappingExist(t *testin
 	ts.EnsureServiceBrokerNotExist(ts.EmptyNs)
 	ts.EnsureServiceClassNotExist(ts.EmptyNs)
 
-	ts.DeleteEnvironmentMapping()
+	ts.DeleteApplicationMapping()
 
-	// Service Broker and Service Class shouldn't exist without EnvironmentMapping
-	t.Log("Waiting until REB will delete service broker")
+	// Service Broker and Service Class shouldn't exist without ApplicationMapping
+	t.Log("Waiting until AppBroker will delete service broker")
 	ts.EnsureServiceBrokerNotExistWithTimeout(time.Second * 30)
 	ts.EnsureServiceClassNotExist(ts.MappedNs)
 

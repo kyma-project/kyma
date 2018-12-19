@@ -25,9 +25,9 @@ type TestSuite struct {
 	// TestID is a short id used as suffix in resource names
 	TestID string
 
-	namespace             string
-	remoteEnvironmentName string
-	dockerImage           string
+	namespace       string
+	applicationName string
+	dockerImage     string
 
 	scCli  v1beta1.ServicecatalogV1beta1Interface
 	config *restclient.Config
@@ -58,10 +58,10 @@ func NewTestSuite(t *testing.T, image, namespace string) *TestSuite {
 	gwSvcName := fmt.Sprintf("acc-test-gw-%s", id)
 
 	return &TestSuite{
-		TestID:                id,
-		namespace:             namespace,
-		dockerImage:           image,
-		remoteEnvironmentName: fmt.Sprintf("acc-test-re-%s", id),
+		TestID:          id,
+		namespace:       namespace,
+		dockerImage:     image,
+		applicationName: fmt.Sprintf("acc-test-app-%s", id),
 
 		scCli:  scClientset.ServicecatalogV1beta1(),
 		config: config,
@@ -83,8 +83,8 @@ func (ts *TestSuite) Setup() {
 	ts.createKubernetesResources()
 	ts.t.Log("Creating Istio resources")
 	ts.createIstioResources()
-	ts.t.Log("Creating RemoteEnvironment")
-	ts.createRemoteEnvironmentResources()
+	ts.t.Log("Creating Application")
+	ts.createApplicationResources()
 }
 
 func (ts *TestSuite) WaitForServiceClassWithTimeout(timeout time.Duration) {
@@ -117,7 +117,7 @@ func (ts *TestSuite) ProvisionServiceInstance(timeout time.Duration) {
 
 	ts.serviceInstance, err = siClient.Create(&catalog.ServiceInstance{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("acc-test-remote-env-%s", ts.TestID),
+			Name: fmt.Sprintf("acc-test-app-env-%s", ts.TestID),
 		},
 		Spec: catalog.ServiceInstanceSpec{
 			PlanReference: catalog.PlanReference{
@@ -204,7 +204,7 @@ func (ts *TestSuite) TearDown(timeoutPerStep time.Duration) {
 
 	ts.ensureServiceInstanceIsDeleted(timeoutPerStep)
 
-	ts.deleteRemoteEnvironment()
+	ts.deleteApplication()
 
 	ts.ensureNamespaceIsDeleted(timeoutPerStep)
 }

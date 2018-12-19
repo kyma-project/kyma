@@ -1,24 +1,24 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: re-acceptance-test
+  name: app-acceptance-test
   namespace: kyma-system
 spec:
-  serviceAccountName: remoteenv-test
+  serviceAccountName: app-test
   containers:
   - name: acceptance-test
     imagePullPolicy: Always
     image: acceptance-tests-re:0.0.1
     env:
-    - name: REMOTE_ENVIRONMENT_KEEP_RESOURCES
+    - name: APPLICATION_KEEP_RESOURCES
       value: "true"
     - name: STUBS_DOCKER_IMAGE
       value: acceptance-tests-re:0.0.1
-    - name: REMOTE_ENVIRONMENT_LINKING_TIMEOUT
+    - name: APPLICATION_LINKING_TIMEOUT
       value: 2m
-    - name: REMOTE_ENVIRONMENT_UNLINKING_TIMEOUT
+    - name: APPLICATION_UNLINKING_TIMEOUT
       value: 2m
-    - name: REMOTE_ENVIRONMENT_DISABLED
+    - name: APPLICATION_DISABLED
       value: "false"
   restartPolicy: Never
 

@@ -1,4 +1,4 @@
-# Remote environment binding test
+# Application binding test
 
 ## Overview
 
@@ -7,7 +7,7 @@ This folder contains the test which checks if the BindingUsage resource allows t
 ## Details
 
 The testing scenario has the following steps:
-1. Setup: create RemoteEnvironment, EnvironmentMapping, deployments (`fake-gateway`, `gateway-client`) and set-up Istio Deniers and Rules
+1. Setup: create Application, ApplicationMapping, deployments (`fake-gateway`, `gateway-client`) and set-up Istio Deniers and Rules
 2. Provision a ServiceClass
 3. Perform binding
 4. Add a BindingUsage
@@ -27,19 +27,19 @@ Go to the project root directory.
 
 Build testing Docker image:
 ```bash
-./remote-environment/contrib/build.sh
+./application/contrib/build.sh
 ```
 
 Create service accounts and roles:
 ```bash
-kubectl apply -f remote-environment/contrib/rbac.yaml
+kubectl apply -f application/contrib/rbac.yaml
 ```
 
 ### Run the test
 
 Create a testing Pod:
 ```bash
-kubectl apply -f remote-environment/contrib/pod.yaml
+kubectl apply -f application/contrib/pod.yaml
 ``` 
 
 ### Watch resources
@@ -58,5 +58,5 @@ Clean up all test resources:
 
 ```bash
 kubectl delete ns acceptance-test
-kubectl delete po -n kyma-system re-acceptance-test
+kubectl delete po -n kyma-system app-acceptance-test
 ```
