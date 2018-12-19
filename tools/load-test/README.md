@@ -53,4 +53,4 @@ To run the **load test** either in a cluster or a local Minikube you will need t
 
 `docker build -t load-test .`
 
-- **load-test/deploy/chart** contains the the chart which installs the test code which in turn stresses the function.
+- **load-test/deploy/chart** contains the chart that installs the test code which stresses the function.
