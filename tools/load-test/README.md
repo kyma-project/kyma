@@ -31,6 +31,8 @@ These are the parameters you must configure to execute the load test:
 
 To run the load test either on a cluster or on a local Minikube, you must set the Helm chart installation parameters. However, on a cluster it is advisable to have environment variables set to default values.
 
+The `bash` instructions below might be executed in case it is wanted to run the test either locally on miniukube or in a cluster.
+
 ```bash
 ### Test config
 # export SLACK_CLIENT_TOKEN='replace by the slack token'
@@ -42,9 +44,11 @@ To run the load test either on a cluster or on a local Minikube, you must set th
 
 ## Development
 
+The main components of the load test can be divided into four and developers might be interested in adjust some of them to their requirements, such as the function definition or even the logic of the test itself throught the `.go` file.
+
 - **load-test/k8syaml**  contains all the Kubernetes resources needed to deploy the function.
 
-- **main.go** contains all the logic of the load test. You can build it with these commands:
+- **load-test.go** contains all the logic of the load test. You can build it with these commands:
  
  `GOOS=linux GOARCH=amd64 go build -o ./bin/app`(Mac)
  `CGO_ENABLED=0 go build -o ./bin/app`(Linux)
