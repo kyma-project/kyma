@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -57,35 +58,35 @@ func TestClientFromEnv(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			creator := Default()
-
-			creator.Getenv = func(s string) string {
-				assert.Equal(t, ServiceNameEnv, s)
-				if c.fqdnProvided {
-					return gwFQDN
-				}
-				return ""
-			}
-
-			creator.LookupHost = func(s string) (strings []string, e error) {
-				assert.Equal(t, gwFQDN, s)
-				if c.serviceAddressResolved {
-					return []string{serviceAddress}, nil
-				}
-				return nil, errors.New("address not resolved")
-			}
-
-			creator.GetMinikubeIP = func() (s string, e error) {
-				if c.minikubeAvailable {
-					return minikubeAddress, nil
-				}
-				return "", errors.New("minikube not available")
-			}
-
 			mock := &dialerMock{}
-			creator.Dialer = mock
+			creator := &clientCreator{
 
-			client, err := creator.ClientFromEnv()
+				ingressFQDN: func() string {
+					if c.fqdnProvided {
+						return gwFQDN
+					}
+					return ""
+				},
+
+				lookupHost: func(s string) (strings []string, e error) {
+					assert.Equal(t, gwFQDN, s)
+					if c.serviceAddressResolved {
+						return []string{serviceAddress}, nil
+					}
+					return nil, errors.New("address not resolved")
+				},
+
+				getMinikubeIP: func() (s string, e error) {
+					if c.minikubeAvailable {
+						return minikubeAddress, nil
+					}
+					return "", errors.New("minikube not available")
+				},
+
+				dialer: mock,
+			}
+
+			client, err := creator.Client()
 
 			if !c.expectSuccess {
 				assert.NotNil(t, err)
@@ -103,6 +104,14 @@ func TestClientFromEnv(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDefaultIngressFQDN(t *testing.T) {
+	err := os.Setenv(ServiceNameEnv, gwFQDN)
+	assert.Nil(t, err)
+
+	actual := defaultIngressFQDN()
+	assert.Equal(t, gwFQDN, actual)
 }
 
 type dialerMock struct {

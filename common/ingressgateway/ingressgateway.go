@@ -14,60 +14,67 @@ import (
 )
 
 const (
-	// This environmental variable must hold FQDN of ingress gateway which client should access
-	ServiceNameEnv = "INGRESSGATEWAY_FQDN"
+	// This environmental variable must hold address of ingress gateway which client should access.
+	// Address may be IP or FQDN. If this variable is not present creator will fallback to output of `minikube ip`.
+	ServiceNameEnv = "INGRESSGATEWAY_ADDRESS"
 )
 
-// Dialer is an interface which abstracts net.Dialer.
+// dialer is an interface which abstracts net.dialer.
 type Dialer interface {
 	DialContext(ctx context.Context, network, address string) (net.Conn, error)
 }
 
-// clientCreator abstracts interactions with outside world for easy testing.
-type clientCreator struct {
-	Getenv        func(string) string
-	LookupHost    func(string) ([]string, error)
-	GetMinikubeIP func() (string, error)
-	Dialer        Dialer
+type ClientCreator interface {
+	// ServiceAddressFromEnv returns address of ingress gateway read from environment. It does so by reading
+	// service name from environmental variable and resolving it. If env variable is not set output of `minikube ip` will
+	// be used as address to support local testing.
+	ServiceAddress() (string, error)
+
+	// ClientFromEnv returns http.Client which dials ingress gateway service address instead of the one provided in request
+	// URL. For details how address is resolved see ServiceAddressFromEnv.
+	Client() (*http.Client, error)
 }
 
-// Default returns clientCreator ready for production use.
-func Default() *clientCreator {
+// clientCreator abstracts interactions with outside world for easy testing.
+type clientCreator struct {
+	ingressFQDN   func() string
+	lookupHost    func(string) ([]string, error)
+	getMinikubeIP func() (string, error)
+	dialer        Dialer
+}
+
+// FromEnv returns ClientCreator ready for production use.
+func FromEnv() ClientCreator {
 	return &clientCreator{
-		Getenv:        os.Getenv,
-		LookupHost:    net.LookupHost,
-		GetMinikubeIP: getMinikubeIP,
-		Dialer: &net.Dialer{
+		ingressFQDN:   defaultIngressFQDN,
+		lookupHost:    net.LookupHost,
+		getMinikubeIP: getMinikubeIP,
+		dialer: &net.Dialer{
 			Timeout: 30 * time.Second,
 		},
 	}
 }
 
-// ServiceAddressFromEnv returns address of ingress gateway read from environment. It does so by reading
-// service name from environmental variable and resolving it. If env variable is not set output of `minikube ip` will
-// be used as address to support local testing.
-func (cc *clientCreator) ServiceAddressFromEnv() (string, error) {
-	serviceUrl := cc.Getenv(ServiceNameEnv)
+func (cc *clientCreator) ServiceAddress() (string, error) {
+	serviceUrl := cc.ingressFQDN()
 
 	if serviceUrl != "" {
-		addresses, err := cc.LookupHost(serviceUrl)
+		addresses, err := cc.lookupHost(serviceUrl)
 		if err != nil {
 			return "", fmt.Errorf("unable to lookup host %s: %s", serviceUrl, err)
 		}
 		return addresses[0], nil
 	}
 
-	minikubeIP, err := cc.GetMinikubeIP()
+	minikubeIP, err := cc.getMinikubeIP()
 	if err != nil {
 		return "", fmt.Errorf("cannot get minikube IP: %s", err)
 	}
 	return minikubeIP, nil
 }
 
-// ClientFromEnv returns http.Client which dials ingress gateway service address instead of the one provided in request
-// URL. For details how address is resolved see ServiceAddressFromEnv.
-func (cc *clientCreator) ClientFromEnv() (*http.Client, error) {
-	ingressGatewayAddr, err := cc.ServiceAddressFromEnv()
+func (cc *clientCreator) Client() (*http.Client, error) {
+	ingressGatewayAddr, err := cc.ServiceAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +83,7 @@ func (cc *clientCreator) ClientFromEnv() (*http.Client, error) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			addr = ingressGatewayAddr + ":443"
-			return cc.Dialer.DialContext(ctx, network, addr)
+			return cc.dialer.DialContext(ctx, network, addr)
 		},
 	}
 
@@ -95,4 +102,8 @@ func getMinikubeIP() (string, error) {
 		return "", err
 	}
 	return strings.Trim(string(mipOut), "\n"), nil
+}
+
+func defaultIngressFQDN() string {
+	return os.Getenv(ServiceNameEnv)
 }
