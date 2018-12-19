@@ -25,12 +25,12 @@ type Dialer interface {
 }
 
 type ClientCreator interface {
-	// ServiceAddressFromEnv returns address of ingress gateway read from environment. It does so by reading
+	// ServiceAddress returns address of ingress gateway read from environment. It does so by reading
 	// service name from environmental variable and resolving it. If env variable is not set output of `minikube ip` will
 	// be used as address to support local testing.
 	ServiceAddress() (string, error)
 
-	// ClientFromEnv returns http.Client which dials ingress gateway service address instead of the one provided in request
+	// Client returns http.Client which dials ingress gateway service address instead of the one provided in request
 	// URL. For details how address is resolved see ServiceAddressFromEnv.
 	Client() (*http.Client, error)
 }
