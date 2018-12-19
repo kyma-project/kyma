@@ -1,6 +1,5 @@
-global:
-  containerRegistry:
-    path: eu.gcr.io/kyma-project
-  xip_patch:
-    dir: pr/xip-patch/
-    version: PR-2055
+containerRegistry:
+  path: eu.gcr.io/kyma-project
+xip_patch:
+  dir: pr/xip-patch/
+  version: PR-2055
