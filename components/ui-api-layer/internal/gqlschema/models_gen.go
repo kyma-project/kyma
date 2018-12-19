@@ -16,6 +16,37 @@ type API struct {
 	AuthenticationPolicies []AuthenticationPolicy `json:"authenticationPolicies"`
 }
 
+type ApplicationEntry struct {
+	Type        string  `json:"type"`
+	GatewayURL  *string `json:"gatewayUrl"`
+	AccessLabel *string `json:"accessLabel"`
+}
+
+type ApplicationEvent struct {
+	Type        SubscriptionEventType `json:"type"`
+	Application Application           `json:"application"`
+}
+
+type ApplicationMapping struct {
+	Environment string `json:"environment"`
+	Application string `json:"application"`
+}
+
+type ApplicationMutationOutput struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Labels      Labels `json:"labels"`
+}
+
+type ApplicationService struct {
+	ID                  string             `json:"id"`
+	DisplayName         string             `json:"displayName"`
+	LongDescription     string             `json:"longDescription"`
+	ProviderDisplayName string             `json:"providerDisplayName"`
+	Tags                []string           `json:"tags"`
+	Entries             []ApplicationEntry `json:"entries"`
+}
+
 type AuthenticationPolicy struct {
 	Type    AuthenticationPolicyType `json:"type"`
 	Issuer  string                   `json:"issuer"`
@@ -74,7 +105,7 @@ type CreateServiceBindingUsageInput struct {
 	Parameters        *ServiceBindingUsageParametersInput `json:"parameters"`
 }
 
-type DeleteRemoteEnvironmentOutput struct {
+type DeleteApplicationOutput struct {
 	Name string `json:"name"`
 }
 
@@ -124,13 +155,8 @@ type EnvPrefixInput struct {
 }
 
 type Environment struct {
-	Name               string   `json:"name"`
-	RemoteEnvironments []string `json:"remoteEnvironments"`
-}
-
-type EnvironmentMapping struct {
-	Environment       string `json:"environment"`
-	RemoteEnvironment string `json:"remoteEnvironment"`
+	Name         string   `json:"name"`
+	Applications []string `json:"applications"`
 }
 
 type EventActivationEvent struct {
@@ -184,32 +210,6 @@ type LocalObjectReference struct {
 type LocalObjectReferenceInput struct {
 	Kind string `json:"kind"`
 	Name string `json:"name"`
-}
-
-type RemoteEnvironmentEntry struct {
-	Type        string  `json:"type"`
-	GatewayURL  *string `json:"gatewayUrl"`
-	AccessLabel *string `json:"accessLabel"`
-}
-
-type RemoteEnvironmentEvent struct {
-	Type              SubscriptionEventType `json:"type"`
-	RemoteEnvironment RemoteEnvironment     `json:"remoteEnvironment"`
-}
-
-type RemoteEnvironmentMutationOutput struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Labels      Labels `json:"labels"`
-}
-
-type RemoteEnvironmentService struct {
-	ID                  string                   `json:"id"`
-	DisplayName         string                   `json:"displayName"`
-	LongDescription     string                   `json:"longDescription"`
-	ProviderDisplayName string                   `json:"providerDisplayName"`
-	Tags                []string                 `json:"tags"`
-	Entries             []RemoteEnvironmentEntry `json:"entries"`
 }
 
 type ResourceQuota struct {
@@ -366,6 +366,43 @@ type UsageKindResource struct {
 	Namespace string `json:"namespace"`
 }
 
+type ApplicationStatus string
+
+const (
+	ApplicationStatusServing              ApplicationStatus = "SERVING"
+	ApplicationStatusNotServing           ApplicationStatus = "NOT_SERVING"
+	ApplicationStatusGatewayNotConfigured ApplicationStatus = "GATEWAY_NOT_CONFIGURED"
+)
+
+func (e ApplicationStatus) IsValid() bool {
+	switch e {
+	case ApplicationStatusServing, ApplicationStatusNotServing, ApplicationStatusGatewayNotConfigured:
+		return true
+	}
+	return false
+}
+
+func (e ApplicationStatus) String() string {
+	return string(e)
+}
+
+func (e *ApplicationStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ApplicationStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ApplicationStatus", str)
+	}
+	return nil
+}
+
+func (e ApplicationStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type AuthenticationPolicyType string
 
 const (
@@ -473,43 +510,6 @@ func (e *LimitType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e LimitType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type RemoteEnvironmentStatus string
-
-const (
-	RemoteEnvironmentStatusServing              RemoteEnvironmentStatus = "SERVING"
-	RemoteEnvironmentStatusNotServing           RemoteEnvironmentStatus = "NOT_SERVING"
-	RemoteEnvironmentStatusGatewayNotConfigured RemoteEnvironmentStatus = "GATEWAY_NOT_CONFIGURED"
-)
-
-func (e RemoteEnvironmentStatus) IsValid() bool {
-	switch e {
-	case RemoteEnvironmentStatusServing, RemoteEnvironmentStatusNotServing, RemoteEnvironmentStatusGatewayNotConfigured:
-		return true
-	}
-	return false
-}
-
-func (e RemoteEnvironmentStatus) String() string {
-	return string(e)
-}
-
-func (e *RemoteEnvironmentStatus) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = RemoteEnvironmentStatus(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid RemoteEnvironmentStatus", str)
-	}
-	return nil
-}
-
-func (e RemoteEnvironmentStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

@@ -67,7 +67,7 @@ func main() {
 func newReleaseManager(options *options) (appRelease.ReleaseManager, error) {
 	overridesData := appRelease.OverridesData{
 		DomainName:             options.domainName,
-		ProxyServiceImage:      options.proxyServiceImage,
+		ApplicationProxyImage:  options.applicationProxyImage,
 		EventServiceImage:      options.eventServiceImage,
 		EventServiceTestsImage: options.eventServiceTestsImage,
 	}

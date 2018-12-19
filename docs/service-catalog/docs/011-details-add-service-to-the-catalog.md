@@ -7,7 +7,7 @@ In general, the Service Catalog can expose a service from any Service Broker tha
 
 The Kyma Service Catalog is currently integrated with the following Service Brokers:
 * Azure Broker
-* Remote Environment Broker
+* Application Broker
 * Helm Broker (experimental)
 
 For details on how to build and register your own Service Broker to expose more services and plans to the cluster users, see the Service Brokers **Overview** document.

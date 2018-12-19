@@ -12,10 +12,10 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir: develop/
-    version: 3b5c337d
+    version: 4b93b792
   application_operator_tests:
     dir: develop/
-    version: 3b5c337d
+    version: 4b93b792
   connector_service:
     dir: develop/
     version: 9e960a99
@@ -24,22 +24,22 @@ global:
     version: 9e960a99
   connection_token_handler:
     dir: develop/
-    version: 9e960a99
+    version: 0910a14b
   event_service:
     dir: develop/
     version: 6e0a7fe2
-  proxy_service:
+  application_proxy:
     dir: develop/
-    version: 9debaa6b
+    version: 4b93b792
   gateway_tests:
     dir: develop/
-    version: 3b5c337d
-  metadata_service:
+    version: 8b074a71
+  application_registry:
     dir: develop/
-    version: 9debaa6b
-  metadata_service_tests:
+    version: 4b93b792
+  application_registry_tests:
     dir: develop/
-    version: 9debaa6b
+    version: 4b93b792
   application_broker:
     dir: develop/
     version: 4707ed32
