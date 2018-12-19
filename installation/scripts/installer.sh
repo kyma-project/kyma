@@ -6,6 +6,7 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCES_DIR="${CURRENT_DIR}/../resources"
 INSTALLER="${RESOURCES_DIR}/installer.yaml"
 INSTALLER_CONFIG=""
+DEFAULT_SA_RBAC_ROLE_PATH="${RESOURCES_DIR}/default-sa-rbac-role.yaml"
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -36,11 +37,6 @@ echo "
 ################################################################################
 "
 
-kubectl apply -f ${RESOURCES_DIR}/default-sa-rbac-role.yaml
-
-bash ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
-bash ${CURRENT_DIR}/install-tiller.sh
-
 if [ $LOCAL ]; then
     INSTALLER="${RESOURCES_DIR}/installer-local.yaml"
     INSTALLER_CONFIG="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
@@ -61,7 +57,10 @@ if [ $CR_PATH ]; then
 fi
 
 echo -e "\nApplying installation combo yaml"
-bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} | kubectl apply -f -
+bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} ${DEFAULT_SA_RBAC_ROLE_PATH} | kubectl apply -f -
+
+bash ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
+bash ${CURRENT_DIR}/install-tiller.sh
 
 echo -e "\nTriggering installation"
 kubectl label installation/kyma-installation action=install
