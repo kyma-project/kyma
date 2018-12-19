@@ -44,7 +44,7 @@ To run the **load test** either in a cluster or a local Minikube you will need t
 
 - **load-test/k8syaml**  contains all the Kubernetes resources needed to deploy the function.
 
-- **main.go** All the logic of the **load test** can be found in this file. It can be built as follows:
+- **main.go** contains all the logic of the load test. You can build it with these commands:
  
  `GOOS=linux GOARCH=amd64 go build -o ./bin/app`(Mac)
  `CGO_ENABLED=0 go build -o ./bin/app`(Linux)
