@@ -29,7 +29,7 @@ These are the parameters you must configure to execute the load test:
 
 ### Environment Variables
 
-To run the **load test** either in a cluster or a local Minikube you will need to set the above parameters for the installation of the helm chart. However in a cluster it is advisable to have environment variables as it is shown above.
+To run the load test either on a cluster or on a local Minikube, you must set the Helm chart installation parameters. However, on a cluster it is advisable to have environment variables set to default values.
 
 ```bash
 ### Test config
