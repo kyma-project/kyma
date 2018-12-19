@@ -24,7 +24,6 @@ spec:
     env:
     - name: DOMAIN_NAME
       value: {{ .Values.global.domainName }}
-    env:
     - name: NAMESPACE
       value: {{ .Values.global.api_controller_acceptance_tests.testNamespace }}
   restartPolicy: Never
