@@ -24,7 +24,7 @@ global:
     version: PR-2005
   connection_token_handler:
     dir: pr/
-    version: PR-2005
+    version: PR-1965
   event_service:
     dir: develop/
     version: 6e0a7fe2
