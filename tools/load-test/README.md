@@ -7,7 +7,7 @@ The load test verifies the execution of the Horizontal Pod Autoscaling of functi
 
 ## Installation
 
-As the load test is implemented as a Helm chart, run the following script to install the test:
+Run the following script to install the test:
 
 ```bash
 echo "Installing helm chart..."
