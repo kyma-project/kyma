@@ -18,7 +18,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 
 	testServiceURL := fmt.Sprintf("https://test-service.knative-serving.%s", domainName)
 
-	ingressClient, err := ingressgateway.Default().ClientFromEnv()
+	ingressClient, err := ingressgateway.FromEnv().Client()
 	if err != nil {
 		t.Fatalf("Unexpected error when creating ingressgateway client: %s", err)
 	}

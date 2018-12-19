@@ -11,14 +11,14 @@
   branch = "test-ingressgateway"
   name = "github.com/kyma-project/kyma"
   packages = ["common/ingressgateway"]
-  revision = "98b9d9b30cb9c96299ef367a0e9c26daec88fe50"
+  revision = "abcf68b37a2a83b5076ac5a6cc0887ec1d17e8d4"
   source = "https://github.com/sjanota/kyma"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context"]
-  revision = "fae4c4e3ad76c295c3d6d259f898136b4bf833a8"
+  revision = "e147a9138326bc0e9d4e179541ffd8af41cff8a9"
 
 [solve-meta]
   analyzer-name = "dep"
