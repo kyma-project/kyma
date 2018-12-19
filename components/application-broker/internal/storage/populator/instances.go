@@ -53,10 +53,10 @@ func (p *Instances) Do(ctx context.Context) error {
 		return errors.Wrap(err, "while listing service classes")
 	}
 
-	rebClassNames := make(map[string]struct{})
+	abClassNames := make(map[string]struct{})
 	for _, sc := range serviceClasses {
 		if sc.Spec.ServiceBrokerName == nsbroker.NamespacedBrokerName {
-			rebClassNames[sc.Name] = struct{}{}
+			abClassNames[sc.Name] = struct{}{}
 		}
 	}
 
@@ -68,7 +68,7 @@ func (p *Instances) Do(ctx context.Context) error {
 
 	for _, si := range serviceInstances {
 		if si.Spec.ServiceClassRef != nil {
-			if _, ex := rebClassNames[si.Spec.ServiceClassRef.Name]; ex {
+			if _, ex := abClassNames[si.Spec.ServiceClassRef.Name]; ex {
 				if err := p.inserter.Insert(p.converter.MapServiceInstance(si)); err != nil {
 					return errors.Wrap(err, "while inserting service instance")
 				}

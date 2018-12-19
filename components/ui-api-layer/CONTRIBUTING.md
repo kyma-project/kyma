@@ -14,7 +14,7 @@ Before you make a pull request, review the following rules.
     - `{NAME}_service.go`, which contains the business logic. The service uses data transfer object (DTO) type.
     - `{NAME}_converter.go`, which is used for DTO to GraphQL type conversion. The type conversion for basic types, for example `string`, can be performed in a resolver.
 - You can create subpackages and define their custom structure.
-- Put all kind of generic utilities in the `pkg` directory. For example, see the [Gateway](./internal/domain/remoteenvironment) utility in the `remoteenvironment` domain.
+- Put all kind of generic utilities in the `pkg` directory. For example, see the [Gateway](internal/domain/application) utility in the `application` domain.
 - Place utilities tied to a specific domain in domain subpackages. For example, see the [Resource](./pkg/resource) utility.
 - Place cross-domain utils in the `internal` directory. For example, see the [Pager](./internal/pager) utility.
 - The domain resolver must be composed of resource resolvers defined in that package.

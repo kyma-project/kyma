@@ -17,14 +17,14 @@ func TestApiSpec(t *testing.T) {
 	k8sResourcesClient, err := testkit.NewK8sInClusterResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	dummyRE, err := k8sResourcesClient.CreateDummyRemoteEnvironment("dummy-re", v1.GetOptions{})
+	dummyApp, err := k8sResourcesClient.CreateDummyApplication("dummy-app", v1.GetOptions{})
 	require.NoError(t, err)
 
 	t.Run("Application Connector Metadata", func(t *testing.T) {
 
 		t.Run("should return api spec", func(t *testing.T) {
 			// given
-			url := config.MetadataServiceUrl + "/" + dummyRE.Name + "/v1/metadata/api.yaml"
+			url := config.MetadataServiceUrl + "/" + dummyApp.Name + "/v1/metadata/api.yaml"
 
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
@@ -48,12 +48,12 @@ func TestApiSpec(t *testing.T) {
 			// given
 			client := &http.Client{
 				CheckRedirect: func(req *http.Request, via []*http.Request) error {
-					require.Equal(t, "/"+dummyRE.Name+"/v1/metadata/api.yaml", req.URL.Path)
+					require.Equal(t, "/"+dummyApp.Name+"/v1/metadata/api.yaml", req.URL.Path)
 					return http.ErrUseLastResponse
 				},
 			}
 
-			url := config.MetadataServiceUrl + "/" + dummyRE.Name + "/v1/metadata"
+			url := config.MetadataServiceUrl + "/" + dummyApp.Name + "/v1/metadata"
 
 			request, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
@@ -67,6 +67,6 @@ func TestApiSpec(t *testing.T) {
 		})
 	})
 
-	err = k8sResourcesClient.DeleteRemoteEnvironment(dummyRE.Name, &v1.DeleteOptions{})
+	err = k8sResourcesClient.DeleteApplication(dummyApp.Name, &v1.DeleteOptions{})
 	require.NoError(t, err)
 }

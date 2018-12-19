@@ -8,6 +8,6 @@ func (m *envLister) ExpectOnListAllEnvironments(envs []gqlschema.Environment, er
 	m.On("List").Return(envs, err)
 }
 
-func (m *envLister) ExpectOnListEnvironmentsForRemoteEnvironment(reName string, envs []gqlschema.Environment, err error) {
-	m.On("ListForRemoteEnvironment", reName).Return(envs, err)
+func (m *envLister) ExpectOnListEnvironmentsForApplication(reName string, envs []gqlschema.Environment, err error) {
+	m.On("ListForApplication", reName).Return(envs, err)
 }

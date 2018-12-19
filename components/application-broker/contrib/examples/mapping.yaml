@@ -1,8 +1,8 @@
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: EnvironmentMapping
+kind: ApplicationMapping
 metadata:
   # Instance of the EnvrionmentMapping enables
-  # Remote Environment in the given namespace.
-  # The name must be the same as the name of RemoteEnvironment.
+  # Application in the given namespace.
+  # The name must be the same as the name of Application.
   name: ec-prod
   namespace: production

@@ -44,14 +44,14 @@ func (w *loggingResponseWriter) WriteHeader(statusCode int) {
 }
 
 func ContextLogger(r *http.Request) *log.Entry {
-	return log.WithField("remote environment", mux.Vars(r)["remoteEnvironment"])
+	return log.WithField("application", mux.Vars(r)["application"])
 }
 
 func ContextLoggerWithId(r *http.Request) *log.Entry {
-	reName := mux.Vars(r)["remoteEnvironment"]
+	reName := mux.Vars(r)["application"]
 	serviceId := mux.Vars(r)["serviceId"]
 
-	fields := map[string]interface{}{"remote environment": reName, "service ID": serviceId}
+	fields := map[string]interface{}{"application": reName, "service ID": serviceId}
 
 	return log.WithFields(fields)
 }

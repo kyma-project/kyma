@@ -49,7 +49,7 @@ func TestProvisionAsync(t *testing.T) {
 			name: "cannot provision",
 			givenCanProvisionOutput:        access.CanProvisionOutput{Allowed: false, Reason: "very important reason"},
 			expectedOpState:                internal.OperationStateFailed,
-			expectedOpDesc:                 "Forbidden provisioning instance [inst-123] for remote environment [name: ec-prod, id: service-id] in namespace: [example-namesapce]. Reason: [very important reason]",
+			expectedOpDesc:                 "Forbidden provisioning instance [inst-123] for application [name: ec-prod, id: service-id] in namespace: [example-namesapce]. Reason: [very important reason]",
 			expectedEventActivationCreated: false,
 			expectedInstanceState:          internal.InstanceStateFailed,
 		},
@@ -72,8 +72,8 @@ func TestProvisionAsync(t *testing.T) {
 			defer mockOperationStorage.AssertExpectations(t)
 			mockAccessChecker := &accessAutomock.ProvisionChecker{}
 			defer mockAccessChecker.AssertExpectations(t)
-			mockReFinder := &automock.ReFinder{}
-			defer mockReFinder.AssertExpectations(t)
+			mockAppFinder := &automock.AppFinder{}
+			defer mockAppFinder.AssertExpectations(t)
 			mockServiceInstanceGetter := &automock.ServiceInstanceGetter{}
 			defer mockServiceInstanceGetter.AssertExpectations(t)
 
@@ -100,11 +100,11 @@ func TestProvisionAsync(t *testing.T) {
 			mockInstanceStorage.On("Insert", fixNewInstance()).
 				Return(nil)
 
-			mockAccessChecker.On("CanProvision", fixInstanceID(), internal.RemoteServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
+			mockAccessChecker.On("CanProvision", fixInstanceID(), internal.ApplicationServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
 				Return(tc.givenCanProvisionOutput, tc.givenCanProvisionError)
 
-			mockReFinder.On("FindOneByServiceID", internal.RemoteServiceID(fixServiceID())).
-				Return(fixRe(), nil).
+			mockAppFinder.On("FindOneByServiceID", internal.ApplicationServiceID(fixServiceID())).
+				Return(fixApp(), nil).
 				Once()
 
 			mockInstanceStorage.On("UpdateState", fixInstanceID(), tc.expectedInstanceState).
@@ -120,7 +120,7 @@ func TestProvisionAsync(t *testing.T) {
 				mockOperationStorage,
 				mockOperationStorage,
 				mockAccessChecker,
-				mockReFinder,
+				mockAppFinder,
 				mockServiceInstanceGetter,
 				clientset.ApplicationconnectorV1alpha1(),
 				mockInstanceStorage,
@@ -144,7 +144,7 @@ func TestProvisionAsync(t *testing.T) {
 			select {
 			case <-asyncFinished:
 				if tc.expectedEventActivationCreated == true {
-					eventActivation, err := sut.reClient.EventActivations(fixNs()).Get(fixServiceID(), v1.GetOptions{})
+					eventActivation, err := sut.eaClient.EventActivations(fixNs()).Get(fixServiceID(), v1.GetOptions{})
 					assert.NoError(t, err)
 					assert.Equal(t, fixEventActivation(), eventActivation)
 				}
@@ -236,8 +236,8 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 			defer mockOperationStorage.AssertExpectations(t)
 			mockAccessChecker := &accessAutomock.ProvisionChecker{}
 			defer mockAccessChecker.AssertExpectations(t)
-			mockReFinder := &automock.ReFinder{}
-			defer mockReFinder.AssertExpectations(t)
+			mockAppFinder := &automock.AppFinder{}
+			defer mockAppFinder.AssertExpectations(t)
 			mockServiceInstanceGetter := &automock.ServiceInstanceGetter{}
 			defer mockServiceInstanceGetter.AssertExpectations(t)
 			clientset := fake.NewSimpleClientset(fixEventActivation())
@@ -259,11 +259,11 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 			mockInstanceStorage.On("Insert", fixNewInstance()).
 				Return(nil)
 
-			mockReFinder.On("FindOneByServiceID", internal.RemoteServiceID(fixServiceID())).
-				Return(fixRe(), nil).
+			mockAppFinder.On("FindOneByServiceID", internal.ApplicationServiceID(fixServiceID())).
+				Return(fixApp(), nil).
 				Once()
 
-			mockAccessChecker.On("CanProvision", fixInstanceID(), internal.RemoteServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
+			mockAccessChecker.On("CanProvision", fixInstanceID(), internal.ApplicationServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
 				Return(access.CanProvisionOutput{Allowed: true}, nil)
 
 			mockServiceInstanceGetter.On("GetByNamespaceAndExternalID", fixNs(), string(fixInstanceID())).Return(FixServiceInstance(), nil)
@@ -274,7 +274,7 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 				mockOperationStorage,
 				mockOperationStorage,
 				mockAccessChecker,
-				mockReFinder,
+				mockAppFinder,
 				mockServiceInstanceGetter,
 				clientset.ApplicationconnectorV1alpha1(),
 				mockInstanceStorage,
@@ -309,8 +309,8 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 	defer mockOperationStorage.AssertExpectations(t)
 	mockAccessChecker := &accessAutomock.ProvisionChecker{}
 	defer mockAccessChecker.AssertExpectations(t)
-	mockReFinder := &automock.ReFinder{}
-	defer mockReFinder.AssertExpectations(t)
+	mockAppFinder := &automock.AppFinder{}
+	defer mockAppFinder.AssertExpectations(t)
 	mockServiceInstanceGetter := &automock.ServiceInstanceGetter{}
 	defer mockServiceInstanceGetter.AssertExpectations(t)
 
@@ -334,11 +334,11 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 	mockInstanceStorage.On("Insert", fixNewInstance()).
 		Return(nil)
 
-	mockReFinder.On("FindOneByServiceID", internal.RemoteServiceID(fixServiceID())).
-		Return(fixRe(), nil).
+	mockAppFinder.On("FindOneByServiceID", internal.ApplicationServiceID(fixServiceID())).
+		Return(fixApp(), nil).
 		Once()
 
-	mockAccessChecker.On("CanProvision", fixInstanceID(), internal.RemoteServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
+	mockAccessChecker.On("CanProvision", fixInstanceID(), internal.ApplicationServiceID(fixServiceID()), internal.Namespace(fixNs()), defaultWaitTime).
 		Return(access.CanProvisionOutput{Allowed: true}, nil)
 
 	mockServiceInstanceGetter.On("GetByNamespaceAndExternalID", fixNs(), string(fixInstanceID())).Return(nil, errors.New("custom error"))
@@ -355,7 +355,7 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 		mockOperationStorage,
 		mockOperationStorage,
 		mockAccessChecker,
-		mockReFinder,
+		mockAppFinder,
 		mockServiceInstanceGetter,
 		clientset.ApplicationconnectorV1alpha1(),
 		mockInstanceStorage,
@@ -473,8 +473,8 @@ func TestProvisionErrorOnInsertingInstance(t *testing.T) {
 	defer mockStateGetter.AssertExpectations(t)
 	mockOperationStorage := &automock.OperationStorage{}
 	defer mockOperationStorage.AssertExpectations(t)
-	mockReFinder := &automock.ReFinder{}
-	defer mockReFinder.AssertExpectations(t)
+	mockAppFinder := &automock.AppFinder{}
+	defer mockAppFinder.AssertExpectations(t)
 
 	mockStateGetter.On("IsProvisioned", fixInstanceID()).
 		Return(false, nil).Once()
@@ -491,8 +491,8 @@ func TestProvisionErrorOnInsertingInstance(t *testing.T) {
 
 	mockInstanceStorage.On("Insert", fixNewInstance()).Return(fixError())
 
-	mockReFinder.On("FindOneByServiceID", internal.RemoteServiceID(fixServiceID())).
-		Return(fixRe(), nil).
+	mockAppFinder.On("FindOneByServiceID", internal.ApplicationServiceID(fixServiceID())).
+		Return(fixApp(), nil).
 		Once()
 
 	sut := NewProvisioner(mockInstanceStorage,
@@ -500,7 +500,7 @@ func TestProvisionErrorOnInsertingInstance(t *testing.T) {
 		mockOperationStorage,
 		mockOperationStorage,
 		nil,
-		mockReFinder,
+		mockAppFinder,
 		nil,
 		nil,
 		nil,

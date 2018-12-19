@@ -24,11 +24,11 @@ Implementation is also merged to master and tagged with version: "v1.10.0-beta.4
 
 So currently we get following error when calling UpdateStatus method.
 ```text
-panic: while updating status: the server could not find the requested resource (put remoteenvironments.remoteenvironment.kyma.io ec-prod)
+panic: while updating status: the server could not find the requested resource (put applications.application.kyma.io ec-prod)
 ```
 
-To add `UpdateStatus` method to Remote Environment client, following actions has to be performed:
-- add Status field for type `RemoteEnvironment`
+To add `UpdateStatus` method to Application client, following actions has to be performed:
+- add Status field for type `Application`
 - remove annotation `+genclient:noStatus`
 
 [API Conventions](https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#spec-and-status) contains information how Status should looks like:

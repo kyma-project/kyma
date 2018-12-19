@@ -16,7 +16,7 @@ func TestDurationMiddleware_Handle(t *testing.T) {
 
 	t.Run("should observe status", func(t *testing.T) {
 		// given
-		path := "/v1/remoteenvironments/ec-default/tokens"
+		path := "/v1/applications/ec-default/tokens"
 
 		collector := &mocks.Collector{}
 		collector.On("AddObservation", mock.AnythingOfType("float64"), path, http.MethodPost).Return()

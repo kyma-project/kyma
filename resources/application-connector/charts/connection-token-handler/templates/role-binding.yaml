@@ -8,7 +8,7 @@ metadata:
     release: {{ .Chart.Name }}
     heritage: {{ .Release.Service }}
 rules:
-- apiGroups: ["connectorservice.kyma-project.io"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["tokenrequests"]
   verbs: ["get", "list", "update", "delete", "watch"]
 ---

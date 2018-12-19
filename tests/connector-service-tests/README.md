@@ -24,7 +24,7 @@ Set the environment parameters:
 |------|----------|---------|-------------|-----------------|
 | **INTERNAL_API_URL** | Yes | - | The URL of Connector Service internal API | `http://localhost:8080` | 
 | **EXTERNAL_API_URL** | Yes | - | The URL of Connector Service external API | `https://connector-service.kyma.local` |
-| **GATEWAY_URL** | Yes | - |  The URL of Remote Environment Gateway API | `https://gateway.kyma.local:30218` |
+| **GATEWAY_URL** | Yes | - |  The URL of Application Gateway API | `https://gateway.kyma.local:30218` |
 | **SKIP_SSL_VERIFY** | No | `false` | A flag for skipping SSL certificate validation | `true` |
 
 Run this command to execute tests:

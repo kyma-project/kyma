@@ -12,7 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 )
 
-const TokenURL = "https://%s/v1/remoteenvironments/%s/info?token=%s"
+const TokenURL = "https://%s/v1/applications/%s/info?token=%s"
 
 type tokenHandler struct {
 	tokenGenerator tokens.TokenGenerator
@@ -24,14 +24,14 @@ func NewTokenHandler(tokenGenerator tokens.TokenGenerator, host string) TokenHan
 }
 
 func (tg *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
-	reName := mux.Vars(r)["reName"]
-	token, err := tg.tokenGenerator.NewToken(reName)
+	appName := mux.Vars(r)["appName"]
+	token, err := tg.tokenGenerator.NewToken(appName)
 	if err != nil {
 		respondWithError(w, err)
 		return
 	}
 
-	url := fmt.Sprintf(TokenURL, tg.host, reName, token)
+	url := fmt.Sprintf(TokenURL, tg.host, appName, token)
 	res := tokenResponse{URL: url, Token: token}
 
 	respondWithBody(w, 201, res)
