@@ -114,6 +114,12 @@ func TestDefaultIngressFQDN(t *testing.T) {
 	assert.Equal(t, gwFQDN, actual)
 }
 
+func TestLookupHostWithIP(t *testing.T) {
+	lookupLocalhost, err := net.LookupHost("127.0.0.1")
+	assert.Nil(t, err)
+	assert.Equal(t, "127.0.0.1", lookupLocalhost[0])
+}
+
 type dialerMock struct {
 	lastDialed string
 }
