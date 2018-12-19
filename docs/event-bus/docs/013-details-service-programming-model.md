@@ -3,7 +3,7 @@ title: Service Programming Model
 type: Details
 ---
 
-You can configure a microservice deployed in Kyma to receive Events from the Event Bus by creating a Subscription custom resource. Find various configuration options in the Consume Events section.
+You can configure a microservice deployed in Kyma to receive Events from the Event Bus by creating a Subscription custom resource.
 
 ## Event Delivery
 
@@ -13,7 +13,7 @@ The Event is delivered as an `HTTP POST` request. Event Metadata is a part of an
 
 The Event Delivery workflow is as follows:
 
-1. The Event is published to the Kyma Event Bus from an external system instance in a bound Remote Environment.
+1. The Event is published to the Kyma Event Bus from an external system instance in a bound Application.
 2. The Event Bus checks for the Event subscription and activation. It creates an `HTTP POST` request using Event Payload and Metadata.
 3. The Service receives the `HTTP POST` request. The Event Metadata is represented in the `HTTP Request Headers` request and the Event Payload is represented in the `HTTP Request Body`.
 
