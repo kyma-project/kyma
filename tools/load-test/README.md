@@ -3,7 +3,7 @@
 
 ## Overview
 
-The purpose of the load test is to verify the execution of the Horizontal Pod Autoscaling of functions deployed with the help of Kubeless in **Kyma**. It runs a **golang** app which stress a function by making thousands of HTTP POST request in set period of time defined in an environment variable. At the end of the execution of the test a notification is send to a Slack channel with the final output of the load test.
+The load test verifies the execution of the Horizontal Pod Autoscaling of functions deployed using Kubeless in Kyma. It runs a Golang application which stresses a function by making thousands of HTTP POST requests in a set period of time defined in an environment variable. At the end of the test execution, a notification with the output is sent to a Slack channel.
 
 ## Installation
 
