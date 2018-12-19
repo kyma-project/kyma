@@ -48,7 +48,7 @@ These are the main components of the load test:
 
 - **load-test/k8syaml**  contains all the Kubernetes resources needed to deploy the function.
 
-- *load-test.go** contains all the logic of the load test. You can build it with these commands:
+- **load-test.go** contains all the logic of the load test. You can build it with these commands:
  
  ```
     GOOS=linux GOARCH=amd64 go build -o ./bin/app (Mac)
@@ -57,6 +57,8 @@ These are the main components of the load test:
  
 - **load-test/Dockerfile** is a file needed to build the Docker image. To build the image, run this command:
 
-`docker build -t load-test .`
+```
+    docker build -t load-test .
+```
 
 - **load-test/deploy/chart** contains the chart that installs the test code which stresses the function.
