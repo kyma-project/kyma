@@ -7,8 +7,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/scheme"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/scheme"
+
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,7 +43,7 @@ func main() {
 		panic(err)
 	}
 
-	reClient, err := versioned.NewForConfig(config)
+	appClient, err := versioned.NewForConfig(config)
 	if err != nil {
 		panic(err)
 	}
@@ -52,16 +53,16 @@ func main() {
 		fmt.Printf(format, args...)
 	})
 	broadcaster.StartRecordingToSink(&typedV1.EventSinkImpl{Interface: clientset.CoreV1().Events(metav1.NamespaceDefault)})
-	eventRecorder := broadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: "Remote-Environment-Broker"})
+	eventRecorder := broadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: "Application-Broker"})
 
-	re, err := reClient.ApplicationconnectorV1alpha1().RemoteEnvironments().Get("ec-prod", metav1.GetOptions{})
+	app, err := appClient.ApplicationconnectorV1alpha1().Applications().Get("ec-prod", metav1.GetOptions{})
 	if err != nil {
-		panic(errors.Wrap(err, "on getting remote environment"))
+		panic(errors.Wrap(err, "on getting application"))
 	}
 
-	ref, err := reference.GetReference(scheme.Scheme, re)
+	ref, err := reference.GetReference(scheme.Scheme, app)
 	if err != nil {
-		panic(errors.Wrap(err, "on getting reference for Remote Environment"))
+		panic(errors.Wrap(err, "on getting reference for Application"))
 	}
 
 	eventRecorder.Event(ref, v1.EventTypeWarning, "SomeReason", "Some additional message")

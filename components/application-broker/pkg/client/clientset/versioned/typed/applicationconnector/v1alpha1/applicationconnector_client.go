@@ -12,9 +12,7 @@ import (
 type ApplicationconnectorV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	ApplicationMappingsGetter
-	EnvironmentMappingsGetter
 	EventActivationsGetter
-	RemoteEnvironmentsGetter
 }
 
 // ApplicationconnectorV1alpha1Client is used to interact with features provided by the applicationconnector.kyma-project.io group.
@@ -26,16 +24,8 @@ func (c *ApplicationconnectorV1alpha1Client) ApplicationMappings(namespace strin
 	return newApplicationMappings(c, namespace)
 }
 
-func (c *ApplicationconnectorV1alpha1Client) EnvironmentMappings(namespace string) EnvironmentMappingInterface {
-	return newEnvironmentMappings(c, namespace)
-}
-
 func (c *ApplicationconnectorV1alpha1Client) EventActivations(namespace string) EventActivationInterface {
 	return newEventActivations(c, namespace)
-}
-
-func (c *ApplicationconnectorV1alpha1Client) RemoteEnvironments() RemoteEnvironmentInterface {
-	return newRemoteEnvironments(c)
 }
 
 // NewForConfig creates a new ApplicationconnectorV1alpha1Client for the given config.

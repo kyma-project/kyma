@@ -18,7 +18,7 @@ func GoldenConfigMemorySingleSeparate() storage.ConfigList {
 		{
 			Driver: storage.DriverMemory,
 			Provide: storage.ProviderConfigMap{
-				storage.EntityRemoteEnvironment: storage.ProviderConfig{},
+				storage.EntityApplication: storage.ProviderConfig{},
 			},
 		},
 	}
@@ -26,6 +26,6 @@ func GoldenConfigMemorySingleSeparate() storage.ConfigList {
 
 func GoldenConfigMemoryMultipleSeparate() storage.ConfigList {
 	return storage.ConfigList{
-		{Driver: storage.DriverMemory, Provide: storage.ProviderConfigMap{storage.EntityRemoteEnvironment: storage.ProviderConfig{}}},
+		{Driver: storage.DriverMemory, Provide: storage.ProviderConfigMap{storage.EntityApplication: storage.ProviderConfig{}}},
 	}
 }

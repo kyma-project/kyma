@@ -4,23 +4,23 @@ import (
 	"time"
 )
 
-// RemoteEnvironmentName is a Remote Environment name
-type RemoteEnvironmentName string
+// ApplicationName is a Application name
+type ApplicationName string
 
-// RemoteServiceID is an ID of Service defined in RemoteEnvironment
-type RemoteServiceID string
+// ApplicationServiceID is an ID of Service defined in Application
+type ApplicationServiceID string
 
-// RemoteEnvironment represents Remote Environment as defined by OSB API.
-type RemoteEnvironment struct {
-	Name        RemoteEnvironmentName
+// Application represents Application as defined by OSB API.
+type Application struct {
+	Name        ApplicationName
 	Description string
 	Services    []Service
 	AccessLabel string
 }
 
-// Service represents service defined in the remote environment which is mapped to service class in the service catalog.
+// Service represents service defined in the application which is mapped to service class in the service catalog.
 type Service struct {
-	ID                  RemoteServiceID
+	ID                  ApplicationServiceID
 	Name                string
 	DisplayName         string
 	Description         string
@@ -41,7 +41,7 @@ type Entry struct {
 	Type string
 }
 
-// APIEntry represents API of the remote environment.
+// APIEntry represents API of the application.
 type APIEntry struct {
 	Entry
 	GatewayURL  string
