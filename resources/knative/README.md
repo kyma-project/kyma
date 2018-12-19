@@ -11,5 +11,5 @@ Included releases:
 Kyma-specific changes:
  * Every CRD has the `helm.sh/hook: crd-install` annotation set. This forces Helm to install the CRDs before other resources.
  * The duplicate of the `images.caching.internal.knative.dev` CRD is removed from the serving release.
- * `knative-ingressgateway` Service's `type` is changed to `NodePort`.
- * `knative-shared-gateway` Gateway have TLS enabled
+ * `knative-ingressgateway` Service **type** is changed to `NodePort`.
+ * `knative-shared-gateway` Gateway has TLS enabled
