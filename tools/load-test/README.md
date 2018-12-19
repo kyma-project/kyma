@@ -31,7 +31,7 @@ These are the parameters you must configure to execute the load test:
 **slackClientChannelId** |`#channelId`| ID of the Slack channel.
 **loadTestExecutionTimeout** |`30`| Time after which the test execution timeout occurs. All the related metrics to be sent to the Slack channel are collected after the timeout.
 
-You can also define the values of these parameters by running this command:
+You can also define the values of these parameters while running this command:
 
 ```bash
 ### Test config
