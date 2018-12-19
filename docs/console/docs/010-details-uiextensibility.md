@@ -45,7 +45,7 @@ Use the CustomResourceDefinitions to extend the Console functionality and config
 
 ### Micro front-end for a specific Namespace
 
-You can define a micro front-end visible only in the context of a specific Namespace (Namespace).
+You can define a micro front-end visible only in the context of a specific Namespace.
 
 [Here](https://github.com/kyma-project/kyma/blob/master/docs/console/docs/assets/mf-namespaced.yaml) you can find a sample micro front-end entity using the **namespace** metadata attribute to enable the micro front-end **only** for the production Namespace.
 
@@ -56,7 +56,7 @@ Using this yaml file in your Kyma cluster results in a **Tractors Overview** mic
 ### Cluster-wide micro front-end
 You can define a cluster-wide micro front-end available for all Namespaces in the side navigation.
 
-[Here](https://github.com/kyma-project/kyma/blob/master/docs/console/docs/assets/cmf-namespace.yaml) you can find a sample ClusterMicroFrontend entity using the `namespace` value for the **placement** attribute to make the micro front-end available for all Namespaces in the cluster.
+[Here](https://github.com/kyma-project/kyma/blob/master/docs/console/docs/assets/cmf-environment.yaml) you can find a sample ClusterMicroFrontend entity using the `namespace` value for the **placement** attribute to make the micro front-end available for all Namespaces in the cluster.
 
 Using this yaml file in your Kyma cluster results in a **Tractors Overview** micro front-end navigation node displayed under the **Hardware** category. It is available **for every** Namespace in your cluster.
 
