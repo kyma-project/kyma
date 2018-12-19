@@ -171,7 +171,7 @@ spec:
     - name: k8syaml
       mountPath: /k8syaml
     env:
-    - name: INGRESSGATEWAY_FQDN
+    - name: INGRESSGATEWAY_ADDRESS
       value: {{ $serviceName }}.istio-system.svc.cluster.local
     - name: KUBELESS_NAMESPACE
       value: kyma-system
