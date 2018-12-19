@@ -24,7 +24,7 @@ spec:
     env:
     - name: DOMAIN_NAME
       value: {{ .Values.global.domainName }}
-    - name: INGRESSGATEWAY_FQDN
+    - name: INGRESSGATEWAY_ADDRESS
       value: {{ $serviceName }}.istio-system.svc.cluster.local
     - name: NAMESPACE
       value: {{ .Values.global.api_controller_acceptance_tests.testNamespace }}
