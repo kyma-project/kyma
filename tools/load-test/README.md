@@ -7,6 +7,8 @@ The load test verifies the execution of the Horizontal Pod Autoscaling of functi
 
 ## Installation
 
+As the load test has been implemented as `helm chart` the script below is the way how the test must be installed.
+
 ```bash
 echo "Installing helm chart..."
 helm install --set slackEndpoint="${SLACK_ENDPOINT}" \
