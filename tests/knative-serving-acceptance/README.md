@@ -10,4 +10,16 @@ This section provides information on building and versioning of the Docker image
 
 ### Configuring Kyma
 
-After building and pushing the Docker image, set the proper tag in the `resources/core/charts/api-controller/values.yaml` file, in the`tests.image.version` property.
+After building and pushing the Docker image, set the proper tag in the `resources/kantive/values.yaml` file, in the`global.test_knative_serving_acceptance.version` property.
+
+### Building docker image
+
+To build docker image run:
+```
+make build
+```
+
+To push built image run:
+```
+DOCKER_PUSH_REPOSITORY=[address of repository] make push-image
+```
