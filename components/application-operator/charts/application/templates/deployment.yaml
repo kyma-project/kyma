@@ -1,11 +1,11 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-proxy-service
+  name: {{ .Release.Name }}-application-proxy
   labels:
-    app: {{ .Release.Name }}-proxy-service
-    release: {{ .Release.Name }}-proxy-service
-    heritage: {{ .Release.Service }}-proxy-service
+    app: {{ .Release.Name }}-application-proxy
+    release: {{ .Release.Name }}-application-proxy
+    heritage: {{ .Release.Service }}-application-proxy
 spec:
   replicas: 1
   strategy:
@@ -17,15 +17,15 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
-        app: {{ .Release.Name }}-proxy-service
-        release: {{ .Release.Name }}-proxy-service
+        app: {{ .Release.Name }}-application-proxy
+        release: {{ .Release.Name }}-application-proxy
     spec:
       containers:
-      - name: {{ .Release.Name }}-proxy-service
-        image: {{ .Values.global.proxyServiceImage }}
+      - name: {{ .Release.Name }}-application-proxy
+        image: {{ .Values.global.applicationProxyImage }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
-          - "/proxyservice"
+          - "/applicationproxy"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--application={{ .Release.Name }}"
