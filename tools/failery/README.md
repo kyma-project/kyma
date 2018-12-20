@@ -1,11 +1,9 @@
 # Failery
 
 ## Overview
-This project allows to generate failing mock types for given interfaces.
+This project allows you to generate failing mock types for given interfaces. It is based on the [mockery](https://github.com/vektra/mockery) project.
 
-What is a failing mock type? It is a type that implements an interface, but when any of method returns an error or pointer to it, it will always return an error.
-
-Failery is based on [mockery](https://github.com/vektra/mockery).
+A failing mock type is a type that implements an interface. In case any method returns an error or error pointer, a failing mock type also returns an error.
 
 ## Prerequisites
 
@@ -24,7 +22,7 @@ dep ensure -add 'github.com/kyma-project/kyma/tools/failery'
 
 ## Usage
 
-1. Create an interface, for which you want to generate mock implementation type. For example:
+1. Create an interface for which you want to generate a mock implementation type. For example:
 
     ```go
     type Requester interface {
@@ -41,13 +39,13 @@ dep ensure -add 'github.com/kyma-project/kyma/tools/failery'
     }
     ```
     
-    Make sure that the `-name` parameter value is equal to the name of the interface, for which you want to generate the mock implementation.
+    Make sure that the `-name` parameter value is equal to the name of the interface for which you want to generate the mock implementation.
     
-    Replace values in curly braces with proper details, where:
+    Replace values in curly braces with the proper details, where:
     - `{relativeVendorPath}` is the relative path to the `vendor` directory of the project.
-    - `{generationTypeParams}` are additional parameters that specify mock generation type. The `-inpkg` parameter creates file in the same package, and `-output {packageName}` parameter generates the mock in `{packageName}` package.
+    - `{generationTypeParams}` are additional parameters that specify a mock generation type. The **-inpkg** parameter creates a file in the same package, and the **-output {packageName}** parameter generates a mock in the `{packageName}` package.
     
-    For more configuration options, see the Readme of the original project, [mockery](https://github.com/vektra/mockery).
+    For more configuration options, see the [mockery](https://github.com/vektra/mockery) documentation.
   
 1. Run the following command in your project root:
 
