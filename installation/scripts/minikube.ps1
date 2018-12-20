@@ -47,7 +47,6 @@ function StartMinikube() {
         + " --extra-config=apiserver.Authorization.Mode=RBAC"`
         + " --extra-config "apiserver.cors-allowed-origins=http://*"`
         + " --kubernetes-version=v${KUBERNETES_VERSION}"`
-        + " --feature-gates='MountPropagation=false'"`
         + " --disk-size=${DISK_SIZE}"`
         + " --vm-driver=${VM_DRIVER}"`
         + " -b=localkube"

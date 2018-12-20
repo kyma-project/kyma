@@ -191,7 +191,6 @@ function start() {
     --kubernetes-version=v$KUBERNETES_VERSION \
     --vm-driver=$VM_DRIVER \
     --disk-size=$DISK_SIZE \
-    --feature-gates="MountPropagation=false" \
     -b=localkube
     --extra-config "apiserver.cors-allowed-origins=http://*"
 
