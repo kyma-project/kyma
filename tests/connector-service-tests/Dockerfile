@@ -1,13 +1,17 @@
-FROM golang:1.9-alpine3.7
+FROM golang:1.10-alpine as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/connector-service-tests
 
-ADD . $SRC_DIR
-
 WORKDIR $SRC_DIR
+COPY . $SRC_DIR
 
 RUN go test -c ./test/apitests
 
+FROM alpine:3.8
+
 LABEL source=git@github.com:kyma-project/kyma.git
 
-ENTRYPOINT ./scripts/entrypoint.sh
+COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/connector-service-tests/scripts/entrypoint.sh .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/connector-service-tests/apitests.test .
+
+ENTRYPOINT ./entrypoint.sh
