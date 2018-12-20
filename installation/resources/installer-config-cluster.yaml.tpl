@@ -94,9 +94,6 @@ data:
 
   security.enabled: "true"
 
-  gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
-  gateways.istio-ingressgateway.type: "LoadBalancer"
-
   pilot.resources.limits.memory: 2Gi
   pilot.resources.requests.memory: 512Mi
 
