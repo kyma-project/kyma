@@ -57,7 +57,7 @@ if [ $CR_PATH ]; then
 fi
 
 echo -e "\nApplying installation combo yaml"
-bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} ${DEFAULT_SA_RBAC_ROLE_PATH} | kubectl apply -f -
+bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${DEFAULT_SA_RBAC_ROLE_PATH}  ${CR_PATH} | kubectl apply -f -
 
 bash ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
 bash ${CURRENT_DIR}/install-tiller.sh
