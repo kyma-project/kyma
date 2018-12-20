@@ -14,6 +14,6 @@ You can't configure this component through environment variables.
 
 This component performs the following actions:
  1. Reads the external address of the`istio-ingressgateway` service. 
- 2. Sets `global.domainName` to `{ip address}.xip.io`.
+ 2. Sets the **global.domainName** to `{IP_ADDRESS}.xip.io`.
  3. Creates self-signed certificate for this domain.
  4. Sets `global.tlsCrt` and `global.tlsKey` to contain created certificate.
