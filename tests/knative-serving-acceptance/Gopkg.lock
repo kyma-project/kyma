@@ -8,11 +8,10 @@
   version = "1.0.2"
 
 [[projects]]
-  branch = "test-ingressgateway"
+  branch = "master"
   name = "github.com/kyma-project/kyma"
   packages = ["common/ingressgateway"]
-  revision = "abcf68b37a2a83b5076ac5a6cc0887ec1d17e8d4"
-  source = "https://github.com/sjanota/kyma"
+  revision = "acb1e8299a1b24cbee7f82777104178f9d482eac"
 
 [[projects]]
   branch = "master"
@@ -23,6 +22,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c58526cafc27a0ea3c345b51f02d2f462fad1dadef95a06203185403f72b77c2"
+  inputs-digest = "759343e608b50f2a4963c63e6f84aa56c582f93b22f4ef57f7b1e559c3160add"
   solver-name = "gps-cdcl"
   solver-version = 1
