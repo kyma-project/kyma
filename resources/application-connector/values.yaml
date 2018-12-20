@@ -17,11 +17,11 @@ global:
     dir: develop/
     version: 4b93b792
   connector_service:
-    dir: pr/
-    version: PR-2005
+    dir: develop/
+    version: 9e960a99
   connector_service_tests:
-    dir: pr/
-    version: PR-2005
+    dir: develop/
+    version: 9e960a99
   connection_token_handler:
     dir: develop/
     version: 0910a14b
@@ -32,8 +32,8 @@ global:
     dir: develop/
     version: 4b93b792
   gateway_tests:
-    dir: pr/
-    version: PR-2019
+    dir: develop/
+    version: 8b074a71
   application_registry:
     dir: develop/
     version: 4b93b792
@@ -41,5 +41,5 @@ global:
     dir: develop/
     version: 4b93b792
   application_broker:
-    dir: pr/
-    version: PR-2040
+    dir: develop/
+    version: 4707ed32
