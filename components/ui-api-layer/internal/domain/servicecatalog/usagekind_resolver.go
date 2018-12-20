@@ -6,9 +6,9 @@ import (
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
-	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 )
 

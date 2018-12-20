@@ -32,7 +32,7 @@ spec:
           servicePort: 8081
       - path: /{{ .Release.Name }}/v1/metadata
         backend:
-          serviceName: metadata-service-external-api
+          serviceName: application-registry-external-api
           servicePort: 8081
 
   tls:

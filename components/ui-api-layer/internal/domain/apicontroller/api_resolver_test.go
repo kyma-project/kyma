@@ -6,8 +6,8 @@ import (
 
 	"github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/apicontroller/automock"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
-	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"

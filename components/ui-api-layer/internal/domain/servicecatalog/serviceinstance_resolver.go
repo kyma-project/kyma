@@ -8,9 +8,9 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/listener"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
-	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 )
 

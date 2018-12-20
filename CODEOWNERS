@@ -57,8 +57,8 @@
 # The `connection-token-handler` subchart
 /resources/application-connector/charts/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# The `metadata-service` subchart
-/resources/application-connector/charts/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+# The `application-registry` subchart
+/resources/application-connector/charts/application-registry/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `application-operator` subchart
 /resources/application-connector/charts/application-operator/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -199,14 +199,14 @@
 # Connector Service Token Request Component
 /components/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# Metadata Service Component
-/components/metadata-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+# Application Registry Component
+/components/application-registry/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Operator Component
 /components/application-operator/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# Proxy Service Component
-/components/proxy-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+# Application Proxy Component
+/components/application-proxy/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Event Bus Component
 /components/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
@@ -240,8 +240,8 @@
 # Connector Service Tests
 /tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# Metadata Service Tests
-/tests/metadata-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+# Application Registry Tests
+/tests/application-registry-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Operator Tests
 /tests/application-operator-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -271,6 +271,9 @@
 # The docsbuilder directory
 /tools/docsbuilder/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
+# The failery directory
+/tools/failery/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
+
 # The static-users-generator directory
 /tools/static-users-generator/ @piotrmsc @sjanota @kubadz 
 
@@ -279,6 +282,9 @@
 
 # The tools/kyma-installer directory
 /tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek @jasiu001 @adamwalach
+
+# The tools/load-test directory
+/tools/load-test/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # kubeless-integration tests directory 
 /tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r

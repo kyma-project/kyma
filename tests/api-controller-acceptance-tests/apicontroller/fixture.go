@@ -16,7 +16,6 @@ import (
 
 const (
 	namespaceEnv                                   = "NAMESPACE"
-	ingressGatewayControllerServiceURL             = "istio-ingressgateway.istio-system.svc.cluster.local"
 	testIDLength                                   = 8
 	maxRetries                                     = 1000
 	minimalNumberOfCorrectResults                  = 5
