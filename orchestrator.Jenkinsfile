@@ -65,6 +65,7 @@ projects = [
     "tests/test-environments": "test-environments",
     "tests/kubeless-integration": "kubeless-integration-tests",
     "tests/kubeless": "kubeless-tests",
+    "tests/knative-serving-acceptance": "knative-serving-acceptance-tests",
     "tests/api-controller-acceptance-tests": "api-controller-acceptance-tests",
     "tests/connector-service-tests": "connector-service-tests",
     "tests/application-operator-tests": "application-operator-tests",
