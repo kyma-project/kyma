@@ -6,7 +6,7 @@ param (
 )
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
-$KUBERNETES_VERSION = "1.10.0"
+$KUBERNETES_VERSION = "1.13.1"
 
 Write-Output @"
 ################################################################################
