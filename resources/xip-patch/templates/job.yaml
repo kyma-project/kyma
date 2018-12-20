@@ -10,7 +10,7 @@ spec:
     metadata:
       name: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{ .Release.Name }}
+      serviceAccountName: {{ .Release.Name }}-service-account
       restartPolicy: OnFailure
       containers:
       - name: {{ .Release.Name }}
