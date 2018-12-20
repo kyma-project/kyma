@@ -12,6 +12,18 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/kyma-project/kyma"
+  packages = ["common/ingressgateway"]
+  revision = "e317ebe1138298091cef2f93131311674aa0dd72"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["context"]
+  revision = "e147a9138326bc0e9d4e179541ffd8af41cff8a9"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -19,11 +31,11 @@
     "go/internal/gcimporter",
     "go/types/typeutil"
   ]
-  revision = "22934f0fdb6201c132a3dc6120150dcb1646d74c"
+  revision = "92cdcd90bf52150d9c63b7a8432ab7b10fc92385"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "eac9aff91777620e36bab609338e0127d29380e8cd3dca17c081e30625590f64"
+  inputs-digest = "90b41749ec07baa20dfbacc6c73aa20ae7448633f6354ed4a85625cd2721272c"
   solver-name = "gps-cdcl"
   solver-version = 1
