@@ -18,6 +18,7 @@ trap on_exit EXIT
 readonly SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 readonly KYMA_REPOSITORY="https://github.com/kyma-project/kyma.git"
 readonly DOCUMENTATION_DIR="${SCRIPTS_DIR}/../static/documentation"
+readonly WEBSITE_DIR="../../../website"
 readonly GENERATOR_IMAGE="eu.gcr.io/kyma-project/documentation-generator:0.1.49"
 
 # Colors
@@ -85,16 +86,16 @@ publish() {
 
     echo "Commit documentation"
     git add "${DOCUMENTATION_DIR}" || return
-    # git commit -m "Publish documentation for Kyma" --no-verify || return
+    git commit -m "Publish documentation for Kyma" --no-verify || return
 
     echo "Pushing documentation to master"
-    # git push origin HEAD:master || return
+    git push origin HEAD:master || return
 }
 
 main() {
     init "${ARGS[@]}" || return
-
-    cd /home/prow/go/src/github.com/kyma-project/website
+    
+    cd ${WEBSITE_DIR}
 echo $(pwd)
 echo $(ls)
 echo "HOME ${HOME}"
@@ -102,12 +103,12 @@ echo "HOME ${HOME}"
     generate || return
     pass "Generated"
 
-    # step "Publishing"
-    # if [[ ${PUBLISH} == true ]]; then
-    #     publish || return
-    # else
-    #     echo "Skipped"
-    # fi
-    # pass "Published"
+    step "Publishing"
+    if [[ ${PUBLISH} == true ]]; then
+        publish || return
+    else
+        echo "Skipped"
+    fi
+    pass "Published"
 }
 main

@@ -2,7 +2,7 @@ IMG_DIR = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/
 TAG = $(DOCKER_TAG)
 DOCS_BUILDER_PATH=../tools/docsbuilder
 
-ci-pr: resolve-tool build-and-push-images prepare-git generate-docs
+ci-pr: resolve-tool build-and-push-images
 ci-master: resolve-tool build-and-push-images prepare-git generate-docs
 ci-release: resolve-tool build-and-push-images prepare-git generate-docs
 
