@@ -3,16 +3,17 @@
 package gqlschema
 
 import (
-	bytes "bytes"
-	context "context"
-	strconv "strconv"
-	sync "sync"
-	time "time"
+	"bytes"
+	"context"
+	"errors"
+	"strconv"
+	"sync"
+	"time"
 
-	graphql "github.com/99designs/gqlgen/graphql"
-	introspection "github.com/99designs/gqlgen/graphql/introspection"
-	gqlparser "github.com/vektah/gqlparser"
-	ast "github.com/vektah/gqlparser/ast"
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/vektah/gqlparser"
+	"github.com/vektah/gqlparser/ast"
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
@@ -4315,12 +4316,15 @@ func (ec *executionContext) _API(ctx context.Context, sel ast.SelectionSet, obj 
 
 // nolint: vetshadow
 func (ec *executionContext) _API_name(ctx context.Context, field graphql.CollectedField, obj *API) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "API",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -4333,17 +4337,21 @@ func (ec *executionContext) _API_name(ctx context.Context, field graphql.Collect
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _API_hostname(ctx context.Context, field graphql.CollectedField, obj *API) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "API",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Hostname, nil
@@ -4356,17 +4364,21 @@ func (ec *executionContext) _API_hostname(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _API_service(ctx context.Context, field graphql.CollectedField, obj *API) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "API",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Service, nil
@@ -4379,18 +4391,22 @@ func (ec *executionContext) _API_service(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(Service)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._Service(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _API_authenticationPolicies(ctx context.Context, field graphql.CollectedField, obj *API) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "API",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.AuthenticationPolicies, nil
@@ -4403,6 +4419,7 @@ func (ec *executionContext) _API_authenticationPolicies(ctx context.Context, fie
 	}
 	res := resTmp.([]AuthenticationPolicy)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -4505,12 +4522,15 @@ func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionS
 
 // nolint: vetshadow
 func (ec *executionContext) _Application_name(ctx context.Context, field graphql.CollectedField, obj *Application) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Application",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -4523,17 +4543,21 @@ func (ec *executionContext) _Application_name(ctx context.Context, field graphql
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Application_description(ctx context.Context, field graphql.CollectedField, obj *Application) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Application",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -4546,17 +4570,21 @@ func (ec *executionContext) _Application_description(ctx context.Context, field 
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Application_labels(ctx context.Context, field graphql.CollectedField, obj *Application) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Application",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Labels, nil
@@ -4569,17 +4597,21 @@ func (ec *executionContext) _Application_labels(ctx context.Context, field graph
 	}
 	res := resTmp.(Labels)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Application_services(ctx context.Context, field graphql.CollectedField, obj *Application) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Application",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Services, nil
@@ -4592,6 +4624,7 @@ func (ec *executionContext) _Application_services(ctx context.Context, field gra
 	}
 	res := resTmp.([]ApplicationService)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -4630,12 +4663,15 @@ func (ec *executionContext) _Application_services(ctx context.Context, field gra
 
 // nolint: vetshadow
 func (ec *executionContext) _Application_enabledInEnvironments(ctx context.Context, field graphql.CollectedField, obj *Application) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Application",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Application().EnabledInEnvironments(rctx, obj)
@@ -4648,6 +4684,7 @@ func (ec *executionContext) _Application_enabledInEnvironments(ctx context.Conte
 	}
 	res := resTmp.([]string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 
@@ -4662,12 +4699,15 @@ func (ec *executionContext) _Application_enabledInEnvironments(ctx context.Conte
 
 // nolint: vetshadow
 func (ec *executionContext) _Application_status(ctx context.Context, field graphql.CollectedField, obj *Application) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Application",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Application().Status(rctx, obj)
@@ -4680,6 +4720,7 @@ func (ec *executionContext) _Application_status(ctx context.Context, field graph
 	}
 	res := resTmp.(ApplicationStatus)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
@@ -4719,12 +4760,15 @@ func (ec *executionContext) _ApplicationEntry(ctx context.Context, sel ast.Selec
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationEntry_type(ctx context.Context, field graphql.CollectedField, obj *ApplicationEntry) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationEntry",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -4737,17 +4781,21 @@ func (ec *executionContext) _ApplicationEntry_type(ctx context.Context, field gr
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationEntry_gatewayUrl(ctx context.Context, field graphql.CollectedField, obj *ApplicationEntry) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationEntry",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.GatewayURL, nil
@@ -4757,6 +4805,7 @@ func (ec *executionContext) _ApplicationEntry_gatewayUrl(ctx context.Context, fi
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -4766,12 +4815,15 @@ func (ec *executionContext) _ApplicationEntry_gatewayUrl(ctx context.Context, fi
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationEntry_accessLabel(ctx context.Context, field graphql.CollectedField, obj *ApplicationEntry) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationEntry",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.AccessLabel, nil
@@ -4781,6 +4833,7 @@ func (ec *executionContext) _ApplicationEntry_accessLabel(ctx context.Context, f
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -4825,12 +4878,15 @@ func (ec *executionContext) _ApplicationEvent(ctx context.Context, sel ast.Selec
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationEvent_type(ctx context.Context, field graphql.CollectedField, obj *ApplicationEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -4843,17 +4899,21 @@ func (ec *executionContext) _ApplicationEvent_type(ctx context.Context, field gr
 	}
 	res := resTmp.(SubscriptionEventType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationEvent_application(ctx context.Context, field graphql.CollectedField, obj *ApplicationEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Application, nil
@@ -4866,6 +4926,7 @@ func (ec *executionContext) _ApplicationEvent_application(ctx context.Context, f
 	}
 	res := resTmp.(Application)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._Application(ctx, field.Selections, &res)
 }
@@ -4907,12 +4968,15 @@ func (ec *executionContext) _ApplicationMapping(ctx context.Context, sel ast.Sel
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationMapping_environment(ctx context.Context, field graphql.CollectedField, obj *ApplicationMapping) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationMapping",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -4925,17 +4989,21 @@ func (ec *executionContext) _ApplicationMapping_environment(ctx context.Context,
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationMapping_application(ctx context.Context, field graphql.CollectedField, obj *ApplicationMapping) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationMapping",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Application, nil
@@ -4948,6 +5016,7 @@ func (ec *executionContext) _ApplicationMapping_application(ctx context.Context,
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -4993,12 +5062,15 @@ func (ec *executionContext) _ApplicationMutationOutput(ctx context.Context, sel 
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationMutationOutput_name(ctx context.Context, field graphql.CollectedField, obj *ApplicationMutationOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationMutationOutput",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -5011,17 +5083,21 @@ func (ec *executionContext) _ApplicationMutationOutput_name(ctx context.Context,
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationMutationOutput_description(ctx context.Context, field graphql.CollectedField, obj *ApplicationMutationOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationMutationOutput",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -5034,17 +5110,21 @@ func (ec *executionContext) _ApplicationMutationOutput_description(ctx context.C
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationMutationOutput_labels(ctx context.Context, field graphql.CollectedField, obj *ApplicationMutationOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationMutationOutput",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Labels, nil
@@ -5057,6 +5137,7 @@ func (ec *executionContext) _ApplicationMutationOutput_labels(ctx context.Contex
 	}
 	res := resTmp.(Labels)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
@@ -5117,12 +5198,15 @@ func (ec *executionContext) _ApplicationService(ctx context.Context, sel ast.Sel
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationService_id(ctx context.Context, field graphql.CollectedField, obj *ApplicationService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationService",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -5135,17 +5219,21 @@ func (ec *executionContext) _ApplicationService_id(ctx context.Context, field gr
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationService_displayName(ctx context.Context, field graphql.CollectedField, obj *ApplicationService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationService",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DisplayName, nil
@@ -5158,17 +5246,21 @@ func (ec *executionContext) _ApplicationService_displayName(ctx context.Context,
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationService_longDescription(ctx context.Context, field graphql.CollectedField, obj *ApplicationService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationService",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.LongDescription, nil
@@ -5181,17 +5273,21 @@ func (ec *executionContext) _ApplicationService_longDescription(ctx context.Cont
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationService_providerDisplayName(ctx context.Context, field graphql.CollectedField, obj *ApplicationService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationService",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ProviderDisplayName, nil
@@ -5204,17 +5300,21 @@ func (ec *executionContext) _ApplicationService_providerDisplayName(ctx context.
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationService_tags(ctx context.Context, field graphql.CollectedField, obj *ApplicationService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationService",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Tags, nil
@@ -5227,6 +5327,7 @@ func (ec *executionContext) _ApplicationService_tags(ctx context.Context, field 
 	}
 	res := resTmp.([]string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 
@@ -5241,12 +5342,15 @@ func (ec *executionContext) _ApplicationService_tags(ctx context.Context, field 
 
 // nolint: vetshadow
 func (ec *executionContext) _ApplicationService_entries(ctx context.Context, field graphql.CollectedField, obj *ApplicationService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ApplicationService",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Entries, nil
@@ -5259,6 +5363,7 @@ func (ec *executionContext) _ApplicationService_entries(ctx context.Context, fie
 	}
 	res := resTmp.([]ApplicationEntry)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -5337,12 +5442,15 @@ func (ec *executionContext) _AuthenticationPolicy(ctx context.Context, sel ast.S
 
 // nolint: vetshadow
 func (ec *executionContext) _AuthenticationPolicy_type(ctx context.Context, field graphql.CollectedField, obj *AuthenticationPolicy) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "AuthenticationPolicy",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -5355,17 +5463,21 @@ func (ec *executionContext) _AuthenticationPolicy_type(ctx context.Context, fiel
 	}
 	res := resTmp.(AuthenticationPolicyType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _AuthenticationPolicy_issuer(ctx context.Context, field graphql.CollectedField, obj *AuthenticationPolicy) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "AuthenticationPolicy",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Issuer, nil
@@ -5378,17 +5490,21 @@ func (ec *executionContext) _AuthenticationPolicy_issuer(ctx context.Context, fi
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _AuthenticationPolicy_jwksURI(ctx context.Context, field graphql.CollectedField, obj *AuthenticationPolicy) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "AuthenticationPolicy",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.JwksURI, nil
@@ -5401,6 +5517,7 @@ func (ec *executionContext) _AuthenticationPolicy_jwksURI(ctx context.Context, f
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -5446,12 +5563,15 @@ func (ec *executionContext) _BindableResourcesOutputItem(ctx context.Context, se
 
 // nolint: vetshadow
 func (ec *executionContext) _BindableResourcesOutputItem_kind(ctx context.Context, field graphql.CollectedField, obj *BindableResourcesOutputItem) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "BindableResourcesOutputItem",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Kind, nil
@@ -5464,17 +5584,21 @@ func (ec *executionContext) _BindableResourcesOutputItem_kind(ctx context.Contex
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _BindableResourcesOutputItem_displayName(ctx context.Context, field graphql.CollectedField, obj *BindableResourcesOutputItem) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "BindableResourcesOutputItem",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DisplayName, nil
@@ -5487,17 +5611,21 @@ func (ec *executionContext) _BindableResourcesOutputItem_displayName(ctx context
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _BindableResourcesOutputItem_resources(ctx context.Context, field graphql.CollectedField, obj *BindableResourcesOutputItem) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "BindableResourcesOutputItem",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Resources, nil
@@ -5510,6 +5638,7 @@ func (ec *executionContext) _BindableResourcesOutputItem_resources(ctx context.C
 	}
 	res := resTmp.([]UsageKindResource)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -5598,12 +5727,15 @@ func (ec *executionContext) _ClusterServiceBroker(ctx context.Context, sel ast.S
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceBroker_name(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceBroker",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -5616,17 +5748,21 @@ func (ec *executionContext) _ClusterServiceBroker_name(ctx context.Context, fiel
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceBroker_status(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceBroker",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Status, nil
@@ -5639,18 +5775,22 @@ func (ec *executionContext) _ClusterServiceBroker_status(ctx context.Context, fi
 	}
 	res := resTmp.(ServiceBrokerStatus)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ServiceBrokerStatus(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceBroker_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceBroker",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.CreationTimestamp, nil
@@ -5663,17 +5803,21 @@ func (ec *executionContext) _ClusterServiceBroker_creationTimestamp(ctx context.
 	}
 	res := resTmp.(time.Time)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return MarshalTimestamp(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceBroker_url(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceBroker",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.URL, nil
@@ -5686,17 +5830,21 @@ func (ec *executionContext) _ClusterServiceBroker_url(ctx context.Context, field
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceBroker_labels(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBroker) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceBroker",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Labels, nil
@@ -5709,6 +5857,7 @@ func (ec *executionContext) _ClusterServiceBroker_labels(ctx context.Context, fi
 	}
 	res := resTmp.(Labels)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
@@ -5749,12 +5898,15 @@ func (ec *executionContext) _ClusterServiceBrokerEvent(ctx context.Context, sel 
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceBrokerEvent_type(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBrokerEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceBrokerEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -5767,17 +5919,21 @@ func (ec *executionContext) _ClusterServiceBrokerEvent_type(ctx context.Context,
 	}
 	res := resTmp.(SubscriptionEventType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceBrokerEvent_clusterServiceBroker(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceBrokerEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceBrokerEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ClusterServiceBroker, nil
@@ -5790,6 +5946,7 @@ func (ec *executionContext) _ClusterServiceBrokerEvent_clusterServiceBroker(ctx 
 	}
 	res := resTmp.(ClusterServiceBroker)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ClusterServiceBroker(ctx, field.Selections, &res)
 }
@@ -5900,12 +6057,15 @@ func (ec *executionContext) _ClusterServiceClass(ctx context.Context, sel ast.Se
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_name(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -5918,17 +6078,21 @@ func (ec *executionContext) _ClusterServiceClass_name(ctx context.Context, field
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_externalName(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ExternalName, nil
@@ -5941,17 +6105,21 @@ func (ec *executionContext) _ClusterServiceClass_externalName(ctx context.Contex
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_displayName(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DisplayName, nil
@@ -5961,6 +6129,7 @@ func (ec *executionContext) _ClusterServiceClass_displayName(ctx context.Context
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -5970,12 +6139,15 @@ func (ec *executionContext) _ClusterServiceClass_displayName(ctx context.Context
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.CreationTimestamp, nil
@@ -5988,17 +6160,21 @@ func (ec *executionContext) _ClusterServiceClass_creationTimestamp(ctx context.C
 	}
 	res := resTmp.(time.Time)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return MarshalTimestamp(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_description(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -6011,17 +6187,21 @@ func (ec *executionContext) _ClusterServiceClass_description(ctx context.Context
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_longDescription(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.LongDescription, nil
@@ -6031,6 +6211,7 @@ func (ec *executionContext) _ClusterServiceClass_longDescription(ctx context.Con
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -6040,12 +6221,15 @@ func (ec *executionContext) _ClusterServiceClass_longDescription(ctx context.Con
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_imageUrl(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ImageURL, nil
@@ -6055,6 +6239,7 @@ func (ec *executionContext) _ClusterServiceClass_imageUrl(ctx context.Context, f
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -6064,12 +6249,15 @@ func (ec *executionContext) _ClusterServiceClass_imageUrl(ctx context.Context, f
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_documentationUrl(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentationURL, nil
@@ -6079,6 +6267,7 @@ func (ec *executionContext) _ClusterServiceClass_documentationUrl(ctx context.Co
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -6088,12 +6277,15 @@ func (ec *executionContext) _ClusterServiceClass_documentationUrl(ctx context.Co
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_supportUrl(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SupportURL, nil
@@ -6103,6 +6295,7 @@ func (ec *executionContext) _ClusterServiceClass_supportUrl(ctx context.Context,
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -6112,12 +6305,15 @@ func (ec *executionContext) _ClusterServiceClass_supportUrl(ctx context.Context,
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_providerDisplayName(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ProviderDisplayName, nil
@@ -6127,6 +6323,7 @@ func (ec *executionContext) _ClusterServiceClass_providerDisplayName(ctx context
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -6136,12 +6333,15 @@ func (ec *executionContext) _ClusterServiceClass_providerDisplayName(ctx context
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_tags(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Tags, nil
@@ -6154,6 +6354,7 @@ func (ec *executionContext) _ClusterServiceClass_tags(ctx context.Context, field
 	}
 	res := resTmp.([]string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 
@@ -6168,12 +6369,15 @@ func (ec *executionContext) _ClusterServiceClass_tags(ctx context.Context, field
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_labels(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Labels, nil
@@ -6186,17 +6390,21 @@ func (ec *executionContext) _ClusterServiceClass_labels(ctx context.Context, fie
 	}
 	res := resTmp.(Labels)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_plans(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ClusterServiceClass().Plans(rctx, obj)
@@ -6209,6 +6417,7 @@ func (ec *executionContext) _ClusterServiceClass_plans(ctx context.Context, fiel
 	}
 	res := resTmp.([]ClusterServicePlan)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -6247,12 +6456,15 @@ func (ec *executionContext) _ClusterServiceClass_plans(ctx context.Context, fiel
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_activated(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ClusterServiceClass().Activated(rctx, obj)
@@ -6265,17 +6477,21 @@ func (ec *executionContext) _ClusterServiceClass_activated(ctx context.Context, 
 	}
 	res := resTmp.(bool)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalBoolean(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_apiSpec(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ClusterServiceClass().APISpec(rctx, obj)
@@ -6285,6 +6501,7 @@ func (ec *executionContext) _ClusterServiceClass_apiSpec(ctx context.Context, fi
 	}
 	res := resTmp.(*JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -6294,12 +6511,15 @@ func (ec *executionContext) _ClusterServiceClass_apiSpec(ctx context.Context, fi
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_asyncApiSpec(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ClusterServiceClass().AsyncAPISpec(rctx, obj)
@@ -6309,6 +6529,7 @@ func (ec *executionContext) _ClusterServiceClass_asyncApiSpec(ctx context.Contex
 	}
 	res := resTmp.(*JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -6318,12 +6539,15 @@ func (ec *executionContext) _ClusterServiceClass_asyncApiSpec(ctx context.Contex
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServiceClass_content(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ClusterServiceClass().Content(rctx, obj)
@@ -6333,6 +6557,7 @@ func (ec *executionContext) _ClusterServiceClass_content(ctx context.Context, fi
 	}
 	res := resTmp.(*JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -6393,12 +6618,15 @@ func (ec *executionContext) _ClusterServicePlan(ctx context.Context, sel ast.Sel
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServicePlan_name(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -6411,17 +6639,21 @@ func (ec *executionContext) _ClusterServicePlan_name(ctx context.Context, field 
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServicePlan_displayName(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DisplayName, nil
@@ -6431,6 +6663,7 @@ func (ec *executionContext) _ClusterServicePlan_displayName(ctx context.Context,
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -6440,12 +6673,15 @@ func (ec *executionContext) _ClusterServicePlan_displayName(ctx context.Context,
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServicePlan_externalName(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ExternalName, nil
@@ -6458,17 +6694,21 @@ func (ec *executionContext) _ClusterServicePlan_externalName(ctx context.Context
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServicePlan_description(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -6481,17 +6721,21 @@ func (ec *executionContext) _ClusterServicePlan_description(ctx context.Context,
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServicePlan_relatedClusterServiceClassName(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.RelatedClusterServiceClassName, nil
@@ -6504,17 +6748,21 @@ func (ec *executionContext) _ClusterServicePlan_relatedClusterServiceClassName(c
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServicePlan_instanceCreateParameterSchema(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.InstanceCreateParameterSchema, nil
@@ -6524,6 +6772,7 @@ func (ec *executionContext) _ClusterServicePlan_instanceCreateParameterSchema(ct
 	}
 	res := resTmp.(*JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -6533,12 +6782,15 @@ func (ec *executionContext) _ClusterServicePlan_instanceCreateParameterSchema(ct
 
 // nolint: vetshadow
 func (ec *executionContext) _ClusterServicePlan_bindingCreateParameterSchema(ctx context.Context, field graphql.CollectedField, obj *ClusterServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.BindingCreateParameterSchema, nil
@@ -6548,6 +6800,7 @@ func (ec *executionContext) _ClusterServicePlan_bindingCreateParameterSchema(ctx
 	}
 	res := resTmp.(*JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -6587,12 +6840,15 @@ func (ec *executionContext) _ConnectorService(ctx context.Context, sel ast.Selec
 
 // nolint: vetshadow
 func (ec *executionContext) _ConnectorService_url(ctx context.Context, field graphql.CollectedField, obj *ConnectorService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ConnectorService",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.URL, nil
@@ -6605,6 +6861,7 @@ func (ec *executionContext) _ConnectorService_url(ctx context.Context, field gra
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -6645,12 +6902,15 @@ func (ec *executionContext) _Container(ctx context.Context, sel ast.SelectionSet
 
 // nolint: vetshadow
 func (ec *executionContext) _Container_name(ctx context.Context, field graphql.CollectedField, obj *Container) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Container",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -6663,17 +6923,21 @@ func (ec *executionContext) _Container_name(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Container_image(ctx context.Context, field graphql.CollectedField, obj *Container) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Container",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Image, nil
@@ -6686,6 +6950,7 @@ func (ec *executionContext) _Container_image(ctx context.Context, field graphql.
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -6731,12 +6996,15 @@ func (ec *executionContext) _CreateServiceBindingOutput(ctx context.Context, sel
 
 // nolint: vetshadow
 func (ec *executionContext) _CreateServiceBindingOutput_name(ctx context.Context, field graphql.CollectedField, obj *CreateServiceBindingOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "CreateServiceBindingOutput",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -6749,17 +7017,21 @@ func (ec *executionContext) _CreateServiceBindingOutput_name(ctx context.Context
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _CreateServiceBindingOutput_serviceInstanceName(ctx context.Context, field graphql.CollectedField, obj *CreateServiceBindingOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "CreateServiceBindingOutput",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ServiceInstanceName, nil
@@ -6772,17 +7044,21 @@ func (ec *executionContext) _CreateServiceBindingOutput_serviceInstanceName(ctx 
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _CreateServiceBindingOutput_environment(ctx context.Context, field graphql.CollectedField, obj *CreateServiceBindingOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "CreateServiceBindingOutput",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -6795,6 +7071,7 @@ func (ec *executionContext) _CreateServiceBindingOutput_environment(ctx context.
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -6830,12 +7107,15 @@ func (ec *executionContext) _DeleteApplicationOutput(ctx context.Context, sel as
 
 // nolint: vetshadow
 func (ec *executionContext) _DeleteApplicationOutput_name(ctx context.Context, field graphql.CollectedField, obj *DeleteApplicationOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeleteApplicationOutput",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -6848,6 +7128,7 @@ func (ec *executionContext) _DeleteApplicationOutput_name(ctx context.Context, f
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -6888,12 +7169,15 @@ func (ec *executionContext) _DeleteServiceBindingOutput(ctx context.Context, sel
 
 // nolint: vetshadow
 func (ec *executionContext) _DeleteServiceBindingOutput_name(ctx context.Context, field graphql.CollectedField, obj *DeleteServiceBindingOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeleteServiceBindingOutput",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -6906,17 +7190,21 @@ func (ec *executionContext) _DeleteServiceBindingOutput_name(ctx context.Context
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _DeleteServiceBindingOutput_environment(ctx context.Context, field graphql.CollectedField, obj *DeleteServiceBindingOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeleteServiceBindingOutput",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -6929,6 +7217,7 @@ func (ec *executionContext) _DeleteServiceBindingOutput_environment(ctx context.
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -6969,12 +7258,15 @@ func (ec *executionContext) _DeleteServiceBindingUsageOutput(ctx context.Context
 
 // nolint: vetshadow
 func (ec *executionContext) _DeleteServiceBindingUsageOutput_name(ctx context.Context, field graphql.CollectedField, obj *DeleteServiceBindingUsageOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeleteServiceBindingUsageOutput",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -6987,17 +7279,21 @@ func (ec *executionContext) _DeleteServiceBindingUsageOutput_name(ctx context.Co
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _DeleteServiceBindingUsageOutput_environment(ctx context.Context, field graphql.CollectedField, obj *DeleteServiceBindingUsageOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeleteServiceBindingUsageOutput",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -7010,6 +7306,7 @@ func (ec *executionContext) _DeleteServiceBindingUsageOutput_environment(ctx con
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -7080,12 +7377,15 @@ func (ec *executionContext) _Deployment(ctx context.Context, sel ast.SelectionSe
 
 // nolint: vetshadow
 func (ec *executionContext) _Deployment_name(ctx context.Context, field graphql.CollectedField, obj *Deployment) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Deployment",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -7098,17 +7398,21 @@ func (ec *executionContext) _Deployment_name(ctx context.Context, field graphql.
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Deployment_environment(ctx context.Context, field graphql.CollectedField, obj *Deployment) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Deployment",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -7121,17 +7425,21 @@ func (ec *executionContext) _Deployment_environment(ctx context.Context, field g
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Deployment_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *Deployment) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Deployment",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.CreationTimestamp, nil
@@ -7144,17 +7452,21 @@ func (ec *executionContext) _Deployment_creationTimestamp(ctx context.Context, f
 	}
 	res := resTmp.(time.Time)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return MarshalTimestamp(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Deployment_status(ctx context.Context, field graphql.CollectedField, obj *Deployment) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Deployment",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Status, nil
@@ -7167,18 +7479,22 @@ func (ec *executionContext) _Deployment_status(ctx context.Context, field graphq
 	}
 	res := resTmp.(DeploymentStatus)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._DeploymentStatus(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Deployment_labels(ctx context.Context, field graphql.CollectedField, obj *Deployment) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Deployment",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Labels, nil
@@ -7191,17 +7507,21 @@ func (ec *executionContext) _Deployment_labels(ctx context.Context, field graphq
 	}
 	res := resTmp.(Labels)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Deployment_containers(ctx context.Context, field graphql.CollectedField, obj *Deployment) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Deployment",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Containers, nil
@@ -7214,6 +7534,7 @@ func (ec *executionContext) _Deployment_containers(ctx context.Context, field gr
 	}
 	res := resTmp.([]Container)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -7252,12 +7573,15 @@ func (ec *executionContext) _Deployment_containers(ctx context.Context, field gr
 
 // nolint: vetshadow
 func (ec *executionContext) _Deployment_boundServiceInstanceNames(ctx context.Context, field graphql.CollectedField, obj *Deployment) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Deployment",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Deployment().BoundServiceInstanceNames(rctx, obj)
@@ -7270,6 +7594,7 @@ func (ec *executionContext) _Deployment_boundServiceInstanceNames(ctx context.Co
 	}
 	res := resTmp.([]string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 
@@ -7339,12 +7664,15 @@ func (ec *executionContext) _DeploymentCondition(ctx context.Context, sel ast.Se
 
 // nolint: vetshadow
 func (ec *executionContext) _DeploymentCondition_status(ctx context.Context, field graphql.CollectedField, obj *DeploymentCondition) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeploymentCondition",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Status, nil
@@ -7357,17 +7685,21 @@ func (ec *executionContext) _DeploymentCondition_status(ctx context.Context, fie
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _DeploymentCondition_type(ctx context.Context, field graphql.CollectedField, obj *DeploymentCondition) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeploymentCondition",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -7380,17 +7712,21 @@ func (ec *executionContext) _DeploymentCondition_type(ctx context.Context, field
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _DeploymentCondition_lastTransitionTimestamp(ctx context.Context, field graphql.CollectedField, obj *DeploymentCondition) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeploymentCondition",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.LastTransitionTimestamp, nil
@@ -7403,17 +7739,21 @@ func (ec *executionContext) _DeploymentCondition_lastTransitionTimestamp(ctx con
 	}
 	res := resTmp.(time.Time)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return MarshalTimestamp(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _DeploymentCondition_lastUpdateTimestamp(ctx context.Context, field graphql.CollectedField, obj *DeploymentCondition) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeploymentCondition",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.LastUpdateTimestamp, nil
@@ -7426,17 +7766,21 @@ func (ec *executionContext) _DeploymentCondition_lastUpdateTimestamp(ctx context
 	}
 	res := resTmp.(time.Time)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return MarshalTimestamp(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _DeploymentCondition_message(ctx context.Context, field graphql.CollectedField, obj *DeploymentCondition) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeploymentCondition",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Message, nil
@@ -7449,17 +7793,21 @@ func (ec *executionContext) _DeploymentCondition_message(ctx context.Context, fi
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _DeploymentCondition_reason(ctx context.Context, field graphql.CollectedField, obj *DeploymentCondition) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeploymentCondition",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Reason, nil
@@ -7472,6 +7820,7 @@ func (ec *executionContext) _DeploymentCondition_reason(ctx context.Context, fie
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -7527,12 +7876,15 @@ func (ec *executionContext) _DeploymentStatus(ctx context.Context, sel ast.Selec
 
 // nolint: vetshadow
 func (ec *executionContext) _DeploymentStatus_replicas(ctx context.Context, field graphql.CollectedField, obj *DeploymentStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeploymentStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Replicas, nil
@@ -7545,17 +7897,21 @@ func (ec *executionContext) _DeploymentStatus_replicas(ctx context.Context, fiel
 	}
 	res := resTmp.(int)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalInt(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _DeploymentStatus_updatedReplicas(ctx context.Context, field graphql.CollectedField, obj *DeploymentStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeploymentStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.UpdatedReplicas, nil
@@ -7568,17 +7924,21 @@ func (ec *executionContext) _DeploymentStatus_updatedReplicas(ctx context.Contex
 	}
 	res := resTmp.(int)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalInt(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _DeploymentStatus_readyReplicas(ctx context.Context, field graphql.CollectedField, obj *DeploymentStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeploymentStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ReadyReplicas, nil
@@ -7591,17 +7951,21 @@ func (ec *executionContext) _DeploymentStatus_readyReplicas(ctx context.Context,
 	}
 	res := resTmp.(int)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalInt(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _DeploymentStatus_availableReplicas(ctx context.Context, field graphql.CollectedField, obj *DeploymentStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeploymentStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.AvailableReplicas, nil
@@ -7614,17 +7978,21 @@ func (ec *executionContext) _DeploymentStatus_availableReplicas(ctx context.Cont
 	}
 	res := resTmp.(int)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalInt(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _DeploymentStatus_conditions(ctx context.Context, field graphql.CollectedField, obj *DeploymentStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "DeploymentStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Conditions, nil
@@ -7637,6 +8005,7 @@ func (ec *executionContext) _DeploymentStatus_conditions(ctx context.Context, fi
 	}
 	res := resTmp.([]DeploymentCondition)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -7705,12 +8074,15 @@ func (ec *executionContext) _EnvPrefix(ctx context.Context, sel ast.SelectionSet
 
 // nolint: vetshadow
 func (ec *executionContext) _EnvPrefix_name(ctx context.Context, field graphql.CollectedField, obj *EnvPrefix) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "EnvPrefix",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -7723,6 +8095,7 @@ func (ec *executionContext) _EnvPrefix_name(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -7763,12 +8136,15 @@ func (ec *executionContext) _Environment(ctx context.Context, sel ast.SelectionS
 
 // nolint: vetshadow
 func (ec *executionContext) _Environment_name(ctx context.Context, field graphql.CollectedField, obj *Environment) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Environment",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -7781,17 +8157,21 @@ func (ec *executionContext) _Environment_name(ctx context.Context, field graphql
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Environment_applications(ctx context.Context, field graphql.CollectedField, obj *Environment) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Environment",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Applications, nil
@@ -7804,6 +8184,7 @@ func (ec *executionContext) _Environment_applications(ctx context.Context, field
 	}
 	res := resTmp.([]string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 
@@ -7868,12 +8249,15 @@ func (ec *executionContext) _EventActivation(ctx context.Context, sel ast.Select
 
 // nolint: vetshadow
 func (ec *executionContext) _EventActivation_name(ctx context.Context, field graphql.CollectedField, obj *EventActivation) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "EventActivation",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -7886,17 +8270,21 @@ func (ec *executionContext) _EventActivation_name(ctx context.Context, field gra
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _EventActivation_displayName(ctx context.Context, field graphql.CollectedField, obj *EventActivation) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "EventActivation",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DisplayName, nil
@@ -7909,17 +8297,21 @@ func (ec *executionContext) _EventActivation_displayName(ctx context.Context, fi
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _EventActivation_sourceId(ctx context.Context, field graphql.CollectedField, obj *EventActivation) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "EventActivation",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SourceID, nil
@@ -7932,17 +8324,21 @@ func (ec *executionContext) _EventActivation_sourceId(ctx context.Context, field
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _EventActivation_events(ctx context.Context, field graphql.CollectedField, obj *EventActivation) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "EventActivation",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.EventActivation().Events(rctx, obj)
@@ -7955,6 +8351,7 @@ func (ec *executionContext) _EventActivation_events(ctx context.Context, field g
 	}
 	res := resTmp.([]EventActivationEvent)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -8033,12 +8430,15 @@ func (ec *executionContext) _EventActivationEvent(ctx context.Context, sel ast.S
 
 // nolint: vetshadow
 func (ec *executionContext) _EventActivationEvent_eventType(ctx context.Context, field graphql.CollectedField, obj *EventActivationEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "EventActivationEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.EventType, nil
@@ -8051,17 +8451,21 @@ func (ec *executionContext) _EventActivationEvent_eventType(ctx context.Context,
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _EventActivationEvent_version(ctx context.Context, field graphql.CollectedField, obj *EventActivationEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "EventActivationEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Version, nil
@@ -8074,17 +8478,21 @@ func (ec *executionContext) _EventActivationEvent_version(ctx context.Context, f
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _EventActivationEvent_description(ctx context.Context, field graphql.CollectedField, obj *EventActivationEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "EventActivationEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -8097,6 +8505,7 @@ func (ec *executionContext) _EventActivationEvent_description(ctx context.Contex
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -8142,12 +8551,15 @@ func (ec *executionContext) _ExceededQuota(ctx context.Context, sel ast.Selectio
 
 // nolint: vetshadow
 func (ec *executionContext) _ExceededQuota_quotaName(ctx context.Context, field graphql.CollectedField, obj *ExceededQuota) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ExceededQuota",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.QuotaName, nil
@@ -8160,17 +8572,21 @@ func (ec *executionContext) _ExceededQuota_quotaName(ctx context.Context, field 
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ExceededQuota_resourceName(ctx context.Context, field graphql.CollectedField, obj *ExceededQuota) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ExceededQuota",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ResourceName, nil
@@ -8183,17 +8599,21 @@ func (ec *executionContext) _ExceededQuota_resourceName(ctx context.Context, fie
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ExceededQuota_affectedResources(ctx context.Context, field graphql.CollectedField, obj *ExceededQuota) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ExceededQuota",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.AffectedResources, nil
@@ -8206,6 +8626,7 @@ func (ec *executionContext) _ExceededQuota_affectedResources(ctx context.Context
 	}
 	res := resTmp.([]string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 
@@ -8270,12 +8691,15 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 
 // nolint: vetshadow
 func (ec *executionContext) _Function_name(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Function",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -8288,17 +8712,21 @@ func (ec *executionContext) _Function_name(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Function_trigger(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Function",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Trigger, nil
@@ -8311,17 +8739,21 @@ func (ec *executionContext) _Function_trigger(ctx context.Context, field graphql
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Function_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Function",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.CreationTimestamp, nil
@@ -8334,17 +8766,21 @@ func (ec *executionContext) _Function_creationTimestamp(ctx context.Context, fie
 	}
 	res := resTmp.(time.Time)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return MarshalTimestamp(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Function_labels(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Function",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Labels, nil
@@ -8357,17 +8793,21 @@ func (ec *executionContext) _Function_labels(ctx context.Context, field graphql.
 	}
 	res := resTmp.(Labels)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Function_environment(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Function",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -8380,6 +8820,7 @@ func (ec *executionContext) _Function_environment(ctx context.Context, field gra
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -8425,12 +8866,15 @@ func (ec *executionContext) _IDPPreset(ctx context.Context, sel ast.SelectionSet
 
 // nolint: vetshadow
 func (ec *executionContext) _IDPPreset_name(ctx context.Context, field graphql.CollectedField, obj *IDPPreset) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "IDPPreset",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -8443,17 +8887,21 @@ func (ec *executionContext) _IDPPreset_name(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _IDPPreset_issuer(ctx context.Context, field graphql.CollectedField, obj *IDPPreset) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "IDPPreset",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Issuer, nil
@@ -8466,17 +8914,21 @@ func (ec *executionContext) _IDPPreset_issuer(ctx context.Context, field graphql
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _IDPPreset_jwksUri(ctx context.Context, field graphql.CollectedField, obj *IDPPreset) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "IDPPreset",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.JwksURI, nil
@@ -8489,6 +8941,7 @@ func (ec *executionContext) _IDPPreset_jwksUri(ctx context.Context, field graphq
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -8529,12 +8982,15 @@ func (ec *executionContext) _LimitRange(ctx context.Context, sel ast.SelectionSe
 
 // nolint: vetshadow
 func (ec *executionContext) _LimitRange_name(ctx context.Context, field graphql.CollectedField, obj *LimitRange) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "LimitRange",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -8547,17 +9003,21 @@ func (ec *executionContext) _LimitRange_name(ctx context.Context, field graphql.
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _LimitRange_limits(ctx context.Context, field graphql.CollectedField, obj *LimitRange) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "LimitRange",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Limits, nil
@@ -8570,6 +9030,7 @@ func (ec *executionContext) _LimitRange_limits(ctx context.Context, field graphq
 	}
 	res := resTmp.([]LimitRangeItem)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -8653,12 +9114,15 @@ func (ec *executionContext) _LimitRangeItem(ctx context.Context, sel ast.Selecti
 
 // nolint: vetshadow
 func (ec *executionContext) _LimitRangeItem_limitType(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "LimitRangeItem",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.LimitType, nil
@@ -8671,17 +9135,21 @@ func (ec *executionContext) _LimitRangeItem_limitType(ctx context.Context, field
 	}
 	res := resTmp.(LimitType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _LimitRangeItem_max(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "LimitRangeItem",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Max, nil
@@ -8694,18 +9162,22 @@ func (ec *executionContext) _LimitRangeItem_max(ctx context.Context, field graph
 	}
 	res := resTmp.(ResourceType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ResourceType(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _LimitRangeItem_default(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "LimitRangeItem",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Default, nil
@@ -8718,18 +9190,22 @@ func (ec *executionContext) _LimitRangeItem_default(ctx context.Context, field g
 	}
 	res := resTmp.(ResourceType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ResourceType(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, field graphql.CollectedField, obj *LimitRangeItem) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "LimitRangeItem",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DefaultRequest, nil
@@ -8742,6 +9218,7 @@ func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, 
 	}
 	res := resTmp.(ResourceType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ResourceType(ctx, field.Selections, &res)
 }
@@ -8783,12 +9260,15 @@ func (ec *executionContext) _LocalObjectReference(ctx context.Context, sel ast.S
 
 // nolint: vetshadow
 func (ec *executionContext) _LocalObjectReference_kind(ctx context.Context, field graphql.CollectedField, obj *LocalObjectReference) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "LocalObjectReference",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Kind, nil
@@ -8801,17 +9281,21 @@ func (ec *executionContext) _LocalObjectReference_kind(ctx context.Context, fiel
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _LocalObjectReference_name(ctx context.Context, field graphql.CollectedField, obj *LocalObjectReference) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "LocalObjectReference",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -8824,6 +9308,7 @@ func (ec *executionContext) _LocalObjectReference_name(ctx context.Context, fiel
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -8893,6 +9378,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_createServiceInstance(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_createServiceInstance_args(rawArgs)
 	if err != nil {
@@ -8905,6 +9392,7 @@ func (ec *executionContext) _Mutation_createServiceInstance(ctx context.Context,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().CreateServiceInstance(rctx, args["params"].(ServiceInstanceCreateInput))
@@ -8914,6 +9402,7 @@ func (ec *executionContext) _Mutation_createServiceInstance(ctx context.Context,
 	}
 	res := resTmp.(*ServiceInstance)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -8924,6 +9413,8 @@ func (ec *executionContext) _Mutation_createServiceInstance(ctx context.Context,
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_deleteServiceInstance(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_deleteServiceInstance_args(rawArgs)
 	if err != nil {
@@ -8936,6 +9427,7 @@ func (ec *executionContext) _Mutation_deleteServiceInstance(ctx context.Context,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().DeleteServiceInstance(rctx, args["name"].(string), args["environment"].(string))
@@ -8945,6 +9437,7 @@ func (ec *executionContext) _Mutation_deleteServiceInstance(ctx context.Context,
 	}
 	res := resTmp.(*ServiceInstance)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -8955,6 +9448,8 @@ func (ec *executionContext) _Mutation_deleteServiceInstance(ctx context.Context,
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_createServiceBinding(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_createServiceBinding_args(rawArgs)
 	if err != nil {
@@ -8967,6 +9462,7 @@ func (ec *executionContext) _Mutation_createServiceBinding(ctx context.Context, 
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().CreateServiceBinding(rctx, args["serviceBindingName"].(*string), args["serviceInstanceName"].(string), args["environment"].(string), args["parameters"].(*JSON))
@@ -8976,6 +9472,7 @@ func (ec *executionContext) _Mutation_createServiceBinding(ctx context.Context, 
 	}
 	res := resTmp.(*CreateServiceBindingOutput)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -8986,6 +9483,8 @@ func (ec *executionContext) _Mutation_createServiceBinding(ctx context.Context, 
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_deleteServiceBinding(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_deleteServiceBinding_args(rawArgs)
 	if err != nil {
@@ -8998,6 +9497,7 @@ func (ec *executionContext) _Mutation_deleteServiceBinding(ctx context.Context, 
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().DeleteServiceBinding(rctx, args["serviceBindingName"].(string), args["environment"].(string))
@@ -9007,6 +9507,7 @@ func (ec *executionContext) _Mutation_deleteServiceBinding(ctx context.Context, 
 	}
 	res := resTmp.(*DeleteServiceBindingOutput)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -9017,6 +9518,8 @@ func (ec *executionContext) _Mutation_deleteServiceBinding(ctx context.Context, 
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_createServiceBindingUsage(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_createServiceBindingUsage_args(rawArgs)
 	if err != nil {
@@ -9029,6 +9532,7 @@ func (ec *executionContext) _Mutation_createServiceBindingUsage(ctx context.Cont
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().CreateServiceBindingUsage(rctx, args["createServiceBindingUsageInput"].(*CreateServiceBindingUsageInput))
@@ -9038,6 +9542,7 @@ func (ec *executionContext) _Mutation_createServiceBindingUsage(ctx context.Cont
 	}
 	res := resTmp.(*ServiceBindingUsage)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -9048,6 +9553,8 @@ func (ec *executionContext) _Mutation_createServiceBindingUsage(ctx context.Cont
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_deleteServiceBindingUsage(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_deleteServiceBindingUsage_args(rawArgs)
 	if err != nil {
@@ -9060,6 +9567,7 @@ func (ec *executionContext) _Mutation_deleteServiceBindingUsage(ctx context.Cont
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().DeleteServiceBindingUsage(rctx, args["serviceBindingUsageName"].(string), args["environment"].(string))
@@ -9069,6 +9577,7 @@ func (ec *executionContext) _Mutation_deleteServiceBindingUsage(ctx context.Cont
 	}
 	res := resTmp.(*DeleteServiceBindingUsageOutput)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -9079,6 +9588,8 @@ func (ec *executionContext) _Mutation_deleteServiceBindingUsage(ctx context.Cont
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_createApplication(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_createApplication_args(rawArgs)
 	if err != nil {
@@ -9091,6 +9602,7 @@ func (ec *executionContext) _Mutation_createApplication(ctx context.Context, fie
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().CreateApplication(rctx, args["name"].(string), args["description"].(*string), args["labels"].(*Labels))
@@ -9103,12 +9615,15 @@ func (ec *executionContext) _Mutation_createApplication(ctx context.Context, fie
 	}
 	res := resTmp.(ApplicationMutationOutput)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ApplicationMutationOutput(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_updateApplication(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_updateApplication_args(rawArgs)
 	if err != nil {
@@ -9121,6 +9636,7 @@ func (ec *executionContext) _Mutation_updateApplication(ctx context.Context, fie
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().UpdateApplication(rctx, args["name"].(string), args["description"].(*string), args["labels"].(*Labels))
@@ -9133,12 +9649,15 @@ func (ec *executionContext) _Mutation_updateApplication(ctx context.Context, fie
 	}
 	res := resTmp.(ApplicationMutationOutput)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ApplicationMutationOutput(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_deleteApplication(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_deleteApplication_args(rawArgs)
 	if err != nil {
@@ -9151,6 +9670,7 @@ func (ec *executionContext) _Mutation_deleteApplication(ctx context.Context, fie
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().DeleteApplication(rctx, args["name"].(string))
@@ -9163,12 +9683,15 @@ func (ec *executionContext) _Mutation_deleteApplication(ctx context.Context, fie
 	}
 	res := resTmp.(DeleteApplicationOutput)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._DeleteApplicationOutput(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_enableApplication(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_enableApplication_args(rawArgs)
 	if err != nil {
@@ -9181,6 +9704,7 @@ func (ec *executionContext) _Mutation_enableApplication(ctx context.Context, fie
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().EnableApplication(rctx, args["application"].(string), args["environment"].(string))
@@ -9190,6 +9714,7 @@ func (ec *executionContext) _Mutation_enableApplication(ctx context.Context, fie
 	}
 	res := resTmp.(*ApplicationMapping)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -9200,6 +9725,8 @@ func (ec *executionContext) _Mutation_enableApplication(ctx context.Context, fie
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_disableApplication(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_disableApplication_args(rawArgs)
 	if err != nil {
@@ -9212,6 +9739,7 @@ func (ec *executionContext) _Mutation_disableApplication(ctx context.Context, fi
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().DisableApplication(rctx, args["application"].(string), args["environment"].(string))
@@ -9221,6 +9749,7 @@ func (ec *executionContext) _Mutation_disableApplication(ctx context.Context, fi
 	}
 	res := resTmp.(*ApplicationMapping)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -9231,6 +9760,8 @@ func (ec *executionContext) _Mutation_disableApplication(ctx context.Context, fi
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_createIDPPreset(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_createIDPPreset_args(rawArgs)
 	if err != nil {
@@ -9243,6 +9774,7 @@ func (ec *executionContext) _Mutation_createIDPPreset(ctx context.Context, field
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().CreateIDPPreset(rctx, args["name"].(string), args["issuer"].(string), args["jwksUri"].(string))
@@ -9252,6 +9784,7 @@ func (ec *executionContext) _Mutation_createIDPPreset(ctx context.Context, field
 	}
 	res := resTmp.(*IDPPreset)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -9262,6 +9795,8 @@ func (ec *executionContext) _Mutation_createIDPPreset(ctx context.Context, field
 
 // nolint: vetshadow
 func (ec *executionContext) _Mutation_deleteIDPPreset(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Mutation_deleteIDPPreset_args(rawArgs)
 	if err != nil {
@@ -9274,6 +9809,7 @@ func (ec *executionContext) _Mutation_deleteIDPPreset(ctx context.Context, field
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().DeleteIDPPreset(rctx, args["name"].(string))
@@ -9283,6 +9819,7 @@ func (ec *executionContext) _Mutation_deleteIDPPreset(ctx context.Context, field
 	}
 	res := resTmp.(*IDPPreset)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -9564,6 +10101,8 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_serviceInstance(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_serviceInstance_args(rawArgs)
 	if err != nil {
@@ -9576,6 +10115,7 @@ func (ec *executionContext) _Query_serviceInstance(ctx context.Context, field gr
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ServiceInstance(rctx, args["name"].(string), args["environment"].(string))
@@ -9585,6 +10125,7 @@ func (ec *executionContext) _Query_serviceInstance(ctx context.Context, field gr
 	}
 	res := resTmp.(*ServiceInstance)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -9595,6 +10136,8 @@ func (ec *executionContext) _Query_serviceInstance(ctx context.Context, field gr
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_serviceInstances(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_serviceInstances_args(rawArgs)
 	if err != nil {
@@ -9607,6 +10150,7 @@ func (ec *executionContext) _Query_serviceInstances(ctx context.Context, field g
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ServiceInstances(rctx, args["environment"].(string), args["first"].(*int), args["offset"].(*int), args["status"].(*InstanceStatusType))
@@ -9619,6 +10163,7 @@ func (ec *executionContext) _Query_serviceInstances(ctx context.Context, field g
 	}
 	res := resTmp.([]ServiceInstance)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -9657,6 +10202,8 @@ func (ec *executionContext) _Query_serviceInstances(ctx context.Context, field g
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_clusterServiceClasses(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_clusterServiceClasses_args(rawArgs)
 	if err != nil {
@@ -9669,6 +10216,7 @@ func (ec *executionContext) _Query_clusterServiceClasses(ctx context.Context, fi
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ClusterServiceClasses(rctx, args["first"].(*int), args["offset"].(*int))
@@ -9681,6 +10229,7 @@ func (ec *executionContext) _Query_clusterServiceClasses(ctx context.Context, fi
 	}
 	res := resTmp.([]ClusterServiceClass)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -9719,6 +10268,8 @@ func (ec *executionContext) _Query_clusterServiceClasses(ctx context.Context, fi
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_clusterServiceClass(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_clusterServiceClass_args(rawArgs)
 	if err != nil {
@@ -9731,6 +10282,7 @@ func (ec *executionContext) _Query_clusterServiceClass(ctx context.Context, fiel
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ClusterServiceClass(rctx, args["name"].(string))
@@ -9740,6 +10292,7 @@ func (ec *executionContext) _Query_clusterServiceClass(ctx context.Context, fiel
 	}
 	res := resTmp.(*ClusterServiceClass)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -9750,6 +10303,8 @@ func (ec *executionContext) _Query_clusterServiceClass(ctx context.Context, fiel
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_serviceClasses(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_serviceClasses_args(rawArgs)
 	if err != nil {
@@ -9762,6 +10317,7 @@ func (ec *executionContext) _Query_serviceClasses(ctx context.Context, field gra
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ServiceClasses(rctx, args["environment"].(string), args["first"].(*int), args["offset"].(*int))
@@ -9774,6 +10330,7 @@ func (ec *executionContext) _Query_serviceClasses(ctx context.Context, field gra
 	}
 	res := resTmp.([]ServiceClass)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -9812,6 +10369,8 @@ func (ec *executionContext) _Query_serviceClasses(ctx context.Context, field gra
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_serviceClass(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_serviceClass_args(rawArgs)
 	if err != nil {
@@ -9824,6 +10383,7 @@ func (ec *executionContext) _Query_serviceClass(ctx context.Context, field graph
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ServiceClass(rctx, args["environment"].(string), args["name"].(string))
@@ -9833,6 +10393,7 @@ func (ec *executionContext) _Query_serviceClass(ctx context.Context, field graph
 	}
 	res := resTmp.(*ServiceClass)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -9843,6 +10404,8 @@ func (ec *executionContext) _Query_serviceClass(ctx context.Context, field graph
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_clusterServiceBrokers(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_clusterServiceBrokers_args(rawArgs)
 	if err != nil {
@@ -9855,6 +10418,7 @@ func (ec *executionContext) _Query_clusterServiceBrokers(ctx context.Context, fi
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ClusterServiceBrokers(rctx, args["first"].(*int), args["offset"].(*int))
@@ -9867,6 +10431,7 @@ func (ec *executionContext) _Query_clusterServiceBrokers(ctx context.Context, fi
 	}
 	res := resTmp.([]ClusterServiceBroker)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -9905,6 +10470,8 @@ func (ec *executionContext) _Query_clusterServiceBrokers(ctx context.Context, fi
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_clusterServiceBroker(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_clusterServiceBroker_args(rawArgs)
 	if err != nil {
@@ -9917,6 +10484,7 @@ func (ec *executionContext) _Query_clusterServiceBroker(ctx context.Context, fie
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ClusterServiceBroker(rctx, args["name"].(string))
@@ -9926,6 +10494,7 @@ func (ec *executionContext) _Query_clusterServiceBroker(ctx context.Context, fie
 	}
 	res := resTmp.(*ClusterServiceBroker)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -9936,6 +10505,8 @@ func (ec *executionContext) _Query_clusterServiceBroker(ctx context.Context, fie
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_serviceBrokers(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_serviceBrokers_args(rawArgs)
 	if err != nil {
@@ -9948,6 +10519,7 @@ func (ec *executionContext) _Query_serviceBrokers(ctx context.Context, field gra
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ServiceBrokers(rctx, args["environment"].(string), args["first"].(*int), args["offset"].(*int))
@@ -9960,6 +10532,7 @@ func (ec *executionContext) _Query_serviceBrokers(ctx context.Context, field gra
 	}
 	res := resTmp.([]ServiceBroker)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -9998,6 +10571,8 @@ func (ec *executionContext) _Query_serviceBrokers(ctx context.Context, field gra
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_serviceBroker(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_serviceBroker_args(rawArgs)
 	if err != nil {
@@ -10010,6 +10585,7 @@ func (ec *executionContext) _Query_serviceBroker(ctx context.Context, field grap
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ServiceBroker(rctx, args["name"].(string), args["environment"].(string))
@@ -10019,6 +10595,7 @@ func (ec *executionContext) _Query_serviceBroker(ctx context.Context, field grap
 	}
 	res := resTmp.(*ServiceBroker)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -10029,6 +10606,8 @@ func (ec *executionContext) _Query_serviceBroker(ctx context.Context, field grap
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_serviceBindingUsage(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_serviceBindingUsage_args(rawArgs)
 	if err != nil {
@@ -10041,6 +10620,7 @@ func (ec *executionContext) _Query_serviceBindingUsage(ctx context.Context, fiel
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ServiceBindingUsage(rctx, args["name"].(string), args["environment"].(string))
@@ -10050,6 +10630,7 @@ func (ec *executionContext) _Query_serviceBindingUsage(ctx context.Context, fiel
 	}
 	res := resTmp.(*ServiceBindingUsage)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -10060,6 +10641,8 @@ func (ec *executionContext) _Query_serviceBindingUsage(ctx context.Context, fiel
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_serviceBinding(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_serviceBinding_args(rawArgs)
 	if err != nil {
@@ -10072,6 +10655,7 @@ func (ec *executionContext) _Query_serviceBinding(ctx context.Context, field gra
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ServiceBinding(rctx, args["name"].(string), args["environment"].(string))
@@ -10081,6 +10665,7 @@ func (ec *executionContext) _Query_serviceBinding(ctx context.Context, field gra
 	}
 	res := resTmp.(*ServiceBinding)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -10091,6 +10676,8 @@ func (ec *executionContext) _Query_serviceBinding(ctx context.Context, field gra
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_usageKinds(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_usageKinds_args(rawArgs)
 	if err != nil {
@@ -10103,6 +10690,7 @@ func (ec *executionContext) _Query_usageKinds(ctx context.Context, field graphql
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().UsageKinds(rctx, args["first"].(*int), args["offset"].(*int))
@@ -10115,6 +10703,7 @@ func (ec *executionContext) _Query_usageKinds(ctx context.Context, field graphql
 	}
 	res := resTmp.([]UsageKind)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -10153,6 +10742,8 @@ func (ec *executionContext) _Query_usageKinds(ctx context.Context, field graphql
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_usageKindResources(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_usageKindResources_args(rawArgs)
 	if err != nil {
@@ -10165,6 +10756,7 @@ func (ec *executionContext) _Query_usageKindResources(ctx context.Context, field
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().UsageKindResources(rctx, args["usageKind"].(string), args["environment"].(string))
@@ -10177,6 +10769,7 @@ func (ec *executionContext) _Query_usageKindResources(ctx context.Context, field
 	}
 	res := resTmp.([]UsageKindResource)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -10215,6 +10808,8 @@ func (ec *executionContext) _Query_usageKindResources(ctx context.Context, field
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_bindableResources(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_bindableResources_args(rawArgs)
 	if err != nil {
@@ -10227,6 +10822,7 @@ func (ec *executionContext) _Query_bindableResources(ctx context.Context, field 
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().BindableResources(rctx, args["environment"].(string))
@@ -10239,6 +10835,7 @@ func (ec *executionContext) _Query_bindableResources(ctx context.Context, field 
 	}
 	res := resTmp.([]BindableResourcesOutputItem)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -10277,6 +10874,8 @@ func (ec *executionContext) _Query_bindableResources(ctx context.Context, field 
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_apis(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_apis_args(rawArgs)
 	if err != nil {
@@ -10289,6 +10888,7 @@ func (ec *executionContext) _Query_apis(ctx context.Context, field graphql.Colle
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Apis(rctx, args["environment"].(string), args["serviceName"].(*string), args["hostname"].(*string))
@@ -10301,6 +10901,7 @@ func (ec *executionContext) _Query_apis(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.([]API)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -10339,6 +10940,8 @@ func (ec *executionContext) _Query_apis(ctx context.Context, field graphql.Colle
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_application(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_application_args(rawArgs)
 	if err != nil {
@@ -10351,6 +10954,7 @@ func (ec *executionContext) _Query_application(ctx context.Context, field graphq
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Application(rctx, args["name"].(string))
@@ -10360,6 +10964,7 @@ func (ec *executionContext) _Query_application(ctx context.Context, field graphq
 	}
 	res := resTmp.(*Application)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -10370,6 +10975,8 @@ func (ec *executionContext) _Query_application(ctx context.Context, field graphq
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_applications(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_applications_args(rawArgs)
 	if err != nil {
@@ -10382,6 +10989,7 @@ func (ec *executionContext) _Query_applications(ctx context.Context, field graph
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Applications(rctx, args["environment"].(*string), args["first"].(*int), args["offset"].(*int))
@@ -10394,6 +11002,7 @@ func (ec *executionContext) _Query_applications(ctx context.Context, field graph
 	}
 	res := resTmp.([]Application)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -10432,6 +11041,8 @@ func (ec *executionContext) _Query_applications(ctx context.Context, field graph
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_connectorService(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_connectorService_args(rawArgs)
 	if err != nil {
@@ -10444,6 +11055,7 @@ func (ec *executionContext) _Query_connectorService(ctx context.Context, field g
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ConnectorService(rctx, args["application"].(string))
@@ -10456,12 +11068,15 @@ func (ec *executionContext) _Query_connectorService(ctx context.Context, field g
 	}
 	res := resTmp.(ConnectorService)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ConnectorService(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_environments(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_environments_args(rawArgs)
 	if err != nil {
@@ -10474,6 +11089,7 @@ func (ec *executionContext) _Query_environments(ctx context.Context, field graph
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Environments(rctx, args["application"].(*string))
@@ -10486,6 +11102,7 @@ func (ec *executionContext) _Query_environments(ctx context.Context, field graph
 	}
 	res := resTmp.([]Environment)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -10524,6 +11141,8 @@ func (ec *executionContext) _Query_environments(ctx context.Context, field graph
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_deployments(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_deployments_args(rawArgs)
 	if err != nil {
@@ -10536,6 +11155,7 @@ func (ec *executionContext) _Query_deployments(ctx context.Context, field graphq
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Deployments(rctx, args["environment"].(string), args["excludeFunctions"].(*bool))
@@ -10548,6 +11168,7 @@ func (ec *executionContext) _Query_deployments(ctx context.Context, field graphq
 	}
 	res := resTmp.([]Deployment)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -10586,6 +11207,8 @@ func (ec *executionContext) _Query_deployments(ctx context.Context, field graphq
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_resourceQuotas(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_resourceQuotas_args(rawArgs)
 	if err != nil {
@@ -10598,6 +11221,7 @@ func (ec *executionContext) _Query_resourceQuotas(ctx context.Context, field gra
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ResourceQuotas(rctx, args["environment"].(string))
@@ -10610,6 +11234,7 @@ func (ec *executionContext) _Query_resourceQuotas(ctx context.Context, field gra
 	}
 	res := resTmp.([]ResourceQuota)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -10648,6 +11273,8 @@ func (ec *executionContext) _Query_resourceQuotas(ctx context.Context, field gra
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_resourceQuotasStatus(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_resourceQuotasStatus_args(rawArgs)
 	if err != nil {
@@ -10660,6 +11287,7 @@ func (ec *executionContext) _Query_resourceQuotasStatus(ctx context.Context, fie
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().ResourceQuotasStatus(rctx, args["environment"].(string))
@@ -10672,12 +11300,15 @@ func (ec *executionContext) _Query_resourceQuotasStatus(ctx context.Context, fie
 	}
 	res := resTmp.(ResourceQuotasStatus)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ResourceQuotasStatus(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_functions(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_functions_args(rawArgs)
 	if err != nil {
@@ -10690,6 +11321,7 @@ func (ec *executionContext) _Query_functions(ctx context.Context, field graphql.
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Functions(rctx, args["environment"].(string), args["first"].(*int), args["offset"].(*int))
@@ -10702,6 +11334,7 @@ func (ec *executionContext) _Query_functions(ctx context.Context, field graphql.
 	}
 	res := resTmp.([]Function)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -10740,6 +11373,8 @@ func (ec *executionContext) _Query_functions(ctx context.Context, field graphql.
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_content(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_content_args(rawArgs)
 	if err != nil {
@@ -10752,6 +11387,7 @@ func (ec *executionContext) _Query_content(ctx context.Context, field graphql.Co
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Content(rctx, args["contentType"].(string), args["id"].(string))
@@ -10761,6 +11397,7 @@ func (ec *executionContext) _Query_content(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -10770,6 +11407,8 @@ func (ec *executionContext) _Query_content(ctx context.Context, field graphql.Co
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_topics(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_topics_args(rawArgs)
 	if err != nil {
@@ -10782,6 +11421,7 @@ func (ec *executionContext) _Query_topics(ctx context.Context, field graphql.Col
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().Topics(rctx, args["input"].([]InputTopic), args["internal"].(*bool))
@@ -10791,6 +11431,7 @@ func (ec *executionContext) _Query_topics(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.([]TopicEntry)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -10829,6 +11470,8 @@ func (ec *executionContext) _Query_topics(ctx context.Context, field graphql.Col
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_eventActivations(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_eventActivations_args(rawArgs)
 	if err != nil {
@@ -10841,6 +11484,7 @@ func (ec *executionContext) _Query_eventActivations(ctx context.Context, field g
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().EventActivations(rctx, args["environment"].(string))
@@ -10853,6 +11497,7 @@ func (ec *executionContext) _Query_eventActivations(ctx context.Context, field g
 	}
 	res := resTmp.([]EventActivation)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -10891,6 +11536,8 @@ func (ec *executionContext) _Query_eventActivations(ctx context.Context, field g
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_limitRanges(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_limitRanges_args(rawArgs)
 	if err != nil {
@@ -10903,6 +11550,7 @@ func (ec *executionContext) _Query_limitRanges(ctx context.Context, field graphq
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().LimitRanges(rctx, args["environment"].(string))
@@ -10915,6 +11563,7 @@ func (ec *executionContext) _Query_limitRanges(ctx context.Context, field graphq
 	}
 	res := resTmp.([]LimitRange)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -10953,6 +11602,8 @@ func (ec *executionContext) _Query_limitRanges(ctx context.Context, field graphq
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_IDPPreset(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_IDPPreset_args(rawArgs)
 	if err != nil {
@@ -10965,6 +11616,7 @@ func (ec *executionContext) _Query_IDPPreset(ctx context.Context, field graphql.
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().IDPPreset(rctx, args["name"].(string))
@@ -10974,6 +11626,7 @@ func (ec *executionContext) _Query_IDPPreset(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*IDPPreset)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -10984,6 +11637,8 @@ func (ec *executionContext) _Query_IDPPreset(ctx context.Context, field graphql.
 
 // nolint: vetshadow
 func (ec *executionContext) _Query_IDPPresets(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query_IDPPresets_args(rawArgs)
 	if err != nil {
@@ -10996,6 +11651,7 @@ func (ec *executionContext) _Query_IDPPresets(ctx context.Context, field graphql
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().IDPPresets(rctx, args["first"].(*int), args["offset"].(*int))
@@ -11008,6 +11664,7 @@ func (ec *executionContext) _Query_IDPPresets(ctx context.Context, field graphql
 	}
 	res := resTmp.([]IDPPreset)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -11046,6 +11703,8 @@ func (ec *executionContext) _Query_IDPPresets(ctx context.Context, field graphql
 
 // nolint: vetshadow
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field_Query___type_args(rawArgs)
 	if err != nil {
@@ -11058,15 +11717,17 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.introspectType(args["name"].(string)), nil
+		return ec.introspectType(args["name"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Type)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -11077,21 +11738,25 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 
 // nolint: vetshadow
 func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.introspectSchema(), nil
+		return ec.introspectSchema()
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
 	res := resTmp.(*introspection.Schema)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -11144,12 +11809,15 @@ func (ec *executionContext) _ResourceQuota(ctx context.Context, sel ast.Selectio
 
 // nolint: vetshadow
 func (ec *executionContext) _ResourceQuota_name(ctx context.Context, field graphql.CollectedField, obj *ResourceQuota) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ResourceQuota",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -11162,17 +11830,21 @@ func (ec *executionContext) _ResourceQuota_name(ctx context.Context, field graph
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ResourceQuota_pods(ctx context.Context, field graphql.CollectedField, obj *ResourceQuota) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ResourceQuota",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Pods, nil
@@ -11182,6 +11854,7 @@ func (ec *executionContext) _ResourceQuota_pods(ctx context.Context, field graph
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -11191,12 +11864,15 @@ func (ec *executionContext) _ResourceQuota_pods(ctx context.Context, field graph
 
 // nolint: vetshadow
 func (ec *executionContext) _ResourceQuota_limits(ctx context.Context, field graphql.CollectedField, obj *ResourceQuota) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ResourceQuota",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Limits, nil
@@ -11209,18 +11885,22 @@ func (ec *executionContext) _ResourceQuota_limits(ctx context.Context, field gra
 	}
 	res := resTmp.(ResourceValues)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ResourceValues(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ResourceQuota_requests(ctx context.Context, field graphql.CollectedField, obj *ResourceQuota) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ResourceQuota",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Requests, nil
@@ -11233,6 +11913,7 @@ func (ec *executionContext) _ResourceQuota_requests(ctx context.Context, field g
 	}
 	res := resTmp.(ResourceValues)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ResourceValues(ctx, field.Selections, &res)
 }
@@ -11274,12 +11955,15 @@ func (ec *executionContext) _ResourceQuotasStatus(ctx context.Context, sel ast.S
 
 // nolint: vetshadow
 func (ec *executionContext) _ResourceQuotasStatus_exceeded(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotasStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ResourceQuotasStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Exceeded, nil
@@ -11292,17 +11976,21 @@ func (ec *executionContext) _ResourceQuotasStatus_exceeded(ctx context.Context, 
 	}
 	res := resTmp.(bool)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalBoolean(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ResourceQuotasStatus_exceededQuotas(ctx context.Context, field graphql.CollectedField, obj *ResourceQuotasStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ResourceQuotasStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ExceededQuotas, nil
@@ -11315,6 +12003,7 @@ func (ec *executionContext) _ResourceQuotasStatus_exceededQuotas(ctx context.Con
 	}
 	res := resTmp.([]ExceededQuota)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -11382,12 +12071,15 @@ func (ec *executionContext) _ResourceType(ctx context.Context, sel ast.Selection
 
 // nolint: vetshadow
 func (ec *executionContext) _ResourceType_memory(ctx context.Context, field graphql.CollectedField, obj *ResourceType) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ResourceType",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Memory, nil
@@ -11397,6 +12089,7 @@ func (ec *executionContext) _ResourceType_memory(ctx context.Context, field grap
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -11406,12 +12099,15 @@ func (ec *executionContext) _ResourceType_memory(ctx context.Context, field grap
 
 // nolint: vetshadow
 func (ec *executionContext) _ResourceType_cpu(ctx context.Context, field graphql.CollectedField, obj *ResourceType) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ResourceType",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.CPU, nil
@@ -11421,6 +12117,7 @@ func (ec *executionContext) _ResourceType_cpu(ctx context.Context, field graphql
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -11459,12 +12156,15 @@ func (ec *executionContext) _ResourceValues(ctx context.Context, sel ast.Selecti
 
 // nolint: vetshadow
 func (ec *executionContext) _ResourceValues_memory(ctx context.Context, field graphql.CollectedField, obj *ResourceValues) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ResourceValues",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Memory, nil
@@ -11474,6 +12174,7 @@ func (ec *executionContext) _ResourceValues_memory(ctx context.Context, field gr
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -11483,12 +12184,15 @@ func (ec *executionContext) _ResourceValues_memory(ctx context.Context, field gr
 
 // nolint: vetshadow
 func (ec *executionContext) _ResourceValues_cpu(ctx context.Context, field graphql.CollectedField, obj *ResourceValues) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ResourceValues",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.CPU, nil
@@ -11498,6 +12202,7 @@ func (ec *executionContext) _ResourceValues_cpu(ctx context.Context, field graph
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -11547,12 +12252,15 @@ func (ec *executionContext) _Secret(ctx context.Context, sel ast.SelectionSet, o
 
 // nolint: vetshadow
 func (ec *executionContext) _Secret_name(ctx context.Context, field graphql.CollectedField, obj *Secret) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Secret",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -11565,17 +12273,21 @@ func (ec *executionContext) _Secret_name(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Secret_environment(ctx context.Context, field graphql.CollectedField, obj *Secret) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Secret",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -11588,17 +12300,21 @@ func (ec *executionContext) _Secret_environment(ctx context.Context, field graph
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Secret_data(ctx context.Context, field graphql.CollectedField, obj *Secret) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Secret",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Data, nil
@@ -11611,6 +12327,7 @@ func (ec *executionContext) _Secret_data(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
@@ -11661,12 +12378,15 @@ func (ec *executionContext) _Section(ctx context.Context, sel ast.SelectionSet, 
 
 // nolint: vetshadow
 func (ec *executionContext) _Section_name(ctx context.Context, field graphql.CollectedField, obj *Section) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Section",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -11679,17 +12399,21 @@ func (ec *executionContext) _Section_name(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Section_anchor(ctx context.Context, field graphql.CollectedField, obj *Section) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Section",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Anchor, nil
@@ -11702,17 +12426,21 @@ func (ec *executionContext) _Section_anchor(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Section_titles(ctx context.Context, field graphql.CollectedField, obj *Section) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Section",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Titles, nil
@@ -11725,6 +12453,7 @@ func (ec *executionContext) _Section_titles(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]Title)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -11763,12 +12492,15 @@ func (ec *executionContext) _Section_titles(ctx context.Context, field graphql.C
 
 // nolint: vetshadow
 func (ec *executionContext) _Section_topicType(ctx context.Context, field graphql.CollectedField, obj *Section) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Section",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.TopicType, nil
@@ -11781,6 +12513,7 @@ func (ec *executionContext) _Section_topicType(ctx context.Context, field graphq
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -11821,12 +12554,15 @@ func (ec *executionContext) _Service(ctx context.Context, sel ast.SelectionSet, 
 
 // nolint: vetshadow
 func (ec *executionContext) _Service_name(ctx context.Context, field graphql.CollectedField, obj *Service) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Service",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -11839,17 +12575,21 @@ func (ec *executionContext) _Service_name(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Service_port(ctx context.Context, field graphql.CollectedField, obj *Service) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Service",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Port, nil
@@ -11862,6 +12602,7 @@ func (ec *executionContext) _Service_port(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(int)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalInt(res)
 }
 
@@ -11921,12 +12662,15 @@ func (ec *executionContext) _ServiceBinding(ctx context.Context, sel ast.Selecti
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBinding_name(ctx context.Context, field graphql.CollectedField, obj *ServiceBinding) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBinding",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -11939,17 +12683,21 @@ func (ec *executionContext) _ServiceBinding_name(ctx context.Context, field grap
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBinding_serviceInstanceName(ctx context.Context, field graphql.CollectedField, obj *ServiceBinding) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBinding",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ServiceInstanceName, nil
@@ -11962,17 +12710,21 @@ func (ec *executionContext) _ServiceBinding_serviceInstanceName(ctx context.Cont
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBinding_environment(ctx context.Context, field graphql.CollectedField, obj *ServiceBinding) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBinding",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -11985,17 +12737,21 @@ func (ec *executionContext) _ServiceBinding_environment(ctx context.Context, fie
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBinding_secret(ctx context.Context, field graphql.CollectedField, obj *ServiceBinding) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBinding",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceBinding().Secret(rctx, obj)
@@ -12005,6 +12761,7 @@ func (ec *executionContext) _ServiceBinding_secret(ctx context.Context, field gr
 	}
 	res := resTmp.(*Secret)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -12015,12 +12772,15 @@ func (ec *executionContext) _ServiceBinding_secret(ctx context.Context, field gr
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBinding_status(ctx context.Context, field graphql.CollectedField, obj *ServiceBinding) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBinding",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Status, nil
@@ -12033,18 +12793,22 @@ func (ec *executionContext) _ServiceBinding_status(ctx context.Context, field gr
 	}
 	res := resTmp.(ServiceBindingStatus)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ServiceBindingStatus(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBinding_parameters(ctx context.Context, field graphql.CollectedField, obj *ServiceBinding) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBinding",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Parameters, nil
@@ -12054,6 +12818,7 @@ func (ec *executionContext) _ServiceBinding_parameters(ctx context.Context, fiel
 	}
 	res := resTmp.(JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
@@ -12094,12 +12859,15 @@ func (ec *executionContext) _ServiceBindingEvent(ctx context.Context, sel ast.Se
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingEvent_type(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -12112,17 +12880,21 @@ func (ec *executionContext) _ServiceBindingEvent_type(ctx context.Context, field
 	}
 	res := resTmp.(SubscriptionEventType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingEvent_serviceBinding(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ServiceBinding, nil
@@ -12135,6 +12907,7 @@ func (ec *executionContext) _ServiceBindingEvent_serviceBinding(ctx context.Cont
 	}
 	res := resTmp.(ServiceBinding)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ServiceBinding(ctx, field.Selections, &res)
 }
@@ -12181,12 +12954,15 @@ func (ec *executionContext) _ServiceBindingStatus(ctx context.Context, sel ast.S
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingStatus_type(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -12199,17 +12975,21 @@ func (ec *executionContext) _ServiceBindingStatus_type(ctx context.Context, fiel
 	}
 	res := resTmp.(ServiceBindingStatusType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingStatus_reason(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Reason, nil
@@ -12222,17 +13002,21 @@ func (ec *executionContext) _ServiceBindingStatus_reason(ctx context.Context, fi
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingStatus_message(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Message, nil
@@ -12245,6 +13029,7 @@ func (ec *executionContext) _ServiceBindingStatus_message(ctx context.Context, f
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -12304,12 +13089,15 @@ func (ec *executionContext) _ServiceBindingUsage(ctx context.Context, sel ast.Se
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingUsage_name(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsage) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsage",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -12322,17 +13110,21 @@ func (ec *executionContext) _ServiceBindingUsage_name(ctx context.Context, field
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingUsage_environment(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsage) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsage",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -12345,17 +13137,21 @@ func (ec *executionContext) _ServiceBindingUsage_environment(ctx context.Context
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingUsage_serviceBinding(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsage) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsage",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceBindingUsage().ServiceBinding(rctx, obj)
@@ -12365,6 +13161,7 @@ func (ec *executionContext) _ServiceBindingUsage_serviceBinding(ctx context.Cont
 	}
 	res := resTmp.(*ServiceBinding)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -12375,12 +13172,15 @@ func (ec *executionContext) _ServiceBindingUsage_serviceBinding(ctx context.Cont
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingUsage_usedBy(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsage) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsage",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.UsedBy, nil
@@ -12393,18 +13193,22 @@ func (ec *executionContext) _ServiceBindingUsage_usedBy(ctx context.Context, fie
 	}
 	res := resTmp.(LocalObjectReference)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._LocalObjectReference(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingUsage_parameters(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsage) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsage",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Parameters, nil
@@ -12414,6 +13218,7 @@ func (ec *executionContext) _ServiceBindingUsage_parameters(ctx context.Context,
 	}
 	res := resTmp.(*ServiceBindingUsageParameters)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -12424,12 +13229,15 @@ func (ec *executionContext) _ServiceBindingUsage_parameters(ctx context.Context,
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingUsage_status(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsage) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsage",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Status, nil
@@ -12442,6 +13250,7 @@ func (ec *executionContext) _ServiceBindingUsage_status(ctx context.Context, fie
 	}
 	res := resTmp.(ServiceBindingUsageStatus)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ServiceBindingUsageStatus(ctx, field.Selections, &res)
 }
@@ -12483,12 +13292,15 @@ func (ec *executionContext) _ServiceBindingUsageEvent(ctx context.Context, sel a
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingUsageEvent_type(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsageEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsageEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -12501,17 +13313,21 @@ func (ec *executionContext) _ServiceBindingUsageEvent_type(ctx context.Context, 
 	}
 	res := resTmp.(SubscriptionEventType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingUsageEvent_serviceBindingUsage(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsageEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsageEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ServiceBindingUsage, nil
@@ -12524,6 +13340,7 @@ func (ec *executionContext) _ServiceBindingUsageEvent_serviceBindingUsage(ctx co
 	}
 	res := resTmp.(ServiceBindingUsage)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ServiceBindingUsage(ctx, field.Selections, &res)
 }
@@ -12557,12 +13374,15 @@ func (ec *executionContext) _ServiceBindingUsageParameters(ctx context.Context, 
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingUsageParameters_envPrefix(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsageParameters) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsageParameters",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.EnvPrefix, nil
@@ -12572,6 +13392,7 @@ func (ec *executionContext) _ServiceBindingUsageParameters_envPrefix(ctx context
 	}
 	res := resTmp.(*EnvPrefix)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -12622,12 +13443,15 @@ func (ec *executionContext) _ServiceBindingUsageStatus(ctx context.Context, sel 
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingUsageStatus_type(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsageStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsageStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -12640,17 +13464,21 @@ func (ec *executionContext) _ServiceBindingUsageStatus_type(ctx context.Context,
 	}
 	res := resTmp.(ServiceBindingUsageStatusType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingUsageStatus_reason(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsageStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsageStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Reason, nil
@@ -12663,17 +13491,21 @@ func (ec *executionContext) _ServiceBindingUsageStatus_reason(ctx context.Contex
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingUsageStatus_message(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsageStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingUsageStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Message, nil
@@ -12686,6 +13518,7 @@ func (ec *executionContext) _ServiceBindingUsageStatus_message(ctx context.Conte
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -12726,12 +13559,15 @@ func (ec *executionContext) _ServiceBindings(ctx context.Context, sel ast.Select
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindings_items(ctx context.Context, field graphql.CollectedField, obj *ServiceBindings) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindings",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Items, nil
@@ -12744,6 +13580,7 @@ func (ec *executionContext) _ServiceBindings_items(ctx context.Context, field gr
 	}
 	res := resTmp.([]ServiceBinding)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -12782,12 +13619,15 @@ func (ec *executionContext) _ServiceBindings_items(ctx context.Context, field gr
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindings_stats(ctx context.Context, field graphql.CollectedField, obj *ServiceBindings) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindings",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Stats, nil
@@ -12800,6 +13640,7 @@ func (ec *executionContext) _ServiceBindings_stats(ctx context.Context, field gr
 	}
 	res := resTmp.(ServiceBindingsStats)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ServiceBindingsStats(ctx, field.Selections, &res)
 }
@@ -12851,12 +13692,15 @@ func (ec *executionContext) _ServiceBindingsStats(ctx context.Context, sel ast.S
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingsStats_ready(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingsStats) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingsStats",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Ready, nil
@@ -12869,17 +13713,21 @@ func (ec *executionContext) _ServiceBindingsStats_ready(ctx context.Context, fie
 	}
 	res := resTmp.(int)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalInt(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingsStats_failed(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingsStats) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingsStats",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Failed, nil
@@ -12892,17 +13740,21 @@ func (ec *executionContext) _ServiceBindingsStats_failed(ctx context.Context, fi
 	}
 	res := resTmp.(int)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalInt(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingsStats_pending(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingsStats) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingsStats",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Pending, nil
@@ -12915,17 +13767,21 @@ func (ec *executionContext) _ServiceBindingsStats_pending(ctx context.Context, f
 	}
 	res := resTmp.(int)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalInt(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBindingsStats_unknown(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingsStats) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBindingsStats",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Unknown, nil
@@ -12938,6 +13794,7 @@ func (ec *executionContext) _ServiceBindingsStats_unknown(ctx context.Context, f
 	}
 	res := resTmp.(int)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalInt(res)
 }
 
@@ -12998,12 +13855,15 @@ func (ec *executionContext) _ServiceBroker(ctx context.Context, sel ast.Selectio
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBroker_name(ctx context.Context, field graphql.CollectedField, obj *ServiceBroker) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBroker",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -13016,17 +13876,21 @@ func (ec *executionContext) _ServiceBroker_name(ctx context.Context, field graph
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBroker_environment(ctx context.Context, field graphql.CollectedField, obj *ServiceBroker) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBroker",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -13039,17 +13903,21 @@ func (ec *executionContext) _ServiceBroker_environment(ctx context.Context, fiel
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBroker_status(ctx context.Context, field graphql.CollectedField, obj *ServiceBroker) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBroker",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Status, nil
@@ -13062,18 +13930,22 @@ func (ec *executionContext) _ServiceBroker_status(ctx context.Context, field gra
 	}
 	res := resTmp.(ServiceBrokerStatus)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ServiceBrokerStatus(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBroker_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *ServiceBroker) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBroker",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.CreationTimestamp, nil
@@ -13086,17 +13958,21 @@ func (ec *executionContext) _ServiceBroker_creationTimestamp(ctx context.Context
 	}
 	res := resTmp.(time.Time)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return MarshalTimestamp(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBroker_url(ctx context.Context, field graphql.CollectedField, obj *ServiceBroker) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBroker",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.URL, nil
@@ -13109,17 +13985,21 @@ func (ec *executionContext) _ServiceBroker_url(ctx context.Context, field graphq
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBroker_labels(ctx context.Context, field graphql.CollectedField, obj *ServiceBroker) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBroker",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Labels, nil
@@ -13132,6 +14012,7 @@ func (ec *executionContext) _ServiceBroker_labels(ctx context.Context, field gra
 	}
 	res := resTmp.(Labels)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
@@ -13172,12 +14053,15 @@ func (ec *executionContext) _ServiceBrokerEvent(ctx context.Context, sel ast.Sel
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBrokerEvent_type(ctx context.Context, field graphql.CollectedField, obj *ServiceBrokerEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBrokerEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -13190,17 +14074,21 @@ func (ec *executionContext) _ServiceBrokerEvent_type(ctx context.Context, field 
 	}
 	res := resTmp.(SubscriptionEventType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBrokerEvent_serviceBroker(ctx context.Context, field graphql.CollectedField, obj *ServiceBrokerEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBrokerEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ServiceBroker, nil
@@ -13213,6 +14101,7 @@ func (ec *executionContext) _ServiceBrokerEvent_serviceBroker(ctx context.Contex
 	}
 	res := resTmp.(ServiceBroker)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ServiceBroker(ctx, field.Selections, &res)
 }
@@ -13259,12 +14148,15 @@ func (ec *executionContext) _ServiceBrokerStatus(ctx context.Context, sel ast.Se
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBrokerStatus_ready(ctx context.Context, field graphql.CollectedField, obj *ServiceBrokerStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBrokerStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Ready, nil
@@ -13277,17 +14169,21 @@ func (ec *executionContext) _ServiceBrokerStatus_ready(ctx context.Context, fiel
 	}
 	res := resTmp.(bool)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalBoolean(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBrokerStatus_reason(ctx context.Context, field graphql.CollectedField, obj *ServiceBrokerStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBrokerStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Reason, nil
@@ -13300,17 +14196,21 @@ func (ec *executionContext) _ServiceBrokerStatus_reason(ctx context.Context, fie
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceBrokerStatus_message(ctx context.Context, field graphql.CollectedField, obj *ServiceBrokerStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceBrokerStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Message, nil
@@ -13323,6 +14223,7 @@ func (ec *executionContext) _ServiceBrokerStatus_message(ctx context.Context, fi
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -13437,12 +14338,15 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel ast.Selection
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_name(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -13455,17 +14359,21 @@ func (ec *executionContext) _ServiceClass_name(ctx context.Context, field graphq
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_environment(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -13478,17 +14386,21 @@ func (ec *executionContext) _ServiceClass_environment(ctx context.Context, field
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_externalName(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ExternalName, nil
@@ -13501,17 +14413,21 @@ func (ec *executionContext) _ServiceClass_externalName(ctx context.Context, fiel
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_displayName(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DisplayName, nil
@@ -13521,6 +14437,7 @@ func (ec *executionContext) _ServiceClass_displayName(ctx context.Context, field
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -13530,12 +14447,15 @@ func (ec *executionContext) _ServiceClass_displayName(ctx context.Context, field
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.CreationTimestamp, nil
@@ -13548,17 +14468,21 @@ func (ec *executionContext) _ServiceClass_creationTimestamp(ctx context.Context,
 	}
 	res := resTmp.(time.Time)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return MarshalTimestamp(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_description(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -13571,17 +14495,21 @@ func (ec *executionContext) _ServiceClass_description(ctx context.Context, field
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_longDescription(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.LongDescription, nil
@@ -13591,6 +14519,7 @@ func (ec *executionContext) _ServiceClass_longDescription(ctx context.Context, f
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -13600,12 +14529,15 @@ func (ec *executionContext) _ServiceClass_longDescription(ctx context.Context, f
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_imageUrl(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ImageURL, nil
@@ -13615,6 +14547,7 @@ func (ec *executionContext) _ServiceClass_imageUrl(ctx context.Context, field gr
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -13624,12 +14557,15 @@ func (ec *executionContext) _ServiceClass_imageUrl(ctx context.Context, field gr
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_documentationUrl(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DocumentationURL, nil
@@ -13639,6 +14575,7 @@ func (ec *executionContext) _ServiceClass_documentationUrl(ctx context.Context, 
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -13648,12 +14585,15 @@ func (ec *executionContext) _ServiceClass_documentationUrl(ctx context.Context, 
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_supportUrl(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SupportURL, nil
@@ -13663,6 +14603,7 @@ func (ec *executionContext) _ServiceClass_supportUrl(ctx context.Context, field 
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -13672,12 +14613,15 @@ func (ec *executionContext) _ServiceClass_supportUrl(ctx context.Context, field 
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_providerDisplayName(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ProviderDisplayName, nil
@@ -13687,6 +14631,7 @@ func (ec *executionContext) _ServiceClass_providerDisplayName(ctx context.Contex
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -13696,12 +14641,15 @@ func (ec *executionContext) _ServiceClass_providerDisplayName(ctx context.Contex
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_tags(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Tags, nil
@@ -13714,6 +14662,7 @@ func (ec *executionContext) _ServiceClass_tags(ctx context.Context, field graphq
 	}
 	res := resTmp.([]string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 
@@ -13728,12 +14677,15 @@ func (ec *executionContext) _ServiceClass_tags(ctx context.Context, field graphq
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_labels(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Labels, nil
@@ -13746,17 +14698,21 @@ func (ec *executionContext) _ServiceClass_labels(ctx context.Context, field grap
 	}
 	res := resTmp.(Labels)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_plans(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceClass().Plans(rctx, obj)
@@ -13769,6 +14725,7 @@ func (ec *executionContext) _ServiceClass_plans(ctx context.Context, field graph
 	}
 	res := resTmp.([]ServicePlan)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -13807,12 +14764,15 @@ func (ec *executionContext) _ServiceClass_plans(ctx context.Context, field graph
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_activated(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceClass().Activated(rctx, obj)
@@ -13825,17 +14785,21 @@ func (ec *executionContext) _ServiceClass_activated(ctx context.Context, field g
 	}
 	res := resTmp.(bool)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalBoolean(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_apiSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceClass().APISpec(rctx, obj)
@@ -13845,6 +14809,7 @@ func (ec *executionContext) _ServiceClass_apiSpec(ctx context.Context, field gra
 	}
 	res := resTmp.(*JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -13854,12 +14819,15 @@ func (ec *executionContext) _ServiceClass_apiSpec(ctx context.Context, field gra
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_asyncApiSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceClass().AsyncAPISpec(rctx, obj)
@@ -13869,6 +14837,7 @@ func (ec *executionContext) _ServiceClass_asyncApiSpec(ctx context.Context, fiel
 	}
 	res := resTmp.(*JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -13878,12 +14847,15 @@ func (ec *executionContext) _ServiceClass_asyncApiSpec(ctx context.Context, fiel
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceClass_content(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceClass",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceClass().Content(rctx, obj)
@@ -13893,6 +14865,7 @@ func (ec *executionContext) _ServiceClass_content(ctx context.Context, field gra
 	}
 	res := resTmp.(*JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -14010,12 +14983,15 @@ func (ec *executionContext) _ServiceInstance(ctx context.Context, sel ast.Select
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_name(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -14028,17 +15004,21 @@ func (ec *executionContext) _ServiceInstance_name(ctx context.Context, field gra
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_environment(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -14051,17 +15031,21 @@ func (ec *executionContext) _ServiceInstance_environment(ctx context.Context, fi
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_planSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PlanSpec, nil
@@ -14071,6 +15055,7 @@ func (ec *executionContext) _ServiceInstance_planSpec(ctx context.Context, field
 	}
 	res := resTmp.(*JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -14080,12 +15065,15 @@ func (ec *executionContext) _ServiceInstance_planSpec(ctx context.Context, field
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.CreationTimestamp, nil
@@ -14098,17 +15086,21 @@ func (ec *executionContext) _ServiceInstance_creationTimestamp(ctx context.Conte
 	}
 	res := resTmp.(time.Time)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return MarshalTimestamp(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_labels(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Labels, nil
@@ -14121,6 +15113,7 @@ func (ec *executionContext) _ServiceInstance_labels(ctx context.Context, field g
 	}
 	res := resTmp.([]string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 
@@ -14135,12 +15128,15 @@ func (ec *executionContext) _ServiceInstance_labels(ctx context.Context, field g
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_status(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Status, nil
@@ -14153,18 +15149,22 @@ func (ec *executionContext) _ServiceInstance_status(ctx context.Context, field g
 	}
 	res := resTmp.(ServiceInstanceStatus)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ServiceInstanceStatus(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_classReference(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ClassReference, nil
@@ -14174,6 +15174,7 @@ func (ec *executionContext) _ServiceInstance_classReference(ctx context.Context,
 	}
 	res := resTmp.(*ServiceInstanceResourceRef)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -14184,12 +15185,15 @@ func (ec *executionContext) _ServiceInstance_classReference(ctx context.Context,
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_planReference(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PlanReference, nil
@@ -14199,6 +15203,7 @@ func (ec *executionContext) _ServiceInstance_planReference(ctx context.Context, 
 	}
 	res := resTmp.(*ServiceInstanceResourceRef)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -14209,12 +15214,15 @@ func (ec *executionContext) _ServiceInstance_planReference(ctx context.Context, 
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_serviceClass(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceInstance().ServiceClass(rctx, obj)
@@ -14224,6 +15232,7 @@ func (ec *executionContext) _ServiceInstance_serviceClass(ctx context.Context, f
 	}
 	res := resTmp.(*ServiceClass)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -14234,12 +15243,15 @@ func (ec *executionContext) _ServiceInstance_serviceClass(ctx context.Context, f
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_clusterServiceClass(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceInstance().ClusterServiceClass(rctx, obj)
@@ -14249,6 +15261,7 @@ func (ec *executionContext) _ServiceInstance_clusterServiceClass(ctx context.Con
 	}
 	res := resTmp.(*ClusterServiceClass)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -14259,12 +15272,15 @@ func (ec *executionContext) _ServiceInstance_clusterServiceClass(ctx context.Con
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_servicePlan(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceInstance().ServicePlan(rctx, obj)
@@ -14274,6 +15290,7 @@ func (ec *executionContext) _ServiceInstance_servicePlan(ctx context.Context, fi
 	}
 	res := resTmp.(*ServicePlan)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -14284,12 +15301,15 @@ func (ec *executionContext) _ServiceInstance_servicePlan(ctx context.Context, fi
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_clusterServicePlan(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceInstance().ClusterServicePlan(rctx, obj)
@@ -14299,6 +15319,7 @@ func (ec *executionContext) _ServiceInstance_clusterServicePlan(ctx context.Cont
 	}
 	res := resTmp.(*ClusterServicePlan)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -14309,12 +15330,15 @@ func (ec *executionContext) _ServiceInstance_clusterServicePlan(ctx context.Cont
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_bindable(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceInstance().Bindable(rctx, obj)
@@ -14327,17 +15351,21 @@ func (ec *executionContext) _ServiceInstance_bindable(ctx context.Context, field
 	}
 	res := resTmp.(bool)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalBoolean(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_serviceBindings(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceInstance().ServiceBindings(rctx, obj)
@@ -14350,18 +15378,22 @@ func (ec *executionContext) _ServiceInstance_serviceBindings(ctx context.Context
 	}
 	res := resTmp.(ServiceBindings)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ServiceBindings(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstance_serviceBindingUsages(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstance",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceInstance().ServiceBindingUsages(rctx, obj)
@@ -14374,6 +15406,7 @@ func (ec *executionContext) _ServiceInstance_serviceBindingUsages(ctx context.Co
 	}
 	res := resTmp.([]ServiceBindingUsage)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -14447,12 +15480,15 @@ func (ec *executionContext) _ServiceInstanceEvent(ctx context.Context, sel ast.S
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstanceEvent_type(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstanceEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -14465,17 +15501,21 @@ func (ec *executionContext) _ServiceInstanceEvent_type(ctx context.Context, fiel
 	}
 	res := resTmp.(SubscriptionEventType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstanceEvent_serviceInstance(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstanceEvent",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ServiceInstance, nil
@@ -14488,6 +15528,7 @@ func (ec *executionContext) _ServiceInstanceEvent_serviceInstance(ctx context.Co
 	}
 	res := resTmp.(ServiceInstance)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ServiceInstance(ctx, field.Selections, &res)
 }
@@ -14534,12 +15575,15 @@ func (ec *executionContext) _ServiceInstanceResourceRef(ctx context.Context, sel
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstanceResourceRef_name(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceResourceRef) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstanceResourceRef",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -14552,17 +15596,21 @@ func (ec *executionContext) _ServiceInstanceResourceRef_name(ctx context.Context
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstanceResourceRef_displayName(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceResourceRef) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstanceResourceRef",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DisplayName, nil
@@ -14575,17 +15623,21 @@ func (ec *executionContext) _ServiceInstanceResourceRef_displayName(ctx context.
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstanceResourceRef_clusterWide(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceResourceRef) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstanceResourceRef",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ClusterWide, nil
@@ -14598,6 +15650,7 @@ func (ec *executionContext) _ServiceInstanceResourceRef_clusterWide(ctx context.
 	}
 	res := resTmp.(bool)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalBoolean(res)
 }
 
@@ -14643,12 +15696,15 @@ func (ec *executionContext) _ServiceInstanceStatus(ctx context.Context, sel ast.
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstanceStatus_type(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstanceStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -14661,17 +15717,21 @@ func (ec *executionContext) _ServiceInstanceStatus_type(ctx context.Context, fie
 	}
 	res := resTmp.(InstanceStatusType)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstanceStatus_reason(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstanceStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Reason, nil
@@ -14684,17 +15744,21 @@ func (ec *executionContext) _ServiceInstanceStatus_reason(ctx context.Context, f
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServiceInstanceStatus_message(ctx context.Context, field graphql.CollectedField, obj *ServiceInstanceStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServiceInstanceStatus",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Message, nil
@@ -14707,6 +15771,7 @@ func (ec *executionContext) _ServiceInstanceStatus_message(ctx context.Context, 
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -14768,12 +15833,15 @@ func (ec *executionContext) _ServicePlan(ctx context.Context, sel ast.SelectionS
 
 // nolint: vetshadow
 func (ec *executionContext) _ServicePlan_name(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -14786,17 +15854,21 @@ func (ec *executionContext) _ServicePlan_name(ctx context.Context, field graphql
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServicePlan_environment(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
@@ -14809,17 +15881,21 @@ func (ec *executionContext) _ServicePlan_environment(ctx context.Context, field 
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServicePlan_displayName(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DisplayName, nil
@@ -14829,6 +15905,7 @@ func (ec *executionContext) _ServicePlan_displayName(ctx context.Context, field 
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -14838,12 +15915,15 @@ func (ec *executionContext) _ServicePlan_displayName(ctx context.Context, field 
 
 // nolint: vetshadow
 func (ec *executionContext) _ServicePlan_externalName(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ExternalName, nil
@@ -14856,17 +15936,21 @@ func (ec *executionContext) _ServicePlan_externalName(ctx context.Context, field
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServicePlan_description(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -14879,17 +15963,21 @@ func (ec *executionContext) _ServicePlan_description(ctx context.Context, field 
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServicePlan_relatedServiceClassName(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.RelatedServiceClassName, nil
@@ -14902,17 +15990,21 @@ func (ec *executionContext) _ServicePlan_relatedServiceClassName(ctx context.Con
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _ServicePlan_instanceCreateParameterSchema(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.InstanceCreateParameterSchema, nil
@@ -14922,6 +16014,7 @@ func (ec *executionContext) _ServicePlan_instanceCreateParameterSchema(ctx conte
 	}
 	res := resTmp.(*JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -14931,12 +16024,15 @@ func (ec *executionContext) _ServicePlan_instanceCreateParameterSchema(ctx conte
 
 // nolint: vetshadow
 func (ec *executionContext) _ServicePlan_bindingCreateParameterSchema(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "ServicePlan",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.BindingCreateParameterSchema, nil
@@ -14946,6 +16042,7 @@ func (ec *executionContext) _ServicePlan_bindingCreateParameterSchema(ctx contex
 	}
 	res := resTmp.(*JSON)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -14994,7 +16091,9 @@ func (ec *executionContext) _Subscription_serviceInstanceEvent(ctx context.Conte
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Field: field,
 	})
-	rctx := ctx // FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
 	results, err := ec.resolvers.Subscription().ServiceInstanceEvent(rctx, args["environment"].(string))
 	if err != nil {
 		ec.Error(ctx, err)
@@ -15023,7 +16122,9 @@ func (ec *executionContext) _Subscription_serviceBindingEvent(ctx context.Contex
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Field: field,
 	})
-	rctx := ctx // FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
 	results, err := ec.resolvers.Subscription().ServiceBindingEvent(rctx, args["environment"].(string))
 	if err != nil {
 		ec.Error(ctx, err)
@@ -15052,7 +16153,9 @@ func (ec *executionContext) _Subscription_serviceBindingUsageEvent(ctx context.C
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Field: field,
 	})
-	rctx := ctx // FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
 	results, err := ec.resolvers.Subscription().ServiceBindingUsageEvent(rctx, args["environment"].(string))
 	if err != nil {
 		ec.Error(ctx, err)
@@ -15081,7 +16184,9 @@ func (ec *executionContext) _Subscription_serviceBrokerEvent(ctx context.Context
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Field: field,
 	})
-	rctx := ctx // FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
 	results, err := ec.resolvers.Subscription().ServiceBrokerEvent(rctx, args["environment"].(string))
 	if err != nil {
 		ec.Error(ctx, err)
@@ -15104,7 +16209,9 @@ func (ec *executionContext) _Subscription_clusterServiceBrokerEvent(ctx context.
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Field: field,
 	})
-	rctx := ctx // FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
 	results, err := ec.resolvers.Subscription().ClusterServiceBrokerEvent(rctx)
 	if err != nil {
 		ec.Error(ctx, err)
@@ -15127,7 +16234,9 @@ func (ec *executionContext) _Subscription_applicationEvent(ctx context.Context, 
 	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
 		Field: field,
 	})
-	rctx := ctx // FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
 	results, err := ec.resolvers.Subscription().ApplicationEvent(rctx)
 	if err != nil {
 		ec.Error(ctx, err)
@@ -15185,12 +16294,15 @@ func (ec *executionContext) _Title(ctx context.Context, sel ast.SelectionSet, ob
 
 // nolint: vetshadow
 func (ec *executionContext) _Title_name(ctx context.Context, field graphql.CollectedField, obj *Title) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Title",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -15203,17 +16315,21 @@ func (ec *executionContext) _Title_name(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Title_anchor(ctx context.Context, field graphql.CollectedField, obj *Title) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Title",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Anchor, nil
@@ -15226,17 +16342,21 @@ func (ec *executionContext) _Title_anchor(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _Title_titles(ctx context.Context, field graphql.CollectedField, obj *Title) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "Title",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Titles, nil
@@ -15246,6 +16366,7 @@ func (ec *executionContext) _Title_titles(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.([]Title)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -15324,12 +16445,15 @@ func (ec *executionContext) _TopicEntry(ctx context.Context, sel ast.SelectionSe
 
 // nolint: vetshadow
 func (ec *executionContext) _TopicEntry_contentType(ctx context.Context, field graphql.CollectedField, obj *TopicEntry) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "TopicEntry",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ContentType, nil
@@ -15342,17 +16466,21 @@ func (ec *executionContext) _TopicEntry_contentType(ctx context.Context, field g
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _TopicEntry_id(ctx context.Context, field graphql.CollectedField, obj *TopicEntry) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "TopicEntry",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
@@ -15365,17 +16493,21 @@ func (ec *executionContext) _TopicEntry_id(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _TopicEntry_sections(ctx context.Context, field graphql.CollectedField, obj *TopicEntry) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "TopicEntry",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Sections, nil
@@ -15388,6 +16520,7 @@ func (ec *executionContext) _TopicEntry_sections(ctx context.Context, field grap
 	}
 	res := resTmp.([]Section)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -15476,12 +16609,15 @@ func (ec *executionContext) _UsageKind(ctx context.Context, sel ast.SelectionSet
 
 // nolint: vetshadow
 func (ec *executionContext) _UsageKind_name(ctx context.Context, field graphql.CollectedField, obj *UsageKind) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "UsageKind",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -15494,17 +16630,21 @@ func (ec *executionContext) _UsageKind_name(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _UsageKind_group(ctx context.Context, field graphql.CollectedField, obj *UsageKind) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "UsageKind",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Group, nil
@@ -15517,17 +16657,21 @@ func (ec *executionContext) _UsageKind_group(ctx context.Context, field graphql.
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _UsageKind_kind(ctx context.Context, field graphql.CollectedField, obj *UsageKind) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "UsageKind",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Kind, nil
@@ -15540,17 +16684,21 @@ func (ec *executionContext) _UsageKind_kind(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _UsageKind_version(ctx context.Context, field graphql.CollectedField, obj *UsageKind) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "UsageKind",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Version, nil
@@ -15563,17 +16711,21 @@ func (ec *executionContext) _UsageKind_version(ctx context.Context, field graphq
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _UsageKind_displayName(ctx context.Context, field graphql.CollectedField, obj *UsageKind) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "UsageKind",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DisplayName, nil
@@ -15586,6 +16738,7 @@ func (ec *executionContext) _UsageKind_displayName(ctx context.Context, field gr
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -15626,12 +16779,15 @@ func (ec *executionContext) _UsageKindResource(ctx context.Context, sel ast.Sele
 
 // nolint: vetshadow
 func (ec *executionContext) _UsageKindResource_name(ctx context.Context, field graphql.CollectedField, obj *UsageKindResource) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "UsageKindResource",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -15644,17 +16800,21 @@ func (ec *executionContext) _UsageKindResource_name(ctx context.Context, field g
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) _UsageKindResource_namespace(ctx context.Context, field graphql.CollectedField, obj *UsageKindResource) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "UsageKindResource",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Namespace, nil
@@ -15667,6 +16827,7 @@ func (ec *executionContext) _UsageKindResource_namespace(ctx context.Context, fi
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
@@ -15714,12 +16875,15 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 
 // nolint: vetshadow
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -15732,17 +16896,21 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) ___Directive_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -15752,17 +16920,21 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) ___Directive_locations(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Locations, nil
@@ -15775,6 +16947,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	}
 	res := resTmp.([]string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 
@@ -15789,12 +16962,15 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 
 // nolint: vetshadow
 func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Directive",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Args, nil
@@ -15807,6 +16983,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	}
 	res := resTmp.([]introspection.InputValue)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -15884,12 +17061,15 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 
 // nolint: vetshadow
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -15902,17 +17082,21 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) ___EnumValue_description(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -15922,20 +17106,24 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.IsDeprecated, nil
+		return obj.IsDeprecated(), nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -15945,27 +17133,36 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 	}
 	res := resTmp.(bool)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalBoolean(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__EnumValue",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.DeprecationReason, nil
+		return obj.DeprecationReason(), nil
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	rctx.Result = res
-	return graphql.MarshalString(res)
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 var __FieldImplementors = []string{"__Field"}
@@ -16019,12 +17216,15 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 
 // nolint: vetshadow
 func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -16037,17 +17237,21 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) ___Field_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -16057,17 +17261,21 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Args, nil
@@ -16080,6 +17288,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.([]introspection.InputValue)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -16118,12 +17327,15 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 
 // nolint: vetshadow
 func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -16136,6 +17348,7 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*introspection.Type)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		if !ec.HasError(rctx) {
@@ -16149,15 +17362,18 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 
 // nolint: vetshadow
 func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.IsDeprecated, nil
+		return obj.IsDeprecated(), nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -16167,27 +17383,36 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 	}
 	res := resTmp.(bool)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalBoolean(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Field",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.DeprecationReason, nil
+		return obj.DeprecationReason(), nil
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	rctx.Result = res
-	return graphql.MarshalString(res)
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
 }
 
 var __InputValueImplementors = []string{"__InputValue"}
@@ -16231,12 +17456,15 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 
 // nolint: vetshadow
 func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
@@ -16249,17 +17477,21 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) ___InputValue_description(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
@@ -16269,17 +17501,21 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
@@ -16292,6 +17528,7 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 	}
 	res := resTmp.(*introspection.Type)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		if !ec.HasError(rctx) {
@@ -16305,12 +17542,15 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 
 // nolint: vetshadow
 func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__InputValue",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DefaultValue, nil
@@ -16320,6 +17560,7 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -16373,12 +17614,15 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 
 // nolint: vetshadow
 func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Types(), nil
@@ -16391,6 +17635,7 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]introspection.Type)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -16429,12 +17674,15 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 
 // nolint: vetshadow
 func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.QueryType(), nil
@@ -16447,6 +17695,7 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 	}
 	res := resTmp.(*introspection.Type)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		if !ec.HasError(rctx) {
@@ -16460,12 +17709,15 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 
 // nolint: vetshadow
 func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.MutationType(), nil
@@ -16475,6 +17727,7 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 	}
 	res := resTmp.(*introspection.Type)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -16485,12 +17738,15 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 
 // nolint: vetshadow
 func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SubscriptionType(), nil
@@ -16500,6 +17756,7 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 	}
 	res := resTmp.(*introspection.Type)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -16510,12 +17767,15 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 
 // nolint: vetshadow
 func (ec *executionContext) ___Schema_directives(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Schema",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Directives(), nil
@@ -16528,6 +17788,7 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 	}
 	res := resTmp.([]introspection.Directive)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -16612,12 +17873,15 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // nolint: vetshadow
 func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Kind(), nil
@@ -16630,17 +17894,21 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name(), nil
@@ -16650,6 +17918,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 	}
 	res := resTmp.(*string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -16659,12 +17928,15 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 
 // nolint: vetshadow
 func (ec *executionContext) ___Type_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description(), nil
@@ -16674,11 +17946,14 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 	}
 	res := resTmp.(string)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field___Type_fields_args(rawArgs)
 	if err != nil {
@@ -16691,6 +17966,7 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Fields(args["includeDeprecated"].(bool)), nil
@@ -16700,6 +17976,7 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.([]introspection.Field)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -16738,12 +18015,15 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 
 // nolint: vetshadow
 func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Interfaces(), nil
@@ -16753,6 +18033,7 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	}
 	res := resTmp.([]introspection.Type)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -16791,12 +18072,15 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 
 // nolint: vetshadow
 func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PossibleTypes(), nil
@@ -16806,6 +18090,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	}
 	res := resTmp.([]introspection.Type)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -16844,6 +18129,8 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 
 // nolint: vetshadow
 func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
 	args, err := field___Type_enumValues_args(rawArgs)
 	if err != nil {
@@ -16856,6 +18143,7 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.EnumValues(args["includeDeprecated"].(bool)), nil
@@ -16865,6 +18153,7 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 	}
 	res := resTmp.([]introspection.EnumValue)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -16903,12 +18192,15 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 
 // nolint: vetshadow
 func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.InputFields(), nil
@@ -16918,6 +18210,7 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	}
 	res := resTmp.([]introspection.InputValue)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	arr1 := make(graphql.Array, len(res))
 	var wg sync.WaitGroup
@@ -16956,12 +18249,15 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 
 // nolint: vetshadow
 func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
 		Object: "__Type",
 		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.OfType(), nil
@@ -16971,6 +18267,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*introspection.Type)
 	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
@@ -17241,12 +18538,18 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 	return res
 }
 
-func (ec *executionContext) introspectSchema() *introspection.Schema {
-	return introspection.WrapSchema(parsedSchema)
+func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapSchema(parsedSchema), nil
 }
 
-func (ec *executionContext) introspectType(name string) *introspection.Type {
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name])
+func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
+	if ec.DisableIntrospection {
+		return nil, errors.New("introspection disabled")
+	}
+	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
