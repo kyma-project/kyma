@@ -1,4 +1,4 @@
-FROM golang:1.10.3-alpine as builder
+FROM golang:1.10-alpine as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-operator
 
