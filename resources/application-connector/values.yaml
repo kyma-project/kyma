@@ -14,14 +14,14 @@ global:
     dir: pr/
     version: PR-2093
   application_operator_tests:
-    dir: develop/
-    version: 4b93b792
+    dir: pr/
+    version: PR-2093
   connector_service:
     dir: pr/
     version: PR-2093
   connector_service_tests:
-    dir: develop/
-    version: 9e960a99
+    dir: pr/
+    version: PR-2093
   connection_token_handler:
     dir: pr/
     version: PR-2093
@@ -38,8 +38,8 @@ global:
     dir: pr/
     version: PR-2093
   application_registry_tests:
-    dir: develop/
-    version: 4b93b792
+    dir: pr/
+    version: PR-2093
   application_broker:
     dir: develop/
     version: 4707ed32
