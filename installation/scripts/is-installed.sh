@@ -93,7 +93,7 @@ do
     if [ "$TIMEOUT_SET" -ne 0 ] && [ "$ITERATIONS_LEFT" -le 0 ]; then
       echo "timeout reached on kyma installation error. Fetching logs from the installer:"
       echo "----------"
-      echo "$(kubectl logs -n kyma-installer $(kubectl get pods --all-namespaces -l name=kyma-installer --no-headers -o jsonpath='{.items[*].metadata.name}'))"
+      kubectl logs -n kyma-installer $(kubectl get pods --all-namespaces -l name=kyma-installer --no-headers -o jsonpath='{.items[*].metadata.name}')
       echo "----------"
       exit 1
     fi
@@ -105,9 +105,9 @@ do
     fi
   fi
   if [ "${VERBOSE}" -eq 1 ]; then
-    echo "$(kubectl get installation/kyma-installation -o yaml)"
+    kubectl get installation/kyma-installation -o yaml
     echo "----------"
-    echo "$(kubectl get po --all-namespaces)"
+    kubectl get po --all-namespaces
   fi
   sleep $DELAY
   ITERATIONS_LEFT=$(( ITERATIONS_LEFT-1 ))
