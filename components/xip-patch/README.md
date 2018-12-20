@@ -2,7 +2,7 @@
 
 ## Overview
 
-This application prepares Kyma's configuration to use wildcard xip.io DNS.
+This component configures Kyma to use a wildcard DNS provided by `xip.io`.
 
 ## Prerequisites
 
