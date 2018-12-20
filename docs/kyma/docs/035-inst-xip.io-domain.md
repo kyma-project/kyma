@@ -15,7 +15,7 @@ The prerequisites match these listed in the **Install Kyma on a GKE cluster**. H
 
 The installation process follows the steps outlined in the **Install Kyma on a GKE cluster** document. Skip the DNS configuration of your Google project and start with the **Prepare the GKE cluster** section of the document.
 
-1. In addition to exporting the desired cluster name as an environment, make sure to export your GCP project name. Run:
+1. In addition to exporting the desired cluster name as an environment variable, make sure to export your GCP project name. Run:
   ```
   export PROJECT={YOUR_GCP_PROJECT_NAME}
   ```
@@ -23,7 +23,7 @@ The installation process follows the steps outlined in the **Install Kyma on a G
   ```
   cat installation/resources/installer.yaml <(echo -e "\n---") installation/resources/installer-config-cluster.yaml.tpl  <(echo -e "\n---") installation/resources/installer-cr-cluster-xip-io.yaml.tpl | sed -e "s/__.*__//g" > my-kyma.yaml
   ```
-3. Follow the instructions from the **Deploy Kyma** to install Kyma using the configuration file you prepared.
+3. Follow the instructions from the **Deploy Kyma** section to install Kyma using the configuration file you prepared.
 
 4. Add the custom Kyma [`xip.io`](www.xip.io) self-signed certificate to the trusted certificates of your OS. For MacOS run:
   ```
