@@ -12,7 +12,7 @@ while [ ${SECONDS} -lt ${END_TIME} ];do
 
     EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
-    if [ ${EXTERNAL_PUBLIC_IP} ]; then
+    if [ "${EXTERNAL_PUBLIC_IP}" ]; then
         echo "External public IP address is ${EXTERNAL_PUBLIC_IP}"
         break
     fi
@@ -20,7 +20,7 @@ while [ ${SECONDS} -lt ${END_TIME} ];do
     sleep 10
 done
 
-if [ -z ${EXTERNAL_PUBLIC_IP} ]; then
+if [ -z "${EXTERNAL_PUBLIC_IP}" ]; then
     echo "External public IP not found"
     exit 1
 fi
