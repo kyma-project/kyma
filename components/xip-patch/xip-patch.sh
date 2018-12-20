@@ -43,10 +43,31 @@ openssl req -x509 -nodes -days 5 -newkey rsa:4069 \
 TLS_CERT=$(base64 "${CERT_PATH}" | tr -d '\n')
 TLS_KEY=$(base64 "${KEY_PATH}" | tr -d '\n')
 
-kubectl patch configmap installation-config-overrides -p '{"data": {"global.domainName":"'"${DOMAIN}"'"}}' -n kyma-installer
-kubectl patch configmap cluster-certificate-overrides -p '{"data": {"global.tlsCrt":"'"${TLS_CERT}"'"}}' -n kyma-installer
-kubectl patch configmap cluster-certificate-overrides -p '{"data": {"global.tlsKey":"'"${TLS_KEY}"'"}}' -n kyma-installer
-kubectl patch secret ingress-tls-cert -p '{"data": {"tls.crt":"'"${TLS_CERT}"'"}}' -n kyma-system
+DOMAIN_YAML=$(cat << EOF
+---
+data:
+  global.domainName: "${DOMAIN}"
+EOF
+)
+
+TLS_CERT_YAML=$(cat << EOF
+---
+data:
+  tls.crt: "${TLS_CERT}"
+EOF
+)
+
+TLS_CERT_AND_KEY_YAML=$(cat << EOF
+---
+data:
+  global.tlsCrt: "${TLS_CERT}"
+  global.tlsKey: "${TLS_KEY}"
+EOF
+)
+
+kubectl patch configmap installation-config-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
+kubectl patch configmap cluster-certificate-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer
+kubectl patch secret ingress-tls-cert --patch "${TLS_CERT_YAML}" -n kyma-system
 
 rm "${CERT_PATH}"
 rm "${KEY_PATH}"
