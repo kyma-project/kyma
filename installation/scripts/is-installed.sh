@@ -22,7 +22,7 @@
 
 function parse_timeout {
   TIME=$(echo "$TIMEOUT" | tr -dc '0-9')
-  UNIT=$(echo "$TIMEOUT" | tr -d  '0-9')
+  UNIT=$(echo "$TIMEOUT" | tr -d  '0-9' | tr -d ' ')
 
   case "${UNIT}" in
     "s"|"S") TIMEOUT=TIME ;;
