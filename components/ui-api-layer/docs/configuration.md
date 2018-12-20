@@ -22,11 +22,11 @@ Use the following environment variables to configure the application:
 | APP_CONTENT_EXTERNAL_ADDRESS | No |  | The external address of the content storage server. If not set, the system uses the `APP_CONTENT_ADDRESS` variable. |
 | APP_CONTENT_ASSETS_FOLDER | No | `assets` | The name of the `assets` folder. |
 | APP_CONTENT_VERIFY_SSL | No | `true` | Ignore invalid SSL certificates. |
-| APP_REMOTE_ENVIRONMENT_GATEWAY_STATUS_REFRESH_PERIOD | No | `15s` | The period of time after which the application refreshes the remote environment statuses. |
-| APP_REMOTE_ENVIRONMENT_GATEWAY_STATUS_CALL_TIMEOUT | No | `500ms` | The timeout of the HTTP call status check. |
-| APP_REMOTE_ENVIRONMENT_GATEWAY_INTEGRATION_NAMESPACE | Yes |  | The namespace with gateway services. |
-| APP_REMOTE_ENVIRONMENT_CONNECTOR_URL | Yes |  | The address of the connector service. |
-| APP_REMOTE_ENVIRONMENT_CONNECTOR_CALL_HTTP_TIMEOUT | No | `500ms` | The timeout of the HTTP call. |
+| APP_APPLICATION_GATEWAY_STATUS_REFRESH_PERIOD | No | `15s` | The period of time after which the application refreshes the Application statuses. |
+| APP_APPLICATION_GATEWAY_STATUS_CALL_TIMEOUT | No | `500ms` | The timeout of the HTTP call status check. |
+| APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE | Yes |  | The namespace with gateway services. |
+| APP_APPLICATION_CONNECTOR_URL | Yes |  | The address of the connector service. |
+| APP_APPLICATION_CONNECTOR_CALL_HTTP_TIMEOUT | No | `500ms` | The timeout of the HTTP call. |
 
 ## Configure logger verbosity level
 This application uses `glog` to log messages. Pass command line arguments described in the [glog.go](https://github.com/golang/glog/blob/master/glog.go) document to customize the log, such as log level and output.

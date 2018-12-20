@@ -50,7 +50,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	reName := mux.Vars(r)["reName"]
+	reName := mux.Vars(r)["appName"]
 
 	cachedToken, found := sh.tokenCache.Get(reName)
 	if !found || cachedToken != token {

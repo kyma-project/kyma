@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	re_type_v1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	appTypes "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 )
 
-type reCRValidator struct{}
+type appCRValidator struct{}
 
 const (
 	apiEntryType         = "API"
@@ -16,8 +16,8 @@ const (
 	connectedAppLabelKey = "connected-app"
 )
 
-// Validate validates RemoteEnvironment custom resource.
-func (v *reCRValidator) Validate(dto *re_type_v1alpha1.RemoteEnvironment) error {
+// Validate validates Application custom resource.
+func (v *appCRValidator) Validate(dto *appTypes.Application) error {
 	var messages []string
 
 	for _, svc := range dto.Spec.Services {
@@ -64,7 +64,7 @@ func (v *reCRValidator) Validate(dto *re_type_v1alpha1.RemoteEnvironment) error 
 	return nil
 }
 
-func (*reCRValidator) containsConnectedAppLabel(labels map[string]string) bool {
+func (*appCRValidator) containsConnectedAppLabel(labels map[string]string) bool {
 	for key := range labels {
 		if key == connectedAppLabelKey {
 			return true

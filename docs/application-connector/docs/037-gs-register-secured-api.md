@@ -3,9 +3,9 @@ title: Register a secured API
 type: Details
 ---
 
-The Metadata Service allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617) and [OAuth](https://tools.ietf.org/html/rfc6750).
+The Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617) and [OAuth](https://tools.ietf.org/html/rfc6750).
 
-You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, the Metadata Service returns a `400` code response.
+You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, the Application Registry returns a `400` code response.
 
 ## Register a Basic Authentication-secured API
 

@@ -16,16 +16,8 @@ func (c *FakeApplicationconnectorV1alpha1) ApplicationMappings(namespace string)
 	return &FakeApplicationMappings{c, namespace}
 }
 
-func (c *FakeApplicationconnectorV1alpha1) EnvironmentMappings(namespace string) v1alpha1.EnvironmentMappingInterface {
-	return &FakeEnvironmentMappings{c, namespace}
-}
-
 func (c *FakeApplicationconnectorV1alpha1) EventActivations(namespace string) v1alpha1.EventActivationInterface {
 	return &FakeEventActivations{c, namespace}
-}
-
-func (c *FakeApplicationconnectorV1alpha1) RemoteEnvironments() v1alpha1.RemoteEnvironmentInterface {
-	return &FakeRemoteEnvironments{c}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

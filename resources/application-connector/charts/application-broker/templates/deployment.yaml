@@ -76,4 +76,4 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: re-broker-config-map
+          name: app-broker-config-map

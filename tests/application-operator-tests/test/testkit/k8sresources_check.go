@@ -2,17 +2,18 @@ package testkit
 
 import (
 	"fmt"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
-	ingressNameFormat             = "%s-remote-environment"
-	proxyServiceDeploymentFormat  = "%s-proxy-service"
-	proxyServiceRoleFormat        = "%s-proxy-service-role"
-	proxyServiceRoleBindingFormat = "%s-proxy-service-rolebinding"
-	proxyServiceSvcFormat         = "%s-proxy-service-external-api"
-	eventServiceDeploymentFormat  = "%s-event-service"
-	eventServiceSvcFormat         = "%s-event-service-external-api"
+	ingressNameFormat                 = "%s-application"
+	applicationProxyDeploymentFormat  = "%s-application-proxy"
+	applicationProxyRoleFormat        = "%s-application-proxy-role"
+	applicationProxyRoleBindingFormat = "%s-application-proxy-rolebinding"
+	applicationProxySvcFormat         = "%s-application-proxy-external-api"
+	eventServiceDeploymentFormat      = "%s-event-service"
+	eventServiceSvcFormat             = "%s-event-service-external-api"
 )
 
 type k8sResource struct {
@@ -31,25 +32,25 @@ func newResource(name string, kind string, getFunc func(string, v1.GetOptions) (
 
 type K8sResourceChecker struct {
 	k8sClient K8sResourcesClient
-	reName    string
+	appName   string
 
 	resources []k8sResource
 }
 
-func NewK8sChecker(client K8sResourcesClient, reName string) *K8sResourceChecker {
+func NewK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChecker {
 	resources := []k8sResource{
-		newResource(fmt.Sprintf(ingressNameFormat, reName), "ingress", client.GetIngress),
-		newResource(fmt.Sprintf(proxyServiceDeploymentFormat, reName), "deployment", client.GetDeployment),
-		newResource(fmt.Sprintf(proxyServiceRoleFormat, reName), "role", client.GetRole),
-		newResource(fmt.Sprintf(proxyServiceRoleBindingFormat, reName), "ingress", client.GetRoleBinding),
-		newResource(fmt.Sprintf(proxyServiceSvcFormat, reName), "ingress", client.GetService),
-		newResource(fmt.Sprintf(eventServiceDeploymentFormat, reName), "ingress", client.GetDeployment),
-		newResource(fmt.Sprintf(eventServiceSvcFormat, reName), "ingress", client.GetService),
+		newResource(fmt.Sprintf(ingressNameFormat, appName), "ingress", client.GetIngress),
+		newResource(fmt.Sprintf(applicationProxyDeploymentFormat, appName), "deployment", client.GetDeployment),
+		newResource(fmt.Sprintf(applicationProxyRoleFormat, appName), "role", client.GetRole),
+		newResource(fmt.Sprintf(applicationProxyRoleBindingFormat, appName), "ingress", client.GetRoleBinding),
+		newResource(fmt.Sprintf(applicationProxySvcFormat, appName), "ingress", client.GetService),
+		newResource(fmt.Sprintf(eventServiceDeploymentFormat, appName), "ingress", client.GetDeployment),
+		newResource(fmt.Sprintf(eventServiceSvcFormat, appName), "ingress", client.GetService),
 	}
 
 	return &K8sResourceChecker{
 		k8sClient: client,
-		reName:    reName,
+		appName:   appName,
 		resources: resources,
 	}
 }
