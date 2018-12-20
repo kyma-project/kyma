@@ -26,21 +26,12 @@ const (
 	expectedOutput = "Call to the function load-test was successful!"
 )
 
-var (
-	endpoint   = fmt.Sprintf("http://%s.%s:8080", functionName, namespace)
-	client     = getHttpClient(true)
-	slack      *Slack
-	testResult *TestResult
-	timeout    = time.After(time.Duration(5) * time.Minute)
-	stopping   = false
-	mutex      sync.RWMutex
-)
-
-type Slack struct {
+type slack struct {
 	SlackEndpoint string
 	SlackChannel  string
 }
-type TestResult struct {
+
+type testResult struct {
 	sync.RWMutex
 	resultMessage         string
 	errorResponse         string
@@ -51,6 +42,16 @@ type TestResult struct {
 	totalRequests         int
 }
 
+var (
+	endpoint = fmt.Sprintf("http://%s.%s:8080", functionName, namespace)
+	client   = getHTTPClient(true)
+	slk      *slack
+	tResult  *testResult
+	timeout  = time.After(time.Duration(5) * time.Minute)
+	stopping = false
+	mutex    sync.RWMutex
+)
+
 func init() {
 	cleanup()
 	log.Printf("Creating namespace: %s", namespace)
@@ -60,8 +61,8 @@ func init() {
 	log.Printf("Verifying correct function output for %s", functionName)
 	log.Printf("HTTP endpoint for the function: %v", endpoint)
 	ensureOutputIsCorrect()
-	slack = NewSlack()
-	testResult = NewTestResult()
+	slk = newSlack()
+	tResult = newTestResult()
 }
 
 func main() {
@@ -78,8 +79,8 @@ func main() {
 	doneCh := make(chan bool)
 	var wg sync.WaitGroup
 	wg.Add(numCPUs)
-	testResult.totalRequests = numCPUs * numRequest
-	log.Println("Number of requests to be done: ", testResult.totalRequests)
+	tResult.totalRequests = numCPUs * numRequest
+	log.Println("Number of requests to be done: ", tResult.totalRequests)
 	for c := 0; c < numCPUs; c++ {
 		go func() {
 			defer wg.Done()
@@ -89,7 +90,7 @@ func main() {
 					break
 				}
 				mutex.RUnlock()
-				makeHttpRequest(respCh)
+				makeHTTPRequest(respCh)
 			}
 		}()
 	}
@@ -127,40 +128,40 @@ func main() {
 
 }
 
-func makeHttpRequest(respCh chan<- string) {
-	testResult.Lock()
-	defer testResult.Unlock()
-	testResult.totalRequestsDone++
+func makeHTTPRequest(respCh chan<- string) {
+	tResult.Lock()
+	defer tResult.Unlock()
+	tResult.totalRequestsDone++
 	start := time.Now()
 	testID := randomString(8)
 	resp, err := http.Post(endpoint, "text/plain", bytes.NewBuffer([]byte(testID)))
 	secs := time.Since(start).Seconds()
 	if err != nil {
-		testResult.errorRequest = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with error on response [ERROR] %v", testID, secs, err)
-		respCh <- testResult.errorRequest
-		testResult.numFailedRequests++
+		tResult.errorRequest = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with error on response [ERROR] %v", testID, secs, err)
+		respCh <- tResult.errorRequest
+		tResult.numFailedRequests++
 		return
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		testResult.errorResponse = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with error : unable to read response [ERROR] %v", testID, secs, err)
-		respCh <- testResult.errorResponse
-		testResult.numFailedRequests++
+		tResult.errorResponse = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with error : unable to read response [ERROR] %v", testID, secs, err)
+		respCh <- tResult.errorResponse
+		tResult.numFailedRequests++
 		return
 	}
 	if resp.StatusCode != http.StatusOK {
-		testResult.errorResponse = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with no 200 response: response code: %v endpoint: %s", testID, secs, resp.StatusCode, endpoint)
-		respCh <- testResult.errorResponse
-		testResult.numFailedRequests++
+		tResult.errorResponse = fmt.Sprintf("TestId: [%v] %.2f secs elapsed with no 200 response: response code: %v endpoint: %s", testID, secs, resp.StatusCode, endpoint)
+		respCh <- tResult.errorResponse
+		tResult.numFailedRequests++
 		return
 	}
 	respCh <- fmt.Sprintf("TestId: [%v] Response code: HTTP %v, Response: %s, Response time: %.2f secs,  endpoint: %s", testID, resp.StatusCode, string([]byte(body)), secs, endpoint)
-	testResult.numSuccessfulRequests++
+	tResult.numSuccessfulRequests++
 }
 
 func closingTest(start time.Time, premature bool) {
 	checkFunctionAutoscaled(premature)
-	slack.sendNotificationtoSlackChannel(testResult)
+	slk.sendNotificationtoSlackChannel(tResult)
 	log.Printf("%.2fm elapsed\n", time.Since(start).Minutes())
 	cleanup()
 	if premature {
@@ -292,7 +293,7 @@ func randomString(n int) string {
 	return string(b)
 }
 
-func getHttpClient(skipVerify bool) *http.Client {
+func getHTTPClient(skipVerify bool) *http.Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 	}
@@ -372,13 +373,13 @@ func checkFunctionHpa() ([]byte, error) {
 }
 
 func checkFunctionAutoscaled(premature bool) {
-	testResult.RLock()
+	tResult.RLock()
 	functionHpaCmd := exec.Command("kubectl", "-n", namespace, "get", "hpa", "-l", "function="+functionName, "-ojsonpath={.items[0].metadata.name} {.items[0].spec.minReplicas} {.items[0].status.currentReplicas} {.items[0].status.currentCPUUtilizationPercentage}")
 	hpaOutput, err := functionHpaCmd.CombinedOutput()
 	result := ""
 	if err != nil {
-		testResult.resultMessage = fmt.Sprintf("Error in fetching function HPA: %v \n", string(hpaOutput))
-		log.Printf(testResult.resultMessage)
+		tResult.resultMessage = fmt.Sprintf("Error in fetching function HPA: %v \n", string(hpaOutput))
+		log.Printf(tResult.resultMessage)
 	} else {
 		if premature {
 			result = "<!channel>\nHorizontal Pod Autoscaler test timed out!"
@@ -410,35 +411,35 @@ func checkFunctionAutoscaled(premature bool) {
 			result = "Function autoscale succeeded"
 		}
 		finalStatus := fmt.Sprintf("Test HPA final status: %s \n%s \n%s \n%s\n", result, minReplicasStatus, currentReplicasStatus, cpuStatus)
-		testResult.resultMessage = finalStatus
+		tResult.resultMessage = finalStatus
 
-		if testResult.totalRequests > 0 {
-			totalRequests := fmt.Sprintf("Total number of requests: %v \n", testResult.totalRequests)
-			testResult.resultMessage = fmt.Sprintf("%s %s\n", testResult.resultMessage, strings.TrimSpace(totalRequests))
+		if tResult.totalRequests > 0 {
+			totalRequests := fmt.Sprintf("Total number of requests: %v \n", tResult.totalRequests)
+			tResult.resultMessage = fmt.Sprintf("%s %s\n", tResult.resultMessage, strings.TrimSpace(totalRequests))
 		}
 
-		if testResult.totalRequestsDone > 0 {
-			totalRequestsDone := fmt.Sprintf("Total number of requests done: %v \n", testResult.totalRequestsDone)
-			testResult.resultMessage = fmt.Sprintf("%s %s\n", testResult.resultMessage, strings.TrimSpace(totalRequestsDone))
+		if tResult.totalRequestsDone > 0 {
+			totalRequestsDone := fmt.Sprintf("Total number of requests done: %v \n", tResult.totalRequestsDone)
+			tResult.resultMessage = fmt.Sprintf("%s %s\n", tResult.resultMessage, strings.TrimSpace(totalRequestsDone))
 		}
 
-		if testResult.numSuccessfulRequests > 0 {
-			numSuccessfulRequests := fmt.Sprintf("Successful requests: %v \n", testResult.numSuccessfulRequests)
-			testResult.resultMessage = fmt.Sprintf("%s %s\n", testResult.resultMessage, strings.TrimSpace(numSuccessfulRequests))
+		if tResult.numSuccessfulRequests > 0 {
+			numSuccessfulRequests := fmt.Sprintf("Successful requests: %v \n", tResult.numSuccessfulRequests)
+			tResult.resultMessage = fmt.Sprintf("%s %s\n", tResult.resultMessage, strings.TrimSpace(numSuccessfulRequests))
 		}
 
-		if testResult.numFailedRequests > 0 {
-			numFailedRequests := fmt.Sprintf("Failed resquests: %v \n", testResult.numFailedRequests)
-			testResult.resultMessage = fmt.Sprintf("%s %s\n", testResult.resultMessage, strings.TrimSpace(numFailedRequests))
-			testResult.totalRequests = testResult.totalRequests + testResult.numFailedRequests
+		if tResult.numFailedRequests > 0 {
+			numFailedRequests := fmt.Sprintf("Failed resquests: %v \n", tResult.numFailedRequests)
+			tResult.resultMessage = fmt.Sprintf("%s %s\n", tResult.resultMessage, strings.TrimSpace(numFailedRequests))
+			tResult.totalRequests = tResult.totalRequests + tResult.numFailedRequests
 		}
 
-		log.Println(testResult.resultMessage)
-		testResult.RUnlock()
+		log.Println(tResult.resultMessage)
+		tResult.RUnlock()
 	}
 }
 
-func (slack *Slack) sendNotificationtoSlackChannel(testResult *TestResult) {
+func (slack *slack) sendNotificationtoSlackChannel(testResult *testResult) {
 	textMessage := fmt.Sprintf(`{"channel": "%v", "text":"%v"}"`, slack.SlackChannel, testResult.resultMessage)
 	var jsonStr = []byte(textMessage)
 	req, err := http.NewRequest("POST", slack.SlackEndpoint, bytes.NewBuffer(jsonStr))
@@ -446,6 +447,7 @@ func (slack *Slack) sendNotificationtoSlackChannel(testResult *TestResult) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("Unable to send slack notification to endpoint: %v : Error: %v", slack.SlackChannel, err)
+		return
 	}
 	defer resp.Body.Close()
 	log.Println("Slack response status:", resp.Status)
@@ -453,7 +455,7 @@ func (slack *Slack) sendNotificationtoSlackChannel(testResult *TestResult) {
 	log.Println("Slack response response body:", string(body))
 }
 
-func NewSlack() *Slack {
+func newSlack() *slack {
 	slackEndpoint := os.Getenv("LOAD_TEST_SLACK_ENDPOINT")
 	if len(slackEndpoint) == 0 {
 		log.Fatalln("No slack endpoint provided!")
@@ -463,19 +465,19 @@ func NewSlack() *Slack {
 	if len(apiToken) == 0 {
 		log.Fatalln("No slack api token provided!")
 	}
-	sUrl := fmt.Sprintf("%s%s", slackEndpoint, apiToken)
+	sURL := fmt.Sprintf("%s%s", slackEndpoint, apiToken)
 
 	sChannel := os.Getenv("LOAD_TEST_SLACK_CHANNEL")
 	if len(sChannel) == 0 {
 		log.Fatalln("No slack channel provided!")
 	}
-	s := &Slack{sUrl, sChannel}
+	s := &slack{sURL, sChannel}
 
 	log.Printf("Slack configuration: %v", s)
 	return s
 }
 
-func NewTestResult() *TestResult {
-	t := &TestResult{}
+func newTestResult() *testResult {
+	t := &testResult{}
 	return t
 }
