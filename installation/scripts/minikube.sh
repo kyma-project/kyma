@@ -11,6 +11,7 @@ KUBECTL_CLI_VERSION=1.13.1
 VM_DRIVER=hyperkit
 DISK_SIZE=20g
 MEMORY=8192
+CPU=4
 
 source $CURRENT_DIR/utils.sh
 
@@ -185,11 +186,11 @@ function start() {
     fi
 
     minikube start \
-    --memory $MEMORY \
-    --cpus 4 \
-    --kubernetes-version=v$KUBERNETES_VERSION \
-    --vm-driver=$VM_DRIVER \
-    --disk-size=$DISK_SIZE \
+    --kubernetes-version=v${KUBERNETES_VERSION} \
+    --cpus=${CPU} \
+    --memory=${MEMORY} \
+    --vm-driver=${VM_DRIVER} \
+    --disk-size=${DISK_SIZE} \
     --extra-config "apiserver.cors-allowed-origins=http://*"
 
     waitForMinikubeToBeUp
