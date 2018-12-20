@@ -187,7 +187,6 @@ function start() {
     minikube start \
     --memory $MEMORY \
     --cpus 4 \
-    --extra-config=apiserver.Authorization.Mode=RBAC \
     --kubernetes-version=v$KUBERNETES_VERSION \
     --vm-driver=$VM_DRIVER \
     --disk-size=$DISK_SIZE \
