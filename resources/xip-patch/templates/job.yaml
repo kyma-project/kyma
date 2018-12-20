@@ -14,4 +14,4 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: {{ .Release.Name }}
-        image: eu.gcr.io/kyma-project/pr/xip-patch:PR-2055
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.xip_patch.dir }}xip-patch:{{ .Values.global.xip_patch.version }}
