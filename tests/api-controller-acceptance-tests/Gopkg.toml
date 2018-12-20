@@ -42,8 +42,7 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  source = "https://github.com/sjanota/kyma"
-  branch = "test-ingressgateway"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/go-test/deep"
