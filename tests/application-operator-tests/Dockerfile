@@ -1,15 +1,13 @@
-FROM golang:1.9-alpine3.7 as builder
-LABEL source=git@github.com:kyma-project/kyma.git
+FROM golang:1.10-alpine as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/application-operator-tests
 
-ADD . $SRC_DIR
-
 WORKDIR $SRC_DIR
+COPY . $SRC_DIR
 
 RUN go test -o controllertests.test -c ./test/controllertests
 
-FROM alpine
+FROM alpine:3.8
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
