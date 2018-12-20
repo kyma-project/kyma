@@ -188,7 +188,6 @@ function start() {
     --memory $MEMORY \
     --cpus 4 \
     --extra-config=apiserver.Authorization.Mode=RBAC \
-    --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList=".*" \
     --extra-config=controller-manager.ClusterSigningCertFile="/var/lib/localkube/certs/ca.crt" \
     --extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
     --extra-config=apiserver.admission-control="LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota" \
@@ -197,6 +196,7 @@ function start() {
     --disk-size=$DISK_SIZE \
     --feature-gates="MountPropagation=false" \
     -b=localkube
+    --extra-config "apiserver.cors-allowed-origins=http://*"
 
     waitForMinikubeToBeUp
 
