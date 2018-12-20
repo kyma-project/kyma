@@ -10,7 +10,7 @@ This component must be installed after `cluster-essentials` the component and be
 
 ## Usage
 
-Application cannot be configured via environmental variables.
+You can't configure this component through environment variables.
 
 The application:
  1. Reads `istio-ingressgateway` Service's external address.
