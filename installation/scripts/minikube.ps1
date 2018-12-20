@@ -49,7 +49,6 @@ function StartMinikube() {
         + " --kubernetes-version=v${KUBERNETES_VERSION}"`
         + " --disk-size=${DISK_SIZE}"`
         + " --vm-driver=${VM_DRIVER}"`
-        + " -b=localkube"
 
     if ($VM_DRIVER -eq "hyperv") {
         $cmd += " --hyperv-virtual-switch='${env.HYPERV_VIRTUAL_SW}'"
