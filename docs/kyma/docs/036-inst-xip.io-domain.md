@@ -9,7 +9,7 @@ This solution is not suitable for a production environment, but makes for a grea
 
 ## Prerequisites
 
-The prerequisites match these listed in the **Install Kyma on a GKE cluster**. However, you don't need to prepare a domain for your cluster as it is replaced by a wildcard DNS provided by [`xip.io`](www.xip.io).
+The prerequisites match these listed in the **Install Kyma on a GKE cluster** document. However, you don't need to prepare a domain for your cluster as it is replaced by a wildcard DNS provided by [`xip.io`](www.xip.io).
 
 ## Installation
 
@@ -48,4 +48,4 @@ Access your cluster under this address:
 https://console.{WILDCARD_DNS}.xip.io
 ```
 
->**NOTE:** To log in to your cluster, use the default `admin` static user. To learn how to get the login details for this user, see the **Access the Kyma console** in the **Install Kyma locally from the release** document.
+>**NOTE:** To log in to your cluster, use the default `admin` static user. To learn how to get the login details for this user, see the **Access the Kyma console** section in the **Install Kyma locally from the release** document.
