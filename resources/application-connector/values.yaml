@@ -21,7 +21,7 @@ global:
     version: acb1e829
   connector_service_tests:
     dir: develop/
-    version: acb1e829
+    version: 32a77c71
   connection_token_handler:
     dir: develop/
     version: acb1e829
