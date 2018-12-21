@@ -14,4 +14,4 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: {{ .Release.Name }}
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.xip_patch.dir }}xip-patch:{{ .Values.global.xip_patch.version }}
+        image: {{ .Values.containerRegistry.path }}/{{ .Values.xip_patch.dir }}xip-patch:{{ .Values.xip_patch.version }}
