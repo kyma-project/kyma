@@ -32,45 +32,39 @@ func NewServiceBrokerSyncer(serviceBrokerGetter v1beta12.ServiceBrokersGetter) *
 }
 
 // Sync syncs the ServiceBrokers
-func (r *ServiceBrokerSync) Sync(labelSelector string, maxSyncRetries int) error {
+func (r *ServiceBrokerSync) Sync(maxSyncRetries int) error {
+	labelSelector := fmt.Sprintf("%s=%s", nsbroker.BrokerLabelKey, nsbroker.BrokerLabelValue)
 	brokersList, err := r.serviceBrokerGetter.ServiceBrokers(v1.NamespaceAll).List(v1.ListOptions{
 		LabelSelector: labelSelector,
 	})
 	if err != nil {
 		return errors.Wrapf(err, "while listing ServiceBrokers [labelSelector: %s]", labelSelector)
 	}
-
-	brokersInfo := make([]brokerInfo, 0)
-	for _, broker := range brokersList.Items {
-		brokersInfo = append(brokersInfo, brokerInfo{
-			name:      broker.Name,
-			namespace: broker.Namespace,
-		})
-	}
+	r.log.Infof("There are %d ServiceBroker(s) with label: %s", len(brokersList.Items), labelSelector)
 
 	var resultErr *multierror.Error
-	for _, broker := range brokersInfo {
+	for _, broker := range brokersList.Items {
 		for i := 0; i < maxSyncRetries; i++ {
-			retrievedBroker, err := r.serviceBrokerGetter.ServiceBrokers(broker.namespace).Get(broker.name, v1.GetOptions{})
+			retrievedBroker, err := r.serviceBrokerGetter.ServiceBrokers(broker.Namespace).Get(broker.Name, v1.GetOptions{})
 			if err != nil {
-				resultErr = multierror.Append(resultErr, errors.Wrapf(err, "while getting ServiceBroker %q [namespace: %s]", broker.name, broker.namespace))
+				resultErr = multierror.Append(resultErr, errors.Wrapf(err, "while getting ServiceBroker %q [namespace: %s]", broker.Name, broker.Namespace))
 				if i == maxSyncRetries-1 {
-					resultErr = multierror.Append(resultErr, fmt.Errorf("could not sync ServiceBroker %q [namespace: %s], after %d tries", broker.name, broker.namespace, maxSyncRetries))
+					resultErr = multierror.Append(resultErr, fmt.Errorf("could not sync ServiceBroker %q [namespace: %s], after %d tries", broker.Name, broker.Namespace, maxSyncRetries))
 				}
 				continue
 			}
 
 			retrievedBroker.Spec.RelistRequests = retrievedBroker.Spec.RelistRequests + 1
-			_, err = r.serviceBrokerGetter.ServiceBrokers(broker.namespace).Update(retrievedBroker)
+			_, err = r.serviceBrokerGetter.ServiceBrokers(broker.Namespace).Update(retrievedBroker)
 			if err == nil {
-				r.log.Infof("Relist request for ServiceBroker %q [namespace: %s] fulfilled", broker.name, broker.namespace)
+				r.log.Infof("Relist request for ServiceBroker %q [namespace: %s] fulfilled", broker.Name, broker.Namespace)
 				break
 			}
 			if !apiErrors.IsConflict(err) {
-				resultErr = multierror.Append(resultErr, errors.Wrapf(err, "while updating ServiceBroker %q [namespace: %s]", broker.name, broker.namespace))
+				resultErr = multierror.Append(resultErr, errors.Wrapf(err, "while updating ServiceBroker %q [namespace: %s]", broker.Name, broker.Namespace))
 			}
 			if i == maxSyncRetries-1 {
-				resultErr = multierror.Append(resultErr, fmt.Errorf("could not sync ServiceBroker %q [namespace: %s], after %d tries", broker.name, broker.namespace, maxSyncRetries))
+				resultErr = multierror.Append(resultErr, fmt.Errorf("could not sync ServiceBroker %q [namespace: %s], after %d tries", broker.Name, broker.Namespace, maxSyncRetries))
 			}
 		}
 	}
