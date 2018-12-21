@@ -32,5 +32,4 @@ ssh-add -l
 git config --global user.email "${BOT_GITHUB_EMAIL}"
 git config --global user.name "${BOT_GITHUB_NAME}"
 git config --global core.sshCommand 'ssh -i '${SSH_FILE}''
-echo $(pwd)
-# git remote add origin git@github.com:kyma-project/website.git
+git remote add origin git@github.com:kyma-project/website.git

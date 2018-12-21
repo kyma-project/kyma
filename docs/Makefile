@@ -16,6 +16,6 @@ build-and-push-images:
 	go run main.go
 prepare-git:
 	cp ${BOT_GITHUB_SSH_PATH} $(HOME)/ssh_key.pem && \
-	./git-config.sh --ssh-file $(HOME)/ssh_key.pem
+	./.ci/git-config.sh --ssh-file $(HOME)/ssh_key.pem
 generate-docs:
-	./generate-docs.sh --publish --skip $(SKIP)
+	./.ci/generate-docs.sh --publish --skip $(SKIP)

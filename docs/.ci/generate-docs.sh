@@ -19,7 +19,7 @@ readonly SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 readonly KYMA_REPOSITORY="https://github.com/kyma-project/kyma.git"
 readonly DOCUMENTATION_DIR="${SCRIPTS_DIR}/../static/documentation"
 readonly WEBSITE_DIR="../../../website"
-readonly GENERATOR_IMAGE="eu.gcr.io/kyma-project/documentation-generator:0.1.49"
+readonly GENERATOR_IMAGE="eu.gcr.io/kyma-project/prow/test/pr/documentation-generator:PR-164"
 
 # Colors
 readonly ARGS=("$@")
