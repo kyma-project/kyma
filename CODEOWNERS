@@ -159,6 +159,9 @@
 # The `service-catalog` chart
 /resources/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
+# The `xip-patch` chart
+/resources/xip-patch/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
+
 # Components
 #API server proxy Component
 /components/apiserver-proxy/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
@@ -216,6 +219,9 @@
 
 # Event Service Component
 /components/event-service/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+
+# Xip Patch Component
+/components/xip-patch/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # Tests
 # acceptance tests
