@@ -2,6 +2,9 @@ package domain
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/experimental"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 	"time"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/apicontroller"
@@ -26,7 +29,13 @@ type RootResolver struct {
 	idpPreset *authentication.Resolver
 }
 
-func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.Config, informerResyncPeriod time.Duration) (*RootResolver, error) {
+func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
+
+	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
+
+
+	makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer, featureToggles.ModulePluggability)
+
 	contentContainer, err := content.New(contentCfg)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Content resolver")

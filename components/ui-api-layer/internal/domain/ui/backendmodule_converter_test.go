@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestServiceClassConverter_ToGQL(t *testing.T) {
+func TestBackendModuleConverter_ToGQL(t *testing.T) {
 	t.Run("All properties are given", func(t *testing.T) {
 		converter := backendModuleConverter{}
 		name := "test-name"
@@ -41,5 +41,53 @@ func TestServiceClassConverter_ToGQL(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Nil(t, item)
+	})
+}
+
+func TestBackendModuleConverter_ToGQLs(t *testing.T) {
+	name := "example-name"
+	module := v1alpha1.BackendModule{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		instances := []*v1alpha1.BackendModule{
+			&module,
+			&module,
+		}
+
+		converter := backendModuleConverter{}
+		result, err := converter.ToGQLs(instances)
+
+		require.NoError(t, err)
+		assert.Len(t, result, 2)
+		assert.Equal(t, name, result[0].Name)
+	})
+
+	t.Run("Empty", func(t *testing.T) {
+		var instances []*v1alpha1.BackendModule
+
+		converter := backendModuleConverter{}
+		result, err := converter.ToGQLs(instances)
+
+		require.NoError(t, err)
+		assert.Empty(t, result)
+	})
+
+	t.Run("With nil", func(t *testing.T) {
+		instances := []*v1alpha1.BackendModule{
+			nil,
+			&module,
+			nil,
+		}
+
+		converter := backendModuleConverter{}
+		result, err := converter.ToGQLs(instances)
+
+		require.NoError(t, err)
+		assert.Len(t, result, 1)
+		assert.Equal(t, name, result[0].Name)
 	})
 }
