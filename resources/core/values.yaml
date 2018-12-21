@@ -28,8 +28,8 @@ global:
     dir: develop/
     version: 8c274255
   api_controller_acceptance_tests:
-    dir: pr/
-    version: PR-1948
+    dir: develop/
+    version: 8a32751d
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
@@ -59,8 +59,8 @@ global:
     dir: develop/
     version: 0d1ffe15
   kubeless_integration_tests:
-    dir: pr/
-    version: PR-1948
+    dir: develop/
+    version: 8a32751d
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
