@@ -309,7 +309,7 @@
     "components/idppreset/pkg/client/informers/externalversions/internalinterfaces",
     "components/idppreset/pkg/client/listers/authentication/v1alpha1"
   ]
-  revision = "46be4bf9ea1d63216d644240036909ce0b50c7eb"
+  revision = "56b261fcf0ecff236ed643d5c6620faad1b708d2"
 
 [[projects]]
   name = "github.com/magiconair/properties"
@@ -852,6 +852,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6dec8216805a942e93006a2f37d5b9fd1ca89828c303d909171ced5d681b5832"
+  inputs-digest = "bf41d9c5fbe93ffa253289a546e7dfe4979d1f4b45188b8d634926bbcd99fb4c"
   solver-name = "gps-cdcl"
   solver-version = 1

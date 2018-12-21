@@ -4,7 +4,7 @@ In this example, the ServiceBindingUsage injects a Secret associated with the `r
 
 
 ```yaml
-apiVersion: servicecatalog.kyma.cx/v1alpha1
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
 kind: ServiceBindingUsage
 metadata:
  name: redis-client-binding-usage
@@ -42,7 +42,7 @@ status:
 The corresponding UsageKind looks as follows:
 
 ```yaml
-apiVersion: servicecatalog.kyma.cx/v1alpha1
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
 kind: UsageKind
 metadata:
   name: deployment

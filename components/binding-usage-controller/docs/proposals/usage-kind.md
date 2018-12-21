@@ -11,7 +11,7 @@ The idea is to have a new cluster-wide custom resource which defines a bindable 
 See the example:
 
 ```yaml
-apiVersion: servicecatalog.kyma.cx/v1alpha1
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
 kind: UsageKind
 metadata:
    name: function
@@ -47,7 +47,7 @@ The administrator who adds UsageKind must take care of RBAC settings. BUC and ui
 
 There is a defined UsageKind:
 ```yaml
-apiVersion: servicecatalog.kyma.cx/v1alpha1
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
 kind: UsageKind
 metadata:
   name: function
@@ -82,7 +82,7 @@ spec:
   instanceRef:
     name: redis
 ---
-apiVersion: servicecatalog.kyma.cx/v1alpha1
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
 kind: ServiceBindingUsage
 metadata:
  name: fn-redis-client
@@ -105,18 +105,18 @@ The Binding Usage Controller implementation cannot handle the ServiceBindingUsag
 
 1. In this scenario, there are the following UsageKind and ServiceBindingUsage:
 ```yaml
-apiVersion: servicecatalog.kyma.cx/v1alpha1
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
 kind: UsageKind
 metadata:
   clusterName: ""
   creationTimestamp: 2018-08-06T08:02:19Z
   finalizers:
-  - servicecatalog.kyma.cx/usage-kind-protection
+  - servicecatalog.kyma-project.io/usage-kind-protection
   generation: 1
   name: deployment
   namespace: ""
   resourceVersion: "10984"
-  selfLink: /apis/servicecatalog.kyma.cx/v1alpha1/usagekinds/deployment
+  selfLink: /apis/servicecatalog.kyma-project.io/v1alpha1/usagekinds/deployment
   uid: 0a7716ef-994f-11e8-98a9-560fb490844b
 spec:
   displayName: Deployment
@@ -128,18 +128,18 @@ spec:
 ```
 
 ```yaml
-apiVersion: servicecatalog.kyma.cx/v1alpha1
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
   kind: ServiceBindingUsage
   metadata:
     clusterName: ""
     creationTimestamp: 2018-08-06T08:02:34Z
     finalizers:
-      - servicecatalog.kyma.cx/sbu-protection
+      - servicecatalog.kyma-project.io/sbu-protection
     generation: 1
     name: deploy-redis-client
     namespace: default
     resourceVersion: "11016"
-    selfLink: /apis/servicecatalog.kyma.cx/v1alpha1/namespaces/default/servicebindingusages/deploy-redis-client
+    selfLink: /apis/servicecatalog.kyma-project.io/v1alpha1/namespaces/default/servicebindingusages/deploy-redis-client
     uid: 13c260e7-994f-11e8-98a9-560fb490844b
   spec:
     serviceBindingRef:
@@ -158,7 +158,7 @@ apiVersion: servicecatalog.kyma.cx/v1alpha1
 2. The administrator performs the UsageKind deletion.
 3. The Usage Kind Protection Controller handles the UsageKind update. The controller does not remove the UsageKind finalizer as it is used by the ServiceBindingUsage. The UsageKind looks as follows:
 ```yaml
-apiVersion: servicecatalog.kyma.cx/v1alpha1
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
 kind: UsageKind
 metadata:
   clusterName: ""
@@ -166,12 +166,12 @@ metadata:
   deletionGracePeriodSeconds: 0
   deletionTimestamp: 2018-08-06T08:15:09Z
   finalizers:
-  - servicecatalog.kyma.cx/usage-kind-protection
+  - servicecatalog.kyma-project.io/usage-kind-protection
   generation: 2
   name: deployment
   namespace: ""
   resourceVersion: "12019"
-  selfLink: /apis/servicecatalog.kyma.cx/v1alpha1/usagekinds/deployment
+  selfLink: /apis/servicecatalog.kyma-project.io/v1alpha1/usagekinds/deployment
   uid: 0a7716ef-994f-11e8-98a9-560fb490844b
 spec:
   displayName: Deployment

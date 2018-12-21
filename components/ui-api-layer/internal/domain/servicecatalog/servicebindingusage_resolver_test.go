@@ -235,7 +235,7 @@ func fixServiceBindingUsageResource() *api.ServiceBindingUsage {
 	return &api.ServiceBindingUsage{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceBindingUsage",
-			APIVersion: "servicecatalog.kyma.cx/v1alpha1",
+			APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "sbu-name",
