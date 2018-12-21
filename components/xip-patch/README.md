@@ -1,4 +1,4 @@
-# Istio Kyma patch
+# XIP patch
 
 ## Overview
 
