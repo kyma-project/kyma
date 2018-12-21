@@ -8,6 +8,8 @@ ARG MINIKUBE_VERSION
 ARG HELM_VERSION
 ARG DOCKER_VERSION
 
+# Dummy change
+
 # Get dependencies for curl of the docker
 RUN apt-get update && apt-get install -y \
     bash \
