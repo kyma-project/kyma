@@ -1,4 +1,4 @@
-{{ if .Values.tests.enabled }}
+{{- $serviceName := .Values.global.knative | ternary "knative-ingressgateway" "istio-ingressgateway" -}}
 ---
 apiVersion: v1
 kind: Namespace
@@ -24,8 +24,9 @@ spec:
     env:
     - name: DOMAIN_NAME
       value: {{ .Values.global.domainName }}
+    - name: INGRESSGATEWAY_ADDRESS
+      value: {{ $serviceName }}.istio-system.svc.cluster.local
     - name: NAMESPACE
       value: {{ .Values.global.api_controller_acceptance_tests.testNamespace }}
   restartPolicy: Never
 ---
-{{ end }}
