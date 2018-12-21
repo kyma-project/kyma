@@ -5,9 +5,9 @@ metadata:
     app: "Kyma"
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     heritage: {{ .Release.Service }}
-    prometheus: {{ .Release.Name }}
     release: {{ .Release.Name }}
     role: alert-rules
+    prometheus: monitoring
   name: {{ template "alert-rules.fullname" . }}
 data:
 {{- if .Values.prometheusRules }}
