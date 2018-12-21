@@ -5,13 +5,12 @@ import (
 
 	"fmt"
 
+	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-const (
-	tracingAnnotationKey = "servicebindingusages.servicecatalog.kyma.cx/tracing-information"
-)
+var tracingAnnotationKey = fmt.Sprintf("servicebindingusages.%s/tracing-information", sbuTypes.SchemeGroupVersion.Group)
 
 //go:generate mockery -name=genericUsageBindingAnnotationTracer -output=automock -outpkg=automock -case=underscore
 type genericUsageBindingAnnotationTracer interface {
