@@ -42,4 +42,4 @@ global:
     version: acb1e829
   application_broker:
     dir: develop/
-    version: 4707ed32
+    version: 8492a486
