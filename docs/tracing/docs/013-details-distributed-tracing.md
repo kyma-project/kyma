@@ -10,4 +10,4 @@ Distributed tracing charts out the transactions in cloud-native systems, helping
 
 The diagram shows how the distributed tracing helps to track the request path.
 
-![Distributed tracing](assets/distributed-tracing.svg)
+![Distributed tracing](./assets/distributed-tracing.svg)

@@ -9,15 +9,15 @@ Compare the traces using the **Jaeger** user interface.
 
 1. In the search page for traces, select the traces to compare and click **Compare Traces**.
 
-   ![Tracing architecture](assets/list-traces.png)
+   ![Tracing architecture](./assets/list-traces.png)
 
 2. The page shows the comparison of two traces selected in the previous step. The traces are marked with **A** and **B**.
 
-   ![Tracing architecture](assets/compare-traces-1.png)
+   ![Tracing architecture](./assets/compare-traces-1.png)
 
 3. Use the top menus for **A** and **B** to select the traces you want to compare.
 
-   ![Tracing architecture](assets/compare-traces-2.png)
+   ![Tracing architecture](./assets/compare-traces-2.png)
    
    Trace spans have different colors which indicate their meaning:
    * Dark colors indicate that the span is missing from one of the traces:
@@ -32,4 +32,4 @@ Compare the traces using the **Jaeger** user interface.
    
    >**NOTE:** Missing spans can be interpreted as either the application not calling the downstream service, which might be a bug, or that the downstream service is down.
 
-   ![Tracing architecture](assets/compare-traces-colors.png)
+   ![Tracing architecture](./assets/compare-traces-colors.png)
