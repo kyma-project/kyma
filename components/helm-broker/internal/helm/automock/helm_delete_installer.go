@@ -71,3 +71,62 @@ func (_m *HelmDeleteInstaller) InstallReleaseFromChart(_a0 *chart.Chart, ns stri
 
 	return r0, r1
 }
+
+// ListReleases provides a mock function with given fields: opts
+func (_m *HelmDeleteInstaller) ListReleases(opts ...helm.ReleaseListOption) (*services.ListReleasesResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *services.ListReleasesResponse
+	if rf, ok := ret.Get(0).(func(...helm.ReleaseListOption) *services.ListReleasesResponse); ok {
+		r0 = rf(opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*services.ListReleasesResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(...helm.ReleaseListOption) error); ok {
+		r1 = rf(opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateReleaseFromChart provides a mock function with given fields: rlsName, _a1, opts
+func (_m *HelmDeleteInstaller) UpdateReleaseFromChart(rlsName string, _a1 *chart.Chart, opts ...helm.UpdateOption) (*services.UpdateReleaseResponse, error) {
+	_va := make([]interface{}, len(opts))
+	for _i := range opts {
+		_va[_i] = opts[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, rlsName, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *services.UpdateReleaseResponse
+	if rf, ok := ret.Get(0).(func(string, *chart.Chart, ...helm.UpdateOption) *services.UpdateReleaseResponse); ok {
+		r0 = rf(rlsName, _a1, opts...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*services.UpdateReleaseResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, *chart.Chart, ...helm.UpdateOption) error); ok {
+		r1 = rf(rlsName, _a1, opts...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}

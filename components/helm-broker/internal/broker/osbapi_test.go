@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 
 	"github.com/kyma-project/kyma/components/helm-broker/platform/ptr"
 
@@ -23,6 +22,7 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker/automock"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/platform/logger/spy"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 )
@@ -188,7 +188,7 @@ func TestOSBAPIProvisionSuccess(t *testing.T) {
 	// GIVEN
 	ts := newOSBAPITestSuite(t)
 
-	ts.HelmClient.On("Install", mock.Anything, mock.Anything, ts.Exp.ReleaseName, ts.Exp.Namespace).Return(&rls.InstallReleaseResponse{}, nil).Once()
+	ts.HelmClient.On("InstallOrUpdate", mock.Anything, mock.Anything, ts.Exp.ReleaseName, ts.Exp.Namespace).Return(&helm.ReleaseResponse{}, nil).Once()
 	defer ts.HelmClient.AssertExpectations(t)
 
 	ts.ServerRun()
@@ -522,7 +522,7 @@ func TestOSBAPIBindFailureWithDisallowedParametersFieldInReq(t *testing.T) {
 
 type fakeBindTmplRenderer struct{}
 
-func (fakeBindTmplRenderer) Render(bindTemplate internal.BundlePlanBindTemplate, resp *rls.InstallReleaseResponse) (bind.RenderedBindYAML, error) {
+func (fakeBindTmplRenderer) Render(bindTemplate internal.BundlePlanBindTemplate, resp *helm.ReleaseResponse) (bind.RenderedBindYAML, error) {
 	return []byte(`fake`), nil
 }
 

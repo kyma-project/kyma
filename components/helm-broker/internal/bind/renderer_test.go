@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
+
 	google_protobuf "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
@@ -15,12 +17,11 @@ import (
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	hapi_release5 "k8s.io/helm/pkg/proto/hapi/release"
-	"k8s.io/helm/pkg/proto/hapi/services"
 )
 
 func TestRenderSuccess(t *testing.T) {
 	// given
-	fixResp := fixInstallReleaseResponse(fixChart())
+	fixResp := fixReleaseResponse(fixChart())
 	fixRenderOutFiles := map[string]string{
 		fmt.Sprintf("%s/%s", fixChart().Metadata.Name, "bindTmpl"): "rendered-content",
 	}
@@ -45,7 +46,7 @@ func TestRenderSuccess(t *testing.T) {
 func TestRenderFailureOnInputParamValidation(t *testing.T) {
 	for tn, tc := range map[string]struct {
 		expErrMsg string
-		givenResp *services.InstallReleaseResponse
+		givenResp *helm.ReleaseResponse
 	}{
 		"response is nil": {
 			expErrMsg: "input parameter 'InstallReleaseResponse' cannot be nil",
@@ -53,24 +54,24 @@ func TestRenderFailureOnInputParamValidation(t *testing.T) {
 		},
 		"missing Release filed": {
 			expErrMsg: "'Release' filed from 'InstallReleaseResponse' is missing",
-			givenResp: func() *services.InstallReleaseResponse {
-				malformedResp := fixInstallReleaseResponse(fixChart())
+			givenResp: func() *helm.ReleaseResponse {
+				malformedResp := fixReleaseResponse(fixChart())
 				malformedResp.Release = nil
 				return malformedResp
 			}(),
 		},
 		"missing Info filed": {
 			expErrMsg: "'Info' filed from 'InstallReleaseResponse' is missing",
-			givenResp: func() *services.InstallReleaseResponse {
-				malformedResp := fixInstallReleaseResponse(fixChart())
+			givenResp: func() *helm.ReleaseResponse {
+				malformedResp := fixReleaseResponse(fixChart())
 				malformedResp.Release.Info = nil
 				return malformedResp
 			}(),
 		},
 		"unsupported render engine": {
 			expErrMsg: "chart \"test-chart\" requested non-existent template engine \"osm-engine\"",
-			givenResp: func() *services.InstallReleaseResponse {
-				malformedResp := fixInstallReleaseResponse(fixChart())
+			givenResp: func() *helm.ReleaseResponse {
+				malformedResp := fixReleaseResponse(fixChart())
 				malformedResp.Release.Chart.Metadata.Engine = "osm-engine"
 				return malformedResp
 			}(),
@@ -94,7 +95,7 @@ func TestRenderFailureOnInputParamValidation(t *testing.T) {
 func TestRenderFailureOnCreatingToRenderValues(t *testing.T) {
 	// given
 	fixErr := errors.New("fix err")
-	fixResp := fixInstallReleaseResponse(fixChart())
+	fixResp := fixReleaseResponse(fixChart())
 	tplToRender := internal.BundlePlanBindTemplate("template-body-to-render")
 
 	toRenderFake := toRenderValuesFake{t}.WithForcedError(fixErr)
@@ -110,7 +111,7 @@ func TestRenderFailureOnCreatingToRenderValues(t *testing.T) {
 
 func TestRenderFailureOnEngineRender(t *testing.T) {
 	// given
-	fixResp := fixInstallReleaseResponse(fixChart())
+	fixResp := fixReleaseResponse(fixChart())
 	fixErr := errors.New("fix err")
 	tplToRender := internal.BundlePlanBindTemplate("template-body-to-render")
 
@@ -133,7 +134,7 @@ func TestRenderFailureOnEngineRender(t *testing.T) {
 
 func TestRenderFailureOnExtractingResolveBindFile(t *testing.T) {
 	// given
-	fixResp := fixInstallReleaseResponse(fixChart())
+	fixResp := fixReleaseResponse(fixChart())
 	tplToRender := internal.BundlePlanBindTemplate("template-body-to-render")
 
 	engineRenderMock := &automock.ChartGoTemplateRenderer{}
@@ -163,7 +164,7 @@ type toRenderValuesFake struct {
 	t *testing.T
 }
 
-func (r toRenderValuesFake) WithInputAssertion(expChrt chart.Chart, expResp *services.InstallReleaseResponse) func(*chart.Chart, *chart.Config, chartutil.ReleaseOptions, *chartutil.Capabilities) (chartutil.Values, error) {
+func (r toRenderValuesFake) WithInputAssertion(expChrt chart.Chart, expResp *helm.ReleaseResponse) func(*chart.Chart, *chart.Config, chartutil.ReleaseOptions, *chartutil.Capabilities) (chartutil.Values, error) {
 	return func(chrt *chart.Chart, chrtVals *chart.Config, options chartutil.ReleaseOptions, caps *chartutil.Capabilities) (chartutil.Values, error) {
 		assert.Equal(r.t, expChrt, *chrt)
 		assert.Equal(r.t, expResp.Release.Config, chrtVals)
@@ -196,8 +197,8 @@ func fixChart() chart.Chart {
 		},
 	}
 }
-func fixInstallReleaseResponse(ch chart.Chart) *services.InstallReleaseResponse {
-	return &services.InstallReleaseResponse{
+func fixReleaseResponse(ch chart.Chart) *helm.ReleaseResponse {
+	return &helm.ReleaseResponse{
 		Release: &hapi_release5.Release{
 			Info: &hapi_release5.Info{
 				LastDeployed: &google_protobuf.Timestamp{

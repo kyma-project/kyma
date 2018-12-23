@@ -10,12 +10,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/helm/pkg/proto/hapi/chart"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker/automock"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger/spy"
 )
 
@@ -96,8 +96,8 @@ func TestProvisionServiceProvisionSuccessAsyncInstall(t *testing.T) {
 
 	hiMock := &automock.HelmClient{}
 	defer hiMock.AssertExpectations(t)
-	releaseResp := &rls.InstallReleaseResponse{}
-	hiMock.On("Install", &expChart, internal.ChartValues(map[string]interface{}{}), ts.Exp.ReleaseName, ts.Exp.Namespace).Return(releaseResp, nil).Once()
+	releaseResp := &helm.ReleaseResponse{}
+	hiMock.On("InstallOrUpdate", &expChart, internal.ChartValues(map[string]interface{}{}), ts.Exp.ReleaseName, ts.Exp.Namespace).Return(releaseResp, nil).Once()
 
 	renderedYAML := bind.RenderedBindYAML(`rendered-template`)
 	rendererMock := &automock.BindTemplateRenderer{}

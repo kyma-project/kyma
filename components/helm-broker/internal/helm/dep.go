@@ -7,6 +7,8 @@ import (
 )
 
 type helmDeleteInstaller interface {
+	ListReleases(opts ...helm.ReleaseListOption) (*rls.ListReleasesResponse, error)
 	InstallReleaseFromChart(chart *chart.Chart, ns string, opts ...helm.InstallOption) (*rls.InstallReleaseResponse, error)
+	UpdateReleaseFromChart(rlsName string, chart *chart.Chart, opts ...helm.UpdateOption) (*rls.UpdateReleaseResponse, error)
 	DeleteRelease(rlsName string, opts ...helm.DeleteOption) (*rls.UninstallReleaseResponse, error)
 }

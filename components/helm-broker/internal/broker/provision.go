@@ -6,12 +6,11 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/kyma-project/kyma/components/helm-broker/internal"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
-
-	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
 type provisionService struct {
@@ -142,7 +141,7 @@ func (svc *provisionService) doAsync(ctx context.Context, iID internal.InstanceI
 // do is called asynchronously
 func (svc *provisionService) do(ctx context.Context, iID internal.InstanceID, opID internal.OperationID, namespace internal.Namespace, releaseName internal.ReleaseName, bundlePlan internal.BundlePlan, isBundleBindable bool, cvOver internal.ChartValues) {
 
-	fDo := func() (*rls.InstallReleaseResponse, error) {
+	fDo := func() (*helm.ReleaseResponse, error) {
 		c, err := svc.chartGetter.Get(bundlePlan.ChartRef.Name, bundlePlan.ChartRef.Version)
 		if err != nil {
 			return nil, errors.Wrap(err, "while getting chart from storage")
@@ -158,7 +157,7 @@ func (svc *provisionService) do(ctx context.Context, iID internal.InstanceID, op
 		svc.log.Infof("Merging values for operation [%s], releaseName [%s], namespace [%s], bundlePlan [%s]. Plan values are: [%v], overrides: [%v], merged: [%v] ",
 			opID, releaseName, namespace, bundlePlan.Name, bundlePlan.ChartValues, cvOver, out)
 
-		resp, err := svc.helmInstaller.Install(c, internal.ChartValues(out), releaseName, namespace)
+		resp, err := svc.helmInstaller.InstallOrUpdate(c, internal.ChartValues(out), releaseName, namespace)
 		if err != nil {
 			return nil, errors.Wrap(err, "while installing helm release")
 		}
@@ -191,7 +190,7 @@ func (*provisionService) isBindable(plan internal.BundlePlan, isBundleBindable b
 		(plan.Bindable == nil && isBundleBindable) // if bindable field is NOT set on plan thet bindalbe field on bundle is important
 }
 
-func (svc *provisionService) resolveAndSaveBindData(iID internal.InstanceID, namespace internal.Namespace, bundlePlan internal.BundlePlan, resp *rls.InstallReleaseResponse) error {
+func (svc *provisionService) resolveAndSaveBindData(iID internal.InstanceID, namespace internal.Namespace, bundlePlan internal.BundlePlan, resp *helm.ReleaseResponse) error {
 	rendered, err := svc.bindTemplateRenderer.Render(bundlePlan.BindTemplate, resp)
 	if err != nil {
 		return errors.Wrap(err, "while rendering bind yaml template")

@@ -3,13 +3,13 @@ package bind
 import (
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
+
+	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/pkg/errors"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/engine"
 	"k8s.io/helm/pkg/proto/hapi/chart"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
-
-	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
 const (
@@ -39,7 +39,7 @@ func NewRenderer() *Renderer {
 }
 
 // Render renders given bindTemplate in context of helm Chart by e.g. replacing directives like: {{ .Release.Namespace }}
-func (r *Renderer) Render(bindTemplate internal.BundlePlanBindTemplate, resp *rls.InstallReleaseResponse) (RenderedBindYAML, error) {
+func (r *Renderer) Render(bindTemplate internal.BundlePlanBindTemplate, resp *helm.ReleaseResponse) (RenderedBindYAML, error) {
 	if err := r.validateInstallReleaseResponse(resp); err != nil {
 		return nil, errors.Wrap(err, "while validating input")
 	}
@@ -68,7 +68,7 @@ func (r *Renderer) Render(bindTemplate internal.BundlePlanBindTemplate, resp *rl
 	return RenderedBindYAML(rendered), nil
 }
 
-func (*Renderer) validateInstallReleaseResponse(resp *rls.InstallReleaseResponse) error {
+func (*Renderer) validateInstallReleaseResponse(resp *helm.ReleaseResponse) error {
 	if resp == nil {
 		return fmt.Errorf("input parameter 'InstallReleaseResponse' cannot be nil")
 	}
@@ -89,7 +89,7 @@ func (*Renderer) validateInstallReleaseResponse(resp *rls.InstallReleaseResponse
 	return nil
 }
 
-func (*Renderer) createReleaseOptions(resp *rls.InstallReleaseResponse) chartutil.ReleaseOptions {
+func (*Renderer) createReleaseOptions(resp *helm.ReleaseResponse) chartutil.ReleaseOptions {
 	return chartutil.ReleaseOptions{
 		Name:      resp.Release.Name,
 		Time:      resp.Release.Info.LastDeployed,

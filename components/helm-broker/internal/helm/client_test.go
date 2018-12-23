@@ -33,7 +33,7 @@ func TestClientInstallSuccess(t *testing.T) {
 	}, spy.NewLogDummy())
 
 	// when
-	_, err := hClient.Install(fixChart(), cVals, "r-name", "ns-name")
+	_, err := hClient.InstallOrUpdate(fixChart(), cVals, "r-name", "ns-name")
 
 	// then
 	assert.NoError(t, err)
@@ -81,6 +81,7 @@ func TestClientDeleteSuccess(t *testing.T) {
 
 type fakeTillerSvc struct {
 	services.ReleaseServiceServer
+	GoListReleaseReq  *services.ListReleasesRequest
 	GotInstReleaseReq *services.InstallReleaseRequest
 	GotDelReleaseReq  *services.UninstallReleaseRequest
 
@@ -132,6 +133,21 @@ func (s *fakeTillerSvc) UninstallRelease(ctx context.Context, delReleaseReq *ser
 			Name: "Fake-Test-Release",
 		},
 	}, nil
+}
+
+func (s *fakeTillerSvc) ListReleases(listReleaseReq *services.ListReleasesRequest, listRelesaServer services.ReleaseService_ListReleasesServer) error {
+	s.GoListReleaseReq = listReleaseReq
+
+	listReleases := &services.ListReleasesResponse{
+		Releases: []*hapi_release5.Release{
+			&hapi_release5.Release{
+				Name: "Some-release",
+			},
+		},
+	}
+	listRelesaServer.Send(listReleases)
+
+	return nil
 }
 
 func fixChart() *chart.Chart {

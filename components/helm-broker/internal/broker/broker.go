@@ -2,14 +2,13 @@ package broker
 
 import (
 	"github.com/Masterminds/semver"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/sirupsen/logrus"
-
-	"k8s.io/helm/pkg/proto/hapi/chart"
-	rls "k8s.io/helm/pkg/proto/hapi/services"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/platform/idprovider"
+	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
 // be aware that after regenerating mocks, manual steps are required
@@ -100,7 +99,7 @@ type (
 	}
 
 	helmInstaller interface {
-		Install(c *chart.Chart, cv internal.ChartValues, releaseName internal.ReleaseName, namespace internal.Namespace) (*rls.InstallReleaseResponse, error)
+		InstallOrUpdate(c *chart.Chart, cv internal.ChartValues, releaseName internal.ReleaseName, namespace internal.Namespace) (*helm.ReleaseResponse, error)
 	}
 	helmDeleter interface {
 		Delete(internal.ReleaseName) error
@@ -129,7 +128,7 @@ type (
 	}
 
 	bindTemplateRenderer interface {
-		Render(bindTemplate internal.BundlePlanBindTemplate, resp *rls.InstallReleaseResponse) (bind.RenderedBindYAML, error)
+		Render(bindTemplate internal.BundlePlanBindTemplate, resp *helm.ReleaseResponse) (bind.RenderedBindYAML, error)
 	}
 
 	bindTemplateResolver interface {
