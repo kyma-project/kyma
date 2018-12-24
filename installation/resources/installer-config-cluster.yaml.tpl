@@ -94,7 +94,7 @@ data:
 
   security.enabled: "true"
 
-  # service type is later changed by isito p
+  # service type is later changed by isito patch
   gateways.istio-ingressgateway.service.externalPublicIp: ""
   gateways.istio-ingressgateway.type: "NodePort"
 
