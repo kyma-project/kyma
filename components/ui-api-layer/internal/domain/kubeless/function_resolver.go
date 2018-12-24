@@ -2,6 +2,7 @@ package kubeless
 
 import (
 	"context"
+	"github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/kubeless/pretty"
@@ -10,6 +11,11 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	"github.com/pkg/errors"
 )
+
+//go:generate mockery -name=functionLister -output=automock -outpkg=automock -case=underscore
+type functionLister interface {
+	List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.Function, error)
+}
 
 type functionResolver struct {
 	functionLister    functionLister
