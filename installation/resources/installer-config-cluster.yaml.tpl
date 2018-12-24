@@ -94,6 +94,10 @@ data:
 
   security.enabled: "true"
 
+  # service type is later changed by isito p
+  gateways.istio-ingressgateway.service.externalPublicIp: ""
+  gateways.istio-ingressgateway.type: "NodePort"
+
   pilot.resources.limits.memory: 2Gi
   pilot.resources.requests.memory: 512Mi
 
