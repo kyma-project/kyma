@@ -30,7 +30,7 @@ func TestBackendModuleService_List(t *testing.T) {
 		instances, err := svc.List()
 		require.NoError(t, err)
 		assert.Equal(t, []*v1alpha1.BackendModule{
-			backendModule1, backendModule2,
+			backendModule1, backendModule2, backendModule3,
 		}, instances)
 	})
 

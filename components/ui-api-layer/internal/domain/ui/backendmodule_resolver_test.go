@@ -3,6 +3,7 @@ package ui_test
 import (
 	"errors"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/apis/ui/v1alpha1"
@@ -23,7 +24,7 @@ func TestBackendModuleResolver_BackendModulesQuery(t *testing.T) {
 		resources := []*v1alpha1.BackendModule{
 			resource, resource,
 		}
-		expected := []gqlschema.ServiceInstance{
+		expected := []gqlschema.BackendModule{
 			{
 				Name: "Test",
 			},
@@ -32,11 +33,11 @@ func TestBackendModuleResolver_BackendModulesQuery(t *testing.T) {
 			},
 		}
 
-		resourceGetter := ui.NewMockBackendModuleService()
+		resourceGetter := automock.NewBackendModuleService()
 		resourceGetter.On("List").Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := ui.NewMockBackendModuleConverter()
+		converter := automock.NewBackendModuleConverter()
 		converter.On("ToGQLs", resources).Return(expected, nil)
 		defer converter.AssertExpectations(t)
 
@@ -52,11 +53,11 @@ func TestBackendModuleResolver_BackendModulesQuery(t *testing.T) {
 	t.Run("NotFound", func(t *testing.T) {
 		var resources []*v1alpha1.BackendModule
 
-		resourceGetter := ui.NewMockBackendModuleService()
+		resourceGetter := automock.NewBackendModuleService()
 		resourceGetter.On("List").Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := ui.NewBackendModuleResolver(resourceGetter)
-		var expected []gqlschema.ServiceInstance
+		var expected []gqlschema.BackendModule
 
 		result, err := resolver.BackendModulesQuery(nil)
 
@@ -69,7 +70,7 @@ func TestBackendModuleResolver_BackendModulesQuery(t *testing.T) {
 
 		var resources []*v1alpha1.BackendModule
 
-		resourceGetter := ui.NewMockBackendModuleService()
+		resourceGetter := automock.NewBackendModuleService()
 		resourceGetter.On("List").Return(resources, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := ui.NewBackendModuleResolver(resourceGetter)

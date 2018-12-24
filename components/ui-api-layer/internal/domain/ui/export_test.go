@@ -10,14 +10,6 @@ func NewBackendModuleResolver(backendModuleLister backendModuleLister) *backendM
 	return newBackendModuleResolver(backendModuleLister)
 }
 
-func NewMockBackendModuleConverter() *mockGqlBackendModuleConverter {
-	return new(mockGqlBackendModuleConverter )
-}
-
-func NewMockBackendModuleService() *mockBackendModuleLister {
-	return new(mockBackendModuleLister)
-}
-
 func (r *backendModuleResolver) SetInstanceConverter(converter gqlBackendModuleConverter) {
 	r.backendModuleConverter = converter
 }

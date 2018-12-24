@@ -1,7 +1,6 @@
 package module
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	"log"
 	"time"
