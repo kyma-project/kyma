@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 def label = "kyma-${UUID.randomUUID().toString()}"
-def application = "environments"
+def application = 'test-namespace-controller'
 def dockerPushRoot = "${env.DOCKER_REGISTRY}${params.PUSH_DIR}"
 def dockerImageTag = params.APP_VERSION
 def registry = env.DOCKER_REGISTRY
@@ -39,7 +39,7 @@ podTemplate(label: label,
                         stage("setup") {
 
                             workDir = pwd()
-                            
+
                             dir(checkoutDir) {
                                 checkout scm
                             }
@@ -53,31 +53,17 @@ podTemplate(label: label,
                             }
                         }
 
-                        stage("install dependencies $application") {
-                            execute("dep ensure -vendor-only -v", workDir, componentDir)
-                        }
-
-                        stage("code quality $application") {
-                            execute("gometalinter --vendor --deadline=2m --disable-all --enable=vet ./...", workDir, componentDir)
-                        }
-
-                        stage("build $application") {
-                            execute("CGO_ENABLED=0 go build -o environments ./cmd/controller/", workDir, componentDir)
-                        }
-
-                        stage("test $application") {
-                            execute("2>&1 go test -v ./... | go2xunit -fail -output unit-tests.xml", workDir, componentDir)
-                            junit '**/unit-tests.xml'
+                        stage("install dependencies and check code quality $application") {
+                            execute("./prepare.sh", workDir, componentDir)
                         }
 
                         stage("build image $application") {
                             dir(componentDir){
-                                sh "cp ./$application deploy/controller/$application"
-                                sh "docker build -t ${dockerPushRoot}${application}:latest deploy/controller --label version=${dockerImageTag} --label component=${application}"
+                                sh "docker build -t ${dockerPushRoot}${application}:latest . --label version=${dockerImageTag} --label component=${application}"
                             }
                         }
 
-                        stage("push image") {
+                        stage("push image $application") {
                             sh "docker tag ${dockerPushRoot}${application}:latest ${dockerPushRoot}${application}:${dockerImageTag}"
                             sh "docker push ${dockerPushRoot}${application}:${dockerImageTag}"
                             if (params.GIT_BRANCH == 'master') {

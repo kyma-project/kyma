@@ -33,7 +33,7 @@ if [ "$1" == "$CI_FLAG" ]; then
 	buildEnv="env CGO_ENABLED=0"
 fi
 
-${buildEnv} go build -o environments ./cmd/controller
+${buildEnv} go build -o namespace-controller ./cmd/controller
 
 goBuildResult=$?
 if [ ${goBuildResult} != 0 ]; then

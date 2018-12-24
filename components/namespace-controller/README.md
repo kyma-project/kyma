@@ -29,36 +29,36 @@ Use the following commands to prepare to run on Kubernetes. Run them in the foll
 
  - `dep ensure`
  - `export GOOS=linux`
- - `go build -o environments cmd/controller/main.go`
+ - `go build -o namespace-controller cmd/controller/main.go`
 
 ### Build a Docker image
 
 Make sure that the [build](#build-to-run-on-kubernetes) step is complete. Run the following commands:
 
-- `cp ./environments deploy/controller/environments`
-- `docker build -t environments:{your_tag} deploy/controller`
+- `cp ./namespace-controller deploy/controller/namespace-controller`
+- `docker build -t namespace-controller:{your_tag} deploy/controller`
 
 Make sure the image is built:
 
-- `docker images | grep environments`
+- `docker images | grep namespace-controller`
 
 ### Run the image locally inside Kyma
 
-This section describes how to run Kyma with an updated environments image. The procedure is useful in case the component has been modified and needs to be tested.
+This section describes how to run Kyma with an updated namespace-controller image. The procedure is useful in case the component has been modified and needs to be tested.
 
-Read the main [Kyma project README.md](../../README.md). By default, the system runs the environments image specified in the [4-deployment.yaml](../../resources/core/charts/environments/templates/4-deployment.yaml) file. You can provide your own image by following one of the procedures.
+Read the main [Kyma project README.md](../../README.md). By default, the system runs the namespace-controller image specified in the [4-deployment.yaml](../../resources/core/charts/namespace-controller/templates/4-deployment.yaml) file. You can provide your own image by following one of the procedures.
 
 #### Docker registry
 
-If you have access to an external Docker registry, build your Docker image, push it to the registry and modify the [4-deployment.yaml](../../resources/core/charts/environments/templates/4-deployment.yaml) file by swapping the evironments image. Follow the [instructions](../../docs/kyma/docs/030-inst-local-installation-from-release.md) to run Kyma as usual.
+If you have access to an external Docker registry, build your Docker image, push it to the registry and modify the [4-deployment.yaml](../../resources/core/charts/namespace-controller/templates/4-deployment.yaml) file by swapping the evironments image. Follow the [instructions](../../docs/kyma/docs/030-inst-local-installation-from-release.md) to run Kyma as usual.
 
 #### Minikube built in Docker daemon
 
 In case you have no access to a Docker registry, use Minikube’s built in Docker daemon that keeps images for running containers:
 
-1. Modify the [4-deployment.yaml](../../resources/core/charts/environments/templates/4-deployment.yaml) file by swapping the evironments image.
+1. Modify the [4-deployment.yaml](../../resources/core/charts/namespace-controller/templates/4-deployment.yaml) file by swapping the evironments image.
 ```
-image: environments:my_tag
+image: namespace-controller:my_tag
 ```
 
 2. [Start Kyma installation as usual](../../docs/kyma/docs/030-inst-local-installation-from-release.md).

@@ -11,7 +11,7 @@ limitRanges:
   # Maximum memory that a container can request
   max: 1Gi
 
-# resourceQuota defines quotas per environment. Values are defined as a standard Kubernetes quantity,
+# resourceQuota defines quotas per namespace. Values are defined as a standard Kubernetes quantity,
 # for example: 1Gi, 512Mi
 resourceQuota:
   # Sum of all container memory requests must not exceed this value.

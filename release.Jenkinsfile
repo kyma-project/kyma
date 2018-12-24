@@ -36,7 +36,7 @@ projects = [
     "components/apiserver-proxy",
     "components/binding-usage-controller",
     "components/configurations-generator",
-    "components/environments",
+    "components/namespace-controller",
     "components/istio-kyma-patch",
     "components/helm-broker",
     "components/application-broker",

@@ -5,6 +5,6 @@ RUN apk add --no-cache curl
 
 LABEL source="github.com:kyma-project/kyma.git"
 
-ADD environments /environments
+ADD namespace-controller /namespace-controller
 
-ENTRYPOINT ["/environments"]
+ENTRYPOINT ["/namespace-controller"]

@@ -3,7 +3,7 @@ package controller
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/environments/internal"
+	"github.com/kyma-project/kyma/components/namespace-controller/internal"
 	. "github.com/smartystreets/goconvey/convey"
 	"k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -39,7 +39,7 @@ var testNamespace = &v1.Namespace{
 	},
 }
 
-var testEnvironmentsConfig = &EnvironmentsConfig{
+var testNamespacesConfig = &NamespacesConfig{
 	Namespace: "configSecretNamespace",
 	LimitRangeMemory: LimitRangeConfig{
 		Max:            formattedQuantity("1024Mi"),
@@ -61,13 +61,13 @@ var testLimitRange = &v1.LimitRange{
 			{
 				Type: v1.LimitTypeContainer,
 				Default: v1.ResourceList{
-					v1.ResourceMemory: *testEnvironmentsConfig.LimitRangeMemory.Default.AsQuantity(),
+					v1.ResourceMemory: *testNamespacesConfig.LimitRangeMemory.Default.AsQuantity(),
 				},
 				DefaultRequest: v1.ResourceList{
-					v1.ResourceMemory: *testEnvironmentsConfig.LimitRangeMemory.DefaultRequest.AsQuantity(),
+					v1.ResourceMemory: *testNamespacesConfig.LimitRangeMemory.DefaultRequest.AsQuantity(),
 				},
 				Max: v1.ResourceList{
-					v1.ResourceMemory: *testEnvironmentsConfig.LimitRangeMemory.Max.AsQuantity(),
+					v1.ResourceMemory: *testNamespacesConfig.LimitRangeMemory.Max.AsQuantity(),
 				},
 			},
 		},
@@ -85,16 +85,16 @@ var testRolesList = &rbacv1.RoleList{
 	Items: []rbacv1.Role{testRole},
 }
 
-func GetTestSetup() (envs *environments, nc *testNamespacesClient, rc *testRolesClient, lr *testLimitRangeClient, rq *testResourceQuotaClient) {
+func GetTestSetup() (envs *controller, nc *testNamespacesClient, rc *testRolesClient, lr *testLimitRangeClient, rq *testResourceQuotaClient) {
 
 	nc = &testNamespacesClient{GetNamespaceCalled: false, UpdateNamespaceCalled: false}
 	rc = &testRolesClient{GetRoleCalled: false, GetListCalled: false, CreateRoleCalled: false, DeleteRoleCalled: false}
 	lr = &testLimitRangeClient{DeleteCalled: false, CreateCalled: false}
 	rq = &testResourceQuotaClient{DeleteCalled: false, CreateCalled: false}
 
-	envs = &environments{
+	envs = &controller{
 		Clientset:           nil,
-		Config:              testEnvironmentsConfig,
+		Config:              testNamespacesConfig,
 		NamespacesClient:    nc,
 		RolesClient:         rc,
 		LimitRangeClient:    lr,
@@ -121,7 +121,7 @@ func (nc *testNamespacesClient) UpdateNamespace(namespace *v1.Namespace) (result
 }
 
 func (rc *testRolesClient) GetList(namespace string, opts metav1.ListOptions) (*rbacv1.RoleList, error) {
-	So(testEnvironmentsConfig.Namespace, ShouldEqual, namespace)
+	So(testNamespacesConfig.Namespace, ShouldEqual, namespace)
 	rc.GetListCalled = true
 
 	return testRolesList, nil
@@ -154,9 +154,9 @@ func (rc *testRolesClient) DeleteRole(name string, namespace string) error {
 func (lr *testLimitRangeClient) CreateLimitRange(namespace string, limitRange *v1.LimitRange) error {
 	So(testNamespace.Name, ShouldEqual, namespace)
 	So(limitRange.Name, ShouldEqual, "kyma-default")
-	So(limitRange.Spec.Limits[0].Default.Memory().Value(), ShouldEqual, testEnvironmentsConfig.LimitRangeMemory.Default.AsQuantity().Value())
-	So(limitRange.Spec.Limits[0].DefaultRequest.Memory().Value(), ShouldEqual, testEnvironmentsConfig.LimitRangeMemory.DefaultRequest.AsQuantity().Value())
-	So(limitRange.Spec.Limits[0].Max.Memory().Value(), ShouldEqual, testEnvironmentsConfig.LimitRangeMemory.Max.AsQuantity().Value())
+	So(limitRange.Spec.Limits[0].Default.Memory().Value(), ShouldEqual, testNamespacesConfig.LimitRangeMemory.Default.AsQuantity().Value())
+	So(limitRange.Spec.Limits[0].DefaultRequest.Memory().Value(), ShouldEqual, testNamespacesConfig.LimitRangeMemory.DefaultRequest.AsQuantity().Value())
+	So(limitRange.Spec.Limits[0].Max.Memory().Value(), ShouldEqual, testNamespacesConfig.LimitRangeMemory.Max.AsQuantity().Value())
 	lr.CreateCalled = true
 
 	return nil
@@ -187,12 +187,12 @@ func (lr *testResourceQuotaClient) DeleteResourceQuota(namespace string) error {
 	return nil
 }
 
-func TestYfenvironments(t *testing.T) {
-	Convey("Adding roles for environment shouldn't return error", t, func() {
+func TestNamespaces(t *testing.T) {
+	Convey("Adding roles for namespace shouldn't return error", t, func() {
 
 		envs, nc, rc, lr, _ := GetTestSetup()
 
-		err := envs.AddRolesForEnvironment(testNamespace)
+		err := envs.AddRolesForNamespace(testNamespace)
 
 		So(err, ShouldBeNil)
 		So(nc.GetNamespaceCalled, ShouldBeTrue)
@@ -206,7 +206,7 @@ func TestYfenvironments(t *testing.T) {
 		So(rc.GetRoleCalled, ShouldBeFalse)
 	})
 
-	Convey("Should not add roles for environment with existing roles", t, func() {
+	Convey("Should not add roles for namespace with existing roles", t, func() {
 
 		origNamespace := testNamespace.DeepCopy()
 		envs, nc, rc, lr, _ := GetTestSetup()
@@ -215,13 +215,13 @@ func TestYfenvironments(t *testing.T) {
 		annotations[rolesAnnotName] = "true"
 		testNamespace.SetAnnotations(annotations)
 
-		err := envs.AddRolesForEnvironment(testNamespace)
+		err := envs.AddRolesForNamespace(testNamespace)
 
 		So(err, ShouldBeNil)
 		So(nc.GetNamespaceCalled, ShouldBeTrue)
 		So(nc.UpdateNamespaceCalled, ShouldBeFalse)
 
-		allRolesClientMethodsShuldNotBeCalled(rc)
+		allRolesClientMethodsShouldNotBeCalled(rc)
 		allLimitRangeClientMethodsShouldNotBeCalled(lr)
 
 		Reset(func() {
@@ -229,7 +229,7 @@ func TestYfenvironments(t *testing.T) {
 		})
 	})
 
-	Convey("Removing roles from environment shouldn't return error", t, func() {
+	Convey("Removing roles from namespace shouldn't return error", t, func() {
 
 		origNamespace := testNamespace.DeepCopy()
 		envs, nc, rc, lr, _ := GetTestSetup()
@@ -238,7 +238,7 @@ func TestYfenvironments(t *testing.T) {
 		annotations[rolesAnnotName] = "true"
 		testNamespace.SetAnnotations(annotations)
 
-		err := envs.RemoveRolesFromEnvironment(testNamespace)
+		err := envs.RemoveRolesFromNamespace(testNamespace)
 
 		So(err, ShouldBeNil)
 		So(nc.GetNamespaceCalled, ShouldBeTrue)
@@ -348,7 +348,7 @@ func TestYfenvironments(t *testing.T) {
 	})
 }
 
-func allRolesClientMethodsShuldNotBeCalled(rc *testRolesClient) {
+func allRolesClientMethodsShouldNotBeCalled(rc *testRolesClient) {
 	So(rc.CreateRoleCalled, ShouldBeFalse)
 	So(rc.GetListCalled, ShouldBeFalse)
 	So(rc.GetRoleCalled, ShouldBeFalse)

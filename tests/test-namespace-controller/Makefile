@@ -1,4 +1,4 @@
-APP_NAME = test-environments
+APP_NAME = test-namespace-controller
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 
