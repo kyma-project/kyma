@@ -6,6 +6,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
+//go:generate mockery -name=PluggableModule -output=automock -outpkg=automock -case=underscore
 type PluggableModule interface {
 	Enable() error
 	Disable() error

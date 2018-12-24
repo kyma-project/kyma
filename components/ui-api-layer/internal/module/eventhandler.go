@@ -96,5 +96,5 @@ func (h *eventHandler) printIncorrectTypeErrorIfShould(ok bool, obj interface{})
 		return
 	}
 
-	glog.Error("Incorrect item type: %T, should be: *BackendModule", obj)
+	glog.Errorf("Incorrect item type: %T, should be: *BackendModule", obj)
 }
