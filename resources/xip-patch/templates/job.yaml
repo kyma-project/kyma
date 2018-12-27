@@ -15,3 +15,6 @@ spec:
       containers:
       - name: {{ .Release.Name }}
         image: {{ .Values.containerRegistry.path }}/{{ .Values.xip_patch.dir }}xip-patch:{{ .Values.xip_patch.version }}
+        env:
+        - name: EXTERNAL_PUBLIC_IP
+          value: {{ .Values.global.loadBalancerIP }}

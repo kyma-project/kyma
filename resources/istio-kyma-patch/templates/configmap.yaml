@@ -28,13 +28,13 @@ data:
       {{ end }}
     ]
 
-  {{ if .Values.loadBalancerIP }}
+  {{ if .Values.global.loadBalancerIP }}
   {{ $serviceName }}.service.patch.json: |
     [
       {
         "op": "add",
         "path": "/spec/loadBalancerIP",
-        "value": "{{ .Values.loadBalancerIP }}"
+        "value": "{{ .Values.global.loadBalancerIP }}"
       },{
         "op": "replace",
         "path": "/spec/type",
