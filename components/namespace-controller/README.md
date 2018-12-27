@@ -1,4 +1,4 @@
-# Environments
+# Namespace controller
 
 ## Overview
 
