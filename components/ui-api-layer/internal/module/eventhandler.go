@@ -43,10 +43,18 @@ func (h *eventHandler) OnUpdate(oldObj, newObj interface{}) {
 
 	moduleName := h.module.Name()
 	if oldResource.Name == moduleName {
+		if !h.module.IsEnabled() {
+			return
+		}
+
 		glog.Infof("Disabling module %s...", moduleName)
 		err := h.module.Disable()
 		printModuleErrorIfShould(err, h.module, "disabling")
 	} else if newResource.Name == moduleName {
+		if h.module.IsEnabled() {
+			return
+		}
+
 		glog.Infof("Enabling module %s...", moduleName)
 		err := h.module.Enable()
 		printModuleErrorIfShould(err, h.module, "enabling")
@@ -84,7 +92,7 @@ func (h *eventHandler) isUpdateEventRelatedToTheModule(oldResource, newResource 
 	}
 
 	moduleName := h.module.Name()
-	if oldResource.Name != moduleName || newResource.Name != moduleName {
+	if oldResource.Name != moduleName && newResource.Name != moduleName {
 		return false
 	}
 
