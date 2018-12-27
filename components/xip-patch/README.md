@@ -10,7 +10,7 @@ This component must be installed after `cluster-essentials` the component and be
 
 ## Usage
 
-The patch accepts the **EXTERNAL_PUBLIC_IP** environment variable which must hold a manually reserved, external IP address. If this 
+The patch accepts the **EXTERNAL_PUBLIC_IP** environment variable which must contain a manually reserved, external IP address. If this 
 variable is not set, the script tries to get the external IP address from the `istio-ingressgateway` service.
 
 This component performs the following actions:
