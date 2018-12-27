@@ -35,10 +35,17 @@ The function retrieves two parameters: Event and Context.
 
 ```yaml
 event:
-  data:                                         # Event data
+  data:                                         # Event data / request body
     foo: "bar"                                  # The data is parsed as JSON when required
   extensions:                                   # Optional parameters
-    request: ...                                # Reference to the request received
+    request:                                    # Reference to the request received
+      query: 
+        baz: "qux"                              # Query parameters
+      headers:
+        accept: "application/json"              # Request headers
+        ...
+      method: "POST"                            # HTTP method
+      ...  
     response: ...                               # Reference to the response to send
                                                 # (specific properties will depend on the function language)
 context:
@@ -49,6 +56,7 @@ context:
 ```
 
 The Event contains the event payload as well as some request specific metadata. The request and response attributes are primarily responsible for providing control over http behavior.
+
 
 ### Advanced Response Handling
 
