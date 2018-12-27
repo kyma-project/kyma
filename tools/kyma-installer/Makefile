@@ -17,3 +17,15 @@ push-image:
 
 .PHONY: ci-release
 ci-release: build-image push-image
+
+
+
+.PHONY: ci-create-release-artifacts
+ci-create-release-artifacts:
+	cd ./../..; \
+	docker run --rm --volume $(CURDIR)/../..:/kyma \
+		-e KYMA_INSTALLER_PUSH_DIR=$(DOCKER_PATH) \
+		-e KYMA_INSTALLER_VERSION=$(TAG) \
+		-e ARTIFACTS_DIR=$(ARTIFACTS) \
+		--entrypoint /kyma/installation/scripts/release-generate-kyma-installer-artifacts.sh \
+		eu.gcr.io/kyma-project/acs-installer:0.0.4
