@@ -43,9 +43,9 @@ global:
   docs:
     dir: develop/
     version: 0f7a9d1a
-  namespace_controller:
-    dir: pr/
-    version: PR-2123
+  environments:
+    dir: develop/
+    version: 6e0a7fe2
   etcd_backup:
     dir: develop/
     version: 6e0a7fe2
@@ -64,9 +64,9 @@ global:
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
-  test_namespace_controller:
-    dir: pr/
-    version: PR-2123
+  test_environments:
+    dir: develop/
+    version: '84359277'
   test_logging_monitoring:
     dir: develop/
     version: 6e0a7fe2
