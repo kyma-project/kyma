@@ -20,13 +20,7 @@ func (h *eventHandler) OnAdd(obj interface{}) {
 		return
 	}
 
-	if h.module.IsEnabled() {
-		return
-	}
-
-	glog.Infof("Enabling module %s...", h.module.Name())
-	err := h.module.Enable()
-	printModuleErrorIfShould(err, h.module, "enabling")
+	h.enableModuleIfShould()
 }
 
 func (h *eventHandler) OnUpdate(oldObj, newObj interface{}) {
@@ -36,28 +30,15 @@ func (h *eventHandler) OnUpdate(oldObj, newObj interface{}) {
 	newResource, ok := newObj.(*v1alpha1.BackendModule)
 	h.printIncorrectTypeErrorIfShould(ok, newObj)
 
-
 	if !h.isUpdateEventRelatedToTheModule(oldResource, newResource) {
 		return
 	}
 
 	moduleName := h.module.Name()
 	if oldResource.Name == moduleName {
-		if !h.module.IsEnabled() {
-			return
-		}
-
-		glog.Infof("Disabling module %s...", moduleName)
-		err := h.module.Disable()
-		printModuleErrorIfShould(err, h.module, "disabling")
+		h.disableModuleIfShould()
 	} else if newResource.Name == moduleName {
-		if h.module.IsEnabled() {
-			return
-		}
-
-		glog.Infof("Enabling module %s...", moduleName)
-		err := h.module.Enable()
-		printModuleErrorIfShould(err, h.module, "enabling")
+		h.enableModuleIfShould()
 	}
 }
 
@@ -69,6 +50,20 @@ func (h *eventHandler) OnDelete(obj interface{}) {
 		return
 	}
 
+	h.disableModuleIfShould()
+}
+
+func (h *eventHandler) enableModuleIfShould() {
+	if h.module.IsEnabled() {
+		return
+	}
+
+	glog.Infof("Enabling module %s...", h.module.Name())
+	err := h.module.Enable()
+	printModuleErrorIfShould(err, h.module, "enabling")
+}
+
+func (h *eventHandler) disableModuleIfShould() {
 	if !h.module.IsEnabled() {
 		return
 	}

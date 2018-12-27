@@ -2,10 +2,10 @@ package domain
 
 import (
 	"context"
+	"time"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/experimental"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
-	"time"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/apicontroller"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application"
@@ -20,6 +20,7 @@ import (
 )
 
 type RootResolver struct {
+	ui        *ui.Resolver
 	k8s       *k8s.Resolver
 	kubeless  *kubeless.Resolver
 	sc        *servicecatalog.Resolver
@@ -30,11 +31,9 @@ type RootResolver struct {
 }
 
 func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
-
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
 
-
-	makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer, featureToggles.ModulePluggability)
+	// makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer, featureToggles.ModulePluggability)
 
 	contentContainer, err := content.New(contentCfg)
 	if err != nil {
@@ -72,6 +71,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	}
 
 	return &RootResolver{
+		ui:        uiContainer.Resolver,
 		k8s:       k8sResolver,
 		kubeless:  kubelessResolver,
 		app:       appContainer.Resolver,
@@ -84,6 +84,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 
 // WaitForCacheSync waits for caches to populate. This is blocking operation.
 func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
+	r.ui.WaitForCacheSync(stopCh)
 	r.app.WaitForCacheSync(stopCh)
 	r.sc.WaitForCacheSync(stopCh)
 	r.k8s.WaitForCacheSync(stopCh)

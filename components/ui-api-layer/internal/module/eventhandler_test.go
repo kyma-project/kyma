@@ -26,7 +26,7 @@ func TestEventHandler_OnAdd(t *testing.T) {
 
 		moduleMock := new(automock.PluggableModule)
 		moduleMock.On("Name").Return(name)
-		moduleMock.On("IsEnabled").Return(false)
+		moduleMock.On("IsEnabled").Return(false).Once()
 		moduleMock.On("Enable").Return(nil).Once()
 		defer moduleMock.AssertExpectations(t)
 
@@ -40,7 +40,7 @@ func TestEventHandler_OnAdd(t *testing.T) {
 
 		moduleMock := new(automock.PluggableModule)
 		moduleMock.On("Name").Return(name)
-		moduleMock.On("IsEnabled").Return(true)
+		moduleMock.On("IsEnabled").Return(true).Once()
 		defer moduleMock.AssertExpectations(t)
 
 		eventHandler := newEventHandler(moduleMock)
