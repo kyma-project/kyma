@@ -96,18 +96,6 @@
   version = "v4.2.1"
 
 [[projects]]
-  name = "github.com/kyma-project/kyma"
-  packages = [
-    "components/namespace-controller/internal",
-    "components/namespace-controller/internal/limit_range",
-    "components/namespace-controller/internal/namespaces",
-    "components/namespace-controller/internal/resource-quota",
-    "components/namespace-controller/internal/roles"
-  ]
-  revision = "3bababa43441d7a2fb9058c88560490f57294d48"
-  version = "0.5.0"
-
-[[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
@@ -365,6 +353,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d02ef3ec0981c8814405b7b28fe7b8c2d9ccbcfc883f66f16ca5c1f12fa1c5ad"
+  inputs-digest = "3310854552e4a5a025770575d1e1c262ddd1c28e35b6b167a9a629e80dd170b0"
   solver-name = "gps-cdcl"
   solver-version = 1
