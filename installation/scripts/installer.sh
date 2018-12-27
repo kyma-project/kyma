@@ -22,6 +22,10 @@ do
             shift # past argument
             shift # past value
             ;;
+        --knative)
+            KNATIVE=true
+            shift
+            ;;
         *) # unknown option
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
@@ -60,8 +64,15 @@ if [ $CR_PATH ]; then
 
 fi
 
+
 echo -e "\nApplying installation combo yaml"
-bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH} | kubectl apply -f -
+COMBO_YAML=$(bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${CR_PATH})
+
+if [ $KNATIVE ]; then
+    COMBO_YAML=$(sed 's/global\.knative: .*/global.knative: "true"/g' <<<"$COMBO_YAML")
+fi
+
+kubectl apply -f - <<<"$COMBO_YAML"
 
 echo -e "\nTriggering installation"
 kubectl label installation/kyma-installation action=install

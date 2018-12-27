@@ -20,9 +20,10 @@ import (
 )
 
 const (
-	finalizerName = "servicecatalog.kyma.cx/usage-kind-protection"
-	indexKind     = "usedByKind"
+	indexKind = "usedByKind"
 )
+
+var finalizerName = fmt.Sprintf("%s/usage-kind-protection", v1alpha1.SchemeGroupVersion.Group)
 
 // ProtectionController adds and removes UsageKindProtection finalizer.
 type ProtectionController struct {

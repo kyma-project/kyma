@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s"
-	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/api/core/v1"

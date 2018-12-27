@@ -17,9 +17,6 @@ import (
 
 func TestNewRelistRequesterSuccess(t *testing.T) {
 	// given
-	fixBrokerLabelKey := "app"
-	fixBrokerLabelValue := "label"
-	labelSelector := fmt.Sprintf("%s=%s", fixBrokerLabelKey, fixBrokerLabelValue)
 	fixRelistDuration := time.Microsecond
 
 	logSink := newLogSinkForErrors()
@@ -30,11 +27,11 @@ func TestNewRelistRequesterSuccess(t *testing.T) {
 	}
 
 	brokerSyncer := &automock.BrokerSyncer{}
-	brokerSyncer.On("Sync", labelSelector, 5).
+	brokerSyncer.On("Sync", 5).
 		Run(fulfillExpectation).Return(nil)
 	defer brokerSyncer.AssertExpectations(t)
 
-	relister := syncer.NewRelistRequester(brokerSyncer, fixRelistDuration, fixBrokerLabelKey, fixBrokerLabelValue, logSink.Logger)
+	relister := syncer.NewRelistRequester(brokerSyncer, fixRelistDuration, logSink.Logger)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -51,9 +48,6 @@ func TestNewRelistRequesterSuccess(t *testing.T) {
 
 func TestNewRelistRequesterError(t *testing.T) {
 	// given
-	fixBrokerLabelKey := "app"
-	fixBrokerLabelValue := "label"
-	labelSelector := fmt.Sprintf("%s=%s", fixBrokerLabelKey, fixBrokerLabelValue)
 	fixRelistDuration := time.Microsecond
 	maxRetries := 5
 
@@ -65,11 +59,11 @@ func TestNewRelistRequesterError(t *testing.T) {
 	}
 
 	brokerSyncer := &automock.BrokerSyncer{}
-	brokerSyncer.On("Sync", labelSelector, maxRetries).
+	brokerSyncer.On("Sync", maxRetries).
 		Run(fulfillExpectation).Return(errors.New("fix"))
 	defer brokerSyncer.AssertExpectations(t)
 
-	relister := syncer.NewRelistRequester(brokerSyncer, fixRelistDuration, fixBrokerLabelKey, fixBrokerLabelValue, logSink.Logger)
+	relister := syncer.NewRelistRequester(brokerSyncer, fixRelistDuration, logSink.Logger)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -88,7 +82,7 @@ func TestNewRelistRequesterError(t *testing.T) {
 		return false, nil
 	}, time.Second)
 
-	logSink.AssertLogged(t, logrus.ErrorLevel, fmt.Sprintf("Error occurred when synchronizing ServiceBrokers [labelSelector: %s][maxRetires=%d]: %v", labelSelector, maxRetries, fixError()))
+	logSink.AssertLogged(t, logrus.ErrorLevel, fmt.Sprintf("Error occurred when synchronizing ServiceBrokers [maxRetires=%d]: %v", maxRetries, fixError()))
 }
 
 func newLogSinkForErrors() *spy.LogSink {

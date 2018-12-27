@@ -3,10 +3,10 @@
 package gqlschema
 
 import (
-	fmt "fmt"
-	io "io"
-	strconv "strconv"
-	time "time"
+	"fmt"
+	"io"
+	"strconv"
+	"time"
 )
 
 type API struct {

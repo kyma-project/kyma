@@ -29,8 +29,8 @@ global:
     version: 8c274255
   api_controller_acceptance_tests:
     dir: develop/
-    version: 1f513da9
-    testNamespace: sampleapp
+    version: 8a32751d
+    testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
     version: 6e0a7fe2
@@ -60,7 +60,7 @@ global:
     version: 0d1ffe15
   kubeless_integration_tests:
     dir: develop/
-    version: a9bfa9fc
+    version: 8a32751d
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc

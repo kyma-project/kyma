@@ -132,7 +132,7 @@
     "components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1"
   ]
-  revision = "46be4bf9ea1d63216d644240036909ce0b50c7eb"
+  revision = "56b261fcf0ecff236ed643d5c6620faad1b708d2"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -420,6 +420,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "31f8c0ab9e18e416bd8a516d2f7e2abded392babfec2f300963191af3f257222"
+  inputs-digest = "478e205b2f315b259a8cc1efbeff1223e85c39b5548add812269b6b39822ee44"
   solver-name = "gps-cdcl"
   solver-version = 1

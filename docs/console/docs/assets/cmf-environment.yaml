@@ -9,7 +9,7 @@ spec:
   displayName: Tractors Overview
   version: v1
   category: Hardware
-  placement: environment
+  placement: namespace
   viewBaseUrl: https://base_url_of_the_microfrontend
   navigationNodes:
     - label: Tractors Overview

@@ -1,6 +1,6 @@
 package usagekind
 
-const FinalizerName = finalizerName
+var FinalizerName = finalizerName
 
 func (c *ProtectionController) WithTestHookOnAsyncOpDone(addHook func(), deletionHook func()) *ProtectionController {
 	c.testHookAddFinalizerDone = addHook

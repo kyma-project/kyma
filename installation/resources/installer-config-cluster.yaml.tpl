@@ -30,7 +30,9 @@ metadata:
     installer: overrides
 data:
   global.isLocalEnv: "false"
+  global.knative: "__KNATIVE__"
   global.domainName: "__DOMAIN__"
+  global.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.etcdBackup.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
@@ -93,8 +95,9 @@ data:
 
   security.enabled: "true"
 
-  gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
-  gateways.istio-ingressgateway.type: "LoadBalancer"
+  # service type is later changed by isito patch
+  gateways.istio-ingressgateway.service.externalPublicIp: ""
+  gateways.istio-ingressgateway.type: "NodePort"
 
   pilot.resources.limits.memory: 2Gi
   pilot.resources.requests.memory: 512Mi

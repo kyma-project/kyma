@@ -18,9 +18,9 @@ type FakeServiceBindingUsages struct {
 	ns   string
 }
 
-var servicebindingusagesResource = schema.GroupVersionResource{Group: "servicecatalog.kyma.cx", Version: "v1alpha1", Resource: "servicebindingusages"}
+var servicebindingusagesResource = schema.GroupVersionResource{Group: "servicecatalog.kyma-project.io", Version: "v1alpha1", Resource: "servicebindingusages"}
 
-var servicebindingusagesKind = schema.GroupVersionKind{Group: "servicecatalog.kyma.cx", Version: "v1alpha1", Kind: "ServiceBindingUsage"}
+var servicebindingusagesKind = schema.GroupVersionKind{Group: "servicecatalog.kyma-project.io", Version: "v1alpha1", Kind: "ServiceBindingUsage"}
 
 // Get takes name of the serviceBindingUsage, and returns the corresponding serviceBindingUsage object, and an error if there is any.
 func (c *FakeServiceBindingUsages) Get(name string, options v1.GetOptions) (result *v1alpha1.ServiceBindingUsage, err error) {

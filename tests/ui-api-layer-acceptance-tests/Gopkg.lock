@@ -110,7 +110,7 @@
     "components/idppreset/pkg/client/clientset/versioned/scheme",
     "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1"
   ]
-  revision = "01af467a7485d695790da907f60d0e617ad65120"
+  revision = "56b261fcf0ecff236ed643d5c6620faad1b708d2"
 
 [[projects]]
   name = "github.com/machinebox/graphql"
@@ -354,6 +354,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0d3835c358fcd271ab4611b48bc5822c39311cdca5a7d3508e11491ccdde097f"
+  inputs-digest = "5b8e0aedc0017b19406d2e2e8debf3fe0ecd394771576d9f4549606663bd02d7"
   solver-name = "gps-cdcl"
   solver-version = 1

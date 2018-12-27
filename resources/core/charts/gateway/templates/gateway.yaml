@@ -5,11 +5,19 @@ metadata:
   namespace: {{.Release.Namespace }}  
 spec:
   selector:
+    {{ if .Values.global.knative }}
+    knative: ingressgateway
+    {{ else }}
     istio: ingressgateway # use istio default ingress gateway
+    {{ end }}
   servers:
   - port:
       number: 443
+      {{ if .Values.global.knative }}
+      name: kyma_https
+      {{ else }}
       name: https
+      {{ end }}
       protocol: HTTPS
     tls:
       mode: SIMPLE
@@ -19,7 +27,11 @@ spec:
     - "*.{{.Values.global.domainName}}"
   - port:
       number: 80
+      {{ if .Values.global.knative }}
+      name: kyma_http
+      {{ else }}
       name: http
+      {{ end }}
       protocol: HTTP
     tls:
       httpsRedirect: true # automatic 301 redirect from http to https
