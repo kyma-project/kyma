@@ -18,8 +18,6 @@ push-image:
 .PHONY: ci-release
 ci-release: build-image push-image
 
-
-
 .PHONY: ci-create-release-artifacts
 ci-create-release-artifacts:
 	cd ./../..; \
