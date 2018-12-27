@@ -63,7 +63,7 @@ projects = [
     "tests/acceptance": "acceptance-tests",
     "tests/ui-api-layer-acceptance-tests": "ui-api-layer-acceptance-tests",
     "tests/gateway-tests": "gateway-acceptance-tests",
-    "tests/test-environments": "test-environments",
+    "tests/test-namespace-controller": "test-namespace-controller",
     "tests/kubeless-integration": "kubeless-integration-tests",
     "tests/kubeless": "kubeless-tests",
     "tests/knative-serving-acceptance": "knative-serving-acceptance-tests",
