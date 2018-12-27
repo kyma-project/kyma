@@ -1,12 +1,13 @@
 package ui
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/apis/ui/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
 )
 
 func TestBackendModuleConverter_ToGQL(t *testing.T) {

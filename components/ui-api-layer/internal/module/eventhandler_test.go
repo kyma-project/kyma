@@ -1,11 +1,12 @@
 package module
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/apis/ui/v1alpha1"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
 )
 
 func TestEventHandler_OnAdd(t *testing.T) {

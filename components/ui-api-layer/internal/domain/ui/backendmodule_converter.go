@@ -12,9 +12,8 @@ func (c *backendModuleConverter) ToGQL(in *v1alpha1.BackendModule) (*gqlschema.B
 		return nil, nil
 	}
 
-
 	module := gqlschema.BackendModule{
-		Name:                in.Name,
+		Name: in.Name,
 	}
 
 	return &module, nil

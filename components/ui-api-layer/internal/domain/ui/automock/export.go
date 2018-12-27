@@ -1,7 +1,7 @@
 package automock
 
 func NewBackendModuleConverter() *gqlBackendModuleConverter {
-	return new(gqlBackendModuleConverter )
+	return new(gqlBackendModuleConverter)
 }
 
 func NewBackendModuleService() *backendModuleLister {

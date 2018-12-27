@@ -8,8 +8,9 @@ import (
 type eventHandler struct {
 	module PluggableModule
 }
+
 func newEventHandler(module PluggableModule) *eventHandler {
-	return &eventHandler{module:module}
+	return &eventHandler{module: module}
 }
 
 func (h *eventHandler) OnAdd(obj interface{}) {

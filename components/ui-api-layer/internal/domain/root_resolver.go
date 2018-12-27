@@ -322,6 +322,10 @@ func (r *queryResolver) IDPPresets(ctx context.Context, first *int, offset *int)
 	return r.idpPreset.IDPPresetsQuery(ctx, first, offset)
 }
 
+func (r *queryResolver) BackendModules(ctx context.Context) ([]gqlschema.BackendModule, error) {
+	return r.ui.BackendModulesQuery(ctx)
+}
+
 // Subscriptions
 
 type subscriptionResolver struct {

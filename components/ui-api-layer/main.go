@@ -4,9 +4,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/experimental"
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/experimental"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/golang/glog"
@@ -25,7 +26,6 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/origin"
 )
-
 
 type config struct {
 	Host                 string   `envconfig:"default=127.0.0.1"`

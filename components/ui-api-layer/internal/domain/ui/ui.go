@@ -1,15 +1,16 @@
 package ui
 
 import (
+	"time"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/client/informers/externalversions"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
-	"time"
 )
 
 type Container struct {
-	Resolver *Resolver
+	Resolver              *Resolver
 	BackendModuleInformer cache.SharedIndexInformer
 }
 
@@ -32,7 +33,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Containe
 	return &Container{
 		Resolver: &Resolver{
 			backendModuleResolver: newBackendModuleResolver(backendModuleService),
-			informerFactory: informerFactory,
+			informerFactory:       informerFactory,
 		},
 		BackendModuleInformer: backendModuleInformer,
 	}, nil

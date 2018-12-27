@@ -2,6 +2,7 @@ package ui
 
 import (
 	"context"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"

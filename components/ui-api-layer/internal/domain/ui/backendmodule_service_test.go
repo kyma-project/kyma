@@ -1,6 +1,9 @@
 package ui_test
 
 import (
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui"
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/apis/ui/v1alpha1"
@@ -11,8 +14,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
-	"testing"
-	"time"
 )
 
 func TestBackendModuleService_List(t *testing.T) {

@@ -1,6 +1,9 @@
 package module_test
 
 import (
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module/automock"
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
@@ -10,8 +13,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
-	"testing"
-	"time"
 )
 
 func TestMakePluggableFunc_PluggabilityDisabled(t *testing.T) {

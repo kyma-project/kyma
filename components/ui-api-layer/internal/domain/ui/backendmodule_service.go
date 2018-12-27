@@ -2,17 +2,18 @@ package ui
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/apis/ui/v1alpha1"
 	"k8s.io/client-go/tools/cache"
 )
 
 type backendModuleService struct {
-	informer    cache.SharedIndexInformer
+	informer cache.SharedIndexInformer
 }
 
 func newBackendModuleService(informer cache.SharedIndexInformer) *backendModuleService {
 	return &backendModuleService{
-		informer:    informer,
+		informer: informer,
 	}
 }
 
