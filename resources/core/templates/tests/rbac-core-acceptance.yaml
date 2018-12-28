@@ -30,7 +30,7 @@ rules:
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["serviceclasses"]
     verbs: ["get", "list"]
-  - apiGroups: ["servicecatalog.kyma.cx"]
+  - apiGroups: ["servicecatalog.kyma-project.io"]
     resources: ["servicebindingusages"]
     verbs: ["get", "delete", "create", "list"]
     nonResourceURLs: []
