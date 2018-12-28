@@ -28,7 +28,6 @@ ci-create-release-artifacts:
 	cd ./../..; \
 	docker run --rm --volume $(CURDIR)/../..:/kyma  \
 		--volume $(ARTIFACTS):$(ARTIFACTS) \
-		-e KYMA_INSTALLER_PUSH_DIR=$(DOCKER_PATH)/ \
 		-e KYMA_INSTALLER_VERSION=$(TAG) \
 		-e ARTIFACTS_DIR=$(ARTIFACTS) \
 		--entrypoint /kyma/installation/scripts/release-generate-kyma-installer-artifacts.sh \
