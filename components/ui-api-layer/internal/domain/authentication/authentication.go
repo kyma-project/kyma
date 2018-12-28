@@ -15,10 +15,9 @@ import (
 
 
 type PluggableResolver struct {
-	resolver
+	*module.Pluggable
 	cfg    *resolverConfig
-	stopCh    chan struct{}
-	isEnabled bool
+	resolver
 
 	informerFactory externalversions.SharedInformerFactory
 }
@@ -35,29 +34,21 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 			restConfig: restConfig,
 			client: client,
 		},
+		Pluggable: module.NewPluggable("authentication"),
 	}
 	err = resolver.Disable()
 
 	return resolver, err
 }
 
-func (r *PluggableResolver) Name() string {
-	return "authentication"
-}
-
-func (r *PluggableResolver) IsEnabled() bool {
-	return r.isEnabled
-}
-
 func (r *PluggableResolver) Enable() error {
-	r.isEnabled = true
-	r.stopCh = make(chan struct{})
+	r.Pluggable.Enable()
 
 	r.informerFactory = externalversions.NewSharedInformerFactory(r.cfg.client, r.cfg.informerResyncPeriod)
 	svc := newIDPPresetService(r.cfg.client.AuthenticationV1alpha1(), r.informerFactory.Authentication().V1alpha1().IDPPresets().Informer())
 
 	go func() {
-		r.startAndWaitForCacheSync()
+		r.Pluggable.StartAndWaitForCacheSync(r.informerFactory)
 		r.resolver = &domainResolver{
 			idpPresetResolver: newIDPPresetResolver(svc),
 		}
@@ -67,28 +58,12 @@ func (r *PluggableResolver) Enable() error {
 }
 
 func (r *PluggableResolver) Disable() error {
-	r.isEnabled = false
-
-	if r.stopCh != nil {
-		close(r.stopCh)
-	}
+	r.Pluggable.Disable()
 
 	disabledErr := module.DisabledError(r)
 	r.resolver = disabled.NewResolver(disabledErr)
 
 	return nil
-}
-
-func (r *PluggableResolver) StopCacheSyncOnClose(stopCh <-chan struct{}) {
-	go func() {
-		<-stopCh
-		close(r.stopCh)
-	}()
-}
-
-func (r *PluggableResolver) startAndWaitForCacheSync() {
-	r.informerFactory.Start(r.stopCh)
-	r.informerFactory.WaitForCacheSync(r.stopCh)
 }
 
 type resolverConfig struct {
