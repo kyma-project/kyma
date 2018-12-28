@@ -30,7 +30,7 @@ metadata:
     installer: overrides
 data:
   global.isLocalEnv: "false"
-  global.knative: "__KNATIVE__"
+  global.knative: "false"
   global.domainName: "__DOMAIN__"
   global.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.etcdBackup.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
