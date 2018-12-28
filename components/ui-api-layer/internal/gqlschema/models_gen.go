@@ -53,6 +53,10 @@ type AuthenticationPolicy struct {
 	JwksURI string                   `json:"jwksURI"`
 }
 
+type BackendModule struct {
+	Name string `json:"name"`
+}
+
 type BindableResourcesOutputItem struct {
 	Kind        string              `json:"kind"`
 	DisplayName string              `json:"displayName"`

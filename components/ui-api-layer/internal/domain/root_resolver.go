@@ -4,6 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/experimental"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/apicontroller"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/authentication"
@@ -17,6 +20,7 @@ import (
 )
 
 type RootResolver struct {
+	ui        *ui.Resolver
 	k8s       *k8s.Resolver
 	kubeless  *kubeless.Resolver
 	sc        *servicecatalog.Resolver
@@ -26,7 +30,9 @@ type RootResolver struct {
 	idpPreset *authentication.Resolver
 }
 
-func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.Config, informerResyncPeriod time.Duration) (*RootResolver, error) {
+func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
+	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
+
 	contentContainer, err := content.New(contentCfg)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Content resolver")
@@ -63,6 +69,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	}
 
 	return &RootResolver{
+		ui:        uiContainer.Resolver,
 		k8s:       k8sResolver,
 		kubeless:  kubelessResolver,
 		app:       appContainer.Resolver,
@@ -75,6 +82,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 
 // WaitForCacheSync waits for caches to populate. This is blocking operation.
 func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
+	r.ui.WaitForCacheSync(stopCh)
 	r.app.WaitForCacheSync(stopCh)
 	r.sc.WaitForCacheSync(stopCh)
 	r.k8s.WaitForCacheSync(stopCh)
@@ -310,6 +318,10 @@ func (r *queryResolver) IDPPreset(ctx context.Context, name string) (*gqlschema.
 
 func (r *queryResolver) IDPPresets(ctx context.Context, first *int, offset *int) ([]gqlschema.IDPPreset, error) {
 	return r.idpPreset.IDPPresetsQuery(ctx, first, offset)
+}
+
+func (r *queryResolver) BackendModules(ctx context.Context) ([]gqlschema.BackendModule, error) {
+	return r.ui.BackendModulesQuery(ctx)
 }
 
 // Subscriptions

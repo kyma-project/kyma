@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/experimental"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/signal"
@@ -35,6 +37,7 @@ type config struct {
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
 	Application          application.Config
+	FeatureToggles       experimental.FeatureToggles
 }
 
 func main() {
@@ -45,7 +48,7 @@ func main() {
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	exitOnError(err, "Error while initializing REST client config")
 
-	resolvers, err := domain.New(k8sConfig, cfg.Content, cfg.Application, cfg.InformerResyncPeriod)
+	resolvers, err := domain.New(k8sConfig, cfg.Content, cfg.Application, cfg.InformerResyncPeriod, cfg.FeatureToggles)
 	exitOnError(err, "Error while creating resolvers")
 
 	stopCh := signal.SetupChannel()

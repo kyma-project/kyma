@@ -14,7 +14,7 @@ import (
 // BackendModulesGetter has a method to return a BackendModuleInterface.
 // A group's client should implement this interface.
 type BackendModulesGetter interface {
-	BackendModules(namespace string) BackendModuleInterface
+	BackendModules() BackendModuleInterface
 }
 
 // BackendModuleInterface has methods to work with BackendModule resources.
@@ -33,14 +33,12 @@ type BackendModuleInterface interface {
 // backendModules implements BackendModuleInterface
 type backendModules struct {
 	client rest.Interface
-	ns     string
 }
 
 // newBackendModules returns a BackendModules
-func newBackendModules(c *UiV1alpha1Client, namespace string) *backendModules {
+func newBackendModules(c *UiV1alpha1Client) *backendModules {
 	return &backendModules{
 		client: c.RESTClient(),
-		ns:     namespace,
 	}
 }
 
@@ -48,7 +46,6 @@ func newBackendModules(c *UiV1alpha1Client, namespace string) *backendModules {
 func (c *backendModules) Get(name string, options v1.GetOptions) (result *v1alpha1.BackendModule, err error) {
 	result = &v1alpha1.BackendModule{}
 	err = c.client.Get().
-		Namespace(c.ns).
 		Resource("backendmodules").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
@@ -61,7 +58,6 @@ func (c *backendModules) Get(name string, options v1.GetOptions) (result *v1alph
 func (c *backendModules) List(opts v1.ListOptions) (result *v1alpha1.BackendModuleList, err error) {
 	result = &v1alpha1.BackendModuleList{}
 	err = c.client.Get().
-		Namespace(c.ns).
 		Resource("backendmodules").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Do().
@@ -73,7 +69,6 @@ func (c *backendModules) List(opts v1.ListOptions) (result *v1alpha1.BackendModu
 func (c *backendModules) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	opts.Watch = true
 	return c.client.Get().
-		Namespace(c.ns).
 		Resource("backendmodules").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Watch()
@@ -83,7 +78,6 @@ func (c *backendModules) Watch(opts v1.ListOptions) (watch.Interface, error) {
 func (c *backendModules) Create(backendModule *v1alpha1.BackendModule) (result *v1alpha1.BackendModule, err error) {
 	result = &v1alpha1.BackendModule{}
 	err = c.client.Post().
-		Namespace(c.ns).
 		Resource("backendmodules").
 		Body(backendModule).
 		Do().
@@ -95,7 +89,6 @@ func (c *backendModules) Create(backendModule *v1alpha1.BackendModule) (result *
 func (c *backendModules) Update(backendModule *v1alpha1.BackendModule) (result *v1alpha1.BackendModule, err error) {
 	result = &v1alpha1.BackendModule{}
 	err = c.client.Put().
-		Namespace(c.ns).
 		Resource("backendmodules").
 		Name(backendModule.Name).
 		Body(backendModule).
@@ -107,7 +100,6 @@ func (c *backendModules) Update(backendModule *v1alpha1.BackendModule) (result *
 // Delete takes name of the backendModule and deletes it. Returns an error if one occurs.
 func (c *backendModules) Delete(name string, options *v1.DeleteOptions) error {
 	return c.client.Delete().
-		Namespace(c.ns).
 		Resource("backendmodules").
 		Name(name).
 		Body(options).
@@ -118,7 +110,6 @@ func (c *backendModules) Delete(name string, options *v1.DeleteOptions) error {
 // DeleteCollection deletes a collection of objects.
 func (c *backendModules) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
 	return c.client.Delete().
-		Namespace(c.ns).
 		Resource("backendmodules").
 		VersionedParams(&listOptions, scheme.ParameterCodec).
 		Body(options).
@@ -130,7 +121,6 @@ func (c *backendModules) DeleteCollection(options *v1.DeleteOptions, listOptions
 func (c *backendModules) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.BackendModule, err error) {
 	result = &v1alpha1.BackendModule{}
 	err = c.client.Patch(pt).
-		Namespace(c.ns).
 		Resource("backendmodules").
 		SubResource(subresources...).
 		Name(name).

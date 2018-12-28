@@ -16,11 +16,11 @@ required = [
 
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
-  version = "v0.1.3"
+  version = "=v0.1.28"
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "56b261fcf0ecff236ed643d5c6620faad1b708d2"
+  revision = "95373b0a3e099b946786f28b23a0b7e57e087ce4"
 
 [[constraint]]
   name = "github.com/gorilla/websocket"
@@ -33,7 +33,20 @@ required = [
 [[constraint]]
   name = "github.com/vrischmann/envconfig"
   version = "1.1.0"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.11.3"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.11.3"
+
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.11.3"
   
 [prune]
   go-tests = true
   unused-packages = true
+  non-go = true
