@@ -61,9 +61,6 @@ type applicationEvent struct {
 }
 
 func TestApplicationMutations(t *testing.T) {
-	if dex.IsSCIEnabled() {
-		t.Skip("SCI Enabled")
-	}
 	c, err := graphql.New()
 	require.NoError(t, err)
 

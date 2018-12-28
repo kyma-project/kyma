@@ -55,7 +55,7 @@ func createBackendModules(moduleNames []string, uiCli *versioned.Clientset) erro
 				Name: moduleName,
 			},
 		}
-		_, err := uiCli.UiV1alpha1().BackendModules("").Create(resource)
+		_, err := uiCli.UiV1alpha1().BackendModules().Create(resource)
 		if err != nil {
 			return err
 		}
@@ -66,7 +66,7 @@ func createBackendModules(moduleNames []string, uiCli *versioned.Clientset) erro
 
 func deleteBackendModules(moduleNames []string, uiCli *versioned.Clientset) error {
 	for _, moduleName := range moduleNames {
-		err := uiCli.UiV1alpha1().BackendModules("").Delete(moduleName, nil)
+		err := uiCli.UiV1alpha1().BackendModules().Delete(moduleName, nil)
 		if err != nil {
 			return err
 		}
