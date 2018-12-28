@@ -25,5 +25,5 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 
 // BackendModules returns a BackendModuleInformer.
 func (v *version) BackendModules() BackendModuleInformer {
-	return &backendModuleInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+	return &backendModuleInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }

@@ -12,8 +12,8 @@ type FakeUiV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeUiV1alpha1) BackendModules(namespace string) v1alpha1.BackendModuleInterface {
-	return &FakeBackendModules{c, namespace}
+func (c *FakeUiV1alpha1) BackendModules() v1alpha1.BackendModuleInterface {
+	return &FakeBackendModules{c}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

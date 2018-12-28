@@ -13,8 +13,8 @@ import (
 type BackendModuleLister interface {
 	// List lists all BackendModules in the indexer.
 	List(selector labels.Selector) (ret []*v1alpha1.BackendModule, err error)
-	// BackendModules returns an object that can list and get BackendModules.
-	BackendModules(namespace string) BackendModuleNamespaceLister
+	// Get retrieves the BackendModule from the index for a given name.
+	Get(name string) (*v1alpha1.BackendModule, error)
 	BackendModuleListerExpansion
 }
 
@@ -36,38 +36,9 @@ func (s *backendModuleLister) List(selector labels.Selector) (ret []*v1alpha1.Ba
 	return ret, err
 }
 
-// BackendModules returns an object that can list and get BackendModules.
-func (s *backendModuleLister) BackendModules(namespace string) BackendModuleNamespaceLister {
-	return backendModuleNamespaceLister{indexer: s.indexer, namespace: namespace}
-}
-
-// BackendModuleNamespaceLister helps list and get BackendModules.
-type BackendModuleNamespaceLister interface {
-	// List lists all BackendModules in the indexer for a given namespace.
-	List(selector labels.Selector) (ret []*v1alpha1.BackendModule, err error)
-	// Get retrieves the BackendModule from the indexer for a given namespace and name.
-	Get(name string) (*v1alpha1.BackendModule, error)
-	BackendModuleNamespaceListerExpansion
-}
-
-// backendModuleNamespaceLister implements the BackendModuleNamespaceLister
-// interface.
-type backendModuleNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all BackendModules in the indexer for a given namespace.
-func (s backendModuleNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.BackendModule, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.BackendModule))
-	})
-	return ret, err
-}
-
-// Get retrieves the BackendModule from the indexer for a given namespace and name.
-func (s backendModuleNamespaceLister) Get(name string) (*v1alpha1.BackendModule, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
+// Get retrieves the BackendModule from the index for a given name.
+func (s *backendModuleLister) Get(name string) (*v1alpha1.BackendModule, error) {
+	obj, exists, err := s.indexer.GetByKey(name)
 	if err != nil {
 		return nil, err
 	}
