@@ -15,8 +15,8 @@ type PluggableModule interface {
 	Name() string
 }
 
-func DisabledError(m PluggableModule) error {
-	errMessage := fmt.Sprintf("The %s module is disabled.", m.Name())
+func DisabledError(name string) error {
+	errMessage := fmt.Sprintf("The %s module is disabled.", name)
 	return errors.New(errMessage)
 }
 

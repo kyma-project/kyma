@@ -42,26 +42,22 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 }
 
 func (r *PluggableResolver) Enable() error {
-	r.Pluggable.Enable()
-
 	r.informerFactory = externalversions.NewSharedInformerFactory(r.cfg.client, r.cfg.informerResyncPeriod)
 	svc := newIDPPresetService(r.cfg.client.AuthenticationV1alpha1(), r.informerFactory.Authentication().V1alpha1().IDPPresets().Informer())
 
-	go func() {
-		r.Pluggable.StartAndWaitForCacheSync(r.informerFactory)
+	r.Pluggable.Enable(r.informerFactory, func() {
 		r.resolver = &domainResolver{
 			idpPresetResolver: newIDPPresetResolver(svc),
 		}
-	}()
+	})
 
 	return nil
 }
 
 func (r *PluggableResolver) Disable() error {
-	r.Pluggable.Disable()
-
-	disabledErr := module.DisabledError(r)
-	r.resolver = disabled.NewResolver(disabledErr)
+	r.Pluggable.Disable(func(disabledErr error) {
+		r.resolver = disabled.NewResolver(disabledErr)
+	})
 
 	return nil
 }
