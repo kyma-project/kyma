@@ -4,9 +4,10 @@ package authentication
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
 
 	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/client"

@@ -2,13 +2,14 @@ package module
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"testing"
+
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	"log"
-	"os"
-	"testing"
 )
 
 func SkipTestIfShould(t *testing.T, c *graphql.Client, moduleName string) {
@@ -36,7 +37,6 @@ func ExitIfShould(c *graphql.Client, moduleName string) {
 		os.Exit(0)
 	})
 }
-
 
 func checkIfTestShouldBeSkipped(pluggable bool, c *graphql.Client, moduleName string, onError func(error), onSkip func(string)) {
 	if dex.IsSCIEnabled() {

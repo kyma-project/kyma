@@ -3,8 +3,9 @@
 package k8s
 
 import (
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
 	"testing"
+
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
 
 	"time"
 

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/waiter"

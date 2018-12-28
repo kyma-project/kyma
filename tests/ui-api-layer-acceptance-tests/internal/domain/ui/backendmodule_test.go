@@ -3,8 +3,9 @@
 package ui
 
 import (
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
 	"testing"
+
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/apis/ui/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/client/clientset/versioned"

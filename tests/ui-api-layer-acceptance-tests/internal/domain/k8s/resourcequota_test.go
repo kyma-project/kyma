@@ -3,9 +3,10 @@
 package k8s
 
 import (
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
 
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"

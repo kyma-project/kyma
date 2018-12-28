@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 )
