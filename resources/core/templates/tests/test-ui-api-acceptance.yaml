@@ -13,6 +13,8 @@ spec:
     - name: "test-{{ template "fullname" . }}-ui-api-acceptance"
       image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_api_layer_acceptance_tests.dir }}ui-api-layer-acceptance-tests:{{ .Values.global.ui_api_layer_acceptance_tests.version }}
       env:
+        - name: IS_LOCAL_CLUSTER
+          value: "{{ .Values.global.isLocalEnv }}"
         - name: DOMAIN
           value: "{{ .Values.global.domainName }}"
         - name: USERNAME
