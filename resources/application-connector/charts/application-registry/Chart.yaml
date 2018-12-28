@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Application Registry for Kyma
+name: application-registry
+version: 0.0.1

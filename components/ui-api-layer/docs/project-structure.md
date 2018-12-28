@@ -23,6 +23,7 @@ This repository has the following structure:
     │   └── ...                                 # Other internal packages
     ├── contrib                                 # Examples, non-essential source files, configurations and other files
     │   └── examples                            # Example API resources
+    ├── hack                                    # Scripts for generating Custom Resource API
     ├── acceptance                              # Acceptance test setup
     ├── pkg                                     # All generic utilities
     ├── vendor                                  # Dependencies managed by Dep

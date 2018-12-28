@@ -352,7 +352,7 @@ func (ts *TestSuite) bindingUsage(bindingName, sbuName, envPrefix string) {
 	sbu := &bucTypes.ServiceBindingUsage{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceBindingUsage",
-			APIVersion: "servicecatalog.kyma.cx/v1alpha1",
+			APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: sbuName,

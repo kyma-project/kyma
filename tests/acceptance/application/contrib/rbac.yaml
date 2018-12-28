@@ -25,7 +25,7 @@ rules:
     resources: ["serviceinstances", "servicebindings", "servicebrokers"]
     verbs: ["get", "delete", "create", "list"]
     nonResourceURLs: []
-  - apiGroups: ["servicecatalog.kyma.cx"]
+  - apiGroups: ["servicecatalog.kyma-project.io"]
     resources: ["servicebindingusages"]
     verbs: ["get", "delete", "create", "list"]
     nonResourceURLs: []

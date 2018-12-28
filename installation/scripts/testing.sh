@@ -186,10 +186,13 @@ cleanupCoreErr=$?
 cleanupHelmTestPods istio-system
 cleanupIstioErr=$?
 
+cleanupHelmTestPods knative-serving
+cleanupKnativeErr=$?
+
 cleanupHelmTestPods kyma-integration
 cleanupGatewayErr=$?
 
-if [ ${cleanupGatewayErr} -ne 0 ] || [ ${cleanupIstioErr} -ne 0 ]  || [ ${cleanupCoreErr} -ne 0 ]
+if [ ${cleanupGatewayErr} -ne 0 ] || [ ${cleanupIstioErr} -ne 0 ] || [ ${cleanupCoreErr} -ne 0 ] || [ ${cleanupKnativeErr} -ne 0 ]
 then
     exit 1
 fi
@@ -230,6 +233,13 @@ istioTestErr=$?
 checkAndCleanupTest istio-system
 testCheckIstio=$?
 
+echo "- Testing Knative components..."
+helm test knative
+knativeTestErr=$?
+
+checkAndCleanupTest knative-serving
+knativeTestErr=$?
+
 echo "- Testing Application Connector"
 helm test application-connector
 acTestErr=$?
@@ -240,7 +250,7 @@ testCheckGateway=$?
 printImagesWithLatestTag
 latestTagsErr=$?
 
-if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${acTestErr} -ne 0 ] || [ ${loggingTestErr} -ne 0 ] || [ ${monitoringTestErr} -ne 0 ]
+if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${acTestErr} -ne 0 ] || [ ${loggingTestErr} -ne 0 ] || [ ${monitoringTestErr} -ne 0 ] || [ ${knativeTestErr} -ne 0 ]
 then
     exit 1
 else

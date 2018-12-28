@@ -1,8 +1,6 @@
 package controller
 
-const (
-	TracingAnnotationKey = tracingAnnotationKey
-)
+var TracingAnnotationKey = tracingAnnotationKey
 
 func NewGenericUsageAnnotationTracer() *genericUsageAnnotationTracer {
 	return &genericUsageAnnotationTracer{}

@@ -25,7 +25,7 @@ func TestServiceBrokerSync_Success(t *testing.T) {
 	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
 
 	// when
-	err := nsBrokerSync.Sync(fixLabelSelector(), maxSyncRetries)
+	err := nsBrokerSync.Sync(maxSyncRetries)
 
 	// then
 	sb, err := client.Servicecatalog().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
@@ -51,7 +51,7 @@ func TestServiceBrokerSync_SuccessAfterRetry(t *testing.T) {
 	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
 
 	// when
-	resultErr := nsBrokerSync.Sync(fixLabelSelector(), maxSyncRetries)
+	resultErr := nsBrokerSync.Sync(maxSyncRetries)
 
 	// then
 	sb, err := client.Servicecatalog().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
@@ -67,7 +67,7 @@ func TestServiceBrokerSync_Empty(t *testing.T) {
 	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
 
 	// when
-	err := nsBrokerSync.Sync(fixLabelSelector(), maxSyncRetries)
+	err := nsBrokerSync.Sync(maxSyncRetries)
 
 	// then
 	assert.Nil(t, err)
@@ -81,7 +81,7 @@ func TestServiceBrokerSync_ListError(t *testing.T) {
 	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
 
 	// when
-	err := nsBrokerSync.Sync(fixLabelSelector(), maxSyncRetries)
+	err := nsBrokerSync.Sync(maxSyncRetries)
 
 	// then
 	assert.EqualError(t, err, fmt.Sprintf("while listing ServiceBrokers [labelSelector: %s]: %v", fixLabelSelector(), fixError()))
@@ -95,7 +95,7 @@ func TestServiceBrokerSync_ConflictError(t *testing.T) {
 	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
 
 	// when
-	err := nsBrokerSync.Sync(fixLabelSelector(), maxSyncRetries)
+	err := nsBrokerSync.Sync(maxSyncRetries)
 
 	// then
 	assert.EqualError(t, err, "1 error occurred:\n\n* could not sync ServiceBroker \"application-broker\" [namespace: test], after 5 tries")
@@ -109,7 +109,7 @@ func TestServiceBrokerSync_UpdateError(t *testing.T) {
 	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
 
 	// when
-	err := nsBrokerSync.Sync(fixLabelSelector(), maxSyncRetries)
+	err := nsBrokerSync.Sync(maxSyncRetries)
 
 	// then
 	assert.Error(t, err)
@@ -123,7 +123,7 @@ func TestServiceBrokerSync_GetError(t *testing.T) {
 	nsBrokerSync := NewServiceBrokerSyncer(client.Servicecatalog())
 
 	// when
-	err := nsBrokerSync.Sync(fixLabelSelector(), maxSyncRetries)
+	err := nsBrokerSync.Sync(maxSyncRetries)
 
 	// then
 	assert.Error(t, err)
@@ -194,14 +194,14 @@ func fixServiceBroker() *v1beta1.ServiceBroker {
 			Name:      nsbroker.NamespacedBrokerName,
 			Namespace: "test",
 			Labels: map[string]string{
-				"app": "label",
+				"namespaced-application-broker": "true",
 			},
 		},
 	}
 }
 
 func fixLabelSelector() string {
-	return "app=label"
+	return "namespaced-application-broker=true"
 }
 
 func failingReactor(retErr error) k8s_testing.ReactionFunc {

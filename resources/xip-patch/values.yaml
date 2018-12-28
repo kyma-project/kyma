@@ -1,0 +1,5 @@
+containerRegistry:
+  path: eu.gcr.io/kyma-project
+xip_patch:
+  dir: develop/
+  version: 34d2cea5

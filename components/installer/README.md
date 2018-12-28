@@ -73,15 +73,6 @@ Change the `url` property in **spec** to `{URL TO KYMA TAR GZ}`. Trigger the upd
 kubectl label installation/{CR_NAME} action=install --overwrite
 ```
 
-### Update the local Kyma installation
-
-Prepare local changes in Kyma sources. Run the following command to copy the updated sources to the Installer Pod and trigger the update action:
-```
-../../installation/scripts/update.sh --local --cr-name {CR_NAME}
-```
-
-> **NOTE:** You do not have to restart Minikube.
-
 ### Uninstall Kyma
 
 Run the following command to completely uninstall Kyma:

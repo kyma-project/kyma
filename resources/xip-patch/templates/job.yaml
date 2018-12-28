@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-service-account
+      restartPolicy: OnFailure
+      containers:
+      - name: {{ .Release.Name }}
+        image: {{ .Values.containerRegistry.path }}/{{ .Values.xip_patch.dir }}xip-patch:{{ .Values.xip_patch.version }}
+        env:
+        - name: EXTERNAL_PUBLIC_IP
+          value: {{ .Values.global.loadBalancerIP }}

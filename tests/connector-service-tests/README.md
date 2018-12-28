@@ -10,7 +10,7 @@ The project requires Go 1.8 or higher.
 
 ## Installation
 
-To install the Metadata Service components, follow these steps:
+To install the Connector Service components, follow these steps:
 
 1. `git clone git@github.com:kyma-project/kyma.git`
 2. `cd /tests/connector-service-tests`
