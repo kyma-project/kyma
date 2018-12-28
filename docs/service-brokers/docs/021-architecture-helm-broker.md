@@ -11,7 +11,7 @@ The registration process in case of the Helm Broker consists of the following st
 1. The Helm Broker fetches bundles from the remote HTTP server.
 2. The Helm Broker registers bundles as ServiceClasses in the Service Catalog.
 
-![Helm Broker registration](assets/010-helm-registration.png)
+![Helm Broker registration](./assets/010-helm-registration.png)
 
 ### Bundles provisioning and binding
 
@@ -22,4 +22,4 @@ After the registration, the process of bundle provisioning and binding takes pla
 3. Bind your ServiceInstance to the service or lambda. During the binding process, ServiceBinding and ServiceBindingUsage resources are created.
 4. The service or lambda calls a bundle.
 
-![Helm Broker architecture](assets/011-helm-architecture.png)
+![Helm Broker architecture](./assets/011-helm-architecture.png)

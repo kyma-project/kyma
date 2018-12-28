@@ -79,8 +79,8 @@ The following rules apply in cases of credential name conflicts:
 
 |   Field Name   |                                                                                                                              Description                                                                                                                              |
 |:--------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-|   [credential](#credential)   |                                                                                                         The list of the credential variables to return during the binding action.                                                                                                        |
-| [credentialFrom](#credentialfrom) | The list of the sources to populate the credential variables on the binding action. When the key exists in multiple sources, the value associated with the last source takes precedence. The variables from the `credential` section override the values if duplicate keys exist. |
+|   [credential](#configuration-binding-bundles-credential)   |                                                                                                         The list of the credential variables to return during the binding action.                                                                                                        |
+| [credentialFrom](#configuration-binding-bundles-credentialfrom) | The list of the sources to populate the credential variables on the binding action. When the key exists in multiple sources, the value associated with the last source takes precedence. The variables from the `credential` section override the values if duplicate keys exist. |
 
 #### Credential
 
@@ -88,15 +88,15 @@ The following rules apply in cases of credential name conflicts:
 |:----------:|:---------------------------------------------------------------------------------:|
 |    **name**    |                          The name of the credential variable.                         |
 |    **value**   |      A variable value. You can also use the Helm Chart templating directives.      |
-| [valueFrom](#valuefrom)  | The source of the credential variable's value. You cannot use it if the value is not empty. |
+| [valueFrom](#configuration-binding-bundles-valuefrom)  | The source of the credential variable's value. You cannot use it if the value is not empty. |
 
 ##### ValueFrom
 
 |    Field Name   |                               Description                              |
 |:---------------:|:----------------------------------------------------------------------:|
-| [configMapKeyRef](#configmapkeyref) |    Selects a ConfigMap key in the Helm chart release Namespace.   |
-|   [secretKeyRef](#secretkeyref)  |     Selects a Secret key in the Helm Chart release Namespace.     |
-|    [serviceRef](#serviceref)   | Selects a Service resource in the Helm Chart release Namespace. |
+| [configMapKeyRef](#configuration-binding-bundles-configmapkeyref) |    Selects a ConfigMap key in the Helm chart release Namespace.   |
+|   [secretKeyRef](#configuration-binding-bundles-secretkeyref)  |     Selects a Secret key in the Helm Chart release Namespace.     |
+|    [serviceRef](#configuration-binding-bundles-serviceref)   | Selects a Service resource in the Helm Chart release Namespace. |
 
 ###### ConfigMapKeyRef
 
@@ -123,8 +123,8 @@ The following rules apply in cases of credential name conflicts:
 
 |  Field Name  |                                   Description                                 |
 |:------------:|:-----------------------------------------------------------------------------:|
-| [configMapRef](#configmapref) | The ConfigMap to retrieve the values from. It must be available in the Helm Chart release Namespace. |
-|   [secretRef](#secretref)  |   The Secret to retrieve the values from. It must be available in the Helm Chart release Namespace.  |
+| [configMapRef](#configuration-binding-bundles-configmapref) | The ConfigMap to retrieve the values from. It must be available in the Helm Chart release Namespace. |
+|   [secretRef](#configuration-binding-bundles-secretref)  |   The Secret to retrieve the values from. It must be available in the Helm Chart release Namespace.  |
 
 ##### ConfigMapRef
 

@@ -5,9 +5,9 @@ type: Details
 
 The Event Bus enables a successful flow of the Events in Kyma when:
 
-- The [EventActivation](#activate-events) is in place.
-- You create a [Subscription](#consume-events) Kubernetes custom resource and register the webhook for the lambda or a service to consume the Events.
-- The Events are [published](#event-publishing).
+- The [EventActivation](#details-event-flow-requirements-activate-events) is in place.
+- You create a [Subscription](#details-event-flow-requirements-consume-events) Kubernetes custom resource and register the webhook for the lambda or a service to consume the Events.
+- The Events are [published](#details-event-flow-requirements-event-publishing).
 
 ## Details
 
@@ -19,7 +19,7 @@ To receive Events, use EventActivation between the Environment and the Applicati
 
 For example, if you define the lambda in the `test123` Environment and want to receive the `order-created` Event type from the `ec-qa` App, you need to enable the EventActivation between the `test123` Environment and the `ec-qa` App. Otherwise, the lambda cannot receive the `order-created` Event type.
 
-![EventActivation.png](assets/event-activation.png)
+![EventActivation.png](./assets/event-activation.png)
 
 ### Consume Events
 
