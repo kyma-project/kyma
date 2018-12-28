@@ -5,12 +5,12 @@ type: Details
 
 ## Service description
 
-The `azure-rediscache` service provides the following plan names and descriptions:
+The service provides the following plan names and descriptions:
 
 | Plan Name | Description |
 |-----------|-------------|
-| `enterprise` | Basic Tier, 250MB Cache |
-| `micro` | Standard Tier, 1GB Cache |
+| `enterprise` |  |
+| `micro` | Redis micro plan which uses the in-memory persistence. |
 
 
 ## Provision
@@ -23,15 +23,27 @@ These are the provisioning parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `Labels` | `string` | The Azure region in which to provision applicable resources. | NO | - |
-| `Image Pull Policy` | `string` | Possible values are `Always`, `IfNotPresent`, `Never`. | Y | `IfNotPresent` |
+| `imagePullPolicy` | `string` | The possible values are `Always`, `IfNotPresent`, `Never`. | Y | `IfNotPresent` |
+
+## Update parameters
+
+
+
+## Binding parameters
+
+Binding grants the provided service account access to the Redis cache. These are the binding parameters:
+
+| Parameter Name | Type | Description | Required | Default Value |
+|----------------|------|-------------|----------|---------------|
+| **** | `` | |  |  |
+
 
 ### Credentials
 
-The binding returns the following connection details and credentials:
+The binding returns the following credentials:
 
 | Parameter Name | Type | Description |
 |----------------|------|-------------|
-| `host` | `string` | The fully-qualified address of the Redis cache. |
-| `port` | `int	` | The port number to connect to on the Redis cache. |
-| `password` | `string` | The password for the Redis cache. |
+| **host** | `string` | The fully-qualified address of the Redis cache. |
+| **port** | `int` | The port number to connect to the Redis cache. |
+| **redis_password** | `string` | The password to the Redis cache. |
