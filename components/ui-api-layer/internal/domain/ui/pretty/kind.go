@@ -4,7 +4,7 @@ type Kind int
 
 const (
 	BackendModule  Kind = iota
-	BackendModules Kind = iota
+	BackendModules
 )
 
 func (k Kind) String() string {

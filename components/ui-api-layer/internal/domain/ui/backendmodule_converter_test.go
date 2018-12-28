@@ -26,7 +26,7 @@ func TestBackendModuleConverter_ToGQL(t *testing.T) {
 
 		result, err := converter.ToGQL(&item)
 
-		assert.Equal(t, err, nil)
+		require.NoError(t, err)
 		assert.Equal(t, &expected, result)
 	})
 
