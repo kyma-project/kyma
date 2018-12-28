@@ -41,7 +41,7 @@ oklog:
       cpu: 125m
       memory: 96Mi
     limits:
-      memory: 1Gi
+      memory: 1500Mi
 
 # Local installation config
 isLocalEnv:
