@@ -5,7 +5,7 @@ import (
 	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
 	uiClientset "github.com/kyma-project/kyma/components/ui-api-layer/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
-	"k8s.io/client-go/kubernetes/typed/core/v1"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 )
 

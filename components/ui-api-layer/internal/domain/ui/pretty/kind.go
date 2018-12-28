@@ -3,7 +3,7 @@ package pretty
 type Kind int
 
 const (
-	BackendModule  Kind = iota
+	BackendModule Kind = iota
 	BackendModules
 )
 

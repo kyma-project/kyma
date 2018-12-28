@@ -1,3 +1,5 @@
+// +build acceptance
+
 package ui
 
 import (
@@ -10,7 +12,7 @@ import (
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type BackendModule struct {
