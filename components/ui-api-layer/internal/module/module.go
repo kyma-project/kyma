@@ -1,6 +1,7 @@
 package module
 
 import (
+	"fmt"
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/tools/cache"
@@ -12,6 +13,11 @@ type PluggableModule interface {
 	Disable() error
 	IsEnabled() bool
 	Name() string
+}
+
+func DisabledError(m PluggableModule) error {
+	errMessage := fmt.Sprintf("The %s module is disabled.", m.Name())
+	return errors.New(errMessage)
 }
 
 func MakePluggableFunc(informer cache.SharedIndexInformer, pluggabilityEnabled bool) func(PluggableModule) {

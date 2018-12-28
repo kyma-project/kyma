@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 	"time"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui"
@@ -27,11 +28,14 @@ type RootResolver struct {
 	app       *application.Resolver
 	content   *content.Resolver
 	ac        *apicontroller.Resolver
-	idpPreset *authentication.Resolver
+
+	authentication *authentication.PluggableResolver
 }
 
 func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
+
+	makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer, featureToggles.ModulePluggability)
 
 	contentContainer, err := content.New(contentCfg)
 	if err != nil {
@@ -57,16 +61,19 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Kubeless resolver")
 	}
+	//makePluggable(kubelessResolver)
 
 	acResolver, err := apicontroller.New(restConfig, informerResyncPeriod)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing API controller resolver")
 	}
+	//makePluggable(acResolver)
 
-	idpPresetResolver, err := authentication.New(restConfig, informerResyncPeriod)
+	authenticationResolver, err := authentication.New(restConfig, informerResyncPeriod)
 	if err != nil {
-		return nil, errors.Wrap(err, "while initializing idpPreset resolver")
+		return nil, errors.Wrap(err, "while initializing authentication resolver")
 	}
+	makePluggable(authenticationResolver)
 
 	return &RootResolver{
 		ui:        uiContainer.Resolver,
@@ -76,7 +83,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 		sc:        scContainer.Resolver,
 		content:   contentContainer.Resolver,
 		ac:        acResolver,
-		idpPreset: idpPresetResolver,
+		authentication: authenticationResolver,
 	}, nil
 }
 
@@ -88,8 +95,9 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.k8s.WaitForCacheSync(stopCh)
 	r.kubeless.WaitForCacheSync(stopCh)
 	r.ac.WaitForCacheSync(stopCh)
-	r.idpPreset.WaitForCacheSync(stopCh)
 	r.content.WaitForCacheSync(stopCh)
+
+	r.authentication.StopCacheSyncOnClose(stopCh)
 }
 
 func (r *RootResolver) Deployment() gqlschema.DeploymentResolver {
@@ -175,11 +183,11 @@ func (r *mutationResolver) DisableApplication(ctx context.Context, application s
 }
 
 func (r *mutationResolver) CreateIDPPreset(ctx context.Context, name string, issuer string, jwksURI string) (*gqlschema.IDPPreset, error) {
-	return r.idpPreset.CreateIDPPresetMutation(ctx, name, issuer, jwksURI)
+	return r.authentication.CreateIDPPresetMutation(ctx, name, issuer, jwksURI)
 }
 
 func (r *mutationResolver) DeleteIDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
-	return r.idpPreset.DeleteIDPPresetMutation(ctx, name)
+	return r.authentication.DeleteIDPPresetMutation(ctx, name)
 }
 
 func (r *mutationResolver) CreateApplication(ctx context.Context, name string, description *string, labels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error) {
@@ -313,11 +321,11 @@ func (r *queryResolver) Apis(ctx context.Context, environment string, serviceNam
 }
 
 func (r *queryResolver) IDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
-	return r.idpPreset.IDPPresetQuery(ctx, name)
+	return r.authentication.IDPPresetQuery(ctx, name)
 }
 
 func (r *queryResolver) IDPPresets(ctx context.Context, first *int, offset *int) ([]gqlschema.IDPPreset, error) {
-	return r.idpPreset.IDPPresetsQuery(ctx, first, offset)
+	return r.authentication.IDPPresetsQuery(ctx, first, offset)
 }
 
 func (r *queryResolver) BackendModules(ctx context.Context) ([]gqlschema.BackendModule, error) {
