@@ -20,7 +20,7 @@ ci-release: build-image push-image
 
 
 # Creates release artifacts. Artifacts are stored in $(ARTIFACTS) directory.
-# This variable is provided by Prow and files stored there are automatically upload to GCS.
+# This variable is provided by Prow and files stored there are automatically upload to GCS. 
 .PHONY: ci-create-release-artifacts
 ci-create-release-artifacts:
 	echo $(DOCKER_PATH)
