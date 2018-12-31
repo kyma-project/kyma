@@ -11,8 +11,8 @@ import (
 	"k8s.io/client-go/rest"
 
 	scClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	bucClient "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
-	reClient "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
 )
 
 type Report struct {
@@ -48,7 +48,7 @@ func (t TestLogWriter) Write(p []byte) (n int, err error) {
 // PrintJsonReport create report for injected namespace for every resource taking part in binding usage test
 // and print all of them as a json in testing logs
 // resources included in report: Deployment, Pod, Service, ServiceBroker, ServiceClass, ServiceInstance
-// ServiceBinding, RemoteEnvironment, ServiceBindingUsage
+// ServiceBinding, Application, ServiceBindingUsage
 func (r Report) PrintJsonReport(namespace string) {
 	printer := &printers.JSONPrinter{}
 
@@ -66,7 +66,7 @@ func (r Report) PrintJsonReport(namespace string) {
 
 	r.kubernetesResourceDump(printer, k8sclientset, namespace)
 	r.serviceCatalogResourceDump(printer, scclientset, namespace)
-	r.remoteEnvironmentResourceDump(printer, r.cfg)
+	r.applicationResourceDump(printer, r.cfg)
 	r.bucResourceDump(printer, r.cfg, namespace)
 
 	r.test.Log("########## End Report Namespace ##########")
@@ -118,17 +118,17 @@ func (r Report) serviceCatalogResourceDump(printer printers.ResourcePrinter, cli
 	r.printObject(printer, bngs, "ServiceBinding")
 }
 
-func (r Report) remoteEnvironmentResourceDump(printer printers.ResourcePrinter, config *rest.Config) {
-	clientset, err := reClient.NewForConfig(config)
+func (r Report) applicationResourceDump(printer printers.ResourcePrinter, config *rest.Config) {
+	clientset, err := appClient.NewForConfig(config)
 	if err != nil {
-		r.test.Logf("Remote Environment client unreachable: %v \n", err)
+		r.test.Logf("Application client unreachable: %v \n", err)
 	}
 
-	reb, err := clientset.ApplicationconnectorV1alpha1().RemoteEnvironments().List(metav1.ListOptions{})
+	ab, err := clientset.ApplicationconnectorV1alpha1().Applications().List(metav1.ListOptions{})
 	if err != nil {
-		r.test.Logf("RemoteEnvironment list unreachable: %v \n", err)
+		r.test.Logf("Application list unreachable: %v \n", err)
 	}
-	r.printObject(printer, reb, "RemoteEnvironment")
+	r.printObject(printer, ab, "Application")
 }
 
 func (r Report) bucResourceDump(printer printers.ResourcePrinter, config *rest.Config, ns string) {
