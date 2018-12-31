@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/pretty"
@@ -44,6 +45,10 @@ func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context
 
 	asyncApiSpec, err := r.asyncApiSpecGetter.Find("service-class", eventActivation.Name)
 	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+
 		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", pretty.EventActivationEvents, pretty.EventActivation, eventActivation.Name))
 		return nil, gqlerror.New(err, pretty.EventActivationEvents, gqlerror.WithName(eventActivation.Name))
 	}

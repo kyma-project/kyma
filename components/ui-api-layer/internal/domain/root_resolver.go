@@ -28,8 +28,8 @@ type RootResolver struct {
 	//TODO: Make pluggable
 	sc      *servicecatalog.Resolver
 	app     *application.Resolver
-	content *content.Resolver
 
+	content *content.PluggableContainer
 	kubeless       *kubeless.PluggableResolver
 	ac             *apicontroller.PluggableResolver
 	authentication *authentication.PluggableResolver
@@ -44,7 +44,9 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Content resolver")
 	}
+	makePluggable(contentContainer)
 
+	//TODO:
 	scContainer, err := servicecatalog.New(restConfig, informerResyncPeriod, contentContainer.AsyncApiSpecGetter, contentContainer.ApiSpecGetter, contentContainer.ContentGetter)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
@@ -84,7 +86,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 		kubeless:       kubelessResolver,
 		app:            appContainer.Resolver,
 		sc:             scContainer.Resolver,
-		content:        contentContainer.Resolver,
+		content:        contentContainer,
 		ac:             acResolver,
 		authentication: authenticationResolver,
 	}, nil
@@ -93,13 +95,16 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 // WaitForCacheSync waits for caches to populate. This is blocking operation.
 func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.ui.WaitForCacheSync(stopCh)
+	r.k8s.WaitForCacheSync(stopCh)
+
+
+	//TODO:
 	r.app.WaitForCacheSync(stopCh)
 	r.sc.WaitForCacheSync(stopCh)
-	r.k8s.WaitForCacheSync(stopCh)
-	r.kubeless.WaitForCacheSync(stopCh)
-	r.ac.WaitForCacheSync(stopCh)
-	r.content.WaitForCacheSync(stopCh)
 
+	r.content.StopCacheSyncOnClose(stopCh)
+	r.ac.StopCacheSyncOnClose(stopCh)
+	r.kubeless.StopCacheSyncOnClose(stopCh)
 	r.authentication.StopCacheSyncOnClose(stopCh)
 }
 
@@ -296,11 +301,11 @@ func (r *queryResolver) ServiceBindingUsage(ctx context.Context, name, environme
 }
 
 func (r *queryResolver) Content(ctx context.Context, contentType, id string) (*gqlschema.JSON, error) {
-	return r.content.ContentQuery(ctx, contentType, id)
+	return r.content.Resolver.ContentQuery(ctx, contentType, id)
 }
 
 func (r *queryResolver) Topics(ctx context.Context, input []gqlschema.InputTopic, internal *bool) ([]gqlschema.TopicEntry, error) {
-	return r.content.TopicsQuery(ctx, input, internal)
+	return r.content.Resolver.TopicsQuery(ctx, input, internal)
 }
 
 func (r *queryResolver) Application(ctx context.Context, name string) (*gqlschema.Application, error) {

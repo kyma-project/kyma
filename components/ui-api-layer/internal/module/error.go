@@ -16,3 +16,8 @@ func (e *DisabledModuleError) Error() string {
 	errMessage := fmt.Sprintf("The %s module is disabled.", e.ModuleName)
 	return errMessage
 }
+
+func IsDisabledModuleError(err error) bool {
+	_, ok := err.(*DisabledModuleError)
+	return ok
+}

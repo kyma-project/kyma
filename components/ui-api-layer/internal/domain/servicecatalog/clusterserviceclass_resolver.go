@@ -3,6 +3,7 @@ package servicecatalog
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 
 	"github.com/golang/glog"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -143,6 +144,10 @@ func (r *clusterServiceClassResolver) ClusterServiceClassApiSpecField(ctx contex
 
 	apiSpec, err := r.apiSpecGetter.Find("service-class", obj.Name)
 	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+
 		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.ApiSpec, pretty.ClusterServiceClass, obj.ExternalName))
 		return nil, gqlerror.New(err, contentPretty.ApiSpec)
 	}
@@ -169,6 +174,10 @@ func (r *clusterServiceClassResolver) ClusterServiceClassAsyncApiSpecField(ctx c
 
 	asyncApiSpec, err := r.asyncApiSpecGetter.Find("service-class", obj.Name)
 	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+
 		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.AsyncApiSpec, pretty.ClusterServiceClass, obj.ExternalName))
 		return nil, gqlerror.New(err, contentPretty.AsyncApiSpec)
 	}
@@ -195,6 +204,10 @@ func (r *clusterServiceClassResolver) ClusterServiceClassContentField(ctx contex
 
 	content, err := r.contentGetter.Find("service-class", obj.Name)
 	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+
 		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.Content, pretty.ClusterServiceClass, obj.ExternalName))
 		return nil, gqlerror.New(err, contentPretty.Content)
 	}
