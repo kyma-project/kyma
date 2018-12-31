@@ -2,10 +2,11 @@ package authentication
 
 import (
 	"context"
+	"time"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/authentication/disabled"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
-	"time"
 
 	"github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/idppreset/pkg/client/informers/externalversions"
@@ -13,10 +14,9 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-
 type PluggableResolver struct {
 	*module.Pluggable
-	cfg    *resolverConfig
+	cfg *resolverConfig
 	resolver
 
 	informerFactory externalversions.SharedInformerFactory
@@ -30,9 +30,9 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 
 	resolver := &PluggableResolver{
 		cfg: &resolverConfig{
-			informerResyncPeriod:informerResyncPeriod,
-			restConfig: restConfig,
-			client: client,
+			informerResyncPeriod: informerResyncPeriod,
+			restConfig:           restConfig,
+			client:               client,
 		},
 		Pluggable: module.NewPluggable("authentication"),
 	}
@@ -63,9 +63,9 @@ func (r *PluggableResolver) Disable() error {
 }
 
 type resolverConfig struct {
-	restConfig                *rest.Config
-	informerResyncPeriod      time.Duration
-	client *versioned.Clientset
+	restConfig           *rest.Config
+	informerResyncPeriod time.Duration
+	client               *versioned.Clientset
 }
 
 //go:generate failery -name=resolver -case=underscore -output disabled -outpkg disabled

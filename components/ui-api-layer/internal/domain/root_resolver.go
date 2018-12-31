@@ -2,8 +2,9 @@ package domain
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 	"time"
+
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/experimental"
@@ -21,13 +22,13 @@ import (
 )
 
 type RootResolver struct {
-	ui        *ui.Resolver
-	k8s       *k8s.Resolver
-	kubeless  *kubeless.Resolver
-	sc        *servicecatalog.Resolver
-	app       *application.Resolver
-	content   *content.Resolver
-	ac        *apicontroller.Resolver
+	ui       *ui.Resolver
+	k8s      *k8s.Resolver
+	kubeless *kubeless.Resolver
+	sc       *servicecatalog.Resolver
+	app      *application.Resolver
+	content  *content.Resolver
+	ac       *apicontroller.Resolver
 
 	authentication *authentication.PluggableResolver
 }
@@ -76,13 +77,13 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	makePluggable(authenticationResolver)
 
 	return &RootResolver{
-		ui:        uiContainer.Resolver,
-		k8s:       k8sResolver,
-		kubeless:  kubelessResolver,
-		app:       appContainer.Resolver,
-		sc:        scContainer.Resolver,
-		content:   contentContainer.Resolver,
-		ac:        acResolver,
+		ui:             uiContainer.Resolver,
+		k8s:            k8sResolver,
+		kubeless:       kubelessResolver,
+		app:            appContainer.Resolver,
+		sc:             scContainer.Resolver,
+		content:        contentContainer.Resolver,
+		ac:             acResolver,
 		authentication: authenticationResolver,
 	}, nil
 }

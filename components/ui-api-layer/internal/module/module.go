@@ -2,6 +2,7 @@ package module
 
 import (
 	"fmt"
+
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/tools/cache"
@@ -40,4 +41,3 @@ func printModuleErrorIfShould(err error, module PluggableModule, operationType s
 	}
 	glog.Error(errors.Wrapf(err, "while %s module %s", operationType, module.Name()))
 }
-

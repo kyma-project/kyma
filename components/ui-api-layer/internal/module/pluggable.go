@@ -5,11 +5,10 @@ import (
 )
 
 type Pluggable struct {
-	name string
+	name      string
 	isEnabled bool
 	stopCh    chan struct{}
 }
-
 
 func NewPluggable(name string) *Pluggable {
 	return &Pluggable{name: name}
@@ -53,9 +52,7 @@ func (p *Pluggable) StopCacheSyncOnClose(stopCh <-chan struct{}) {
 	}()
 }
 
-
 type SharedInformerFactory interface {
 	Start(stopCh <-chan struct{})
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 }
-
