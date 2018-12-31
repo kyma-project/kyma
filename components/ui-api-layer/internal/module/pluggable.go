@@ -22,16 +22,25 @@ func (p *Pluggable) IsEnabled() bool {
 	return p.isEnabled
 }
 
-func (p *Pluggable) Enable(informerFactory SharedInformerFactory, onSync func()) {
+func (p *Pluggable) Enable() {
 	p.isEnabled = true
 	p.stopCh = make(chan struct{})
+}
+
+func (p *Pluggable) EnableAndSyncCache(sync func(stopCh chan struct{})) {
+	p.Enable()
+
+	go sync(p.stopCh)
+}
+
+func (p *Pluggable) EnableAndSyncInformerFactory(informerFactory SharedInformerFactory, onSync func()) {
+	p.Enable()
 
 	go func(informerFactory SharedInformerFactory) {
 		informerFactory.Start(p.stopCh)
 		informerFactory.WaitForCacheSync(p.stopCh)
 		onSync()
 	}(informerFactory)
-
 }
 
 func (p *Pluggable) Disable(disableModule func(disabledErr error)) {

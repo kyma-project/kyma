@@ -15,11 +15,15 @@ type apiResolver struct {
 	apiConverter apiConverter
 }
 
-func newApiResolver(lister apiLister) *apiResolver {
+func newApiResolver(lister apiLister) (*apiResolver, error) {
+	if lister == nil {
+		return nil, errors.New("Nil pointer for apiLister")
+	}
+
 	return &apiResolver{
 		apiLister:    lister,
 		apiConverter: apiConverter{},
-	}
+	}, nil
 }
 
 func (ar *apiResolver) APIsQuery(ctx context.Context, environment string, serviceName *string, hostname *string) ([]gqlschema.API, error) {

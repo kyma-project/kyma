@@ -23,11 +23,15 @@ type functionResolver struct {
 	functionConverter *functionConverter
 }
 
-func newFunctionResolver(functionLister functionLister) *functionResolver {
+func newFunctionResolver(functionLister functionLister) (*functionResolver, error) {
+	if functionLister == nil {
+		return nil, errors.New("Nil pointer for functionLister")
+	}
+
 	return &functionResolver{
 		functionLister:    functionLister,
 		functionConverter: &functionConverter{},
-	}
+	}, nil
 }
 
 func (r *functionResolver) FunctionsQuery(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.Function, error) {

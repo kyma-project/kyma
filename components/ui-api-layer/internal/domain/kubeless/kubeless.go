@@ -33,7 +33,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 			restConfig:           restConfig,
 			client:               client,
 		},
-		Pluggable: module.NewPluggable("authentication"),
+		Pluggable: module.NewPluggable("kubeless"),
 	}
 	err = resolver.Disable()
 
@@ -44,9 +44,14 @@ func (r *PluggableResolver) Enable() error {
 	r.informerFactory = externalversions.NewSharedInformerFactory(r.cfg.client, r.cfg.informerResyncPeriod)
 	functionService := newFunctionService(r.informerFactory.Kubeless().V1beta1().Functions().Informer())
 
-	r.Pluggable.Enable(r.informerFactory, func() {
+	functionResolver, err := newFunctionResolver(functionService)
+	if err != nil {
+		return err
+	}
+
+	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
 		r.resolver = &domainResolver{
-			functionResolver: newFunctionResolver(functionService),
+			functionResolver: functionResolver,
 		}
 	})
 

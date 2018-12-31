@@ -33,7 +33,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 			restConfig:           restConfig,
 			client:               client,
 		},
-		Pluggable: module.NewPluggable("authentication"),
+		Pluggable: module.NewPluggable("apicontroller"),
 	}
 	err = resolver.Disable()
 
@@ -43,10 +43,14 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 func (r *PluggableResolver) Enable() error {
 	r.informerFactory = externalversions.NewSharedInformerFactory(r.cfg.client, r.cfg.informerResyncPeriod)
 	apiService := newApiService(r.informerFactory.Gateway().V1alpha2().Apis().Informer())
+	apiResolver, err := newApiResolver(apiService)
+	if err != nil {
+		return err
+	}
 
-	r.Pluggable.Enable(r.informerFactory, func() {
+	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
 		r.resolver = &domainResolver{
-			apiResolver:     newApiResolver(apiService),
+			apiResolver: apiResolver,
 		}
 	})
 

@@ -45,9 +45,14 @@ func (r *PluggableResolver) Enable() error {
 	r.informerFactory = externalversions.NewSharedInformerFactory(r.cfg.client, r.cfg.informerResyncPeriod)
 	idpPresetService := newIDPPresetService(r.cfg.client.AuthenticationV1alpha1(), r.informerFactory.Authentication().V1alpha1().IDPPresets().Informer())
 
-	r.Pluggable.Enable(r.informerFactory, func() {
+	idpPresetResolver, err := newIDPPresetResolver(idpPresetService)
+	if err != nil {
+		return err
+	}
+
+	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
 		r.resolver = &domainResolver{
-			idpPresetResolver: newIDPPresetResolver(idpPresetService),
+			idpPresetResolver: idpPresetResolver,
 		}
 	})
 
