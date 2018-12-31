@@ -78,13 +78,14 @@ func TestUsageKind(t *testing.T) {
 
 	t.Log("Querying for usageKinds...")
 	var usageKindsResponse usageKindsResponse
-	waiter.WaitAtMost(func() (bool, error) {
+	err = waiter.WaitAtMost(func() (bool, error) {
 		err = c.Do(fixUsageKindsQuery(), &usageKindsResponse)
 		if err != nil {
 			return false, err
 		}
 		return usageKindExists(usageKindsResponse.UsageKinds, fixUsageKindResponse()), nil
 	}, time.Second*5)
+	require.NoError(t, err)
 
 	t.Log("Creating resource for UsageKind...")
 	_, err = deployClient.Deployments(usageKindNamespace).Create(fixDeployment())

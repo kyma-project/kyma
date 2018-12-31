@@ -4,12 +4,14 @@ package ui
 
 import (
 	"testing"
+	"time"
 
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/apis/ui/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/client"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/waiter"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,10 +41,17 @@ func TestBackendModule(t *testing.T) {
 		err = createBackendModules(moduleNames, uiCli)
 		require.NoError(t, err)
 
-		resp, err := queryBackendModules(c)
-		assert.NoError(t, err)
+		err = waiter.WaitAtMost(func() (bool, error) {
+			resp, err := queryBackendModules(c)
+			if err != nil {
+				return false, err
+			}
 
-		assertBackendModules(t, moduleNames, resp.BackendModules)
+			assertBackendModules(t, moduleNames, resp.BackendModules)
+			return true, nil
+
+		}, time.Second*5)
+		assert.NoError(t, err)
 
 		err = deleteBackendModules(moduleNames, uiCli)
 		require.NoError(t, err)
