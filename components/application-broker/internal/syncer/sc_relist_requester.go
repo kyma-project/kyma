@@ -3,8 +3,6 @@ package syncer
 import (
 	"time"
 
-	"fmt"
-
 	"github.com/sirupsen/logrus"
 )
 
@@ -12,7 +10,7 @@ const maxSyncRetries = 5
 
 //go:generate mockery -name=brokerSyncer -output=automock -outpkg=automock -case=underscore
 type brokerSyncer interface {
-	Sync(labelSelector string, retries int) error
+	Sync(retries int) error
 }
 
 // RelistRequester informs the Service Catalog that given Service Broker should be relisted.
@@ -20,8 +18,6 @@ type brokerSyncer interface {
 // result in a single Service Catalog relist trigger.
 type RelistRequester struct {
 	brokerSyncer         brokerSyncer
-	labelSelectorKey     string
-	labelSelectorValue   string
 	reListDurationWindow time.Duration
 	log                  logrus.FieldLogger
 
@@ -31,11 +27,9 @@ type RelistRequester struct {
 }
 
 // NewRelistRequester returns new instance of RelistRequester
-func NewRelistRequester(brokerSyncer brokerSyncer, reListDuration time.Duration, labelSelectorKey string, labelSelectorValue string, log logrus.FieldLogger) *RelistRequester {
+func NewRelistRequester(brokerSyncer brokerSyncer, reListDuration time.Duration, log logrus.FieldLogger) *RelistRequester {
 	return &RelistRequester{
 		brokerSyncer:         brokerSyncer,
-		labelSelectorKey:     labelSelectorKey,
-		labelSelectorValue:   labelSelectorValue,
 		reListDurationWindow: reListDuration,
 		log:                  log.WithField("service", "syncer:sc-relist-requester"),
 
@@ -63,11 +57,10 @@ func (r *RelistRequester) Run(stopCh <-chan struct{}) {
 		}
 		select {
 		case <-r.relistRequested:
-			labelSelector := fmt.Sprintf("%s=%s", r.labelSelectorKey, r.labelSelectorValue)
-			if err := r.brokerSyncer.Sync(labelSelector, maxSyncRetries); err != nil {
-				r.log.Errorf("Error occurred when synchronizing ServiceBrokers [labelSelector: %s][maxRetires=%d]: %v", labelSelector, maxSyncRetries, err)
+			if err := r.brokerSyncer.Sync(maxSyncRetries); err != nil {
+				r.log.Errorf("Error occurred when synchronizing ServiceBrokers [maxRetires=%d]: %v", maxSyncRetries, err)
 			} else {
-				r.log.Infof("Relist request for ServiceBrokers [labelSelector: %s] fulfilled", labelSelector)
+				r.log.Infof("Relist request for ServiceBrokers fulfilled")
 			}
 		default:
 		}

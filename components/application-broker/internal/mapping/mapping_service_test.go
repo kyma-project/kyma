@@ -13,20 +13,20 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-func TestMappingService_ListEnvironmentMappings(t *testing.T) {
+func TestMappingService_ListApplicationMappings(t *testing.T) {
 	// GIVEN
 	em1 := fixEM("em1", "prod")
 	em2 := fixEM("em2", "prod")
 	emQa := fixEM("em3", "qa")
 	client := fake.NewSimpleClientset(em1, em2, emQa)
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	emInformer := informerFactory.Applicationconnector().V1alpha1().EnvironmentMappings().Informer()
+	emInformer := informerFactory.Applicationconnector().V1alpha1().ApplicationMappings().Informer()
 
 	waitForInformerStart(t, emInformer)
 	svc := newMappingService(emInformer)
 
 	// WHEN
-	result, err := svc.ListEnvironmentMappings("prod")
+	result, err := svc.ListApplicationMappings("prod")
 
 	// THEN
 	require.NoError(t, err)
@@ -35,8 +35,8 @@ func TestMappingService_ListEnvironmentMappings(t *testing.T) {
 	assert.Contains(t, result, em2)
 }
 
-func fixEM(name string, namespace string) *v1alpha1.EnvironmentMapping {
-	return &v1alpha1.EnvironmentMapping{
+func fixEM(name string, namespace string) *v1alpha1.ApplicationMapping {
+	return &v1alpha1.ApplicationMapping{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,

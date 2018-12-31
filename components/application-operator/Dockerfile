@@ -1,19 +1,17 @@
-FROM golang:1.10.3 as builder
+FROM golang:1.10-alpine as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-operator
 
-RUN mkdir -p $DOCK_PKG_DIR
-
-COPY ./ $DOCK_PKG_DIR
 WORKDIR $DOCK_PKG_DIR
+COPY . $DOCK_PKG_DIR
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -o manager ./cmd/manager
 
-FROM alpine
+FROM alpine:3.8
 
+LABEL source=git@github.com:kyma-project/kyma.git
+
+COPY charts/application application/
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-operator/manager .
-
-# Copy RE chart
-COPY ./charts/remote-environments   remote-environments/
 
 CMD ["/manager"]

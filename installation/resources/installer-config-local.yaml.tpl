@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: remote-env-certificate-overrides
+  name: application-connector-certificate-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
 type: Opaque
 data:
-  global.remoteEnvCa: ""
-  global.remoteEnvCaKey: ""
+  global.applicationConnectorCa: ""
+  global.applicationConnectorCaKey: ""
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -30,6 +30,7 @@ metadata:
     installer: overrides
 data:
   global.isLocalEnv: "true"
+  global.knative: "false"
   global.domainName: "kyma.local"
   global.etcdBackup.containerName: ""
   global.etcdBackup.enabled: "false"

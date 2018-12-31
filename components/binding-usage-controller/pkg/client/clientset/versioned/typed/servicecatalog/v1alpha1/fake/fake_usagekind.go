@@ -17,9 +17,9 @@ type FakeUsageKinds struct {
 	Fake *FakeServicecatalogV1alpha1
 }
 
-var usagekindsResource = schema.GroupVersionResource{Group: "servicecatalog.kyma.cx", Version: "v1alpha1", Resource: "usagekinds"}
+var usagekindsResource = schema.GroupVersionResource{Group: "servicecatalog.kyma-project.io", Version: "v1alpha1", Resource: "usagekinds"}
 
-var usagekindsKind = schema.GroupVersionKind{Group: "servicecatalog.kyma.cx", Version: "v1alpha1", Kind: "UsageKind"}
+var usagekindsKind = schema.GroupVersionKind{Group: "servicecatalog.kyma-project.io", Version: "v1alpha1", Kind: "UsageKind"}
 
 // Get takes name of the usageKind, and returns the corresponding usageKind object, and an error if there is any.
 func (c *FakeUsageKinds) Get(name string, options v1.GetOptions) (result *v1alpha1.UsageKind, err error) {

@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: remote-env-certificate-overrides
+  name: application-connector-certificate-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
 type: Opaque
 data:
-  global.remoteEnvCa: "__REMOTE_ENV_CA__"
-  global.remoteEnvCaKey: "__REMOTE_ENV_CA_KEY__"
+  global.applicationConnectorCa: "__REMOTE_ENV_CA__"
+  global.applicationConnectorCaKey: "__REMOTE_ENV_CA_KEY__"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -30,13 +30,15 @@ metadata:
     installer: overrides
 data:
   global.isLocalEnv: "false"
+  global.knative: "false"
   global.domainName: "__DOMAIN__"
+  global.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.etcdBackup.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
   etcd-stateful.replicaCount: "3"
-  acceptanceTest.remoteEnvironment.disabled: "true"
+  acceptanceTest.application.disabled: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -93,8 +95,9 @@ data:
 
   security.enabled: "true"
 
-  gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
-  gateways.istio-ingressgateway.type: "LoadBalancer"
+  # service type is later changed by isito patch
+  gateways.istio-ingressgateway.service.externalPublicIp: ""
+  gateways.istio-ingressgateway.type: "NodePort"
 
   pilot.resources.limits.memory: 2Gi
   pilot.resources.requests.memory: 512Mi

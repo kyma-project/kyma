@@ -117,18 +117,22 @@
 [[projects]]
   name = "github.com/kyma-project/kyma"
   packages = [
+    "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/clientset/versioned",
+    "components/application-broker/pkg/client/clientset/versioned/scheme",
+    "components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/clientset/versioned",
+    "components/application-operator/pkg/client/clientset/versioned/scheme",
+    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/binding-usage-controller/pkg/apis/settings/v1alpha1",
     "components/binding-usage-controller/pkg/client/clientset/versioned",
     "components/binding-usage-controller/pkg/client/clientset/versioned/scheme",
     "components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
-    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
-    "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
-    "components/remote-environment-broker/pkg/client/clientset/versioned",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1"
   ]
-  revision = "7400291c88b0dde7d2b674f02a40efc5eb1934e5"
+  revision = "56b261fcf0ecff236ed643d5c6620faad1b708d2"
 
 [[projects]]
   name = "github.com/pkg/errors"

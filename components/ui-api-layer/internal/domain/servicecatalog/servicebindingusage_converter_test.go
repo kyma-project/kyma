@@ -166,7 +166,7 @@ func TestBindingUsageConversionInput(t *testing.T) {
 			expK8sSBU: &api.ServiceBindingUsage{
 				TypeMeta: v1.TypeMeta{
 					Kind:       "ServiceBindingUsage",
-					APIVersion: "servicecatalog.kyma.cx/v1alpha1",
+					APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
 				},
 				Spec: api.ServiceBindingUsageSpec{
 					UsedBy: api.LocalReferenceByKindAndName{
@@ -200,7 +200,7 @@ func TestBindingUsageConversionInput(t *testing.T) {
 				},
 				TypeMeta: v1.TypeMeta{
 					Kind:       "ServiceBindingUsage",
-					APIVersion: "servicecatalog.kyma.cx/v1alpha1",
+					APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
 				},
 				Spec: api.ServiceBindingUsageSpec{
 					ServiceBindingRef: api.LocalReferenceByName{
@@ -234,7 +234,7 @@ func TestBindingUsageConversionInput(t *testing.T) {
 				},
 				TypeMeta: v1.TypeMeta{
 					Kind:       "ServiceBindingUsage",
-					APIVersion: "servicecatalog.kyma.cx/v1alpha1",
+					APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
 				},
 				Spec: api.ServiceBindingUsageSpec{
 					ServiceBindingRef: api.LocalReferenceByName{

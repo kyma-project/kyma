@@ -4,19 +4,19 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestReCRMapperToModel(t *testing.T) {
+func TestAppCRMapperToModel(t *testing.T) {
 	// given
-	fix := v1alpha1.RemoteEnvironment{
+	fix := v1alpha1.Application{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "re",
+			Name: "app",
 		},
-		Spec: v1alpha1.RemoteEnvironmentSpec{
+		Spec: v1alpha1.ApplicationSpec{
 			Description: "EC description",
 			Services: []v1alpha1.Service{
 				{
@@ -40,14 +40,14 @@ func TestReCRMapperToModel(t *testing.T) {
 		},
 	}
 
-	mapper := &reCRMapper{}
+	mapper := &appCRMapper{}
 
 	// when
 	dm := mapper.ToModel(&fix)
 
 	// then
 	assert.Equal(t, dm.Description, fix.Spec.Description)
-	assert.Equal(t, dm.Name, internal.RemoteEnvironmentName(fix.Name))
+	assert.Equal(t, dm.Name, internal.ApplicationName(fix.Name))
 
 	require.Len(t, dm.Services, 1)
 	assert.Equal(t, string(dm.Services[0].ID), fix.Spec.Services[0].ID)
@@ -62,14 +62,14 @@ func TestReCRMapperToModel(t *testing.T) {
 }
 
 func TestEventProviderTrue(t *testing.T) {
-	fixEventRE := fixEventsBasedRE()
-	fixAPIEventsRE := fixAPIAndEventsRE()
+	fixEventApp := fixEventsBasedApp()
+	fixAPIEventsApp := fixAPIAndEventsApp()
 
-	mapper := &reCRMapper{}
+	mapper := &appCRMapper{}
 
 	// when
-	dmEvent := mapper.ToModel(fixEventRE)
-	dmAPIEvent := mapper.ToModel(fixAPIEventsRE)
+	dmEvent := mapper.ToModel(fixEventApp)
+	dmAPIEvent := mapper.ToModel(fixAPIEventsApp)
 
 	// then
 	assert.Equal(t, true, dmEvent.Services[0].EventProvider)
@@ -77,18 +77,18 @@ func TestEventProviderTrue(t *testing.T) {
 }
 
 func TestEventProviderFalse(t *testing.T) {
-	mapper := &reCRMapper{}
+	mapper := &appCRMapper{}
 
 	// when
-	dmAPI := mapper.ToModel(fixAPIBasedRE())
+	dmAPI := mapper.ToModel(fixAPIBasedApp())
 
 	// then
 	assert.Equal(t, false, dmAPI.Services[0].EventProvider)
 }
 
-func fixEventsBasedRE() *v1alpha1.RemoteEnvironment {
-	return &v1alpha1.RemoteEnvironment{
-		Spec: v1alpha1.RemoteEnvironmentSpec{
+func fixEventsBasedApp() *v1alpha1.Application {
+	return &v1alpha1.Application{
+		Spec: v1alpha1.ApplicationSpec{
 			Services: []v1alpha1.Service{
 				{
 					ID: "123",
@@ -103,9 +103,9 @@ func fixEventsBasedRE() *v1alpha1.RemoteEnvironment {
 	}
 }
 
-func fixAPIBasedRE() *v1alpha1.RemoteEnvironment {
-	return &v1alpha1.RemoteEnvironment{
-		Spec: v1alpha1.RemoteEnvironmentSpec{
+func fixAPIBasedApp() *v1alpha1.Application {
+	return &v1alpha1.Application{
+		Spec: v1alpha1.ApplicationSpec{
 			Services: []v1alpha1.Service{
 				{
 					ID: "123",
@@ -122,9 +122,9 @@ func fixAPIBasedRE() *v1alpha1.RemoteEnvironment {
 	}
 }
 
-func fixAPIAndEventsRE() *v1alpha1.RemoteEnvironment {
-	return &v1alpha1.RemoteEnvironment{
-		Spec: v1alpha1.RemoteEnvironmentSpec{
+func fixAPIAndEventsApp() *v1alpha1.Application {
+	return &v1alpha1.Application{
+		Spec: v1alpha1.ApplicationSpec{
 			Services: []v1alpha1.Service{
 				{
 					ID: "123",

@@ -8,7 +8,7 @@ metadata:
     heritage: {{ .Release.Service }}
 rules:
 - apiGroups: ["applicationconnector.kyma-project.io"]
-  resources: ["remoteenvironments"]
+  resources: ["applications"]
   verbs: ["get", "list", "update","create", "delete", "watch"]
 ---
 kind: ClusterRoleBinding

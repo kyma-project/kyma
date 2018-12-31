@@ -58,41 +58,41 @@ To install Kyma, follow these steps:
   ```
 
 2. Use the following command to run Kubernetes locally using Minikube:
-```
-$ ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
-```
+  ```
+  ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
+  ```
 
 3. Kyma installation requires increased permissions granted by the **cluster-admin** role. To bind the role to the default **ServiceAccount**, run the following command:
-```
-$ kubectl apply -f ./resources/default-sa-rbac-role.yaml
-```
+  ```
+  kubectl apply -f ./resources/default-sa-rbac-role.yaml
+  ```
 
 4. Wait until the `kube-dns` Pod is ready. Run this script to setup Tiller:
-```
-$ ./scripts/install-tiller.sh
-```
+  ```
+  ./scripts/install-tiller.sh
+  ```
 
 5. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
 
 6. Export the version you chose as an environment variable. Run:
-```
-$ export LATEST={KYMA_RELEASE_VERSION}
-```
+  ```
+  export LATEST={KYMA_RELEASE_VERSION}
+  ```
 
 7. Configure the Kyma installation using the local configuration file from the $LATEST release:
-```
-$ kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml
-```
+  ```
+  kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml
+  ```
 
 8. To trigger the installation process, label the `kyma-installation` custom resource:
-```
-$ kubectl label installation/kyma-installation action=install
-```
+  ```
+  kubectl label installation/kyma-installation action=install
+  ```
 
 9. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
-```
-$ ./scripts/is-installed.sh
-```
+  ```
+  ./scripts/is-installed.sh
+  ```
 
 Read the **Reinstall Kyma** document to learn how to reinstall Kyma without deleting the cluster from Minikube.
 To learn how to test Kyma, see the **Testing Kyma** document.
@@ -101,16 +101,13 @@ To learn how to test Kyma, see the **Testing Kyma** document.
 
 Follow the guidelines in the subsections to confirm that your Kubernetes API Server is up and running as expected.
 
-### Access Kyma with CLI
+### Verify the installation status using the is-installed.sh script
 
-Verify the cluster deployment with the kubectl command line interface (CLI).
+The `is-installed.sh` script is designed to give you clear information about the Kyma installation. Run it at any point to get the current installation status, or to find out whether the installation is successful.
 
-Run this command to fetch all Pods in all Namespaces:
+If the script indicates that the installation failed, try to install Kyma again by re-running the `run.sh` script.
 
-  ``` bash
-  kubectl get pods --all-namespaces
-  ```
-The command retrieves all Pods from all Namespaces, the status of the Pods, and their instance numbers. Check if the **STATUS** column shows `Running` for all Pods. If any of the Pods that you require do not start successfully, perform the installation again.
+If the installation fails in a reproducible manner, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue in the project or reach out to the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
 
 ### Access the Kyma console
 
@@ -154,14 +151,14 @@ Kyma uses the autoscaling/v1 stable version, which only provides support for CPU
 To enable Horizontal Pod Autoscaler, follow these steps:
 
 1. Enable the metrics server for resource metrics by running the following command:
-    ```
-    $ minikube addons enable metrics-server
-    ```
+  ```
+  minikube addons enable metrics-server
+  ```
 
 2. Verify if the metrics server is active by checking the list of addons:
-    ```
-    $ minikube addons list
-    ```
+  ```
+  minikube addons list
+  ```
 
 ## Troubleshooting
 
@@ -169,3 +166,11 @@ If the Installer does not respond as expected, check the installation status usi
 ```
 scripts/is-installed.sh --verbose
 ```
+
+If the installation is successful but a component does not behave in an expected way, see if all deployed Pods are running. Run this command:  
+```
+kubectl get pods --all-namespaces
+```
+
+The command retrieves all Pods from all Namespaces, the status of the Pods, and their instance numbers. Check if the STATUS column shows Running for all Pods. If any of the Pods that you require do not start successfully, perform the installation again.
+If the problem persists, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue or reach out to the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.

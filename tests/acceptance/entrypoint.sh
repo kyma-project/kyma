@@ -10,8 +10,8 @@ echo "Run servicecatalog tests"
 ./servicecatalog.test
 res=$((res+$?))
 
-echo "Run remote-environment tests"
-./remote-environment.test
+echo "Run application tests"
+./application.test
 res=$((res+$?))
 
 exit ${res}

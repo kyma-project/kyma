@@ -5,8 +5,8 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/apicontroller/pretty"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
-	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 )
 

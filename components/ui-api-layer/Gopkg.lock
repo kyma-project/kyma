@@ -4,13 +4,30 @@
 [[projects]]
   name = "github.com/99designs/gqlgen"
   packages = [
+    "cmd",
+    "codegen",
+    "codegen/templates",
     "complexity",
     "graphql",
     "graphql/introspection",
-    "handler"
+    "handler",
+    "internal/gopath",
+    "internal/imports"
   ]
-  revision = "6f486bde038887adf67c3e3766624ef111ea95cf"
-  version = "v0.6.0"
+  revision = "3a7f37c7e22a8fedce430c4d340ad5c1351198f4"
+  version = "v0.7.1"
+
+[[projects]]
+  name = "github.com/PuerkitoBio/purell"
+  packages = ["."]
+  revision = "0bcb03f4b4d0a9428594752bd2a3b9aa0a9d4bd4"
+  version = "v1.1.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/PuerkitoBio/urlesc"
+  packages = ["."]
+  revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
   name = "github.com/agnivade/levenshtein"
@@ -46,6 +63,15 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/emicklei/go-restful"
+  packages = [
+    ".",
+    "log"
+  ]
+  revision = "3eb9738c1697594ea6e71a7156a9bb32ed216cf0"
+  version = "v2.8.0"
+
+[[projects]]
   name = "github.com/ghodss/yaml"
   packages = ["."]
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
@@ -56,6 +82,30 @@
   packages = ["."]
   revision = "9c8236e659b76e87bf02044d06fde8683008ff3e"
   version = "v1.39.0"
+
+[[projects]]
+  name = "github.com/go-openapi/jsonpointer"
+  packages = ["."]
+  revision = "ef5f0afec364d3b9396b7b77b43dbe26bf1f8004"
+  version = "v0.17.2"
+
+[[projects]]
+  name = "github.com/go-openapi/jsonreference"
+  packages = ["."]
+  revision = "8483a886a90412cd6858df4ea3483dce9c8e35a3"
+  version = "v0.17.2"
+
+[[projects]]
+  name = "github.com/go-openapi/spec"
+  packages = ["."]
+  revision = "5bae59e25b21498baea7f9d46e9c147ec106a42e"
+  version = "v0.17.2"
+
+[[projects]]
+  name = "github.com/go-openapi/swag"
+  packages = ["."]
+  revision = "5899d5c5e619fda5fa86e14795a835f473ca284c"
+  version = "v0.17.2"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -208,6 +258,28 @@
     "components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions/gateway.kyma-project.io/v1alpha2",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions/internalinterfaces",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/listers/gateway.kyma-project.io/v1alpha2",
+    "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/clientset/versioned",
+    "components/application-broker/pkg/client/clientset/versioned/fake",
+    "components/application-broker/pkg/client/clientset/versioned/scheme",
+    "components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1/fake",
+    "components/application-broker/pkg/client/informers/externalversions",
+    "components/application-broker/pkg/client/informers/externalversions/applicationconnector",
+    "components/application-broker/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/informers/externalversions/internalinterfaces",
+    "components/application-broker/pkg/client/listers/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/clientset/versioned",
+    "components/application-operator/pkg/client/clientset/versioned/fake",
+    "components/application-operator/pkg/client/clientset/versioned/scheme",
+    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1/fake",
+    "components/application-operator/pkg/client/informers/externalversions",
+    "components/application-operator/pkg/client/informers/externalversions/applicationconnector",
+    "components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/informers/externalversions/internalinterfaces",
+    "components/application-operator/pkg/client/listers/applicationconnector/v1alpha1",
     "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/binding-usage-controller/pkg/apis/settings/v1alpha1",
     "components/binding-usage-controller/pkg/client/clientset/versioned",
@@ -235,26 +307,25 @@
     "components/idppreset/pkg/client/informers/externalversions/authentication",
     "components/idppreset/pkg/client/informers/externalversions/authentication/v1alpha1",
     "components/idppreset/pkg/client/informers/externalversions/internalinterfaces",
-    "components/idppreset/pkg/client/listers/authentication/v1alpha1",
-    "components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1",
-    "components/remote-environment-broker/pkg/client/clientset/versioned",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/fake",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/scheme",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1/fake",
-    "components/remote-environment-broker/pkg/client/informers/externalversions",
-    "components/remote-environment-broker/pkg/client/informers/externalversions/applicationconnector",
-    "components/remote-environment-broker/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
-    "components/remote-environment-broker/pkg/client/informers/externalversions/internalinterfaces",
-    "components/remote-environment-broker/pkg/client/listers/applicationconnector/v1alpha1"
+    "components/idppreset/pkg/client/listers/authentication/v1alpha1"
   ]
-  revision = "343d311bb9f41f217ff66869cb7398b2d8d7ae43"
+  revision = "56b261fcf0ecff236ed643d5c6620faad1b708d2"
 
 [[projects]]
   name = "github.com/magiconair/properties"
   packages = ["assert"]
   revision = "c2353362d570a7bfa228149c62842019201cfb71"
   version = "v1.8.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mailru/easyjson"
+  packages = [
+    "buffer",
+    "jlexer",
+    "jwriter"
+  ]
+  revision = "60711f1a8329503b04e1c88535f419d0bb440bff"
 
 [[projects]]
   name = "github.com/minio/minio-go"
@@ -365,7 +436,6 @@
   version = "v1.20.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/vektah/gqlparser"
   packages = [
     ".",
@@ -376,7 +446,8 @@
     "validator",
     "validator/rules"
   ]
-  revision = "f119686bf1d4d1a68c7ed6afe35f183625443c41"
+  revision = "e805d08bb209b1accdea76bd2327811858d81985"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/vrischmann/envconfig"
@@ -427,7 +498,8 @@
     "unicode/bidi",
     "unicode/cldr",
     "unicode/norm",
-    "unicode/rangetable"
+    "unicode/rangetable",
+    "width"
   ]
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
@@ -444,6 +516,9 @@
   packages = [
     "cmd/goimports",
     "go/ast/astutil",
+    "go/buildutil",
+    "go/internal/cgo",
+    "go/loader",
     "imports",
     "internal/fastwalk",
     "internal/gopathwalk"
@@ -710,14 +785,73 @@
   version = "kubernetes-1.11.3"
 
 [[projects]]
+  branch = "release-1.11"
+  name = "k8s.io/code-generator"
+  packages = [
+    "cmd/client-gen",
+    "cmd/client-gen/args",
+    "cmd/client-gen/generators",
+    "cmd/client-gen/generators/fake",
+    "cmd/client-gen/generators/scheme",
+    "cmd/client-gen/generators/util",
+    "cmd/client-gen/path",
+    "cmd/client-gen/types",
+    "cmd/conversion-gen",
+    "cmd/conversion-gen/args",
+    "cmd/conversion-gen/generators",
+    "cmd/deepcopy-gen",
+    "cmd/deepcopy-gen/args",
+    "cmd/defaulter-gen",
+    "cmd/defaulter-gen/args",
+    "cmd/informer-gen",
+    "cmd/informer-gen/args",
+    "cmd/informer-gen/generators",
+    "cmd/lister-gen",
+    "cmd/lister-gen/args",
+    "cmd/lister-gen/generators",
+    "cmd/openapi-gen",
+    "cmd/openapi-gen/args",
+    "pkg/util"
+  ]
+  revision = "f8cba74510f397bac80157a6c4ccb0ffbc31b9d0"
+
+[[projects]]
+  branch = "master"
+  name = "k8s.io/gengo"
+  packages = [
+    "args",
+    "examples/deepcopy-gen/generators",
+    "examples/defaulter-gen/generators",
+    "examples/set-gen/sets",
+    "generator",
+    "namer",
+    "parser",
+    "types"
+  ]
+  revision = "fd15ee9cc2f77baa4f31e59e6acbf21146455073"
+
+[[projects]]
+  name = "k8s.io/klog"
+  packages = ["."]
+  revision = "a5bc97fbc634d635061f3146511332c7e313a55a"
+  version = "v0.1.0"
+
+[[projects]]
   branch = "master"
   name = "k8s.io/kube-openapi"
-  packages = ["pkg/util/proto"]
+  packages = [
+    "cmd/openapi-gen/args",
+    "pkg/common",
+    "pkg/generators",
+    "pkg/generators/rules",
+    "pkg/util/proto",
+    "pkg/util/sets"
+  ]
   revision = "0d1aeffe1c68f49accbd05c185ae534fe1372a3f"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0978688f584720b5202d3d68141d6cbd6b3f5864f654818602e2b08c9e24249f"
+  inputs-digest = "bf41d9c5fbe93ffa253289a546e7dfe4979d1f4b45188b8d634926bbcd99fb4c"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,0 +1,9 @@
+env:
+  kubelessConfig: core-kubeless-config
+  kubelessNamespace: kyma-system
+
+containerRegistry:
+  path: eu.gcr.io/kyma-project
+
+image:
+  tag: 7b124a51
