@@ -41,7 +41,7 @@ func (p *Pluggable) Disable(disableModule func(disabledErr error)) {
 		close(p.stopCh)
 	}
 
-	disabledErr := DisabledError(p.name)
+	disabledErr := NewDisabledModuleError(p.name)
 	disableModule(disabledErr)
 }
 
