@@ -3,6 +3,8 @@ package k8s
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
 	scPretty "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
@@ -57,6 +59,10 @@ func (r *deploymentResolver) DeploymentBoundServiceInstanceNamesField(ctx contex
 
 	usages, err := r.serviceBindingUsageLister.ListForDeployment(deployment.Environment, kind, deployment.Name)
 	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+
 		glog.Error(errors.Wrapf(err, "while listing %s for %s in environment `%s`, name `%s` and kind `%s`", scPretty.ServiceBindingUsages, pretty.Deployment, deployment.Environment, deployment.Name, kind))
 		return nil, gqlerror.New(err, scPretty.ServiceBindingUsages, gqlerror.WithEnvironment(deployment.Environment))
 	}
@@ -65,6 +71,10 @@ func (r *deploymentResolver) DeploymentBoundServiceInstanceNamesField(ctx contex
 	for _, usage := range usages {
 		binding, err := r.serviceBindingGetter.Find(deployment.Environment, usage.Spec.ServiceBindingRef.Name)
 		if err != nil {
+			if module.IsDisabledModuleError(err) {
+				return nil, err
+			}
+
 			glog.Error(errors.Wrapf(err, "while gathering %s for environment `%s` with name `%s`", scPretty.ServiceBinding, deployment.Environment, usage.Spec.ServiceBindingRef.Name))
 			return nil, gqlerror.New(err, scPretty.ServiceBinding, gqlerror.WithName(usage.Spec.ServiceBindingRef.Name), gqlerror.WithEnvironment(deployment.Environment))
 		}

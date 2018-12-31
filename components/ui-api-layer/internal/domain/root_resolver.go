@@ -25,9 +25,7 @@ type RootResolver struct {
 	ui  *ui.Resolver
 	k8s *k8s.Resolver
 
-	//TODO: Make pluggable
-	sc *servicecatalog.Resolver
-
+	sc             *servicecatalog.PluggableContainer
 	app            *application.PluggableContainer
 	content        *content.PluggableContainer
 	kubeless       *kubeless.PluggableResolver
@@ -50,6 +48,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
 	}
+	makePluggable(scContainer)
 
 	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod, contentContainer.AsyncApiSpecGetter)
 	if err != nil {
@@ -85,7 +84,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 		k8s:            k8sResolver,
 		kubeless:       kubelessResolver,
 		app:            appContainer,
-		sc:             scContainer.Resolver,
+		sc:             scContainer,
 		content:        contentContainer,
 		ac:             acResolver,
 		authentication: authenticationResolver,
@@ -97,9 +96,7 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.ui.WaitForCacheSync(stopCh)
 	r.k8s.WaitForCacheSync(stopCh)
 
-	//TODO:
-	r.sc.WaitForCacheSync(stopCh)
-
+	r.sc.StopCacheSyncOnClose(stopCh)
 	r.app.StopCacheSyncOnClose(stopCh)
 	r.content.StopCacheSyncOnClose(stopCh)
 	r.ac.StopCacheSyncOnClose(stopCh)
@@ -158,27 +155,27 @@ type mutationResolver struct {
 }
 
 func (r *mutationResolver) CreateServiceInstance(ctx context.Context, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
-	return r.sc.CreateServiceInstanceMutation(ctx, params)
+	return r.sc.Resolver.CreateServiceInstanceMutation(ctx, params)
 }
 
 func (r *mutationResolver) DeleteServiceInstance(ctx context.Context, name string, environment string) (*gqlschema.ServiceInstance, error) {
-	return r.sc.DeleteServiceInstanceMutation(ctx, name, environment)
+	return r.sc.Resolver.DeleteServiceInstanceMutation(ctx, name, environment)
 }
 
 func (r *mutationResolver) CreateServiceBinding(ctx context.Context, serviceBindingName *string, serviceInstanceName, env string, parameters *gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
-	return r.sc.CreateServiceBindingMutation(ctx, serviceBindingName, serviceInstanceName, env, parameters)
+	return r.sc.Resolver.CreateServiceBindingMutation(ctx, serviceBindingName, serviceInstanceName, env, parameters)
 }
 
 func (r *mutationResolver) DeleteServiceBinding(ctx context.Context, serviceBindingName string, env string) (*gqlschema.DeleteServiceBindingOutput, error) {
-	return r.sc.DeleteServiceBindingMutation(ctx, serviceBindingName, env)
+	return r.sc.Resolver.DeleteServiceBindingMutation(ctx, serviceBindingName, env)
 }
 
 func (r *mutationResolver) CreateServiceBindingUsage(ctx context.Context, createServiceBindingUsageInput *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
-	return r.sc.CreateServiceBindingUsageMutation(ctx, createServiceBindingUsageInput)
+	return r.sc.Resolver.CreateServiceBindingUsageMutation(ctx, createServiceBindingUsageInput)
 }
 
 func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, env string) (*gqlschema.DeleteServiceBindingUsageOutput, error) {
-	return r.sc.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, env)
+	return r.sc.Resolver.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, env)
 }
 
 func (r *mutationResolver) EnableApplication(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error) {
@@ -240,63 +237,63 @@ func (r *queryResolver) Functions(ctx context.Context, environment string, first
 }
 
 func (r *queryResolver) ServiceInstance(ctx context.Context, name string, environment string) (*gqlschema.ServiceInstance, error) {
-	return r.sc.ServiceInstanceQuery(ctx, name, environment)
+	return r.sc.Resolver.ServiceInstanceQuery(ctx, name, environment)
 }
 
 func (r *queryResolver) ServiceInstances(ctx context.Context, environment string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]gqlschema.ServiceInstance, error) {
-	return r.sc.ServiceInstancesQuery(ctx, environment, first, offset, status)
+	return r.sc.Resolver.ServiceInstancesQuery(ctx, environment, first, offset, status)
 }
 
 func (r *queryResolver) ServiceClasses(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.ServiceClass, error) {
-	return r.sc.ServiceClassesQuery(ctx, environment, first, offset)
+	return r.sc.Resolver.ServiceClassesQuery(ctx, environment, first, offset)
 }
 
 func (r *queryResolver) ServiceClass(ctx context.Context, environment string, name string) (*gqlschema.ServiceClass, error) {
-	return r.sc.ServiceClassQuery(ctx, name, environment)
+	return r.sc.Resolver.ServiceClassQuery(ctx, name, environment)
 }
 
 func (r *queryResolver) ClusterServiceClasses(ctx context.Context, first *int, offset *int) ([]gqlschema.ClusterServiceClass, error) {
-	return r.sc.ClusterServiceClassesQuery(ctx, first, offset)
+	return r.sc.Resolver.ClusterServiceClassesQuery(ctx, first, offset)
 }
 
 func (r *queryResolver) ClusterServiceClass(ctx context.Context, name string) (*gqlschema.ClusterServiceClass, error) {
-	return r.sc.ClusterServiceClassQuery(ctx, name)
+	return r.sc.Resolver.ClusterServiceClassQuery(ctx, name)
 }
 
 func (r *queryResolver) ServiceBrokers(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.ServiceBroker, error) {
-	return r.sc.ServiceBrokersQuery(ctx, environment, first, offset)
+	return r.sc.Resolver.ServiceBrokersQuery(ctx, environment, first, offset)
 }
 
 func (r *queryResolver) ServiceBroker(ctx context.Context, environment string, name string) (*gqlschema.ServiceBroker, error) {
-	return r.sc.ServiceBrokerQuery(ctx, environment, name)
+	return r.sc.Resolver.ServiceBrokerQuery(ctx, environment, name)
 }
 
 func (r *queryResolver) ClusterServiceBrokers(ctx context.Context, first *int, offset *int) ([]gqlschema.ClusterServiceBroker, error) {
-	return r.sc.ClusterServiceBrokersQuery(ctx, first, offset)
+	return r.sc.Resolver.ClusterServiceBrokersQuery(ctx, first, offset)
 }
 
 func (r *queryResolver) ClusterServiceBroker(ctx context.Context, name string) (*gqlschema.ClusterServiceBroker, error) {
-	return r.sc.ClusterServiceBrokerQuery(ctx, name)
+	return r.sc.Resolver.ClusterServiceBrokerQuery(ctx, name)
 }
 
 func (r *queryResolver) UsageKinds(ctx context.Context, first *int, offset *int) ([]gqlschema.UsageKind, error) {
-	return r.sc.ListUsageKinds(ctx, first, offset)
+	return r.sc.Resolver.ListUsageKinds(ctx, first, offset)
 }
 
 func (r *queryResolver) UsageKindResources(ctx context.Context, usageKind string, environment string) ([]gqlschema.UsageKindResource, error) {
-	return r.sc.ListServiceUsageKindResources(ctx, usageKind, environment)
+	return r.sc.Resolver.ListServiceUsageKindResources(ctx, usageKind, environment)
 }
 
 func (r *queryResolver) BindableResources(ctx context.Context, environment string) ([]gqlschema.BindableResourcesOutputItem, error) {
-	return r.sc.ListBindableResources(ctx, environment)
+	return r.sc.Resolver.ListBindableResources(ctx, environment)
 }
 
 func (r *queryResolver) ServiceBinding(ctx context.Context, name string, environment string) (*gqlschema.ServiceBinding, error) {
-	return r.sc.ServiceBindingQuery(ctx, name, environment)
+	return r.sc.Resolver.ServiceBindingQuery(ctx, name, environment)
 }
 
 func (r *queryResolver) ServiceBindingUsage(ctx context.Context, name, environment string) (*gqlschema.ServiceBindingUsage, error) {
-	return r.sc.ServiceBindingUsageQuery(ctx, name, environment)
+	return r.sc.Resolver.ServiceBindingUsageQuery(ctx, name, environment)
 }
 
 func (r *queryResolver) Content(ctx context.Context, contentType, id string) (*gqlschema.JSON, error) {
@@ -346,23 +343,23 @@ type subscriptionResolver struct {
 }
 
 func (r *subscriptionResolver) ServiceInstanceEvent(ctx context.Context, environment string) (<-chan gqlschema.ServiceInstanceEvent, error) {
-	return r.sc.ServiceInstanceEventSubscription(ctx, environment)
+	return r.sc.Resolver.ServiceInstanceEventSubscription(ctx, environment)
 }
 
 func (r *subscriptionResolver) ServiceBindingUsageEvent(ctx context.Context, environment string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
-	return r.sc.ServiceBindingUsageEventSubscription(ctx, environment)
+	return r.sc.Resolver.ServiceBindingUsageEventSubscription(ctx, environment)
 }
 
 func (r *subscriptionResolver) ServiceBindingEvent(ctx context.Context, environment string) (<-chan gqlschema.ServiceBindingEvent, error) {
-	return r.sc.ServiceBindingEventSubscription(ctx, environment)
+	return r.sc.Resolver.ServiceBindingEventSubscription(ctx, environment)
 }
 
 func (r *subscriptionResolver) ServiceBrokerEvent(ctx context.Context, environment string) (<-chan gqlschema.ServiceBrokerEvent, error) {
-	return r.sc.ServiceBrokerEventSubscription(ctx, environment)
+	return r.sc.Resolver.ServiceBrokerEventSubscription(ctx, environment)
 }
 
 func (r *subscriptionResolver) ClusterServiceBrokerEvent(ctx context.Context) (<-chan gqlschema.ClusterServiceBrokerEvent, error) {
-	return r.sc.ClusterServiceBrokerEventSubscription(ctx)
+	return r.sc.Resolver.ClusterServiceBrokerEventSubscription(ctx)
 }
 
 func (r *subscriptionResolver) ApplicationEvent(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error) {
@@ -372,35 +369,35 @@ func (r *subscriptionResolver) ApplicationEvent(ctx context.Context) (<-chan gql
 // Service Instance
 
 type serviceInstanceResolver struct {
-	sc *servicecatalog.Resolver
+	sc *servicecatalog.PluggableContainer
 }
 
 func (r *serviceInstanceResolver) ClusterServicePlan(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ClusterServicePlan, error) {
-	return r.sc.ServiceInstanceClusterServicePlanField(ctx, obj)
+	return r.sc.Resolver.ServiceInstanceClusterServicePlanField(ctx, obj)
 }
 
 func (r *serviceInstanceResolver) ClusterServiceClass(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ClusterServiceClass, error) {
-	return r.sc.ServiceInstanceClusterServiceClassField(ctx, obj)
+	return r.sc.Resolver.ServiceInstanceClusterServiceClassField(ctx, obj)
 }
 
 func (r *serviceInstanceResolver) ServicePlan(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ServicePlan, error) {
-	return r.sc.ServiceInstanceServicePlanField(ctx, obj)
+	return r.sc.Resolver.ServiceInstanceServicePlanField(ctx, obj)
 }
 
 func (r *serviceInstanceResolver) ServiceClass(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ServiceClass, error) {
-	return r.sc.ServiceInstanceServiceClassField(ctx, obj)
+	return r.sc.Resolver.ServiceInstanceServiceClassField(ctx, obj)
 }
 
 func (r *serviceInstanceResolver) Bindable(ctx context.Context, obj *gqlschema.ServiceInstance) (bool, error) {
-	return r.sc.ServiceInstanceBindableField(ctx, obj)
+	return r.sc.Resolver.ServiceInstanceBindableField(ctx, obj)
 }
 
 func (r *serviceInstanceResolver) ServiceBindings(ctx context.Context, obj *gqlschema.ServiceInstance) (gqlschema.ServiceBindings, error) {
-	return r.sc.ServiceBindingsToInstanceQuery(ctx, obj.Name, obj.Environment)
+	return r.sc.Resolver.ServiceBindingsToInstanceQuery(ctx, obj.Name, obj.Environment)
 }
 
 func (r *serviceInstanceResolver) ServiceBindingUsages(ctx context.Context, obj *gqlschema.ServiceInstance) ([]gqlschema.ServiceBindingUsage, error) {
-	return r.sc.ServiceBindingUsagesOfInstanceQuery(ctx, obj.Name, obj.Environment)
+	return r.sc.Resolver.ServiceBindingUsagesOfInstanceQuery(ctx, obj.Name, obj.Environment)
 }
 
 // Service Binding
@@ -416,11 +413,11 @@ func (r *serviceBindingResolver) Secret(ctx context.Context, serviceBinding *gql
 // Service Binding Usage
 
 type serviceBindingUsageResolver struct {
-	sc *servicecatalog.Resolver
+	sc *servicecatalog.PluggableContainer
 }
 
 func (r *serviceBindingUsageResolver) ServiceBinding(ctx context.Context, obj *gqlschema.ServiceBindingUsage) (*gqlschema.ServiceBinding, error) {
-	return r.sc.ServiceBindingQuery(ctx, obj.ServiceBindingName, obj.Environment)
+	return r.sc.Resolver.ServiceBindingQuery(ctx, obj.ServiceBindingName, obj.Environment)
 }
 
 // Application
@@ -460,51 +457,51 @@ func (r *eventActivationResolver) Events(ctx context.Context, eventActivation *g
 // Service Class
 
 type serviceClassResolver struct {
-	sc *servicecatalog.Resolver
+	sc *servicecatalog.PluggableContainer
 }
 
 func (r *serviceClassResolver) Activated(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error) {
-	return r.sc.ServiceClassActivatedField(ctx, obj)
+	return r.sc.Resolver.ServiceClassActivatedField(ctx, obj)
 }
 
 func (r *serviceClassResolver) Plans(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServicePlan, error) {
-	return r.sc.ServiceClassPlansField(ctx, obj)
+	return r.sc.Resolver.ServiceClassPlansField(ctx, obj)
 }
 
 func (r *serviceClassResolver) APISpec(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.ServiceClassApiSpecField(ctx, obj)
+	return r.sc.Resolver.ServiceClassApiSpecField(ctx, obj)
 }
 
 func (r *serviceClassResolver) AsyncAPISpec(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.ServiceClassAsyncApiSpecField(ctx, obj)
+	return r.sc.Resolver.ServiceClassAsyncApiSpecField(ctx, obj)
 }
 
 func (r *serviceClassResolver) Content(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.ServiceClassContentField(ctx, obj)
+	return r.sc.Resolver.ServiceClassContentField(ctx, obj)
 }
 
 // Cluster Service Class
 
 type clusterServiceClassResolver struct {
-	sc *servicecatalog.Resolver
+	sc *servicecatalog.PluggableContainer
 }
 
 func (r *clusterServiceClassResolver) Activated(ctx context.Context, obj *gqlschema.ClusterServiceClass) (bool, error) {
-	return r.sc.ClusterServiceClassActivatedField(ctx, obj)
+	return r.sc.Resolver.ClusterServiceClassActivatedField(ctx, obj)
 }
 
 func (r *clusterServiceClassResolver) Plans(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ClusterServicePlan, error) {
-	return r.sc.ClusterServiceClassPlansField(ctx, obj)
+	return r.sc.Resolver.ClusterServiceClassPlansField(ctx, obj)
 }
 
 func (r *clusterServiceClassResolver) APISpec(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.ClusterServiceClassApiSpecField(ctx, obj)
+	return r.sc.Resolver.ClusterServiceClassApiSpecField(ctx, obj)
 }
 
 func (r *clusterServiceClassResolver) AsyncAPISpec(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.ClusterServiceClassAsyncApiSpecField(ctx, obj)
+	return r.sc.Resolver.ClusterServiceClassAsyncApiSpecField(ctx, obj)
 }
 
 func (r *clusterServiceClassResolver) Content(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.ClusterServiceClassContentField(ctx, obj)
+	return r.sc.Resolver.ClusterServiceClassContentField(ctx, obj)
 }
