@@ -4,14 +4,15 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/allegro/bigcache"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/disabled"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 	"github.com/minio/minio-go"
-	"net/http"
-	"time"
 )
 
 //go:generate failery -name=AsyncApiSpecGetter -case=underscore -output disabled -outpkg disabled
@@ -43,13 +44,13 @@ type Config struct {
 
 type PluggableContainer struct {
 	*module.Pluggable
-	cfg        *resolverConfig
+	cfg *resolverConfig
 
 	Resolver           Resolver
 	ApiSpecGetter      ApiSpecGetter
 	AsyncApiSpecGetter AsyncApiSpecGetter
 	ContentGetter      ContentGetter
-	storageSvc storage.Service
+	storageSvc         storage.Service
 }
 
 func New(cfg Config) (*PluggableContainer, error) {

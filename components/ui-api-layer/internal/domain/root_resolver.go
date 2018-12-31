@@ -22,14 +22,14 @@ import (
 )
 
 type RootResolver struct {
-	ui      *ui.Resolver
-	k8s     *k8s.Resolver
+	ui  *ui.Resolver
+	k8s *k8s.Resolver
 
 	//TODO: Make pluggable
-	sc      *servicecatalog.Resolver
-	app     *application.Resolver
+	sc *servicecatalog.Resolver
 
-	content *content.PluggableContainer
+	app            *application.PluggableContainer
+	content        *content.PluggableContainer
 	kubeless       *kubeless.PluggableResolver
 	ac             *apicontroller.PluggableResolver
 	authentication *authentication.PluggableResolver
@@ -46,7 +46,6 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	}
 	makePluggable(contentContainer)
 
-	//TODO:
 	scContainer, err := servicecatalog.New(restConfig, informerResyncPeriod, contentContainer.AsyncApiSpecGetter, contentContainer.ApiSpecGetter, contentContainer.ContentGetter)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
@@ -56,6 +55,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Application resolver")
 	}
+	makePluggable(appContainer)
 
 	k8sResolver, err := k8s.New(restConfig, appContainer.AppLister, informerResyncPeriod, scContainer.ServiceBindingUsageLister, scContainer.ServiceBindingGetter)
 	if err != nil {
@@ -84,7 +84,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 		ui:             uiContainer.Resolver,
 		k8s:            k8sResolver,
 		kubeless:       kubelessResolver,
-		app:            appContainer.Resolver,
+		app:            appContainer,
 		sc:             scContainer.Resolver,
 		content:        contentContainer,
 		ac:             acResolver,
@@ -97,11 +97,10 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.ui.WaitForCacheSync(stopCh)
 	r.k8s.WaitForCacheSync(stopCh)
 
-
 	//TODO:
-	r.app.WaitForCacheSync(stopCh)
 	r.sc.WaitForCacheSync(stopCh)
 
+	r.app.StopCacheSyncOnClose(stopCh)
 	r.content.StopCacheSyncOnClose(stopCh)
 	r.ac.StopCacheSyncOnClose(stopCh)
 	r.kubeless.StopCacheSyncOnClose(stopCh)
@@ -183,11 +182,11 @@ func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, servic
 }
 
 func (r *mutationResolver) EnableApplication(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error) {
-	return r.app.EnableApplicationMutation(ctx, application, environment)
+	return r.app.Resolver.EnableApplicationMutation(ctx, application, environment)
 }
 
 func (r *mutationResolver) DisableApplication(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error) {
-	return r.app.DisableApplicationMutation(ctx, application, environment)
+	return r.app.Resolver.DisableApplicationMutation(ctx, application, environment)
 }
 
 func (r *mutationResolver) CreateIDPPreset(ctx context.Context, name string, issuer string, jwksURI string) (*gqlschema.IDPPreset, error) {
@@ -199,15 +198,15 @@ func (r *mutationResolver) DeleteIDPPreset(ctx context.Context, name string) (*g
 }
 
 func (r *mutationResolver) CreateApplication(ctx context.Context, name string, description *string, labels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error) {
-	return r.app.CreateApplication(ctx, name, description, labels)
+	return r.app.Resolver.CreateApplication(ctx, name, description, labels)
 }
 
 func (r *mutationResolver) UpdateApplication(ctx context.Context, name string, description *string, labels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error) {
-	return r.app.UpdateApplication(ctx, name, description, labels)
+	return r.app.Resolver.UpdateApplication(ctx, name, description, labels)
 }
 
 func (r *mutationResolver) DeleteApplication(ctx context.Context, name string) (gqlschema.DeleteApplicationOutput, error) {
-	return r.app.DeleteApplication(ctx, name)
+	return r.app.Resolver.DeleteApplication(ctx, name)
 }
 
 // Queries
@@ -309,19 +308,19 @@ func (r *queryResolver) Topics(ctx context.Context, input []gqlschema.InputTopic
 }
 
 func (r *queryResolver) Application(ctx context.Context, name string) (*gqlschema.Application, error) {
-	return r.app.ApplicationQuery(ctx, name)
+	return r.app.Resolver.ApplicationQuery(ctx, name)
 }
 
 func (r *queryResolver) Applications(ctx context.Context, environment *string, first *int, offset *int) ([]gqlschema.Application, error) {
-	return r.app.ApplicationsQuery(ctx, environment, first, offset)
+	return r.app.Resolver.ApplicationsQuery(ctx, environment, first, offset)
 }
 
 func (r *queryResolver) ConnectorService(ctx context.Context, application string) (gqlschema.ConnectorService, error) {
-	return r.app.ConnectorServiceQuery(ctx, application)
+	return r.app.Resolver.ConnectorServiceQuery(ctx, application)
 }
 
 func (r *queryResolver) EventActivations(ctx context.Context, environment string) ([]gqlschema.EventActivation, error) {
-	return r.app.EventActivationsQuery(ctx, environment)
+	return r.app.Resolver.EventActivationsQuery(ctx, environment)
 }
 
 func (r *queryResolver) Apis(ctx context.Context, environment string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
@@ -367,7 +366,7 @@ func (r *subscriptionResolver) ClusterServiceBrokerEvent(ctx context.Context) (<
 }
 
 func (r *subscriptionResolver) ApplicationEvent(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error) {
-	return r.app.ApplicationEventSubscription(ctx)
+	return r.app.Resolver.ApplicationEventSubscription(ctx)
 }
 
 // Service Instance
@@ -427,15 +426,15 @@ func (r *serviceBindingUsageResolver) ServiceBinding(ctx context.Context, obj *g
 // Application
 
 type appResolver struct {
-	app *application.Resolver
+	app *application.PluggableContainer
 }
 
 func (r *appResolver) EnabledInEnvironments(ctx context.Context, obj *gqlschema.Application) ([]string, error) {
-	return r.app.ApplicationEnabledInEnvironmentsField(ctx, obj)
+	return r.app.Resolver.ApplicationEnabledInEnvironmentsField(ctx, obj)
 }
 
 func (r *appResolver) Status(ctx context.Context, obj *gqlschema.Application) (gqlschema.ApplicationStatus, error) {
-	return r.app.ApplicationStatusField(ctx, obj)
+	return r.app.Resolver.ApplicationStatusField(ctx, obj)
 }
 
 // Deployment
@@ -451,11 +450,11 @@ func (r *deploymentResolver) BoundServiceInstanceNames(ctx context.Context, depl
 // Event Activation
 
 type eventActivationResolver struct {
-	re *application.Resolver
+	app *application.PluggableContainer
 }
 
 func (r *eventActivationResolver) Events(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error) {
-	return r.re.EventActivationEventsField(ctx, eventActivation)
+	return r.app.Resolver.EventActivationEventsField(ctx, eventActivation)
 }
 
 // Service Class

@@ -2,10 +2,11 @@ package kubeless
 
 import (
 	"context"
+	"time"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/kubeless/disabled"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
-	"time"
 
 	"github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	"github.com/kubeless/kubeless/pkg/client/informers/externalversions"
@@ -65,7 +66,6 @@ func (r *PluggableResolver) Disable() error {
 
 	return nil
 }
-
 
 type resolverConfig struct {
 	informerResyncPeriod time.Duration

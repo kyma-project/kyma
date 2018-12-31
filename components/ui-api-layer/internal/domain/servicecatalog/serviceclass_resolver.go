@@ -3,6 +3,7 @@ package servicecatalog
 import (
 	"context"
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 
 	"github.com/golang/glog"

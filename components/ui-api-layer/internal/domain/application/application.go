@@ -1,0 +1,168 @@
+package application
+
+import (
+	"context"
+	"time"
+
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/disabled"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
+	"github.com/pkg/errors"
+	"k8s.io/client-go/rest"
+
+	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+
+	mappingInformer "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/gateway"
+)
+
+//go:generate failery -name=ApplicationLister -case=underscore -output disabled -outpkg disabled
+type ApplicationLister interface {
+	ListInEnvironment(environment string) ([]*v1alpha1.Application, error)
+	ListNamespacesFor(appName string) ([]string, error)
+}
+
+type Config struct {
+	Gateway   gateway.Config
+	Connector ConnectorSvcCfg
+}
+
+type ConnectorSvcCfg struct {
+	URL             string
+	HTTPCallTimeout time.Duration `envconfig:"default=500ms"`
+}
+
+type PluggableContainer struct {
+	*module.Pluggable
+	cfg *resolverConfig
+
+	Resolver               Resolver
+	AppLister              ApplicationLister
+	mappingInformerFactory mappingInformer.SharedInformerFactory
+	appInformerFactory     appInformer.SharedInformerFactory
+	gatewayService         *gateway.Service
+}
+
+func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Duration, asyncApiSpecGetter AsyncApiSpecGetter) (*PluggableContainer, error) {
+	mCli, err := mappingClient.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing application broker Clientset")
+	}
+
+	aCli, err := appClient.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing application operator Clientset")
+	}
+
+	container := &PluggableContainer{
+		cfg: &resolverConfig{
+			appClient:            aCli,
+			mappingClient:        mCli,
+			cfg:                  reCfg,
+			informerResyncPeriod: informerResyncPeriod,
+			rest:                 restConfig,
+			asyncApiSpecGetter:   asyncApiSpecGetter,
+		},
+		Pluggable: module.NewPluggable("application"),
+	}
+	err = container.Disable()
+	if err != nil {
+		return nil, err
+	}
+
+	return container, nil
+}
+
+func (r *PluggableContainer) Enable() error {
+	informerResyncPeriod := r.cfg.informerResyncPeriod
+	mCli := r.cfg.mappingClient
+	aCli := r.cfg.appClient
+	reCfg := r.cfg.cfg
+
+	// ApplicationMapping
+	r.mappingInformerFactory = mappingInformer.NewSharedInformerFactory(mCli, informerResyncPeriod)
+	mInformerGroup := r.mappingInformerFactory.Applicationconnector().V1alpha1()
+	mInformer := mInformerGroup.ApplicationMappings().Informer()
+	mLister := mInformerGroup.ApplicationMappings().Lister()
+
+	// Application
+	r.appInformerFactory = appInformer.NewSharedInformerFactory(aCli, informerResyncPeriod)
+	aInformer := r.appInformerFactory.Applicationconnector().V1alpha1().Applications().Informer()
+
+	appService, err := newApplicationService(reCfg, aCli.ApplicationconnectorV1alpha1(), mCli.ApplicationconnectorV1alpha1(), mInformer, mLister, aInformer)
+	if err != nil {
+		return errors.Wrap(err, "while creating Application Service")
+	}
+
+	gatewayService, err := gateway.New(r.cfg.rest, reCfg.Gateway, informerResyncPeriod)
+	if err != nil {
+		return errors.Wrap(err, "while creating Gateway Service")
+	}
+	r.gatewayService = gatewayService
+
+	eventActivationService := newEventActivationService(mInformerGroup.EventActivations().Informer())
+
+	r.Pluggable.EnableAndSyncCache(func(stopCh chan struct{}) {
+		r.mappingInformerFactory.Start(stopCh)
+		r.mappingInformerFactory.WaitForCacheSync(stopCh)
+
+		r.gatewayService.Start(stopCh)
+
+		r.appInformerFactory.Start(stopCh)
+		r.appInformerFactory.WaitForCacheSync(stopCh)
+
+		r.Resolver = &domainResolver{
+			applicationResolver:     NewApplicationResolver(appService, gatewayService),
+			eventActivationResolver: newEventActivationResolver(eventActivationService, r.cfg.asyncApiSpecGetter),
+		}
+		r.AppLister = appService
+	})
+
+	return nil
+}
+
+func (r *PluggableContainer) Disable() error {
+	r.Pluggable.Disable(func(disabledErr error) {
+		r.Resolver = disabled.NewResolver(disabledErr)
+		r.AppLister = disabled.NewApplicationLister(disabledErr)
+		r.gatewayService = nil
+		r.appInformerFactory = nil
+		r.mappingInformerFactory = nil
+	})
+
+	return nil
+}
+
+type resolverConfig struct {
+	cfg                  Config
+	rest                 *rest.Config
+	mappingClient        *mappingClient.Clientset
+	appClient            *appClient.Clientset
+	informerResyncPeriod time.Duration
+	asyncApiSpecGetter   AsyncApiSpecGetter
+}
+
+//go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
+type Resolver interface {
+	ApplicationQuery(ctx context.Context, name string) (*gqlschema.Application, error)
+	ApplicationsQuery(ctx context.Context, environment *string, first *int, offset *int) ([]gqlschema.Application, error)
+	ApplicationEventSubscription(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error)
+	CreateApplication(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error)
+	DeleteApplication(ctx context.Context, name string) (gqlschema.DeleteApplicationOutput, error)
+	UpdateApplication(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error)
+	ConnectorServiceQuery(ctx context.Context, application string) (gqlschema.ConnectorService, error)
+	EnableApplicationMutation(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error)
+	DisableApplicationMutation(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error)
+	ApplicationEnabledInEnvironmentsField(ctx context.Context, obj *gqlschema.Application) ([]string, error)
+	ApplicationStatusField(ctx context.Context, app *gqlschema.Application) (gqlschema.ApplicationStatus, error)
+	EventActivationsQuery(ctx context.Context, environment string) ([]gqlschema.EventActivation, error)
+	EventActivationEventsField(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error)
+}
+
+type domainResolver struct {
+	*applicationResolver
+	*eventActivationResolver
+}

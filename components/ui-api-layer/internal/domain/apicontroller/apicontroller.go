@@ -2,10 +2,11 @@ package apicontroller
 
 import (
 	"context"
+	"time"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/apicontroller/disabled"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
-	"time"
 
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions"
