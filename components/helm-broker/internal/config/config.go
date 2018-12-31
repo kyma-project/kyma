@@ -14,7 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
-	"github.com/mcuadros/go-defaults"
+	defaults "github.com/mcuadros/go-defaults"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
 )

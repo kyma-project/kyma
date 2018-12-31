@@ -272,14 +272,17 @@ func newBundleDSO(in *internal.Bundle) (*bundleDSO, error) {
 }
 
 type bundleDSO struct {
-	ID          internal.BundleID
-	Name        internal.BundleName
-	Version     string
-	Description string
-	Plans       map[internal.BundlePlanID]bundlePlanDSO
-	Metadata    internal.BundleMetadata
-	Tags        []internal.BundleTag
-	Bindable    bool
+	ID                  internal.BundleID
+	Name                internal.BundleName
+	Version             string
+	Description         string
+	Plans               map[internal.BundlePlanID]bundlePlanDSO
+	Metadata            internal.BundleMetadata
+	Tags                []internal.BundleTag
+	Requires            []string
+	Bindable            bool
+	BindingsRetrievable bool
+	PlanUpdatable       *bool
 }
 
 func newBundlePlanDSO(plan internal.BundlePlan) (bundlePlanDSO, error) {
@@ -309,8 +312,9 @@ type bundlePlanDSO struct {
 	ChartRef     internal.ChartRef
 	ChartValues  chartValuesDSO
 	Metadata     internal.BundlePlanMetadata
-	Bindable     *bool
 	BindTemplate internal.BundlePlanBindTemplate
+	Bindable     *bool
+	Free         *bool
 }
 
 func (dso *bundlePlanDSO) ToModel() (internal.BundlePlan, error) {
@@ -327,6 +331,7 @@ func (dso *bundlePlanDSO) ToModel() (internal.BundlePlan, error) {
 		ChartRef:     dso.ChartRef,
 		Name:         dso.Name,
 		Schemas:      dso.Schemas,
+		Free:         dso.Free,
 		ChartValues:  chValues,
 	}, nil
 }
@@ -361,13 +366,16 @@ func (dto *bundleDSO) NewModel() (*internal.Bundle, error) {
 	}
 
 	out := internal.Bundle{
-		ID:          dto.ID,
-		Name:        dto.Name,
-		Description: dto.Description,
-		Plans:       plans,
-		Metadata:    dto.Metadata,
-		Tags:        dto.Tags,
-		Bindable:    dto.Bindable,
+		ID:                  dto.ID,
+		Name:                dto.Name,
+		Description:         dto.Description,
+		Plans:               plans,
+		Metadata:            dto.Metadata,
+		Tags:                dto.Tags,
+		Bindable:            dto.Bindable,
+		PlanUpdatable:       dto.PlanUpdatable,
+		BindingsRetrievable: dto.BindingsRetrievable,
+		Requires:            dto.Requires,
 	}
 
 	ver, err := semver.NewVersion(dto.Version)
