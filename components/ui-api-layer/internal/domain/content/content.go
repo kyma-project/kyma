@@ -46,7 +46,7 @@ type PluggableContainer struct {
 	cfg     *resolverConfig
 	storage storage.Service
 
-	Resolver           resolver
+	Resolver           Resolver
 	ApiSpecGetter      ApiSpecGetter
 	AsyncApiSpecGetter AsyncApiSpecGetter
 	ContentGetter      ContentGetter
@@ -138,8 +138,8 @@ type resolverConfig struct {
 	cache bigcache.Config
 }
 
-//go:generate failery -name=resolver -case=underscore -output disabled -outpkg disabled
-type resolver interface {
+//go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
+type Resolver interface {
 	ContentQuery(ctx context.Context, contentType, id string) (*gqlschema.JSON, error)
 	TopicsQuery(ctx context.Context, topics []gqlschema.InputTopic, internal *bool) ([]gqlschema.TopicEntry, error)
 }

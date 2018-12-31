@@ -16,7 +16,7 @@ import (
 type PluggableResolver struct {
 	*module.Pluggable
 	cfg *resolverConfig
-	resolver
+	Resolver
 
 	informerFactory externalversions.SharedInformerFactory
 }
@@ -30,7 +30,6 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 	resolver := &PluggableResolver{
 		cfg: &resolverConfig{
 			informerResyncPeriod: informerResyncPeriod,
-			restConfig:           restConfig,
 			client:               client,
 		},
 		Pluggable: module.NewPluggable("apicontroller"),
@@ -49,7 +48,7 @@ func (r *PluggableResolver) Enable() error {
 	}
 
 	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
-		r.resolver = &domainResolver{
+		r.Resolver = &domainResolver{
 			apiResolver: apiResolver,
 		}
 	})
@@ -59,20 +58,19 @@ func (r *PluggableResolver) Enable() error {
 
 func (r *PluggableResolver) Disable() error {
 	r.Pluggable.Disable(func(disabledErr error) {
-		r.resolver = disabled.NewResolver(disabledErr)
+		r.Resolver = disabled.NewResolver(disabledErr)
 	})
 
 	return nil
 }
 
 type resolverConfig struct {
-	restConfig           *rest.Config
 	informerResyncPeriod time.Duration
 	client               *versioned.Clientset
 }
 
-//go:generate failery -name=resolver -case=underscore -output disabled -outpkg disabled
-type resolver interface {
+//go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
+type Resolver interface {
 	APIsQuery(ctx context.Context, environment string, serviceName *string, hostname *string) ([]gqlschema.API, error)
 }
 
