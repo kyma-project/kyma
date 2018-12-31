@@ -43,13 +43,13 @@ type Config struct {
 
 type PluggableContainer struct {
 	*module.Pluggable
-	cfg     *resolverConfig
-	storage storage.Service
+	cfg        *resolverConfig
 
 	Resolver           Resolver
 	ApiSpecGetter      ApiSpecGetter
 	AsyncApiSpecGetter AsyncApiSpecGetter
 	ContentGetter      ContentGetter
+	storageSvc storage.Service
 }
 
 func New(cfg Config) (*PluggableContainer, error) {
@@ -101,14 +101,13 @@ func (r *PluggableContainer) Enable() error {
 		return err
 	}
 
-	storageSvc := storage.New(minioClient, cache, cfg.Bucket, cfg.ExternalAddress, cfg.AssetsFolder)
-	asynApiSpecSvc := newAsyncApiSpecService(storageSvc)
-	apiSpecSvc := newApiSpecService(storageSvc)
-	contentSvc := newContentService(storageSvc)
+	r.storageSvc = storage.New(minioClient, cache, cfg.Bucket, cfg.ExternalAddress, cfg.AssetsFolder)
+	asynApiSpecSvc := newAsyncApiSpecService(r.storageSvc)
+	apiSpecSvc := newApiSpecService(r.storageSvc)
+	contentSvc := newContentService(r.storageSvc)
 
 	r.Pluggable.EnableAndSyncCache(func(stopCh chan struct{}) {
-		r.storage = storageSvc
-		r.storage.Initialize(stopCh)
+		r.storageSvc.Initialize(stopCh)
 
 		r.Resolver = &domainResolver{
 			contentResolver: newContentResolver(contentSvc),
@@ -128,6 +127,7 @@ func (r *PluggableContainer) Disable() error {
 		r.AsyncApiSpecGetter = disabled.NewAsyncApiSpecGetter(disabledErr)
 		r.ApiSpecGetter = disabled.NewApiSpecGetter(disabledErr)
 		r.ContentGetter = disabled.NewContentGetter(disabledErr)
+		r.storageSvc = nil
 	})
 
 	return nil

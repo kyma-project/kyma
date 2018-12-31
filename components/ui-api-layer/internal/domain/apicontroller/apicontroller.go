@@ -16,8 +16,8 @@ import (
 type PluggableResolver struct {
 	*module.Pluggable
 	cfg *resolverConfig
-	Resolver
 
+	Resolver
 	informerFactory externalversions.SharedInformerFactory
 }
 
@@ -59,6 +59,7 @@ func (r *PluggableResolver) Enable() error {
 func (r *PluggableResolver) Disable() error {
 	r.Pluggable.Disable(func(disabledErr error) {
 		r.Resolver = disabled.NewResolver(disabledErr)
+		r.informerFactory = nil
 	})
 
 	return nil
