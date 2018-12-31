@@ -22,14 +22,16 @@ import (
 )
 
 type RootResolver struct {
-	ui       *ui.Resolver
-	k8s      *k8s.Resolver
-	kubeless *kubeless.Resolver
-	sc       *servicecatalog.Resolver
-	app      *application.Resolver
-	content  *content.Resolver
-	ac       *apicontroller.Resolver
+	ui      *ui.Resolver
+	k8s     *k8s.Resolver
 
+	//TODO: Make pluggable
+	sc      *servicecatalog.Resolver
+	app     *application.Resolver
+	content *content.Resolver
+
+	kubeless       *kubeless.PluggableResolver
+	ac             *apicontroller.PluggableResolver
 	authentication *authentication.PluggableResolver
 }
 
@@ -62,13 +64,13 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Kubeless resolver")
 	}
-	//makePluggable(kubelessResolver)
+	makePluggable(kubelessResolver)
 
 	acResolver, err := apicontroller.New(restConfig, informerResyncPeriod)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing API controller resolver")
 	}
-	//makePluggable(acResolver)
+	makePluggable(acResolver)
 
 	authenticationResolver, err := authentication.New(restConfig, informerResyncPeriod)
 	if err != nil {
