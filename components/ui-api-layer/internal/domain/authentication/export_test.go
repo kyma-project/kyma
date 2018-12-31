@@ -13,6 +13,6 @@ func NewIDPPresetService(client idppresetv1alpha1.AuthenticationV1alpha1Interfac
 	return newIDPPresetService(client, informer)
 }
 
-func NewIDPPresetResolver(service idpPresetSvc) *idpPresetResolver {
+func NewIDPPresetResolver(service idpPresetSvc) (*idpPresetResolver, error) {
 	return newIDPPresetResolver(service)
 }

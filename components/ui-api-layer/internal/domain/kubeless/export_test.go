@@ -6,6 +6,6 @@ func NewFunctionService(informer cache.SharedIndexInformer) *functionService {
 	return newFunctionService(informer)
 }
 
-func NewFunctionResolver(functionSvc functionLister) *functionResolver {
+func NewFunctionResolver(functionSvc functionLister) (*functionResolver, error) {
 	return newFunctionResolver(functionSvc)
 }
