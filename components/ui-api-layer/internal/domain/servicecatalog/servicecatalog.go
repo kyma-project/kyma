@@ -88,6 +88,7 @@ func (r *PluggableContainer) Enable() error {
 	contentGetter := r.cfg.contentGetter
 
 	informerFactory := catalogInformers.NewSharedInformerFactory(client, informerResyncPeriod)
+	r.informerFactory = informerFactory
 
 	serviceInstanceService := newServiceInstanceService(informerFactory.Servicecatalog().V1beta1().ServiceInstances().Informer(), client)
 	servicePlanService := newServicePlanService(informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer())
@@ -101,6 +102,7 @@ func (r *PluggableContainer) Enable() error {
 
 	//TODO: Move to servicecatalogaddons module
 	serviceBindingUsageInformerFactory := bindingUsageInformers.NewSharedInformerFactory(serviceBindingUsageClient, informerResyncPeriod)
+	r.bindingUsageInformerFactory = serviceBindingUsageInformerFactory
 	usageKindService := newUsageKindService(serviceBindingUsageClient.ServicecatalogV1alpha1(), dynamicClient, serviceBindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer())
 	serviceBindingUsageService := newServiceBindingUsageService(serviceBindingUsageClient.ServicecatalogV1alpha1(), serviceBindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer(), serviceBindingService, name.Generate)
 
