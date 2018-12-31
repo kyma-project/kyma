@@ -25,18 +25,6 @@ These are the provisioning parameters:
 |----------------|------|-------------|----------|---------------|
 | `imagePullPolicy` | `string` | The possible values are `Always`, `IfNotPresent`, `Never`. | Y | `IfNotPresent` |
 
-## Update parameters
-
-
-
-## Binding parameters
-
-Binding grants the provided service account access to the Redis cache. These are the binding parameters:
-
-| Parameter Name | Type | Description | Required | Default Value |
-|----------------|------|-------------|----------|---------------|
-| **** | `` | |  |  |
-
 
 ### Credentials
 
