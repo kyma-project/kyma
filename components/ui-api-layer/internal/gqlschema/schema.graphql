@@ -533,6 +533,11 @@ type API {
     authenticationPolicies: [AuthenticationPolicy!]!
 }
 
+# Backend Module
+type BackendModule {
+    name: String!
+}
+
 # Queries
 
 type Query {
@@ -581,6 +586,8 @@ type Query {
 
     IDPPreset(name: String!): IDPPreset
     IDPPresets(first: Int, offset: Int): [IDPPreset!]!
+
+    backendModules: [BackendModule!]!
 }
 
 # Mutations

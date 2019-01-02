@@ -47,22 +47,22 @@ Use the CustomResourceDefinitions to extend the Console functionality and config
 
 You can define a micro front-end visible only in the context of a specific Namespace.
 
-[Here](https://github.com/kyma-project/kyma/blob/master/docs/console/docs/assets/mf-namespaced.yaml) you can find a sample micro front-end entity using the **namespace** metadata attribute to enable the micro front-end **only** for the production Namespace.
+[Here](./assets/mf-namespaced.yaml) you can find a sample micro front-end entity using the **namespace** metadata attribute to enable the micro front-end **only** for the production Namespace.
 
 Using this yaml file in your Kyma cluster results in a **Tractors Overview** micro front-end navigation node displayed under the **Hardware** category. It is available **only** in the production Namespace.
 
-![MF-one-namespace](assets/mf-one-namespace.png)
+![MF-one-namespace](./assets/mf-one-namespace.png)
 
 ### Cluster-wide micro front-end
 You can define a cluster-wide micro front-end available for all Namespaces in the side navigation.
 
-[Here](https://github.com/kyma-project/kyma/blob/master/docs/console/docs/assets/cmf-environment.yaml) you can find a sample ClusterMicroFrontend entity using the `namespace` value for the **placement** attribute to make the micro front-end available for all Namespaces in the cluster.
+[Here](./assets/cmf-environment.yaml) you can find a sample ClusterMicroFrontend entity using the `namespace` value for the **placement** attribute to make the micro front-end available for all Namespaces in the cluster.
 
 Using this yaml file in your Kyma cluster results in a **Tractors Overview** micro front-end navigation node displayed under the **Hardware** category. It is available **for every** Namespace in your cluster.
 
 ### Cluster-wide micro front-end for the administration section
 You can define a cluster micro front-end visible in the **Administration** section of the Console.
 
-[Here](https://github.com/kyma-project/kyma/blob/master/docs/console/docs/assets/cmf-cluster.yaml) you can find a sample of such ClusterMicroFrontend entity using the `cluster` value for placement  **attribute** to ensure the micro front-end is visible in the **Administration** section.
+[Here](./assets/cmf-cluster.yaml) you can find a sample of such ClusterMicroFrontend entity using the `cluster` value for placement  **attribute** to ensure the micro front-end is visible in the **Administration** section.
 
-![CMF-admin-section](assets/cmf-admin-section.png)
+![CMF-admin-section](./assets/cmf-admin-section.png)

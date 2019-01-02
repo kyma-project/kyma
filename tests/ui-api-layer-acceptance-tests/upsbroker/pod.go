@@ -1,7 +1,7 @@
 package upsbroker
 
 import (
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

@@ -4,7 +4,7 @@ title: Architecture
 
 See the diagram and steps for an overview of the basic Event Bus flow:
 
-![Event Bus architecture](assets/event-bus-architecture.png)
+![Event Bus architecture](./assets/event-bus-architecture.png)
 
 ## Event flow
 
@@ -20,7 +20,7 @@ See the diagram and steps for an overview of the basic Event Bus flow:
 
 5. NATS Streaming stores the Event details in the Persistence storage volume to ensure the data is not lost if the NATS Streaming crashes.
 
-6. If the Subscription [validation process](#event-validation) completes successfully, `push` consumes the Event from NATS Streaming.
+6. If the Subscription [validation process](#architecture-architecture-event-validation) completes successfully, `push` consumes the Event from NATS Streaming.
 
 7. `push` delivers the Event to the lambda or the service.
 
@@ -40,7 +40,7 @@ Before the Event Bus forwards the Event to the receiver, the sub-validator perfo
 
 See the diagram and a step-by-step description of the Event verification process.
 
-![Event validation process](assets/event-validation.png)
+![Event validation process](./assets/event-validation.png)
 
 1. Kyma user defines a lambda or a service.
 2. Kyma user creates a Subscription custom resource.

@@ -14,11 +14,11 @@ Configure the Helm Broker to enable the **Google Cloud Platform Service Broker P
 kubectl set env -n kyma-system deployment/core-helm-broker -e APP_REPOSITORY_URLS="https://github.com/kyma-project/bundles/releases/download/latest/index.yaml"
 ```
 
-![Service Catalog view without GCP Classes](assets/003-gcp-provider-class.png)
+![Service Catalog view without GCP Classes](./assets/003-gcp-provider-class.png)
 
 Once you provision the **Google Cloud Platform Service Broker Provider** class, the GCP Service Broker classes are available in the Service Catalog view in a given Namespace.
 
-![Service Catalog view without GCP Classes](assets/003-gcp-broker-classes.png)
+![Service Catalog view without GCP Classes](./assets/003-gcp-broker-classes.png)
 
 For more information about provisiong the **Google Cloud Platform Service Broker Provider** class, go to the service class overview in the Service Catalog UI.
 
