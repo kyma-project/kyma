@@ -1,31 +1,40 @@
-package tokens
+package tokens_test
 
 import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/cache/mocks"
+	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
+
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 const (
 	tokenLength = 10
-	reName      = "appName"
+	appName     = "appName"
+	group       = "group"
+	tenant      = "tenant"
 )
 
 func TestTokenGenerator_NewToken(t *testing.T) {
 
 	t.Run("should generate token", func(t *testing.T) {
 		// given
-		tokenCache := &mocks.TokenCache{}
-		tokenCache.On("Put", reName, mock.AnythingOfType("string"))
+		tokenData := &tokens.TokenData{
+			Group:  group,
+			Tenant: tenant,
+		}
 
-		tokenGenerator := NewTokenService(tokenLength, tokenCache)
+		tokenCache := &mocks.Cache{}
+		tokenCache.On("Put", appName, tokenData)
+
+		tokenService := tokens.NewTokenService(tokenLength, tokenCache)
 
 		// when
-		newToken, apperr := tokenGenerator.CreateToken(reName)
+		newToken, apperr := tokenService.CreateToken(appName, tokenData)
 
 		// then
 		require.NoError(t, apperr)

@@ -15,10 +15,10 @@ type Service interface {
 
 type tokenService struct {
 	tokenLength int
-	tokenCache  TokenCache
+	tokenCache  Cache
 }
 
-func NewTokenService(tokenLength int, tokenCache TokenCache) Service {
+func NewTokenService(tokenLength int, tokenCache Cache) Service {
 	return &tokenService{tokenLength: tokenLength, tokenCache: tokenCache}
 }
 

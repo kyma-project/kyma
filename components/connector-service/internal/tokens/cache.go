@@ -6,7 +6,7 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-type TokenCache interface {
+type Cache interface {
 	Put(app string, tokenData *TokenData)
 	Get(app string) (*TokenData, bool)
 	Delete(app string)
@@ -17,7 +17,7 @@ type tokenCache struct {
 }
 
 // TODO - decide if there should be separate cache for the Runtime tokens and Application tokens
-func NewTokenCache(expirationMinutes int) TokenCache {
+func NewTokenCache(expirationMinutes int) Cache {
 	return &tokenCache{
 		tokenCache: cache.New(time.Duration(expirationMinutes)*time.Minute, 1*time.Minute),
 	}
