@@ -24,7 +24,7 @@ These are the provisioning parameters:
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
 | **labels** | `object` | To organize your project, add arbitrary labels. Use them to indicate different elements, such as environments, services, or teams. | NO | - |
-| **imagePullPolicy** | `string` | Specifies how the kubelet pulls images from the specified registry. The possible values are `Always` (the image is pulled every time the Pod is started) `IfNotPresent` (the image is pulled only if it is not already present locally), `Never` (the image is assumed to exist locally and there is no attempt to pull it). | YES | `IfNotPresent` |
+| **imagePullPolicy** | `string` | Specifies how the kubelet pulls images from the specified registry. The possible values are `Always` (the image is pulled every time the Pod is started), `IfNotPresent` (the image is pulled only if it is not already present locally), `Never` (the image is assumed to exist locally and there is no attempt to pull it). | YES | `IfNotPresent` |
 
 ## Credentials
 
