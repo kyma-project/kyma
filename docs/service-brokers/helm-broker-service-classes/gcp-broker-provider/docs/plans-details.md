@@ -39,7 +39,7 @@ generate service account keys used by brokers installed in different Namespaces.
 The generated service account key has a **roles/servicebroker.operator** role and is 
 used during provisioning, deprovisioning, binding, and unbinding actions.
 
-![](assets/gcp-broker-key-management.svg)
+![](./assets/gcp-broker-key-management.svg)
 
 Provisioning and deprovisioning processes use the [GCP Broker Provider](https://github.com/kyma-project/kyma/tree/master/tools/gcp-broker-provider) tool.
 
@@ -52,7 +52,7 @@ The provisioning process flow looks as follows:
 6. After the provisioning process, the post-install job is triggered.
 
 
-![GCP Broker Provisioning](assets/gcp-broker-provisioning.svg)
+![GCP Broker Provisioning](./assets/gcp-broker-provisioning.svg)
 
 
 In the Service Catalog view, click **Google Cloud Platform Service Broker Provider**.
@@ -72,7 +72,7 @@ The deprovisioning process flow looks as follows:
 4. The script uses [sc](https://github.com/kyma-incubator/k8s-service-catalog) CLI to remove the GCP Broker from the Kyma cluster.
 5. `sc` CLI removes access keys from the Google Cloud Platform.
 
-![GCP Broker Deprovisioning](assets/gcp-broker-deprovisioning.svg)
+![GCP Broker Deprovisioning](./assets/gcp-broker-deprovisioning.svg)
 
 
 

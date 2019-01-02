@@ -79,7 +79,7 @@ This is a basic example where `Gauge` and `Counter` metrics are exported using t
     ```
     Open a browser and access [`http://localhost:8081/metrics`](http://localhost:8081/metrics)
 
-    ![metrics on port 8081](assets/sample-metrics-2.png)
+    ![metrics on port 8081](./assets/sample-metrics-2.png)
 
 Find the source code for the sample application [here](https://github.com/kyma-project/examples/blob/master/monitoring-custom-metrics/main.go). See the [package prometheus](https://godoc.org/github.com/prometheus/client_golang/prometheus) for the reference documentation. Read [this](https://prometheus.io/docs/concepts/metric_types/) documentation to learn more about the Prometheus metric types.
 
@@ -94,11 +94,11 @@ Forwarding from [::1]:9090 -> 9090
 ```
 All the **sample-metrics** endpoints appear as the [`Targets`](http://localhost:9090/targets#job-sample-metrics-8081) list.
 
-![Prometheus Dashboard](assets/pm-dashboard-1.png)
+![Prometheus Dashboard](./assets/pm-dashboard-1.png)
 
 Use either the `cpu_temperature_celsius` or `hd_errors_total` in the [**expression**](http://localhost:9090/graph) field. Click the **Execute** button to check the values scrapped by Prometheus.
 
-![Prometheus Dashboard](assets/pm-dashboard-2.png)
+![Prometheus Dashboard](./assets/pm-dashboard-2.png)
 
 ### ServiceMonitor
 

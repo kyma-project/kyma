@@ -41,4 +41,4 @@ servicebindingusages.servicecatalog.kyma-project.io/tracing-information: '{
 }
 ```
 
-![Architecture](assets/architecture.png)
+![Architecture](assets/architecture.svg)

@@ -15,7 +15,6 @@ import (
 // FakeBackendModules implements BackendModuleInterface
 type FakeBackendModules struct {
 	Fake *FakeUiV1alpha1
-	ns   string
 }
 
 var backendmodulesResource = schema.GroupVersionResource{Group: "ui.kyma-project.io", Version: "v1alpha1", Resource: "backendmodules"}
@@ -25,8 +24,7 @@ var backendmodulesKind = schema.GroupVersionKind{Group: "ui.kyma-project.io", Ve
 // Get takes name of the backendModule, and returns the corresponding backendModule object, and an error if there is any.
 func (c *FakeBackendModules) Get(name string, options v1.GetOptions) (result *v1alpha1.BackendModule, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(backendmodulesResource, c.ns, name), &v1alpha1.BackendModule{})
-
+		Invokes(testing.NewRootGetAction(backendmodulesResource, name), &v1alpha1.BackendModule{})
 	if obj == nil {
 		return nil, err
 	}
@@ -36,8 +34,7 @@ func (c *FakeBackendModules) Get(name string, options v1.GetOptions) (result *v1
 // List takes label and field selectors, and returns the list of BackendModules that match those selectors.
 func (c *FakeBackendModules) List(opts v1.ListOptions) (result *v1alpha1.BackendModuleList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(backendmodulesResource, backendmodulesKind, c.ns, opts), &v1alpha1.BackendModuleList{})
-
+		Invokes(testing.NewRootListAction(backendmodulesResource, backendmodulesKind, opts), &v1alpha1.BackendModuleList{})
 	if obj == nil {
 		return nil, err
 	}
@@ -58,15 +55,13 @@ func (c *FakeBackendModules) List(opts v1.ListOptions) (result *v1alpha1.Backend
 // Watch returns a watch.Interface that watches the requested backendModules.
 func (c *FakeBackendModules) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(backendmodulesResource, c.ns, opts))
-
+		InvokesWatch(testing.NewRootWatchAction(backendmodulesResource, opts))
 }
 
 // Create takes the representation of a backendModule and creates it.  Returns the server's representation of the backendModule, and an error, if there is any.
 func (c *FakeBackendModules) Create(backendModule *v1alpha1.BackendModule) (result *v1alpha1.BackendModule, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(backendmodulesResource, c.ns, backendModule), &v1alpha1.BackendModule{})
-
+		Invokes(testing.NewRootCreateAction(backendmodulesResource, backendModule), &v1alpha1.BackendModule{})
 	if obj == nil {
 		return nil, err
 	}
@@ -76,8 +71,7 @@ func (c *FakeBackendModules) Create(backendModule *v1alpha1.BackendModule) (resu
 // Update takes the representation of a backendModule and updates it. Returns the server's representation of the backendModule, and an error, if there is any.
 func (c *FakeBackendModules) Update(backendModule *v1alpha1.BackendModule) (result *v1alpha1.BackendModule, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(backendmodulesResource, c.ns, backendModule), &v1alpha1.BackendModule{})
-
+		Invokes(testing.NewRootUpdateAction(backendmodulesResource, backendModule), &v1alpha1.BackendModule{})
 	if obj == nil {
 		return nil, err
 	}
@@ -87,14 +81,13 @@ func (c *FakeBackendModules) Update(backendModule *v1alpha1.BackendModule) (resu
 // Delete takes name of the backendModule and deletes it. Returns an error if one occurs.
 func (c *FakeBackendModules) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(backendmodulesResource, c.ns, name), &v1alpha1.BackendModule{})
-
+		Invokes(testing.NewRootDeleteAction(backendmodulesResource, name), &v1alpha1.BackendModule{})
 	return err
 }
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeBackendModules) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(backendmodulesResource, c.ns, listOptions)
+	action := testing.NewRootDeleteCollectionAction(backendmodulesResource, listOptions)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.BackendModuleList{})
 	return err
@@ -103,8 +96,7 @@ func (c *FakeBackendModules) DeleteCollection(options *v1.DeleteOptions, listOpt
 // Patch applies the patch and returns the patched backendModule.
 func (c *FakeBackendModules) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.BackendModule, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(backendmodulesResource, c.ns, name, data, subresources...), &v1alpha1.BackendModule{})
-
+		Invokes(testing.NewRootPatchSubresourceAction(backendmodulesResource, name, data, subresources...), &v1alpha1.BackendModule{})
 	if obj == nil {
 		return nil, err
 	}

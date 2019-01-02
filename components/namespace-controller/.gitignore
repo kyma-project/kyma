@@ -1,0 +1,9 @@
+.DS_Store
+.idea
+.vscode
+
+/namespace-controller
+namespace-controller
+info.json
+
+vendor

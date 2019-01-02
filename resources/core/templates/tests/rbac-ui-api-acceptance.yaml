@@ -16,7 +16,7 @@ rules:
     resources: ["clusterservicebrokers", "servicebrokers", "serviceinstances", "servicebindings"]
     verbs: ["create", "get", "delete"]
     nonResourceURLs: []
-  - apiGroups: ["servicecatalog.kyma.cx"]
+  - apiGroups: ["servicecatalog.kyma-project.io"]
     resources: ["usagekinds"]
     verbs: ["create", "delete"]
   - apiGroups: ["apps"]

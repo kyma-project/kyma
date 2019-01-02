@@ -30,8 +30,9 @@ metadata:
     installer: overrides
 data:
   global.isLocalEnv: "false"
-  global.knative: "__KNATIVE__"
+  global.knative: "false"
   global.domainName: "__DOMAIN__"
+  global.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.etcdBackup.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
@@ -103,17 +104,6 @@ data:
 
   mixer.resources.limits.memory: 1Gi
   mixer.resources.requests.memory: 256Mi
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: istio-kyma-patch-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: istio-kyma-patch
-data:
-  loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
 ---
 apiVersion: v1
 kind: ConfigMap
