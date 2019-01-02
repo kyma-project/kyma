@@ -35,7 +35,7 @@ func NewApplicationRepository(appManager Manager) ApplicationRepository {
 	}
 }
 
-// CreateToken creates new Application
+// Create creates new Application
 func (r *repository) Create(application *v1alpha1.Application) apperrors.AppError {
 	_, err := r.appMannager.Create(application)
 	if err != nil {

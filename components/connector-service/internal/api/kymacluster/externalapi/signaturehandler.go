@@ -49,7 +49,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var certificateRequest CertificateRequest
-	err := api.ReadRequestBody(r, certificateRequest)
+	err := api.ReadRequestBody(r, &certificateRequest)
 	if err != nil {
 		api.RespondWithError(w, err)
 		return

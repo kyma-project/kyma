@@ -11,8 +11,6 @@ import (
 	"k8s.io/client-go/util/retry"
 )
 
-// TODO - add comments
-
 // Manager contains operations for managing Kyma Group CR
 type Manager interface {
 	Create(kymaGroup *v1alpha1.KymaGroup) (*v1alpha1.KymaGroup, error)
@@ -20,6 +18,7 @@ type Manager interface {
 	Get(name string, options v1.GetOptions) (*v1alpha1.KymaGroup, error)
 }
 
+// KymaGroupsRepository contains operations for managing KymaGroup CR
 type KymaGroupsRepository interface {
 	Create(application *v1alpha1.KymaGroup) apperrors.AppError
 	UpdateClusterData(group string, cluster *v1alpha1.Cluster) apperrors.AppError
@@ -32,12 +31,14 @@ type repository struct {
 	kymaGroupManager Manager
 }
 
+// NewKymaGroupRepository creates a new KymaGroupsRepository
 func NewKymaGroupRepository(kymaGroupManager Manager) KymaGroupsRepository {
 	return &repository{
 		kymaGroupManager: kymaGroupManager,
 	}
 }
 
+// Create creates new KymaGroup
 func (r *repository) Create(kymaGroup *v1alpha1.KymaGroup) apperrors.AppError {
 	_, err := r.kymaGroupManager.Create(kymaGroup)
 	if err != nil {
@@ -47,13 +48,18 @@ func (r *repository) Create(kymaGroup *v1alpha1.KymaGroup) apperrors.AppError {
 	return nil
 }
 
+// UpdateClusterData updates cluster data inside KymaGroup
 func (r *repository) UpdateClusterData(group string, cluster *v1alpha1.Cluster) apperrors.AppError {
 	return r.updateKymaGroup(group, func(kg *v1alpha1.KymaGroup) apperrors.AppError {
 		kg.Spec.Cluster = *cluster
+		if kg.Spec.Applications == nil {
+			kg.Spec.Applications = []v1alpha1.Application{}
+		}
 		return nil
 	})
 }
 
+// AddApplication adds application to KymaGroup
 func (r *repository) AddApplication(group string, app *v1alpha1.Application) apperrors.AppError {
 	return r.updateKymaGroup(group, func(kg *v1alpha1.KymaGroup) apperrors.AppError {
 		if applicationInGroup(kg, app.ID) == -1 {
@@ -66,6 +72,7 @@ func (r *repository) AddApplication(group string, app *v1alpha1.Application) app
 	})
 }
 
+// RemoveApplication removes application from KymaGroup
 func (r *repository) RemoveApplication(group string, appID string) apperrors.AppError {
 	return r.updateKymaGroup(group, func(kg *v1alpha1.KymaGroup) apperrors.AppError {
 		return removeAppFromGroup(kg, appID)
@@ -75,12 +82,12 @@ func (r *repository) RemoveApplication(group string, appID string) apperrors.App
 func (r *repository) updateKymaGroup(group string, modification func(kymaGroup *v1alpha1.KymaGroup) apperrors.AppError) apperrors.AppError {
 	kymaGroup, appErr := r.getKymaGroup(group)
 	if appErr != nil {
-		return appErr.Append("Failed to update %s Kyma Group", group)
+		return appErr.Append("Failed to update %s Kyma Group, %s", group, appErr.Error())
 	}
 
 	appErr = modification(kymaGroup)
 	if appErr != nil {
-		return appErr.Append("Failed to update %s Kyma Group", group)
+		return appErr.Append("Failed to update %s Kyma Group, %s", group, appErr.Error())
 	}
 
 	err := r.updateWithRetries(kymaGroup)
@@ -91,6 +98,7 @@ func (r *repository) updateKymaGroup(group string, modification func(kymaGroup *
 	return nil
 }
 
+// Get reads KymaGroup CR
 func (r *repository) Get(name string) (*v1alpha1.KymaGroup, apperrors.AppError) {
 	return r.getKymaGroup(name)
 }
@@ -99,7 +107,7 @@ func (r *repository) getKymaGroup(group string) (*v1alpha1.KymaGroup, apperrors.
 	re, err := r.kymaGroupManager.Get(group, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			message := fmt.Sprintf("Kyma Group %s not found", group)
+			message := fmt.Sprintf("Kyma Group %s not found, %s", group, err.Error())
 			return nil, apperrors.NotFound(message)
 		}
 
