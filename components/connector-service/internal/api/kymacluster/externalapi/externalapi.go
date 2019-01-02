@@ -1,0 +1,33 @@
+package externalapi
+
+import (
+	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
+)
+
+type SignatureHandler interface {
+	SignCSR(w http.ResponseWriter, r *http.Request)
+}
+
+type InfoHandler interface {
+	GetInfo(w http.ResponseWriter, r *http.Request)
+}
+
+func NewHandler(sHandler SignatureHandler, iHandler InfoHandler, middlewares []mux.MiddlewareFunc) http.Handler {
+	router := mux.NewRouter()
+
+	for _, middleware := range middlewares {
+		router.Use(middleware)
+	}
+
+	registrationRouter := router.PathPrefix("/v1/clusters").Subrouter()
+	registrationRouter.HandleFunc("/{identifier}/client-certs", sHandler.SignCSR).Methods(http.MethodPost)
+	registrationRouter.HandleFunc("/{identifier}/info", iHandler.GetInfo).Methods(http.MethodGet)
+
+	router.NotFoundHandler = errorhandler.NewErrorHandler(404, "Requested resource could not be found.")
+	router.MethodNotAllowedHandler = errorhandler.NewErrorHandler(405, "Method not allowed.")
+
+	return router
+}

@@ -36,6 +36,44 @@ spec:
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}-kyma-external-api
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.service.kymaexternalapi.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}-kyma-internal-api
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.internalapi.serviceType }}
+  ports:
+    - port: {{ .Values.service.kymainternalapi.port }}
+      protocol: TCP
+      name: int-api-port
+  selector:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+---
 kind: Service
 apiVersion: v1
 metadata:

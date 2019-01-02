@@ -10,7 +10,7 @@ type TokenGenerator struct {
 	mock.Mock
 }
 
-// NewToken provides a mock function with given fields: app
+// CreateToken provides a mock function with given fields: app
 func (_m *TokenGenerator) NewToken(app string) (string, apperrors.AppError) {
 	ret := _m.Called(app)
 

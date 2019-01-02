@@ -26,15 +26,6 @@ type CertificateUtility interface {
 type certificateUtility struct {
 }
 
-type CSRSubject struct {
-	CName              string
-	Country            string
-	Organization       string
-	OrganizationalUnit string
-	Locality           string
-	Province           string
-}
-
 func NewCertificateUtility() CertificateUtility {
 	return &certificateUtility{}
 }

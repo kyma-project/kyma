@@ -4,6 +4,8 @@ deployment:
   args:
     internalAPIPort: &internalAPIPort 8080
     externalAPIPort: &externalAPIPort 8081
+    kymaInternalAPIPort: &kymaInternalAPIPort 8082
+    kymaExternalAPIPort: &kymaExternalAPIPort 8083
     tokenLength: 64
     tokenExpirationMinutes: 5
   envvars:
@@ -16,10 +18,14 @@ deployment:
 service:
   externalapi:
     port: *externalAPIPort
-    nodePort: 32010
   internalapi:
     serviceType: ClusterIP
     port: *internalAPIPort
+  kymaexternalapi:
+    port: *kymaExternalAPIPort
+  kymainternalapi:
+    serviceType: ClusterIP
+    port: *kymaInternalAPIPort
 
 tests:
   skipSslVerify: false

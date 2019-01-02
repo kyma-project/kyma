@@ -1,0 +1,10 @@
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: KymaGroup
+metadata:
+  name: default
+spec:
+  tenant: "default"
+  cluster:
+    appRegistryUrl: "http://gateway.kyma.local/metadata/services"
+    eventsUrl: "http://gateway.kyma.local/events"
+  applications: []

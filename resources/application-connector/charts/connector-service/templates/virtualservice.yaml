@@ -16,9 +16,18 @@ spec:
   http:
   - match:
     - uri:
-        regex: /.*
+        # TODO - change depending on how api spec should be handled
+        prefix: /v1/applications
     route:
     - destination:
         port:
           number: {{ .Values.service.externalapi.port }}
         host: {{ .Chart.Name }}-external-api
+  - match:
+      - uri:
+          prefix: /v1/clusters
+    route:
+      - destination:
+          port:
+            number: {{ .Values.service.kymaexternalapi.port }}
+          host: {{ .Chart.Name }}-kyma-external-api

@@ -15,6 +15,9 @@ type options struct {
 	tokenExpirationMinutes int
 	domainName             string
 	connectorServiceHost   string
+	global                 bool
+	externalKymaAPIPort    int
+	internalKymaAPIPort    int
 }
 
 type environment struct {
@@ -34,6 +37,9 @@ func parseArgs() *options {
 	tokenExpirationMinutes := flag.Int("tokenExpirationMinutes", 5, "Time to Live of tokens expressed in minutes.")
 	domainName := flag.String("domainName", ".wormhole.cluster.kyma.cx", "Domain name used for URL generation.")
 	connectorServiceHost := flag.String("connectorServiceHost", "cert-service.wormhole.cluster.kyma.cx", "Host at which this service is accessible.")
+	global := flag.Bool("global", true, "Determines if Connector Service should act as global")
+	externalKymaAPIPort := flag.Int("externalKymaAPIPort", 8083, "External Kyma Clusters API Port")
+	internalKymaAPIPort := flag.Int("internalKymaAPIPort", 8082, "Internal Kyma Clusters API Port")
 
 	flag.Parse()
 
@@ -46,13 +52,19 @@ func parseArgs() *options {
 		tokenExpirationMinutes: *tokenExpirationMinutes,
 		domainName:             *domainName,
 		connectorServiceHost:   *connectorServiceHost,
+		global:                 *global,
+		externalKymaAPIPort:    *externalKymaAPIPort,
+		internalKymaAPIPort:    *internalKymaAPIPort,
 	}
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s --tokenLength=%d "+
-		"--tokenExpirationMinutes=%d --domainName=%s --connectorServiceHost=%s", o.appName, o.externalAPIPort,
-		o.internalAPIPort, o.namespace, o.tokenLength, o.tokenExpirationMinutes, o.domainName, o.connectorServiceHost)
+	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s "+
+		"--tokenLength=%d --tokenExpirationMinutes=%d --domainName=%s --connectorServiceHost=%s"+
+		" --global=%t --externalKymaAPIPort=%d --internalKymaAPIPort=%d",
+		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace,
+		o.tokenLength, o.tokenExpirationMinutes, o.domainName, o.connectorServiceHost,
+		o.global, o.externalKymaAPIPort, o.internalKymaAPIPort)
 }
 
 func parseEnv() *environment {

@@ -14,6 +14,9 @@ const (
 type AppError interface {
 	Code() int
 	Error() string
+	Append(string, ...interface{}) AppError
+	IsNotFound() bool
+	IsAlreadyExists() bool
 }
 
 type appError struct {
@@ -55,4 +58,17 @@ func (ae appError) Code() int {
 
 func (ae appError) Error() string {
 	return ae.message
+}
+
+func (ae appError) Append(additionalFormat string, a ...interface{}) AppError {
+	format := additionalFormat + ", " + ae.message
+	return errorf(ae.code, format, a...)
+}
+
+func (ae appError) IsNotFound() bool {
+	return ae.code == CodeNotFound
+}
+
+func (ae appError) IsAlreadyExists() bool {
+	return ae.code == CodeAlreadyExists
 }
