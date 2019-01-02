@@ -106,6 +106,7 @@ func (r *PluggableContainer) Enable() error {
 	usageKindService := newUsageKindService(serviceBindingUsageClient.ServicecatalogV1alpha1(), dynamicClient, serviceBindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer())
 	serviceBindingUsageService := newServiceBindingUsageService(serviceBindingUsageClient.ServicecatalogV1alpha1(), serviceBindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer(), serviceBindingService, name.Generate)
 
+	// TODO: Use EnableAndSyncInformerFactory after splitting module into two
 	r.Pluggable.EnableAndSyncCache(func(stopCh chan struct{}) {
 		r.informerFactory.Start(stopCh)
 		r.informerFactory.WaitForCacheSync(stopCh)
@@ -144,8 +145,8 @@ func (r *PluggableContainer) Disable() error {
 }
 
 type resolverConfig struct {
-	client                    *clientset.Clientset
-	serviceBindingUsageClient *bindingUsageClientset.Clientset
+	client                    clientset.Interface
+	serviceBindingUsageClient bindingUsageClientset.Interface
 	dynamicClient             dynamic.Interface
 
 	informerResyncPeriod time.Duration

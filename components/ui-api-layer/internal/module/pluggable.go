@@ -7,6 +7,7 @@ import (
 type Pluggable struct {
 	name      string
 	isEnabled bool
+	SyncCh    chan bool
 	stopCh    chan struct{}
 }
 
@@ -25,22 +26,27 @@ func (p *Pluggable) IsEnabled() bool {
 func (p *Pluggable) Enable() {
 	p.isEnabled = true
 	p.stopCh = make(chan struct{})
+	p.SyncCh = make(chan bool)
 }
 
 func (p *Pluggable) EnableAndSyncCache(sync func(stopCh chan struct{})) {
 	p.Enable()
 
-	go sync(p.stopCh)
+	go func(stopCh chan struct{}, syncCh chan bool) {
+		sync(stopCh)
+		syncCh <- true
+	}(p.stopCh, p.SyncCh)
 }
 
 func (p *Pluggable) EnableAndSyncInformerFactory(informerFactory SharedInformerFactory, onSync func()) {
 	p.Enable()
 
-	go func(informerFactory SharedInformerFactory) {
+	go func(informerFactory SharedInformerFactory, onSyncFn func(), syncCh chan bool) {
 		informerFactory.Start(p.stopCh)
 		informerFactory.WaitForCacheSync(p.stopCh)
-		onSync()
-	}(informerFactory)
+		onSyncFn()
+		syncCh <- true
+	}(informerFactory, onSync, p.SyncCh)
 }
 
 func (p *Pluggable) Disable(disableModule func(disabledErr error)) {

@@ -68,7 +68,7 @@ func (r *PluggableResolver) Disable() error {
 
 type resolverConfig struct {
 	informerResyncPeriod time.Duration
-	client               *versioned.Clientset
+	client               versioned.Interface
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
