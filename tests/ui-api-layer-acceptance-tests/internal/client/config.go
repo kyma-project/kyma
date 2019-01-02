@@ -23,6 +23,6 @@ func NewRestClientConfig(kubeconfigPath string) (*rest.Config, error) {
 }
 
 func NewRestClientConfigFromEnv() (*rest.Config, error) {
-	kubeConfigPath := os.Getenv("KUBE_CONFIG")
+	kubeConfigPath := os.Getenv("KUBECONFIG")
 	return NewRestClientConfig(kubeConfigPath)
 }

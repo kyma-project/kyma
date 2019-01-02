@@ -22,25 +22,39 @@ dep ensure -vendor-only
 
 ### Run tests outside the cluster
 
+Before you run the acceptance tests, export required environmental variables with the following command:
+
+```bash
+export USERNAME=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D)
+export PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D)
+export KUBECONFIG=/Users/${USER}/.kube/config
+```
+
 Run acceptance tests using the following command:
 
 - against the UI API Layer deployed on the local cluster:
   
   ```bash
-  KUBE_CONFIG=/Users/${USER}/.kube/config go test ./... -tags=acceptance
+  go test ./... -tags=acceptance
   ```
 
 - against standalone UI API Layer deployed on the local host:
   
   ```bash
-  KUBE_CONFIG=/Users/${USER}/.kube/config GRAPHQL_ENDPOINT=http://localhost:3000/graphql USERNAME=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D) PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D) go test ./... -tags=acceptance
+  GRAPHQL_ENDPOINT=http://localhost:3000/graphql go test ./... -tags=acceptance
   ```
 
 - against the UI API Layer deployed on the cluster with custom domain:
   
   ```bash
-  KUBE_CONFIG=/Users/${USER}/.kube/config DOMAIN=nightly.kyma.cx USERNAME={username} PASSWORD={password} go test ./... -tags=acceptance
+  DOMAIN=nightly.kyma.cx go test ./... -tags=acceptance
   ```
+  
+To run the tests against the UI API Layer with module pluggability turned on, add the following environmental variable:
+  
+```bash
+MODULE_PLUGGABILITY=true
+```
 
 ### Verify the code
 
