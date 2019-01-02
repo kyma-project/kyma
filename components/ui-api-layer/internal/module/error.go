@@ -13,7 +13,7 @@ func NewDisabledModuleError(moduleName string) *DisabledModuleError {
 }
 
 func (e *DisabledModuleError) Error() string {
-	errMessage := fmt.Sprintf("The %s module is disabled.", e.ModuleName)
+	errMessage := fmt.Sprintf("MODULE_DISABLED: The %s module is disabled.", e.ModuleName)
 	return errMessage
 }
 

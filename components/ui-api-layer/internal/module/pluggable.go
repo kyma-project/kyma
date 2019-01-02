@@ -63,6 +63,10 @@ func (p *Pluggable) Disable(disableModule func(disabledErr error)) {
 func (p *Pluggable) StopCacheSyncOnClose(stopCh <-chan struct{}) {
 	go func() {
 		<-stopCh
+
+		if p.stopCh == nil {
+			return
+		}
 		close(p.stopCh)
 	}()
 }
