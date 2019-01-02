@@ -40,3 +40,5 @@
 # Helm Broker
 - name: gcp-broker-provider
   directory: service-brokers/helm-broker-service-classes/gcp-broker-provider
+- name: redis
+  directory: service-brokers/helm-broker-service-classes/redis

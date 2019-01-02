@@ -9,7 +9,7 @@ The service provides the following plan names and descriptions:
 
 | Plan Name | Description |
 |-----------|-------------|
-| `enterprise` |  |
+| `enterprise` | Redis enterprise plan which uses Persistent Volume Claim (PVC). |
 | `micro` | Redis micro plan which uses the in-memory persistence. |
 
 
@@ -23,7 +23,7 @@ These are the provisioning parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `imagePullPolicy` | `string` | The possible values are `Always`, `IfNotPresent`, `Never`. | Y | `IfNotPresent` |
+| `imagePullPolicy` | `string` | Specifies how the kubelet pulls images from the specified registry. The possible values are `Always`, `IfNotPresent`, `Never`. | Y | `IfNotPresent` |
 
 
 ### Credentials
