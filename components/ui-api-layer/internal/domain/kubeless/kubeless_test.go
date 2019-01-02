@@ -1,6 +1,7 @@
 package kubeless_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -25,17 +26,27 @@ func TestPluggableResolver(t *testing.T) {
 			require.NoError(t, err)
 			<-pluggable.Pluggable.SyncCh
 
-			checkExportedFields(t, pluggable)
+			checkExportedFields(t, pluggable, true)
 		})
 		require.NotPanics(t, func() {
 			err := pluggable.Disable()
 			require.NoError(t, err)
 
-			checkExportedFields(t, pluggable)
+			checkExportedFields(t, pluggable, false)
 		})
 	}
 }
 
-func checkExportedFields(t *testing.T, resolver *kubeless.PluggableResolver) {
+func checkExportedFields(t *testing.T, resolver *kubeless.PluggableResolver, enabled bool) {
 	assert.NotNil(t, resolver.Resolver)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	val, err := resolver.Resolver.FunctionsQuery(ctx, "default", nil, nil)
+	if enabled {
+		require.NoError(t, err)
+	} else {
+		require.Error(t, err)
+		require.Nil(t, val)
+	}
 }

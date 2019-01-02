@@ -1,11 +1,11 @@
 package authentication_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/authentication"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/rest"
 )
@@ -25,17 +25,27 @@ func TestPluggableResolver(t *testing.T) {
 			require.NoError(t, err)
 			<-pluggable.Pluggable.SyncCh
 
-			checkExportedFields(t, pluggable)
+			checkExportedFields(t, pluggable, true)
 		})
 		require.NotPanics(t, func() {
 			err := pluggable.Disable()
 			require.NoError(t, err)
 
-			checkExportedFields(t, pluggable)
+			checkExportedFields(t, pluggable, false)
 		})
 	}
 }
 
-func checkExportedFields(t *testing.T, resolver *authentication.PluggableResolver) {
-	assert.NotNil(t, resolver.Resolver)
+func checkExportedFields(t *testing.T, resolver *authentication.PluggableResolver, enabled bool) {
+	require.NotNil(t, resolver.Resolver)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	val, err := resolver.Resolver.IDPPresetsQuery(ctx, nil, nil)
+	if enabled {
+		require.NoError(t, err)
+	} else {
+		require.Nil(t, val)
+		require.Error(t, err)
+	}
 }

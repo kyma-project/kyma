@@ -1,7 +1,9 @@
 package content_test
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content"
 	"github.com/stretchr/testify/assert"
@@ -23,20 +25,31 @@ func TestPluggableResolver(t *testing.T) {
 			require.NoError(t, err)
 			<-pluggable.Pluggable.SyncCh
 
-			checkExportedFields(t, pluggable)
+			checkExportedFields(t, pluggable, true)
 		})
 		require.NotPanics(t, func() {
 			err := pluggable.Disable()
 			require.NoError(t, err)
 
-			checkExportedFields(t, pluggable)
+			checkExportedFields(t, pluggable, false)
 		})
 	}
 }
 
-func checkExportedFields(t *testing.T, resolver *content.PluggableContainer) {
+func checkExportedFields(t *testing.T, resolver *content.PluggableContainer, enabled bool) {
 	assert.NotNil(t, resolver.Resolver)
 	assert.NotNil(t, resolver.ApiSpecGetter)
 	assert.NotNil(t, resolver.AsyncApiSpecGetter)
 	assert.NotNil(t, resolver.ContentGetter)
+
+	if enabled {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+
+	val, err := resolver.Resolver.ContentQuery(ctx, "test", "test")
+	require.Error(t, err)
+	require.Nil(t, val)
 }

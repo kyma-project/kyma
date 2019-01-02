@@ -1,6 +1,7 @@
 package application_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -32,18 +33,28 @@ func TestPluggableContainer(t *testing.T) {
 			require.NoError(t, err)
 			<-pluggable.Pluggable.SyncCh
 
-			checkExportedFields(t, pluggable)
+			checkExportedFields(t, pluggable, true)
 		})
 		require.NotPanics(t, func() {
 			err := pluggable.Disable()
 			require.NoError(t, err)
 
-			checkExportedFields(t, pluggable)
+			checkExportedFields(t, pluggable, false)
 		})
 	}
 }
 
-func checkExportedFields(t *testing.T, resolver *application.PluggableContainer) {
+func checkExportedFields(t *testing.T, resolver *application.PluggableContainer, enabled bool) {
 	assert.NotNil(t, resolver.Resolver)
 	assert.NotNil(t, resolver.AppLister)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	val, err := resolver.Resolver.ApplicationsQuery(ctx, nil, nil, nil)
+	if enabled {
+		require.NoError(t, err)
+	} else {
+		require.Nil(t, val)
+		require.Error(t, err)
+	}
 }
