@@ -29,16 +29,6 @@ func NewCertificateService(secretRepository secrets.Repository, certUtil Certifi
 
 func (svc *certificateService) SignCSR(encodedCSR string, identifier string) (string, apperrors.AppError) {
 
-	csr, err := svc.certUtil.LoadCSR(encodedCSR)
-	if err != nil {
-		return "", err
-	}
-
-	err = svc.checkCSR(csr, identifier)
-	if err != nil {
-		return "", err
-	}
-
 	caCrtBytesEncoded, caKeyBytesEncoded, err := svc.secretsRepository.Get(svc.caSecretName)
 	if err != nil {
 		return "", err
@@ -50,6 +40,16 @@ func (svc *certificateService) SignCSR(encodedCSR string, identifier string) (st
 	}
 
 	caKey, err := svc.certUtil.LoadKey(caKeyBytesEncoded)
+	if err != nil {
+		return "", err
+	}
+
+	csr, err := svc.certUtil.LoadCSR(encodedCSR)
+	if err != nil {
+		return "", err
+	}
+
+	err = svc.checkCSR(csr, identifier)
 	if err != nil {
 		return "", err
 	}

@@ -13,7 +13,7 @@ import (
 type KymaGroupLister interface {
 	// List lists all KymaGroups in the indexer.
 	List(selector labels.Selector) (ret []*v1alpha1.KymaGroup, err error)
-	// GetToken retrieves the KymaGroup from the index for a given name.
+	// Get retrieves the KymaGroup from the index for a given name.
 	Get(name string) (*v1alpha1.KymaGroup, error)
 	KymaGroupListerExpansion
 }
@@ -36,7 +36,7 @@ func (s *kymaGroupLister) List(selector labels.Selector) (ret []*v1alpha1.KymaGr
 	return ret, err
 }
 
-// GetToken retrieves the KymaGroup from the index for a given name.
+// Get retrieves the KymaGroup from the index for a given name.
 func (s *kymaGroupLister) Get(name string) (*v1alpha1.KymaGroup, error) {
 	obj, exists, err := s.indexer.GetByKey(name)
 	if err != nil {

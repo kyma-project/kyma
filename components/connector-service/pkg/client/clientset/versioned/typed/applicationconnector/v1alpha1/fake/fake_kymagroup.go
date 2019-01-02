@@ -21,7 +21,7 @@ var kymagroupsResource = schema.GroupVersionResource{Group: "applicationconnecto
 
 var kymagroupsKind = schema.GroupVersionKind{Group: "applicationconnector.kyma-project.io", Version: "v1alpha1", Kind: "KymaGroup"}
 
-// GetToken takes name of the kymaGroup, and returns the corresponding kymaGroup object, and an error if there is any.
+// Get takes name of the kymaGroup, and returns the corresponding kymaGroup object, and an error if there is any.
 func (c *FakeKymaGroups) Get(name string, options v1.GetOptions) (result *v1alpha1.KymaGroup, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewRootGetAction(kymagroupsResource, name), &v1alpha1.KymaGroup{})
@@ -58,7 +58,7 @@ func (c *FakeKymaGroups) Watch(opts v1.ListOptions) (watch.Interface, error) {
 		InvokesWatch(testing.NewRootWatchAction(kymagroupsResource, opts))
 }
 
-// CreateToken takes the representation of a kymaGroup and creates it.  Returns the server's representation of the kymaGroup, and an error, if there is any.
+// Create takes the representation of a kymaGroup and creates it.  Returns the server's representation of the kymaGroup, and an error, if there is any.
 func (c *FakeKymaGroups) Create(kymaGroup *v1alpha1.KymaGroup) (result *v1alpha1.KymaGroup, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewRootCreateAction(kymagroupsResource, kymaGroup), &v1alpha1.KymaGroup{})
@@ -89,7 +89,7 @@ func (c *FakeKymaGroups) UpdateStatus(kymaGroup *v1alpha1.KymaGroup) (*v1alpha1.
 	return obj.(*v1alpha1.KymaGroup), err
 }
 
-// DeleteToken takes name of the kymaGroup and deletes it. Returns an error if one occurs.
+// Delete takes name of the kymaGroup and deletes it. Returns an error if one occurs.
 func (c *FakeKymaGroups) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewRootDeleteAction(kymagroupsResource, name), &v1alpha1.KymaGroup{})

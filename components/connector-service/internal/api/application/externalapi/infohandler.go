@@ -47,7 +47,7 @@ func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 
 	identifier := mux.Vars(r)["identifier"]
 
-	tokenData, found := ih.tokenService.GetToken(identifier)
+	tokenData, found := ih.tokenService.Get(identifier)
 	if !found || tokenData.Token != token {
 		api.RespondWithError(w, apperrors.Forbidden("Invalid token."))
 		return

@@ -43,7 +43,7 @@ func newKymaGroups(c *ApplicationconnectorV1alpha1Client) *kymaGroups {
 	}
 }
 
-// GetToken takes name of the kymaGroup, and returns the corresponding kymaGroup object, and an error if there is any.
+// Get takes name of the kymaGroup, and returns the corresponding kymaGroup object, and an error if there is any.
 func (c *kymaGroups) Get(name string, options v1.GetOptions) (result *v1alpha1.KymaGroup, err error) {
 	result = &v1alpha1.KymaGroup{}
 	err = c.client.Get().
@@ -75,7 +75,7 @@ func (c *kymaGroups) Watch(opts v1.ListOptions) (watch.Interface, error) {
 		Watch()
 }
 
-// CreateToken takes the representation of a kymaGroup and creates it.  Returns the server's representation of the kymaGroup, and an error, if there is any.
+// Create takes the representation of a kymaGroup and creates it.  Returns the server's representation of the kymaGroup, and an error, if there is any.
 func (c *kymaGroups) Create(kymaGroup *v1alpha1.KymaGroup) (result *v1alpha1.KymaGroup, err error) {
 	result = &v1alpha1.KymaGroup{}
 	err = c.client.Post().
@@ -113,7 +113,7 @@ func (c *kymaGroups) UpdateStatus(kymaGroup *v1alpha1.KymaGroup) (result *v1alph
 	return
 }
 
-// DeleteToken takes name of the kymaGroup and deletes it. Returns an error if one occurs.
+// Delete takes name of the kymaGroup and deletes it. Returns an error if one occurs.
 func (c *kymaGroups) Delete(name string, options *v1.DeleteOptions) error {
 	return c.client.Delete().
 		Resource("kymagroups").

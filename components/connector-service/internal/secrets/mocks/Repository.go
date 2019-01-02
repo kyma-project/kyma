@@ -9,7 +9,7 @@ type Repository struct {
 	mock.Mock
 }
 
-// GetToken provides a mock function with given fields: name
+// Get provides a mock function with given fields: name
 func (_m *Repository) Get(name string) ([]byte, []byte, apperrors.AppError) {
 	ret := _m.Called(name)
 

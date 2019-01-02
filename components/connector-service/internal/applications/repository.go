@@ -45,7 +45,7 @@ func (r *repository) Create(application *v1alpha1.Application) apperrors.AppErro
 	return nil
 }
 
-// GetToken reads Application with name
+// Get reads Application with name
 func (r *repository) Get(name string) (*v1alpha1.Application, apperrors.AppError) {
 	app, err := r.appMannager.Get(name, v1.GetOptions{})
 	if err != nil {

@@ -11,7 +11,7 @@ type Manager struct {
 	mock.Mock
 }
 
-// GetToken provides a mock function with given fields: name, options
+// Get provides a mock function with given fields: name, options
 func (_m *Manager) Get(name string, options v1.GetOptions) (*corev1.Secret, error) {
 	ret := _m.Called(name, options)
 

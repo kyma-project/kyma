@@ -62,7 +62,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		tokenCache.On("DeleteToken", appName).Return()
 
 		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("GetToken", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
+		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
 
 		certUtils := &certMock.CertificateUtility{}
 		certUtils.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
@@ -242,7 +242,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 		secretNotFoundError := apperrors.NotFound("error")
 		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("GetToken", authSecretName).Return([]byte(""), []byte(""), secretNotFoundError)
+		secretsRepository.On("Get", authSecretName).Return([]byte(""), []byte(""), secretNotFoundError)
 
 		certUtils := &certMock.CertificateUtility{}
 		certUtils.On("LoadCSR", mock.Anything).Return(nil, nil)
@@ -279,7 +279,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		tokenCache.On("GetToken", appName).Return(token, true)
 
 		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("GetToken", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
+		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
 
 		certUtils := &certMock.CertificateUtility{}
 		certUtils.On("LoadCSR", mock.Anything).Return(nil, nil)
@@ -318,7 +318,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		tokenCache.On("GetToken", appName).Return(token, true)
 
 		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("GetToken", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
+		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
 
 		certUtils := &certMock.CertificateUtility{}
 		certUtils.On("LoadCSR", mock.Anything).Return(nil, nil)
@@ -358,7 +358,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		tokenCache.On("GetToken", appName).Return(token, true)
 
 		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("GetToken", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
+		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
 
 		certUtils := &certMock.CertificateUtility{}
 		certUtils.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
