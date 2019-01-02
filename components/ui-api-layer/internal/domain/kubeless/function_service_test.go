@@ -1,4 +1,4 @@
- package kubeless_test
+package kubeless_test
 
 import (
 	"testing"

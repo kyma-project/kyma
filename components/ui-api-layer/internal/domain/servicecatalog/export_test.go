@@ -8,8 +8,8 @@ import (
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
+	fakeSbu "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
-	fakeSbu 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
 	fakeDynamic "k8s.io/client-go/dynamic/fake"
 )
 

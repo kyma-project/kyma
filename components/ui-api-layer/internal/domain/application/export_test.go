@@ -1,9 +1,12 @@
 package application
 
 import (
+	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	mappingLister "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
+	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
 	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	k8sClient "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -17,4 +20,10 @@ func NewEventActivationService(informer cache.SharedIndexInformer) *eventActivat
 
 func NewEventActivationResolver(service eventActivationLister, asyncApiSpecGetter AsyncApiSpecGetter) *eventActivationResolver {
 	return newEventActivationResolver(service, asyncApiSpecGetter)
+}
+
+func (r *PluggableContainer) SetFakeClient() {
+	r.cfg.mappingClient = mappingClient.NewSimpleClientset()
+	r.cfg.appClient = appClient.NewSimpleClientset()
+	r.cfg.k8sCli = k8sClient.NewSimpleClientset()
 }

@@ -1,23 +1,21 @@
-package authentication_test
+package content_test
 
 import (
 	"testing"
-	"time"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/authentication"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/client-go/rest"
 )
 
 const testTimes = 3
-const informerResyncPeriod = 10 * time.Second
 
 func TestPluggableResolver(t *testing.T) {
-	pluggable, err := authentication.New(&rest.Config{}, informerResyncPeriod)
+	pluggable, err := content.New(content.Config{
+		Address: "test-content.kyma.local",
+		Bucket:  "test",
+	})
 	require.NoError(t, err)
-
-	pluggable.SetFakeClient()
 
 	for i := 0; i < testTimes; i++ {
 		require.NotPanics(t, func() {
@@ -36,6 +34,9 @@ func TestPluggableResolver(t *testing.T) {
 	}
 }
 
-func checkExportedFields(t *testing.T, resolver *authentication.PluggableResolver) {
+func checkExportedFields(t *testing.T, resolver *content.PluggableContainer) {
 	assert.NotNil(t, resolver.Resolver)
+	assert.NotNil(t, resolver.ApiSpecGetter)
+	assert.NotNil(t, resolver.AsyncApiSpecGetter)
+	assert.NotNil(t, resolver.ContentGetter)
 }

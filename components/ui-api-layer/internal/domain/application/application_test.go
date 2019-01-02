@@ -1,10 +1,11 @@
-package authentication_test
+package application_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/authentication"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/gateway"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/rest"
@@ -13,8 +14,13 @@ import (
 const testTimes = 3
 const informerResyncPeriod = 10 * time.Second
 
-func TestPluggableResolver(t *testing.T) {
-	pluggable, err := authentication.New(&rest.Config{}, informerResyncPeriod)
+func TestPluggableContainer(t *testing.T) {
+	appCfg := application.Config{
+		Gateway: gateway.Config{
+			StatusRefreshPeriod: 1 * time.Second,
+		},
+	}
+	pluggable, err := application.New(&rest.Config{}, appCfg, informerResyncPeriod, nil)
 	require.NoError(t, err)
 
 	pluggable.SetFakeClient()
@@ -22,6 +28,7 @@ func TestPluggableResolver(t *testing.T) {
 	for i := 0; i < testTimes; i++ {
 		require.NotPanics(t, func() {
 			err := pluggable.Enable()
+
 			require.NoError(t, err)
 			<-pluggable.Pluggable.SyncCh
 
@@ -36,6 +43,7 @@ func TestPluggableResolver(t *testing.T) {
 	}
 }
 
-func checkExportedFields(t *testing.T, resolver *authentication.PluggableResolver) {
+func checkExportedFields(t *testing.T, resolver *application.PluggableContainer) {
 	assert.NotNil(t, resolver.Resolver)
+	assert.NotNil(t, resolver.AppLister)
 }

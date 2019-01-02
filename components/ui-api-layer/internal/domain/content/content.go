@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/allegro/bigcache"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/disabled"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
@@ -54,6 +56,19 @@ type PluggableContainer struct {
 }
 
 func New(cfg Config) (*PluggableContainer, error) {
+	minioClient, err := minio.New(fmt.Sprintf("%s:%d", cfg.Address, cfg.Port), cfg.AccessKey, cfg.SecretKey, cfg.Secure)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing Minio client")
+	}
+
+	if !cfg.VerifySSL {
+		transCfg := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore invalid SSL certificates
+		}
+
+		minioClient.SetCustomTransport(transCfg)
+	}
+
 	cacheConfig := bigcache.DefaultConfig(24 * time.Hour)
 	cacheConfig.Shards = 2
 	cacheConfig.MaxEntriesInWindow = 60
@@ -70,32 +85,21 @@ func New(cfg Config) (*PluggableContainer, error) {
 
 	container := &PluggableContainer{
 		cfg: &resolverConfig{
-			cfg:   cfg,
-			cache: cacheConfig,
+			cfg:         cfg,
+			cache:       cacheConfig,
+			minioClient: minioClient,
 		},
 		Pluggable: module.NewPluggable("content"),
 	}
 
-	err := container.Disable()
+	err = container.Disable()
 
 	return container, err
 }
 
 func (r *PluggableContainer) Enable() error {
 	cfg := r.cfg.cfg
-
-	minioClient, err := minio.New(fmt.Sprintf("%s:%d", cfg.Address, cfg.Port), cfg.AccessKey, cfg.SecretKey, cfg.Secure)
-	if err != nil {
-		return err
-	}
-
-	if !cfg.VerifySSL {
-		transCfg := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore invalid SSL certificates
-		}
-
-		minioClient.SetCustomTransport(transCfg)
-	}
+	minioClient := r.cfg.minioClient
 
 	cache, err := bigcache.NewBigCache(r.cfg.cache)
 	if err != nil {
@@ -135,8 +139,9 @@ func (r *PluggableContainer) Disable() error {
 }
 
 type resolverConfig struct {
-	cfg   Config
-	cache bigcache.Config
+	minioClient *minio.Client
+	cfg         Config
+	cache       bigcache.Config
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled

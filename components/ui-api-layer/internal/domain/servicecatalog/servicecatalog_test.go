@@ -1,12 +1,13 @@
 package servicecatalog_test
 
 import (
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/rest"
-	"testing"
-	"time"
 )
 
 const testTimes = 3
@@ -22,7 +23,7 @@ func TestPluggableContainer(t *testing.T) {
 		require.NotPanics(t, func() {
 			err := pluggable.Enable()
 			require.NoError(t, err)
-			<- pluggable.Pluggable.SyncCh
+			<-pluggable.Pluggable.SyncCh
 
 			checkExportedFields(t, pluggable)
 		})
@@ -40,4 +41,3 @@ func checkExportedFields(t *testing.T, resolver *servicecatalog.PluggableContain
 	assert.NotNil(t, resolver.ServiceBindingUsageLister)
 	assert.NotNil(t, resolver.ServiceBindingGetter)
 }
-

@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"k8s.io/client-go/kubernetes"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/disabled"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
@@ -12,6 +14,7 @@ import (
 
 	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	k8sClient "k8s.io/client-go/kubernetes"
 
 	mappingInformer "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -57,13 +60,18 @@ func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Durati
 		return nil, errors.Wrap(err, "while initializing application operator Clientset")
 	}
 
+	k8sCli, err := kubernetes.NewForConfig(restConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing application K8s Clientset")
+	}
+
 	container := &PluggableContainer{
 		cfg: &resolverConfig{
 			appClient:            aCli,
 			mappingClient:        mCli,
+			k8sCli:               k8sCli,
 			cfg:                  reCfg,
 			informerResyncPeriod: informerResyncPeriod,
-			rest:                 restConfig,
 			asyncApiSpecGetter:   asyncApiSpecGetter,
 		},
 		Pluggable: module.NewPluggable("application"),
@@ -80,6 +88,8 @@ func (r *PluggableContainer) Enable() error {
 	informerResyncPeriod := r.cfg.informerResyncPeriod
 	mCli := r.cfg.mappingClient
 	aCli := r.cfg.appClient
+	kCli := r.cfg.k8sCli
+
 	reCfg := r.cfg.cfg
 
 	// ApplicationMapping
@@ -97,7 +107,7 @@ func (r *PluggableContainer) Enable() error {
 		return errors.Wrap(err, "while creating Application Service")
 	}
 
-	gatewayService, err := gateway.New(r.cfg.rest, reCfg.Gateway, informerResyncPeriod)
+	gatewayService, err := gateway.New(kCli, reCfg.Gateway, informerResyncPeriod)
 	if err != nil {
 		return errors.Wrap(err, "while creating Gateway Service")
 	}
@@ -138,9 +148,9 @@ func (r *PluggableContainer) Disable() error {
 
 type resolverConfig struct {
 	cfg                  Config
-	rest                 *rest.Config
-	mappingClient        *mappingClient.Clientset
-	appClient            *appClient.Clientset
+	mappingClient        mappingClient.Interface
+	appClient            appClient.Interface
+	k8sCli               k8sClient.Interface
 	informerResyncPeriod time.Duration
 	asyncApiSpecGetter   AsyncApiSpecGetter
 }
