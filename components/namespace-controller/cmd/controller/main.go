@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/kyma-project/kyma/components/environments/internal/controller"
+	"github.com/kyma-project/kyma/components/namespace-controller/internal/controller"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/client-go/kubernetes"
@@ -16,7 +16,7 @@ func main() {
 
 	kubeconfig := flag.String("kubeconfig", "", "Path to a kubeconfig file")
 
-	var cfg controller.EnvironmentsConfig
+	var cfg controller.NamespacesConfig
 	err := envconfig.InitWithPrefix(&cfg, "APP")
 	panicOnError(errors.Wrap(err, "while reading configuration from environment variables"))
 

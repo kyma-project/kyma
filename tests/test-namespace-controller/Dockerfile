@@ -1,6 +1,6 @@
 FROM golang:1.10.2-alpine3.7 as builder
 
-ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/test-environments/
+ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/test-namespace-controller/
 WORKDIR ${BASE_APP_DIR}
 
 # Copy files
@@ -26,8 +26,8 @@ RUN apk add --no-cache bash
 RUN curl -Lo /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.8.4/bin/linux/amd64/kubectl
 RUN chmod +x /usr/local/bin/kubectl
 
-COPY ./test-environments.sh /test-environments.sh
+COPY ./test-namespace-controller.sh /test-namespace-controller.sh
 COPY ./sample-namespace.yaml /sample-namespace.yaml
 COPY --from=builder /quantity-to-int /quantity-to-int
 
-CMD ["/test-environments.sh"]
+CMD ["/test-namespace-controller.sh"]

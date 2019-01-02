@@ -4,7 +4,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
-type EnvironmentsConfig struct {
+type NamespacesConfig struct {
 	Namespace        string
 	LimitRangeMemory LimitRangeConfig
 	ResourceQuota    ResourceQuotaConfig
