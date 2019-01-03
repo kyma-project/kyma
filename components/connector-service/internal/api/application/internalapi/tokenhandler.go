@@ -24,11 +24,12 @@ type tokenHandler struct {
 	uuidGenerator   uuid.Generator
 }
 
-func NewTokenHandler(varificationSvc verification.Service, tokenService tokens.Service, host string) TokenHandler {
+func NewTokenHandler(varificationSvc verification.Service, tokenService tokens.Service, host string, uuidGenerator uuid.Generator) TokenHandler {
 	return &tokenHandler{
 		tokenGenerator:  tokenService,
 		host:            host,
 		verificationSvc: varificationSvc,
+		uuidGenerator:   uuidGenerator,
 	}
 }
 

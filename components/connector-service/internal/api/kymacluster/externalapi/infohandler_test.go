@@ -9,35 +9,17 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/connector-service/pkg/apis/applicationconnector/v1alpha1"
-
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
-
-	kymaGroupMocks "github.com/kyma-project/kyma/components/connector-service/internal/kymagroup/mocks"
-
-	"github.com/kyma-project/kyma/components/connector-service/internal/api"
-
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 	tokenMocks "github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
+	tokenCacheMocks "github.com/kyma-project/kyma/components/connector-service/internal/tokens/cache/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	group  = "group"
-	tenant = "tenant"
-)
-
 func TestInfoHandler_GetInfo(t *testing.T) {
-
-	tokenData := &tokens.TokenData{
-		Group:  group,
-		Tenant: tenant,
-		Token:  token,
-	}
 
 	t.Run("should get info", func(t *testing.T) {
 		// given
@@ -46,36 +28,23 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 		expectedSignUrl := fmt.Sprintf("https://%s/v1/applications/%s/client-certs?token=%s", host, appName, newToken)
 
-		metadataUrl := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", domain, appName)
-		eventsUrl := fmt.Sprintf("https://gateway.%s/%s/v1/events", domain, appName)
-
-		kymaGroup := v1alpha1.KymaGroup{
-			Spec: v1alpha1.KymaGroupSpec{
-				Cluster: v1alpha1.Cluster{
-					AppRegistryUrl: metadataUrl,
-					EventsUrl:      eventsUrl,
-				},
-			},
-		}
-
-		expectedApi := Api{
-			MetadataURL:     metadataUrl,
-			EventsURL:       eventsUrl,
+		expectedApi := api{
+			MetadataURL:     fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", domain, appName),
+			EventsURL:       fmt.Sprintf("https://gateway.%s/%s/v1/events", domain, appName),
 			CertificatesUrl: fmt.Sprintf("https://%s/v1/applications/%s", host, appName),
 		}
 
-		expectedCertInfo := api.CertificateInfo{
+		expectedCertInfo := certInfo{
 			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, appName),
 			Extensions:   "",
 			KeyAlgorithm: "rsa2048",
 		}
 
-		tokenService := &tokenMocks.Service{}
-		tokenService.On("GetToken", appName).Return(tokenData, true)
-		tokenService.On("CreateToken", appName).Return(newToken, nil)
+		tokenCache := &tokenCacheMocks.TokenCache{}
+		tokenCache.On("GetToken", appName).Return(token, true)
 
-		groupRepository := &kymaGroupMocks.Repository{}
-		groupRepository.On("Get", group).Return(kymaGroup, nil)
+		tokenGenerator := &tokenMocks.TokenGenerator{}
+		tokenGenerator.On("CreateToken", appName).Return(newToken, nil)
 
 		subjectValues := certificates.CSRSubject{
 			CName:              appName,
@@ -85,8 +54,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 			Locality:           locality,
 			Province:           province,
 		}
-
-		infoHandler := NewInfoHandler(tokenService, host, domain, subjectValues, groupRepository)
+		infoHandler := NewInfoHandler(tokenCache, tokenGenerator, host, domain, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -101,7 +69,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		responseBody, err := ioutil.ReadAll(rr.Body)
 		require.NoError(t, err)
 
-		var infoResponse InfoResponse
+		var infoResponse infoResponse
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 
@@ -115,8 +83,8 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert", appName)
 
-		tokenService := &tokenMocks.Service{}
-		groupRepository := &kymaGroupMocks.Repository{}
+		tokenCache := &tokenCacheMocks.TokenCache{}
+		tokenGenerator := &tokenMocks.TokenGenerator{}
 
 		subjectValues := certificates.CSRSubject{
 			CName:              appName,
@@ -126,7 +94,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 			Locality:           locality,
 			Province:           province,
 		}
-		infoHandler := NewInfoHandler(tokenService, host, domain, subjectValues, groupRepository)
+		infoHandler := NewInfoHandler(tokenCache, tokenGenerator, host, domain, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -153,10 +121,10 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
-		tokenService := &tokenMocks.Service{}
-		tokenService.On("GetToken", appName).Return("", false)
+		tokenCache := &tokenCacheMocks.TokenCache{}
+		tokenCache.On("GetToken", appName).Return("", false)
 
-		groupRepository := &kymaGroupMocks.Repository{}
+		tokenGenerator := &tokenMocks.TokenGenerator{}
 
 		subjectValues := certificates.CSRSubject{
 			CName:              appName,
@@ -166,7 +134,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 			Locality:           locality,
 			Province:           province,
 		}
-		infoHandler := NewInfoHandler(tokenService, host, domain, subjectValues, groupRepository)
+		infoHandler := NewInfoHandler(tokenCache, tokenGenerator, host, domain, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -193,10 +161,10 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
-		tokenService := &tokenMocks.Service{}
-		tokenService.On("GetToken", appName).Return("differentToken", true)
+		tokenCache := &tokenCacheMocks.TokenCache{}
+		tokenCache.On("GetToken", appName).Return("differentToken", true)
 
-		groupRepository := &kymaGroupMocks.Repository{}
+		tokenGenerator := &tokenMocks.TokenGenerator{}
 
 		subjectValues := certificates.CSRSubject{
 			CName:              appName,
@@ -206,7 +174,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 			Locality:           locality,
 			Province:           province,
 		}
-		infoHandler := NewInfoHandler(tokenService, host, domain, subjectValues, groupRepository)
+		infoHandler := NewInfoHandler(tokenCache, tokenGenerator, host, domain, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -233,11 +201,11 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
-		tokenService := &tokenMocks.Service{}
-		tokenService.On("GetToken", appName).Return(token, true)
-		tokenService.On("CreateToken", appName).Return("", apperrors.Internal("error"))
+		tokenCache := &tokenCacheMocks.TokenCache{}
+		tokenCache.On("GetToken", appName).Return(token, true)
 
-		groupRepository := &kymaGroupMocks.Repository{}
+		tokenGenerator := &tokenMocks.TokenGenerator{}
+		tokenGenerator.On("CreateToken", appName).Return("", apperrors.Internal("error"))
 
 		subjectValues := certificates.CSRSubject{
 			CName:              appName,
@@ -247,7 +215,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 			Locality:           locality,
 			Province:           province,
 		}
-		infoHandler := NewInfoHandler(tokenService, host, domain, subjectValues, groupRepository)
+		infoHandler := NewInfoHandler(tokenCache, tokenGenerator, host, domain, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)

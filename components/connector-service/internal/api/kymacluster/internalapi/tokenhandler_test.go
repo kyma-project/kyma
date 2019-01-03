@@ -12,7 +12,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/api"
 
-	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
@@ -54,8 +53,6 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
-
 		// when
 		tokenHandler.CreateToken(rr, req)
 
@@ -86,8 +83,6 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
-
-		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
 		tokenHandler.CreateToken(rr, req)

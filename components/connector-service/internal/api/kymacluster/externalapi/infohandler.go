@@ -23,9 +23,9 @@ type infoHandler struct {
 	csrSubject   certificates.CSRSubject
 }
 
-func NewInfoHandler(tokenGenerator tokens.Service, host string, csrSubject certificates.CSRSubject) InfoHandler {
+func NewInfoHandler(tokenService tokens.Service, host string, csrSubject certificates.CSRSubject) InfoHandler {
 	return &infoHandler{
-		tokenService: tokenGenerator,
+		tokenService: tokenService,
 		host:         host,
 		csrSubject:   csrSubject,
 	}
