@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
+
 	"github.com/pkg/errors"
 
 	"github.com/allegro/bigcache"
@@ -17,19 +19,20 @@ import (
 	"github.com/minio/minio-go"
 )
 
-//go:generate failery -name=AsyncApiSpecGetter -case=underscore -output disabled -outpkg disabled
-type AsyncApiSpecGetter interface {
-	Find(kind, id string) (*storage.AsyncApiSpec, error)
+type contentRetriever struct {
+	ContentGetter      shared.ContentGetter
+	ApiSpecGetter      shared.ApiSpecGetter
+	AsyncApiSpecGetter shared.AsyncApiSpecGetter
 }
 
-//go:generate failery -name=ApiSpecGetter -case=underscore -output disabled -outpkg disabled
-type ApiSpecGetter interface {
-	Find(kind, id string) (*storage.ApiSpec, error)
+func (r *contentRetriever) Content() shared.ContentGetter {
+	return r.ContentGetter
 }
-
-//go:generate failery -name=ContentGetter -case=underscore -output disabled -outpkg disabled
-type ContentGetter interface {
-	Find(kind, id string) (*storage.Content, error)
+func (r *contentRetriever) ApiSpec() shared.ApiSpecGetter {
+	return r.ApiSpecGetter
+}
+func (r *contentRetriever) AsyncApiSpec() shared.AsyncApiSpecGetter {
+	return r.AsyncApiSpecGetter
 }
 
 type Config struct {
@@ -48,11 +51,9 @@ type PluggableContainer struct {
 	*module.Pluggable
 	cfg *resolverConfig
 
-	Resolver           Resolver
-	ApiSpecGetter      ApiSpecGetter
-	AsyncApiSpecGetter AsyncApiSpecGetter
-	ContentGetter      ContentGetter
-	storageSvc         storage.Service
+	Resolver         resolver
+	ContentRetriever *contentRetriever
+	storageSvc       storage.Service
 }
 
 func New(cfg Config) (*PluggableContainer, error) {
@@ -89,7 +90,8 @@ func New(cfg Config) (*PluggableContainer, error) {
 			cache:       cacheConfig,
 			minioClient: minioClient,
 		},
-		Pluggable: module.NewPluggable("content"),
+		Pluggable:        module.NewPluggable("content"),
+		ContentRetriever: &contentRetriever{},
 	}
 
 	err = container.Disable()
@@ -107,7 +109,7 @@ func (r *PluggableContainer) Enable() error {
 	}
 
 	r.storageSvc = storage.New(minioClient, cache, cfg.Bucket, cfg.ExternalAddress, cfg.AssetsFolder)
-	asynApiSpecSvc := newAsyncApiSpecService(r.storageSvc)
+	asyncApiSpecSvc := newAsyncApiSpecService(r.storageSvc)
 	apiSpecSvc := newApiSpecService(r.storageSvc)
 	contentSvc := newContentService(r.storageSvc)
 
@@ -118,9 +120,9 @@ func (r *PluggableContainer) Enable() error {
 			contentResolver: newContentResolver(contentSvc),
 			topicsResolver:  newTopicsResolver(contentSvc),
 		}
-		r.ApiSpecGetter = apiSpecSvc
-		r.AsyncApiSpecGetter = asynApiSpecSvc
-		r.ContentGetter = contentSvc
+		r.ContentRetriever.ApiSpecGetter = apiSpecSvc
+		r.ContentRetriever.AsyncApiSpecGetter = asyncApiSpecSvc
+		r.ContentRetriever.ContentGetter = contentSvc
 	})
 
 	return nil
@@ -129,9 +131,9 @@ func (r *PluggableContainer) Enable() error {
 func (r *PluggableContainer) Disable() error {
 	r.Pluggable.Disable(func(disabledErr error) {
 		r.Resolver = disabled.NewResolver(disabledErr)
-		r.AsyncApiSpecGetter = disabled.NewAsyncApiSpecGetter(disabledErr)
-		r.ApiSpecGetter = disabled.NewApiSpecGetter(disabledErr)
-		r.ContentGetter = disabled.NewContentGetter(disabledErr)
+		r.ContentRetriever.AsyncApiSpecGetter = disabled.NewAsyncApiSpecGetter(disabledErr)
+		r.ContentRetriever.ApiSpecGetter = disabled.NewApiSpecGetter(disabledErr)
+		r.ContentRetriever.ContentGetter = disabled.NewContentGetter(disabledErr)
 		r.storageSvc = nil
 	})
 
@@ -144,10 +146,25 @@ type resolverConfig struct {
 	cache       bigcache.Config
 }
 
-//go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
-type Resolver interface {
+//go:generate failery -name=resolver -case=underscore -output disabled -outpkg disabled
+type resolver interface {
 	ContentQuery(ctx context.Context, contentType, id string) (*gqlschema.JSON, error)
 	TopicsQuery(ctx context.Context, topics []gqlschema.InputTopic, internal *bool) ([]gqlschema.TopicEntry, error)
+}
+
+//go:generate failery -name=asyncApiSpecGetter -case=underscore -output disabled -outpkg disabled
+type asyncApiSpecGetter interface {
+	Find(kind, id string) (*storage.AsyncApiSpec, error)
+}
+
+//go:generate failery -name=apiSpecGetter -case=underscore -output disabled -outpkg disabled
+type apiSpecGetter interface {
+	Find(kind, id string) (*storage.ApiSpec, error)
+}
+
+//go:generate failery -name=contentGetter -case=underscore -output disabled -outpkg disabled
+type contentGetter interface {
+	Find(kind, id string) (*storage.Content, error)
 }
 
 type domainResolver struct {

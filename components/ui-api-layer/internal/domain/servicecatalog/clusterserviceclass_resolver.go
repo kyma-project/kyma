@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 
 	"github.com/golang/glog"
@@ -39,26 +41,22 @@ type instanceListerByClusterServiceClass interface {
 }
 
 type clusterServiceClassResolver struct {
-	classLister        clusterServiceClassListGetter
-	planLister         clusterServicePlanLister
-	instanceLister     instanceListerByClusterServiceClass
-	asyncApiSpecGetter AsyncApiSpecGetter
-	apiSpecGetter      ApiSpecGetter
-	contentGetter      ContentGetter
-	classConverter     gqlClusterServiceClassConverter
-	planConverter      gqlClusterServicePlanConverter
+	classLister      clusterServiceClassListGetter
+	planLister       clusterServicePlanLister
+	instanceLister   instanceListerByClusterServiceClass
+	contentRetriever shared.ContentRetriever
+	classConverter   gqlClusterServiceClassConverter
+	planConverter    gqlClusterServicePlanConverter
 }
 
-func newClusterServiceClassResolver(classLister clusterServiceClassListGetter, planLister clusterServicePlanLister, instanceLister instanceListerByClusterServiceClass, asyncApiSpecGetter AsyncApiSpecGetter, apiSpecGetter ApiSpecGetter, contentGetter ContentGetter) *clusterServiceClassResolver {
+func newClusterServiceClassResolver(classLister clusterServiceClassListGetter, planLister clusterServicePlanLister, instanceLister instanceListerByClusterServiceClass, contentRetriever shared.ContentRetriever) *clusterServiceClassResolver {
 	return &clusterServiceClassResolver{
-		classLister:        classLister,
-		planLister:         planLister,
-		instanceLister:     instanceLister,
-		asyncApiSpecGetter: asyncApiSpecGetter,
-		apiSpecGetter:      apiSpecGetter,
-		contentGetter:      contentGetter,
-		classConverter:     &clusterServiceClassConverter{},
-		planConverter:      &clusterServicePlanConverter{},
+		classLister:      classLister,
+		planLister:       planLister,
+		instanceLister:   instanceLister,
+		contentRetriever: contentRetriever,
+		classConverter:   &clusterServiceClassConverter{},
+		planConverter:    &clusterServicePlanConverter{},
 	}
 }
 
@@ -143,7 +141,7 @@ func (r *clusterServiceClassResolver) ClusterServiceClassApiSpecField(ctx contex
 		return nil, gqlerror.NewInternal()
 	}
 
-	apiSpec, err := r.apiSpecGetter.Find("service-class", obj.Name)
+	apiSpec, err := r.contentRetriever.ApiSpec().Find("service-class", obj.Name)
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
 			return nil, err
@@ -173,7 +171,7 @@ func (r *clusterServiceClassResolver) ClusterServiceClassAsyncApiSpecField(ctx c
 		return nil, gqlerror.NewInternal()
 	}
 
-	asyncApiSpec, err := r.asyncApiSpecGetter.Find("service-class", obj.Name)
+	asyncApiSpec, err := r.contentRetriever.AsyncApiSpec().Find("service-class", obj.Name)
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
 			return nil, err
@@ -203,7 +201,7 @@ func (r *clusterServiceClassResolver) ClusterServiceClassContentField(ctx contex
 		return nil, gqlerror.NewInternal()
 	}
 
-	content, err := r.contentGetter.Find("service-class", obj.Name)
+	content, err := r.contentRetriever.Content().Find("service-class", obj.Name)
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
 			return nil, err

@@ -44,19 +44,19 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	}
 	makePluggable(contentContainer)
 
-	scContainer, err := servicecatalog.New(restConfig, informerResyncPeriod, contentContainer.AsyncApiSpecGetter, contentContainer.ApiSpecGetter, contentContainer.ContentGetter)
+	scContainer, err := servicecatalog.New(restConfig, informerResyncPeriod, contentContainer.ContentRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
 	}
 	makePluggable(scContainer)
 
-	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod, contentContainer.AsyncApiSpecGetter)
+	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod, contentContainer.ContentRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Application resolver")
 	}
 	makePluggable(appContainer)
 
-	k8sResolver, err := k8s.New(restConfig, appContainer.AppLister, informerResyncPeriod, scContainer.ServiceBindingUsageLister, scContainer.ServiceBindingGetter)
+	k8sResolver, err := k8s.New(restConfig, appContainer.ApplicationRetriever, informerResyncPeriod, scContainer.ServiceCatalogRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
@@ -93,9 +93,11 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 
 // WaitForCacheSync waits for caches to populate. This is blocking operation.
 func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
+	// Not pluggable modules
 	r.ui.WaitForCacheSync(stopCh)
 	r.k8s.WaitForCacheSync(stopCh)
 
+	// Pluggable modules
 	r.sc.StopCacheSyncOnClose(stopCh)
 	r.app.StopCacheSyncOnClose(stopCh)
 	r.content.StopCacheSyncOnClose(stopCh)

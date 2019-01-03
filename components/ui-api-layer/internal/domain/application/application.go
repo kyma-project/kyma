@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
+
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/disabled"
@@ -28,6 +30,14 @@ type ApplicationLister interface {
 	ListNamespacesFor(appName string) ([]string, error)
 }
 
+type applicationRetriever struct {
+	ApplicationLister shared.ApplicationLister
+}
+
+func (r *applicationRetriever) Application() shared.ApplicationLister {
+	return r.ApplicationLister
+}
+
 type Config struct {
 	Gateway   gateway.Config
 	Connector ConnectorSvcCfg
@@ -43,13 +53,13 @@ type PluggableContainer struct {
 	cfg *resolverConfig
 
 	Resolver               Resolver
-	AppLister              ApplicationLister
+	ApplicationRetriever   *applicationRetriever
 	mappingInformerFactory mappingInformer.SharedInformerFactory
 	appInformerFactory     appInformer.SharedInformerFactory
 	gatewayService         *gateway.Service
 }
 
-func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Duration, asyncApiSpecGetter AsyncApiSpecGetter) (*PluggableContainer, error) {
+func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Duration, contentRetriever shared.ContentRetriever) (*PluggableContainer, error) {
 	mCli, err := mappingClient.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing application broker Clientset")
@@ -72,9 +82,10 @@ func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Durati
 			k8sCli:               k8sCli,
 			cfg:                  reCfg,
 			informerResyncPeriod: informerResyncPeriod,
-			asyncApiSpecGetter:   asyncApiSpecGetter,
+			contentRetriever:     contentRetriever,
 		},
-		Pluggable: module.NewPluggable("application"),
+		Pluggable:            module.NewPluggable("application"),
+		ApplicationRetriever: &applicationRetriever{},
 	}
 	err = container.Disable()
 	if err != nil {
@@ -126,9 +137,9 @@ func (r *PluggableContainer) Enable() error {
 
 		r.Resolver = &domainResolver{
 			applicationResolver:     NewApplicationResolver(appService, gatewayService),
-			eventActivationResolver: newEventActivationResolver(eventActivationService, r.cfg.asyncApiSpecGetter),
+			eventActivationResolver: newEventActivationResolver(eventActivationService, r.cfg.contentRetriever),
 		}
-		r.AppLister = appService
+		r.ApplicationRetriever.ApplicationLister = appService
 	})
 
 	return nil
@@ -137,7 +148,7 @@ func (r *PluggableContainer) Enable() error {
 func (r *PluggableContainer) Disable() error {
 	r.Pluggable.Disable(func(disabledErr error) {
 		r.Resolver = disabled.NewResolver(disabledErr)
-		r.AppLister = disabled.NewApplicationLister(disabledErr)
+		r.ApplicationRetriever.ApplicationLister = disabled.NewApplicationLister(disabledErr)
 		r.gatewayService = nil
 		r.appInformerFactory = nil
 		r.mappingInformerFactory = nil
@@ -152,7 +163,7 @@ type resolverConfig struct {
 	appClient            appClient.Interface
 	k8sCli               k8sClient.Interface
 	informerResyncPeriod time.Duration
-	asyncApiSpecGetter   AsyncApiSpecGetter
+	contentRetriever     shared.ContentRetriever
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled

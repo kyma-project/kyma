@@ -2,28 +2,35 @@ package k8s
 
 import (
 	"context"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
 	scPretty "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 	"github.com/pkg/errors"
 	"k8s.io/api/apps/v1beta2"
+	api "k8s.io/api/apps/v1beta2"
 )
 
-type deploymentResolver struct {
-	deploymentLister          deploymentLister
-	deploymentConverter       *deploymentConverter
-	serviceBindingUsageLister ServiceBindingUsageLister
-	serviceBindingGetter      ServiceBindingGetter
+//go:generate mockery -name=deploymentLister -output=automock -outpkg=automock -case=underscore
+type deploymentLister interface {
+	List(environment string) ([]*api.Deployment, error)
+	ListWithoutFunctions(environment string) ([]*api.Deployment, error)
 }
 
-func newDeploymentResolver(deploymentLister deploymentLister, serviceBindingUsageLister ServiceBindingUsageLister, serviceBindingGetter ServiceBindingGetter) *deploymentResolver {
+type deploymentResolver struct {
+	deploymentLister    deploymentLister
+	deploymentConverter *deploymentConverter
+	scRetriever         shared.ServiceCatalogRetriever
+}
+
+func newDeploymentResolver(deploymentLister deploymentLister, scRetriever shared.ServiceCatalogRetriever) *deploymentResolver {
 	return &deploymentResolver{
-		deploymentLister:          deploymentLister,
-		serviceBindingUsageLister: serviceBindingUsageLister,
-		serviceBindingGetter:      serviceBindingGetter,
+		deploymentLister: deploymentLister,
+		scRetriever:      scRetriever,
 	}
 }
 
@@ -55,7 +62,7 @@ func (r *deploymentResolver) DeploymentBoundServiceInstanceNamesField(ctx contex
 		kind = "function"
 	}
 
-	usages, err := r.serviceBindingUsageLister.ListForDeployment(deployment.Environment, kind, deployment.Name)
+	usages, err := r.scRetriever.ServiceBindingUsage().ListForDeployment(deployment.Environment, kind, deployment.Name)
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
 			return nil, err
@@ -67,7 +74,7 @@ func (r *deploymentResolver) DeploymentBoundServiceInstanceNamesField(ctx contex
 
 	instanceNames := make(map[string]struct{})
 	for _, usage := range usages {
-		binding, err := r.serviceBindingGetter.Find(deployment.Environment, usage.Spec.ServiceBindingRef.Name)
+		binding, err := r.scRetriever.ServiceBinding().Find(deployment.Environment, usage.Spec.ServiceBindingRef.Name)
 		if err != nil {
 			if module.IsDisabledModuleError(err) {
 				return nil, err

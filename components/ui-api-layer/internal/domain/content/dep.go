@@ -11,11 +11,6 @@ type topicsConverterInterface interface {
 	ExtractSection(documents []storage.Document, internal bool) ([]gqlschema.Section, error)
 }
 
-//go:generate mockery -name=contentGetter -output=automock -outpkg=automock -case=underscore
-type contentGetter interface {
-	Find(kind, id string) (*storage.Content, error)
-}
-
 //go:generate mockery -name=minioAsyncApiSpecGetter -output=automock -outpkg=automock -case=underscore
 type minioAsyncApiSpecGetter interface {
 	AsyncApiSpec(id string) (*storage.AsyncApiSpec, bool, error)

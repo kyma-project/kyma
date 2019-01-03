@@ -6,6 +6,7 @@ import (
 	mappingLister "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
 	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
 	k8sClient "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
 )
@@ -18,8 +19,8 @@ func NewEventActivationService(informer cache.SharedIndexInformer) *eventActivat
 	return newEventActivationService(informer)
 }
 
-func NewEventActivationResolver(service eventActivationLister, asyncApiSpecGetter AsyncApiSpecGetter) *eventActivationResolver {
-	return newEventActivationResolver(service, asyncApiSpecGetter)
+func NewEventActivationResolver(service eventActivationLister, contentRetriever shared.ContentRetriever) *eventActivationResolver {
+	return newEventActivationResolver(service, contentRetriever)
 }
 
 func (r *PluggableContainer) SetFakeClient() {

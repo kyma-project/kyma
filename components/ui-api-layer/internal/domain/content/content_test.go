@@ -38,9 +38,10 @@ func TestPluggableResolver(t *testing.T) {
 
 func checkExportedFields(t *testing.T, resolver *content.PluggableContainer, enabled bool) {
 	assert.NotNil(t, resolver.Resolver)
-	assert.NotNil(t, resolver.ApiSpecGetter)
-	assert.NotNil(t, resolver.AsyncApiSpecGetter)
-	assert.NotNil(t, resolver.ContentGetter)
+	require.NotNil(t, resolver.ContentRetriever)
+	assert.NotNil(t, resolver.ContentRetriever.ApiSpec())
+	assert.NotNil(t, resolver.ContentRetriever.AsyncApiSpec())
+	assert.NotNil(t, resolver.ContentRetriever.Content())
 
 	if enabled {
 		return

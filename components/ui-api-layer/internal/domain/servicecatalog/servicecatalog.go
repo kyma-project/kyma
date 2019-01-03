@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/disabled"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
@@ -25,10 +27,22 @@ type PluggableContainer struct {
 	cfg *resolverConfig
 
 	Resolver                    Resolver
-	ServiceBindingUsageLister   ServiceBindingUsageLister
-	ServiceBindingGetter        ServiceBindingGetter
+	ServiceCatalogRetriever     *serviceCatalogRetriever
 	informerFactory             catalogInformers.SharedInformerFactory
 	bindingUsageInformerFactory bindingUsageInformers.SharedInformerFactory
+}
+
+type serviceCatalogRetriever struct {
+	ServiceBindingUsageLister ServiceBindingUsageLister
+	ServiceBindingGetter      ServiceBindingGetter
+}
+
+func (r *serviceCatalogRetriever) ServiceBinding() shared.ServiceBindingGetter {
+	return r.ServiceBindingGetter
+}
+
+func (r *serviceCatalogRetriever) ServiceBindingUsage() shared.ServiceBindingUsageLister {
+	return r.ServiceBindingUsageLister
 }
 
 //go:generate failery -name=ServiceBindingUsageLister -case=underscore -output disabled -outpkg disabled
@@ -41,7 +55,7 @@ type ServiceBindingGetter interface {
 	Find(env string, name string) (*bindingApi.ServiceBinding, error)
 }
 
-func New(restConfig *rest.Config, informerResyncPeriod time.Duration, asyncApiSpecGetter AsyncApiSpecGetter, apiSpecGetter ApiSpecGetter, contentGetter ContentGetter) (*PluggableContainer, error) {
+func New(restConfig *rest.Config, informerResyncPeriod time.Duration, contentRetriever shared.ContentRetriever) (*PluggableContainer, error) {
 	client, err := clientset.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Clientset")
@@ -63,11 +77,10 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, asyncApiSp
 			serviceBindingUsageClient: serviceBindingUsageClient,
 			dynamicClient:             dynamicClient,
 			informerResyncPeriod:      informerResyncPeriod,
-			asyncApiSpecGetter:        asyncApiSpecGetter,
-			apiSpecGetter:             apiSpecGetter,
-			contentGetter:             contentGetter,
+			contentRetriever:          contentRetriever,
 		},
-		Pluggable: module.NewPluggable("servicecatalog"),
+		Pluggable:               module.NewPluggable("servicecatalog"),
+		ServiceCatalogRetriever: &serviceCatalogRetriever{},
 	}
 	err = container.Disable()
 	if err != nil {
@@ -83,9 +96,7 @@ func (r *PluggableContainer) Enable() error {
 	serviceBindingUsageClient := r.cfg.serviceBindingUsageClient
 	dynamicClient := r.cfg.dynamicClient
 
-	asyncApiSpecGetter := r.cfg.asyncApiSpecGetter
-	apiSpecGetter := r.cfg.apiSpecGetter
-	contentGetter := r.cfg.contentGetter
+	contentRetriever := r.cfg.contentRetriever
 
 	informerFactory := catalogInformers.NewSharedInformerFactory(client, informerResyncPeriod)
 	r.informerFactory = informerFactory
@@ -116,8 +127,8 @@ func (r *PluggableContainer) Enable() error {
 
 		r.Resolver = &domainResolver{
 			serviceInstanceResolver:      newServiceInstanceResolver(serviceInstanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
-			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, asyncApiSpecGetter, apiSpecGetter, contentGetter),
-			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, asyncApiSpecGetter, apiSpecGetter, contentGetter),
+			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, contentRetriever),
+			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, contentRetriever),
 			clusterServiceBrokerResolver: newClusterServiceBrokerResolver(clusterServiceBrokerService),
 			serviceBrokerResolver:        newServiceBrokerResolver(serviceBrokerService),
 			serviceBindingResolver:       newServiceBindingResolver(serviceBindingService),
@@ -125,8 +136,8 @@ func (r *PluggableContainer) Enable() error {
 			usageKindResolver:            newUsageKindResolver(usageKindService),
 			bindableResourcesResolver:    newBindableResourcesResolver(usageKindService),
 		}
-		r.ServiceBindingUsageLister = serviceBindingUsageService
-		r.ServiceBindingGetter = serviceBindingService
+		r.ServiceCatalogRetriever.ServiceBindingUsageLister = serviceBindingUsageService
+		r.ServiceCatalogRetriever.ServiceBindingGetter = serviceBindingService
 	})
 
 	return nil
@@ -135,8 +146,8 @@ func (r *PluggableContainer) Enable() error {
 func (r *PluggableContainer) Disable() error {
 	r.Pluggable.Disable(func(disabledErr error) {
 		r.Resolver = disabled.NewResolver(disabledErr)
-		r.ServiceBindingGetter = disabled.NewServiceBindingGetter(disabledErr)
-		r.ServiceBindingUsageLister = disabled.NewServiceBindingUsageLister(disabledErr)
+		r.ServiceCatalogRetriever.ServiceBindingGetter = disabled.NewServiceBindingGetter(disabledErr)
+		r.ServiceCatalogRetriever.ServiceBindingUsageLister = disabled.NewServiceBindingUsageLister(disabledErr)
 		r.informerFactory = nil
 		r.bindingUsageInformerFactory = nil
 	})
@@ -150,9 +161,7 @@ type resolverConfig struct {
 	dynamicClient             dynamic.Interface
 
 	informerResyncPeriod time.Duration
-	asyncApiSpecGetter   AsyncApiSpecGetter
-	apiSpecGetter        ApiSpecGetter
-	contentGetter        ContentGetter
+	contentRetriever     shared.ContentRetriever
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled

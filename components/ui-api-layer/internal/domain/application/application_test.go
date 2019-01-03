@@ -46,7 +46,8 @@ func TestPluggableContainer(t *testing.T) {
 
 func checkExportedFields(t *testing.T, resolver *application.PluggableContainer, enabled bool) {
 	assert.NotNil(t, resolver.Resolver)
-	assert.NotNil(t, resolver.AppLister)
+	require.NotNil(t, resolver.ApplicationRetriever)
+	assert.NotNil(t, resolver.ApplicationRetriever.Application())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
