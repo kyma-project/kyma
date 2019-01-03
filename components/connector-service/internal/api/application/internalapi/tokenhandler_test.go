@@ -23,11 +23,11 @@ import (
 )
 
 const (
-	host    = "host"
-	appName = "appName"
-	token   = "token"
-	group   = "group"
-	tenant  = "tenant"
+	host       = "host"
+	identifier = "identifier"
+	token      = "token"
+	group      = "group"
+	tenant     = "tenant"
 )
 
 func TestTokenHandler_CreateToken(t *testing.T) {
@@ -39,10 +39,10 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should create token when app name specified", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/tokens", appName)
+		url := fmt.Sprintf("/v1/applications/%s/tokens", identifier)
 
 		expectedTokenResponse := api.TokenResponse{
-			URL:   fmt.Sprintf("https://%s/v1/applications/%s/info?token=%s", host, appName, token),
+			URL:   fmt.Sprintf("https://%s/v1/applications/%s/info?token=%s", host, identifier, token),
 			Token: token,
 		}
 
@@ -50,15 +50,15 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{identifier: identifier})
 
 		uuidGenerator := &uuidmocks.Generator{}
 
 		verificationService := &vermocks.Service{}
-		verificationService.On("Verify", req, appName).Return(tokenData, nil)
+		verificationService.On("Verify", req, identifier).Return(tokenData, nil)
 
 		tokenService := &mocks.Service{}
-		tokenService.On("CreateToken", appName, tokenData).Return(token, nil)
+		tokenService.On("CreateToken", identifier, tokenData).Return(token, nil)
 
 		tokenHandler := NewTokenHandler(verificationService, tokenService, host, uuidGenerator)
 
@@ -82,7 +82,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		url := "/v1/applications/tokens"
 
 		expectedTokenResponse := api.TokenResponse{
-			URL:   fmt.Sprintf("https://%s/v1/applications/%s/info?token=%s", host, appName, token),
+			URL:   fmt.Sprintf("https://%s/v1/applications/%s/info?token=%s", host, identifier, token),
 			Token: token,
 		}
 
@@ -91,13 +91,13 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		rr := httptest.NewRecorder()
 
 		uuidGenerator := &uuidmocks.Generator{}
-		uuidGenerator.On("NewUUID").Return(appName)
+		uuidGenerator.On("NewUUID").Return(identifier)
 
 		verificationService := &vermocks.Service{}
-		verificationService.On("Verify", req, appName).Return(tokenData, nil)
+		verificationService.On("Verify", req, identifier).Return(tokenData, nil)
 
 		tokenService := &mocks.Service{}
-		tokenService.On("CreateToken", appName, tokenData).Return(token, nil)
+		tokenService.On("CreateToken", identifier, tokenData).Return(token, nil)
 
 		tokenHandler := NewTokenHandler(verificationService, tokenService, host, uuidGenerator)
 
@@ -125,10 +125,10 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		rr := httptest.NewRecorder()
 
 		uuidGenerator := &uuidmocks.Generator{}
-		uuidGenerator.On("NewUUID").Return(appName)
+		uuidGenerator.On("NewUUID").Return(identifier)
 
 		verificationService := &vermocks.Service{}
-		verificationService.On("Verify", req, appName).Return(nil, apperrors.Internal("error"))
+		verificationService.On("Verify", req, identifier).Return(nil, apperrors.Internal("error"))
 
 		tokenService := &mocks.Service{}
 
@@ -159,13 +159,13 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		rr := httptest.NewRecorder()
 
 		uuidGenerator := &uuidmocks.Generator{}
-		uuidGenerator.On("NewUUID").Return(appName)
+		uuidGenerator.On("NewUUID").Return(identifier)
 
 		verificationService := &vermocks.Service{}
-		verificationService.On("Verify", req, appName).Return(tokenData, nil)
+		verificationService.On("Verify", req, identifier).Return(tokenData, nil)
 
 		tokenService := &mocks.Service{}
-		tokenService.On("CreateToken", appName, tokenData).Return("", apperrors.Internal("error"))
+		tokenService.On("CreateToken", identifier, tokenData).Return("", apperrors.Internal("error"))
 
 		tokenHandler := NewTokenHandler(verificationService, tokenService, host, uuidGenerator)
 

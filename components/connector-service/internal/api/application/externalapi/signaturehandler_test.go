@@ -11,24 +11,29 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/connector-service/pkg/apis/applicationconnector/v1alpha1"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
+
+	applicationMocks "github.com/kyma-project/kyma/components/connector-service/internal/applications/mocks"
+	kymaGroupMocks "github.com/kyma-project/kyma/components/connector-service/internal/kymagroup/mocks"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/api"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	certMock "github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
-	secrectsMock "github.com/kyma-project/kyma/components/connector-service/internal/secrets/mocks"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/cache"
-	tokensMock "github.com/kyma-project/kyma/components/connector-service/internal/tokens/cache/mocks"
+	tokensMock "github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 const (
-	authSecretName = "nginx-auth-ca"
-	appName        = "appName"
-	token          = "token"
+	identifier = "identifier"
+	token      = "token"
 
 	host               = "host"
 	domain             = "domain"
@@ -44,7 +49,7 @@ var (
 	caCrtEncoded    = []byte("caCrtEncoded")
 	caKeyEncoded    = []byte("caKeyEncoded")
 
-	tokenRequest = certRequest{CSR: "CSR"}
+	tokenRequest = CertificateRequest{CSR: "CSR"}
 	caCrt        = &x509.Certificate{}
 	caKey        = &rsa.PrivateKey{}
 	csr          = &x509.CertificateRequest{}
@@ -53,49 +58,55 @@ var (
 
 func TestSignatureHandler_SignCSR(t *testing.T) {
 
+	tokenData := &tokens.TokenData{
+		Token:  token,
+		Group:  group,
+		Tenant: tenant,
+	}
+
+	kymaGroup := v1alpha1.KymaGroup{
+		Spec: v1alpha1.KymaGroupSpec{
+			Cluster: v1alpha1.Cluster{},
+		},
+	}
+
+	appGroupEntry := v1alpha1.Application{ID: identifier}
+
 	t.Run("should create certificate", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("GetToken", appName).Return(token, true)
-		tokenCache.On("DeleteToken", appName).Return()
+		tokenService := &tokensMock.Service{}
+		tokenService.On("GetToken", identifier).Return(tokenData, true)
+		tokenService.On("DeleteToken", identifier).Return()
 
-		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
+		certService := &certMock.Service{}
+		certService.On("SignCSR", tokenRequest.CSR, identifier).Return(crtBase64, nil)
 
-		certUtils := &certMock.CertificateUtility{}
-		certUtils.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
-		certUtils.On("LoadKey", caKeyEncoded).Return(caKey, nil)
-		certUtils.On("LoadCSR", tokenRequest.CSR).Return(csr, nil)
+		groupRepository := &kymaGroupMocks.Repository{}
+		groupRepository.On("Get", group).Return(kymaGroup, nil)
+		groupRepository.On("AddApplication", group, appGroupEntry).Return(kymaGroup, nil)
 
-		subjectValues := certificates.CSRSubject{
-			CName:              appName,
-			Country:            country,
-			Organization:       organization,
-			OrganizationalUnit: organizationalUnit,
-			Locality:           locality,
-			Province:           province,
-		}
-		certUtils.On("CheckCSRValues", csr, subjectValues).Return(nil)
-		certUtils.On("CreateCrtChain", caCrt, csr, caKey).Return(crtBase64, nil)
+		appRepository := &applicationMocks.Repository{}
+		appRepository.On("Get", identifier).Return(nil, apperrors.NotFound("error"))
+		appRepository.On("Create", identifier).Return(nil, apperrors.NotFound("error"))
 
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, host, domain, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
-		registrationHandler.SignCSR(rr, req)
+		signatureHandler.SignCSR(rr, req)
 
 		// then
 		responseBody, err := ioutil.ReadAll(rr.Body)
 		require.NoError(t, err)
 
-		var certResponse certResponse
+		var certResponse api.CertificateResponse
 		err = json.Unmarshal(responseBody, &certResponse)
 		require.NoError(t, err)
 
@@ -105,13 +116,15 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 403 when token not provided", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert", appName)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert", identifier)
 
-		tokenCache := &tokensMock.TokenCache{}
-		secretsRepository := &secrectsMock.Repository{}
-		certUtils := &certMock.CertificateUtility{}
+		tokenService := &tokensMock.Service{}
+		certService := &certMock.Service{}
 
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		groupRepository := &kymaGroupMocks.Repository{}
+		appRepository := &applicationMocks.Repository{}
+
+		registrationHandler := NewSignatureHandler(tokenService, certService, host, domain, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -134,21 +147,23 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 400 when token not found", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("GetToken", appName).Return("", false)
+		tokenService := &tokensMock.Service{}
+		tokenService.On("GetToken", identifier).Return("", false)
 
-		secretsRepository := &secrectsMock.Repository{}
-		certUtils := &certMock.CertificateUtility{}
+		certService := &certMock.Service{}
 
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		groupRepository := &kymaGroupMocks.Repository{}
+		appRepository := &applicationMocks.Repository{}
+
+		registrationHandler := NewSignatureHandler(tokenService, certService, host, domain, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
 		registrationHandler.SignCSR(rr, req)
@@ -167,24 +182,26 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 403 when wrong token provided", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("GetToken", appName).Return("differentToken", true)
+		tokenService := &tokensMock.Service{}
+		tokenService.On("GetToken", identifier).Return("differentToken", true)
 
-		secretsRepository := &secrectsMock.Repository{}
-		certUtils := &certMock.CertificateUtility{}
+		certService := &certMock.Service{}
 
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		groupRepository := &kymaGroupMocks.Repository{}
+		appRepository := &applicationMocks.Repository{}
+
+		signatureHandler := NewSignatureHandler(tokenService, certService, host, domain, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
-		registrationHandler.SignCSR(rr, req)
+		signatureHandler.SignCSR(rr, req)
 
 		// then
 		responseBody, err := ioutil.ReadAll(rr.Body)
@@ -200,25 +217,27 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when couldn't unmarshal request body", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("GetToken", appName).Return(token, true)
+		tokenService := &tokensMock.Service{}
+		tokenService.On("GetToken", identifier).Return(token, true)
 
-		secretsRepository := &secrectsMock.Repository{}
-		certUtils := &certMock.CertificateUtility{}
+		certService := &certMock.Service{}
 
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		groupRepository := &kymaGroupMocks.Repository{}
+		appRepository := &applicationMocks.Repository{}
+
+		signatureHandler := NewSignatureHandler(tokenService, certService, host, domain, groupRepository, appRepository)
 
 		incorrectBody := []byte("incorrectBody")
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(incorrectBody))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
-		registrationHandler.SignCSR(rr, req)
+		signatureHandler.SignCSR(rr, req)
 
 		// then
 		responseBody, err := ioutil.ReadAll(rr.Body)
@@ -234,30 +253,29 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 404 when secret not found", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("GetToken", appName).Return(token, true)
-		tokenCache.On("DeleteToken", appName).Return()
+		tokenService := &tokensMock.Service{}
+		tokenService.On("GetToken", identifier).Return(token, true)
+		tokenService.On("DeleteToken", identifier).Return()
 
-		secretNotFoundError := apperrors.NotFound("error")
-		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("Get", authSecretName).Return([]byte(""), []byte(""), secretNotFoundError)
+		certService := &certMock.Service{}
+		certService.On("LoadCSR", mock.Anything).Return(nil, nil)
+		certService.On("CheckCSRValues", mock.Anything, mock.Anything).Return(nil, nil)
 
-		certUtils := &certMock.CertificateUtility{}
-		certUtils.On("LoadCSR", mock.Anything).Return(nil, nil)
-		certUtils.On("CheckCSRValues", mock.Anything, mock.Anything).Return(nil, nil)
+		groupRepository := &kymaGroupMocks.Repository{}
+		appRepository := &applicationMocks.Repository{}
 
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, host, domain, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
-		registrationHandler.SignCSR(rr, req)
+		signatureHandler.SignCSR(rr, req)
 
 		// then
 		responseBody, err := ioutil.ReadAll(rr.Body)
@@ -273,29 +291,29 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when couldn't load cert", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("GetToken", appName).Return(token, true)
+		tokenService := &tokensMock.Service{}
+		tokenService.On("GetToken", identifier).Return(token, true)
 
-		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
+		certService := &certMock.Service{}
+		certService.On("LoadCSR", mock.Anything).Return(nil, nil)
+		certService.On("CheckCSRValues", mock.Anything, mock.Anything).Return(nil, nil)
+		certService.On("LoadCert", caCrtEncoded).Return(nil, apperrors.Internal("error"))
 
-		certUtils := &certMock.CertificateUtility{}
-		certUtils.On("LoadCSR", mock.Anything).Return(nil, nil)
-		certUtils.On("CheckCSRValues", mock.Anything, mock.Anything).Return(nil, nil)
-		certUtils.On("LoadCert", caCrtEncoded).Return(nil, apperrors.Internal("error"))
+		groupRepository := &kymaGroupMocks.Repository{}
+		appRepository := &applicationMocks.Repository{}
 
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, host, domain, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
-		registrationHandler.SignCSR(rr, req)
+		signatureHandler.SignCSR(rr, req)
 
 		// then
 		responseBody, err := ioutil.ReadAll(rr.Body)
@@ -312,30 +330,30 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when couldn't load key", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("GetToken", appName).Return(token, true)
+		tokenService := &tokensMock.Service{}
+		tokenService.On("GetToken", identifier).Return(token, true)
 
-		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
+		certService := &certMock.Service{}
+		certService.On("LoadCSR", mock.Anything).Return(nil, nil)
+		certService.On("CheckCSRValues", mock.Anything, mock.Anything).Return(nil, nil)
+		certService.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
+		certService.On("LoadKey", caKeyEncoded).Return(nil, apperrors.Internal("error"))
 
-		certUtils := &certMock.CertificateUtility{}
-		certUtils.On("LoadCSR", mock.Anything).Return(nil, nil)
-		certUtils.On("CheckCSRValues", mock.Anything, mock.Anything).Return(nil, nil)
-		certUtils.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
-		certUtils.On("LoadKey", caKeyEncoded).Return(nil, apperrors.Internal("error"))
+		groupRepository := &kymaGroupMocks.Repository{}
+		appRepository := &applicationMocks.Repository{}
 
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, host, domain, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
-		registrationHandler.SignCSR(rr, req)
+		signatureHandler.SignCSR(rr, req)
 
 		// then
 		responseBody, err := ioutil.ReadAll(rr.Body)
@@ -352,29 +370,29 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when couldn't load CSR", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("GetToken", appName).Return(token, true)
+		tokenService := &tokensMock.Service{}
+		tokenService.On("GetToken", identifier).Return(token, true)
 
-		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
+		certService := &certMock.Service{}
+		certService.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
+		certService.On("LoadKey", caKeyEncoded).Return(caKey, nil)
+		certService.On("LoadCSR", tokenRequest.CSR).Return(nil, apperrors.Internal("error"))
 
-		certUtils := &certMock.CertificateUtility{}
-		certUtils.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
-		certUtils.On("LoadKey", caKeyEncoded).Return(caKey, nil)
-		certUtils.On("LoadCSR", tokenRequest.CSR).Return(nil, apperrors.Internal("error"))
+		groupRepository := &kymaGroupMocks.Repository{}
+		appRepository := &applicationMocks.Repository{}
 
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, host, domain, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
-		registrationHandler.SignCSR(rr, req)
+		signatureHandler.SignCSR(rr, req)
 
 		// then
 		responseBody, err := ioutil.ReadAll(rr.Body)
@@ -391,39 +409,39 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when failed to check CSR values", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("GetToken", appName).Return(token, true)
+		tokenService := &tokensMock.Service{}
+		tokenService.On("GetToken", identifier).Return(token, true)
 
-		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("GetToken", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
-
-		certUtils := &certMock.CertificateUtility{}
-		certUtils.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
-		certUtils.On("LoadKey", caKeyEncoded).Return(caKey, nil)
-		certUtils.On("LoadCSR", tokenRequest.CSR).Return(csr, nil)
+		certService := &certMock.Service{}
+		certService.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
+		certService.On("LoadKey", caKeyEncoded).Return(caKey, nil)
+		certService.On("LoadCSR", tokenRequest.CSR).Return(csr, nil)
 
 		subjectValues := certificates.CSRSubject{
-			CName:              appName,
+			CName:              identifier,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
 			Locality:           locality,
 			Province:           province,
 		}
-		certUtils.On("CheckCSRValues", csr, subjectValues).Return(apperrors.Forbidden("error"))
+		certService.On("CheckCSRValues", csr, subjectValues).Return(apperrors.Forbidden("error"))
 
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		groupRepository := &kymaGroupMocks.Repository{}
+		appRepository := &applicationMocks.Repository{}
+
+		signatureHandler := NewSignatureHandler(tokenService, certService, host, domain, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
-		registrationHandler.SignCSR(rr, req)
+		signatureHandler.SignCSR(rr, req)
 
 		// then
 		responseBody, err := ioutil.ReadAll(rr.Body)
@@ -437,19 +455,6 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		assert.Equal(t, "error", errorResponse.Error)
 		assert.Equal(t, http.StatusForbidden, rr.Code)
 	})
-}
-
-func createSignatureHandler(tokenCache cache.TokenCache, certUtils certificates.CertificateUtility, secretsRepository secrets.Repository) SignatureHandler {
-	subjectValues := certificates.CSRSubject{
-		CName:              appName,
-		Country:            country,
-		Organization:       organization,
-		OrganizationalUnit: organizationalUnit,
-		Locality:           locality,
-		Province:           province,
-	}
-
-	return NewSignatureHandler(tokenCache, certUtils, secretsRepository, host, domain, subjectValues)
 }
 
 func compact(src []byte) []byte {

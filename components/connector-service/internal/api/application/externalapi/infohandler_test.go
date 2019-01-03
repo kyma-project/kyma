@@ -42,12 +42,12 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 	t.Run("should get info", func(t *testing.T) {
 		// given
 		newToken := "newToken"
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		expectedSignUrl := fmt.Sprintf("https://%s/v1/applications/%s/client-certs?token=%s", host, appName, newToken)
+		expectedSignUrl := fmt.Sprintf("https://%s/v1/applications/%s/client-certs?token=%s", host, identifier, newToken)
 
-		metadataUrl := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", domain, appName)
-		eventsUrl := fmt.Sprintf("https://gateway.%s/%s/v1/events", domain, appName)
+		metadataUrl := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", domain, identifier)
+		eventsUrl := fmt.Sprintf("https://gateway.%s/%s/v1/events", domain, identifier)
 
 		kymaGroup := v1alpha1.KymaGroup{
 			Spec: v1alpha1.KymaGroupSpec{
@@ -61,24 +61,24 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		expectedApi := Api{
 			MetadataURL:     metadataUrl,
 			EventsURL:       eventsUrl,
-			CertificatesUrl: fmt.Sprintf("https://%s/v1/applications/%s", host, appName),
+			CertificatesUrl: fmt.Sprintf("https://%s/v1/applications/%s", host, identifier),
 		}
 
 		expectedCertInfo := api.CertificateInfo{
-			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, appName),
+			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, identifier),
 			Extensions:   "",
 			KeyAlgorithm: "rsa2048",
 		}
 
 		tokenService := &tokenMocks.Service{}
-		tokenService.On("GetToken", appName).Return(tokenData, true)
-		tokenService.On("CreateToken", appName).Return(newToken, nil)
+		tokenService.On("GetToken", identifier).Return(tokenData, true)
+		tokenService.On("CreateToken", identifier).Return(newToken, nil)
 
 		groupRepository := &kymaGroupMocks.Repository{}
 		groupRepository.On("Get", group).Return(kymaGroup, nil)
 
 		subjectValues := certificates.CSRSubject{
-			CName:              appName,
+			CName:              identifier,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
@@ -92,7 +92,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -113,13 +113,13 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 403 when token not provided", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert", appName)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert", identifier)
 
 		tokenService := &tokenMocks.Service{}
 		groupRepository := &kymaGroupMocks.Repository{}
 
 		subjectValues := certificates.CSRSubject{
-			CName:              appName,
+			CName:              identifier,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
@@ -132,7 +132,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -151,15 +151,15 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 403 when token not found", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
 		tokenService := &tokenMocks.Service{}
-		tokenService.On("GetToken", appName).Return("", false)
+		tokenService.On("GetToken", identifier).Return("", false)
 
 		groupRepository := &kymaGroupMocks.Repository{}
 
 		subjectValues := certificates.CSRSubject{
-			CName:              appName,
+			CName:              identifier,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
@@ -172,7 +172,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -191,15 +191,15 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 403 when wrong token provided", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
 		tokenService := &tokenMocks.Service{}
-		tokenService.On("GetToken", appName).Return("differentToken", true)
+		tokenService.On("GetToken", identifier).Return("differentToken", true)
 
 		groupRepository := &kymaGroupMocks.Repository{}
 
 		subjectValues := certificates.CSRSubject{
-			CName:              appName,
+			CName:              identifier,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
@@ -212,7 +212,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -231,16 +231,16 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 500 when failed to generate new token", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
 		tokenService := &tokenMocks.Service{}
-		tokenService.On("GetToken", appName).Return(token, true)
-		tokenService.On("CreateToken", appName).Return("", apperrors.Internal("error"))
+		tokenService.On("GetToken", identifier).Return(token, true)
+		tokenService.On("CreateToken", identifier).Return("", apperrors.Internal("error"))
 
 		groupRepository := &kymaGroupMocks.Repository{}
 
 		subjectValues := certificates.CSRSubject{
-			CName:              appName,
+			CName:              identifier,
 			Country:            country,
 			Organization:       organization,
 			OrganizationalUnit: organizationalUnit,
@@ -253,7 +253,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
 		infoHandler.GetInfo(rr, req)

@@ -55,7 +55,7 @@ func (tg *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func (tg *tokenHandler) getIdentifier(req *http.Request) string {
-	appName := mux.Vars(req)["appName"]
+	appName := mux.Vars(req)["identifier"]
 
 	if appName != "" {
 		return appName
