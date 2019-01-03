@@ -12,7 +12,7 @@ This solution is not suitable for a production environment but makes for a great
 
 The prerequisites match these listed in the **Install Kyma on a GKE cluster** document. However, you don't need to prepare a domain for your cluster as it is replaced by a wildcard DNS provided by [`xip.io`](http://xip.io/).
 
-To use the wildcard DNS, you must build a new Kyma installer image using the sources. 
+To use the wildcard DNS, you must build a new Kyma installer image using the sources.
 
 ## Installation
 
@@ -33,18 +33,18 @@ The installation process follows the steps outlined in the **Install Kyma on a G
 
   - Run this command to reserve a public IP address for the load balancer of your cluster.
     ```  
-    gcloud beta compute --project=${PROJECT} addresses create ${IP_ADDRESS_NAME} --region=europe-west1 --network-tier=PREMIUM
+    gcloud beta compute --project=$PROJECT addresses create $IP_ADDRESS_NAME --region=europe-west1 --network-tier=PREMIUM
     ```
     >**NOTE:** The region in which you reserve the IP address must match the region of your GKE cluster.
 
   - Set the reserved IP address as the `EXTERNAL_PUBLIC_IP` environment variable. Run:
     ```
-    export EXTERNAL_PUBLIC_IP=$(gcloud compute addresses list --project=${PROJECT} --filter="name=${IP_ADDRESS_NAME}" --format="value(address)")
+    export EXTERNAL_PUBLIC_IP=$(gcloud compute addresses list --project=$PROJECT --filter="name=$IP_ADDRESS_NAME" --format="value(address)")
     ```
 
 3. Use this command to prepare a configuration file that deploys Kyma with [`xip.io`](http://xip.io/) providing a wildcard DNS:
   ```
-  cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__EXTERNAL_PUBLIC_IP__/${EXTERNAL_PUBLIC_IP}/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+  cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__EXTERNAL_PUBLIC_IP__/$EXTERNAL_PUBLIC_IP/g" | sed -e "s/__.*__//g" > my-kyma.yaml
   ```
 
 4. Follow the instructions from the **Deploy Kyma** section to install Kyma using the configuration file you prepared.
