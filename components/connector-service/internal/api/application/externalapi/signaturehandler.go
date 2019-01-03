@@ -27,17 +27,15 @@ type signatureHandler struct {
 	tokenService    tokens.ApplicationService
 	certService     certificates.Service
 	host            string
-	domainName      string
 	groupRepository kymagroup.Repository
 	appRepository   applications.Repository
 }
 
-func NewSignatureHandler(tokenService tokens.ApplicationService, certService certificates.Service, host string, domainName string, groupRepository kymagroup.Repository, appRepository applications.Repository) SignatureHandler {
+func NewSignatureHandler(tokenService tokens.ApplicationService, certService certificates.Service, host string, groupRepository kymagroup.Repository, appRepository applications.Repository) SignatureHandler {
 
 	return &signatureHandler{
 		tokenService:    tokenService,
 		host:            host,
-		domainName:      domainName,
 		certService:     certService,
 		groupRepository: groupRepository,
 		appRepository:   appRepository,
@@ -88,12 +86,12 @@ func (sh *signatureHandler) handleResources(identifier string, tokenData *tokens
 
 	err := sh.handleApplicationCR(identifier, certRequest)
 	if err != nil {
-		return apperrors.Internal("Failed to handle Application CR, %s", err.Error())
+		return err
 	}
 
 	err = sh.handleGroupCR(identifier, tokenData)
 	if err != nil {
-		return apperrors.Internal("Failed to handle KymaGroup CR, %s", err.Error())
+		return err
 	}
 
 	return nil

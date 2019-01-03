@@ -138,8 +138,8 @@ func csrSubject(env *environment) certificates.CSRSubject {
 }
 
 func newExternalHandler(certService certificates.Service, tokenService tokens.Service, opts *options, middlewares []mux.MiddlewareFunc, subjectValues certificates.CSRSubject, groupsRepository kymagroup.Repository, appsRepository applications.Repository) http.Handler {
-	rh := externalapi.NewSignatureHandler(tokenService, certService, opts.connectorServiceHost, opts.domainName, groupsRepository, appsRepository)
-	ih := externalapi.NewInfoHandler(tokenService, opts.connectorServiceHost, opts.domainName, subjectValues, groupsRepository)
+	rh := externalapi.NewSignatureHandler(tokenService, certService, opts.connectorServiceHost, groupsRepository, appsRepository)
+	ih := externalapi.NewInfoHandler(tokenService, opts.connectorServiceHost, subjectValues, groupsRepository)
 	return externalapi.NewHandler(rh, ih, middlewares)
 }
 

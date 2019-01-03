@@ -61,6 +61,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO - should we update if empty?
 	err = sh.updateKymaGroupClusterData(identifier, &certificateRequest)
 	if err != nil {
 		api.RespondWithError(w, err)

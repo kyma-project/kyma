@@ -26,8 +26,18 @@ import (
 )
 
 const (
-	group  = "group"
-	tenant = "tenant"
+	group      = "group"
+	tenant     = "tenant"
+	identifier = "identifier"
+	token      = "token"
+
+	host               = "host"
+	domain             = "domain"
+	country            = "country"
+	organization       = "organization"
+	organizationalUnit = "organizationalUnit"
+	locality           = "locality"
+	province           = "province"
 )
 
 var (
@@ -45,16 +55,25 @@ var (
 		Tenant: tenant,
 		Token:  token,
 	}
-
-	getInfoUrl = fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
-
-	metadataUrl = fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", domain, identifier)
-	eventsUrl   = fmt.Sprintf("https://gateway.%s/%s/v1/events", domain, identifier)
 )
 
 func TestInfoHandler_GetInfo(t *testing.T) {
 
+	getInfoUrl := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
+
+	metadataUrl := fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", domain, identifier)
+	eventsUrl := fmt.Sprintf("https://gateway.%s/%s/v1/events", domain, identifier)
+
 	newToken := "newToken"
+
+	kymaGroup := &v1alpha1.KymaGroup{
+		Spec: v1alpha1.KymaGroupSpec{
+			Cluster: v1alpha1.Cluster{
+				AppRegistryUrl: metadataUrl,
+				EventsUrl:      eventsUrl,
+			},
+		},
+	}
 
 	t.Run("should get info", func(t *testing.T) {
 		// given
@@ -71,7 +90,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		tokenService.On("CreateAppToken", identifier, tokenData).Return(newToken, nil)
 
 		groupRepository := &kymaGroupMocks.Repository{}
-		groupRepository.On("Get", group).Return(newKymaGroup(), nil)
+		groupRepository.On("Get", group).Return(kymaGroup, nil)
 
 		infoHandler := NewInfoHandler(tokenService, host, subjectValues, groupRepository)
 
@@ -249,7 +268,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		tokenService.On("CreateAppToken", identifier, tokenData).Return("", apperrors.Internal("error"))
 
 		groupRepository := &kymaGroupMocks.Repository{}
-		groupRepository.On("Get", group).Return(newKymaGroup(), nil)
+		groupRepository.On("Get", group).Return(kymaGroup, nil)
 
 		infoHandler := NewInfoHandler(tokenService, host, subjectValues, groupRepository)
 
@@ -313,16 +332,5 @@ func getExpectedCertInfo() api.CertificateInfo {
 		Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, identifier),
 		Extensions:   "",
 		KeyAlgorithm: "rsa2048",
-	}
-}
-
-func newKymaGroup() *v1alpha1.KymaGroup {
-	return &v1alpha1.KymaGroup{
-		Spec: v1alpha1.KymaGroupSpec{
-			Cluster: v1alpha1.Cluster{
-				AppRegistryUrl: metadataUrl,
-				EventsUrl:      eventsUrl,
-			},
-		},
 	}
 }
