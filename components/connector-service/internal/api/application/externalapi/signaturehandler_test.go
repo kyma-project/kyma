@@ -76,7 +76,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenService := &tokensMock.Service{}
+		tokenService := &tokensMock.ApplicationService{}
 		tokenService.On("GetToken", identifier).Return(tokenData, true)
 		tokenService.On("DeleteToken", identifier).Return()
 
@@ -118,7 +118,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert", identifier)
 
-		tokenService := &tokensMock.Service{}
+		tokenService := &tokensMock.ApplicationService{}
 		certService := &certMock.Service{}
 
 		groupRepository := &kymaGroupMocks.Repository{}
@@ -149,7 +149,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenService := &tokensMock.Service{}
+		tokenService := &tokensMock.ApplicationService{}
 		tokenService.On("GetToken", identifier).Return("", false)
 
 		certService := &certMock.Service{}
@@ -184,7 +184,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenService := &tokensMock.Service{}
+		tokenService := &tokensMock.ApplicationService{}
 		tokenService.On("GetToken", identifier).Return("differentToken", true)
 
 		certService := &certMock.Service{}
@@ -219,7 +219,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenService := &tokensMock.Service{}
+		tokenService := &tokensMock.ApplicationService{}
 		tokenService.On("GetToken", identifier).Return(token, true)
 
 		certService := &certMock.Service{}
@@ -255,7 +255,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenService := &tokensMock.Service{}
+		tokenService := &tokensMock.ApplicationService{}
 		tokenService.On("GetToken", identifier).Return(token, true)
 		tokenService.On("DeleteToken", identifier).Return()
 
@@ -293,7 +293,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenService := &tokensMock.Service{}
+		tokenService := &tokensMock.ApplicationService{}
 		tokenService.On("GetToken", identifier).Return(token, true)
 
 		certService := &certMock.Service{}
@@ -332,7 +332,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenService := &tokensMock.Service{}
+		tokenService := &tokensMock.ApplicationService{}
 		tokenService.On("GetToken", identifier).Return(token, true)
 
 		certService := &certMock.Service{}
@@ -372,7 +372,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenService := &tokensMock.Service{}
+		tokenService := &tokensMock.ApplicationService{}
 		tokenService.On("GetToken", identifier).Return(token, true)
 
 		certService := &certMock.Service{}
@@ -411,7 +411,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenService := &tokensMock.Service{}
+		tokenService := &tokensMock.ApplicationService{}
 		tokenService.On("GetToken", identifier).Return(token, true)
 
 		certService := &certMock.Service{}

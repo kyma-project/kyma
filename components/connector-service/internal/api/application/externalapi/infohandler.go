@@ -23,16 +23,14 @@ const (
 type infoHandler struct {
 	tokenService    tokens.ApplicationService
 	host            string
-	domainName      string
 	csrSubject      certificates.CSRSubject
 	groupRepository kymagroup.Repository
 }
 
-func NewInfoHandler(tokenGenerator tokens.ApplicationService, host string, domainName string, csrSubject certificates.CSRSubject, groupRepository kymagroup.Repository) InfoHandler {
+func NewInfoHandler(tokenService tokens.ApplicationService, host string, csrSubject certificates.CSRSubject, groupRepository kymagroup.Repository) InfoHandler {
 	return &infoHandler{
-		tokenService:    tokenGenerator,
+		tokenService:    tokenService,
 		host:            host,
-		domainName:      domainName,
 		csrSubject:      csrSubject,
 		groupRepository: groupRepository,
 	}
@@ -53,6 +51,13 @@ func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	certUrl := fmt.Sprintf(CertUrl, ih.host, identifier)
+	apiData, err := ih.createApiData(certUrl, tokenData)
+	if err != nil {
+		api.RespondWithError(w, err)
+		return
+	}
+
 	newToken, err := ih.tokenService.CreateAppToken(identifier, tokenData)
 	if err != nil {
 		api.RespondWithError(w, apperrors.Internal("Failed to generate new token."))
@@ -60,10 +65,6 @@ func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	signUrl := fmt.Sprintf(SignUrl, ih.host, identifier, newToken)
-	certUrl := fmt.Sprintf(CertUrl, ih.host, identifier)
-
-	apiData, err := ih.createApiData(certUrl, tokenData)
-
 	certInfo := api.MakeCertInfo(ih.csrSubject, identifier)
 
 	api.RespondWithBody(w, 200, InfoResponse{SignUrl: signUrl, Api: apiData, CertificateInfo: certInfo})

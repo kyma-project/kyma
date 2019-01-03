@@ -1,7 +1,6 @@
 package externalapi
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,58 +8,67 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/api"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 	tokenMocks "github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
-	tokenCacheMocks "github.com/kyma-project/kyma/components/connector-service/internal/tokens/cache/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	identifier = "identifier"
+	token      = "token"
+
+	host               = "host"
+	country            = "country"
+	organization       = "organization"
+	organizationalUnit = "organizationalUnit"
+	locality           = "locality"
+	province           = "province"
+)
+
+var (
+	subjectValues = certificates.CSRSubject{
+		CName:              identifier,
+		Country:            country,
+		Organization:       organization,
+		OrganizationalUnit: organizationalUnit,
+		Locality:           locality,
+		Province:           province,
+	}
+
+	getInfoUrl = fmt.Sprintf("/v1/clusters/%s/client-cert?token=%s", identifier, token)
+)
+
 func TestInfoHandler_GetInfo(t *testing.T) {
+
+	newToken := "newToken"
 
 	t.Run("should get info", func(t *testing.T) {
 		// given
-		newToken := "newToken"
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		expectedSignUrl := fmt.Sprintf("https://%s/v1/clusters/%s/client-certs?token=%s", host, identifier, newToken)
 
-		expectedSignUrl := fmt.Sprintf("https://%s/v1/applications/%s/client-certs?token=%s", host, appName, newToken)
-
-		expectedApi := api{
-			MetadataURL:     fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", domain, appName),
-			EventsURL:       fmt.Sprintf("https://gateway.%s/%s/v1/events", domain, appName),
-			CertificatesUrl: fmt.Sprintf("https://%s/v1/applications/%s", host, appName),
-		}
-
-		expectedCertInfo := certInfo{
-			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, appName),
+		expectedCertInfo := api.CertificateInfo{
+			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, identifier),
 			Extensions:   "",
 			KeyAlgorithm: "rsa2048",
 		}
 
-		tokenCache := &tokenCacheMocks.TokenCache{}
-		tokenCache.On("GetToken", appName).Return(token, true)
+		tokenService := &tokenMocks.ClusterService{}
+		tokenService.On("GetClusterToken", identifier).Return(token, true)
+		tokenService.On("CreateClusterToken", identifier).Return(newToken, nil)
 
-		tokenGenerator := &tokenMocks.TokenGenerator{}
-		tokenGenerator.On("CreateToken", appName).Return(newToken, nil)
+		infoHandler := NewInfoHandler(tokenService, host, subjectValues)
 
-		subjectValues := certificates.CSRSubject{
-			CName:              appName,
-			Country:            country,
-			Organization:       organization,
-			OrganizationalUnit: organizationalUnit,
-			Locality:           locality,
-			Province:           province,
-		}
-		infoHandler := NewInfoHandler(tokenCache, tokenGenerator, host, domain, subjectValues)
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
+		req, err := http.NewRequest(http.MethodPost, getInfoUrl, nil)
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -69,38 +77,28 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		responseBody, err := ioutil.ReadAll(rr.Body)
 		require.NoError(t, err)
 
-		var infoResponse infoResponse
+		var infoResponse InfoResponse
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, expectedSignUrl, infoResponse.SignUrl)
-		assert.EqualValues(t, expectedApi, infoResponse.Api)
 		assert.EqualValues(t, expectedCertInfo, infoResponse.CertificateInfo)
 	})
 
 	t.Run("should return 403 when token not provided", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert", appName)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert", identifier)
 
-		tokenCache := &tokenCacheMocks.TokenCache{}
-		tokenGenerator := &tokenMocks.TokenGenerator{}
+		tokenService := &tokenMocks.ClusterService{}
 
-		subjectValues := certificates.CSRSubject{
-			CName:              appName,
-			Country:            country,
-			Organization:       organization,
-			OrganizationalUnit: organizationalUnit,
-			Locality:           locality,
-			Province:           province,
-		}
-		infoHandler := NewInfoHandler(tokenCache, tokenGenerator, host, domain, subjectValues)
+		infoHandler := NewInfoHandler(tokenService, host, subjectValues)
 
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
+		req, err := http.NewRequest(http.MethodPost, url, nil)
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -119,28 +117,18 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 403 when token not found", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenCache := &tokenCacheMocks.TokenCache{}
-		tokenCache.On("GetToken", appName).Return("", false)
+		tokenService := &tokenMocks.ClusterService{}
+		tokenService.On("GetClusterToken", identifier).Return("", false)
 
-		tokenGenerator := &tokenMocks.TokenGenerator{}
+		infoHandler := NewInfoHandler(tokenService, host, subjectValues)
 
-		subjectValues := certificates.CSRSubject{
-			CName:              appName,
-			Country:            country,
-			Organization:       organization,
-			OrganizationalUnit: organizationalUnit,
-			Locality:           locality,
-			Province:           province,
-		}
-		infoHandler := NewInfoHandler(tokenCache, tokenGenerator, host, domain, subjectValues)
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
+		req, err := http.NewRequest(http.MethodPost, url, nil)
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -159,28 +147,18 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 403 when wrong token provided", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenCache := &tokenCacheMocks.TokenCache{}
-		tokenCache.On("GetToken", appName).Return("differentToken", true)
+		tokenService := &tokenMocks.ClusterService{}
+		tokenService.On("GetClusterToken", identifier).Return("invalid token", true)
 
-		tokenGenerator := &tokenMocks.TokenGenerator{}
+		infoHandler := NewInfoHandler(tokenService, host, subjectValues)
 
-		subjectValues := certificates.CSRSubject{
-			CName:              appName,
-			Country:            country,
-			Organization:       organization,
-			OrganizationalUnit: organizationalUnit,
-			Locality:           locality,
-			Province:           province,
-		}
-		infoHandler := NewInfoHandler(tokenCache, tokenGenerator, host, domain, subjectValues)
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
+		req, err := http.NewRequest(http.MethodPost, url, nil)
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
 		infoHandler.GetInfo(rr, req)
@@ -199,29 +177,19 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 	t.Run("should return 500 when failed to generate new token", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", identifier, token)
 
-		tokenCache := &tokenCacheMocks.TokenCache{}
-		tokenCache.On("GetToken", appName).Return(token, true)
+		tokenService := &tokenMocks.ClusterService{}
+		tokenService.On("GetClusterToken", identifier).Return(token, true)
+		tokenService.On("CreateClusterToken", identifier).Return("", apperrors.Internal("error"))
 
-		tokenGenerator := &tokenMocks.TokenGenerator{}
-		tokenGenerator.On("CreateToken", appName).Return("", apperrors.Internal("error"))
+		infoHandler := NewInfoHandler(tokenService, host, subjectValues)
 
-		subjectValues := certificates.CSRSubject{
-			CName:              appName,
-			Country:            country,
-			Organization:       organization,
-			OrganizationalUnit: organizationalUnit,
-			Locality:           locality,
-			Province:           province,
-		}
-		infoHandler := NewInfoHandler(tokenCache, tokenGenerator, host, domain, subjectValues)
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
+		req, err := http.NewRequest(http.MethodPost, url, nil)
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
+		req = mux.SetURLVars(req, map[string]string{"identifier": identifier})
 
 		// when
 		infoHandler.GetInfo(rr, req)
