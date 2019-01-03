@@ -56,7 +56,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	}
 	makePluggable(appContainer)
 
-	k8sResolver, err := k8s.New(restConfig, appContainer.ApplicationRetriever, informerResyncPeriod, scContainer.ServiceCatalogRetriever)
+	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod, appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}

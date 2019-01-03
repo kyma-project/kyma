@@ -29,7 +29,7 @@ type Resolver struct {
 	informerFactory informers.SharedInformerFactory
 }
 
-func New(restConfig *rest.Config, applicationRetriever shared.ApplicationRetriever, informerResyncPeriod time.Duration, scRetriever shared.ServiceCatalogRetriever) (*Resolver, error) {
+func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicationRetriever shared.ApplicationRetriever, scRetriever shared.ServiceCatalogRetriever) (*Resolver, error) {
 	client, err := v1.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating K8S Client")
