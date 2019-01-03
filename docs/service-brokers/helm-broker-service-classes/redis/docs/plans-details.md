@@ -27,7 +27,7 @@ These are the provisioning parameters:
 
 ## Credentials
 
-The binding returns the following credentials:
+The binding creates a Secret with the following credentials:
 
 | Parameter Name | Type | Description |
 |----------------|------|-------------|
