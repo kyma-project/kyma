@@ -212,6 +212,14 @@ type LocalObjectReferenceInput struct {
 	Name string `json:"name"`
 }
 
+type RBACAttributes struct {
+	Verb        string `json:"verb"`
+	APIGroup    string `json:"apiGroup"`
+	APIVersion  string `json:"apiVersion"`
+	Resource    string `json:"resource"`
+	Subresource string `json:"subresource"`
+}
+
 type ResourceQuota struct {
 	Name     string         `json:"name"`
 	Pods     *string        `json:"pods"`

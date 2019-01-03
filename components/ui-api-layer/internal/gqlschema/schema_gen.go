@@ -46,6 +46,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	CheckRBAC func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes RBACAttributes) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -1905,6 +1906,21 @@ func field___Type_enumValues_args(rawArgs map[string]interface{}) (map[string]in
 		}
 	}
 	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
+func dir_checkRBAC_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 RBACAttributes
+	if tmp, ok := rawArgs["attributes"]; ok {
+		var err error
+		arg0, err = UnmarshalRBACAttributes(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["attributes"] = arg0
 	return args, nil
 
 }
@@ -18394,6 +18410,48 @@ func UnmarshalLocalObjectReferenceInput(v interface{}) (LocalObjectReferenceInpu
 	return it, nil
 }
 
+func UnmarshalRBACAttributes(v interface{}) (RBACAttributes, error) {
+	var it RBACAttributes
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "verb":
+			var err error
+			it.Verb, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "apiGroup":
+			var err error
+			it.APIGroup, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "apiVersion":
+			var err error
+			it.APIVersion, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "resource":
+			var err error
+			it.Resource, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "subresource":
+			var err error
+			it.Subresource, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func UnmarshalServiceBindingRefInput(v interface{}) (ServiceBindingRefInput, error) {
 	var it ServiceBindingRefInput
 	var asMap = v.(map[string]interface{})
@@ -18530,6 +18588,24 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 			ret = nil
 		}
 	}()
+	rctx := graphql.GetResolverContext(ctx)
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "checkRBAC":
+			if ec.directives.CheckRBAC != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args, err := dir_checkRBAC_args(rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
+				}
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.CheckRBAC(ctx, obj, n, args["attributes"].(RBACAttributes))
+				}
+			}
+		}
+	}
 	res, err := ec.ResolverMiddleware(ctx, next)
 	if err != nil {
 		ec.Error(ctx, err)
@@ -18560,6 +18636,24 @@ scalar JSON
 scalar Labels
 
 scalar Timestamp
+
+# Directives
+
+directive @checkRBAC(attributes: RBACAttributes!) on FIELD_DEFINITION
+
+input RBACAttributes {
+	verb: String!
+	apiGroup: String!
+	apiVersion: String!
+	resource: String!
+	subresource: String!
+}
+#TODO: resourceRequest and path should be handled in the future (possibility of checking non-resource requests)
+#https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.10/#nonresourceattributes-v1beta1-authorization-k8s-io
+#resourceRequest: Boolean!
+#path: String!
+
+# TODO: name and namespace should be handled inside the directive
 
 # Content
 
@@ -19134,9 +19228,10 @@ type Query {
 
     limitRanges(environment: String!): [LimitRange!]!
 
-    IDPPreset(name: String!): IDPPreset
-    IDPPresets(first: Int, offset: Int): [IDPPreset!]!
+    IDPPreset(name: String!): IDPPreset @checkRBAC(RBACAttributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", subresource: "" })
+    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @checkRBAC(RBACAttributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", subresource: "" })
 }
+# TODO: find out which verb (get or list) should be used for listing resources (get is set in proxy.go, but somehow it is list in logs)
 
 # Mutations
 

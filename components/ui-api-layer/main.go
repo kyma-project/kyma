@@ -51,7 +51,21 @@ func main() {
 	stopCh := signal.SetupChannel()
 	resolvers.WaitForCacheSync(stopCh)
 
-	executableSchema := gqlschema.NewExecutableSchema(gqlschema.Config{Resolvers: resolvers})
+	c := gqlschema.Config{Resolvers: resolvers}
+	c.Directives.CheckRBAC = func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes gqlschema.RBACAttributes) (res interface{}, err error) {
+
+		// check if user is allowed to get requested resource
+		if false { // TODO: put proper condition here
+			return nil, fmt.Errorf("Access denied")
+		}
+		// success path TODO: delete this comment and logging attributes below
+		glog.Infof("atrributes: %+v", attributes)
+		glog.Infof("obj: %+v", obj)
+		glog.Infof("ctx: %+v", ctx)
+
+		return next(ctx)
+	}
+	executableSchema := gqlschema.NewExecutableSchema(c)
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
 	runServer(stopCh, addr, cfg.AllowedOrigins, executableSchema)
