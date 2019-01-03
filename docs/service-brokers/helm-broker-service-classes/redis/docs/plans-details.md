@@ -5,7 +5,7 @@ type: Details
 
 ## Service description
 
-The service provides the following plan names and descriptions:
+The Redis Service Class provides the following plans:
 
 | Plan Name | Description |
 |-----------|-------------|
