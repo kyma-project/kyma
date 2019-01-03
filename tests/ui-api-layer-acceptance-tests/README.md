@@ -22,7 +22,7 @@ dep ensure -vendor-only
 
 ### Run tests outside the cluster
 
-Before you run the acceptance tests, export required environmental variables with the following command:
+Before you run the acceptance tests, export required environment variables with the following command:
 
 ```bash
 export USERNAME=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D)
@@ -50,7 +50,7 @@ Run acceptance tests using the following command:
   DOMAIN=nightly.kyma.cx go test ./... -tags=acceptance
   ```
   
-To run the tests against the UI API Layer with module pluggability turned on, add the following environmental variable:
+To run the tests against the UI API Layer with module pluggability turned on, add the following environment variable:
   
 ```bash
 MODULE_PLUGGABILITY=true
