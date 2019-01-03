@@ -19,7 +19,7 @@ type K8sResourcesClient interface {
 	GetRule(name string, options v1.GetOptions) (*v1alpha2.Rule, error)
 	GetChecknothing(name string, options v1.GetOptions) (*v1alpha2.Checknothing, error)
 	GetApplicationServices(name string, options v1.GetOptions) (*v1alpha1.Application, error)
-	CreateDummyApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error)
+	CreateDummyApplication(name string, options v1.GetOptions, skipInstallation bool) (*v1alpha1.Application, error)
 	DeleteApplication(name string, options *v1.DeleteOptions) error
 }
 
@@ -88,13 +88,16 @@ func (c *k8sResourcesClient) GetApplicationServices(name string, options v1.GetO
 	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Get(name, options)
 }
 
-func (c *k8sResourcesClient) CreateDummyApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error) {
+func (c *k8sResourcesClient) CreateDummyApplication(name string, options v1.GetOptions, skipInstallation bool) (*v1alpha1.Application, error) {
+	spec := v1alpha1.ApplicationSpec{
+		Services:         []v1alpha1.Service{},
+		SkipInstallation: skipInstallation,
+	}
+
 	dummyApp := &v1alpha1.Application{
 		TypeMeta:   v1.TypeMeta{Kind: "Application", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: name},
-		Spec: v1alpha1.ApplicationSpec{
-			Services: []v1alpha1.Service{},
-		},
+		Spec:       spec,
 	}
 
 	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Create(dummyApp)

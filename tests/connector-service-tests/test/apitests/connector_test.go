@@ -32,7 +32,7 @@ func TestConnector(t *testing.T) {
 
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
 	require.NoError(t, err)
-	_, e := k8sResourcesClient.CreateDummyApplication(appName, "")
+	_, e := k8sResourcesClient.CreateDummyApplication(appName, "", false)
 
 	client := testkit.NewConnectorClient(appName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
 
@@ -282,9 +282,9 @@ func TestCertificateValidation(t *testing.T) {
 
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
 	require.NoError(t, err)
-	_, e := k8sResourcesClient.CreateDummyApplication(appName, "")
+	_, e := k8sResourcesClient.CreateDummyApplication(appName, "", false)
 	require.NoError(t, e)
-	_, e = k8sResourcesClient.CreateDummyApplication(forbiddenAppName, "")
+	_, e = k8sResourcesClient.CreateDummyApplication(forbiddenAppName, "", false)
 	require.NoError(t, e)
 
 	client := testkit.NewConnectorClient(appName, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)

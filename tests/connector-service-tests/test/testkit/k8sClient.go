@@ -8,7 +8,7 @@ import (
 )
 
 type K8sResourcesClient interface {
-	CreateDummyApplication(name string, accessLabel string) (*v1alpha1.Application, error)
+	CreateDummyApplication(name string, accessLabel string, skipInstallation bool) (*v1alpha1.Application, error)
 	DeleteApplication(name string, options *v1.DeleteOptions) error
 }
 type k8sResourcesClient struct {
@@ -31,17 +31,23 @@ func initClient(k8sConfig *restclient.Config) (K8sResourcesClient, error) {
 		applicationsClient: applicationsClientSet,
 	}, nil
 }
-func (c *k8sResourcesClient) CreateDummyApplication(name string, accessLabel string) (*v1alpha1.Application, error) {
+
+func (c *k8sResourcesClient) CreateDummyApplication(name string, accessLabel string, skipInstallation bool) (*v1alpha1.Application, error) {
+	spec := v1alpha1.ApplicationSpec{
+		Services:         []v1alpha1.Service{},
+		AccessLabel:      accessLabel,
+		SkipInstallation: skipInstallation,
+	}
+
 	dummyApp := &v1alpha1.Application{
 		TypeMeta:   v1.TypeMeta{Kind: "Application", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: name},
-		Spec: v1alpha1.ApplicationSpec{
-			Services:    []v1alpha1.Service{},
-			AccessLabel: accessLabel,
-		},
+		Spec:       spec,
 	}
+
 	return c.applicationsClient.ApplicationconnectorV1alpha1().Applications().Create(dummyApp)
 }
+
 func (c *k8sResourcesClient) DeleteApplication(name string, options *v1.DeleteOptions) error {
 	return c.applicationsClient.ApplicationconnectorV1alpha1().Applications().Delete(name, options)
 }

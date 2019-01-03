@@ -74,12 +74,9 @@ func (c *k8sResourcesClient) GetService(name string, options v1.GetOptions) (int
 
 func (c *k8sResourcesClient) CreateDummyApplication(name string, accessLabel string, skipInstallation bool) (*v1alpha1.Application, error) {
 	spec := v1alpha1.ApplicationSpec{
-		Services:    []v1alpha1.Service{},
-		AccessLabel: accessLabel,
-	}
-
-	if skipInstallation {
-		spec.SkipInstallation = true
+		Services:         []v1alpha1.Service{},
+		AccessLabel:      accessLabel,
+		SkipInstallation: skipInstallation,
 	}
 
 	dummyApp := &v1alpha1.Application{
