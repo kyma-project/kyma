@@ -82,13 +82,13 @@ func (c *k8sResourcesClient) CreateDummyApplication(name string, accessLabel str
 		spec.SkipInstallation = true
 	}
 
-	dummyRe := &v1alpha1.Application{
+	dummyApp := &v1alpha1.Application{
 		TypeMeta:   v1.TypeMeta{Kind: "Application", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: name, Namespace: c.namespace},
 		Spec:       spec,
 	}
 
-	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Create(dummyRe)
+	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Create(dummyApp)
 }
 
 func (c *k8sResourcesClient) DeleteApplication(name string, options *v1.DeleteOptions) error {
