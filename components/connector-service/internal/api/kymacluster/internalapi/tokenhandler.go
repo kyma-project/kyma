@@ -14,12 +14,12 @@ import (
 const TokenURL = "https://%s/v1/clusters/%s/info?token=%s"
 
 type tokenHandler struct {
-	tokenService  tokens.Service
+	tokenService  tokens.ClusterService
 	host          string
 	uuidGenerator uuid.Generator
 }
 
-func NewTokenHandler(tokenService tokens.Service, host string, uuidGenerator uuid.Generator) TokenHandler {
+func NewTokenHandler(tokenService tokens.ClusterService, host string, uuidGenerator uuid.Generator) TokenHandler {
 	return &tokenHandler{
 		tokenService:  tokenService,
 		host:          host,
@@ -30,12 +30,7 @@ func NewTokenHandler(tokenService tokens.Service, host string, uuidGenerator uui
 func (tg *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 	identifier := tg.uuidGenerator.NewUUID()
 
-	// TODO: use Kyma Cluster specific struct instead of TokenData
-	tokenData := &tokens.TokenData{
-		Group: identifier,
-	}
-
-	token, err := tg.tokenService.CreateToken(identifier, tokenData)
+	token, err := tg.tokenService.CreateClusterToken(identifier)
 	if err != nil {
 		api.RespondWithError(w, err)
 		return

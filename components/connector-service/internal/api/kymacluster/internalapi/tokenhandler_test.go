@@ -8,8 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
-
 	"github.com/kyma-project/kyma/components/connector-service/internal/api"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
@@ -28,10 +26,6 @@ const (
 
 func TestTokenHandler_CreateToken(t *testing.T) {
 
-	tokenData := &tokens.TokenData{
-		Group: identifier,
-	}
-
 	t.Run("should create token", func(t *testing.T) {
 		// given
 		url := "/v1/clusters"
@@ -41,8 +35,8 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 			Token: token,
 		}
 
-		tokenService := &mocks.Service{}
-		tokenService.On("CreateToken", identifier, tokenData).Return(token, nil)
+		tokenService := &mocks.ClusterService{}
+		tokenService.On("CreateClusterToken", identifier).Return(token, nil)
 
 		uuidGenerator := &uuidmocks.Generator{}
 		uuidGenerator.On("NewUUID").Return("identifier")
@@ -72,8 +66,8 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		// given
 		url := fmt.Sprintf("/v1/applications/%s/tokens", identifier)
 
-		tokenService := &mocks.Service{}
-		tokenService.On("CreateToken", identifier, tokenData).Return("", apperrors.Internal("error"))
+		tokenService := &mocks.ClusterService{}
+		tokenService.On("CreateClusterToken", identifier).Return("", apperrors.Internal("error"))
 
 		uuidGenerator := &uuidmocks.Generator{}
 		uuidGenerator.On("NewUUID").Return("identifier")

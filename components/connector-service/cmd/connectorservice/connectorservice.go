@@ -4,6 +4,9 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
+	"time"
+
+	"github.com/patrickmn/go-cache"
 
 	connectoruuid "github.com/kyma-project/kyma/components/connector-service/internal/uuid"
 	uuid "github.com/satori/go.uuid"
@@ -80,8 +83,9 @@ func setup(options *options, env *environment) ([]*http.Server, error) {
 		log.Errorf("Error while setting up monitoring: %s", appErr)
 	}
 
-	tokenCache := tokens.NewTokenCache(options.tokenExpirationMinutes)
-	tokenService := tokens.NewTokenService(options.tokenLength, tokenCache)
+	appTokenCache := cache.New(time.Duration(options.tokenExpirationMinutes)*time.Minute, 1*time.Minute)
+	clusterTokenCache := cache.New(time.Duration(options.tokenExpirationMinutes)*time.Minute, 1*time.Minute)
+	tokenService := tokens.NewTokenService(options.tokenLength, tokens.GenerateRandomString, appTokenCache, clusterTokenCache)
 
 	secretsRepository, kymaGroupRepository, appRepository, appErr := newK8sClients(options.namespace)
 	if appErr != nil {
@@ -94,12 +98,12 @@ func setup(options *options, env *environment) ([]*http.Server, error) {
 	certUtil := certificates.NewCertificateUtility()
 	certificateService := certificates.NewCertificateService(secretsRepository, certUtil, caSecretName, subjectValues)
 
-	externalHandler := newExternalHandler(certificateService, tokenService, options, middlewares, subjectValues, kymaGroupRepository, appRepository)
-	internalHandler := newInternalHandler(tokenService, options.connectorServiceHost, middlewares, verificationService)
-
 	uuidGenerator := connectoruuid.GeneratorFunc(func() string {
 		return uuid.NewV4().String()
 	})
+
+	externalHandler := newExternalHandler(certificateService, tokenService, options, middlewares, subjectValues, kymaGroupRepository, appRepository)
+	internalHandler := newInternalHandler(tokenService, options.connectorServiceHost, middlewares, verificationService, uuidGenerator)
 
 	externalSrv := &http.Server{
 		Addr:    ":" + strconv.Itoa(options.externalAPIPort),
@@ -139,8 +143,8 @@ func newExternalHandler(certService certificates.Service, tokenService tokens.Se
 	return externalapi.NewHandler(rh, ih, middlewares)
 }
 
-func newInternalHandler(tokenGenerator tokens.Service, host string, middlewares []mux.MiddlewareFunc, verificationSvc verification.Service) http.Handler {
-	th := internalapi.NewTokenHandler(verificationSvc, tokenGenerator, host)
+func newInternalHandler(tokenService tokens.Service, host string, middlewares []mux.MiddlewareFunc, verificationSvc verification.Service, generator connectoruuid.Generator) http.Handler {
+	th := internalapi.NewTokenHandler(verificationSvc, tokenService, host, generator)
 	return internalapi.NewHandler(th, middlewares)
 }
 

@@ -57,8 +57,8 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		verificationService := &vermocks.Service{}
 		verificationService.On("Verify", req, identifier).Return(tokenData, nil)
 
-		tokenService := &mocks.Service{}
-		tokenService.On("CreateToken", identifier, tokenData).Return(token, nil)
+		tokenService := &mocks.ApplicationService{}
+		tokenService.On("CreateAppToken", identifier, tokenData).Return(token, nil)
 
 		tokenHandler := NewTokenHandler(verificationService, tokenService, host, uuidGenerator)
 
@@ -96,8 +96,8 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		verificationService := &vermocks.Service{}
 		verificationService.On("Verify", req, identifier).Return(tokenData, nil)
 
-		tokenService := &mocks.Service{}
-		tokenService.On("CreateToken", identifier, tokenData).Return(token, nil)
+		tokenService := &mocks.ApplicationService{}
+		tokenService.On("CreateAppToken", identifier, tokenData).Return(token, nil)
 
 		tokenHandler := NewTokenHandler(verificationService, tokenService, host, uuidGenerator)
 
@@ -130,7 +130,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		verificationService := &vermocks.Service{}
 		verificationService.On("Verify", req, identifier).Return(nil, apperrors.Internal("error"))
 
-		tokenService := &mocks.Service{}
+		tokenService := &mocks.ApplicationService{}
 
 		tokenHandler := NewTokenHandler(verificationService, tokenService, host, uuidGenerator)
 
@@ -164,8 +164,8 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		verificationService := &vermocks.Service{}
 		verificationService.On("Verify", req, identifier).Return(tokenData, nil)
 
-		tokenService := &mocks.Service{}
-		tokenService.On("CreateToken", identifier, tokenData).Return("", apperrors.Internal("error"))
+		tokenService := &mocks.ApplicationService{}
+		tokenService.On("CreateAppToken", identifier, tokenData).Return("", apperrors.Internal("error"))
 
 		tokenHandler := NewTokenHandler(verificationService, tokenService, host, uuidGenerator)
 

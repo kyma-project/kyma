@@ -18,15 +18,15 @@ import (
 const TokenURL = "https://%s/v1/applications/%s/info?token=%s"
 
 type tokenHandler struct {
-	tokenGenerator  tokens.Service
+	tokenService    tokens.ApplicationService
 	host            string
 	verificationSvc verification.Service
 	uuidGenerator   uuid.Generator
 }
 
-func NewTokenHandler(varificationSvc verification.Service, tokenService tokens.Service, host string, uuidGenerator uuid.Generator) TokenHandler {
+func NewTokenHandler(varificationSvc verification.Service, tokenService tokens.ApplicationService, host string, uuidGenerator uuid.Generator) TokenHandler {
 	return &tokenHandler{
-		tokenGenerator:  tokenService,
+		tokenService:    tokenService,
 		host:            host,
 		verificationSvc: varificationSvc,
 		uuidGenerator:   uuidGenerator,
@@ -42,7 +42,7 @@ func (tg *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := tg.tokenGenerator.CreateToken(identifier, tokenData)
+	token, err := tg.tokenService.CreateAppToken(identifier, tokenData)
 	if err != nil {
 		api.RespondWithError(w, err)
 		return

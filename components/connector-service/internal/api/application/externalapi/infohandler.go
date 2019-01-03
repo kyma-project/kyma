@@ -21,14 +21,14 @@ const (
 )
 
 type infoHandler struct {
-	tokenService    tokens.Service
+	tokenService    tokens.ApplicationService
 	host            string
 	domainName      string
 	csrSubject      certificates.CSRSubject
 	groupRepository kymagroup.Repository
 }
 
-func NewInfoHandler(tokenGenerator tokens.Service, host string, domainName string, csrSubject certificates.CSRSubject, groupRepository kymagroup.Repository) InfoHandler {
+func NewInfoHandler(tokenGenerator tokens.ApplicationService, host string, domainName string, csrSubject certificates.CSRSubject, groupRepository kymagroup.Repository) InfoHandler {
 	return &infoHandler{
 		tokenService:    tokenGenerator,
 		host:            host,
@@ -47,13 +47,13 @@ func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 
 	identifier := mux.Vars(r)["identifier"]
 
-	tokenData, found := ih.tokenService.GetToken(identifier)
+	tokenData, found := ih.tokenService.GetAppToken(identifier)
 	if !found || tokenData.Token != token {
 		api.RespondWithError(w, apperrors.Forbidden("Invalid token."))
 		return
 	}
 
-	newToken, err := ih.tokenService.CreateToken(identifier, tokenData)
+	newToken, err := ih.tokenService.CreateAppToken(identifier, tokenData)
 	if err != nil {
 		api.RespondWithError(w, apperrors.Internal("Failed to generate new token."))
 		return

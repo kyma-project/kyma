@@ -18,12 +18,12 @@ const (
 )
 
 type infoHandler struct {
-	tokenService tokens.Service
+	tokenService tokens.ClusterService
 	host         string
 	csrSubject   certificates.CSRSubject
 }
 
-func NewInfoHandler(tokenService tokens.Service, host string, csrSubject certificates.CSRSubject) InfoHandler {
+func NewInfoHandler(tokenService tokens.ClusterService, host string, csrSubject certificates.CSRSubject) InfoHandler {
 	return &infoHandler{
 		tokenService: tokenService,
 		host:         host,
@@ -40,13 +40,13 @@ func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 
 	identifier := mux.Vars(r)["identifier"]
 
-	tokenData, found := ih.tokenService.GetToken(identifier)
-	if !found || tokenData.Token != token {
+	cachedToken, found := ih.tokenService.GetClusterToken(identifier)
+	if !found || cachedToken != token {
 		api.RespondWithError(w, apperrors.Forbidden("Invalid token."))
 		return
 	}
 
-	newToken, err := ih.tokenService.CreateToken(identifier, tokenData)
+	newToken, err := ih.tokenService.CreateClusterToken(identifier)
 	if err != nil {
 		api.RespondWithError(w, apperrors.Internal("Failed to generate new token."))
 		return

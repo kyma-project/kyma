@@ -1,57 +1,99 @@
 package tokens
 
 import (
-	"crypto/rand"
-	"encoding/base64"
+	"time"
+
+	"github.com/patrickmn/go-cache"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
 
+type Cache interface {
+	Set(string, interface{}, time.Duration)
+	Get(string) (interface{}, bool)
+	Delete(string)
+}
+
 type Service interface {
-	CreateToken(app string, data *TokenData) (string, apperrors.AppError)
-	GetToken(identifier string) (*TokenData, bool)
-	DeleteToken(identifier string)
+	CreateAppToken(identifier string, data *TokenData) (string, apperrors.AppError)
+	GetAppToken(identifier string) (*TokenData, bool)
+	DeleteAppToken(identifier string)
+	CreateClusterToken(identifier string) (string, apperrors.AppError)
+	GetClusterToken(identifier string) (string, bool)
+	DeleteClusterToken(identifier string)
+}
+
+type ApplicationService interface {
+	CreateAppToken(identifier string, data *TokenData) (string, apperrors.AppError)
+	GetAppToken(identifier string) (*TokenData, bool)
+	DeleteAppToken(identifier string)
+}
+
+type ClusterService interface {
+	CreateClusterToken(identifier string) (string, apperrors.AppError)
+	GetClusterToken(identifier string) (string, bool)
+	DeleteClusterToken(identifier string)
 }
 
 type tokenService struct {
-	tokenLength int
-	tokenCache  Cache
+	tokenLength       int
+	generatorFunc     func(length int) (string, apperrors.AppError)
+	appTokenCache     Cache
+	clusterTokenCache Cache
 }
 
-func NewTokenService(tokenLength int, tokenCache Cache) Service {
-	return &tokenService{tokenLength: tokenLength, tokenCache: tokenCache}
+func NewTokenService(tokenLength int, generatorFunc func(length int) (string, apperrors.AppError), appTokenCache Cache, clusterTokenCache Cache) Service {
+	return &tokenService{
+		tokenLength:       tokenLength,
+		generatorFunc:     generatorFunc,
+		appTokenCache:     appTokenCache,
+		clusterTokenCache: clusterTokenCache,
+	}
 }
 
-func (ts *tokenService) CreateToken(app string, tokenData *TokenData) (string, apperrors.AppError) {
-	token, err := generateRandomString(ts.tokenLength)
+func (ts *tokenService) CreateAppToken(identifier string, tokenData *TokenData) (string, apperrors.AppError) {
+	token, err := ts.generatorFunc(ts.tokenLength)
 	if err != nil {
 		return "", err
 	}
 	tokenData.Token = token
 
-	ts.tokenCache.Put(app, tokenData)
+	ts.appTokenCache.Set(identifier, tokenData, cache.DefaultExpiration)
 	return token, nil
 }
 
-func generateRandomBytes(number int) ([]byte, apperrors.AppError) {
-	bytes := make([]byte, number)
-	_, err := rand.Read(bytes)
-	if err != nil {
-		return nil, apperrors.Internal("Failed to generate random bytes: %s", err)
+func (ts *tokenService) GetAppToken(identifier string) (*TokenData, bool) {
+	token, found := ts.appTokenCache.Get(identifier)
+	if !found {
+		return nil, found
 	}
 
-	return bytes, nil
+	return token.(*TokenData), found
 }
 
-func generateRandomString(length int) (string, apperrors.AppError) {
-	bytes, err := generateRandomBytes(length)
-	return base64.URLEncoding.EncodeToString(bytes), err
+func (ts *tokenService) DeleteAppToken(identifier string) {
+	ts.appTokenCache.Delete(identifier)
 }
 
-func (ts *tokenService) GetToken(identifier string) (*TokenData, bool) {
-	return ts.tokenCache.Get(identifier)
+func (ts *tokenService) CreateClusterToken(identifier string) (string, apperrors.AppError) {
+	token, err := ts.generatorFunc(ts.tokenLength)
+	if err != nil {
+		return "", err
+	}
+
+	ts.clusterTokenCache.Set(identifier, token, cache.DefaultExpiration)
+	return token, nil
 }
 
-func (ts *tokenService) DeleteToken(identifier string) {
-	ts.tokenCache.Delete(identifier)
+func (ts *tokenService) GetClusterToken(identifier string) (string, bool) {
+	token, found := ts.clusterTokenCache.Get(identifier)
+	if !found {
+		return "", found
+	}
+
+	return token.(string), found
+}
+
+func (ts *tokenService) DeleteClusterToken(identifier string) {
+	ts.clusterTokenCache.Delete(identifier)
 }

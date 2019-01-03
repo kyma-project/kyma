@@ -24,7 +24,7 @@ import (
 )
 
 type signatureHandler struct {
-	tokenService    tokens.Service
+	tokenService    tokens.ApplicationService
 	certService     certificates.Service
 	host            string
 	domainName      string
@@ -32,7 +32,7 @@ type signatureHandler struct {
 	appRepository   applications.Repository
 }
 
-func NewSignatureHandler(tokenService tokens.Service, certService certificates.Service, host string, domainName string, groupRepository kymagroup.Repository, appRepository applications.Repository) SignatureHandler {
+func NewSignatureHandler(tokenService tokens.ApplicationService, certService certificates.Service, host string, domainName string, groupRepository kymagroup.Repository, appRepository applications.Repository) SignatureHandler {
 
 	return &signatureHandler{
 		tokenService:    tokenService,
@@ -53,7 +53,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 
 	identifier := mux.Vars(r)["identifier"]
 
-	tokenData, found := sh.tokenService.GetToken(identifier)
+	tokenData, found := sh.tokenService.GetAppToken(identifier)
 	if !found || tokenData.Token != token {
 		api.RespondWithError(w, apperrors.Forbidden("Invalid token."))
 		return
@@ -78,7 +78,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sh.tokenService.DeleteToken(identifier)
+	sh.tokenService.DeleteAppToken(identifier)
 
 	api.RespondWithBody(w, http.StatusCreated, api.CertificateResponse{CRT: signedCrt})
 }

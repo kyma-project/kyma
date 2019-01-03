@@ -17,13 +17,13 @@ import (
 )
 
 type signatureHandler struct {
-	tokenService    tokens.Service
+	tokenService    tokens.ClusterService
 	certService     certificates.Service
 	host            string
 	groupRepository kymagroup.Repository
 }
 
-func NewSignatureHandler(tokenService tokens.Service, certService certificates.Service, host string, groupRepository kymagroup.Repository) SignatureHandler {
+func NewSignatureHandler(tokenService tokens.ClusterService, certService certificates.Service, host string, groupRepository kymagroup.Repository) SignatureHandler {
 
 	return &signatureHandler{
 		tokenService:    tokenService,
@@ -42,8 +42,8 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 
 	identifier := mux.Vars(r)["identifier"]
 
-	tokenData, found := sh.tokenService.GetToken(identifier)
-	if !found || tokenData.Token != token {
+	cachedToken, found := sh.tokenService.GetClusterToken(identifier)
+	if !found || cachedToken != token {
 		api.RespondWithError(w, apperrors.Forbidden("Invalid token."))
 		return
 	}
@@ -61,13 +61,13 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sh.updateKymaGroupClusterData(tokenData.Group, &certificateRequest)
+	err = sh.updateKymaGroupClusterData(identifier, &certificateRequest)
 	if err != nil {
 		api.RespondWithError(w, err)
 		return
 	}
 
-	sh.tokenService.DeleteToken(identifier)
+	sh.tokenService.DeleteClusterToken(identifier)
 
 	api.RespondWithBody(w, http.StatusCreated, api.CertificateResponse{CRT: signedCrt})
 }
