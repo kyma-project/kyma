@@ -27,6 +27,7 @@ Use the following environment variables to configure the application:
 | APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE | Yes |  | The namespace with gateway services. |
 | APP_APPLICATION_CONNECTOR_URL | Yes |  | The address of the connector service. |
 | APP_APPLICATION_CONNECTOR_CALL_HTTP_TIMEOUT | No | `500ms` | The timeout of the HTTP call. |
+| MODULE_PLUGGABILITY | No | `false` | The feature toggle for module pluggability. |
 
 ## Configure logger verbosity level
 This application uses `glog` to log messages. Pass command line arguments described in the [glog.go](https://github.com/golang/glog/blob/master/glog.go) document to customize the log, such as log level and output.

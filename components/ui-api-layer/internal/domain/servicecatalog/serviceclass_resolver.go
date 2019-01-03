@@ -4,6 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
+
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
+
 	"github.com/golang/glog"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	contentPretty "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/pretty"
@@ -37,26 +41,22 @@ type instanceListerByServiceClass interface {
 }
 
 type serviceClassResolver struct {
-	classLister        serviceClassListGetter
-	planLister         servicePlanLister
-	instanceLister     instanceListerByServiceClass
-	asyncApiSpecGetter AsyncApiSpecGetter
-	apiSpecGetter      ApiSpecGetter
-	contentGetter      ContentGetter
-	classConverter     gqlServiceClassConverter
-	planConverter      gqlServicePlanConverter
+	classLister      serviceClassListGetter
+	planLister       servicePlanLister
+	instanceLister   instanceListerByServiceClass
+	contentRetriever shared.ContentRetriever
+	classConverter   gqlServiceClassConverter
+	planConverter    gqlServicePlanConverter
 }
 
-func newServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, asyncApiSpecGetter AsyncApiSpecGetter, apiSpecGetter ApiSpecGetter, contentGetter ContentGetter) *serviceClassResolver {
+func newServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, contentRetriever shared.ContentRetriever) *serviceClassResolver {
 	return &serviceClassResolver{
-		classLister:        classLister,
-		planLister:         planLister,
-		instanceLister:     instanceLister,
-		asyncApiSpecGetter: asyncApiSpecGetter,
-		apiSpecGetter:      apiSpecGetter,
-		contentGetter:      contentGetter,
-		classConverter:     &serviceClassConverter{},
-		planConverter:      &servicePlanConverter{},
+		classLister:      classLister,
+		planLister:       planLister,
+		instanceLister:   instanceLister,
+		contentRetriever: contentRetriever,
+		classConverter:   &serviceClassConverter{},
+		planConverter:    &servicePlanConverter{},
 	}
 }
 func (r *serviceClassResolver) ServiceClassQuery(ctx context.Context, name, environment string) (*gqlschema.ServiceClass, error) {
@@ -141,8 +141,12 @@ func (r *serviceClassResolver) ServiceClassApiSpecField(ctx context.Context, obj
 	}
 
 	//TODO: Fix getting docs for local ServiceClasses
-	apiSpec, err := r.apiSpecGetter.Find("service-class", obj.Name)
+	apiSpec, err := r.contentRetriever.ApiSpec().Find("service-class", obj.Name)
 	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+
 		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.ApiSpec, pretty.ServiceClass, obj.ExternalName))
 		return nil, gqlerror.New(err, contentPretty.ApiSpec)
 	}
@@ -168,8 +172,12 @@ func (r *serviceClassResolver) ServiceClassAsyncApiSpecField(ctx context.Context
 	}
 
 	//TODO: Fix getting docs for local ServiceClasses
-	asyncApiSpec, err := r.asyncApiSpecGetter.Find("service-class", obj.Name)
+	asyncApiSpec, err := r.contentRetriever.AsyncApiSpec().Find("service-class", obj.Name)
 	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+
 		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.AsyncApiSpec, pretty.ServiceClass, obj.ExternalName))
 		return nil, gqlerror.New(err, contentPretty.AsyncApiSpec)
 	}
@@ -195,8 +203,12 @@ func (r *serviceClassResolver) ServiceClassContentField(ctx context.Context, obj
 	}
 
 	//TODO: Fix getting docs for local ServiceClasses
-	content, err := r.contentGetter.Find("service-class", obj.Name)
+	content, err := r.contentRetriever.Content().Find("service-class", obj.Name)
 	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+
 		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.Content, pretty.ServiceClass, obj.ExternalName))
 		return nil, gqlerror.New(err, contentPretty.Content)
 	}

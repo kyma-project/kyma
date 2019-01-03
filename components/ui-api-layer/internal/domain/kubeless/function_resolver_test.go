@@ -37,7 +37,8 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 		svc := automock.NewFunctionLister()
 		svc.On("List", environment, pagingParams).Return(functions, nil).Once()
 
-		resolver := kubeless.NewFunctionResolver(svc)
+		resolver, err := kubeless.NewFunctionResolver(svc)
+		require.NoError(t, err)
 
 		result, err := resolver.FunctionsQuery(nil, environment, nil, nil)
 
@@ -53,7 +54,8 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 		svc := automock.NewFunctionLister()
 		svc.On("List", environment, pagingParams).Return(functions, nil).Once()
 
-		resolver := kubeless.NewFunctionResolver(svc)
+		resolver, err := kubeless.NewFunctionResolver(svc)
+		require.NoError(t, err)
 
 		result, err := resolver.FunctionsQuery(nil, environment, nil, nil)
 		require.NoError(t, err)
@@ -64,9 +66,10 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 		svc := automock.NewFunctionLister()
 		svc.On("List", environment, pagingParams).Return(nil, errors.New("test")).Once()
 
-		resolver := kubeless.NewFunctionResolver(svc)
+		resolver, err := kubeless.NewFunctionResolver(svc)
+		require.NoError(t, err)
 
-		_, err := resolver.FunctionsQuery(nil, environment, nil, nil)
+		_, err = resolver.FunctionsQuery(nil, environment, nil, nil)
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
 	})

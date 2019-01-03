@@ -44,7 +44,8 @@ func TestApiResolver_APIsQuery(t *testing.T) {
 		service := automock.NewApiLister()
 		service.On("List", environment, empty, empty).Return(apis, nil).Once()
 
-		resolver := newApiResolver(service)
+		resolver, err := newApiResolver(service)
+		require.NoError(t, err)
 
 		result, err := resolver.APIsQuery(nil, environment, nil, nil)
 
@@ -59,9 +60,10 @@ func TestApiResolver_APIsQuery(t *testing.T) {
 		service := automock.NewApiLister()
 		service.On("List", environment, empty, empty).Return(nil, errors.New("test")).Once()
 
-		resolver := newApiResolver(service)
+		resolver, err := newApiResolver(service)
+		require.NoError(t, err)
 
-		_, err := resolver.APIsQuery(nil, environment, nil, nil)
+		_, err = resolver.APIsQuery(nil, environment, nil, nil)
 
 		service.AssertExpectations(t)
 		require.Error(t, err)
