@@ -20,10 +20,10 @@ type signatureHandler struct {
 	tokenService    tokens.Service
 	certService     certificates.Service
 	host            string
-	groupRepository kymagroup.KymaGroupsRepository
+	groupRepository kymagroup.Repository
 }
 
-func NewSignatureHandler(tokenService tokens.Service, certService certificates.Service, host string, groupRepository kymagroup.KymaGroupsRepository) SignatureHandler {
+func NewSignatureHandler(tokenService tokens.Service, certService certificates.Service, host string, groupRepository kymagroup.Repository) SignatureHandler {
 
 	return &signatureHandler{
 		tokenService:    tokenService,

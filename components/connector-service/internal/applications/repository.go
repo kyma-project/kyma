@@ -19,25 +19,25 @@ type Manager interface {
 }
 
 type repository struct {
-	appMannager Manager
+	appManager Manager
 }
 
-// ApplicationRepository contains operations for managing Applications CR
-type ApplicationRepository interface {
+// Repository contains operations for managing Applications CR
+type Repository interface {
 	Create(application *v1alpha1.Application) apperrors.AppError
 	Get(name string) (*v1alpha1.Application, apperrors.AppError)
 }
 
-// NewApplicationRepository creates a new ApplicationRepository
-func NewApplicationRepository(appManager Manager) ApplicationRepository {
+// NewApplicationRepository creates a new Application Repository
+func NewApplicationRepository(appManager Manager) Repository {
 	return &repository{
-		appMannager: appManager,
+		appManager: appManager,
 	}
 }
 
 // Create creates new Application
 func (r *repository) Create(application *v1alpha1.Application) apperrors.AppError {
-	_, err := r.appMannager.Create(application)
+	_, err := r.appManager.Create(application)
 	if err != nil {
 		return apperrors.Internal(fmt.Sprintf("Creating application %s failed, %s", application.Name, err.Error()))
 	}
@@ -47,7 +47,7 @@ func (r *repository) Create(application *v1alpha1.Application) apperrors.AppErro
 
 // Get reads Application with name
 func (r *repository) Get(name string) (*v1alpha1.Application, apperrors.AppError) {
-	app, err := r.appMannager.Get(name, v1.GetOptions{})
+	app, err := r.appManager.Get(name, v1.GetOptions{})
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return nil, apperrors.NotFound(fmt.Sprintf("Application %s not found, %s", name, err.Error()))

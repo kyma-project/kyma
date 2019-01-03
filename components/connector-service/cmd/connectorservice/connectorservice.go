@@ -133,7 +133,7 @@ func csrSubject(env *environment) certificates.CSRSubject {
 	}
 }
 
-func newExternalHandler(certService certificates.Service, tokenService tokens.Service, opts *options, middlewares []mux.MiddlewareFunc, subjectValues certificates.CSRSubject, groupsRepository kymagroup.KymaGroupsRepository, appsRepository applications.ApplicationRepository) http.Handler {
+func newExternalHandler(certService certificates.Service, tokenService tokens.Service, opts *options, middlewares []mux.MiddlewareFunc, subjectValues certificates.CSRSubject, groupsRepository kymagroup.Repository, appsRepository applications.Repository) http.Handler {
 	rh := externalapi.NewSignatureHandler(tokenService, certService, opts.connectorServiceHost, opts.domainName, groupsRepository, appsRepository)
 	ih := externalapi.NewInfoHandler(tokenService, opts.connectorServiceHost, opts.domainName, subjectValues, groupsRepository)
 	return externalapi.NewHandler(rh, ih, middlewares)
@@ -144,7 +144,7 @@ func newInternalHandler(tokenGenerator tokens.Service, host string, middlewares 
 	return internalapi.NewHandler(th, middlewares)
 }
 
-func newK8sClients(namespace string) (secrets.Repository, kymagroup.KymaGroupsRepository, applications.ApplicationRepository, apperrors.AppError) {
+func newK8sClients(namespace string) (secrets.Repository, kymagroup.Repository, applications.Repository, apperrors.AppError) {
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
 		return nil, nil, nil, apperrors.Internal("failed to read k8s in-cluster configuration, %s", err)
@@ -171,7 +171,7 @@ func newK8sClients(namespace string) (secrets.Repository, kymagroup.KymaGroupsRe
 	return secrets.NewRepository(sei), kymagroup.NewKymaGroupRepository(groupsClient), applications.NewApplicationRepository(appsClient), nil
 }
 
-func newKymaClusterAPIs(tokenService tokens.Service, certificateService certificates.Service, subjectValues certificates.CSRSubject, options *options, middlewares []mux.MiddlewareFunc, groupRepository kymagroup.KymaGroupsRepository, generator connectoruuid.Generator) []*http.Server {
+func newKymaClusterAPIs(tokenService tokens.Service, certificateService certificates.Service, subjectValues certificates.CSRSubject, options *options, middlewares []mux.MiddlewareFunc, groupRepository kymagroup.Repository, generator connectoruuid.Generator) []*http.Server {
 	clusterTokenHandler := kymaintapi.NewTokenHandler(tokenService, options.connectorServiceHost, generator)
 
 	internalSrv := &http.Server{

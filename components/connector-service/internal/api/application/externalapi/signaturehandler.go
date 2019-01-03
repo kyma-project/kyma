@@ -28,11 +28,11 @@ type signatureHandler struct {
 	certService     certificates.Service
 	host            string
 	domainName      string
-	groupRepository kymagroup.KymaGroupsRepository
-	appRepository   applications.ApplicationRepository
+	groupRepository kymagroup.Repository
+	appRepository   applications.Repository
 }
 
-func NewSignatureHandler(tokenService tokens.Service, certService certificates.Service, host string, domainName string, groupRepository kymagroup.KymaGroupsRepository, appRepository applications.ApplicationRepository) SignatureHandler {
+func NewSignatureHandler(tokenService tokens.Service, certService certificates.Service, host string, domainName string, groupRepository kymagroup.Repository, appRepository applications.Repository) SignatureHandler {
 
 	return &signatureHandler{
 		tokenService:    tokenService,

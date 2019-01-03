@@ -25,10 +25,10 @@ type infoHandler struct {
 	host            string
 	domainName      string
 	csrSubject      certificates.CSRSubject
-	groupRepository kymagroup.KymaGroupsRepository
+	groupRepository kymagroup.Repository
 }
 
-func NewInfoHandler(tokenGenerator tokens.Service, host string, domainName string, csrSubject certificates.CSRSubject, groupRepository kymagroup.KymaGroupsRepository) InfoHandler {
+func NewInfoHandler(tokenGenerator tokens.Service, host string, domainName string, csrSubject certificates.CSRSubject, groupRepository kymagroup.Repository) InfoHandler {
 	return &infoHandler{
 		tokenService:    tokenGenerator,
 		host:            host,

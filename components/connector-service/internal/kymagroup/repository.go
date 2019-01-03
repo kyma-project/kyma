@@ -18,8 +18,8 @@ type Manager interface {
 	Get(name string, options v1.GetOptions) (*v1alpha1.KymaGroup, error)
 }
 
-// KymaGroupsRepository contains operations for managing KymaGroup CR
-type KymaGroupsRepository interface {
+// Repository contains operations for managing KymaGroup CR
+type Repository interface {
 	Create(application *v1alpha1.KymaGroup) apperrors.AppError
 	UpdateClusterData(group string, cluster *v1alpha1.Cluster) apperrors.AppError
 	AddApplication(group string, app *v1alpha1.Application) apperrors.AppError
@@ -31,8 +31,8 @@ type repository struct {
 	kymaGroupManager Manager
 }
 
-// NewKymaGroupRepository creates a new KymaGroupsRepository
-func NewKymaGroupRepository(kymaGroupManager Manager) KymaGroupsRepository {
+// NewKymaGroupRepository creates a new Kyma Group Repository
+func NewKymaGroupRepository(kymaGroupManager Manager) Repository {
 	return &repository{
 		kymaGroupManager: kymaGroupManager,
 	}
