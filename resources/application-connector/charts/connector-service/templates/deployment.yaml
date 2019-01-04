@@ -37,6 +37,10 @@ spec:
           - "--tokenExpirationMinutes={{ .Values.deployment.args.tokenExpirationMinutes }}"
           - "--domainName={{ .Values.global.domainName }}"
           - "--connectorServiceHost=connector-service.{{ .Values.global.domainName }}"
+          - "--caSecretName={{ .Values.deployment.args.caSecretName }}"
+          - "--global={{ .Values.deployment.args.global }}"
+          - "--externalKymaAPIPort={{ .Values.deployment.args.kymaExternalAPIPort }}"
+          - "--internalKymaAPIPort={{ .Values.deployment.args.kymaInternalAPIPort }}"
         env:
           - name: COUNTRY
             value: "{{ .Values.deployment.envvars.country }}"

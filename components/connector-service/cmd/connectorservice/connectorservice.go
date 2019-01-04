@@ -33,10 +33,6 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
-const (
-	caSecretName = "nginx-auth-ca" // TODO - as flag?
-)
-
 func main() {
 	formatter := &log.TextFormatter{
 		FullTimestamp: true,
@@ -96,7 +92,7 @@ func setup(options *options, env *environment) ([]*http.Server, error) {
 	verificationService := verification.NewVerificationService(options.global)
 
 	certUtil := certificates.NewCertificateUtility()
-	certificateService := certificates.NewCertificateService(secretsRepository, certUtil, caSecretName, subjectValues)
+	certificateService := certificates.NewCertificateService(secretsRepository, certUtil, options.caSecretName, subjectValues)
 
 	uuidGenerator := connectoruuid.GeneratorFunc(func() string {
 		return uuid.NewV4().String()

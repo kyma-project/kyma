@@ -17,8 +17,8 @@ global:
     dir: develop/
     version: acb1e829
   connector_service:
-    dir: develop/
-    version: acb1e829
+    dir: pr/
+    version: PR-2149
   connector_service_tests:
     dir: develop/
     version: 32a77c71

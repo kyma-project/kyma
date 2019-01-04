@@ -8,6 +8,8 @@ deployment:
     kymaExternalAPIPort: &kymaExternalAPIPort 8083
     tokenLength: 64
     tokenExpirationMinutes: 5
+    global: "false"
+    caSecretName: "nginx-auth-ca"
   envvars:
     country: DE
     organization: Organization
