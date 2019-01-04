@@ -676,7 +676,6 @@
   version = "kubernetes-1.11.3"
 
 [[projects]]
-  branch = "master"
   name = "k8s.io/apiserver"
   packages = [
     "pkg/authentication/authenticator",
@@ -688,7 +687,8 @@
     "plugin/pkg/authenticator/token/oidc",
     "plugin/pkg/authorizer/webhook"
   ]
-  revision = "fdeb778d731fc8996a43faf969587f98529c8c0b"
+  revision = "386115dd78fde3efc2366cb381420a4dd0157348"
+  version = "kubernetes-1.11.3"
 
 [[projects]]
   name = "k8s.io/client-go"
@@ -921,6 +921,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f24dd4a89938773030a342312f7fed6611b0e64d298908f5d6ce1429b5885465"
+  inputs-digest = "543ca377cfdafdebc4801ee64f151ad82d481f2845bdcd997ed9cdb41d71bc8a"
   solver-name = "gps-cdcl"
   solver-version = 1

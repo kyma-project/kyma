@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"k8s.io/apiserver/pkg/authentication/user"
 	authorizer2 "k8s.io/apiserver/pkg/authorization/authorizer"
 	"k8s.io/client-go/kubernetes"
 	"net/http"
@@ -20,7 +21,7 @@ import (
 
 	"github.com/99designs/gqlgen/handler"
 	"github.com/gorilla/websocket"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"
+	//"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authz"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application"
@@ -55,8 +56,8 @@ func main() {
 	kubeClient, err := kubernetes.NewForConfig(k8sConfig)
 	exitOnError(err, "Failed to instantiate Kubernetes client")
 
-	config := authn.OIDCConfig{}
-	authenticator, err := authn.NewOIDCAuthenticator(&config)
+	//config := authn.OIDCConfig{}
+	//authenticator, err := authn.NewOIDCAuthenticator(&config)
 	exitOnError(err, "Error while creating OIDC authenticator")
 
 	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
@@ -70,11 +71,14 @@ func main() {
 	c.Directives.CheckRBAC = func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes gqlschema.RBACAttributes) (res interface{}, err error) {
 
 		//authenticate and get user info
-		u, ok, err := authenticator.Authenticate(ctx)
-		fmt.Println(u, ok, err) // TODO: handle errors instead
+		//u, ok, err := authenticator.Authenticate(ctx)
+		//fmt.Println(u, ok, err) // TODO: handle errors instead
+
+		u := &user.DefaultInfo{Name: "szymon.janota@sap.com"}
 
 		// prepare attributes for authz
 		attrs := authz.PrepareAttributes(ctx, u, attributes)
+		glog.Infof("%+v", attrs)
 
 		// check if user is allowed to get requested resource
 		authorized, _, err := authorizer.Authorize(attrs)

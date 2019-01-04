@@ -556,8 +556,8 @@ type API {
 # Queries
 
 type Query {
-    serviceInstance(name: String!, environment: String!): ServiceInstance
-    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]!
+    serviceInstance(name: String!, environment: String!): ServiceInstance @checkRBAC(attributes: {resource: "ServiceInstance", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
+    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @checkRBAC(attributes: {resource: "ServiceInstance", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment"})
 
     clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]!
     clusterServiceClass(name: String!): ClusterServiceClass

@@ -19209,8 +19209,8 @@ type API {
 # Queries
 
 type Query {
-    serviceInstance(name: String!, environment: String!): ServiceInstance
-    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]!
+    serviceInstance(name: String!, environment: String!): ServiceInstance @checkRBAC(attributes: {resource: "ServiceInstance", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
+    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @checkRBAC(attributes: {resource: "ServiceInstance", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment"})
 
     clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]!
     clusterServiceClass(name: String!): ClusterServiceClass
@@ -19223,7 +19223,7 @@ type Query {
     serviceBroker(name: String!, environment: String!): ServiceBroker
 
     serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
-    serviceBinding(name: String!, environment: String!): ServiceBinding
+    serviceBinding(name: String!, environment: String!): ServiceBinding @checkRBAC(attributes: {resource: "ServiceBinding", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]!
 
     # The query returns all instances of the resources specified by the usageKind parameter in the given environment. The result contains the resources which do not have the metadata.ownerReference.
@@ -19250,7 +19250,7 @@ type Query {
     topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
     eventActivations(environment: String!): [EventActivation!]!
 
-    limitRanges(environment: String!): [LimitRange!]! @checkRBAC(attributes: {resource: "LimitRange", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "environments"})
+    limitRanges(environment: String!): [LimitRange!]! @checkRBAC(attributes: {resource: "LimitRange", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "environment"})
 
     IDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @checkRBAC(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
