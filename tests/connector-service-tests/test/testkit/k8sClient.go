@@ -10,7 +10,7 @@ import (
 )
 
 type K8sResourcesClient interface {
-	CreateDummyApplication(name string, accessLabel string, skipInstallation bool) (*v1alpha1.Application, error)
+	CreateDummyApplication(namePrefix string, accessLabel string, skipInstallation bool) (*v1alpha1.Application, error)
 	DeleteApplication(name string, options *v1.DeleteOptions) error
 }
 type k8sResourcesClient struct {
@@ -54,7 +54,7 @@ func (c *k8sResourcesClient) CreateDummyApplication(namePrefix string, accessLab
 }
 
 func addRandomPostfix(s string) string {
-	return fmt.Sprintf(s + "-%s", rand.String(5))
+	return fmt.Sprintf(s+"-%s", rand.String(5))
 }
 
 func (c *k8sResourcesClient) DeleteApplication(name string, options *v1.DeleteOptions) error {
