@@ -1,6 +1,6 @@
 // +build acceptance
 
-package servicecatalog
+package servicecatalogaddons
 
 import (
 	"testing"
@@ -49,7 +49,7 @@ func TestUsageKind(t *testing.T) {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
-	client, cfg, err := client.NewClientWithConfig()
+	cli, cfg, err := client.NewClientWithConfig()
 	require.NoError(t, err)
 
 	bucClient, err := versioned.NewForConfig(cfg)
@@ -59,7 +59,7 @@ func TestUsageKind(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Log("Creating namespace...")
-	_, err = client.Namespaces().Create(fixNamespace(usageKindNamespace))
+	_, err = cli.Namespaces().Create(fixNamespace(usageKindNamespace))
 	require.NoError(t, err)
 
 	t.Log("Creating UsageKind...")
@@ -72,7 +72,7 @@ func TestUsageKind(t *testing.T) {
 		assert.NoError(t, err)
 
 		t.Log("Deleting namespace...")
-		err = client.Namespaces().Delete(usageKindNamespace, &metav1.DeleteOptions{})
+		err = cli.Namespaces().Delete(usageKindNamespace, &metav1.DeleteOptions{})
 		assert.NoError(t, err)
 	}()
 
@@ -97,7 +97,7 @@ func TestUsageKind(t *testing.T) {
 
 	t.Log("Querying for usageKindResources...")
 	var usageKindResourcesResponse usageKindResourcesResponse
-	waiter.WaitAtMost(func() (bool, error) {
+	err = waiter.WaitAtMost(func() (bool, error) {
 		err = c.Do(fixUsageKindsResourcesQuery(), &usageKindResourcesResponse)
 		if err != nil {
 			return false, err
@@ -110,6 +110,7 @@ func TestUsageKind(t *testing.T) {
 		}
 		return true, nil
 	}, time.Second*5)
+	require.NoError(t, err)
 }
 
 func fixUsageKindsQuery() *graphql.Request {

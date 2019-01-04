@@ -4,88 +4,36 @@ package servicecatalog
 
 import (
 	"fmt"
-	"testing"
-	"time"
-
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/client"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared/fixture"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared/wait"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/waiter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-const (
-	instanceReadyTimeout             = time.Second * 45
-	instanceDeletionTimeout          = time.Second * 15
-	serviceInstanceStatusTypeRunning = "RUNNING"
+	"testing"
 )
 
 type ServiceInstanceEvent struct {
 	Type            string
-	ServiceInstance ServiceInstance
-}
-
-type ServiceInstanceResourceRef struct {
-	Name        string
-	DisplayName string
-	ClusterWide bool
-}
-
-type ServiceInstance struct {
-	Name                 string
-	Environment          string
-	ClassReference       ServiceInstanceResourceRef
-	PlanReference        ServiceInstanceResourceRef
-	PlanSpec             map[string]interface{}
-	ClusterServicePlan   ClusterServicePlan
-	ClusterServiceClass  ClusterServiceClass
-	ServicePlan          ServicePlan
-	ServiceClass         ServiceClass
-	CreationTimestamp    int
-	Labels               []string
-	Status               ServiceInstanceStatus
-	ServiceBindings      ServiceBindings
-	ServiceBindingUsages []ServiceBindingUsage
-	Bindable             bool
-}
-
-type ServiceBindings struct {
-	Items []ServiceBinding
-	Stats ServiceBindingStats
-}
-
-type ServiceBindingStats struct {
-	Ready   int
-	Failed  int
-	Pending int
-	Unknown int
-}
-
-type ServiceInstanceStatus struct {
-	Type    string
-	Reason  string
-	Message string
+	ServiceInstance shared.ServiceInstance
 }
 
 type instancesQueryResponse struct {
-	ServiceInstances []ServiceInstance
+	ServiceInstances []shared.ServiceInstance
 }
 
 type instanceQueryResponse struct {
-	ServiceInstance ServiceInstance
+	ServiceInstance shared.ServiceInstance
 }
 
 type instanceCreateMutationResponse struct {
-	CreateServiceInstance ServiceInstance
+	CreateServiceInstance shared.ServiceInstance
 }
 
 type instanceDeleteMutationResponse struct {
-	DeleteServiceInstance ServiceInstance
+	DeleteServiceInstance shared.ServiceInstance
 }
 
 func TestServiceInstanceMutationsAndQueries(t *testing.T) {
@@ -95,7 +43,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
 	require.NoError(t, err)
 
-	expectedResourceFromClusterServiceClass := instanceFromClusterServiceClass("cluster-test-instance")
+	expectedResourceFromClusterServiceClass := fixture.ServiceInstance("cluster-test-instance")
 	expectedResourceFromServiceClass := instanceFromServiceClass("test-instance")
 	resourceDetailsQuery := instanceDetailsFields()
 
@@ -116,7 +64,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	checkInstanceEvent(t, expectedEvent, event)
 
 	t.Log(("Wait for instance Ready created by %s"), tester.ClusterServiceBroker)
-	err = waitForInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Environment, svcatCli)
+	err = wait.ForServiceInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Environment, svcatCli)
 	assert.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Create instance from %s", tester.ServiceBroker))
@@ -126,7 +74,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	checkInstanceFromServiceClass(t, expectedResourceFromServiceClass, createRes.CreateServiceInstance)
 
 	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ServiceBroker))
-	err = waitForInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Environment, svcatCli)
+	err = wait.ForServiceInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Environment, svcatCli)
 	assert.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", tester.ClusterServiceBroker))
@@ -150,11 +98,11 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 
 	// We must again wait for RUNNING status of created instances, because sometimes Kubernetess change status from RUNNING to PROVISIONING at the first queries - Query Single Resource
 	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ClusterServiceBroker))
-	err = waitForInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Environment, svcatCli)
+	err = wait.ForServiceInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Environment, svcatCli)
 	assert.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ServiceBroker))
-	err = waitForInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Environment, svcatCli)
+	err = wait.ForServiceInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Environment, svcatCli)
 	assert.NoError(t, err)
 
 	t.Log("Query Multiple Resources With Status")
@@ -171,7 +119,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	checkInstanceFromClusterServiceClass(t, expectedResourceFromClusterServiceClass, deleteRes.DeleteServiceInstance)
 
 	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", tester.ClusterServiceBroker))
-	err = waitForInstanceDeletion(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Environment, svcatCli)
+	err = wait.ForServiceInstanceDeletion(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Environment, svcatCli)
 	assert.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Delete instance created by %s", tester.ServiceBroker))
@@ -181,11 +129,11 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	checkInstanceFromServiceClass(t, expectedResourceFromServiceClass, deleteRes.DeleteServiceInstance)
 
 	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", tester.ServiceBroker))
-	err = waitForInstanceDeletion(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Environment, svcatCli)
+	err = wait.ForServiceInstanceDeletion(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Environment, svcatCli)
 	assert.NoError(t, err)
 }
 
-func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource ServiceInstance, clusterWide bool) (instanceCreateMutationResponse, error) {
+func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance, clusterWide bool) (instanceCreateMutationResponse, error) {
 	query := fmt.Sprintf(`
 			mutation ($name: String!, $environment: String!, $externalPlanName: String!, $externalServiceClassName: String!, $labels: [String!]!, $parameterSchema: JSON) {
 				createServiceInstance(params: {
@@ -239,7 +187,7 @@ func subscribeInstance(c *graphql.Client, resourceDetailsQuery string, environme
 	return c.Subscribe(req)
 }
 
-func querySingleInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource ServiceInstance) (instanceQueryResponse, error) {
+func querySingleInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance) (instanceQueryResponse, error) {
 	req := singleResourceQueryRequest(resourceDetailsQuery, expectedResource)
 
 	var res instanceQueryResponse
@@ -275,7 +223,7 @@ func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery, e
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("environment", environment)
-	req.SetVar("status", serviceInstanceStatusTypeRunning)
+	req.SetVar("status", shared.ServiceInstanceStatusTypeRunning)
 
 	var res instancesQueryResponse
 	err := c.Do(req, &res)
@@ -283,7 +231,7 @@ func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery, e
 	return res, err
 }
 
-func deleteInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource ServiceInstance) (instanceDeleteMutationResponse, error) {
+func deleteInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance) (instanceDeleteMutationResponse, error) {
 	query := fmt.Sprintf(`
 			mutation ($name: String!, $environment: String!) {
 				deleteServiceInstance(name: $name, environment: $environment) {
@@ -301,7 +249,7 @@ func deleteInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 	return res, err
 }
 
-func singleResourceQueryRequest(resourceDetailsQuery string, expectedResource ServiceInstance) *graphql.Request {
+func singleResourceQueryRequest(resourceDetailsQuery string, expectedResource shared.ServiceInstance) *graphql.Request {
 	query := fmt.Sprintf(`
 			query ($name: String!, $environment: String!) {
 				serviceInstance(name: $name, environment: $environment) {
@@ -423,7 +371,7 @@ func instanceEventDetailsFields() string {
     `, instanceDetailsFields())
 }
 
-func checkInstanceFromClusterServiceClass(t *testing.T, expected, actual ServiceInstance) {
+func checkInstanceFromClusterServiceClass(t *testing.T, expected, actual shared.ServiceInstance) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
@@ -439,7 +387,7 @@ func checkInstanceFromClusterServiceClass(t *testing.T, expected, actual Service
 	assert.Equal(t, expected.Bindable, actual.Bindable)
 }
 
-func checkInstanceFromServiceClass(t *testing.T, expected, actual ServiceInstance) {
+func checkInstanceFromServiceClass(t *testing.T, expected, actual shared.ServiceInstance) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
@@ -456,7 +404,7 @@ func checkInstanceFromServiceClass(t *testing.T, expected, actual ServiceInstanc
 	assert.Equal(t, expected.ServiceClass.Environment, actual.ServiceClass.Environment)
 }
 
-func assertInstanceFromClusterServiceClassExistsAndEqual(t *testing.T, expectedElement ServiceInstance, arr []ServiceInstance) {
+func assertInstanceFromClusterServiceClassExistsAndEqual(t *testing.T, expectedElement shared.ServiceInstance, arr []shared.ServiceInstance) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
@@ -469,7 +417,7 @@ func assertInstanceFromClusterServiceClassExistsAndEqual(t *testing.T, expectedE
 	}, "Resource does not exist")
 }
 
-func assertInstanceFromServiceClassExistsAndEqual(t *testing.T, expectedElement ServiceInstance, arr []ServiceInstance) {
+func assertInstanceFromServiceClassExistsAndEqual(t *testing.T, expectedElement shared.ServiceInstance, arr []shared.ServiceInstance) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
@@ -482,8 +430,8 @@ func assertInstanceFromServiceClassExistsAndEqual(t *testing.T, expectedElement 
 	}, "Resource does not exist")
 }
 
-func instanceFromClusterServiceClass(name string) ServiceInstance {
-	return ServiceInstance{
+func instanceFromServiceClass(name string) shared.ServiceInstance {
+	return shared.ServiceInstance{
 		Name:        name,
 		Environment: tester.DefaultNamespace,
 		Labels:      []string{"test", "test2"},
@@ -493,86 +441,27 @@ func instanceFromClusterServiceClass(name string) ServiceInstance {
 				"value": "2",
 			},
 		},
-		ClusterServicePlan: ClusterServicePlan{
+		ServicePlan: shared.ServicePlan{
 			Name:         "86064792-7ea2-467b-af93-ac9694d96d52",
 			ExternalName: "default",
 		},
-		ClusterServiceClass: ClusterServiceClass{
-			Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
-			ExternalName: "user-provided-service",
-		},
-		Status: ServiceInstanceStatus{
-			Type: serviceInstanceStatusTypeRunning,
-		},
-		Bindable: true,
-	}
-}
-
-func instanceFromServiceClass(name string) ServiceInstance {
-	return ServiceInstance{
-		Name:        name,
-		Environment: tester.DefaultNamespace,
-		Labels:      []string{"test", "test2"},
-		PlanSpec: map[string]interface{}{
-			"first": "1",
-			"second": map[string]interface{}{
-				"value": "2",
-			},
-		},
-		ServicePlan: ServicePlan{
-			Name:         "86064792-7ea2-467b-af93-ac9694d96d52",
-			ExternalName: "default",
-		},
-		ServiceClass: ServiceClass{
+		ServiceClass: shared.ServiceClass{
 			Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
 			ExternalName: "user-provided-service",
 			Environment:  tester.DefaultNamespace,
 		},
-		Status: ServiceInstanceStatus{
-			Type: serviceInstanceStatusTypeRunning,
+		Status: shared.ServiceInstanceStatus{
+			Type: shared.ServiceInstanceStatusTypeRunning,
 		},
 		Bindable: true,
 	}
 }
 
-func instanceEvent(eventType string, serviceInstance ServiceInstance) ServiceInstanceEvent {
+func instanceEvent(eventType string, serviceInstance shared.ServiceInstance) ServiceInstanceEvent {
 	return ServiceInstanceEvent{
 		Type:            eventType,
 		ServiceInstance: serviceInstance,
 	}
-}
-
-func waitForInstanceReady(instanceName, environment string, svcatCli *clientset.Clientset) error {
-	return waiter.WaitAtMost(func() (bool, error) {
-		instance, err := svcatCli.ServicecatalogV1beta1().ServiceInstances(environment).Get(instanceName, metav1.GetOptions{})
-		if err != nil || instance == nil {
-			return false, err
-		}
-
-		conditions := instance.Status.Conditions
-		for _, cond := range conditions {
-			if cond.Type == v1beta1.ServiceInstanceConditionReady {
-				return cond.Status == v1beta1.ConditionTrue, nil
-			}
-		}
-
-		return false, nil
-	}, instanceReadyTimeout)
-}
-
-func waitForInstanceDeletion(instanceName, environment string, svcatCli *clientset.Clientset) error {
-	return waiter.WaitAtMost(func() (bool, error) {
-		_, err := svcatCli.ServicecatalogV1beta1().ServiceInstances(environment).Get(instanceName, metav1.GetOptions{})
-
-		if errors.IsNotFound(err) {
-			return true, nil
-		}
-		if err != nil {
-			return false, err
-		}
-
-		return false, nil
-	}, instanceDeletionTimeout)
 }
 
 func readInstanceEvent(sub *graphql.Subscription) (ServiceInstanceEvent, error) {
