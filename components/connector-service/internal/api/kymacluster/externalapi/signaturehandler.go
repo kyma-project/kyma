@@ -61,7 +61,6 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO - should we update if empty?
 	err = sh.updateKymaGroupClusterData(identifier, &certificateRequest)
 	if err != nil {
 		api.RespondWithError(w, err)
@@ -76,6 +75,10 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 // We assume that KymaGroup already exists when Kyma Cluster is registering
 // If it is not the case operation will fail
 func (sh *signatureHandler) updateKymaGroupClusterData(groupId string, certRequest *CertificateRequest) apperrors.AppError {
+	if certRequest.KymaCluster.AppRegistryUrl == "" || certRequest.KymaCluster.EventsUrl == "" {
+		return nil
+	}
+
 	clusterInfo := &v1alpha1.Cluster{
 		AppRegistryUrl: certRequest.KymaCluster.AppRegistryUrl,
 		EventsUrl:      certRequest.KymaCluster.EventsUrl,

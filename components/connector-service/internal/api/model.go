@@ -14,12 +14,3 @@ type CertificateInfo struct {
 	Extensions   string `json:"extensions"`
 	KeyAlgorithm string `json:"key-algorithm"`
 }
-
-//
-//type CSRInfo struct {
-//	Country            string `json:"country"`
-//	Organization       string `json:"organization"`
-//	OrganizationalUnit string `json:"organizationalUnit"`
-//	Locality           string `json:"locality"`
-//	Province           string `json:"province"`
-//}

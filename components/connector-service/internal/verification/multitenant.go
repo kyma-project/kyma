@@ -15,7 +15,6 @@ func newMultiTenantIdentificationService() Service {
 	return &multiTenant{}
 }
 
-// TODO - validate group and tenant matching
 func (svc *multiTenant) Verify(request *http.Request, identifier string) (*tokens.TokenData, apperrors.AppError) {
 	group := request.Header.Get("Group")
 	if group == "" {
