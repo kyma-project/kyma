@@ -97,7 +97,6 @@ func (c *k8sResourcesClient) CreateDummyApplication(namePrefix string, options v
 	}
 
 	dummyAppName := addRandomPostfix(namePrefix)
-	//dummyAppName := namePrefix
 
 	dummyApp := &v1alpha1.Application{
 		TypeMeta:   v1.TypeMeta{Kind: "Application", APIVersion: v1alpha1.SchemeGroupVersion.String()},
@@ -109,7 +108,7 @@ func (c *k8sResourcesClient) CreateDummyApplication(namePrefix string, options v
 }
 
 func addRandomPostfix(s string) string {
-	return fmt.Sprintf(s + "-%s", rand.String(5))
+	return fmt.Sprintf(s+"-%s", rand.String(5))
 }
 
 func (c *k8sResourcesClient) DeleteApplication(name string, options *v1.DeleteOptions) error {
