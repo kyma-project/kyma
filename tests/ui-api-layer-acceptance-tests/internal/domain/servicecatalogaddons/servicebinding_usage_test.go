@@ -4,10 +4,11 @@ package servicecatalogaddons
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared/wait"
-	"testing"
 
 	catalog "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
@@ -19,7 +20,6 @@ import (
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 )
-
 
 type ServiceBindingUsageEvent struct {
 	Type                string

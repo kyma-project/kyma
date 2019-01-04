@@ -1,7 +1,7 @@
 package fixture
 
 import (
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared"
 )
 

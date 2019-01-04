@@ -4,7 +4,9 @@ package servicecatalog
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	"testing"
+
+	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared/fixture"
@@ -12,7 +14,6 @@ import (
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 type ServiceInstanceEvent struct {
