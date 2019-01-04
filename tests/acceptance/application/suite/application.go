@@ -67,8 +67,9 @@ func fixApplication(name, accessLabel, serviceId, gatewayUrl, displayName string
 			Name: name,
 		},
 		Spec: appTypes.ApplicationSpec{
-			AccessLabel: "re-access-label",
-			Description: "Application used by application acceptance test",
+			AccessLabel:      "re-access-label",
+			Description:      "Application used by application acceptance test",
+			SkipInstallation: true,
 			Services: []appTypes.Service{
 				{
 					ID:   serviceId,
