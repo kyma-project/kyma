@@ -50,6 +50,9 @@ func main() {
 	resolvers, err := domain.New(k8sConfig, cfg.Content, cfg.Application, cfg.InformerResyncPeriod)
 	exitOnError(err, "Error while creating resolvers")
 
+	kubeClient, err := kubernetes.NewForConfig(k8sConfig)
+	exitOnError(err, "Failed to instantiate Kubernetes client")
+
 	config := authn.OIDCConfig{}
 	authenticator, err := authn.NewOIDCAuthenticator(&config)
 	exitOnError(err, "Error while creating OIDC authenticator")
