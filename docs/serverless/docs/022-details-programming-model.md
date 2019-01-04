@@ -35,7 +35,7 @@ The function retrieves two parameters: Event and Context.
 
 ```yaml
 event:
-  data:                                         # Event data / request body
+  data:                                         # Request body
     foo: "bar"                                  # The data is parsed as JSON when required
   extensions:                                   # Optional parameters
     request:                                    # Reference to the request received
