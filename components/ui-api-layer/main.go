@@ -55,8 +55,7 @@ func main() {
 	exitOnError(err, "Error while creating OIDC authenticator")
 
 	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
-	authorizer := authz.NewAuthorizer(sarClient)
-
+	authorizer, err := authz.NewAuthorizer(sarClient)
 	exitOnError(err, "Failed to create authorizer")
 
 	stopCh := signal.SetupChannel()
