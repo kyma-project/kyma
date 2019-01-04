@@ -251,4 +251,3 @@ func fixServiceBindingUsageResource() *api.ServiceBindingUsage {
 		},
 	}
 }
-

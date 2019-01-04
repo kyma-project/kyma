@@ -2,6 +2,7 @@ package servicecatalogaddons
 
 import (
 	"context"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
 
 	"github.com/golang/glog"

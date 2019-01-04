@@ -2,8 +2,9 @@ package servicecatalogaddons
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
 
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
@@ -19,20 +20,20 @@ type notifier interface {
 }
 
 type serviceBindingUsageService struct {
-	client         v1alpha1.ServicecatalogV1alpha1Interface
-	informer       cache.SharedIndexInformer
+	client      v1alpha1.ServicecatalogV1alpha1Interface
+	informer    cache.SharedIndexInformer
 	scRetriever shared.ServiceCatalogRetriever
-	notifier       notifier
+	notifier    notifier
 
 	nameFunc func() string
 }
 
 func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, scRetriever shared.ServiceCatalogRetriever, nameFunc func() string) *serviceBindingUsageService {
 	svc := &serviceBindingUsageService{
-		client:         client,
-		informer:       informer,
-		scRetriever:scRetriever,
-		nameFunc:       nameFunc,
+		client:      client,
+		informer:    informer,
+		scRetriever: scRetriever,
+		nameFunc:    nameFunc,
 	}
 
 	informer.AddIndexers(cache.Indexers{

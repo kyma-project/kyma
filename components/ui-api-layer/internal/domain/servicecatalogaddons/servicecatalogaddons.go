@@ -2,6 +2,8 @@ package servicecatalogaddons
 
 import (
 	"context"
+	"time"
+
 	bindingUsageApi "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	bindingUsageClientset "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
 	bindingUsageInformers "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions"
@@ -13,16 +15,15 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
-	"time"
 )
 
 type PluggableContainer struct {
 	*module.Pluggable
 	cfg *resolverConfig
 
-	Resolver                    Resolver
-	ServiceCatalogAddonsRetriever     *serviceCatalogAddonsRetriever
-	informerFactory bindingUsageInformers.SharedInformerFactory
+	Resolver                      Resolver
+	ServiceCatalogAddonsRetriever *serviceCatalogAddonsRetriever
+	informerFactory               bindingUsageInformers.SharedInformerFactory
 }
 
 type serviceCatalogAddonsRetriever struct {
@@ -54,10 +55,10 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, scRetrieve
 			serviceBindingUsageClient: serviceBindingUsageClient,
 			dynamicClient:             dynamicClient,
 			informerResyncPeriod:      informerResyncPeriod,
-			scRetriever: scRetriever,
+			scRetriever:               scRetriever,
 		},
 		ServiceCatalogAddonsRetriever: &serviceCatalogAddonsRetriever{},
-		Pluggable:               module.NewPluggable("servicecatalogaddons"),
+		Pluggable:                     module.NewPluggable("servicecatalogaddons"),
 	}
 	err = container.Disable()
 	if err != nil {
@@ -78,9 +79,9 @@ func (r *PluggableContainer) Enable() error {
 
 	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
 		r.Resolver = &domainResolver{
-			serviceBindingUsageResolver:  newServiceBindingUsageResolver(serviceBindingUsageService),
-			usageKindResolver:            newUsageKindResolver(usageKindService),
-			bindableResourcesResolver:    newBindableResourcesResolver(usageKindService),
+			serviceBindingUsageResolver: newServiceBindingUsageResolver(serviceBindingUsageService),
+			usageKindResolver:           newUsageKindResolver(usageKindService),
+			bindableResourcesResolver:   newBindableResourcesResolver(usageKindService),
 		}
 		r.ServiceCatalogAddonsRetriever.ServiceBindingUsageLister = serviceBindingUsageService
 	})
@@ -91,6 +92,7 @@ func (r *PluggableContainer) Enable() error {
 func (r *PluggableContainer) Disable() error {
 	r.Pluggable.Disable(func(disabledErr error) {
 		r.Resolver = disabled.NewResolver(disabledErr)
+		r.ServiceCatalogAddonsRetriever.ServiceBindingUsageLister = disabled.NewServiceBindingUsageLister(disabledErr)
 		r.informerFactory = nil
 	})
 
@@ -100,8 +102,8 @@ func (r *PluggableContainer) Disable() error {
 type resolverConfig struct {
 	serviceBindingUsageClient bindingUsageClientset.Interface
 	dynamicClient             dynamic.Interface
-	scRetriever shared.ServiceCatalogRetriever
-	informerResyncPeriod time.Duration
+	scRetriever               shared.ServiceCatalogRetriever
+	informerResyncPeriod      time.Duration
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled

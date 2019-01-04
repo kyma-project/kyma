@@ -2,12 +2,13 @@ package servicecatalogaddons_test
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/rest"
-	"testing"
-	"time"
 )
 
 const testTimes = 3
@@ -51,4 +52,3 @@ func checkExportedFields(t *testing.T, resolver *servicecatalogaddons.PluggableC
 		require.Nil(t, val)
 	}
 }
-

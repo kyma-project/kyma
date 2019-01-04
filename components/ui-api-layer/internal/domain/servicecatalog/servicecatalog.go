@@ -22,13 +22,13 @@ type PluggableContainer struct {
 	*module.Pluggable
 	cfg *resolverConfig
 
-	Resolver                    Resolver
-	ServiceCatalogRetriever     *serviceCatalogRetriever
-	informerFactory             catalogInformers.SharedInformerFactory
+	Resolver                Resolver
+	ServiceCatalogRetriever *serviceCatalogRetriever
+	informerFactory         catalogInformers.SharedInformerFactory
 }
 
 type serviceCatalogRetriever struct {
-	ServiceBindingFinderLister      ServiceBindingFinderLister
+	ServiceBindingFinderLister ServiceBindingFinderLister
 }
 
 func (r *serviceCatalogRetriever) ServiceBinding() shared.ServiceBindingFinderLister {
@@ -49,9 +49,9 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, contentRet
 
 	container := &PluggableContainer{
 		cfg: &resolverConfig{
-			client: client,
-			informerResyncPeriod:      informerResyncPeriod,
-			contentRetriever:          contentRetriever,
+			client:               client,
+			informerResyncPeriod: informerResyncPeriod,
+			contentRetriever:     contentRetriever,
 		},
 		Pluggable:               module.NewPluggable("servicecatalog"),
 		ServiceCatalogRetriever: &serviceCatalogRetriever{},
@@ -83,7 +83,6 @@ func (r *PluggableContainer) Enable() error {
 	clusterServicePlanService := newClusterServicePlanService(informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer())
 	clusterServiceBrokerService := newClusterServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ClusterServiceBrokers().Informer())
 
-
 	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
 		r.Resolver = &domainResolver{
 			serviceInstanceResolver:      newServiceInstanceResolver(serviceInstanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
@@ -110,7 +109,7 @@ func (r *PluggableContainer) Disable() error {
 }
 
 type resolverConfig struct {
-	client                    clientset.Interface
+	client               clientset.Interface
 	informerResyncPeriod time.Duration
 	contentRetriever     shared.ContentRetriever
 }

@@ -2,9 +2,10 @@ package servicecatalogaddons_test
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"

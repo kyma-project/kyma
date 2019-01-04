@@ -5,8 +5,8 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
-	scaPretty "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/pretty"
 	scPretty "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
+	scaPretty "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
@@ -26,14 +26,14 @@ type deploymentResolver struct {
 	deploymentLister    deploymentLister
 	deploymentConverter *deploymentConverter
 	scRetriever         shared.ServiceCatalogRetriever
-	scaRetriever         shared.ServiceCatalogAddonsRetriever
+	scaRetriever        shared.ServiceCatalogAddonsRetriever
 }
 
 func newDeploymentResolver(deploymentLister deploymentLister, scRetriever shared.ServiceCatalogRetriever, scaRetriever shared.ServiceCatalogAddonsRetriever) *deploymentResolver {
 	return &deploymentResolver{
 		deploymentLister: deploymentLister,
 		scRetriever:      scRetriever,
-		scaRetriever: scaRetriever,
+		scaRetriever:     scaRetriever,
 	}
 }
 

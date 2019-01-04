@@ -8,8 +8,6 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-
-
 )
 
 func NewServiceInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) *serviceInstanceService {

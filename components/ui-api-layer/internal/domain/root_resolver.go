@@ -2,8 +2,9 @@ package domain
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons"
 	"time"
+
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 
