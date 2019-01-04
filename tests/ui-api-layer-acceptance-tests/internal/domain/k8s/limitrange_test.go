@@ -5,7 +5,7 @@ package k8s
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
 
 	"time"
 
@@ -25,7 +25,7 @@ const (
 )
 
 func TestLimitRangeQuery(t *testing.T) {
-	module.SkipNotPluggableTestIfShould(t)
+	dex.SkipTestIfShould(t)
 
 	c, err := graphql.New()
 	require.NoError(t, err)

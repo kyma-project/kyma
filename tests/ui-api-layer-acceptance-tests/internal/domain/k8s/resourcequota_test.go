@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
 
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
@@ -45,7 +45,7 @@ type resourceQuotaStatus struct {
 }
 
 func TestResourceQuotaQuery(t *testing.T) {
-	module.SkipNotPluggableTestIfShould(t)
+	dex.SkipTestIfShould(t)
 
 	c, err := graphql.New()
 	require.NoError(t, err)

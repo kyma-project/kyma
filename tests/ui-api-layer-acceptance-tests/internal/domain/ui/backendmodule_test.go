@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/apis/ui/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/client/clientset/versioned"
@@ -27,7 +27,7 @@ type backendModuleQueryResponse struct {
 }
 
 func TestBackendModule(t *testing.T) {
-	module.SkipNotPluggableTestIfShould(t)
+	dex.SkipTestIfShould(t)
 
 	c, err := graphql.New()
 	require.NoError(t, err)

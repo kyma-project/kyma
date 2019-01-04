@@ -8,6 +8,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
+
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
 
@@ -30,10 +32,12 @@ type serviceCatalogInstallers struct {
 }
 
 func TestMain(m *testing.M) {
+	dex.SkipMainIfShould()
+
 	c, err := graphql.New()
 	exitOnError(err, "while GraphQL client setup")
 
-	module.ExitIfShould(c, ModuleName)
+	module.SkipPluggableMainIfShould(c, ModuleName)
 
 	k8sClient, _, err := client.NewClientWithConfig()
 	exitOnError(err, "while initializing K8S Client")
