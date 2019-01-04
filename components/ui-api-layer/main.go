@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"k8s.io/apiserver/pkg/authentication/user"
-	authorizer2 "k8s.io/apiserver/pkg/authorization/authorizer"
+	authorizerpkg "k8s.io/apiserver/pkg/authorization/authorizer"
 	"k8s.io/client-go/kubernetes"
 	"net/http"
 	"time"
@@ -74,18 +74,20 @@ func main() {
 		//u, ok, err := authenticator.Authenticate(ctx)
 		//fmt.Println(u, ok, err) // TODO: handle errors instead
 
-		u := &user.DefaultInfo{Name: "szymon.janota@sap.com"}
+		u := &user.DefaultInfo{Name: "admin@kyma.cx"}
 
 		// prepare attributes for authz
 		attrs := authz.PrepareAttributes(ctx, u, attributes)
 		glog.Infof("%+v", attrs)
 
 		// check if user is allowed to get requested resource
-		authorized, _, err := authorizer.Authorize(attrs)
+		authorized, reason, err := authorizer.Authorize(attrs)
 		// TODO: handle errors
 
-		if authorized == authorizer2.DecisionDeny || err != nil {
-			return nil, fmt.Errorf("Access denied") // TODO: handle this error correctly
+		glog.Infof("authorized: %v, reason: %s, err: %v", authorized, reason, err)
+
+		if authorized != authorizerpkg.DecisionAllow || err != nil {
+			return nil, fmt.Errorf("access denied")
 		}
 
 		// success path TODO: delete this comment and logging attributes below
