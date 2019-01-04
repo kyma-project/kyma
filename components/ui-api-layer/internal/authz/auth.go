@@ -27,13 +27,13 @@ func NewAuthorizer(client authorizationclient.SubjectAccessReviewInterface) (aut
 		AllowCacheTTL:             5 * time.Minute,
 		DenyCacheTTL:              30 * time.Second,
 	}
-	authorizer := authorizerConfig.New()
+	a, err := authorizerConfig.New()
 
-	return &Authorizer{authorizer}
+	return &Authorizer{a}, err
 }
 
 // PrepareAttributes prepares attributes for authorization
 func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.RBACAttributes) authorizer.Attributes {
 	// TODO: implement
-	return authorizer.Attributes{}
+	return authorizer.AttributesRecord{}
 }
