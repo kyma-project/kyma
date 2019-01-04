@@ -69,8 +69,8 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 	kymaGroup := &v1alpha1.KymaGroup{
 		Spec: v1alpha1.KymaGroupSpec{
 			Cluster: v1alpha1.Cluster{
-				AppRegistryUrl: metadataUrl,
-				EventsUrl:      eventsUrl,
+				AppRegistryUrl: "https://gateway.domain/%s/v1/metadata/services",
+				EventsUrl:      "https://gateway.domain/%s/v1/events",
 			},
 		},
 	}

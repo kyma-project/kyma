@@ -19,16 +19,14 @@ import (
 type signatureHandler struct {
 	tokenService    tokens.ClusterService
 	certService     certificates.Service
-	host            string
 	groupRepository kymagroup.Repository
 }
 
-func NewSignatureHandler(tokenService tokens.ClusterService, certService certificates.Service, host string, groupRepository kymagroup.Repository) SignatureHandler {
+func NewSignatureHandler(tokenService tokens.ClusterService, certService certificates.Service, groupRepository kymagroup.Repository) SignatureHandler {
 
 	return &signatureHandler{
 		tokenService:    tokenService,
 		certService:     certService,
-		host:            host,
 		groupRepository: groupRepository,
 	}
 }

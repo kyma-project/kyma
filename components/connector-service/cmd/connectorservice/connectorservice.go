@@ -134,7 +134,7 @@ func csrSubject(env *environment) certificates.CSRSubject {
 }
 
 func newExternalHandler(certService certificates.Service, tokenService tokens.Service, opts *options, middlewares []mux.MiddlewareFunc, subjectValues certificates.CSRSubject, groupsRepository kymagroup.Repository, appsRepository applications.Repository) http.Handler {
-	rh := externalapi.NewSignatureHandler(tokenService, certService, opts.connectorServiceHost, groupsRepository, appsRepository)
+	rh := externalapi.NewSignatureHandler(tokenService, certService, groupsRepository, appsRepository)
 	ih := externalapi.NewInfoHandler(tokenService, opts.connectorServiceHost, subjectValues, groupsRepository)
 	return externalapi.NewHandler(rh, ih, middlewares)
 }
@@ -180,7 +180,7 @@ func newKymaClusterAPIs(tokenService tokens.Service, certificateService certific
 	}
 
 	clusterInfoHandler := kymaextapi.NewInfoHandler(tokenService, options.connectorServiceHost, subjectValues)
-	clusterSignHandler := kymaextapi.NewSignatureHandler(tokenService, certificateService, options.connectorServiceHost, groupRepository)
+	clusterSignHandler := kymaextapi.NewSignatureHandler(tokenService, certificateService, groupRepository)
 
 	externalSrv := &http.Server{
 		Addr:    ":" + strconv.Itoa(options.externalKymaAPIPort),

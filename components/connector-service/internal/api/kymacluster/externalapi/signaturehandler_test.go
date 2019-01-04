@@ -54,7 +54,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		groupRepository := &kymaGroupMocks.Repository{}
 		groupRepository.On("UpdateClusterData", identifier, clusterData).Return(nil)
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository)
 
 		req, err := http.NewRequest(http.MethodPost, signatureHandlerUrl, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)
@@ -86,7 +86,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 		groupRepository := &kymaGroupMocks.Repository{}
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository)
 
 		req, err := http.NewRequest(http.MethodPost, urlWithoutToken, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)
@@ -116,7 +116,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 		groupRepository := &kymaGroupMocks.Repository{}
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository)
 
 		req, err := http.NewRequest(http.MethodPost, signatureHandlerUrl, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)
@@ -148,7 +148,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 		groupRepository := &kymaGroupMocks.Repository{}
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository)
 
 		req, err := http.NewRequest(http.MethodPost, signatureHandlerUrl, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)
@@ -180,7 +180,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 		groupRepository := &kymaGroupMocks.Repository{}
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository)
 
 		incorrectBody := []byte("incorrectBody")
 		req, err := http.NewRequest(http.MethodPost, signatureHandlerUrl, bytes.NewReader(incorrectBody))
@@ -216,7 +216,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 		groupRepository := &kymaGroupMocks.Repository{}
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)
@@ -253,7 +253,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		groupRepository := &kymaGroupMocks.Repository{}
 		groupRepository.On("UpdateClusterData", identifier, clusterData).Return(apperrors.Internal("error"))
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)

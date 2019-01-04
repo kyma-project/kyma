@@ -76,7 +76,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		appRepository := &applicationMocks.Repository{}
 		appRepository.On("Get", identifier).Return(application, nil)
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository, appRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, signatureHandlerUrl, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)
@@ -136,7 +136,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		appRepository.On("Get", identifier).Return(nil, apperrors.NotFound("error"))
 		appRepository.On("Create", createdApplication).Return(nil)
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository, appRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, signatureHandlerUrl, bytes.NewReader(rawCertRequest))
 		require.NoError(t, err)
@@ -169,7 +169,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		groupRepository := &kymaGroupMocks.Repository{}
 		appRepository := &applicationMocks.Repository{}
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository, appRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, urlWithoutToken, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)
@@ -200,7 +200,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		groupRepository := &kymaGroupMocks.Repository{}
 		appRepository := &applicationMocks.Repository{}
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository, appRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, signatureHandlerUrl, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)
@@ -237,7 +237,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		groupRepository := &kymaGroupMocks.Repository{}
 		appRepository := &applicationMocks.Repository{}
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository, appRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, signatureHandlerUrl, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)
@@ -270,7 +270,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		groupRepository := &kymaGroupMocks.Repository{}
 		appRepository := &applicationMocks.Repository{}
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository, appRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository, appRepository)
 
 		incorrectBody := []byte("incorrectBody")
 		req, err := http.NewRequest(http.MethodPost, signatureHandlerUrl, bytes.NewReader(incorrectBody))
@@ -307,7 +307,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		groupRepository := &kymaGroupMocks.Repository{}
 		appRepository := &applicationMocks.Repository{}
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository, appRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)
@@ -347,7 +347,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		appRepository := &applicationMocks.Repository{}
 		appRepository.On("Get", identifier).Return(application, nil)
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository, appRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)
@@ -385,7 +385,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		appRepository := &applicationMocks.Repository{}
 		appRepository.On("Get", identifier).Return(nil, apperrors.Internal("error"))
 
-		signatureHandler := NewSignatureHandler(tokenService, certService, host, groupRepository, appRepository)
+		signatureHandler := NewSignatureHandler(tokenService, certService, groupRepository, appRepository)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(certRequestRaw))
 		require.NoError(t, err)
