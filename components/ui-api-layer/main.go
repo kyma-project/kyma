@@ -4,6 +4,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	authorizer2 "k8s.io/apiserver/pkg/authorization/authorizer"
+	"k8s.io/client-go/kubernetes"
 	"net/http"
 	"time"
 
@@ -72,13 +74,13 @@ func main() {
 		fmt.Println(u, ok, err) // TODO: handle errors instead
 
 		// prepare attributes for authz
-		attrs := authorizer.PrepareAttributes(ctx, u, attributes)
+		attrs := authz.PrepareAttributes(ctx, u, attributes)
 
 		// check if user is allowed to get requested resource
 		authorized, _, err := authorizer.Authorize(attrs)
 		// TODO: handle errors
 
-		if !authorized || err != nil {
+		if authorized == authorizer2.DecisionDeny || err != nil {
 			return nil, fmt.Errorf("Access denied") // TODO: handle this error correctly
 		}
 
@@ -110,7 +112,7 @@ func exitOnError(err error, context string) {
 
 func parseFlags(cfg config) {
 	if cfg.Verbose {
-		flag.Set("stderrthreshold", "INFO")
+		_ = flag.Set("stderrthreshold", "INFO")
 	}
 	flag.Parse()
 }
