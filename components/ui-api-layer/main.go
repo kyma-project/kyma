@@ -18,6 +18,8 @@ import (
 
 	"github.com/99designs/gqlgen/handler"
 	"github.com/gorilla/websocket"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authz"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content"
@@ -48,16 +50,35 @@ func main() {
 	resolvers, err := domain.New(k8sConfig, cfg.Content, cfg.Application, cfg.InformerResyncPeriod)
 	exitOnError(err, "Error while creating resolvers")
 
+	config := OIDCConfig{}
+	authenticator := authn.NewOIDCAuthenticator(&config)
+
+	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
+	authorizer := authz.NewAuthorizer(sarClient)
+
+	exitOnError(err,"Failed to create authorizer")
+
 	stopCh := signal.SetupChannel()
 	resolvers.WaitForCacheSync(stopCh)
 
 	c := gqlschema.Config{Resolvers: resolvers}
 	c.Directives.CheckRBAC = func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes gqlschema.RBACAttributes) (res interface{}, err error) {
 
+		//authenticate and get user info
+		u, ok, err := authenticator.Authenticate(ctx)
+		fmt.Println(u, ok, err)// TODO: handle errors instead
+
+		// prepare attributes for authz
+		attrs := authorizer.PrepareAttributes(ctx, u, attributes)
+
 		// check if user is allowed to get requested resource
-		if false { // TODO: put proper condition here
-			return nil, fmt.Errorf("Access denied")
+		authorized, _, err := authorizer.Authorize(attrs)
+		// TODO: handle errors
+
+		if !authorized || err != nil {
+			return nil, fmt.Errorf("Access denied") // TODO: handle this error correctly
 		}
+
 		// success path TODO: delete this comment and logging attributes below
 		glog.Infof("atrributes: %+v", attributes)
 		glog.Infof("obj: %+v", obj)

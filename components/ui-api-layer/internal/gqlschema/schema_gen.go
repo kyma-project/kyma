@@ -19228,8 +19228,8 @@ type Query {
 
     limitRanges(environment: String!): [LimitRange!]!
 
-    IDPPreset(name: String!): IDPPreset @checkRBAC(RBACAttributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", subresource: "" })
-    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @checkRBAC(RBACAttributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", subresource: "" })
+    IDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", subresource: "" })
+    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @checkRBAC(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", subresource: "" })
 }
 # TODO: find out which verb (get or list) should be used for listing resources (get is set in proxy.go, but somehow it is list in logs)
 
