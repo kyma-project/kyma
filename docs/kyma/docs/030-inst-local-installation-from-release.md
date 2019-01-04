@@ -21,7 +21,7 @@ Virtualization:
 - [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - Mac only
 - [VirtualBox](https://www.virtualbox.org/) - Linux only
 
-> **NOTE:** To work with Kyma, use only the provided scripts and commands. Kyma does not work on a basic Minikube cluster that you can start using the `minikube start` command or stop with the `minikube stop` command. If you don't need Kyma on Minikube anymore, remove the cluster with the `minikube delete` command.
+> **NOTE:** To work with Kyma, use only the provided scripts and commands. Kyma does not work on a basic Minikube cluster that you can start using the `minikube start` command. 
 
 ## Set up certificates
 
@@ -159,6 +159,23 @@ To enable Horizontal Pod Autoscaler, follow these steps:
   ```
   minikube addons list
   ```
+
+## Minikube stop and start
+
+If you want to stop minikube cluster and start it later without installing kyma from scratch you can do it using `minikube.sh` script.
+
+```
+# stop minikube with kyma installed
+minikube stop
+
+# start it again
+./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
+```
+The script will discover that you have minikube cluster initialized, and will ask you, if you want to delete it. Answer `no`. The script will start minikube cluster and all components installed previously will be restarted. It takes some time, but still is much faster than the installation from scratch (you don't have to download all docker images). After while you should see all pods in the running state:
+
+```
+kubectl get pods --all-namespaces
+```
 
 ## Troubleshooting
 
