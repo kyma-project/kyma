@@ -2,7 +2,7 @@ package servicecatalogaddons
 
 import (
 	"fmt"
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
 	"strings"
 
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
@@ -18,32 +18,20 @@ type notifier interface {
 	DeleteListener(observer resource.Listener)
 }
 
-
-//go:generate mockery -name=serviceBindingOperations -output=automock -outpkg=automock -case=underscore
-type serviceBindingOperations interface {
-	Create(env string, sb *v1beta1.ServiceBinding) (*v1beta1.ServiceBinding, error)
-	Delete(env string, name string) error
-	Find(env string, name string) (*v1beta1.ServiceBinding, error)
-	ListForServiceInstance(env string, instanceName string) ([]*v1beta1.ServiceBinding, error)
-	Subscribe(listener resource.Listener)
-	Unsubscribe(listener resource.Listener)
-}
-
-
 type serviceBindingUsageService struct {
 	client         v1alpha1.ServicecatalogV1alpha1Interface
 	informer       cache.SharedIndexInformer
-	bindingService serviceBindingOperations
+	scRetriever shared.ServiceCatalogRetriever
 	notifier       notifier
 
 	nameFunc func() string
 }
 
-func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, service serviceBindingOperations, nameFunc func() string) *serviceBindingUsageService {
+func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, scRetriever shared.ServiceCatalogRetriever, nameFunc func() string) *serviceBindingUsageService {
 	svc := &serviceBindingUsageService{
 		client:         client,
 		informer:       informer,
-		bindingService: service,
+		scRetriever:scRetriever,
 		nameFunc:       nameFunc,
 	}
 
@@ -99,7 +87,7 @@ func (f *serviceBindingUsageService) List(env string) ([]*api.ServiceBindingUsag
 }
 
 func (f *serviceBindingUsageService) ListForServiceInstance(env string, instanceName string) ([]*api.ServiceBindingUsage, error) {
-	bindings, err := f.bindingService.ListForServiceInstance(env, instanceName)
+	bindings, err := f.scRetriever.ServiceBinding().ListForServiceInstance(env, instanceName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while getting ServiceBindings for instance [env: %s, name: %s]", env, instanceName)
 	}

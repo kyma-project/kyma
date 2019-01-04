@@ -1,7 +1,6 @@
 package resource
 
 import (
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/resource"
 	"sync"
 )
 

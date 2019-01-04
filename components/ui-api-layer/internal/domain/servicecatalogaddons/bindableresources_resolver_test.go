@@ -1,4 +1,4 @@
-package servicecatalog
+package servicecatalogaddons
 
 import (
 	"context"

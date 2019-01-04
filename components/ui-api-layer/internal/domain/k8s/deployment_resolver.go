@@ -5,6 +5,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
+	scaPretty "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/pretty"
 	scPretty "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
@@ -25,12 +26,14 @@ type deploymentResolver struct {
 	deploymentLister    deploymentLister
 	deploymentConverter *deploymentConverter
 	scRetriever         shared.ServiceCatalogRetriever
+	scaRetriever         shared.ServiceCatalogAddonsRetriever
 }
 
-func newDeploymentResolver(deploymentLister deploymentLister, scRetriever shared.ServiceCatalogRetriever) *deploymentResolver {
+func newDeploymentResolver(deploymentLister deploymentLister, scRetriever shared.ServiceCatalogRetriever, scaRetriever shared.ServiceCatalogAddonsRetriever) *deploymentResolver {
 	return &deploymentResolver{
 		deploymentLister: deploymentLister,
 		scRetriever:      scRetriever,
+		scaRetriever: scaRetriever,
 	}
 }
 
@@ -62,14 +65,14 @@ func (r *deploymentResolver) DeploymentBoundServiceInstanceNamesField(ctx contex
 		kind = "function"
 	}
 
-	usages, err := r.scRetriever.ServiceBindingUsage().ListForDeployment(deployment.Environment, kind, deployment.Name)
+	usages, err := r.scaRetriever.ServiceBindingUsage().ListForDeployment(deployment.Environment, kind, deployment.Name)
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
 			return nil, err
 		}
 
-		glog.Error(errors.Wrapf(err, "while listing %s for %s in environment `%s`, name `%s` and kind `%s`", scPretty.ServiceBindingUsages, pretty.Deployment, deployment.Environment, deployment.Name, kind))
-		return nil, gqlerror.New(err, scPretty.ServiceBindingUsages, gqlerror.WithEnvironment(deployment.Environment))
+		glog.Error(errors.Wrapf(err, "while listing %s for %s in environment `%s`, name `%s` and kind `%s`", scaPretty.ServiceBindingUsages, pretty.Deployment, deployment.Environment, deployment.Name, kind))
+		return nil, gqlerror.New(err, scaPretty.ServiceBindingUsages, gqlerror.WithEnvironment(deployment.Environment))
 	}
 
 	instanceNames := make(map[string]struct{})

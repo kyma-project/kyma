@@ -13,12 +13,8 @@ import (
 	bindingApi "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	catalogInformers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
-	bindingUsageApi "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	bindingUsageClientset "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
-	bindingUsageInformers "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/name"
 	"github.com/pkg/errors"
-	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 )
 
@@ -29,30 +25,20 @@ type PluggableContainer struct {
 	Resolver                    Resolver
 	ServiceCatalogRetriever     *serviceCatalogRetriever
 	informerFactory             catalogInformers.SharedInformerFactory
-	bindingUsageInformerFactory bindingUsageInformers.SharedInformerFactory
 }
 
 type serviceCatalogRetriever struct {
-	ServiceBindingUsageLister ServiceBindingUsageLister
-	ServiceBindingGetter      ServiceBindingGetter
+	ServiceBindingFinderLister      ServiceBindingFinderLister
 }
 
-func (r *serviceCatalogRetriever) ServiceBinding() shared.ServiceBindingGetter {
-	return r.ServiceBindingGetter
+func (r *serviceCatalogRetriever) ServiceBinding() shared.ServiceBindingFinderLister {
+	return r.ServiceBindingFinderLister
 }
 
-func (r *serviceCatalogRetriever) ServiceBindingUsage() shared.ServiceBindingUsageLister {
-	return r.ServiceBindingUsageLister
-}
-
-//go:generate failery -name=ServiceBindingUsageLister -case=underscore -output disabled -outpkg disabled
-type ServiceBindingUsageLister interface {
-	ListForDeployment(environment, kind, deploymentName string) ([]*bindingUsageApi.ServiceBindingUsage, error)
-}
-
-//go:generate failery -name=ServiceBindingGetter -case=underscore -output disabled -outpkg disabled
-type ServiceBindingGetter interface {
+//go:generate failery -name=ServiceBindingFinderLister -case=underscore -output disabled -outpkg disabled
+type ServiceBindingFinderLister interface {
 	Find(env string, name string) (*bindingApi.ServiceBinding, error)
+	ListForServiceInstance(env string, instanceName string) ([]*bindingApi.ServiceBinding, error)
 }
 
 func New(restConfig *rest.Config, informerResyncPeriod time.Duration, contentRetriever shared.ContentRetriever) (*PluggableContainer, error) {
@@ -61,21 +47,9 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, contentRet
 		return nil, errors.Wrap(err, "while initializing Clientset")
 	}
 
-	serviceBindingUsageClient, err := bindingUsageClientset.NewForConfig(restConfig)
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing Binding Usage Clientset")
-	}
-
-	dynamicClient, err := dynamic.NewForConfig(restConfig)
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing Dynamic Clientset")
-	}
-
 	container := &PluggableContainer{
 		cfg: &resolverConfig{
 			client: client,
-			serviceBindingUsageClient: serviceBindingUsageClient,
-			dynamicClient:             dynamicClient,
 			informerResyncPeriod:      informerResyncPeriod,
 			contentRetriever:          contentRetriever,
 		},
@@ -93,8 +67,6 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, contentRet
 func (r *PluggableContainer) Enable() error {
 	informerResyncPeriod := r.cfg.informerResyncPeriod
 	client := r.cfg.client
-	serviceBindingUsageClient := r.cfg.serviceBindingUsageClient
-	dynamicClient := r.cfg.dynamicClient
 
 	contentRetriever := r.cfg.contentRetriever
 
@@ -111,20 +83,8 @@ func (r *PluggableContainer) Enable() error {
 	clusterServicePlanService := newClusterServicePlanService(informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer())
 	clusterServiceBrokerService := newClusterServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ClusterServiceBrokers().Informer())
 
-	//TODO: Move to servicecatalogaddons module
-	serviceBindingUsageInformerFactory := bindingUsageInformers.NewSharedInformerFactory(serviceBindingUsageClient, informerResyncPeriod)
-	r.bindingUsageInformerFactory = serviceBindingUsageInformerFactory
-	usageKindService := newUsageKindService(serviceBindingUsageClient.ServicecatalogV1alpha1(), dynamicClient, serviceBindingUsageInformerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer())
-	serviceBindingUsageService := newServiceBindingUsageService(serviceBindingUsageClient.ServicecatalogV1alpha1(), serviceBindingUsageInformerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer(), serviceBindingService, name.Generate)
 
-	// TODO: Use EnableAndSyncInformerFactory after splitting module into two
-	r.Pluggable.EnableAndSyncCache(func(stopCh chan struct{}) {
-		r.informerFactory.Start(stopCh)
-		r.informerFactory.WaitForCacheSync(stopCh)
-
-		r.bindingUsageInformerFactory.Start(stopCh)
-		r.bindingUsageInformerFactory.WaitForCacheSync(stopCh)
-
+	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
 		r.Resolver = &domainResolver{
 			serviceInstanceResolver:      newServiceInstanceResolver(serviceInstanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
 			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, contentRetriever),
@@ -132,12 +92,8 @@ func (r *PluggableContainer) Enable() error {
 			clusterServiceBrokerResolver: newClusterServiceBrokerResolver(clusterServiceBrokerService),
 			serviceBrokerResolver:        newServiceBrokerResolver(serviceBrokerService),
 			serviceBindingResolver:       newServiceBindingResolver(serviceBindingService),
-			serviceBindingUsageResolver:  newServiceBindingUsageResolver(serviceBindingUsageService),
-			usageKindResolver:            newUsageKindResolver(usageKindService),
-			bindableResourcesResolver:    newBindableResourcesResolver(usageKindService),
 		}
-		r.ServiceCatalogRetriever.ServiceBindingUsageLister = serviceBindingUsageService
-		r.ServiceCatalogRetriever.ServiceBindingGetter = serviceBindingService
+		r.ServiceCatalogRetriever.ServiceBindingFinderLister = serviceBindingService
 	})
 
 	return nil
@@ -146,10 +102,8 @@ func (r *PluggableContainer) Enable() error {
 func (r *PluggableContainer) Disable() error {
 	r.Pluggable.Disable(func(disabledErr error) {
 		r.Resolver = disabled.NewResolver(disabledErr)
-		r.ServiceCatalogRetriever.ServiceBindingGetter = disabled.NewServiceBindingGetter(disabledErr)
-		r.ServiceCatalogRetriever.ServiceBindingUsageLister = disabled.NewServiceBindingUsageLister(disabledErr)
+		r.ServiceCatalogRetriever.ServiceBindingFinderLister = disabled.NewServiceBindingFinderLister(disabledErr)
 		r.informerFactory = nil
-		r.bindingUsageInformerFactory = nil
 	})
 
 	return nil
@@ -157,9 +111,6 @@ func (r *PluggableContainer) Disable() error {
 
 type resolverConfig struct {
 	client                    clientset.Interface
-	serviceBindingUsageClient bindingUsageClientset.Interface
-	dynamicClient             dynamic.Interface
-
 	informerResyncPeriod time.Duration
 	contentRetriever     shared.ContentRetriever
 }
@@ -206,19 +157,6 @@ type Resolver interface {
 	ServiceBindingQuery(ctx context.Context, name, env string) (*gqlschema.ServiceBinding, error)
 	ServiceBindingsToInstanceQuery(ctx context.Context, instanceName, environment string) (gqlschema.ServiceBindings, error)
 	ServiceBindingEventSubscription(ctx context.Context, environment string) (<-chan gqlschema.ServiceBindingEvent, error)
-
-	//TODO: Move to servicecatalogaddons
-
-	CreateServiceBindingUsageMutation(ctx context.Context, input *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error)
-	DeleteServiceBindingUsageMutation(ctx context.Context, serviceBindingUsageName, namespace string) (*gqlschema.DeleteServiceBindingUsageOutput, error)
-	ServiceBindingUsageQuery(ctx context.Context, name, environment string) (*gqlschema.ServiceBindingUsage, error)
-	ServiceBindingUsagesOfInstanceQuery(ctx context.Context, instanceName, env string) ([]gqlschema.ServiceBindingUsage, error)
-	ServiceBindingUsageEventSubscription(ctx context.Context, environment string) (<-chan gqlschema.ServiceBindingUsageEvent, error)
-
-	ListUsageKinds(ctx context.Context, first *int, offset *int) ([]gqlschema.UsageKind, error)
-	ListServiceUsageKindResources(ctx context.Context, usageKind string, environment string) ([]gqlschema.UsageKindResource, error)
-
-	ListBindableResources(ctx context.Context, environment string) ([]gqlschema.BindableResourcesOutputItem, error)
 }
 
 type domainResolver struct {
@@ -228,7 +166,4 @@ type domainResolver struct {
 	*clusterServiceBrokerResolver
 	*serviceBrokerResolver
 	*serviceBindingResolver
-	*serviceBindingUsageResolver
-	*usageKindResolver
-	*bindableResourcesResolver
 }

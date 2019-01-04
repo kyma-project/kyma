@@ -82,3 +82,7 @@ type serviceBindingOperations interface {
 	Unsubscribe(listener resource.Listener)
 }
 
+type notifier interface {
+	AddListener(observer resource.Listener)
+	DeleteListener(observer resource.Listener)
+}

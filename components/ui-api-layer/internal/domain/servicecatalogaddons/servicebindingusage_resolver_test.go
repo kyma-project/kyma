@@ -7,6 +7,7 @@ import (
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/automock"
+	scaMock "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
@@ -236,7 +237,7 @@ func fixServiceBindingUsageResource() *api.ServiceBindingUsage {
 	return &api.ServiceBindingUsage{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceBindingUsage",
-			APIVersion: "servicecatalogaddons.kyma-project.io/v1alpha1",
+			APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "sbu-name",
