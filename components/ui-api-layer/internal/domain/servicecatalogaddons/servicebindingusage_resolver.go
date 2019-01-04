@@ -1,7 +1,8 @@
-package servicecatalog
+package servicecatalogaddons
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
 
 	"github.com/golang/glog"
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
@@ -11,6 +12,16 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
 )
+
+//go:generate mockery -name=serviceBindingUsageOperations -output=automock -outpkg=automock -case=underscore
+type serviceBindingUsageOperations interface {
+	Create(env string, sb *api.ServiceBindingUsage) (*api.ServiceBindingUsage, error)
+	Delete(env string, name string) error
+	Find(env string, name string) (*api.ServiceBindingUsage, error)
+	ListForServiceInstance(env string, instanceName string) ([]*api.ServiceBindingUsage, error)
+	Subscribe(listener resource.Listener)
+	Unsubscribe(listener resource.Listener)
+}
 
 type serviceBindingUsageResolver struct {
 	operations serviceBindingUsageOperations

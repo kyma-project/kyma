@@ -1,7 +1,8 @@
-package servicecatalog
+package servicecatalogaddons
 
 import (
 	"fmt"
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"strings"
 
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
@@ -11,6 +12,23 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
 )
+
+type notifier interface {
+	AddListener(observer resource.Listener)
+	DeleteListener(observer resource.Listener)
+}
+
+
+//go:generate mockery -name=serviceBindingOperations -output=automock -outpkg=automock -case=underscore
+type serviceBindingOperations interface {
+	Create(env string, sb *v1beta1.ServiceBinding) (*v1beta1.ServiceBinding, error)
+	Delete(env string, name string) error
+	Find(env string, name string) (*v1beta1.ServiceBinding, error)
+	ListForServiceInstance(env string, instanceName string) ([]*v1beta1.ServiceBinding, error)
+	Subscribe(listener resource.Listener)
+	Unsubscribe(listener resource.Listener)
+}
+
 
 type serviceBindingUsageService struct {
 	client         v1alpha1.ServicecatalogV1alpha1Interface

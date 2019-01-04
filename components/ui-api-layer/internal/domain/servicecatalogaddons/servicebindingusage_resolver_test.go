@@ -1,12 +1,12 @@
-package servicecatalog_test
+package servicecatalogaddons_test
 
 import (
 	"errors"
 	"testing"
 
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/automock"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +27,7 @@ func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testin
 		bindingUsage.Name = ""
 		svc.On("Create", "test-ns", bindingUsage).Return(fixServiceBindingUsageResource(), nil).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		input := fixCreateServiceBindingUsageInput()
 		input.Name = nil
@@ -43,7 +43,7 @@ func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testin
 		bindingUsage.Namespace = ""
 		svc.On("Create", "test-ns", bindingUsage).Return(fixServiceBindingUsageResource(), nil).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		input := fixCreateServiceBindingUsageInput()
 		result, err := resolver.CreateServiceBindingUsageMutation(nil, input)
@@ -56,7 +56,7 @@ func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testin
 		svc := automock.NewServiceBindingUsageOperations()
 		svc.On("Create", mock.Anything, mock.Anything).Return(nil, apiErrors.NewAlreadyExists(schema.GroupResource{}, "test")).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 		binding := fixCreateServiceBindingUsageInput()
 
 		_, err := resolver.CreateServiceBindingUsageMutation(nil, binding)
@@ -69,7 +69,7 @@ func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testin
 		svc := automock.NewServiceBindingUsageOperations()
 		svc.On("Create", mock.Anything, mock.Anything).Return(nil, errors.New("trololo")).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		_, err := resolver.CreateServiceBindingUsageMutation(nil, fixCreateServiceBindingUsageInput())
 
@@ -83,7 +83,7 @@ func TestServiceBindingUsageResolver_DeleteServiceBindingUsageMutation(t *testin
 		svc := automock.NewServiceBindingUsageOperations()
 		svc.On("Delete", "test", "test").Return(nil).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		result, err := resolver.DeleteServiceBindingUsageMutation(nil, "test", "test")
 
@@ -98,7 +98,7 @@ func TestServiceBindingUsageResolver_DeleteServiceBindingUsageMutation(t *testin
 		svc := automock.NewServiceBindingUsageOperations()
 		svc.On("Delete", "test", "test").Return(apiErrors.NewNotFound(schema.GroupResource{}, "test")).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		_, err := resolver.DeleteServiceBindingUsageMutation(nil, "test", "test")
 
@@ -110,7 +110,7 @@ func TestServiceBindingUsageResolver_DeleteServiceBindingUsageMutation(t *testin
 		svc := automock.NewServiceBindingUsageOperations()
 		svc.On("Delete", "test", "test").Return(errors.New("trololo")).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		_, err := resolver.DeleteServiceBindingUsageMutation(nil, "test", "test")
 
@@ -124,7 +124,7 @@ func TestServiceBindingUsageResolver_ServiceBindingUsageQuery(t *testing.T) {
 		svc := automock.NewServiceBindingUsageOperations()
 		svc.On("Find", "test", "test").Return(fixServiceBindingUsageResource(), nil).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		result, err := resolver.ServiceBindingUsageQuery(nil, "test", "test")
 
@@ -136,7 +136,7 @@ func TestServiceBindingUsageResolver_ServiceBindingUsageQuery(t *testing.T) {
 		svc := automock.NewServiceBindingUsageOperations()
 		svc.On("Find", "test", "test").Return(nil, nil).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		result, err := resolver.ServiceBindingUsageQuery(nil, "test", "test")
 
@@ -148,7 +148,7 @@ func TestServiceBindingUsageResolver_ServiceBindingUsageQuery(t *testing.T) {
 		svc := automock.NewServiceBindingUsageOperations()
 		svc.On("Find", "test", "test").Return(nil, errors.New("trolololo")).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		_, err := resolver.ServiceBindingUsageQuery(nil, "test", "test")
 
@@ -166,7 +166,7 @@ func TestServiceBindingUsageResolver_ServiceBindingUsagesOfInstanceQuery(t *test
 		svc := automock.NewServiceBindingUsageOperations()
 		svc.On("ListForServiceInstance", "test", "test").Return(usages, nil).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		result, err := resolver.ServiceBindingUsagesOfInstanceQuery(nil, "test", "test")
 
@@ -181,7 +181,7 @@ func TestServiceBindingUsageResolver_ServiceBindingUsagesOfInstanceQuery(t *test
 		svc := automock.NewServiceBindingUsageOperations()
 		svc.On("ListForServiceInstance", "test", "test").Return([]*api.ServiceBindingUsage{}, nil).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		result, err := resolver.ServiceBindingUsagesOfInstanceQuery(nil, "test", "test")
 
@@ -193,7 +193,7 @@ func TestServiceBindingUsageResolver_ServiceBindingUsagesOfInstanceQuery(t *test
 		svc := automock.NewServiceBindingUsageOperations()
 		svc.On("ListForServiceInstance", "test", "test").Return(nil, errors.New("trolololo")).Once()
 		defer svc.AssertExpectations(t)
-		resolver := servicecatalog.NewServiceBindingUsageResolver(svc)
+		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		_, err := resolver.ServiceBindingUsagesOfInstanceQuery(nil, "test", "test")
 
@@ -218,8 +218,9 @@ func fixServiceBindingUsage() *gqlschema.ServiceBindingUsage {
 }
 
 func fixCreateServiceBindingUsageInput() *gqlschema.CreateServiceBindingUsageInput {
+	name := "sbu-name"
 	return &gqlschema.CreateServiceBindingUsageInput{
-		Name:        ptr("sbu-name"),
+		Name:        &name,
 		Environment: "test-ns",
 		ServiceBindingRef: gqlschema.ServiceBindingRefInput{
 			Name: "binding-name",
@@ -235,7 +236,7 @@ func fixServiceBindingUsageResource() *api.ServiceBindingUsage {
 	return &api.ServiceBindingUsage{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceBindingUsage",
-			APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
+			APIVersion: "servicecatalogaddons.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "sbu-name",

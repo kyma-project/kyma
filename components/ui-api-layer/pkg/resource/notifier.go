@@ -1,6 +1,9 @@
 package resource
 
-import "sync"
+import (
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/resource"
+	"sync"
+)
 
 //go:generate mockery -name=Listener -output=automock -outpkg=automock -case=underscore
 type Listener interface {
