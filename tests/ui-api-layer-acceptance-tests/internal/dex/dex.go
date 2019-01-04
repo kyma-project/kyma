@@ -21,6 +21,10 @@ func SkipTestIfShould(t *testing.T) {
 }
 
 func SkipMainIfShould() {
+	if !isSCIEnabled() {
+		return
+	}
+
 	log.Println(sciEnabledMessage)
 	os.Exit(0)
 }
