@@ -52,7 +52,7 @@ func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	certUrl := fmt.Sprintf(CertUrl, ih.host, identifier)
-	apiData, err := ih.createApiData(certUrl, tokenData)
+	apiData, err := ih.createApiData(certUrl, tokenData, identifier)
 	if err != nil {
 		api.RespondWithError(w, err)
 		return
@@ -70,14 +70,14 @@ func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	api.RespondWithBody(w, 200, InfoResponse{SignUrl: signUrl, Api: apiData, CertificateInfo: certInfo})
 }
 
-func (ih *infoHandler) createApiData(certUrl string, tokenData *tokens.TokenData) (Api, apperrors.AppError) {
+func (ih *infoHandler) createApiData(certUrl string, tokenData *tokens.TokenData, identifier string) (Api, apperrors.AppError) {
 	registryUrl := ""
 	eventsUrl := ""
 
 	group, err := ih.groupRepository.Get(tokenData.Group)
 	if err == nil {
-		registryUrl = group.Spec.Cluster.AppRegistryUrl
-		eventsUrl = group.Spec.Cluster.EventsUrl
+		registryUrl = fmt.Sprintf(group.Spec.Cluster.AppRegistryUrl, identifier)
+		eventsUrl = fmt.Sprintf(group.Spec.Cluster.EventsUrl, identifier)
 	} else {
 		if err.Code() != apperrors.CodeNotFound {
 			return Api{}, err.Append("Failed to read Cluster URLs")

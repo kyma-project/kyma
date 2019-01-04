@@ -5,6 +5,6 @@ metadata:
 spec:
   tenant: "default"
   cluster:
-    appRegistryUrl: "http://gateway.kyma.local/metadata/services"
-    eventsUrl: "http://gateway.kyma.local/events"
+    appRegistryUrl: "https://gateway.{{ .Values.global.domainName }}/%s/metadata/services"
+    eventsUrl: "https://gateway.{{ .Values.global.domainName }}/%s/events"
   applications: []
