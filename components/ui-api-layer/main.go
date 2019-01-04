@@ -50,13 +50,14 @@ func main() {
 	resolvers, err := domain.New(k8sConfig, cfg.Content, cfg.Application, cfg.InformerResyncPeriod)
 	exitOnError(err, "Error while creating resolvers")
 
-	config := OIDCConfig{}
-	authenticator := authn.NewOIDCAuthenticator(&config)
+	config := authn.OIDCConfig{}
+	authenticator, err := authn.NewOIDCAuthenticator(&config)
+	exitOnError(err, "Error while creating OIDC authenticator")
 
 	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
 	authorizer := authz.NewAuthorizer(sarClient)
 
-	exitOnError(err,"Failed to create authorizer")
+	exitOnError(err, "Failed to create authorizer")
 
 	stopCh := signal.SetupChannel()
 	resolvers.WaitForCacheSync(stopCh)
@@ -66,7 +67,7 @@ func main() {
 
 		//authenticate and get user info
 		u, ok, err := authenticator.Authenticate(ctx)
-		fmt.Println(u, ok, err)// TODO: handle errors instead
+		fmt.Println(u, ok, err) // TODO: handle errors instead
 
 		// prepare attributes for authz
 		attrs := authorizer.PrepareAttributes(ctx, u, attributes)
