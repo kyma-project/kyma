@@ -24,12 +24,12 @@ func TestApiMetadata(t *testing.T) {
 	k8sResourcesClient, err := testkit.NewK8sInClusterResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	dummyApp, err := k8sResourcesClient.CreateDummyApplication("dummy-app", v1.GetOptions{}, true)
+	dummyApp, err := k8sResourcesClient.CreateDummyApplication("appmetadatatest0", v1.GetOptions{}, true)
 	require.NoError(t, err)
 
 	metadataServiceClient := testkit.NewMetadataServiceClient(config.MetadataServiceUrl + "/" + dummyApp.Name + "/v1/metadata/services")
 
-	expectedLabels := map[string]string{connectedApp: "dummy-app"}
+	expectedLabels := map[string]string{connectedApp: dummyApp.Name}
 
 	oauthAPI := &testkit.API{
 		TargetUrl: "http://service.com",
@@ -115,7 +115,7 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service provider", postedService.Provider)
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, "service-identifier"))
-			require.Equal(t, map[string]string{connectedApp: "dummy-app"}, postedService.Labels)
+			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
 
 			// clean up
 			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
@@ -157,7 +157,7 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service provider", postedService.Provider)
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, "service-identifier-2"))
-			require.Equal(t, map[string]string{connectedApp: "dummy-app"}, postedService.Labels)
+			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
 
 			// clean up
 			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
@@ -168,7 +168,7 @@ func TestApiMetadata(t *testing.T) {
 
 		t.Run("should return 400 when both OAuth and BasicAuth credentials provided", func(t *testing.T) {
 			// when
-			initialServiceDefinition := prepareServiceDetails("service-identifier-3", map[string]string{"connected-app": "dummy-app"}).WithAPI(oauthAndBasicAuthAPI)
+			initialServiceDefinition := prepareServiceDetails("service-identifier-3", map[string]string{"connected-app": dummyApp.Name}).WithAPI(oauthAndBasicAuthAPI)
 
 			statusCode, _, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
@@ -210,7 +210,7 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service provider", postedService.Provider)
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, "service-identifier-4"))
-			require.Equal(t, map[string]string{connectedApp: "dummy-app"}, postedService.Labels)
+			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
 
 			// clean up
 			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
@@ -222,7 +222,7 @@ func TestApiMetadata(t *testing.T) {
 
 		t.Run("should register service modifying swagger api spec", func(t *testing.T) {
 			// when
-			initialServiceDefinition := prepareServiceDetails("service-identifier-5", map[string]string{"connected-app": "dummy-app"}).WithAPI(swaggerSpecAPI)
+			initialServiceDefinition := prepareServiceDetails("service-identifier-5", map[string]string{"connected-app": dummyApp.Name}).WithAPI(swaggerSpecAPI)
 
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
@@ -254,7 +254,7 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service provider", postedService.Provider)
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, "service-identifier-5"))
-			require.Equal(t, map[string]string{connectedApp: "dummy-app"}, postedService.Labels)
+			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
 
 			// clean up
 			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
@@ -266,7 +266,7 @@ func TestApiMetadata(t *testing.T) {
 
 		t.Run("should register service using inline spec when both inline spec and spec url provided", func(t *testing.T) {
 			// when
-			initialServiceDefinition := prepareServiceDetails("service-identifier-6", map[string]string{"connected-app": "dummy-app"}).WithAPI(specAndSpecUrlAPI)
+			initialServiceDefinition := prepareServiceDetails("service-identifier-6", map[string]string{"connected-app": dummyApp.Name}).WithAPI(specAndSpecUrlAPI)
 
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
@@ -297,7 +297,7 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service provider", postedService.Provider)
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, "service-identifier-6"))
-			require.Equal(t, map[string]string{connectedApp: "dummy-app"}, postedService.Labels)
+			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
 
 			// clean up
 			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
@@ -645,9 +645,9 @@ func getExpectedDefinition(initialDefinition testkit.ServiceDetails, expectedLab
 	return hideClientCredentials(initialDefinition)
 }
 
-func modifiedSwaggerSpec(reName string, serviceId string, namespace string) []byte {
+func modifiedSwaggerSpec(appName string, serviceId string, namespace string) []byte {
 	return testkit.Compact([]byte(
-		fmt.Sprintf("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"app-%s-%s.%s.svc.cluster.local\",\"paths\":null}", reName, serviceId, namespace)),
+		fmt.Sprintf("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"app-%s-%s.%s.svc.cluster.local\",\"paths\":null}", appName, serviceId, namespace)),
 	)
 }
 
