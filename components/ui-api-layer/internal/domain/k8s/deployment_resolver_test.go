@@ -171,7 +171,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 		lister := new(scMock.ServiceBindingUsageLister)
 		lister.On("ListForDeployment", deployment.Environment, "deployment", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
-		getter := new(scMock.ServiceBindingGetter)
+		getter := new(scMock.ServiceBindingFinderLister)
 		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(binding, nil)
 
 		scRetriever := new(scMock.ServiceCatalogRetriever)
@@ -216,7 +216,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 		lister := new(scMock.ServiceBindingUsageLister)
 		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
-		getter := new(scMock.ServiceBindingGetter)
+		getter := new(scMock.ServiceBindingFinderLister)
 		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(binding, nil)
 
 		scRetriever := new(scMock.ServiceCatalogRetriever)
@@ -275,7 +275,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 		lister := new(scMock.ServiceBindingUsageLister)
 		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
-		getter := new(scMock.ServiceBindingGetter)
+		getter := new(scMock.ServiceBindingFinderLister)
 		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(nil, nil)
 
 		scRetriever := new(scMock.ServiceCatalogRetriever)
@@ -342,7 +342,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		lister := new(scMock.ServiceBindingUsageLister)
 		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
 		defer lister.AssertExpectations(t)
-		getter := new(scMock.ServiceBindingGetter)
+		getter := new(scMock.ServiceBindingFinderLister)
 		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(nil, errors.New("trolololo"))
 		defer getter.AssertExpectations(t)
 

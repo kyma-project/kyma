@@ -40,7 +40,7 @@ func TestPluggableContainer(t *testing.T) {
 func checkExportedFields(t *testing.T, resolver *servicecatalog.PluggableContainer, enabled bool) {
 	assert.NotNil(t, resolver.Resolver)
 	require.NotNil(t, resolver.ServiceCatalogRetriever)
-	assert.NotNil(t, resolver.ServiceCatalogRetriever.ServiceBindingGetter)
+	assert.NotNil(t, resolver.ServiceCatalogRetriever.ServiceBindingFinderLister)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()

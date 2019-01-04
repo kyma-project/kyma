@@ -7,7 +7,6 @@ import (
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/automock"
-	scaMock "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
@@ -15,9 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	k8stesting "k8s.io/client-go/testing"
 )
 
 func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testing.T) {
@@ -255,6 +252,3 @@ func fixServiceBindingUsageResource() *api.ServiceBindingUsage {
 	}
 }
 
-func failingReactor(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-	return true, nil, errors.New("custom error")
-}

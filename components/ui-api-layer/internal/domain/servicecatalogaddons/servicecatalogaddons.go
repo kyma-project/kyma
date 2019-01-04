@@ -56,6 +56,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, scRetrieve
 			informerResyncPeriod:      informerResyncPeriod,
 			scRetriever: scRetriever,
 		},
+		ServiceCatalogAddonsRetriever: &serviceCatalogAddonsRetriever{},
 		Pluggable:               module.NewPluggable("servicecatalogaddons"),
 	}
 	err = container.Disable()

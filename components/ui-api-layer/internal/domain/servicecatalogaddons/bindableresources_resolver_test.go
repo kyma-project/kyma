@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/automock"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/magiconair/properties/assert"
 	"github.com/stretchr/testify/require"

@@ -90,9 +90,3 @@ func NewServiceInstanceLister() *serviceInstanceLister {
 func NewServiceBindingOperations() *serviceBindingOperations {
 	return new(serviceBindingOperations)
 }
-
-// Bindable Resources
-
-func NewBindableResourcesLister() *bindableResourceLister {
-	return new(bindableResourceLister)
-}

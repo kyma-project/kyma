@@ -88,13 +88,14 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	makePluggable(authenticationResolver)
 
 	return &RootResolver{
-		ui:             uiContainer.Resolver,
 		k8s:            k8sResolver,
-		kubeless:       kubelessResolver,
-		app:            appContainer,
+		ui:             uiContainer.Resolver,
 		sc:             scContainer,
+		sca:            scaContainer,
+		app:            appContainer,
 		content:        contentContainer,
 		ac:             acResolver,
+		kubeless:       kubelessResolver,
 		authentication: authenticationResolver,
 	}, nil
 }
@@ -102,11 +103,12 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 // WaitForCacheSync waits for caches to populate. This is blocking operation.
 func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	// Not pluggable modules
-	r.ui.WaitForCacheSync(stopCh)
 	r.k8s.WaitForCacheSync(stopCh)
+	r.ui.WaitForCacheSync(stopCh)
 
 	// Pluggable modules
 	r.sc.StopCacheSyncOnClose(stopCh)
+	r.sca.StopCacheSyncOnClose(stopCh)
 	r.app.StopCacheSyncOnClose(stopCh)
 	r.content.StopCacheSyncOnClose(stopCh)
 	r.ac.StopCacheSyncOnClose(stopCh)
@@ -379,7 +381,7 @@ func (r *subscriptionResolver) ApplicationEvent(ctx context.Context) (<-chan gql
 // Service Instance
 
 type serviceInstanceResolver struct {
-	sc *servicecatalog.PluggableContainer
+	sc  *servicecatalog.PluggableContainer
 	sca *servicecatalogaddons.PluggableContainer
 }
 
