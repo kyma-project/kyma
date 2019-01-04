@@ -18446,6 +18446,28 @@ func UnmarshalRBACAttributes(v interface{}) (RBACAttributes, error) {
 			if err != nil {
 				return it, err
 			}
+		case "nameArg":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.NameArg = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "namespaceArg":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.NamespaceArg = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -18646,7 +18668,9 @@ input RBACAttributes {
 	apiGroup: String!
 	apiVersion: String!
 	resource: String!
-	subresource: String!
+	subresource: String! = ""
+    nameArg: String
+    namespaceArg: String
 }
 #TODO: resourceRequest and path should be handled in the future (possibility of checking non-resource requests)
 #https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.10/#nonresourceattributes-v1beta1-authorization-k8s-io
@@ -19226,12 +19250,12 @@ type Query {
     topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
     eventActivations(environment: String!): [EventActivation!]!
 
-    limitRanges(environment: String!): [LimitRange!]!
+    limitRanges(environment: String!): [LimitRange!]! @checkRBAC(attributes: {resource: "LimitRange", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "environments"})
 
-    IDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", subresource: "" })
-    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @checkRBAC(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", subresource: "" })
+    IDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @checkRBAC(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 }
-# TODO: find out which verb (get or list) should be used for listing resources (get is set in proxy.go, but somehow it is list in logs)
+# TODO: find out which verb (get or list) should be used for listing resources
 
 # Mutations
 

@@ -213,11 +213,13 @@ type LocalObjectReferenceInput struct {
 }
 
 type RBACAttributes struct {
-	Verb        string `json:"verb"`
-	APIGroup    string `json:"apiGroup"`
-	APIVersion  string `json:"apiVersion"`
-	Resource    string `json:"resource"`
-	Subresource string `json:"subresource"`
+	Verb         string  `json:"verb"`
+	APIGroup     string  `json:"apiGroup"`
+	APIVersion   string  `json:"apiVersion"`
+	Resource     string  `json:"resource"`
+	Subresource  string  `json:"subresource"`
+	NameArg      *string `json:"nameArg"`
+	NamespaceArg *string `json:"namespaceArg"`
 }
 
 type ResourceQuota struct {
