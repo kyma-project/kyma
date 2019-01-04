@@ -19,7 +19,7 @@ func NewHandler(handler TokenHandler, middlewares []mux.MiddlewareFunc) http.Han
 	}
 
 	tokenRouter := router.PathPrefix("/v1/clusters").Subrouter()
-	tokenRouter.HandleFunc("/tokens", handler.CreateToken).Methods(http.MethodPost)
+	tokenRouter.HandleFunc("/{identifier}/tokens", handler.CreateToken).Methods(http.MethodPost)
 
 	router.NotFoundHandler = errorhandler.NewErrorHandler(404, "Requested resource could not be found.")
 	router.MethodNotAllowedHandler = errorhandler.NewErrorHandler(405, "Method not allowed.")

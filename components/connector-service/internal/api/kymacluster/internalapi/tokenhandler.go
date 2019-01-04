@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/api"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/uuid"
@@ -28,7 +30,7 @@ func NewTokenHandler(tokenService tokens.ClusterService, host string, uuidGenera
 }
 
 func (tg *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
-	identifier := tg.uuidGenerator.NewUUID()
+	identifier := mux.Vars(r)["identifier"]
 
 	token, err := tg.tokenService.CreateClusterToken(identifier)
 	if err != nil {

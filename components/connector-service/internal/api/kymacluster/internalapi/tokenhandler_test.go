@@ -8,6 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gorilla/mux"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/api"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
@@ -28,7 +30,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should create token", func(t *testing.T) {
 		// given
-		url := "/v1/clusters"
+		url := "/v1/clusters/identifier"
 
 		expectedTokenResponse := api.TokenResponse{
 			URL:   fmt.Sprintf("https://%s/v1/clusters/%s/info?token=%s", host, identifier, token),
@@ -46,6 +48,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
+		req = mux.SetURLVars(req, map[string]string{identifier: identifier})
 
 		// when
 		tokenHandler.CreateToken(rr, req)
@@ -77,6 +80,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
+		req = mux.SetURLVars(req, map[string]string{identifier: identifier})
 
 		// when
 		tokenHandler.CreateToken(rr, req)
