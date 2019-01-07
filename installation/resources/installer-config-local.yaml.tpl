@@ -95,3 +95,14 @@ metadata:
     component: service-catalog
 data:
   etcd-stateful.etcd.resources.limits.memory: 256Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: knative
+data:
+  knative.ingressgateway.service.type: NodePort
