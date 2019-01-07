@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"
-	authorizerpkg "k8s.io/apiserver/pkg/authorization/authorizer"
 	"net/http"
 	"time"
 
@@ -72,28 +71,7 @@ func main() {
 	resolvers.WaitForCacheSync(stopCh)
 
 	c := gqlschema.Config{Resolvers: resolvers}
-	c.Directives.CheckRBAC = func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes gqlschema.RBACAttributes) (res interface{}, err error) {
-
-		// fetch user from context
-		u := authn.UserInfoForContext(ctx)
-
-		// prepare attributes for authz
-		attrs := authz.PrepareAttributes(ctx, u, attributes)
-		glog.Infof("SAR attributes: %+v", attrs)
-
-		// check if user is allowed to get requested resource
-		authorized, reason, err := authorizer.Authorize(attrs)
-		glog.Infof("authorized: %v, reason: %s, err: %v", authorized, reason, err)
-
-		if authorized != authorizerpkg.DecisionAllow {
-			if err != nil {
-				glog.Errorf("Error during authorization: %v", err)
-			}
-			return nil, errors.New("access denied")
-		}
-
-		return next(ctx)
-	}
+	c.Directives.CheckRBAC = authz.NewRBACDirective(authorizer)
 	executableSchema := gqlschema.NewExecutableSchema(c)
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
