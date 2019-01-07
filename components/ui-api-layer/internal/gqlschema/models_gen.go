@@ -211,7 +211,7 @@ type LocalObjectReferenceInput struct {
 	Name string `json:"name"`
 }
 
-type RBACAttributes struct {
+type ResourceAttributes struct {
 	Verb         string  `json:"verb"`
 	APIGroup     string  `json:"apiGroup"`
 	APIVersion   string  `json:"apiVersion"`

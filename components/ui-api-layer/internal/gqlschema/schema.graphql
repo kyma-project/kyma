@@ -8,9 +8,9 @@ scalar Timestamp
 
 # Directives
 
-directive @checkRBAC(attributes: RBACAttributes!) on FIELD_DEFINITION
+directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
-input RBACAttributes {
+input ResourceAttributes {
 	verb: String!
 	apiGroup: String!
 	apiVersion: String!
@@ -565,8 +565,8 @@ type BackendModule {
 # Queries
 
 type Query {
-    serviceInstance(name: String!, environment: String!): ServiceInstance @checkRBAC(attributes: {resource: "ServiceInstance", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
-    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @checkRBAC(attributes: {resource: "ServiceInstance", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment"})
+    serviceInstance(name: String!, environment: String!): ServiceInstance @HasAccess(attributes: {resource: "ServiceInstance", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
+    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "ServiceInstance", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment"})
 
     clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]!
     clusterServiceClass(name: String!): ClusterServiceClass
@@ -579,7 +579,7 @@ type Query {
     serviceBroker(name: String!, environment: String!): ServiceBroker
 
     serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
-    serviceBinding(name: String!, environment: String!): ServiceBinding @checkRBAC(attributes: {resource: "ServiceBinding", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
+    serviceBinding(name: String!, environment: String!): ServiceBinding @HasAccess(attributes: {resource: "ServiceBinding", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]!
 
     # The query returns all instances of the resources specified by the usageKind parameter in the given environment. The result contains the resources which do not have the metadata.ownerReference.
@@ -608,12 +608,12 @@ type Query {
     topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
     eventActivations(environment: String!): [EventActivation!]!
 
-    limitRanges(environment: String!): [LimitRange!]! @checkRBAC(attributes: {resource: "LimitRange", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "environment"})
-
-    IDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
-    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @checkRBAC(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    limitRanges(environment: String!): [LimitRange!]! @HasAccess(attributes: {resource: "LimitRange", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "environment"})
 
     backendModules: [BackendModule!]!
+
+    IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 }
 
 # Mutations

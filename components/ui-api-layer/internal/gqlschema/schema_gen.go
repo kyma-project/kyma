@@ -47,7 +47,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	CheckRBAC func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes RBACAttributes) (res interface{}, err error)
+	HasAccess func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes ResourceAttributes) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -1920,12 +1920,12 @@ func field___Type_enumValues_args(rawArgs map[string]interface{}) (map[string]in
 
 }
 
-func dir_checkRBAC_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func dir_HasAccess_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 RBACAttributes
+	var arg0 ResourceAttributes
 	if tmp, ok := rawArgs["attributes"]; ok {
 		var err error
-		arg0, err = UnmarshalRBACAttributes(tmp)
+		arg0, err = UnmarshalResourceAttributes(tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -18541,8 +18541,8 @@ func UnmarshalLocalObjectReferenceInput(v interface{}) (LocalObjectReferenceInpu
 	return it, nil
 }
 
-func UnmarshalRBACAttributes(v interface{}) (RBACAttributes, error) {
-	var it RBACAttributes
+func UnmarshalResourceAttributes(v interface{}) (ResourceAttributes, error) {
+	var it ResourceAttributes
 	var asMap = v.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -18744,17 +18744,17 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 	rctx := graphql.GetResolverContext(ctx)
 	for _, d := range rctx.Field.Definition.Directives {
 		switch d.Name {
-		case "checkRBAC":
-			if ec.directives.CheckRBAC != nil {
+		case "HasAccess":
+			if ec.directives.HasAccess != nil {
 				rawArgs := d.ArgumentMap(ec.Variables)
-				args, err := dir_checkRBAC_args(rawArgs)
+				args, err := dir_HasAccess_args(rawArgs)
 				if err != nil {
 					ec.Error(ctx, err)
 					return nil
 				}
 				n := next
 				next = func(ctx context.Context) (interface{}, error) {
-					return ec.directives.CheckRBAC(ctx, obj, n, args["attributes"].(RBACAttributes))
+					return ec.directives.HasAccess(ctx, obj, n, args["attributes"].(ResourceAttributes))
 				}
 			}
 		}
@@ -18792,9 +18792,9 @@ scalar Timestamp
 
 # Directives
 
-directive @checkRBAC(attributes: RBACAttributes!) on FIELD_DEFINITION
+directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
-input RBACAttributes {
+input ResourceAttributes {
 	verb: String!
 	apiGroup: String!
 	apiVersion: String!
@@ -19349,8 +19349,8 @@ type BackendModule {
 # Queries
 
 type Query {
-    serviceInstance(name: String!, environment: String!): ServiceInstance @checkRBAC(attributes: {resource: "ServiceInstance", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
-    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @checkRBAC(attributes: {resource: "ServiceInstance", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment"})
+    serviceInstance(name: String!, environment: String!): ServiceInstance @HasAccess(attributes: {resource: "ServiceInstance", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
+    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "ServiceInstance", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment"})
 
     clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]!
     clusterServiceClass(name: String!): ClusterServiceClass
@@ -19363,7 +19363,7 @@ type Query {
     serviceBroker(name: String!, environment: String!): ServiceBroker
 
     serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
-    serviceBinding(name: String!, environment: String!): ServiceBinding @checkRBAC(attributes: {resource: "ServiceBinding", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
+    serviceBinding(name: String!, environment: String!): ServiceBinding @HasAccess(attributes: {resource: "ServiceBinding", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]!
 
     # The query returns all instances of the resources specified by the usageKind parameter in the given environment. The result contains the resources which do not have the metadata.ownerReference.
@@ -19392,12 +19392,17 @@ type Query {
     topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
     eventActivations(environment: String!): [EventActivation!]!
 
-    limitRanges(environment: String!): [LimitRange!]! @checkRBAC(attributes: {resource: "LimitRange", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "environment"})
+    limitRanges(environment: String!): [LimitRange!]! @HasAccess(attributes: {resource: "LimitRange", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "environment"})
 
+<<<<<<< HEAD
     IDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @checkRBAC(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 
     backendModules: [BackendModule!]!
+=======
+    IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+>>>>>>> Directive renaming
 }
 
 # Mutations

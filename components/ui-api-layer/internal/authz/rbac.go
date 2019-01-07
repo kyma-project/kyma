@@ -11,10 +11,10 @@ import (
 	authorizerpkg "k8s.io/apiserver/pkg/authorization/authorizer"
 )
 
-type RBACDirective func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes gqlschema.RBACAttributes) (res interface{}, err error)
+type RBACDirective func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes gqlschema.ResourceAttributes) (res interface{}, err error)
 
 func NewRBACDirective(authorizer authorizerpkg.Authorizer) RBACDirective {
-	return func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes gqlschema.RBACAttributes) (res interface{}, err error) {
+	return func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes gqlschema.ResourceAttributes) (res interface{}, err error) {
 
 		// fetch user from context
 		u := authn.UserInfoForContext(ctx)

@@ -35,7 +35,7 @@ func NewAuthorizer(client authorizationclient.SubjectAccessReviewInterface) (aut
 }
 
 // PrepareAttributes prepares attributes for authorization
-func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.RBACAttributes) authorizer.Attributes {
+func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.ResourceAttributes) authorizer.Attributes {
 	resolverCtx := graphql.GetResolverContext(ctx)
 
 	var name string
