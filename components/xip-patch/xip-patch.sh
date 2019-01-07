@@ -2,11 +2,6 @@
 
 set -o errexit
 
-if [ -z "${CONNECTOR_IP}" ]; then
-  echo "Connector IP address not provided"
-  exit 1
-fi
-
 if [ -z "${EXTERNAL_PUBLIC_IP}" ]; then
 
   SECONDS=0
@@ -34,7 +29,6 @@ fi
 XIP_PATCH_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 PUBLIC_DOMAIN="${EXTERNAL_PUBLIC_IP}.xip.io"
-CONNECTOR_DOMAIN="${CONNECTOR_IP}.xip.io"
 
 CERT_PATH="${XIP_PATCH_DIR}/cert.pem"
 KEY_PATH="${XIP_PATCH_DIR}/key.pem"
@@ -78,21 +72,3 @@ EOF
 kubectl patch configmap installation-config-overrides --patch "${PUBLIC_DOMAIN_YAML}" -n kyma-installer
 kubectl patch configmap cluster-certificate-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer
 kubectl patch secret ingress-tls-cert --patch "${TLS_CERT_YAML}" -n kyma-system
-
-CONFIGMAP=$(cat << EOF
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: connector-service-xip-tls-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: application-connector
-data:
-  "global.connectorDomainName": "${CONNECTOR_DOMAIN}"
-  "connector-service.tests.skipSslVerify": "true"
-EOF
-)
-
-echo "${CONFIGMAP}" | kubectl create -f -

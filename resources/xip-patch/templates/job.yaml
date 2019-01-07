@@ -18,5 +18,4 @@ spec:
         env:
         - name: EXTERNAL_PUBLIC_IP
           value: {{ .Values.global.loadBalancerIP }}
-        - name: CONNECTOR_IP
-          value: {{ .Values.global.connectorIP }}
+          

@@ -36,7 +36,6 @@ data:
   global.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.etcdBackup.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
-  global.connectorIP: "__REMOTE_ENV_IP__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
   etcd-stateful.replicaCount: "3"
