@@ -36,7 +36,7 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 	}
 }
 
-func UserInfoForContext(ctx context.Context) *user.Info {
-	raw, _ := ctx.Value(userInfoCtxKey).(*user.Info)
+func UserInfoForContext(ctx context.Context) user.Info {
+	raw, _ := ctx.Value(userInfoCtxKey).(user.Info)
 	return raw
 }

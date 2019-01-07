@@ -27,6 +27,8 @@ spec:
         heritage: "{{ .Release.Service }}"
     spec:
       serviceAccountName: {{ template "fullname" . }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_api_layer.dir }}{{ .Values.image.name }}:{{ .Values.global.ui_api_layer.version }}"
@@ -94,3 +96,10 @@ spec:
             value: "2s"
         ports:
           - containerPort: {{ .Values.service.internalPort }}
+        volumeMounts:
+          - name: ingress-tls-cert
+            mountPath: /etc/ingress-tls-cert/
+      volumes:
+        - name: ingress-tls-cert
+          secret:
+            secretName: ingress-tls-cert

@@ -4,14 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"k8s.io/apiserver/pkg/authentication/user"
+	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"
 	authorizerpkg "k8s.io/apiserver/pkg/authorization/authorizer"
 	"net/http"
 	"time"
 
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 
-	"github.com/gorilla/mux"
 	"k8s.io/client-go/kubernetes"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -61,7 +61,7 @@ func main() {
 	exitOnError(err, "Failed to instantiate Kubernetes client")
 
 	config := authn.OIDCConfig{} // TODO: prepare config
-	authenticator, err := authn.NewOIDCAuthenticator(&config)
+	authReq, err := authn.NewOIDCAuthenticator(&config)
 	exitOnError(err, "Error while creating OIDC authenticator")
 
 	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
@@ -75,33 +75,29 @@ func main() {
 	c.Directives.CheckRBAC = func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes gqlschema.RBACAttributes) (res interface{}, err error) {
 
 		// fetch user from context
-		u := UserInfoForContext(ctx)
+		u := authn.UserInfoForContext(ctx)
 
 		// prepare attributes for authz
 		attrs := authz.PrepareAttributes(ctx, u, attributes)
-		glog.Infof("%+v", attrs)
+		glog.Infof("SAR attributes: %+v", attrs)
 
 		// check if user is allowed to get requested resource
 		authorized, reason, err := authorizer.Authorize(attrs)
-		// TODO: handle errors
-
 		glog.Infof("authorized: %v, reason: %s, err: %v", authorized, reason, err)
 
-		if authorized != authorizerpkg.DecisionAllow || err != nil {
-			return nil, fmt.Errorf("access denied")
+		if authorized != authorizerpkg.DecisionAllow {
+			if err != nil {
+				glog.Errorf("Error during authorization: %v", err)
+			}
+			return nil, errors.New("access denied")
 		}
-
-		// success path TODO: delete this comment and logging attributes below
-		glog.Infof("atrributes: %+v", attributes)
-		glog.Infof("obj: %+v", obj)
-		glog.Infof("ctx: %+v", ctx)
 
 		return next(ctx)
 	}
 	executableSchema := gqlschema.NewExecutableSchema(c)
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
-	runServer(stopCh, addr, cfg.AllowedOrigins, executableSchema, authenticator)
+	runServer(stopCh, addr, cfg.AllowedOrigins, executableSchema, authReq)
 }
 
 func loadConfig(prefix string) (config, error) {
@@ -139,17 +135,17 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 	return config, nil
 }
 
-func runServer(stop <-chan struct{}, addr string, allowedOrigins []string, schema graphql.ExecutableSchema, authenticator authenticator.Request) {
+func runServer(stop <-chan struct{}, addr string, allowedOrigins []string, schema graphql.ExecutableSchema, authReq authenticator.Request) {
 	if len(allowedOrigins) == 0 {
 		allowedOrigins = []string{"*"}
 	}
 
-	mux := mux.NewRouter()
+	router := mux.NewRouter()
 
-	mux.Use(authn.AuthMiddleware(authenticator))
+	router.Use(authn.AuthMiddleware(authReq))
 
-	mux.HandleFunc("/", handler.Playground("Dataloader", "/graphql"))
-	mux.HandleFunc("/graphql", handler.GraphQL(schema,
+	router.HandleFunc("/", handler.Playground("Dataloader", "/graphql"))
+	router.HandleFunc("/graphql", handler.GraphQL(schema,
 		handler.WebsocketUpgrader(websocket.Upgrader{
 			CheckOrigin: origin.CheckFn(allowedOrigins),
 		}),
@@ -163,7 +159,7 @@ func runServer(stop <-chan struct{}, addr string, allowedOrigins []string, schem
 		AllowCredentials:   true,
 		AllowedHeaders:     []string{"*"},
 		OptionsPassthrough: false,
-	}).Handler(mux)
+	}).Handler(router)
 
 	srv := &http.Server{Addr: addr, Handler: serverHandler}
 
