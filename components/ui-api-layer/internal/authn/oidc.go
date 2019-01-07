@@ -34,6 +34,5 @@ func NewOIDCAuthenticator(config *OIDCConfig) (authenticator.Request, error) {
 		return nil, err
 	}
 
-	// TODO: implement
 	return bearertoken.New(tokenAuthenticator), nil
 }

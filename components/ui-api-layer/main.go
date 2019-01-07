@@ -6,9 +6,13 @@ import (
 	"fmt"
 	"k8s.io/apiserver/pkg/authentication/user"
 	authorizerpkg "k8s.io/apiserver/pkg/authorization/authorizer"
-	"k8s.io/client-go/kubernetes"
 	"net/http"
 	"time"
+
+	"k8s.io/apiserver/pkg/authentication/authenticator"
+
+	"github.com/gorilla/mux"
+	"k8s.io/client-go/kubernetes"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/golang/glog"
@@ -56,8 +60,8 @@ func main() {
 	kubeClient, err := kubernetes.NewForConfig(k8sConfig)
 	exitOnError(err, "Failed to instantiate Kubernetes client")
 
-	//config := authn.OIDCConfig{}
-	//authenticator, err := authn.NewOIDCAuthenticator(&config)
+	config := authn.OIDCConfig{} // TODO: prepare config
+	authenticator, err := authn.NewOIDCAuthenticator(&config)
 	exitOnError(err, "Error while creating OIDC authenticator")
 
 	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
@@ -70,11 +74,8 @@ func main() {
 	c := gqlschema.Config{Resolvers: resolvers}
 	c.Directives.CheckRBAC = func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes gqlschema.RBACAttributes) (res interface{}, err error) {
 
-		//authenticate and get user info
-		//u, ok, err := authenticator.Authenticate(ctx)
-		//fmt.Println(u, ok, err) // TODO: handle errors instead
-
-		u := &user.DefaultInfo{Name: "admin@kyma.cx"}
+		// fetch user from context
+		u := UserInfoForContext(ctx)
 
 		// prepare attributes for authz
 		attrs := authz.PrepareAttributes(ctx, u, attributes)
@@ -100,7 +101,7 @@ func main() {
 	executableSchema := gqlschema.NewExecutableSchema(c)
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
-	runServer(stopCh, addr, cfg.AllowedOrigins, executableSchema)
+	runServer(stopCh, addr, cfg.AllowedOrigins, executableSchema, authenticator)
 }
 
 func loadConfig(prefix string) (config, error) {
@@ -138,14 +139,17 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 	return config, nil
 }
 
-func runServer(stop <-chan struct{}, addr string, allowedOrigins []string, schema graphql.ExecutableSchema) {
+func runServer(stop <-chan struct{}, addr string, allowedOrigins []string, schema graphql.ExecutableSchema, authenticator authenticator.Request) {
 	if len(allowedOrigins) == 0 {
 		allowedOrigins = []string{"*"}
 	}
 
-	mux := http.NewServeMux()
-	mux.Handle("/", handler.Playground("Dataloader", "/graphql"))
-	mux.Handle("/graphql", handler.GraphQL(schema,
+	mux := mux.NewRouter()
+
+	mux.Use(authn.AuthMiddleware(authenticator))
+
+	mux.HandleFunc("/", handler.Playground("Dataloader", "/graphql"))
+	mux.HandleFunc("/graphql", handler.GraphQL(schema,
 		handler.WebsocketUpgrader(websocket.Upgrader{
 			CheckOrigin: origin.CheckFn(allowedOrigins),
 		}),

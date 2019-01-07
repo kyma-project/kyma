@@ -1,8 +1,10 @@
 package authn
 
 import (
+	"context"
+
 	"k8s.io/apiserver/pkg/authentication/authenticator"
-	"k8s.io/apiserver/pkg/authentication/request/bearertoken"
+	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/plugin/pkg/authenticator/token/oidc"
 )
 
@@ -18,8 +20,18 @@ type OIDCConfig struct {
 	SupportedSigningAlgs []string
 }
 
+type Authenticator struct {
+	auth authenticator.Token
+}
+
+func (a *Authenticator) AuthenticateRequest(ctx context.Context) (user.Info, bool, error) {
+	// TODO: get token from context
+	token := ""
+	return a.auth.AuthenticateToken(token)
+}
+
 // NewOIDCAuthenticator returns OIDC authenticator
-func NewOIDCAuthenticator(config *OIDCConfig) (authenticator.Request, error) {
+func NewOIDCAuthenticator(config *OIDCConfig) (*Authenticator, error) {
 	tokenAuthenticator, err := oidc.New(oidc.Options{
 		IssuerURL:            config.IssuerURL,
 		ClientID:             config.ClientID,
@@ -34,5 +46,5 @@ func NewOIDCAuthenticator(config *OIDCConfig) (authenticator.Request, error) {
 		return nil, err
 	}
 
-	return bearertoken.New(tokenAuthenticator), nil
+	return &Authenticator{tokenAuthenticator}, nil
 }
