@@ -14,7 +14,7 @@ if [[ ! -f "${FILE_PATH}" || ! -s "${FILE_PATH}" ]]; then
     exit 0
 fi
 
-kubectl create configmap ${CM_NAME} -n kyma-installer --from-env-file=${FILE_PATH} --dry-run -o yaml | kubectl apply -f -
+kubectl create configmap ${CM_NAME} -n kyma-installer --from-env-file="${FILE_PATH}" --dry-run -o yaml | kubectl apply -f -
 kubectl label configmap ${CM_NAME} -n kyma-installer ${LABEL}
 
-rm -rf "$FILE_PATH"
+rm -rf "${FILE_PATH}"
