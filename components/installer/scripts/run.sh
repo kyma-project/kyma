@@ -40,7 +40,6 @@ fi
 
 bash ${CURRENT_DIR}/build.sh
 bash ${KYMA_PATH}/installation/scripts/build-kyma-installer.sh --installer-version "dev"
-bash ${KYMA_PATH}/installation/scripts/generate-local-config.sh
 
 if [[ -z ${CR_PATH} ]]; then
     TMPDIR=`mktemp -d "${KYMA_PATH}/temp-XXXXXXXXXX"`
