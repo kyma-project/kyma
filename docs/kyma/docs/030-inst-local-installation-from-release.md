@@ -160,18 +160,22 @@ To enable Horizontal Pod Autoscaler, follow these steps:
   minikube addons list
   ```
 
-## Minikube stop and start
+## Stop and restart Kyma without reinstalling
 
-If you want to stop minikube cluster and start it later without installing kyma from scratch you can do it using `minikube.sh` script.
+Use the `minikube.sh` script to restart the Minikube cluster without reinstalling Kyma. Follow these steps to stop and restart your cluster:
 
+1. Stop the Minikube cluster with Kyma installed. Run: 
 ```
-# stop minikube with kyma installed
 minikube stop
-
-# start it again
+```
+2. Restart the cluster without reinstalling Kyma. Run: 
+```
 ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
 ```
-The script will discover that you have minikube cluster initialized, and will ask you, if you want to delete it. Answer `no`. The script will start minikube cluster and all components installed previously will be restarted. It takes some time, but still is much faster than the installation from scratch (you don't have to download all docker images). After while you should see all pods in the running state:
+
+The script discovers that a minikube cluster is initialized and asks if you want to delete it. Answering `no` causes the script to start the Minikube cluster and restarts all of the previously installed components. Even though this procedure takes some time, it is faster than a clean installation as you don't download all of the required Docker images.
+
+To verify that the restart is successful, run this command and check if all Pods have the `RUNNING` status:
 
 ```
 kubectl get pods --all-namespaces
