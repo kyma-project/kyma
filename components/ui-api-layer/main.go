@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"
 
-	"k8s.io/apiserver/pkg/authentication/authenticator"
+	authenticatorpkg "k8s.io/apiserver/pkg/authentication/authenticator"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/experimental"
 	"k8s.io/client-go/kubernetes"
@@ -26,7 +26,6 @@ import (
 
 	"github.com/99designs/gqlgen/handler"
 	"github.com/gorilla/websocket"
-
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authz"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application"
@@ -63,7 +62,7 @@ func main() {
 	kubeClient, err := kubernetes.NewForConfig(k8sConfig)
 	exitOnError(err, "Failed to instantiate Kubernetes client")
 
-	authReq, err := authn.NewOIDCAuthenticator(&cfg.OIDC)
+	authenticator, err := authn.NewOIDCAuthenticator(&cfg.OIDC)
 	exitOnError(err, "Error while creating OIDC authenticator")
 	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
 	authorizer, err := authz.NewAuthorizer(sarClient)
@@ -77,7 +76,7 @@ func main() {
 	executableSchema := gqlschema.NewExecutableSchema(c)
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
-	runServer(stopCh, addr, cfg.AllowedOrigins, executableSchema, authReq)
+	runServer(stopCh, addr, cfg.AllowedOrigins, executableSchema, authenticator)
 }
 
 func loadConfig(prefix string) (config, error) {
@@ -115,14 +114,14 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 	return config, nil
 }
 
-func runServer(stop <-chan struct{}, addr string, allowedOrigins []string, schema graphql.ExecutableSchema, authReq authenticator.Request) {
+func runServer(stop <-chan struct{}, addr string, allowedOrigins []string, schema graphql.ExecutableSchema, authenticator authenticatorpkg.Request) {
 	if len(allowedOrigins) == 0 {
 		allowedOrigins = []string{"*"}
 	}
 
 	router := mux.NewRouter()
 
-	router.Use(authn.AuthMiddleware(authReq))
+	router.Use(authn.AuthMiddleware(authenticator))
 
 	router.HandleFunc("/", handler.Playground("Dataloader", "/graphql"))
 	router.HandleFunc("/graphql", handler.GraphQL(schema,
