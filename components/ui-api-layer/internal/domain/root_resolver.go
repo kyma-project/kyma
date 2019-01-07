@@ -249,6 +249,14 @@ func (r *RootResolver) ResourceQuotasStatus(ctx context.Context, environment str
 	return r.k8s.ResourceQuotasStatus(ctx, environment)
 }
 
+func (r *queryResolver) Pod(ctx context.Context, name string, namespace string) (*gqlschema.Pod, error) {
+	return r.k8s.PodQuery(ctx, name, namespace)
+}
+
+func (r *queryResolver) Pods(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Pod, error) {
+	return r.k8s.PodsQuery(ctx, namespace, first, offset)
+}
+
 func (r *queryResolver) Functions(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.Function, error) {
 	return r.kubeless.FunctionsQuery(ctx, environment, first, offset)
 }

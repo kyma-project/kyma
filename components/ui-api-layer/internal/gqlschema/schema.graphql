@@ -374,6 +374,38 @@ type Deployment {
     boundServiceInstanceNames: [String!]
 }
 
+type Pod {
+    name: String!
+    nodeName: String!
+    namespace: String!
+    restartCount: Int!
+    creationTimestamp: Timestamp!
+    labels: Labels!
+    status: PodStatusType!
+    containerStates: [ContainerState!]!
+    json: JSON!
+}
+
+enum PodStatusType {
+    PENDING
+    RUNNING
+    SUCCEEDED
+    FAILED
+    UNKNOWN
+}
+
+type ContainerState {
+    state: ContainerStateType!
+    reason: String
+    message: String
+}
+
+enum ContainerStateType {
+    WAITING
+    RUNNING
+    TERMINATED
+}
+
 type ResourceValues {
     memory: String
     cpu: String
@@ -581,6 +613,8 @@ type Query {
     environments(application: String): [Environment!]!
 
     deployments(environment: String!, excludeFunctions: Boolean): [Deployment!]!
+    pod(name: String!, namespace: String!): Pod
+    pods(namespace: String!, first: Int, offset: Int): [Pod!]!
     resourceQuotas(environment: String!): [ResourceQuota!]!
     resourceQuotasStatus(environment: String!): ResourceQuotasStatus!
 
