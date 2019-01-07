@@ -1,11 +1,10 @@
 ---
-title: Etcd Database
+title: Service Catalog backup and restore
 type: Details
 ---
 
-The Service Catalog requires an `etcd` database cluster for a production use.
-It has a separate `etcd` cluster defined in the Service Catalog [etcd-stateful][sc-etcd-sub-chart] sub-chart.
-The [etcd-backup-operator][etcd-backup-operator] executes the backup procedure.
+This section describes the backup and restore processes for the Service Catalog. The Service Catalog uses the `etcd` database cluster in a production setup, and one `etcd` instance in case of local installation.
+It has a separate `etcd` cluster defined in the Service Catalog [etcd-stateful][sc-etcd-sub-chart] sub-chart. The [etcd-backup-operator][etcd-backup-operator] executes the backup procedure.
 
 ## Details
 

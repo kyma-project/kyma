@@ -34,14 +34,6 @@ To provision a service, create a ServiceInstance custom resource. Generally spea
 
 ![Kyma provisioning](./assets/provisioning.png)
 
-### Deprovision a service
-
-To deprovision a given service, delete the ServiceInstance custom resource. As part of this operation, the Service Broker deletes any resources created during the provisioning. When the process completes, the service becomes unavailable.
-
-![Kyma deprovisioning](./assets/deprovisioning.png)
-
-> **NOTE:** You can deprovision a service only if no corresponding ServiceBinding for a given ServiceInstance exists.
-
 ### Create a ServiceBinding
 
 Kyma binding operation consists of two phases:
@@ -52,16 +44,25 @@ Kyma binding operation consists of two phases:
 
 > **NOTE:** The system allows you to create the ServiceBinding and ServiceBindingUsage resources at the same time.
 
-### Bind with other resources
+### Define other types of resources
 
 The UsageKind is a cluster-wide custom resource which allows you to bind a ServiceInstance to any resource. By default, Kyma provides two UsageKinds which enable binding either to a Deployment or Function. You can add more UsageKinds if you want to bind your ServiceInstance to other types of resources. The UsageKind contains information on the way in which binding to this custom resource is conducted. The ServiceBindingUsage uses this information to inject Secrets to the Application.
 
 ![Kyma UsageKind](./assets/usagekind.png)
 
+
 ### Delete a ServiceBinding
 
 Kyma unbinding can be achieved in two ways:
 1. Delete the ServiceBindingUsage. The Secret injected into application will be deleted by BindingUsageController but the Secret still exist.
-2. Delete the ServiceBinding. It deletes the Secret and triggers the deletion of all the related ServiceBindingUsages. 
+2. Delete the ServiceBinding. It deletes the Secret and triggers the deletion of all the related ServiceBindingUsages.
 
 ![Kyma unbinding](./assets/unbinding.png)
+
+### Deprovision a service
+
+To deprovision a given service, delete the ServiceInstance custom resource. As part of this operation, the Service Broker deletes any resources created during the provisioning. When the process completes, the service becomes unavailable.
+
+![Kyma deprovisioning](./assets/deprovisioning.png)
+
+> **NOTE:** You can deprovision a service only if no corresponding ServiceBinding for a given ServiceInstance exists.
