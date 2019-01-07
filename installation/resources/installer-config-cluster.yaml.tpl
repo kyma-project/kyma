@@ -32,6 +32,8 @@ data:
   global.isLocalEnv: "false"
   global.knative: "false"
   global.domainName: "__DOMAIN__"
+  global.applicationConnectorDomainName: "__APPLICATION_CONNECTOR_DOMAIN__"
+  global.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.etcdBackup.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"

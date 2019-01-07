@@ -7,7 +7,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["configmaps"]
-  verbs: ["get", "patch"]
+  verbs: ["get", "create", "patch"]
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
