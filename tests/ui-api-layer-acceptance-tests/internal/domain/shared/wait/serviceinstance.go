@@ -1,17 +1,11 @@
 package wait
 
 import (
-	"time"
-
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/waiter"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-const (
-	readyTimeout = time.Second * 45
 )
 
 func ForServiceInstanceReady(instanceName, environment string, svcatCli *clientset.Clientset) error {

@@ -24,7 +24,7 @@ func TestMain(m *testing.M) {
 
 	module.SkipPluggableMainIfShould(c, ModuleName)
 
-	scInstaller, err := setup.NewServiceCatalogInstaller()
+	scInstaller, err := setup.NewServiceCatalogInstaller("ui-api-acceptance-sc")
 	exitOnError(err, "while initializing Service Catalog installer")
 
 	err = scInstaller.Setup()

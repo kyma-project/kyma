@@ -124,10 +124,10 @@ type bindingUsageTestSuite struct {
 func (s *bindingUsageTestSuite) fixServiceBindingUsage(name, serviceBindingName, deploymentName string) shared.ServiceBindingUsage {
 	return shared.ServiceBindingUsage{
 		Name:        name,
-		Environment: tester.DefaultNamespace,
+		Environment: TestNamespace,
 		ServiceBinding: shared.ServiceBinding{
 			Name:        serviceBindingName,
-			Environment: tester.DefaultNamespace,
+			Environment: TestNamespace,
 		},
 		UsedBy: shared.LocalObjectReference{
 			Name: deploymentName,
@@ -139,8 +139,8 @@ func (s *bindingUsageTestSuite) fixServiceBindingUsage(name, serviceBindingName,
 func (s *bindingUsageTestSuite) prepareInstanceAndBinding() {
 	instanceName := "binding-usage-test"
 	bindingName := "binding-usage-test"
-	s.givenInstance = fixture.ServiceInstance(instanceName)
-	s.givenBinding = fixture.ServiceBinding(bindingName, instanceName)
+	s.givenInstance = fixture.ServiceInstance(instanceName, TestNamespace)
+	s.givenBinding = fixture.ServiceBinding(bindingName, instanceName, TestNamespace)
 	s.givenBindingUsage = s.fixServiceBindingUsage("binding-usage-test", bindingName, "sample-deployment")
 
 	s.t.Log("Create Instance")
@@ -161,7 +161,7 @@ func (s *bindingUsageTestSuite) prepareInstanceAndBinding() {
 }
 
 func (s *bindingUsageTestSuite) createInstance() error {
-	_, err := s.svcatCli.ServicecatalogV1beta1().ServiceInstances(tester.DefaultNamespace).Create(&catalog.ServiceInstance{
+	_, err := s.svcatCli.ServicecatalogV1beta1().ServiceInstances(TestNamespace).Create(&catalog.ServiceInstance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: s.givenInstance.Name,
 		},
@@ -176,7 +176,7 @@ func (s *bindingUsageTestSuite) createInstance() error {
 }
 
 func (s *bindingUsageTestSuite) createBinding() error {
-	_, err := s.svcatCli.ServicecatalogV1beta1().ServiceBindings(tester.DefaultNamespace).Create(&catalog.ServiceBinding{
+	_, err := s.svcatCli.ServicecatalogV1beta1().ServiceBindings(TestNamespace).Create(&catalog.ServiceBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: s.givenBinding.Name,
 		},
@@ -190,11 +190,11 @@ func (s *bindingUsageTestSuite) createBinding() error {
 }
 
 func (s *bindingUsageTestSuite) deleteInstance() error {
-	return s.svcatCli.ServicecatalogV1beta1().ServiceInstances(tester.DefaultNamespace).Delete(s.givenInstance.Name, &metav1.DeleteOptions{})
+	return s.svcatCli.ServicecatalogV1beta1().ServiceInstances(TestNamespace).Delete(s.givenInstance.Name, &metav1.DeleteOptions{})
 }
 
 func (s *bindingUsageTestSuite) deleteBinding() error {
-	return s.svcatCli.ServicecatalogV1beta1().ServiceBindings(tester.DefaultNamespace).Delete(s.givenBinding.Name, &metav1.DeleteOptions{})
+	return s.svcatCli.ServicecatalogV1beta1().ServiceBindings(TestNamespace).Delete(s.givenBinding.Name, &metav1.DeleteOptions{})
 }
 
 func (s *bindingUsageTestSuite) createBindingUsage() (bindingUsageCreateMutationResponse, error) {

@@ -8,7 +8,6 @@ import (
 
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared"
 
-	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -146,7 +145,7 @@ func assertPlanExistsAndEqual(t *testing.T, arr []shared.ServicePlan, expectedEl
 func serviceClass() shared.ServiceClass {
 	return shared.ServiceClass{
 		Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
-		Environment:  tester.DefaultNamespace,
+		Environment:  TestNamespace,
 		ExternalName: "user-provided-service",
 		Activated:    false,
 		Plans: []shared.ServicePlan{

@@ -44,7 +44,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
 	require.NoError(t, err)
 
-	expectedResourceFromClusterServiceClass := fixture.ServiceInstance("cluster-test-instance")
+	expectedResourceFromClusterServiceClass := fixture.ServiceInstance("cluster-test-instance", TestNamespace)
 	expectedResourceFromServiceClass := instanceFromServiceClass("test-instance")
 	resourceDetailsQuery := instanceDetailsFields()
 
@@ -91,7 +91,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	checkInstanceFromServiceClass(t, expectedResourceFromServiceClass, res.ServiceInstance)
 
 	t.Log("Query Multiple Resources")
-	multipleRes, err := queryMultipleInstances(c, resourceDetailsQuery, tester.DefaultNamespace)
+	multipleRes, err := queryMultipleInstances(c, resourceDetailsQuery, TestNamespace)
 
 	assert.NoError(t, err)
 	assertInstanceFromClusterServiceClassExistsAndEqual(t, expectedResourceFromClusterServiceClass, multipleRes.ServiceInstances)
@@ -107,7 +107,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	assert.NoError(t, err)
 
 	t.Log("Query Multiple Resources With Status")
-	multipleResWithStatus, err := queryMultipleInstancesWithStatus(c, resourceDetailsQuery, tester.DefaultNamespace)
+	multipleResWithStatus, err := queryMultipleInstancesWithStatus(c, resourceDetailsQuery, TestNamespace)
 
 	assert.NoError(t, err)
 	assertInstanceFromClusterServiceClassExistsAndEqual(t, expectedResourceFromClusterServiceClass, multipleResWithStatus.ServiceInstances)
@@ -434,7 +434,7 @@ func assertInstanceFromServiceClassExistsAndEqual(t *testing.T, expectedElement 
 func instanceFromServiceClass(name string) shared.ServiceInstance {
 	return shared.ServiceInstance{
 		Name:        name,
-		Environment: tester.DefaultNamespace,
+		Environment: TestNamespace,
 		Labels:      []string{"test", "test2"},
 		PlanSpec: map[string]interface{}{
 			"first": "1",
@@ -449,7 +449,7 @@ func instanceFromServiceClass(name string) shared.ServiceInstance {
 		ServiceClass: shared.ServiceClass{
 			Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
 			ExternalName: "user-provided-service",
-			Environment:  tester.DefaultNamespace,
+			Environment:  TestNamespace,
 		},
 		Status: shared.ServiceInstanceStatus{
 			Type: shared.ServiceInstanceStatusTypeRunning,

@@ -20,9 +20,10 @@ type ServiceCatalogInstaller struct {
 	serviceInstaller       *installer.ServiceInstaller
 	clusterBrokerInstaller *installer.ClusterBrokerInstaller
 	brokerInstaller        *installer.BrokerInstaller
+	namespace              string
 }
 
-func NewServiceCatalogInstaller() (*ServiceCatalogInstaller, error) {
+func NewServiceCatalogInstaller(namespace string) (*ServiceCatalogInstaller, error) {
 	k8sClient, _, err := client.NewClientWithConfig()
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing K8S Client")
@@ -33,10 +34,10 @@ func NewServiceCatalogInstaller() (*ServiceCatalogInstaller, error) {
 		return nil, errors.Wrap(err, "while initializing service catalog client")
 	}
 
-	podInstaller := installer.NewPod(tester.ReleaseName, tester.DefaultNamespace)
-	serviceInstaller := installer.NewService(tester.ReleaseName, tester.DefaultNamespace)
-	clusterBrokerInstaller := installer.NewClusterBroker(tester.ClusterBrokerReleaseName, tester.DefaultNamespace)
-	brokerInstaller := installer.NewBroker(tester.BrokerReleaseName, tester.DefaultNamespace)
+	podInstaller := installer.NewPod(tester.ReleaseName, namespace)
+	serviceInstaller := installer.NewService(tester.ReleaseName, namespace)
+	clusterBrokerInstaller := installer.NewClusterBroker(tester.ClusterBrokerReleaseName, namespace)
+	brokerInstaller := installer.NewBroker(tester.BrokerReleaseName, namespace)
 
 	return &ServiceCatalogInstaller{
 		k8sClient:              k8sClient,
@@ -45,13 +46,14 @@ func NewServiceCatalogInstaller() (*ServiceCatalogInstaller, error) {
 		serviceInstaller:       serviceInstaller,
 		clusterBrokerInstaller: clusterBrokerInstaller,
 		brokerInstaller:        brokerInstaller,
+		namespace:              namespace,
 	}, nil
 }
 
 func (i *ServiceCatalogInstaller) Setup() error {
 	log.Println("Setting up tests...")
 
-	err := installer.CreateNamespace(i.k8sClient, tester.DefaultNamespace)
+	err := installer.CreateNamespace(i.k8sClient, i.namespace)
 	if err != nil {
 		return errors.Wrap(err, "while creating namespace")
 	}
@@ -66,7 +68,7 @@ func (i *ServiceCatalogInstaller) Setup() error {
 		return err
 	}
 
-	url := fmt.Sprintf("http://%s.%s.svc.cluster.local", tester.ReleaseName, tester.DefaultNamespace)
+	url := fmt.Sprintf("http://%s.%s.svc.cluster.local", tester.ReleaseName, i.namespace)
 
 	err = i.initClusterBroker(i.clusterBrokerInstaller, i.svcatCli, url)
 	if err != nil {
@@ -104,7 +106,7 @@ func (i *ServiceCatalogInstaller) Cleanup() {
 		log.Print(errors.Wrapf(err, "while uninstalling %s", tester.ServiceBroker))
 	}
 
-	err = installer.DeleteNamespace(i.k8sClient, tester.DefaultNamespace)
+	err = installer.DeleteNamespace(i.k8sClient, i.namespace)
 	if err != nil {
 		log.Print(errors.Wrap(err, "while deleting namespace"))
 	}

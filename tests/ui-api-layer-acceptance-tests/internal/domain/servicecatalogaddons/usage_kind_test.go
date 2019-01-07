@@ -42,7 +42,7 @@ type usageKindResourcesResponse struct {
 
 const (
 	usageKindName      = "usage-kind-test"
-	usageKindNamespace = "usage-kind-ns-test"
+	usageKindNamespace = "ui-api-acceptance-usage-kind"
 )
 
 func TestUsageKind(t *testing.T) {

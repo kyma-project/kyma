@@ -1,14 +1,13 @@
 package fixture
 
 import (
-	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared"
 )
 
-func ServiceInstance(name string) shared.ServiceInstance {
+func ServiceInstance(name string, namespace string) shared.ServiceInstance {
 	return shared.ServiceInstance{
 		Name:        name,
-		Environment: tester.DefaultNamespace,
+		Environment: namespace,
 		Labels:      []string{"test", "test2"},
 		PlanSpec: map[string]interface{}{
 			"first": "1",

@@ -5,7 +5,6 @@ package servicecatalog
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared"
@@ -19,7 +18,6 @@ import (
 )
 
 const (
-	bindingReadyTimeout             = time.Second * 30
 	serviceBindingStatusTypeUnknown = "UNKNOWN"
 )
 
@@ -59,10 +57,10 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	instanceName := "binding-test-instance"
-	instance := fixture.ServiceInstance(instanceName)
+	instance := fixture.ServiceInstance(instanceName, TestNamespace)
 
 	bindingName := "test-binding"
-	binding := fixture.ServiceBinding(bindingName, instanceName)
+	binding := fixture.ServiceBinding(bindingName, instanceName, TestNamespace)
 	createBindingOutput := createBindingOutput(bindingName, instanceName)
 	deleteBindingOutput := deleteBindingOutput(bindingName)
 
@@ -275,7 +273,7 @@ func bindingEvent(eventType string, binding shared.ServiceBinding) ServiceBindin
 func createBindingOutput(bindingName, instanceName string) CreateServiceBindingOutput {
 	return CreateServiceBindingOutput{
 		Name:                bindingName,
-		Environment:         tester.DefaultNamespace,
+		Environment:         TestNamespace,
 		ServiceInstanceName: instanceName,
 	}
 }
@@ -283,7 +281,7 @@ func createBindingOutput(bindingName, instanceName string) CreateServiceBindingO
 func deleteBindingOutput(bindingName string) DeleteServiceBindingOutput {
 	return DeleteServiceBindingOutput{
 		Name:        bindingName,
-		Environment: tester.DefaultNamespace,
+		Environment: TestNamespace,
 	}
 }
 
