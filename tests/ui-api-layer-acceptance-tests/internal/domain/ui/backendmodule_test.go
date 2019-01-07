@@ -3,10 +3,9 @@
 package ui
 
 import (
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
 	"testing"
 	"time"
-
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/apis/ui/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/client/clientset/versioned"
@@ -15,7 +14,11 @@ import (
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/waiter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+const (
+	readyTimeout = time.Minute
 )
 
 type BackendModule struct {
@@ -50,7 +53,7 @@ func TestBackendModule(t *testing.T) {
 			assertBackendModules(t, moduleNames, resp.BackendModules)
 			return true, nil
 
-		}, time.Second*5)
+		}, readyTimeout)
 		assert.NoError(t, err)
 
 		err = deleteBackendModules(moduleNames, uiCli)
