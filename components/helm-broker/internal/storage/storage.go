@@ -2,7 +2,7 @@ package storage
 
 import (
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage/driver/etcd"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage/driver/memory"
