@@ -9,7 +9,7 @@ The Application Proxy sends the requests from Lambda functions and services in K
 
 The following diagram illustrates how the Application Proxy interacts with other components and external APIs secured with OAuth.
 
-![Proxy Service Diagram](assets/003-architecture-proxy-service.svg)
+![Proxy Service Diagram](./assets/003-architecture-proxy-service.svg)
 
 1. A lambda function calls the Access Service. The name of every Access Service follows this format: `app-{application-name}-{service-id}`
 2. The Access Service exposes the Application Proxy.

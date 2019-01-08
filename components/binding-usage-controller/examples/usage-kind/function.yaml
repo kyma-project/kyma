@@ -1,4 +1,4 @@
-apiVersion: servicecatalog.kyma.cx/v1alpha1
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
 kind: UsageKind
 metadata:
    name: function

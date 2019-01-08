@@ -25,8 +25,8 @@
     "proto",
     "sortkeys"
   ]
-  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
-  version = "v1.1.1"
+  revision = "4cbf7e384e768b4e01799441fdf2a706a5635ae7"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
@@ -102,6 +102,7 @@
   branch = "master"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "common/ingressgateway",
     "components/api-controller/pkg/apis/authentication.istio.io/v1alpha1",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
@@ -116,7 +117,7 @@
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/scheme",
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3"
   ]
-  revision = "8c274255cc4e4ecebb438bc8f9057ba7afb82e31"
+  revision = "e317ebe1138298091cef2f93131311674aa0dd72"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -166,18 +167,19 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "3d3f9f413869b949e48070b5bc593aa22cc2b8f2"
+  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = [
+    "context",
     "http/httpguts",
     "http2",
     "http2/hpack",
     "idna"
   ]
-  revision = "03003ca0c849e57b6ea29a4bab8d3cb6e4d568fe"
+  revision = "e147a9138326bc0e9d4e179541ffd8af41cff8a9"
 
 [[projects]]
   branch = "master"
@@ -186,7 +188,7 @@
     "unix",
     "windows"
   ]
-  revision = "66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399"
+  revision = "074acd46bca67915925527c07849494d115e7c43"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -224,8 +226,8 @@
 [[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
-  version = "v2.2.1"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
 
 [[projects]]
   name = "k8s.io/api"
@@ -363,6 +365,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "20431aa45f3bfcdd12b47ad623d15146bc1519692b91102d934fb4e8c0a9c998"
+  inputs-digest = "384187829491cdfef4d155af011f081b876496ef4755e0dcd907e65624d364de"
   solver-name = "gps-cdcl"
   solver-version = 1

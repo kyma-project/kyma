@@ -3,7 +3,7 @@ env:
   kubelessNamespace: kyma-system
 
 containerRegistry:
-  path: eu.gcr.io
+  path: eu.gcr.io/kyma-project
 
 image:
-  tag: tbd
+  tag: 3b990070

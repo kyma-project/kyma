@@ -8,7 +8,6 @@ type: Configuration
 [service-metadata]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/profile.md#service-metadata "OSB Spec Service Metadata"
 [plan-objects]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object "OSB Spec Plan Objects"
 
-
 To create your own bundle, you must create a directory with the following structure:
 
 ```
@@ -22,6 +21,8 @@ sample-bundle/
        │   ├── meta.yaml                    # A file which contains the metadata information about this plan
        │   ├── bind.yaml                    # A file which contains information about the values that the Helm Broker returns when it receives the bind request
        │   ├── create-instance-schema.json  # The JSON Schema definitions for creating a ServiceInstance
+       │   ├── bind-instance-schema.json    # The JSON Schema definitions for binding a ServiceInstance
+       │   ├── update-instance-schema.json  # The JSON Schema definitions for updating a ServiceInstance
        │   └── values.yaml                  # The default configuration values in this plan for a chart defined in the `chart` directory
        └── ....
 ```
@@ -47,6 +48,10 @@ The `meta.yaml` file is mandatory as it contains information about the bundle. S
 |   **documentationURL**  |   false  |                                  The **documentationURL** field described in the [Open Service Broker API][service-metadata].                                    |
 |      **supportURL**     |   false  |                                     The **supportURL** field described in the [Open Service Broker API][service-metadata].                                       |
 |       **imageURL**      |   false  |     The **imageURL** field described in the [Open Service Broker API][service-metadata]. You must provide the image as an SVG.          |
+|       **labels**        |   false  |     To organize your project, add arbitrary labels as key/value pairs. Use labels to indicate different elements, such as environments, services, or teams.   |
+| **bindingsRetrievable** |   false  |     The **bindingRetrievable** field specifies whether fetching a ServiceBinding using a `GET` call on the resource's endpoint is supported for all plans. The default value is `false`.   |
+|   **planUpdatable**     |   false  |     The **planUpdatable** field specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
+|       **requires**      |   false  |     The **requires** field defines a list of permissions the user must grant to the instances of this service.          |
 
 ### The chart directory
 
@@ -72,12 +77,13 @@ The `meta.yaml` file contains information about a bundle plan. Set the following
 | **description** |   true   | The plan description. It has the same restrictions as defined in the [Open Service Broker API][plan-objects]. |
 | **displayName** |   true   | The plan display name. It has the same restrictions as defined in the [Open Service Broker API][plan-objects]. |
 |  **bindable**   |   false  | The plan bindable attribute. It has the same restrictions as defined in the [Open Service Broker API][plan-objects].    |
+|     **free**    |   false  | The attribute which specifies whether the instance is free or not. The default value is `false`.    |
 
 #### The bind.yaml file
 
 The `bind.yaml` file contains the information required for the [binding action][bind] in a specific plan.
 If you defined in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file.
-For more information about the content of the `bind.yaml` file, see the [Binding bundles](https://github.com/kyma-project/kyma/blob/master/docs/service-brokers/docs/013-configuration-helm-broker-bundles-binding.md) document.
+For more information about the content of the `bind.yaml` file, see the [Binding bundles](#configuration-binding-bundles) document.
 
 #### The values.yaml file
 
@@ -87,9 +93,21 @@ For more information about the content of the `values.yaml` file, see the [Value
 
 #### The create-instance-schema.json file
 
-The `create-instance-schema.json` file contains a schema used to define the parameters. Each input parameter is expressed as a property within a JSON object.
+The `create-instance-schema.json` file contains a schema used to define the parameters for a provision operation of the ServiceInstance. Each input parameter is expressed as a property within a JSON object.
 This file is not required.
-For more information about the content of the `create-instance-schema.json` file, see the [Input parameters](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#input-parameters-schema-object) specification.
+For more information about the content of the `create-instance-schema.json` file, see the [Schemas](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#schemas-object) specification.
+
+#### The update-instance-schema.json file
+
+The `update-instance-schema.json` file contains a schema used to define the parameters for an update operation of the ServiceInstance. Each input parameter is expressed as a property within a JSON object.
+This file is not required.
+For more information about the content of the `update-instance-schema.json` file, see the [Schemas](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#schemas-object) specification.
+
+#### The bind-instance-schema.json file
+
+The `bind-instance-schema.json` file contains a schema used to define the parameters for a bind operation. Each input parameter is expressed as a property within a JSON object.
+This file is not required.
+For more information about the content of the `bind-instance-schema.json` file, see the [Schemas](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#schemas-object) specification.
 
 ### Troubleshooting
 

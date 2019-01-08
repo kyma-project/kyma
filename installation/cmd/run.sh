@@ -32,7 +32,7 @@ do
             shift
         ;;
         --knative)
-            KNATIVE="true"
+            KNATIVE="--knative"
             shift
         ;;
         *)    # unknown option
@@ -44,11 +44,11 @@ done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
 MINIKUBE_EXTRA_ARGS=""
-CREATE_CR_EXTRA_ARGS=""
 
-if [[ -n "$KNATIVE" ]]; then
+if [ -n "$KNATIVE" ]; then
+
     MINIKUBE_EXTRA_ARGS="${MINIKUBE_EXTRA_ARGS} --memory 10240 --disk-size 30g"
-    CREATE_CR_EXTRA_ARGS="${CREATE_CR_EXTRA_ARGS} --crtpl_path $CURRENT_DIR/../resources/installer-cr-knative.yaml.tpl"
+
 fi
 
 if [[ ! ${SKIP_MINIKUBE_START} ]]; then
@@ -57,15 +57,13 @@ fi
 
 bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
 
-bash ${CURRENT_DIR}/../scripts/generate-local-config.sh
-
 if [ -z "$CR_PATH" ]; then
 
     TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
     CR_PATH="${TMPDIR}/installer-cr-local.yaml"
-    bash ${CURRENT_DIR}/../scripts/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}" ${CREATE_CR_EXTRA_ARGS}
+    bash ${CURRENT_DIR}/../scripts/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}"
 
 fi
 
-bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}"
+bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}" "${KNATIVE}"
 rm -rf $TMPDIR

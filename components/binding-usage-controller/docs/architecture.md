@@ -15,7 +15,7 @@ The Binding Usage Controller workflow steps are as follows:
 6. The Binding Usage Controller adds an annotation with data on the applied ServiceBindingUsage. Annotations are used for the tracing and debugging purposes. With annotations, you can trace the labels attached to a given Deployment. The patter of such annotation is as follows:
 
  ```
- servicebindingusages.servicecatalog.kyma.cx/tracing-information: '{
+ servicebindingusages.servicecatalog.kyma-project.io/tracing-information: '{
   "{ServiceBindingUsage Name}": {
     "injectedLabels": {
       "{label-key}": "{label-value}"
@@ -26,7 +26,7 @@ The Binding Usage Controller workflow steps are as follows:
 See the example:
 
   ```
-servicebindingusages.servicecatalog.kyma.cx/tracing-information: '{
+servicebindingusages.servicecatalog.kyma-project.io/tracing-information: '{
   "azure-mysqldb-instance-binding-usage": {
     "injectedLabels": {
       "use-db31ae30-7ecb-11e8-a568-000d3a384f22": "445978"
@@ -41,4 +41,4 @@ servicebindingusages.servicecatalog.kyma.cx/tracing-information: '{
 }
 ```
 
-![Architecture](assets/architecture.png)
+![Architecture](assets/architecture.svg)

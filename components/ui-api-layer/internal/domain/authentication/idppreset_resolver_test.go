@@ -7,9 +7,9 @@ import (
 	"github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/authentication/automock"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
-	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -36,7 +36,8 @@ func TestIDPPresetResolver_CreateIDPPresetMutation(t *testing.T) {
 		defer converterMock.AssertExpectations(t)
 		converterMock.On("ToGQL", fixIDPPresetObj).Return(fixGQLIDPPresetObj)
 
-		resolver := authentication.NewIDPPresetResolver(svc)
+		resolver, err := authentication.NewIDPPresetResolver(svc)
+		require.NoError(t, err)
 		resolver.SetIDPPresetConverter(converterMock)
 
 		// when
@@ -61,7 +62,8 @@ func TestIDPPresetResolver_CreateIDPPresetMutation(t *testing.T) {
 		defer svc.AssertExpectations(t)
 		svc.On("Create", fixName, fixIssuer, fixJwksURI).Return(nil, fixErr)
 
-		resolver := authentication.NewIDPPresetResolver(svc)
+		resolver, err := authentication.NewIDPPresetResolver(svc)
+		require.NoError(t, err)
 
 		// when
 		gotIDP, err := resolver.CreateIDPPresetMutation(context.Background(), fixName, fixIssuer, fixJwksURI)
@@ -85,7 +87,8 @@ func TestIDPPresetResolver_CreateIDPPresetMutation(t *testing.T) {
 		defer svc.AssertExpectations(t)
 		svc.On("Create", fixName, fixIssuer, fixJwksURI).Return(nil, fixErr)
 
-		resolver := authentication.NewIDPPresetResolver(svc)
+		resolver, err := authentication.NewIDPPresetResolver(svc)
+		require.NoError(t, err)
 
 		// when
 		gotIDP, err := resolver.CreateIDPPresetMutation(context.Background(), fixName, fixIssuer, fixJwksURI)
@@ -115,7 +118,8 @@ func TestIDPPresetResolver_DeleteIDPPresetMutation(t *testing.T) {
 		defer converterMock.AssertExpectations(t)
 		converterMock.On("ToGQL", fixIDPPresetObj).Return(fixGQLIDPPresetObj)
 
-		resolver := authentication.NewIDPPresetResolver(svc)
+		resolver, err := authentication.NewIDPPresetResolver(svc)
+		require.NoError(t, err)
 		resolver.SetIDPPresetConverter(converterMock)
 
 		// when
@@ -135,7 +139,8 @@ func TestIDPPresetResolver_DeleteIDPPresetMutation(t *testing.T) {
 		defer svc.AssertExpectations(t)
 		svc.On("Find", fixName).Return(nil, nil)
 
-		resolver := authentication.NewIDPPresetResolver(svc)
+		resolver, err := authentication.NewIDPPresetResolver(svc)
+		require.NoError(t, err)
 
 		// when
 		gotIDP, err := resolver.DeleteIDPPresetMutation(context.Background(), fixName)
@@ -159,7 +164,8 @@ func TestIDPPresetResolver_DeleteIDPPresetMutation(t *testing.T) {
 		svc.On("Find", fixName).Return(fixIDPPresetObj, nil)
 		svc.On("Delete", fixName).Return(fixErr)
 
-		resolver := authentication.NewIDPPresetResolver(svc)
+		resolver, err := authentication.NewIDPPresetResolver(svc)
+		require.NoError(t, err)
 
 		// when
 		gotIDP, err := resolver.DeleteIDPPresetMutation(context.Background(), fixName)
@@ -187,7 +193,8 @@ func TestIDPPresetResolver_IDPPresetQuery(t *testing.T) {
 		defer converterMock.AssertExpectations(t)
 		converterMock.On("ToGQL", fixIDPPresetObj).Return(fixGQLIDPPresetObj)
 
-		resolver := authentication.NewIDPPresetResolver(svc)
+		resolver, err := authentication.NewIDPPresetResolver(svc)
+		require.NoError(t, err)
 		resolver.SetIDPPresetConverter(converterMock)
 
 		// when
@@ -207,7 +214,8 @@ func TestIDPPresetResolver_IDPPresetQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 		svc.On("Find", fixName).Return(nil, nil)
 
-		resolver := authentication.NewIDPPresetResolver(svc)
+		resolver, err := authentication.NewIDPPresetResolver(svc)
+		require.NoError(t, err)
 
 		// when
 		gotIDP, err := resolver.IDPPresetQuery(context.Background(), fixName)
@@ -228,7 +236,8 @@ func TestIDPPresetResolver_IDPPresetQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 		svc.On("Find", fixName).Return(nil, fixErr)
 
-		resolver := authentication.NewIDPPresetResolver(svc)
+		resolver, err := authentication.NewIDPPresetResolver(svc)
+		require.NoError(t, err)
 
 		// when
 		gotIDP, err := resolver.IDPPresetQuery(context.Background(), fixName)
@@ -257,7 +266,8 @@ func TestIDPPresetResolver_IDPPresetsQuery(t *testing.T) {
 		defer converterMock.AssertExpectations(t)
 		converterMock.On("ToGQL", fixIDPPreset).Return(fixGQLIDPPreset)
 
-		resolver := authentication.NewIDPPresetResolver(svc)
+		resolver, err := authentication.NewIDPPresetResolver(svc)
+		require.NoError(t, err)
 		resolver.SetIDPPresetConverter(converterMock)
 
 		// when
@@ -279,7 +289,8 @@ func TestIDPPresetResolver_IDPPresetsQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 		svc.On("List", pager.PagingParams{}).Return(fixEmptyIDPPresetsArray, nil)
 
-		resolver := authentication.NewIDPPresetResolver(svc)
+		resolver, err := authentication.NewIDPPresetResolver(svc)
+		require.NoError(t, err)
 
 		// when
 		gotIDPs, err := resolver.IDPPresetsQuery(context.Background(), nil, nil)
@@ -301,7 +312,8 @@ func TestIDPPresetResolver_IDPPresetsQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 		svc.On("List", pager.PagingParams{}).Return(fixEmptyIDPPresetsArray, fixErr)
 
-		resolver := authentication.NewIDPPresetResolver(svc)
+		resolver, err := authentication.NewIDPPresetResolver(svc)
+		require.NoError(t, err)
 
 		// when
 		gotIDPs, err := resolver.IDPPresetsQuery(context.Background(), nil, nil)

@@ -470,7 +470,7 @@ func (c *ctrlTestCase) fixPodPreset(usage *sbuTypes.ServiceBindingUsage) *svcatS
 			Name:      "9e8947c3a22caf7875e80141e91eaf66e07f1bee", // sha1(binding usage name)
 			Namespace: usage.Namespace,
 			Annotations: map[string]string{
-				"servicebindingusages.servicecatalog.kyma.cx/owner-name": usage.Name,
+				fmt.Sprintf("servicebindingusages.%s/owner-name", sbuTypes.SchemeGroupVersion.Group): usage.Name,
 			},
 		},
 		Spec: svcatSettings.PodPresetSpec{

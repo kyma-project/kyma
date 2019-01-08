@@ -14,8 +14,6 @@ fi
 
 bash $CURRENT_DIR/../scripts/build-kyma-installer.sh --vm-driver "$VM_DRIVER"
 
-bash $CURRENT_DIR/../scripts/generate-local-config.sh
-
 if [ -z "$CR_PATH" ]; then
 
     TMPDIR=`mktemp -d "$CURRENT_DIR/../../temp-XXXXXXXXXX"`
@@ -51,9 +49,9 @@ The `installation/scripts/build-kyma-installer.sh` script extracts the Kyma-Inst
 
 >**NOTE:** For the Kyma-Installer Docker image details, refer to the `tools/kyma-installer/kyma.Dockerfile` file.
 
-## The generate-local-config.sh script
+## The configure-azure-broker.sh script
 
-The `generate-local-config.sh` script configures optional subcomponents. At the moment, only the Azure Broker is an optional subcomponent of the `core` deployment.
+The `configure-azure-broker.sh` script configures Azure Broker, an optional subcomponent of the `core` deployment.
 
 The Azure Broker subcomponent is part of the `core` deployment that provisions managed services in the Microsoft Azure cloud. To enable the Azure Broker, export the following environment variables:
  - AZURE_BROKER_SUBSCRIPTION_ID

@@ -132,7 +132,7 @@
     "components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1"
   ]
-  revision = "46be4bf9ea1d63216d644240036909ce0b50c7eb"
+  revision = "56b261fcf0ecff236ed643d5c6620faad1b708d2"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -366,6 +366,12 @@
   version = "kubernetes-1.10.1"
 
 [[projects]]
+  branch = "master"
+  name = "k8s.io/cli-runtime"
+  packages = ["pkg/genericclioptions/printers"]
+  revision = "2f0d1d0a58f22eae7a0ec3d6cf01f4a122a57dae"
+
+[[projects]]
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -406,20 +412,28 @@
     "plugin/pkg/client/auth/exec",
     "rest",
     "rest/watch",
+    "third_party/forked/golang/template",
     "tools/clientcmd/api",
     "tools/metrics",
     "tools/reference",
     "transport",
     "util/cert",
     "util/flowcontrol",
-    "util/integer"
+    "util/integer",
+    "util/jsonpath"
   ]
   revision = "989be4278f353e42f26c416c53757d16fcff77db"
   version = "kubernetes-1.10.1"
 
+[[projects]]
+  name = "sigs.k8s.io/yaml"
+  packages = ["."]
+  revision = "fd68e9863619f6ec2fdd8625fe1f02e7c877e480"
+  version = "v1.1.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "31f8c0ab9e18e416bd8a516d2f7e2abded392babfec2f300963191af3f257222"
+  inputs-digest = "478e205b2f315b259a8cc1efbeff1223e85c39b5548add812269b6b39822ee44"
   solver-name = "gps-cdcl"
   solver-version = 1

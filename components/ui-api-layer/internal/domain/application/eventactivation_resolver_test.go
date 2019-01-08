@@ -3,12 +3,14 @@ package application_test
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/automock"
+	contentMock "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared/automock"
+
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
-	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -80,11 +82,14 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 			},
 		}
 
-		getter := new(automock.AsyncApiSpecGetter)
+		getter := new(contentMock.AsyncApiSpecGetter)
 		getter.On("Find", "service-class", "test").Return(asyncApiSpec, nil)
 		defer getter.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(nil, getter)
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("AsyncApiSpec").Return(getter)
+
+		resolver := application.NewEventActivationResolver(nil, retriever)
 		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("env", "test"))
 
 		require.NoError(t, err)
@@ -94,11 +99,14 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 	})
 
 	t.Run("Not found", func(t *testing.T) {
-		getter := new(automock.AsyncApiSpecGetter)
+		getter := new(contentMock.AsyncApiSpecGetter)
 		getter.On("Find", "service-class", "test").Return(nil, nil)
 		defer getter.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(nil, getter)
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("AsyncApiSpec").Return(getter)
+
+		resolver := application.NewEventActivationResolver(nil, retriever)
 		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("env", "test"))
 
 		require.NoError(t, err)
@@ -112,11 +120,14 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 			},
 		}
 
-		getter := new(automock.AsyncApiSpecGetter)
+		getter := new(contentMock.AsyncApiSpecGetter)
 		getter.On("Find", "service-class", "test").Return(asyncApiSpec, nil)
 		defer getter.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(nil, getter)
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("AsyncApiSpec").Return(getter)
+
+		resolver := application.NewEventActivationResolver(nil, retriever)
 		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("env", "test"))
 
 		require.Error(t, err)
@@ -124,9 +135,12 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		getter := new(automock.AsyncApiSpecGetter)
+		getter := new(contentMock.AsyncApiSpecGetter)
 
-		resolver := application.NewEventActivationResolver(nil, getter)
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("AsyncApiSpec").Return(getter)
+
+		resolver := application.NewEventActivationResolver(nil, retriever)
 		_, err := resolver.EventActivationEventsField(nil, nil)
 
 		require.Error(t, err)
@@ -134,11 +148,14 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		getter := new(automock.AsyncApiSpecGetter)
+		getter := new(contentMock.AsyncApiSpecGetter)
 		getter.On("Find", "service-class", "test").Return(nil, errors.New("nope"))
 		defer getter.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(nil, getter)
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("AsyncApiSpec").Return(getter)
+
+		resolver := application.NewEventActivationResolver(nil, retriever)
 		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("env", "test"))
 
 		require.Error(t, err)

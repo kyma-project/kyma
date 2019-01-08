@@ -3,10 +3,10 @@
 package gqlschema
 
 import (
-	fmt "fmt"
-	io "io"
-	strconv "strconv"
-	time "time"
+	"fmt"
+	"io"
+	"strconv"
+	"time"
 )
 
 type API struct {
@@ -51,6 +51,10 @@ type AuthenticationPolicy struct {
 	Type    AuthenticationPolicyType `json:"type"`
 	Issuer  string                   `json:"issuer"`
 	JwksURI string                   `json:"jwksURI"`
+}
+
+type BackendModule struct {
+	Name string `json:"name"`
 }
 
 type BindableResourcesOutputItem struct {

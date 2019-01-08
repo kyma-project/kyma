@@ -139,7 +139,7 @@ EOF
 
 ```
 cat <<EOF | kubectl apply -f -
-apiVersion: servicecatalog.kyma.cx/v1alpha1
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
 kind: ServiceBindingUsage
 metadata:
   labels:

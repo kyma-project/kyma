@@ -57,11 +57,11 @@ Possible values of the `dir` property:
 
 To override subcomponents versions during Kyma startup, create the `versions-overrides.env` file in the `installation` directory.
 
-The example overrides the `Environments` component and sets the image version to `0.0.1`, based on the version from the `develop` directory.
+The example overrides the Namespace Controller component and sets the image version to `0.0.1`, based on the version from the `develop` directory.
 
 Example:
 
 ```
-global.environments.dir=develop/
-global.environments.version=0.0.1
+global.namespace_controller.dir=develop/
+global.namespace_controller.version=0.0.1
 ```
