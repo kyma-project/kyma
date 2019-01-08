@@ -7436,9 +7436,6 @@ func (ec *executionContext) _Deployment(ctx context.Context, sel ast.SelectionSe
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Deployment_boundServiceInstanceNames(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		default:
@@ -7664,9 +7661,6 @@ func (ec *executionContext) _Deployment_boundServiceInstanceNames(ctx context.Co
 		return ec.resolvers.Deployment().BoundServiceInstanceNames(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]string)
@@ -8197,9 +8191,6 @@ func (ec *executionContext) _Environment(ctx context.Context, sel ast.SelectionS
 			}
 		case "applications":
 			out.Values[i] = ec._Environment_applications(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8254,9 +8245,6 @@ func (ec *executionContext) _Environment_applications(ctx context.Context, field
 		return obj.Applications, nil
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]string)
@@ -8308,9 +8296,6 @@ func (ec *executionContext) _EventActivation(ctx context.Context, sel ast.Select
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._EventActivation_events(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		default:
@@ -8421,9 +8406,6 @@ func (ec *executionContext) _EventActivation_events(ctx context.Context, field g
 		return ec.resolvers.EventActivation().Events(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]EventActivationEvent)
@@ -15111,9 +15093,6 @@ func (ec *executionContext) _ServiceInstance(ctx context.Context, sel ast.Select
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._ServiceInstance_serviceBindingUsages(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		default:
@@ -15545,9 +15524,6 @@ func (ec *executionContext) _ServiceInstance_serviceBindingUsages(ctx context.Co
 		return ec.resolvers.ServiceInstance().ServiceBindingUsages(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]ServiceBindingUsage)
@@ -18746,7 +18722,9 @@ type ServiceInstance {
     clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
     serviceBindings: ServiceBindings!
-    serviceBindingUsages: [ServiceBindingUsage!]!
+
+    # Depends on servicecatalogaddons domain
+    serviceBindingUsages: [ServiceBindingUsage!]
 }
 
 type ServiceInstanceResourceRef {
@@ -19068,7 +19046,9 @@ type Deployment {
     status: DeploymentStatus!
     labels: Labels!
     containers: [Container!]!
-    boundServiceInstanceNames: [String!]!
+
+    # Depends on servicecatalog and servicecatalogaddons modules
+    boundServiceInstanceNames: [String!]
 }
 
 type ResourceValues {
@@ -19098,7 +19078,9 @@ type ExceededQuota {
 
 type Environment {
     name: String!
-    applications: [String!]!
+
+    # Depends on application module
+    applications: [String!]
 }
 
 type Application {
@@ -19165,7 +19147,7 @@ type EventActivation {
     name: String!
     displayName: String!
     sourceId: String!
-    events: [EventActivationEvent!]!
+    events: [EventActivationEvent!] # content module
 }
 
 type UsageKind {
@@ -19272,7 +19254,9 @@ type Query {
     applications(environment: String, first: Int, offset: Int): [Application!]!
     connectorService(application: String!): ConnectorService!
 
+    # Depends on 'application'
     environments(application: String): [Environment!]!
+
     deployments(environment: String!, excludeFunctions: Boolean): [Deployment!]!
     resourceQuotas(environment: String!): [ResourceQuota!]!
     resourceQuotasStatus(environment: String!): ResourceQuotasStatus!
