@@ -199,7 +199,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
-		releaseManager.On("DeleteChart", applicationName).Return(nil)
+		releaseManager.On("DeleteReleaseIfExists", applicationName).Return(nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
