@@ -1,9 +1,9 @@
-package servicecatalog
+package servicecatalogaddons
 
 import (
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/status"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/status"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/name"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

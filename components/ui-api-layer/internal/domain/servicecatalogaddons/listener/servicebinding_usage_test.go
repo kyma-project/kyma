@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/listener"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/listener/automock"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/listener"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/listener/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

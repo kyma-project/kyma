@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/ui"
@@ -26,6 +28,7 @@ type RootResolver struct {
 	k8s *k8s.Resolver
 
 	sc             *servicecatalog.PluggableContainer
+	sca            *servicecatalogaddons.PluggableContainer
 	app            *application.PluggableContainer
 	content        *content.PluggableContainer
 	kubeless       *kubeless.PluggableResolver
@@ -50,13 +53,19 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	}
 	makePluggable(scContainer)
 
+	scaContainer, err := servicecatalogaddons.New(restConfig, informerResyncPeriod, scContainer.ServiceCatalogRetriever)
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
+	}
+	makePluggable(scaContainer)
+
 	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod, contentContainer.ContentRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Application resolver")
 	}
 	makePluggable(appContainer)
 
-	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod, appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever)
+	k8sResolver, err := k8s.New(restConfig, informerResyncPeriod, appContainer.ApplicationRetriever, scContainer.ServiceCatalogRetriever, scaContainer.ServiceCatalogAddonsRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
@@ -80,13 +89,14 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	makePluggable(authenticationResolver)
 
 	return &RootResolver{
-		ui:             uiContainer.Resolver,
 		k8s:            k8sResolver,
-		kubeless:       kubelessResolver,
-		app:            appContainer,
+		ui:             uiContainer.Resolver,
 		sc:             scContainer,
+		sca:            scaContainer,
+		app:            appContainer,
 		content:        contentContainer,
 		ac:             acResolver,
+		kubeless:       kubelessResolver,
 		authentication: authenticationResolver,
 	}, nil
 }
@@ -94,11 +104,12 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 // WaitForCacheSync waits for caches to populate. This is blocking operation.
 func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	// Not pluggable modules
-	r.ui.WaitForCacheSync(stopCh)
 	r.k8s.WaitForCacheSync(stopCh)
+	r.ui.WaitForCacheSync(stopCh)
 
 	// Pluggable modules
 	r.sc.StopCacheSyncOnClose(stopCh)
+	r.sca.StopCacheSyncOnClose(stopCh)
 	r.app.StopCacheSyncOnClose(stopCh)
 	r.content.StopCacheSyncOnClose(stopCh)
 	r.ac.StopCacheSyncOnClose(stopCh)
@@ -135,7 +146,11 @@ func (r *RootResolver) ClusterServiceClass() gqlschema.ClusterServiceClassResolv
 }
 
 func (r *RootResolver) ServiceInstance() gqlschema.ServiceInstanceResolver {
-	return &serviceInstanceResolver{r.sc}
+	return &serviceInstanceResolver{r.sc, r.sca}
+}
+
+func (r *RootResolver) Environment() gqlschema.EnvironmentResolver {
+	return &environmentResolver{r.k8s}
 }
 
 func (r *RootResolver) Query() gqlschema.QueryResolver {
@@ -173,11 +188,11 @@ func (r *mutationResolver) DeleteServiceBinding(ctx context.Context, serviceBind
 }
 
 func (r *mutationResolver) CreateServiceBindingUsage(ctx context.Context, createServiceBindingUsageInput *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
-	return r.sc.Resolver.CreateServiceBindingUsageMutation(ctx, createServiceBindingUsageInput)
+	return r.sca.Resolver.CreateServiceBindingUsageMutation(ctx, createServiceBindingUsageInput)
 }
 
 func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, env string) (*gqlschema.DeleteServiceBindingUsageOutput, error) {
-	return r.sc.Resolver.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, env)
+	return r.sca.Resolver.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, env)
 }
 
 func (r *mutationResolver) EnableApplication(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error) {
@@ -279,15 +294,15 @@ func (r *queryResolver) ClusterServiceBroker(ctx context.Context, name string) (
 }
 
 func (r *queryResolver) UsageKinds(ctx context.Context, first *int, offset *int) ([]gqlschema.UsageKind, error) {
-	return r.sc.Resolver.ListUsageKinds(ctx, first, offset)
+	return r.sca.Resolver.ListUsageKinds(ctx, first, offset)
 }
 
 func (r *queryResolver) UsageKindResources(ctx context.Context, usageKind string, environment string) ([]gqlschema.UsageKindResource, error) {
-	return r.sc.Resolver.ListServiceUsageKindResources(ctx, usageKind, environment)
+	return r.sca.Resolver.ListServiceUsageKindResources(ctx, usageKind, environment)
 }
 
 func (r *queryResolver) BindableResources(ctx context.Context, environment string) ([]gqlschema.BindableResourcesOutputItem, error) {
-	return r.sc.Resolver.ListBindableResources(ctx, environment)
+	return r.sca.Resolver.ListBindableResources(ctx, environment)
 }
 
 func (r *queryResolver) ServiceBinding(ctx context.Context, name string, environment string) (*gqlschema.ServiceBinding, error) {
@@ -295,7 +310,7 @@ func (r *queryResolver) ServiceBinding(ctx context.Context, name string, environ
 }
 
 func (r *queryResolver) ServiceBindingUsage(ctx context.Context, name, environment string) (*gqlschema.ServiceBindingUsage, error) {
-	return r.sc.Resolver.ServiceBindingUsageQuery(ctx, name, environment)
+	return r.sca.Resolver.ServiceBindingUsageQuery(ctx, name, environment)
 }
 
 func (r *queryResolver) Content(ctx context.Context, contentType, id string) (*gqlschema.JSON, error) {
@@ -349,7 +364,7 @@ func (r *subscriptionResolver) ServiceInstanceEvent(ctx context.Context, environ
 }
 
 func (r *subscriptionResolver) ServiceBindingUsageEvent(ctx context.Context, environment string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
-	return r.sc.Resolver.ServiceBindingUsageEventSubscription(ctx, environment)
+	return r.sca.Resolver.ServiceBindingUsageEventSubscription(ctx, environment)
 }
 
 func (r *subscriptionResolver) ServiceBindingEvent(ctx context.Context, environment string) (<-chan gqlschema.ServiceBindingEvent, error) {
@@ -371,7 +386,8 @@ func (r *subscriptionResolver) ApplicationEvent(ctx context.Context) (<-chan gql
 // Service Instance
 
 type serviceInstanceResolver struct {
-	sc *servicecatalog.PluggableContainer
+	sc  *servicecatalog.PluggableContainer
+	sca *servicecatalogaddons.PluggableContainer
 }
 
 func (r *serviceInstanceResolver) ClusterServicePlan(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ClusterServicePlan, error) {
@@ -399,7 +415,7 @@ func (r *serviceInstanceResolver) ServiceBindings(ctx context.Context, obj *gqls
 }
 
 func (r *serviceInstanceResolver) ServiceBindingUsages(ctx context.Context, obj *gqlschema.ServiceInstance) ([]gqlschema.ServiceBindingUsage, error) {
-	return r.sc.Resolver.ServiceBindingUsagesOfInstanceQuery(ctx, obj.Name, obj.Environment)
+	return r.sca.Resolver.ServiceBindingUsagesOfInstanceQuery(ctx, obj.Name, obj.Environment)
 }
 
 // Service Binding
@@ -506,4 +522,12 @@ func (r *clusterServiceClassResolver) AsyncAPISpec(ctx context.Context, obj *gql
 
 func (r *clusterServiceClassResolver) Content(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
 	return r.sc.Resolver.ClusterServiceClassContentField(ctx, obj)
+}
+
+type environmentResolver struct {
+	k8s *k8s.Resolver
+}
+
+func (r *environmentResolver) Applications(ctx context.Context, obj *gqlschema.Environment) ([]string, error) {
+	return r.k8s.ApplicationsField(ctx, obj)
 }

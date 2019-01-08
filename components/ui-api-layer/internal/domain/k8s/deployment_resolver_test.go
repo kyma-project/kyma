@@ -35,7 +35,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		svc := automock.NewDeploymentLister()
 		svc.On("List", environment).Return(deployments, nil).Once()
 		svc.On("ListWithoutFunctions", mock.Anything, mock.Anything).Return(deployments, nil).Once()
-		resolver := k8s.NewDeploymentResolver(svc, nil)
+		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
 		result, err := resolver.DeploymentsQuery(nil, environment, nil)
 
@@ -59,7 +59,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		svc := automock.NewDeploymentLister()
 		svc.On("List", environment).Return(deployments, nil).Once()
 		svc.On("ListWithoutFunctions", mock.Anything, mock.Anything).Return(deployments, nil).Once()
-		resolver := k8s.NewDeploymentResolver(svc, nil)
+		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
 		result, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(false))
 
@@ -83,7 +83,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		svc := automock.NewDeploymentLister()
 		svc.On("List", mock.Anything, mock.Anything).Return(deployments, nil).Once()
 		svc.On("ListWithoutFunctions", environment).Return(deployments, nil).Once()
-		resolver := k8s.NewDeploymentResolver(svc, nil)
+		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
 		result, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(true))
 
@@ -96,7 +96,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		svc := automock.NewDeploymentLister()
 		svc.On("List", environment).Return([]*v1beta2.Deployment{}, nil).Once()
 		svc.On("ListWithoutFunctions", mock.Anything, mock.Anything).Return([]*v1beta2.Deployment{}, nil).Once()
-		resolver := k8s.NewDeploymentResolver(svc, nil)
+		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
 		result, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(false))
 
@@ -109,7 +109,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		svc := automock.NewDeploymentLister()
 		svc.On("List", mock.Anything, mock.Anything).Return([]*v1beta2.Deployment{}, nil).Once()
 		svc.On("ListWithoutFunctions", environment).Return([]*v1beta2.Deployment{}, nil).Once()
-		resolver := k8s.NewDeploymentResolver(svc, nil)
+		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
 		result, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(true))
 
@@ -122,7 +122,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		svc := automock.NewDeploymentLister()
 		svc.On("List", environment).Return(nil, errors.New("test")).Once()
 		defer svc.AssertExpectations(t)
-		resolver := k8s.NewDeploymentResolver(svc, nil)
+		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
 		_, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(false))
 
@@ -134,7 +134,7 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 		svc := automock.NewDeploymentLister()
 		svc.On("ListWithoutFunctions", environment).Return(nil, errors.New("test")).Once()
 		defer svc.AssertExpectations(t)
-		resolver := k8s.NewDeploymentResolver(svc, nil)
+		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
 		_, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(true))
 
@@ -171,14 +171,16 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 		lister := new(scMock.ServiceBindingUsageLister)
 		lister.On("ListForDeployment", deployment.Environment, "deployment", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
-		getter := new(scMock.ServiceBindingGetter)
+		getter := new(scMock.ServiceBindingFinderLister)
 		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(binding, nil)
 
 		scRetriever := new(scMock.ServiceCatalogRetriever)
 		scRetriever.On("ServiceBinding").Return(getter)
-		scRetriever.On("ServiceBindingUsage").Return(lister)
 
-		resolver := k8s.NewDeploymentResolver(nil, scRetriever)
+		scaRetriever := new(scMock.ServiceCatalogAddonsRetriever)
+		scaRetriever.On("ServiceBindingUsage").Return(lister)
+
+		resolver := k8s.NewDeploymentResolver(nil, scRetriever, scaRetriever)
 
 		result, err := resolver.DeploymentBoundServiceInstanceNamesField(nil, deployment)
 		require.NoError(t, err)
@@ -214,14 +216,16 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 		lister := new(scMock.ServiceBindingUsageLister)
 		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
-		getter := new(scMock.ServiceBindingGetter)
+		getter := new(scMock.ServiceBindingFinderLister)
 		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(binding, nil)
 
 		scRetriever := new(scMock.ServiceCatalogRetriever)
 		scRetriever.On("ServiceBinding").Return(getter)
-		scRetriever.On("ServiceBindingUsage").Return(lister)
 
-		resolver := k8s.NewDeploymentResolver(nil, scRetriever)
+		scaRetriever := new(scMock.ServiceCatalogAddonsRetriever)
+		scaRetriever.On("ServiceBindingUsage").Return(lister)
+
+		resolver := k8s.NewDeploymentResolver(nil, scRetriever, scaRetriever)
 
 		result, err := resolver.DeploymentBoundServiceInstanceNamesField(nil, deployment)
 		require.NoError(t, err)
@@ -242,10 +246,10 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		lister := new(scMock.ServiceBindingUsageLister)
 		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{}, nil)
 
-		scRetriever := new(scMock.ServiceCatalogRetriever)
-		scRetriever.On("ServiceBindingUsage").Return(lister)
+		scaRetriever := new(scMock.ServiceCatalogAddonsRetriever)
+		scaRetriever.On("ServiceBindingUsage").Return(lister)
 
-		resolver := k8s.NewDeploymentResolver(nil, scRetriever)
+		resolver := k8s.NewDeploymentResolver(nil, nil, scaRetriever)
 
 		result, err := resolver.DeploymentBoundServiceInstanceNamesField(nil, deployment)
 		require.NoError(t, err)
@@ -271,14 +275,16 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 		lister := new(scMock.ServiceBindingUsageLister)
 		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
-		getter := new(scMock.ServiceBindingGetter)
+		getter := new(scMock.ServiceBindingFinderLister)
 		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(nil, nil)
 
 		scRetriever := new(scMock.ServiceCatalogRetriever)
 		scRetriever.On("ServiceBinding").Return(getter)
-		scRetriever.On("ServiceBindingUsage").Return(lister)
 
-		resolver := k8s.NewDeploymentResolver(nil, scRetriever)
+		scaRetriever := new(scMock.ServiceCatalogAddonsRetriever)
+		scaRetriever.On("ServiceBindingUsage").Return(lister)
+
+		resolver := k8s.NewDeploymentResolver(nil, scRetriever, scaRetriever)
 
 		result, err := resolver.DeploymentBoundServiceInstanceNamesField(nil, deployment)
 		require.NoError(t, err)
@@ -286,7 +292,7 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 	})
 
 	t.Run("Error when deployment not provided", func(t *testing.T) {
-		resolver := k8s.NewDeploymentResolver(nil, nil)
+		resolver := k8s.NewDeploymentResolver(nil, nil, nil)
 
 		_, err := resolver.DeploymentBoundServiceInstanceNamesField(nil, nil)
 		require.Error(t, err)
@@ -306,10 +312,10 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{}, errors.New("trolololo"))
 		defer lister.AssertExpectations(t)
 
-		scRetriever := new(scMock.ServiceCatalogRetriever)
-		scRetriever.On("ServiceBindingUsage").Return(lister)
+		scaRetriever := new(scMock.ServiceCatalogAddonsRetriever)
+		scaRetriever.On("ServiceBindingUsage").Return(lister)
 
-		resolver := k8s.NewDeploymentResolver(nil, scRetriever)
+		resolver := k8s.NewDeploymentResolver(nil, nil, scaRetriever)
 
 		_, err := resolver.DeploymentBoundServiceInstanceNamesField(nil, deployment)
 		require.Error(t, err)
@@ -336,15 +342,17 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		lister := new(scMock.ServiceBindingUsageLister)
 		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
 		defer lister.AssertExpectations(t)
-		getter := new(scMock.ServiceBindingGetter)
+		getter := new(scMock.ServiceBindingFinderLister)
 		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(nil, errors.New("trolololo"))
 		defer getter.AssertExpectations(t)
 
 		scRetriever := new(scMock.ServiceCatalogRetriever)
 		scRetriever.On("ServiceBinding").Return(getter)
-		scRetriever.On("ServiceBindingUsage").Return(lister)
 
-		resolver := k8s.NewDeploymentResolver(nil, scRetriever)
+		scaRetriever := new(scMock.ServiceCatalogAddonsRetriever)
+		scaRetriever.On("ServiceBindingUsage").Return(lister)
+
+		resolver := k8s.NewDeploymentResolver(nil, scRetriever, scaRetriever)
 
 		_, err := resolver.DeploymentBoundServiceInstanceNamesField(nil, deployment)
 		require.Error(t, err)

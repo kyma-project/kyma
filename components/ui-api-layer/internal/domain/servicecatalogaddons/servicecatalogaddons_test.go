@@ -1,11 +1,11 @@
-package servicecatalog_test
+package servicecatalogaddons_test
 
 import (
 	"context"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/rest"
@@ -15,7 +15,7 @@ const testTimes = 3
 const informerResyncPeriod = 10 * time.Second
 
 func TestPluggableContainer(t *testing.T) {
-	pluggable, err := servicecatalog.New(&rest.Config{}, informerResyncPeriod, nil)
+	pluggable, err := servicecatalogaddons.New(&rest.Config{}, informerResyncPeriod, nil)
 	require.NoError(t, err)
 
 	pluggable.SetFakeClient()
@@ -37,14 +37,14 @@ func TestPluggableContainer(t *testing.T) {
 	}
 }
 
-func checkExportedFields(t *testing.T, resolver *servicecatalog.PluggableContainer, enabled bool) {
+func checkExportedFields(t *testing.T, resolver *servicecatalogaddons.PluggableContainer, enabled bool) {
 	assert.NotNil(t, resolver.Resolver)
-	require.NotNil(t, resolver.ServiceCatalogRetriever)
-	assert.NotNil(t, resolver.ServiceCatalogRetriever.ServiceBindingFinderLister)
+	require.NotNil(t, resolver.ServiceCatalogAddonsRetriever)
+	assert.NotNil(t, resolver.ServiceCatalogAddonsRetriever.ServiceBindingUsageLister)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
-	val, err := resolver.Resolver.ClusterServiceClassesQuery(ctx, nil, nil)
+	val, err := resolver.Resolver.ListUsageKinds(ctx, nil, nil)
 	if enabled {
 		require.NoError(t, err)
 	} else {

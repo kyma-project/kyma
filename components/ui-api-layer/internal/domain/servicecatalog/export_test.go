@@ -8,10 +8,6 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-
-	fakeSbu "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
-	fakeDynamic "k8s.io/client-go/dynamic/fake"
 )
 
 func NewServiceInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) *serviceInstanceService {
@@ -152,22 +148,8 @@ func NewServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, inf
 	})
 }
 
-// Binding usage
-
-func NewServiceBindingUsageService(buInterface v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, bindingOp serviceBindingOperations, sbuName string) *serviceBindingUsageService {
-	return newServiceBindingUsageService(buInterface, informer, bindingOp, func() string {
-		return sbuName
-	})
-}
-
-func NewServiceBindingUsageResolver(op serviceBindingUsageOperations) *serviceBindingUsageResolver {
-	return newServiceBindingUsageResolver(op)
-}
-
 // Service Catalog Module
 
 func (r *PluggableContainer) SetFakeClient() {
 	r.cfg.client = fake.NewSimpleClientset()
-	r.cfg.serviceBindingUsageClient = fakeSbu.NewSimpleClientset()
-	r.cfg.dynamicClient = fakeDynamic.NewSimpleDynamicClient(nil)
 }

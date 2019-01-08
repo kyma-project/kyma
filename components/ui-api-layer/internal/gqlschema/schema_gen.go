@@ -35,6 +35,7 @@ type ResolverRoot interface {
 	Application() ApplicationResolver
 	ClusterServiceClass() ClusterServiceClassResolver
 	Deployment() DeploymentResolver
+	Environment() EnvironmentResolver
 	EventActivation() EventActivationResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
@@ -551,6 +552,9 @@ type ClusterServiceClassResolver interface {
 }
 type DeploymentResolver interface {
 	BoundServiceInstanceNames(ctx context.Context, obj *Deployment) ([]string, error)
+}
+type EnvironmentResolver interface {
+	Applications(ctx context.Context, obj *Environment) ([]string, error)
 }
 type EventActivationResolver interface {
 	Events(ctx context.Context, obj *EventActivation) ([]EventActivationEvent, error)
@@ -7436,9 +7440,6 @@ func (ec *executionContext) _Deployment(ctx context.Context, sel ast.SelectionSe
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Deployment_boundServiceInstanceNames(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		default:
@@ -7664,9 +7665,6 @@ func (ec *executionContext) _Deployment_boundServiceInstanceNames(ctx context.Co
 		return ec.resolvers.Deployment().BoundServiceInstanceNames(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]string)
@@ -8182,6 +8180,7 @@ var environmentImplementors = []string{"Environment"}
 func (ec *executionContext) _Environment(ctx context.Context, sel ast.SelectionSet, obj *Environment) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, environmentImplementors)
 
+	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -8196,15 +8195,16 @@ func (ec *executionContext) _Environment(ctx context.Context, sel ast.SelectionS
 				invalid = true
 			}
 		case "applications":
-			out.Values[i] = ec._Environment_applications(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Environment_applications(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	wg.Wait()
 	if invalid {
 		return graphql.Null
 	}
@@ -8251,12 +8251,9 @@ func (ec *executionContext) _Environment_applications(ctx context.Context, field
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Applications, nil
+		return ec.resolvers.Environment().Applications(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]string)
@@ -8308,9 +8305,6 @@ func (ec *executionContext) _EventActivation(ctx context.Context, sel ast.Select
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._EventActivation_events(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		default:
@@ -8421,9 +8415,6 @@ func (ec *executionContext) _EventActivation_events(ctx context.Context, field g
 		return ec.resolvers.EventActivation().Events(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]EventActivationEvent)
@@ -15111,9 +15102,6 @@ func (ec *executionContext) _ServiceInstance(ctx context.Context, sel ast.Select
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._ServiceInstance_serviceBindingUsages(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		default:
@@ -15545,9 +15533,6 @@ func (ec *executionContext) _ServiceInstance_serviceBindingUsages(ctx context.Co
 		return ec.resolvers.ServiceInstance().ServiceBindingUsages(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]ServiceBindingUsage)
@@ -18746,7 +18731,9 @@ type ServiceInstance {
     clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
     serviceBindings: ServiceBindings!
-    serviceBindingUsages: [ServiceBindingUsage!]!
+
+    # Depends on servicecatalogaddons domain
+    serviceBindingUsages: [ServiceBindingUsage!]
 }
 
 type ServiceInstanceResourceRef {
@@ -19068,7 +19055,9 @@ type Deployment {
     status: DeploymentStatus!
     labels: Labels!
     containers: [Container!]!
-    boundServiceInstanceNames: [String!]!
+
+    # Depends on servicecatalog and servicecatalogaddons modules
+    boundServiceInstanceNames: [String!]
 }
 
 type ResourceValues {
@@ -19098,7 +19087,9 @@ type ExceededQuota {
 
 type Environment {
     name: String!
-    applications: [String!]!
+
+    # Depends on application module
+    applications: [String!]
 }
 
 type Application {
@@ -19165,7 +19156,7 @@ type EventActivation {
     name: String!
     displayName: String!
     sourceId: String!
-    events: [EventActivationEvent!]!
+    events: [EventActivationEvent!] # content module
 }
 
 type UsageKind {
@@ -19272,7 +19263,9 @@ type Query {
     applications(environment: String, first: Int, offset: Int): [Application!]!
     connectorService(application: String!): ConnectorService!
 
+    # Depends on 'application'
     environments(application: String): [Environment!]!
+
     deployments(environment: String!, excludeFunctions: Boolean): [Deployment!]!
     resourceQuotas(environment: String!): [ResourceQuota!]!
     resourceQuotasStatus(environment: String!): ResourceQuotasStatus!

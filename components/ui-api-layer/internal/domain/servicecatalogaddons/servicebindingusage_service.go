@@ -1,8 +1,10 @@
-package servicecatalog
+package servicecatalogaddons
 
 import (
 	"fmt"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
 
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
@@ -12,21 +14,26 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
+type notifier interface {
+	AddListener(observer resource.Listener)
+	DeleteListener(observer resource.Listener)
+}
+
 type serviceBindingUsageService struct {
-	client         v1alpha1.ServicecatalogV1alpha1Interface
-	informer       cache.SharedIndexInformer
-	bindingService serviceBindingOperations
-	notifier       notifier
+	client      v1alpha1.ServicecatalogV1alpha1Interface
+	informer    cache.SharedIndexInformer
+	scRetriever shared.ServiceCatalogRetriever
+	notifier    notifier
 
 	nameFunc func() string
 }
 
-func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, service serviceBindingOperations, nameFunc func() string) *serviceBindingUsageService {
+func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, scRetriever shared.ServiceCatalogRetriever, nameFunc func() string) *serviceBindingUsageService {
 	svc := &serviceBindingUsageService{
-		client:         client,
-		informer:       informer,
-		bindingService: service,
-		nameFunc:       nameFunc,
+		client:      client,
+		informer:    informer,
+		scRetriever: scRetriever,
+		nameFunc:    nameFunc,
 	}
 
 	informer.AddIndexers(cache.Indexers{
@@ -81,7 +88,7 @@ func (f *serviceBindingUsageService) List(env string) ([]*api.ServiceBindingUsag
 }
 
 func (f *serviceBindingUsageService) ListForServiceInstance(env string, instanceName string) ([]*api.ServiceBindingUsage, error) {
-	bindings, err := f.bindingService.ListForServiceInstance(env, instanceName)
+	bindings, err := f.scRetriever.ServiceBinding().ListForServiceInstance(env, instanceName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while getting ServiceBindings for instance [env: %s, name: %s]", env, instanceName)
 	}

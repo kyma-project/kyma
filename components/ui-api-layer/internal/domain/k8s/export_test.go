@@ -12,8 +12,8 @@ func NewDeploymentService(informer cache.SharedIndexInformer) *deploymentService
 	return newDeploymentService(informer)
 }
 
-func NewDeploymentResolver(service deploymentLister, scRetriever shared.ServiceCatalogRetriever) *deploymentResolver {
-	return newDeploymentResolver(service, scRetriever)
+func NewDeploymentResolver(service deploymentLister, scRetriever shared.ServiceCatalogRetriever, scaRetriever shared.ServiceCatalogAddonsRetriever) *deploymentResolver {
+	return newDeploymentResolver(service, scRetriever, scaRetriever)
 }
 
 // Secret

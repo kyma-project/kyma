@@ -5,8 +5,6 @@ type Kind int
 const (
 	ServiceBinding Kind = iota
 	ServiceBindings
-	ServiceBindingUsage
-	ServiceBindingUsages
 
 	ServiceBroker
 	ServiceBrokers
@@ -25,12 +23,6 @@ const (
 	ServicePlans
 	ClusterServicePlan
 	ClusterServicePlans
-
-	UsageKind
-	UsageKinds
-	UsageKindResource
-	UsageKindResources
-	BindableResources
 )
 
 func (k Kind) String() string {
@@ -39,10 +31,6 @@ func (k Kind) String() string {
 		return "Service Binding"
 	case ServiceBindings:
 		return "Service Bindings"
-	case ServiceBindingUsage:
-		return "Service Binding Usage"
-	case ServiceBindingUsages:
-		return "Service Binding Usages"
 	case ServiceBroker:
 		return "Service Broker"
 	case ServiceBrokers:
@@ -71,16 +59,6 @@ func (k Kind) String() string {
 		return "Cluster Service Plan"
 	case ClusterServicePlans:
 		return "Cluster Service Plans"
-	case UsageKind:
-		return "Usage Kind"
-	case UsageKinds:
-		return "Usage Kinds"
-	case UsageKindResource:
-		return "Usage Kind Resource"
-	case UsageKindResources:
-		return "Usage Kind Resources"
-	case BindableResources:
-		return "Bindable Resources"
 	default:
 		return ""
 	}
