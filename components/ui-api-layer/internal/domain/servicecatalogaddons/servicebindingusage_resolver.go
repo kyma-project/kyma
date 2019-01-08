@@ -1,16 +1,28 @@
-package servicecatalog
+package servicecatalogaddons
 
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
+
 	"github.com/golang/glog"
 	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/listener"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/pretty"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/listener"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
 )
+
+//go:generate mockery -name=serviceBindingUsageOperations -output=automock -outpkg=automock -case=underscore
+type serviceBindingUsageOperations interface {
+	Create(env string, sb *api.ServiceBindingUsage) (*api.ServiceBindingUsage, error)
+	Delete(env string, name string) error
+	Find(env string, name string) (*api.ServiceBindingUsage, error)
+	ListForServiceInstance(env string, instanceName string) ([]*api.ServiceBindingUsage, error)
+	Subscribe(listener resource.Listener)
+	Unsubscribe(listener resource.Listener)
+}
 
 type serviceBindingUsageResolver struct {
 	operations serviceBindingUsageOperations

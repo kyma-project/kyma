@@ -1,4 +1,4 @@
-package servicecatalog
+package servicecatalogaddons
 
 import (
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"

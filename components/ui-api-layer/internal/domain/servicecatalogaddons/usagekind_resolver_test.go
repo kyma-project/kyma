@@ -1,4 +1,4 @@
-package servicecatalog
+package servicecatalogaddons
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/automock"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
