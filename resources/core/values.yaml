@@ -57,7 +57,7 @@ global:
     version: f01c8848
   helm_broker:
     dir: develop/
-    version: 0d1ffe15
+    version: fe43403d
   kubeless_integration_tests:
     dir: develop/
     version: 8a32751d
