@@ -78,7 +78,7 @@ func (r *applicationReconciler) handleErrorWhileGettingInstance(err error, reque
 }
 
 func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.Application) error {
-	if application.DeletionTimestamp != nil {
+	if shouldBeRemoved(application) {
 		return r.removeApplicationWithResources(application)
 	}
 
@@ -88,11 +88,8 @@ func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.Applic
 	}
 	log.Infof("Release status for %s Application: %s", application.Name, appStatus)
 
-	if hasApplicationFinalizer(application.GetFinalizers()) == -1 {
-		addApplicationFinalizer(application)
-	}
-
-	r.ensureAccessLabel(application)
+	setFinalizer(application)
+	application.SetAccessLabel()
 	r.setCurrentStatus(application, appStatus, statusDescription)
 
 	return nil
@@ -107,7 +104,7 @@ func (r *applicationReconciler) removeApplicationWithResources(application *v1al
 	}
 	log.Infof("Release %s successfully deleted", application.Name)
 
-	removeApplicationFinalizer(application)
+	application.RemoveFinalizer(applicationFinalizer)
 	return nil
 }
 
@@ -126,6 +123,16 @@ func (r *applicationReconciler) manageInstallation(application *v1alpha1.Applica
 	} else {
 		return r.checkApplicationStatus(application)
 	}
+}
+
+func setFinalizer(application *v1alpha1.Application) {
+	if !application.HasFinalizer(applicationFinalizer) {
+		application.AddFinalizer(applicationFinalizer)
+	}
+}
+
+func shouldBeRemoved(application *v1alpha1.Application) bool {
+	return application.DeletionTimestamp != nil
 }
 
 func shouldSkipInstallation(application *v1alpha1.Application) bool {
@@ -173,37 +180,7 @@ func (r *applicationReconciler) setCurrentStatus(application *v1alpha1.Applicati
 		Description: description,
 	}
 
-	application.Status.InstallationStatus = installationStatus
-}
-
-func (r *applicationReconciler) ensureAccessLabel(application *v1alpha1.Application) {
-	if application.Spec.AccessLabel != application.Name {
-		log.Infof("Invalid access-label, setting access-label to %s", application.Name)
-		application.Spec.AccessLabel = application.Name
-	}
-}
-
-func hasApplicationFinalizer(finalizers []string) int {
-	for i, e := range finalizers {
-		if e == applicationFinalizer {
-			return i
-		}
-	}
-
-	return -1
-}
-
-func addApplicationFinalizer(application *v1alpha1.Application) {
-	application.Finalizers = append(application.Finalizers, applicationFinalizer)
-}
-
-func removeApplicationFinalizer(application *v1alpha1.Application) {
-	finalizerIndex := hasApplicationFinalizer(application.Finalizers)
-	if finalizerIndex == -1 {
-		return
-	}
-
-	application.Finalizers = append(application.Finalizers[:finalizerIndex], application.Finalizers[finalizerIndex+1:]...)
+	application.SetInstallationStatus(installationStatus)
 }
 
 func logAndError(err error, format string, args ...interface{}) error {
