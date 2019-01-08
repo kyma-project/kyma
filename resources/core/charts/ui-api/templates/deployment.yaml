@@ -84,6 +84,8 @@ spec:
               configMapKeyRef:
                 name: core-minio-docs-upload
                 key: APP_ASSETS_FOLDER
+          - name: MODULE_PLUGGABILITY
+            value: "true"
           - name: APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE
             value: "kyma-integration"
           - name: APP_APPLICATION_GATEWAY_STATUS_REFRESH_PERIOD

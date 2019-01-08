@@ -27,6 +27,8 @@ spec:
               key: password
         - name: DEX_CONFIGURATION_FILE
           value: /etc/dex/cfg/config.yaml
+        - name: MODULE_PLUGGABILITY
+          value: "true"
       resources:
         limits:
           memory: 128Mi
