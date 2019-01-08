@@ -3,29 +3,26 @@ title: Service Catalog backup and restore
 type: Details
 ---
 
-This section describes the backup and restore processes for the Service Catalog. The Service Catalog uses the `etcd` database cluster in a production setup, and one `etcd` instance in case of local installation.
-It has a separate `etcd` cluster defined in the Service Catalog [etcd-stateful][sc-etcd-sub-chart] sub-chart. The [etcd-backup-operator][etcd-backup-operator] executes the backup procedure.
+In the production setup, the Service Catalog uses the etcd database cluster. It has a separate definition described in the [`etcd-stateful`][sc-etcd-sub-chart] sub-chart. The [etcd backup operator][etcd-backup-operator] executes the backup procedure.
 
-## Details
-
-This section describes the backup and restore processes of the `etcd` cluster for the Service Catalog.
+>**NOTE:** On local installation, the Service Catalog uses only one etcd instance.
 
 ### Backup
 
-To execute the backup process, you must set the following values in the [core][core-chart-values] chart:
+To execute the backup process, set the following values in the [`core`][core-chart-values] chart:
 
 | Property name              | Description |
 |---------------------------------------------------|---|
-| **global.etcdBackup.enabled**                       | If set to `true`, the [etcd-operator][etcd-operator-chart] chart and the Service Catalog [sub-chart][sc-backup-sub-chart] installs the CronJob which executes periodically the [Etcd Backup][etcd-backup-app] application. The etcd-operator also creates the [Secret][abs-creds] with the **storage-account** and **storage-key** keys. For more information on how to configure the backup CronJob, see the [Etcd Backup][etcd-backup-app-readme] documentation. |
-| **global.etcdBackup.containerName**                 | The ABS container to store the backup. |
-| **etcd-operator.backupOperator.abs.storageAccount** | The name of the storage account for the Azure Blob Storage (ABS). It stores the value for the **storage-account** Secret key. |
+| **global.etcdBackup.enabled**                       | If set to `true`, the [`etcd-operator`][etcd-operator-chart] chart and the Service Catalog backup [sub-chart][sc-backup-sub-chart] install the CronJob which periodically executes the [Etcd Backup][etcd-backup-app] application. The etcd-operator also creates a [Secret][abs-creds] with the **storage-account** and **storage-key** keys. For more information on how to configure the backup CronJob, see the [Etcd Backup][etcd-backup-app-readme] documentation. |
+| **global.etcdBackup.containerName**                 | The Azure Blob Storage (ABS) container to store the backup. |
+| **etcd-operator.backupOperator.abs.storageAccount** | The name of the storage account for the ABS. It stores the value for the **storage-account** Secret key. |
 | **etcd-operator.backupOperator.abs.storageKey**     | The key value of the storage account for the ABS. It stores the value for the **storage-key** Secret key. |
 
 > **NOTE:** If you set the **storageAccount**, **storageKey**, and **containerName** properties, the **global.etcdBackup.enabled** must be set to `true`.
 
 ### Restore
 
-Follow this instruction to restore an `etcd` cluster from the existing backup.
+Follow these steps to restore the etcd cluster from the existing backup.
 
 1. Export the **ABS_PATH** environment variable with the path to the last successful backup file.
 ```bash
@@ -33,14 +30,12 @@ export ABS_PATH=$(kubectl get cm -n kyma-system sc-recorded-etcd-backup-data -o=
 export BACKUP_FILE_NAME=etcd.backup
 ```
 
-2. Download the backup to the local workstation. You can do it from the portal or by using [azure cli][az-cli]. Set the downloaded file path:
-
+2. Download the backup to the local workstation. You can do it from the portal or by using the [Azure CLI][az-cli]. Set the downloaded file path:
 ```bash
 export BACKUP_FILE_NAME=/path/to/downloaded/file
 ```
 
 3. Copy the backup file to every running Pod of the StatefulSet.
-
 ```bash
 for i in {0..2};
 do
@@ -49,7 +44,6 @@ done
 ```
 
 4. Restore the backup on every Pod of the StatefulSet.
-
 ```bash
 for i in {0..2};
 do
@@ -70,7 +64,6 @@ done
 ```
 
 5. Delete old Pods.
-
 ```bash
 kubectl delete pod service-catalog-etcd-stateful-0 service-catalog-etcd-stateful-1 service-catalog-etcd-stateful-2 -n kyma-system
 ```
