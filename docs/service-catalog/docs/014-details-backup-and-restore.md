@@ -3,9 +3,7 @@ title: Service Catalog backup and restore
 type: Details
 ---
 
-In the production setup, the Service Catalog uses the etcd database cluster. It has a separate definition described in the [`etcd-stateful`][sc-etcd-sub-chart] sub-chart. The [etcd backup operator][etcd-backup-operator] executes the backup procedure.
-
->**NOTE:** On local installation, the Service Catalog only one etcd instance.
+In the production setup, the Service Catalog uses the etcd database cluster which is defined in the Service Catalog [`etcd-stateful`][sc-etcd-sub-chart] sub-chart. The [etcd backup operator][etcd-backup-operator] executes the backup procedure.
 
 ### Backup
 
