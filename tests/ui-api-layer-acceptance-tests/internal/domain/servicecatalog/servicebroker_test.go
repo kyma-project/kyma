@@ -123,7 +123,7 @@ func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedEleme
 func broker() ServiceBroker {
 	return ServiceBroker{
 		Name:        tester.BrokerReleaseName,
-		Environment: tester.DefaultNamespace,
+		Environment: TestNamespace,
 		Status: ServiceBrokerStatus{
 			Ready: true,
 		},

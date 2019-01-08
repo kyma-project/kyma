@@ -6,45 +6,19 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared"
+
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-type ClusterServicePlan struct {
-	Name                           string
-	DisplayName                    string
-	ExternalName                   string
-	Description                    string
-	RelatedClusterServiceClassName string
-	InstanceCreateParameterSchema  map[string]interface{}
-}
-
-type ClusterServiceClass struct {
-	Name                string
-	ExternalName        string
-	DisplayName         string
-	CreationTimestamp   int
-	Description         string
-	LongDescription     string
-	ImageUrl            string
-	DocumentationUrl    string
-	SupportUrl          string
-	ProviderDisplayName string
-	Tags                []string
-	Activated           bool
-	Plans               []ClusterServicePlan
-	apiSpec             map[string]interface{}
-	asyncApiSpec        map[string]interface{}
-	content             map[string]interface{}
-}
-
 type clusterServiceClassesQueryResponse struct {
-	ClusterServiceClasses []ClusterServiceClass
+	ClusterServiceClasses []shared.ClusterServiceClass
 }
 
 type clusterServiceClassQueryResponse struct {
-	ClusterServiceClass ClusterServiceClass
+	ClusterServiceClass shared.ClusterServiceClass
 }
 
 func TestClusterServiceClassesQueries(t *testing.T) {
@@ -111,7 +85,7 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 	})
 }
 
-func checkClusterClass(t *testing.T, expected, actual ClusterServiceClass) {
+func checkClusterClass(t *testing.T, expected, actual shared.ClusterServiceClass) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
@@ -123,7 +97,7 @@ func checkClusterClass(t *testing.T, expected, actual ClusterServiceClass) {
 	assertClusterPlanExistsAndEqual(t, actual.Plans, expected.Plans[0])
 }
 
-func checkClusterPlan(t *testing.T, expected, actual ClusterServicePlan) {
+func checkClusterPlan(t *testing.T, expected, actual shared.ClusterServicePlan) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
@@ -134,7 +108,7 @@ func checkClusterPlan(t *testing.T, expected, actual ClusterServicePlan) {
 	assert.Equal(t, expected.RelatedClusterServiceClassName, actual.RelatedClusterServiceClassName)
 }
 
-func assertClusterClassExistsAndEqual(t *testing.T, arr []ClusterServiceClass, expectedElement ClusterServiceClass) {
+func assertClusterClassExistsAndEqual(t *testing.T, arr []shared.ClusterServiceClass, expectedElement shared.ClusterServiceClass) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
@@ -147,7 +121,7 @@ func assertClusterClassExistsAndEqual(t *testing.T, arr []ClusterServiceClass, e
 	}, "Resource does not exist")
 }
 
-func assertClusterPlanExistsAndEqual(t *testing.T, arr []ClusterServicePlan, expectedElement ClusterServicePlan) {
+func assertClusterPlanExistsAndEqual(t *testing.T, arr []shared.ClusterServicePlan, expectedElement shared.ClusterServicePlan) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
@@ -160,12 +134,12 @@ func assertClusterPlanExistsAndEqual(t *testing.T, arr []ClusterServicePlan, exp
 	}, "Resource does not exist")
 }
 
-func clusterServiceClass() ClusterServiceClass {
-	return ClusterServiceClass{
+func clusterServiceClass() shared.ClusterServiceClass {
+	return shared.ClusterServiceClass{
 		Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
 		ExternalName: "user-provided-service",
 		Activated:    false,
-		Plans: []ClusterServicePlan{
+		Plans: []shared.ClusterServicePlan{
 			{
 				Name:                           "86064792-7ea2-467b-af93-ac9694d96d52",
 				ExternalName:                   "default",

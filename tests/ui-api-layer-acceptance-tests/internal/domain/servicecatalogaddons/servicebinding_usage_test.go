@@ -1,10 +1,14 @@
 // +build acceptance
 
-package servicecatalog
+package servicecatalogaddons
 
 import (
 	"fmt"
 	"testing"
+
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared/fixture"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared/wait"
 
 	catalog "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
@@ -17,17 +21,9 @@ import (
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 )
 
-type ServiceBindingUsage struct {
-	Name           string
-	Environment    string
-	ServiceBinding ServiceBinding
-	UsedBy         LocalObjectReference
-	Status         ServiceBindingUsageStatus
-}
-
 type ServiceBindingUsageEvent struct {
 	Type                string
-	ServiceBindingUsage ServiceBindingUsage
+	ServiceBindingUsage shared.ServiceBindingUsage
 }
 
 type DeleteServiceBindingUsageOutput struct {
@@ -35,27 +31,16 @@ type DeleteServiceBindingUsageOutput struct {
 	Environment string
 }
 
-type LocalObjectReference struct {
-	Kind string
-	Name string
+type instanceQueryResponse struct {
+	ServiceInstance shared.ServiceInstance
 }
-
-type ServiceBindingUsageStatus struct {
-	Type ServiceBindingUsageStatusType
-}
-
-type ServiceBindingUsageStatusType string
-
-const (
-	serviceBindingUsageStatusTypeUnknown ServiceBindingUsageStatusType = "UNKNOWN"
-)
 
 type bindingUsageQueryResponse struct {
-	ServiceBindingUsage ServiceBindingUsage
+	ServiceBindingUsage shared.ServiceBindingUsage
 }
 
 type bindingUsageCreateMutationResponse struct {
-	CreateServiceBindingUsage ServiceBindingUsage
+	CreateServiceBindingUsage shared.ServiceBindingUsage
 }
 
 type bindingUsageDeleteMutationResponse struct {
@@ -131,20 +116,20 @@ type bindingUsageTestSuite struct {
 	svcatCli *clientset.Clientset
 	t        *testing.T
 
-	givenBindingUsage ServiceBindingUsage
-	givenInstance     ServiceInstance
-	givenBinding      ServiceBinding
+	givenBindingUsage shared.ServiceBindingUsage
+	givenInstance     shared.ServiceInstance
+	givenBinding      shared.ServiceBinding
 }
 
-func (s *bindingUsageTestSuite) fixServiceBindingUsage(name, serviceBindingName, deploymentName string) ServiceBindingUsage {
-	return ServiceBindingUsage{
+func (s *bindingUsageTestSuite) fixServiceBindingUsage(name, serviceBindingName, deploymentName string) shared.ServiceBindingUsage {
+	return shared.ServiceBindingUsage{
 		Name:        name,
-		Environment: tester.DefaultNamespace,
-		ServiceBinding: ServiceBinding{
+		Environment: TestNamespace,
+		ServiceBinding: shared.ServiceBinding{
 			Name:        serviceBindingName,
-			Environment: tester.DefaultNamespace,
+			Environment: TestNamespace,
 		},
-		UsedBy: LocalObjectReference{
+		UsedBy: shared.LocalObjectReference{
 			Name: deploymentName,
 			Kind: "deployment",
 		},
@@ -154,8 +139,8 @@ func (s *bindingUsageTestSuite) fixServiceBindingUsage(name, serviceBindingName,
 func (s *bindingUsageTestSuite) prepareInstanceAndBinding() {
 	instanceName := "binding-usage-test"
 	bindingName := "binding-usage-test"
-	s.givenInstance = instanceFromClusterServiceClass(instanceName)
-	s.givenBinding = binding(bindingName, instanceName)
+	s.givenInstance = fixture.ServiceInstance(instanceName, TestNamespace)
+	s.givenBinding = fixture.ServiceBinding(bindingName, instanceName, TestNamespace)
 	s.givenBindingUsage = s.fixServiceBindingUsage("binding-usage-test", bindingName, "sample-deployment")
 
 	s.t.Log("Create Instance")
@@ -163,7 +148,7 @@ func (s *bindingUsageTestSuite) prepareInstanceAndBinding() {
 	require.NoError(s.t, err)
 
 	s.t.Log("Wait for Instance")
-	err = waitForInstanceReady(s.givenInstance.Name, s.givenInstance.Environment, s.svcatCli)
+	err = wait.ForServiceInstanceReady(s.givenInstance.Name, s.givenInstance.Environment, s.svcatCli)
 	require.NoError(s.t, err)
 
 	s.t.Log("Create Binding")
@@ -171,12 +156,12 @@ func (s *bindingUsageTestSuite) prepareInstanceAndBinding() {
 	require.NoError(s.t, err)
 
 	s.t.Log("Wait for Binding")
-	err = waitForBindingReady(s.givenBinding.Name, s.givenBinding.Environment, s.svcatCli)
+	err = wait.ForServiceBindingReady(s.givenBinding.Name, s.givenBinding.Environment, s.svcatCli)
 	require.NoError(s.t, err)
 }
 
 func (s *bindingUsageTestSuite) createInstance() error {
-	_, err := s.svcatCli.ServicecatalogV1beta1().ServiceInstances(tester.DefaultNamespace).Create(&catalog.ServiceInstance{
+	_, err := s.svcatCli.ServicecatalogV1beta1().ServiceInstances(TestNamespace).Create(&catalog.ServiceInstance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: s.givenInstance.Name,
 		},
@@ -191,7 +176,7 @@ func (s *bindingUsageTestSuite) createInstance() error {
 }
 
 func (s *bindingUsageTestSuite) createBinding() error {
-	_, err := s.svcatCli.ServicecatalogV1beta1().ServiceBindings(tester.DefaultNamespace).Create(&catalog.ServiceBinding{
+	_, err := s.svcatCli.ServicecatalogV1beta1().ServiceBindings(TestNamespace).Create(&catalog.ServiceBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: s.givenBinding.Name,
 		},
@@ -205,11 +190,11 @@ func (s *bindingUsageTestSuite) createBinding() error {
 }
 
 func (s *bindingUsageTestSuite) deleteInstance() error {
-	return s.svcatCli.ServicecatalogV1beta1().ServiceInstances(tester.DefaultNamespace).Delete(s.givenInstance.Name, &metav1.DeleteOptions{})
+	return s.svcatCli.ServicecatalogV1beta1().ServiceInstances(TestNamespace).Delete(s.givenInstance.Name, &metav1.DeleteOptions{})
 }
 
 func (s *bindingUsageTestSuite) deleteBinding() error {
-	return s.svcatCli.ServicecatalogV1beta1().ServiceBindings(tester.DefaultNamespace).Delete(s.givenBinding.Name, &metav1.DeleteOptions{})
+	return s.svcatCli.ServicecatalogV1beta1().ServiceBindings(TestNamespace).Delete(s.givenBinding.Name, &metav1.DeleteOptions{})
 }
 
 func (s *bindingUsageTestSuite) createBindingUsage() (bindingUsageCreateMutationResponse, error) {
@@ -239,6 +224,30 @@ func (s *bindingUsageTestSuite) createBindingUsage() (bindingUsageCreateMutation
 
 	var res bindingUsageCreateMutationResponse
 	err := s.gqlCli.Do(req, &res)
+
+	return res, err
+}
+
+func singleResourceQueryRequest(resourceDetailsQuery string, expectedResource shared.ServiceInstance) *graphql.Request {
+	query := fmt.Sprintf(`
+			query ($name: String!, $environment: String!) {
+				serviceInstance(name: $name, environment: $environment) {
+					%s
+				}
+			}
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("name", expectedResource.Name)
+	req.SetVar("environment", expectedResource.Environment)
+
+	return req
+}
+
+func querySingleInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance) (instanceQueryResponse, error) {
+	req := singleResourceQueryRequest(resourceDetailsQuery, expectedResource)
+
+	var res instanceQueryResponse
+	err := c.Do(req, &res)
 
 	return res, err
 }
@@ -276,7 +285,7 @@ func (s *bindingUsageTestSuite) deleteServiceInstanceAndBinding() {
 	assert.NoError(s.t, err)
 
 	s.t.Log("Wait for binding deletion")
-	err = waitForBindingDeletion(s.givenBinding.Name, s.givenBinding.Environment, s.svcatCli)
+	err = wait.ForServiceBindingDeletion(s.givenBinding.Name, s.givenBinding.Environment, s.svcatCli)
 	assert.NoError(s.t, err)
 
 	s.t.Log("Delete Instance")
@@ -284,7 +293,7 @@ func (s *bindingUsageTestSuite) deleteServiceInstanceAndBinding() {
 	assert.NoError(s.t, err)
 
 	s.t.Log("Wait for instance deletion")
-	err = waitForInstanceDeletion(s.givenBinding.Name, s.givenBinding.Environment, s.svcatCli)
+	err = wait.ForServiceInstanceDeletion(s.givenBinding.Name, s.givenBinding.Environment, s.svcatCli)
 	assert.NoError(s.t, err)
 }
 
@@ -307,7 +316,7 @@ func (s *bindingUsageTestSuite) deleteBindingUsage() (bindingUsageDeleteMutation
 	return res, err
 }
 
-func (s *bindingUsageTestSuite) assertEqualBindingUsage(expected, actual ServiceBindingUsage) {
+func (s *bindingUsageTestSuite) assertEqualBindingUsage(expected, actual shared.ServiceBindingUsage) {
 	assert.Equal(s.t, expected.Name, actual.Name)
 	assert.Equal(s.t, expected.Environment, actual.Environment)
 	assert.Equal(s.t, expected.Name, actual.ServiceBinding.Name)
@@ -318,10 +327,10 @@ func (s *bindingUsageTestSuite) assertEqualBindingUsage(expected, actual Service
 	// The test is checking, if the status is retrieved without any error.
 	// Does not matter, if it is READY or PENDING
 	assert.NotEmpty(s.t, actual.Status)
-	assert.NotEqual(s.t, serviceBindingUsageStatusTypeUnknown, actual.Status)
+	assert.NotEqual(s.t, shared.ServiceBindingUsageStatusTypeUnknown, actual.Status)
 }
 
-func (s *bindingUsageTestSuite) assertServiceInstanceContainsServiceBindingUsage(instance ServiceInstance, expected ServiceBindingUsage) {
+func (s *bindingUsageTestSuite) assertServiceInstanceContainsServiceBindingUsage(instance shared.ServiceInstance, expected shared.ServiceBindingUsage) {
 	// check, if service instance contains expected binding usage
 	assert.Condition(s.t, func() bool {
 		for _, bu := range instance.ServiceBindingUsages {
