@@ -17,7 +17,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	dex.SkipMainIfShould()
+	dex.ExitIfSCIEnabled()
 
 	c, err := graphql.New()
 	exitOnError(err, "while GraphQL client setup")
