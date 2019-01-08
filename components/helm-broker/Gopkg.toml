@@ -36,8 +36,8 @@ required= [
   revision = "bdcc60b419d136a85cdf2e7cbcac34b3f1cd6e57"
 
 [[constraint]]
-  name = "google.golang.org/grpc"
-  branch = "v1.7.x"
+  name = "github.com/pmorie/go-open-service-broker-client"
+  version = "=0.0.12"
 
 [[constraint]]
   name = "github.com/coreos/etcd"

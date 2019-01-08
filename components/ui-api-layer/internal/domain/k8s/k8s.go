@@ -3,6 +3,8 @@ package k8s
 import (
 	"time"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/informers"
@@ -27,7 +29,7 @@ type Resolver struct {
 	informerFactory informers.SharedInformerFactory
 }
 
-func New(restConfig *rest.Config, applicationLister ApplicationLister, informerResyncPeriod time.Duration, serviceBindingUsageLister ServiceBindingUsageLister, serviceBindingGetter ServiceBindingGetter) (*Resolver, error) {
+func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicationRetriever shared.ApplicationRetriever, scRetriever shared.ServiceCatalogRetriever) (*Resolver, error) {
 	client, err := v1.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating K8S Client")
@@ -40,7 +42,7 @@ func New(restConfig *rest.Config, applicationLister ApplicationLister, informerR
 
 	informerFactory := informers.NewSharedInformerFactory(clientset, informerResyncPeriod)
 
-	environmentService := newEnvironmentService(client.Namespaces(), applicationLister)
+	environmentService := newEnvironmentService(client.Namespaces(), applicationRetriever)
 	deploymentService := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer())
 
@@ -51,7 +53,7 @@ func New(restConfig *rest.Config, applicationLister ApplicationLister, informerR
 	return &Resolver{
 		environmentResolver:         newEnvironmentResolver(environmentService),
 		secretResolver:              newSecretResolver(client),
-		deploymentResolver:          newDeploymentResolver(deploymentService, serviceBindingUsageLister, serviceBindingGetter),
+		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever),
 		limitRangeResolver:          newLimitRangeResolver(limitRangeService),
 		resourceQuotaResolver:       newResourceQuotaResolver(resourceQuotaService),
 		resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),

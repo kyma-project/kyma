@@ -49,10 +49,11 @@ func (f *bundleToServiceConverter) Convert(b *internal.Bundle) (osb.Service, err
 			Bindable:    bPlan.Bindable,
 			Description: bPlan.Description,
 			Metadata:    bPlan.Metadata.ToMap(),
+			Free:        bPlan.Free,
 		}
 
 		if len(bPlan.Schemas) > 0 {
-			sPlan.ParameterSchemas = f.mapToParametersSchemas(bPlan.Schemas)
+			sPlan.Schemas = f.mapToParametersSchemas(bPlan.Schemas)
 		}
 
 		sPlans = append(sPlans, sPlan)
@@ -66,17 +67,20 @@ func (f *bundleToServiceConverter) Convert(b *internal.Bundle) (osb.Service, err
 	meta := f.applyOverridesOnBundleMetadata(b.Metadata)
 
 	return osb.Service{
-		ID:          string(b.ID),
-		Name:        string(b.Name),
-		Description: b.Description,
-		Bindable:    b.Bindable,
-		Plans:       sPlans,
-		Metadata:    meta.ToMap(),
-		Tags:        sTags,
+		ID:                  string(b.ID),
+		Name:                string(b.Name),
+		Description:         b.Description,
+		Bindable:            b.Bindable,
+		BindingsRetrievable: b.BindingsRetrievable,
+		Requires:            b.Requires,
+		PlanUpdatable:       b.PlanUpdatable,
+		Plans:               sPlans,
+		Metadata:            meta.ToMap(),
+		Tags:                sTags,
 	}, nil
 }
 
-func (f *bundleToServiceConverter) mapToParametersSchemas(planSchemas map[internal.PlanSchemaType]internal.PlanSchema) *osb.ParameterSchemas {
+func (f *bundleToServiceConverter) mapToParametersSchemas(planSchemas map[internal.PlanSchemaType]internal.PlanSchema) *osb.Schemas {
 	ensureServiceInstancesInit := func(in *osb.ServiceInstanceSchema) *osb.ServiceInstanceSchema {
 		if in == nil {
 			return &osb.ServiceInstanceSchema{}
@@ -84,24 +88,26 @@ func (f *bundleToServiceConverter) mapToParametersSchemas(planSchemas map[intern
 		return in
 	}
 
-	out := &osb.ParameterSchemas{}
+	out := &osb.Schemas{}
 
 	if schema, exists := planSchemas[internal.SchemaTypeProvision]; exists {
-		out.ServiceInstances = ensureServiceInstancesInit(out.ServiceInstances)
-		out.ServiceInstances.Create = &osb.InputParameters{
+		out.ServiceInstance = ensureServiceInstancesInit(out.ServiceInstance)
+		out.ServiceInstance.Create = &osb.InputParametersSchema{
 			Parameters: schema,
 		}
 	}
 	if schema, exists := planSchemas[internal.SchemaTypeUpdate]; exists {
-		out.ServiceInstances = ensureServiceInstancesInit(out.ServiceInstances)
-		out.ServiceInstances.Update = &osb.InputParameters{
+		out.ServiceInstance = ensureServiceInstancesInit(out.ServiceInstance)
+		out.ServiceInstance.Update = &osb.InputParametersSchema{
 			Parameters: schema,
 		}
 	}
 	if schema, exists := planSchemas[internal.SchemaTypeBind]; exists {
-		out.ServiceBindings = &osb.ServiceBindingSchema{
-			Create: &osb.InputParameters{
-				Parameters: schema,
+		out.ServiceBinding = &osb.ServiceBindingSchema{
+			Create: &osb.RequestResponseSchema{
+				InputParametersSchema: osb.InputParametersSchema{
+					Parameters: schema,
+				},
 			},
 		}
 	}

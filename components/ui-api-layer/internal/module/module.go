@@ -22,7 +22,7 @@ func MakePluggableFunc(informer cache.SharedIndexInformer, pluggabilityEnabled b
 			return
 		}
 
-		glog.Infof("Enabling module pluggability for %s", module.Name())
+		glog.Infof("Making the '%s' module pluggable...", module.Name())
 		eventHandler := newEventHandler(module)
 		informer.AddEventHandler(eventHandler)
 	}

@@ -20,7 +20,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "95373b0a3e099b946786f28b23a0b7e57e087ce4"
+  revision = "ab3d772008f8b831dc831882fe7fdb9665b1fdb7"
 
 [[constraint]]
   name = "github.com/gorilla/websocket"

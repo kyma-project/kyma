@@ -28,6 +28,7 @@ const (
 
 	bundlePlanMetaName             = "meta.yaml"
 	bundlePlaSchemaCreateJSONName  = "create-instance-schema.json"
+	bundlePlanSchemaBindJSONName   = "bind-instance-schema.json"
 	bundlePlanSchemaUpdateJSONName = "update-instance-schema.json"
 	bundlePlanValuesFileName       = "values.yaml"
 	bundlePlanBindTemplateFileName = "bind.yaml"
@@ -223,6 +224,10 @@ func (Loader) loadPlanDefinition(path string, plan *formPlan) error {
 
 	if plan.SchemasCreate, err = loadPlanSchema(topdir, bundlePlaSchemaCreateJSONName, false); err != nil {
 		return unmarshalPlanErr(err, bundlePlaSchemaCreateJSONName)
+	}
+
+	if plan.SchemasBind, err = loadPlanSchema(topdir, bundlePlanSchemaBindJSONName, false); err != nil {
+		return unmarshalPlanErr(err, bundlePlanSchemaBindJSONName)
 	}
 
 	if plan.SchemasUpdate, err = loadPlanSchema(topdir, bundlePlanSchemaUpdateJSONName, false); err != nil {

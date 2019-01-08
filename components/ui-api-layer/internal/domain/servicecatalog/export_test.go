@@ -2,12 +2,16 @@ package servicecatalog
 
 // ServiceInstance
 import (
+	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
+	fakeSbu "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
+	fakeDynamic "k8s.io/client-go/dynamic/fake"
 )
 
 func NewServiceInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) *serviceInstanceService {
@@ -69,8 +73,8 @@ func NewServiceClassService(informer cache.SharedIndexInformer) *serviceClassSer
 	return newServiceClassService(informer)
 }
 
-func NewServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, asyncApiSpecGetter AsyncApiSpecGetter, apiSpecGetter ApiSpecGetter, contentGetter ContentGetter) *serviceClassResolver {
-	return newServiceClassResolver(classLister, planLister, instanceLister, asyncApiSpecGetter, apiSpecGetter, contentGetter)
+func NewServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, contentRetriever shared.ContentRetriever) *serviceClassResolver {
+	return newServiceClassResolver(classLister, planLister, instanceLister, contentRetriever)
 }
 
 func (r *serviceClassResolver) SetClassConverter(converter gqlServiceClassConverter) {
@@ -87,8 +91,8 @@ func NewClusterServiceClassService(informer cache.SharedIndexInformer) *clusterS
 	return newClusterServiceClassService(informer)
 }
 
-func NewClusterServiceClassResolver(classLister clusterServiceClassListGetter, planLister clusterServicePlanLister, instanceLister instanceListerByClusterServiceClass, asyncApiSpecGetter AsyncApiSpecGetter, apiSpecGetter ApiSpecGetter, contentGetter ContentGetter) *clusterServiceClassResolver {
-	return newClusterServiceClassResolver(classLister, planLister, instanceLister, asyncApiSpecGetter, apiSpecGetter, contentGetter)
+func NewClusterServiceClassResolver(classLister clusterServiceClassListGetter, planLister clusterServicePlanLister, instanceLister instanceListerByClusterServiceClass, contentRetriever shared.ContentRetriever) *clusterServiceClassResolver {
+	return newClusterServiceClassResolver(classLister, planLister, instanceLister, contentRetriever)
 }
 
 func (r *clusterServiceClassResolver) SetClassConverter(converter gqlClusterServiceClassConverter) {
@@ -158,4 +162,12 @@ func NewServiceBindingUsageService(buInterface v1alpha1.ServicecatalogV1alpha1In
 
 func NewServiceBindingUsageResolver(op serviceBindingUsageOperations) *serviceBindingUsageResolver {
 	return newServiceBindingUsageResolver(op)
+}
+
+// Service Catalog Module
+
+func (r *PluggableContainer) SetFakeClient() {
+	r.cfg.client = fake.NewSimpleClientset()
+	r.cfg.serviceBindingUsageClient = fakeSbu.NewSimpleClientset()
+	r.cfg.dynamicClient = fakeDynamic.NewSimpleDynamicClient(nil)
 }

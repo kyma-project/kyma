@@ -35,3 +35,6 @@ rules:
   - apiGroups: ["authentication.kyma-project.io"]
     resources: ["idppresets"]
     verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: ["ui.kyma-project.io"]
+    resources: ["backendmodules"]
+    verbs: ["get", "list", "watch"]
