@@ -57,6 +57,6 @@ func (t *BrokerInstaller) WaitForBrokerRunning(svcatCli *clientset.Clientset) er
 			}
 		}
 
-		return false, fmt.Errorf("%v", broker.Status.Conditions)
+		return false, fmt.Errorf("Waiting for ServiceBroker running... Conditions: %v", broker.Status.Conditions)
 	}, brokerReadyTimeout)
 }

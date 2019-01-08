@@ -54,7 +54,7 @@ func (t *PodInstaller) WaitForPodRunning(k8sClient *corev1Type.CoreV1Client) err
 		case corev1.PodRunning:
 			return true, nil
 		case corev1.PodFailed, corev1.PodSucceeded:
-			return false, fmt.Errorf("%v", pod.Status)
+			return false, fmt.Errorf("Waiting for pod running... Pod status: %+v", pod.Status)
 		}
 
 		return false, nil

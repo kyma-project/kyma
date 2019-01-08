@@ -1,19 +1,17 @@
 // +build acceptance
 
-package servicecatalog
+package servicecatalogaddons
 
 import (
 	"log"
 	"os"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared/setup"
-	"github.com/pkg/errors"
-
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
-
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared/setup"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
+	"github.com/pkg/errors"
 )
 
 func TestMain(m *testing.M) {
@@ -24,7 +22,7 @@ func TestMain(m *testing.M) {
 
 	module.SkipPluggableMainIfShould(c, ModuleName)
 
-	scInstaller, err := setup.NewServiceCatalogInstaller("ui-api-acceptance-sc")
+	scInstaller, err := setup.NewServiceCatalogInstaller(TestNamespace)
 	exitOnError(err, "while initializing Service Catalog installer")
 
 	err = scInstaller.Setup()

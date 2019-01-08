@@ -6,48 +6,19 @@ import (
 	"fmt"
 	"testing"
 
-	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared"
+
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-type ServicePlan struct {
-	Name                          string
-	DisplayName                   string
-	ExternalName                  string
-	Description                   string
-	RelatedServiceClassName       string
-	InstanceCreateParameterSchema map[string]interface{}
-	BindingCreateParameterSchema  map[string]interface{}
-}
-
-type ServiceClass struct {
-	Name                string
-	Environment         string
-	ExternalName        string
-	DisplayName         string
-	CreationTimestamp   int
-	Description         string
-	LongDescription     string
-	ImageUrl            string
-	DocumentationUrl    string
-	SupportUrl          string
-	ProviderDisplayName string
-	Tags                []string
-	Activated           bool
-	Plans               []ServicePlan
-	apiSpec             map[string]interface{}
-	asyncApiSpec        map[string]interface{}
-	content             map[string]interface{}
-}
-
 type serviceClassesQueryResponse struct {
-	ServiceClasses []ServiceClass
+	ServiceClasses []shared.ServiceClass
 }
 
 type serviceClassQueryResponse struct {
-	ServiceClass ServiceClass
+	ServiceClass shared.ServiceClass
 }
 
 func TestServiceClassesQueries(t *testing.T) {
@@ -119,7 +90,7 @@ func TestServiceClassesQueries(t *testing.T) {
 	})
 }
 
-func checkClass(t *testing.T, expected, actual ServiceClass) {
+func checkClass(t *testing.T, expected, actual shared.ServiceClass) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
@@ -134,7 +105,7 @@ func checkClass(t *testing.T, expected, actual ServiceClass) {
 	assertPlanExistsAndEqual(t, actual.Plans, expected.Plans[0])
 }
 
-func checkPlan(t *testing.T, expected, actual ServicePlan) {
+func checkPlan(t *testing.T, expected, actual shared.ServicePlan) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
@@ -145,7 +116,7 @@ func checkPlan(t *testing.T, expected, actual ServicePlan) {
 	assert.Equal(t, expected.RelatedServiceClassName, actual.RelatedServiceClassName)
 }
 
-func assertClassExistsAndEqual(t *testing.T, arr []ServiceClass, expectedElement ServiceClass) {
+func assertClassExistsAndEqual(t *testing.T, arr []shared.ServiceClass, expectedElement shared.ServiceClass) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
@@ -158,7 +129,7 @@ func assertClassExistsAndEqual(t *testing.T, arr []ServiceClass, expectedElement
 	}, "Resource does not exist")
 }
 
-func assertPlanExistsAndEqual(t *testing.T, arr []ServicePlan, expectedElement ServicePlan) {
+func assertPlanExistsAndEqual(t *testing.T, arr []shared.ServicePlan, expectedElement shared.ServicePlan) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
@@ -171,13 +142,13 @@ func assertPlanExistsAndEqual(t *testing.T, arr []ServicePlan, expectedElement S
 	}, "Resource does not exist")
 }
 
-func serviceClass() ServiceClass {
-	return ServiceClass{
+func serviceClass() shared.ServiceClass {
+	return shared.ServiceClass{
 		Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
-		Environment:  tester.DefaultNamespace,
+		Environment:  TestNamespace,
 		ExternalName: "user-provided-service",
 		Activated:    false,
-		Plans: []ServicePlan{
+		Plans: []shared.ServicePlan{
 			{
 				Name:                    "86064792-7ea2-467b-af93-ac9694d96d52",
 				ExternalName:            "default",
