@@ -162,16 +162,6 @@
   version = "v1.1.5"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/kyma-project/kyma"
-  packages = [
-    "components/connection-token-handler/pkg/apis",
-    "components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1",
-    "components/connection-token-handler/pkg/controller/tokenrequest"
-  ]
-  revision = "e9e635eaa8a467b7b7f4cbf228e1e6f81b7b58ca"
-
-[[projects]]
   name = "github.com/markbates/inflect"
   packages = ["."]
   revision = "24b83195037b3bc61fcda2d28b7b0518bce293b6"
@@ -727,6 +717,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2cf9fb92893408fb41a33f7d85d9db30c81db7aac36585e6002363ad1cf52119"
+  inputs-digest = "df4bc0fcf27fa531503e585c9146bf52e0d95fd44be71650e46110081fefa9c1"
   solver-name = "gps-cdcl"
   solver-version = 1
