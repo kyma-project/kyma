@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/controller/mocks"
 	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -198,38 +198,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 			Return(errors.NewNotFound(schema.GroupResource{}, applicationName))
 
 		releaseManager := &helmmocks.ReleaseManager{}
-		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
 		releaseManager.On("DeleteReleaseIfExists", applicationName).Return(nil)
-
-		reReconciler := NewReconciler(managerClient, releaseManager)
-
-		request := reconcile.Request{
-			NamespacedName: namespacedName,
-		}
-
-		// when
-		result, err := reReconciler.Reconcile(request)
-
-		// then
-		assert.NoError(t, err)
-		assert.NotNil(t, result)
-		managerClient.AssertExpectations(t)
-		releaseManager.AssertExpectations(t)
-	})
-
-	t.Run("should not delete chart when Application is deleted and release does not exist", func(t *testing.T) {
-		// given
-		namespacedName := types.NamespacedName{
-			Name: applicationName,
-		}
-
-		managerClient := &mocks.ApplicationManagerClient{}
-		managerClient.On(
-			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
-			Return(errors.NewNotFound(schema.GroupResource{}, applicationName))
-
-		releaseManager := &helmmocks.ReleaseManager{}
-		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 

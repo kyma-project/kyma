@@ -207,7 +207,7 @@ func removeApplicationFinalizer(application *v1alpha1.Application) {
 }
 
 func logAndError(err error, format string, args ...interface{}) error {
-	msg := fmt.Sprintf(format, args)
+	msg := fmt.Sprintf(format, args...)
 	log.Errorf("%s: %s", msg, err.Error())
 	return err
 }
