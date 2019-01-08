@@ -74,8 +74,8 @@ func GetChannel(name string, namespace string) (*eventingv1alpha1.Channel, error
 	}
 }
 
-func CreateChannel(provisioner string, name string, namespace string) (*eventingv1alpha1.Channel, error) {
-	log.Printf("createChannel() provisioner: %v; name: %v; namespace", provisioner, name, namespace)
+func CreateChannel(provisioner string, name string, namespace string, timeout time.Duration) (*eventingv1alpha1.Channel, error) {
+	log.Printf("createChannel() provisioner: %v; name: %v; namespace: %v; timeout: %v", provisioner, name, namespace, timeout)
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		log.Printf("ERROR: getting cluster config: %v", err)
@@ -94,11 +94,11 @@ func CreateChannel(provisioner string, name string, namespace string) (*eventing
 		return nil, err
 	} else {
 		isReady := channel.Status.IsReady()
-		timeout := time.After(5 * time.Second)
+		tout := time.After(timeout) // 5 * time.Second
 		tick := time.Tick(100 * time.Millisecond)
 		for ; !isReady; {
 			select {
-			case <-timeout:
+			case <-tout:
 				return nil, errors.New("timed out")
 			case <-tick:
 				if channel, err = evClient.EventingV1alpha1().Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
@@ -214,7 +214,7 @@ func resendMessage(httpClient *http.Client, channel *eventingv1alpha1.Channel, m
 		}
 	}
 	if sc != http.StatusAccepted {
-		log.Printf("ERROR: %s", sc)
+		log.Printf("ERROR: %v", sc)
 		return errors.New(string(sc))
 	}
 	return nil
