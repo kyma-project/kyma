@@ -149,6 +149,10 @@ func (r *RootResolver) ServiceInstance() gqlschema.ServiceInstanceResolver {
 	return &serviceInstanceResolver{r.sc, r.sca}
 }
 
+func (r *RootResolver) Environment() gqlschema.EnvironmentResolver {
+	return &environmentResolver{r.k8s}
+}
+
 func (r *RootResolver) Query() gqlschema.QueryResolver {
 	return &queryResolver{r}
 }
@@ -518,4 +522,12 @@ func (r *clusterServiceClassResolver) AsyncAPISpec(ctx context.Context, obj *gql
 
 func (r *clusterServiceClassResolver) Content(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
 	return r.sc.Resolver.ClusterServiceClassContentField(ctx, obj)
+}
+
+type environmentResolver struct {
+	k8s *k8s.Resolver
+}
+
+func (r *environmentResolver) Applications(ctx context.Context, obj *gqlschema.Environment) ([]string, error) {
+	return r.k8s.ApplicationsField(ctx, obj)
 }

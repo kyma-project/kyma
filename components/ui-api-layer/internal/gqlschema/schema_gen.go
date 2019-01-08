@@ -35,6 +35,7 @@ type ResolverRoot interface {
 	Application() ApplicationResolver
 	ClusterServiceClass() ClusterServiceClassResolver
 	Deployment() DeploymentResolver
+	Environment() EnvironmentResolver
 	EventActivation() EventActivationResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
@@ -551,6 +552,9 @@ type ClusterServiceClassResolver interface {
 }
 type DeploymentResolver interface {
 	BoundServiceInstanceNames(ctx context.Context, obj *Deployment) ([]string, error)
+}
+type EnvironmentResolver interface {
+	Applications(ctx context.Context, obj *Environment) ([]string, error)
 }
 type EventActivationResolver interface {
 	Events(ctx context.Context, obj *EventActivation) ([]EventActivationEvent, error)
@@ -8176,6 +8180,7 @@ var environmentImplementors = []string{"Environment"}
 func (ec *executionContext) _Environment(ctx context.Context, sel ast.SelectionSet, obj *Environment) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, environmentImplementors)
 
+	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -8190,12 +8195,16 @@ func (ec *executionContext) _Environment(ctx context.Context, sel ast.SelectionS
 				invalid = true
 			}
 		case "applications":
-			out.Values[i] = ec._Environment_applications(ctx, field, obj)
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Environment_applications(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	wg.Wait()
 	if invalid {
 		return graphql.Null
 	}
@@ -8242,7 +8251,7 @@ func (ec *executionContext) _Environment_applications(ctx context.Context, field
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Applications, nil
+		return ec.resolvers.Environment().Applications(rctx, obj)
 	})
 	if resTmp == nil {
 		return graphql.Null

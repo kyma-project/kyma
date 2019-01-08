@@ -42,7 +42,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 
 	informerFactory := informers.NewSharedInformerFactory(clientset, informerResyncPeriod)
 
-	environmentService := newEnvironmentService(client.Namespaces(), applicationRetriever)
+	environmentService := newEnvironmentService(client.Namespaces())
 	deploymentService := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer())
 
@@ -51,7 +51,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, limitRangeService)
 
 	return &Resolver{
-		environmentResolver:         newEnvironmentResolver(environmentService),
+		environmentResolver:         newEnvironmentResolver(environmentService, applicationRetriever),
 		secretResolver:              newSecretResolver(client),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
 		limitRangeResolver:          newLimitRangeResolver(limitRangeService),
