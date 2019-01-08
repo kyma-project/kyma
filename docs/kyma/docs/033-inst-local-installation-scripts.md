@@ -79,4 +79,4 @@ The script applies the Installation custom resource and marks it with the `actio
 
 ## The is-installed.sh script
 
-The `installation/scripts/is-installed.sh` script follows the process of Kyma installation. It checks the status on Installation CR and returns on `Installed` status. If there was a timeout set it fetches the logs from installer when the time reaches the timeout. If timeout is not set it waits infinitely.
+The `installation/scripts/is-installed.sh` script shows the status of Kyma installation in real time. The script checks the status of the Installation custom resource. When it detects that the status changed to `Installed`, the script exits. If you define a timeout period and the status doesn't change to `Installed` within that period, the script fetches the installer logs. If you don't set a timeout period, the script waits for the change of the status until you terminate it. 
