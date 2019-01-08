@@ -9,11 +9,6 @@ Google Cloud Platform (GCP) Service Broker is an implementation of the [Open Ser
 
 Kyma provides Namespace-scoped GCP Service Broker. In each Namespace, you can configure the GCP Broker against different Google Cloud Platforms. Install the GCP Service Broker by provisioning the **Google Cloud Platform Service Broker Provider** class provided by the Helm Broker. 
 
-Configure the Helm Broker to enable the **Google Cloud Platform Service Broker Provider** class:
-```bash
-kubectl set env -n kyma-system deployment/core-helm-broker -e APP_REPOSITORY_URLS="https://github.com/kyma-project/bundles/releases/download/latest/index.yaml"
-```
-
 ![Service Catalog view without GCP Classes](./assets/003-gcp-provider-class.png)
 
 Once you provision the **Google Cloud Platform Service Broker Provider** class, the GCP Service Broker classes are available in the Service Catalog view in a given Namespace.
