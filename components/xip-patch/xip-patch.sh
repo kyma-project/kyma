@@ -2,6 +2,10 @@
 
 set -o errexit
 
+if [ -z "${INGRESSGATEWAY_SERVICE_NAME}" ]; then
+  INGRESSGATEWAY_SERVICE_NAME=istio-ingressgateway
+fi
+
 if [ -z "${EXTERNAL_PUBLIC_IP}" ]; then
 
   SECONDS=0
@@ -10,7 +14,7 @@ if [ -z "${EXTERNAL_PUBLIC_IP}" ]; then
   while [ ${SECONDS} -lt ${END_TIME} ];do
       echo "Trying to get loadbalancer IP address"
 
-      EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+      EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system ${INGRESSGATEWAY_SERVICE_NAME} -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
       if [ "${EXTERNAL_PUBLIC_IP}" ]; then
           echo "External public IP address is ${EXTERNAL_PUBLIC_IP}"
