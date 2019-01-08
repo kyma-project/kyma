@@ -126,3 +126,4 @@ metadata:
     component: knative
 data:
   knative.ingressgateway.service.type: LoadBalancer
+  knative.domainName: "__DOMAIN__"

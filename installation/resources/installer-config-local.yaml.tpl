@@ -106,3 +106,4 @@ metadata:
     component: knative
 data:
   knative.ingressgateway.service.type: NodePort
+  knative.domainName: "kyma.local"
