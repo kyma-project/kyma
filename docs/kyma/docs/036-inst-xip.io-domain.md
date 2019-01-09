@@ -23,10 +23,10 @@ The installation process follows the steps outlined in the **Install Kyma on a G
   export PROJECT={YOUR_GCP_PROJECT_NAME}
   ```
 2. There are two scenarios for installing Kyma with wildcard DNS:
-  - Using dynamic allocation of IP addresses
-  - Manually allocate IP addresses
-### Dynamic allocation of IP addresses
+  - Dynamic allocation of IP addresses
+  - Manual allocation of IP addresses
 
+### Dynamic allocation of IP addresses
 Use this command to prepare a configuration file that deploys Kyma with [`xip.io`](http://xip.io/) providing a wildcard DNS:
   ```
 (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__.*__//g" > my-kyma.yaml
@@ -34,7 +34,7 @@ Use this command to prepare a configuration file that deploys Kyma with [`xip.io
   >**NOTE:** In that scenario application connector is not working
 
 ### Manual allocation of IP addresses
-Get a public IP addresses for the load balancer of the GKE cluster to which you deploy Kyma and for the load balancer of the application connector nginx.
+Get public IP addresses for the load balancer of the GKE cluster to which you deploy Kyma and for the load balancer of the application connector nginx.
 
   - Export the `PUBLIC_IP_ADDRESS_NAME` and the `APP_CONNECTOR_IP_ADDRESS_NAME` environment variables. This defines names of reserved public IP addresses in your GCP project. Run:
     ```
