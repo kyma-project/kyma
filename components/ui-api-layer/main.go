@@ -26,7 +26,7 @@ import (
 
 	"github.com/99designs/gqlgen/handler"
 	"github.com/gorilla/websocket"
-	//"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authz"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application"

@@ -2,6 +2,7 @@ package authz
 
 import (
 	"context"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"

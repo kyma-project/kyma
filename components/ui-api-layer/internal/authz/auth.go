@@ -3,8 +3,9 @@ package authz
 import (
 	"context"
 	"errors"
-	"github.com/99designs/gqlgen/graphql"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"k8s.io/apiserver/pkg/authentication/user"
