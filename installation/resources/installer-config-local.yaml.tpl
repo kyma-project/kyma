@@ -74,7 +74,7 @@ data:
 
   security.enabled: "true"
 
-  gateways.istio-ingressgateway.service.externalPublicIp: ""
+  gateways.istio-ingressgateway.service.loadBalancerIP: ""
   gateways.istio-ingressgateway.type: "NodePort"
 
   pilot.resources.limits.memory: 1024Mi
