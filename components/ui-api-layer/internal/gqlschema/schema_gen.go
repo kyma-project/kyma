@@ -18677,8 +18677,6 @@ input RBACAttributes {
 #resourceRequest: Boolean!
 #path: String!
 
-# TODO: name and namespace should be handled inside the directive
-
 # Content
 
 
@@ -19255,7 +19253,6 @@ type Query {
     IDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @checkRBAC(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 }
-# TODO: find out which verb (get or list) should be used for listing resources
 
 # Mutations
 
@@ -19274,8 +19271,9 @@ type Mutation {
     enableApplication(application: String!, environment: String!): ApplicationMapping
     disableApplication(application: String!, environment: String!): ApplicationMapping
 
-    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
-    deleteIDPPreset(name: String!): IDPPreset
+    # TODO: should we use specific name to check if user is permissed to create a resource?
+    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    deleteIDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 }
 
 # Subscriptions
