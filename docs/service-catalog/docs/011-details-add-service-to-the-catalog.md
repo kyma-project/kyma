@@ -11,6 +11,6 @@ The Kyma Service Catalog is currently integrated with the following Service Brok
 * Helm Broker (experimental)
 * GCP Broker
 
-For details on how to register a sample Service Broker, see the Service Brokers [Getting Started](#gs-broker-registration.md) guide.
+For details on how to register a sample Service Broker, see the Service Brokers [Getting Started](#getting-started-register-a-broker-in-the-service-catalog) guide.
 
 >**NOTE:** The Service Catalog has the Istio sidecar injected. To enable the communication between the Service Catalog and Service Brokers, either inject Istio sidecar into all brokers or disable mutual TLS authentication.

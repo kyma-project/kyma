@@ -17,7 +17,7 @@ In the Kyma Console UI, there are two types of views:
 - Catalog view
 - Instances view
 
-Read the [Catalog view](#ui-catalog) and [Instances view](ui-instances) documents to:
+Read the [Catalog view](#ui-contracts-catalog-view) and [Instances view](#ui-contracts-instances-view) documents to:
 - Understand the contract mapping between the Kyma Console UI and the OSBA
 - Learn which fields are primary to define, to provide the best user experience
 - See which fields are used as fallbacks if you do not provide the primary ones
