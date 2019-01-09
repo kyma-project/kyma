@@ -41,7 +41,7 @@ echo "
 ################################################################################
 "
 
-kubectl apply -f ${RESOURCES_DIR}/default-sa-rbac-role.yaml
+kubectl apply -f ${RESOURCES_DIR}/default-sa-rbac-role.yaml # to be deleted once the script is used in local scenario only
 
 bash ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
 bash ${CURRENT_DIR}/install-tiller.sh
