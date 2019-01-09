@@ -48,7 +48,7 @@ To add a dashboard to Kyma:
 
 Users can create their own **Grafana Dashboard** by using the Grafana UI as the dashboards are persisted even after the Pod restarts.
 
-1. Create or Modify a dashboard using Grafana UI
+1. Create or modify a dashboard using Grafana UI.
 2. Save the dashboard with a new name.
 
 ## Lambda dashboard
