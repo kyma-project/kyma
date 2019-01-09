@@ -43,7 +43,7 @@ Kyma binding operation consists of two phases:
 
 ### Define other types of resources
 
-The UsageKind is a cluster-wide custom resource which allows you to bind a ServiceInstance to any kind of resource. By default, Kyma provides two UsageKinds which enable binding either to a Deployment or a Function. You can add more UsageKinds if you want to bind your ServiceInstance to other types of resources. The UsageKind contains information on the way in which binding to this custom resources is conducted. The ServiceBindingUsage uses this information to inject Secrets to the application.
+The UsageKind is a cluster-wide custom resource which allows you to bind a ServiceInstance to any kind of resource. By default, Kyma provides two UsageKinds which enable binding either to a Deployment or a Function. You can add more UsageKinds if you want to bind your ServiceInstance to other types of resources. The UsageKind contains information on how the binding to these custom resources is conducted. The ServiceBindingUsage uses this information to inject Secrets to the application.
 
 ![Kyma UsageKind](./assets/usagekind.png)
 
@@ -51,7 +51,7 @@ The UsageKind is a cluster-wide custom resource which allows you to bind a Servi
 ### Delete a ServiceBinding
 
 Kyma unbinding can be achieved in two ways:
-- Delete the ServiceBindingUsage. The Binding Usage Controller deletes the Secret injection but the Secret itself still exists in the Namespace.
+- Delete the ServiceBindingUsage. The Binding Usage Controller deletes the Secret injection, but the Secret itself still exists in the Namespace.
 - Delete the ServiceBinding. It deletes the Secret and triggers the deletion of all related ServiceBindingUsages.
 
 ![Kyma unbinding](./assets/unbinding.png)
