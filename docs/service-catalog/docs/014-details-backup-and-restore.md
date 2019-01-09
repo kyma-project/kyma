@@ -28,7 +28,7 @@ export ABS_PATH=$(kubectl get cm -n kyma-system sc-recorded-etcd-backup-data -o=
 export BACKUP_FILE_NAME=etcd.backup
 ```
 
-2. Download the backup to the local workstation. You can do it from the portal or by using the [Azure CLI][az-cli]. Set the downloaded file path:
+2. Download the backup to the local workstation using the portal or [Azure CLI][az-cli]. Set the downloaded file path:
 ```bash
 export BACKUP_FILE_NAME=/path/to/downloaded/file
 ```
