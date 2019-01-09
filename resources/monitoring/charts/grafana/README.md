@@ -62,7 +62,7 @@ You can access the dashboard directly from the lambda UI.
 The Unique Dashboard Identifier or UID allows having consistent URLs for accessing dashboards from the lambda UI. 
 This UID is defined in the `*-dashboard.json` file.
 
->**Important:** Change the uid will break the url used to access specific dashboards from lambda ui.
+>**Note:** Changing the UID breaks the URL used to access specific dashboards from the lambda UI.
 
 ## Additional Resources
 
