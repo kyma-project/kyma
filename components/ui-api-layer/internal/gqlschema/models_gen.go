@@ -53,6 +53,10 @@ type AuthenticationPolicy struct {
 	JwksURI string                   `json:"jwksURI"`
 }
 
+type BackendModule struct {
+	Name string `json:"name"`
+}
+
 type BindableResourcesOutputItem struct {
 	Kind        string              `json:"kind"`
 	DisplayName string              `json:"displayName"`
@@ -152,11 +156,6 @@ type EnvPrefix struct {
 
 type EnvPrefixInput struct {
 	Name string `json:"name"`
-}
-
-type Environment struct {
-	Name         string   `json:"name"`
-	Applications []string `json:"applications"`
 }
 
 type EventActivationEvent struct {

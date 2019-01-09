@@ -16,7 +16,6 @@ func newFunctionService(informer cache.SharedIndexInformer) *functionService {
 	return &functionService{
 		informer: informer,
 	}
-
 }
 
 func (svc *functionService) List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.Function, error) {

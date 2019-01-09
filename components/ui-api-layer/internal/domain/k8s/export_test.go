@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
 	"k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
 )
@@ -11,8 +12,8 @@ func NewDeploymentService(informer cache.SharedIndexInformer) *deploymentService
 	return newDeploymentService(informer)
 }
 
-func NewDeploymentResolver(service deploymentLister, serviceBindingUsageLister ServiceBindingUsageLister, serviceBindingGetter ServiceBindingGetter) *deploymentResolver {
-	return newDeploymentResolver(service, serviceBindingUsageLister, serviceBindingGetter)
+func NewDeploymentResolver(service deploymentLister, scRetriever shared.ServiceCatalogRetriever, scaRetriever shared.ServiceCatalogAddonsRetriever) *deploymentResolver {
+	return newDeploymentResolver(service, scRetriever, scaRetriever)
 }
 
 // Secret

@@ -92,6 +92,11 @@ models:
     fields:
       events:
         resolver: true
+  Environment:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Environment"
+    fields:
+      applications:
+        resolver: true
   Section:
     model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Section"
   TopicEntry:

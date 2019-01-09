@@ -1,4 +1,4 @@
-APP_NAME = logging-tests
+APP_NAME = test-logging
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 

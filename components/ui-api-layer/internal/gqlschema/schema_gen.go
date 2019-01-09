@@ -35,6 +35,7 @@ type ResolverRoot interface {
 	Application() ApplicationResolver
 	ClusterServiceClass() ClusterServiceClassResolver
 	Deployment() DeploymentResolver
+	Environment() EnvironmentResolver
 	EventActivation() EventActivationResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
@@ -101,6 +102,10 @@ type ComplexityRoot struct {
 		Type    func(childComplexity int) int
 		Issuer  func(childComplexity int) int
 		JwksUri func(childComplexity int) int
+	}
+
+	BackendModule struct {
+		Name func(childComplexity int) int
 	}
 
 	BindableResourcesOutputItem struct {
@@ -314,6 +319,7 @@ type ComplexityRoot struct {
 		LimitRanges           func(childComplexity int, environment string) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
+		BackendModules        func(childComplexity int) int
 	}
 
 	ResourceQuota struct {
@@ -548,6 +554,9 @@ type ClusterServiceClassResolver interface {
 type DeploymentResolver interface {
 	BoundServiceInstanceNames(ctx context.Context, obj *Deployment) ([]string, error)
 }
+type EnvironmentResolver interface {
+	Applications(ctx context.Context, obj *Environment) ([]string, error)
+}
 type EventActivationResolver interface {
 	Events(ctx context.Context, obj *EventActivation) ([]EventActivationEvent, error)
 }
@@ -597,6 +606,7 @@ type QueryResolver interface {
 	LimitRanges(ctx context.Context, environment string) ([]LimitRange, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
+	BackendModules(ctx context.Context) ([]BackendModule, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -2141,6 +2151,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AuthenticationPolicy.JwksUri(childComplexity), true
 
+	case "BackendModule.name":
+		if e.complexity.BackendModule.Name == nil {
+			break
+		}
+
+		return e.complexity.BackendModule.Name(childComplexity), true
+
 	case "BindableResourcesOutputItem.kind":
 		if e.complexity.BindableResourcesOutputItem.Kind == nil {
 			break
@@ -3300,6 +3317,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Idppresets(childComplexity, args["first"].(*int), args["offset"].(*int)), true
+
+	case "Query.backendModules":
+		if e.complexity.Query.BackendModules == nil {
+			break
+		}
+
+		return e.complexity.Query.BackendModules(childComplexity), true
 
 	case "ResourceQuota.name":
 		if e.complexity.ResourceQuota.Name == nil {
@@ -5537,6 +5561,63 @@ func (ec *executionContext) _AuthenticationPolicy_jwksURI(ctx context.Context, f
 	return graphql.MarshalString(res)
 }
 
+var backendModuleImplementors = []string{"BackendModule"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _BackendModule(ctx context.Context, sel ast.SelectionSet, obj *BackendModule) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, backendModuleImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("BackendModule")
+		case "name":
+			out.Values[i] = ec._BackendModule_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _BackendModule_name(ctx context.Context, field graphql.CollectedField, obj *BackendModule) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "BackendModule",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
 var bindableResourcesOutputItemImplementors = []string{"BindableResourcesOutputItem"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -7375,9 +7456,6 @@ func (ec *executionContext) _Deployment(ctx context.Context, sel ast.SelectionSe
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Deployment_boundServiceInstanceNames(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		default:
@@ -7603,9 +7681,6 @@ func (ec *executionContext) _Deployment_boundServiceInstanceNames(ctx context.Co
 		return ec.resolvers.Deployment().BoundServiceInstanceNames(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]string)
@@ -8121,6 +8196,7 @@ var environmentImplementors = []string{"Environment"}
 func (ec *executionContext) _Environment(ctx context.Context, sel ast.SelectionSet, obj *Environment) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, environmentImplementors)
 
+	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -8135,15 +8211,16 @@ func (ec *executionContext) _Environment(ctx context.Context, sel ast.SelectionS
 				invalid = true
 			}
 		case "applications":
-			out.Values[i] = ec._Environment_applications(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Environment_applications(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	wg.Wait()
 	if invalid {
 		return graphql.Null
 	}
@@ -8190,12 +8267,9 @@ func (ec *executionContext) _Environment_applications(ctx context.Context, field
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Applications, nil
+		return ec.resolvers.Environment().Applications(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]string)
@@ -8247,9 +8321,6 @@ func (ec *executionContext) _EventActivation(ctx context.Context, sel ast.Select
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._EventActivation_events(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		default:
@@ -8360,9 +8431,6 @@ func (ec *executionContext) _EventActivation_events(ctx context.Context, field g
 		return ec.resolvers.EventActivation().Events(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]EventActivationEvent)
@@ -10100,6 +10168,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "backendModules":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_backendModules(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -11704,6 +11781,66 @@ func (ec *executionContext) _Query_IDPPresets(ctx context.Context, field graphql
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._IDPPreset(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_backendModules(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BackendModules(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]BackendModule)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._BackendModule(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -14981,9 +15118,6 @@ func (ec *executionContext) _ServiceInstance(ctx context.Context, sel ast.Select
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._ServiceInstance_serviceBindingUsages(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		default:
@@ -15415,9 +15549,6 @@ func (ec *executionContext) _ServiceInstance_serviceBindingUsages(ctx context.Co
 		return ec.resolvers.ServiceInstance().ServiceBindingUsages(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]ServiceBindingUsage)
@@ -18716,7 +18847,9 @@ type ServiceInstance {
     clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
     serviceBindings: ServiceBindings!
-    serviceBindingUsages: [ServiceBindingUsage!]!
+
+    # Depends on servicecatalogaddons domain
+    serviceBindingUsages: [ServiceBindingUsage!]
 }
 
 type ServiceInstanceResourceRef {
@@ -19038,7 +19171,9 @@ type Deployment {
     status: DeploymentStatus!
     labels: Labels!
     containers: [Container!]!
-    boundServiceInstanceNames: [String!]!
+
+    # Depends on servicecatalog and servicecatalogaddons modules
+    boundServiceInstanceNames: [String!]
 }
 
 type ResourceValues {
@@ -19068,7 +19203,9 @@ type ExceededQuota {
 
 type Environment {
     name: String!
-    applications: [String!]!
+
+    # Depends on application module
+    applications: [String!]
 }
 
 type Application {
@@ -19135,7 +19272,7 @@ type EventActivation {
     name: String!
     displayName: String!
     sourceId: String!
-    events: [EventActivationEvent!]!
+    events: [EventActivationEvent!] # content module
 }
 
 type UsageKind {
@@ -19204,6 +19341,11 @@ type API {
     authenticationPolicies: [AuthenticationPolicy!]!
 }
 
+# Backend Module
+type BackendModule {
+    name: String!
+}
+
 # Queries
 
 type Query {
@@ -19237,7 +19379,9 @@ type Query {
     applications(environment: String, first: Int, offset: Int): [Application!]!
     connectorService(application: String!): ConnectorService!
 
+    # Depends on 'application'
     environments(application: String): [Environment!]!
+
     deployments(environment: String!, excludeFunctions: Boolean): [Deployment!]!
     resourceQuotas(environment: String!): [ResourceQuota!]!
     resourceQuotasStatus(environment: String!): ResourceQuotasStatus!
@@ -19252,6 +19396,8 @@ type Query {
 
     IDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @checkRBAC(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+
+    backendModules: [BackendModule!]!
 }
 
 # Mutations

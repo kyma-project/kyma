@@ -325,7 +325,8 @@
     "components/idppreset/pkg/client/informers/externalversions/authentication",
     "components/idppreset/pkg/client/informers/externalversions/authentication/v1alpha1",
     "components/idppreset/pkg/client/informers/externalversions/internalinterfaces",
-    "components/idppreset/pkg/client/listers/authentication/v1alpha1"
+    "components/idppreset/pkg/client/listers/authentication/v1alpha1",
+    "tools/failery"
   ]
   revision = "56b261fcf0ecff236ed643d5c6620faad1b708d2"
 
@@ -932,6 +933,10 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
+<<<<<<< HEAD
   inputs-digest = "dbbc3acf79ef463c1a319464d91a47145aa2759ab6d3748dff9b1160b9639264"
+=======
+  inputs-digest = "254e45e76c594094e3ec2fb13f8acc08f00623a42e7948f7c45f2e3ff76184ce"
+>>>>>>> master
   solver-name = "gps-cdcl"
   solver-version = 1

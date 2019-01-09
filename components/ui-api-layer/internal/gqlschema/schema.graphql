@@ -63,7 +63,9 @@ type ServiceInstance {
     clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
     serviceBindings: ServiceBindings!
-    serviceBindingUsages: [ServiceBindingUsage!]!
+
+    # Depends on servicecatalogaddons domain
+    serviceBindingUsages: [ServiceBindingUsage!]
 }
 
 type ServiceInstanceResourceRef {
@@ -385,7 +387,9 @@ type Deployment {
     status: DeploymentStatus!
     labels: Labels!
     containers: [Container!]!
-    boundServiceInstanceNames: [String!]!
+
+    # Depends on servicecatalog and servicecatalogaddons modules
+    boundServiceInstanceNames: [String!]
 }
 
 type ResourceValues {
@@ -415,7 +419,9 @@ type ExceededQuota {
 
 type Environment {
     name: String!
-    applications: [String!]!
+
+    # Depends on application module
+    applications: [String!]
 }
 
 type Application {
@@ -482,7 +488,7 @@ type EventActivation {
     name: String!
     displayName: String!
     sourceId: String!
-    events: [EventActivationEvent!]!
+    events: [EventActivationEvent!] # content module
 }
 
 type UsageKind {
@@ -551,6 +557,11 @@ type API {
     authenticationPolicies: [AuthenticationPolicy!]!
 }
 
+# Backend Module
+type BackendModule {
+    name: String!
+}
+
 # Queries
 
 type Query {
@@ -584,7 +595,9 @@ type Query {
     applications(environment: String, first: Int, offset: Int): [Application!]!
     connectorService(application: String!): ConnectorService!
 
+    # Depends on 'application'
     environments(application: String): [Environment!]!
+
     deployments(environment: String!, excludeFunctions: Boolean): [Deployment!]!
     resourceQuotas(environment: String!): [ResourceQuota!]!
     resourceQuotasStatus(environment: String!): ResourceQuotasStatus!
@@ -599,6 +612,8 @@ type Query {
 
     IDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @checkRBAC(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+
+    backendModules: [BackendModule!]!
 }
 
 # Mutations

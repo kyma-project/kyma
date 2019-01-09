@@ -4,6 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
+
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/pretty"
 	contentPretty "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/pretty"
@@ -13,16 +18,21 @@ import (
 )
 
 type eventActivationResolver struct {
-	service            eventActivationLister
-	converter          *eventActivationConverter
-	asyncApiSpecGetter AsyncApiSpecGetter
+	service          eventActivationLister
+	converter        *eventActivationConverter
+	contentRetriever shared.ContentRetriever
 }
 
-func newEventActivationResolver(service eventActivationLister, asyncApiSpecGetter AsyncApiSpecGetter) *eventActivationResolver {
+//go:generate mockery -name=eventActivationLister -output=automock -outpkg=automock -case=underscore
+type eventActivationLister interface {
+	List(environment string) ([]*v1alpha1.EventActivation, error)
+}
+
+func newEventActivationResolver(service eventActivationLister, contentRetriever shared.ContentRetriever) *eventActivationResolver {
 	return &eventActivationResolver{
-		service:            service,
-		converter:          &eventActivationConverter{},
-		asyncApiSpecGetter: asyncApiSpecGetter,
+		service:          service,
+		converter:        &eventActivationConverter{},
+		contentRetriever: contentRetriever,
 	}
 }
 
@@ -42,8 +52,12 @@ func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context
 		return nil, gqlerror.NewInternal()
 	}
 
-	asyncApiSpec, err := r.asyncApiSpecGetter.Find("service-class", eventActivation.Name)
+	asyncApiSpec, err := r.contentRetriever.AsyncApiSpec().Find("service-class", eventActivation.Name)
 	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+
 		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", pretty.EventActivationEvents, pretty.EventActivation, eventActivation.Name))
 		return nil, gqlerror.New(err, pretty.EventActivationEvents, gqlerror.WithName(eventActivation.Name))
 	}

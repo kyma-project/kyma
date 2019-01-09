@@ -19,8 +19,8 @@ type UiV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *UiV1alpha1Client) BackendModules(namespace string) BackendModuleInterface {
-	return newBackendModules(c, namespace)
+func (c *UiV1alpha1Client) BackendModules() BackendModuleInterface {
+	return newBackendModules(c)
 }
 
 // NewForConfig creates a new UiV1alpha1Client for the given config.

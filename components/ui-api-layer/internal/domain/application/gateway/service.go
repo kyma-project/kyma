@@ -4,9 +4,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/executor"
-	"github.com/pkg/errors"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 )
 
 // Service gives a functionality to provide gateway status. It hides implementation details
@@ -18,12 +16,8 @@ type Service struct {
 	cfg Config
 }
 
-func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Duration) (*Service, error) {
-	k8sClient, err := kubernetes.NewForConfig(restConfig)
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing Clientset")
-	}
-	gatewaySvcProvider := newProvider(k8sClient.CoreV1(), reCfg.IntegrationNamespace, informerResyncPeriod)
+func New(k8sCli kubernetes.Interface, reCfg Config, informerResyncPeriod time.Duration) (*Service, error) {
+	gatewaySvcProvider := newProvider(k8sCli.CoreV1(), reCfg.IntegrationNamespace, informerResyncPeriod)
 	watcher := newStatusWatcher(gatewaySvcProvider, reCfg.StatusCallTimeout)
 
 	return &Service{

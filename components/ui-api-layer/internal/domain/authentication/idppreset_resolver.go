@@ -30,11 +30,15 @@ type idpPresetResolver struct {
 	idpPresetConverter gqlIDPPresetConverter
 }
 
-func newIDPPresetResolver(idpPresetSvc idpPresetSvc) *idpPresetResolver {
+func newIDPPresetResolver(idpPresetSvc idpPresetSvc) (*idpPresetResolver, error) {
+	if idpPresetSvc == nil {
+		return nil, errors.New("Nil pointer for idpPresetSvc")
+	}
+
 	return &idpPresetResolver{
 		idpPresetSvc:       idpPresetSvc,
 		idpPresetConverter: &idpPresetConverter{},
-	}
+	}, nil
 }
 
 func (r *idpPresetResolver) CreateIDPPresetMutation(ctx context.Context, name string, issuer string, jwksURI string) (*gqlschema.IDPPreset, error) {

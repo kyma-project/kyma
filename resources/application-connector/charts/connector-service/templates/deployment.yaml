@@ -35,7 +35,7 @@ spec:
           - "--namespace={{ .Values.global.namespace }}"
           - "--tokenLength={{ .Values.deployment.args.tokenLength }}"
           - "--tokenExpirationMinutes={{ .Values.deployment.args.tokenExpirationMinutes }}"
-          - "--domainName={{ .Values.global.domainName }}"
+          - "--domainName={{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}"
           - "--connectorServiceHost=connector-service.{{ .Values.global.domainName }}"
         env:
           - name: COUNTRY

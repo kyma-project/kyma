@@ -2,30 +2,11 @@ package servicecatalog
 
 import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalog/status"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
 )
-
-// Content
-
-//go:generate mockery -name=AsyncApiSpecGetter -output=automock -outpkg=automock -case=underscore
-type AsyncApiSpecGetter interface {
-	Find(kind, id string) (*storage.AsyncApiSpec, error)
-}
-
-//go:generate mockery -name=ApiSpecGetter -output=automock -outpkg=automock -case=underscore
-type ApiSpecGetter interface {
-	Find(kind, id string) (*storage.ApiSpec, error)
-}
-
-//go:generate mockery -name=ContentGetter -output=automock -outpkg=automock -case=underscore
-type ContentGetter interface {
-	Find(kind, id string) (*storage.Content, error)
-}
 
 // ServiceClass
 
@@ -89,13 +70,6 @@ type gqlServicePlanConverter interface {
 	ToGQLs(in []*v1beta1.ServicePlan) ([]gqlschema.ServicePlan, error)
 }
 
-// Notifier
-
-type notifier interface {
-	AddListener(observer resource.Listener)
-	DeleteListener(observer resource.Listener)
-}
-
 // Binding
 
 //go:generate mockery -name=serviceBindingOperations -output=automock -outpkg=automock -case=underscore
@@ -108,14 +82,7 @@ type serviceBindingOperations interface {
 	Unsubscribe(listener resource.Listener)
 }
 
-// Binding usage
-
-//go:generate mockery -name=serviceBindingUsageOperations -output=automock -outpkg=automock -case=underscore
-type serviceBindingUsageOperations interface {
-	Create(env string, sb *api.ServiceBindingUsage) (*api.ServiceBindingUsage, error)
-	Delete(env string, name string) error
-	Find(env string, name string) (*api.ServiceBindingUsage, error)
-	ListForServiceInstance(env string, instanceName string) ([]*api.ServiceBindingUsage, error)
-	Subscribe(listener resource.Listener)
-	Unsubscribe(listener resource.Listener)
+type notifier interface {
+	AddListener(observer resource.Listener)
+	DeleteListener(observer resource.Listener)
 }

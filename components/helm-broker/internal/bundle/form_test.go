@@ -189,6 +189,8 @@ func TestFormPlanToModelSuccess(t *testing.T) {
 		},
 		Schemas: map[internal.PlanSchemaType]internal.PlanSchema{
 			internal.SchemaTypeProvision: *fixPlan.SchemasCreate,
+			internal.SchemaTypeBind:      *fixPlan.SchemasBind,
+			internal.SchemaTypeUpdate:    *fixPlan.SchemasUpdate,
 		},
 		ChartRef: internal.ChartRef{
 			Name:    internal.ChartName(fixChart.Metadata.Name),
@@ -354,6 +356,8 @@ func fixValidFormPlan(id string) formPlan {
 			DisplayName: "Plan Display Name",
 		},
 		SchemasCreate: &internal.PlanSchema{},
+		SchemasBind:   &internal.PlanSchema{},
+		SchemasUpdate: &internal.PlanSchema{},
 		Values: map[string]interface{}{
 			"par1": "val1",
 		},

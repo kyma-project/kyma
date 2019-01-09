@@ -17,3 +17,16 @@ push-image:
 
 .PHONY: ci-release
 ci-release: build-image push-image
+
+
+# Creates release artifacts. Artifacts are stored in $(ARTIFACTS) directory.
+# This variable is provided by Prow and files stored there are automatically uploaded to GCS.
+.PHONY: ci-create-release-artifacts
+ci-create-release-artifacts:
+	cd ./../..; \
+	docker run --rm --volume $(CURDIR)/../..:/kyma  \
+		--volume $(ARTIFACTS):$(ARTIFACTS) \
+		-e KYMA_INSTALLER_VERSION=$(TAG) \
+		-e ARTIFACTS_DIR=$(ARTIFACTS) \
+		--entrypoint /kyma/installation/scripts/release-generate-kyma-installer-artifacts.sh \
+		eu.gcr.io/kyma-project/acs-installer:0.0.4

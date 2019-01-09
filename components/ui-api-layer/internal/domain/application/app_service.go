@@ -33,6 +33,11 @@ const (
 	maxUpdateRetries = 5
 )
 
+type notifier interface {
+	AddListener(observer resource.Listener)
+	DeleteListener(observer resource.Listener)
+}
+
 // applicationService provides listing environments along with Applications.
 // It provides also Applications enabling/disabling in given namespace.
 type applicationService struct {
