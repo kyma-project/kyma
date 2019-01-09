@@ -51,6 +51,21 @@ Users can create their own **Grafana Dashboard** by using the Grafana UI as the 
 1. Create or Modify a dashboard using Grafana UI
 2. Save the dashboard with a new name.
 
+## Lambda Dashboard
+
+The Lambda Dashboard provides visualisation for specific lambda function metrics such as Memory usage, CPU usage and success rate response, etc.
+
+This can be accessed from lambda ui directly.
+
+## Unique Dashboard Identifier
+
+The Unique Dashboard Identifier or uid allows having consistent URL’s for accessing dashboards from lambda ui. 
+This uid is defined in the `*-dashboard.json`
+
+>**Important:** Change the uid will break the url used to access specific dashboards from lambda ui.
+
 ## Additional Resources
 
 There are several resources you can use to become more familiar with Grafana. The [Grafana Getting Started Guide](http://docs.grafana.org/guides/getting_started/) is an ideal starting point. Refer to the document [Export and Import Dashboards](http://docs.grafana.org/reference/export_import/) for a closer look at dashboards used to export and import data in Grafana. Grafana also provides in-depth documentation on the [Grafana Dashboard API](http://docs.grafana.org/http_api/dashboard/).
+
+
