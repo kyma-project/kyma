@@ -19,62 +19,62 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   alpine_net:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   api_controller:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   api_controller_acceptance_tests:
-    dir: /
+    dir:
     version: 0.6.0-rc1
     testNamespace: api-controller-tests
   apiserver_proxy:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   binding_usage_controller:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   configurations_generator:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   docs:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   namespace_controller:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   etcd_backup:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   event_bus:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   event_bus_tests:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   helm_broker:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   kubeless_integration_tests:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   kubeless_tests:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   test_namespace_controller:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   test_logging_monitoring:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   ui_api_layer:
-    dir: /
+    dir:
     version: 0.6.0-rc1
   ui_api_layer_acceptance_tests:
-    dir: /
+    dir:
     version: 0.6.0-rc1
 
 test:

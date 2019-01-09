@@ -69,5 +69,5 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   ark_plugin:
-    dir: develop/
+    dir:
     version: "52070221"
