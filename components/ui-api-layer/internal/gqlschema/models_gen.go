@@ -158,11 +158,6 @@ type EnvPrefixInput struct {
 	Name string `json:"name"`
 }
 
-type Environment struct {
-	Name         string   `json:"name"`
-	Applications []string `json:"applications"`
-}
-
 type EventActivationEvent struct {
 	EventType   string `json:"eventType"`
 	Version     string `json:"version"`

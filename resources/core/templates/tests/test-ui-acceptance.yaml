@@ -10,7 +10,7 @@ spec:
   hostNetwork: true
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
-      image: {{ .Values.global.containerRegistry.path }}/ui-tests:2db15681
+      image: {{ .Values.global.containerRegistry.path }}/ui-tests:35238a98
       imagePullPolicy: IfNotPresent
       resources:
          requests:

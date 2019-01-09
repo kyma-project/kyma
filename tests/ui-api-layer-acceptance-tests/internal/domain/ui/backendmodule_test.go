@@ -18,6 +18,10 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	readyTimeout = time.Minute
+)
+
 type BackendModule struct {
 	Name string
 }
@@ -27,7 +31,7 @@ type backendModuleQueryResponse struct {
 }
 
 func TestBackendModule(t *testing.T) {
-	dex.SkipTestIfShould(t)
+	dex.SkipTestIfSCIEnabled(t)
 
 	c, err := graphql.New()
 	require.NoError(t, err)
@@ -50,7 +54,7 @@ func TestBackendModule(t *testing.T) {
 			assertBackendModules(t, moduleNames, resp.BackendModules)
 			return true, nil
 
-		}, time.Second*5)
+		}, readyTimeout)
 		assert.NoError(t, err)
 
 		err = deleteBackendModules(moduleNames, uiCli)

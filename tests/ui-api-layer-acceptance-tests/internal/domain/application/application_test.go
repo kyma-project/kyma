@@ -63,7 +63,7 @@ type applicationEvent struct {
 }
 
 func TestApplicationMutations(t *testing.T) {
-	dex.SkipTestIfShould(t)
+	dex.SkipTestIfSCIEnabled(t)
 
 	c, err := graphql.New()
 	require.NoError(t, err)

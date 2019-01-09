@@ -5,35 +5,25 @@ package servicecatalog
 import (
 	"fmt"
 	"testing"
-	"time"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared/fixture"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/shared/wait"
+
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/waiter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
-	bindingReadyTimeout             = time.Second * 30
 	serviceBindingStatusTypeUnknown = "UNKNOWN"
 )
 
-type ServiceBinding struct {
-	Name                string
-	ServiceInstanceName string
-	Environment         string
-	Secret              Secret
-	Status              ServiceBindingStatus
-}
-
 type ServiceBindingEvent struct {
 	Type           string
-	ServiceBinding ServiceBinding
+	ServiceBinding shared.ServiceBinding
 }
 
 type CreateServiceBindingOutput struct {
@@ -47,24 +37,8 @@ type DeleteServiceBindingOutput struct {
 	Environment string
 }
 
-type Secret struct {
-	Name        string
-	Environment string
-	Data        map[string]interface{}
-}
-
-type ServiceBindingStatus struct {
-	Type ServiceBindingStatusType
-}
-
-type ServiceBindingStatusType string
-
-const (
-	serviceBindingStatusTypeReady ServiceBindingStatusType = "READY"
-)
-
 type bindingQueryResponse struct {
-	ServiceBinding ServiceBinding
+	ServiceBinding shared.ServiceBinding
 }
 
 type bindingCreateMutationResponse struct {
@@ -83,22 +57,23 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	instanceName := "binding-test-instance"
-	instance := instanceFromClusterServiceClass(instanceName)
+	instance := fixture.ServiceInstance(instanceName, TestNamespace)
 
 	bindingName := "test-binding"
-	binding := binding(bindingName, instanceName)
+	binding := fixture.ServiceBinding(bindingName, instanceName, TestNamespace)
 	createBindingOutput := createBindingOutput(bindingName, instanceName)
 	deleteBindingOutput := deleteBindingOutput(bindingName)
 
 	t.Log("Subscribe bindings")
-	subscription := subscribeBinding(c, bindingEventDetailsFields(), binding.Environment, binding.ServiceInstanceName)
+	subscription := subscribeBinding(c, bindingEventDetailsFields(), binding.Environment)
 	defer subscription.Close()
 
 	t.Log("Create Instance")
 	_, err = createInstance(c, "name", instance, true)
 	require.NoError(t, err)
 
-	waitForInstanceReady(instance.Name, instance.Environment, svcatCli)
+	err = wait.ForServiceInstanceReady(instance.Name, instance.Environment, svcatCli)
+	require.NoError(t, err)
 
 	t.Log("Create Binding")
 	createRes, err := createBinding(c, createBindingOutput)
@@ -112,7 +87,8 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	assert.NoError(t, err)
 	checkBindingEvent(t, expectedEvent, event)
 
-	waitForBindingReady(binding.Name, binding.Environment, svcatCli)
+	err = wait.ForServiceBindingReady(binding.Name, binding.Environment, svcatCli)
+	require.NoError(t, err)
 
 	t.Log("Query Single Resource")
 	res, err := queryBinding(c, binding)
@@ -158,18 +134,19 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	checkDeleteBindingOutput(t, deleteBindingOutput, deleteRes.DeleteServiceBinding)
 
 	t.Log("Wait for binding deletion")
-	waitForBindingDeletion(binding.Name, binding.Environment, svcatCli)
+	err = wait.ForServiceBindingDeletion(binding.Name, binding.Environment, svcatCli)
+	require.NoError(t, err)
 
 	t.Log("Delete Instance")
 	_, err = deleteInstance(c, "name", instance)
 	assert.NoError(t, err)
 
 	t.Log("Wait for instance deletion")
-	err = waitForInstanceDeletion(instance.Name, instance.Environment, svcatCli)
+	err = wait.ForServiceInstanceDeletion(instance.Name, instance.Environment, svcatCli)
 	assert.NoError(t, err)
 }
 
-func subscribeBinding(c *graphql.Client, resourceDetailsQuery string, environment, instanceName string) *graphql.Subscription {
+func subscribeBinding(c *graphql.Client, resourceDetailsQuery string, environment string) *graphql.Subscription {
 	query := fmt.Sprintf(`
 			subscription ($environment: String!) {
 				serviceBindingEvent(environment: $environment) {
@@ -204,7 +181,7 @@ func createBinding(c *graphql.Client, expectedResource CreateServiceBindingOutpu
 	return res, err
 }
 
-func queryBinding(c *graphql.Client, expectedResource ServiceBinding) (bindingQueryResponse, error) {
+func queryBinding(c *graphql.Client, expectedResource shared.ServiceBinding) (bindingQueryResponse, error) {
 	query := `
 		query ($name: String!, $environment: String!) {
 			serviceBinding(name: $name, environment: $environment) {
@@ -251,7 +228,7 @@ func deleteBinding(c *graphql.Client, expectedResource DeleteServiceBindingOutpu
 	return res, err
 }
 
-func checkBinding(t *testing.T, expected, actual ServiceBinding) {
+func checkBinding(t *testing.T, expected, actual shared.ServiceBinding) {
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Equal(t, expected.Environment, actual.Environment)
 	assert.Equal(t, expected.ServiceInstanceName, actual.ServiceInstanceName)
@@ -262,7 +239,7 @@ func checkBinding(t *testing.T, expected, actual ServiceBinding) {
 	assert.NotEqual(t, serviceBindingStatusTypeUnknown, actual.Status.Type)
 }
 
-func assertBindingExistsAndEqual(t *testing.T, expectedElement ServiceBinding, arr []ServiceBinding) {
+func assertBindingExistsAndEqual(t *testing.T, expectedElement shared.ServiceBinding, arr []shared.ServiceBinding) {
 	assert.Condition(t, func() (success bool) {
 		for _, v := range arr {
 			if v.Name == expectedElement.Name {
@@ -273,37 +250,6 @@ func assertBindingExistsAndEqual(t *testing.T, expectedElement ServiceBinding, a
 
 		return false
 	}, "Resource does not exist")
-}
-
-func waitForBindingReady(name, environment string, svcatCli *clientset.Clientset) error {
-	return waiter.WaitAtMost(func() (bool, error) {
-		instance, err := svcatCli.ServicecatalogV1beta1().ServiceBindings(environment).Get(name, metav1.GetOptions{})
-		if err != nil || instance == nil {
-			return false, err
-		}
-
-		arr := instance.Status.Conditions
-		for _, v := range arr {
-			if v.Type == "Ready" {
-				return v.Status == "True", nil
-			}
-		}
-
-		return false, nil
-	}, bindingReadyTimeout)
-}
-
-func waitForBindingDeletion(name, environment string, svcatCli *clientset.Clientset) error {
-	return waiter.WaitAtMost(func() (bool, error) {
-		_, err := svcatCli.ServicecatalogV1beta1().ServiceBindings(environment).Get(name, metav1.GetOptions{})
-		if errors.IsNotFound(err) {
-			return true, nil
-		}
-		if err != nil {
-			return false, err
-		}
-		return true, nil
-	}, bindingReadyTimeout)
 }
 
 func checkCreateBindingOutput(t *testing.T, expected, actual CreateServiceBindingOutput) {
@@ -317,22 +263,7 @@ func checkDeleteBindingOutput(t *testing.T, expected, actual DeleteServiceBindin
 	assert.Equal(t, expected.Environment, actual.Environment)
 }
 
-func binding(bindingName, instanceName string) ServiceBinding {
-	return ServiceBinding{
-		Name:                bindingName,
-		Environment:         tester.DefaultNamespace,
-		ServiceInstanceName: instanceName,
-		Secret: Secret{
-			Name:        bindingName,
-			Environment: tester.DefaultNamespace,
-		},
-		Status: ServiceBindingStatus{
-			Type: serviceBindingStatusTypeReady,
-		},
-	}
-}
-
-func bindingEvent(eventType string, binding ServiceBinding) ServiceBindingEvent {
+func bindingEvent(eventType string, binding shared.ServiceBinding) ServiceBindingEvent {
 	return ServiceBindingEvent{
 		Type:           eventType,
 		ServiceBinding: binding,
@@ -342,7 +273,7 @@ func bindingEvent(eventType string, binding ServiceBinding) ServiceBindingEvent 
 func createBindingOutput(bindingName, instanceName string) CreateServiceBindingOutput {
 	return CreateServiceBindingOutput{
 		Name:                bindingName,
-		Environment:         tester.DefaultNamespace,
+		Environment:         TestNamespace,
 		ServiceInstanceName: instanceName,
 	}
 }
@@ -350,7 +281,7 @@ func createBindingOutput(bindingName, instanceName string) CreateServiceBindingO
 func deleteBindingOutput(bindingName string) DeleteServiceBindingOutput {
 	return DeleteServiceBindingOutput{
 		Name:        bindingName,
-		Environment: tester.DefaultNamespace,
+		Environment: TestNamespace,
 	}
 }
 
