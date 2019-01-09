@@ -27,4 +27,4 @@ This document includes an overview of resources that the Kyma Service Catalog pr
 
 * **ServiceBindingUsage** is a Kyma custom resource that allows the ServiceBindingUsage controller to inject Secrets into a given application.
 
-* **UsageKind** is a Kyma custom resource that defines which resources can be bound with the ServiceBinding and how to bind them..
+* **UsageKind** is a Kyma custom resource that defines which resources can be bound with the ServiceBinding and how to bind them.
