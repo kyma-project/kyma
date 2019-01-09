@@ -8,7 +8,7 @@ import (
 
 //
 // Subscriptions
-// var uri "bla-bla"
+// var uri = ""
 // usage: subscription := Subscription("my-sub", "default").ToChannel("my-channel").ToUri(&uri).EmptyReply().Build()
 //
 

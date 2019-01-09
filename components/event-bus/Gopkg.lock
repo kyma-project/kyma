@@ -304,15 +304,17 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:6f9265d605b16c24d4376cdcfa7e9ba23518b6de8ab3ecd02cba879d80897d35"
+  digest = "1:565080c3dd0439585c7a79715d866694ee3e7c1a4afebde43890771ad2521c46"
   name = "github.com/knative/eventing"
   packages = [
     "pkg/apis/duck/v1alpha1",
     "pkg/apis/eventing",
     "pkg/apis/eventing/v1alpha1",
     "pkg/client/clientset/versioned",
+    "pkg/client/clientset/versioned/fake",
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1",
+    "pkg/client/clientset/versioned/typed/eventing/v1alpha1/fake",
   ]
   pruneopts = "UT"
   revision = "604de5d66f1692af13f9c7fb7e25f554b2f5bba9"
@@ -331,7 +333,7 @@
     "webhook",
   ]
   pruneopts = "UT"
-  revision = "fff36e41c69f31f4f2522c47f808e9bef7156d3c"
+  revision = "fcefd953681e7127c2d13609bf2364e55d31086c"
 
 [[projects]]
   branch = "master"
@@ -925,8 +927,12 @@
   analyzer-version = 1
   input-imports = [
     "github.com/golang/glog",
+    "github.com/google/go-cmp/cmp",
+    "github.com/google/go-cmp/cmp/cmpopts",
     "github.com/knative/eventing/pkg/apis/eventing/v1alpha1",
     "github.com/knative/eventing/pkg/client/clientset/versioned",
+    "github.com/knative/eventing/pkg/client/clientset/versioned/fake",
+    "github.com/knative/pkg/apis",
     "github.com/nats-io/go-nats",
     "github.com/nats-io/go-nats-streaming",
     "github.com/nats-io/nats-streaming-server/server",
@@ -949,6 +955,7 @@
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
+    "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/cache",
