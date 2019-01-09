@@ -24,14 +24,14 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 				glog.Errorf("Unable to authenticate the request due to an error: %v", err)
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			}
-			if !ok {
+			if ok {
+				ctx := context.WithValue(r.Context(), userInfoCtxKey, u)
+
+				r = r.WithContext(ctx)
+				next.ServeHTTP(w, r)
+			} else {
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			}
-
-			ctx := context.WithValue(r.Context(), userInfoCtxKey, u)
-
-			r = r.WithContext(ctx)
-			next.ServeHTTP(w, r)
 		})
 	}
 }
