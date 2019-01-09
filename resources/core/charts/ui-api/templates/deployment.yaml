@@ -27,8 +27,10 @@ spec:
         heritage: "{{ .Release.Service }}"
     spec:
       serviceAccountName: {{ template "fullname" . }}
+      {{ if .Values.global.isLocalEnv }}
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
+      {{ end }}
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_api_layer.dir }}{{ .Values.image.name }}:{{ .Values.global.ui_api_layer.version }}"
@@ -94,6 +96,12 @@ spec:
             value: "http://connector-service-internal-api.kyma-integration.svc.cluster.local:8080"
           - name: APP_APPLICATION_CONNECTOR_HTTP_CALL_TIMEOUT
             value: "2s"
+          - name: APP_OIDC_ISSUER_URL
+            value: "https://dex.{{ .Values.global.domainName }}"
+          - name: APP_OIDC_CLIENT_ID
+            value: "kyma-client"
+          - name: APP_OIDC_CA_FILE
+            value: "/etc/ingress-tls-cert/tls.crt"
         ports:
           - containerPort: {{ .Values.service.internalPort }}
         volumeMounts:

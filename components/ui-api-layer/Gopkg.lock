@@ -479,8 +479,7 @@
 [[projects]]
   name = "github.com/vrischmann/envconfig"
   packages = ["."]
-  revision = "7a443243d539c9595dd8aa7f03a6f68707b80e66"
-  version = "v1.1.0"
+  revision = "d647766a494a7182c05fa4ddd1702c2c307a770d"
 
 [[projects]]
   branch = "master"
@@ -933,6 +932,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "96b636bf3e6900f0b7473ec93b6465bd9b1bc05125a3c627c9b3d7b4b05254de"
+  inputs-digest = "dbbc3acf79ef463c1a319464d91a47145aa2759ab6d3748dff9b1160b9639264"
   solver-name = "gps-cdcl"
   solver-version = 1

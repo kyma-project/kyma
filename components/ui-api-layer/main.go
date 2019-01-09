@@ -4,10 +4,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"
 
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 
@@ -43,6 +44,7 @@ type config struct {
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
 	Application          application.Config
+	OIDC                 authn.OIDCConfig
 }
 
 func main() {
@@ -59,10 +61,8 @@ func main() {
 	kubeClient, err := kubernetes.NewForConfig(k8sConfig)
 	exitOnError(err, "Failed to instantiate Kubernetes client")
 
-	config := authn.OIDCConfig{} // TODO: prepare config
-	authReq, err := authn.NewOIDCAuthenticator(&config)
+	authReq, err := authn.NewOIDCAuthenticator(&cfg.OIDC)
 	exitOnError(err, "Error while creating OIDC authenticator")
-
 	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
 	authorizer, err := authz.NewAuthorizer(sarClient)
 	exitOnError(err, "Failed to create authorizer")
