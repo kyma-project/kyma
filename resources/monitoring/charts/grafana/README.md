@@ -57,7 +57,7 @@ The lambda dashboard provides visualisation for specific lambda function metrics
 
 You can access the dashboard directly from the lambda UI.
 
-## Unique dashboard identifier
+## Unique Dashboard Identifier
 
 The Unique Dashboard Identifier or UID allows having consistent URLs for accessing dashboards from the lambda UI. 
 This UID is defined in the `*-dashboard.json` file.
