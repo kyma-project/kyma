@@ -53,7 +53,7 @@ Users can create their own **Grafana Dashboard** by using the Grafana UI as the 
 
 ## Lambda dashboard
 
-The Lambda Dashboard provides visualisation for specific lambda function metrics such as Memory usage, CPU usage and success rate response, etc.
+The lambda dashboard provides visualisation for specific lambda function metrics such as memory usage, CPU usage or success rate response.
 
 This can be accessed from lambda ui directly.
 
