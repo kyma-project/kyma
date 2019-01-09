@@ -16,7 +16,7 @@ It allows you to manage lambda functions, which are the key part of Kyma capabil
 - Add and remove labels.
 - Enable API security.
 - Select the function size.
-- Direct access to Lambda Dashboard. 
+- Direct access to Lambda dashboard. 
 
 ### Configuration
 
