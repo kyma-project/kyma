@@ -22,34 +22,48 @@ The installation process follows the steps outlined in the **Install Kyma on a G
   ```
   export PROJECT={YOUR_GCP_PROJECT_NAME}
   ```
+2. There are two scenarios for installing Kyma with wildcard DNS:
+  - Using dynamic allocation of IP addresses
+  - Manually allocate IP addresses
+### Dynamic allocation of IP addresses
 
-2. Get a public IP address for the load balancer of the GKE cluster to which you deploy Kyma.
+Use this command to prepare a configuration file that deploys Kyma with [`xip.io`](http://xip.io/) providing a wildcard DNS:
+  ```
+(cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__.*__//g" > my-kyma.yaml
+  ```
+  >**NOTE:** In that scenario application connector is not working
 
-  - Export the `IP_ADDRESS_NAME` environment variable. This defines the name of the reserved public IP address in your GCP project. Run:
+### Manual allocation of IP addresses
+Get a public IP addresses for the load balancer of the GKE cluster to which you deploy Kyma and for the load balancer of the application connector nginx.
+
+  - Export the `PUBLIC_IP_ADDRESS_NAME` and the `APP_CONNECTOR_IP_ADDRESS_NAME` environment variables. This defines names of reserved public IP addresses in your GCP project. Run:
     ```
-    export IP_ADDRESS_NAME={GCP_COMPLIANT_IP_ADDRESS_NAME}
+    export PUBLIC_IP_ADDRESS_NAME={GCP_COMPLIANT_PUBLIC_IP_ADDRESS_NAME}
+    export APP_CONNECTOR_IP_ADDRESS_NAME={GCP_COMPLIANT_APP_CONNECTOR_IP_ADDRESS_NAME}
     ```
     >**NOTE:** The name you set for the reserved public IP address must start with a lowercase letter followed by up to 62 lowercase letters, numbers, or hyphens, and cannot end with a hyphen.
 
-  - Run this command to reserve a public IP address for the load balancer of your cluster.
-    ```  
-    gcloud beta compute --project=$PROJECT addresses create $IP_ADDRESS_NAME --region=europe-west1 --network-tier=PREMIUM
+  - Run these commands to reserve public IP addresses for the load balancer of your cluster and application connector nginx.
     ```
-    >**NOTE:** The region in which you reserve the IP address must match the region of your GKE cluster.
+    gcloud beta compute --project=$PROJECT addresses create $PUBLIC_IP_ADDRESS_NAME --region=europe-west1 --network-tier=PREMIUM
+    gcloud beta compute --project=$PROJECT addresses create $APP_CONNECTOR_IP_ADDRESS_NAME --region=europe-west1 --network-tier=PREMIUM
+    ```
+    >**NOTE:** The region in which you reserve IP addresses must match the region of your GKE cluster.
 
-  - Set the reserved IP address as the `EXTERNAL_PUBLIC_IP` environment variable. Run:
+  - Set reserved IP addresses as the `EXTERNAL_PUBLIC_IP` and `CONNCETOR_IP` environment variables. Run:
     ```
-    export EXTERNAL_PUBLIC_IP=$(gcloud compute addresses list --project=$PROJECT --filter="name=$IP_ADDRESS_NAME" --format="value(address)")
+    export EXTERNAL_PUBLIC_IP=$(gcloud compute addresses list --project=$PROJECT --filter="name=$PUBLIC_IP_ADDRESS_NAME" --format="value(address)")
+    export CONNECTOR_IP=$(gcloud compute addresses list --project=$PROJECT --filter="name=$APP_CONNECTOR_IP_ADDRESS_NAME" --format="value(address)")
     ```
 
-3. Use this command to prepare a configuration file that deploys Kyma with [`xip.io`](http://xip.io/) providing a wildcard DNS:
+Use this command to prepare a configuration file that deploys Kyma with [`xip.io`](http://xip.io/) providing a wildcard DNS:
   ```
-  (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__EXTERNAL_PUBLIC_IP__/$EXTERNAL_PUBLIC_IP/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+(cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__EXTERNAL_PUBLIC_IP__/$EXTERNAL_PUBLIC_IP/g" | sed -e "s/__APPLICATION_CONNECTOR_DOMAIN__/$CONNECTOR_IP.xip.io/g" | sed -e "s/__SKIP_SSL_VERIFY__/true/g" | sed -e "s/__.*__//g" > my-kyma.yaml
   ```
 
-4. Follow the instructions from the **Deploy Kyma** section to install Kyma using the configuration file you prepared.
+3. Follow the instructions from the **Deploy Kyma** section to install Kyma using the configuration file you prepared.
 
-5. Add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS run:
+4. Add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS run:
   ```
   tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
   && kubectl get configmap cluster-certificate-overrides -n kyma-installer -o jsonpath='{.data.global\.tlsCrt}' | base64 --decode > $tmpfile \
