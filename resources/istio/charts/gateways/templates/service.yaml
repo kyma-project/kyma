@@ -18,8 +18,8 @@ metadata:
     {{ $key }}: {{ $val }}
     {{- end }}
 spec:
-{{- if $spec.service.loadBalancerIP }}
-  loadBalancerIP: "{{ $spec.service.loadBalancerIP }}"
+{{- if $spec.loadBalancerIP }}
+  loadBalancerIP: "{{ $spec.loadBalancerIP }}"
 {{- end }}
   type: {{ .type }}
   selector:
