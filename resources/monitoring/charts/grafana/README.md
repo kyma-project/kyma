@@ -51,7 +51,7 @@ Users can create their own **Grafana Dashboard** by using the Grafana UI as the 
 1. Create or Modify a dashboard using Grafana UI
 2. Save the dashboard with a new name.
 
-## Lambda Dashboard
+## Lambda dashboard
 
 The Lambda Dashboard provides visualisation for specific lambda function metrics such as Memory usage, CPU usage and success rate response, etc.
 
