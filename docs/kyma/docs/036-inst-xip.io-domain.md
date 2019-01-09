@@ -31,10 +31,10 @@ Use this command to prepare a configuration file that deploys Kyma with [`xip.io
   ```
 (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__.*__//g" > my-kyma.yaml
   ```
-  >**NOTE:** In that scenario application connector is not working
+  >**NOTE:** In this scenario application connector is not working.
 
 ### Manual allocation of IP addresses
-Get public IP addresses for the load balancer of the GKE cluster to which you deploy Kyma and for the load balancer of the application connector nginx.
+Get public IP addresses for the load balancer of the GKE cluster to which you deploy Kyma and for the load balancer of the application connector.
 
   - Export the `PUBLIC_IP_ADDRESS_NAME` and the `APP_CONNECTOR_IP_ADDRESS_NAME` environment variables. This defines names of reserved public IP addresses in your GCP project. Run:
     ```
@@ -43,7 +43,7 @@ Get public IP addresses for the load balancer of the GKE cluster to which you de
     ```
     >**NOTE:** The name you set for the reserved public IP address must start with a lowercase letter followed by up to 62 lowercase letters, numbers, or hyphens, and cannot end with a hyphen.
 
-  - Run these commands to reserve public IP addresses for the load balancer of your cluster and application connector nginx.
+  - Run these commands to reserve public IP addresses for the load balancer of your cluster and the load balancer of the application connector.
     ```
     gcloud beta compute --project=$PROJECT addresses create $PUBLIC_IP_ADDRESS_NAME --region=europe-west1 --network-tier=PREMIUM
     gcloud beta compute --project=$PROJECT addresses create $APP_CONNECTOR_IP_ADDRESS_NAME --region=europe-west1 --network-tier=PREMIUM
