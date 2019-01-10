@@ -2,6 +2,7 @@ package servicecatalog_test
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"testing"
 	"time"
@@ -599,6 +600,16 @@ func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, 
 		client := http.Client{
 			Transport: &http.Transport{
 				DisableKeepAlives: true,
+				DialContext: (&net.Dialer{
+					Timeout:   20 * time.Second,
+					KeepAlive: 20 * time.Second,
+					DualStack: true,
+				}).DialContext,
+				Proxy:                 http.ProxyFromEnvironment,
+				MaxIdleConns:          50,
+				IdleConnTimeout:       30 * time.Second,
+				TLSHandshakeTimeout:   10 * time.Second,
+				ExpectContinueTimeout: 1 * time.Second,
 			},
 		}
 		req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
