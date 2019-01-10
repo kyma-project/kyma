@@ -68,9 +68,9 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
   (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__EXTERNAL_PUBLIC_IP__/$EXTERNAL_PUBLIC_IP/g" | sed -e "s/__APPLICATION_CONNECTOR_DOMAIN__/$CONNECTOR_IP.xip.io/g" | sed -e "s/__SKIP_SSL_VERIFY__/true/g" | sed -e "s/__.*__//g" > my-kyma.yaml
   ```
 3. Follow [these](#installation-install-kyma-on-a-gke-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.  
----
 
-### Add the xip.io self-signed certificate to trusted
+
+### Add the xip.io self-signed certificate to your OS trusted certificates
 
 After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS run:
 ```
