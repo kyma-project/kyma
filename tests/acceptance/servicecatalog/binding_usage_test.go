@@ -192,8 +192,9 @@ func (ts *TestSuite) fixApplication() *appTypes.Application {
 			Name: ts.applicationName,
 		},
 		Spec: appTypes.ApplicationSpec{
-			AccessLabel: "app-access-label",
-			Description: "Application used by acceptance test",
+			AccessLabel:      "app-access-label",
+			Description:      "Application used by acceptance test",
+			SkipInstallation: true,
 			Services: []appTypes.Service{
 				{
 					ID:   ts.appSvcNameA,

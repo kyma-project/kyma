@@ -234,6 +234,7 @@
     "pkg/util/intstr",
     "pkg/util/json",
     "pkg/util/net",
+    "pkg/util/rand",
     "pkg/util/runtime",
     "pkg/util/sets",
     "pkg/util/validation",
@@ -271,6 +272,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6d7f2adbab73358dfe50efeaf1c70010cf6d26ae2d6fc5da4f67b3d591cffa33"
+  inputs-digest = "75105789b7d626340ad28b0ef0f51f374a9ef0bbaf22622a7d5acbaf941510d3"
   solver-name = "gps-cdcl"
   solver-version = 1
