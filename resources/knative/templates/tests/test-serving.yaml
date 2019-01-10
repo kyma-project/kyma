@@ -17,7 +17,7 @@ spec:
     - name: INGRESSGATEWAY_ADDRESS
       value: knative-ingressgateway.istio-system.svc.cluster.local
     - name: DOMAIN_NAME
-      value: example.com
+      value: {{ .Values.global.domainName }}
     - name: TARGET
       value: {{ .Values.test.target }}
   restartPolicy: Never

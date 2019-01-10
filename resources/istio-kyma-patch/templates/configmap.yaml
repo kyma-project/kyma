@@ -28,21 +28,6 @@ data:
       {{ end }}
     ]
 
-  {{ if .Values.global.loadBalancerIP }}
-  {{ $serviceName }}.service.patch.json: |
-    [
-      {
-        "op": "add",
-        "path": "/spec/loadBalancerIP",
-        "value": "{{ .Values.global.loadBalancerIP }}"
-      },{
-        "op": "replace",
-        "path": "/spec/type",
-        "value": "LoadBalancer"
-      }
-    ]
-  {{ end }}
-
   istio-egressgateway.deployment.patch.json: |
     [
       {
