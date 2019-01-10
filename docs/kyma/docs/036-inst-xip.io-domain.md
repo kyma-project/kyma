@@ -43,7 +43,7 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
 
 1. Get public IP addresses for the load balancer of the GKE cluster to which you deploy Kyma and for the load balancer of the Application Connector.
 
-  - Export the `PUBLIC_IP_ADDRESS_NAME` and the `APP_CONNECTOR_IP_ADDRESS_NAME` environment variables. This defines names of reserved public IP addresses in your GCP project. Run:
+  - Export the `PUBLIC_IP_ADDRESS_NAME` and the `APP_CONNECTOR_IP_ADDRESS_NAME` environment variables. This defines the names of the reserved public IP addresses in your GCP project. Run:
     ```
     export PUBLIC_IP_ADDRESS_NAME={GCP_COMPLIANT_PUBLIC_IP_ADDRESS_NAME}
     export APP_CONNECTOR_IP_ADDRESS_NAME={GCP_COMPLIANT_APP_CONNECTOR_IP_ADDRESS_NAME}
