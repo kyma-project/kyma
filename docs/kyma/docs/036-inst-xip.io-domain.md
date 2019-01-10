@@ -95,4 +95,4 @@ Access your cluster under this address:
 https://console.{WILDCARD_DNS}.xip.io
 ```
 
->**NOTE:** To log in to your cluster, use the default `admin` static user. To learn how to get the login details for this user, see the **Access the Kyma console** section in the **Install Kyma locally from the release** document.
+>**NOTE:** To log in to your cluster, use the default `admin` static user. To learn how to get the login details for this user, see [this](#installation-install-kyma-locally-from-the-release-access-the-kyma-console) document. 
