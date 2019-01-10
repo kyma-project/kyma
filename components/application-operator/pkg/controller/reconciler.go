@@ -2,9 +2,10 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
-	appReleases "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	appReleases "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -16,6 +17,7 @@ import (
 
 const (
 	installationSkippedStatus = "INSTALLATION_SKIPPED"
+	applicationFinalizer      = "finalizer.applicationconnector.kyma-project.io"
 )
 
 type ApplicationManagerClient interface {
@@ -54,7 +56,7 @@ func (r *applicationReconciler) Reconcile(request reconcile.Request) (reconcile.
 
 	err = r.updateApplication(instance)
 	if err != nil {
-		return reconcile.Result{}, logAndError(err, "Error while updating Application %s: %s", instance.Name, err.Error())
+		return reconcile.Result{}, logAndError(err, "Error while updating Application %s", instance.Name)
 	}
 
 	return reconcile.Result{}, nil
@@ -64,34 +66,45 @@ func (r *applicationReconciler) handleErrorWhileGettingInstance(err error, reque
 	if k8sErrors.IsNotFound(err) {
 		log.Infof("Application %s deleted", request.Name)
 
-		releaseExist, err := r.releaseManager.CheckReleaseExistence(request.Name)
+		err := r.releaseManager.DeleteReleaseIfExists(request.Name)
 		if err != nil {
-			return reconcile.Result{}, logAndError(err, "Error while checking release existence for %s Application: %s", request.Name, err.Error())
+			return reconcile.Result{}, logAndError(err, "")
 		}
-
-		if releaseExist {
-			err = r.releaseManager.DeleteChart(request.Name)
-			if err != nil {
-				return reconcile.Result{}, logAndError(err, "Error while deleting release for %s Application: %s", request.Name, err.Error())
-			}
-			log.Infof("Release %s successfully deleted", request.Name)
-		}
+		log.Infof("Release %s successfully deleted", request.Name)
 
 		return reconcile.Result{}, nil
 	}
-	return reconcile.Result{}, logAndError(err, "Error getting %s Application: %s", request.Name, err.Error())
+	return reconcile.Result{}, logAndError(err, "Error getting %s Application", request.Name)
 }
 
 func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.Application) error {
+	if shouldBeRemoved(application) {
+		return r.removeApplicationWithResources(application)
+	}
+
 	appStatus, statusDescription, err := r.manageInstallation(application)
 	if err != nil {
-		return logAndError(err, "Error managing Helm release: %s", err.Error())
+		return logAndError(err, "Error managing Helm release for %s Application", application.Name)
 	}
 	log.Infof("Release status for %s Application: %s", application.Name, appStatus)
 
-	r.ensureAccessLabel(application)
+	application.SetFinalizer(applicationFinalizer)
+	application.SetAccessLabel()
 	r.setCurrentStatus(application, appStatus, statusDescription)
 
+	return nil
+}
+
+func (r *applicationReconciler) removeApplicationWithResources(application *v1alpha1.Application) error {
+	log.Infof("Removing %s Application with all resources...", application.Name)
+
+	err := r.releaseManager.DeleteReleaseIfExists(application.Name)
+	if err != nil {
+		return errors.Wrapf(err, "Error removing %s Application with all resources", application.Name)
+	}
+	log.Infof("Release %s successfully deleted", application.Name)
+
+	application.RemoveFinalizer(applicationFinalizer)
 	return nil
 }
 
@@ -112,6 +125,10 @@ func (r *applicationReconciler) manageInstallation(application *v1alpha1.Applica
 	}
 }
 
+func shouldBeRemoved(application *v1alpha1.Application) bool {
+	return application.DeletionTimestamp != nil
+}
+
 func shouldSkipInstallation(application *v1alpha1.Application) bool {
 	return application.Spec.SkipInstallation == true
 }
@@ -120,7 +137,7 @@ func (r *applicationReconciler) installApplication(application *v1alpha1.Applica
 	log.Infof("Installing release for %s Application...", application.Name)
 	status, description, err := r.releaseManager.InstallChart(application.Name)
 	if err != nil {
-		return "", "", errors.Wrapf(err, "Error installing release for %s Application, %s", application.Name, err.Error())
+		return "", "", errors.Wrapf(err, "Error installing release for %s Application", application.Name)
 	}
 	log.Infof("Release for %s Application, installed successfully", application.Name)
 
@@ -130,7 +147,7 @@ func (r *applicationReconciler) installApplication(application *v1alpha1.Applica
 func (r *applicationReconciler) checkApplicationStatus(application *v1alpha1.Application) (string, string, error) {
 	status, description, err := r.releaseManager.CheckReleaseStatus(application.Name)
 	if err != nil {
-		return "", "", errors.Wrapf(err, "Error checking release status for %s Application, %s", application.Name, err.Error())
+		return "", "", errors.Wrapf(err, "Error checking release status for %s Application", application.Name)
 	}
 
 	return status.String(), description, err
@@ -157,17 +174,11 @@ func (r *applicationReconciler) setCurrentStatus(application *v1alpha1.Applicati
 		Description: description,
 	}
 
-	application.Status.InstallationStatus = installationStatus
+	application.SetInstallationStatus(installationStatus)
 }
 
-func (r *applicationReconciler) ensureAccessLabel(application *v1alpha1.Application) {
-	if application.Spec.AccessLabel != application.Name {
-		log.Infof("Invalid access-label, setting access-label to %s", application.Name)
-		application.Spec.AccessLabel = application.Name
-	}
-}
-
-func logAndError(err error, format string, arg ...interface{}) error {
-	log.Errorf(format, arg...)
+func logAndError(err error, format string, args ...interface{}) error {
+	msg := fmt.Sprintf(format, args...)
+	log.Errorf("%s: %s", msg, err.Error())
 	return err
 }
