@@ -1,12 +1,14 @@
 package testkit
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/metadata-service/pkg/apis/istio/v1alpha2"
 	istioclient "github.com/kyma-project/kyma/components/metadata-service/pkg/client/clientset/versioned"
 	v1core "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/rand"
 
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -19,7 +21,7 @@ type K8sResourcesClient interface {
 	GetRule(name string, options v1.GetOptions) (*v1alpha2.Rule, error)
 	GetChecknothing(name string, options v1.GetOptions) (*v1alpha2.Checknothing, error)
 	GetApplicationServices(name string, options v1.GetOptions) (*v1alpha1.Application, error)
-	CreateDummyApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error)
+	CreateDummyApplication(namePrefix string, options v1.GetOptions, skipInstallation bool) (*v1alpha1.Application, error)
 	DeleteApplication(name string, options *v1.DeleteOptions) error
 }
 
@@ -88,16 +90,25 @@ func (c *k8sResourcesClient) GetApplicationServices(name string, options v1.GetO
 	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Get(name, options)
 }
 
-func (c *k8sResourcesClient) CreateDummyApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error) {
+func (c *k8sResourcesClient) CreateDummyApplication(namePrefix string, options v1.GetOptions, skipInstallation bool) (*v1alpha1.Application, error) {
+	spec := v1alpha1.ApplicationSpec{
+		Services:         []v1alpha1.Service{},
+		SkipInstallation: skipInstallation,
+	}
+
+	dummyAppName := addRandomPostfix(namePrefix)
+
 	dummyApp := &v1alpha1.Application{
 		TypeMeta:   v1.TypeMeta{Kind: "Application", APIVersion: v1alpha1.SchemeGroupVersion.String()},
-		ObjectMeta: v1.ObjectMeta{Name: name},
-		Spec: v1alpha1.ApplicationSpec{
-			Services: []v1alpha1.Service{},
-		},
+		ObjectMeta: v1.ObjectMeta{Name: dummyAppName},
+		Spec:       spec,
 	}
 
 	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Create(dummyApp)
+}
+
+func addRandomPostfix(s string) string {
+	return fmt.Sprintf(s+"-%s", rand.String(5))
 }
 
 func (c *k8sResourcesClient) DeleteApplication(name string, options *v1.DeleteOptions) error {

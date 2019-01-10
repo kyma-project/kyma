@@ -18,7 +18,7 @@ func TestApiSpec(t *testing.T) {
 	k8sResourcesClient, err := testkit.NewK8sInClusterResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	dummyApp, err := k8sResourcesClient.CreateDummyApplication("dummy-app", v1.GetOptions{})
+	dummyApp, err := k8sResourcesClient.CreateDummyApplication("appapispectest0", v1.GetOptions{}, true)
 	require.NoError(t, err)
 
 	t.Run("Application Connector Metadata", func(t *testing.T) {

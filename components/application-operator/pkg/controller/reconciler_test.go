@@ -4,12 +4,13 @@ import (
 	"context"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/controller/mocks"
 	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
@@ -198,8 +199,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 			Return(errors.NewNotFound(schema.GroupResource{}, applicationName))
 
 		releaseManager := &helmmocks.ReleaseManager{}
-		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
-		releaseManager.On("DeleteChart", applicationName).Return(nil)
+		releaseManager.On("DeleteReleaseIfExists", applicationName).Return(nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
@@ -217,19 +217,26 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager.AssertExpectations(t)
 	})
 
-	t.Run("should not delete chart when Application is deleted and release does not exist", func(t *testing.T) {
+	t.Run("should delete chart when deletion timestamp is set", func(t *testing.T) {
 		// given
 		namespacedName := types.NamespacedName{
 			Name: applicationName,
 		}
 
+		checkFinilizerRemoved := func(args mock.Arguments) {
+			appInstance := args.Get(1).(*v1alpha1.Application)
+			assert.Empty(t, appInstance.Finalizers)
+		}
+
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
-			Return(errors.NewNotFound(schema.GroupResource{}, applicationName))
+			Run(setupAppWithDeletionTimestamp).Return(nil)
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
+			Run(checkFinilizerRemoved).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
-		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
+		releaseManager.On("DeleteReleaseIfExists", applicationName).Return(nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
@@ -372,6 +379,37 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager.AssertExpectations(t)
 	})
 
+	t.Run("should return error when release installation failed", func(t *testing.T) {
+		// given
+		namespacedName := types.NamespacedName{
+			Name: applicationName,
+		}
+
+		managerClient := &mocks.ApplicationManagerClient{}
+		managerClient.On(
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
+			Run(setupAppInstance).Return(nil)
+
+		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
+		releaseManager.On("InstallChart", applicationName).Return(hapi_4.Status_FAILED, "", errors.NewBadRequest("error"))
+
+		reReconciler := NewReconciler(managerClient, releaseManager)
+
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
+
+		// when
+		result, err := reReconciler.Reconcile(request)
+
+		// then
+		assert.Error(t, err)
+		assert.NotNil(t, result)
+		managerClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
+	})
+
 	t.Run("should return error when failed to update Application", func(t *testing.T) {
 		namespacedName := types.NamespacedName{
 			Name: applicationName,
@@ -428,4 +466,9 @@ func setupAppWithoutAccessLabel(args mock.Arguments) {
 func setupAppWithWrongAccessLabel(args mock.Arguments) {
 	appInstance := getAppFromArgs(args)
 	appInstance.Spec.AccessLabel = ""
+}
+
+func setupAppWithDeletionTimestamp(args mock.Arguments) {
+	appInstance := getAppFromArgs(args)
+	appInstance.DeletionTimestamp = &v1.Time{}
 }
