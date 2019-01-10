@@ -14,14 +14,14 @@ global:
     dir: develop/
     version: acb1e829
   application_operator_tests:
-    dir: develop/
-    version: acb1e829
+    dir: pr/
+    version: PR-2154
   connector_service:
     dir: develop/
     version: acb1e829
   connector_service_tests:
-    dir: develop/
-    version: 32a77c71
+    dir: pr/
+    version: PR-2154
   connection_token_handler:
     dir: develop/
     version: acb1e829
@@ -38,8 +38,8 @@ global:
     dir: develop/
     version: acb1e829
   application_registry_tests:
-    dir: develop/
-    version: acb1e829
+    dir: pr/
+    version: PR-2154
   application_broker:
     dir: develop/
     version: 8492a486
