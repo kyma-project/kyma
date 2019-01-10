@@ -20,62 +20,62 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   alpine_net:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   api_controller:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   api_controller_acceptance_tests:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   binding_usage_controller:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   configurations_generator:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   docs:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   namespace_controller:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   etcd_backup:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   event_bus:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   event_bus_tests:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   helm_broker:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   kubeless_integration_tests:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   kubeless_tests:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   test_namespace_controller:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   test_logging_monitoring:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   ui_api_layer:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   ui_api_layer_acceptance_tests:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
 
 test:
   acceptance:
