@@ -127,8 +127,7 @@ func (mehc *MockErrorHelmClient) PrintRelease(release *release.Release) {}
 
 //MockCommandExecutor .
 type MockCommandExecutor struct {
-	TimesMockCommandExecutorCalled     int
-	TimesMockBashCommandExecutorCalled int
+	TimesMockCommandExecutorCalled int
 }
 
 //RunCommand .
@@ -137,29 +136,15 @@ func (kymaCommandExecutor *MockCommandExecutor) RunCommand(execPath string, exec
 	return nil
 }
 
-//RunBashCommand .
-func (kymaCommandExecutor *MockCommandExecutor) RunBashCommand(scriptPath string, execArgs ...string) error {
-	kymaCommandExecutor.TimesMockBashCommandExecutorCalled++
-	return nil
-}
-
 //MockFailingCommandExecutor .
 type MockFailingCommandExecutor struct {
-	MockFailingCommandExecutorCalled     bool
-	MockFailingBashCommandExecutorCalled bool
+	MockFailingCommandExecutorCalled bool
 }
 
 //RunCommand .
 func (kymaFailingCommandExecutor *MockFailingCommandExecutor) RunCommand(execPath string, execArgs ...string) error {
 	kymaFailingCommandExecutor.MockFailingCommandExecutorCalled = true
 	err := errors.New("RunCommand test error")
-	return err
-}
-
-//RunBashCommand .
-func (kymaFailingCommandExecutor *MockFailingCommandExecutor) RunBashCommand(scriptPath string, execArgs ...string) error {
-	kymaFailingCommandExecutor.MockFailingBashCommandExecutorCalled = true
-	err := errors.New("RunBashCommand test error")
 	return err
 }
 

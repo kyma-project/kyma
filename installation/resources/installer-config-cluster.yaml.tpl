@@ -96,9 +96,8 @@ data:
 
   security.enabled: "true"
 
-  # service type is later changed by isito patch
-  gateways.istio-ingressgateway.service.externalPublicIp: ""
-  gateways.istio-ingressgateway.type: "NodePort"
+  gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
+  gateways.istio-ingressgateway.type: "LoadBalancer"
 
   pilot.resources.limits.memory: 2Gi
   pilot.resources.requests.memory: 512Mi
@@ -116,3 +115,15 @@ metadata:
     component: service-catalog
 data:
   etcd-stateful.etcd.resources.limits.memory: 512Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: knative
+data:
+  knative.ingressgateway.service.type: LoadBalancer
+  knative.domainName: "__DOMAIN__"
