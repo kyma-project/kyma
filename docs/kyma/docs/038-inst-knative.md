@@ -5,11 +5,11 @@ type: Installation
 
 You can install Kyma with [Knative](https://cloud.google.com/knative/) and use its solutions for handling events and serverless functions.
 
-> **NOTE** Knative integration does not work with pre-allocated IP addresses
+> **NOTE:** You can’t install Kyma with Knative on clusters with a pre-allocated ingress gateway IP address.
 
 ## Knative with local deployment from release
 
-When you install Kyma locally from release, run following command after step 7 of the existing guide:
+When you install Kyma locally from a release, follow [this](installation-install-kyma-locally-from-the-release-install-kyma-on-minikube) guide and run the following command after you complete step 6:
 ```
 kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"knative": "true"}}'
 ```  
