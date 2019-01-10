@@ -19,63 +19,63 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
-    dir: develop/
-    version: ea0d89a3
+    dir:
+    version: 0.6.0-rc1
   alpine_net:
-    dir: develop/
-    version: ed568f0f
+    dir:
+    version: 0.6.0-rc1
   api_controller:
-    dir: develop/
-    version: 8c274255
+    dir:
+    version: 0.6.0-rc1
   api_controller_acceptance_tests:
-    dir: develop/
-    version: 8a32751d
+    dir:
+    version: 0.6.0-rc1
     testNamespace: api-controller-tests
   apiserver_proxy:
-    dir: develop/
-    version: 6e0a7fe2
+    dir:
+    version: 0.6.0-rc1
   binding_usage_controller:
-    dir: develop/
-    version: d1930a3d
+    dir:
+    version: 0.6.0-rc1
   configurations_generator:
-    dir: develop/
-    version: 4a23580f
+    dir:
+    version: 0.6.0-rc1
   docs:
-    dir: develop/
-    version: b0367cd0
+    dir:
+    version: 0.6.0-rc1
   namespace_controller:
-    dir: develop/
-    version: 429bfbcc
+    dir:
+    version: 0.6.0-rc1
   etcd_backup:
-    dir: develop/
-    version: 6e0a7fe2
+    dir:
+    version: 0.6.0-rc1
   event_bus:
-    dir: develop/
-    version: f01c8848
+    dir:
+    version: 0.6.0-rc1
   event_bus_tests:
-    dir: develop/
-    version: f01c8848
+    dir:
+    version: 0.6.0-rc1
   helm_broker:
-    dir: develop/
-    version: fe43403d
+    dir:
+    version: 0.6.0-rc1
   kubeless_integration_tests:
-    dir: develop/
-    version: 8a32751d
+    dir:
+    version: 0.6.0-rc1
   kubeless_tests:
-    dir: develop/
-    version: a9bfa9fc
+    dir:
+    version: 0.6.0-rc1
   test_namespace_controller:
-    dir: develop/
-    version: 429bfbcc
+    dir:
+    version: 0.6.0-rc1
   test_logging_monitoring:
-    dir: develop/
-    version: 6e0a7fe2
+    dir:
+    version: 0.6.0-rc1
   ui_api_layer:
-    dir: develop/
-    version: 70cf6c71
+    dir:
+    version: 0.6.0-rc1
   ui_api_layer_acceptance_tests:
-    dir: develop/
-    version: 481add96
+    dir:
+    version: 0.6.0-rc1
 
 test:
   acceptance:
