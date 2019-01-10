@@ -11,7 +11,7 @@ You can install Kyma with [Knative](https://cloud.google.com/knative/) and use i
 
 ## Knative with local deployment from release
 
-When you install Kyma locally from a release, follow [this](installation-install-kyma-locally-from-the-release-install-kyma-on-minikube) guide and run the following command after you complete step 6:
+When you install Kyma locally from a release, follow [this](#installation-install-kyma-locally-from-the-release-install-kyma-on-minikube) guide and run the following command after you complete step 6:
 ```
 kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"knative": "true"}}'
 ```  
