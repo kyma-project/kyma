@@ -127,7 +127,7 @@ func (mehc *MockErrorHelmClient) PrintRelease(release *release.Release) {}
 
 //MockCommandExecutor .
 type MockCommandExecutor struct {
-	TimesMockCommandExecutorCalled     int
+	TimesMockCommandExecutorCalled int
 }
 
 //RunCommand .
@@ -138,7 +138,7 @@ func (kymaCommandExecutor *MockCommandExecutor) RunCommand(execPath string, exec
 
 //MockFailingCommandExecutor .
 type MockFailingCommandExecutor struct {
-	MockFailingCommandExecutorCalled     bool
+	MockFailingCommandExecutorCalled bool
 }
 
 //RunCommand .
