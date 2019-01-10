@@ -57,8 +57,6 @@ fi
 
 bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
 
-bash ${CURRENT_DIR}/../scripts/generate-local-config.sh
-
 if [ -z "$CR_PATH" ]; then
 
     TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`

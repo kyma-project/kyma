@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
+
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
 
 	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
@@ -43,10 +45,12 @@ type idpPresetDeleteMutationResponse struct {
 }
 
 func TestIDPPresetQueriesAndMutations(t *testing.T) {
+	dex.SkipTestIfSCIEnabled(t)
+
 	c, err := graphql.New()
 	require.NoError(t, err)
 
-	module.SkipTestIfShould(t, c, ModuleName)
+	module.SkipPluggableTestIfShould(t, c, ModuleName)
 
 	client, _, err := client.NewIDPPresetClientWithConfig()
 	require.NoError(t, err)

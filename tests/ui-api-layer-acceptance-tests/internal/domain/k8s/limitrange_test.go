@@ -5,7 +5,7 @@ package k8s
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
 
 	"time"
 
@@ -25,7 +25,7 @@ const (
 )
 
 func TestLimitRangeQuery(t *testing.T) {
-	module.SkipNotPluggableTestIfShould(t)
+	dex.SkipTestIfSCIEnabled(t)
 
 	c, err := graphql.New()
 	require.NoError(t, err)
@@ -46,13 +46,14 @@ func TestLimitRangeQuery(t *testing.T) {
 	_, err = client.LimitRanges(limitRangeNamespace).Create(fixLimitRange())
 	require.NoError(t, err)
 
-	waiter.WaitAtMost(func() (bool, error) {
+	err = waiter.WaitAtMost(func() (bool, error) {
 		_, err := client.LimitRanges(limitRangeNamespace).Get(limitRangeName, metav1.GetOptions{})
 		if err == nil {
 			return true, nil
 		}
 		return false, err
 	}, time.Minute)
+	require.NoError(t, err)
 
 	t.Log("Querying for Limit Ranges...")
 	var res limitRangeQueryResponse

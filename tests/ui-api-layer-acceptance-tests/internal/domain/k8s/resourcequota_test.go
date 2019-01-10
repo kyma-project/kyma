@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
 
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
@@ -45,7 +45,7 @@ type resourceQuotaStatus struct {
 }
 
 func TestResourceQuotaQuery(t *testing.T) {
-	module.SkipNotPluggableTestIfShould(t)
+	dex.SkipTestIfSCIEnabled(t)
 
 	c, err := graphql.New()
 	require.NoError(t, err)
@@ -63,13 +63,14 @@ func TestResourceQuotaQuery(t *testing.T) {
 	_, err = k8sClient.ResourceQuotas(resourceQuotaNamespace).Create(fixResourceQuota())
 	require.NoError(t, err)
 
-	waiter.WaitAtMost(func() (bool, error) {
+	err = waiter.WaitAtMost(func() (bool, error) {
 		_, err := k8sClient.ResourceQuotas(resourceQuotaNamespace).Get(resourceQuotaName, metav1.GetOptions{})
 		if err == nil {
 			return true, nil
 		}
 		return false, err
 	}, time.Minute)
+	require.NoError(t, err)
 
 	var listResult resourceQuotas
 	var statusResult resourceQuotaStatus

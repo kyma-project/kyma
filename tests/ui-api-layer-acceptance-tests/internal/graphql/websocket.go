@@ -92,8 +92,12 @@ func newSubscription(connection *clusterWebsocket) *Subscription {
 		IsCloseError: websocket.IsCloseError,
 		Next: func(response interface{}, timeout time.Duration) error {
 			var op operationMessage
-			connection.SetReadDeadline(time.Now().Add(timeout))
-			err := connection.ReadJSON(&op)
+			err := connection.SetReadDeadline(time.Now().Add(timeout))
+			if err != nil {
+				return errors.Wrap(err, "while setting connection deadline for subscription")
+			}
+
+			err = connection.ReadJSON(&op)
 			if err != nil {
 				return errors.Wrap(err, "while reading JSON from subscription")
 			}

@@ -5,11 +5,31 @@ import (
 	"log"
 	"os"
 	"strings"
+	"testing"
 
 	"github.com/pkg/errors"
 )
 
-func IsSCIEnabled() bool {
+const sciEnabledMessage = "SCI is enabled"
+
+func SkipTestIfSCIEnabled(t *testing.T) {
+	if !isSCIEnabled() {
+		return
+	}
+
+	t.Skip(sciEnabledMessage)
+}
+
+func ExitIfSCIEnabled() {
+	if !isSCIEnabled() {
+		return
+	}
+
+	log.Println(sciEnabledMessage)
+	os.Exit(0)
+}
+
+func isSCIEnabled() bool {
 	config := readConfigurationFile()
 	return strings.Contains(config, "SAP CI")
 }

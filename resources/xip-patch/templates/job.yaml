@@ -1,3 +1,4 @@
+{{- $serviceName := .Values.global.knative | ternary "knative-ingressgateway" "istio-ingressgateway" -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -18,3 +19,6 @@ spec:
         env:
         - name: EXTERNAL_PUBLIC_IP
           value: {{ .Values.global.loadBalancerIP }}
+        - name: INGRESSGATEWAY_SERVICE_NAME
+          value: {{ $serviceName }}
+          

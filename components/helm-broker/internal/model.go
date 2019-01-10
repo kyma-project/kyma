@@ -106,6 +106,7 @@ type BundlePlan struct {
 	ChartValues  ChartValues
 	Metadata     BundlePlanMetadata
 	Bindable     *bool
+	Free         *bool
 	BindTemplate BundlePlanBindTemplate
 }
 
@@ -128,15 +129,18 @@ type BundleTag string
 
 // Bundle represents bundle as defined by OSB API.
 type Bundle struct {
-	ID          BundleID
-	Name        BundleName
-	Version     semver.Version
-	Description string
-	Plans       map[BundlePlanID]BundlePlan
-	Metadata    BundleMetadata
-	Tags        []BundleTag
-	Bindable    bool
-	Repository  RemoteRepository
+	ID                  BundleID
+	Name                BundleName
+	Version             semver.Version
+	Description         string
+	Plans               map[BundlePlanID]BundlePlan
+	Metadata            BundleMetadata
+	Repository          RemoteRepository
+	Tags                []BundleTag
+	Requires            []string
+	Bindable            bool
+	BindingsRetrievable bool
+	PlanUpdatable       *bool
 }
 
 // Labels are key-value pairs which add metadata information for bundle.

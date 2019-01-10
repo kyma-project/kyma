@@ -5,6 +5,7 @@ knative:
   gateway:
     tls:
       enabled: true
+  domainName: example.com
 
 global:
   containerRegistry:

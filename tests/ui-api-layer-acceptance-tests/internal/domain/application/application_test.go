@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
+
 	tester "github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/module"
@@ -61,10 +63,12 @@ type applicationEvent struct {
 }
 
 func TestApplicationMutations(t *testing.T) {
+	dex.SkipTestIfSCIEnabled(t)
+
 	c, err := graphql.New()
 	require.NoError(t, err)
 
-	module.SkipTestIfShould(t, c, ModuleName)
+	module.SkipPluggableTestIfShould(t, c, ModuleName)
 
 	t.Log("Subscribe On Applications")
 	subscription := subscribeApplicationEvent(c)

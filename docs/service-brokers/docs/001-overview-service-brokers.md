@@ -1,5 +1,6 @@
 ---
-title: Overview
+title: Service Brokers
+type: Overview
 ---
 
 A Service Broker is a server compatible with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md) specification. A Service Broker manages the lifecycle of one or more services. It advertises a catalog of service offerings and service plans to a platform.

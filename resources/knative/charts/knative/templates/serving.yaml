@@ -1307,7 +1307,7 @@ metadata:
 ---
 apiVersion: v1
 data:
-  example.com: ""
+  {{ .Values.domainName }}: ""
 kind: ConfigMap
 metadata:
   name: config-domain
