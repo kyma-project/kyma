@@ -10,8 +10,7 @@ spec:
   hostNetwork: true
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
-      # image: {{ .Values.global.containerRegistry.path }}/ui-tests:8c6eeaa2
-      image: eu.gcr.io/kyma-project/pr/ui-tests:PR-466
+      image: {{ .Values.global.containerRegistry.path }}/ui-tests:45f8be26
       imagePullPolicy: IfNotPresent
       resources:
          requests:
