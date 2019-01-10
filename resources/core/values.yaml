@@ -19,8 +19,8 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
-    dir: pr/
-    version: PR-2154
+    dir: develop/
+    version: 501c4fe5
   alpine_net:
     dir: develop/
     version: ed568f0f
