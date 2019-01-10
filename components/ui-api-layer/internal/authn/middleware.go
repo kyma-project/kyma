@@ -3,6 +3,7 @@ package authn
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/golang/glog"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
@@ -19,9 +20,12 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			wsToken := r.Header.Get("sec-websocket-protocol")
-			if wsToken != "" {
-				r.Header.Set("authorization", "Bearer "+wsToken)
+			wsProtocolHeader := r.Header.Get("sec-websocket-protocol")
+			if wsProtocolHeader != "" {
+				wsProtocolParts := strings.Split(wsProtocolHeader, ",")
+				wsProtocol, wsToken := strings.TrimSpace(wsProtocolParts[0]), strings.TrimSpace(wsProtocolParts[1])
+				r.Header.Set("Authorization", "Bearer "+wsToken)
+				r.Header.Set("sec-websocket-protocol", wsProtocol)
 			}
 
 			u, ok, err := a.AuthenticateRequest(r)
