@@ -633,16 +633,16 @@ type Mutation {
     enableApplication(application: String!, environment: String!): ApplicationMapping
     disableApplication(application: String!, environment: String!): ApplicationMapping
 
-    # TODO: should we use specific name to check if user is permissed to create a resource?
-    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
-    deleteIDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    # TODO: should we use specific name to check if user is allowed to create a resource?
+    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 }
 
 # Subscriptions
 
 type Subscription {
     serviceInstanceEvent(environment: String!): ServiceInstanceEvent!
-    serviceBindingEvent(environment: String!): ServiceBindingEvent!
+    serviceBindingEvent(environment: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "ServiceBinding", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment"})
     serviceBindingUsageEvent(environment: String!): ServiceBindingUsageEvent!
     serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,

@@ -317,9 +317,9 @@ type ComplexityRoot struct {
 		Topics                func(childComplexity int, input []InputTopic, internal *bool) int
 		EventActivations      func(childComplexity int, environment string) int
 		LimitRanges           func(childComplexity int, environment string) int
+		BackendModules        func(childComplexity int) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
-		BackendModules        func(childComplexity int) int
 	}
 
 	ResourceQuota struct {
@@ -604,9 +604,9 @@ type QueryResolver interface {
 	Topics(ctx context.Context, input []InputTopic, internal *bool) ([]TopicEntry, error)
 	EventActivations(ctx context.Context, environment string) ([]EventActivation, error)
 	LimitRanges(ctx context.Context, environment string) ([]LimitRange, error)
+	BackendModules(ctx context.Context) ([]BackendModule, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
-	BackendModules(ctx context.Context) ([]BackendModule, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -3294,6 +3294,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.LimitRanges(childComplexity, args["environment"].(string)), true
 
+	case "Query.backendModules":
+		if e.complexity.Query.BackendModules == nil {
+			break
+		}
+
+		return e.complexity.Query.BackendModules(childComplexity), true
+
 	case "Query.IDPPreset":
 		if e.complexity.Query.Idppreset == nil {
 			break
@@ -3317,13 +3324,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Idppresets(childComplexity, args["first"].(*int), args["offset"].(*int)), true
-
-	case "Query.backendModules":
-		if e.complexity.Query.BackendModules == nil {
-			break
-		}
-
-		return e.complexity.Query.BackendModules(childComplexity), true
 
 	case "ResourceQuota.name":
 		if e.complexity.ResourceQuota.Name == nil {
@@ -10153,6 +10153,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "backendModules":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_backendModules(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "IDPPreset":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -10163,15 +10172,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_IDPPresets(ctx, field)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
-				wg.Done()
-			}(i, field)
-		case "backendModules":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_backendModules(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -11694,6 +11694,66 @@ func (ec *executionContext) _Query_limitRanges(ctx context.Context, field graphq
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Query_backendModules(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BackendModules(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]BackendModule)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._BackendModule(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Query_IDPPreset(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -11781,66 +11841,6 @@ func (ec *executionContext) _Query_IDPPresets(ctx context.Context, field graphql
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._IDPPreset(ctx, field.Selections, &res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Query_backendModules(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().BackendModules(rctx)
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]BackendModule)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: &res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				return ec._BackendModule(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -19394,15 +19394,10 @@ type Query {
 
     limitRanges(environment: String!): [LimitRange!]! @HasAccess(attributes: {resource: "LimitRange", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "environment"})
 
-<<<<<<< HEAD
-    IDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
-    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @checkRBAC(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
-
     backendModules: [BackendModule!]!
-=======
+
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
->>>>>>> Directive renaming
 }
 
 # Mutations
@@ -19422,16 +19417,16 @@ type Mutation {
     enableApplication(application: String!, environment: String!): ApplicationMapping
     disableApplication(application: String!, environment: String!): ApplicationMapping
 
-    # TODO: should we use specific name to check if user is permissed to create a resource?
-    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
-    deleteIDPPreset(name: String!): IDPPreset @checkRBAC(attributes: {resource: "IDPPreset", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    # TODO: should we use specific name to check if user is allowed to create a resource?
+    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 }
 
 # Subscriptions
 
 type Subscription {
     serviceInstanceEvent(environment: String!): ServiceInstanceEvent!
-    serviceBindingEvent(environment: String!): ServiceBindingEvent!
+    serviceBindingEvent(environment: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "ServiceBinding", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment"})
     serviceBindingUsageEvent(environment: String!): ServiceBindingUsageEvent!
     serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
