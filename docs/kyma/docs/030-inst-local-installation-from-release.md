@@ -62,34 +62,29 @@ To install Kyma, follow these steps:
   ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
   ```
 
-3. Kyma installation requires increased permissions granted by the **cluster-admin** role. To bind the role to the default **ServiceAccount**, run the following command:
-  ```
-  kubectl apply -f ./resources/default-sa-rbac-role.yaml
-  ```
-
-4. Wait until the `kube-dns` Pod is ready. Run this script to setup Tiller:
+3. Wait until the `kube-dns` Pod is ready. Run this script to setup Tiller:
   ```
   ./scripts/install-tiller.sh
   ```
 
-5. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
+4. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
 
-6. Export the version you chose as an environment variable. Run:
+5. Export the version you chose as an environment variable. Run:
   ```
   export LATEST={KYMA_RELEASE_VERSION}
   ```
 
-7. Configure the Kyma installation using the local configuration file from the $LATEST release:
+6. Configure the Kyma installation using the local configuration file from the $LATEST release:
   ```
   kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml
   ```
 
-8. To trigger the installation process, label the `kyma-installation` custom resource:
+7. To trigger the installation process, label the `kyma-installation` custom resource:
   ```
   kubectl label installation/kyma-installation action=install
   ```
 
-9. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
+8. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
   ```
   ./scripts/is-installed.sh
   ```
