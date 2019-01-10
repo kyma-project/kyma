@@ -25,10 +25,6 @@ function CheckIfMinikubeIsInitialized() {
             $cmd = "minikube delete"
             Invoke-Expression -Command $cmd
         }
-        else {
-            Write-Output "Starting minikube cancelled"
-            exit 1
-        }
     }
 }
 

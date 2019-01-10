@@ -101,9 +101,6 @@ function checkIfMinikubeIsInitialized() {
         read -p "Do you want to remove previous minikube cluster [y/N]: " deleteMinikube
         if [ "${deleteMinikube}" == "y" ]; then
             minikube delete
-        else
-            log "Starting minikube cancelled" red
-            exit -1
         fi
     fi
 }
