@@ -88,7 +88,7 @@ func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.Applic
 	}
 	log.Infof("Release status for %s Application: %s", application.Name, appStatus)
 
-	setFinalizer(application)
+	application.SetFinalizer(applicationFinalizer)
 	application.SetAccessLabel()
 	r.setCurrentStatus(application, appStatus, statusDescription)
 
@@ -122,12 +122,6 @@ func (r *applicationReconciler) manageInstallation(application *v1alpha1.Applica
 		return r.installApplication(application)
 	} else {
 		return r.checkApplicationStatus(application)
-	}
-}
-
-func setFinalizer(application *v1alpha1.Application) {
-	if !application.HasFinalizer(applicationFinalizer) {
-		application.AddFinalizer(applicationFinalizer)
 	}
 }
 

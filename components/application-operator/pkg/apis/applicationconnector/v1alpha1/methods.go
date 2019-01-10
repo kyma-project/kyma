@@ -8,7 +8,13 @@ func (app *Application) SetAccessLabel() {
 	app.Spec.AccessLabel = app.Name
 }
 
-func (app *Application) AddFinalizer(finalizer string) {
+func (app *Application) SetFinalizer(finalizer string) {
+	if !app.HasFinalizer(finalizer) {
+		app.addFinalizer(finalizer)
+	}
+}
+
+func (app *Application) addFinalizer(finalizer string) {
 	app.Finalizers = append(app.Finalizers, finalizer)
 }
 

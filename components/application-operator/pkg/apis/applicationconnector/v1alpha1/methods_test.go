@@ -83,3 +83,42 @@ func TestApplication_RemoveFinalizer(t *testing.T) {
 		}
 	})
 }
+
+func TestApplication_SetFinalizer(t *testing.T) {
+	testCases := []struct {
+		finalizers []string
+		new        string
+		result     []string
+	}{
+		{
+			finalizers: []string{"finalizer.test", "finalizer.test2", "finalizer.test3"},
+			new:        "finalizer.test4",
+			result:     []string{"finalizer.test", "finalizer.test2", "finalizer.test3", "finalizer.test4"},
+		},
+		{
+			finalizers: []string{"finalizer.test", "finalizer.test2", "finalizer.test3"},
+			new:        "finalizer.test",
+			result:     []string{"finalizer.test", "finalizer.test2", "finalizer.test3"},
+		},
+		{
+			finalizers: nil,
+			new:        "finalizer",
+			result:     []string{"finalizer"},
+		},
+	}
+
+	t.Run("test has finalizer", func(t *testing.T) {
+		for _, test := range testCases {
+			app := v1alpha1.Application{
+				ObjectMeta: v1.ObjectMeta{
+					Name:       "test",
+					Finalizers: test.finalizers,
+				},
+			}
+
+			app.SetFinalizer(test.new)
+
+			assert.Equal(t, test.result, app.Finalizers)
+		}
+	})
+}
