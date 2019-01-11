@@ -20,6 +20,7 @@ function checkInputParameterValue() {
         echo "Invalid parameter value:"
         echo "${1}"
         echo "Make sure parameter value is neither empty nor start with two hyphens"
+        exit 1
     fi
 }
 
