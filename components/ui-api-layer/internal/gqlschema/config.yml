@@ -65,8 +65,8 @@ models:
         resolver: true
       content:
         resolver: true
-  RemoteEnvironment:
-    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.RemoteEnvironment"
+  Application:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Application"
     fields:
       enabledInEnvironments:
         resolver: true
@@ -91,6 +91,11 @@ models:
     model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.EventActivation"
     fields:
       events:
+        resolver: true
+  Environment:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Environment"
+    fields:
+      applications:
         resolver: true
   Section:
     model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Section"

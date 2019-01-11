@@ -43,7 +43,7 @@ RBAC in Istio is based on these concepts:
 
     - **request.headers[kyma-graphql-resources]** - Allows to specify the query by using a custom header as described in the **Custom Envoy filter** section. Include the names of the queried resources. List the resources in alphabetical order. Enclose the list in curly brackets.
   
-  For example, to define a role for access to the query with `remoteEnvironments` resource you must define the following Service Role:
+  For example, to define a role for access to the query with `applications` resource you must define the following Service Role:
    ```yaml	
   apiVersion: "rbac.istio.io/v1alpha1"
   kind: ServiceRole
@@ -57,7 +57,7 @@ RBAC in Istio is based on these concepts:
       constraints:
       - key: request.headers[kyma-graphql-resources]
         values:
-        - '{remoteEnvironments}'
+        - '{applications}'
   ```
 
 - **Service Role Binding** grants a role to subjects (e.g., a user, a group, a service).

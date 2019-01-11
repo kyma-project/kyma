@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: remote-env-certificate-overrides
+  name: application-connector-certificate-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
 type: Opaque
 data:
-  global.remoteEnvCa: ""
-  global.remoteEnvCaKey: ""
+  global.applicationConnectorCa: ""
+  global.applicationConnectorCaKey: ""
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -30,6 +30,7 @@ metadata:
     installer: overrides
 data:
   global.isLocalEnv: "true"
+  global.knative: "false"
   global.domainName: "kyma.local"
   global.etcdBackup.containerName: ""
   global.etcdBackup.enabled: "false"
@@ -73,7 +74,7 @@ data:
 
   security.enabled: "true"
 
-  gateways.istio-ingressgateway.service.externalPublicIp: ""
+  gateways.istio-ingressgateway.loadBalancerIP: ""
   gateways.istio-ingressgateway.type: "NodePort"
 
   pilot.resources.limits.memory: 1024Mi
@@ -83,3 +84,26 @@ data:
 
   mixer.resources.limits.memory: 256Mi
   mixer.resources.requests.memory: 128Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-catalog-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: service-catalog
+data:
+  etcd-stateful.etcd.resources.limits.memory: 256Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: knative
+data:
+  knative.ingressgateway.service.type: NodePort
+  knative.domainName: "kyma.local"

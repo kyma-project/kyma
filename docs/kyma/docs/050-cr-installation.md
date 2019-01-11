@@ -12,7 +12,7 @@ kubectl get crd installations.installer.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample CR that controls the Kyma installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma. The  **name** and **namespace**  fields in the `components` array define which components you install and Namespaces in which you install them. This example shows that you install the `hmc-default` release of the `remote-environments` component in the `kyma-integration` Namespace.
+This is a sample CR that controls the Kyma Installer. This example has the **action** label set to `install`, which means that it triggers the installation of Kyma. The  **name** and **namespace**  fields in the `components` array define which components you install and Namespaces in which you install them. This example shows that you install the `hmc-default` release of the `remote-environments` component in the `kyma-integration` Namespace.
 
 >**NOTE:** See the `installer-cr.yaml.tpl` file in the `/installation/resources` directory for the complete list of Kyma components.
 
@@ -49,7 +49,7 @@ This table lists all the possible parameters of a given resource together with t
 | Field   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** | **YES** | Specifies the name of the CR. |
-| **metadata.labels.action** | **YES** | Defines the behavior of the Kyma installer. Available options are `install` and `uninstall`. |
+| **metadata.labels.action** | **YES** | Defines the behavior of the Kyma Installer. Available options are `install` and `uninstall`. |
 | **metadata.finalizers** | **NO** | Protects the CR from deletion. Read [this](https://kubernetes.io/docs/tasks/access-kubernetes-api/custom-resources/custom-resource-definitions/#finalizers) Kubernetes document to learn more about finalizers. |
 | **spec.version** | **NO** | When manually installing Kyma on a cluster, specify any valid [SemVer](https://semver.org/) notation string. |
 | **spec.url** | **YES** | Specifies the location of the Kyma sources `tar.gz` package. For example, for the `master` branch of Kyma, the address is `https://github.com/kyma-project/kyma/archive/master.tar.gz` |
@@ -65,4 +65,4 @@ These components use this CR:
 
 | Component   |   Description |
 |:----------:|:------|
-| Installer  |  The CR triggers the installer to install, update or delete of the specified components. |
+| Installer  |  The CR triggers the Installer to install, update or delete of the specified components. |

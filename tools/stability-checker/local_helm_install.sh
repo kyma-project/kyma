@@ -3,6 +3,7 @@
 helm install deploy/chart/stability-checker \
   --set containerRegistry.path="local" \
   --set image.tag="local" \
+  --set clusterName="TBD" \
   --set slackClientWebhookUrl="TBD" \
   --set slackClientChannelId="TBD" \
   --set slackClientToken="TBD" \

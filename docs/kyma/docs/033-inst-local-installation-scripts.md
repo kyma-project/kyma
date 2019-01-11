@@ -14,8 +14,6 @@ fi
 
 bash $CURRENT_DIR/../scripts/build-kyma-installer.sh --vm-driver "$VM_DRIVER"
 
-bash $CURRENT_DIR/../scripts/generate-local-config.sh
-
 if [ -z "$CR_PATH" ]; then
 
     TMPDIR=`mktemp -d "$CURRENT_DIR/../../temp-XXXXXXXXXX"`
@@ -33,9 +31,12 @@ Subsequent sections provide details of all involved subscripts, in the order in 
 
 ## The minikube.sh script
 
-> **NOTE:** To work with Kyma, use only the provided scripts and commands. Kyma does not work on a basic Minikube cluster that you can start using the `minikube start` command or stop with the `minikube stop` command. If you don't need Kyma on Minikube anymore, remove the cluster with the `minikube delete` command.
+> **NOTE:** To work with Kyma, use only the provided scripts and commands. Kyma does not work on a basic Minikube cluster that you can start using the `minikube start` command.
 
-The purpose of the `installation/scripts/minikube.sh` script is to configure and start Minikube. The script also checks if your development environment is configured to handle the Kyma installation. This includes checking Minikube and kubectl versions. If Minikube is already initialized, the system prompts you to agree to remove the previous Minikube cluster. The script exits if you do not want to restart your cluster.
+The purpose of the `installation/scripts/minikube.sh` script is to configure and start Minikube. The script also checks if your development environment is configured to handle the Kyma installation. This includes checking Minikube and kubectl versions. 
+If Minikube is already initialized, the system prompts you to agree to remove the previous Minikube cluster. 
+- If you plan to perform a clean installation, answer `yes`. 
+- If you installed Kyma to your Minikube cluster and then stopped the cluster using the `minikube stop` command, answer `no`.  This allows you to start the cluster again without reinstalling Kyma. 
 
 Minikube is configured to disable the default Nginx Ingress Controller.
 
@@ -51,9 +52,9 @@ The `installation/scripts/build-kyma-installer.sh` script extracts the Kyma-Inst
 
 >**NOTE:** For the Kyma-Installer Docker image details, refer to the `tools/kyma-installer/kyma.Dockerfile` file.
 
-## The generate-local-config.sh script
+## The configure-azure-broker.sh script
 
-The `generate-local-config.sh` script configures optional subcomponents. At the moment, only the Azure Broker is an optional subcomponent of the `core` deployment.
+The `configure-azure-broker.sh` script configures Azure Broker, an optional subcomponent of the `core` deployment.
 
 The Azure Broker subcomponent is part of the `core` deployment that provisions managed services in the Microsoft Azure cloud. To enable the Azure Broker, export the following environment variables:
  - AZURE_BROKER_SUBSCRIPTION_ID
@@ -73,8 +74,12 @@ The `installation/scripts/create-cr.sh` script prepares the Installation custom 
 
 The `installation/scripts/installer.sh` script creates the default RBAC role, installs [Tiller](https://docs.helm.sh/), and deploys the Kyma-Installer component.
 
->**NOTE:** For the Kyma-Installer deployment details, refer to the `installation/resources/installer.yaml` file.
+>**NOTE:** For the Kyma Installer deployment details, refer to the `installation/resources/installer.yaml` file.
 
 The script applies the Installation custom resource and marks it with the `action=install` label, which triggers the Kyma installation.
 
 >**NOTE:** The Kyma installation runs in the background. Execute the `./installation/scripts/is-installed.sh` script to follow the installation process.
+
+## The is-installed.sh script
+
+The `installation/scripts/is-installed.sh` script shows the status of Kyma installation in real time. The script checks the status of the Installation custom resource. When it detects that the status changed to `Installed`, the script exits. If you define a timeout period and the status doesn't change to `Installed` within that period, the script fetches the installer logs. If you don't set a timeout period, the script waits for the change of the status until you terminate it. 

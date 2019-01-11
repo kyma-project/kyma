@@ -4,7 +4,7 @@ TAG = $(DOCKER_TAG)
 
 .PHONY: build
 build:
-	./before-commit.sh
+	./before-commit.sh ci
 
 .PHONY: build-image
 build-image:

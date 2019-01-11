@@ -20,9 +20,10 @@ import (
 )
 
 const (
-	finalizerName = "servicecatalog.kyma.cx/usage-kind-protection"
-	indexKind     = "usedByKind"
+	indexKind = "usedByKind"
 )
+
+var finalizerName = fmt.Sprintf("%s/usage-kind-protection", v1alpha1.SchemeGroupVersion.Group)
 
 // ProtectionController adds and removes UsageKindProtection finalizer.
 type ProtectionController struct {
@@ -54,9 +55,10 @@ func NewProtectionController(
 	sbuInformer sbuInformer.ServiceBindingUsageInformer,
 	usageKindInterface ukClient.ServicecatalogV1alpha1Interface,
 	log logrus.FieldLogger,
-) *ProtectionController {
+) (*ProtectionController, error) {
 	serviceBindingUsageInformer := sbuInformer.Informer()
-	serviceBindingUsageInformer.AddIndexers(cache.Indexers{
+
+	err := serviceBindingUsageInformer.AddIndexers(cache.Indexers{
 		indexKind: func(obj interface{}) ([]string, error) {
 			sbu, ok := obj.(*v1alpha1.ServiceBindingUsage)
 			if !ok {
@@ -65,6 +67,9 @@ func NewProtectionController(
 			return []string{sbu.Spec.UsedBy.Kind}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexer for ServiceBindingUsage Informer")
+	}
 
 	c := &ProtectionController{
 		queue:                    workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "UsageKindProtection"),
@@ -92,7 +97,7 @@ func NewProtectionController(
 	//sbuInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 	//	DeleteFunc: c.OnDeleteSBU,
 	//})
-	return c
+	return c, nil
 }
 
 func (c *ProtectionController) onAddOrUpdateUsageKind(obj interface{}) {

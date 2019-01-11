@@ -1,0 +1,85 @@
+#!/usr/bin/env groovy
+def label = "kyma-${UUID.randomUUID().toString()}"
+def application = 'common'
+def buildpack = 'golang-buildpack:0.0.9'
+def registry = env.DOCKER_REGISTRY
+def appFolder = env.APP_FOLDER
+def repositoryName = 'kyma'
+
+def checkoutDir = "src/github.com/kyma-project/$repositoryName"
+def componentDir = "$checkoutDir/$appFolder"
+def workDir = ""
+
+echo """
+********************************
+Job started with the following parameters:
+DOCKER_REGISTRY=${env.DOCKER_REGISTRY}
+PUSH_DIR=${params.PUSH_DIR}
+DOCKER_CREDENTIALS=${env.DOCKER_CREDENTIALS}
+GIT_REVISION=${params.GIT_REVISION}
+GIT_BRANCH=${params.GIT_BRANCH}
+APP_VERSION=${params.APP_VERSION}
+APP_FOLDER=${env.APP_FOLDER}
+FULL_BUILD=${params.FULL_BUILD}
+********************************
+"""
+
+podTemplate(label: label, 
+    containers: [
+        containerTemplate(name: "golang-buildpack", image: "${registry}${buildpack}", ttyEnabled: true, command: 'cat'),
+    ]) {
+    
+    node(label) {
+        try {
+            timestamps {
+                timeout(time:20, unit:"MINUTES") {
+                    ansiColor('xterm') {
+                        stage("setup") {
+                            workDir = pwd()
+
+                            dir(checkoutDir) {
+                                checkout scm
+                            }
+                        }
+                        stage("install dependencies $application") {
+                            execute("dep ensure --vendor-only -v", workDir, componentDir)
+                        }
+
+                        stage("code quality $application") {
+                            execute("gometalinter --vendor --deadline=2m --disable-all --enable=vet ./...", workDir, componentDir)
+                        }
+
+                        stage("test $application") {
+                            execute("2>&1 go test -count 100 -race -v ./...", workDir, componentDir)
+                        }
+                    }
+                }
+            }
+        } catch (ex) {
+            slaveDiagnostics()
+            execute("df -h", workDir, componentDir)
+
+            echo "Got exception: ${ex}"
+            currentBuild.result = "FAILURE"
+            def body = "${currentBuild.currentResult} ${env.JOB_NAME}${env.BUILD_DISPLAY_NAME}: on branch: ${params.GIT_BRANCH}. See details: ${env.BUILD_URL}"
+            emailext body: body, recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'CulpritsRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+        }
+    }
+}
+
+def execute(command, workDir, componentDir) {
+    container("golang-buildpack") {
+        sh """
+            export GOPATH=$workDir
+            cd $workDir/$componentDir
+            bash -c '$command'
+        """
+    }
+}
+
+def slaveDiagnostics() {
+    sh "whoami"
+    sh "pwd"
+    sh "df -h"
+    sh "mount"
+}

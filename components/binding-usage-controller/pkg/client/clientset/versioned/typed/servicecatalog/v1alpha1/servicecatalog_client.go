@@ -15,7 +15,7 @@ type ServicecatalogV1alpha1Interface interface {
 	UsageKindsGetter
 }
 
-// ServicecatalogV1alpha1Client is used to interact with features provided by the servicecatalog.kyma.cx group.
+// ServicecatalogV1alpha1Client is used to interact with features provided by the servicecatalog.kyma-project.io group.
 type ServicecatalogV1alpha1Client struct {
 	restClient rest.Interface
 }

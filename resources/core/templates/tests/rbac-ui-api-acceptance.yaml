@@ -16,7 +16,7 @@ rules:
     resources: ["clusterservicebrokers", "servicebrokers", "serviceinstances", "servicebindings"]
     verbs: ["create", "get", "delete"]
     nonResourceURLs: []
-  - apiGroups: ["servicecatalog.kyma.cx"]
+  - apiGroups: ["servicecatalog.kyma-project.io"]
     resources: ["usagekinds"]
     verbs: ["create", "delete"]
   - apiGroups: ["apps"]
@@ -38,6 +38,9 @@ rules:
   - apiGroups: ["authentication.kyma-project.io"]
     resources: ["idppresets"]
     verbs: ["get"]
+  - apiGroups: ["ui.kyma-project.io"]
+    resources: ["backendmodules"]
+    verbs: ["create", "get", "delete"]
 
 ---
 kind: ClusterRoleBinding

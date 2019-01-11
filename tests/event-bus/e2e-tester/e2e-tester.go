@@ -29,11 +29,11 @@ const (
 	testerName          = "test-core-event-bus-tester"
 	subscriptionName    = "test-sub"
 	eventActivationName = "test-ea"
-	srcId               = "test.local.kyma.commerce"
+	srcID               = "test.local.kyma.commerce"
 
-	SUCCESS = 0
-	FAIL    = 1
-	RETRIES = 20
+	success = 0
+	fail    = 1
+	retries = 20
 )
 
 var (
@@ -73,26 +73,26 @@ func main() {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		log.Printf("Error in getting cluster config: %v\n", err)
-		shutdown(FAIL)
+		shutdown(fail)
 	}
 
 	log.Println("Create the clientK8S")
 	clientK8S, err = kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Printf("Failed to create a ClientSet: %v\n", err)
-		shutdown(FAIL)
+		shutdown(fail)
 	}
 
 	log.Println("Create an event activation")
 	eaClient, err = eaClientSet.NewForConfig(config)
 	if err != nil {
 		log.Printf("Error in creating event activation client: %v\n", err)
-		shutdown(FAIL)
+		shutdown(fail)
 	}
 
-	if !createEventActivation(namespace, RETRIES) {
+	if !createEventActivation(namespace, retries) {
 		log.Println("Error: Cannot create the event activation")
-		shutdown(FAIL)
+		shutdown(fail)
 	}
 	time.Sleep(5 * time.Second)
 
@@ -100,13 +100,13 @@ func main() {
 	subClient, err = subscriptionClientSet.NewForConfig(config)
 	if err != nil {
 		log.Printf("Error in creating subscription client: %v\n", err)
-		shutdown(FAIL)
+		shutdown(fail)
 	}
-	_, err = subClient.EventingV1alpha1().Subscriptions(*namespace).Create(util.NewSubscription(subscriptionName, *namespace, *subscriberEventEndpointURL, eventType, "v1", srcId))
+	_, err = subClient.EventingV1alpha1().Subscriptions(*namespace).Create(util.NewSubscription(subscriptionName, *namespace, *subscriberEventEndpointURL, eventType, "v1", srcID))
 	if err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
 			log.Printf("Error in creating subscription: %v\n", err)
-			shutdown(FAIL)
+			shutdown(fail)
 		}
 	}
 	time.Sleep(5 * time.Second)
@@ -117,23 +117,23 @@ func main() {
 	}
 
 	log.Println("Check Subscriber Status")
-	if !checkSubscriberStatus(RETRIES) {
+	if !checkSubscriberStatus(retries) {
 		log.Println("Error: Cannot connect to Subscriber")
-		shutdown(FAIL)
+		shutdown(fail)
 	}
 
 	log.Println("Check Publisher Status")
-	if !checkPublisherStatus(RETRIES) {
+	if !checkPublisherStatus(retries) {
 		log.Println("Error: Cannot connect to Publisher")
-		shutdown(FAIL)
+		shutdown(fail)
 	}
 
 	log.Println("Publish an event")
 
 	var eventSent bool
-	for i := 0; i < RETRIES; i++ {
+	for i := 0; i < retries; i++ {
 		if _, err := publishTestEvent(*publishEventEndpointURL); err != nil {
-			log.Printf("Publish event failed: %v; Retrying (%d/%d)", err, i, RETRIES)
+			log.Printf("Publish event failed: %v; Retrying (%d/%d)", err, i, retries)
 			time.Sleep(time.Duration(i) * time.Second)
 		} else {
 			eventSent = true
@@ -142,17 +142,17 @@ func main() {
 	}
 	if !eventSent {
 		log.Println("Error: Cannot send test event")
-		shutdown(FAIL)
+		shutdown(fail)
 	}
 
 	log.Println("Try to read the response from subscriber server")
 	if err := checkSubscriberReceivedEvent(); err != nil {
 		log.Printf("Error: Cannot get the test event from subscriber: %v\n", err)
-		shutdown(FAIL)
+		shutdown(fail)
 	}
 
 	log.Println("Successfully finished")
-	shutdown(SUCCESS)
+	shutdown(success)
 }
 
 func shutdown(code int) {
@@ -189,7 +189,7 @@ func shutdown(code int) {
 		if _, err := clientK8S.CoreV1().Pods("kyma-system").Get(testerName, metav1.GetOptions{}); err != nil {
 			log.Printf("Cannot get my pod: %v", err)
 		} else {
-			if code == SUCCESS {
+			if code == success {
 				body := "{\"status\":{\"phase\":\"" + v1.PodSucceeded + "\"}}"
 				_, err = clientK8S.CoreV1().Pods("kyma-system").Patch(testerName, types.MergePatchType, []byte(body), "status")
 			} else {
@@ -206,7 +206,7 @@ func shutdown(code int) {
 
 func publishTestEvent(publishEventURL string) (*api.PublishResponse, error) {
 	payload := fmt.Sprintf(
-		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":"test-event-1"}`, srcId, eventType)
+		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":"test-event-1"}`, srcID, eventType)
 	log.Printf("event to be published: %v\n", payload)
 	res, err := http.Post(publishEventURL, "application/json", strings.NewReader(payload))
 	if err != nil {
@@ -234,9 +234,9 @@ func publishTestEvent(publishEventURL string) (*api.PublishResponse, error) {
 
 func checkSubscriberReceivedEvent() error {
 
-	for i := 0; i < RETRIES; i++ {
+	for i := 0; i < retries; i++ {
 		time.Sleep(time.Duration(i) * time.Second)
-		log.Printf("Get subscriber response (%d/%d)\n", i, RETRIES)
+		log.Printf("Get subscriber response (%d/%d)\n", i, retries)
 		res, err := http.Get(*subscriberResultsEndpointURL)
 		if err != nil {
 			log.Printf("Get request failed: %v\n", err)
@@ -348,7 +348,7 @@ func createEventActivation(namespace *string, noOfRetries int) bool {
 	var eventActivationOK bool
 	var err error
 	for i := 0; i < noOfRetries; i++ {
-		_, err = eaClient.ApplicationconnectorV1alpha1().EventActivations(*namespace).Create(util.NewEventActivation(eventActivationName, *namespace, srcId))
+		_, err = eaClient.ApplicationconnectorV1alpha1().EventActivations(*namespace).Create(util.NewEventActivation(eventActivationName, *namespace, srcID))
 		if err == nil {
 			eventActivationOK = true
 			break

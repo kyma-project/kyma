@@ -1,8 +1,9 @@
 package notifier
 
 const (
-	header = "_Tests execution summary report from last *{{ .TestResultWindowTime }}*_"
-	body   = `
+	header = `_Tests execution summary report from last *{{ .TestResultWindowTime }}*_
+	{{- if .TestRunnerInfo.ClusterName }}{{"\n"}}_Running on the *{{ .TestRunnerInfo.ClusterName }}* cluster_{{- end }}`
+	body = `
 	{{- if .FailedExecutions }}
 	*Summary:* {{ .TotalTestsCnt }} test executions and {{ len .FailedExecutions }} of them failed :sad-frog:
 	{{- if .ShowTestStats -}}

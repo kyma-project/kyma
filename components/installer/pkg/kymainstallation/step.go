@@ -43,36 +43,23 @@ type installStep struct {
 func (s installStep) Run() error {
 	chartDir := path.Join(s.kymaPackage.GetChartsDirPath(), s.component.Name)
 
-	overrides, overridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
+	releaseOverrides, releaseOverridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
 
-	if overridesErr != nil {
-		return overridesErr
+	if releaseOverridesErr != nil {
+		return releaseOverridesErr
 	}
 
 	installResp, installErr := s.helmClient.InstallRelease(
 		chartDir,
 		s.component.Namespace,
 		s.component.GetReleaseName(),
-		overrides)
+		releaseOverrides)
 
 	if installErr != nil {
 		return errors.New("Helm install error: " + installErr.Error())
 	}
 
 	s.helmClient.PrintRelease(installResp.Release)
-
-	if s.component.Name == "core" {
-		upgradeResp, upgradeErr := s.helmClient.UpgradeRelease(
-			chartDir,
-			s.component.GetReleaseName(),
-			overrides)
-
-		if upgradeErr != nil {
-			return upgradeErr
-		}
-
-		s.helmClient.PrintRelease(upgradeResp.Release)
-	}
 
 	return nil
 }
@@ -85,16 +72,16 @@ type upgradeStep struct {
 func (s upgradeStep) Run() error {
 	chartDir := path.Join(s.kymaPackage.GetChartsDirPath(), s.component.Name)
 
-	overrides, overridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
+	releaseOverrides, releaseOverridesErr := s.overrideData.ForRelease(s.component.GetReleaseName())
 
-	if overridesErr != nil {
-		return overridesErr
+	if releaseOverridesErr != nil {
+		return releaseOverridesErr
 	}
 
 	upgradeResp, upgradeErr := s.helmClient.UpgradeRelease(
 		chartDir,
 		s.component.GetReleaseName(),
-		overrides)
+		releaseOverrides)
 
 	if upgradeErr != nil {
 		return errors.New("Helm upgrade error: " + upgradeErr.Error())

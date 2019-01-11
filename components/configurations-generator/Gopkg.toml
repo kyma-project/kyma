@@ -24,6 +24,9 @@
 #   go-tests = true
 #   unused-packages = true
 
+required = [
+	"golang.org/x/tools/cmd/goimports"
+]
 
 [[constraint]]
   name = "github.com/gorilla/mux"

@@ -32,7 +32,7 @@ spec:
               pattern: "[a-zA-Z0-9]+"
             placement:
               type: string
-              pattern: "^(environment|cluster)$"
+              pattern: "^(environment|cluster|namespace)$"
             category:
               type: string
             viewBaseUrl:

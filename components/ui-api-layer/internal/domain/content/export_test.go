@@ -23,7 +23,3 @@ func NewAsyncApiSpecService(storage minioAsyncApiSpecGetter) *asyncApiSpecServic
 func (r *topicsResolver) SetTopicsConverter(converter topicsConverterInterface) {
 	r.converter = converter
 }
-
-//func NewMockTopicsConverter() *mockTopicsConverterInterface {
-//	return new(mockTopicsConverterInterface)
-//}

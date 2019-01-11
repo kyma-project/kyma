@@ -30,6 +30,9 @@ type FormMeta struct {
 	ImageURL            string            `yaml:"imageURL"`
 	Bindable            bool              `yaml:"bindable"`
 	Labels              map[string]string `yaml:"labels"`
+	Requires            []string          `yaml:"requires"`
+	BindingsRetrievable bool              `yaml:"bindingsRetrievable"`
+	PlanUpdatable       *bool             `yaml:"planUpdatable"`
 }
 
 // MapLabelsToModel maps the FormMeta.Labels to the model internal.Labels
@@ -134,16 +137,20 @@ func (f *form) ToModel(c *chart.Chart) (internal.Bundle, error) {
 			SupportURL:          f.Meta.SupportURL,
 			Labels:              f.Meta.MapLabelsToModel(),
 		},
-		Tags:    f.Meta.MapTagsToModel(),
-		Version: *ybVer,
-		Plans:   mappedPlans,
+		Tags:                f.Meta.MapTagsToModel(),
+		Version:             *ybVer,
+		Plans:               mappedPlans,
+		Requires:            f.Meta.Requires,
+		BindingsRetrievable: f.Meta.BindingsRetrievable,
+		PlanUpdatable:       f.Meta.PlanUpdatable,
 	}, nil
 }
 
 type formPlan struct {
 	Meta          *formPlanMeta
-	SchemasUpdate *internal.PlanSchema
 	SchemasCreate *internal.PlanSchema
+	SchemasBind   *internal.PlanSchema
+	SchemasUpdate *internal.PlanSchema
 	Values        map[string]interface{}
 	BindTemplate  []byte
 }
@@ -190,6 +197,9 @@ func (p *formPlan) ToModel(c *chart.Chart) (internal.BundlePlan, error) {
 	if p.SchemasCreate != nil {
 		mappedSchemas[internal.SchemaTypeProvision] = *p.SchemasCreate
 	}
+	if p.SchemasBind != nil {
+		mappedSchemas[internal.SchemaTypeBind] = *p.SchemasBind
+	}
 
 	return internal.BundlePlan{
 		ID:          internal.BundlePlanID(p.Meta.ID),
@@ -203,6 +213,7 @@ func (p *formPlan) ToModel(c *chart.Chart) (internal.BundlePlan, error) {
 		ChartRef:     cRef,
 		Bindable:     p.Meta.Bindable,
 		BindTemplate: p.BindTemplate,
+		Free:         p.Meta.Free,
 	}, nil
 }
 
@@ -212,6 +223,7 @@ type formPlanMeta struct {
 	Description string `yaml:"description"`
 	DisplayName string `yaml:"displayName"`
 	Bindable    *bool  `yaml:"bindable"`
+	Free        *bool  `yaml:"free"`
 }
 
 func (f *formPlanMeta) Validate() error {

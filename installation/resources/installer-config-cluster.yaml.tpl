@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: remote-env-certificate-overrides
+  name: application-connector-certificate-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
 type: Opaque
 data:
-  global.remoteEnvCa: "__REMOTE_ENV_CA__"
-  global.remoteEnvCaKey: "__REMOTE_ENV_CA_KEY__"
+  global.applicationConnectorCa: "__REMOTE_ENV_CA__"
+  global.applicationConnectorCaKey: "__REMOTE_ENV_CA_KEY__"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -30,13 +30,16 @@ metadata:
     installer: overrides
 data:
   global.isLocalEnv: "false"
+  global.knative: "false"
   global.domainName: "__DOMAIN__"
+  global.applicationConnectorDomainName: "__APPLICATION_CONNECTOR_DOMAIN__"
+  global.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.etcdBackup.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
   etcd-stateful.replicaCount: "3"
-  acceptanceTest.remoteEnvironment.disabled: "true"
+  acceptanceTest.application.disabled: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -101,3 +104,26 @@ data:
 
   mixer.resources.limits.memory: 1Gi
   mixer.resources.requests.memory: 256Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-catalog-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: service-catalog
+data:
+  etcd-stateful.etcd.resources.limits.memory: 512Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: knative
+data:
+  knative.ingressgateway.service.type: LoadBalancer
+  knative.domainName: "__DOMAIN__"

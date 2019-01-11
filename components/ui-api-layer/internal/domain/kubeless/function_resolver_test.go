@@ -6,9 +6,9 @@ import (
 	"github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/kubeless"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/kubeless/automock"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
-	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/gqlerror"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -37,7 +37,8 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 		svc := automock.NewFunctionLister()
 		svc.On("List", environment, pagingParams).Return(functions, nil).Once()
 
-		resolver := kubeless.NewFunctionResolver(svc)
+		resolver, err := kubeless.NewFunctionResolver(svc)
+		require.NoError(t, err)
 
 		result, err := resolver.FunctionsQuery(nil, environment, nil, nil)
 
@@ -53,7 +54,8 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 		svc := automock.NewFunctionLister()
 		svc.On("List", environment, pagingParams).Return(functions, nil).Once()
 
-		resolver := kubeless.NewFunctionResolver(svc)
+		resolver, err := kubeless.NewFunctionResolver(svc)
+		require.NoError(t, err)
 
 		result, err := resolver.FunctionsQuery(nil, environment, nil, nil)
 		require.NoError(t, err)
@@ -64,9 +66,10 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 		svc := automock.NewFunctionLister()
 		svc.On("List", environment, pagingParams).Return(nil, errors.New("test")).Once()
 
-		resolver := kubeless.NewFunctionResolver(svc)
+		resolver, err := kubeless.NewFunctionResolver(svc)
+		require.NoError(t, err)
 
-		_, err := resolver.FunctionsQuery(nil, environment, nil, nil)
+		_, err = resolver.FunctionsQuery(nil, environment, nil, nil)
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
 	})

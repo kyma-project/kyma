@@ -45,6 +45,9 @@ func fixtureBundle(t *testing.T, testdataBasePath string) internal.Bundle {
 			micro.ID:      micro,
 			enterprise.ID: enterprise,
 		},
+		Requires:            meta.Requires,
+		PlanUpdatable:       meta.PlanUpdatable,
+		BindingsRetrievable: meta.BindingsRetrievable,
 	}
 }
 
@@ -71,6 +74,7 @@ func fixturePlan(t *testing.T, testdataBasePath string, planName string, cRef in
 		Description string `yaml:"description"`
 		DisplayName string `yaml:"displayName"`
 		Bindable    *bool  `yaml:"bindable"`
+		Free        *bool  `yaml:"free"`
 	}
 	unmarshalYamlTestdata(t, fullbasePath+"meta.yaml", &meta)
 
@@ -80,6 +84,8 @@ func fixturePlan(t *testing.T, testdataBasePath string, planName string, cRef in
 	schemaCreate := unmarshalJSONTestdata(t, fullbasePath+"create-instance-schema.json")
 
 	schemaUpdate := unmarshalJSONTestdata(t, fullbasePath+"update-instance-schema.json")
+
+	schemaBind := unmarshalJSONTestdata(t, fullbasePath+"bind-instance-schema.json")
 
 	bindTemplate := loadRawTestdata(t, fullbasePath+"bind.yaml")
 
@@ -95,6 +101,7 @@ func fixturePlan(t *testing.T, testdataBasePath string, planName string, cRef in
 		Schemas: map[internal.PlanSchemaType]internal.PlanSchema{
 			internal.SchemaTypeProvision: schemaCreate,
 			internal.SchemaTypeUpdate:    schemaUpdate,
+			internal.SchemaTypeBind:      schemaBind,
 		},
 		ChartValues:  internal.ChartValues(chartVal),
 		BindTemplate: bindTemplate,

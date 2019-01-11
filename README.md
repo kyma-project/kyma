@@ -3,6 +3,11 @@
 </p>
 
 [![Go Report Card](https://goreportcard.com/badge/kyma-project/kyma)](https://goreportcard.com/report/github.com/kyma-project/kyma)
+[![Slack](https://img.shields.io/badge/slack-@kyma--community-yellow.svg)](http://slack.kyma-project.io)
+[![Twitter](https://img.shields.io/badge/twitter-@kymaproject-blue.svg)](https://twitter.com/kymaproject)
+
+
+
 
 ## Overview
 

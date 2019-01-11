@@ -2,6 +2,7 @@ package servicecatalog_test
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"testing"
 	"time"
@@ -15,11 +16,15 @@ import (
 	bucClient "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
 	bucInterface "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 
-	reTypes "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/apis/applicationconnector/v1alpha1"
-	reClient "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned"
-	reInterface "github.com/kyma-project/kyma/components/remote-environment-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	appTypes "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	appInterface "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+
+	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/report"
 	"github.com/stretchr/testify/require"
 	"github.com/vrischmann/envconfig"
 	appsTypes "k8s.io/api/apps/v1beta1"
@@ -48,24 +53,24 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	ts := NewTestSuite(t)
 
 	ts.createTestNamespace()
-	defer ts.deleteTestNamespace()
+	ts.createApplication()
 
-	ts.createRemoteEnvironment()
-	defer ts.deleteRemoteEnvironment()
+	defer func() {
+		if t.Failed() {
+			namespaceReport := report.NewReport(t, ts.k8sClientCfg)
+			namespaceReport.PrintJsonReport(ts.namespace)
+		}
+		ts.cleanup()
+	}()
 
-	ts.enableRemoteEnvironmentInTestNamespace()
-
-	ts.waitForREServiceClasses(time.Second * 90)
+	ts.enableApplicationInTestNamespace()
+	ts.waitForAppServiceClasses(time.Second * 90)
 
 	ts.createAndWaitForServiceInstanceA(timeoutPerStep)
-	defer ts.deleteServiceInstanceA(timeoutPerStep)
 	ts.createAndWaitForServiceInstanceB(timeoutPerStep)
-	defer ts.deleteServiceInstanceB(timeoutPerStep)
 
 	ts.createAndWaitForServiceBindingA(timeoutPerStep)
-	defer ts.deleteServiceBindingA(timeoutPerStep)
 	ts.createAndWaitForServiceBindingB(timeoutPerStep)
-	defer ts.deleteServiceBindingB(timeoutPerStep)
 
 	ts.createTesterDeploymentAndService()
 
@@ -94,19 +99,19 @@ func NewTestSuite(t *testing.T) *TestSuite {
 		k8sClientCfg:     k8sCfg,
 		stubsDockerImage: cfg.StubsDockerImage,
 
-		namespace:             fmt.Sprintf("svc-test-ns-%s", randID),
-		testerDeploymentName:  fmt.Sprintf("acc-test-env-tester-%s", randID),
-		remoteEnvironmentName: fmt.Sprintf("acc-test-re-env-%s", randID),
-		gatewayUrl:            fmt.Sprintf("http://some-gateway-%s.url", randID),
-		envPrefix:             "SOME_DUMMY_PREFIX_",
+		namespace:            fmt.Sprintf("svc-test-ns-%s", randID),
+		testerDeploymentName: fmt.Sprintf("acc-test-env-tester-%s", randID),
+		applicationName:      fmt.Sprintf("acc-test-app-env-%s", randID),
+		gatewayUrl:           fmt.Sprintf("http://some-gateway-%s.url", randID),
+		envPrefix:            "SOME_DUMMY_PREFIX_",
 
 		serviceInstanceNameA: fmt.Sprintf("acc-test-instance-a-%s", randID),
 		bindingNameA:         fmt.Sprintf("acc-test-credential-a-%s", randID),
-		reSvcNameA:           fmt.Sprintf("acc-test-svc-id-a-%s", randID),
+		appSvcNameA:          fmt.Sprintf("acc-test-svc-id-a-%s", randID),
 
 		serviceInstanceNameB: fmt.Sprintf("acc-test-instance-b-%s", randID),
 		bindingNameB:         fmt.Sprintf("acc-test-credential-b-%s", randID),
-		reSvcNameB:           fmt.Sprintf("acc-test-svc-id-b-%s", randID),
+		appSvcNameB:          fmt.Sprintf("acc-test-svc-id-b-%s", randID),
 	}
 }
 
@@ -115,92 +120,93 @@ type TestSuite struct {
 
 	k8sClientCfg *restclient.Config
 
-	namespace             string
-	remoteEnvironmentName string
-	testerDeploymentName  string
-	gatewayUrl            string
-	envPrefix             string
+	namespace            string
+	applicationName      string
+	testerDeploymentName string
+	gatewayUrl           string
+	envPrefix            string
 
 	serviceInstanceNameA string
 	classExternalNameA   string
-	reSvcNameA           string
+	appSvcNameA          string
 	bindingNameA         string
 
 	serviceInstanceNameB string
 	classExternalNameB   string
-	reSvcNameB           string
+	appSvcNameB          string
 	bindingNameB         string
 
 	stubsDockerImage string
 }
 
-// Remote Environment helpers
-func (ts *TestSuite) createRemoteEnvironment() {
-	reCli := ts.remoteEnvironmentClient()
+// Application helpers
+func (ts *TestSuite) createApplication() {
+	reCli := ts.applicationClient()
 
-	_, err := reCli.Create(ts.fixRemoteEnvironment())
+	_, err := reCli.Create(ts.fixApplication())
 	require.NoError(ts.t, err)
 }
 
-func (ts *TestSuite) deleteRemoteEnvironment() {
-	reCli := ts.remoteEnvironmentClient()
+func (ts *TestSuite) deleteApplication() {
+	reCli := ts.applicationClient()
 
-	err := reCli.Delete(ts.remoteEnvironmentName, &metav1.DeleteOptions{})
+	err := reCli.Delete(ts.applicationName, &metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 }
 
-func (ts *TestSuite) enableRemoteEnvironmentInTestNamespace() {
-	reCli, err := reClient.NewForConfig(ts.k8sClientCfg)
+func (ts *TestSuite) enableApplicationInTestNamespace() {
+	client, err := mappingClient.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
 
-	emCli := reCli.ApplicationconnectorV1alpha1().EnvironmentMappings(ts.namespace)
-	_, err = emCli.Create(ts.fixEnvironmentMapping())
+	emCli := client.ApplicationconnectorV1alpha1().ApplicationMappings(ts.namespace)
+	_, err = emCli.Create(ts.fixApplicationMapping())
 	require.NoError(ts.t, err)
 }
 
-func (ts *TestSuite) remoteEnvironmentClient() reInterface.RemoteEnvironmentInterface {
-	client, err := reClient.NewForConfig(ts.k8sClientCfg)
+func (ts *TestSuite) applicationClient() appInterface.ApplicationInterface {
+	client, err := appClient.NewForConfig(ts.k8sClientCfg)
 	require.NoError(ts.t, err)
 
-	return client.ApplicationconnectorV1alpha1().RemoteEnvironments()
+	return client.ApplicationconnectorV1alpha1().Applications()
 }
 
-func (ts *TestSuite) fixEnvironmentMapping() *reTypes.EnvironmentMapping {
-	return &reTypes.EnvironmentMapping{
+func (ts *TestSuite) fixApplicationMapping() *mappingTypes.ApplicationMapping {
+	return &mappingTypes.ApplicationMapping{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "EnvironmentMapping",
+			Kind:       "ApplicationMapping",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: ts.remoteEnvironmentName,
+			Name: ts.applicationName,
 		},
 	}
 }
 
-func (ts *TestSuite) fixRemoteEnvironment() *reTypes.RemoteEnvironment {
-	return &reTypes.RemoteEnvironment{
+func (ts *TestSuite) fixApplication() *appTypes.Application {
+	return &appTypes.Application{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "RemoteEnvironment",
+			Kind:       "Application",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: ts.remoteEnvironmentName,
+			Name: ts.applicationName,
 		},
-		Spec: reTypes.RemoteEnvironmentSpec{
-			AccessLabel: "re-access-label",
-			Description: "Remote Environment used by acceptance test",
-			Services: []reTypes.Service{
+		Spec: appTypes.ApplicationSpec{
+			AccessLabel:      "app-access-label",
+			Description:      "Application used by acceptance test",
+			SkipInstallation: true,
+			Services: []appTypes.Service{
 				{
-					ID:   ts.reSvcNameA,
-					Name: ts.reSvcNameA,
+					ID:   ts.appSvcNameA,
+					Name: ts.appSvcNameA,
 					Labels: map[string]string{
-						"connected-app": ts.remoteEnvironmentName,
+						"connected-app": ts.applicationName,
 					},
-					ProviderDisplayName: "SAP Hybris",
-					DisplayName:         "Some testable RE service",
-					Description:         "Remote Environment Service Class used by remote-environment acceptance test",
+					ProviderDisplayName: "Hakuna Matata",
+					DisplayName:         "Some testable Application service",
+					Description:         "Application Service Class used by application acceptance test",
 					Tags:                []string{},
-					Entries: []reTypes.Entry{
+					Entries: []appTypes.Entry{
 						{
 							Type:        "API",
 							AccessLabel: "some-access-label-A",
@@ -209,16 +215,16 @@ func (ts *TestSuite) fixRemoteEnvironment() *reTypes.RemoteEnvironment {
 					},
 				},
 				{
-					ID:   ts.reSvcNameB,
-					Name: ts.reSvcNameB,
+					ID:   ts.appSvcNameB,
+					Name: ts.appSvcNameB,
 					Labels: map[string]string{
-						"connected-app": ts.remoteEnvironmentName,
+						"connected-app": ts.applicationName,
 					},
-					ProviderDisplayName: "SAP Hybris",
-					DisplayName:         "Some testable RE service",
-					Description:         "Remote Environment Service Class used by remote-environment acceptance test",
+					ProviderDisplayName: "Hakuna Matata",
+					DisplayName:         "Some testable Application service",
+					Description:         "Application Service Class used by application acceptance test",
 					Tags:                []string{},
-					Entries: []reTypes.Entry{
+					Entries: []appTypes.Entry{
 						{
 							Type:        "API",
 							AccessLabel: "some-access-label-B",
@@ -283,10 +289,13 @@ func (ts *TestSuite) deleteServiceBinding(bindingName string, timeout time.Durat
 	require.NoError(ts.t, err)
 
 	repeat.FuncAtMost(ts.t, func() error {
-		_, err := siClient.Get(bindingName, metav1.GetOptions{})
+		binding, err := siClient.Get(bindingName, metav1.GetOptions{})
 		switch {
 		case err == nil:
-			return fmt.Errorf("ServiceBiding %q still exists", bindingName)
+			return fmt.Errorf(
+				"ServiceBiding %q still exists. [%s].",
+				bindingName,
+				prettyBindingResourceStatus(binding.Status.Conditions))
 		case apiErrors.IsNotFound(err):
 			return nil
 		default:
@@ -350,7 +359,7 @@ func (ts *TestSuite) bindingUsage(bindingName, sbuName, envPrefix string) {
 	sbu := &bucTypes.ServiceBindingUsage{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ServiceBindingUsage",
-			APIVersion: "servicecatalog.kyma.cx/v1alpha1",
+			APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: sbuName,
@@ -410,10 +419,13 @@ func (ts *TestSuite) deleteServiceInstance(instanceName string, timeout time.Dur
 	require.NoError(ts.t, err)
 
 	repeat.FuncAtMost(ts.t, func() error {
-		_, err := siClient.Get(instanceName, metav1.GetOptions{})
+		instance, err := siClient.Get(instanceName, metav1.GetOptions{})
 		switch {
 		case err == nil:
-			return fmt.Errorf("ServiceInstance %q still exists", instanceName)
+			return fmt.Errorf(
+				"ServiceInstance %q still exists. [%s].",
+				instanceName,
+				prettyInstanceResourceStatus(instance.Status.Conditions))
 		case apiErrors.IsNotFound(err):
 			return nil
 		default:
@@ -464,7 +476,7 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 }
 
 // ServiceClass helpers
-func (ts *TestSuite) waitForREServiceClasses(timeout time.Duration) {
+func (ts *TestSuite) waitForAppServiceClasses(timeout time.Duration) {
 	repeat.FuncAtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
 	repeat.FuncAtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
 }
@@ -474,7 +486,7 @@ func (ts *TestSuite) serviceClassIsAvailableA() func() error {
 	require.NoError(ts.t, err)
 
 	return func() error {
-		class, err := clientSet.ServicecatalogV1beta1().ServiceClasses(ts.namespace).Get(ts.reSvcNameA, metav1.GetOptions{})
+		class, err := clientSet.ServicecatalogV1beta1().ServiceClasses(ts.namespace).Get(ts.appSvcNameA, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
@@ -488,13 +500,22 @@ func (ts *TestSuite) serviceClassIsAvailableB() func() error {
 	require.NoError(ts.t, err)
 
 	return func() error {
-		class, err := clientSet.ServicecatalogV1beta1().ServiceClasses(ts.namespace).Get(ts.reSvcNameB, metav1.GetOptions{})
+		class, err := clientSet.ServicecatalogV1beta1().ServiceClasses(ts.namespace).Get(ts.appSvcNameB, metav1.GetOptions{})
 		if err != nil {
 			return err
 		}
 		ts.classExternalNameB = class.Spec.ExternalName
 		return nil
 	}
+}
+
+func (ts *TestSuite) cleanup() {
+	ts.deleteServiceBindingA(timeoutPerStep)
+	ts.deleteServiceBindingB(timeoutPerStep)
+	ts.deleteServiceInstanceA(timeoutPerStep)
+	ts.deleteServiceInstanceB(timeoutPerStep)
+	ts.deleteTestNamespace()
+	ts.deleteApplication()
 }
 
 // Deployment helpers
@@ -574,10 +595,30 @@ func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.De
 }
 
 func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, timeout time.Duration) {
-	req := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs?name=%s&value=%s", ts.namespace, envName, envValue)
+	url := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs?name=%s&value=%s", ts.namespace, envName, envValue)
 
 	repeat.FuncAtMost(ts.t, func() error {
-		resp, err := http.Get(req)
+		client := http.Client{
+			Transport: &http.Transport{
+				DisableKeepAlives: true,
+				DialContext: (&net.Dialer{
+					Timeout:   20 * time.Second,
+					KeepAlive: 20 * time.Second,
+					DualStack: true,
+				}).DialContext,
+				Proxy:                 http.ProxyFromEnvironment,
+				MaxIdleConns:          50,
+				IdleConnTimeout:       30 * time.Second,
+				TLSHandshakeTimeout:   10 * time.Second,
+				ExpectContinueTimeout: 1 * time.Second,
+			},
+		}
+		req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
+		if err != nil {
+			return err
+		}
+
+		resp, err := client.Do(req)
 		if err != nil {
 			return err
 		}
@@ -585,6 +626,32 @@ func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, 
 		if resp.StatusCode != http.StatusOK {
 			return fmt.Errorf("while checking if proper env is injected, received unexpected status code [got: %d, expected: %d]", resp.StatusCode, http.StatusOK)
 		}
+
+		err = resp.Body.Close()
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}, timeout)
+}
+
+func prettyBindingResourceStatus(conditions []scTypes.ServiceBindingCondition) string {
+	var response string
+
+	for _, condition := range conditions {
+		response += fmt.Sprintf("Status: %q, Reason: %q, Message: %q", condition.Status, condition.Reason, condition.Message)
+	}
+
+	return response
+}
+
+func prettyInstanceResourceStatus(conditions []scTypes.ServiceInstanceCondition) string {
+	var response string
+
+	for _, condition := range conditions {
+		response += fmt.Sprintf("Status: %q, Reason: %q, Message: %q", condition.Status, condition.Reason, condition.Message)
+	}
+
+	return response
 }

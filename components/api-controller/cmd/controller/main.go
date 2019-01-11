@@ -59,7 +59,7 @@ func main() {
 	internalInformerFactory.Start(stop)
 	err := v1alpha2Controller.Run(2, stop)
 	if err != nil {
-		log.Fatal("Unable to run controller: %v", err)
+		log.Fatalf("Unable to run controller: %v", err)
 	}
 }
 

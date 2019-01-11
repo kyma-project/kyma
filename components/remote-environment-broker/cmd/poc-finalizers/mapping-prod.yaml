@@ -1,5 +1,0 @@
-apiVersion: remoteenvironment.kyma.io/v1alpha1
-kind: EnvironmentMapping
-metadata:
-  # Remote Environment "ec-prod" is enabled in "production" environment
-  name: ec-prod

@@ -34,9 +34,9 @@ const (
 	//
 	// 5ms, 10ms, 20ms, 40ms, 80ms, 160ms, 320ms, 640ms, 1.3s, 2.6s, 5.1s, 10.2s, 20.4s, 41s, 82s
 	defaultMaxRetries = 15
-
-	podPresetOwnerAnnotationKey = "servicebindingusages.servicecatalog.kyma.cx/owner-name"
 )
+
+var podPresetOwnerAnnotationKey = fmt.Sprintf("servicebindingusages.%s/owner-name", sbuTypes.SchemeGroupVersion.Group)
 
 //go:generate mockery -name=podPresetModifier -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=kindsSupervisors -output=automock -outpkg=automock -case=underscore
@@ -233,7 +233,12 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 	if usageStatus != nil {
 		usageStatus.wrapMessageForFailed(fmt.Sprintf("Process error during %d attempts from %d", retry, c.maxRetires))
 
-		bindingUsage, _ := c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
+		bindingUsage, err := c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
+		if err != nil {
+			c.log.Errorf("Cannot get ServiceBindingUsage %s/%s, got error: %v", namespace, name, err)
+			return true
+		}
+
 		condition := sbuStatus.NewUsageCondition(usageStatus.sbuType, usageStatus.condition, usageStatus.reason, usageStatus.message)
 		if err := c.updateStatus(bindingUsage, *condition); err != nil {
 			c.log.Errorf("Error processing %q while updating sbu status with condition %+v", key, condition)

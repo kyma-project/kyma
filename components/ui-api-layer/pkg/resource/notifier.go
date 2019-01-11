@@ -1,6 +1,8 @@
 package resource
 
-import "sync"
+import (
+	"sync"
+)
 
 //go:generate mockery -name=Listener -output=automock -outpkg=automock -case=underscore
 type Listener interface {

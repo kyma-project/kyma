@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Remote Environment Controller of Kyma
-name: remote-environment-controller
-version: 0.0.1

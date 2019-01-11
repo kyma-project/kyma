@@ -24,7 +24,7 @@ This script sets up default parameters, starts Minikube, builds the Kyma-Install
 You can execute the `installation/cmd/run.sh` script with the following parameters:
 
 - `--skip-minikube-start` which skips the execution of the `installation/scripts/minikube.sh` script.
-- `--vm-driver` which points to either `virtualbox` or `hiperkit`, depending on your operating system.
+- `--vm-driver` which points to either `virtualbox` or `hyperkit`, depending on your operating system.
 
 Read the **Reinstall Kyma** document to learn how to reinstall Kyma without deleting the cluster from Minikube.
 To learn how to test Kyma, see the **Testing Kyma** document.

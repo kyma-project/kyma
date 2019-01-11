@@ -8,15 +8,15 @@ import (
 )
 
 const (
-	eventServiceUrlEnvName   = "EVENT_SERVICE_URL"
-	namespaceEnvName         = "NAMESPACE"
-	remoteEnvironmentEnvName = "REMOTE_ENVIRONMENT"
+	eventServiceUrlEnvName = "EVENT_SERVICE_URL"
+	namespaceEnvName       = "NAMESPACE"
+	applicationEnvName     = "APPLICATION"
 )
 
 type TestConfig struct {
-	EventServiceUrl   string
-	Namespace         string
-	RemoteEnvironment string
+	EventServiceUrl string
+	Namespace       string
+	Application     string
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -30,15 +30,15 @@ func ReadConfig() (TestConfig, error) {
 		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", namespaceEnvName))
 	}
 
-	remoteEnvironment, found := os.LookupEnv(remoteEnvironmentEnvName)
+	application, found := os.LookupEnv(applicationEnvName)
 	if !found {
-		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", remoteEnvironmentEnvName))
+		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", applicationEnvName))
 	}
 
 	config := TestConfig{
-		EventServiceUrl:   eventServiceUrl,
-		Namespace:         namespace,
-		RemoteEnvironment: remoteEnvironment,
+		EventServiceUrl: eventServiceUrl,
+		Namespace:       namespace,
+		Application:     application,
 	}
 
 	log.Printf("Read configuration: %+v", config)

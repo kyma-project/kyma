@@ -1,0 +1,18 @@
+knative:
+  ingressgateway:
+    service:
+      type: NodePort
+  gateway:
+    tls:
+      enabled: true
+  domainName: example.com
+
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  test_knative_serving_acceptance:
+    dir: develop/
+    version: 4a2b51ec
+
+test:
+  target: "Test Target"

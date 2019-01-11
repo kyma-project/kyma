@@ -7,14 +7,8 @@ WORKDIR ${BASE_APP_DIR}
 # Copy files
 #
 
-COPY ./dex/ ${BASE_APP_DIR}/dex/
-COPY ./domain/ ${BASE_APP_DIR}/domain/
-COPY ./graphql/ ${BASE_APP_DIR}/graphql/
-COPY ./installer/ ${BASE_APP_DIR}/installer/
-COPY ./k8s/ ${BASE_APP_DIR}/k8s/
-COPY ./waiter/ ${BASE_APP_DIR}/waiter/
+COPY ./internal/ ${BASE_APP_DIR}/internal/
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
-COPY ./upsbroker/ ${BASE_APP_DIR}/upsbroker/
 COPY ./tester.go ${BASE_APP_DIR}/tester.go
 
 #
@@ -22,17 +16,17 @@ COPY ./tester.go ${BASE_APP_DIR}/tester.go
 #
 
 RUN mkdir -p /app
-RUN cd ${BASE_APP_DIR}/domain && \
+RUN cd ${BASE_APP_DIR}/internal/domain && \
     for dir in $(ls -1FA | grep / | tr -d /); do \
     echo "Building test package ${dir}..."; \
-    go test -tags=acceptance ./${dir} -c \
+    go test -tags=acceptance ./${dir} -c || exit 1 \
     ; done
 
 FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
-ENV TESTS_DIR /go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/domain
+ENV TESTS_DIR /go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain
 ENV TEST_SERVICE_CATALOG_DIR /app/tests/servicecatalog
 
 #
