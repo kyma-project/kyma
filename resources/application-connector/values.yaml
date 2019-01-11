@@ -15,13 +15,13 @@ global:
     version: 8639c25a
   application_operator_tests:
     dir: develop/
-    version: acb1e829
+    version: 0c447819
   connector_service:
     dir: develop/
     version: acb1e829
   connector_service_tests:
     dir: develop/
-    version: 32a77c71
+    version: 501c4fe5
   connection_token_handler:
     dir: develop/
     version: acb1e829
@@ -39,7 +39,7 @@ global:
     version: acb1e829
   application_registry_tests:
     dir: develop/
-    version: acb1e829
+    version: 501c4fe5
   application_broker:
     dir: develop/
     version: 8492a486
