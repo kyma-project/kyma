@@ -42,7 +42,7 @@ global:
     version: 4a23580f
   docs:
     dir: develop/
-    version: 6ad85861
+    version: 55889d1c
   namespace_controller:
     dir: develop/
     version: 429bfbcc
