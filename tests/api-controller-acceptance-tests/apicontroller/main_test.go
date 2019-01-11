@@ -22,11 +22,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("Namespace not set.")
 	}
 
-	var err error
-	kubeConfig, err = clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
-	if err != nil {
-		log.Fatalf("Cannot read kubeconfig: %s", err)
-	}
+	kubeConfig = loadKubeConfigOrDie()
 
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
 
@@ -76,4 +72,21 @@ func catchInterrupt() {
 		deleteNamespace()
 		os.Exit(2)
 	}()
+}
+
+func loadKubeConfigOrDie() *rest.Config {
+	if _, err := os.Stat(clientcmd.RecommendedHomeFile); os.IsNotExist(err) {
+		cfg, err := rest.InClusterConfig()
+		if err != nil {
+			log.Fatalf("Cannot create in-cluster config: %v", err)
+		}
+		return cfg
+	}
+
+	var err error
+	kubeConfig, err = clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
+	if err != nil {
+		log.Fatalf("Cannot read kubeconfig: %s", err)
+	}
+	return kubeConfig
 }
