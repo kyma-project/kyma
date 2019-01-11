@@ -9,9 +9,14 @@ INSTALLER_CONFIG=""
 AZURE_BROKER_CONFIG=""
 
 function checkInputParameterValue() {
-    if [ -z "$1" ] || [ "${1:0:2}" == "--" ]; then
-        echo "Invalid parameter value:"
-        echo "${1}"
+    if [ -z "${2}" ]; then
+        echo "Value parameter for ${1} is empty"
+        echo "Make sure parameter value is neither empty nor start with two hyphens"
+        exit 1
+    fi
+    if [ "${2:0:2}" == "--" ]; then
+        echo "Invalid parameter value for ${1}:"
+        echo "${2}"
         echo "Make sure parameter value is neither empty nor start with two hyphens"
         exit 1
     fi
@@ -29,7 +34,7 @@ do
             shift
             ;;
         --cr)
-            checkInputParameterValue "$2"
+            checkInputParameterValue "$1" "$2"
             CR_PATH="$2"
             shift # past argument
             shift # past value
