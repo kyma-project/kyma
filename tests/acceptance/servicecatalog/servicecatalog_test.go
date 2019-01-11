@@ -130,8 +130,9 @@ func fixApplication() *appTypes.Application {
 			Name: "test-acc-app",
 		},
 		Spec: appTypes.ApplicationSpec{
-			Description: "Application used by acceptance test",
-			AccessLabel: "fix-access",
+			Description:      "Application used by acceptance test",
+			AccessLabel:      "fix-access",
+			SkipInstallation: true,
 			Services: []appTypes.Service{
 				{
 					ID:   "id-00000-1234-test",

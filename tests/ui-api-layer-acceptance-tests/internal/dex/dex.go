@@ -12,7 +12,7 @@ import (
 
 const sciEnabledMessage = "SCI is enabled"
 
-func SkipTestIfShould(t *testing.T) {
+func SkipTestIfSCIEnabled(t *testing.T) {
 	if !isSCIEnabled() {
 		return
 	}
@@ -20,7 +20,11 @@ func SkipTestIfShould(t *testing.T) {
 	t.Skip(sciEnabledMessage)
 }
 
-func SkipMainIfShould() {
+func ExitIfSCIEnabled() {
+	if !isSCIEnabled() {
+		return
+	}
+
 	log.Println(sciEnabledMessage)
 	os.Exit(0)
 }

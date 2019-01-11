@@ -59,7 +59,7 @@ RUN echo 'alias kc="kubectl"' >> ~/.bashrc
 # minikube and docker start must be done on starting container to make it work
 ENTRYPOINT /kyma/installation/scripts/docker-start.sh \
     && /kyma/installation/cmd/run.sh --vm-driver none \
-    && /kyma/installation/scripts/is-installed.sh \
+    && /kyma/installation/scripts/is-installed.sh --timeout 30m \
     && /kyma/installation/scripts/watch-pods.sh \
     && (($RUN_TESTS && /kyma/installation/scripts/testing.sh) || $IGNORE_TEST_FAIL) \
     && exec bash

@@ -84,19 +84,19 @@ func CheckK8sChecknothing(t *testing.T, checknothing *istio.Checknothing, name s
 	checkLabels(t, labels, checknothing.Labels)
 }
 
-func CheckK8sApplication(t *testing.T, re *application.Application, name string, expectedServiceData ServiceData) {
-	require.Equal(t, name, re.Name)
+func CheckK8sApplication(t *testing.T, app *application.Application, name string, expectedServiceData ServiceData) {
+	require.Equal(t, name, app.Name)
 
-	reService := findServiceInApp(re.Spec.Services, expectedServiceData.ServiceId)
-	require.NotNil(t, reService)
+	appService := findServiceInApp(app.Spec.Services, expectedServiceData.ServiceId)
+	require.NotNil(t, appService)
 
-	require.Equal(t, expectedServiceData.ServiceId, reService.ID)
-	require.Equal(t, expectedServiceData.DisplayName, reService.DisplayName)
-	require.Equal(t, expectedServiceData.ProviderDisplayName, reService.ProviderDisplayName)
-	require.Equal(t, expectedServiceData.LongDescription, reService.LongDescription)
+	require.Equal(t, expectedServiceData.ServiceId, appService.ID)
+	require.Equal(t, expectedServiceData.DisplayName, appService.DisplayName)
+	require.Equal(t, expectedServiceData.ProviderDisplayName, appService.ProviderDisplayName)
+	require.Equal(t, expectedServiceData.LongDescription, appService.LongDescription)
 
 	if expectedServiceData.HasAPI {
-		apiEntry := findEntryOfType(reService.Entries, "API")
+		apiEntry := findEntryOfType(appService.Entries, "API")
 		require.NotNil(t, apiEntry)
 
 		if apiEntry.Type == "OAuth" {
@@ -109,7 +109,7 @@ func CheckK8sApplication(t *testing.T, re *application.Application, name string,
 	}
 
 	if expectedServiceData.HasEvents {
-		eventsEntry := findEntryOfType(reService.Entries, "Events")
+		eventsEntry := findEntryOfType(appService.Entries, "Events")
 		require.NotNil(t, eventsEntry)
 	}
 }

@@ -3,7 +3,7 @@ global:
     path: eu.gcr.io/kyma-project
   istio_webhook:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2
   istio_kyma_patch:
     dir:
-    version: 0.6.0-rc1
+    version: 0.6.0-rc2

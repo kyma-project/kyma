@@ -74,7 +74,7 @@ data:
 
   security.enabled: "true"
 
-  gateways.istio-ingressgateway.service.externalPublicIp: ""
+  gateways.istio-ingressgateway.loadBalancerIP: ""
   gateways.istio-ingressgateway.type: "NodePort"
 
   pilot.resources.limits.memory: 1024Mi
@@ -95,3 +95,15 @@ metadata:
     component: service-catalog
 data:
   etcd-stateful.etcd.resources.limits.memory: 256Mi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: knative-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: knative
+data:
+  knative.ingressgateway.service.type: NodePort
+  knative.domainName: "kyma.local"

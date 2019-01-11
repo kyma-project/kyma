@@ -10,31 +10,15 @@ type ServiceCatalogRetriever struct {
 }
 
 // ServiceBinding provides a mock function with given fields:
-func (_m *ServiceCatalogRetriever) ServiceBinding() shared.ServiceBindingGetter {
+func (_m *ServiceCatalogRetriever) ServiceBinding() shared.ServiceBindingFinderLister {
 	ret := _m.Called()
 
-	var r0 shared.ServiceBindingGetter
-	if rf, ok := ret.Get(0).(func() shared.ServiceBindingGetter); ok {
+	var r0 shared.ServiceBindingFinderLister
+	if rf, ok := ret.Get(0).(func() shared.ServiceBindingFinderLister); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(shared.ServiceBindingGetter)
-		}
-	}
-
-	return r0
-}
-
-// ServiceBindingUsage provides a mock function with given fields:
-func (_m *ServiceCatalogRetriever) ServiceBindingUsage() shared.ServiceBindingUsageLister {
-	ret := _m.Called()
-
-	var r0 shared.ServiceBindingUsageLister
-	if rf, ok := ret.Get(0).(func() shared.ServiceBindingUsageLister); ok {
-		r0 = rf()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(shared.ServiceBindingUsageLister)
+			r0 = ret.Get(0).(shared.ServiceBindingFinderLister)
 		}
 	}
 

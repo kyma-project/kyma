@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
@@ -229,13 +230,32 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName, appID, ns strin
 		svc.log.Infof("Created EventActivation: [%s], in namespace: [%s]", appID, ns)
 	case apiErrors.IsAlreadyExists(err):
 		// We perform update action to adjust OwnerReference of the EventActivation after the backup restore.
-		_, err := svc.eaClient.EventActivations(ns).Update(ea)
-		if err != nil {
-			return errors.Wrapf(err, "while updating EventActivation with name: %q in namespace: %q", appID, ns)
+		if err = svc.ensureEaUpdate(appID, ns, si); err != nil {
+			return errors.Wrapf(err, "while ensuring update on EventActivation")
 		}
 		svc.log.Infof("Updated EventActivation: [%s], in namespace: [%s]", appID, ns)
 	default:
 		return errors.Wrapf(err, "while creating EventActivation with name: %q in namespace: %q", appID, ns)
+	}
+	return nil
+}
+
+func (svc *ProvisionService) ensureEaUpdate(appID, ns string, si *v1beta1.ServiceInstance) error {
+	ea, err := svc.eaClient.EventActivations(ns).Get(appID, v1.GetOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "while getting EventActivation with name: %q from namespace: %q", appID, ns)
+	}
+	ea.OwnerReferences = []v1.OwnerReference{
+		{
+			APIVersion: serviceCatalogAPIVersion,
+			Kind:       "ServiceInstance",
+			Name:       si.Name,
+			UID:        si.UID,
+		},
+	}
+	_, err = svc.eaClient.EventActivations(ns).Update(ea)
+	if err != nil {
+		return errors.Wrapf(err, "while updating EventActivation with name: %q in namespace: %q", appID, ns)
 	}
 	return nil
 }
