@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 	var err error
 	kubeConfig, err = clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 	if err != nil {
-		log.Fatal("Cannot read kubeconfig")
+		log.Fatalf("Cannot read kubeconfig: %s", err)
 	}
 
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
@@ -44,7 +44,7 @@ func createNamespace(k8sClient kubernetes.Interface) {
 	log.Infof("Creating namespace '%s", namespace)
 	_, err := k8sClient.CoreV1().Namespaces().Create(&v1.Namespace{
 		ObjectMeta: meta_v1.ObjectMeta{
-			Name:        namespace,
+			Name: namespace,
 			Labels: map[string]string{
 				"helm-chart-test": "true",
 				"istio-injection": "enabled",
@@ -71,7 +71,7 @@ func deleteNamespace() {
 func catchInterrupt() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
-	go func(){
+	go func() {
 		<-c
 		deleteNamespace()
 		os.Exit(2)
