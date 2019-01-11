@@ -3,7 +3,7 @@ title: ClusterMicroFrontend
 type: Custom Resource
 ---
 
-The `clustermicrofrontend.ui.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to extend the Kyma Console. It allows to extend the Console for the entire Cluster. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The clustermicrofrontend.ui.kyma-project.io CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to extend the Kyma Console. It allows to extend the Console for the entire Cluster. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```
 kubectl get crd clustermicrofrontends.ui.kyma-project.io -o yaml
