@@ -15,7 +15,7 @@ global:
     version: 8639c25a
   application_operator_tests:
     dir: develop/
-    version: 501c4fe5
+    version: 0c447819
   connector_service:
     dir: develop/
     version: acb1e829
