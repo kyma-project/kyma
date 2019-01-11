@@ -8,9 +8,18 @@ INSTALLER="${RESOURCES_DIR}/installer.yaml"
 INSTALLER_CONFIG=""
 AZURE_BROKER_CONFIG=""
 
+function checkInputParameterValue() {
+    if [ -z "$1" ] || [ "${1:0:2}" == "--" ]; then
+        echo "Invalid parameter value:"
+        echo "${1}"
+        echo "Make sure parameter value is neither empty nor start with two hyphens"
+    fi
+}
+
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
+    
     key="$1"
 
     case ${key} in
@@ -19,6 +28,7 @@ do
             shift
             ;;
         --cr)
+            checkInputParameterValue "$2"
             CR_PATH="$2"
             shift # past argument
             shift # past value

@@ -15,28 +15,41 @@ MEMORY=8192
 
 source $CURRENT_DIR/utils.sh
 
+function checkInputParameterValue() {
+    if [ -z "$1" ] || [ "${1:0:2}" == "--" ]; then
+        echo "Invalid parameter value:"
+        echo "${1}"
+        echo "Make sure parameter value is neither empty nor start with two hyphens"
+    fi
+}
+
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
+
     key="$1"
 
     case ${key} in
         --disk-size)
+            checkInputParameterValue "$2"
             DISK_SIZE=$2
             shift
             shift
             ;;
         --vm-driver)
+            checkInputParameterValue "$2"
             VM_DRIVER="$2"
             shift # past argument
             shift # past value
             ;;
         --memory)
+            checkInputParameterValue "$2"
             MEMORY=$2
             shift
             shift
             ;;
         --domain)
+            checkInputParameterValue "$2"
             MINIKUBE_DOMAIN="$2"
             shift # past argument
             shift # past value
