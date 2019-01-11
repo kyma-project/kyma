@@ -1,18 +1,30 @@
 package application
 
 import (
+	"testing"
+
 	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/mocks"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	hapi_release5 "k8s.io/helm/pkg/proto/hapi/release"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
-	"testing"
 )
 
 const (
 	appName   = "default-app"
 	namespace = "integration"
+)
+
+var (
+	notEmptyListReleaseResponse = &rls.ListReleasesResponse{
+		Count: 1,
+		Releases: []*release.Release{
+			{Name: appName},
+		},
+	}
+
+	emptyListReleaseResponse = &rls.ListReleasesResponse{}
 )
 
 func TestReleaseManager_InstallNewAppChart(t *testing.T) {
@@ -61,17 +73,33 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 	})
 }
 
-func TestReleaseManager_DeleteAppChart(t *testing.T) {
+func TestReleaseManager_DeleteReleaseIfExists(t *testing.T) {
 
 	t.Run("should delete release", func(t *testing.T) {
 		// given
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("DeleteRelease", appName).Return(nil, nil)
+		helmClient.On("ListReleases").Return(notEmptyListReleaseResponse, nil)
 
 		releaseManager := NewReleaseManager(helmClient, "overrides", namespace)
 
 		// when
-		err := releaseManager.DeleteChart(appName)
+		err := releaseManager.DeleteReleaseIfExists(appName)
+
+		// then
+		assert.NoError(t, err)
+		helmClient.AssertExpectations(t)
+	})
+
+	t.Run("should succeed if release does not exists", func(t *testing.T) {
+		// given
+		helmClient := &helmmocks.HelmClient{}
+		helmClient.On("ListReleases").Return(emptyListReleaseResponse, nil)
+
+		releaseManager := NewReleaseManager(helmClient, "overrides", namespace)
+
+		// when
+		err := releaseManager.DeleteReleaseIfExists(appName)
 
 		// then
 		assert.NoError(t, err)
@@ -82,11 +110,27 @@ func TestReleaseManager_DeleteAppChart(t *testing.T) {
 		// given
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("DeleteRelease", appName).Return(nil, errors.New("Error"))
+		helmClient.On("ListReleases").Return(notEmptyListReleaseResponse, nil)
 
 		releaseManager := NewReleaseManager(helmClient, "overrides", namespace)
 
 		// when
-		err := releaseManager.DeleteChart(appName)
+		err := releaseManager.DeleteReleaseIfExists(appName)
+
+		// then
+		assert.Error(t, err)
+		helmClient.AssertExpectations(t)
+	})
+
+	t.Run("should return error when failed to check existence", func(t *testing.T) {
+		// given
+		helmClient := &helmmocks.HelmClient{}
+		helmClient.On("ListReleases").Return(nil, errors.New("error"))
+
+		releaseManager := NewReleaseManager(helmClient, "overrides", namespace)
+
+		// when
+		err := releaseManager.DeleteReleaseIfExists(appName)
 
 		// then
 		assert.Error(t, err)
@@ -98,15 +142,8 @@ func TestReleaseManager_CheckReleaseExistence(t *testing.T) {
 
 	t.Run("should return true when release exists", func(t *testing.T) {
 		// given
-		listReleaseResponse := &rls.ListReleasesResponse{
-			Count: 1,
-			Releases: []*release.Release{
-				{Name: appName},
-			},
-		}
-
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("ListReleases").Return(listReleaseResponse, nil)
+		helmClient.On("ListReleases").Return(notEmptyListReleaseResponse, nil)
 
 		releaseManager := NewReleaseManager(helmClient, "", namespace)
 
@@ -121,10 +158,8 @@ func TestReleaseManager_CheckReleaseExistence(t *testing.T) {
 
 	t.Run("should return false when release does not exist", func(t *testing.T) {
 		// given
-		listReleaseResponse := &rls.ListReleasesResponse{}
-
 		helmClient := &helmmocks.HelmClient{}
-		helmClient.On("ListReleases").Return(listReleaseResponse, nil)
+		helmClient.On("ListReleases").Return(emptyListReleaseResponse, nil)
 
 		releaseManager := NewReleaseManager(helmClient, "", namespace)
 
