@@ -76,7 +76,10 @@ affinity: {}
 
 global:
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: docker.io/hbalik
   test_logging:
     dir: develop/
     version: fce4f51f
+  istio:
+    gateway:
+      name: kyma-gateway
