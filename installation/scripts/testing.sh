@@ -241,7 +241,7 @@ checkAndCleanupTest knative-serving
 knativeTestErr=$?
 
 echo "- Testing Application Connector"
-helm test application-connector
+helm test application-connector --timeout 600
 acTestErr=$?
 
 checkAndCleanupTest kyma-integration
