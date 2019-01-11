@@ -34,6 +34,7 @@ spec:
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.containerRegistry.path }}/develop/stability-checker:{{ .Values.image.tag }}"
+        imagePullPolicy: "{{ .Values.image.pullPolicy }}"
 
         ports:
         - containerPort: {{ .Values.service.internalPort }}
@@ -43,6 +44,8 @@ spec:
             value: "{{ .Values.service.internalPort }}"
           - name: APP_WORKING_NAMESPACE
             value: "{{ .Release.Namespace }}"
+          - name: APP_CLUSTER_NAME
+            value: "{{ .Values.clusterName }}"
           - name: APP_TEST_CONFIG_MAP_NAME
             value: "{{ .Chart.Name }}-test-results"
           - name: APP_PATH_TO_TESTING_SCRIPT
