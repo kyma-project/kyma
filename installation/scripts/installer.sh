@@ -8,19 +8,7 @@ INSTALLER="${RESOURCES_DIR}/installer.yaml"
 INSTALLER_CONFIG=""
 AZURE_BROKER_CONFIG=""
 
-function checkInputParameterValue() {
-    if [ -z "${2}" ]; then
-        echo "Value parameter for ${1} is empty"
-        echo "Make sure parameter value is neither empty nor start with two hyphens"
-        exit 1
-    fi
-    if [ "${2:0:2}" == "--" ]; then
-        echo "Invalid parameter value for ${1}:"
-        echo "${2}"
-        echo "Make sure parameter value is neither empty nor start with two hyphens"
-        exit 1
-    fi
-}
+source $CURRENT_DIR/utils.sh
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
