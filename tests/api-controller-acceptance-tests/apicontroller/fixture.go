@@ -16,7 +16,6 @@ const (
 	namespaceEnv                                   = "NAMESPACE"
 	domainNameEnv                                  = "DOMAIN_NAME"
 	testIDLength                                   = 8
-	maxRetries                                     = 10
 	apiSecurityDisabled                APISecurity = false
 	apiSecurityEnabled                 APISecurity = true
 )

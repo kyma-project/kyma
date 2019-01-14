@@ -4,8 +4,8 @@
 [[projects]]
   name = "github.com/avast/retry-go"
   packages = ["."]
-  revision = "7e261362c3c12cecc863202c96253ad29daa34f2"
-  version = "2.0.0"
+  revision = "48dfe711bb728e1c3c6a82ae93b07c3ab0750d4a"
+  version = "v2.1.0"
 
 [[projects]]
   name = "github.com/ghodss/yaml"
@@ -371,6 +371,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c1c9bd5481256a5b7672b9f8b3f5d3af2a95187195d4d299d3f49c305b007900"
+  inputs-digest = "e960a90d636b8470127fc262ca6acc4bc2ad268d92777c571518a20543ce14b9"
   solver-name = "gps-cdcl"
   solver-version = 1

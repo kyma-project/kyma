@@ -186,6 +186,8 @@ func (ctx integrationTestContext) validateAPINotSecured(httpClient *http.Client,
 }
 
 func (integrationTestContext) withRetries(httpCall func() (*http.Response, error), shouldRetry func(*http.Response) bool) (*http.Response, error) {
+	var retries uint = 120
+	delay := 1 * time.Second
 
 	var response *http.Response
 
@@ -201,10 +203,11 @@ func (integrationTestContext) withRetries(httpCall func() (*http.Response, error
 		}
 		return nil
 	},
-		retry.Attempts(maxRetries),
-		retry.Delay(1 * time.Second),
+		retry.Attempts(retries),
+		retry.Delay(delay),
+		retry.DelayType(retry.FixedDelay),
 		retry.OnRetry(func(retryNo uint, err error) {
-			log.Errorf("[%d / %d] Status: %s", retryNo, maxRetries, err)
+			log.Errorf("[%d / %d] Status: %s", retryNo, retries, err)
 		}),
 	)
 
