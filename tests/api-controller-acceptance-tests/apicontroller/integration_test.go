@@ -202,6 +202,7 @@ func (integrationTestContext) withRetries(httpCall func() (*http.Response, error
 		return nil
 	},
 		retry.Attempts(maxRetries),
+		retry.Delay(1 * time.Second),
 		retry.OnRetry(func(retryNo uint, err error) {
 			log.Errorf("[%d / %d] Status: %s", retryNo, maxRetries, err)
 		}),
