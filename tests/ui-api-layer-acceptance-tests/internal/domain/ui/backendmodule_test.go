@@ -3,6 +3,7 @@
 package ui
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -51,8 +52,7 @@ func TestBackendModule(t *testing.T) {
 				return false, err
 			}
 
-			assertBackendModules(t, moduleNames, resp.BackendModules)
-			return true, nil
+			return checkBackendModulesExist(moduleNames, resp.BackendModules)
 
 		}, readyTimeout)
 		assert.NoError(t, err)
@@ -105,8 +105,22 @@ func queryBackendModules(c *graphql.Client) (backendModuleQueryResponse, error) 
 	return res, err
 }
 
-func assertBackendModules(t *testing.T, expectedNames []string, actual []BackendModule) {
-	for _, v := range expectedNames {
-		assert.Contains(t, actual, BackendModule{Name: v})
+func checkBackendModulesExist(expectedNames []string, modules []BackendModule) (bool, error) {
+	for _, name := range expectedNames {
+		if !contains(modules, BackendModule{Name: name}) {
+			return false, fmt.Errorf("BackendModule %s doesn't exist", name)
+		}
 	}
+
+	return true, nil
+}
+
+func contains(modules []BackendModule, module BackendModule) bool {
+	for _, v := range modules {
+		if v.Name == module.Name {
+			return true
+		}
+	}
+
+	return false
 }
