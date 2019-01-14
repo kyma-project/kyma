@@ -3,7 +3,7 @@
 set -o errexit
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
+SCRIPTS_DIR="${CURRENT_DIR}/../scripts"
 DOMAIN="kyma.local"
 
 VM_DRIVER="virtualbox"
@@ -11,7 +11,7 @@ if [ `uname -s` = "Darwin" ]; then
     VM_DRIVER="hyperkit"
 fi
 
-source $CURRENT_DIR/../scripts/utils.sh
+source $SCRIPTS_DIR/utils.sh
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -57,18 +57,18 @@ if [ -n "$KNATIVE" ]; then
 fi
 
 if [[ ! ${SKIP_MINIKUBE_START} ]]; then
-    bash ${CURRENT_DIR}/../scripts/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}" ${MINIKUBE_EXTRA_ARGS}
+    bash ${SCRIPTS_DIR}/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}" ${MINIKUBE_EXTRA_ARGS}
 fi
 
-bash ${CURRENT_DIR}/../scripts/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
+bash ${SCRIPTS_DIR}/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
 
 if [ -z "$CR_PATH" ]; then
 
     TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
     CR_PATH="${TMPDIR}/installer-cr-local.yaml"
-    bash ${CURRENT_DIR}/../scripts/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}"
+    bash ${SCRIPTS_DIR}/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}"
 
 fi
 
-bash ${CURRENT_DIR}/../scripts/installer.sh --local --cr "${CR_PATH}" "${KNATIVE}"
+bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" "${KNATIVE}"
 rm -rf $TMPDIR
