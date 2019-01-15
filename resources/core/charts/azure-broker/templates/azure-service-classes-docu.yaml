@@ -11,6 +11,8 @@ spec:
   template:
     metadata:
       name: {{ template "fullname" . }}-docs
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         inject: docs-upload-config
     spec:

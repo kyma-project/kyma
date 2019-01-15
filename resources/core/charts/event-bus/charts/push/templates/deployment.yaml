@@ -64,7 +64,7 @@ spec:
             - --trace_operation_name={{ .Values.trace.operationName }}
             - --check_events_activation={{ .Values.check.eventsActivation }}
           ports:
-            - name: http 
+            - name: http
               containerPort: {{ .Values.port }}
           livenessProbe:
             httpGet:

@@ -58,6 +58,8 @@ spec:
   template:
     metadata:
       name: istio-grafana-post-install
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: istio-grafana
         release: {{ .Release.Name }}

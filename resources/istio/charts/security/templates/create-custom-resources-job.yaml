@@ -69,6 +69,8 @@ spec:
   template:
     metadata:
       name: istio-security-post-install
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: istio-security
         release: {{ .Release.Name }}
