@@ -25,7 +25,7 @@ The Installer constructs a single override by inspecting the ConfigMap or Secret
 Installer merges all overrides recursively into a single YAML stream and passes it to Helm during the Kyma installation/upgrade operation.
 
 
-## Common vs component overides
+## Common vs component overrides
 
 The Installer looks for available overrides each time a component installation or update operation is due.
 Overrides for the component are composed from two sets: **common** overrides and **component-specific** overrides.
