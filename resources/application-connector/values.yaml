@@ -12,34 +12,34 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: 0.6.0
+    version: 0.6.1
   application_operator_tests:
     dir:
-    version: 0.6.0
+    version: 0.6.1
   connector_service:
     dir:
-    version: 0.6.0
+    version: 0.6.1
   connector_service_tests:
     dir:
-    version: 0.6.0
+    version: 0.6.1
   connection_token_handler:
     dir:
-    version: 0.6.0
+    version: 0.6.1
   event_service:
     dir:
-    version: 0.6.0
+    version: 0.6.1
   application_proxy:
     dir:
-    version: 0.6.0
+    version: 0.6.1
   gateway_tests:
     dir:
-    version: 0.6.0
+    version: 0.6.1
   application_registry:
     dir:
-    version: 0.6.0
+    version: 0.6.1
   application_registry_tests:
     dir:
-    version: 0.6.0
+    version: 0.6.1
   application_broker:
     dir:
-    version: 0.6.0
+    version: 0.6.1
