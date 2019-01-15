@@ -58,7 +58,7 @@ The update procedure consists of three main steps:
   kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}
   ```
 
-## Update Kyma Installer on a cluster deployment
+## Update the Kyma Installer on a cluster deployment
 
 - Build a new image for the Kyma Installer: 
   ```
@@ -67,14 +67,18 @@ The update procedure consists of three main steps:
 
 - Push the image to your Docker registry.
 
-- Redeploy the Kyma Installer Pod using the new image. Run `kubectl edit deployment kyma-installer -n kyma-installer`  to edit the Deployment configuration. Change the `image` and `imagePullPolicy` attributes in this section:  
-  ```  
-       spec:
-         containers:
-         - image: <your_image_name>:<your_tag>
-           imagePullPolicy: Always
-  ```  
-> **NOTE:** If the desired image name and `imagePullPolicy` is already set in the deployment configuration, restart  the Pod by running `kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}`
+- Redeploy the Kyma Installer Pod using the new image. Run this command to edit the Deployment configuration:
+  ```
+  kubectl edit deployment kyma-installer -n kyma-installer
+  ```
+  Change the `image` and `imagePullPolicy` attributes in this section:  
+    ```  
+         spec:
+           containers:
+           - image: <your_image_name>:<your_tag>
+             imagePullPolicy: Always
+    ```  
+  > **NOTE:** If the desired image name and `imagePullPolicy` is already set in the deployment configuration, restart  the Pod by running `kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}`
 
 ## Trigger the update process
 
