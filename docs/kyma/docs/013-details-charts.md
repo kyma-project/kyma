@@ -18,6 +18,7 @@ The **ADR 003: Init Containers for dependency management** document declares the
 [Readiness Probes](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes) ensure that the essential containers are ready to handle requests before you expose them. At a minimum, probes are defined for every container accessible from outside of the Pod. It is recommended to pair the Init Containers with readiness probes to provide a basic dependency management solution.
 
 ## Examples
+
 Here are some examples:
 
 1. Generic
@@ -68,7 +69,6 @@ spec:
 ```
 
 2. Kyma
-
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -137,7 +137,7 @@ The Tiller server performs the chart installation process. This is the order of 
 
 ## Notes
 
-All notes are based on Helm v2.10.0 implementation and are subject to change in feature releases.
+All notes are based on Helm v2.10.0 implementation and are subject to change in future releases.
 
 * Regardless of how complex a chart is, and regardless of the number of sub-charts it references or consists of, it's always evaluated as one. This means that each Helm release is compiled into a single Kubernetes manifest file when applied on API server.
 
