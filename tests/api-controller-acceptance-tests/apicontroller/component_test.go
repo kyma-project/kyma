@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -17,11 +16,8 @@ import (
 	istioAuth "github.com/kyma-project/kyma/components/api-controller/pkg/clients/authentication.istio.io/clientset/versioned"
 	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	istioNet "github.com/kyma-project/kyma/components/api-controller/pkg/clients/networking.istio.io/clientset/versioned"
-	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 type componentTestContext struct{}
@@ -33,14 +29,7 @@ func TestComponentSpec(t *testing.T) {
 		t.Fatal("Domain name not set.")
 	}
 
-	namespace := os.Getenv(namespaceEnv)
-	if namespace == "" {
-		t.Fatal("Namespace not set.")
-	}
-
 	ctx := componentTestContext{}
-
-	kubeConfig := ctx.defaultConfigOrExit()
 
 	kymaClient := kyma.NewForConfigOrDie(kubeConfig)
 	istioNetClient := istioNet.NewForConfigOrDie(kubeConfig)
@@ -351,22 +340,6 @@ func (componentTestContext) awaitAPIChanged(iface *kyma.Clientset, api *kymaApi.
 		return nil
 	}, retry.Attempts(10))
 	return result, err
-}
-
-func (componentTestContext) defaultConfigOrExit() *rest.Config {
-
-	kubeConfigLocation := filepath.Join(os.Getenv("HOME"), ".kube", "config")
-
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", kubeConfigLocation)
-	if err != nil {
-		log.Debugf("unable to load local kube config. Root cause: %v", err)
-		if config, err2 := rest.InClusterConfig(); err2 != nil {
-			log.Fatalf("unable to load kube config. Root cause: %v", err2)
-		} else {
-			kubeConfig = config
-		}
-	}
-	return kubeConfig
 }
 
 func (componentTestContext) generateTestID(n int) string {
