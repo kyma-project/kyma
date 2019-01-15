@@ -1,4 +1,4 @@
-package knutil
+package util
 
 import (
 	"log"
@@ -58,7 +58,10 @@ func Test_CreateChannel(t *testing.T) {
 		return true, testChannel, nil
 	})
 
-	ch, err := createChannel(client.EventingV1alpha1(), provisioner, channelName, testNS, 10 * time.Second)
+	k := &KnativeLib {
+		evClient: client.EventingV1alpha1(),
+	}
+	ch, err := k.CreateChannel(provisioner, channelName, testNS, 10 * time.Second)
 	assert.Nil(t, err)
 	log.Printf("Channel created: %v", ch)
 
@@ -78,7 +81,10 @@ func Test_CreateChannelTimeout(t *testing.T) {
 		return true, testChannel, nil
 	})
 
-	_, err := createChannel(client.EventingV1alpha1(), provisioner, channelName, testNS, 1 * time.Second)
+	k := &KnativeLib {
+		evClient: client.EventingV1alpha1(),
+	}
+	_, err := k.CreateChannel(provisioner, channelName, testNS, 1 * time.Second)
 	assert.NotNil(t, err)
 	log.Printf("Test_CreateChannelTimeout: %v", err)
 }

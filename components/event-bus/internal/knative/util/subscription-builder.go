@@ -1,4 +1,4 @@
-package knutil
+package util
 
 import (
 	eventingv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
