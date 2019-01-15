@@ -26,8 +26,8 @@ func TestMain(m *testing.M) {
 
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
 
-	createNamespace(k8sClient)
 	catchInterrupt()
+	createNamespace(k8sClient)
 
 	result := m.Run()
 
