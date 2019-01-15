@@ -31,7 +31,7 @@ The update procedure consists of three main steps:
 
 ## Prepare the update
 
-- If you update an existing component, make all required changes to the Helm charts of the component located in the in the [`resource`](https://github.com/kyma-project/kyma/tree/master/resources) directory.
+- If you update an existing component, make all required changes to the Helm charts of the component located in the [`resource`](https://github.com/kyma-project/kyma/tree/master/resources) directory.
 
 
 - If you add a new component to your Kyma deployment, add a top-level Helm chart for that component. Additionally, run this command to edit the Installation custom resource and add the new component to the installed components list:
