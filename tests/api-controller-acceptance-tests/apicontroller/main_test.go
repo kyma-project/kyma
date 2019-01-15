@@ -23,20 +23,12 @@ func TestMain(m *testing.M) {
 	}
 
 	kubeConfig = loadKubeConfigOrDie()
-
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
 
-	catchInterrupt()
-	createNamespace(k8sClient)
-
-	result := m.Run()
-
-	deleteNamespace()
-
-	os.Exit(result)
+	os.Exit(testWithNamespace(m))
 }
 
-func createNamespace(k8sClient kubernetes.Interface) {
+func createNamespace() {
 	log.Infof("Creating namespace '%s", namespace)
 	_, err := k8sClient.CoreV1().Namespaces().Create(&v1.Namespace{
 		ObjectMeta: meta_v1.ObjectMeta{
@@ -89,4 +81,12 @@ func loadKubeConfigOrDie() *rest.Config {
 		log.Fatalf("Cannot read kubeconfig: %s", err)
 	}
 	return kubeConfig
+}
+
+func testWithNamespace(m *testing.M) int {
+	catchInterrupt()
+	createNamespace()
+	defer deleteNamespace()
+
+	return m.Run()
 }
