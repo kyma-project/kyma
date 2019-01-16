@@ -39,10 +39,11 @@ func TestPluggableResolver(t *testing.T) {
 
 func checkExportedFields(t *testing.T, resolver *apicontroller.PluggableResolver, enabled bool) {
 	assert.NotNil(t, resolver.Resolver)
+	namespace := "default"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
-	val, err := resolver.Resolver.APIsQuery(ctx, "default", nil, nil)
+	val, err := resolver.Resolver.APIsQuery(ctx, &namespace, &namespace, nil, nil)
 	if enabled {
 		require.NoError(t, err)
 	} else {
