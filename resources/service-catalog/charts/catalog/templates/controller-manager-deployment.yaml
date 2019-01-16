@@ -22,6 +22,7 @@ spec:
   template:
     metadata:
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/apiregistration.yaml") . | sha256sum }}
         prometheus.io/scrape: "{{ .Values.controllerManager.enablePrometheusScrape }}"
       {{ if .Values.controllerManager.annotations }}
 {{ toYaml .Values.controllerManager.annotations | indent 8 }}
