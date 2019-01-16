@@ -279,10 +279,7 @@ func apiDefined(serviceDefinition *model.ServiceDefinition) bool {
 }
 
 func overrideLabels(application string, labels map[string]string) map[string]string {
-	_, found := labels[connectedApp]
-	if found {
-		labels[connectedApp] = application
-	}
+	labels[connectedApp] = application
 
 	return labels
 }

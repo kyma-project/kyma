@@ -303,7 +303,7 @@ type ComplexityRoot struct {
 		UsageKinds            func(childComplexity int, first *int, offset *int) int
 		UsageKindResources    func(childComplexity int, usageKind string, environment string) int
 		BindableResources     func(childComplexity int, environment string) int
-		Apis                  func(childComplexity int, environment string, serviceName *string, hostname *string) int
+		Apis                  func(childComplexity int, environment *string, namespace *string, serviceName *string, hostname *string) int
 		Application           func(childComplexity int, name string) int
 		Applications          func(childComplexity int, environment *string, first *int, offset *int) int
 		ConnectorService      func(childComplexity int, application string) int
@@ -590,7 +590,7 @@ type QueryResolver interface {
 	UsageKinds(ctx context.Context, first *int, offset *int) ([]UsageKind, error)
 	UsageKindResources(ctx context.Context, usageKind string, environment string) ([]UsageKindResource, error)
 	BindableResources(ctx context.Context, environment string) ([]BindableResourcesOutputItem, error)
-	Apis(ctx context.Context, environment string, serviceName *string, hostname *string) ([]API, error)
+	Apis(ctx context.Context, environment *string, namespace *string, serviceName *string, hostname *string) ([]API, error)
 	Application(ctx context.Context, name string) (*Application, error)
 	Applications(ctx context.Context, environment *string, first *int, offset *int) ([]Application, error)
 	ConnectorService(ctx context.Context, application string) (ConnectorService, error)
@@ -1430,17 +1430,22 @@ func field_Query_bindableResources_args(rawArgs map[string]interface{}) (map[str
 
 func field_Query_apis_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["environment"]; ok {
 		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg0 = &ptr1
+		}
+
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["environment"] = arg0
 	var arg1 *string
-	if tmp, ok := rawArgs["serviceName"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		var ptr1 string
 		if tmp != nil {
@@ -1452,9 +1457,9 @@ func field_Query_apis_args(rawArgs map[string]interface{}) (map[string]interface
 			return nil, err
 		}
 	}
-	args["serviceName"] = arg1
+	args["namespace"] = arg1
 	var arg2 *string
-	if tmp, ok := rawArgs["hostname"]; ok {
+	if tmp, ok := rawArgs["serviceName"]; ok {
 		var err error
 		var ptr1 string
 		if tmp != nil {
@@ -1466,7 +1471,21 @@ func field_Query_apis_args(rawArgs map[string]interface{}) (map[string]interface
 			return nil, err
 		}
 	}
-	args["hostname"] = arg2
+	args["serviceName"] = arg2
+	var arg3 *string
+	if tmp, ok := rawArgs["hostname"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg3 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hostname"] = arg3
 	return args, nil
 
 }
@@ -3132,7 +3151,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Apis(childComplexity, args["environment"].(string), args["serviceName"].(*string), args["hostname"].(*string)), true
+		return e.complexity.Query.Apis(childComplexity, args["environment"].(*string), args["namespace"].(*string), args["serviceName"].(*string), args["hostname"].(*string)), true
 
 	case "Query.application":
 		if e.complexity.Query.Application == nil {
@@ -10968,7 +10987,7 @@ func (ec *executionContext) _Query_apis(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Apis(rctx, args["environment"].(string), args["serviceName"].(*string), args["hostname"].(*string))
+		return ec.resolvers.Query().Apis(rctx, args["environment"].(*string), args["namespace"].(*string), args["serviceName"].(*string), args["hostname"].(*string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -19257,7 +19276,7 @@ type Query {
     # The query returns all instance of the resources which could be bound (proper UsageKind exists).
     bindableResources(environment: String!): [BindableResourcesOutputItem!]!
 
-    apis(environment: String!, serviceName: String, hostname: String): [API!]!
+    apis(environment: String, namespace: String, serviceName: String, hostname: String): [API!]!
 
     application(name: String!): Application
     applications(environment: String, first: Int, offset: Int): [Application!]!
