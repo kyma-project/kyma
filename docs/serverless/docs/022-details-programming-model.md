@@ -1,5 +1,5 @@
 ---
-title: The Node.js Programming Model
+title: The Node.js Runtime
 type: Details
 ---
 
