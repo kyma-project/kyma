@@ -1,7 +1,6 @@
 package k8s
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -143,153 +142,6 @@ func TestPodConverter_ToGQLs(t *testing.T) {
 		assert.Len(t, result, 1)
 		assert.Equal(t, expectedName, result[0].Name)
 	})
-}
-
-func TestPodConverter_ContainerStatusesToGQLContainerStates(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		converter := podConverter{}
-		strings := []string{
-			"WaitingReason",
-			"WaitingMessage",
-			"TerminatedReason",
-			"TerminatedMessage",
-		}
-		in := []v1.ContainerStatus{
-			fixContainerStatus("Waiting", 0, &v1.ContainerState{
-				Waiting: &v1.ContainerStateWaiting{
-					Reason:  strings[0],
-					Message: strings[1],
-				},
-			}),
-			fixContainerStatus("Running", 0, &v1.ContainerState{
-				Running: &v1.ContainerStateRunning{
-					StartedAt: metav1.Time{},
-				},
-			}),
-			fixContainerStatus("Terminated", 0, &v1.ContainerState{
-				Terminated: &v1.ContainerStateTerminated{
-					ExitCode:    111,
-					Signal:      222,
-					Reason:      strings[2],
-					Message:     strings[3],
-					StartedAt:   metav1.Time{},
-					FinishedAt:  metav1.Time{},
-					ContainerID: "",
-				},
-			}),
-			fixContainerStatus("EmptyState", 0, &v1.ContainerState{}),
-		}
-		expected := []gqlschema.ContainerState{
-			{
-				State:   gqlschema.ContainerStateTypeWaiting,
-				Reason:  &strings[0],
-				Message: &strings[1],
-			},
-			{
-				State:   gqlschema.ContainerStateTypeRunning,
-				Reason:  nil,
-				Message: nil,
-			},
-			{
-				State:   gqlschema.ContainerStateTypeTerminated,
-				Reason:  &strings[2],
-				Message: &strings[3],
-			},
-			{
-				State:   gqlschema.ContainerStateTypeWaiting,
-				Reason:  nil,
-				Message: nil,
-			},
-		}
-
-		result := converter.containerStatusesToGQLContainerStates(in)
-
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("EmptyPassed", func(t *testing.T) {
-		converter := podConverter{}
-		in := []v1.ContainerStatus{}
-		expected := []gqlschema.ContainerState{}
-
-		result := converter.containerStatusesToGQLContainerStates(in)
-
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("NilPassed", func(t *testing.T) {
-		converter := podConverter{}
-		var in []v1.ContainerStatus = nil
-		expected := []gqlschema.ContainerState{}
-
-		result := converter.containerStatusesToGQLContainerStates(in)
-
-		assert.Equal(t, expected, result)
-	})
-}
-
-func TestPodConverter_GetTerminatedContainerState(t *testing.T) {
-	t.Run("Reason", func(t *testing.T) {
-		converter := podConverter{}
-		reason := "exampleReason"
-		message := "exampleMessage"
-		in := v1.ContainerStateTerminated{
-			ExitCode: 111,
-			Signal:   222,
-			Reason:   reason,
-			Message:  message,
-		}
-		expected := fixGQLContainerState(gqlschema.ContainerStateTypeTerminated, reason, message)
-
-		result := converter.getTerminatedContainerState(&in)
-
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("Signal", func(t *testing.T) {
-		converter := podConverter{}
-		signal := int32(123)
-		message := "exampleMessage"
-		in := v1.ContainerStateTerminated{
-			ExitCode: 111,
-			Signal:   signal,
-			Message:  message,
-		}
-		expectedReason := fmt.Sprintf("Signal: %d", signal)
-		expected := fixGQLContainerState(gqlschema.ContainerStateTypeTerminated, expectedReason, message)
-
-		result := converter.getTerminatedContainerState(&in)
-
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("ExitCode", func(t *testing.T) {
-		converter := podConverter{}
-		exitCode := int32(123)
-		message := "exampleMessage"
-		in := v1.ContainerStateTerminated{
-			ExitCode: exitCode,
-			Message:  message,
-		}
-		expectedReason := fmt.Sprintf("Exit code: %d", exitCode)
-		expected := fixGQLContainerState(gqlschema.ContainerStateTypeTerminated, expectedReason, message)
-
-		result := converter.getTerminatedContainerState(&in)
-
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("Nil", func(t *testing.T) {
-		converter := podConverter{}
-		expected := gqlschema.ContainerState{
-			State: gqlschema.ContainerStateTypeTerminated,
-		}
-
-		result := converter.getTerminatedContainerState(nil)
-
-		assert.Equal(t, expected, result)
-	})
-
 }
 
 func TestPodConverter_PodToGQLJSON(t *testing.T) {
@@ -513,7 +365,7 @@ func fixContainerStatus(name string, restartCount int, state *v1.ContainerState)
 func fixGQLContainerState(state gqlschema.ContainerStateType, reason string, message string) gqlschema.ContainerState {
 	return gqlschema.ContainerState{
 		State:   state,
-		Reason:  &reason,
-		Message: &message,
+		Reason:  reason,
+		Message: message,
 	}
 }

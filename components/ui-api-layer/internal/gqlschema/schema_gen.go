@@ -7253,8 +7253,14 @@ func (ec *executionContext) _ContainerState(ctx context.Context, sel ast.Selecti
 			}
 		case "reason":
 			out.Values[i] = ec._ContainerState_reason(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "message":
 			out.Values[i] = ec._ContainerState_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -7309,16 +7315,15 @@ func (ec *executionContext) _ContainerState_reason(ctx context.Context, field gr
 		return obj.Reason, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
@@ -7337,16 +7342,15 @@ func (ec *executionContext) _ContainerState_message(ctx context.Context, field g
 		return obj.Message, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*string)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
+	return graphql.MarshalString(res)
 }
 
 var createServiceBindingOutputImplementors = []string{"CreateServiceBindingOutput"}
@@ -19858,8 +19862,8 @@ enum PodStatusType {
 
 type ContainerState {
     state: ContainerStateType!
-    reason: String
-    message: String
+    reason: String!
+    message: String!
 }
 
 enum ContainerStateType {

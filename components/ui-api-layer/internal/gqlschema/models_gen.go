@@ -97,8 +97,8 @@ type Container struct {
 
 type ContainerState struct {
 	State   ContainerStateType `json:"state"`
-	Reason  *string            `json:"reason"`
-	Message *string            `json:"message"`
+	Reason  string             `json:"reason"`
+	Message string             `json:"message"`
 }
 
 type CreateServiceBindingOutput struct {

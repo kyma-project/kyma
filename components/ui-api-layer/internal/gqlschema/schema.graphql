@@ -396,8 +396,8 @@ enum PodStatusType {
 
 type ContainerState {
     state: ContainerStateType!
-    reason: String
-    message: String
+    reason: String!
+    message: String!
 }
 
 enum ContainerStateType {

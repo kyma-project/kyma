@@ -2,24 +2,30 @@ package k8s
 
 import (
 	"encoding/json"
-	"fmt"
+
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
+	"github.com/pkg/errors"
+
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/status"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	v1 "k8s.io/api/core/v1"
 )
 
-type podConverter struct{}
+type podConverter struct {
+	extractor status.PodExtractor
+}
 
 func (c *podConverter) ToGQL(in *v1.Pod) (*gqlschema.Pod, error) {
 	if in == nil {
 		return nil, nil
 	}
 
-	containerStates := c.containerStatusesToGQLContainerStates(in.Status.ContainerStatuses)
+	containerStates := c.extractor.ContainerStatusesToGQLContainerStates(in.Status.ContainerStatuses)
 
 	gqlJSON, err := c.podToGQLJSON(in)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "while converting %s `%s` to it's json representation", pretty.Pod, in.Name)
 	}
 
 	return &gqlschema.Pod{
@@ -50,90 +56,6 @@ func (c *podConverter) ToGQLs(in []*v1.Pod) ([]gqlschema.Pod, error) {
 	return result, nil
 }
 
-func (c *podConverter) containerStatusesToGQLContainerStates(in []v1.ContainerStatus) []gqlschema.ContainerState {
-	containerStates := []gqlschema.ContainerState{}
-
-	for _, containerStatus := range in {
-		if containerStatus.State.Waiting != nil {
-			containerStates = append(containerStates, c.getWaitingContainerState(containerStatus.State.Waiting))
-		} else if containerStatus.State.Terminated != nil {
-			containerStates = append(containerStates, c.getTerminatedContainerState(containerStatus.State.Terminated))
-		} else if containerStatus.State.Running != nil {
-			containerStates = append(containerStates, c.getRunningContainerState())
-		} else {
-			containerStates = append(containerStates, c.getDefaultContainerState())
-		}
-	}
-
-	return containerStates
-}
-
-func (c *podConverter) getWaitingContainerState(in *v1.ContainerStateWaiting) gqlschema.ContainerState {
-	if in == nil {
-		return gqlschema.ContainerState{
-			State: gqlschema.ContainerStateTypeWaiting,
-		}
-	}
-
-	var reason, message *string
-	if in.Reason != "" {
-		tmp := in.Reason
-		reason = &tmp
-	}
-	if in.Message != "" {
-		tmp := in.Message
-		message = &tmp
-	}
-
-	return gqlschema.ContainerState{
-		State:   gqlschema.ContainerStateTypeWaiting,
-		Reason:  reason,
-		Message: message,
-	}
-}
-
-func (c *podConverter) getRunningContainerState() gqlschema.ContainerState {
-	return gqlschema.ContainerState{
-		State:   gqlschema.ContainerStateTypeRunning,
-		Reason:  nil,
-		Message: nil,
-	}
-}
-
-func (c *podConverter) getTerminatedContainerState(in *v1.ContainerStateTerminated) gqlschema.ContainerState {
-	if in == nil {
-		return gqlschema.ContainerState{
-			State: gqlschema.ContainerStateTypeTerminated,
-		}
-	}
-
-	var reason, message *string
-	if in.Reason != "" {
-		tmp := in.Reason
-		reason = &tmp
-	} else if in.Signal != 0 {
-		tmp := fmt.Sprintf("Signal: %d", in.Signal)
-		reason = &tmp
-	} else {
-		tmp := fmt.Sprintf("Exit code: %d", in.ExitCode)
-		reason = &tmp
-	}
-	if in.Message != "" {
-		tmp := in.Message
-		message = &tmp
-	}
-
-	return gqlschema.ContainerState{
-		State:   gqlschema.ContainerStateTypeTerminated,
-		Reason:  reason,
-		Message: message,
-	}
-}
-
-func (c *podConverter) getDefaultContainerState() gqlschema.ContainerState {
-	return c.getWaitingContainerState(nil)
-}
-
 func (c *podConverter) podToGQLJSON(in *v1.Pod) (gqlschema.JSON, error) {
 	if in == nil {
 		return nil, nil
@@ -141,19 +63,19 @@ func (c *podConverter) podToGQLJSON(in *v1.Pod) (gqlschema.JSON, error) {
 
 	jsonByte, err := json.Marshal(in)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "while marshaling %s `%s`", pretty.Pod, in.Name)
 	}
 
 	var jsonMap map[string]interface{}
 	err = json.Unmarshal(jsonByte, &jsonMap)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "while unmarshaling %s `%s` to map", pretty.Pod, in.Name)
 	}
 
 	var result gqlschema.JSON
 	err = result.UnmarshalGQL(jsonMap)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "while unmarshaling %s `%s` to GQL JSON", pretty.Pod, in.Name)
 	}
 
 	return result, nil
