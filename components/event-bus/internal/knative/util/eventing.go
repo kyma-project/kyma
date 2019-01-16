@@ -161,6 +161,12 @@ func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, message *strin
 	return nil
 }
 
+// InjectClient injects a client, useful for running tests.
+func (r *KnativeLib) InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error {
+	r.evClient = c
+	return nil
+}
+
 func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, message *string)  error {
 	timeout := time.After(10 * time.Second)
 	tick := time.Tick(200 * time.Millisecond)

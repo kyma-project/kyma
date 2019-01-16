@@ -88,3 +88,11 @@ func Test_CreateChannelTimeout(t *testing.T) {
 	assert.NotNil(t, err)
 	log.Printf("Test_CreateChannelTimeout: %v", err)
 }
+
+func Test_InjectClient(t *testing.T) {
+	log.Print("Test_InjectClient")
+	client := evclientsetfake.NewSimpleClientset().EventingV1alpha1()
+	k := &KnativeLib {}
+	err := k.InjectClient(client)
+	assert.Nil(t, err)
+}
