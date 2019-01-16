@@ -35,11 +35,11 @@ global:
     dir: develop/
     version: 8b074a71
   application_registry:
-    dir: pr/
-    version: PR-2306
+    dir: develop/
+    version: a8ea14aa
   application_registry_tests:
-    dir: pr/
-    version: PR-2306
+    dir: develop/
+    version: a8ea14aa
   application_broker:
     dir: develop/
     version: f25caafe
