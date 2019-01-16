@@ -76,12 +76,10 @@ func (c *podConverter) getWaitingContainerState(in *v1.ContainerStateWaiting) gq
 	}
 
 	var reason, message *string
-
 	if in.Reason != "" {
 		tmp := in.Reason
 		reason = &tmp
 	}
-
 	if in.Message != "" {
 		tmp := in.Message
 		message = &tmp
@@ -110,7 +108,6 @@ func (c *podConverter) getTerminatedContainerState(in *v1.ContainerStateTerminat
 	}
 
 	var reason, message *string
-
 	if in.Reason != "" {
 		tmp := in.Reason
 		reason = &tmp
@@ -121,7 +118,6 @@ func (c *podConverter) getTerminatedContainerState(in *v1.ContainerStateTerminat
 		tmp := fmt.Sprintf("Exit code: %d", in.ExitCode)
 		reason = &tmp
 	}
-
 	if in.Message != "" {
 		tmp := in.Message
 		message = &tmp

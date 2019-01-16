@@ -134,7 +134,6 @@ func fixPod(name, namespace string) *v1.Pod {
 			},
 		},
 	}
-
 }
 
 func fixPodQuery() *graphql.Request {
