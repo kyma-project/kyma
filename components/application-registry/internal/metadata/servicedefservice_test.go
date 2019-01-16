@@ -316,6 +316,51 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		specService.AssertExpectations(t)
 	})
 
+	t.Run("should add connected-app label if not provided", func(t *testing.T) {
+		// given
+		serviceDefinition := model.ServiceDefinition{
+			Name:          "Some service",
+			Description:   "Some cool service",
+			Provider:      "Service Provider",
+			Labels:        &map[string]string{"test": "test"},
+			Api:           nil,
+			Events:        nil,
+			Documentation: nil,
+		}
+
+		applicationService := applications.Service{
+			ID:                  "uuid-1",
+			DisplayName:         "Some service",
+			LongDescription:     "Some cool service",
+			ShortDescription:    "Some cool service",
+			ProviderDisplayName: "Service Provider",
+			Labels:              map[string]string{"connected-app": "app", "test": "test"},
+			Tags:                make([]string, 0),
+			API:                 nil,
+			Events:              false,
+		}
+
+		uuidGenerator := new(uuidmocks.Generator)
+		uuidGenerator.On("NewUUID").Return("uuid-1")
+		serviceRepository := new(applicationsmocks.ServiceRepository)
+		serviceRepository.On("Create", "app", applicationService).Return(nil)
+		specService := new(specmocks.Service)
+		specService.On("PutSpec", &serviceDefinition, "").Return(nil)
+
+		service := NewServiceDefinitionService(uuidGenerator, nil, serviceRepository, specService)
+
+		// when
+		serviceID, err := service.Create("app", &serviceDefinition)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, "uuid-1", serviceID)
+
+		uuidGenerator.AssertExpectations(t)
+		serviceRepository.AssertExpectations(t)
+		specService.AssertExpectations(t)
+	})
+
 	t.Run("should return error when adding API fails", func(t *testing.T) {
 		// given
 		serviceAPI := &model.API{
