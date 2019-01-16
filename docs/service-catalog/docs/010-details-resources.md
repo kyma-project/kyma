@@ -5,7 +5,7 @@ type: Details
 
 This document includes an overview of resources that the Kyma Service Catalog provides.
 
->**NOTE:** The "Cluster" prefix in front of resources means they are cluster-wide. Resources without that prefix refer to the Environment scope.   
+>**NOTE:** The "Cluster" prefix in front of resources means they are cluster-wide. Resources without that prefix refer to the Namespace scope.   
 
 * **ClusterServiceBroker** is an endpoint for a set of managed services that a third party offers and maintains.
 
@@ -13,11 +13,11 @@ This document includes an overview of resources that the Kyma Service Catalog pr
 
 * **ClusterServicePlan** is a variation of a ClusterServiceClass that offers different levels of quality, configuration options, and the cost of a given service. Contrary to the ClusterServiceClass, which is purely descriptive, the ClusterServicePlan provides technical information to the ClusterServiceBroker on this part of the service that the ClusterServiceBroker can expose.
 
-* **ServiceBroker** is any Service Broker registered in a given Environment where it exposes ServiceClasses and ServicePlans that are available only in that Environment.
+* **ServiceBroker** is any Service Broker registered in a given Namespace where it exposes ServiceClasses and ServicePlans that are available only in that Namespace.
 
-* **ServiceClass**  is an Environment-wide representation of a ClusterServiceClass. Similarly to the ClusterServiceClass, it is synonymous with a service in the Service Catalog.
+* **ServiceClass**  is an Namespace-wide representation of a ClusterServiceClass. Similarly to the ClusterServiceClass, it is synonymous with a service in the Service Catalog.
 
-* **ServicePlan** is an Environment-wide representation of a ClusterServicePlan.
+* **ServicePlan** is an Namespace-wide representation of a ClusterServicePlan.
 
 * **ServiceInstance** is a provisioned instance of a ClusterServiceClass to use in one or more cluster applications.
 

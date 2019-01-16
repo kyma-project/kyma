@@ -21,7 +21,7 @@ The Connector Service:
 
 ## Application Registry
 
-The Application Registry stores all registered APIs and Event Catalog exposed by a connected external solution. The APIs and Event catalogs metadata are stored in RemoteEnvironment custom resource.
+The Application Registry stores all registered APIs and Event Catalog exposed by a connected external solution. The APIs and Event catalogs metadata are stored in the [Application](#custom-resource-application) custom resource.
 The system creates a new Kubernetes service for each registered API. Additionally, a new Service Classes is registered in the Service Catalog.
 
 >**NOTE:** Using the Application Registry, you can register an API along with its OAuth or Basic Authentication credentials. The credentials are stored in a Kubernetes Secret.
@@ -35,7 +35,7 @@ This allows routing the Events to lambda functions and services based on their s
 
 An App represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or the Event Bus.
 Using the components of the Application Connector, the App creates a coherent identity for a connected external solution and ensures its separation.
-All Apps are created through the Application custom resource, which also stores all of the relevant metadata. You can map an App to many Kyma Environments and use the APIs and the Event Catalogs of the connected external solution within their context.
+All Apps are created through the Application custom resource, which also stores all of the relevant metadata. You can map an App to many Kyma Namespaces and use the APIs and the Event Catalogs of the connected external solution within their context.
 
 ## Application Operator
 

@@ -21,7 +21,7 @@ Virtualization:
 - [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - Mac only
 - [VirtualBox](https://www.virtualbox.org/) - Linux only
 
-> **NOTE:** To work with Kyma, use only the provided scripts and commands. Kyma does not work on a basic Minikube cluster that you can start using the `minikube start` command. 
+> **NOTE:** To work with Kyma, use only the provided scripts and commands. Kyma does not work on a basic Minikube cluster that you can start using the `minikube start` command.
 
 ## Set up certificates
 
@@ -114,7 +114,7 @@ Access your local Kyma instance through [this](https://console.kyma.local/) link
 kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D
 ```
 
-* Click the **Environments** section and select an Environment from the drop-down menu to explore Kyma further.
+* Click the **Namespaces** section and select a Namespace from the drop-down menu to explore Kyma further.
 
 ### Access the Kubernetes Dashboard
 
@@ -159,11 +159,11 @@ To enable Horizontal Pod Autoscaler, follow these steps:
 
 Use the `minikube.sh` script to restart the Minikube cluster without reinstalling Kyma. Follow these steps to stop and restart your cluster:
 
-1. Stop the Minikube cluster with Kyma installed. Run: 
+1. Stop the Minikube cluster with Kyma installed. Run:
 ```
 minikube stop
 ```
-2. Restart the cluster without reinstalling Kyma. Run: 
+2. Restart the cluster without reinstalling Kyma. Run:
 ```
 ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
 ```

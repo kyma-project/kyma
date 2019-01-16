@@ -23,7 +23,7 @@ metadata:
   labels:
     example: event-bus-lambda-subscription
 spec:
-  endpoint: http://hello-with-data.<environment>:8080/
+  endpoint: http://hello-with-data.{NAMESPACE}:8080/
   push_request_timeout_ms: 2000
   max_inflight: 400
   include_subscription_name_header: true
