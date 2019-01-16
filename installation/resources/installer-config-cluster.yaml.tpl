@@ -127,3 +127,18 @@ metadata:
 data:
   knative.ingressgateway.service.type: LoadBalancer
   knative.domainName: "__DOMAIN__"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: natsstreaming-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+data:
+  global.natsStreaming.clusterID: "kyma-nats-streaming"
+  global.natsStreaming.ports.client: "4222"
+  global.natsStreaming.name: "nats-streaming"
+  global.natsStreaming.fullname: "nats-streaming"
+  global.natsStreaming.namespace: "natss"
+  
