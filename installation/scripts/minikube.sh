@@ -6,9 +6,9 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCES_DIR="${CURRENT_DIR}/../resources"
 
 MINIKUBE_DOMAIN=""
-MINIKUBE_VERSION=0.28.2
-KUBERNETES_VERSION=1.10.0
-KUBECTL_CLI_VERSION=1.10.0
+MINIKUBE_VERSION=0.31.0
+KUBERNETES_VERSION=1.11.3
+KUBECTL_CLI_VERSION=1.11.0
 VM_DRIVER=hyperkit
 DISK_SIZE=20g
 MEMORY=8192
@@ -87,9 +87,9 @@ function waitForMinikubeToBeUp() {
       sleep 1
     done
 
-    # In case apiserver is not available get localkube logs
+    # In case apiserver is not available get minikube logs
     if [[ -z "$STATUS" ]] && [[ "$VM_DRIVER" = "none" ]]; then
-      cat /var/lib/localkube/localkube.err
+      cat /var/lib/minikube/minikube.err
     fi
 
     set -o errexit
@@ -198,16 +198,14 @@ function start() {
     minikube start \
     --memory $MEMORY \
     --cpus 4 \
-    --extra-config=apiserver.Authorization.Mode=RBAC \
-    --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList=".*" \
-    --extra-config=controller-manager.ClusterSigningCertFile="/var/lib/localkube/certs/ca.crt" \
-    --extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
-    --extra-config=apiserver.admission-control="LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota" \
+    --extra-config=apiserver.authorization-mode=RBAC \
+    --extra-config=apiserver.cors-allowed-origins="http://*" \
+    --extra-config=apiserver.enable-admission-plugins="LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota" \
     --kubernetes-version=v$KUBERNETES_VERSION \
     --vm-driver=$VM_DRIVER \
     --disk-size=$DISK_SIZE \
     --feature-gates="MountPropagation=false" \
-    -b=localkube
+    -b=kubeadm
 
     waitForMinikubeToBeUp
 
