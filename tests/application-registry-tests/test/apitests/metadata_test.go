@@ -220,6 +220,50 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, http.StatusNoContent, statusCode)
 		})
 
+		t.Run("should register service adding connected-app label to the existing", func(t *testing.T) {
+			// when
+			initialServiceDefinition := prepareServiceDetails("service-identifier-4", map[string]string{"test": "test"}).WithAPI(oauthAPI)
+
+			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
+			require.NoError(t, err)
+
+			// then
+			require.Equal(t, http.StatusOK, statusCode)
+			require.NotEmpty(t, postResponseData.ID)
+
+			// when
+			statusCode, receivedServiceDefinition, err := metadataServiceClient.GetService(t, postResponseData.ID)
+			require.NoError(t, err)
+			expectedLabels := map[string]string{"test": "test", connectedApp: dummyApp.Name}
+			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, receivedServiceDefinition.Identifier)
+
+			// then
+			require.Equal(t, http.StatusOK, statusCode)
+			require.EqualValues(t, expectedServiceDefinition, *receivedServiceDefinition)
+
+			// when
+			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
+			require.NoError(t, err)
+
+			postedService := findPostedService(existingServices, postResponseData.ID)
+
+			// then
+			require.Equal(t, http.StatusOK, statusCode)
+			require.NotNil(t, postedService)
+			require.Equal(t, "test service", postedService.Name)
+			require.Equal(t, "service provider", postedService.Provider)
+			require.Equal(t, "service description", postedService.Description)
+			require.True(t, strings.HasPrefix(postedService.Identifier, "service-identifier-4"))
+			require.Equal(t, expectedLabels, postedService.Labels)
+
+			// clean up
+			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
+			require.NoError(t, err)
+			initialServiceDefinition.Labels = map[string]string{}
+
+			require.Equal(t, http.StatusNoContent, statusCode)
+		})
+
 		t.Run("should register service modifying swagger api spec", func(t *testing.T) {
 			// when
 			initialServiceDefinition := prepareServiceDetails("service-identifier-5", map[string]string{"connected-app": dummyApp.Name}).WithAPI(swaggerSpecAPI)
