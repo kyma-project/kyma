@@ -45,7 +45,7 @@ These are the OSBA fields used in the detailed Service Class view:
 
 ![alt text](./assets/catalog-details-page.png 'Catalog Details')
 
-## Add to Namesoace
+## Add to Namespace
 
 These are the OSBA fields used in the **Add to Namespace** window:
 
