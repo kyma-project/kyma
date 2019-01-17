@@ -2,7 +2,7 @@ package k8s
 
 import (
 	api "k8s.io/api/apps/v1beta2"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 //go:generate mockery -name=deploymentGetter -output=automock -outpkg=automock -case=underscore

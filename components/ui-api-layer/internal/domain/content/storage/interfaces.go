@@ -3,7 +3,7 @@ package storage
 import (
 	"io"
 
-	"github.com/minio/minio-go"
+	minio "github.com/minio/minio-go"
 )
 
 //go:generate mockery -name=Cache -output=automock -outpkg=automock -case=underscore

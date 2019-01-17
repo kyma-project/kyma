@@ -5,7 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 func TestResourceQuotaStatusConverter_ToGQL(t *testing.T) {
