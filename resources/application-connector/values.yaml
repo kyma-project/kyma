@@ -36,10 +36,10 @@ global:
     version: 8b074a71
   application_registry:
     dir: develop/
-    version: acb1e829
+    version: a8ea14aa
   application_registry_tests:
     dir: develop/
-    version: 501c4fe5
+    version: a8ea14aa
   application_broker:
     dir: develop/
     version: f25caafe
