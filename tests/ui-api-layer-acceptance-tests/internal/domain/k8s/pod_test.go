@@ -43,8 +43,8 @@ type pod struct {
 
 type containerState struct {
 	State   containerStateType `json:"state"`
-	Reason  *string            `json:"reason"`
-	Message *string            `json:"message"`
+	Reason  string             `json:"reason"`
+	Message string             `json:"message"`
 }
 
 type containerStateType string
@@ -75,26 +75,26 @@ func TestPodQuery(t *testing.T) {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
-	client, _, err := client.NewClientWithConfig()
+	k8sClient, _, err := client.NewClientWithConfig()
 	require.NoError(t, err)
 
 	t.Log("Creating namespace...")
-	_, err = client.Namespaces().Create(fixNamespace(podNamespace))
+	_, err = k8sClient.Namespaces().Create(fixNamespace(podNamespace))
 	require.NoError(t, err)
 
 	defer func() {
 		t.Log("Deleting namespace...")
-		err = client.Namespaces().Delete(podNamespace, &metav1.DeleteOptions{})
+		err = k8sClient.Namespaces().Delete(podNamespace, &metav1.DeleteOptions{})
 		require.NoError(t, err)
 	}()
 
 	t.Log("Creating pod...")
-	_, err = client.Pods(podNamespace).Create(fixPod(podName, podNamespace))
+	_, err = k8sClient.Pods(podNamespace).Create(fixPod(podName, podNamespace))
 	require.NoError(t, err)
 
 	t.Log("Retrieving pod...")
 	err = waiter.WaitAtMost(func() (bool, error) {
-		_, err := client.Pods(podNamespace).Get(podName, metav1.GetOptions{})
+		_, err := k8sClient.Pods(podNamespace).Get(podName, metav1.GetOptions{})
 		if err == nil {
 			return true, nil
 		}

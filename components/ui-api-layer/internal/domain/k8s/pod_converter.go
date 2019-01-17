@@ -6,14 +6,14 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
 	"github.com/pkg/errors"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/status"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/state"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	v1 "k8s.io/api/core/v1"
 )
 
 type podConverter struct {
-	extractor status.PodExtractor
+	extractor state.ContainerExtractor
 }
 
 func (c *podConverter) ToGQL(in *v1.Pod) (*gqlschema.Pod, error) {
@@ -21,7 +21,7 @@ func (c *podConverter) ToGQL(in *v1.Pod) (*gqlschema.Pod, error) {
 		return nil, nil
 	}
 
-	containerStates := c.extractor.ContainerStatusesToGQLContainerStates(in.Status.ContainerStatuses)
+	containerStates := c.extractor.States(in.Status.ContainerStatuses)
 
 	gqlJSON, err := c.podToGQLJSON(in)
 	if err != nil {

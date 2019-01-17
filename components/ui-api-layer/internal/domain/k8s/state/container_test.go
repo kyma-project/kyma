@@ -1,4 +1,4 @@
-package status
+package state
 
 import (
 	"fmt"
@@ -10,9 +10,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestPodExtractor_ContainerStatusesToGQLContainerStates(t *testing.T) {
+func TestContainerExtractor_States(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		extractor := PodExtractor{}
+		extractor := ContainerExtractor{}
 		strings := []string{
 			"WaitingReason",
 			"WaitingMessage",
@@ -67,27 +67,27 @@ func TestPodExtractor_ContainerStatusesToGQLContainerStates(t *testing.T) {
 			},
 		}
 
-		result := extractor.ContainerStatusesToGQLContainerStates(in)
+		result := extractor.States(in)
 
 		assert.Equal(t, expected, result)
 	})
 
 	t.Run("EmptyPassed", func(t *testing.T) {
-		extractor := PodExtractor{}
+		extractor := ContainerExtractor{}
 		in := []v1.ContainerStatus{}
 		expected := []gqlschema.ContainerState{}
 
-		result := extractor.ContainerStatusesToGQLContainerStates(in)
+		result := extractor.States(in)
 
 		assert.Equal(t, expected, result)
 	})
 
 	t.Run("NilPassed", func(t *testing.T) {
-		extractor := PodExtractor{}
+		extractor := ContainerExtractor{}
 		var in []v1.ContainerStatus = nil
 		expected := []gqlschema.ContainerState{}
 
-		result := extractor.ContainerStatusesToGQLContainerStates(in)
+		result := extractor.States(in)
 
 		assert.Equal(t, expected, result)
 	})
@@ -95,7 +95,7 @@ func TestPodExtractor_ContainerStatusesToGQLContainerStates(t *testing.T) {
 
 func TestPodConverter_GetTerminatedContainerState(t *testing.T) {
 	t.Run("Reason", func(t *testing.T) {
-		extractor := PodExtractor{}
+		extractor := ContainerExtractor{}
 		reason := "exampleReason"
 		message := "exampleMessage"
 		in := v1.ContainerStateTerminated{
@@ -112,7 +112,7 @@ func TestPodConverter_GetTerminatedContainerState(t *testing.T) {
 	})
 
 	t.Run("Signal", func(t *testing.T) {
-		extractor := PodExtractor{}
+		extractor := ContainerExtractor{}
 		signal := int32(123)
 		message := "exampleMessage"
 		in := v1.ContainerStateTerminated{
@@ -129,7 +129,7 @@ func TestPodConverter_GetTerminatedContainerState(t *testing.T) {
 	})
 
 	t.Run("ExitCode", func(t *testing.T) {
-		extractor := PodExtractor{}
+		extractor := ContainerExtractor{}
 		exitCode := int32(123)
 		message := "exampleMessage"
 		in := v1.ContainerStateTerminated{
@@ -145,7 +145,7 @@ func TestPodConverter_GetTerminatedContainerState(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		extractor := PodExtractor{}
+		extractor := ContainerExtractor{}
 		expected := gqlschema.ContainerState{
 			State: gqlschema.ContainerStateTypeTerminated,
 		}

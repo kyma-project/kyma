@@ -1,4 +1,4 @@
-package status
+package state
 
 import (
 	"fmt"
@@ -7,10 +7,10 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-type PodExtractor struct{}
+type ContainerExtractor struct{}
 
-func (ext *PodExtractor) ContainerStatusesToGQLContainerStates(in []v1.ContainerStatus) []gqlschema.ContainerState {
-	containerStates := []gqlschema.ContainerState{}
+func (ext *ContainerExtractor) States(in []v1.ContainerStatus) []gqlschema.ContainerState {
+	containerStates := make([]gqlschema.ContainerState, 0, len(in))
 
 	for _, containerStatus := range in {
 		if containerStatus.State.Waiting != nil {
@@ -27,7 +27,7 @@ func (ext *PodExtractor) ContainerStatusesToGQLContainerStates(in []v1.Container
 	return containerStates
 }
 
-func (ext *PodExtractor) getWaitingContainerState(in *v1.ContainerStateWaiting) gqlschema.ContainerState {
+func (ext *ContainerExtractor) getWaitingContainerState(in *v1.ContainerStateWaiting) gqlschema.ContainerState {
 	if in == nil {
 		return gqlschema.ContainerState{
 			State: gqlschema.ContainerStateTypeWaiting,
@@ -41,7 +41,7 @@ func (ext *PodExtractor) getWaitingContainerState(in *v1.ContainerStateWaiting) 
 	}
 }
 
-func (ext *PodExtractor) getRunningContainerState() gqlschema.ContainerState {
+func (ext *ContainerExtractor) getRunningContainerState() gqlschema.ContainerState {
 	return gqlschema.ContainerState{
 		State:   gqlschema.ContainerStateTypeRunning,
 		Reason:  "",
@@ -49,7 +49,7 @@ func (ext *PodExtractor) getRunningContainerState() gqlschema.ContainerState {
 	}
 }
 
-func (ext *PodExtractor) getTerminatedContainerState(in *v1.ContainerStateTerminated) gqlschema.ContainerState {
+func (ext *ContainerExtractor) getTerminatedContainerState(in *v1.ContainerStateTerminated) gqlschema.ContainerState {
 	if in == nil {
 		return gqlschema.ContainerState{
 			State: gqlschema.ContainerStateTypeTerminated,
@@ -72,6 +72,6 @@ func (ext *PodExtractor) getTerminatedContainerState(in *v1.ContainerStateTermin
 	}
 }
 
-func (ext *PodExtractor) getDefaultContainerState() gqlschema.ContainerState {
+func (ext *ContainerExtractor) getDefaultContainerState() gqlschema.ContainerState {
 	return ext.getWaitingContainerState(nil)
 }
