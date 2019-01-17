@@ -37,26 +37,31 @@ required = [
   name = "github.com/stretchr/testify"
   version = "1.2.1"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.11.3"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.11.3"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/code-generator"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.11.3"
 
 [[override]]
   branch = "master"
   name = "github.com/apache/thrift"
 
+[[override]]
+  name = "github.com/knative/eventing"
+  # HEAD as of 2018-12-05
+  revision = "604de5d66f1692af13f9c7fb7e25f554b2f5bba9"
+
 [prune]
   go-tests = true
   unused-packages = true
 
-  [[prune.project]]
-      name = "k8s.io/code-generator"
-      unused-packages = false
+[[prune.project]]
+   name = "k8s.io/code-generator"
+   unused-packages = false

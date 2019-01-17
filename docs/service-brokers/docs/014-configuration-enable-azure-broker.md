@@ -2,7 +2,7 @@
 title: Enable the Azure Broker for local deployment
 type: Configuration
 ---
->**NOTE:** To enable the Azure Broker, you need a [Microsoft Azure](https://azure.microsoft.com/en-us) subscription.
+>**NOTE:** To enable the Azure Broker, you need a [Microsoft Azure](https://azure.microsoft.com/en-us/) subscription.
 
 By default, the Azure Broker is disabled for local installation and does not install along with other Kyma core components.
 To enable the installation of the Azure Broker, export these Azure Broker-specific environment variables before you install Kyma:  

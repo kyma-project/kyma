@@ -8,9 +8,12 @@ INSTALLER="${RESOURCES_DIR}/installer.yaml"
 INSTALLER_CONFIG=""
 AZURE_BROKER_CONFIG=""
 
+source $CURRENT_DIR/utils.sh
+
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
+    
     key="$1"
 
     case ${key} in
@@ -19,6 +22,7 @@ do
             shift
             ;;
         --cr)
+            checkInputParameterValue "$1" "$2"
             CR_PATH="$2"
             shift # past argument
             shift # past value

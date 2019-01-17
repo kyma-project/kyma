@@ -54,8 +54,9 @@ type RenderTestSummaryInput struct {
 
 // TestRunnerInfo describes test runner in kubernetes system
 type TestRunnerInfo struct {
-	PodName   string
-	Namespace string
+	PodName     string
+	Namespace   string
+	ClusterName string
 }
 
 // RenderTestSummary returns header and body summary of given tests

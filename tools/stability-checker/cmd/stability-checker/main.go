@@ -31,6 +31,7 @@ type Config struct {
 	TestThrottle        time.Duration `envconfig:"default=5m"`
 	WorkingNamespace    string        `envconfig:"default=kyma-system"`
 	PodName             string        `envconfig:"HOSTNAME"`
+	ClusterName         string        `envconfig:"optional"`
 	TestConfigMapName   string        `envconfig:"default=stability-checker"`
 	PathToTestingScript string
 	Stats               struct {
@@ -80,7 +81,7 @@ func main() {
 	logFetcher, err := podlogger.NewPodLogFetcher(cfg.WorkingNamespace, cfg.PodName)
 	fatalOnError(err)
 
-	sNotifier := notifier.New(slackClient, testRenderer, cfgMapClient, cfg.TestConfigMapName, cfg.TestResultWindowTime, cfg.PodName, cfg.WorkingNamespace, log)
+	sNotifier := notifier.New(slackClient, testRenderer, cfgMapClient, cfg.TestConfigMapName, cfg.TestResultWindowTime, cfg.PodName, cfg.WorkingNamespace, cfg.ClusterName, log)
 
 	if cfg.Stats.Enabled {
 		outputProcessor, err := summary.NewOutputProcessor(cfg.Stats.FailingTestRegexp, cfg.Stats.SuccessfulTestRegexp)

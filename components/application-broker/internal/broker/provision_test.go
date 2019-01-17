@@ -224,6 +224,17 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 				Return(nil).
 				Once()
 		},
+		"generic error when getting EA after already exist error": func(cli *fake.Clientset, instStorage *automock.InstanceStorage, optStorage *automock.OperationStorage) {
+			cli.PrependReactor("create", "eventactivations", func(action k8testing.Action) (handled bool, ret runtime.Object, err error) {
+				return true, nil, apiErrors.NewAlreadyExists(schema.GroupResource{}, "fix")
+			})
+			cli.PrependReactor("get", "eventactivations", failingReactor)
+			optStorage.On("UpdateStateDesc", fixInstanceID(), fixOperationID(), internal.OperationStateFailed, fixErrWhileGettingEA()).
+				Return(nil)
+			instStorage.On("UpdateState", fixInstanceID(), internal.InstanceStateFailed).
+				Return(nil).
+				Once()
+		},
 	}
 	for tn, setupMocks := range tests {
 		t.Run(tn, func(t *testing.T) {
@@ -523,7 +534,12 @@ func fixErrWhileCreatingEA() *string {
 }
 
 func fixErrWhileUpdatingEA() *string {
-	err := fmt.Sprintf("provisioning failed while creating EventActivation on error: while updating EventActivation with name: %q in namespace: %q: custom error", fixServiceID(), fixNs())
+	err := fmt.Sprintf("provisioning failed while creating EventActivation on error: while ensuring update on EventActivation: while updating EventActivation with name: %q in namespace: %q: custom error", fixServiceID(), fixNs())
+	return &err
+}
+
+func fixErrWhileGettingEA() *string {
+	err := fmt.Sprintf("provisioning failed while creating EventActivation on error: while ensuring update on EventActivation: while getting EventActivation with name: %q from namespace: %q: custom error", fixServiceID(), fixNs())
 	return &err
 }
 

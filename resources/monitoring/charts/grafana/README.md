@@ -48,9 +48,24 @@ To add a dashboard to Kyma:
 
 Users can create their own **Grafana Dashboard** by using the Grafana UI as the dashboards are persisted even after the Pod restarts.
 
-1. Create or Modify a dashboard using Grafana UI
+1. Create or modify a dashboard using Grafana UI.
 2. Save the dashboard with a new name.
+
+## Lambda dashboard
+
+The lambda dashboard provides visualisation for specific lambda function metrics such as memory usage, CPU usage or success rate response.
+
+You can access the dashboard directly from the lambda UI.
+
+## Unique Dashboard Identifier
+
+The Unique Dashboard Identifier or UID allows having consistent URLs for accessing dashboards from the lambda UI. 
+This UID is defined in the `*-dashboard.json` file.
+
+>**Note:** Changing the UID breaks the URL used to access specific dashboards from the lambda UI.
 
 ## Additional Resources
 
 There are several resources you can use to become more familiar with Grafana. The [Grafana Getting Started Guide](http://docs.grafana.org/guides/getting_started/) is an ideal starting point. Refer to the document [Export and Import Dashboards](http://docs.grafana.org/reference/export_import/) for a closer look at dashboards used to export and import data in Grafana. Grafana also provides in-depth documentation on the [Grafana Dashboard API](http://docs.grafana.org/http_api/dashboard/).
+
+

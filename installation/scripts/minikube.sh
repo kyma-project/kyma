@@ -18,25 +18,30 @@ source $CURRENT_DIR/utils.sh
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
+
     key="$1"
 
     case ${key} in
         --disk-size)
-            DISK_SIZE=$2
+            checkInputParameterValue "$1" "$2"
+            DISK_SIZE="$2"
             shift
             shift
             ;;
         --vm-driver)
+            checkInputParameterValue "$1" "$2"
             VM_DRIVER="$2"
             shift # past argument
             shift # past value
             ;;
         --memory)
-            MEMORY=$2
+            checkInputParameterValue "$1" "$2"
+            MEMORY="$2"
             shift
             shift
             ;;
         --domain)
+            checkInputParameterValue "$1" "$2"
             MINIKUBE_DOMAIN="$2"
             shift # past argument
             shift # past value
