@@ -17,8 +17,9 @@ type API struct {
 // Credentials contains OAuth configuration.
 type Credentials struct {
 	// Oauth is OAuth configuration.
-	Oauth *Oauth
-	Basic *Basic
+	Oauth          *Oauth
+	Basic          *Basic
+	CertificateGen *CertificateGen
 }
 
 // Oauth contains details of OAuth configuration.
@@ -37,6 +38,11 @@ type Basic struct {
 	Username string
 	// Password to use for authentication.
 	Password string
+}
+
+// CertificateGen contains common name of the certificate to generate
+type CertificateGen struct {
+	CommonName string
 }
 
 // ServiceDefinition is an internal representation of a service.

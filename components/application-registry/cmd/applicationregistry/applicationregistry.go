@@ -6,6 +6,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/certificates"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy"
+
 	"sync"
 
 	"github.com/gorilla/mux"
@@ -177,9 +180,10 @@ func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace stri
 
 func newSecretsRepository(coreClientset *kubernetes.Clientset, nameResolver k8sconsts.NameResolver, namespace string) secrets.Service {
 	sei := coreClientset.CoreV1().Secrets(namespace)
+	strategyFactory := strategy.NewSecretsStrategyFactory(certificates.GenerateKeyAndCertificate)
 	repository := secrets.NewRepository(sei)
 
-	return secrets.NewService(repository, nameResolver)
+	return secrets.NewService(repository, nameResolver, strategyFactory)
 }
 
 func newIstioService(config *restclient.Config, namespace string) (istio.Service, apperrors.AppError) {

@@ -41,8 +41,9 @@ type API struct {
 }
 
 type Credentials struct {
-	Oauth *Oauth     `json:"oauth,omitempty"`
-	Basic *BasicAuth `json:"basic,omitempty"`
+	Oauth          *Oauth          `json:"oauth,omitempty"`
+	Basic          *BasicAuth      `json:"basic,omitempty"`
+	CertificateGen *CertificateGen `json:"certificateGen,omitempty"`
 }
 
 type Oauth struct {
@@ -54,6 +55,11 @@ type Oauth struct {
 type BasicAuth struct {
 	Username string `json:"username" valid:"required~basic auth username field cannot be empty"`
 	Password string `json:"password" valid:"required~basic auth password field cannot be empty"`
+}
+
+// TODO - do I need some parameter pased here?
+type CertificateGen struct {
+	CommonName string `json:"commonName"`
 }
 
 type Events struct {
@@ -127,6 +133,14 @@ func serviceDefinitionToServiceDetails(serviceDefinition model.ServiceDefinition
 					},
 				}
 			}
+
+			if serviceDefinition.Api.Credentials.CertificateGen != nil {
+				serviceDetails.Api.Credentials = &Credentials{
+					CertificateGen: &CertificateGen{
+						CommonName: serviceDefinition.Api.Credentials.CertificateGen.CommonName,
+					},
+				}
+			}
 		}
 	}
 
@@ -182,6 +196,14 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 					Basic: &model.Basic{
 						Username: serviceDetails.Api.Credentials.Basic.Username,
 						Password: serviceDetails.Api.Credentials.Basic.Password,
+					},
+				}
+			}
+
+			if serviceDetails.Api.Credentials.CertificateGen != nil {
+				serviceDefinition.Api.Credentials = &model.Credentials{
+					CertificateGen: &model.CertificateGen{
+						CommonName: serviceDetails.Api.Credentials.CertificateGen.CommonName,
 					},
 				}
 			}

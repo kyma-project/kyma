@@ -1,7 +1,9 @@
 package authorization
 
 import (
+	"crypto/tls"
 	"net/http"
+	"net/http/httputil"
 	"testing"
 
 	oauthMocks "github.com/kyma-project/kyma/components/application-proxy/internal/authorization/oauth/mocks"
@@ -29,7 +31,7 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = strategy.AddAuthorizationHeader(request)
+		err = strategy.AddAuthorization(request, proxyStub)
 
 		// then
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
@@ -43,7 +45,7 @@ func TestStrategyFactory(t *testing.T) {
 		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = strategy.AddAuthorizationHeader(requestWithExternalToken)
+		err = strategy.AddAuthorization(requestWithExternalToken, proxyStub)
 
 		// then
 		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)
@@ -74,7 +76,7 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = strategy.AddAuthorizationHeader(request)
+		err = strategy.AddAuthorization(request, proxyStub)
 
 		// then
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
@@ -88,7 +90,7 @@ func TestStrategyFactory(t *testing.T) {
 		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = strategy.AddAuthorizationHeader(requestWithExternalToken)
+		err = strategy.AddAuthorization(requestWithExternalToken, proxyStub)
 
 		// then
 		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)
@@ -121,7 +123,7 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = strategy.AddAuthorizationHeader(request)
+		err = strategy.AddAuthorization(request, proxyStub)
 
 		// then
 		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
@@ -135,7 +137,67 @@ func TestStrategyFactory(t *testing.T) {
 		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = strategy.AddAuthorizationHeader(requestWithExternalToken)
+		err = strategy.AddAuthorization(requestWithExternalToken, proxyStub)
+
+		// then
+		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)
+		assert.Nil(t, err)
+		assert.Equal(t, "Bearer external", authHeader)
+	})
+
+	t.Run("should create certificate gen strategy", func(t *testing.T) {
+		// given
+		oauthClientMock := &oauthMocks.Client{}
+
+		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
+		credentials := &metadatamodel.Credentials{
+			CertificateGen: &metadatamodel.CertificateGen{
+				Certificate: certificate,
+				PrivateKey:  privateKey,
+			},
+		}
+
+		proxy := &httputil.ReverseProxy{}
+
+		expectedProxy := &httputil.ReverseProxy{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					Certificates: []tls.Certificate{
+						{
+							Certificate: [][]byte{cert()},
+							PrivateKey:  key(),
+						},
+					},
+				},
+			},
+		}
+
+		// when
+		strategy := factory.Create(credentials)
+
+		// then
+		require.NotNil(t, strategy)
+
+		// given
+		request, err := http.NewRequest("GET", "www.example.com", nil)
+		require.NoError(t, err)
+
+		// when
+		err = strategy.AddAuthorization(request, proxy)
+
+		// then
+		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
+		assert.Nil(t, err)
+		assert.Equal(t, expectedProxy, proxy)
+
+		// given
+		requestWithExternalToken, err := http.NewRequest("GET", "www.example.com", nil)
+		require.NoError(t, err)
+
+		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
+
+		// when
+		err = strategy.AddAuthorization(requestWithExternalToken, proxyStub)
 
 		// then
 		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)

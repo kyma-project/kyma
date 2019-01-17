@@ -62,7 +62,7 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	newRequest, cancel := p.prepareRequest(r, cacheEntry)
 	defer cancel()
 
-	err = p.addAuthorizationHeader(newRequest, cacheEntry)
+	err = p.addAuthorization(newRequest, cacheEntry)
 	if err != nil {
 		handleErrors(w, err)
 		return
@@ -114,8 +114,8 @@ func (p *proxy) prepareRequest(r *http.Request, cacheEntry *CacheEntry) (*http.R
 	return newRequest, cancel
 }
 
-func (p *proxy) addAuthorizationHeader(r *http.Request, cacheEntry *CacheEntry) apperrors.AppError {
-	return cacheEntry.AuthorizationStrategy.AddAuthorizationHeader(r)
+func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry) apperrors.AppError {
+	return cacheEntry.AuthorizationStrategy.AddAuthorization(r, cacheEntry.Proxy)
 }
 
 func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry *CacheEntry) {
@@ -125,7 +125,7 @@ func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry 
 func (p *proxy) createModifyResponseFunction(id string, r *http.Request) func(*http.Response) error {
 	// Handle the case when credentials has been changed or OAuth token has expired
 	return func(response *http.Response) error {
-		retrier := newUnathorizedResponseRetrier(id, r, p.proxyTimeout, p.createCacheEntry)
+		retrier := newUnauthorizedResponseRetrier(id, r, p.proxyTimeout, p.createCacheEntry)
 
 		return retrier.RetryIfFailedToAuthorize(response)
 	}
