@@ -305,7 +305,7 @@ type ComplexityRoot struct {
 		BindableResources     func(childComplexity int, environment string) int
 		Apis                  func(childComplexity int, environment *string, namespace *string, serviceName *string, hostname *string) int
 		Application           func(childComplexity int, name string) int
-		Applications          func(childComplexity int, environment *string, first *int, offset *int) int
+		Applications          func(childComplexity int, environment *string, namespace *string, first *int, offset *int) int
 		ConnectorService      func(childComplexity int, application string) int
 		Environments          func(childComplexity int, application *string) int
 		Deployments           func(childComplexity int, environment string, excludeFunctions *bool) int
@@ -592,7 +592,7 @@ type QueryResolver interface {
 	BindableResources(ctx context.Context, environment string) ([]BindableResourcesOutputItem, error)
 	Apis(ctx context.Context, environment *string, namespace *string, serviceName *string, hostname *string) ([]API, error)
 	Application(ctx context.Context, name string) (*Application, error)
-	Applications(ctx context.Context, environment *string, first *int, offset *int) ([]Application, error)
+	Applications(ctx context.Context, environment *string, namespace *string, first *int, offset *int) ([]Application, error)
 	ConnectorService(ctx context.Context, application string) (ConnectorService, error)
 	Environments(ctx context.Context, application *string) ([]Environment, error)
 	Deployments(ctx context.Context, environment string, excludeFunctions *bool) ([]Deployment, error)
@@ -1521,12 +1521,12 @@ func field_Query_applications_args(rawArgs map[string]interface{}) (map[string]i
 		}
 	}
 	args["environment"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["first"]; ok {
+	var arg1 *string
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
-		var ptr1 int
+		var ptr1 string
 		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
+			ptr1, err = graphql.UnmarshalString(tmp)
 			arg1 = &ptr1
 		}
 
@@ -1534,9 +1534,9 @@ func field_Query_applications_args(rawArgs map[string]interface{}) (map[string]i
 			return nil, err
 		}
 	}
-	args["first"] = arg1
+	args["namespace"] = arg1
 	var arg2 *int
-	if tmp, ok := rawArgs["offset"]; ok {
+	if tmp, ok := rawArgs["first"]; ok {
 		var err error
 		var ptr1 int
 		if tmp != nil {
@@ -1548,7 +1548,21 @@ func field_Query_applications_args(rawArgs map[string]interface{}) (map[string]i
 			return nil, err
 		}
 	}
-	args["offset"] = arg2
+	args["first"] = arg2
+	var arg3 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg3 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg3
 	return args, nil
 
 }
@@ -3175,7 +3189,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Applications(childComplexity, args["environment"].(*string), args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.Applications(childComplexity, args["environment"].(*string), args["namespace"].(*string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.connectorService":
 		if e.complexity.Query.ConnectorService == nil {
@@ -11088,7 +11102,7 @@ func (ec *executionContext) _Query_applications(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Applications(rctx, args["environment"].(*string), args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().Applications(rctx, args["environment"].(*string), args["namespace"].(*string), args["first"].(*int), args["offset"].(*int))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -19279,7 +19293,7 @@ type Query {
     apis(environment: String, namespace: String, serviceName: String, hostname: String): [API!]!
 
     application(name: String!): Application
-    applications(environment: String, first: Int, offset: Int): [Application!]!
+    applications(environment: String, namespace: String, first: Int, offset: Int): [Application!]!
     connectorService(application: String!): ConnectorService!
 
     # Depends on 'application'
