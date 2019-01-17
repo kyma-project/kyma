@@ -67,22 +67,28 @@ func (r *applicationResolver) ApplicationQuery(ctx context.Context, name string)
 	return &gqlApp, nil
 }
 
-func (r *applicationResolver) ApplicationsQuery(ctx context.Context, environment *string, first *int, offset *int) ([]gqlschema.Application, error) {
+func (r *applicationResolver) ApplicationsQuery(ctx context.Context, environment *string, namespace *string, first *int, offset *int) ([]gqlschema.Application, error) {
 	var items []*appTypes.Application
 	var err error
 
-	if environment == nil { // retrieve all
+	if namespace == nil && environment == nil { // retrieve all
 		items, err = r.appSvc.List(pager.PagingParams{First: first, Offset: offset})
 		if err != nil {
 			glog.Error(errors.Wrapf(err, "while listing all %s", pretty.Applications))
 			return []gqlschema.Application{}, gqlerror.New(err, pretty.Applications)
 		}
-	} else { // retrieve only for given environment
+	} else { // retrieve only for given namespace (or environment - deprecated)
 		// TODO: Add support for paging.
-		items, err = r.appSvc.ListInEnvironment(*environment)
+		var ns string
+		if namespace != nil {
+			ns = *namespace
+		} else {
+			ns = *environment
+		}
+		items, err = r.appSvc.ListInEnvironment(ns)
 		if err != nil {
-			glog.Error(errors.Wrapf(err, "while listing %s for environment %v", pretty.Applications, environment))
-			return []gqlschema.Application{}, gqlerror.New(err, pretty.Applications, gqlerror.WithEnvironment(*environment))
+			glog.Error(errors.Wrapf(err, "while listing %s for namespace %v", pretty.Applications, ns))
+			return []gqlschema.Application{}, gqlerror.New(err, pretty.Applications, gqlerror.WithEnvironment(ns))
 		}
 	}
 
