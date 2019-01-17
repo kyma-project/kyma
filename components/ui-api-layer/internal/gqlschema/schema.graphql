@@ -574,7 +574,7 @@ type Query {
     apis(environment: String, namespace: String, serviceName: String, hostname: String): [API!]!
 
     application(name: String!): Application
-    applications(environment: String, first: Int, offset: Int): [Application!]!
+    applications(environment: String, namespace: String, first: Int, offset: Int): [Application!]!
     connectorService(application: String!): ConnectorService!
 
     # Depends on 'application'

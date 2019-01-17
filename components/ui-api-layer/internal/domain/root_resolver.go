@@ -325,8 +325,8 @@ func (r *queryResolver) Application(ctx context.Context, name string) (*gqlschem
 	return r.app.Resolver.ApplicationQuery(ctx, name)
 }
 
-func (r *queryResolver) Applications(ctx context.Context, environment *string, first *int, offset *int) ([]gqlschema.Application, error) {
-	return r.app.Resolver.ApplicationsQuery(ctx, environment, first, offset)
+func (r *queryResolver) Applications(ctx context.Context, environment *string, namespace *string, first *int, offset *int) ([]gqlschema.Application, error) {
+	return r.app.Resolver.ApplicationsQuery(ctx, environment, namespace, first, offset)
 }
 
 func (r *queryResolver) ConnectorService(ctx context.Context, application string) (gqlschema.ConnectorService, error) {

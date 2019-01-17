@@ -169,7 +169,7 @@ type resolverConfig struct {
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 type Resolver interface {
 	ApplicationQuery(ctx context.Context, name string) (*gqlschema.Application, error)
-	ApplicationsQuery(ctx context.Context, environment *string, first *int, offset *int) ([]gqlschema.Application, error)
+	ApplicationsQuery(ctx context.Context, environment *string, namespace *string, first *int, offset *int) ([]gqlschema.Application, error)
 	ApplicationEventSubscription(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error)
 	CreateApplication(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error)
 	DeleteApplication(ctx context.Context, name string) (gqlschema.DeleteApplicationOutput, error)
