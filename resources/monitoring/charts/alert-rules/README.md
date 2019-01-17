@@ -96,6 +96,10 @@ Resource metrics such as **cpu and memory** are also served by kube-state-metric
 - kube_pod_container_resource_requests_nvidia_gpu_devices
 - kube_pod_container_resource_limits_nvidia_gpu_devices
 
+### Monitoring Persistent volume claims
+Under the **data. alert.rules**, there is a configuration of the [pvc-rules.yaml](templates/pvc-rules.yaml) file, which creates a rule for alerting when a PVC(Persistent Volume Claim) in any of the system namespace(`kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public` or `kube-system`) is more than **90%** filled up. In such a case its recommended to increase the capacity of the PVCs.
+
+
 ### Configure Alertmanager
 
 In Kyma all the configuration related to the Alertmanager is in the chart [alertmanager](../alertmanager/README.md)
