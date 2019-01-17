@@ -52,7 +52,7 @@ func (_m *Resolver) ApplicationStatusField(ctx context.Context, app *gqlschema.A
 }
 
 // ApplicationsQuery provides a failing mock function with given fields: ctx, environment, first, offset
-func (_m *Resolver) ApplicationsQuery(ctx context.Context, environment *string, first *int, offset *int) ([]gqlschema.Application, error) {
+func (_m *Resolver) ApplicationsQuery(ctx context.Context, environment *string, namespace *string, first *int, offset *int) ([]gqlschema.Application, error) {
 	var r0 []gqlschema.Application
 	var r1 error
 	r1 = _m.err
