@@ -28,3 +28,46 @@ The three binaries of `Event Bus` reside under `cmd/event-bus-XXXX` "e.g. `cmd/e
 |`make test`|Run all the tests.|
 |`make vet`|Runs `go vet` on all sources including `vendor` but excluding the `generated` directory.|
 |`make compile`|Builds a binary without running any tests.|
+
+## Publish controller and dispatcher Docker images of Nats Streaming provisioner on Knative using `ko`
+
+[`ko`](https://github.com/google/go-containerregistry/tree/master/cmd/ko) makes it possible to publish an image for a Golang application without a Dockerfile. `ko` builds the application and creates a Docker image out of it. Follow these steps to publish Docker images for `controller` and `dispatcher` of Nats Streaming provisioner on Knative:
+
+1. Install `ko`:
+
+```
+go get github.com/google/go-containerregistry/cmd/ko
+```
+
+2. Authenticate to Google Cloud and set project to `kyma-project`.
+
+```
+gcloud auth login
+gcloud config set project kyma-project
+```
+
+3. Clone [knative/eventing](https://github.com/knative/eventing) and checkout the release branch you want to produce the images from.
+
+4. Go to `natss` folder in knative/eventing:
+
+```
+cd eventing/pkg/provisioners/natss
+```
+
+5. Set `KO_DOCKER_REPO` to the repository and image path to be used.
+
+```
+export KO_DOCKER_REPO=eu.gcr.io/kyma-project/event-bus/knative/natss
+```
+
+6. Use `ko publish` to publish the Docker image for `controller`. `-t` is used to specify the tag, which should be the used Knative release branch. Setting `-B` disables the default behovior of adding MD5 hash after `KO_DOCKER_REPO`.
+
+```
+ko publish -B -t release-0.3 ./controller
+```
+
+7. Use `ko publish` to publish the Docker image for `dispatcher`.
+
+```
+ko publish -B -t release-0.3 ./dispatcher
+```
