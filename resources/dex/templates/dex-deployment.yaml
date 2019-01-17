@@ -12,8 +12,8 @@ spec:
   template:
     metadata:
     # temp disabled, looks like dex with sidecar have some problems affecting apiserver->dex communication used to verify id_tokens
-      # annotations:
-      #   sidecar.istio.io/inject: "true"
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: dex
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -42,7 +42,7 @@ spec:
           mountPath: /config/dst
         - name: config-tpl
           mountPath: /config/src
-        
+
       volumes:
       - name: config-tpl
         configMap:
