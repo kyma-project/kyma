@@ -39,11 +39,12 @@ The three binaries of `Event Bus` reside under `cmd/event-bus-XXXX` "e.g. `cmd/e
 go get github.com/google/go-containerregistry/cmd/ko
 ```
 
-2. Authenticate to Google Cloud and set project to `kyma-project`.
+2. Authenticate to Google Cloud, set project to `kyma-project`, and configure Docker.  
 
 ```
 gcloud auth login
 gcloud config set project kyma-project
+gcloud auth configure-docker
 ```
 
 3. Clone [knative/eventing](https://github.com/knative/eventing) and checkout the release branch you want to produce the images from.
