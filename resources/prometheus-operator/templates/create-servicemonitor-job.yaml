@@ -13,6 +13,8 @@ metadata:
 spec:
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ template "prometheus-operator.name" . }}
         release: {{ .Release.Name }}
@@ -24,8 +26,8 @@ spec:
           imagePullPolicy: "{{ .Values.global.hyperkube.pullPolicy }}"
           command:
             - ./kubectl
-            - apply 
-            - -f 
+            - apply
+            - -f
             - /tmp/servicemonitor/servicemonitor-operator.yaml
           volumeMounts:
             - mountPath: "/tmp/servicemonitor"
