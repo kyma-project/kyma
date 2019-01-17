@@ -19,7 +19,7 @@ Read, learn, and try on your own to:
 - [Create a new Application](/docs/components/application-connector#getting-started-create-a-new-application)
 - [Get the client certificate](/docs/components/application-connector#getting-started-get-the-client-certificate)
 - [Register a service](/docs/components/application-connector#getting-started-register-a-service)
-- [Bind an Application to a Namespace](/docs/components/application-connector#getting-started-bind-an-application-to-an-environment)
+- [Bind an Application to a Namespace](/docs/components/application-connector#getting-started-bind-an-application-to-a-namespace)
 - [Trigger a lambda with events](/docs/components/application-connector#getting-started-trigger-a-lambda-with-events)
 - [Call a registered external service from Kyma](/docs/components/application-connector#getting-started-call-a-registered-external-service-from-kyma)
 - [Expose custom metrics in Kyma](/docs/components/monitoring#getting-started-expose-custom-metrics-in-kyma)
