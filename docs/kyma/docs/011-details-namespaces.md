@@ -5,7 +5,7 @@ type: Details
 
 A Namespace is a security and organizational unit which allows you to divide the cluster into smaller units to use for different purposes, such as development and testing.
 
-Kyma Namespace is a user-created Namespace marked with the `env: "true"` label. The Kyma UI only displays the Namespaces marked with the `env: "true"` label.
+Namespaces available for users are marked with the `env: "true"` label. The Kyma UI only displays the Namespaces marked with the `env: "true"` label.
 
 
 ## Default Kyma Namespaces
