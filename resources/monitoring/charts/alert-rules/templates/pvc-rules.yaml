@@ -8,6 +8,6 @@ groups:
     labels:
       severity: critical
     annotations:
-      description:  "PVC {{`{{$labels.namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
-      summary: "PVC {{`{{$labels.namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+      description:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+      summary: "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
 {{ end }}
