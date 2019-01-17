@@ -83,7 +83,7 @@ These are the **Settings** properties:
 | **storageAutoResize** | `boolean` | Configuration to increase storage size automatically. Applies only to Second Generation instances. | NO | `true` |
 | **storageAutoResizeLimit** | `string` | The maximum size to which storage capacity can be automatically increased. The default value is `0`, which specifies that there is no limit. Applies only to Second Generation instances. | NO | `0` |
 | **tier** | `string` | For better performance, choose a CloudSQL machine type with enough memory to hold your largest table. These are the possible values: `db-f1-micro`, `db-g1-small`, `db-n1-standard-1`, `db-n1-standard-2`, `db-n1-standard-4`, `db-n1-standard-8`, `db-n1-standard-16`, `db-n1-standard-32`, `db-n1-standard-64`, `db-n1-highmem-2`, `db-n1-highmem-4`, `db-n1-highmem-8`, `db-n1-highmem-16`, `db-n1-highmem-32`, `db-n1-highmem-64` | YES | `db-n1-standard-1` |
-| **userLabels** | `object` | To organize your project, add arbitrary labels as key/value pairs to CloudSQL. Use labels to indicate different elements, such as environments, services, teams. | NO | - |
+| **userLabels** | `object` | To organize your project, add arbitrary labels as key/value pairs to CloudSQL. Use labels to indicate different elements, such as Namespaces, services, teams. | NO | - |
 
 ### BackupConfiguration properties
 
@@ -142,4 +142,4 @@ To connect your business application to your Cloud SQL instance, use the [Cloud 
       env:
       command: ["bin/sh"]
       args: ["-c", "echo $privateKeyData > /token; /cloud_sql_proxy -instances=$(connectionName)=tcp:3306 -credential_file=/token"]
-``` 
+```

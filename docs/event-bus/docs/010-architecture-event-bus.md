@@ -34,7 +34,7 @@ When you create a lambda or a service to perform a given business functionality,
 
 > **NOTE:** The Event Bus creates a separate Event Trigger for each Subscription.
 
-Before the Event Bus forwards the Event to the receiver, the sub-validator performs a security check to verify the permissions for this Event in a given Environment. It reads all new Subscription resources and refers to the EventActivation resource to check whether a particular Event type is enabled in a given Environment. If the Event is enabled for an Environment, it updates the Subscription resource with the information. Based on the information, `push` sends the Event to the lambda or the service.
+Before the Event Bus forwards the Event to the receiver, the sub-validator performs a security check to verify the permissions for this Event in a given Namespace. It reads all new Subscription resources and refers to the EventActivation resource to check whether a particular Event type is enabled in a given Namespace. If the Event is enabled for an Namespace, it updates the Subscription resource with the information. Based on the information, `push` sends the Event to the lambda or the service.
 
 ### Validation flow
 
@@ -45,5 +45,5 @@ See the diagram and a step-by-step description of the Event verification process
 1. Kyma user defines a lambda or a service.
 2. Kyma user creates a Subscription custom resource.
 3. The sub-validator reads the new Subscription.
-4. The sub-validator refers to the EventActivation resource to check if the Event in the Subscription is activated for the given Environment.
+4. The sub-validator refers to the EventActivation resource to check if the Event in the Subscription is activated for the given Namespace.
 5. The sub-validator updates the Subscription resource accordingly.

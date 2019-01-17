@@ -11,7 +11,7 @@ kubectl get crd applicationmappings.applicationconnector.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample resource in which the ApplicationMapping enables the `test` Application in the `production` Environment:
+This is a sample ApplicationMapping resource which enables the `test` Application in the `production` Namespace:
 
 ```
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
@@ -37,11 +37,11 @@ These are the resources related to this CR:
 
 | Custom resource   |   Description |
 |:----------:|:------|
-| ApplicationMapping |  Uses this CR to expose the services of an App in a given Environment. |
+| ApplicationMapping |  Uses this CR to expose the services of an App in a given Namespace. |
 
 These components use this CR:
 
 | Component   |   Description |
 |:----------:|:------|
-| Application Broker |  Uses this CR to enable the provisioning of ServiceClasses in a given Environment. |
+| Application Broker |  Uses this CR to enable the provisioning of ServiceClasses in a given Namespace. |
 | UI API Layer | Uses this CR to filter the enabled Apps. It also allows you to create or delete ApplicationMappings. |

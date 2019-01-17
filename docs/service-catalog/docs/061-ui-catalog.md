@@ -24,7 +24,7 @@ These are the OSBA fields used in the main Catalog page:
 
 \*\***metadata.labels** is the custom object that is not defined in the [OSBA metadata convention](https://github.com/openservicebrokerapi/servicebroker/blob/master/profile.md#service-metadata).
 
-![alt text](./assets/catalog-page.png 'Catalog')
+![alt text](./assets/catalog-page.png)
 
 ## Catalog Details page
 
@@ -45,9 +45,9 @@ These are the OSBA fields used in the detailed Service Class view:
 
 ![alt text](./assets/catalog-details-page.png 'Catalog Details')
 
-## Add to Environment
+## Add to Namespace
 
-These are the OSBA fields used in the **Add to Environment** window:
+These are the OSBA fields used in the **Add to Namespace** window:
 
 | Number | OSBA field                | Fallbacks            | Description |
 | ------ | ------------------------- | -------------------- | ----------- |
@@ -57,7 +57,7 @@ These are the OSBA fields used in the **Add to Environment** window:
 
 \*Fields with an asterisk are required OSBA attributes.
 
-![alt text](./assets/add-to-environment.png 'Add to Environment')
+![alt text](./assets/add-to-environment.png)
 
 ### Plan schema
 
@@ -93,7 +93,7 @@ See the sample schema:
 
 This sample renders in the following way:
 
-![alt text](./assets/schema-form.png 'SchemaForm')
+![alt text](./assets/schema-form.png)
 
 Follow these rules when you design schema objects:
 

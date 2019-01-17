@@ -9,5 +9,5 @@ Due to the fact that Kyma runs on Kubernetes, you can easily instantiate a servi
 You can perform the following operations in the Service Catalog:
 
 - Expose the consumable services by listing them with all the details, including the documentation and the consumption plans.
-- Consume the services by provisioning them in a given Environment, which is Kyma's representation of the Kubernetes Namespace.
+- Consume the services by provisioning them in a given Namespace.
 - Bind the services to the applications through Secrets.

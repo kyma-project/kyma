@@ -8,14 +8,15 @@ This guide shows how to create a simple lambda function and trigger it with an e
 
 ## Prerequisites
 
-- An Application (App) bound to the `production` Environment
+- An Application (App) bound to the `production` Namespace
 - Client certificates generated for the connected App.
 
 
 ## Steps
 
 1. Register a service with the following specification to the desired App.
->**NOTE:** To learn how to register a service, see the **Register a service** Getting Started Guide.
+
+>**NOTE:** See [this](#getting-started-get-the-client-certificate) Getting Started Guide to learn how to register a service.
 ```json
 {
   "name": "my-service",
@@ -82,7 +83,7 @@ spec:
 EOF
 ```
 
-4. Create a sample lambda function which sends a request to `http://httpbin.org/uuid`. A successful response logs a `Response acquired successfully! Uuid: {RECEIVED_UUID}` message. To create and register the lambda function in the `production` Environment, run:
+4. Create a sample lambda function which sends a request to `http://httpbin.org/uuid`. A successful response logs a `Response acquired successfully! Uuid: {RECEIVED_UUID}` message. To create and register the lambda function in the `production` Namespace, run:
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: kubeless.io/v1beta1

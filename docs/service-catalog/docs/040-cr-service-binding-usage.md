@@ -58,7 +58,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.usedBy** |    **YES**   | Specifies the application into which the Secret is injected. |
 | **spec.usedBy.kind** |    **YES**   | Specifies the name of the UsageKind custom resource. |
 | **spec.usedBy.name** |    **YES**   | Specifies the name of the application. |
-| **spec.parameters.envPrefix** |    **NO**   | Defines the prefix of environment variables environment variables that the ServiceBindingUsage injects. The prefixing is disabled by default. |
+| **spec.parameters.envPrefix** |    **NO**   | Defines the prefix of the environment variables that the ServiceBindingUsage injects. The prefixing is disabled by default. |
 | **spec.parameters.envPrefix.name** |    **YES**   | Specifies the name of the prefix. This field is mandatory if **envPrefix** is specified.  |
 | **status.conditions** |    **NO**   | Specifies the state of the ServiceBindingUsage.|
 | **status.conditions.lastTransitionTime** |    **NO**   | Specifies the time when the Binding Usage Controller processes the ServiceBindingUsage for the first time or when the **status.conditions.status** field changes. |
