@@ -71,8 +71,13 @@ global:
     dir: develop/
     version: e11a469a
   ui_api_layer:
+<<<<<<< HEAD
     dir: develop/
     version: 339a2e65
+=======
+    dir: pr/
+    version: PR-2328
+>>>>>>> Change image to PR one
   ui_api_layer_acceptance_tests:
     dir: develop/
     version: 339a2e65
