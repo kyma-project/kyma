@@ -1,14 +1,6 @@
 {{- $serviceName := .Values.global.knative | ternary "knative-ingressgateway" "istio-ingressgateway" -}}
 ---
 apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    istio-injection: enabled
-    "helm-chart-test": "true"
-  name: {{ .Values.global.api_controller_acceptance_tests.testNamespace }}
----
-apiVersion: v1
 kind: Pod
 metadata:
   name: test-api-controller-acceptance
