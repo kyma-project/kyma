@@ -1,13 +1,14 @@
 package authn
 
 import (
-	"github.com/pkg/errors"
-	. "github.com/smartystreets/goconvey/convey"
-	"k8s.io/apiserver/pkg/authentication/user"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/pkg/errors"
+	. "github.com/smartystreets/goconvey/convey"
+	"k8s.io/apiserver/pkg/authentication/user"
 )
 
 func TestAuthMiddleware(t *testing.T) {
@@ -176,11 +177,11 @@ func TestAuthMiddleware(t *testing.T) {
 }
 
 type mockAuthenticator struct {
-	UserInfo user.Info
+	UserInfo   user.Info
 	Authorised bool
-	Err error
-	LastReq *http.Request
-	Called bool
+	Err        error
+	LastReq    *http.Request
+	Called     bool
 }
 
 func (a *mockAuthenticator) AuthenticateRequest(req *http.Request) (user.Info, bool, error) {
@@ -191,8 +192,8 @@ func (a *mockAuthenticator) AuthenticateRequest(req *http.Request) (user.Info, b
 
 type mockHandler struct {
 	Called bool
-	w http.ResponseWriter
-	r *http.Request
+	w      http.ResponseWriter
+	r      *http.Request
 }
 
 func (h *mockHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

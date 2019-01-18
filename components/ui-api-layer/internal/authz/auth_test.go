@@ -2,14 +2,14 @@ package authz
 
 import (
 	"context"
+	"testing"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	. "github.com/smartystreets/goconvey/convey"
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/authorization/authorizer"
-	"testing"
 )
-
 
 func TestPrepareAttributes(t *testing.T) {
 
@@ -84,8 +84,7 @@ func TestPrepareAttributes(t *testing.T) {
 		gqlAttributes.NameArg = &nameArg
 		resolver := graphql.ResolverContext{Args: map[string]interface{}{
 			namespaceArg: namespace,
-			nameArg: name,
-
+			nameArg:      name,
 		}}
 		resolverCtx := graphql.WithResolverContext(ctx, &resolver)
 		authAttributes := PrepareAttributes(resolverCtx, &userInfo, gqlAttributes)
