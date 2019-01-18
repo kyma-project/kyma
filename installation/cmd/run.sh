@@ -32,7 +32,7 @@ do
         ;;
         --cr)
             checkInputParameterValue "$2"
-            CR_PATH="$2"a
+            CR_PATH="$2"
             shift # past argument
             shift # past value
         ;;
