@@ -15,10 +15,10 @@ To disable a component from the list of components that install with Kyma, remov
 1. Download one of the Kyma [release](https://github.com/kyma-project/kyma/releases).
 2. Configure the file:
   * If you want to install Kyma release **locally** without a given component, remove the component's **name** and **namespace** from the `kyma-config-local.yaml` file. For example, if you want to disable Istio installation, remove these lines:
-  ```
-  name: "istio"
-  namespace: "istio-system"
-  ```
+    ```
+    name: "istio"
+    namespace: "istio-system"
+    ```
   * If you want to install Kyma release on a **cluster** without a given component, remove the component's **name** and **namespace** from the `kyma-config-cluster.yaml` file.
 
 3. Follow the installation steps described in the [Install Kyma locally from the release](#installation-install-kyma-locally-from-the-release) document, or [Install Kyma on a GKE cluster](#installation-install-kyma-on-a-gke-cluster) accordingly.
