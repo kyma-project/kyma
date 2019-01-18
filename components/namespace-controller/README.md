@@ -61,7 +61,7 @@ In case you have no access to a Docker registry, use Minikube’s built in Docke
 image: namespace-controller:my_tag
 ```
 
-2. [Start Kyma installation as usual](../../docs/kyma/docs/030-inst-local-installation-from-release.md).
+2. [Start Kyma installation as usual](../../docs/kyma/docs/031-inst-local-installation-from-release.md).
 
 3. Run the following command to set up the Docker environment variables so a Docker client can communicate with the Minikube Docker daemon:
 ```
