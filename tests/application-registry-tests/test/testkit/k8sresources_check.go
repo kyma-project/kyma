@@ -1,6 +1,7 @@
 package testkit
 
 import (
+	"crypto/tls"
 	"testing"
 
 	application "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -51,6 +52,22 @@ func CheckK8sBasicAuthSecret(t *testing.T, secret *v1core.Secret, name string, l
 	secretData := secret.Data
 	require.Equal(t, username, string(secretData["username"]))
 	require.Equal(t, password, string(secretData["password"]))
+
+	checkLabels(t, labels, secret.Labels)
+}
+
+func CheckK8sCertificateGenSecret(t *testing.T, secret *v1core.Secret, name string, labels Labels, commonName string) {
+	require.Equal(t, name, secret.Name)
+
+	secretData := secret.Data
+	require.Equal(t, commonName, string(secretData["commonName"]))
+
+	crt := secretData["crt"]
+	key := secretData["key"]
+
+	cert, err := tls.X509KeyPair(crt, key)
+	require.NoError(t, err)
+	require.Nil(t, cert.Leaf)
 
 	checkLabels(t, labels, secret.Labels)
 }

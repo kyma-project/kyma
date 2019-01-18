@@ -57,7 +57,6 @@ type BasicAuth struct {
 	Password string `json:"password" valid:"required~basic auth password field cannot be empty"`
 }
 
-// TODO - do I need some parameter pased here?
 type CertificateGen struct {
 	CommonName string `json:"commonName"`
 }
