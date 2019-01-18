@@ -11,6 +11,10 @@ required = [
     "github.com/kyma-project/kyma/tools/failery",
 ]
 
+[[constraint]]
+  name = "github.com/smartystreets/goconvey"
+  version = "1.6.3"
+
 [[override]]
   name = "golang.org/x/net"
   branch = "release-branch.go1.10"

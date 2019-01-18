@@ -23,6 +23,10 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 			wsProtocolHeader := r.Header.Get("sec-websocket-protocol")
 			if wsProtocolHeader != "" {
 				wsProtocolParts := strings.Split(wsProtocolHeader, ",")
+				if len(wsProtocolParts) != 2 {
+					http.Error(w, "sec-websocket-protocol malformed", http.StatusBadRequest)
+					return
+				}
 				wsProtocol, wsToken := strings.TrimSpace(wsProtocolParts[0]), strings.TrimSpace(wsProtocolParts[1])
 				r.Header.Set("Authorization", "Bearer "+wsToken)
 				r.Header.Set("sec-websocket-protocol", wsProtocol)
@@ -32,15 +36,15 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 			if err != nil {
 				glog.Errorf("Unable to authenticate the request due to an error: %v", err)
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
 			}
-			if ok {
-				ctx := context.WithValue(r.Context(), userInfoCtxKey, u)
-
-				r = r.WithContext(ctx)
-				next.ServeHTTP(w, r)
-			} else {
+			if !ok {
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
 			}
+			ctx := context.WithValue(r.Context(), userInfoCtxKey, u)
+			r = r.WithContext(ctx)
+			next.ServeHTTP(w, r)
 		})
 	}
 }
