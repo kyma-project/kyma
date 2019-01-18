@@ -100,6 +100,13 @@ func TestApiMetadata(t *testing.T) {
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 
+			defer func() {
+				// clean up
+				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
+				require.NoError(t, err)
+				require.Equal(t, http.StatusNoContent, statusCode)
+			}()
+
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
 			require.NotEmpty(t, postResponseData.ID)
@@ -127,12 +134,6 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, identifier))
 			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
-
-			// clean up
-			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-			require.NoError(t, err)
-
-			require.Equal(t, http.StatusNoContent, statusCode)
 		})
 
 		t.Run("should register a service with Basic Auth credentials (with API, Events catalog, Documentation", func(t *testing.T) {
@@ -143,6 +144,13 @@ func TestApiMetadata(t *testing.T) {
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 
+			defer func() {
+				// clean up
+				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
+				require.NoError(t, err)
+				require.Equal(t, http.StatusNoContent, statusCode)
+			}()
+
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
 			require.NotEmpty(t, postResponseData.ID)
@@ -170,12 +178,6 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, identifier))
 			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
-
-			// clean up
-			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-			require.NoError(t, err)
-
-			require.Equal(t, http.StatusNoContent, statusCode)
 		})
 
 		t.Run("should register a service with CertificateGen credentials (with API, Events catalog, Documentation", func(t *testing.T) {
@@ -186,6 +188,13 @@ func TestApiMetadata(t *testing.T) {
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 
+			defer func() {
+				// clean up
+				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
+				require.NoError(t, err)
+				require.Equal(t, http.StatusNoContent, statusCode)
+			}()
+
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
 			require.NotEmpty(t, postResponseData.ID)
@@ -213,12 +222,6 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, identifier))
 			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
-
-			// clean up
-			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-			require.NoError(t, err)
-
-			require.Equal(t, http.StatusNoContent, statusCode)
 		})
 
 		t.Run("should return 400 when both OAuth and BasicAuth credentials provided", func(t *testing.T) {
@@ -240,6 +243,13 @@ func TestApiMetadata(t *testing.T) {
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 
+			defer func() {
+				// clean up
+				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
+				require.NoError(t, err)
+				require.Equal(t, http.StatusNoContent, statusCode)
+			}()
+
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
 			require.NotEmpty(t, postResponseData.ID)
@@ -267,13 +277,6 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, identifier))
 			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
-
-			// clean up
-			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-			require.NoError(t, err)
-			initialServiceDefinition.Labels = map[string]string{}
-
-			require.Equal(t, http.StatusNoContent, statusCode)
 		})
 
 		t.Run("should register service modifying swagger api spec", func(t *testing.T) {
@@ -283,6 +286,13 @@ func TestApiMetadata(t *testing.T) {
 
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
+
+			defer func() {
+				// clean up
+				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
+				require.NoError(t, err)
+				require.Equal(t, http.StatusNoContent, statusCode)
+			}()
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
@@ -312,13 +322,6 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, identifier))
 			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
-
-			// clean up
-			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-			require.NoError(t, err)
-			initialServiceDefinition.Labels = map[string]string{}
-
-			require.Equal(t, http.StatusNoContent, statusCode)
 		})
 
 		t.Run("should register service using inline spec when both inline spec and spec url provided", func(t *testing.T) {
@@ -328,6 +331,13 @@ func TestApiMetadata(t *testing.T) {
 
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
+
+			defer func() {
+				// clean up
+				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
+				require.NoError(t, err)
+				require.Equal(t, http.StatusNoContent, statusCode)
+			}()
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
@@ -356,13 +366,6 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, identifier))
 			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
-
-			// clean up
-			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-			require.NoError(t, err)
-			initialServiceDefinition.Labels = map[string]string{}
-
-			require.Equal(t, http.StatusNoContent, statusCode)
 		})
 
 		t.Run("should update service with OAuth credentials (with API, Events catalog, Documentation)", func(t *testing.T) {
@@ -373,6 +376,13 @@ func TestApiMetadata(t *testing.T) {
 			postStatusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusOK, postStatusCode)
+
+			defer func() {
+				// clean up
+				statusCode, err := metadataServiceClient.DeleteService(t, postResponseData.ID)
+				require.NoError(t, err)
+				require.Equal(t, http.StatusNoContent, statusCode)
+			}()
 
 			updatedServiceDefinition := testkit.ServiceDetails{
 				Name:        "updated test service",
@@ -430,12 +440,6 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "updated service provider", updatedService.Provider)
 			require.Equal(t, "updated service description", updatedService.Description)
 			require.True(t, strings.HasPrefix(updatedService.Identifier, identifier))
-
-			// clean up
-			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-			require.NoError(t, err)
-
-			require.Equal(t, http.StatusNoContent, statusCode)
 		})
 
 		t.Run("should update a service with Basic Auth credentials (with API, Events catalog, Documentation)", func(t *testing.T) {
@@ -446,6 +450,13 @@ func TestApiMetadata(t *testing.T) {
 			postStatusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusOK, postStatusCode)
+
+			defer func() {
+				// clean up
+				statusCode, err := metadataServiceClient.DeleteService(t, postResponseData.ID)
+				require.NoError(t, err)
+				require.Equal(t, http.StatusNoContent, statusCode)
+			}()
 
 			updatedServiceDefinition := testkit.ServiceDetails{
 				Name:        "updated test service",
@@ -502,12 +513,6 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "updated service provider", updatedService.Provider)
 			require.Equal(t, "updated service description", updatedService.Description)
 			require.True(t, strings.HasPrefix(updatedService.Identifier, identifier))
-
-			// clean up
-			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-			require.NoError(t, err)
-
-			require.Equal(t, http.StatusNoContent, statusCode)
 		})
 
 		t.Run("should return not found 404 when updating not existing service", func(t *testing.T) {
@@ -588,6 +593,13 @@ func TestApiMetadata(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, http.StatusOK, postStatusCode)
 
+			defer func() {
+				// clean up
+				statusCode, err := metadataServiceClient.DeleteService(t, postResponseData.ID)
+				require.NoError(t, err)
+				require.Equal(t, http.StatusNoContent, statusCode)
+			}()
+
 			// when
 			statusCode, receivedServiceDefinition, err := metadataServiceClient.GetService(t, postResponseData.ID)
 			require.NoError(t, err)
@@ -610,12 +622,6 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service provider", postedService.Provider)
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, identifier))
-
-			// clean up
-			statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-			require.NoError(t, err)
-
-			require.Equal(t, http.StatusNoContent, statusCode)
 		})
 
 		t.Run("should get all services (with API, Events catalog, Documentation)", func(t *testing.T) {
@@ -632,6 +638,16 @@ func TestApiMetadata(t *testing.T) {
 			postStatusCode2, postResponseData2, err := metadataServiceClient.CreateService(t, initialServiceDefinition2)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusOK, postStatusCode2)
+
+			defer func() {
+				// clean up
+				statusCode1, err := metadataServiceClient.DeleteService(t, postResponseData1.ID)
+				require.NoError(t, err)
+				statusCode2, err := metadataServiceClient.DeleteService(t, postResponseData2.ID)
+				require.NoError(t, err)
+				require.Equal(t, http.StatusNoContent, statusCode1)
+				require.Equal(t, http.StatusNoContent, statusCode2)
+			}()
 
 			// when
 			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
@@ -655,16 +671,6 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service provider", postedService2.Provider)
 			require.Equal(t, "service description", postedService2.Description)
 			require.True(t, strings.HasPrefix(postedService2.Identifier, identifier2))
-
-			// clean up
-			statusCode1, err := metadataServiceClient.DeleteService(t, postResponseData1.ID)
-			require.NoError(t, err)
-
-			statusCode2, err := metadataServiceClient.DeleteService(t, postResponseData2.ID)
-			require.NoError(t, err)
-
-			require.Equal(t, http.StatusNoContent, statusCode1)
-			require.Equal(t, http.StatusNoContent, statusCode2)
 		})
 
 	})
