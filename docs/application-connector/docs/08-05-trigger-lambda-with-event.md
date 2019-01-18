@@ -1,6 +1,6 @@
 ---
 title: Trigger a lambda with events
-type: Getting Started
+type: Tutorials
 ---
 
 This guide shows how to create a simple lambda function and trigger it with an event.
