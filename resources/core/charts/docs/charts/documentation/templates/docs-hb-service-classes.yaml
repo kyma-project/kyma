@@ -25,6 +25,13 @@ spec:
              memory: {{ .Values.resources.documentation.requests.memory }}
            limits:
              memory: {{ .Values.resources.documentation.limits.memory }}
+      - name:  azure-service-broker
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.docs.dir }}azure-broker-docs:{{ .Values.global.docs.version }}
+        resources:
+           requests:
+             memory: {{ .Values.resources.documentation.requests.memory }}
+           limits:
+             memory: {{ .Values.resources.documentation.limits.memory }}
       - name:  redis
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.docs.dir }}redis-docs:{{ .Values.global.docs.version }}
         resources:

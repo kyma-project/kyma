@@ -5,34 +5,13 @@ type: Details
 
 ## Service description
 
-The `gcp-broker-provider` service provides the following plan names and descriptions:
+The `GCP Service Broker` service provides the following plan names and descriptions:
 
 | Plan Name | Description |
 |-----------|-------------|
 | `Default` | Installs the Google Cloud Platform (GCP) Service Broker in a default configuration. |
 
 ## Provisioning
-
->**NOTE:** You can provision only one instance of the GCP Service Broker Provider in each Namespace.
-
-To add GCP Broker Provider to your Namespace, you must prepare a service account and a 
-JSON access key. 
-
-Follow these steps to create a Kubernetes Secret which contains a JSON access key:
-1. Open https://console.cloud.google.com/ and select your project.
-2. On the left pane, go to **IAM & admin** and select **Service accounts**.
-3. Click **Create service account**, name your account, and click **Create**.
-4. Set the `Project Owner` role.
-5. Click **Create key** and choose `JSON` as a key type.
-6. Save the `JSON` file.
-7. Create a Secret from the JSON file by running this command:
-    ```
-    kubectl create secret generic gcp-broker-data --from-file=sa-key={filename} --from-literal=project-name={gcp-project} --namespace {namespace}
-    ```
-
-8. Click **Done**.
-
->**NOTE:** You must create a Secret in every Namespace where you provision the GCP Broker Provider class.
 
 The service account key is used to 
 generate service account keys used by brokers installed in different Namespaces.
