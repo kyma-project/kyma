@@ -175,11 +175,11 @@ type Resolver interface {
 	DeleteApplication(ctx context.Context, name string) (gqlschema.DeleteApplicationOutput, error)
 	UpdateApplication(ctx context.Context, name string, description *string, qglLabels *gqlschema.Labels) (gqlschema.ApplicationMutationOutput, error)
 	ConnectorServiceQuery(ctx context.Context, application string) (gqlschema.ConnectorService, error)
-	EnableApplicationMutation(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error)
-	DisableApplicationMutation(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error)
+	EnableApplicationMutation(ctx context.Context, application string, environment string, namespace string) (*gqlschema.ApplicationMapping, error)
+	DisableApplicationMutation(ctx context.Context, application string, environment string, namespace string) (*gqlschema.ApplicationMapping, error)
 	ApplicationEnabledInEnvironmentsField(ctx context.Context, obj *gqlschema.Application) ([]string, error)
 	ApplicationStatusField(ctx context.Context, app *gqlschema.Application) (gqlschema.ApplicationStatus, error)
-	EventActivationsQuery(ctx context.Context, environment string) ([]gqlschema.EventActivation, error)
+	EventActivationsQuery(ctx context.Context, environment string, namespace string) ([]gqlschema.EventActivation, error)
 	EventActivationEventsField(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error)
 }
 

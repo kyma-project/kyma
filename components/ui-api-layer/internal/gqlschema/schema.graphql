@@ -588,7 +588,7 @@ type Query {
 
     content(contentType: String!, id: String!): JSON
     topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
-    eventActivations(environment: String!): [EventActivation!]!
+    eventActivations(environment: String!, namespace: String!): [EventActivation!]!
 
     limitRanges(environment: String!): [LimitRange!]!
 
@@ -612,8 +612,8 @@ type Mutation {
     updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput!
     deleteApplication(name: String!): DeleteApplicationOutput!
 
-    enableApplication(application: String!, environment: String!): ApplicationMapping
-    disableApplication(application: String!, environment: String!): ApplicationMapping
+    enableApplication(application: String!, environment: String!, namespace: String!): ApplicationMapping
+    disableApplication(application: String!, environment: String!, namespace: String!): ApplicationMapping
 
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
     deleteIDPPreset(name: String!): IDPPreset

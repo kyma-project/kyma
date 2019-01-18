@@ -195,12 +195,12 @@ func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, servic
 	return r.sca.Resolver.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, env)
 }
 
-func (r *mutationResolver) EnableApplication(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error) {
-	return r.app.Resolver.EnableApplicationMutation(ctx, application, environment)
+func (r *mutationResolver) EnableApplication(ctx context.Context, application string, environment string, namespace string) (*gqlschema.ApplicationMapping, error) {
+	return r.app.Resolver.EnableApplicationMutation(ctx, application, environment, namespace)
 }
 
-func (r *mutationResolver) DisableApplication(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error) {
-	return r.app.Resolver.DisableApplicationMutation(ctx, application, environment)
+func (r *mutationResolver) DisableApplication(ctx context.Context, application string, environment string, namespace string) (*gqlschema.ApplicationMapping, error) {
+	return r.app.Resolver.DisableApplicationMutation(ctx, application, environment, namespace)
 }
 
 func (r *mutationResolver) CreateIDPPreset(ctx context.Context, name string, issuer string, jwksURI string) (*gqlschema.IDPPreset, error) {
@@ -333,8 +333,8 @@ func (r *queryResolver) ConnectorService(ctx context.Context, application string
 	return r.app.Resolver.ConnectorServiceQuery(ctx, application)
 }
 
-func (r *queryResolver) EventActivations(ctx context.Context, environment string) ([]gqlschema.EventActivation, error) {
-	return r.app.Resolver.EventActivationsQuery(ctx, environment)
+func (r *queryResolver) EventActivations(ctx context.Context, environment string, namespace string) ([]gqlschema.EventActivation, error) {
+	return r.app.Resolver.EventActivationsQuery(ctx, environment, namespace)
 }
 
 func (r *queryResolver) Apis(ctx context.Context, environment *string, namespace *string, serviceName *string, hostname *string) ([]gqlschema.API, error) {

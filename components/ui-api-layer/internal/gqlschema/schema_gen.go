@@ -281,8 +281,8 @@ type ComplexityRoot struct {
 		CreateApplication         func(childComplexity int, name string, description *string, labels *Labels) int
 		UpdateApplication         func(childComplexity int, name string, description *string, labels *Labels) int
 		DeleteApplication         func(childComplexity int, name string) int
-		EnableApplication         func(childComplexity int, application string, environment string) int
-		DisableApplication        func(childComplexity int, application string, environment string) int
+		EnableApplication         func(childComplexity int, application string, environment string, namespace string) int
+		DisableApplication        func(childComplexity int, application string, environment string, namespace string) int
 		CreateIdppreset           func(childComplexity int, name string, issuer string, jwksUri string) int
 		DeleteIdppreset           func(childComplexity int, name string) int
 	}
@@ -314,7 +314,7 @@ type ComplexityRoot struct {
 		Functions             func(childComplexity int, environment string, first *int, offset *int) int
 		Content               func(childComplexity int, contentType string, id string) int
 		Topics                func(childComplexity int, input []InputTopic, internal *bool) int
-		EventActivations      func(childComplexity int, environment string) int
+		EventActivations      func(childComplexity int, environment string, namespace string) int
 		LimitRanges           func(childComplexity int, environment string) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
@@ -569,8 +569,8 @@ type MutationResolver interface {
 	CreateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
 	UpdateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
 	DeleteApplication(ctx context.Context, name string) (DeleteApplicationOutput, error)
-	EnableApplication(ctx context.Context, application string, environment string) (*ApplicationMapping, error)
-	DisableApplication(ctx context.Context, application string, environment string) (*ApplicationMapping, error)
+	EnableApplication(ctx context.Context, application string, environment string, namespace string) (*ApplicationMapping, error)
+	DisableApplication(ctx context.Context, application string, environment string, namespace string) (*ApplicationMapping, error)
 	CreateIDPPreset(ctx context.Context, name string, issuer string, jwksUri string) (*IDPPreset, error)
 	DeleteIDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 }
@@ -601,7 +601,7 @@ type QueryResolver interface {
 	Functions(ctx context.Context, environment string, first *int, offset *int) ([]Function, error)
 	Content(ctx context.Context, contentType string, id string) (*JSON, error)
 	Topics(ctx context.Context, input []InputTopic, internal *bool) ([]TopicEntry, error)
-	EventActivations(ctx context.Context, environment string) ([]EventActivation, error)
+	EventActivations(ctx context.Context, environment string, namespace string) ([]EventActivation, error)
 	LimitRanges(ctx context.Context, environment string) ([]LimitRange, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
@@ -918,6 +918,15 @@ func field_Mutation_enableApplication_args(rawArgs map[string]interface{}) (map[
 		}
 	}
 	args["environment"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg2, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg2
 	return args, nil
 
 }
@@ -942,6 +951,15 @@ func field_Mutation_disableApplication_args(rawArgs map[string]interface{}) (map
 		}
 	}
 	args["environment"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg2, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg2
 	return args, nil
 
 }
@@ -1779,6 +1797,15 @@ func field_Query_eventActivations_args(rawArgs map[string]interface{}) (map[stri
 		}
 	}
 	args["environment"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -2937,7 +2964,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EnableApplication(childComplexity, args["application"].(string), args["environment"].(string)), true
+		return e.complexity.Mutation.EnableApplication(childComplexity, args["application"].(string), args["environment"].(string), args["namespace"].(string)), true
 
 	case "Mutation.disableApplication":
 		if e.complexity.Mutation.DisableApplication == nil {
@@ -2949,7 +2976,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DisableApplication(childComplexity, args["application"].(string), args["environment"].(string)), true
+		return e.complexity.Mutation.DisableApplication(childComplexity, args["application"].(string), args["environment"].(string), args["namespace"].(string)), true
 
 	case "Mutation.createIDPPreset":
 		if e.complexity.Mutation.CreateIdppreset == nil {
@@ -3297,7 +3324,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.EventActivations(childComplexity, args["environment"].(string)), true
+		return e.complexity.Query.EventActivations(childComplexity, args["environment"].(string), args["namespace"].(string)), true
 
 	case "Query.limitRanges":
 		if e.complexity.Query.LimitRanges == nil {
@@ -9808,7 +9835,7 @@ func (ec *executionContext) _Mutation_enableApplication(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EnableApplication(rctx, args["application"].(string), args["environment"].(string))
+		return ec.resolvers.Mutation().EnableApplication(rctx, args["application"].(string), args["environment"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -9843,7 +9870,7 @@ func (ec *executionContext) _Mutation_disableApplication(ctx context.Context, fi
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DisableApplication(rctx, args["application"].(string), args["environment"].(string))
+		return ec.resolvers.Mutation().DisableApplication(rctx, args["application"].(string), args["environment"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -11597,7 +11624,7 @@ func (ec *executionContext) _Query_eventActivations(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EventActivations(rctx, args["environment"].(string))
+		return ec.resolvers.Query().EventActivations(rctx, args["environment"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -19307,7 +19334,7 @@ type Query {
 
     content(contentType: String!, id: String!): JSON
     topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
-    eventActivations(environment: String!): [EventActivation!]!
+    eventActivations(environment: String!, namespace: String!): [EventActivation!]!
 
     limitRanges(environment: String!): [LimitRange!]!
 
@@ -19331,8 +19358,8 @@ type Mutation {
     updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput!
     deleteApplication(name: String!): DeleteApplicationOutput!
 
-    enableApplication(application: String!, environment: String!): ApplicationMapping
-    disableApplication(application: String!, environment: String!): ApplicationMapping
+    enableApplication(application: String!, environment: String!, namespace: String!): ApplicationMapping
+    disableApplication(application: String!, environment: String!, namespace: String!): ApplicationMapping
 
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
     deleteIDPPreset(name: String!): IDPPreset

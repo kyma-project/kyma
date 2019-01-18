@@ -29,7 +29,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		resolver := application.NewEventActivationResolver(svc, nil)
-		result, err := resolver.EventActivationsQuery(nil, "test")
+		result, err := resolver.EventActivationsQuery(nil, "test", "")
 
 		require.NoError(t, err)
 		assert.Len(t, result, 2)
@@ -43,7 +43,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		resolver := application.NewEventActivationResolver(svc, nil)
-		result, err := resolver.EventActivationsQuery(nil, "test")
+		result, err := resolver.EventActivationsQuery(nil, "test", "")
 
 		require.NoError(t, err)
 		assert.Empty(t, result)
@@ -55,7 +55,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		resolver := application.NewEventActivationResolver(svc, nil)
-		_, err := resolver.EventActivationsQuery(nil, "test")
+		_, err := resolver.EventActivationsQuery(nil, "test", "")
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))

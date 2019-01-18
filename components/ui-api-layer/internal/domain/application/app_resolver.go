@@ -85,6 +85,7 @@ func (r *applicationResolver) ApplicationsQuery(ctx context.Context, environment
 		} else {
 			ns = *environment
 		}
+
 		items, err = r.appSvc.ListInEnvironment(ns)
 		if err != nil {
 			glog.Error(errors.Wrapf(err, "while listing %s for namespace %v", pretty.Applications, ns))
@@ -165,12 +166,22 @@ func (r *applicationResolver) ConnectorServiceQuery(ctx context.Context, applica
 	return dto, nil
 }
 
-func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error) {
-	em, err := r.appSvc.Enable(environment, application)
+func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, application string, environment string, namespace string) (*gqlschema.ApplicationMapping, error) {
+	if namespace == "" && environment == "" {
+		return nil, errors.New("One of environment or namespace is required")
+	}
+	var ns string
+	if namespace != "" {
+		ns = namespace
+	} else {
+		ns = environment
+	}
+
+	em, err := r.appSvc.Enable(ns, application)
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while enabling %s", pretty.Application))
-		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithEnvironment(environment))
+		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithEnvironment(ns))
 	}
 
 	return &gqlschema.ApplicationMapping{
@@ -179,15 +190,25 @@ func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, app
 	}, nil
 }
 
-func (r *applicationResolver) DisableApplicationMutation(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error) {
-	err := r.appSvc.Disable(environment, application)
+func (r *applicationResolver) DisableApplicationMutation(ctx context.Context, application string, environment string, namespace string) (*gqlschema.ApplicationMapping, error) {
+	if namespace == "" && environment == "" {
+		return nil, errors.New("One of environment or namespace is required")
+	}
+	var ns string
+	if namespace != "" {
+		ns = namespace
+	} else {
+		ns = environment
+	}
+
+	err := r.appSvc.Disable(ns, application)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while disabling %s", pretty.Application))
-		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithEnvironment(environment))
+		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithEnvironment(ns))
 	}
 
 	return &gqlschema.ApplicationMapping{
-		Environment: environment,
+		Environment: ns,
 		Application: application,
 	}, nil
 }
