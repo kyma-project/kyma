@@ -47,9 +47,9 @@ func (r *repository) Get(application, name string) (data strategy.SecretData, er
 	secret, err := r.secretsManager.Get(name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			return map[string][]byte{}, apperrors.NotFound("Secret %s not found", name)
+			return strategy.SecretData{}, apperrors.NotFound("Secret %s not found", name)
 		}
-		return map[string][]byte{}, apperrors.Internal("Getting %s secret failed, %s", name, err.Error())
+		return strategy.SecretData{}, apperrors.Internal("Getting %s secret failed, %s", name, err.Error())
 	}
 
 	return secret.Data, nil
