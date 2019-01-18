@@ -68,6 +68,7 @@ func (r *applicationResolver) ApplicationQuery(ctx context.Context, name string)
 }
 
 func (r *applicationResolver) ApplicationsQuery(ctx context.Context, environment *string, namespace *string, first *int, offset *int) ([]gqlschema.Application, error) {
+	// TODO: Environment argument is deprecated. Delete it after full migration to namespace.
 	var items []*appTypes.Application
 	var err error
 
@@ -79,12 +80,7 @@ func (r *applicationResolver) ApplicationsQuery(ctx context.Context, environment
 		}
 	} else { // retrieve only for given namespace (or environment - deprecated)
 		// TODO: Add support for paging.
-		var ns string
-		if namespace != nil {
-			ns = *namespace
-		} else {
-			ns = *environment
-		}
+		ns := returnNamespaceIfGiven(namespace, environment)
 
 		items, err = r.appSvc.ListInEnvironment(ns)
 		if err != nil {
@@ -167,15 +163,11 @@ func (r *applicationResolver) ConnectorServiceQuery(ctx context.Context, applica
 }
 
 func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, application string, environment string, namespace string) (*gqlschema.ApplicationMapping, error) {
+	// TODO: Environment argument is deprecated. Delete it after full migration to namespace.
 	if namespace == "" && environment == "" {
 		return nil, errors.New("One of environment or namespace is required")
 	}
-	var ns string
-	if namespace != "" {
-		ns = namespace
-	} else {
-		ns = environment
-	}
+	ns := returnNamespaceIfGiven(&namespace, &environment)
 
 	em, err := r.appSvc.Enable(ns, application)
 
@@ -186,20 +178,17 @@ func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, app
 
 	return &gqlschema.ApplicationMapping{
 		Environment: em.Namespace,
+		Namespace:   em.Namespace,
 		Application: em.Name,
 	}, nil
 }
 
 func (r *applicationResolver) DisableApplicationMutation(ctx context.Context, application string, environment string, namespace string) (*gqlschema.ApplicationMapping, error) {
+	// TODO: Environment argument is deprecated. Delete it after full migration to namespace.
 	if namespace == "" && environment == "" {
 		return nil, errors.New("One of environment or namespace is required")
 	}
-	var ns string
-	if namespace != "" {
-		ns = namespace
-	} else {
-		ns = environment
-	}
+	ns := returnNamespaceIfGiven(&namespace, &environment)
 
 	err := r.appSvc.Disable(ns, application)
 	if err != nil {
@@ -209,6 +198,7 @@ func (r *applicationResolver) DisableApplicationMutation(ctx context.Context, ap
 
 	return &gqlschema.ApplicationMapping{
 		Environment: ns,
+		Namespace:   ns,
 		Application: application,
 	}, nil
 }
@@ -250,4 +240,14 @@ func (r *applicationResolver) returnWithDefaults(description *string, gqlLabels 
 	}
 
 	return desc, labels
+}
+
+// TODO: Environment argument is deprecated. Delete returnNamespaceIfGiven function after full migration to namespace.
+func returnNamespaceIfGiven(namespace *string, environment *string) string {
+	if namespace != nil && *namespace != "" {
+		return *namespace
+	} else if environment != nil {
+		return *environment
+	}
+	return ""
 }

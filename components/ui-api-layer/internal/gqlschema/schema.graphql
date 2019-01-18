@@ -421,6 +421,7 @@ type ConnectorService {
 
 type ApplicationMapping {
     environment: String!
+    namespace: String!
     application: String!
 }
 

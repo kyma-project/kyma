@@ -79,6 +79,7 @@ type ComplexityRoot struct {
 
 	ApplicationMapping struct {
 		Environment func(childComplexity int) int
+		Namespace   func(childComplexity int) int
 		Application func(childComplexity int) int
 	}
 
@@ -2103,6 +2104,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ApplicationMapping.Environment(childComplexity), true
+
+	case "ApplicationMapping.namespace":
+		if e.complexity.ApplicationMapping.Namespace == nil {
+			break
+		}
+
+		return e.complexity.ApplicationMapping.Namespace(childComplexity), true
 
 	case "ApplicationMapping.application":
 		if e.complexity.ApplicationMapping.Application == nil {
@@ -5034,6 +5042,11 @@ func (ec *executionContext) _ApplicationMapping(ctx context.Context, sel ast.Sel
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "namespace":
+			out.Values[i] = ec._ApplicationMapping_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "application":
 			out.Values[i] = ec._ApplicationMapping_application(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5064,6 +5077,33 @@ func (ec *executionContext) _ApplicationMapping_environment(ctx context.Context,
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Environment, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ApplicationMapping_namespace(ctx context.Context, field graphql.CollectedField, obj *ApplicationMapping) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ApplicationMapping",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -19167,6 +19207,7 @@ type ConnectorService {
 
 type ApplicationMapping {
     environment: String!
+    namespace: String!
     application: String!
 }
 
