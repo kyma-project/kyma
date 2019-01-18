@@ -3,12 +3,11 @@ title: Custom component installation
 type: Installation
 ---
 
-You can use Kyma with a custom deployment of a component that you installed in the target environment. To enable such implementation, remove a given component from the list of components that install with Kyma.
-The version of your component's deployment must match the version that Kyma currently supports. [todo]
+Since Kyma is a modular tool, you can remove some components so that they do not install together with Kyma. You can also add some of them later, after the installation process. Read this document to learn how.
 
 ## Remove a component
 
-To disable a component from the list of components that install with Kyma, remove this component's entries from the appropriate file. The file depends on whether you install Kyma from the release or from sources, and whether you install Kyma locally or on the cluster.
+To disable a component from the list of components that install with Kyma, remove this component's entries from the appropriate file. The file depends on whether you install Kyma from the release or from sources, and whether you install Kyma locally or on a cluster. The version of your component's deployment must match the version that Kyma currently supports.
 
 ### Installation from the release
 
@@ -43,4 +42,23 @@ To disable a component from the list of components that install with Kyma, remov
 
 
 ## Add a component
-[todo]
+
+To install a component that does not install with Kyma by default, run an appropriate `helm install` command inside the `resources` directory:
+
+* To install Jaeger, run:
+
+```bash
+helm install -n jaeger -f jaeger/values.yaml --namespace kyma-system --set-string global.domainName=kyma.local --set-string global.isLocalEnv=true jaeger/
+```
+
+* To install Logging, run:
+
+```bash
+helm install logging --set global.isLocalEnv=true --namespace=kyma-system --name=logging
+```
+
+* To install Monitoring, run:
+
+```bash
+helm install monitoring --set global.isLocalEnv=true --set global.alertTools.credentials.victorOps.apikey="" --set global.alertTools.credentials.victorOps.routingkey="" --set global.alertTools.credentials.slack.channel="" --set global.alertTools.credentials.slack.apiurl="" --set global.domainName=kyma.local --namespace=kyma-system --name=monitoring
+```

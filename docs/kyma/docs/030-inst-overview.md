@@ -2,34 +2,40 @@
 title: Overview
 type: Installation
 ---
-[todo]
 
-Kyma is a complex tool which consists of many different [components](#details-details) that provide various functionalities to extend your application.
+Kyma is a complex tool which consists of many different [components](#details-details) that provide various functionalities to extend your application. This entails high technical requirements that may influence your local development process. To meet the customers needs, we ensured Kyma modularity, which means that you can decide not to include a given component in the Kyma installation, or install it after the Kyma installation process. Read [this](#installation-custom-component-installation) document to learn how.
 
-You can install either from the release or from sources. You can also install... [todo]
+To make the local development process easier, we introduced the **Kyma Lite** concept, in which case some components are by default not included in the local installation process. These are the Kyma and Kyma Lite components:
 
-
-Due to this fact, we provide Kyma modularity , you can choose components you want to include in the Kyma installation.
-These components do not install with Kyma Lite:
-
-| Parameter Name | Type | Description |
-|----------------|------|-------------|
-| `host` | `string` | The fully-qualified address of the SQL Server. |
-| `port` | `int	` | The port number to connect to on the SQL Server. |
-| `database` | `string` | The name of the database. |
-| `username` | `string` | The name of the database user. |
-| `password` | `string` | The password for the database user. |
+| Component | Kyma | Kyma Lite |
+|----------------|------|
+| `core` | ✅ | ✅ |
+| `cluster-essentials` | ✅ | ✅ |
+| `application-connector` | ✅ | ✅ |
+| `ark` | ✅ | ⛔️ |
+| `dex` | ✅ | ✅ |
+| `istio` | ✅ | ✅ |
+| `istio-kyma-patch` | ✅ | ✅ |
+| `jaeger` | ✅ | ⛔️ |
+| `knative` | ✅ | ✅ |
+| `logging` | ✅ | ⛔️ |
+| `monitoring` | ✅ | ⛔️ |
+| `prometheus-operator` | ✅ | ✅ |
+| `service-catalog` | ✅ | ✅ |
+| `xip-patch` | ✅ | ⛔️ |
 
 Follow these installation guides to install Kyma locally:
-* Install Kyma locally from release
-* Install Kyma locally from sources
+- [Install Kyma locally from release](#installation-install-kyma-locally-from-the-release)
+- [Install Kyma locally from sources](#installation-install-kyma-locally-from-sources)
 
 You can also install Kyma depending on the supported cloud providers:
-- Install Kyma on GKE cluster
+- [Install Kyma on GKE cluster](#installation-install-kyma-on-a-gke-cluster)
 - Install Kyma on AKS cluster
-- xip?
+- [Install Kyma on a GKE cluster with wildcard DNS](#installation-install-kyma-on-a-gke-cluster-with-wildcard-dns)
+- Install Kyma on a AKS cluster with wildcard DNS
 
 Read rest of the installation documents to:
-- Install Kyma with Knative
-- Reinstall Kyma
-- Learn more about the installation scripts
+- [Install Kyma with Knative](#installation-installation-with-knative)
+- [Update Kyma](#installation-update-kyma)
+- [Reinstall Kyma](#installation-reinstall-kyma)
+- [Get a deep-dive knowledge about the installation scripts](#installation-local-installation-scripts)
