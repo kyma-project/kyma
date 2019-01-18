@@ -29,7 +29,6 @@ spec:
         heritage: "{{ .Release.Service }}"
       {{ if .Values.apiserver.annotations }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/apiregistration.yaml") . | sha256sum }}
 {{ toYaml .Values.apiserver.annotations | indent 8 }}
       {{- end }}
     spec:
