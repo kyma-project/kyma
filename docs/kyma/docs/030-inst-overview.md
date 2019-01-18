@@ -8,7 +8,7 @@ Kyma is a complex tool which consists of many different [components](#details-de
 To make the local development process easier, we introduced the **Kyma Lite** concept, in which case some components are by default not included in the local installation process. These are the Kyma and Kyma Lite components:
 
 | Component | Kyma | Kyma Lite |
-|----------------|------|
+|----------------|------|------|
 | `core` | ✅ | ✅ |
 | `cluster-essentials` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
