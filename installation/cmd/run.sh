@@ -19,19 +19,25 @@ do
     
     key="$1"
 
+    if [[ ${key} == *"="* ]]; then
+        echo "Invalid parameter"
+        echo "Use space instead of equal sign"
+        exit 1
+    fi
+
     case ${key} in
         --skip-minikube-start)
             SKIP_MINIKUBE_START=true
             shift # past argument
         ;;
         --cr)
-            checkInputParameterValue "$1" "$2"
-            CR_PATH="$2"
+            checkInputParameterValue "$2"
+            CR_PATH="$2"a
             shift # past argument
             shift # past value
         ;;
         --vm-driver)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             VM_DRIVER="$2"
             shift
             shift
@@ -41,6 +47,7 @@ do
             shift
         ;;
         *)    # unknown option
+            echo "Unknown input parameter: ${1}"
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
         ;;

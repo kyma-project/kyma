@@ -21,32 +21,39 @@ do
 
     key="$1"
 
+    if [[ ${key} == *"="* ]]; then
+        echo "Invalid parameter"
+        echo "Use space instead of equal sign"
+        exit 1
+    fi
+
     case ${key} in
         --disk-size)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             DISK_SIZE="$2"
             shift
             shift
             ;;
         --vm-driver)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             VM_DRIVER="$2"
             shift # past argument
             shift # past value
             ;;
         --memory)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             MEMORY="$2"
             shift
             shift
             ;;
         --domain)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             MINIKUBE_DOMAIN="$2"
             shift # past argument
             shift # past value
             ;;
         *)    # unknown option
+            echo "Unknown input parameter: ${1}"
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
             ;;
