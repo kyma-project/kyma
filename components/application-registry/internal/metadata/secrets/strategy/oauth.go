@@ -13,7 +13,7 @@ const (
 
 type oauth struct{}
 
-func (svc *oauth) ToCredentials(secretData map[string][]byte, appCredentials *applications.Credentials) model.Credentials {
+func (svc *oauth) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.Credentials {
 	clientId, clientSecret := svc.readOauthMap(secretData)
 
 	return model.Credentials{
@@ -29,11 +29,11 @@ func (svc *oauth) CredentialsProvided(credentials *model.Credentials) bool {
 	return svc.oauthCredentialsProvided(credentials)
 }
 
-func (svc *oauth) CreateSecretData(credentials *model.Credentials) (map[string][]byte, apperrors.AppError) {
+func (svc *oauth) CreateSecretData(credentials *model.Credentials) (SecretData, apperrors.AppError) {
 	return svc.makeOauthMap(credentials.Oauth.ClientID, credentials.Oauth.ClientSecret), nil
 }
 
-func (svc *oauth) ToAppCredentials(credentials *model.Credentials, secretName string) applications.Credentials {
+func (svc *oauth) ToCredentialsInfo(credentials *model.Credentials, secretName string) applications.Credentials {
 	applicationCredentials := applications.Credentials{
 		AuthenticationUrl: credentials.Oauth.URL,
 		Type:              applications.CredentialsOAuthType,
@@ -41,6 +41,11 @@ func (svc *oauth) ToAppCredentials(credentials *model.Credentials, secretName st
 	}
 
 	return applicationCredentials
+}
+
+func (svc *oauth) ShouldUpdate(currentData SecretData, newData SecretData) bool {
+	return string(currentData[OauthClientIDKey]) != string(newData[OauthClientIDKey]) ||
+		string(currentData[OauthClientSecretKey]) != string(newData[OauthClientSecretKey])
 }
 
 func (svc *oauth) oauthCredentialsProvided(credentials *model.Credentials) bool {

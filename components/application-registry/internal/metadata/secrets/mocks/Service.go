@@ -73,8 +73,8 @@ func (_m *Service) Get(application string, credentials applications.Credentials)
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: application, serviceID, credentials
-func (_m *Service) Update(application string, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError) {
+// Upsert provides a mock function with given fields: application, serviceID, credentials
+func (_m *Service) Upsert(application string, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError) {
 	ret := _m.Called(application, serviceID, credentials)
 
 	var r0 applications.Credentials

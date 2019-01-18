@@ -7,17 +7,22 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 )
 
-type Strategy interface {
-	ToCredentials(secretData map[string][]byte, appCredentials *applications.Credentials) model.Credentials
+type SecretData map[string][]byte
+
+type ModificationStrategy interface {
 	CredentialsProvided(credentials *model.Credentials) bool
-	CreateSecretData(credentials *model.Credentials) (map[string][]byte, apperrors.AppError) // TODO - allias secretData?
-	ToAppCredentials(credentials *model.Credentials, secretName string) applications.Credentials
+	CreateSecretData(credentials *model.Credentials) (SecretData, apperrors.AppError)
+	ToCredentialsInfo(credentials *model.Credentials, secretName string) applications.Credentials
+	ShouldUpdate(currentData SecretData, newData SecretData) bool
 }
 
-// TODO - split Strategy interface to two?
+type AccessStrategy interface {
+	ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.Credentials
+}
+
 type Factory interface {
-	NewSecretModificationStrategy(credentials *model.Credentials) (Strategy, apperrors.AppError)
-	NewSecretAccessStrategy(credentials *applications.Credentials) (Strategy, apperrors.AppError)
+	NewSecretModificationStrategy(credentials *model.Credentials) (ModificationStrategy, apperrors.AppError)
+	NewSecretAccessStrategy(credentials *applications.Credentials) (AccessStrategy, apperrors.AppError)
 }
 
 type factory struct {
@@ -30,8 +35,7 @@ func NewSecretsStrategyFactory(certificateGenerator certificates.Generator) Fact
 	}
 }
 
-func (s *factory) NewSecretModificationStrategy(credentials *model.Credentials) (Strategy, apperrors.AppError) {
-	// TODO - decide what to do with all that validation?
+func (s *factory) NewSecretModificationStrategy(credentials *model.Credentials) (ModificationStrategy, apperrors.AppError) {
 	if !credentialsValid(credentials) {
 		return nil, apperrors.WrongInput("Error: only one credential type have to be provided.")
 	}
@@ -71,7 +75,7 @@ func credentialsValid(credentials *model.Credentials) bool {
 	return credentialsCount == 1
 }
 
-func (s *factory) NewSecretAccessStrategy(credentials *applications.Credentials) (Strategy, apperrors.AppError) {
+func (s *factory) NewSecretAccessStrategy(credentials *applications.Credentials) (AccessStrategy, apperrors.AppError) {
 	switch credentials.Type {
 	case applications.CredentialsBasicType:
 		return &basicAuth{}, nil

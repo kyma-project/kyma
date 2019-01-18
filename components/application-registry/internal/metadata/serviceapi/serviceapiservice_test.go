@@ -611,7 +611,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"Update",
+			"Upsert",
 			"app",
 			"uuid-1",
 			api.Credentials,
@@ -666,7 +666,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"Update",
+			"Upsert",
 			"app",
 			"uuid-1",
 			api.Credentials,
@@ -796,7 +796,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"Update",
+			"Upsert",
 			"app",
 			"uuid-1",
 			api.Credentials,
@@ -839,7 +839,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"Update",
+			"Upsert",
 			"app",
 			"uuid-1",
 			api.Credentials,
@@ -916,7 +916,7 @@ func TestDefaultService_Update(t *testing.T) {
 
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
-			"Update",
+			"Upsert",
 			"app",
 			"uuid-1",
 			api.Credentials,

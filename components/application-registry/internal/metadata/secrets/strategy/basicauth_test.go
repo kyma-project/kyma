@@ -31,7 +31,7 @@ func TestBasicAuth_ToCredentials(t *testing.T) {
 		BasicAuthPasswordKey: []byte(password),
 	}
 
-	t.Run("should convert to basicCredentials", func(t *testing.T) {
+	t.Run("should convert to credentials", func(t *testing.T) {
 		// given
 		basicAuthStrategy := basicAuth{}
 
@@ -75,7 +75,7 @@ func TestBasicAuth_CredentialsProvided(t *testing.T) {
 		},
 	}
 
-	t.Run("should check if basicCredentials provided", func(t *testing.T) {
+	t.Run("should check if credentials provided", func(t *testing.T) {
 		// given
 		basicAuthStrategy := basicAuth{}
 
@@ -84,7 +84,6 @@ func TestBasicAuth_CredentialsProvided(t *testing.T) {
 			result := basicAuthStrategy.CredentialsProvided(test.credentials)
 
 			// then
-			assert.Equal(t, test.result, result)
 			assert.Equal(t, test.result, result)
 		}
 	})
@@ -105,13 +104,13 @@ func TestBasicAuth_CreateSecretData(t *testing.T) {
 	})
 }
 
-func TestBasicAuth_ToAppCredentials(t *testing.T) {
-	t.Run("should convert to app basicCredentials", func(t *testing.T) {
+func TestBasicAuth_ToCredentialsInfo(t *testing.T) {
+	t.Run("should convert to app credentials", func(t *testing.T) {
 		// given
 		basicAuthStrategy := basicAuth{}
 
 		// when
-		appCredentials := basicAuthStrategy.ToAppCredentials(basicCredentials, secretName)
+		appCredentials := basicAuthStrategy.ToCredentialsInfo(basicCredentials, secretName)
 
 		// then
 		assert.Equal(t, applications.CredentialsBasicType, appCredentials.Type)
@@ -120,19 +119,73 @@ func TestBasicAuth_ToAppCredentials(t *testing.T) {
 	})
 }
 
-//testCases := []struct {
-//secretData     map[string][]byte
-//appCredentials *applications.Credentials
-//}{
-//{
-//secretData: map[string][]byte{
-//BasicAuthUsernameKey: []byte(username),
-//BasicAuthPasswordKey: []byte(password),
-//},
-//appCredentials:nil,
-//},
-//{
-//secretData: map[string][]byte{},
-//appCredentials:nil,
-//},
-//}
+func TestBasicAuth_ShouldUpdate(t *testing.T) {
+	testCases := []struct {
+		currentData SecretData
+		newData     SecretData
+		result      bool
+	}{
+		{
+			currentData: SecretData{
+				BasicAuthUsernameKey: []byte(username),
+				BasicAuthPasswordKey: []byte(password),
+			},
+			newData: SecretData{
+				BasicAuthUsernameKey: []byte("changed username"),
+				BasicAuthPasswordKey: []byte(password),
+			},
+			result: true,
+		},
+		{
+			currentData: SecretData{
+				BasicAuthUsernameKey: []byte(username),
+				BasicAuthPasswordKey: []byte(password),
+			},
+			newData: SecretData{
+				BasicAuthUsernameKey: []byte(username),
+				BasicAuthPasswordKey: []byte("changed password"),
+			},
+			result: true,
+		},
+		{
+			currentData: SecretData{},
+			newData: SecretData{
+				BasicAuthUsernameKey: []byte(username),
+				BasicAuthPasswordKey: []byte(password),
+			},
+			result: true,
+		},
+		{
+			currentData: SecretData{
+				BasicAuthUsernameKey: []byte(username),
+				BasicAuthPasswordKey: []byte(password),
+			},
+			newData: SecretData{},
+			result:  true,
+		},
+		{
+			currentData: SecretData{
+				BasicAuthUsernameKey: []byte(username),
+				BasicAuthPasswordKey: []byte(password),
+			},
+			newData: SecretData{
+				BasicAuthUsernameKey: []byte(username),
+				BasicAuthPasswordKey: []byte(password),
+			},
+			result: false,
+		},
+	}
+
+	t.Run("should return true when update needed", func(t *testing.T) {
+		// given
+		basicAuthStrategy := basicAuth{}
+
+		for _, test := range testCases {
+			// when
+			result := basicAuthStrategy.ShouldUpdate(test.currentData, test.newData)
+
+			// then
+			assert.Equal(t, test.result, result)
+		}
+	})
+}

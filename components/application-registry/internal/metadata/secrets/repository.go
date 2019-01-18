@@ -4,6 +4,7 @@ package secrets
 import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy"
 	"k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -11,10 +12,10 @@ import (
 
 // Repository contains operations for managing client credentials
 type Repository interface {
-	Create(application, name, serviceID string, data map[string][]byte) apperrors.AppError
-	Get(application, name string) (map[string][]byte, apperrors.AppError)
+	Create(application, name, serviceID string, data strategy.SecretData) apperrors.AppError
+	Get(application, name string) (strategy.SecretData, apperrors.AppError)
 	Delete(name string) apperrors.AppError
-	Upsert(application, name, secretID string, data map[string][]byte) apperrors.AppError
+	Upsert(application, name, secretID string, data strategy.SecretData) apperrors.AppError
 }
 
 type repository struct {
@@ -37,12 +38,12 @@ func NewRepository(secretsManager Manager) Repository {
 }
 
 // Create adds a new secret with one entry containing specified clientId and clientSecret
-func (r *repository) Create(application, name, serviceID string, data map[string][]byte) apperrors.AppError {
+func (r *repository) Create(application, name, serviceID string, data strategy.SecretData) apperrors.AppError {
 	secret := makeSecret(name, serviceID, application, data)
 	return r.create(application, secret, name)
 }
 
-func (r *repository) Get(application, name string) (data map[string][]byte, error apperrors.AppError) {
+func (r *repository) Get(application, name string) (data strategy.SecretData, error apperrors.AppError) {
 	secret, err := r.secretsManager.Get(name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
@@ -62,7 +63,7 @@ func (r *repository) Delete(name string) apperrors.AppError {
 	return nil
 }
 
-func (r *repository) Upsert(application, name, serviceID string, data map[string][]byte) apperrors.AppError {
+func (r *repository) Upsert(application, name, serviceID string, data strategy.SecretData) apperrors.AppError {
 	secret := makeSecret(name, serviceID, application, data)
 
 	_, err := r.secretsManager.Update(secret)
@@ -86,7 +87,7 @@ func (r *repository) create(application string, secret *v1.Secret, name string) 
 	return nil
 }
 
-func makeSecret(name, serviceID, application string, data map[string][]byte) *v1.Secret {
+func makeSecret(name, serviceID, application string, data strategy.SecretData) *v1.Secret {
 	return &v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,

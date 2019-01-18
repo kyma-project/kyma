@@ -11,10 +11,9 @@ const (
 	BasicAuthPasswordKey = "password"
 )
 
-// TODO - add tests
 type basicAuth struct{}
 
-func (svc *basicAuth) ToCredentials(secretData map[string][]byte, appCredentials *applications.Credentials) model.Credentials {
+func (svc *basicAuth) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.Credentials {
 	username, password := svc.readBasicAuthMap(secretData)
 
 	return model.Credentials{
@@ -25,22 +24,26 @@ func (svc *basicAuth) ToCredentials(secretData map[string][]byte, appCredentials
 	}
 }
 
-// TODO - what about passing basicCredentials in factory as they are passed to each function?
 func (svc *basicAuth) CredentialsProvided(credentials *model.Credentials) bool {
 	return svc.basicCredentialsProvided(credentials)
 }
 
-func (svc *basicAuth) CreateSecretData(credentials *model.Credentials) (map[string][]byte, apperrors.AppError) {
+func (svc *basicAuth) CreateSecretData(credentials *model.Credentials) (SecretData, apperrors.AppError) {
 	return svc.makeBasicAuthMap(credentials.Basic.Username, credentials.Basic.Password), nil
 }
 
-func (svc *basicAuth) ToAppCredentials(credentials *model.Credentials, secretName string) applications.Credentials {
+func (svc *basicAuth) ToCredentialsInfo(credentials *model.Credentials, secretName string) applications.Credentials {
 	applicationCredentials := applications.Credentials{
 		Type:       applications.CredentialsBasicType,
 		SecretName: secretName,
 	}
 
 	return applicationCredentials
+}
+
+func (svc *basicAuth) ShouldUpdate(currentData SecretData, newData SecretData) bool {
+	return string(currentData[BasicAuthUsernameKey]) != string(newData[BasicAuthUsernameKey]) ||
+		string(currentData[BasicAuthPasswordKey]) != string(newData[BasicAuthPasswordKey])
 }
 
 func (svc *basicAuth) makeBasicAuthMap(username, password string) map[string][]byte {

@@ -15,7 +15,7 @@ func TestFactory_NewSecretModificationStrategy(t *testing.T) {
 
 	testCases := []struct {
 		credentials *model.Credentials
-		strategy    Strategy
+		strategy    ModificationStrategy
 	}{
 		{
 			credentials: basicCredentials,
@@ -62,7 +62,7 @@ func TestFactory_NewSecretModificationStrategy(t *testing.T) {
 func TestFactory_NewSecretAccessStrategy(t *testing.T) {
 	testCases := []struct {
 		credentials *applications.Credentials
-		strategy    Strategy
+		strategy    AccessStrategy
 	}{
 		{
 			credentials: &applications.Credentials{Type: applications.CredentialsBasicType},

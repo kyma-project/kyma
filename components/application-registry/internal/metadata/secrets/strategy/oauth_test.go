@@ -39,7 +39,7 @@ func TestOauth_ToCredentials(t *testing.T) {
 		AuthenticationUrl: oauthUrl,
 	}
 
-	t.Run("should convert to basicCredentials", func(t *testing.T) {
+	t.Run("should convert to credentials", func(t *testing.T) {
 		// given
 		oauthStrategy := oauth{}
 
@@ -83,7 +83,7 @@ func TestOauth_CredentialsProvided(t *testing.T) {
 		},
 	}
 
-	t.Run("should check if basicCredentials provided", func(t *testing.T) {
+	t.Run("should check if credentials provided", func(t *testing.T) {
 		// given
 		oauthStrategy := oauth{}
 
@@ -113,17 +113,88 @@ func TestOauth_CreateSecretData(t *testing.T) {
 	})
 }
 
-func TestOauth_ToAppCredentials(t *testing.T) {
-	t.Run("should convert to app basicCredentials", func(t *testing.T) {
+func TestOauth_ToCredentialsInfo(t *testing.T) {
+	t.Run("should convert to app credentials", func(t *testing.T) {
 		// given
 		oauthStrategy := oauth{}
 
 		// when
-		appCredentials := oauthStrategy.ToAppCredentials(oauthCredentials, secretName)
+		appCredentials := oauthStrategy.ToCredentialsInfo(oauthCredentials, secretName)
 
 		// then
 		assert.Equal(t, applications.CredentialsOAuthType, appCredentials.Type)
 		assert.Equal(t, secretName, appCredentials.SecretName)
 		assert.Equal(t, oauthUrl, appCredentials.AuthenticationUrl)
+	})
+}
+
+func TestOauth_ShouldUpdate(t *testing.T) {
+	testCases := []struct {
+		currentData SecretData
+		newData     SecretData
+		result      bool
+	}{
+		{
+			currentData: SecretData{
+				OauthClientIDKey:     []byte(clientId),
+				OauthClientSecretKey: []byte(clientSecret),
+			},
+			newData: SecretData{
+				OauthClientIDKey:     []byte("changed client id"),
+				OauthClientSecretKey: []byte(clientSecret),
+			},
+			result: true,
+		},
+		{
+			currentData: SecretData{
+				OauthClientIDKey:     []byte(clientId),
+				OauthClientSecretKey: []byte(clientSecret),
+			},
+			newData: SecretData{
+				OauthClientIDKey:     []byte(username),
+				OauthClientSecretKey: []byte("changed secret"),
+			},
+			result: true,
+		},
+		{
+			currentData: SecretData{},
+			newData: SecretData{
+				OauthClientIDKey:     []byte(clientId),
+				OauthClientSecretKey: []byte(clientSecret),
+			},
+			result: true,
+		},
+		{
+			currentData: SecretData{
+				OauthClientIDKey:     []byte(clientId),
+				OauthClientSecretKey: []byte(clientSecret),
+			},
+			newData: SecretData{},
+			result:  true,
+		},
+		{
+			currentData: SecretData{
+				OauthClientIDKey:     []byte(clientId),
+				OauthClientSecretKey: []byte(clientSecret),
+			},
+			newData: SecretData{
+				OauthClientIDKey:     []byte(clientId),
+				OauthClientSecretKey: []byte(clientSecret),
+			},
+			result: false,
+		},
+	}
+
+	t.Run("should return true when update needed", func(t *testing.T) {
+		// given
+		oauthStrategy := oauth{}
+
+		for _, test := range testCases {
+			// when
+			result := oauthStrategy.ShouldUpdate(test.currentData, test.newData)
+
+			// then
+			assert.Equal(t, test.result, result)
+		}
 	})
 }

@@ -3,6 +3,8 @@ package secrets
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
@@ -33,7 +35,7 @@ var (
 		},
 	}
 
-	secretData = map[string][]byte{
+	secretData = strategy.SecretData{
 		"key":  []byte("value"),
 		"key2": []byte("value2"),
 	}
@@ -51,13 +53,13 @@ func TestService_Create(t *testing.T) {
 		nameResolver := &k8smocks.NameResolver{}
 		nameResolver.On("GetResourceName", appName, serviceId).Return(secretName)
 
-		strategy := &strategyMocks.Strategy{}
-		strategy.On("CredentialsProvided", credentials).Return(true)
-		strategy.On("CreateSecretData", credentials).Return(secretData, nil)
-		strategy.On("ToAppCredentials", credentials, secretName).Return(appCredentials)
+		modStrategy := &strategyMocks.ModificationStrategy{}
+		modStrategy.On("CredentialsProvided", credentials).Return(true)
+		modStrategy.On("CreateSecretData", credentials).Return(secretData, nil)
+		modStrategy.On("ToCredentialsInfo", credentials, secretName).Return(appCredentials)
 
 		strategyFactory := &strategyMocks.Factory{}
-		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(strategy, nil)
+		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
 		secretsRepository.On("Create", appName, secretName, serviceId, secretData).Return(nil)
@@ -71,13 +73,13 @@ func TestService_Create(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, appCredentials.Type, createdCredentials.Type)
 		assert.Equal(t, appCredentials.SecretName, createdCredentials.SecretName)
-		assertExpectations(t, nameResolver.Mock, strategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
 	})
 
 	t.Run("should return empty app credentials if credentials are nil", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
-		strategy := &strategyMocks.Strategy{}
+		modStrategy := &strategyMocks.ModificationStrategy{}
 		strategyFactory := &strategyMocks.Factory{}
 		secretsRepository := &mocks.Repository{}
 
@@ -89,13 +91,13 @@ func TestService_Create(t *testing.T) {
 		// then
 		assert.NoError(t, err)
 		assert.Empty(t, createdCredentials)
-		assertExpectations(t, nameResolver.Mock, strategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to initialize strategy", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
-		strategy := &strategyMocks.Strategy{}
+		modStrategy := &strategyMocks.ModificationStrategy{}
 		strategyFactory := &strategyMocks.Factory{}
 		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(nil, apperrors.Internal("error"))
 
@@ -109,16 +111,16 @@ func TestService_Create(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Empty(t, createdCredentials)
-		assertExpectations(t, nameResolver.Mock, strategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
 	})
 
 	t.Run("should return empty app credentials if credentials not provided", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
-		strategy := &strategyMocks.Strategy{}
-		strategy.On("CredentialsProvided", credentials).Return(false)
+		modStrategy := &strategyMocks.ModificationStrategy{}
+		modStrategy.On("CredentialsProvided", credentials).Return(false)
 		strategyFactory := &strategyMocks.Factory{}
-		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(strategy, nil)
+		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
 
@@ -130,7 +132,7 @@ func TestService_Create(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		assert.Empty(t, createdCredentials)
-		assertExpectations(t, nameResolver.Mock, strategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to create secret data", func(t *testing.T) {
@@ -138,12 +140,12 @@ func TestService_Create(t *testing.T) {
 		nameResolver := &k8smocks.NameResolver{}
 		nameResolver.On("GetResourceName", appName, serviceId).Return(secretName)
 
-		strategy := &strategyMocks.Strategy{}
-		strategy.On("CredentialsProvided", credentials).Return(true)
-		strategy.On("CreateSecretData", credentials).Return(nil, apperrors.Internal("error"))
+		modStrategy := &strategyMocks.ModificationStrategy{}
+		modStrategy.On("CredentialsProvided", credentials).Return(true)
+		modStrategy.On("CreateSecretData", credentials).Return(nil, apperrors.Internal("error"))
 
 		strategyFactory := &strategyMocks.Factory{}
-		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(strategy, nil)
+		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
 
@@ -155,7 +157,7 @@ func TestService_Create(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Empty(t, createdCredentials)
-		assertExpectations(t, nameResolver.Mock, strategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to create secret", func(t *testing.T) {
@@ -163,12 +165,12 @@ func TestService_Create(t *testing.T) {
 		nameResolver := &k8smocks.NameResolver{}
 		nameResolver.On("GetResourceName", appName, serviceId).Return(secretName)
 
-		strategy := &strategyMocks.Strategy{}
-		strategy.On("CredentialsProvided", credentials).Return(true)
-		strategy.On("CreateSecretData", credentials).Return(secretData, nil)
+		modStrategy := &strategyMocks.ModificationStrategy{}
+		modStrategy.On("CredentialsProvided", credentials).Return(true)
+		modStrategy.On("CreateSecretData", credentials).Return(secretData, nil)
 
 		strategyFactory := &strategyMocks.Factory{}
-		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(strategy, nil)
+		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
 		secretsRepository.On("Create", appName, secretName, serviceId, secretData).Return(apperrors.Internal("error"))
@@ -181,7 +183,7 @@ func TestService_Create(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Empty(t, createdCredentials)
-		assertExpectations(t, nameResolver.Mock, strategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
 	})
 }
 
@@ -190,10 +192,10 @@ func TestService_Get(t *testing.T) {
 	t.Run("should return credentials", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
-		strategy := &strategyMocks.Strategy{}
-		strategy.On("ToCredentials", secretData, &appCredentials).Return(*credentials)
+		modStrategy := &strategyMocks.AccessStrategy{}
+		modStrategy.On("ToCredentials", secretData, &appCredentials).Return(*credentials)
 		strategyFactory := &strategyMocks.Factory{}
-		strategyFactory.On("NewSecretAccessStrategy", &appCredentials).Return(strategy, nil)
+		strategyFactory.On("NewSecretAccessStrategy", &appCredentials).Return(modStrategy, nil)
 		secretsRepository := &mocks.Repository{}
 		secretsRepository.On("Get", appName, secretName).Return(secretData, nil)
 
@@ -207,13 +209,13 @@ func TestService_Get(t *testing.T) {
 		assert.Equal(t, credentials.Oauth.ClientID, createdCredentials.Oauth.ClientID)
 		assert.Equal(t, credentials.Oauth.ClientSecret, createdCredentials.Oauth.ClientSecret)
 		assert.Equal(t, credentials.Oauth.URL, createdCredentials.Oauth.URL)
-		assertExpectations(t, nameResolver.Mock, strategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to initialize strategy", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
-		strategy := &strategyMocks.Strategy{}
+		modStrategy := &strategyMocks.AccessStrategy{}
 		strategyFactory := &strategyMocks.Factory{}
 		strategyFactory.On("NewSecretAccessStrategy", &appCredentials).Return(nil, apperrors.Internal(""))
 		secretsRepository := &mocks.Repository{}
@@ -226,15 +228,15 @@ func TestService_Get(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Empty(t, createdCredentials)
-		assertExpectations(t, nameResolver.Mock, strategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to get secret", func(t *testing.T) {
 		// given
 		nameResolver := &k8smocks.NameResolver{}
-		strategy := &strategyMocks.Strategy{}
+		modStrategy := &strategyMocks.AccessStrategy{}
 		strategyFactory := &strategyMocks.Factory{}
-		strategyFactory.On("NewSecretAccessStrategy", &appCredentials).Return(strategy, nil)
+		strategyFactory.On("NewSecretAccessStrategy", &appCredentials).Return(modStrategy, nil)
 		secretsRepository := &mocks.Repository{}
 		secretsRepository.On("Get", appName, secretName).Return(nil, apperrors.Internal(""))
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
@@ -245,7 +247,7 @@ func TestService_Get(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Empty(t, createdCredentials)
-		assertExpectations(t, nameResolver.Mock, strategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
 	})
 }
 
@@ -256,27 +258,113 @@ func TestService_Update(t *testing.T) {
 		nameResolver := &k8smocks.NameResolver{}
 		nameResolver.On("GetResourceName", appName, serviceId).Return(secretName)
 
-		strategy := &strategyMocks.Strategy{}
-		strategy.On("CredentialsProvided", credentials).Return(true)
-		strategy.On("CreateSecretData", credentials).Return(secretData, nil)
-		strategy.On("ToAppCredentials", credentials, secretName).Return(appCredentials)
+		modStrategy := &strategyMocks.ModificationStrategy{}
+		modStrategy.On("CredentialsProvided", credentials).Return(true)
+		modStrategy.On("CreateSecretData", credentials).Return(secretData, nil)
+		modStrategy.On("ShouldUpdate", strategy.SecretData{}, secretData).Return(true)
+		modStrategy.On("ToCredentialsInfo", credentials, secretName).Return(appCredentials)
 
 		strategyFactory := &strategyMocks.Factory{}
-		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(strategy, nil)
+		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
+		secretsRepository.On("Get", appName, secretName).Return(strategy.SecretData{}, nil)
 		secretsRepository.On("Upsert", appName, secretName, serviceId, secretData).Return(nil)
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Update(appName, serviceId, credentials)
+		createdCredentials, err := service.Upsert(appName, serviceId, credentials)
 
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, appCredentials.Type, createdCredentials.Type)
 		assert.Equal(t, appCredentials.SecretName, createdCredentials.SecretName)
-		assertExpectations(t, nameResolver.Mock, strategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+	})
+
+	t.Run("should not updated if content the same", func(t *testing.T) {
+		// given
+		nameResolver := &k8smocks.NameResolver{}
+		nameResolver.On("GetResourceName", appName, serviceId).Return(secretName)
+
+		modStrategy := &strategyMocks.ModificationStrategy{}
+		modStrategy.On("CredentialsProvided", credentials).Return(true)
+		modStrategy.On("CreateSecretData", credentials).Return(secretData, nil)
+		modStrategy.On("ShouldUpdate", secretData, secretData).Return(false)
+		modStrategy.On("ToCredentialsInfo", credentials, secretName).Return(appCredentials)
+
+		strategyFactory := &strategyMocks.Factory{}
+		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
+
+		secretsRepository := &mocks.Repository{}
+		secretsRepository.On("Get", appName, secretName).Return(secretData, nil)
+
+		service := NewService(secretsRepository, nameResolver, strategyFactory)
+
+		// when
+		createdCredentials, err := service.Upsert(appName, serviceId, credentials)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, appCredentials.Type, createdCredentials.Type)
+		assert.Equal(t, appCredentials.SecretName, createdCredentials.SecretName)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+	})
+
+	t.Run("should create secret if not found", func(t *testing.T) {
+		// given
+		nameResolver := &k8smocks.NameResolver{}
+		nameResolver.On("GetResourceName", appName, serviceId).Return(secretName)
+
+		modStrategy := &strategyMocks.ModificationStrategy{}
+		modStrategy.On("CredentialsProvided", credentials).Return(true)
+		modStrategy.On("CreateSecretData", credentials).Return(secretData, nil)
+		modStrategy.On("ToCredentialsInfo", credentials, secretName).Return(appCredentials)
+
+		strategyFactory := &strategyMocks.Factory{}
+		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
+
+		secretsRepository := &mocks.Repository{}
+		secretsRepository.On("Get", appName, secretName).Return(strategy.SecretData{}, apperrors.NotFound("error"))
+		secretsRepository.On("Create", appName, secretName, serviceId, secretData).Return(nil)
+
+		service := NewService(secretsRepository, nameResolver, strategyFactory)
+
+		// when
+		createdCredentials, err := service.Upsert(appName, serviceId, credentials)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, appCredentials.Type, createdCredentials.Type)
+		assert.Equal(t, appCredentials.SecretName, createdCredentials.SecretName)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+	})
+
+	t.Run("should return error when failed to get secret", func(t *testing.T) {
+		// given
+		nameResolver := &k8smocks.NameResolver{}
+		nameResolver.On("GetResourceName", appName, serviceId).Return(secretName)
+
+		modStrategy := &strategyMocks.ModificationStrategy{}
+		modStrategy.On("CredentialsProvided", credentials).Return(true)
+		modStrategy.On("CreateSecretData", credentials).Return(secretData, nil)
+
+		strategyFactory := &strategyMocks.Factory{}
+		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
+
+		secretsRepository := &mocks.Repository{}
+		secretsRepository.On("Get", appName, secretName).Return(nil, apperrors.Internal(""))
+
+		service := NewService(secretsRepository, nameResolver, strategyFactory)
+
+		// when
+		createdCredentials, err := service.Upsert(appName, serviceId, credentials)
+
+		// then
+		require.Error(t, err)
+		assert.Empty(t, createdCredentials)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
 	})
 
 	t.Run("should return error when failed to update secret", func(t *testing.T) {
@@ -284,25 +372,27 @@ func TestService_Update(t *testing.T) {
 		nameResolver := &k8smocks.NameResolver{}
 		nameResolver.On("GetResourceName", appName, serviceId).Return(secretName)
 
-		strategy := &strategyMocks.Strategy{}
-		strategy.On("CredentialsProvided", credentials).Return(true)
-		strategy.On("CreateSecretData", credentials).Return(secretData, nil)
+		modStrategy := &strategyMocks.ModificationStrategy{}
+		modStrategy.On("CredentialsProvided", credentials).Return(true)
+		modStrategy.On("CreateSecretData", credentials).Return(secretData, nil)
+		modStrategy.On("ShouldUpdate", strategy.SecretData{}, secretData).Return(true)
 
 		strategyFactory := &strategyMocks.Factory{}
-		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(strategy, nil)
+		strategyFactory.On("NewSecretModificationStrategy", credentials).Return(modStrategy, nil)
 
 		secretsRepository := &mocks.Repository{}
+		secretsRepository.On("Get", appName, secretName).Return(strategy.SecretData{}, nil)
 		secretsRepository.On("Upsert", appName, secretName, serviceId, secretData).Return(apperrors.Internal("error"))
 
 		service := NewService(secretsRepository, nameResolver, strategyFactory)
 
 		// when
-		createdCredentials, err := service.Update(appName, serviceId, credentials)
+		createdCredentials, err := service.Upsert(appName, serviceId, credentials)
 
 		// then
 		require.Error(t, err)
 		assert.Empty(t, createdCredentials)
-		assertExpectations(t, nameResolver.Mock, strategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
+		assertExpectations(t, nameResolver.Mock, modStrategy.Mock, strategyFactory.Mock, secretsRepository.Mock)
 	})
 }
 
