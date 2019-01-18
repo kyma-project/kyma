@@ -2,27 +2,28 @@ package authz
 
 import (
 	"context"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	. "github.com/smartystreets/goconvey/convey"
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/authorization/authorizer"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 const (
-	verb = "list"
-	apiGroup = "k8s.io"
-	apiVersion = "v1alpha1"
-	resource = "pod"
+	verb        = "list"
+	apiGroup    = "k8s.io"
+	apiVersion  = "v1alpha1"
+	resource    = "pod"
 	subresource = "logs"
-	namespace = "x-system"
-	name = "x-deployment"
+	namespace   = "x-system"
+	name        = "x-deployment"
 )
 
 var (
 	namespaceArg = "my-namespace"
-	nameArg = "my-name"
-	userInfo = user.DefaultInfo{Name: "Test User", UID: "deadbeef", Groups: []string{"admins", "testers"}}
+	nameArg      = "my-name"
+	userInfo     = user.DefaultInfo{Name: "Test User", UID: "deadbeef", Groups: []string{"admins", "testers"}}
 )
 
 func noArgsAttributes() gqlschema.ResourceAttributes {

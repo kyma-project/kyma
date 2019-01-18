@@ -2,6 +2,7 @@ package authz
 
 import (
 	"testing"
+
 	. "github.com/smartystreets/goconvey/convey"
 )
 
