@@ -72,8 +72,8 @@ func validateEventsSpec(events *Events) apperrors.AppError {
 
 func validateApiCredentials(api *API) apperrors.AppError {
 	if api != nil && api.Credentials != nil {
-		if api.Credentials.Basic != nil && api.Credentials.Oauth != nil {
-			return apperrors.WrongInput("api.Credentials is invalid: both basic and oauth credentials provided")
+		if validateToManyCredentials(api.Credentials) {
+			return apperrors.WrongInput("api.Credentials is invalid: to many authentication methods provided")
 		}
 	}
 
@@ -83,4 +83,22 @@ func validateApiCredentials(api *API) apperrors.AppError {
 func validateSpec(rawMessage json.RawMessage) error {
 	var m map[string]*json.RawMessage
 	return json.Unmarshal(rawMessage, &m)
+}
+
+func validateToManyCredentials(credentials *Credentials) bool {
+	credentialsCount := 0
+
+	if credentials.Basic != nil {
+		credentialsCount++
+	}
+
+	if credentials.Oauth != nil {
+		credentialsCount++
+	}
+
+	if credentials.CertificateGen != nil {
+		credentialsCount++
+	}
+
+	return credentialsCount > 1
 }

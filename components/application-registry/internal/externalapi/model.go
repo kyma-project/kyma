@@ -41,8 +41,9 @@ type API struct {
 }
 
 type Credentials struct {
-	Oauth *Oauth     `json:"oauth,omitempty"`
-	Basic *BasicAuth `json:"basic,omitempty"`
+	Oauth          *Oauth          `json:"oauth,omitempty"`
+	Basic          *BasicAuth      `json:"basic,omitempty"`
+	CertificateGen *CertificateGen `json:"certificateGen,omitempty"`
 }
 
 type Oauth struct {
@@ -54,6 +55,10 @@ type Oauth struct {
 type BasicAuth struct {
 	Username string `json:"username" valid:"required~basic auth username field cannot be empty"`
 	Password string `json:"password" valid:"required~basic auth password field cannot be empty"`
+}
+
+type CertificateGen struct {
+	CommonName string `json:"commonName"`
 }
 
 type Events struct {
@@ -109,24 +114,7 @@ func serviceDefinitionToServiceDetails(serviceDefinition model.ServiceDefinition
 		}
 
 		if serviceDefinition.Api.Credentials != nil {
-			if serviceDefinition.Api.Credentials.Oauth != nil {
-				serviceDetails.Api.Credentials = &Credentials{
-					Oauth: &Oauth{
-						ClientID:     stars,
-						ClientSecret: stars,
-						URL:          serviceDefinition.Api.Credentials.Oauth.URL,
-					},
-				}
-			}
-
-			if serviceDefinition.Api.Credentials.Basic != nil {
-				serviceDetails.Api.Credentials = &Credentials{
-					Basic: &BasicAuth{
-						Username: stars,
-						Password: stars,
-					},
-				}
-			}
+			serviceDetails.Api.Credentials = serviceDefinitionCredentialsToServiceDetailsCredentials(serviceDefinition.Api.Credentials)
 		}
 	}
 
@@ -145,6 +133,37 @@ func serviceDefinitionToServiceDetails(serviceDefinition model.ServiceDefinition
 	}
 
 	return serviceDetails, nil
+}
+
+func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.Credentials) *Credentials {
+	if credentials.Oauth != nil {
+		return &Credentials{
+			Oauth: &Oauth{
+				ClientID:     stars,
+				ClientSecret: stars,
+				URL:          credentials.Oauth.URL,
+			},
+		}
+	}
+
+	if credentials.Basic != nil {
+		return &Credentials{
+			Basic: &BasicAuth{
+				Username: stars,
+				Password: stars,
+			},
+		}
+	}
+
+	if credentials.CertificateGen != nil {
+		return &Credentials{
+			CertificateGen: &CertificateGen{
+				CommonName: credentials.CertificateGen.CommonName,
+			},
+		}
+	}
+
+	return nil
 }
 
 func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.ServiceDefinition, apperrors.AppError) {
@@ -167,24 +186,7 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 			ApiType:          serviceDetails.Api.ApiType,
 		}
 		if serviceDetails.Api.Credentials != nil {
-			if serviceDetails.Api.Credentials.Oauth != nil {
-				serviceDefinition.Api.Credentials = &model.Credentials{
-					Oauth: &model.Oauth{
-						ClientID:     serviceDetails.Api.Credentials.Oauth.ClientID,
-						ClientSecret: serviceDetails.Api.Credentials.Oauth.ClientSecret,
-						URL:          serviceDetails.Api.Credentials.Oauth.URL,
-					},
-				}
-			}
-
-			if serviceDetails.Api.Credentials.Basic != nil {
-				serviceDefinition.Api.Credentials = &model.Credentials{
-					Basic: &model.Basic{
-						Username: serviceDetails.Api.Credentials.Basic.Username,
-						Password: serviceDetails.Api.Credentials.Basic.Password,
-					},
-				}
-			}
+			serviceDefinition.Api.Credentials = serviceDetailsCredentialsToServiceDefinitionCredentials(serviceDetails.Api.Credentials)
 		}
 		if serviceDetails.Api.Spec != nil {
 			serviceDefinition.Api.Spec = compact(serviceDetails.Api.Spec)
@@ -206,6 +208,37 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 	}
 
 	return serviceDefinition, nil
+}
+
+func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Credentials) *model.Credentials {
+	if credentials.Oauth != nil {
+		return &model.Credentials{
+			Oauth: &model.Oauth{
+				ClientID:     credentials.Oauth.ClientID,
+				ClientSecret: credentials.Oauth.ClientSecret,
+				URL:          credentials.Oauth.URL,
+			},
+		}
+	}
+
+	if credentials.Basic != nil {
+		return &model.Credentials{
+			Basic: &model.Basic{
+				Username: credentials.Basic.Username,
+				Password: credentials.Basic.Password,
+			},
+		}
+	}
+
+	if credentials.CertificateGen != nil {
+		return &model.Credentials{
+			CertificateGen: &model.CertificateGen{
+				CommonName: credentials.CertificateGen.CommonName,
+			},
+		}
+	}
+
+	return nil
 }
 
 func (api API) MarshalJSON() ([]byte, error) {

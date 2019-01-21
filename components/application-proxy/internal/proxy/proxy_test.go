@@ -34,7 +34,9 @@ func TestProxy(t *testing.T) {
 		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(nil).Twice()
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			Return(nil).Twice()
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", (*metadatamodel.Credentials)(nil)).Return(authStrategyMock).Once()
@@ -89,7 +91,9 @@ func TestProxy(t *testing.T) {
 		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(nil)
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			Return(nil)
 
 		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", tsOAuth.URL+"/token")
 
@@ -133,7 +137,9 @@ func TestProxy(t *testing.T) {
 		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(nil)
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			Return(nil)
 
 		credentialsMatcher := createBasicCredentialsMatcher("username", "password")
 
@@ -176,7 +182,9 @@ func TestProxy(t *testing.T) {
 		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(apperrors.UpstreamServerCallFailed("failed"))
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			Return(apperrors.UpstreamServerCallFailed("failed"))
 
 		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", "www.example.com/token")
 
@@ -248,7 +256,9 @@ func TestProxy(t *testing.T) {
 		}, nil).Twice()
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("AddAuthorizationHeader", mock.Anything).Return(nil).Twice()
+		authStrategyMock.
+			On("AddAuthorization", mock.Anything, mock.AnythingOfType("*httputil.ReverseProxy")).
+			Return(nil).Twice()
 		authStrategyMock.On("Invalidate").Return().Once()
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
