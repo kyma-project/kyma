@@ -12,4 +12,5 @@ ROOT_DIR=${CURRENT_DIR}/../../
 sudo ${CURRENT_DIR}/install-deps-debian.sh
 sudo ${ROOT_DIR}/installation/cmd/run.sh --vm-driver "none"
 sudo ${ROOT_DIR}/installation/scripts/is-installed.sh --timeout 30m
+sudo ${ROOT_DIR}/installation/scripts/watch-pods.sh
 sudo ${ROOT_DIR}/installation/scripts/testing.sh
