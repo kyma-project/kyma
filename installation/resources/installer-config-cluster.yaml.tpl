@@ -29,8 +29,6 @@ metadata:
   labels:
     installer: overrides
 data:
-  global.isLocalEnv: "false"
-  global.knative: "false"
   global.domainName: "__DOMAIN__"
   global.applicationConnectorDomainName: "__APPLICATION_CONNECTOR_DOMAIN__"
   global.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
@@ -38,8 +36,6 @@ data:
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
-  etcd-stateful.replicaCount: "3"
-  acceptanceTest.application.disabled: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -69,53 +65,13 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: core-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-data:
-  console.cluster.headerLogoUrl: "assets/logo.svg"
-  console.cluster.headerTitle: ""
-  console.cluster.faviconUrl: "favicon.ico"
-  minio.accessKey: "admin"
-  minio.secretKey: "topSecretKey"
-  minio.resources.limits.memory: 128Mi
-  minio.resources.limits.cpu: 250m
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: istio-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
     component: istio
 data:
-  global.proxy.includeIPRanges: "10.0.0.1/8"
-  global.proxy.excludeIPRanges: "__PROXY_EXCLUDE_IP_RANGES__"
-
-  security.enabled: "true"
-
   gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
-  gateways.istio-ingressgateway.type: "LoadBalancer"
-
-  pilot.resources.limits.memory: 2Gi
-  pilot.resources.requests.memory: 512Mi
-
-  mixer.resources.limits.memory: 1Gi
-  mixer.resources.requests.memory: 256Mi
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: service-catalog-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: service-catalog
-data:
-  etcd-stateful.etcd.resources.limits.memory: 512Mi
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -126,6 +82,4 @@ metadata:
     installer: overrides
     component: knative
 data:
-  knative.ingressgateway.service.type: LoadBalancer
   knative.domainName: "__DOMAIN__"
-  

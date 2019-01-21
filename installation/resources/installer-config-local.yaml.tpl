@@ -61,6 +61,10 @@ data:
   console.cluster.headerLogoUrl: "assets/logo.svg"
   console.cluster.headerTitle: ""
   console.cluster.faviconUrl: "favicon.ico"
+  minio.accessKey: "admin"
+  minio.secretKey: "topSecretKey"
+  minio.resources.requests.memory: 64Mi
+  minio.resources.limits.cpu: 100m
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -96,6 +100,7 @@ metadata:
     component: service-catalog
 data:
   etcd-stateful.etcd.resources.limits.memory: 256Mi
+  etcd-stateful.replicaCount: "1"
 ---
 apiVersion: v1
 kind: ConfigMap

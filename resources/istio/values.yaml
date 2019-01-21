@@ -1,5 +1,7 @@
 # Common settings.
 global:
+  isLocalEnv: false
+  knative: false
   # Default hub for Istio images.
   # Releases are published to docker hub under 'istio' project.
   # Daily builds from prow are on gcr.io, and nightly builds from circle on docker.io/istionightly
@@ -52,7 +54,7 @@ global:
     # example: includeIPRanges: "172.30.0.0/16,172.20.0.0/16"
     # would only capture egress traffic on those two IP Ranges, all other outbound traffic would
     # be allowed by the sidecar
-    includeIPRanges: "*"
+    includeIPRanges: "10.0.0.1/8"
     excludeIPRanges: ""
 
     # istio ingress capture whitelist
@@ -366,6 +368,12 @@ mixer:
     hub: docker.io/prom
     tag: v0.6.0
 
+  resources:
+    limits:
+      memory: 1Gi
+    requests:
+      memory: 256Mi
+
 #
 # pilot configuration
 #
@@ -381,7 +389,9 @@ pilot:
   resources:
     requests:
       cpu: 500m
-      memory: 2048Mi
+      memory: 512Mi
+    limits:
+      memory: 2Gi
   env:
     PILOT_PUSH_THROTTLE_COUNT: 100
     GODEBUG: gctrace=2

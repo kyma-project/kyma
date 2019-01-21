@@ -1,4 +1,6 @@
 global:
+  isLocalEnv: false
+  knative: false
   namespace: kyma-integration
   nginx:
     namespace: kyma-system

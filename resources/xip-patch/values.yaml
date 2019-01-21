@@ -3,3 +3,7 @@ containerRegistry:
 xip_patch:
   dir: develop/
   version: e9e635ea
+
+global:
+  isLocalEnv: false
+  knative: false

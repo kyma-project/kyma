@@ -75,6 +75,8 @@ tolerations: []
 affinity: {}
 
 global:
+  isLocalEnv: false
+  knative: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_logging:
