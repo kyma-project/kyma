@@ -27,6 +27,19 @@ spec:
         metadata:
           type: object
         spec:
+          properties:
+            policy:
+              enum:
+              - none
+              - readonly
+              - readwrite
+              - writeonly
+              type: string
+            region:
+              type: string
+          required:
+          - region
+          - policy
           type: object
         status:
           properties:
