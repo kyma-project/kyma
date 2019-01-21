@@ -20,6 +20,8 @@
   directory: service-brokers/azure-broker-service-classes/azure-redis-cache
 - name: azure-sql
   directory: service-brokers/azure-broker-service-classes/azure-sql
+- name: azure-text-analytics
+  directory: service-brokers/azure-broker-service-classes/azure-textanalytics
 
 # GCP Broker
 - name: gcp-bigquery

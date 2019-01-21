@@ -1,8 +1,8 @@
 {
     "spec": {
-      "displayName": "Azure SQL Database",
-      "description": "Documentation for Azure SQL Database.",
-      "id": "fb9bc99e-0aa9-11e6-8a8a-000d3a002ed5",
+      "displayName": "Azure Text Analytics",
+      "description": "Detect sentiment, key phrases, and language from your text",
+      "id": "8f6c848a-4ce1-4a69-9248-63545d3e7e9c",
       "type":"Service Class"
     }
 }
