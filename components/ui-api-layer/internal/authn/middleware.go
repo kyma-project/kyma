@@ -42,7 +42,7 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
-			ctx := context.WithValue(r.Context(), userInfoCtxKey, u)
+			ctx := WithUserInfoContext(r.Context(), u)
 			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		})
@@ -52,4 +52,8 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 func UserInfoForContext(ctx context.Context) user.Info {
 	raw, _ := ctx.Value(userInfoCtxKey).(user.Info)
 	return raw
+}
+
+func WithUserInfoContext(ctx context.Context, userInfo user.Info) context.Context {
+	return context.WithValue(ctx, userInfoCtxKey, userInfo)
 }
