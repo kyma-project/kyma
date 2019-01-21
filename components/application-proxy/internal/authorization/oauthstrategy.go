@@ -3,6 +3,7 @@ package authorization
 import (
 	"fmt"
 	"net/http"
+	"net/http/httputil"
 
 	"github.com/kyma-project/kyma/components/application-proxy/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-proxy/internal/httpconsts"
@@ -25,7 +26,7 @@ func newOAuthStrategy(oauthClient OAuthClient, clientId, clientSecret, url strin
 	}
 }
 
-func (o oauthStrategy) AddAuthorizationHeader(r *http.Request) apperrors.AppError {
+func (o oauthStrategy) AddAuthorization(r *http.Request, _ *httputil.ReverseProxy) apperrors.AppError {
 	token, err := o.oauthClient.GetToken(o.clientId, o.clientSecret, o.url)
 	if err != nil {
 		log.Errorf("failed to get token : '%s'", err)
