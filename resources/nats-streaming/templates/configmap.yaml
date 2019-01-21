@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nats-streaming
+  name: {{ .Values.global.natsStreaming.fullname }}
   labels:
 {{ include "nats-streaming.labels.standard" . | indent 4 }}
 data:

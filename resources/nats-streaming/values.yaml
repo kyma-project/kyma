@@ -14,6 +14,7 @@ natsStreaming:
   trace: false
 global:
   natsStreaming:
+    fullname: nats-streaming
     persistence:
       # If persistence.enabled is false, the MEMORY store will be used, otherwise the FILE store will be used
       # Specify storage class to use
