@@ -33,7 +33,7 @@ The three binaries of `Event Bus` reside under `cmd/event-bus-XXXX` "e.g. `cmd/e
 
 To use [NATS Streaming based provisioner](https://github.com/knative/eventing/tree/master/pkg/provisioners/natss), the controller and dispatcher images have to be available in GCR.
 
-[`ko`](https://github.com/google/go-containerregistry/tree/master/cmd/ko) allows you to publish an image for a Golang application without a Dockerfile, by building the application and creating a Docker image out of it. Perform the following steps to publish Docker images for `controller` and `dispatcher` of Nats Streaming provisioner on Knative:
+[`ko`](https://github.com/google/go-containerregistry/tree/master/cmd/ko) allows you to publish an image for a Golang application without a Dockerfile by building the application and creating a Docker image out of it. Perform the following steps to publish Docker images for the controller and dispatcher of Nats Streaming provisioner on Knative:
 
 1. Install `ko`:
 
@@ -41,7 +41,7 @@ To use [NATS Streaming based provisioner](https://github.com/knative/eventing/tr
 go get github.com/google/go-containerregistry/cmd/ko
 ```
 
-2. Authenticate to Google Cloud Platform, set project to `kyma-project`, and configure Docker:
+2. Authenticate to Google Cloud Platform, set the project to `kyma-project`, and configure Docker:
 
 ```
 gcloud auth login
@@ -63,13 +63,13 @@ cd eventing/pkg/provisioners/natss
 export KO_DOCKER_REPO=eu.gcr.io/kyma-project/event-bus/knative/natss
 ```
 
-6. Run `ko publish` to publish the Docker image for `controller`. Use the `-t` parameter to specify the Knative release branch tag. Add `-B` to disable the default behavior of adding MD5 hash after **KO_DOCKER_REPO** variable.
+6. Run `ko publish` to publish the Docker image for the controller. Use the `-t` parameter to specify the Knative release branch tag. Add `-B` to disable the default adding of the MD5 hash after the **KO_DOCKER_REPO** variable.
 
 ```
 ko publish -B -t release-0.3 ./controller
 ```
 
-7. Run `ko publish` to publish the Docker image for `dispatcher`.
+7. Run `ko publish` to publish the Docker image for the dispatcher.
 
 ```
 ko publish -B -t release-0.3 ./dispatcher
