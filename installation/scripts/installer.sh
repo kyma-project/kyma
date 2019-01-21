@@ -16,12 +16,6 @@ do
     
     key="$1"
 
-    if [[ ${key} == *"="* ]]; then
-        echo "Invalid parameter"
-        echo "Use space instead of equal sign"
-        exit 1
-    fi
-
     case ${key} in
         --local)
             LOCAL=1
@@ -37,8 +31,11 @@ do
             KNATIVE=true
             shift
             ;;
+        --*)
+            echo "Unknown flag ${1}"
+            exit 1
+        ;;
         *) # unknown option
-            echo "Unknown input parameter: ${1}"
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
             ;;

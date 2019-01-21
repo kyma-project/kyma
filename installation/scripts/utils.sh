@@ -102,15 +102,8 @@ function showFailedResources {
 # for example in installation/cmd/run.sh we can set --vm-driver argument, which has to have a value.
 
 function checkInputParameterValue() {
-    if [ -z "${1}" ]; then
-        echo "Value parameter is empty"
-        echo "Make sure parameter value is neither empty nor start with two hyphens"
-        exit 1
-    fi
-
-    if [ "${1:0:2}" == "--" ]; then
-        echo "Invalid parameter value"
-        echo "${1}"
+    if [ -z "${1}" ] || [ "${1:0:2}" == "--" ]; then
+        echo "Wrong parameter value"
         echo "Make sure parameter value is neither empty nor start with two hyphens"
         exit 1
     fi
