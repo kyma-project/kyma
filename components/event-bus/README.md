@@ -29,7 +29,9 @@ The three binaries of `Event Bus` reside under `cmd/event-bus-XXXX` "e.g. `cmd/e
 |`make vet`|Runs `go vet` on all sources including `vendor` but excluding the `generated` directory.|
 |`make compile`|Builds a binary without running any tests.|
 
-## Publish controller and dispatcher Docker images of Nats Streaming provisioner on Knative using `ko`
+## Knative NATS Streaming provisioner
+
+To use [NATS Streaming based provisioner](https://github.com/knative/eventing/tree/master/pkg/provisioners/natss), we need to have the controller and dispatcher images available in gcr.
 
 [`ko`](https://github.com/google/go-containerregistry/tree/master/cmd/ko) makes it possible to publish an image for a Golang application without a Dockerfile. `ko` builds the application and creates a Docker image out of it. Follow these steps to publish Docker images for `controller` and `dispatcher` of Nats Streaming provisioner on Knative:
 
