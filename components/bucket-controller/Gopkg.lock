@@ -20,6 +20,12 @@
   version = "v1.1.1"
 
 [[projects]]
+  name = "github.com/dustin/go-humanize"
+  packages = ["."]
+  revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/emicklei/go-restful"
   packages = [
     ".",
@@ -33,6 +39,12 @@
   packages = ["."]
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/go-ini/ini"
+  packages = ["."]
+  revision = "6ed8d5f64cd79a498d1f3fab5880cc376ce41bbe"
+  version = "v1.41.0"
 
 [[projects]]
   name = "github.com/go-logr/logr"
@@ -168,6 +180,12 @@
   version = "v1.1.5"
 
 [[projects]]
+  name = "github.com/konsorten/go-windows-terminal-sequences"
+  packages = ["."]
+  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
+  version = "v1.0.1"
+
+[[projects]]
   name = "github.com/markbates/inflect"
   packages = ["."]
   revision = "24b83195037b3bc61fcda2d28b7b0518bce293b6"
@@ -184,6 +202,25 @@
   packages = ["pbutil"]
   revision = "c12348ce28de40eed0136aa2b644d0ee0650e56c"
   version = "v1.0.1"
+
+[[projects]]
+  name = "github.com/minio/minio-go"
+  packages = [
+    ".",
+    "pkg/credentials",
+    "pkg/encrypt",
+    "pkg/s3signer",
+    "pkg/s3utils",
+    "pkg/set"
+  ]
+  revision = "e6694bcc4a6b0c1756797be85b8458635a65924e"
+  version = "v6.0.13"
+
+[[projects]]
+  name = "github.com/mitchellh/go-homedir"
+  packages = ["."]
+  revision = "ae18d6b8b3205b561c79e8e5f69bff09736185f4"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -315,6 +352,12 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  revision = "e1e72e9de974bd926e5c56f83753fba2df402ce5"
+  version = "v1.3.0"
+
+[[projects]]
   name = "github.com/spf13/afero"
   packages = [
     ".",
@@ -363,7 +406,11 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
+  packages = [
+    "argon2",
+    "blake2b",
+    "ssh/terminal"
+  ]
   revision = "ff983b9c42bc9fbf91556e191cc8efb585c16908"
 
 [[projects]]
@@ -378,7 +425,8 @@
     "http/httpguts",
     "http2",
     "http2/hpack",
-    "idna"
+    "idna",
+    "publicsuffix"
   ]
   revision = "915654e7eabcea33ae277abbecf52f0d8b7a9fdc"
 
@@ -398,6 +446,7 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = [
+    "cpu",
     "unix",
     "windows"
   ]
@@ -545,7 +594,10 @@
   name = "k8s.io/apiextensions-apiserver"
   packages = [
     "pkg/apis/apiextensions",
-    "pkg/apis/apiextensions/v1beta1"
+    "pkg/apis/apiextensions/v1beta1",
+    "pkg/client/clientset/clientset",
+    "pkg/client/clientset/clientset/scheme",
+    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
   ]
   revision = "0cd23ebeb6882bd1cdc2cb15fc7b2d72e8a86a5b"
   version = "kubernetes-1.12.3"
@@ -728,6 +780,8 @@
     "pkg/client/apiutil",
     "pkg/client/config",
     "pkg/controller",
+    "pkg/envtest",
+    "pkg/envtest/printer",
     "pkg/event",
     "pkg/handler",
     "pkg/internal/controller",
@@ -742,6 +796,7 @@
     "pkg/recorder",
     "pkg/runtime/inject",
     "pkg/runtime/log",
+    "pkg/runtime/scheme",
     "pkg/runtime/signals",
     "pkg/source",
     "pkg/source/internal",
@@ -788,6 +843,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5d96080d0302787bd931020bc70f9c6fedc09e0ffae29a7463060d674a8f7c50"
+  inputs-digest = "c6d10852a7ae79d40045be23f1dc6a92f9ee34583b2220d6e4b8e30e836ab58c"
   solver-name = "gps-cdcl"
   solver-version = 1
