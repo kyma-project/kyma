@@ -3,7 +3,7 @@ title: Custom component installation
 type: Installation
 ---
 
-Since Kyma is a modular tool, you can remove some components so that they do not install together with Kyma. You can also add some of them later, after the installation process. Read this document to learn how.
+Since Kyma is a modular tool, you can remove some components so that they do not install together with Kyma. You can also add some of them after the installation process. Read this document to learn how.
 
 ## Remove a component
 
@@ -24,13 +24,12 @@ To disable a component from the list of components that install with Kyma, remov
 
 ### Installation from sources
 
-1. [todo]
-2. Configure the file:
+1. Configure the file:
   * If you want to install Kyma from sources **locally** without a given component, remove the component's **name** and **namespace** from the [installer-cr.yaml.tpl](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr.yaml.tpl) file.
 
   * If you want to install Kyma from sources on a **cluster** without a given component, remove the component's **name** and **namespace** from the [installer-cr-cluster.yaml.tpl](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl) file.
 
-3. Follow the installation steps described in the [Install Kyma locally from sources](#installation-install-kyma-locally-from-sources) document, or [Install Kyma on a GKE cluster](#installation-install-kyma-on-a-gke-cluster) accordingly.
+2. Follow the installation steps described in the [Install Kyma locally from sources](#installation-install-kyma-locally-from-sources) document, or [Install Kyma on a GKE cluster](#installation-install-kyma-on-a-gke-cluster) accordingly.
 
 ### Verify the installation
 

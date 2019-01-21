@@ -15,16 +15,16 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `ark` | ✅ | ⛔️ |
 | `dex` | ✅ | ✅ |
 | `istio` | ✅ | ✅ |
-| `istio-kyma-patch` | ✅ | ✅ |
 | `jaeger` | ✅ | ⛔️ |
-| `knative` | ✅ | ✅ |
 | `logging` | ✅ | ⛔️ |
 | `monitoring` | ✅ | ⛔️ |
 | `prometheus-operator` | ✅ | ✅ |
 | `service-catalog` | ✅ | ✅ |
-| `xip-patch` | ✅ | ⛔️ |
+
+### Installation guides
 
 Follow these installation guides to install Kyma locally:
+
 - [Install Kyma locally from release](#installation-install-kyma-locally-from-the-release)
 - [Install Kyma locally from sources](#installation-install-kyma-locally-from-sources)
 
