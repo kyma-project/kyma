@@ -7,6 +7,8 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/apiregistration.yaml") . | sha256sum }}
 spec:
   replicas: {{ .Values.apiserver.replicas }}
   minReadySeconds: {{ .Values.apiserver.minReadySeconds }}
@@ -16,9 +18,9 @@ spec:
   # Strategy overwrites the default service-catalog strategy because of using helm '--wait' flag.
   # As a result, Tiller waits for the readiness of all of the components, and then evaluates the readiness.
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
+    type: Recreate
+#    rollingUpdate:
+#      maxUnavailable: 0
   template:
     metadata:
       labels:
