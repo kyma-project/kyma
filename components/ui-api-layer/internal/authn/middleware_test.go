@@ -23,16 +23,14 @@ func TestAuthMiddleware(t *testing.T) {
 		response := httptest.NewRecorder()
 		middleware(next).ServeHTTP(response, newHttpRequest())
 
-		Convey("Must call authorizer", func() {
+		Convey("Then authorizer is called with token", func() {
 			So(reject.Called, ShouldBeTrue)
-		})
-		Convey("Must pass token to authorizer", func() {
 			So(reject.LastReq.Header.Get("authorization"), ShouldEqual, "Bearer token")
 		})
-		Convey("Must not call next handler", func() {
+		Convey("Then next handler is not called", func() {
 			So(next.Called, ShouldBeFalse)
 		})
-		Convey("Must reject with status code unauthorised", func() {
+		Convey("Then request is rejected with status code unauthorised", func() {
 			So(response.Code, ShouldEqual, http.StatusUnauthorized)
 		})
 	})
@@ -45,16 +43,14 @@ func TestAuthMiddleware(t *testing.T) {
 		response := httptest.NewRecorder()
 		middleware(next).ServeHTTP(response, newHttpRequest())
 
-		Convey("Must call authorizer", func() {
+		Convey("Then authorizer is called with token", func() {
 			So(erroneous.Called, ShouldBeTrue)
-		})
-		Convey("Must pass token to authorizer", func() {
 			So(erroneous.LastReq.Header.Get("authorization"), ShouldEqual, "Bearer token")
 		})
-		Convey("Must not call next handler", func() {
+		Convey("Then next handler is not called", func() {
 			So(next.Called, ShouldBeFalse)
 		})
-		Convey("Must reject with status code unauthorised", func() {
+		Convey("Then request is rejected with status code unauthorised", func() {
 			So(response.Code, ShouldEqual, http.StatusUnauthorized)
 		})
 	})
@@ -68,19 +64,17 @@ func TestAuthMiddleware(t *testing.T) {
 		response.Code = 0
 		middleware(next).ServeHTTP(response, newHttpRequest())
 
-		Convey("Must call authorizer", func() {
+		Convey("Then authorizer is called with token", func() {
 			So(authenticated.Called, ShouldBeTrue)
-		})
-		Convey("Must pass token to authorizer", func() {
 			So(authenticated.LastReq.Header.Get("authorization"), ShouldEqual, "Bearer token")
 		})
-		Convey("Must call next handler", func() {
+		Convey("Then next handler is called", func() {
 			So(next.Called, ShouldBeTrue)
 		})
-		Convey("Must not set status code", func() {
+		Convey("Then status code is not set", func() {
 			So(response.Code, ShouldEqual, 0)
 		})
-		Convey("Must add user.Info to context", func() {
+		Convey("Then user.Info is added to the context", func() {
 			So(UserInfoForContext(next.r.Context()), ShouldEqual, &userInfo)
 		})
 	})
@@ -97,10 +91,10 @@ func TestAuthMiddleware(t *testing.T) {
 		Convey("Must not call authorizer", func() {
 			So(authenticated.Called, ShouldBeFalse)
 		})
-		Convey("Must not call next handler", func() {
+		Convey("Then next handler is not called", func() {
 			So(next.Called, ShouldBeFalse)
 		})
-		Convey("Must reject with status code bad request", func() {
+		Convey("Then request is rejected with status bad request", func() {
 			So(response.Code, ShouldEqual, http.StatusBadRequest)
 		})
 	})
@@ -113,16 +107,14 @@ func TestAuthMiddleware(t *testing.T) {
 		response := httptest.NewRecorder()
 		middleware(next).ServeHTTP(response, newWebsocketRequest())
 
-		Convey("Must call authorizer", func() {
+		Convey("Then authorizer is called with token", func() {
 			So(reject.Called, ShouldBeTrue)
-		})
-		Convey("Must pass token to authorizer", func() {
 			So(reject.LastReq.Header.Get("authorization"), ShouldEqual, "Bearer token")
 		})
-		Convey("Must not call next handler", func() {
+		Convey("Then next handler is not called", func() {
 			So(next.Called, ShouldBeFalse)
 		})
-		Convey("Must reject with status code unauthorised", func() {
+		Convey("Then request is rejected with status code unauthorised", func() {
 			So(response.Code, ShouldEqual, http.StatusUnauthorized)
 		})
 	})
@@ -135,16 +127,14 @@ func TestAuthMiddleware(t *testing.T) {
 		response := httptest.NewRecorder()
 		middleware(next).ServeHTTP(response, newWebsocketRequest())
 
-		Convey("Must call authorizer", func() {
+		Convey("Then authorizer is called with token", func() {
 			So(erroneous.Called, ShouldBeTrue)
-		})
-		Convey("Must pass token to authorizer", func() {
 			So(erroneous.LastReq.Header.Get("authorization"), ShouldEqual, "Bearer token")
 		})
-		Convey("Must not call next handler", func() {
+		Convey("Then next handler is not called", func() {
 			So(next.Called, ShouldBeFalse)
 		})
-		Convey("Must reject with status code unauthorised", func() {
+		Convey("Then request is rejected with status code unauthorised", func() {
 			So(response.Code, ShouldEqual, http.StatusUnauthorized)
 		})
 	})
@@ -158,19 +148,17 @@ func TestAuthMiddleware(t *testing.T) {
 		response.Code = 0
 		middleware(next).ServeHTTP(response, newWebsocketRequest())
 
-		Convey("Must call authorizer", func() {
+		Convey("Then authorizer is called with token", func() {
 			So(authenticated.Called, ShouldBeTrue)
-		})
-		Convey("Must pass token to authorizer", func() {
 			So(authenticated.LastReq.Header.Get("authorization"), ShouldEqual, "Bearer token")
 		})
-		Convey("Must call next handler", func() {
+		Convey("Then next handler is called", func() {
 			So(next.Called, ShouldBeTrue)
 		})
-		Convey("Must not set status code", func() {
+		Convey("Then status code is not set", func() {
 			So(response.Code, ShouldEqual, 0)
 		})
-		Convey("Must add user.Info to context", func() {
+		Convey("Then user.Info is added to the context", func() {
 			So(UserInfoForContext(next.r.Context()), ShouldEqual, &userInfo)
 		})
 	})

@@ -64,25 +64,25 @@ func withArgsContext() context.Context {
 }
 
 func verifyCommonAttributes(authAttributes authorizer.Attributes) {
-	Convey("User is set", func() {
+	Convey("Then user is set", func() {
 		So(authAttributes.GetUser(), ShouldEqual, &userInfo)
 	})
-	Convey("Verb is set", func() {
+	Convey("Then verb is set", func() {
 		So(authAttributes.GetVerb(), ShouldEqual, verb)
 	})
-	Convey("API group is set", func() {
+	Convey("Then API group is set", func() {
 		So(authAttributes.GetAPIGroup(), ShouldEqual, apiGroup)
 	})
-	Convey("API version is set", func() {
+	Convey("Then API version is set", func() {
 		So(authAttributes.GetAPIVersion(), ShouldEqual, apiVersion)
 	})
-	Convey("Resource is set", func() {
+	Convey("Then resource is set", func() {
 		So(authAttributes.GetResource(), ShouldEqual, resource)
 	})
-	Convey("Subresource is set", func() {
+	Convey("Then subresource is set", func() {
 		So(authAttributes.GetSubresource(), ShouldEqual, subresource)
 	})
-	Convey("ResourceRequest is true", func() {
+	Convey("Then ResourceRequest is true", func() {
 		So(authAttributes.IsResourceRequest(), ShouldBeTrue)
 	})
 }

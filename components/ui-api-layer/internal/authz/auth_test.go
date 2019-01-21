@@ -15,10 +15,10 @@ func TestPrepareAttributes(t *testing.T) {
 
 		verifyCommonAttributes(authAttributes)
 
-		Convey("Namespace is empty", func() {
+		Convey("Then namespace is empty", func() {
 			So(authAttributes.GetNamespace(), ShouldBeEmpty)
 		})
-		Convey("Name is empty", func() {
+		Convey("Then name is empty", func() {
 			So(authAttributes.GetName(), ShouldBeEmpty)
 		})
 
@@ -30,10 +30,10 @@ func TestPrepareAttributes(t *testing.T) {
 
 		verifyCommonAttributes(authAttributes)
 
-		Convey("Namespace is set", func() {
+		Convey("Then namespace is set", func() {
 			So(authAttributes.GetNamespace(), ShouldEqual, namespace)
 		})
-		Convey("Name is set", func() {
+		Convey("Then name is set", func() {
 			So(authAttributes.GetName(), ShouldEqual, name)
 		})
 	})
