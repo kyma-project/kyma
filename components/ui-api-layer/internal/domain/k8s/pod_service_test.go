@@ -4,12 +4,15 @@ import (
 	"testing"
 	"time"
 
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/informers"
@@ -23,9 +26,9 @@ func TestPodService_Find(t *testing.T) {
 		namespace := "testNamespace"
 
 		pod := fixPod(instanceName, namespace, nil)
-		podInformer := fixPodInformer(pod)
+		podInformer, _ := fixPodInformer(pod)
 
-		svc := k8s.NewPodService(podInformer)
+		svc := k8s.NewPodService(podInformer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, podInformer)
 
@@ -35,15 +38,32 @@ func TestPodService_Find(t *testing.T) {
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		podInformer := fixPodInformer()
+		podInformer, _ := fixPodInformer()
 
-		svc := k8s.NewPodService(podInformer)
+		svc := k8s.NewPodService(podInformer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, podInformer)
 
 		instance, err := svc.Find("doesntExist", "notExistingNamespace")
 		require.NoError(t, err)
 		assert.Nil(t, instance)
+	})
+
+	t.Run("NoTypeMetaReturned", func(t *testing.T) {
+		instanceName := "testExample"
+		namespace := "testNamespace"
+
+		expectedPod := fixPod(instanceName, namespace, nil)
+		returnedPod := fixPodWithoutTypeMeta(instanceName, namespace, nil)
+		podInformer, _ := fixPodInformer(returnedPod)
+
+		svc := k8s.NewPodService(podInformer, nil)
+
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, podInformer)
+
+		instance, err := svc.Find(instanceName, namespace)
+		require.NoError(t, err)
+		assert.Equal(t, expectedPod, instance)
 	})
 }
 
@@ -54,9 +74,9 @@ func TestPodService_List(t *testing.T) {
 		pod2 := fixPod("pod2", namespace, nil)
 		pod3 := fixPod("pod3", "differentNamespace", nil)
 
-		podInformer := fixPodInformer(pod1, pod2, pod3)
+		podInformer, _ := fixPodInformer(pod1, pod2, pod3)
 
-		svc := k8s.NewPodService(podInformer)
+		svc := k8s.NewPodService(podInformer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, podInformer)
 
@@ -68,9 +88,9 @@ func TestPodService_List(t *testing.T) {
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		podInformer := fixPodInformer()
+		podInformer, _ := fixPodInformer()
 
-		svc := k8s.NewPodService(podInformer)
+		svc := k8s.NewPodService(podInformer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, podInformer)
 
@@ -79,9 +99,171 @@ func TestPodService_List(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, emptyArray, pods)
 	})
+
+	t.Run("NoTypeMetaReturned", func(t *testing.T) {
+		namespace := "testNamespace"
+		returnedPod1 := fixPodWithoutTypeMeta("pod1", namespace, nil)
+		returnedPod2 := fixPodWithoutTypeMeta("pod2", namespace, nil)
+		returnedPod3 := fixPodWithoutTypeMeta("pod3", "differentNamespace", nil)
+		expectedPod1 := fixPod("pod1", namespace, nil)
+		expectedPod2 := fixPod("pod2", namespace, nil)
+
+		podInformer, _ := fixPodInformer(returnedPod1, returnedPod2, returnedPod3)
+
+		svc := k8s.NewPodService(podInformer, nil)
+
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, podInformer)
+
+		pods, err := svc.List(namespace, pager.PagingParams{})
+		require.NoError(t, err)
+		assert.Equal(t, []*v1.Pod{
+			expectedPod1, expectedPod2,
+		}, pods)
+	})
+}
+
+func TestPodService_Update(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		exampleName := "examplePod"
+		exampleNamespace := "exampleNamespace"
+		examplePod := fixPod(exampleName, exampleNamespace, nil)
+		podInformer, client := fixPodInformer(examplePod)
+		svc := k8s.NewPodService(podInformer, client)
+
+		update := examplePod.DeepCopy()
+		update.Labels = map[string]string{
+			"example": "example",
+		}
+
+		pod, err := svc.Update(exampleName, exampleNamespace, *update)
+		require.NoError(t, err)
+		assert.Equal(t, update, pod)
+
+		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, update, pod)
+	})
+
+	t.Run("NotFound", func(t *testing.T) {
+		exampleName := "examplePod"
+		exampleNamespace := "exampleNamespace"
+		examplePod := fixPod(exampleName, exampleNamespace, nil)
+		podInformer, client := fixPodInformer()
+		svc := k8s.NewPodService(podInformer, client)
+
+		update := examplePod.DeepCopy()
+		update.Labels = map[string]string{
+			"example": "example",
+		}
+
+		pod, err := svc.Update(exampleName, exampleNamespace, *update)
+		require.Error(t, err)
+		assert.Nil(t, pod)
+
+		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		require.Error(t, err)
+		assert.Nil(t, pod)
+	})
+
+	t.Run("InvalidUpdate", func(t *testing.T) {
+		exampleName := "examplePod"
+		exampleNamespace := "exampleNamespace"
+		examplePod := fixPod(exampleName, exampleNamespace, nil)
+		podInformer, client := fixFailingPodInformer(examplePod)
+		svc := k8s.NewPodService(podInformer, client)
+
+		update := examplePod.DeepCopy()
+		update.Labels = map[string]string{
+			"example": "example",
+		}
+
+		pod, err := svc.Update(exampleName, exampleNamespace, *update)
+		require.Error(t, err)
+		assert.Nil(t, pod)
+
+		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, examplePod, pod)
+	})
+
+	t.Run("TypeMetaChanged", func(t *testing.T) {
+		exampleName := "examplePod"
+		exampleNamespace := "exampleNamespace"
+		examplePod := fixPod(exampleName, exampleNamespace, nil)
+		podInformer, client := fixPodInformer(examplePod)
+		svc := k8s.NewPodService(podInformer, client)
+
+		update := examplePod.DeepCopy()
+		update.Kind = "OtherKind"
+		pod, err := svc.Update(exampleName, exampleNamespace, *update)
+		require.Error(t, err)
+		assert.Nil(t, pod)
+
+		update.Kind = "Pod"
+		update.APIVersion = "OtherVersion"
+		pod, err = svc.Update(exampleName, exampleNamespace, *update)
+		require.Error(t, err)
+		assert.Nil(t, pod)
+
+		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, examplePod, pod)
+	})
+
+	t.Run("NoTypeMetaReturned", func(t *testing.T) {
+		exampleName := "examplePod"
+		exampleNamespace := "exampleNamespace"
+		returnedPod := fixPodWithoutTypeMeta(exampleName, exampleNamespace, nil)
+		expectedPod := fixPod(exampleName, exampleNamespace, nil)
+		podInformer, client := fixPodInformer(returnedPod)
+		svc := k8s.NewPodService(podInformer, client)
+
+		update := expectedPod.DeepCopy()
+		update.Labels = map[string]string{
+			"example": "example",
+		}
+
+		pod, err := svc.Update(exampleName, exampleNamespace, *update)
+		require.NoError(t, err)
+		assert.Equal(t, update, pod)
+
+		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, update, pod)
+	})
+}
+
+func TestPodService_Delete(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		exampleName := "examplePod"
+		exampleNamespace := "exampleNamespace"
+		examplePod := fixPod(exampleName, exampleNamespace, nil)
+		podInformer, client := fixPodInformer(examplePod)
+		svc := k8s.NewPodService(podInformer, client)
+
+		err := svc.Delete(exampleName, exampleNamespace)
+
+		require.NoError(t, err)
+		_, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		assert.True(t, errors.IsNotFound(err))
+	})
 }
 
 func fixPod(name, environment string, labels map[string]string) *v1.Pod {
+	return &v1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Pod",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: environment,
+			Labels:    labels,
+		},
+	}
+}
+
+func fixPodWithoutTypeMeta(name, environment string, labels map[string]string) *v1.Pod {
 	return &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -91,10 +273,19 @@ func fixPod(name, environment string, labels map[string]string) *v1.Pod {
 	}
 }
 
-func fixPodInformer(objects ...runtime.Object) cache.SharedIndexInformer {
+func fixPodInformer(objects ...runtime.Object) (cache.SharedIndexInformer, v12.CoreV1Interface) {
 	client := fake.NewSimpleClientset(objects...)
 	informerFactory := informers.NewSharedInformerFactory(client, 0)
 	informer := informerFactory.Core().V1().Pods().Informer()
 
-	return informer
+	return informer, client.CoreV1()
+}
+
+func fixFailingPodInformer(objects ...runtime.Object) (cache.SharedIndexInformer, v12.CoreV1Interface) {
+	client := fake.NewSimpleClientset(objects...)
+	client.PrependReactor("update", "pods", failingReactor)
+	informerFactory := informers.NewSharedInformerFactory(client, 0)
+	informer := informerFactory.Core().V1().Pods().Informer()
+
+	return informer, client.CoreV1()
 }

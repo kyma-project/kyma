@@ -22,7 +22,7 @@ func TestPodResolver_PodQuery(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
 		resource := &v1.Pod{}
-		resourceGetter := automock.NewPodLister()
+		resourceGetter := automock.NewPodSvc()
 		resourceGetter.On("Find", name, namespace).Return(resource, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
@@ -42,7 +42,7 @@ func TestPodResolver_PodQuery(t *testing.T) {
 	t.Run("NotFound", func(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
-		resourceGetter := automock.NewPodLister()
+		resourceGetter := automock.NewPodSvc()
 		resourceGetter.On("Find", name, namespace).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
@@ -59,7 +59,7 @@ func TestPodResolver_PodQuery(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
 		resource := &v1.Pod{}
-		resourceGetter := automock.NewPodLister()
+		resourceGetter := automock.NewPodSvc()
 		resourceGetter.On("Find", name, namespace).Return(resource, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
 
@@ -77,7 +77,7 @@ func TestPodResolver_PodQuery(t *testing.T) {
 		name := "name"
 		namespace := "namespace"
 		resource := &v1.Pod{}
-		resourceGetter := automock.NewPodLister()
+		resourceGetter := automock.NewPodSvc()
 		resourceGetter.On("Find", name, namespace).Return(resource, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
@@ -113,7 +113,7 @@ func TestPodResolver_PodsQuery(t *testing.T) {
 			},
 		}
 
-		resourceGetter := automock.NewPodLister()
+		resourceGetter := automock.NewPodSvc()
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
@@ -135,7 +135,7 @@ func TestPodResolver_PodsQuery(t *testing.T) {
 		var resources []*v1.Pod
 		var expected []gqlschema.Pod
 
-		resourceGetter := automock.NewPodLister()
+		resourceGetter := automock.NewPodSvc()
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
@@ -151,7 +151,7 @@ func TestPodResolver_PodsQuery(t *testing.T) {
 		namespace := "namespace"
 		expected := errors.New("Test")
 		var resources []*v1.Pod
-		resourceGetter := automock.NewPodLister()
+		resourceGetter := automock.NewPodSvc()
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
 
@@ -173,7 +173,7 @@ func TestPodResolver_PodsQuery(t *testing.T) {
 		}
 		expected := errors.New("Test")
 
-		resourceGetter := automock.NewPodLister()
+		resourceGetter := automock.NewPodSvc()
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
@@ -185,6 +185,256 @@ func TestPodResolver_PodsQuery(t *testing.T) {
 		resolver.SetInstanceConverter(converter)
 
 		result, err := resolver.PodsQuery(nil, namespace, nil, nil)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+}
+
+func TestPodResolver_UpdatePodMutation(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		updatedPodFix := fixPod(name, namespace, map[string]string{
+			"test": "test",
+		})
+		updatedGQLPodFix := &gqlschema.Pod{
+			Name:      name,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"test": "test",
+			},
+		}
+		gqlJSONFix := gqlschema.JSON{}
+
+		podSvc := automock.NewPodSvc()
+		podSvc.On("Update", name, namespace, *updatedPodFix).Return(updatedPodFix, nil).Once()
+		defer podSvc.AssertExpectations(t)
+
+		converter := automock.NewGqlPodConverter()
+		converter.On("GQLJSONToPod", gqlJSONFix).Return(*updatedPodFix, nil).Once()
+		converter.On("ToGQL", updatedPodFix).Return(updatedGQLPodFix, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewPodResolver(podSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.UpdatePodMutation(nil, name, namespace, gqlJSONFix)
+
+		require.NoError(t, err)
+		assert.Equal(t, updatedGQLPodFix, result)
+	})
+
+	t.Run("ErrorConvertingToPod", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		gqlJSONFix := gqlschema.JSON{}
+		expected := errors.New("fix")
+
+		podSvc := automock.NewPodSvc()
+
+		converter := automock.NewGqlPodConverter()
+		converter.On("GQLJSONToPod", gqlJSONFix).Return(v1.Pod{}, expected).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewPodResolver(podSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.UpdatePodMutation(nil, name, namespace, gqlJSONFix)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+
+	t.Run("NameMismatch", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		updatedPodFix := fixPod("nameMismatch", namespace, map[string]string{
+			"test": "test",
+		})
+		gqlJSONFix := gqlschema.JSON{}
+
+		podSvc := automock.NewPodSvc()
+
+		converter := automock.NewGqlPodConverter()
+		converter.On("GQLJSONToPod", gqlJSONFix).Return(*updatedPodFix, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewPodResolver(podSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.UpdatePodMutation(nil, name, namespace, gqlJSONFix)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInvalid(err))
+		assert.Nil(t, result)
+	})
+
+	t.Run("NamespaceMismatch", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		updatedPodFix := fixPod(name, "namespaceMismatch", map[string]string{
+			"test": "test",
+		})
+		gqlJSONFix := gqlschema.JSON{}
+
+		podSvc := automock.NewPodSvc()
+
+		converter := automock.NewGqlPodConverter()
+		converter.On("GQLJSONToPod", gqlJSONFix).Return(*updatedPodFix, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewPodResolver(podSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.UpdatePodMutation(nil, name, namespace, gqlJSONFix)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInvalid(err))
+		assert.Nil(t, result)
+	})
+
+	t.Run("ErrorUpdating", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		updatedPodFix := fixPod(name, namespace, map[string]string{
+			"test": "test",
+		})
+		gqlJSONFix := gqlschema.JSON{}
+		expected := errors.New("fix")
+
+		podSvc := automock.NewPodSvc()
+		podSvc.On("Update", name, namespace, *updatedPodFix).Return(nil, expected).Once()
+		defer podSvc.AssertExpectations(t)
+
+		converter := automock.NewGqlPodConverter()
+		converter.On("GQLJSONToPod", gqlJSONFix).Return(*updatedPodFix, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewPodResolver(podSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.UpdatePodMutation(nil, name, namespace, gqlJSONFix)
+
+		require.Error(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("ErrorConvertingToGQL", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		updatedPodFix := fixPod(name, namespace, map[string]string{
+			"test": "test",
+		})
+		gqlJSONFix := gqlschema.JSON{}
+		expected := errors.New("fix")
+
+		podSvc := automock.NewPodSvc()
+		podSvc.On("Update", name, namespace, *updatedPodFix).Return(updatedPodFix, nil).Once()
+		defer podSvc.AssertExpectations(t)
+
+		converter := automock.NewGqlPodConverter()
+		converter.On("GQLJSONToPod", gqlJSONFix).Return(*updatedPodFix, nil).Once()
+		converter.On("ToGQL", updatedPodFix).Return(nil, expected).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewPodResolver(podSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.UpdatePodMutation(nil, name, namespace, gqlJSONFix)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+}
+
+func TestPodResolver_DeletePodMutation(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		resource := fixPod(name, namespace, nil)
+		expected := &gqlschema.Pod{
+			Name:      name,
+			Namespace: namespace,
+		}
+
+		podSvc := automock.NewPodSvc()
+		podSvc.On("Find", name, namespace).Return(resource, nil).Once()
+		podSvc.On("Delete", name, namespace).Return(nil).Once()
+		defer podSvc.AssertExpectations(t)
+
+		converter := automock.NewGqlPodConverter()
+		converter.On("ToGQL", resource).Return(expected, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewPodResolver(podSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.DeletePodMutation(nil, name, namespace)
+
+		require.NoError(t, err)
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("NotFound", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		expected := errors.New("fix")
+
+		podSvc := automock.NewPodSvc()
+		podSvc.On("Find", name, namespace).Return(nil, expected).Once()
+		defer podSvc.AssertExpectations(t)
+
+		resolver := k8s.NewPodResolver(podSvc)
+
+		result, err := resolver.DeletePodMutation(nil, name, namespace)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+
+	t.Run("ErrorDeleting", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		resource := fixPod(name, namespace, nil)
+		expected := errors.New("fix")
+
+		podSvc := automock.NewPodSvc()
+		podSvc.On("Find", name, namespace).Return(resource, nil).Once()
+		podSvc.On("Delete", name, namespace).Return(expected).Once()
+		defer podSvc.AssertExpectations(t)
+
+		resolver := k8s.NewPodResolver(podSvc)
+
+		result, err := resolver.DeletePodMutation(nil, name, namespace)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+
+	t.Run("ErrorConverting", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		resource := fixPod(name, namespace, nil)
+		error := errors.New("fix")
+
+		podSvc := automock.NewPodSvc()
+		podSvc.On("Find", name, namespace).Return(resource, nil).Once()
+		defer podSvc.AssertExpectations(t)
+
+		converter := automock.NewGqlPodConverter()
+		converter.On("ToGQL", resource).Return(nil, error).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewPodResolver(podSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.DeletePodMutation(nil, name, namespace)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))

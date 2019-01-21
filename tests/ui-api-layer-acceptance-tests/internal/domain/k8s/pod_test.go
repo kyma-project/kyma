@@ -6,6 +6,10 @@ import (
 	"testing"
 	"time"
 
+	"k8s.io/apimachinery/pkg/api/errors"
+
+	jsonEncoder "encoding/json"
+
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/client"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/dex"
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
@@ -27,6 +31,14 @@ type podQueryResponse struct {
 
 type podsQueryResponse struct {
 	Pods []pod `json:"pods"`
+}
+
+type updatePodMutationResponse struct {
+	UpdatePod pod `json:"updatePod"`
+}
+
+type deletePodMutationResponse struct {
+	DeletePod pod `json:"deletePod"`
 }
 
 type pod struct {
@@ -69,7 +81,7 @@ const (
 
 type json map[string]interface{}
 
-func TestPodQuery(t *testing.T) {
+func TestPodQueries(t *testing.T) {
 	dex.SkipTestIfSCIEnabled(t)
 
 	c, err := graphql.New()
@@ -106,7 +118,6 @@ func TestPodQuery(t *testing.T) {
 	var podRes podQueryResponse
 	err = c.Do(fixPodQuery(), &podRes)
 	require.NoError(t, err)
-
 	assert.Equal(t, podName, podRes.Pod.Name)
 	assert.Equal(t, podNamespace, podRes.Pod.Namespace)
 
@@ -114,9 +125,37 @@ func TestPodQuery(t *testing.T) {
 	var podsRes podsQueryResponse
 	err = c.Do(fixPodsQuery(), &podsRes)
 	require.NoError(t, err)
-
 	assert.Equal(t, podName, podsRes.Pods[0].Name)
 	assert.Equal(t, podNamespace, podsRes.Pods[0].Namespace)
+
+	t.Log("Updating...")
+	podRes.Pod.JSON["metadata"].(map[string]interface{})["generateName"] = "test"
+	update := stringifyJSON(podRes.Pod.JSON)
+	var updateRes updatePodMutationResponse
+	err = c.Do(fixUpdatePodMutation(update), &updateRes)
+	require.NoError(t, err)
+	assert.Equal(t, podName, updateRes.UpdatePod.Name)
+	assert.Equal(t, podNamespace, updateRes.UpdatePod.Namespace)
+
+	t.Log("Deleting pod...")
+	var deleteRes deletePodMutationResponse
+	err = c.Do(fixDeletePodMutation(), &deleteRes)
+	require.NoError(t, err)
+	assert.Equal(t, podName, deleteRes.DeletePod.Name)
+	assert.Equal(t, podNamespace, deleteRes.DeletePod.Namespace)
+
+	t.Log("Waiting for deletion...")
+	err = waiter.WaitAtMost(func() (bool, error) {
+		_, err := k8sClient.Pods(podNamespace).Get(podName, metav1.GetOptions{})
+		if errors.IsNotFound(err) {
+			return true, nil
+		}
+		if err != nil {
+			return false, err
+		}
+		return false, nil
+	}, time.Minute)
+	require.NoError(t, err)
 }
 
 func fixPod(name, namespace string) *v1.Pod {
@@ -183,4 +222,60 @@ func fixPodsQuery() *graphql.Request {
 	req.SetVar("namespace", podNamespace)
 
 	return req
+}
+
+func fixUpdatePodMutation(update string) *graphql.Request {
+	mutation := `mutation ($name: String!, $namespace: String!, $update: JSON!) {
+					updatePod(name: $name, namespace: $namespace, update: $update) {
+						name
+						nodeName
+						namespace
+						restartCount
+						creationTimestamp
+						labels
+						status
+						containerStates {
+							state
+							reason
+							message
+						}
+						json
+					}
+				}`
+	req := graphql.NewRequest(mutation)
+	req.SetVar("name", podName)
+	req.SetVar("namespace", podNamespace)
+	req.SetVar("update", update)
+
+	return req
+}
+
+func fixDeletePodMutation() *graphql.Request {
+	mutation := `mutation ($name: String!, $namespace: String!) {
+					deletePod(name: $name, namespace: $namespace) {
+						name
+						nodeName
+						namespace
+						restartCount
+						creationTimestamp
+						labels
+						status
+						containerStates {
+							state
+							reason
+							message
+						}
+						json
+					}
+				}`
+	req := graphql.NewRequest(mutation)
+	req.SetVar("name", podName)
+	req.SetVar("namespace", podNamespace)
+
+	return req
+}
+
+func stringifyJSON(in json) string {
+	bytes, _ := jsonEncoder.Marshal(in)
+	return string(bytes)
 }
