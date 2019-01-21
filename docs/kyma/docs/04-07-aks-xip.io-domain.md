@@ -18,11 +18,6 @@ The prerequisites match these listed in [this](#installation-install-kyma-on-a-a
 
 The installation process follows the steps outlined in the [Install Kyma on a AKS cluster](#installation-install-kyma-on-a-aks-cluster) document. Follow [this](#installation-install-kyma-on-a-aks-cluster-prepare-the-aks-cluster) section to prepare your cluster.
 
-Make sure to export your Azuer resource group. Run:
-```
-export RS_GROUP={YOUR_RESOURCE_GROUP}
-```
-
 When you install Kyma with the wildcard DNS, you can use one of two approaches to allocating the required IP addresses for your cluster:
 - Dynamic IP allocation - can be used with [Knative](#installation-installation-with-knative) eventing and serverless, but disables the Application Connector. 
 - Manual IP allocation - cannot be used with [Knative](#installation-installation-with-knative) eventing and serverless, but leaves the Application Connector functional. 
@@ -41,7 +36,11 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
 
 ### Manual IP allocation
 
-1. Get public IP addresses for the load balancer of the AKS cluster to which you deploy Kyma and for the load balancer of the Application Connector.
+1. Export your K8S cluster resource group. This group is different than the one you provided during cluster creation, it is automatically created by AKS. Run:
+   ```
+   export CLUSTER_RS_GROUP=MC_{YOUR_RESOURCE_GROUP}_{K8S_CLUSTER_NAME}_{K8S_CLUSTER_REGION}
+   ```
+2. Get public IP addresses for the load balancer of the AKS cluster to which you deploy Kyma and for the load balancer of the Application Connector.
 
   - Export the `PUBLIC_IP_ADDRESS_NAME` and the `APP_CONNECTOR_IP_ADDRESS_NAME` environment variables. This defines the names of the reserved public IP addresses in your Azure subscription. Run:
     ```
@@ -52,22 +51,21 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
 
   - Run these commands to reserve public IP addresses for the load balancer of your cluster and the load balancer of the Application Connector.
     ```
-    az network public-ip create --name $PUBLIC_IP_ADDRESS_NAME --resource-group $RS_GROUP --allocation-method Static
-    az network public-ip create --name $APP_CONNECTOR_IP_ADDRESS_NAME --resource-group $RS_GROUP --allocation-method Static
+    az network public-ip create --name $PUBLIC_IP_ADDRESS_NAME --resource-group $CLUSTER_RS_GROUP --allocation-method Static
+    az network public-ip create --name $APP_CONNECTOR_IP_ADDRESS_NAME --resource-group $CLUSTER_RS_GROUP --allocation-method Static
     ```
     >**NOTE:** The resource group in which you reserve IP addresses must match the resource group of your AKS cluster.
 
   - Set the reserved IP addresses as `EXTERNAL_PUBLIC_IP` and `CONNCETOR_IP` environment variables. Run:
     ```
-    export EXTERNAL_PUBLIC_IP=$(az network public-ip list -g $RS_GROUP --query "[?name=='${PUBLIC_IP_ADDRESS_NAME}'].ipAddress" -otsv)
-    export CONNECTOR_IP=$(az network public-ip list -g $RS_GROUP --query "[?name=='${APP_CONNECTOR_IP_ADDRESS_NAME}'].ipAddress" -otsv)
+    export EXTERNAL_PUBLIC_IP=$(az network public-ip list -g $CLUSTER_RS_GROUP --query "[?name=='${PUBLIC_IP_ADDRESS_NAME}'].ipAddress" -otsv)
+    export CONNECTOR_IP=$(az network public-ip list -g $CLUSTER_RS_GROUP --query "[?name=='${APP_CONNECTOR_IP_ADDRESS_NAME}'].ipAddress" -otsv)
     ```
-
-2. Use this command to prepare a configuration file that deploys Kyma with [`xip.io`](http://xip.io/) providing a wildcard DNS:
+3. Use this command to prepare a configuration file that deploys Kyma with [`xip.io`](http://xip.io/) providing a wildcard DNS:
   ```
 (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__EXTERNAL_PUBLIC_IP__/$EXTERNAL_PUBLIC_IP/g" | sed -e "s/__REMOTE_ENV_IP__/$CONNECTOR_IP/g" | sed -e "s/__APPLICATION_CONNECTOR_DOMAIN__/$CONNECTOR_IP.xip.io/g" | sed -e "s/__SKIP_SSL_VERIFY__/true/g" | sed -e "s/__.*__//g" > my-kyma.yaml
   ```
-3. Follow [these](#installation-install-kyma-on-a-aks-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.  
+4. Follow [these](#installation-install-kyma-on-a-aks-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.  
 
 
 ### Add the xip.io self-signed certificate to your OS trusted certificates

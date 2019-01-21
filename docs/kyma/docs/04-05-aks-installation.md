@@ -86,9 +86,9 @@ Azure DNS is not yet supported by Certbot, so we have to perform a manual veryfi
 4. Open a new console, set environment variables (from the [Environment variables](#Environment-variables) step). Replace the `TXT_VALUE` and run:
     
     ```
-    az network dns record-set txt delete -n "_acme-challenge.${SUB_DOMAIN}" -g ${HOSTED_ZONES_RG} -z ${DNS_DOMAIN} --yes
-    az network dns record-set txt create -n "_acme-challenge.${SUB_DOMAIN}" -g ${HOSTED_ZONES_RG} -z ${DNS_DOMAIN} --ttl 60 > /dev/null
-    az network dns record-set txt add-record -n "_acme-challenge.${SUB_DOMAIN}" -g ${HOSTED_ZONES_RG} -z ${DNS_DOMAIN} --value TXT_VALUE
+    az network dns record-set txt delete -n "_acme-challenge.${SUB_DOMAIN}" -g ${RS_GROUP} -z ${DNS_DOMAIN} --yes
+    az network dns record-set txt create -n "_acme-challenge.${SUB_DOMAIN}" -g ${RS_GROUP} -z ${DNS_DOMAIN} --ttl 60 > /dev/null
+    az network dns record-set txt add-record -n "_acme-challenge.${SUB_DOMAIN}" -g ${RS_GROUP} -z ${DNS_DOMAIN} --value TXT_VALUE
     ``` 
 5. Go back to the first console, wait 2 minutes and press enter. 
 
