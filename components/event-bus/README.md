@@ -51,7 +51,7 @@ gcloud auth configure-docker
 
 3. Clone [knative/eventing](https://github.com/knative/eventing) and checkout the release branch you want to produce the images from.
 
-4. Go to `natss` folder in knative/eventing:
+4. Go to the [`natss`](https://github.com/knative/eventing/tree/master/pkg/provisioners/natss) folder:
 
 ```
 cd eventing/pkg/provisioners/natss
