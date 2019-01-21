@@ -36,17 +36,11 @@ func newEventActivationResolver(service eventActivationLister, contentRetriever 
 	}
 }
 
-func (r *eventActivationResolver) EventActivationsQuery(ctx context.Context, environment string, namespace string) ([]gqlschema.EventActivation, error) {
-	// TODO: Environment argument is deprecated. Delete it after full migration to namespace.
-	if namespace == "" && environment == "" {
-		return nil, errors.New("One of environment or namespace is required")
-	}
-	ns := returnNamespaceIfGiven(&namespace, &environment)
-
-	items, err := r.service.List(ns)
+func (r *eventActivationResolver) EventActivationsQuery(ctx context.Context, namespace string) ([]gqlschema.EventActivation, error) {
+	items, err := r.service.List(namespace)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing %s in `%s` namespace", pretty.EventActivations, ns))
-		return nil, gqlerror.New(err, pretty.EventActivations, gqlerror.WithEnvironment(ns))
+		glog.Error(errors.Wrapf(err, "while listing %s in `%s` namespace", pretty.EventActivations, namespace))
+		return nil, gqlerror.New(err, pretty.EventActivations, gqlerror.WithEnvironment(namespace))
 	}
 
 	return r.converter.ToGQLs(items), nil

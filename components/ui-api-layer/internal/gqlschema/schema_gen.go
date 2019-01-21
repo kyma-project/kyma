@@ -78,7 +78,6 @@ type ComplexityRoot struct {
 	}
 
 	ApplicationMapping struct {
-		Environment func(childComplexity int) int
 		Namespace   func(childComplexity int) int
 		Application func(childComplexity int) int
 	}
@@ -282,8 +281,8 @@ type ComplexityRoot struct {
 		CreateApplication         func(childComplexity int, name string, description *string, labels *Labels) int
 		UpdateApplication         func(childComplexity int, name string, description *string, labels *Labels) int
 		DeleteApplication         func(childComplexity int, name string) int
-		EnableApplication         func(childComplexity int, application string, environment string, namespace string) int
-		DisableApplication        func(childComplexity int, application string, environment string, namespace string) int
+		EnableApplication         func(childComplexity int, application string, namespace string) int
+		DisableApplication        func(childComplexity int, application string, namespace string) int
 		CreateIdppreset           func(childComplexity int, name string, issuer string, jwksUri string) int
 		DeleteIdppreset           func(childComplexity int, name string) int
 	}
@@ -306,7 +305,7 @@ type ComplexityRoot struct {
 		BindableResources     func(childComplexity int, environment string) int
 		Apis                  func(childComplexity int, environment *string, namespace *string, serviceName *string, hostname *string) int
 		Application           func(childComplexity int, name string) int
-		Applications          func(childComplexity int, environment *string, namespace *string, first *int, offset *int) int
+		Applications          func(childComplexity int, namespace *string, first *int, offset *int) int
 		ConnectorService      func(childComplexity int, application string) int
 		Environments          func(childComplexity int, application *string) int
 		Deployments           func(childComplexity int, environment string, excludeFunctions *bool) int
@@ -315,7 +314,7 @@ type ComplexityRoot struct {
 		Functions             func(childComplexity int, environment string, first *int, offset *int) int
 		Content               func(childComplexity int, contentType string, id string) int
 		Topics                func(childComplexity int, input []InputTopic, internal *bool) int
-		EventActivations      func(childComplexity int, environment string, namespace string) int
+		EventActivations      func(childComplexity int, namespace string) int
 		LimitRanges           func(childComplexity int, environment string) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
@@ -570,8 +569,8 @@ type MutationResolver interface {
 	CreateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
 	UpdateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
 	DeleteApplication(ctx context.Context, name string) (DeleteApplicationOutput, error)
-	EnableApplication(ctx context.Context, application string, environment string, namespace string) (*ApplicationMapping, error)
-	DisableApplication(ctx context.Context, application string, environment string, namespace string) (*ApplicationMapping, error)
+	EnableApplication(ctx context.Context, application string, namespace string) (*ApplicationMapping, error)
+	DisableApplication(ctx context.Context, application string, namespace string) (*ApplicationMapping, error)
 	CreateIDPPreset(ctx context.Context, name string, issuer string, jwksUri string) (*IDPPreset, error)
 	DeleteIDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 }
@@ -593,7 +592,7 @@ type QueryResolver interface {
 	BindableResources(ctx context.Context, environment string) ([]BindableResourcesOutputItem, error)
 	Apis(ctx context.Context, environment *string, namespace *string, serviceName *string, hostname *string) ([]API, error)
 	Application(ctx context.Context, name string) (*Application, error)
-	Applications(ctx context.Context, environment *string, namespace *string, first *int, offset *int) ([]Application, error)
+	Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]Application, error)
 	ConnectorService(ctx context.Context, application string) (ConnectorService, error)
 	Environments(ctx context.Context, application *string) ([]Environment, error)
 	Deployments(ctx context.Context, environment string, excludeFunctions *bool) ([]Deployment, error)
@@ -602,7 +601,7 @@ type QueryResolver interface {
 	Functions(ctx context.Context, environment string, first *int, offset *int) ([]Function, error)
 	Content(ctx context.Context, contentType string, id string) (*JSON, error)
 	Topics(ctx context.Context, input []InputTopic, internal *bool) ([]TopicEntry, error)
-	EventActivations(ctx context.Context, environment string, namespace string) ([]EventActivation, error)
+	EventActivations(ctx context.Context, namespace string) ([]EventActivation, error)
 	LimitRanges(ctx context.Context, environment string) ([]LimitRange, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
@@ -911,23 +910,14 @@ func field_Mutation_enableApplication_args(rawArgs map[string]interface{}) (map[
 	}
 	args["application"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["namespace"]; ok {
-		var err error
-		arg2, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["namespace"] = arg2
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -944,23 +934,14 @@ func field_Mutation_disableApplication_args(rawArgs map[string]interface{}) (map
 	}
 	args["application"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["namespace"]; ok {
-		var err error
-		arg2, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["namespace"] = arg2
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -1527,7 +1508,7 @@ func field_Query_application_args(rawArgs map[string]interface{}) (map[string]in
 func field_Query_applications_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 *string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		var ptr1 string
 		if tmp != nil {
@@ -1539,13 +1520,13 @@ func field_Query_applications_args(rawArgs map[string]interface{}) (map[string]i
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["namespace"]; ok {
+	args["namespace"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["first"]; ok {
 		var err error
-		var ptr1 string
+		var ptr1 int
 		if tmp != nil {
-			ptr1, err = graphql.UnmarshalString(tmp)
+			ptr1, err = graphql.UnmarshalInt(tmp)
 			arg1 = &ptr1
 		}
 
@@ -1553,9 +1534,9 @@ func field_Query_applications_args(rawArgs map[string]interface{}) (map[string]i
 			return nil, err
 		}
 	}
-	args["namespace"] = arg1
+	args["first"] = arg1
 	var arg2 *int
-	if tmp, ok := rawArgs["first"]; ok {
+	if tmp, ok := rawArgs["offset"]; ok {
 		var err error
 		var ptr1 int
 		if tmp != nil {
@@ -1567,21 +1548,7 @@ func field_Query_applications_args(rawArgs map[string]interface{}) (map[string]i
 			return nil, err
 		}
 	}
-	args["first"] = arg2
-	var arg3 *int
-	if tmp, ok := rawArgs["offset"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg3 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["offset"] = arg3
+	args["offset"] = arg2
 	return args, nil
 
 }
@@ -1790,23 +1757,14 @@ func field_Query_topics_args(rawArgs map[string]interface{}) (map[string]interfa
 func field_Query_eventActivations_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["namespace"]; ok {
-		var err error
-		arg1, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["namespace"] = arg1
+	args["namespace"] = arg0
 	return args, nil
 
 }
@@ -2097,13 +2055,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ApplicationEvent.Application(childComplexity), true
-
-	case "ApplicationMapping.environment":
-		if e.complexity.ApplicationMapping.Environment == nil {
-			break
-		}
-
-		return e.complexity.ApplicationMapping.Environment(childComplexity), true
 
 	case "ApplicationMapping.namespace":
 		if e.complexity.ApplicationMapping.Namespace == nil {
@@ -2972,7 +2923,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EnableApplication(childComplexity, args["application"].(string), args["environment"].(string), args["namespace"].(string)), true
+		return e.complexity.Mutation.EnableApplication(childComplexity, args["application"].(string), args["namespace"].(string)), true
 
 	case "Mutation.disableApplication":
 		if e.complexity.Mutation.DisableApplication == nil {
@@ -2984,7 +2935,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DisableApplication(childComplexity, args["application"].(string), args["environment"].(string), args["namespace"].(string)), true
+		return e.complexity.Mutation.DisableApplication(childComplexity, args["application"].(string), args["namespace"].(string)), true
 
 	case "Mutation.createIDPPreset":
 		if e.complexity.Mutation.CreateIdppreset == nil {
@@ -3224,7 +3175,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Applications(childComplexity, args["environment"].(*string), args["namespace"].(*string), args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.Applications(childComplexity, args["namespace"].(*string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.connectorService":
 		if e.complexity.Query.ConnectorService == nil {
@@ -3332,7 +3283,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.EventActivations(childComplexity, args["environment"].(string), args["namespace"].(string)), true
+		return e.complexity.Query.EventActivations(childComplexity, args["namespace"].(string)), true
 
 	case "Query.limitRanges":
 		if e.complexity.Query.LimitRanges == nil {
@@ -5037,11 +4988,6 @@ func (ec *executionContext) _ApplicationMapping(ctx context.Context, sel ast.Sel
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ApplicationMapping")
-		case "environment":
-			out.Values[i] = ec._ApplicationMapping_environment(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		case "namespace":
 			out.Values[i] = ec._ApplicationMapping_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5061,33 +5007,6 @@ func (ec *executionContext) _ApplicationMapping(ctx context.Context, sel ast.Sel
 		return graphql.Null
 	}
 	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ApplicationMapping_environment(ctx context.Context, field graphql.CollectedField, obj *ApplicationMapping) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "ApplicationMapping",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
 }
 
 // nolint: vetshadow
@@ -9875,7 +9794,7 @@ func (ec *executionContext) _Mutation_enableApplication(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EnableApplication(rctx, args["application"].(string), args["environment"].(string), args["namespace"].(string))
+		return ec.resolvers.Mutation().EnableApplication(rctx, args["application"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -9910,7 +9829,7 @@ func (ec *executionContext) _Mutation_disableApplication(ctx context.Context, fi
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DisableApplication(rctx, args["application"].(string), args["environment"].(string), args["namespace"].(string))
+		return ec.resolvers.Mutation().DisableApplication(rctx, args["application"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -11169,7 +11088,7 @@ func (ec *executionContext) _Query_applications(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Applications(rctx, args["environment"].(*string), args["namespace"].(*string), args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().Applications(rctx, args["namespace"].(*string), args["first"].(*int), args["offset"].(*int))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -11664,7 +11583,7 @@ func (ec *executionContext) _Query_eventActivations(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EventActivations(rctx, args["environment"].(string), args["namespace"].(string))
+		return ec.resolvers.Query().EventActivations(rctx, args["namespace"].(string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -19206,7 +19125,6 @@ type ConnectorService {
 }
 
 type ApplicationMapping {
-    environment: String!
     namespace: String!
     application: String!
 }
@@ -19361,7 +19279,7 @@ type Query {
     apis(environment: String, namespace: String, serviceName: String, hostname: String): [API!]!
 
     application(name: String!): Application
-    applications(environment: String, namespace: String, first: Int, offset: Int): [Application!]!
+    applications(namespace: String, first: Int, offset: Int): [Application!]!
     connectorService(application: String!): ConnectorService!
 
     # Depends on 'application'
@@ -19375,7 +19293,7 @@ type Query {
 
     content(contentType: String!, id: String!): JSON
     topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
-    eventActivations(environment: String!, namespace: String!): [EventActivation!]!
+    eventActivations(namespace: String!): [EventActivation!]!
 
     limitRanges(environment: String!): [LimitRange!]!
 
@@ -19399,8 +19317,8 @@ type Mutation {
     updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput!
     deleteApplication(name: String!): DeleteApplicationOutput!
 
-    enableApplication(application: String!, environment: String!, namespace: String!): ApplicationMapping
-    disableApplication(application: String!, environment: String!, namespace: String!): ApplicationMapping
+    enableApplication(application: String!, namespace: String!): ApplicationMapping
+    disableApplication(application: String!, namespace: String!): ApplicationMapping
 
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
     deleteIDPPreset(name: String!): IDPPreset

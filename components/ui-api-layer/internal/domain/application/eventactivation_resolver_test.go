@@ -29,27 +29,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		resolver := application.NewEventActivationResolver(svc, nil)
-		result, err := resolver.EventActivationsQuery(nil, "", "test")
-
-		require.NoError(t, err)
-		assert.Len(t, result, 2)
-		assert.Contains(t, result, *fixGQLEventActivation("test", "event1"))
-		assert.Contains(t, result, *fixGQLEventActivation("test", "event2"))
-	})
-
-	t.Run("Success for deprecated environment argument", func(t *testing.T) {
-		eventActivation1 := fixEventActivation("test", "event1")
-		eventActivation2 := fixEventActivation("test", "event2")
-
-		svc := automock.NewEventActivationLister()
-		svc.On("List", "test").Return([]*v1alpha1.EventActivation{
-			eventActivation1,
-			eventActivation2,
-		}, nil)
-		defer svc.AssertExpectations(t)
-
-		resolver := application.NewEventActivationResolver(svc, nil)
-		result, err := resolver.EventActivationsQuery(nil, "test", "")
+		result, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.NoError(t, err)
 		assert.Len(t, result, 2)
@@ -63,19 +43,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		resolver := application.NewEventActivationResolver(svc, nil)
-		result, err := resolver.EventActivationsQuery(nil, "", "test")
-
-		require.NoError(t, err)
-		assert.Empty(t, result)
-	})
-
-	t.Run("Not found for deprecated environment argument", func(t *testing.T) {
-		svc := automock.NewEventActivationLister()
-		svc.On("List", "test").Return([]*v1alpha1.EventActivation{}, nil)
-		defer svc.AssertExpectations(t)
-
-		resolver := application.NewEventActivationResolver(svc, nil)
-		result, err := resolver.EventActivationsQuery(nil, "test", "")
+		result, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.NoError(t, err)
 		assert.Empty(t, result)
@@ -87,19 +55,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		defer svc.AssertExpectations(t)
 
 		resolver := application.NewEventActivationResolver(svc, nil)
-		_, err := resolver.EventActivationsQuery(nil, "", "test")
-
-		require.Error(t, err)
-		assert.True(t, gqlerror.IsInternal(err))
-	})
-
-	t.Run("Error for deprecated environment argument", func(t *testing.T) {
-		svc := automock.NewEventActivationLister()
-		svc.On("List", "test").Return(nil, errors.New("trol"))
-		defer svc.AssertExpectations(t)
-
-		resolver := application.NewEventActivationResolver(svc, nil)
-		_, err := resolver.EventActivationsQuery(nil, "test", "")
+		_, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))

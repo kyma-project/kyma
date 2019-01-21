@@ -28,7 +28,6 @@ type ApplicationEvent struct {
 }
 
 type ApplicationMapping struct {
-	Environment string `json:"environment"`
 	Namespace   string `json:"namespace"`
 	Application string `json:"application"`
 }

@@ -67,25 +67,22 @@ func (r *applicationResolver) ApplicationQuery(ctx context.Context, name string)
 	return &gqlApp, nil
 }
 
-func (r *applicationResolver) ApplicationsQuery(ctx context.Context, environment *string, namespace *string, first *int, offset *int) ([]gqlschema.Application, error) {
-	// TODO: Environment argument is deprecated. Delete it after full migration to namespace.
+func (r *applicationResolver) ApplicationsQuery(ctx context.Context, namespace *string, first *int, offset *int) ([]gqlschema.Application, error) {
 	var items []*appTypes.Application
 	var err error
 
-	if namespace == nil && environment == nil { // retrieve all
+	if namespace == nil { // retrieve all
 		items, err = r.appSvc.List(pager.PagingParams{First: first, Offset: offset})
 		if err != nil {
 			glog.Error(errors.Wrapf(err, "while listing all %s", pretty.Applications))
 			return []gqlschema.Application{}, gqlerror.New(err, pretty.Applications)
 		}
-	} else { // retrieve only for given namespace (or environment - deprecated)
+	} else { // retrieve only for given namespace
 		// TODO: Add support for paging.
-		ns := returnNamespaceIfGiven(namespace, environment)
-
-		items, err = r.appSvc.ListInEnvironment(ns)
+		items, err = r.appSvc.ListInEnvironment(*namespace)
 		if err != nil {
-			glog.Error(errors.Wrapf(err, "while listing %s for namespace %v", pretty.Applications, ns))
-			return []gqlschema.Application{}, gqlerror.New(err, pretty.Applications, gqlerror.WithEnvironment(ns))
+			glog.Error(errors.Wrapf(err, "while listing %s for namespace %v", pretty.Applications, namespace))
+			return []gqlschema.Application{}, gqlerror.New(err, pretty.Applications, gqlerror.WithEnvironment(*namespace))
 		}
 	}
 
@@ -162,43 +159,29 @@ func (r *applicationResolver) ConnectorServiceQuery(ctx context.Context, applica
 	return dto, nil
 }
 
-func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, application string, environment string, namespace string) (*gqlschema.ApplicationMapping, error) {
-	// TODO: Environment argument is deprecated. Delete it after full migration to namespace.
-	if namespace == "" && environment == "" {
-		return nil, errors.New("One of environment or namespace is required")
-	}
-	ns := returnNamespaceIfGiven(&namespace, &environment)
-
-	em, err := r.appSvc.Enable(ns, application)
+func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {
+	em, err := r.appSvc.Enable(namespace, application)
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while enabling %s", pretty.Application))
-		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithEnvironment(ns))
+		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithEnvironment(namespace))
 	}
 
 	return &gqlschema.ApplicationMapping{
-		Environment: em.Namespace,
 		Namespace:   em.Namespace,
 		Application: em.Name,
 	}, nil
 }
 
-func (r *applicationResolver) DisableApplicationMutation(ctx context.Context, application string, environment string, namespace string) (*gqlschema.ApplicationMapping, error) {
-	// TODO: Environment argument is deprecated. Delete it after full migration to namespace.
-	if namespace == "" && environment == "" {
-		return nil, errors.New("One of environment or namespace is required")
-	}
-	ns := returnNamespaceIfGiven(&namespace, &environment)
-
-	err := r.appSvc.Disable(ns, application)
+func (r *applicationResolver) DisableApplicationMutation(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {
+	err := r.appSvc.Disable(namespace, application)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while disabling %s", pretty.Application))
-		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithEnvironment(ns))
+		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithEnvironment(namespace))
 	}
 
 	return &gqlschema.ApplicationMapping{
-		Environment: ns,
-		Namespace:   ns,
+		Namespace:   namespace,
 		Application: application,
 	}, nil
 }
@@ -240,14 +223,4 @@ func (r *applicationResolver) returnWithDefaults(description *string, gqlLabels 
 	}
 
 	return desc, labels
-}
-
-// TODO: Environment argument is deprecated. Delete returnNamespaceIfGiven function after full migration to namespace.
-func returnNamespaceIfGiven(namespace *string, environment *string) string {
-	if namespace != nil && *namespace != "" {
-		return *namespace
-	} else if environment != nil {
-		return *environment
-	}
-	return ""
 }

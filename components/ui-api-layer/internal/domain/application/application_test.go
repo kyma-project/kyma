@@ -51,7 +51,7 @@ func checkExportedFields(t *testing.T, resolver *application.PluggableContainer,
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
-	val, err := resolver.Resolver.ApplicationsQuery(ctx, nil, nil, nil, nil)
+	val, err := resolver.Resolver.ApplicationsQuery(ctx, nil, nil, nil)
 	if enabled {
 		require.NoError(t, err)
 	} else {
