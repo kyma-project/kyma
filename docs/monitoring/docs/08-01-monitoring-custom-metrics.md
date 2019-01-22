@@ -1,6 +1,6 @@
 ---
 title: Expose custom metrics in Kyma
-type: Getting Started
+type: Tutorials
 ---
 
 This Getting Started guide shows how to expose custom metrics to Prometheus with a Golang service in Kyma. To do so, follow these steps:
