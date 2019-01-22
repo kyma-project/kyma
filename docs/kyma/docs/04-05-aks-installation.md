@@ -57,38 +57,57 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 3. Check if everything is set up correctly and your domain is managed by Azure name servers. Run:
     ```
-    host -t ns $DNS_NAME
+    host -t ns $DNS_DOMAIN
     ```
     A successful response returns the list of the name servers you fetched from Azure.
 
 ## Get the TLS certificate
 
-Azure DNS is not yet supported by Certbot, so we have to perform a manual veryfication
+>**NOTE:** Azure DNS is not yet supported by Certbot, so we have to perform a manual veryfication
 
 1. Create a folder for certificates. Run:
     ```
     mkdir letsencrypt
     ```
-4. Run the Certbot Docker image with the `letsencrypt` folder mounted. Certbot stores the TLS certificates in that folder. Replace `YOUR_EMAIL_HERE` with your email address. Run:
+4. Run the Certbot Docker image with the `letsencrypt` folder mounted. Certbot stores the TLS certificates in that folder. Export your email address:
+    ```
+    export YOUR_EMAIL={YOUR_EMAIL}
+    ```
+    To obtain a certificate run:
     ```
     docker run -it --name certbot --rm \
         -v "$(pwd)/letsencrypt:/etc/letsencrypt" \
         certbot/certbot \
         certonly \
-        -m YOUR_EMAIL_HERE --agree-tos --no-eff-email \
+        -m ${YOUR_EMAIL} --agree-tos --no-eff-email \
         --manual \
-        --manual-public-ip-logging-ok
+        --manual-public-ip-logging-ok \
         --preferred-challenges dns \
         --server https://acme-v02.api.letsencrypt.org/directory \
         -d "*.${SUB_DOMAIN}.${DNS_DOMAIN}"
     ```
-
-4. Open a new console, set environment variables (from the [Environment variables](#Environment-variables) step). Replace the `TXT_VALUE` and run:
+    You will see a message similar to this:
     
+    ```
+    Please deploy a DNS TXT record under the name
+    _acme-challenge.rc2-test.kyma.online with the following value:
+
+    # TXT_VALUE
+    
+    Before continuing, verify the record is deployed.
+    ```
+    Copy the TXT_VALUE. 
+    
+4. Open a new console, set environment variables (from the [Environment variables](#Environment-variables) step). Export the TXT_VALUE.
+    
+    ```
+    export TXT_VALUE={YOUR_TXT_VALUE}
+    ```
+    To modify TXT record for your domain, run:
     ```
     az network dns record-set txt delete -n "_acme-challenge.${SUB_DOMAIN}" -g ${RS_GROUP} -z ${DNS_DOMAIN} --yes
     az network dns record-set txt create -n "_acme-challenge.${SUB_DOMAIN}" -g ${RS_GROUP} -z ${DNS_DOMAIN} --ttl 60 > /dev/null
-    az network dns record-set txt add-record -n "_acme-challenge.${SUB_DOMAIN}" -g ${RS_GROUP} -z ${DNS_DOMAIN} --value TXT_VALUE
+    az network dns record-set txt add-record -n "_acme-challenge.${SUB_DOMAIN}" -g ${RS_GROUP} -z ${DNS_DOMAIN} --value ${TXT_VALUE}
     ``` 
 5. Go back to the first console, wait 2 minutes and press enter. 
 
