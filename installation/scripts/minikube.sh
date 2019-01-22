@@ -104,7 +104,7 @@ function fixDindMinikubeIssue() {
 }
 
 function checkIfMinikubeIsInitialized() {
-    local status=$(minikube status --format "{{.MinikubeStatus}}")
+    local status=$(minikube status --format "{{.Host}}")
     if [ -n "${status}" ]; then
         log "Minikube is already initialized" red
         read -p "Do you want to remove previous minikube cluster [y/N]: " deleteMinikube
