@@ -14,8 +14,12 @@
 - name: console
 
 # Azure Broker
-- name: azure-mysql
-  directory: service-brokers/azure-broker-service-classes/azure-mysql
+- name: azure-mysql-5.7-dbms-and-database
+  directory: service-brokers/azure-broker-service-classes/azure-mysql/v5.7/dbms-and-database
+- name: azure-mysql-5.7-database
+  directory: service-brokers/azure-broker-service-classes/azure-mysql/v5.7/database
+- name: azure-mysql-5.7-dbms
+  directory: service-brokers/azure-broker-service-classes/azure-mysql/v5.7/dbms
 - name: azure-mssql-12.0-database
   directory: service-brokers/azure-broker-service-classes/azure-mssql/v12.0/database
 - name: azure-mssql-12.0-database-from-existing
