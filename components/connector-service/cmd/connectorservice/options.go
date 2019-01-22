@@ -50,6 +50,8 @@ func parseArgs() *options {
 		tokenExpirationMinutes: *tokenExpirationMinutes,
 		domainName:             *domainName,
 		connectorServiceHost:   *connectorServiceHost,
+		group:                  *group,
+		tenant:                 *tenant,
 	}
 }
 
