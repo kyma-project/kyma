@@ -1,6 +1,7 @@
 package bucket
 
 import (
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/buckethandler/automock"
 	"testing"
 	"time"
 
@@ -10,38 +11,27 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-	const timeout = time.Second * 5
+const timeout = time.Second * 5
 
 func TestReconcile(t *testing.T) {
-	var c client.Client
 	var expectedRequest = reconcile.Request{NamespacedName: types.NamespacedName{Name: "foo", Namespace: "default"}}
-
-	g := gomega.NewGomegaWithT(t)
 	instance := &assetstorev1alpha1.Bucket{ObjectMeta: metav1.ObjectMeta{Name: "foo", Namespace: "default"}}
 
-	mgr, err := manager.New(cfg, manager.Options{})
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-	c = mgr.GetClient()
+	bucketHandler := &automock.BucketHandler{}
+	bucketHandler.On("CreateIfDoesntExist").Return(true, nil)
 
-	reconciler, err := newReconciler(mgr)
-	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	recFn, requests := SetupTestReconcile(reconciler)
-	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
+	cfg := prepareReconcilerTest(t, bucketHandler)
+	g := cfg.g
+	c := cfg.c
 
-	stopMgr, mgrStopped := StartTestManager(mgr, g)
+	defer cfg.finishTest()
 
-	defer func() {
-		close(stopMgr)
-		mgrStopped.Wait()
-	}()
 
-	err = c.Create(context.TODO(), instance)
+	err := c.Create(context.TODO(), instance)
 
 	if apierrors.IsInvalid(err) {
 		t.Logf("failed to create object, got an invalid object error: %v", err)
@@ -49,9 +39,13 @@ func TestReconcile(t *testing.T) {
 	}
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+
 	defer c.Delete(context.TODO(), instance)
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
+	
 
 }
+
+

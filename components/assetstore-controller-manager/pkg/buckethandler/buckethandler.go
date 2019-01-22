@@ -6,6 +6,16 @@ import (
 	"github.com/pkg/errors"
 )
 
+//go:generate mockery -name=BucketHandler -output=automock -outpkg=automock -case=underscore
+type BucketHandler interface {
+	CreateIfDoesntExist(bucketName string, region string) (bool, error)
+	CheckIfExists(bucketName string) (bool, error)
+	Delete(bucketName string) error
+	SetPolicyIfNotEqual(bucketName string, policy string) (bool, error)
+	GetPolicy(bucketName string) (string, error)
+	ComparePolicy(bucketName, policy string) (bool, error)
+}
+
 //go:generate mockery -name=MinioClient -output=automock -outpkg=automock -case=underscore
 type MinioClient interface {
 	MakeBucket(bucketName string, location string) error
@@ -15,19 +25,19 @@ type MinioClient interface {
 	GetBucketPolicy(bucketName string) (string, error)
 }
 
-type BucketHandler struct {
+type bucketHandler struct {
 	client MinioClient
 	logger logr.Logger
 }
 
-func New(client MinioClient, logger logr.Logger) *BucketHandler {
-	return &BucketHandler{
+func New(client MinioClient, logger logr.Logger) BucketHandler {
+	return &bucketHandler{
 		client: client,
 		logger: logger,
 	}
 }
 
-func (h *BucketHandler) CreateIfDoesntExist(bucketName string, region string) (bool, error) {
+func (h *bucketHandler) CreateIfDoesntExist(bucketName string, region string) (bool, error) {
 	h.logInfof("Creating bucket %s in region %s...", bucketName, region)
 
 	exists, err := h.CheckIfExists(bucketName)
@@ -48,7 +58,7 @@ func (h *BucketHandler) CreateIfDoesntExist(bucketName string, region string) (b
 	return true, nil
 }
 
-func (h *BucketHandler) CheckIfExists(bucketName string) (bool, error) {
+func (h *bucketHandler) CheckIfExists(bucketName string) (bool, error) {
 	h.logInfof("Checking if bucket %s exists", bucketName)
 
 	exists, err := h.client.BucketExists(bucketName)
@@ -59,7 +69,7 @@ func (h *BucketHandler) CheckIfExists(bucketName string) (bool, error) {
 	return exists, nil
 }
 
-func (h *BucketHandler) Delete(bucketName string) error {
+func (h *bucketHandler) Delete(bucketName string) error {
 	h.logInfof("Deleting bucket %s...", bucketName)
 
 	exists, err := h.CheckIfExists(bucketName)
@@ -80,7 +90,7 @@ func (h *BucketHandler) Delete(bucketName string) error {
 	return nil
 }
 
-func (h *BucketHandler) SetPolicyIfNotEqual(bucketName string, policy string) (bool, error) {
+func (h *bucketHandler) SetPolicyIfNotEqual(bucketName string, policy string) (bool, error) {
 	h.logInfof("Setting policy %s for bucket %s...", policy, bucketName)
 
 	currentPolicy, err := h.GetPolicy(bucketName)
@@ -101,7 +111,7 @@ func (h *BucketHandler) SetPolicyIfNotEqual(bucketName string, policy string) (b
 	return true, nil
 }
 
-func (h *BucketHandler) GetPolicy(bucketName string) (string, error) {
+func (h *bucketHandler) GetPolicy(bucketName string) (string, error) {
 	h.logInfof("Getting policy for bucket %s...", bucketName)
 	policy, err := h.client.GetBucketPolicy(bucketName)
 	if err != nil {
@@ -111,7 +121,7 @@ func (h *BucketHandler) GetPolicy(bucketName string) (string, error) {
 	return policy, nil
 }
 
-func (h *BucketHandler) ComparePolicy(bucketName, policy string) (bool, error) {
+func (h *bucketHandler) ComparePolicy(bucketName, policy string) (bool, error) {
 	h.logInfof("Comparing policy for bucket %s...", bucketName)
 	currentPolicy, err := h.GetPolicy(bucketName)
 	if err != nil {
@@ -121,7 +131,7 @@ func (h *BucketHandler) ComparePolicy(bucketName, policy string) (bool, error) {
 	return currentPolicy == policy, nil
 }
 
-func (h *BucketHandler) logInfof(format string, a ...interface{}) {
+func (h *bucketHandler) logInfof(format string, a ...interface{}) {
 	if h.logger == nil {
 		return
 	}

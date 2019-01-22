@@ -1,19 +1,21 @@
 package bucket
 
 import (
-	stdlog "log"
-	"os"
-	"path/filepath"
-	"sync"
-	"testing"
-
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/buckethandler"
 	"github.com/onsi/gomega"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+	stdlog "log"
+	"os"
+	"path/filepath"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sync"
+	"testing"
+	"time"
 )
 
 var cfg *rest.Config
@@ -56,4 +58,41 @@ func StartTestManager(mgr manager.Manager, g *gomega.GomegaWithT) (chan struct{}
 		wg.Done()
 	}()
 	return stop, wg
+}
+
+type testSuite struct {
+	g *gomega.GomegaWithT
+	c client.Client
+	mgr manager.Manager
+	stopMgr chan struct{}
+	mgrStopped *sync.WaitGroup
+	requests chan reconcile.Request
+
+	finishTest func()
+}
+
+func prepareReconcilerTest(t *testing.T, handler buckethandler.BucketHandler) *testSuite {
+	g := gomega.NewGomegaWithT(t)
+	mgr, err := manager.New(cfg, manager.Options{})
+	c := mgr.GetClient()
+
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	reconciler, err := newReconciler(mgr, handler, 1*time.Second)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	recFn, requests := SetupTestReconcile(reconciler)
+	g.Expect(add(mgr, recFn)).NotTo(gomega.HaveOccurred())
+
+	stopMgr, mgrStopped := StartTestManager(mgr, g)
+
+	return &testSuite{
+		g:g,
+		c:c,
+		requests:requests,
+		finishTest: func() {
+			close(stopMgr)
+			mgrStopped.Wait()
+		},
+	}
 }

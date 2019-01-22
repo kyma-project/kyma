@@ -23,7 +23,18 @@ var log = logf.Log.WithName("controller")
 // Add creates a new Bucket Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
-	reconciler, err := newReconciler(mgr)
+	cfg, err := loadConfig("APP")
+	if err != nil {
+		return err
+	}
+
+	minioClient, err := minio.New(cfg.Endpoint, cfg.AccessKey, cfg.SecretKey, cfg.UseSSL)
+	if err != nil {
+		log.Error(err, "while initializing Minio client")
+	}
+	bucketHandler := buckethandler.New(minioClient, log)
+
+	reconciler, err := newReconciler(mgr, bucketHandler, cfg.RequeueInterval)
 	if err != nil {
 		return err
 	}
@@ -32,20 +43,7 @@ func Add(mgr manager.Manager) error {
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
-	//TODO: Load from env variables
-	endpoint := "play.minio.io:9000"
-	accessKeyID := "Q3AM3UQ867SPQQA43P2F"
-	secretAccessKey := "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
-	useSSL := true
-	requeueInterval := 1 * time.Minute
-
-	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
-	if err != nil {
-		log.Error(err, "while initializing Minio client")
-	}
-	bucketHandler := buckethandler.New(minioClient, log)
-
+func newReconciler(mgr manager.Manager, bucketHandler buckethandler.BucketHandler, requeueInterval time.Duration) (reconcile.Reconciler, error) {
 	return &ReconcileBucket{
 		Client:            mgr.GetClient(),
 		scheme:            mgr.GetScheme(),
@@ -79,7 +77,7 @@ type ReconcileBucket struct {
 	requeueInterval time.Duration
 	client.Client
 	scheme            *runtime.Scheme
-	bucketHandler     *buckethandler.BucketHandler
+	bucketHandler     buckethandler.BucketHandler
 	deletionFinalizer *bucketFinalizer
 }
 
