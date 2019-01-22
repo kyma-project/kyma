@@ -41,6 +41,7 @@ metadata:
   labels:
     helm-chart-test: "true"
   annotations:
+    sidecar.istio.io/inject: "false"
     helm.sh/hook: test-success
 spec:
   serviceAccount: test-{{ template "fullname" . }}
