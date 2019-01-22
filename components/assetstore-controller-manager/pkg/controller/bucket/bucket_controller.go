@@ -3,8 +3,8 @@ package bucket
 import (
 	"context"
 	"fmt"
-	objectstorev1alpha1 "github.com/kyma-project/kyma/components/asset-controller/pkg/apis/objectstore/v1alpha1"
-	"github.com/kyma-project/kyma/components/asset-controller/pkg/buckethandler"
+	assetstorev1alpha1 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/buckethandler"
 	"github.com/minio/minio-go"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -40,7 +40,6 @@ func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
 	useSSL := true
 	requeueInterval := 1 * time.Minute
 
-
 	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
 	if err != nil {
 		log.Error(err, "while initializing Minio client")
@@ -50,7 +49,7 @@ func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
 	return &ReconcileBucket{
 		Client:          mgr.GetClient(),
 		scheme:          mgr.GetScheme(),
-		bucketHandler:     bucketHandler,
+		bucketHandler:   bucketHandler,
 		requeueInterval: requeueInterval,
 	}, nil
 }
@@ -64,7 +63,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to Bucket
-	err = c.Watch(&source.Kind{Type: &objectstorev1alpha1.Bucket{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &assetstorev1alpha1.Bucket{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -78,15 +77,15 @@ var _ reconcile.Reconciler = &ReconcileBucket{}
 type ReconcileBucket struct {
 	requeueInterval time.Duration
 	client.Client
-	scheme      *runtime.Scheme
+	scheme        *runtime.Scheme
 	bucketHandler *buckethandler.BucketHandler
 }
 
 // Reconcile reads that state of the cluster for a Bucket object and makes changes based on the state read
-// +kubebuilder:rbac:groups=objectstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=objectstore.kyma-project.io,resources=buckets/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets/status,verbs=get;update;patch
 func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	instance := &objectstorev1alpha1.Bucket{}
+	instance := &assetstorev1alpha1.Bucket{}
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -96,10 +95,10 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, err
 	}
 
+	bucketName := r.bucketNameForInstance(instance)
+
 	// TODO: Remove
 	log.Info(fmt.Sprintf("Reconcile %+v", instance))
-
-
 
 	// name of your custom finalizer
 	deleteBucketFinalizerName := "deletebucket.finalizers.assetstore.kyma-project.io"
@@ -134,11 +133,11 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, nil
 	}
 
-	bucketName := r.bucketName(instance)
+	bucketName := r.bucketNameForInstance(instance)
 	exists, err := r.minioClient.BucketExists(bucketName)
 
 	if exists {
-		instance.Status.Phase = objectstorev1alpha1.BucketCreated
+		instance.Status.Phase = assetstorev1alpha1.BucketReady
 		instance.Status.Reason = "Created"
 		instance.Status.Message = "Bucket %s successfully created"
 		updateErr := r.Update(context.Background(), instance)
@@ -152,15 +151,13 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 	if instance.Status.Phase == "" {
 		//Empty status - make bucket
 
-		bucketName := r.bucketName(instance)
-
-
+		bucketName := r.bucketNameForInstance(instance)
 
 		err = r.minioClient.MakeBucket(bucketName, region)
 		if err != nil {
 			// Bucket failed to create
 
-			instance.Status.Phase = objectstorev1alpha1.BucketFailed
+			instance.Status.Phase = assetstorev1alpha1.BucketFailed
 			instance.Status.Reason = "CreationFailed"
 			instance.Status.Message = fmt.Sprintf("Bucket couldn't be created due to error %s", err)
 			updateErr := r.Update(context.Background(), instance)
@@ -171,7 +168,7 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 			return reconcile.Result{}, err
 		}
 
-		instance.Status.Phase = objectstorev1alpha1.BucketCreated
+		instance.Status.Phase = assetstorev1alpha1.BucketReady
 		instance.Status.Reason = "Created"
 		instance.Status.Message = "Bucket %s successfully created"
 		updateErr := r.Update(context.Background(), instance)
@@ -188,8 +185,8 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileBucket) bucketName(instance *objectstorev1alpha1.Bucket) string {
-	return fmt.Sprintf("%s/%s", instance.Namespace, instance.Name)
+func (r *ReconcileBucket) bucketNameForInstance(instance *assetstorev1alpha1.Bucket) string {
+	return fmt.Sprintf("%s-%s", instance.Namespace, instance.Name)
 }
 
 func containsString(slice []string, s string) bool {

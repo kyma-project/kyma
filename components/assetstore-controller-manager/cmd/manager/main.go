@@ -4,9 +4,9 @@ import (
 	"flag"
 	"os"
 
-	"github.com/kyma-project/kyma/components/asset-controller/pkg/apis"
-	"github.com/kyma-project/kyma/components/asset-controller/pkg/controller"
-	"github.com/kyma-project/kyma/components/asset-controller/pkg/webhook"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/controller"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/webhook"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"

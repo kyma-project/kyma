@@ -1,11 +1,11 @@
 // NOTE: Boilerplate only.  Ignore this file.
 
-// Package v1alpha1 contains API Schema definitions for the objectstore v1alpha1 API group
+// Package v1alpha1 contains API Schema definitions for the assetstore v1alpha1 API group
 // +k8s:openapi-gen=true
 // +k8s:deepcopy-gen=package,register
-// +k8s:conversion-gen=github.com/kyma-project/kyma/components/bucket-controller/pkg/apis/objectstore
+// +k8s:conversion-gen=github.com/kyma-project/kyma/components/bucket-controller/pkg/apis/assetstore
 // +k8s:defaulter-gen=TypeMeta
-// +groupName=objectstore.kyma-project.io
+// +groupName=assetstore.kyma-project.io
 package v1alpha1
 
 import (
@@ -15,7 +15,7 @@ import (
 
 var (
 	// SchemeGroupVersion is group version used to register these objects
-	SchemeGroupVersion = schema.GroupVersion{Group: "objectstore.kyma-project.io", Version: "v1alpha1"}
+	SchemeGroupVersion = schema.GroupVersion{Group: "assetstore.kyma-project.io", Version: "v1alpha1"}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}

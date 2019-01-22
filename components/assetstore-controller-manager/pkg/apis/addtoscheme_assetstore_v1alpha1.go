@@ -1,7 +1,7 @@
 package apis
 
 import (
-	"github.com/kyma-project/kyma/components/asset-controller/pkg/apis/objectstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
 )
 
 func init() {

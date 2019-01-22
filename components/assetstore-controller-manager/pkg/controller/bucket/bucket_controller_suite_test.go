@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/asset-controller/pkg/apis"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis"
 	"github.com/onsi/gomega"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"

@@ -44,9 +44,11 @@ type BucketStatus struct {
 type BucketPhase string
 
 const (
-	BucketCreated BucketPhase = "Created"
-	BucketDeleted BucketPhase = "Deleted"
-	BucketFailed  BucketPhase = "Failed"
+	// BucketReady means that the bucket has been successfully created
+	BucketReady BucketPhase = "Ready"
+
+	// BucketFailed means that the bucket couldn't be created or has been deleted manually
+	BucketFailed BucketPhase = "Failed"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

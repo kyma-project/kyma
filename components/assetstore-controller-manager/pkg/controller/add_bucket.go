@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/kyma-project/kyma/components/asset-controller/pkg/controller/bucket"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/controller/bucket"
 )
 
 func init() {
