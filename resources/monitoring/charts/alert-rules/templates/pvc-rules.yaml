@@ -1,0 +1,13 @@
+{{ define "pvc-90-percent-full-rule.yaml.tpl"}}
+groups:
+- name: pvc-90-percent-full-rule
+  rules:
+  - alert: PVC90PercentFull
+    expr: kubelet_volume_stats_used_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|heptio-ark" } / kubelet_volume_stats_available_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|heptio-ark"} * 100 > 90
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      description:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+      summary: "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+{{ end }}
