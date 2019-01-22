@@ -21,7 +21,7 @@ type Bucket struct {
 type BucketSpec struct {
 	Region string `json:"region"`
 
-	// +kubebuilder:validation:Enum=none,readonly,readwrite,writeonly
+	// +kubebuilder:validation:Enum=,none,readonly,readwrite,writeonly
 	Policy BucketPolicy `json:"policy"`
 }
 

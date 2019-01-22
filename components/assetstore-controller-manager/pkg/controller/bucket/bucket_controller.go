@@ -47,10 +47,11 @@ func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
 	bucketHandler := buckethandler.New(minioClient, log)
 
 	return &ReconcileBucket{
-		Client:          mgr.GetClient(),
-		scheme:          mgr.GetScheme(),
-		bucketHandler:   bucketHandler,
-		requeueInterval: requeueInterval,
+		Client:            mgr.GetClient(),
+		scheme:            mgr.GetScheme(),
+		bucketHandler:     bucketHandler,
+		requeueInterval:   requeueInterval,
+		deletionFinalizer: &bucketFinalizer{},
 	}, nil
 }
 
@@ -77,8 +78,9 @@ var _ reconcile.Reconciler = &ReconcileBucket{}
 type ReconcileBucket struct {
 	requeueInterval time.Duration
 	client.Client
-	scheme        *runtime.Scheme
-	bucketHandler *buckethandler.BucketHandler
+	scheme            *runtime.Scheme
+	bucketHandler     *buckethandler.BucketHandler
+	deletionFinalizer *bucketFinalizer
 }
 
 // Reconcile reads that state of the cluster for a Bucket object and makes changes based on the state read
@@ -95,87 +97,74 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, err
 	}
 
-	bucketName := r.bucketNameForInstance(instance)
-
 	// TODO: Remove
 	log.Info(fmt.Sprintf("Reconcile %+v", instance))
+	// TODO: End
 
-	// name of your custom finalizer
-	deleteBucketFinalizerName := "deletebucket.finalizers.assetstore.kyma-project.io"
+	//bucketName := r.bucketNameForInstance(instance)
 
-	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
-		// The object is not being deleted, so if it does not have our finalizer,
-		// then lets add the finalizer and update the object.
-		if !containsString(instance.ObjectMeta.Finalizers, deleteBucketFinalizerName) {
-			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, deleteBucketFinalizerName)
-			if err := r.Update(context.Background(), instance); err != nil {
-				return reconcile.Result{Requeue: true}, nil
-			}
-		}
-	} else {
-		// The object is being deleted
-		if containsString(instance.ObjectMeta.Finalizers, deleteBucketFinalizerName) {
-			// our finalizer is present, so lets handle minio bucket deletion
-			if err := r.bucketHandler.Delete(instance); err != nil {
-				// if fail to delete bucket here, return with error
-				// so that it can be retried
-				return reconcile.Result{}, err
-			}
-
-			// remove our finalizer from the list and update it.
-			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, deleteBucketFinalizerName)
-			if err := r.Update(context.Background(), instance); err != nil {
-				return reconcile.Result{Requeue: true}, nil
-			}
-		}
-
-		// Our finalizer has finished, so the reconciler can do nothing.
-		return reconcile.Result{}, nil
+	err = r.addFinalizerIfShould(instance)
+	if err != nil {
+		return reconcile.Result{Requeue: true}, nil
 	}
 
-	bucketName := r.bucketNameForInstance(instance)
-	exists, err := r.minioClient.BucketExists(bucketName)
-
-	if exists {
-		instance.Status.Phase = assetstorev1alpha1.BucketReady
-		instance.Status.Reason = "Created"
-		instance.Status.Message = "Bucket %s successfully created"
-		updateErr := r.Update(context.Background(), instance)
-		if updateErr != nil {
-			return reconcile.Result{Requeue: true}, nil
-		}
-
-		return reconcile.Result{RequeueAfter: 10 * time.Minute}, nil
+	handled, requeue, err := r.handleDeletionIfShould(instance)
+	if handled || err != nil {
+		return reconcile.Result{Requeue: requeue}, err
 	}
 
-	if instance.Status.Phase == "" {
-		//Empty status - make bucket
 
-		bucketName := r.bucketNameForInstance(instance)
 
-		err = r.minioClient.MakeBucket(bucketName, region)
-		if err != nil {
-			// Bucket failed to create
 
-			instance.Status.Phase = assetstorev1alpha1.BucketFailed
-			instance.Status.Reason = "CreationFailed"
-			instance.Status.Message = fmt.Sprintf("Bucket couldn't be created due to error %s", err)
-			updateErr := r.Update(context.Background(), instance)
-			if updateErr != nil {
-				return reconcile.Result{Requeue: true}, nil
-			}
 
-			return reconcile.Result{}, err
-		}
 
-		instance.Status.Phase = assetstorev1alpha1.BucketReady
-		instance.Status.Reason = "Created"
-		instance.Status.Message = "Bucket %s successfully created"
-		updateErr := r.Update(context.Background(), instance)
-		if updateErr != nil {
-			return reconcile.Result{Requeue: true}, nil
-		}
-	}
+
+
+
+
+	//
+	//exists, err := r.bucketHandler.CheckIfExists(bucketName)
+	//
+	//if exists {
+	//	instance.Status.Phase = assetstorev1alpha1.BucketReady
+	//	instance.Status.Reason = "Created"
+	//	instance.Status.Message = "Bucket %s successfully created"
+	//	updateErr := r.Update(context.Background(), instance)
+	//	if updateErr != nil {
+	//		return reconcile.Result{Requeue: true}, nil
+	//	}
+	//
+	//	return reconcile.Result{RequeueAfter: 10 * time.Minute}, nil
+	//}
+	//
+	//if instance.Status.Phase == "" {
+	//	//Empty status - make bucket
+	//
+	//	bucketName := r.bucketNameForInstance(instance)
+	//
+	//	err = r.minioClient.MakeBucket(bucketName, region)
+	//	if err != nil {
+	//		// Bucket failed to create
+	//
+	//		instance.Status.Phase = assetstorev1alpha1.BucketFailed
+	//		instance.Status.Reason = "CreationFailed"
+	//		instance.Status.Message = fmt.Sprintf("Bucket couldn't be created due to error %s", err)
+	//		updateErr := r.Update(context.Background(), instance)
+	//		if updateErr != nil {
+	//			return reconcile.Result{Requeue: true}, nil
+	//		}
+	//
+	//		return reconcile.Result{}, err
+	//	}
+	//
+	//	instance.Status.Phase = assetstorev1alpha1.BucketReady
+	//	instance.Status.Reason = "Created"
+	//	instance.Status.Message = "Bucket %s successfully created"
+	//	updateErr := r.Update(context.Background(), instance)
+	//	if updateErr != nil {
+	//		return reconcile.Result{Requeue: true}, nil
+	//	}
+	//}
 
 	err = r.Update(context.Background(), instance)
 	if err != nil {
@@ -185,25 +174,53 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 	return reconcile.Result{}, nil
 }
 
+func (r *ReconcileBucket) addFinalizerIfShould(instance *assetstorev1alpha1.Bucket) error {
+	if r.isObjectBeingDeleted(instance) {
+		return nil
+	}
+
+	if r.deletionFinalizer.IsDefinedIn(instance) {
+		// Finalizer has been already added
+		return nil
+	}
+
+	r.deletionFinalizer.AddTo(instance)
+
+	return r.Update(context.Background(), instance)
+}
+
+func (r *ReconcileBucket) handleDeletionIfShould(instance *assetstorev1alpha1.Bucket) (bool, bool, error) {
+	if !r.isObjectBeingDeleted(instance) {
+		return false, false, nil
+	}
+
+	if !r.deletionFinalizer.IsDefinedIn(instance) {
+		return true, false, nil
+	}
+
+	bucketName := r.bucketNameForInstance(instance)
+	err := r.bucketHandler.Delete(bucketName)
+	if err != nil {
+		return true, false, err
+	}
+
+
+	r.deletionFinalizer.DeleteFrom(instance)
+	err = r.Update(context.Background(), instance)
+	if err != nil {
+		return true, true, nil
+	}
+
+	return true, false, nil
+}
+
+
+func (r *ReconcileBucket) isObjectBeingDeleted(instance *assetstorev1alpha1.Bucket) bool {
+	return !instance.ObjectMeta.DeletionTimestamp.IsZero()
+}
+
+
 func (r *ReconcileBucket) bucketNameForInstance(instance *assetstorev1alpha1.Bucket) string {
 	return fmt.Sprintf("%s-%s", instance.Namespace, instance.Name)
 }
 
-func containsString(slice []string, s string) bool {
-	for _, item := range slice {
-		if item == s {
-			return true
-		}
-	}
-	return false
-}
-
-func removeString(slice []string, s string) (result []string) {
-	for _, item := range slice {
-		if item == s {
-			continue
-		}
-		result = append(result, item)
-	}
-	return
-}
