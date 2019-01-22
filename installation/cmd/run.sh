@@ -56,7 +56,7 @@ MINIKUBE_EXTRA_ARGS=""
 
 if [ -n "$KNATIVE" ]; then
 
-    MINIKUBE_EXTRA_ARGS="${MINIKUBE_EXTRA_ARGS} --memory 10240 --disk-size 30g --extra-config=apiserver.enable-admission-plugins='NamespaceExists'"
+    MINIKUBE_EXTRA_ARGS="${MINIKUBE_EXTRA_ARGS} --memory 10240 --disk-size 30g"
 
 fi
 

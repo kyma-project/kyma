@@ -12,7 +12,7 @@ $MINIKUBE_EXTRA_ARGS = ""
 $CREATE_CR_EXTRA_ARGS = ""
 
 if ($KNATIVE -eq $true) {
-    $MINIKUBE_EXTRA_ARGS = "${MINIKUBE_ARGS} -memory 10240 -disk_size 30g --extra-config=apiserver.enable-admission-plugins='NamespaceExists'"
+    $MINIKUBE_EXTRA_ARGS = "${MINIKUBE_ARGS} -memory 10240 -disk_size 30g"
     $CREATE_CR_EXTRA_ARGS = "${CREATE_CR_EXTRA_ARGS} -crtpl_path ${CURRENT_DIR}/../resources/installer-cr-knative.yaml.tpl"
 }
 
