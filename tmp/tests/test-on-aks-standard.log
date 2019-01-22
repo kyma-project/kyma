@@ -1,0 +1,768 @@
+-------------------------------
+- Ensure test Pods are deleted
+-------------------------------
+
+Cleaning up helm test pods in namespace kyma-system
+No resources found
+Success cleaning test pods.
+
+
+Cleaning up helm test pods in namespace istio-system
+No resources found
+Success cleaning test pods.
+
+
+Cleaning up helm test pods in namespace knative-serving
+No resources found
+Success cleaning test pods.
+
+
+Cleaning up helm test pods in namespace kyma-integration
+No resources found
+Success cleaning test pods.
+
+----------------------------
+- Testing Kyma...
+----------------------------
+- Testing Core components...
+RUNNING: test-api-controller-acceptance
+PASSED: test-api-controller-acceptance
+RUNNING: test-core-core-acceptance
+PASSED: test-core-core-acceptance
+RUNNING: test-core-core-ui-api-acceptance
+FAILED: test-core-core-ui-api-acceptance, run `kubectl logs test-core-core-ui-api-acceptance --namespace kyma-system` for more info
+RUNNING: test-core-kubeless
+PASSED: test-core-kubeless
+RUNNING: test-core-kubeless-int
+PASSED: test-core-kubeless-int
+RUNNING: test-core-core-ui-acceptance
+PASSED: test-core-core-ui-acceptance
+RUNNING: test-core-namespace-controller
+PASSED: test-core-namespace-controller
+RUNNING: test-core-event-bus-tester
+PASSED: test-core-event-bus-tester
+Error: 1 test(s) failed
+- Montitoring module is installed. Running tests for same
+RUNNING: test-monitoring
+PASSED: test-monitoring
+- Logging module is installed. Running tests for same
+RUNNING: test-logging
+PASSED: test-logging
+All test pods should be terminated. Checking...
+Flag --show-all has been deprecated, will be removed in an upcoming release
+OK
+Flag --show-all has been deprecated, will be removed in an upcoming release
+Testing 'test-api-controller-acceptance'
+Test of 'test-api-controller-acceptance' was successful
+Logs are not displayed after success
+End of testing 'test-api-controller-acceptance'
+
+Testing 'test-core-core-acceptance'
+Test of 'test-core-core-acceptance' was successful
+Logs are not displayed after success
+End of testing 'test-core-core-acceptance'
+
+Testing 'test-core-core-ui-acceptance'
+Test of 'test-core-core-ui-acceptance' was successful
+Logs are not displayed after success
+End of testing 'test-core-core-ui-acceptance'
+
+Testing 'test-core-core-ui-api-acceptance'
+'test-core-core-ui-api-acceptance' has Failed status
+Fetching logs from 'test-core-core-ui-api-acceptance' with options tailLimit=2000 and bytesLimit=500000
+PASS
+PASS
+PASS
+2019/01/22 13:29:50 Setting up tests...
+2019/01/22 13:29:56 []
+2019/01/22 13:29:57 []
+2019/01/22 13:29:58 Waiting for ServiceBroker running... Conditions: []
+2019/01/22 13:29:58 Waiting for ServiceBroker running... Conditions: []
+2019/01/22 13:29:59 >> variables: map[]
+2019/01/22 13:29:59 >> query:
+   query {
+    clusterServiceBrokers {
+
+  name
+  creationTimestamp
+     url
+     labels
+     status {
+   ready
+      reason
+      message
+  }
+
+    }
+   }
+
+2019/01/22 13:29:59 >> headers: map[Content-Type:[application/json; charset=utf-8] Accept:[application/json; charset=utf-8]]
+2019/01/22 13:29:59 << upstream connect error or disconnect/reset before headers
+2019/01/22 13:29:59 >> variables: map[name:cluster-ups-broker]
+2019/01/22 13:29:59 >> query:
+   query ($name: String!) {
+    clusterServiceBroker(name: $name) {
+
+  name
+  creationTimestamp
+     url
+     labels
+     status {
+   ready
+      reason
+      message
+  }
+
+    }
+   }
+
+2019/01/22 13:29:59 >> headers: map[Content-Type:[application/json; charset=utf-8] Accept:[application/json; charset=utf-8]]
+2019/01/22 13:29:59 << upstream connect error or disconnect/reset before headers
+--- FAIL: TestClusterServiceBrokerQueries (0.69s)
+    --- FAIL: TestClusterServiceBrokerQueries/MultipleResources (0.02s)
+    	require.go:794:
+    			Error Trace:	clusterservicebroker_test.go:66
+    			Error:      	Received unexpected error:
+    			            	invalid character 'u' looking for beginning of value
+    			            	decoding response
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).runWithJSON
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:137
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).Run
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:93
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql.(*Client).Do
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql/client.go:62
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql.(*Client).DoQuery
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql/client.go:54
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog.TestClusterServiceBrokerQueries.func1
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog/clusterservicebroker_test.go:64
+    			            	testing.tRunner
+    			            		/usr/local/go/src/testing/testing.go:777
+    			            	runtime.goexit
+    			            		/usr/local/go/src/runtime/asm_amd64.s:2361
+    			Test:       	TestClusterServiceBrokerQueries/MultipleResources
+    --- FAIL: TestClusterServiceBrokerQueries/SingleResource (0.00s)
+    	require.go:794:
+    			Error Trace:	clusterservicebroker_test.go:84
+    			Error:      	Received unexpected error:
+    			            	invalid character 'u' looking for beginning of value
+    			            	decoding response
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).runWithJSON
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:137
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).Run
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:93
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql.(*Client).Do
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql/client.go:62
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog.TestClusterServiceBrokerQueries.func2
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog/clusterservicebroker_test.go:82
+    			            	testing.tRunner
+    			            		/usr/local/go/src/testing/testing.go:777
+    			            	runtime.goexit
+    			            		/usr/local/go/src/runtime/asm_amd64.s:2361
+    			Test:       	TestClusterServiceBrokerQueries/SingleResource
+2019/01/22 13:30:00 >> variables: map[]
+2019/01/22 13:30:00 >> query:
+   query {
+    clusterServiceClasses {
+
+  name
+  externalName
+  displayName
+  creationTimestamp
+  description
+  longDescription
+  imageUrl
+  documentationUrl
+  supportUrl
+  providerDisplayName
+  tags
+  labels
+  activated
+  plans {
+   name
+   displayName
+   externalName
+   description
+   relatedClusterServiceClassName
+   instanceCreateParameterSchema
+  }
+
+    }
+   }
+
+2019/01/22 13:30:00 >> headers: map[Content-Type:[application/json; charset=utf-8] Accept:[application/json; charset=utf-8]]
+2019/01/22 13:30:00 << upstream connect error or disconnect/reset before headers
+--- FAIL: TestClusterServiceClassesQueries (0.65s)
+    --- FAIL: TestClusterServiceClassesQueries/MultipleResources (0.01s)
+    	require.go:794:
+    			Error Trace:	clusterserviceclass_test.go:65
+    			Error:      	Received unexpected error:
+    			            	invalid character 'u' looking for beginning of value
+    			            	decoding response
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).runWithJSON
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:137
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).Run
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:93
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql.(*Client).Do
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql/client.go:62
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql.(*Client).DoQuery
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql/client.go:54
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog.TestClusterServiceClassesQueries.func1
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog/clusterserviceclass_test.go:63
+    			            	testing.tRunner
+    			            		/usr/local/go/src/testing/testing.go:777
+    			            	runtime.goexit
+    			            		/usr/local/go/src/runtime/asm_amd64.s:2361
+    			Test:       	TestClusterServiceClassesQueries/MultipleResources
+    --- FAIL: TestClusterServiceClassesQueries/SingleResource (0.00s)
+    	require.go:794:
+    			Error Trace:	clusterserviceclass_test.go:83
+    			Error:      	Received unexpected error:
+    			            	invalid character 'u' looking for beginning of value
+    			            	decoding response
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).runWithJSON
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:137
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).Run
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:93
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql.(*Client).Do
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql/client.go:62
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog.TestClusterServiceClassesQueries.func2
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog/clusterserviceclass_test.go:81
+    			            	testing.tRunner
+    			            		/usr/local/go/src/testing/testing.go:777
+    			            	runtime.goexit
+    			            		/usr/local/go/src/runtime/asm_amd64.s:2361
+    			Test:       	TestClusterServiceClassesQueries/SingleResource
+2019/01/22 13:30:00 >> variables: map[name:4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468]
+2019/01/22 13:30:00 >> query:
+   query ($name: String!) {
+    clusterServiceClass(name: $name) {
+
+  name
+  externalName
+  displayName
+  creationTimestamp
+  description
+  longDescription
+  imageUrl
+  documentationUrl
+  supportUrl
+  providerDisplayName
+  tags
+  labels
+  activated
+  plans {
+   name
+   displayName
+   externalName
+   description
+   relatedClusterServiceClassName
+   instanceCreateParameterSchema
+  }
+
+    }
+   }
+
+2019/01/22 13:30:00 >> headers: map[Content-Type:[application/json; charset=utf-8] Accept:[application/json; charset=utf-8]]
+2019/01/22 13:30:00 << upstream connect error or disconnect/reset before headers
+2019/01/22 13:30:01 >> variables: map[parameterSchema:map[first:1 second:map[value:2]] name:binding-test-instance environment:ui-api-acceptance-sc externalPlanName:default externalServiceClassName:user-provided-service labels:[test test2]]
+2019/01/22 13:30:01 >> query:
+   mutation ($name: String!, $environment: String!, $externalPlanName: String!, $externalServiceClassName: String!, $labels: [String!]!, $parameterSchema: JSON) {
+    createServiceInstance(params: {
+        name: $name,
+        environment: $environment,
+     classRef: {
+      externalName: $externalServiceClassName,
+      clusterWide: true,
+     },
+     planRef: {
+      externalName: $externalPlanName,
+      clusterWide: true,
+     },
+        labels: $labels,
+     parameterSchema: $parameterSchema
+    }) {
+     name
+    }
+   }
+
+2019/01/22 13:30:01 >> headers: map[Content-Type:[application/json; charset=utf-8] Accept:[application/json; charset=utf-8]]
+2019/01/22 13:30:01 << upstream connect error or disconnect/reset before headers
+--- FAIL: TestServiceBindingMutationsAndQueries (0.99s)
+	servicebinding_test.go:67: Subscribe bindings
+	servicebinding_test.go:71: Create Instance
+	require.go:794:
+			Error Trace:	servicebinding_test.go:73
+			Error:      	Received unexpected error:
+			            	invalid character 'u' looking for beginning of value
+			            	decoding response
+			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).runWithJSON
+			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:137
+			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).Run
+			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:93
+			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql.(*Client).Do
+			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql/client.go:62
+			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog.createInstance
+			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog/serviceinstance_test.go:172
+			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog.TestServiceBindingMutationsAndQueries
+			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog/servicebinding_test.go:72
+			            	testing.tRunner
+			            		/usr/local/go/src/testing/testing.go:777
+			            	runtime.goexit
+			            		/usr/local/go/src/runtime/asm_amd64.s:2361
+			Test:       	TestServiceBindingMutationsAndQueries
+2019/01/22 13:30:02 >> variables: map[environment:ui-api-acceptance-sc]
+2019/01/22 13:30:02 >> query:
+   query ($environment: String!) {
+    serviceBrokers(environment: $environment) {
+
+  name
+  environment
+  creationTimestamp
+  url
+  labels
+  status {
+   ready
+   reason
+   message
+  }
+
+    }
+   }
+
+2019/01/22 13:30:02 >> headers: map[Accept:[application/json; charset=utf-8] Content-Type:[application/json; charset=utf-8]]
+2019/01/22 13:30:02 << upstream connect error or disconnect/reset before headers
+2019/01/22 13:30:02 >> variables: map[name:ups-broker environment:ui-api-acceptance-sc]
+2019/01/22 13:30:02 >> query:
+   query ($name: String!, $environment: String!) {
+    serviceBroker(name: $name, environment: $environment) {
+
+  name
+  environment
+  creationTimestamp
+  url
+  labels
+  status {
+   ready
+   reason
+   message
+  }
+
+    }
+   }
+
+2019/01/22 13:30:02 >> headers: map[Content-Type:[application/json; charset=utf-8] Accept:[application/json; charset=utf-8]]
+--- FAIL: TestServiceBrokerQueries (0.58s)
+    --- FAIL: TestServiceBrokerQueries/MultipleResources (0.01s)
+    	require.go:794:
+    			Error Trace:	servicebroker_test.go:70
+    			Error:      	Received unexpected error:
+    			            	invalid character 'u' looking for beginning of value
+    			            	decoding response
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).runWithJSON
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:137
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).Run
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:93
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql.(*Client).Do
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql/client.go:62
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog.TestServiceBrokerQueries.func1
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog/servicebroker_test.go:68
+    			            	testing.tRunner
+    			            		/usr/local/go/src/testing/testing.go:777
+    			            	runtime.goexit
+    			            		/usr/local/go/src/runtime/asm_amd64.s:2361
+    			Test:       	TestServiceBrokerQueries/MultipleResources
+    --- FAIL: TestServiceBrokerQueries/SingleResource (0.01s)
+    	require.go:794:
+    			Error Trace:	servicebroker_test.go:89
+    			Error:      	Received unexpected error:
+    			            	invalid character 'u' looking for beginning of value
+    			            	decoding response
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).runWithJSON
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:137
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).Run
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:93
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql.(*Client).Do
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql/client.go:62
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog.TestServiceBrokerQueries.func2
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog/servicebroker_test.go:87
+    			            	testing.tRunner
+    			            		/usr/local/go/src/testing/testing.go:777
+    			            	runtime.goexit
+    			            		/usr/local/go/src/runtime/asm_amd64.s:2361
+    			Test:       	TestServiceBrokerQueries/SingleResource
+2019/01/22 13:30:02 << upstream connect error or disconnect/reset before headers
+2019/01/22 13:30:02 >> variables: map[environment:ui-api-acceptance-sc]
+2019/01/22 13:30:02 >> query:
+   query ($environment: String!) {
+    serviceClasses(environment: $environment) {
+
+  name
+  environment
+  externalName
+  displayName
+  creationTimestamp
+  description
+  longDescription
+  imageUrl
+  documentationUrl
+  supportUrl
+  providerDisplayName
+  tags
+  labels
+  activated
+  plans {
+   name
+   displayName
+   externalName
+   description
+   relatedServiceClassName
+   instanceCreateParameterSchema
+   bindingCreateParameterSchema
+  }
+
+    }
+   }
+
+2019/01/22 13:30:02 >> headers: map[Content-Type:[application/json; charset=utf-8] Accept:[application/json; charset=utf-8]]
+2019/01/22 13:30:02 << upstream connect error or disconnect/reset before headers
+2019/01/22 13:30:02 >> variables: map[environment:ui-api-acceptance-sc name:4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468]
+2019/01/22 13:30:02 >> query:
+   query ($name: String!, $environment: String!) {
+    serviceClass(name: $name, environment: $environment) {
+
+  name
+  environment
+  externalName
+  displayName
+  creationTimestamp
+  description
+  longDescription
+  imageUrl
+  documentationUrl
+  supportUrl
+  providerDisplayName
+  tags
+  labels
+  activated
+  plans {
+   name
+   displayName
+   externalName
+   description
+   relatedServiceClassName
+   instanceCreateParameterSchema
+   bindingCreateParameterSchema
+  }
+
+    }
+   }
+
+2019/01/22 13:30:02 >> headers: map[Accept:[application/json; charset=utf-8] Content-Type:[application/json; charset=utf-8]]
+2019/01/22 13:30:02 << upstream connect error or disconnect/reset before headers
+--- FAIL: TestServiceClassesQueries (0.62s)
+    --- FAIL: TestServiceClassesQueries/MultipleResources (0.01s)
+    	require.go:794:
+    			Error Trace:	serviceclass_test.go:69
+    			Error:      	Received unexpected error:
+    			            	invalid character 'u' looking for beginning of value
+    			            	decoding response
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).runWithJSON
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:137
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).Run
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:93
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql.(*Client).Do
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql/client.go:62
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog.TestServiceClassesQueries.func1
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog/serviceclass_test.go:67
+    			            	testing.tRunner
+    			            		/usr/local/go/src/testing/testing.go:777
+    			            	runtime.goexit
+    			            		/usr/local/go/src/runtime/asm_amd64.s:2361
+    			Test:       	TestServiceClassesQueries/MultipleResources
+    --- FAIL: TestServiceClassesQueries/SingleResource (0.00s)
+    	require.go:794:
+    			Error Trace:	serviceclass_test.go:88
+    			Error:      	Received unexpected error:
+    			            	invalid character 'u' looking for beginning of value
+    			            	decoding response
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).runWithJSON
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:137
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).Run
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:93
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql.(*Client).Do
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql/client.go:62
+    			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog.TestServiceClassesQueries.func2
+    			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog/serviceclass_test.go:86
+    			            	testing.tRunner
+    			            		/usr/local/go/src/testing/testing.go:777
+    			            	runtime.goexit
+    			            		/usr/local/go/src/runtime/asm_amd64.s:2361
+    			Test:       	TestServiceClassesQueries/SingleResource
+2019/01/22 13:30:03 >> variables: map[name:cluster-test-instance environment:ui-api-acceptance-sc externalPlanName:default externalServiceClassName:user-provided-service labels:[test test2] parameterSchema:map[first:1 second:map[value:2]]]
+2019/01/22 13:30:03 >> query:
+   mutation ($name: String!, $environment: String!, $externalPlanName: String!, $externalServiceClassName: String!, $labels: [String!]!, $parameterSchema: JSON) {
+    createServiceInstance(params: {
+        name: $name,
+        environment: $environment,
+     classRef: {
+      externalName: $externalServiceClassName,
+      clusterWide: true,
+     },
+     planRef: {
+      externalName: $externalPlanName,
+      clusterWide: true,
+     },
+        labels: $labels,
+     parameterSchema: $parameterSchema
+    }) {
+
+  name
+  environment
+  planSpec
+  bindable
+  creationTimestamp
+  labels
+  classReference {
+   name
+   displayName
+   clusterWide
+  }
+  planReference {
+   name
+   displayName
+   clusterWide
+  }
+  status {
+   type
+   reason
+   message
+  }
+  clusterServicePlan {
+   name
+   displayName
+   externalName
+   description
+   relatedClusterServiceClassName
+   instanceCreateParameterSchema
+  }
+  clusterServiceClass {
+   name
+   externalName
+   displayName
+   creationTimestamp
+   description
+   longDescription
+   imageUrl
+   documentationUrl
+   supportUrl
+   providerDisplayName
+   tags
+   activated
+  }
+  servicePlan {
+   name
+   displayName
+   externalName
+   description
+   relatedServiceClassName
+   instanceCreateParameterSchema
+   bindingCreateParameterSchema
+   }
+   serviceClass {
+   name
+   environment
+   externalName
+   displayName
+   creationTimestamp
+   description
+   longDescription
+   imageUrl
+   documentationUrl
+   supportUrl
+   providerDisplayName
+   tags
+   activated
+  }
+  serviceBindings {
+   items {
+    name
+    serviceInstanceName
+    environment
+    secret {
+     name
+     environment
+     data
+    }
+   }
+   stats {
+    ready
+    failed
+    pending
+    unknown
+   }
+        }
+  serviceBindingUsages {
+   name
+   environment
+   usedBy {
+    kind
+    name
+   }
+  }
+
+    }
+   }
+
+2019/01/22 13:30:03 >> headers: map[Content-Type:[application/json; charset=utf-8] Accept:[application/json; charset=utf-8]]
+2019/01/22 13:30:03 << upstream connect error or disconnect/reset before headers
+--- FAIL: TestServiceInstanceMutationsAndQueries (0.79s)
+	serviceinstance_test.go:51: Subscribe instance created by ClusterServiceBroker
+	serviceinstance_test.go:55: Create instance from ClusterServiceBroker
+	require.go:794:
+			Error Trace:	serviceinstance_test.go:58
+			Error:      	Received unexpected error:
+			            	invalid character 'u' looking for beginning of value
+			            	decoding response
+			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).runWithJSON
+			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:137
+			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql.(*Client).Run
+			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/vendor/github.com/machinebox/graphql/graphql.go:93
+			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql.(*Client).Do
+			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql/client.go:62
+			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog.createInstance
+			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog/serviceinstance_test.go:172
+			            	github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog.TestServiceInstanceMutationsAndQueries
+			            		/go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/domain/servicecatalog/serviceinstance_test.go:56
+			            	testing.tRunner
+			            		/usr/local/go/src/testing/testing.go:777
+			            	runtime.goexit
+			            		/usr/local/go/src/runtime/asm_amd64.s:2361
+			Test:       	TestServiceInstanceMutationsAndQueries
+FAIL
+2019/01/22 13:30:03 Cleaning up...
+Setting exit status to 1
+2019/01/22 13:30:07 Setting up tests...
+2019/01/22 13:30:12 []
+2019/01/22 13:30:13 []
+2019/01/22 13:30:14 Waiting for ServiceBroker running... Conditions: []
+2019/01/22 13:30:15 Waiting for ServiceBroker running... Conditions: []
+PASS
+2019/01/22 13:30:22 Cleaning up...
+PASS
+Exiting tests with 1
+End of testing 'test-core-core-ui-api-acceptance'
+
+Testing 'test-core-event-bus-tester'
+Test of 'test-core-event-bus-tester' was successful
+Logs are not displayed after success
+End of testing 'test-core-event-bus-tester'
+
+Testing 'test-core-kubeless'
+Test of 'test-core-kubeless' was successful
+Logs are not displayed after success
+End of testing 'test-core-kubeless'
+
+Testing 'test-core-kubeless-int'
+Test of 'test-core-kubeless-int' was successful
+Logs are not displayed after success
+End of testing 'test-core-kubeless-int'
+
+Testing 'test-core-namespace-controller'
+Test of 'test-core-namespace-controller' was successful
+Logs are not displayed after success
+End of testing 'test-core-namespace-controller'
+
+Testing 'test-logging'
+Test of 'test-logging' was successful
+Logs are not displayed after success
+End of testing 'test-logging'
+
+Testing 'test-monitoring'
+Test of 'test-monitoring' was successful
+Logs are not displayed after success
+End of testing 'test-monitoring'
+
+Test pods should be marked with label 'helm-chart-test=true'. Checking...
+Flag --show-all has been deprecated, will be removed in an upcoming release
+Error from server (NotFound): pods "test-core-event-bus-subscriber-55c8d4d6c4-4xvhz" not found
+OK
+
+Cleaning up helm test pods in namespace kyma-system
+pod "test-api-controller-acceptance" deleted
+pod "test-core-core-acceptance" deleted
+pod "test-core-core-ui-acceptance" deleted
+pod "test-core-core-ui-api-acceptance" deleted
+pod "test-core-event-bus-tester" deleted
+pod "test-core-kubeless" deleted
+pod "test-core-kubeless-int" deleted
+pod "test-core-namespace-controller" deleted
+pod "test-logging" deleted
+pod "test-monitoring" deleted
+Success cleaning test pods.
+
+- Testing Istio components...
+No Tests Found
+All test pods should be terminated. Checking...
+Flag --show-all has been deprecated, will be removed in an upcoming release
+OK
+Flag --show-all has been deprecated, will be removed in an upcoming release
+Test pods should be marked with label 'helm-chart-test=true'. Checking...
+Flag --show-all has been deprecated, will be removed in an upcoming release
+OK
+
+Cleaning up helm test pods in namespace istio-system
+No resources found
+Success cleaning test pods.
+
+- Testing Knative components...
+No Tests Found
+All test pods should be terminated. Checking...
+Flag --show-all has been deprecated, will be removed in an upcoming release
+OK
+Flag --show-all has been deprecated, will be removed in an upcoming release
+Test pods should be marked with label 'helm-chart-test=true'. Checking...
+Flag --show-all has been deprecated, will be removed in an upcoming release
+OK
+
+Cleaning up helm test pods in namespace knative-serving
+No resources found
+Success cleaning test pods.
+
+- Testing Application Connector
+RUNNING: application-operator-tests
+PASSED: application-operator-tests
+RUNNING: application-registry-tests
+PASSED: application-registry-tests
+RUNNING: connector-service-tests
+PASSED: connector-service-tests
+All test pods should be terminated. Checking...
+Flag --show-all has been deprecated, will be removed in an upcoming release
+OK
+Flag --show-all has been deprecated, will be removed in an upcoming release
+Testing 'application-operator-tests'
+Test of 'application-operator-tests' was successful
+Logs are not displayed after success
+End of testing 'application-operator-tests'
+
+Testing 'application-registry-tests'
+Test of 'application-registry-tests' was successful
+Logs are not displayed after success
+End of testing 'application-registry-tests'
+
+Testing 'connector-service-tests'
+Test of 'connector-service-tests' was successful
+Logs are not displayed after success
+End of testing 'connector-service-tests'
+
+Test pods should be marked with label 'helm-chart-test=true'. Checking...
+Flag --show-all has been deprecated, will be removed in an upcoming release
+OK
+
+Cleaning up helm test pods in namespace kyma-integration
+pod "application-operator-tests" deleted
+pod "application-registry-tests" deleted
+pod "connector-service-tests" deleted
+Success cleaning test pods.
+
+Images with tag latest are not allowed. Checking...
+OK

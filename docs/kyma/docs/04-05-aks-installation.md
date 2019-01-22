@@ -17,9 +17,9 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Azure 
 
 Set following environment variables
 ```
-export RS_GROUP={RESOURCE_GROUP_NAME_YOU_WANT}
-export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
-export REGION={REGION_YOU_WANT} #westeurope
+export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
+export CLUSTER_NAME={YOUR_CLUSTER_NAME}
+export REGION={YOUR_REGION} #westeurope
 ```
 
 If you plan to use a custom domain set also these:
