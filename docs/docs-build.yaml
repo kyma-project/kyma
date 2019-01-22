@@ -34,7 +34,7 @@
   directory: service-brokers/azure-broker-service-classes/azure-mssqldr/v12.0/database-pair-from-existing-primary
 - name: azure-mssqldr-12.0-database-pair-registered
   directory: service-brokers/azure-broker-service-classes/azure-mssqldr/v12.0/database-pair-registered
-- name: azure-mssqldr-dbms-pair-registered
+- name: azure-mssqldr-12.0-dbms-pair-registered
   directory: service-brokers/azure-broker-service-classes/azure-mssqldr/v12.0/dbms-pair-registered
 - name: azure-redis-cache
   directory: service-brokers/azure-broker-service-classes/azure-redis-cache
@@ -58,6 +58,18 @@
   directory: service-brokers/azure-broker-service-classes/azure-servicebus/servicebus-queue
 - name: azure-servicebus-topic
   directory: service-brokers/azure-broker-service-classes/azure-servicebus/servicebus-topic
+- name: azure-cosmosdb-graph-account
+  directory: service-brokers/azure-broker-service-classes/azure-cosmosdb/graph-account
+- name: azure-cosmosdb-mongo-account
+  directory: service-brokers/azure-broker-service-classes/azure-cosmosdb/mongo-account
+- name: azure-cosmosdb-sql
+  directory: service-brokers/azure-broker-service-classes/azure-cosmosdb/sql
+- name: azure-cosmosdb-sql-account
+  directory: service-brokers/azure-broker-service-classes/azure-cosmosdb/sql-account
+- name: azure-cosmosdb-sql-database
+  directory: service-brokers/azure-broker-service-classes/azure-cosmosdb/sql-database
+- name: azure-cosmosdb-table-account
+  directory: service-brokers/azure-broker-service-classes/azure-cosmosdb/table-account
 
 # GCP Broker
 - name: gcp-bigquery
