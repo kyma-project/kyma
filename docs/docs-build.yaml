@@ -74,6 +74,8 @@
   directory: service-brokers/azure-broker-service-classes/azure-cosmosdb/sql-database
 - name: azure-cosmosdb-table-account
   directory: service-brokers/azure-broker-service-classes/azure-cosmosdb/table-account
+- name: azure-keyvault
+  directory: service-brokers/azure-broker-service-classes/azure-keyvault
 
 # GCP Broker
 - name: gcp-bigquery
