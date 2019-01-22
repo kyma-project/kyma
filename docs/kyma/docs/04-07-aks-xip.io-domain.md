@@ -16,7 +16,7 @@ The prerequisites match these listed in [this](#installation-install-kyma-on-a-a
 
 ## Installation
 
-The installation process follows the steps outlined in the [Install Kyma on a AKS cluster](#installation-install-kyma-on-a-aks-cluster) document. Follow [this](#installation-install-kyma-on-a-aks-cluster-prepare-the-aks-cluster) section to prepare your cluster.
+The installation process follows the steps outlined in the [Install Kyma on a AKS cluster](#installation-install-kyma-on-a-aks-cluster) document. Set [environment variables](#installation-install-kyma-on-a-aks-cluster-environment-variables) and follow [this](#installation-install-kyma-on-a-aks-cluster-prepare-the-aks-cluster) section to prepare your cluster.
 
 When you install Kyma with the wildcard DNS, you can use one of two approaches to allocating the required IP addresses for your cluster:
 - Dynamic IP allocation - can be used with [Knative](#installation-installation-with-knative) eventing and serverless, but disables the Application Connector. 
@@ -36,9 +36,11 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
 
 ### Manual IP allocation
 
-1. Export your K8S cluster resource group. This group is different than the one you provided during cluster creation, it is automatically created by AKS. Run:
+1. Export your K8S cluster resource group. This group is different than the one you provided during cluster creation, it is automatically created by AKS. 
+   Set the same set of environment variables as during [cluster initialization](#installation-install-kyma-on-a-aks-cluster-environment-variables).
+   Run:
    ```
-   export CLUSTER_RS_GROUP=MC_{YOUR_RESOURCE_GROUP}_{K8S_CLUSTER_NAME}_{K8S_CLUSTER_REGION}
+   export CLUSTER_RS_GROUP=MC_${RS_GROUP}_${CLUSTER_NAME}_${REGION}
    ```
 2. Get public IP addresses for the load balancer of the AKS cluster to which you deploy Kyma and for the load balancer of the Application Connector.
 

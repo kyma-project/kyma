@@ -17,15 +17,20 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Azure 
 
 Set following environment variables
 ```
-export DNS_DOMAIN={YOUR_DOMAIN} # example.com
-export SUB_DOMAIN={YOUR_SUBDOMAIN} # cluster (in this case the full name of your cluster is cluster.example.com)
 export RS_GROUP={RESOURCE_GROUP_NAME_YOU_WANT}
 export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
+export REGION={REGION_YOU_WANT} #westeurope
 ```
 
-Create a resource group to contain all your resources
+If you plan to use a custom domain set also these:
 ```
-az group create --name $RS_GROUP --location westeurope
+export DNS_DOMAIN={YOUR_DOMAIN} # example.com
+export SUB_DOMAIN={YOUR_SUBDOMAIN} # cluster (in this case the full name of your cluster is cluster.example.com)
+```
+
+Create a resource group that will contain all your resources
+```
+az group create --name ${RS_GROUP} --location ${REGION}
 ```
 
 >**NOTE:** If you don't own a domain which you can use or you don't want to assign a domain to a cluster, see the **Install Kyma on a AKS cluster with wildcard DNS** document which shows you how to create a cluster-based playground environment using a wildcard DNS provided by xip.io. 
@@ -57,7 +62,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 3. Check if everything is set up correctly and your domain is managed by Azure name servers. Run:
     ```
-    host -t ns $DNS_DOMAIN
+    host -t ns ${DNS_DOMAIN}
     ```
     A successful response returns the list of the name servers you fetched from Azure.
 
@@ -136,6 +141,11 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     ```
     kubectl apply -f installation/resources/tiller.yaml
     ```
+    
+3. Apply fix for AKS issue with readiness probe 
+    ```
+    kubectl apply -f installation/resources/azure-crb-for-healthz.yaml
+    ```
 
 ## Prepare the installation configuration file
 
@@ -150,12 +160,12 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 3. Download the `kyma-config-cluster` file from the release you chose. Run:
    ```
-   wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-cluster.yaml
+   wget https://github.com/kyma-project/kyma/releases/download/${LATEST}/kyma-config-cluster.yaml
    ```
 
 4. Update the file with the values from your environment variables. Run:
     ```
-    cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/${SUB_DOMAIN}.${DNS_DOMAIN}/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g"|sed -e "s/__.*__//g"  >my-kyma.yaml
+    cat kyma-config-cluster.yaml | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/${SUB_DOMAIN}.${DNS_DOMAIN}/g" |sed -e "s/__TLS_CERT__/${TLS_CERT}/g" | sed -e "s/__TLS_KEY__/${TLS_KEY}/g"|sed -e "s/__.*__//g"  >my-kyma.yaml
     ```
 
 5. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your AKS cluster.
@@ -182,7 +192,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 4. Prepare the deployment file:
 
     ```
-    cat installation/resources/installer.yaml <(echo -e "\n---") installation/resources/installer-config-cluster.yaml.tpl  <(echo -e "\n---") installation/resources/installer-cr-cluster.yaml.tpl | sed -e "s/__DOMAIN__/${SUB_DOMAIN}.${DNS_DOMAIN}/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    cat installation/resources/installer.yaml <(echo -e "\n---") installation/resources/installer-config-cluster.yaml.tpl  <(echo -e "\n---") installation/resources/installer-cr-cluster.yaml.tpl | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/${SUB_DOMAIN}.${DNS_DOMAIN}/g" |sed -e "s/__TLS_CERT__/${TLS_CERT}/g" | sed -e "s/__TLS_KEY__/${TLS_KEY}/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
 5. The output of this operation is the `my_kyma.yaml` file. Modify it to fetch the proper image with the changes you made ([YOUR_DOCKER_LOGIN]/kyma-installer:latest). Use the modified file to deploy Kyma on your AKS cluster.
@@ -192,7 +202,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 1. Configure kubectl to use your new cluster. Run:  add yourself as the cluster admin, and deploy Kyma Installer with your configuration.
     ```
-    az aks get-credentials --resource-group $RS_GROUP --name $CLUSTER_NAME
+    az aks get-credentials --resource-group ${RS_GROUP} --name ${CLUSTER_NAME}
     ```
 2. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:
     ```
@@ -256,5 +266,5 @@ Follow this steps to configure a new, more secure certificate suitable for produ
 3. Prepare installation file with the following command:
 
     ```
-    cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/${SUB_DOMAIN}.${DNS_DOMAIN}/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g"  | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__REMOTE_ENV_CA__/$AC_CRT/g" | sed -e "s/__REMOTE_ENV_CA_KEY__/$AC_KEY/g" |sed -e "s/__.*__//g"  >my-kyma.yaml
+    cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/${SUB_DOMAIN}.${DNS_DOMAIN}/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g"  | sed -e "s/__TLS_CERT__/${TLS_CERT}/g" | sed -e "s/__TLS_KEY__/${TLS_KEY}/g" | sed -e "s/__REMOTE_ENV_CA__/${AC_CRT}/g" | sed -e "s/__REMOTE_ENV_CA_KEY__/${AC_KEY}/g" |sed -e "s/__.*__//g"  >my-kyma.yaml
     ```
