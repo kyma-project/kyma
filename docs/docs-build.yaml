@@ -22,6 +22,22 @@
   directory: service-brokers/azure-broker-service-classes/azure-sql
 - name: azure-text-analytics
   directory: service-brokers/azure-broker-service-classes/azure-textanalytics
+- name: azure-storage-general-purpose-v2-storage-account
+  directory: service-brokers/azure-broker-service-classes/azure-storage/v2-storage-account
+- name: azure-storage-general-purpose-v1-storage-account
+  directory: service-brokers/azure-broker-service-classes/azure-storage/v1-storage-account
+- name: azure-storage-blob-storage-account-and-container
+  directory: service-brokers/azure-broker-service-classes/azure-storage/blob-account-and-container
+- name: azure-storage-blob-storage-account
+  directory: service-brokers/azure-broker-service-classes/azure-storage/blob-account
+- name: azure-storage-blob-container
+  directory: service-brokers/azure-broker-service-classes/azure-storage/blob-container
+- name: azure-servicebus-namespace
+  directory: service-brokers/azure-broker-service-classes/azure-servicebus/servicebus-namespace
+- name: azure-servicebus-queue
+  directory: service-brokers/azure-broker-service-classes/azure-servicebus/servicebus-queue
+- name: azure-servicebus-topic
+  directory: service-brokers/azure-broker-service-classes/azure-servicebus/servicebus-topic
 
 # GCP Broker
 - name: gcp-bigquery
