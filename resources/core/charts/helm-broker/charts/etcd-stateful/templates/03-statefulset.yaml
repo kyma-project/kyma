@@ -16,6 +16,8 @@ spec:
   template:
     metadata:
       name: {{ template "etcd-hb-fullname" . }}
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ template "etcd-hb-fullname" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -23,7 +25,7 @@ spec:
         heritage: "{{ .Release.Service }}"
     spec:
       terminationGracePeriodSeconds: 60
-      restartPolicy: Always     
+      restartPolicy: Always
       containers:
       - name: "{{ template "etcd-hb-fullname" . }}"
         image: "{{.Values.etcd.image}}:{{.Values.etcd.imageTag}}"
@@ -154,8 +156,8 @@ spec:
             - /usr/local/bin/etcdctl
             {{ if .Values.etcd.secure }}
             - --endpoints=https://localhost:2379
-            - --cert=/etc/etcdtls/operator/etcd-tls/etcd-client.crt 
-            - --key=/etc/etcdtls/operator/etcd-tls/etcd-client.key 
+            - --cert=/etc/etcdtls/operator/etcd-tls/etcd-client.crt
+            - --key=/etc/etcdtls/operator/etcd-tls/etcd-client.key
             - --cacert=/etc/etcdtls/operator/etcd-tls/etcd-client-ca.crt
             {{ else }}
             - --endpoints=http://localhost:2379
@@ -166,7 +168,7 @@ spec:
           periodSeconds: 15
           timeoutSeconds: 5
           failureThreshold: 3
-        
+
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -174,7 +176,7 @@ spec:
                 matchExpressions:
                   - key: "app"
                     operator: In
-                    values: 
+                    values:
                     - {{ template "etcd-hb-fullname" . }}
               topologyKey: "kubernetes.io/hostname"
   volumeClaimTemplates:
