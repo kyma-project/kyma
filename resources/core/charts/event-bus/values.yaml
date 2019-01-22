@@ -4,6 +4,11 @@
 global:
   natsStreaming:
     fullname: "nats-streaming"
+    name: "nats-streaming"
+    namespace: "natss"
+    clusterID: "kyma-nats-streaming"
+    ports:
+      client: "4222"
   publish:
     maxRequests: 16
     resources:
