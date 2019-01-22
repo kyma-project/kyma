@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	objectstorev1alpha1 "github.com/kyma-project/kyma/components/bucket-controller/pkg/apis/objectstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/bucket-controller/pkg/buckethandler"
+	"github.com/minio/minio-go"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -13,8 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"github.com/minio/minio-go"
-	errorsPkg "github.com/pkg/errors"
+	"time"
 )
 
 var log = logf.Log.WithName("controller")
@@ -37,13 +38,21 @@ func newReconciler(mgr manager.Manager) (reconcile.Reconciler, error) {
 	accessKeyID := "Q3AM3UQ867SPQQA43P2F"
 	secretAccessKey := "zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"
 	useSSL := true
+	requeueInterval := 1 * time.Minute
+
 
 	minioClient, err := minio.New(endpoint, accessKeyID, secretAccessKey, useSSL)
 	if err != nil {
 		log.Error(err, "while initializing Minio client")
 	}
+	bucketHandler := buckethandler.New(minioClient, log)
 
-	return &ReconcileBucket{Client: mgr.GetClient(), scheme: mgr.GetScheme(), minioClient: minioClient}, nil
+	return &ReconcileBucket{
+		Client:          mgr.GetClient(),
+		scheme:          mgr.GetScheme(),
+		bucketHandler:     bucketHandler,
+		requeueInterval: requeueInterval,
+	}, nil
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -67,33 +76,30 @@ var _ reconcile.Reconciler = &ReconcileBucket{}
 
 // ReconcileBucket reconciles a Bucket object
 type ReconcileBucket struct {
+	requeueInterval time.Duration
 	client.Client
-	scheme *runtime.Scheme
-	minioClient *minio.Client
+	scheme      *runtime.Scheme
+	bucketHandler *buckethandler.BucketHandler
 }
 
 // Reconcile reads that state of the cluster for a Bucket object and makes changes based on the state read
-// and what is in the Bucket.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  The scaffolding writes
-// a Deployment as an example
-// Automatically generate RBAC rules to allow the Controller to read and write Deployments
-// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=apps,resources=deployments/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=objectstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=objectstore.kyma-project.io,resources=buckets/status,verbs=get;update;patch
 func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	// Fetch the Bucket instance
 	instance := &objectstorev1alpha1.Bucket{}
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			// Object not found, return.  Created objects are automatically garbage collected.
-			// For additional cleanup logic use finalizers.
 			return reconcile.Result{}, nil
 		}
-		// Error reading the object - requeue the request.
+
 		return reconcile.Result{}, err
 	}
+
+	// TODO: Remove
+	log.Info(fmt.Sprintf("Reconcile %+v", instance))
+
+
 
 	// name of your custom finalizer
 	deleteBucketFinalizerName := "deletebucket.finalizers.assetstore.kyma-project.io"
@@ -110,9 +116,9 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 	} else {
 		// The object is being deleted
 		if containsString(instance.ObjectMeta.Finalizers, deleteBucketFinalizerName) {
-			// our finalizer is present, so lets handle our external dependency
-			if err := r.deleteExternalDependency(instance); err != nil {
-				// if fail to delete the external dependency here, return with error
+			// our finalizer is present, so lets handle minio bucket deletion
+			if err := r.bucketHandler.Delete(instance); err != nil {
+				// if fail to delete bucket here, return with error
 				// so that it can be retried
 				return reconcile.Result{}, err
 			}
@@ -128,31 +134,58 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, nil
 	}
 
+	bucketName := r.bucketName(instance)
+	exists, err := r.minioClient.BucketExists(bucketName)
 
+	if exists {
+		instance.Status.Phase = objectstorev1alpha1.BucketCreated
+		instance.Status.Reason = "Created"
+		instance.Status.Message = "Bucket %s successfully created"
+		updateErr := r.Update(context.Background(), instance)
+		if updateErr != nil {
+			return reconcile.Result{Requeue: true}, nil
+		}
+
+		return reconcile.Result{RequeueAfter: 10 * time.Minute}, nil
+	}
+
+	if instance.Status.Phase == "" {
+		//Empty status - make bucket
+
+		bucketName := r.bucketName(instance)
+
+
+
+		err = r.minioClient.MakeBucket(bucketName, region)
+		if err != nil {
+			// Bucket failed to create
+
+			instance.Status.Phase = objectstorev1alpha1.BucketFailed
+			instance.Status.Reason = "CreationFailed"
+			instance.Status.Message = fmt.Sprintf("Bucket couldn't be created due to error %s", err)
+			updateErr := r.Update(context.Background(), instance)
+			if updateErr != nil {
+				return reconcile.Result{Requeue: true}, nil
+			}
+
+			return reconcile.Result{}, err
+		}
+
+		instance.Status.Phase = objectstorev1alpha1.BucketCreated
+		instance.Status.Reason = "Created"
+		instance.Status.Message = "Bucket %s successfully created"
+		updateErr := r.Update(context.Background(), instance)
+		if updateErr != nil {
+			return reconcile.Result{Requeue: true}, nil
+		}
+	}
+
+	err = r.Update(context.Background(), instance)
+	if err != nil {
+		return reconcile.Result{Requeue: true}, nil
+	}
 
 	return reconcile.Result{}, nil
-}
-
-func (r *ReconcileBucket) deleteExternalDependency(instance *objectstorev1alpha1.Bucket) error {
-	bucketName := r.bucketName(instance)
-	log.Info("Deleting bucket", bucketName)
-
-	exists, err := r.minioClient.BucketExists(bucketName)
-	if err != nil {
-		return errorsPkg.Wrapf(err, "while checking if bucket %s exists", bucketName)
-	}
-
-	if !exists {
-		log.Info("Bucket already deleted", bucketName)
-		return nil
-	}
-
-	err = r.minioClient.RemoveBucket(bucketName)
-	if err != nil {
-		return errorsPkg.Wrapf(err, "while deleting bucket %s", bucketName)
-	}
-
-	return nil
 }
 
 func (r *ReconcileBucket) bucketName(instance *objectstorev1alpha1.Bucket) string {
