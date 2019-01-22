@@ -16,6 +16,26 @@
 # Azure Broker
 - name: azure-mysql
   directory: service-brokers/azure-broker-service-classes/azure-mysql
+- name: azure-mssql-12.0-database
+  directory: service-brokers/azure-broker-service-classes/azure-mssql/v12.0/database
+- name: azure-mssql-12.0-database-from-existing
+  directory: service-brokers/azure-broker-service-classes/azure-mssql/v12.0/database-from-existing
+- name: azure-mssql-12.0-dbms
+  directory: service-brokers/azure-broker-service-classes/azure-mssql/v12.0/dbms
+- name: azure-mssql-12.0-dbms-and-database
+  directory: service-brokers/azure-broker-service-classes/azure-mssql/v12.0/dbms-and-database
+- name: azure-mssql-12.0-dbms-registered
+  directory: service-brokers/azure-broker-service-classes/azure-mssql/v12.0/dbms-registered
+- name: azure-mssqldr-12.0-database-pair
+  directory: service-brokers/azure-broker-service-classes/azure-mssqldr/v12.0/database-pair
+- name: azure-mssqldr-12.0-database-pair-from-existing
+  directory: service-brokers/azure-broker-service-classes/azure-mssqldr/v12.0/database-pair-from-existing
+- name: azure-mssqldr-12.0-database-pair-from-existing-primary
+  directory: service-brokers/azure-broker-service-classes/azure-mssqldr/v12.0/database-pair-from-existing-primary
+- name: azure-mssqldr-12.0-database-pair-registered
+  directory: service-brokers/azure-broker-service-classes/azure-mssqldr/v12.0/database-pair-registered
+- name: azure-mssqldr-dbms-pair-registered
+  directory: service-brokers/azure-broker-service-classes/azure-mssqldr/v12.0/dbms-pair-registered
 - name: azure-redis-cache
   directory: service-brokers/azure-broker-service-classes/azure-redis-cache
 - name: azure-sql
