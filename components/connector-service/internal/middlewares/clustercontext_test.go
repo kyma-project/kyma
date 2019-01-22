@@ -16,8 +16,8 @@ const (
 	testGroup     = "test-group"
 )
 
-// TODO - more test cases
 func TestClusterContextMiddleware_Middleware(t *testing.T) {
+
 	t.Run("should use default values", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

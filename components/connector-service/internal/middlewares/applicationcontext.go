@@ -3,22 +3,9 @@ package middlewares
 import (
 	"context"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
-
-const (
-	ApplicationHeader     = "Application"
-	ApplicationContextKey = "ApplicationContext"
-)
-
-type ApplicationContext struct {
-	Application string
-}
-
-// TODO - tests
-// IsEmpty returns false if both Group and Tenant are set
-func (context ApplicationContext) IsEmpty() bool {
-	return context.Application == ""
-}
 
 type appContextMiddleware struct {
 }
@@ -34,8 +21,7 @@ func (cc *appContextMiddleware) Middleware(handler http.Handler) http.Handler {
 		}
 
 		if appContext.IsEmpty() {
-			// TODO - error msg + logging
-			w.WriteHeader(http.StatusBadRequest)
+			respondWithError(w, apperrors.BadRequest("Application context is empty"))
 			return
 		}
 

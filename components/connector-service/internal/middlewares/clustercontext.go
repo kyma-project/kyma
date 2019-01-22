@@ -2,26 +2,13 @@ package middlewares
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 )
-
-// TODO - consider moving to different package
-const (
-	ClusterContextKey = "ClusterContext"
-	TenantHeader      = "Tenant"
-	GroupHeader       = "Group"
-)
-
-type ClusterContext struct {
-	Group  string
-	Tenant string
-}
-
-// TODO - tests
-// IsEmpty returns false if both Group and Tenant are set
-func (context ClusterContext) IsEmpty() bool {
-	return context.Group == "" || context.Tenant == ""
-}
 
 type clusterContextMiddleware struct {
 	defaultGroup  string
@@ -51,8 +38,7 @@ func (cc *clusterContextMiddleware) Middleware(handler http.Handler) http.Handle
 		}
 
 		if clusterContext.IsEmpty() {
-			// TODO - error msg + logging
-			w.WriteHeader(http.StatusBadRequest)
+			respondWithError(w, apperrors.BadRequest("Cluster context is empty"))
 			return
 		}
 
@@ -60,4 +46,17 @@ func (cc *clusterContextMiddleware) Middleware(handler http.Handler) http.Handle
 
 		handler.ServeHTTP(w, reqWithCtx)
 	})
+}
+
+func respond(w http.ResponseWriter, statusCode int) {
+	w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
+	w.WriteHeader(statusCode)
+}
+
+func respondWithError(w http.ResponseWriter, apperr apperrors.AppError) {
+	statusCode, responseBody := httperrors.AppErrorToResponse(apperr)
+
+	respond(w, statusCode)
+	json.NewEncoder(w).Encode(responseBody)
+
 }
