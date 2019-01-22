@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	objectstorev1alpha1 "github.com/kyma-project/kyma/components/bucket-controller/pkg/apis/objectstore/v1alpha1"
+	objectstorev1alpha1 "github.com/kyma-project/kyma/components/asset-controller/pkg/apis/objectstore/v1alpha1"
 	"github.com/onsi/gomega"
 	"golang.org/x/net/context"
 	appsv1 "k8s.io/api/apps/v1"

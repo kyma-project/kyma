@@ -1,8 +1,8 @@
 package buckethandler_test
 
 import (
-	"github.com/kyma-project/kyma/components/bucket-controller/pkg/buckethandler"
-	"github.com/kyma-project/kyma/components/bucket-controller/pkg/buckethandler/automock"
+	"github.com/kyma-project/kyma/components/asset-controller/pkg/buckethandler"
+	"github.com/kyma-project/kyma/components/asset-controller/pkg/buckethandler/automock"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"testing"

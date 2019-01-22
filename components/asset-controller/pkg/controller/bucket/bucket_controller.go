@@ -3,8 +3,8 @@ package bucket
 import (
 	"context"
 	"fmt"
-	objectstorev1alpha1 "github.com/kyma-project/kyma/components/bucket-controller/pkg/apis/objectstore/v1alpha1"
-	"github.com/kyma-project/kyma/components/bucket-controller/pkg/buckethandler"
+	objectstorev1alpha1 "github.com/kyma-project/kyma/components/asset-controller/pkg/apis/objectstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/asset-controller/pkg/buckethandler"
 	"github.com/minio/minio-go"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
