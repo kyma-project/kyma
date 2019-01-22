@@ -5,6 +5,7 @@ metadata:
   name: {{ .Chart.Name }}-tests
   namespace: {{ .Values.global.namespace }}
   annotations:
+    sidecar.istio.io/inject: "false"
     "helm.sh/hook": test-success
   labels:
     "helm-chart-test": "true"

@@ -25,13 +25,13 @@ do
             shift # past argument
         ;;
         --cr)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             CR_PATH="$2"
             shift # past argument
             shift # past value
         ;;
         --vm-driver)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             VM_DRIVER="$2"
             shift
             shift
@@ -39,6 +39,10 @@ do
         --knative)
             KNATIVE="--knative"
             shift
+        ;;
+        --*)
+            echo "Unknown flag ${1}"
+            exit 1
         ;;
         *)    # unknown option
             POSITIONAL+=("$1") # save it in an array for later
