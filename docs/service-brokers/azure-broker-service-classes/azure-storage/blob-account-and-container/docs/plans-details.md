@@ -5,38 +5,48 @@ type: Details
 
 ## Service description
 
-The `azure-sql` service provides the following plan names and descriptions:
+The service provides the following plan names and descriptions:
 
-| Plan Name | Description |
-|-----------|-------------|
-| `Basic Tier` | Basic Tier, 5 DTUs, 2GB, 7 days point-in-time restore |
-| `Standard Tier` | Standard Tier, up to 3000 DTUs, with 250GB storage, 35 days point-in-time restore |
-| `General Purpouse (preview)` | General Purpose Tier, up to 80 vCores, up to 440 GB Memory, up to 1 TB storage, 7 days point-in-time restore |
-| `Business Critical (preview)` | Business Critical Tier, up to 80 vCores, up to 440 GB Memory, up to 1 TB storage, Local SSD, 7 days point-in-time restore. Offers highest resilience to failures using several isolated replicas |
-| `Premium Tier` | Premium Tier, up to 4000 DTUs, with 500GB storage, 35 days point-in-time restore |
+| Plan Name    | Description      |
+| ------------ | ---------------- |
+| `all-in-one` | The default plan |
 
 ## Provision
 
-This service provisions a new SQL DBMS and a new database upon that DBMS. The new
-database is named randomly and is owned by a role (group) of the same name.
+Provisions a blob storage account and create a container within the account.
 
-### Provisioning parameters
+### Provisioning Parameters
 
-These are the provisioning parameters:
+| Parameter Name          | Type                | Description                                                  | Required | Default Value                                                |
+| ----------------------- | ------------------- | ------------------------------------------------------------ | -------- | ------------------------------------------------------------ |
+| `location`              | `string`            | The Azure region in which to provision applicable resources. | Yes      |                                                              |
+| `resourceGroup`         | `string`            | The (new or existing) resource group with which to associate new resources. | Yes      |                                                              |
+| `enableNonHttpsTraffic` | `string`            | Specify whether non-https traffic is enabled. Allowed values:["enabled", "disabled"]. | No       | If not provided, "disabled" will be used as the default value. That is, only https traffic is allowed. |
+| `accessTier`            | `string`            | The access tier used for billing.    Allowed values: ["Hot", "Cool"]. Hot storage is optimized for storing data that is accessed frequently ,and cool storage is optimized for storing data that is infrequently accessed and stored for at least 30 days. | No       | If not provided, "Hot" will be used as the default value.    |
+| `accountType`           | `string`            | A combination of account kind and   replication strategy. All possible values: ["Standard_LRS", "Standard_GRS", "Standard_RAGRS"]. | No       | If not provided, "Standard_LRS" will be used as the default value for all plans. |
+| `containerName`         | `string`            | The name of the container which will be created inside the storage account. This name may only contain lowercase letters, numbers, and hyphens, and must begin with a letter or a number. Each hyphen must be preceded and followed by a non-hyphen character. The length of the name must between 3 and 63. | No       | If not provided, a random name will be generated as the container name. |
+| `tags`                  | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | No       | Tags (even if none are specified) are automatically supplemented with `heritage: open-service-broker-azure`. |
 
-| Parameter Name | Type | Description | Required | Default Value |
-|----------------|------|-------------|----------|---------------|
-| `Location` | `string` | The Azure region in which to provision applicable resources. | Y | None. |
-| `Resource group` | `string` | The new or existing resource group with which to associate new resources. | Y | Creates a new resource group with a UUID as its name. |
+## Update
 
-### Credentials
+Updates an existing storage account.
 
-The binding returns the following connection details and credentials:
+### Updating parameters
 
-| Parameter Name | Type | Description |
-|----------------|------|-------------|
-| `host` | `string` | The fully-qualified address of the MySQL Server. |
-| `port` | `int	` | The port number to connect to on the MySQL Server. |
-| `database` | `string` | The name of the database. |
-| `username` | `string` | The name of the database user. |
-| `password` | `string` | The password for the database user. |
+| Parameter Name            | Type                | Description                                                  | Required |
+| ------------------------- | ------------------- | ------------------------------------------------------------ | -------- |
+| ` enableNonHttpsTraffic ` | `string`            | Specify whether non-https traffic is enabled. Allowed values:["enabled", "disabled"]. | No       |
+| `accessTier`              | `string`            | The access tier used for billing.    Allowed values: ["Hot", "Cool"]. Hot storage is optimized for storing data that is accessed frequently ,and cool storage is optimized for storing data that is infrequently accessed and stored for at least 30 days. | No        |
+| `accountType`             | `string`            | A combination of account kind and   replication strategy.    | No       |
+| `tags`                    | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | No       |
+
+## Credentials
+
+Binding returns the following connection details and shared credentials:
+
+| Field Name                   | Type     | Description                                           |
+| ---------------------------- | -------- | ----------------------------------------------------- |
+| `storageAccountName`         | `string` | The storage account name.                             |
+| `accessKey`                  | `string` | A key (password) for accessing the storage account.   |
+| `primaryBlobServiceEndPoint` | `string` | Primary blob service end point.                       |
+| `containerName`              | `string` | The name of the container within the storage account. |
