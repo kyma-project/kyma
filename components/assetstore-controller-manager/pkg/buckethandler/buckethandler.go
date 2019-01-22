@@ -27,41 +27,25 @@ func New(client MinioClient, logger logr.Logger) *BucketHandler {
 	}
 }
 
-func (h *BucketHandler) CreateWithPolicy(bucketName, region, policy string) error {
-	h.logInfof("Creating bucket %s in region %s with policy %s...", bucketName, region, policy)
-
-	err := h.Create(bucketName, region)
-	if err != nil {
-		return err
-	}
-
-	err = h.SetPolicy(bucketName, policy)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (h *BucketHandler) Create(bucketName string, region string) error {
+func (h *BucketHandler) CreateIfDoesntExist(bucketName string, region string) (bool, error) {
 	h.logInfof("Creating bucket %s in region %s...", bucketName, region)
 
 	exists, err := h.CheckIfExists(bucketName)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if exists {
 		h.logInfof("Bucket %s already exist", bucketName)
-		return nil
+		return false, nil
 	}
 
 	err = h.client.MakeBucket(bucketName, region)
 	if err != nil {
-		return errors.Wrapf(err, "while creating bucket %s in region %s", bucketName, region)
+		return false, errors.Wrapf(err, "while creating bucket %s in region %s", bucketName, region)
 	}
 
-	return nil
+	return true, nil
 }
 
 func (h *BucketHandler) CheckIfExists(bucketName string) (bool, error) {
@@ -96,25 +80,25 @@ func (h *BucketHandler) Delete(bucketName string) error {
 	return nil
 }
 
-func (h *BucketHandler) SetPolicy(bucketName string, policy string) error {
+func (h *BucketHandler) SetPolicyIfNotEqual(bucketName string, policy string) (bool, error) {
 	h.logInfof("Setting policy %s for bucket %s...", policy, bucketName)
 
 	currentPolicy, err := h.GetPolicy(bucketName)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if currentPolicy == policy {
 		h.logInfof("Current policy for bucket %s is up to date", bucketName)
-		return nil
+		return false, nil
 	}
 
 	err = h.client.SetBucketPolicy(bucketName, policy)
 	if err != nil {
-		return errors.Wrapf(err, "while setting policy %s for bucket %s", policy, bucketName)
+		return false, errors.Wrapf(err, "while setting policy %s for bucket %s", policy, bucketName)
 	}
 
-	return nil
+	return true, nil
 }
 
 func (h *BucketHandler) GetPolicy(bucketName string) (string, error) {
@@ -125,6 +109,16 @@ func (h *BucketHandler) GetPolicy(bucketName string) (string, error) {
 	}
 
 	return policy, nil
+}
+
+func (h *BucketHandler) ComparePolicy(bucketName, policy string) (bool, error) {
+	h.logInfof("Comparing policy for bucket %s...", bucketName)
+	currentPolicy, err := h.GetPolicy(bucketName)
+	if err != nil {
+		return false, errors.Wrapf(err, "while getting policy for bucket %s", bucketName)
+	}
+
+	return currentPolicy == policy, nil
 }
 
 func (h *BucketHandler) logInfof(format string, a ...interface{}) {

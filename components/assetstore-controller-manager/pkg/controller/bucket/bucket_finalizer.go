@@ -6,7 +6,7 @@ import (
 
 const DeleteBucketFinalizerName = "deletebucket.finalizers.assetstore.kyma-project.io"
 
-type bucketFinalizer struct {}
+type bucketFinalizer struct{}
 
 func NewBucketFinalizer() *bucketFinalizer {
 	return &bucketFinalizer{}

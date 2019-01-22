@@ -101,92 +101,32 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 	log.Info(fmt.Sprintf("Reconcile %+v", instance))
 	// TODO: End
 
-	//bucketName := r.bucketNameForInstance(instance)
-
-	err = r.addFinalizerIfShould(instance)
-	if err != nil {
-		return reconcile.Result{Requeue: true}, nil
-	}
-
+	// Bucket is being deleted
 	handled, requeue, err := r.handleDeletionIfShould(instance)
 	if handled || err != nil {
 		return reconcile.Result{Requeue: requeue}, err
 	}
 
-
-
-
-
-
-
-
-
-
-	//
-	//exists, err := r.bucketHandler.CheckIfExists(bucketName)
-	//
-	//if exists {
-	//	instance.Status.Phase = assetstorev1alpha1.BucketReady
-	//	instance.Status.Reason = "Created"
-	//	instance.Status.Message = "Bucket %s successfully created"
-	//	updateErr := r.Update(context.Background(), instance)
-	//	if updateErr != nil {
-	//		return reconcile.Result{Requeue: true}, nil
-	//	}
-	//
-	//	return reconcile.Result{RequeueAfter: 10 * time.Minute}, nil
-	//}
-	//
-	//if instance.Status.Phase == "" {
-	//	//Empty status - make bucket
-	//
-	//	bucketName := r.bucketNameForInstance(instance)
-	//
-	//	err = r.minioClient.MakeBucket(bucketName, region)
-	//	if err != nil {
-	//		// Bucket failed to create
-	//
-	//		instance.Status.Phase = assetstorev1alpha1.BucketFailed
-	//		instance.Status.Reason = "CreationFailed"
-	//		instance.Status.Message = fmt.Sprintf("Bucket couldn't be created due to error %s", err)
-	//		updateErr := r.Update(context.Background(), instance)
-	//		if updateErr != nil {
-	//			return reconcile.Result{Requeue: true}, nil
-	//		}
-	//
-	//		return reconcile.Result{}, err
-	//	}
-	//
-	//	instance.Status.Phase = assetstorev1alpha1.BucketReady
-	//	instance.Status.Reason = "Created"
-	//	instance.Status.Message = "Bucket %s successfully created"
-	//	updateErr := r.Update(context.Background(), instance)
-	//	if updateErr != nil {
-	//		return reconcile.Result{Requeue: true}, nil
-	//	}
-	//}
-
-	err = r.Update(context.Background(), instance)
-	if err != nil {
-		return reconcile.Result{Requeue: true}, nil
+	// Phase Empty or Failed
+	if instance.Status.Phase == "" || instance.Status.Phase == assetstorev1alpha1.BucketFailed {
+		return r.handleInitialAndFailedState(instance)
 	}
 
-	return reconcile.Result{}, nil
+	// Phase Ready
+	return r.handleReadyState(instance)
 }
 
-func (r *ReconcileBucket) addFinalizerIfShould(instance *assetstorev1alpha1.Bucket) error {
+func (r *ReconcileBucket) addFinalizerIfShould(instance *assetstorev1alpha1.Bucket) {
 	if r.isObjectBeingDeleted(instance) {
-		return nil
+		return
 	}
 
 	if r.deletionFinalizer.IsDefinedIn(instance) {
 		// Finalizer has been already added
-		return nil
+		return
 	}
 
 	r.deletionFinalizer.AddTo(instance)
-
-	return r.Update(context.Background(), instance)
 }
 
 func (r *ReconcileBucket) handleDeletionIfShould(instance *assetstorev1alpha1.Bucket) (bool, bool, error) {
@@ -204,7 +144,6 @@ func (r *ReconcileBucket) handleDeletionIfShould(instance *assetstorev1alpha1.Bu
 		return true, false, err
 	}
 
-
 	r.deletionFinalizer.DeleteFrom(instance)
 	err = r.Update(context.Background(), instance)
 	if err != nil {
@@ -214,13 +153,78 @@ func (r *ReconcileBucket) handleDeletionIfShould(instance *assetstorev1alpha1.Bu
 	return true, false, nil
 }
 
+func (r *ReconcileBucket) handleInitialAndFailedState(instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
+	bucketName := r.bucketNameForInstance(instance)
+	_, err := r.bucketHandler.CreateIfDoesntExist(bucketName, instance.Spec.Region)
+	if err != nil {
+		updateStatusErr := r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
+			Phase:   assetstorev1alpha1.BucketFailed,
+			Reason:  "BucketCreationFailure",
+			Message: fmt.Sprintf("Bucket couldn't be created due to error %s", err.Error()),
+		})
+		if updateStatusErr != nil {
+			return reconcile.Result{Requeue: true}, nil
+		}
+
+		return reconcile.Result{}, err
+	}
+
+	r.addFinalizerIfShould(instance)
+	_ = r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
+		Phase:   assetstorev1alpha1.BucketReady,
+		Reason:  "BucketCreated",
+		Message: "Bucket has been successfully created",
+	})
+	return reconcile.Result{Requeue: true}, nil
+}
+
+func (r *ReconcileBucket) handleReadyState(instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
+	bucketName := r.bucketNameForInstance(instance)
+	policy := string(instance.Spec.Policy)
+
+	exists, err := r.bucketHandler.CheckIfExists(bucketName)
+	if err != nil {
+		return reconcile.Result{Requeue: true}, err
+	}
+
+	if !exists {
+		// Bucket was created before, but has been deleted manually
+		_ = r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
+			Phase:   assetstorev1alpha1.BucketFailed,
+			Reason:  "BucketNotFound",
+			Message: "Bucket doesn't exist anymore",
+		})
+		return reconcile.Result{Requeue: true}, nil
+	}
+
+	// Compare policy
+	updated, err := r.bucketHandler.SetPolicyIfNotEqual(bucketName, policy)
+	if err != nil {
+		return reconcile.Result{Requeue: true}, err
+	}
+
+	if updated {
+		err = r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
+			Phase:   assetstorev1alpha1.BucketReady,
+			Reason:  "BucketPolicyUpdated",
+			Message: "Bucket policy has been updated successfully",
+		})
+		return reconcile.Result{Requeue: err != nil, RequeueAfter: r.requeueInterval}, nil
+	}
+
+	// Everything is OK
+	return reconcile.Result{RequeueAfter: r.requeueInterval}, nil
+}
 
 func (r *ReconcileBucket) isObjectBeingDeleted(instance *assetstorev1alpha1.Bucket) bool {
 	return !instance.ObjectMeta.DeletionTimestamp.IsZero()
 }
 
-
-func (r *ReconcileBucket) bucketNameForInstance(instance *assetstorev1alpha1.Bucket) string {
-	return fmt.Sprintf("%s-%s", instance.Namespace, instance.Name)
+func (r *ReconcileBucket) updateStatus(instance *assetstorev1alpha1.Bucket, status assetstorev1alpha1.BucketStatus) error {
+	instance.Status = status
+	return r.Update(context.Background(), instance)
 }
 
+func (r *ReconcileBucket) bucketNameForInstance(instance *assetstorev1alpha1.Bucket) string {
+	return fmt.Sprintf("ns-%s-%s", instance.Namespace, instance.Name)
+}
