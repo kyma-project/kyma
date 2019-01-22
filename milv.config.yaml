@@ -11,7 +11,7 @@ files:
   - path: "./kyma/tools/stability-checker/README.md"
     config:
       white-list-external: ["https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz"]
-  - path: "./kyma/docs/monitoring/docs/010-architecture-monitoring.md"
+  - path: "./kyma/docs/monitoring/docs/02-01-monitoring.md"
     config:
       white-list-external: ["https://grafana.{DOMAIN"]
   - path: "./kyma/resources/core/charts/monitoring/charts/alertmanager/README.md"
