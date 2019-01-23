@@ -58,3 +58,27 @@ func TestParams_NewApplicationTokenParams(t *testing.T) {
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 	})
 }
+
+func TestParams_NewClusterTokenParams(t *testing.T) {
+	t.Run("should return ClusterTokenParams", func(t *testing.T) {
+		clusterCtxPayload := middlewares.ClusterContext{Group: group, Tenant: tenant}
+
+		ctx := context.WithValue(context.Background(), middlewares.ClusterContextKey, clusterCtxPayload)
+
+		params, err := NewClusterTokenParams(ctx)
+		require.NoError(t, err)
+
+		appTokenParams, ok := params.(ClusterTokenParams)
+		assert.True(t, ok)
+
+		assert.Equal(t, tenant, appTokenParams.Tenant)
+		assert.Equal(t, group, appTokenParams.Group)
+	})
+
+	t.Run("should fail when there is no ClusterContext", func(t *testing.T) {
+		_, err := NewApplicationTokenParams(context.Background())
+		require.Error(t, err)
+
+		assert.Equal(t, apperrors.CodeInternal, err.Code())
+	})
+}

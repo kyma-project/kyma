@@ -47,3 +47,15 @@ func NewApplicationTokenParams(ctx context.Context) (TokenParams, apperrors.AppE
 		},
 	}, nil
 }
+
+func NewClusterTokenParams(ctx context.Context) (TokenParams, apperrors.AppError) {
+	clusterCtx, ok := ctx.Value(middlewares.ClusterContextKey).(middlewares.ClusterContext)
+	if !ok {
+		return nil, apperrors.Internal("Failed to create params when reading ClusterContext")
+	}
+
+	return ClusterTokenParams{
+		Tenant: clusterCtx.Tenant,
+		Group:  clusterCtx.Group,
+	}, nil
+}
