@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
 
@@ -21,7 +23,7 @@ func (cc *appContextMiddleware) Middleware(handler http.Handler) http.Handler {
 		}
 
 		if appContext.IsEmpty() {
-			respondWithError(w, apperrors.BadRequest("Application context is empty"))
+			httphelpers.RespondWithError(w, apperrors.BadRequest("Application context is empty"))
 			return
 		}
 

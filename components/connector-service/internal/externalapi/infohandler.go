@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
@@ -40,7 +42,7 @@ func NewInfoHandler(cache tokencache.TokenCache, tokenGenerator tokens.TokenGene
 func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 	if token == "" {
-		respondWithError(w, apperrors.Forbidden("Token not provided."))
+		httphelpers.RespondWithError(w, apperrors.Forbidden("Token not provided."))
 		return
 	}
 
@@ -49,13 +51,13 @@ func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	cachedToken, found := ih.tokenCache.Get(reName)
 
 	if !found || cachedToken != token {
-		respondWithError(w, apperrors.Forbidden("Invalid token."))
+		httphelpers.RespondWithError(w, apperrors.Forbidden("Invalid token."))
 		return
 	}
 
 	newToken, err := ih.tokenGenerator.NewToken(reName)
 	if err != nil {
-		respondWithError(w, apperrors.Internal("Failed to generate new token."))
+		httphelpers.RespondWithError(w, apperrors.Internal("Failed to generate new token."))
 		return
 	}
 
@@ -71,7 +73,7 @@ func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 
 	certInfo := makeCertInfo(ih.csr, reName)
 
-	respondWithBody(w, 200, infoResponse{SignUrl: signUrl, Api: api, CertificateInfo: certInfo})
+	httphelpers.RespondWithBody(w, 200, infoResponse{SignUrl: signUrl, Api: api, CertificateInfo: certInfo})
 }
 
 func makeCertInfo(info csrInfo, reName string) certInfo {

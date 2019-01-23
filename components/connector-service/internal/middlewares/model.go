@@ -13,7 +13,7 @@ type ApplicationContext struct {
 	Application string
 }
 
-// IsEmpty returns false if both Group and Tenant are set
+// IsEmpty returns false if Application is set
 func (context ApplicationContext) IsEmpty() bool {
 	return context.Application == ""
 }

@@ -6,11 +6,11 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
 )
@@ -46,7 +46,7 @@ func NewSignatureHandler(tokenCache tokencache.TokenCache, certUtil certificates
 func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 	if token == "" {
-		respondWithError(w, apperrors.Forbidden("Token not provided."))
+		httphelpers.RespondWithError(w, apperrors.Forbidden("Token not provided."))
 		return
 	}
 
@@ -54,31 +54,31 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 
 	cachedToken, found := sh.tokenCache.Get(reName)
 	if !found || cachedToken != token {
-		respondWithError(w, apperrors.Forbidden("Invalid token."))
+		httphelpers.RespondWithError(w, apperrors.Forbidden("Invalid token."))
 		return
 	}
 
 	tokenRequest, appErr := sh.readCertRequest(r)
 	if appErr != nil {
-		respondWithError(w, appErr)
+		httphelpers.RespondWithError(w, appErr)
 		return
 	}
 
 	csr, appErr := sh.loadAndCheckCSR(tokenRequest.CSR, reName)
 	if appErr != nil {
-		respondWithError(w, appErr)
+		httphelpers.RespondWithError(w, appErr)
 		return
 	}
 
 	signedCrt, appErr := sh.signCSR("nginx-auth-ca", csr)
 	if appErr != nil {
-		respondWithError(w, appErr)
+		httphelpers.RespondWithError(w, appErr)
 		return
 	}
 
 	sh.tokenCache.Delete(reName)
 
-	respondWithBody(w, 201, certResponse{CRT: signedCrt})
+	httphelpers.RespondWithBody(w, 201, certResponse{CRT: signedCrt})
 }
 
 func (sh *signatureHandler) signCSR(secretName string, csr *x509.CertificateRequest) (
@@ -144,21 +144,4 @@ func (sh *signatureHandler) loadAndCheckCSR(encodedData string, reName string) (
 	}
 
 	return csr, nil
-}
-
-func respondWithError(w http.ResponseWriter, apperr apperrors.AppError) {
-	statusCode, responseBody := httperrors.AppErrorToResponse(apperr)
-
-	respond(w, statusCode)
-	json.NewEncoder(w).Encode(responseBody)
-}
-
-func respond(w http.ResponseWriter, statusCode int) {
-	w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
-	w.WriteHeader(statusCode)
-}
-
-func respondWithBody(w http.ResponseWriter, statusCode int, responseBody interface{}) {
-	respond(w, statusCode)
-	json.NewEncoder(w).Encode(responseBody)
 }
