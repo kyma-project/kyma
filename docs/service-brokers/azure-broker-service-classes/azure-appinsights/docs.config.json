@@ -1,8 +1,8 @@
 {
     "spec": {
-      "displayName": "Azure SQL Database",
-      "description": "Documentation for Azure SQL Database.",
-      "id": "fb9bc99e-0aa9-11e6-8a8a-000d3a002ed5",
+      "displayName": "Azure Application Insights (Experimental)",
+      "description": "Documentation for Azure Application Insights (Experimental).",
+      "id": "66130ee7-451b-4c61-8b78-d5c426a06f3e",
       "type":"Service Class"
     }
 }
