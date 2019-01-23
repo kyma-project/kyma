@@ -1,7 +1,6 @@
-apiVersion: objectstore.kyma-project.io/v1alpha1
+apiVersion: assetstore.kyma-project.io/v1alpha1
 kind: Bucket
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: bucket-sample
-spec: {}
+  name: test-sample

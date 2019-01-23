@@ -17,14 +17,6 @@ rules:
   - patch
   - delete
 - apiGroups:
-  - assetstore.kyma-project.io
-  resources:
-  - buckets/status
-  verbs:
-  - get
-  - update
-  - patch
-- apiGroups:
   - admissionregistration.k8s.io
   resources:
   - mutatingwebhookconfigurations

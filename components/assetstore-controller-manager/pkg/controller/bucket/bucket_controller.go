@@ -7,6 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/buckethandler"
 	"github.com/minio/minio-go"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -16,7 +17,6 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"time"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var log = logf.Log.WithName("controller")
@@ -84,10 +84,9 @@ type ReconcileBucket struct {
 
 // Reconcile reads that state of the cluster for a Bucket object and makes changes based on the state read
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets/status,verbs=get;update;patch
 func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	instance := &assetstorev1alpha1.Bucket{}
-	err := r.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil
@@ -95,10 +94,6 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 
 		return reconcile.Result{}, err
 	}
-
-	// TODO: Remove
-	log.Info(fmt.Sprintf("Reconcile %+v", instance))
-	// TODO: End
 
 	// Bucket is being deleted
 	handled, requeue, err := r.handleDeletionIfShould(instance)
@@ -188,6 +183,7 @@ func (r *ReconcileBucket) handleReadyState(instance *assetstorev1alpha1.Bucket) 
 
 	if !exists {
 		// Bucket was created before, but has been deleted manually
+		log.Info(fmt.Sprintf("Bucket %s/%s has been deleted. Setting failed status...", instance.Namespace, instance.Name))
 		_ = r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
 			Phase:   assetstorev1alpha1.BucketFailed,
 			Reason:  "BucketNotFound",
@@ -234,7 +230,6 @@ func (r *ReconcileBucket) updateHeartbeatTime(instance *assetstorev1alpha1.Bucke
 	instance.Status.LastHeartbeatTime = metav1.Now()
 	return r.Update(context.Background(), instance)
 }
-
 
 func (r *ReconcileBucket) bucketNameForInstance(instance *assetstorev1alpha1.Bucket) string {
 	return fmt.Sprintf("ns-%s-%s", instance.Namespace, instance.Name)

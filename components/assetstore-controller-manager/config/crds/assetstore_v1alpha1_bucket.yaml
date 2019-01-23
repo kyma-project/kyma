@@ -38,12 +38,12 @@ spec:
               type: string
             region:
               type: string
-          required:
-          - region
-          - policy
           type: object
         status:
           properties:
+            lastHeartbeatTime:
+              format: date-time
+              type: string
             message:
               type: string
             phase:

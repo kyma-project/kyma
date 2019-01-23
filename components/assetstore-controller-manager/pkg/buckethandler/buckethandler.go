@@ -38,8 +38,6 @@ func New(client MinioClient, logger logr.Logger) BucketHandler {
 }
 
 func (h *bucketHandler) CreateIfDoesntExist(bucketName string, region string) (bool, error) {
-	h.logInfof("Creating bucket %s in region %s...", bucketName, region)
-
 	exists, err := h.CheckIfExists(bucketName)
 	if err != nil {
 		return false, err
@@ -54,6 +52,7 @@ func (h *bucketHandler) CreateIfDoesntExist(bucketName string, region string) (b
 	if err != nil {
 		return false, errors.Wrapf(err, "while creating bucket %s in region %s", bucketName, region)
 	}
+	h.logInfof("Bucket %s created in region %s", bucketName, region)
 
 	return true, nil
 }
@@ -86,13 +85,12 @@ func (h *bucketHandler) Delete(bucketName string) error {
 	if err != nil {
 		return errors.Wrapf(err, "while deleting bucket %s", bucketName)
 	}
+	h.logInfof("Bucket %s deleted", bucketName)
 
 	return nil
 }
 
 func (h *bucketHandler) SetPolicyIfNotEqual(bucketName string, policy string) (bool, error) {
-	h.logInfof("Setting policy %s for bucket %s...", policy, bucketName)
-
 	currentPolicy, err := h.GetPolicy(bucketName)
 	if err != nil {
 		return false, err
@@ -107,6 +105,7 @@ func (h *bucketHandler) SetPolicyIfNotEqual(bucketName string, policy string) (b
 	if err != nil {
 		return false, errors.Wrapf(err, "while setting policy %s for bucket %s", policy, bucketName)
 	}
+	h.logInfof("Policy %s set for bucket %s", policy, bucketName)
 
 	return true, nil
 }
