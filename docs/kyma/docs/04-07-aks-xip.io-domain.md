@@ -26,13 +26,11 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
 
 ### Dynamic IP allocation
 
-1. Use this command to prepare a configuration file that deploys Kyma with [`xip.io`](http://xip.io/) providing a wildcard DNS:
+Use this command to prepare a configuration file that deploys Kyma with [`xip.io`](http://xip.io/) providing a wildcard DNS:
 ```
 (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__.*__//g" > my-kyma.yaml
 ```
 >**NOTE:** Using this approach disables the Application Connector. 
-
-2. Follow [these](#installation-install-kyma-on-an-aks-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.
 
 ### Manual IP allocation
 
@@ -67,8 +65,34 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
   ```
 (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__EXTERNAL_PUBLIC_IP__/$EXTERNAL_PUBLIC_IP/g" | sed -e "s/__REMOTE_ENV_IP__/$CONNECTOR_IP/g" | sed -e "s/__APPLICATION_CONNECTOR_DOMAIN__/$CONNECTOR_IP.xip.io/g" | sed -e "s/__SKIP_SSL_VERIFY__/true/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" |  sed -e "s/__.*__//g" > my-kyma.yaml
   ```
-4. Follow [these](#installation-install-kyma-on-an-aks-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.  
 
+### Kyma installation
+
+You can either choose pre-build image of kyma-installer or build your own.
+
+* To build your own:
+  1. Build an image that is based on the current Installer image and includes the current installation and resources charts. Run:
+     ```
+     docker build -t kyma-installer:latest -f tools/kyma-installer/kyma.Dockerfile . --build-arg INSTALLER_VERSION=63484523
+     ```
+  2. Push the image to your Docker Hub:
+     ```
+     docker tag kyma-installer:latest [YOUR_DOCKER_LOGIN]/kyma-installer:latest
+     docker push [YOUR_DOCKER_LOGIN]/kyma-installer:latest
+     ```
+* To use a prebuild image go to [this](https://github.com/kyma-project/kyma/releases/) page and check version of latest release. Your url
+```eu.gcr.io/kyma-project/kyma-installer:{latest version}```
+
+In the `my-kyma.yaml` in the `kyma-installer` deployment change the `image` url to the value taken from the previous step.
+```
+kind: Deployment
+metadata:
+  name: kyma-installer
+  namespace: kyma-installer
+......
+        image: eu.gcr.io/kyma-project/develop/installer:30bf314d
+```
+Follow [these](#installation-install-kyma-on-an-aks-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.
 
 ### Add the xip.io self-signed certificate to your OS trusted certificates
 

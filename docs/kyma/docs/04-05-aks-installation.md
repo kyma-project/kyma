@@ -33,7 +33,7 @@ Create a resource group that will contain all your resources:
 az group create --name $RS_GROUP --location $REGION
 ```
 
->**NOTE:** If you don't own a domain which you can use or you don't want to assign a domain to a cluster, see the **Install Kyma on an AKS cluster with wildcard DNS** document which shows you how to create a cluster-based playground environment using a wildcard DNS provided by xip.io. 
+>**NOTE:** If you don't own a domain which you can use or you don't want to assign a domain to a cluster, see the [document](#installation-install-kyma-on-an-aks-with-wildcard-dns) which shows you how to create a cluster-based playground environment using a wildcard DNS provided by xip.io. 
 
 ## DNS setup
 
