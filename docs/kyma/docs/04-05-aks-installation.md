@@ -1,9 +1,9 @@
 ---
-title: Install Kyma on a AKS cluster
+title: Install Kyma on an AKS cluster
 type: Installation
 ---
 
-This Installation guide shows developers how to quickly deploy Kyma on a [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster. Kyma installs on a cluster using a proprietary installer based on a Kubernetes operator.
+This Installation guide shows developers how to quickly deploy Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster. Kyma installs on a cluster using a proprietary installer based on a Kubernetes operator.
 
 ## Prerequisites
 - A domain for your AKS cluster
@@ -11,29 +11,29 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Azure 
 - [Docker](https://www.docker.com/)
 - [Docker Hub](https://hub.docker.com/) account
 - [az](https://docs.microsoft.com/pl-pl/cli/azure/install-azure-cli)
-- set environment variables
+- set the environment variables
 
 ### Environment variables
 
-Set following environment variables
+Set the following environment variables:
 ```
 export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
 export CLUSTER_NAME={YOUR_CLUSTER_NAME}
 export REGION={YOUR_REGION} #westeurope
 ```
 
-If you plan to use a custom domain set also these:
+If you use a custom domain, set also these variables:
 ```
 export DNS_DOMAIN={YOUR_DOMAIN} # example.com
 export SUB_DOMAIN={YOUR_SUBDOMAIN} # cluster (in this case the full name of your cluster is cluster.example.com)
 ```
 
-Create a resource group that will contain all your resources
+Create a resource group that will contain all your resources:
 ```
 az group create --name ${RS_GROUP} --location ${REGION}
 ```
 
->**NOTE:** If you don't own a domain which you can use or you don't want to assign a domain to a cluster, see the **Install Kyma on a AKS cluster with wildcard DNS** document which shows you how to create a cluster-based playground environment using a wildcard DNS provided by xip.io. 
+>**NOTE:** If you don't own a domain which you can use or you don't want to assign a domain to a cluster, see the **Install Kyma on an AKS cluster with wildcard DNS** document which shows you how to create a cluster-based playground environment using a wildcard DNS provided by xip.io. 
 
 ## DNS setup
 
@@ -46,7 +46,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     az network dns zone create -g ${RS_GROUP} -n ${DNS_DOMAIN}
     ```
 
-    Alternatively, create it through the Azure UI. Navigate go to **All services** in the **Networking** section, click **DNS zones** and select **Add**.
+    Alternatively, create it through the Azure UI.  In the **Networking** section, go to **All services**, click **DNS zones**, and select **Add**.
 
 2. Delegate your domain to Azure name servers.
 
@@ -68,7 +68,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 ## Get the TLS certificate
 
->**NOTE:** Azure DNS is not yet supported by Certbot, so we have to perform a manual veryfication
+>**NOTE:** Azure DNS is not yet supported by Certbot so you must perform a manual verification.
 
 1. Create a folder for certificates. Run:
     ```
@@ -78,7 +78,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     ```
     export YOUR_EMAIL={YOUR_EMAIL}
     ```
-    To obtain a certificate run:
+    To obtain a certificate, run:
     ```
     docker run -it --name certbot --rm \
         -v "$(pwd)/letsencrypt:/etc/letsencrypt" \
@@ -91,7 +91,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
         --server https://acme-v02.api.letsencrypt.org/directory \
         -d "*.${SUB_DOMAIN}.${DNS_DOMAIN}"
     ```
-    You will see a message similar to this:
+    You will see the following message:
     
     ```
     Please deploy a DNS TXT record under the name
@@ -101,9 +101,9 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     
     Before continuing, verify the record is deployed.
     ```
-    Copy the TXT_VALUE. 
+    Copy the `TXT_VALUE`. 
     
-4. Open a new console, set environment variables (from the [Environment variables](#Environment-variables) step). Export the TXT_VALUE.
+4. Open a new console and set the environment variables from the [Environment variables](#Environment-variables) step. Export the `TXT_VALUE`.
     
     ```
     export TXT_VALUE={YOUR_TXT_VALUE}
@@ -125,7 +125,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 ## Prepare the AKS cluster
 
-1. Create a AKS cluster. Run:
+1. Create an AKS cluster. Run:
     ```
     az aks create \
       --resource-group ${RS_GROUP} \
@@ -142,7 +142,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     kubectl apply -f installation/resources/tiller.yaml
     ```
     
-3. Apply fix for AKS issue with readiness probe 
+3. Apply a fix for an AKS issue with readiness probe:
     ```
     kubectl apply -f installation/resources/azure-crb-for-healthz.yaml
     ```
@@ -183,10 +183,10 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 3. Push the image to your Docker Hub:
     ```
-    docker tag kyma-installer:latest [YOUR_DOCKER_LOGIN]/kyma-installer:latest
+    docker tag kyma-installer:latest {YOUR_DOCKER_LOGIN}/kyma-installer:latest
     ```
     ```
-    docker push [YOUR_DOCKER_LOGIN]/kyma-installer:latest
+    docker push {YOUR_DOCKER_LOGIN}/kyma-installer:latest
     ```
 
 4. Prepare the deployment file:
@@ -195,7 +195,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     cat installation/resources/installer.yaml <(echo -e "\n---") installation/resources/installer-config-cluster.yaml.tpl  <(echo -e "\n---") installation/resources/installer-cr-cluster.yaml.tpl | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/${SUB_DOMAIN}.${DNS_DOMAIN}/g" |sed -e "s/__TLS_CERT__/${TLS_CERT}/g" | sed -e "s/__TLS_KEY__/${TLS_KEY}/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
-5. The output of this operation is the `my_kyma.yaml` file. Modify it to fetch the proper image with the changes you made ([YOUR_DOCKER_LOGIN]/kyma-installer:latest). Use the modified file to deploy Kyma on your AKS cluster.
+5. The output of this operation is the `my_kyma.yaml` file. Modify it to fetch the proper image with the changes you made ({YOUR_DOCKER_LOGIN}/kyma-installer:latest). Use the modified file to deploy Kyma on your AKS cluster.
 
 
 ## Deploy Kyma

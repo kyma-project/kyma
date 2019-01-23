@@ -1,5 +1,5 @@
 ---
-title: Install Kyma on a AKS cluster with wildcard DNS
+title: Install Kyma on an AKS cluster with wildcard DNS
 type: Installation
 ---
 
@@ -10,13 +10,13 @@ This solution is not suitable for a production environment but makes for a great
 
 ## Prerequisites
 
-The prerequisites match these listed in [this](#installation-install-kyma-on-a-aks-cluster) document. However, you don't need to prepare a domain for your cluster as it is replaced by a wildcard DNS provided by [`xip.io`](http://xip.io/).
+The prerequisites match these listed in [this](#installation-install-kyma-on-an-aks-cluster) document. However, you don't need to prepare a domain for your cluster as it is replaced by a wildcard DNS provided by [`xip.io`](http://xip.io/).
 
 >**NOTE:** This feature requires Kyma version 0.6 or higher.
 
 ## Installation
 
-The installation process follows the steps outlined in the [Install Kyma on a AKS cluster](#installation-install-kyma-on-a-aks-cluster) document. Set [environment variables](#installation-install-kyma-on-a-aks-cluster-environment-variables) and follow [this](#installation-install-kyma-on-a-aks-cluster-prepare-the-aks-cluster) section to prepare your cluster.
+The installation process follows the steps outlined in the [Install Kyma on a AKS cluster](#installation-install-kyma-on-a-aks-cluster) document. Set [environment variables](#installation-install-kyma-on-an-aks-cluster-environment-variables) and follow [this](#installation-install-kyma-on-an-aks-cluster-prepare-the-aks-cluster) section to prepare your cluster.
 
 When you install Kyma with the wildcard DNS, you can use one of two approaches to allocating the required IP addresses for your cluster:
 - Dynamic IP allocation - can be used with [Knative](#installation-installation-with-knative) eventing and serverless, but disables the Application Connector. 
@@ -32,12 +32,12 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
 ```
 >**NOTE:** Using this approach disables the Application Connector. 
 
-2. Follow [these](#installation-install-kyma-on-a-aks-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.
+2. Follow [these](#installation-install-kyma-on-an-aks-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.
 
 ### Manual IP allocation
 
-1. Export your K8S cluster resource group. This group is different than the one you provided during cluster creation, it is automatically created by AKS. 
-   Set the same set of environment variables as during [cluster initialization](#installation-install-kyma-on-a-aks-cluster-environment-variables).
+1. Export your Kubernetes cluster resource group. This group is different than the one you provided during the cluster creation. It is automatically created by AKS. 
+   Set the same set of environment variables as during the [cluster initialization](#installation-install-kyma-on-an-aks-cluster-environment-variables).
    Run:
    ```
    export CLUSTER_RS_GROUP=MC_${RS_GROUP}_${CLUSTER_NAME}_${REGION}
@@ -67,12 +67,12 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
   ```
 (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__EXTERNAL_PUBLIC_IP__/$EXTERNAL_PUBLIC_IP/g" | sed -e "s/__REMOTE_ENV_IP__/$CONNECTOR_IP/g" | sed -e "s/__APPLICATION_CONNECTOR_DOMAIN__/$CONNECTOR_IP.xip.io/g" | sed -e "s/__SKIP_SSL_VERIFY__/true/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" |  sed -e "s/__.*__//g" > my-kyma.yaml
   ```
-4. Follow [these](#installation-install-kyma-on-a-aks-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.  
+4. Follow [these](#installation-install-kyma-on-an-aks-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.  
 
 
 ### Add the xip.io self-signed certificate to your OS trusted certificates
 
-After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS run:
+After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS, run:
 ```
 tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
 && kubectl get configmap cluster-certificate-overrides -n kyma-installer -o jsonpath='{.data.global\.tlsCrt}' | base64 --decode > $tmpfile \
