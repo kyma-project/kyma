@@ -1,6 +1,6 @@
 ---
 title: Call a registered external service from Kyma
-type: Getting Started
+type: Tutorials
 ---
 
 This guide shows how to call a registered external service from Kyma using a simple lambda function.

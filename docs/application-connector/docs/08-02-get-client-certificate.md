@@ -1,6 +1,6 @@
 ---
 title: Get the client certificate
-type: Getting Started
+type: Tutorials
 ---
 
 After you create an Application (App), connect it to an external solution to consume the solution's APIs and Event catalogs in Kyma. To accomplish this, get the client certificate for the external solution and register its services.
@@ -39,7 +39,7 @@ A successful call returns the following response:
     name: {APP_NAME}
   status:
     expireAfter: 2018-11-22T18:38:44Z
-    remoteEnvironment: {APP_NAME}
+    application: {APP_NAME}
     state: OK
     token: h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
     url: https://connector-service.kyma.local/v1/applications/test/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==

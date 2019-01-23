@@ -21,6 +21,8 @@ spec:
       app: {{ template "exporter-kube-state.fullname" . }}
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ template "exporter-kube-state.fullname" . }}
         component: kube-state

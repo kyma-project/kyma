@@ -20,8 +20,8 @@ The Service Catalog Add-ons provide the following views to the Kyma Console:
 
 The Binding Usage Controller allows you to inject Secrets to a given application. For this purpose, it introduces two custom resources (CRs):
 
-* [ServiceBindingUsage](../../../../docs/service-catalog/docs/040-cr-service-binding-usage.md)
-* [UsageKind](../../../../docs/service-catalog/docs/041-cr-usage-kind.md)
+* [ServiceBindingUsage](../../../../docs/service-catalog/docs/06-01-service-binding-usage.md)
+* [UsageKind](../../../../docs/service-catalog/docs/06-02-usage-kind.md)
 
 The Binding Usage Controller chart provides two default UsageKinds to Kyma:
 

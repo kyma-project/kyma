@@ -11,6 +11,8 @@ spec:
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}
