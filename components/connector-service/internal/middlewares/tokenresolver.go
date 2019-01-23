@@ -9,7 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 )
 
-type ExtenderConstructor func(token string) (httpcontext.ContextExtender, apperrors.AppError)
+type ExtenderConstructor func(token string, tokenResolver tokens.Resolver) (httpcontext.ContextExtender, apperrors.AppError)
 
 type tokenResolverMiddleware struct {
 	tokenResolver       tokens.Resolver
@@ -31,7 +31,7 @@ func (cc *tokenResolverMiddleware) Middleware(handler http.Handler) http.Handler
 			return
 		}
 
-		ctxExtender, err := cc.extenderConstructor(token)
+		ctxExtender, err := cc.extenderConstructor(token, cc.tokenResolver)
 		if err != nil {
 			if err.Code() == apperrors.CodeNotFound {
 				httphelpers.RespondWithError(w, apperrors.Forbidden("Invalid token."))
