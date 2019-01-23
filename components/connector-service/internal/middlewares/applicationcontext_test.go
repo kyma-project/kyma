@@ -32,7 +32,7 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewAppContextMiddleware()
+		middleware := NewApplicationContextMiddleware()
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -53,7 +53,7 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewAppContextMiddleware()
+		middleware := NewApplicationContextMiddleware()
 
 		// when
 		resultHandler := middleware.Middleware(handler)

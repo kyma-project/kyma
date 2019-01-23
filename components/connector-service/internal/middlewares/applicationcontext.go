@@ -12,7 +12,7 @@ import (
 type appContextMiddleware struct {
 }
 
-func NewAppContextMiddleware() *appContextMiddleware {
+func NewApplicationContextMiddleware() *appContextMiddleware {
 	return &appContextMiddleware{}
 }
 

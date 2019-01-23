@@ -12,6 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
 	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/connector-service/internal/internalapi"
+	"github.com/kyma-project/kyma/components/connector-service/internal/middlewares"
 	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring"
 	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
@@ -20,6 +21,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
+)
+
+const (
+	appCSRInfoFmt     = "https://%s/v1/applications/csr/info"
+	runtimeCSRInfoFmt = "https://%s/v1/runtimes/csr/info"
 )
 
 func main() {
@@ -37,8 +43,9 @@ func main() {
 	log.Infof("Environment variables: %s", env)
 
 	tokenCache := tokencache.NewTokenCache(options.tokenExpirationMinutes)
+	tokenGenerator := tokens.NewTokenGenerator(options.tokenLength)
+	tokenService := tokens.NewTokenService(tokenCache, tokenGenerator.NewToken)
 	certUtil := certificates.NewCertificateUtility()
-	tokenGenerator := tokens.NewTokenGenerator(options.tokenLength, tokenCache)
 
 	middlewares, appErr := monitoring.SetupMonitoringMiddleware()
 	if appErr != nil {
@@ -97,9 +104,28 @@ func newExternalHandler(cache tokencache.TokenCache, utility certificates.Certif
 	return externalapi.NewHandler(rh, ih, middlewares)
 }
 
-func newInternalHandler(cache tokencache.TokenCache, tokenGenerator tokens.TokenGenerator, host string, middlewares []mux.MiddlewareFunc) http.Handler {
-	th := internalapi.NewTokenHandler(tokenGenerator, host)
-	return internalapi.NewHandler(th, middlewares)
+func newInternalHandler(tokenService tokens.Service, opts *options, globalMiddlewares []mux.MiddlewareFunc) http.Handler {
+
+	applicationCtxMiddleware := middlewares.NewApplicationContextMiddleware()
+	clusterCtxMiddleware := middlewares.NewClusterContextMiddleware(opts.tenant, opts.group)
+
+	appHandlerMiddlewares := []mux.MiddlewareFunc{applicationCtxMiddleware, clusterCtxMiddleware}
+	appHandlerConfig := internalapi.Config{
+		Middlewares:  appHandlerMiddlewares,
+		TokenService: tokenService,
+		CSRInfoURL:   fmt.Sprintf(appCSRInfoFmt, opts.connectorServiceHost),
+		ParamsParser: tokens.NewApplicationTokenParams,
+	}
+
+	runtimeHandlerMiddlewares := []mux.MiddlewareFunc{clusterCtxMiddleware}
+	runtimeHandlerConfig := internalapi.Config{
+		Middlewares:  clusterCtxMiddleware,
+		TokenService: tokenService,
+		CSRInfoURL:   fmt.Sprintf(runtimeCSRInfoFmt, opts.connectorServiceHost),
+		ParamsParser: tokens.NewClusterTokenParams,
+	}
+
+	return internalapi.NewHandler(globalMiddlewares, appHandlerConfig, runtimeHandlerConfig)
 }
 
 func newSecretsRepository(namespace string) (secrets.Repository, apperrors.AppError) {

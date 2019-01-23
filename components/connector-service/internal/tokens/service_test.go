@@ -34,8 +34,8 @@ func TestService_Save(t *testing.T) {
 
 		tokenCache := &mocks.TokenCache{}
 		tokenCache.On("Put", payload, token)
-		tokenGenerator := func(length int) (string, apperrors.AppError) { return token, nil }
-		tokenService := NewTokenService(3, tokenCache, tokenGenerator)
+		tokenGenerator := func() (string, apperrors.AppError) { return token, nil }
+		tokenService := NewTokenService(tokenCache, tokenGenerator)
 
 		generatedToken, err := tokenService.Save(dummyParams)
 
@@ -49,7 +49,7 @@ func TestService_Save(t *testing.T) {
 			Value: nil,
 			Error: errors.New("error"),
 		}
-		tokenService := NewTokenService(3, nil, nil)
+		tokenService := NewTokenService(nil, nil)
 
 		_, err := tokenService.Save(dummyParams)
 
@@ -63,8 +63,8 @@ func TestService_Save(t *testing.T) {
 			Error: nil,
 		}
 
-		tokenGenerator := func(length int) (string, apperrors.AppError) { return "", apperrors.Internal("error") }
-		tokenService := NewTokenService(3, nil, tokenGenerator)
+		tokenGenerator := func() (string, apperrors.AppError) { return "", apperrors.Internal("error") }
+		tokenService := NewTokenService(nil, tokenGenerator)
 
 		_, err := tokenService.Save(dummyParams)
 
