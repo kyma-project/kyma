@@ -103,7 +103,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
     ```
     gcloud container --project "$PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.10.7" --machine-type "n1-standard-2" \
+    --cluster-version "1.11.3" --machine-type "n1-standard-2" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
     ```
 

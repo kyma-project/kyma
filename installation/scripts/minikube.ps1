@@ -67,7 +67,7 @@ function WaitForMinikubeToBeUp() {
         $counter += 1
         Write-Output "Keep calm, there are ${limit} possibilities and so far it is attempt number ${counter}"
 
-        $cmd = "minikube status --format '{{.MinikubeStatus}}'"
+        $cmd = "minikube status --format '{{.Host}}'"
         $clusterStatus = (Invoke-Expression -Command $cmd) | Out-String
         $clusterStatus = $clusterStatus.Trim()
         if ($clusterStatus -eq "Running") {
