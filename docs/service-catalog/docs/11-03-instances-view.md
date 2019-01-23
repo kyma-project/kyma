@@ -1,5 +1,5 @@
 ---
-title: Instances view
+title: Instances View
 type: UI Contracts
 ---
 

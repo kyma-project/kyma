@@ -4,7 +4,7 @@
 
 The Kubeconfig generator is a proprietary tool that generates a `kubeconfig` file which allows the user to access the Kyma cluster through the Command Line Interface (CLI), and to manage the connected cluster within the permission boundaries of the user.
 
-Read [this](../../../../docs/security/docs/020-details-kubecofig-generator.md) document to learn how to use the generator.
+Read [this](../../../../docs/security/docs/03-01-kubecofig-generator.md) document to learn how to use the generator.
 
 ## The kubeconfig file
 

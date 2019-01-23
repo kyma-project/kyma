@@ -1,6 +1,6 @@
 ---
 title: Create a new Application
-type: Getting Started
+type: Tutorials
 ---
 
 The Application Operator listens for the creation of Application custom resources. It provisions and de-provisions the necessary deployments for every created Application (App).

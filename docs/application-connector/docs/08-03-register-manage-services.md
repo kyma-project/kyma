@@ -1,6 +1,6 @@
 ---
 title: Register a service
-type: Getting Started
+type: Tutorials
 ---
 
 This guide shows you how to register a service of your external solution in Kyma.
