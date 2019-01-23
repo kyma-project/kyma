@@ -142,7 +142,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     kubectl apply -f installation/resources/tiller.yaml
     ```
     
-3. Apply a fix for an AKS issue with readiness probe:
+3. Add additional privileges to be able to access readiness probes endpoints:
     ```
     kubectl apply -f installation/resources/azure-crb-for-healthz.yaml
     ```
