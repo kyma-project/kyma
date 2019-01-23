@@ -3,11 +3,4 @@ title: Overview
 type: Overview
 ---
 
-The Open Service Broker for Azure contains the **Azure Redis Cache** services shown:
-
-| Service Name | Description |
-|--------------|-------------|
-| `azure-rediscache` | Provision an Azure Redis Cache instance. |
-
->**NOTE:** This version of the service is based on Open Service Broker for Azure, version [1.1.0](https://github.com/Azure/open-service-broker-azure/releases).
-For more information, see the [documentation](https://github.com/Azure/open-service-broker-azure/blob/v1.1.0/docs/modules/rediscache.md).
+Azure Cache for Redis is based on the popular software Redis. It is typically used as a cache to improve the performance and scalability of systems that rely heavily on backend data-stores. Performance is improved by temporarily copying frequently accessed data to fast storage located close to the application. With Azure Cache for Redis, this fast storage is located in-memory with Azure Cache for Redis instead of being loaded from disk by a database.
