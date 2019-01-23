@@ -6,9 +6,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 
-	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
@@ -22,6 +23,7 @@ type signatureHandler struct {
 	host              string
 	domainName        string
 	csr               csrInfo
+	tokenParamsParser tokens.TokenParamsParser
 }
 
 func NewSignatureHandler(tokenCache tokencache.TokenCache, certUtil certificates.CertificateUtility, secretsRepository secrets.Repository,
@@ -44,17 +46,9 @@ func NewSignatureHandler(tokenCache tokencache.TokenCache, certUtil certificates
 }
 
 func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
-	token := r.URL.Query().Get("token")
-	if token == "" {
-		httphelpers.RespondWithError(w, apperrors.Forbidden("Token not provided."))
-		return
-	}
-
-	reName := mux.Vars(r)["appName"]
-
-	cachedToken, found := sh.tokenCache.Get(reName)
-	if !found || cachedToken != token {
-		httphelpers.RespondWithError(w, apperrors.Forbidden("Invalid token."))
+	tokenParams, err := sh.tokenParamsParser(r.Context())
+	if err != nil {
+		httphelpers.RespondWithError(w, err)
 		return
 	}
 
@@ -64,6 +58,11 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// --------------------------
+
+	// get data for CN
+
+	// --------------------------
 	csr, appErr := sh.loadAndCheckCSR(tokenRequest.CSR, reName)
 	if appErr != nil {
 		httphelpers.RespondWithError(w, appErr)

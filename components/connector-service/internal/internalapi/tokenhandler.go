@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
@@ -12,23 +14,23 @@ import (
 const TokenURLFormat = "https://%s?token=%s"
 
 type tokenHandler struct {
-	tokenService      tokens.Service
-	csrInfoURL        string
-	tokenParamsParser tokens.TokenParamsParser
+	tokenCreator        tokens.Creator
+	csrInfoURL          string
+	serializerExtractor httpcontext.SerializerExtractor
 }
 
-func NewTokenHandler(tokenService tokens.Service, csrInfoURL string, tokenParamsParser tokens.TokenParamsParser) TokenHandler {
-	return &tokenHandler{tokenService: tokenService, csrInfoURL: csrInfoURL, tokenParamsParser: tokenParamsParser}
+func NewTokenHandler(tokenService tokens.Creator, csrInfoURL string, serializerExtractor httpcontext.SerializerExtractor) TokenHandler {
+	return &tokenHandler{tokenCreator: tokenService, csrInfoURL: csrInfoURL, serializerExtractor: serializerExtractor}
 }
 
 func (th *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
-	tokenParams, err := th.tokenParamsParser(r.Context())
+	tokenParams, err := th.serializerExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	token, err := th.tokenService.Save(tokenParams)
+	token, err := th.tokenCreator.Save(tokenParams)
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return

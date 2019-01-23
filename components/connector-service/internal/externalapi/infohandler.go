@@ -6,8 +6,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 
-	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
@@ -20,11 +18,12 @@ const (
 )
 
 type infoHandler struct {
-	tokenCache     tokencache.TokenCache
-	tokenGenerator tokens.TokenGenerator
-	host           string
-	domainName     string
-	csr            csrInfo
+	tokenCache        tokencache.TokenCache
+	tokenGenerator    tokens.TokenGenerator
+	host              string
+	domainName        string
+	csr               csrInfo
+	tokenParamsParser tokens.TokenParamsParser
 }
 
 func NewInfoHandler(cache tokencache.TokenCache, tokenGenerator tokens.TokenGenerator, host string, domainName string, subjectValues certificates.CSRSubject) InfoHandler {
@@ -40,27 +39,18 @@ func NewInfoHandler(cache tokencache.TokenCache, tokenGenerator tokens.TokenGene
 }
 
 func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
-	token := r.URL.Query().Get("token")
-	if token == "" {
-		httphelpers.RespondWithError(w, apperrors.Forbidden("Token not provided."))
-		return
-	}
 
-	reName := mux.Vars(r)["appName"]
-
-	cachedToken, found := ih.tokenCache.Get(reName)
-
-	if !found || cachedToken != token {
-		httphelpers.RespondWithError(w, apperrors.Forbidden("Invalid token."))
-		return
-	}
-
-	newToken, err := ih.tokenGenerator.NewToken(reName)
+	tokenParams, err := ih.tokenParamsParser(r.Context())
 	if err != nil {
-		httphelpers.RespondWithError(w, apperrors.Internal("Failed to generate new token."))
+		httphelpers.RespondWithError(w, err)
 		return
 	}
 
+	// TODO - save token
+
+	// ih.responseStrategy.GenerateInfoResponse
+	// app - application
+	// runtime
 	signUrl := fmt.Sprintf(SignUrl, ih.host, reName, newToken)
 	certUrl := fmt.Sprintf(CertUrl, ih.host, reName)
 
@@ -74,6 +64,7 @@ func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	certInfo := makeCertInfo(ih.csr, reName)
 
 	httphelpers.RespondWithBody(w, 200, infoResponse{SignUrl: signUrl, Api: api, CertificateInfo: certInfo})
+	//
 }
 
 func makeCertInfo(info csrInfo, reName string) certInfo {

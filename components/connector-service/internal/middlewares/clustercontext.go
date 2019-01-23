@@ -1,10 +1,11 @@
 package middlewares
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
@@ -23,26 +24,33 @@ func NewClusterContextMiddleware(tenant, group string) *clusterContextMiddleware
 
 func (cc *clusterContextMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		clusterContext := ClusterContext{
-			Tenant: r.Header.Get(TenantHeader),
-			Group:  r.Header.Get(GroupHeader),
-		}
 
-		if cc.defaultTenant != "" {
-			clusterContext.Tenant = cc.defaultTenant
-		}
-
-		if cc.defaultGroup != "" {
-			clusterContext.Group = cc.defaultGroup
-		}
+		clusterContext := cc.readClusterContextFromRequest(r)
 
 		if clusterContext.IsEmpty() {
 			httphelpers.RespondWithError(w, apperrors.BadRequest("Cluster context is empty"))
 			return
 		}
 
-		reqWithCtx := r.WithContext(context.WithValue(r.Context(), ClusterContextKey, clusterContext))
+		reqWithCtx := r.WithContext(clusterContext.ExtendContext(r.Context()))
 
 		handler.ServeHTTP(w, reqWithCtx)
 	})
+}
+
+func (cc *clusterContextMiddleware) readClusterContextFromRequest(r *http.Request) httpcontext.ClusterContext {
+	clusterContext := httpcontext.ClusterContext{
+		Tenant: r.Header.Get(httpcontext.TenantHeader),
+		Group:  r.Header.Get(httpcontext.GroupHeader),
+	}
+
+	if cc.defaultTenant != "" {
+		clusterContext.Tenant = cc.defaultTenant
+	}
+
+	if cc.defaultGroup != "" {
+		clusterContext.Group = cc.defaultGroup
+	}
+
+	return clusterContext
 }

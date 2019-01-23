@@ -3,6 +3,8 @@ package internalapi
 import (
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
@@ -10,10 +12,10 @@ import (
 )
 
 type Config struct {
-	Middlewares  []mux.MiddlewareFunc
-	TokenService tokens.Service
-	CSRInfoURL   string
-	ParamsParser tokens.TokenParamsParser
+	Middlewares      []mux.MiddlewareFunc
+	TokenCreator     tokens.Creator
+	CSRInfoURL       string
+	ContextExtractor httpcontext.SerializerExtractor
 }
 
 type TokenHandler interface {
@@ -24,13 +26,13 @@ func NewHandler(globalMiddlewares []mux.MiddlewareFunc, appCfg Config, runtimeCf
 	router := mux.NewRouter()
 	httphelpers.WithMiddlewares(router, globalMiddlewares)
 
-	appTokenHandler := NewTokenHandler(appCfg.TokenService, appCfg.CSRInfoURL, appCfg.ParamsParser)
+	appTokenHandler := NewTokenHandler(appCfg.TokenCreator, appCfg.CSRInfoURL, appCfg.ContextExtractor)
 
 	applicationTokenRouter := router.PathPrefix("/v1/applications").Subrouter()
 	httphelpers.WithMiddlewares(applicationTokenRouter, appCfg.Middlewares)
 	applicationTokenRouter.HandleFunc("/tokens", appTokenHandler.CreateToken).Methods(http.MethodPost)
 
-	runtimeTokenHandler := NewTokenHandler(runtimeCfg.TokenService, runtimeCfg.CSRInfoURL, runtimeCfg.ParamsParser)
+	runtimeTokenHandler := NewTokenHandler(runtimeCfg.TokenCreator, runtimeCfg.CSRInfoURL, runtimeCfg.ContextExtractor)
 
 	clusterTokenRouter := router.PathPrefix("/v1/runtimes").Subrouter()
 	httphelpers.WithMiddlewares(clusterTokenRouter, runtimeCfg.Middlewares)

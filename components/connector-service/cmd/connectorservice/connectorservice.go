@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
@@ -53,7 +55,7 @@ func main() {
 	}
 
 	externalHandler := newExternalHandler(tokenCache, certUtil, tokenGenerator, options, env, middlewares)
-	internalHandler := newInternalHandler(tokenCache, tokenGenerator, options.connectorServiceHost, middlewares)
+	internalHandler := newInternalHandler(tokenService, options, middlewares)
 
 	externalSrv := &http.Server{
 		Addr:    ":" + strconv.Itoa(options.externalAPIPort),
@@ -109,20 +111,20 @@ func newInternalHandler(tokenService tokens.Service, opts *options, globalMiddle
 	applicationCtxMiddleware := middlewares.NewApplicationContextMiddleware()
 	clusterCtxMiddleware := middlewares.NewClusterContextMiddleware(opts.tenant, opts.group)
 
-	appHandlerMiddlewares := []mux.MiddlewareFunc{applicationCtxMiddleware, clusterCtxMiddleware}
+	appHandlerMiddlewares := []mux.MiddlewareFunc{applicationCtxMiddleware.Middleware}
 	appHandlerConfig := internalapi.Config{
-		Middlewares:  appHandlerMiddlewares,
-		TokenService: tokenService,
-		CSRInfoURL:   fmt.Sprintf(appCSRInfoFmt, opts.connectorServiceHost),
-		ParamsParser: tokens.NewApplicationTokenParams,
+		Middlewares:      appHandlerMiddlewares,
+		TokenCreator:     tokenService,
+		CSRInfoURL:       fmt.Sprintf(appCSRInfoFmt, opts.connectorServiceHost),
+		ContextExtractor: httpcontext.ExtractSerializableApplicationContext,
 	}
 
-	runtimeHandlerMiddlewares := []mux.MiddlewareFunc{clusterCtxMiddleware}
+	runtimeHandlerMiddlewares := []mux.MiddlewareFunc{clusterCtxMiddleware.Middleware}
 	runtimeHandlerConfig := internalapi.Config{
-		Middlewares:  clusterCtxMiddleware,
-		TokenService: tokenService,
-		CSRInfoURL:   fmt.Sprintf(runtimeCSRInfoFmt, opts.connectorServiceHost),
-		ParamsParser: tokens.NewClusterTokenParams,
+		Middlewares:      runtimeHandlerMiddlewares,
+		TokenCreator:     tokenService,
+		CSRInfoURL:       fmt.Sprintf(runtimeCSRInfoFmt, opts.connectorServiceHost),
+		ContextExtractor: httpcontext.ExtractSerializableClusterContext,
 	}
 
 	return internalapi.NewHandler(globalMiddlewares, appHandlerConfig, runtimeHandlerConfig)

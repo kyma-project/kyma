@@ -15,19 +15,19 @@ const (
 	payload = "data"
 )
 
-type dummyTokenParams struct {
+type dummySerializable struct {
 	Value []byte
 	Error error
 }
 
-func (params dummyTokenParams) ToJSON() ([]byte, error) {
+func (params dummySerializable) ToJSON() ([]byte, error) {
 	return params.Value, params.Error
 }
 
 func TestService_Save(t *testing.T) {
 	t.Run("should trigger Put metod on token store", func(t *testing.T) {
 
-		dummyParams := dummyTokenParams{
+		serializable := dummySerializable{
 			Value: []byte(payload),
 			Error: nil,
 		}
@@ -37,7 +37,7 @@ func TestService_Save(t *testing.T) {
 		tokenGenerator := func() (string, apperrors.AppError) { return token, nil }
 		tokenService := NewTokenService(tokenCache, tokenGenerator)
 
-		generatedToken, err := tokenService.Save(dummyParams)
+		generatedToken, err := tokenService.Save(serializable)
 
 		require.NoError(t, err)
 		assert.Equal(t, token, generatedToken)
@@ -45,20 +45,20 @@ func TestService_Save(t *testing.T) {
 
 	t.Run("should return error when failed on token serialization", func(t *testing.T) {
 
-		dummyParams := dummyTokenParams{
+		serializable := dummySerializable{
 			Value: nil,
 			Error: errors.New("error"),
 		}
 		tokenService := NewTokenService(nil, nil)
 
-		_, err := tokenService.Save(dummyParams)
+		_, err := tokenService.Save(serializable)
 
 		require.Error(t, err)
 	})
 
 	t.Run("should return error when generator fails to generate token", func(t *testing.T) {
 
-		dummyParams := dummyTokenParams{
+		serializable := dummySerializable{
 			Value: []byte(payload),
 			Error: nil,
 		}
@@ -66,7 +66,7 @@ func TestService_Save(t *testing.T) {
 		tokenGenerator := func() (string, apperrors.AppError) { return "", apperrors.Internal("error") }
 		tokenService := NewTokenService(nil, tokenGenerator)
 
-		_, err := tokenService.Save(dummyParams)
+		_, err := tokenService.Save(serializable)
 
 		require.Error(t, err)
 	})

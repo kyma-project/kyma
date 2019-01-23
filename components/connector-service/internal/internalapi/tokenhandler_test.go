@@ -9,9 +9,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -29,17 +30,19 @@ const (
 
 func TestTokenHandler_CreateToken(t *testing.T) {
 
-	tokenParams := tokens.ApplicationTokenParams{
-		ClusterTokenParams: tokens.ClusterTokenParams{
-			Tenant: tenant,
-			Group:  group,
-		},
-		Application: appName,
+	clusterContext := httpcontext.ClusterContext{
+		Tenant: tenant,
+		Group:  group,
 	}
 
-	tokenParamsParser := func(ctx context.Context) (tokens.TokenParams, apperrors.AppError) {
+	applicationContext := httpcontext.ApplicationContext{
+		ClusterContext: clusterContext,
+		Application:    appName,
+	}
+
+	contextExtractor := func(ctx context.Context) (httpcontext.Serializer, apperrors.AppError) {
 		assert.Equal(t, dummyCtxValue, ctx.Value(dummyCtxKey))
-		return tokenParams, nil
+		return applicationContext, nil
 	}
 
 	ctx := context.WithValue(context.Background(), dummyCtxKey, dummyCtxValue)
@@ -52,10 +55,10 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 			Token: token,
 		}
 
-		tokenService := &mocks.Service{}
-		tokenService.On("Save", tokenParams).Return(token, nil)
+		tokenCreator := &mocks.Creator{}
+		tokenCreator.On("Save", applicationContext).Return(token, nil)
 
-		tokenHandler := NewTokenHandler(tokenService, csrURL, tokenParamsParser)
+		tokenHandler := NewTokenHandler(tokenCreator, csrURL, contextExtractor)
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
@@ -75,16 +78,55 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 		assert.Equal(t, http.StatusCreated, rr.Code)
 		assert.EqualValues(t, expectedTokenResponse, tokenResponse)
-		tokenService.AssertExpectations(t)
+		tokenCreator.AssertExpectations(t)
+	})
+
+	t.Run("should create token for cluster context", func(t *testing.T) {
+		// given
+		clusterContextExtractor := func(ctx context.Context) (httpcontext.Serializer, apperrors.AppError) {
+			assert.Equal(t, dummyCtxValue, ctx.Value(dummyCtxKey))
+			return clusterContext, nil
+		}
+
+		csrURL := "domain.local/v1/application/csr/info"
+		expectedTokenResponse := tokenResponse{
+			URL:   fmt.Sprintf("https://%s?token=%s", csrURL, token),
+			Token: token,
+		}
+
+		tokenCreator := &mocks.Creator{}
+		tokenCreator.On("Save", clusterContext).Return(token, nil)
+
+		tokenHandler := NewTokenHandler(tokenCreator, csrURL, clusterContextExtractor)
+
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		require.NoError(t, err)
+		req = req.WithContext(ctx)
+		rr := httptest.NewRecorder()
+
+		// when
+		tokenHandler.CreateToken(rr, req)
+
+		// then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var tokenResponse tokenResponse
+		err = json.Unmarshal(responseBody, &tokenResponse)
+		require.NoError(t, err)
+
+		assert.Equal(t, http.StatusCreated, rr.Code)
+		assert.EqualValues(t, expectedTokenResponse, tokenResponse)
+		tokenCreator.AssertExpectations(t)
 	})
 
 	t.Run("should return 500 when failed to parse context", func(t *testing.T) {
 		// given
-		errorParamsParser := func(ctx context.Context) (tokens.TokenParams, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (httpcontext.Serializer, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
-		tokenHandler := NewTokenHandler(nil, "", errorParamsParser)
+		tokenHandler := NewTokenHandler(nil, "", errorExtractor)
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
@@ -108,10 +150,10 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should return 500 when failed to save", func(t *testing.T) {
 		// given
-		tokenService := &mocks.Service{}
-		tokenService.On("Save", tokenParams).Return("", apperrors.Internal("error"))
+		tokenCreator := &mocks.Creator{}
+		tokenCreator.On("Save", applicationContext).Return("", apperrors.Internal("error"))
 
-		tokenHandler := NewTokenHandler(tokenService, "", tokenParamsParser)
+		tokenHandler := NewTokenHandler(tokenCreator, "", contextExtractor)
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)

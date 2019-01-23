@@ -1,4 +1,4 @@
-package middlewares
+package httpcontext
 
 import (
 	"testing"
@@ -33,11 +33,30 @@ func TestClusterContext_IsEmpty(t *testing.T) {
 
 func TestApplicationContext_IsEmpty(t *testing.T) {
 
-	t.Run("should check if empty", func(t *testing.T) {
-		emptyApp := ApplicationContext{Application: ""}
-		notEmptyApp := ApplicationContext{Application: "app"}
+	testCases := []struct {
+		tenant      string
+		group       string
+		application string
+		result      bool
+	}{
+		{"tenant", "group", "app", false},
+		{"tenant", "group", "", true},
+		{"tenant", "", "application", true},
+		{"", "group", "application", true},
+		{"", "", "", true},
+	}
 
-		assert.Equal(t, true, emptyApp.IsEmpty())
-		assert.Equal(t, false, notEmptyApp.IsEmpty())
+	t.Run("should check if empty", func(t *testing.T) {
+		for _, test := range testCases {
+			appCtx := ApplicationContext{
+				Application: test.application,
+				ClusterContext: ClusterContext{
+					Tenant: test.tenant,
+					Group:  test.group,
+				},
+			}
+
+			assert.Equal(t, test.result, appCtx.IsEmpty())
+		}
 	})
 }
