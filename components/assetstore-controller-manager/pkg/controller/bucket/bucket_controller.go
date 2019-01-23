@@ -16,6 +16,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"time"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var log = logf.Log.WithName("controller")
@@ -34,7 +35,7 @@ func Add(mgr manager.Manager) error {
 	}
 	bucketHandler := buckethandler.New(minioClient, log)
 
-	reconciler, err := newReconciler(mgr, bucketHandler, cfg.RequeueInterval)
+	reconciler, err := newReconciler(mgr, bucketHandler, cfg.SuccessRequeueInterval)
 	if err != nil {
 		return err
 	}
@@ -211,6 +212,11 @@ func (r *ReconcileBucket) handleReadyState(instance *assetstorev1alpha1.Bucket) 
 	}
 
 	// Everything is OK
+	err = r.updateHeartbeatTime(instance)
+	if err != nil {
+		return reconcile.Result{Requeue: true}, err
+	}
+
 	return reconcile.Result{RequeueAfter: r.requeueInterval}, nil
 }
 
@@ -220,8 +226,15 @@ func (r *ReconcileBucket) isObjectBeingDeleted(instance *assetstorev1alpha1.Buck
 
 func (r *ReconcileBucket) updateStatus(instance *assetstorev1alpha1.Bucket, status assetstorev1alpha1.BucketStatus) error {
 	instance.Status = status
+	instance.Status.LastHeartbeatTime = metav1.Now()
 	return r.Update(context.Background(), instance)
 }
+
+func (r *ReconcileBucket) updateHeartbeatTime(instance *assetstorev1alpha1.Bucket) error {
+	instance.Status.LastHeartbeatTime = metav1.Now()
+	return r.Update(context.Background(), instance)
+}
+
 
 func (r *ReconcileBucket) bucketNameForInstance(instance *assetstorev1alpha1.Bucket) string {
 	return fmt.Sprintf("ns-%s-%s", instance.Namespace, instance.Name)

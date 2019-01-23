@@ -61,12 +61,12 @@ func StartTestManager(mgr manager.Manager, g *gomega.GomegaWithT) (chan struct{}
 }
 
 type testSuite struct {
-	g *gomega.GomegaWithT
-	c client.Client
-	mgr manager.Manager
-	stopMgr chan struct{}
+	g          *gomega.GomegaWithT
+	c          client.Client
+	mgr        manager.Manager
+	stopMgr    chan struct{}
 	mgrStopped *sync.WaitGroup
-	requests chan reconcile.Request
+	requests   chan reconcile.Request
 
 	finishTest func()
 }
@@ -87,9 +87,9 @@ func prepareReconcilerTest(t *testing.T, handler buckethandler.BucketHandler) *t
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
 
 	return &testSuite{
-		g:g,
-		c:c,
-		requests:requests,
+		g:        g,
+		c:        c,
+		requests: requests,
 		finishTest: func() {
 			close(stopMgr)
 			mgrStopped.Wait()

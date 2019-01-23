@@ -19,10 +19,10 @@ type Bucket struct {
 
 // BucketSpec defines the desired state of Bucket
 type BucketSpec struct {
-	Region string `json:"region"`
+	Region string `json:"region,omitempty"`
 
 	// +kubebuilder:validation:Enum=,none,readonly,readwrite,writeonly
-	Policy BucketPolicy `json:"policy"`
+	Policy BucketPolicy `json:"policy,omitempty"`
 }
 
 type BucketPolicy string
@@ -39,6 +39,7 @@ type BucketStatus struct {
 	Phase   BucketPhase `json:"phase,omitempty"`
 	Message string      `json:"message,omitempty"`
 	Reason  string      `json:"reason,omitempty"`
+	LastHeartbeatTime metav1.Time `json:"lastHeartbeatTime,omitempty"`
 }
 
 type BucketPhase string
