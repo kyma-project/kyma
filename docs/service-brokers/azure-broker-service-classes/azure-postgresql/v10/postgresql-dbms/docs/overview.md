@@ -13,5 +13,5 @@ The Open Service Broker for Azure contains the **Azure PostgreSQL Database** ser
 
 The `azure-postgresql-10-dbms` provisions an Azure Database for PostgreSQL DBMS instance containing no databases. Databases can be created through subsequent provision requests using the `azure-postgresql-database` service.
 
->**NOTE:** This version of the service is based on Open Service Broker for Azure, version [1.3.1](https://github.com/Azure/open-service-broker-azure/releases).
+>**NOTE:** This version of the service is based on [Open Service Broker for Azure](https://github.com/Azure/open-service-broker-azure).
 For more details, read the **Plans Details** document.

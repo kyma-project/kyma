@@ -42,8 +42,6 @@
   directory: service-brokers/azure-broker-service-classes/azure-mssqldr/v12.0/dbms-pair-registered
 - name: azure-redis-cache
   directory: service-brokers/azure-broker-service-classes/azure-rediscache
-- name: azure-sql
-  directory: service-brokers/azure-broker-service-classes/azure-sql
 - name: azure-text-analytics
   directory: service-brokers/azure-broker-service-classes/azure-textanalytics
 - name: azure-storage-general-purpose-v2-storage-account
@@ -80,6 +78,8 @@
   directory: service-brokers/azure-broker-service-classes/azure-iothub
 - name: azure-eventhubs
   directory: service-brokers/azure-broker-service-classes/azure-eventhubs
+- name: azure-appinsights
+  directory: service-brokers/azure-broker-service-classes/azure-appinsights
 
 # GCP Broker
 - name: gcp-bigquery
