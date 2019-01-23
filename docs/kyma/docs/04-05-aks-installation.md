@@ -165,7 +165,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 4. Update the file with the values from your environment variables. Run:
     ```
-    cat kyma-config-cluster.yaml | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/${SUB_DOMAIN}.${DNS_DOMAIN}/g" |sed -e "s/__TLS_CERT__/${TLS_CERT}/g" | sed -e "s/__TLS_KEY__/${TLS_KEY}/g"|sed -e "s/__.*__//g"  >my-kyma.yaml
+    cat kyma-config-cluster.yaml | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g"|sed -e "s/__.*__//g"  >my-kyma.yaml
     ```
 
 5. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your AKS cluster.
