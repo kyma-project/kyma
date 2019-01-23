@@ -57,7 +57,7 @@ These are the OSBA fields used in the **Add to Namespace** window:
 
 \*Fields with an asterisk are required OSBA attributes.
 
-![alt text](./assets/add-to-environment.png)
+![alt text](./assets/add-to-namespace.png)
 
 ### Plan schema
 
