@@ -9,7 +9,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
 )
 
 const (
@@ -21,9 +20,10 @@ type infoHandler struct {
 	csr                 csrInfo
 	serializerExtractor httpcontext.SerializerExtractor
 	apiInfoUrlsStrategy APIUrlsGenerator
+	host                string
 }
 
-func NewInfoHandler(cache tokencache.TokenCache, tokenGenerator tokens.TokenGenerator, host string, domainName string, subjectValues certificates.CSRSubject) InfoHandler {
+func NewInfoHandler(tokenCreator tokens.Creator, serializerExtractor httpcontext.SerializerExtractor, apiInfoUrlsStrategy APIUrlsGenerator, host string, subjectValues certificates.CSRSubject) InfoHandler {
 	csr := csrInfo{
 		Country:            subjectValues.Country,
 		Organization:       subjectValues.Organization,
@@ -32,7 +32,13 @@ func NewInfoHandler(cache tokencache.TokenCache, tokenGenerator tokens.TokenGene
 		Province:           subjectValues.Province,
 	}
 
-	return &infoHandler{tokenCache: cache, tokenGenerator: tokenGenerator, host: host, domainName: domainName, csr: csr}
+	return &infoHandler{
+		tokenCreator:        tokenCreator,
+		csr:                 csr,
+		serializerExtractor: serializerExtractor,
+		apiInfoUrlsStrategy: apiInfoUrlsStrategy,
+		host:                host,
+	}
 }
 
 func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {

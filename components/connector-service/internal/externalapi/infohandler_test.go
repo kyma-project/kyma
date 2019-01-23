@@ -2,6 +2,7 @@ package externalapi
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,6 +13,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 	tokenMocks "github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
 	tokenCacheMocks "github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache/mocks"
@@ -19,20 +21,28 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type dummyContext struct{}
+
+func (dc dummyContext) ToJSON() ([]byte, error) {
+	return []byte("test"), nil
+}
+
 func TestInfoHandler_GetInfo(t *testing.T) {
 
-	t.Run("should get info", func(t *testing.T) {
+	t.Run("should get info for application handler", func(t *testing.T) {
 		// given
 		newToken := "newToken"
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		url := fmt.Sprintf("/v1/applications/signingRequests/info?token=%s", token)
 
-		expectedSignUrl := fmt.Sprintf("https://%s/v1/applications/%s/client-certs?token=%s", host, appName, newToken)
+		expectedSignUrl := fmt.Sprintf("https://%s/v1/applications/certificates?token=%s", host, appName, newToken)
 
-		expectedApi := api{
-			MetadataURL:     fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", domain, appName),
-			EventsURL:       fmt.Sprintf("https://gateway.%s/%s/v1/events", domain, appName),
-			CertificatesUrl: fmt.Sprintf("https://%s/v1/applications/%s", host, appName),
-		}
+		// TODO
+		// expectedApi := api{
+		// 	MetadataURL:     fmt.Sprintf("https://gateway.%s/%s/v1/metadata/services", domain, appName),
+		// 	EventsURL:       fmt.Sprintf("https://gateway.%s/%s/v1/events", domain, appName),
+		// 	CertificatesUrl: fmt.Sprintf("https://%s/v1/applications/certificates", host),
+		// 	Info
+		// }
 
 		expectedCertInfo := certInfo{
 			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, appName),
@@ -40,11 +50,13 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 			KeyAlgorithm: "rsa2048",
 		}
 
-		tokenCache := &tokenCacheMocks.TokenCache{}
-		tokenCache.On("Get", appName).Return(token, true)
+		dummyContext := dummyContext{}
+		contextExtractor := func(ctx context.Context) (httpcontext.Serializer, apperrors.AppError) {
+			return dummyContext, nil
+		}
 
-		tokenGenerator := &tokenMocks.TokenGenerator{}
-		tokenGenerator.On("NewToken", appName).Return(newToken, nil)
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Replace", token, dummyContext).Return(newToken, nil)
 
 		subjectValues := certificates.CSRSubject{
 			CName:              appName,
@@ -54,7 +66,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 			Locality:           locality,
 			Province:           province,
 		}
-		infoHandler := NewInfoHandler(tokenCache, tokenGenerator, host, domain, subjectValues)
+		infoHandler := NewInfoHandler(tokenCreator, contextExtractor, host, domain, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
