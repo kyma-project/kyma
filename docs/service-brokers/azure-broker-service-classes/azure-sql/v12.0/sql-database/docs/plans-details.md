@@ -26,8 +26,8 @@ These are the provisioning parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `Location` | `string` | The Azure region in which to provision applicable resources. | Y | None. |
-| `Resource group` | `string` | The new or existing resource group with which to associate new resources. | Y | Creates a new resource group with a UUID as its name. |
+| **Location** | `string` | The Azure region in which to provision applicable resources. | Y | None. |
+| **Resource group** | `string` | The new or existing resource group with which to associate new resources. | Y | Creates a new resource group with a UUID as its name. |
 
 ### Credentials
 
@@ -35,8 +35,8 @@ The binding returns the following connection details and credentials:
 
 | Parameter Name | Type | Description |
 |----------------|------|-------------|
-| `host` | `string` | The fully-qualified address of the MySQL Server. |
-| `port` | `int	` | The port number to connect to on the MySQL Server. |
-| `database` | `string` | The name of the database. |
-| `username` | `string` | The name of the database user. |
-| `password` | `string` | The password for the database user. |
+| **host** | `string` | The fully-qualified address of the MySQL Server. |
+| **port** | `int	` | The port number to connect to on the MySQL Server. |
+| **database** | `string` | The name of the database. |
+| **username** | `string` | The name of the database user. |
+| **password** | `string` | The password for the database user. |

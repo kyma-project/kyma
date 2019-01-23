@@ -27,9 +27,9 @@ These are the provisioning parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `location` | `string` | The Azure region in which to provision applicable resources. | Yes |  |
-| `resourceGroup` | `string` | The (new or existing) resource group with which to associate new resources. | Yes |  |
-| `tags` | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | No | Tags (even if none are specified) are automatically supplemented with `heritage: open-service-broker-azure`. |
+| **location** | `string` | The Azure region in which to provision applicable resources. | Yes |  |
+| **resourceGroup** | `string` | The (new or existing) resource group with which to associate new resources. | Yes |  |
+| **tags** | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | No | Tags (even if none are specified) are automatically supplemented with `heritage: open-service-broker-azure`. |
 
 ### Credentials
 
@@ -37,8 +37,8 @@ The binding returns the following connection details and credentials:
 
 | Parameter Name | Type | Description |
 |----------------|------|-------------|
-| `host` | `string` | The fully-qualified address of the MySQL Server. |
-| `port` | `int	` | The port number to connect to on the MySQL Server. |
-| `database` | `string` | The name of the database. |
-| `username` | `string` | The name of the database user. |
-| `password` | `string` | The password for the database user. |
+| **host** | `string` | The fully-qualified address of the MySQL Server. |
+| **port** | `int	` | The port number to connect to on the MySQL Server. |
+| **database** | `string` | The name of the database. |
+| **username** | `string` | The name of the database user. |
+| **password** | `string` | The password for the database user. |
