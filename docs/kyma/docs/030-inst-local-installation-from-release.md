@@ -89,8 +89,8 @@ To install Kyma, follow these steps:
   ./scripts/is-installed.sh
   ```
 
-Read the **Reinstall Kyma** document to learn how to reinstall Kyma without deleting the cluster from Minikube.
-To learn how to test Kyma, see the **Testing Kyma** document.
+Read the [Reinstall Kyma](#reinstall-kyma) document to learn how to reinstall Kyma without deleting the cluster from Minikube.
+To learn how to test Kyma, see the [Testing Kyma](#testing-kyma) document.
 
 ## Verify the deployment
 
