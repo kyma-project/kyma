@@ -14,8 +14,12 @@
 - name: console
 
 # Azure Broker
-- name: azure-mysql
-  directory: service-brokers/azure-broker-service-classes/azure-mysql
+- name: azure-mysql-5.7-dbms-and-database
+  directory: service-brokers/azure-broker-service-classes/azure-mysql/v5.7/dbms-and-database
+- name: azure-mysql-5.7-database
+  directory: service-brokers/azure-broker-service-classes/azure-mysql/v5.7/database
+- name: azure-mysql-5.7-dbms
+  directory: service-brokers/azure-broker-service-classes/azure-mysql/v5.7/dbms
 - name: azure-mssql-12.0-database
   directory: service-brokers/azure-broker-service-classes/azure-mssql/v12.0/database
 - name: azure-mssql-12.0-database-from-existing
@@ -38,8 +42,6 @@
   directory: service-brokers/azure-broker-service-classes/azure-mssqldr/v12.0/dbms-pair-registered
 - name: azure-redis-cache
   directory: service-brokers/azure-broker-service-classes/azure-rediscache
-- name: azure-sql
-  directory: service-brokers/azure-broker-service-classes/azure-sql
 - name: azure-text-analytics
   directory: service-brokers/azure-broker-service-classes/azure-textanalytics
 - name: azure-storage-general-purpose-v2-storage-account
@@ -70,6 +72,14 @@
   directory: service-brokers/azure-broker-service-classes/azure-cosmosdb/sql-database
 - name: azure-cosmosdb-table-account
   directory: service-brokers/azure-broker-service-classes/azure-cosmosdb/table-account
+- name: azure-keyvault
+  directory: service-brokers/azure-broker-service-classes/azure-keyvault
+- name: azure-iothub
+  directory: service-brokers/azure-broker-service-classes/azure-iothub
+- name: azure-eventhubs
+  directory: service-brokers/azure-broker-service-classes/azure-eventhubs
+- name: azure-appinsights
+  directory: service-brokers/azure-broker-service-classes/azure-appinsights
 
 # GCP Broker
 - name: gcp-bigquery

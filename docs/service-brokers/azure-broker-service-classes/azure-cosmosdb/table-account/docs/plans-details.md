@@ -60,6 +60,8 @@ Deletes the CosmosDB database account.
 
 Idempotently update the service instance to specified state.
 
+### Update parameters
+
 | Parameter Name | Type                | Description                                                  | Required | Default Value                                                |
 | -------------- | ------------------- | ------------------------------------------------------------ | -------- | ------------------------------------------------------------ |
 | `tags` | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | N | Tags (even if none are specified) are automatically supplemented with `heritage: open-service-broker-azure`. |

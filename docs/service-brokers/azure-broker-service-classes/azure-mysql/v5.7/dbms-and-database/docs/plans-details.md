@@ -5,7 +5,7 @@ type: Details
 
 ## Services & Plans
 
-All of the `azure-mysql` service classes contains the following plans and parameters:
+Service class contains the following plans and parameters:
 
 | Plan Name | Description |
 |-----------|-------------|
@@ -13,15 +13,26 @@ All of the `azure-mysql` service classes contains the following plans and parame
 | `General Purpose Tier` | General Purpose Tier, up to 32 vCores, predictable I/O Performance, local or geo-redundant backups |
 | `Memory Optimized Tier` | Memory Optimized Tier, up to 16 memory optimized vCores, predictable I/O Performance, local or geo-redundant backups |
 
-### Provision
+## Provision
 
 Provisions a new MySQL DBMS and a new database upon it. The new database will be named randomly.
 
-#### Provisioning Parameters
+### Provisioning Parameters
+
+| Parameter Name | Type | Description | Required | Default Value |
+|----------------|------|-------------|----------|---------------|
+| `location` | `string` | The Azure region in which to provision applicable resources. | Y | |
+| `resourceGroup` | `string` | The (new or existing) resource group with which to associate new resources. | Y | |
+| `sslEnforcement` | `string` | Specifies whether the server requires the use of TLS when connecting. Valid valued are `""` (unspecified), `enabled`, or `disabled`. | N | `""`. Left unspecified, SSL _will_ be enforced. |
+| `firewallRules`  | `array` | Specifies the firewall rules to apply to the server. Definition follows. | N | `[]` Left unspecified, Firewall will default to only Azure IPs. If rules are provided, they must have valid values. |
+| `firewallRules[n].name` | `string` | Specifies the name of the generated firewall rule |Y | |
+| `firewallRules[n].startIPAddress` | `string` | Specifies the start of the IP range allowed by this firewall rule | Y | |
+| `firewallRules[n].endIPAddress` | `string` | Specifies the end of the IP range allowed by this firewall rule | Y | |
+| `tags` | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | N | Tags (even if none are specified) are automatically supplemented with `heritage: open-service-broker-azure`. |
 
 The three plans each have additional provisioning parameters with different default and allowed values. See the tables below for details on each.
 
-Provisioning Parameters: basic
+#### Provisioning Parameters: basic
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -29,7 +40,7 @@ Provisioning Parameters: basic
 | `storage` | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 1048 | N | 10 |
 | `backupRetention` | `integer` | Specifies the number of days to retain backups. Ranges from 7 to 35 | N | 7 |
 
-Provisioning Parameters: general-purpose
+#### Provisioning Parameters: general-purpose
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -38,7 +49,7 @@ Provisioning Parameters: general-purpose
 | `backupRetention` | `integer` | Specifies the number of days to retain backups. Ranges from 7 to 35 | N | 7 |
 | `backupRedundancy` | `string` | Specifies the backup redundancy, either `local` or `geo` | N | `local` |
 
-Provisioning Parameters: memory-optimized
+#### Provisioning Parameters: memory-optimized
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -47,12 +58,12 @@ Provisioning Parameters: memory-optimized
 | `backupRetention` | `integer` | Specifies the number of days to retain backups. Ranges from 7 to 35 | N | 7 |
 | `backupRedundancy` | `string` | Specifies the backup redundancy, either `local` or `geo` | N | `local` |
 
-### Binding
+## Bind
 
 Creates a new user on the MySQL DBMS. The new user will be named randomly and
 will be granted a wide array of permissions on the database.
 
-#### Binding Parameters
+### Binding Parameters
 
 This binding operation does not support any parameters.
 
@@ -70,19 +81,3 @@ Binding returns the following connection details and credentials:
 | `sslRequired` | `boolean` | Flag indicating if SSL is required to connect the MySQL DBMS. |
 | `uri` | `string` | A URI string containing all necessary connection information. |
 | `tags` | `string[]` | A list of tags consumers can use to identify the credential. |
-
-### Examples
-
-#### Kubernetes
-
-The `contrib/k8s/examples/mysql/mysql-instance.yaml` can be used to provision the `basic` plan. This can be done with the following example:
-
-```console
-kubectl create -f contrib/k8s/examples/mysql/mysql-instance.yaml
-```
-
-You can then create a binding with the following command:
-
-```console
-kubectl create -f contrib/k8s/examples/mysql/mysql-binding.yaml
-```

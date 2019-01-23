@@ -1,8 +1,8 @@
 {
     "spec": {
-      "displayName": "Azure SQL Database",
-      "description": "Documentation for Azure SQL Database.",
-      "id": "fb9bc99e-0aa9-11e6-8a8a-000d3a002ed5",
+      "displayName": "Azure Key Vault",
+      "description": "Documentation for Azure Key Vault.",
+      "id": "058a566a-730f-4e50-8569-2e296fdb2364",
       "type":"Service Class"
     }
 }

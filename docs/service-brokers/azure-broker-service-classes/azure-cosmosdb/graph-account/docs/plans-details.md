@@ -11,13 +11,11 @@ The `azure-cosmosdb-graph-account` service consist of the following plan:
 |-----------|-------------|
 | `account` | Database Account configured to use Graph (Gremlin) API |
 
-#### Behaviors
-
-##### Provision
+## Provision
 
 Provisions a new CosmosDB database account that can be accessed through any of the Graph (Gremlin) API. The new database account is named using a new UUID.
 
-###### Provisioning Parameters
+### Provisioning Parameters
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -37,15 +35,15 @@ Provisions a new CosmosDB database account that can be accessed through any of t
 | `multipleWriteRegionsEnabled` | `string` | Specifies if you want  the account to write in multiple regions. Valid values are [ "enabled", "disabled"]. If set to "enabled", regions in `readRegions`  will also be writable. | N | If not specified, "disabled" will be used as the default value. |
 | `autoFailoverEnabled` | `string ` | Specifies if you want Cosmos DB to perform automatic failover of the write region to one of the read regions in the rare event of a data center outage. Valid values are [ "enabled", "disabled"]. **Note**: If `multipleWriteRegionsEnabled` is set to `enabled`, all regions will be writable, and this attribute will not work. | N | If not specified, default "disabled". |
 
-##### Bind
+## Bind
 
 Returns a copy of one shared set of credentials.
 
-###### Binding Parameters
+### Binding Parameters
 
 This binding operation does not support any parameters.
 
-###### Credentials
+### Credentials
 
 Binding returns the following connection details and shared credentials:
 
@@ -55,11 +53,11 @@ Binding returns the following connection details and shared credentials:
 | `primaryKey` | `string` | A secret key used for connecting to the CosmosDB database account. |
 | `primaryConnectionString` | `string` | The full connection string, which includes the URI and primary key. |
 
-##### Deprovision
+## Deprovision
 
 Deletes the CosmosDB database account.
 
-##### Update
+## Update
 
 Idempotently update the service instance to specified state.
 

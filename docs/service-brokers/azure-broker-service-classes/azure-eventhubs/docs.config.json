@@ -1,8 +1,8 @@
 {
     "spec": {
-      "displayName": "Azure SQL Database",
-      "description": "Documentation for Azure SQL Database.",
-      "id": "fb9bc99e-0aa9-11e6-8a8a-000d3a002ed5",
+      "displayName": "Azure Event Hubs",
+      "description": "Documentation for Azure Event Hubs.",
+      "id": "e6d06042-c52d-4cda-85e6-16d5d878314e",
       "type":"Service Class"
     }
 }
