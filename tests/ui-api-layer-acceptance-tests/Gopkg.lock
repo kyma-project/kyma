@@ -108,6 +108,11 @@
 [[projects]]
   name = "github.com/kyma-project/kyma"
   packages = [
+    "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
+    "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
     "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/binding-usage-controller/pkg/apis/settings/v1alpha1",
     "components/binding-usage-controller/pkg/client/clientset/versioned",
@@ -390,6 +395,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ccbe30a14c6fc55362144c11c8d583e1340c1d5c5ed871ebfb3abbb0fa4e6223"
+  inputs-digest = "100d1d413432569f8257b0257a4020733e61d381f1e3e27a7f28c63cad425184"
   solver-name = "gps-cdcl"
   solver-version = 1

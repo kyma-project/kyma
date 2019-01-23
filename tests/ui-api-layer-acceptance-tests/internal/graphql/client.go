@@ -22,6 +22,7 @@ type Client struct {
 	token     string
 	endpoint  string
 	logs      []string
+	Config    config
 }
 
 func New() (*Client, error) {
