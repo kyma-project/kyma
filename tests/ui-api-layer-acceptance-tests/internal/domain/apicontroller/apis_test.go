@@ -74,7 +74,8 @@ func TestApisQuery(t *testing.T) {
 	t.Log("Retrieving API...")
 	var api *gateway.Api
 	err = waiter.WaitAtMost(func() (bool, error) {
-		api, err := gatewayClient.GatewayV1alpha2().Apis(apiNamespace).Get(apiName, metav1.GetOptions{})
+		var err error
+		api, err = gatewayClient.GatewayV1alpha2().Apis(apiNamespace).Get(apiName, metav1.GetOptions{})
 		if err == nil {
 			return true, nil
 		}
