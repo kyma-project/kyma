@@ -40,7 +40,7 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
    Set the same set of environment variables as during the [cluster initialization](#installation-install-kyma-on-an-aks-cluster-environment-variables).
    Run:
    ```
-   export CLUSTER_RS_GROUP=MC_${RS_GROUP}_${CLUSTER_NAME}_${REGION}
+   export CLUSTER_RS_GROUP=MC_"$RS_GROUP"_"$CLUSTER_NAME"_"$REGION"
    ```
 2. Get public IP addresses for the load balancer of the AKS cluster to which you deploy Kyma and for the load balancer of the Application Connector.
 
@@ -60,8 +60,8 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
 
   - Set the reserved IP addresses as `EXTERNAL_PUBLIC_IP` and `CONNCETOR_IP` environment variables. Run:
     ```
-    export EXTERNAL_PUBLIC_IP=$(az network public-ip list -g $CLUSTER_RS_GROUP --query "[?name=='${PUBLIC_IP_ADDRESS_NAME}'].ipAddress" -otsv)
-    export CONNECTOR_IP=$(az network public-ip list -g $CLUSTER_RS_GROUP --query "[?name=='${APP_CONNECTOR_IP_ADDRESS_NAME}'].ipAddress" -otsv)
+    export EXTERNAL_PUBLIC_IP=$(az network public-ip list -g $CLUSTER_RS_GROUP --query "[?name=='$PUBLIC_IP_ADDRESS_NAME'].ipAddress" -otsv)
+    export CONNECTOR_IP=$(az network public-ip list -g $CLUSTER_RS_GROUP --query "[?name=='$APP_CONNECTOR_IP_ADDRESS_NAME'].ipAddress" -otsv)
     ```
 3. Use this command to prepare a configuration file that deploys Kyma with [`xip.io`](http://xip.io/) providing a wildcard DNS:
   ```
