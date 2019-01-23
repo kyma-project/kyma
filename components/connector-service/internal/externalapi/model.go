@@ -9,15 +9,21 @@ type certResponse struct {
 }
 
 type infoResponse struct {
-	SignUrl         string   `json:"csrUrl"`
-	Api             api      `json:"api"`
-	CertificateInfo certInfo `json:"certificate"`
+	CsrURL          string      `json:"csrUrl"`
+	API             interface{} `json:"api"`
+	CertificateInfo certInfo    `json:"certificate"`
 }
 
-type api struct {
+type applicationApi struct {
 	MetadataURL     string `json:"metadataUrl"`
 	EventsURL       string `json:"eventsUrl"`
-	CertificatesUrl string `json:"certificatesUrl"`
+	InfoURL         string `json:"infoUrl"`
+	CertificatesURL string `json:"certificatesUrl"`
+}
+
+type runtimeApi struct {
+	InfoURL         string `json:"infoUrl"`
+	CertificatesURL string `json:"certificatesUrl"`
 }
 
 type certInfo struct {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
@@ -12,18 +13,14 @@ import (
 )
 
 const (
-	CertUrl = "https://%s/v1/applications/%s"
-	SignUrl = "https://%s/v1/applications/%s/client-certs?token=%s"
-	APIUrl  = "https://gateway.%s/%s/v1/"
+	CsrURLFormat = "https://%s/v1/applications/%s/client-certs?token=%s"
 )
 
 type infoHandler struct {
-	tokenCache        tokencache.TokenCache
-	tokenGenerator    tokens.TokenGenerator
-	host              string
-	domainName        string
-	csr               csrInfo
-	tokenParamsParser tokens.TokenParamsParser
+	tokenCreator        tokens.Creator
+	csr                 csrInfo
+	serializerExtractor httpcontext.SerializerExtractor
+	apiInfoUrlsStrategy APIUrlsGenerator
 }
 
 func NewInfoHandler(cache tokencache.TokenCache, tokenGenerator tokens.TokenGenerator, host string, domainName string, subjectValues certificates.CSRSubject) InfoHandler {
@@ -39,32 +36,25 @@ func NewInfoHandler(cache tokencache.TokenCache, tokenGenerator tokens.TokenGene
 }
 
 func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
-
-	tokenParams, err := ih.tokenParamsParser(r.Context())
+	token := r.URL.Query().Get("token")
+	serializableContext, err := ih.serializerExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	// TODO - save token
-
-	// ih.responseStrategy.GenerateInfoResponse
-	// app - application
-	// runtime
-	signUrl := fmt.Sprintf(SignUrl, ih.host, reName, newToken)
-	certUrl := fmt.Sprintf(CertUrl, ih.host, reName)
-
-	apiUrl := fmt.Sprintf(APIUrl, ih.domainName, reName)
-	api := api{
-		MetadataURL:     apiUrl + "metadata/services",
-		EventsURL:       apiUrl + "events",
-		CertificatesUrl: certUrl,
+	newToken, err := ih.tokenCreator.Replace(token, serializableContext)
+	if err != nil {
+		httphelpers.RespondWithError(w, err)
+		return
 	}
+
+	csrURL := fmt.Sprintf(CsrURLFormat, ih.host, reName, newToken)
+	apiURLs := ih.apiInfoUrlsStrategy.Generate(serializableContext)
 
 	certInfo := makeCertInfo(ih.csr, reName)
 
-	httphelpers.RespondWithBody(w, 200, infoResponse{SignUrl: signUrl, Api: api, CertificateInfo: certInfo})
-	//
+	httphelpers.RespondWithBody(w, 200, infoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
 }
 
 func makeCertInfo(info csrInfo, reName string) certInfo {

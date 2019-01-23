@@ -22,6 +22,10 @@ type ContextExtender interface {
 	ExtendContext(ctx context.Context) context.Context
 }
 
+type ContextReader interface {
+	GetApplication() string
+}
+
 type ApplicationContext struct {
 	Application    string
 	ClusterContext ClusterContext
@@ -40,6 +44,10 @@ func (appCtx ApplicationContext) ToJSON() ([]byte, error) {
 // ExtendContext extends provided context with ApplicationContext
 func (appCtx ApplicationContext) ExtendContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, ApplicationContextKey, appCtx)
+}
+
+func (appCtx ApplicationContext) GetApplication() string {
+	return appCtx.Application
 }
 
 //func (ctx ApplicationContext) ToCN(format string) string {
@@ -64,4 +72,8 @@ func (clsCtx ClusterContext) ToJSON() ([]byte, error) {
 // ExtendContext extends provided context with ClusterContext
 func (clsCtx ClusterContext) ExtendContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, ClusterContextKey, clsCtx)
+}
+
+func (clsCtx ClusterContext) GetApplication() string {
+	return ""
 }

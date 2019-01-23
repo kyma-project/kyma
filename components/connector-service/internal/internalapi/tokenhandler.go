@@ -24,13 +24,13 @@ func NewTokenHandler(tokenService tokens.Creator, csrInfoURL string, serializerE
 }
 
 func (th *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
-	tokenParams, err := th.serializerExtractor(r.Context())
+	serializableContext, err := th.serializerExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	token, err := th.tokenCreator.Save(tokenParams)
+	token, err := th.tokenCreator.Save(serializableContext)
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
