@@ -16,7 +16,7 @@ The prerequisites match these listed in [this](#installation-install-kyma-on-an-
 
 ## Installation
 
-The installation process follows the steps outlined in the [Install Kyma on a AKS cluster](#installation-install-kyma-on-a-aks-cluster) document. Set [environment variables](#installation-install-kyma-on-an-aks-cluster-environment-variables) and follow [this](#installation-install-kyma-on-an-aks-cluster-prepare-the-aks-cluster) section to prepare your cluster.
+The installation process follows the steps outlined in the [Install Kyma on an AKS cluster](#installation-install-kyma-on-an-aks-cluster) document. Set [environment variables](#installation-install-kyma-on-an-aks-cluster-environment-variables) and follow [this](#installation-install-kyma-on-an-aks-cluster-prepare-the-aks-cluster) section to prepare your cluster.
 
 When you install Kyma with the wildcard DNS, you can use one of two approaches to allocating the required IP addresses for your cluster:
 - Dynamic IP allocation - can be used with [Knative](#installation-installation-with-knative) eventing and serverless, but disables the Application Connector. 
