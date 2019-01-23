@@ -19,18 +19,18 @@ Register a pair of SQL servers as a service instance: check the existence of the
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `primaryResourceGroup` | `string` | The (new or existing) resource group with which to associate new resources. | Y | |
-| `primaryLocation` | `string` | The Azure region in which to provision applicable resources. | Y | |
-| `primaryServer` | `string` | The name of your existing primary server. | Y | |
-| `primaryAdministratorLogin` | `string` | The administrator login of the primary server. | Y | |
-| `primaryAdministratorLoginPassword` | `string` | The administrator login password of the primary server. | Y | |
-| `secondaryResourceGroup` | `string` | The (new or existing) resource group with which to associate new resources. | Y | |
-| `secondaryLocation` | `string` | The Azure region in which to provision applicable resources. | Y | |
-| `secondaryServer` | `string` | The name of your existing secondary server. | Y | |
-| `secondaryAdministratorLogin` | `string` | The administrator login of the secondary server. | Y | |
-| `secondaryAdministratorLoginPassword` | `string` | The administrator login password of the secondary server. | Y | |
-| `tags` | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | N | Tags (even if none are specified) are automatically supplemented with `heritage: open-service-broker-azure`. |
-| `alias` | `string` | Specifies an alias that can be used by later provision actions to create database pairs on this DBMS pair. | Y | |
+| **primaryResourceGroup** | `string` | The (new or existing) resource group with which to associate new resources. | Yes | |
+| **primaryLocation** | `string` | The Azure region in which to provision applicable resources. | Yes | |
+| **primaryServer** | `string` | The name of your existing primary server. | Yes | |
+| **primaryAdministratorLogin** | `string` | The administrator login of the primary server. | Yes | |
+| **primaryAdministratorLoginPassword** | `string` | The administrator login password of the primary server. | Yes | |
+| **secondaryResourceGroup** | `string` | The (new or existing) resource group with which to associate new resources. | Yes | |
+| **secondaryLocation** | `string` | The Azure region in which to provision applicable resources. | Yes | |
+| **secondaryServer** | `string` | The name of your existing secondary server. | Yes | |
+| **secondaryAdministratorLogin** | `string` | The administrator login of the secondary server. | Yes | |
+| **secondaryAdministratorLoginPassword** | `string` | The administrator login password of the secondary server. | Yes | |
+| **tags** | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | No | Tags (even if none are specified) are automatically supplemented with `heritage: open-service-broker-azure`. |
+| **alias** | `string` | Specifies an alias that can be used by later provision actions to create database pairs on this DBMS pair. | Yes | |
 
 ## Update
 
@@ -40,10 +40,10 @@ Updates broker-stored administrator login/password in case you reset them.
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `primaryAdministratorLogin` | `string` | The administrator login of the primary server. | N | |
-| `primaryAdministratorLoginPassword` | `string` | The administrator login password of the primary server. | N | |
-| `secondaryAdministratorLogin` | `string` | The administrator login of the secondary server. | N | |
-| `secondaryAdministratorLoginPassword` | `string` | The administrator login password of the secondary server. | N | |
+| **primaryAdministratorLogin** | `string` | The administrator login of the primary server. | No | |
+| **primaryAdministratorLoginPassword** | `string` | The administrator login password of the primary server. | No | |
+| **secondaryAdministratorLogin** | `string` | The administrator login of the secondary server. | No | |
+| **secondaryAdministratorLoginPassword** | `string` | The administrator login password of the secondary server. | No | |
 
 ## Deprovision
 

@@ -19,9 +19,9 @@ and hub will be named using new UUIDs.
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `location` | `string` | The Azure region in which to provision applicable resources. | Y |  |
-| `resourceGroup` | `string` | The (new or existing) resource group with which to associate new resources. | Y |  |
-| `tags` | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | N | Tags (even if none are specified) are automatically supplemented with `heritage: open-service-broker-azure`. |
+| `location` | `string` | The Azure region in which to provision applicable resources. | Yes |  |
+| `resourceGroup` | `string` | The (new or existing) resource group with which to associate new resources. | Yes |  |
+| `tags` | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | No | Tags (even if none are specified) are automatically supplemented with `heritage: open-service-broker-azure`. |
 
 ## Bind
 

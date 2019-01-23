@@ -19,7 +19,7 @@ Provisions a new CosmosDB database onto an existing database account that can be
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `parentAlias` | `string` | Specifies the alias of the CosmosDB database account upon which the database should be provisioned. | Y | |
+| `parentAlias` | `string` | Specifies the alias of the CosmosDB database account upon which the database should be provisioned. | Yes | |
 
 ## Bind
 

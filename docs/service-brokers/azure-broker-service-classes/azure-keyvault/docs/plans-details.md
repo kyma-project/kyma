@@ -18,12 +18,12 @@ Provisions a new Key Vault. The new vault will be named using a new UUID.
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `clientId` | `string` | Client ID (username) for an existing service principal, which will be granted access to the new vault.| Y | |
-| `clientSecret` | `string` | Client secret (password) for an existing service principal, which will be granted access to the new vault. __WARNING: This secret will be shared with all users who bind to the vault!__ | Y | |
-| `location` | `string` | The Azure region in which to provision applicable resources. | Y |  |
-| `objectid` | `string` | Object ID for an existing service principal, which will be granted access to the new vault. | Y | |
-| `resourceGroup` | `string` | The (new or existing) resource group with which to associate new resources. | Y |  |
-| `tags` | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | N | Tags (even if none are specified) are automatically supplemented with `heritage: open-service-broker-azure`. |
+| `clientId` | `string` | Client ID (username) for an existing service principal, which will be granted access to the new vault.| Yes | |
+| `clientSecret` | `string` | Client secret (password) for an existing service principal, which will be granted access to the new vault. __WARNING: This secret will be shared with all users who bind to the vault!__ | Yes | |
+| `location` | `string` | The Azure region in which to provision applicable resources. | Yes |  |
+| `objectid` | `string` | Object ID for an existing service principal, which will be granted access to the new vault. | Yes | |
+| `resourceGroup` | `string` | The (new or existing) resource group with which to associate new resources. | Yes |  |
+| `tags` | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | No | Tags (even if none are specified) are automatically supplemented with `heritage: open-service-broker-azure`. |
 
 ## Bind
 
