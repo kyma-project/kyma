@@ -11,7 +11,7 @@ The Example API is registered in Kyma with the `targetUrl` pointing to `https://
 
 The Application Broker, which provides ServiceClasses to the Service Catalog, follows this naming convention for its objects:
 ```
-re-{application-name}-{service-id}
+app-{application-name}-{service-id}
 ```
 The `{service-id}` is the service identifier assigned in the process of registration. The `{application}` is the name of the App created in Kyma. It represents an instance of the connected external solution that owns the registered service. Such identifier used by the Application Broker is referred to as the `name` of a ClusterServiceClass in the Service Catalog.
 

@@ -22,7 +22,7 @@ do
             shift
             ;;
         --cr)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             CR_PATH="$2"
             shift # past argument
             shift # past value
@@ -31,6 +31,10 @@ do
             KNATIVE=true
             shift
             ;;
+        --*)
+            echo "Unknown flag ${1}"
+            exit 1
+        ;;
         *) # unknown option
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
