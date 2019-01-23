@@ -13,13 +13,11 @@ Service class contains the following plans and parameters:
 | `general-purpose` | General Purporse Tier, Up to 32 vCores, Predictable I/O Performance, Local or Geo-Redundant Backups |
 | `memory-optimized` | Memory Optimized Tier, Up to 16 memory optimized vCores, Predictable I/O Performance, Local or Geo-Redundant Backups |
 
-#### Behaviors
-
-##### Provision
+## Provision
 
 Provisions an Azure Database for MySQL DBMS instance containing no databases. Databases can be created through subsequent provision requests using the `azure-mysql-database` service.
 
-###### Provisioning Parameters
+### Provisioning Parameters
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -35,7 +33,7 @@ Provisions an Azure Database for MySQL DBMS instance containing no databases. Da
 
 The three plans each have additional provisioning parameters with different default and allowed values. See the tables below for details on each.
 
-Provisioning Parameters: basic
+#### Provisioning Parameters: basic
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -43,7 +41,7 @@ Provisioning Parameters: basic
 | `storage` | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 1048 | N | 10 |
 | `backupRetention` | `integer` | Specifies the number of days to retain backups. Ranges from 7 to 35 | N | 7 |
 
-Provisioning Parameters: general-purpose
+#### Provisioning Parameters: general-purpose
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -52,7 +50,7 @@ Provisioning Parameters: general-purpose
 | `backupRetention` | `integer` | Specifies the number of days to retain backups. Ranges from 7 to 35 | N | 7 |
 | `backupRedundancy` | `string` | Specifies the backup redundancy, either `local` or `geo` | N | `local` |
 
-Provisioning Parameters: memory-optimized
+#### Provisioning Parameters: memory-optimized
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -60,11 +58,3 @@ Provisioning Parameters: memory-optimized
 | `storage` | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 2048 | N | 10 |
 | `backupRetention` | `integer` | Specifies the number of days to retain backups. Ranges from 7 to 35 | N | 7 |
 | `backupRedundancy` | `string` | Specifies the backup redundancy, either `local` or `geo` | N | `local` |
-
-##### Bind
-
-This service is not bindable.
-
-##### Unbind
-
-This service is not bindable.

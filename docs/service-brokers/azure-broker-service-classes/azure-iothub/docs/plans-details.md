@@ -3,9 +3,8 @@ title: Services and Plans
 type: Details
 ---
 
-## Services & Plans
 
-### Service: azure-iot-hub
+## Service: azure-iot-hub
 
 | Plan Name     | Description                                                  |
 | ------------- | ------------------------------------------------------------ |
@@ -17,13 +16,11 @@ type: Details
 | `standard-s2` | IoT hub Standard S2 Tier - max 6,000,000 messages per unit per day. |
 | `standard-s3` | IoT hub Standard S3 Tier - max 300,000,000 messages per unit per day. |
 
-#### Behaviors
-
-##### Provision
+## Provision
 
 Provisions a new IoT Hub.
 
-###### Provisioning Parameters
+### Provisioning Parameters
 
 | Parameter Name   | Type                | Description                                                  | Required | Default Value                                                |
 | ---------------- | ------------------- | ------------------------------------------------------------ | -------- | ------------------------------------------------------------ |
@@ -33,15 +30,15 @@ Provisions a new IoT Hub.
 | `units`          | `int`               | Number of IoT hub units. Each IoT Hub is provisioned with a certain number of units in a specific tier. The tier and number of units determine the maximum daily quota of messages that you can send. **Note**: for plan `free`, this field is invalid; for plan `standard-s3`, allowed values are from 1 to 10; for other plans, allowed values are from 1 to 200. | N        | If not provided, `1 `will be used as default value.          |
 | `partitionCount` | `int`               | The number of partitions relates the device-to-cloud messages to the number of simultaneous readers of these messages. Most IoT hubs only need four partitions. **Note**: for plan `free`, this field is invalid; for plan `basic-*`, allowed values are from 2 to 8; for plan `standard-*`, allowed values are from 2 to 32. | N        | If not provided, `4` will be used as default value. For plan `free`, this field cannot be provided and `2` will be used. |
 
-##### Bind
+## Bind
 
 Returns a copy of one shared set of credentials.
 
-###### Binding Parameters
+### Binding Parameters
 
 This binding operation does not support any parameters.
 
-###### Credentials
+### Credentials
 
 Binding returns the following connection details and shared credentials:
 
@@ -53,6 +50,3 @@ Binding returns the following connection details and shared credentials:
 | `key`              | `string` | Key of the IoT Hub. Currently, it will always be the primary key of `iothubowner` and having "Registry Write, Service Connect, Device Connect" rights. |
 | `connectionString` | `string` | The connection string.                                       |
 
-##### Unbind
-
-Does nothing.

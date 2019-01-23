@@ -11,7 +11,7 @@ The `azure-sql-12-0-dbms-registered` service does not provides any plans:
 
 Provisions a SQL Server DBMS instance containing no databases. Databases can be created through subsequent provision requests using the `azure-sql-12-0-database` service.
 
-###### Provisioning Parameters
+### Provisioning Parameters
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -29,17 +29,13 @@ Provisions a SQL Server DBMS instance containing no databases. Databases can be 
 | `connectionPolicy` | `string` | Changes connection policy if you want. Refer to [here](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-connectivity-architecture#connection-policy). Valid values are "Redirect", "Proxy", and "Default". | N | |
 
 
-##### Update
+## Update
 
 Update the `administratorLogin` and/or `administratorLoginPassword` as they may change and the server is assumed to be managed by yourself.
 
-###### Updating Parameters
+### Updating Parameters
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
 | `administratorLogin` | `string` | New administratorLogin. | N | |
 | `administratorLoginPassword` | `string` | New administratorLoginPassword. | N | |
-
-##### Deprovision
-
-Do nothing. The SQL server would not be deleted in Azure.

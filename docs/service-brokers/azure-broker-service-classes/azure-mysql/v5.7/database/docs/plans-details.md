@@ -11,28 +11,26 @@ Service class contains the following plans and parameters:
 |-----------|-------------|
 | `database` | New database on existing MySQL DBMS |
 
-#### Behaviors
-
-##### Provision
+## Provision
 
 Provisions a new database upon a previously provisioned DBMS. The new database will be named randomly.
 
-###### Provisioning Parameters
+### Provisioning Parameters
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
 | `parentAlias` | `string` | Specifies the alias of the DBMS upon which the database should be provisioned. | Y | |
 
-##### Bind
+## Bind
 
 Creates a new user on the MySQL DBMS. The new user will be named randomly and
 will be granted a wide array of permissions on the database.
 
-###### Binding Parameters
+### Binding Parameters
 
 This binding operation does not support any parameters.
 
-###### Credentials
+### Credentials
 
 Binding returns the following connection details and credentials:
 
@@ -47,6 +45,6 @@ Binding returns the following connection details and credentials:
 | `uri` | `string` | A URI string containing all necessary connection information. |
 | `tags` | `string[]` | A list of tags consumers can use to identify the credential. |
 
-##### Unbind
+## Unbind
 
 Drops the applicable user from the MySQL DBMS.

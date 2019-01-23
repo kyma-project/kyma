@@ -13,13 +13,11 @@ Service class contains the following plans and parameters:
 | `General Purpose Tier` | General Purpose Tier, up to 32 vCores, predictable I/O Performance, local or geo-redundant backups |
 | `Memory Optimized Tier` | Memory Optimized Tier, up to 16 memory optimized vCores, predictable I/O Performance, local or geo-redundant backups |
 
-#### Behaviors
-
-##### Provision
+## Provision
 
 Provisions a new MySQL DBMS and a new database upon it. The new database will be named randomly.
 
-###### Provisioning Parameters
+### Provisioning Parameters
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -34,7 +32,7 @@ Provisions a new MySQL DBMS and a new database upon it. The new database will be
 
 The three plans each have additional provisioning parameters with different default and allowed values. See the tables below for details on each.
 
-Provisioning Parameters: basic
+#### Provisioning Parameters: basic
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -42,7 +40,7 @@ Provisioning Parameters: basic
 | `storage` | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 1048 | N | 10 |
 | `backupRetention` | `integer` | Specifies the number of days to retain backups. Ranges from 7 to 35 | N | 7 |
 
-Provisioning Parameters: general-purpose
+#### Provisioning Parameters: general-purpose
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -51,7 +49,7 @@ Provisioning Parameters: general-purpose
 | `backupRetention` | `integer` | Specifies the number of days to retain backups. Ranges from 7 to 35 | N | 7 |
 | `backupRedundancy` | `string` | Specifies the backup redundancy, either `local` or `geo` | N | `local` |
 
-Provisioning Parameters: memory-optimized
+#### Provisioning Parameters: memory-optimized
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
@@ -60,16 +58,16 @@ Provisioning Parameters: memory-optimized
 | `backupRetention` | `integer` | Specifies the number of days to retain backups. Ranges from 7 to 35 | N | 7 |
 | `backupRedundancy` | `string` | Specifies the backup redundancy, either `local` or `geo` | N | `local` |
 
-##### Bind
+## Bind
 
 Creates a new user on the MySQL DBMS. The new user will be named randomly and
 will be granted a wide array of permissions on the database.
 
-###### Binding Parameters
+### Binding Parameters
 
 This binding operation does not support any parameters.
 
-###### Credentials
+### Credentials
 
 Binding returns the following connection details and credentials:
 
