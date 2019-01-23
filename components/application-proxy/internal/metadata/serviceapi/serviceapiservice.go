@@ -13,7 +13,7 @@ const (
 	UsernameKey        = "username"
 	PasswordKey        = "password"
 	TypeOAuth          = "OAuth"
-	TypeBasic          = "BasicAuth"
+	TypeBasic          = "Basic"
 	TypeCertificateGen = "CertificateGen"
 	PrivateKeyKey      = "key"
 	CertificateKey     = "crt"
