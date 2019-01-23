@@ -128,7 +128,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 1. Create an AKS cluster. Run:
     ```
     az aks create \
-      --resource-group ${RS_GROUP} \
+      --resource-group $RS_GROUP \
       --name $CLUSTER_NAME \
       --node-vm-size "Standard_DS2_v2" \
       --kubernetes-version 1.10.9 \
