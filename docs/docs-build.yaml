@@ -78,6 +78,8 @@
   directory: service-brokers/azure-broker-service-classes/azure-keyvault
 - name: azure-iothub
   directory: service-brokers/azure-broker-service-classes/azure-iothub
+- name: azure-eventhubs
+  directory: service-brokers/azure-broker-service-classes/azure-eventhubs
 
 # GCP Broker
 - name: gcp-bigquery
