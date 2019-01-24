@@ -14,23 +14,23 @@ import (
 const TokenURLFormat = "https://%s?token=%s"
 
 type tokenHandler struct {
-	tokenCreator        tokens.Creator
-	csrInfoURL          string
-	serializerExtractor httpcontext.ConnectorClientExtractor
+	tokenCreator             tokens.Creator
+	csrInfoURL               string
+	connectorClientExtractor httpcontext.ConnectorClientExtractor
 }
 
-func NewTokenHandler(tokenService tokens.Creator, csrInfoURL string, serializerExtractor httpcontext.ConnectorClientExtractor) TokenHandler {
-	return &tokenHandler{tokenCreator: tokenService, csrInfoURL: csrInfoURL, serializerExtractor: serializerExtractor}
+func NewTokenHandler(tokenService tokens.Creator, csrInfoURL string, connectorClientExtractor httpcontext.ConnectorClientExtractor) TokenHandler {
+	return &tokenHandler{tokenCreator: tokenService, csrInfoURL: csrInfoURL, connectorClientExtractor: connectorClientExtractor}
 }
 
 func (th *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
-	serializableContext, err := th.serializerExtractor(r.Context())
+	connectorClientContext, err := th.connectorClientExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	token, err := th.tokenCreator.Save(serializableContext)
+	token, err := th.tokenCreator.Save(connectorClientContext)
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return

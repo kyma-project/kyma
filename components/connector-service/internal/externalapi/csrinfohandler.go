@@ -20,51 +20,44 @@ type CSRInfoHandler struct {
 	serializerExtractor  httpcontext.ConnectorClientExtractor
 	apiInfoURLsGenerator APIUrlsGenerator
 	host                 string
-	csr                  csrInfo
+	csrSubject           certificates.CSRSubject
 }
 
-func NewCSRInfoHandler(tokenCreator tokens.Creator, serializerExtractor httpcontext.ConnectorClientExtractor, apiInfoURLsGeneretor APIUrlsGenerator, host string, subjectValues certificates.CSRSubject) InfoHandler {
-	csr := csrInfo{
-		Country:            subjectValues.Country,
-		Organization:       subjectValues.Organization,
-		OrganizationalUnit: subjectValues.OrganizationalUnit,
-		Locality:           subjectValues.Locality,
-		Province:           subjectValues.Province,
-	}
+func NewCSRInfoHandler(tokenCreator tokens.Creator, serializerExtractor httpcontext.ConnectorClientExtractor, apiInfoURLsGenerator APIUrlsGenerator, host string, subjectValues certificates.CSRSubject) InfoHandler {
 
 	return &CSRInfoHandler{
 		tokenCreator:         tokenCreator,
 		serializerExtractor:  serializerExtractor,
-		apiInfoURLsGenerator: apiInfoURLsGeneretor,
+		apiInfoURLsGenerator: apiInfoURLsGenerator,
 		host:                 host,
-		csr:                  csr,
+		csrSubject:           subjectValues,
 	}
 }
 
 func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
-	kymaContext, err := ih.serializerExtractor(r.Context())
+	connectorClientContext, err := ih.serializerExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	newToken, err := ih.tokenCreator.Replace(token, kymaContext)
+	newToken, err := ih.tokenCreator.Replace(token, connectorClientContext)
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
 	}
 
 	csrURL := fmt.Sprintf(CsrURLFormat, ih.host, newToken)
-	apiURLs := ih.apiInfoURLsGenerator.Generate(kymaContext)
+	apiURLs := ih.apiInfoURLsGenerator.Generate(connectorClientContext)
 
-	certInfo := makeCertInfo(ih.csr, kymaContext.GetCommonName())
+	certInfo := makeCertInfo(ih.csrSubject, connectorClientContext.GetCommonName())
 
 	httphelpers.RespondWithBody(w, 200, infoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
 }
 
-func makeCertInfo(info csrInfo, reName string) certInfo {
-	subject := fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", info.OrganizationalUnit, info.Organization, info.Locality, info.Province, info.Country, reName)
+func makeCertInfo(csrSubject certificates.CSRSubject, reName string) certInfo {
+	subject := fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", csrSubject.OrganizationalUnit, csrSubject.Organization, csrSubject.Locality, csrSubject.Province, csrSubject.Country, reName)
 
 	return certInfo{
 		Subject:      subject,

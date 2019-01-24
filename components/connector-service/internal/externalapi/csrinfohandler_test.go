@@ -53,9 +53,9 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		Province:           province,
 	}
 
-	dummyContext := dummyContext{}
-	contextExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
-		return dummyContext, nil
+	dummyClientContext := dummyContext{}
+	connectorClientExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+		return dummyClientContext, nil
 	}
 
 	t.Run("should successfully get csr info", func(t *testing.T) {
@@ -72,12 +72,12 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		}
 
 		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Replace", token, dummyContext).Return(newToken, nil)
+		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
 		apiURLsGenerator := &mocks.APIUrlsGenerator{}
-		apiURLsGenerator.On("Generate", dummyContext).Return(expectedAPI)
+		apiURLsGenerator.On("Generate", dummyClientContext).Return(expectedAPI)
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, contextExtractor, apiURLsGenerator, host, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, host, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -133,11 +133,11 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 	t.Run("should return 500 when failed to replace token", func(t *testing.T) {
 		// given
 		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Replace", token, dummyContext).Return("", apperrors.Internal("error"))
+		tokenCreator.On("Replace", token, dummyClientContext).Return("", apperrors.Internal("error"))
 
 		apiURLsGenerator := &mocks.APIUrlsGenerator{}
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, contextExtractor, apiURLsGenerator, host, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, host, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
