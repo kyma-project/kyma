@@ -13,3 +13,45 @@ Run a Docker image build from the [Dockerfile](Dockerfile) as an init container 
 ```bash
 ark plugin add {yourRepo/imageName:tag}
 ```
+
+## Create a new plugin
+
+- New plugins must be added under [`internal/plugins`](internal/plugins) :
+
+```             
+  ├── internal                                                                  
+    ├── plugins
+      ├── backup    # new Backup Item Action plugins 
+      ├── restore   # new Restore Item Action plugins 
+  ```
+
+- All new plugins must be registered in the `tools/ark-plugins/main.go` file.
+- **Backup Item Action** - performs arbitrary logic on individual items prior to storing them in the backup file.
+- **Restore Item Action** - performs arbitrary logic on individual items prior to restoring them in the Kyma cluster.
+- All plugins must be implemented as the following example:
+
+```go
+package restore
+
+import (
+...
+)
+
+// FunctionPluginRestore is a plugin for ark to ...
+type FunctionPluginRestore struct {
+	Log logrus.FieldLogger
+}
+
+// AppliesTo return list of resource kinds which should be handled by this plugin
+func (p *FunctionPluginRestore) AppliesTo() (restore.ResourceSelector, error) {
+	return restore.ResourceSelector{...}, nil
+}
+
+// Execute does ... on the item being restored.
+// nolint
+func (p *FunctionPluginRestore) Execute(item runtime.Unstructured, restore *v1.Restore) (runtime.Unstructured, error, error) {
+    ...
+	return item, nil, nil
+}
+
+```
