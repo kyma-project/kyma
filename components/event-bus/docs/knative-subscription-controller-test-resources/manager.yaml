@@ -44,8 +44,6 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: SECRET_NAME
-            value: knative-subscription-controller-webhook-server-secret
         resources:
           limits:
             cpu: 100m
@@ -54,9 +52,6 @@ spec:
             cpu: 100m
             memory: 20Mi
         ports:
-        - containerPort: 9876
-          name: webhook-server
-          protocol: TCP
         - name: http
           containerPort: 8080
         livenessProbe:
@@ -70,19 +65,5 @@ spec:
             port: http
           initialDelaySeconds: 5
           periodSeconds: 5
-        volumeMounts:
-        - mountPath: /tmp/cert
-          name: cert
-          readOnly: true
       terminationGracePeriodSeconds: 10
-      volumes:
-      - name: cert
-        secret:
-          defaultMode: 420
-          secretName: knative-subscription-controller-webhook-server-secret
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: knative-subscription-controller-webhook-server-secret
-  namespace: kyma-system

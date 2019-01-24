@@ -9,7 +9,6 @@ COPY internal/ internal/
 COPY generated/ generated/
 
 WORKDIR /go/src/github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-subscription-controller-knative
-COPY pkg/    pkg/
 COPY cmd/    cmd/
 
 # Build

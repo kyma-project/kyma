@@ -12,7 +12,7 @@ clean:
 	
 # Run tests
 test: generate fmt vet
-	go test ./pkg/... ./cmd/... -coverprofile cover.out
+	go test ./cmd/... -coverprofile cover.out
 
 # Build manager binary
 compile: generate fmt vet
@@ -24,15 +24,15 @@ run: generate fmt vet
 
 # Run go fmt against code
 fmt:
-	go fmt ./pkg/... ./cmd/...
+	go fmt ./cmd/...
 
 # Run go vet against code
 vet:
-	go vet ./pkg/... ./cmd/...
+	go vet ./cmd/...
 
 # Generate code
 generate:
-	go generate ./pkg/... ./cmd/...
+	go generate ./cmd/...
 
 # Build the docker image
 docker-build: 

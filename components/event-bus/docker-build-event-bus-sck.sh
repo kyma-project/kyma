@@ -9,7 +9,7 @@ COMPONENT=$3
 echo -e "Start building docker image...."
 mkdir -p ./cmd/event-bus-subscription-controller-knative/docker/image
 cp ./cmd/event-bus-subscription-controller-knative/Dockerfile ./cmd/event-bus-subscription-controller-knative/docker/image/
-cp -R ./cmd/event-bus-subscription-controller-knative/cmd ./cmd/event-bus-subscription-controller-knative/pkg ./cmd/event-bus-subscription-controller-knative/docker/image/
+cp -R ./cmd/event-bus-subscription-controller-knative/cmd ./cmd/event-bus-subscription-controller-knative/docker/image/
 cp -R ./generated ./cmd/event-bus-subscription-controller-knative/docker/image/
 cp -R ./internal ./cmd/event-bus-subscription-controller-knative/docker/image/
 cp -R ./vendor ./cmd/event-bus-subscription-controller-knative/docker/image/

@@ -23,7 +23,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-subscription-controller-knative/pkg/webhook"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
@@ -68,12 +67,6 @@ func main() {
 	log.Info("Setting up controller")
 	if err := controller.AddToManager(mgr); err != nil {
 		log.Error(err, "unable to register controllers to the manager")
-		os.Exit(1)
-	}
-
-	log.Info("setting up webhooks")
-	if err := webhook.AddToManager(mgr); err != nil {
-		log.Error(err, "unable to register webhooks to the manager")
 		os.Exit(1)
 	}
 

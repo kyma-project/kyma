@@ -9,7 +9,7 @@ COMPONENT=$3
 echo -e "Start building docker image...."
 mkdir -p docker/image
 cp Dockerfile docker/image/
-cp -R cmd pkg docker/image/
+cp -R cmd docker/image/
 cp -R ../../api docker/image/
 cp -R ../../generated docker/image/
 cp -R ../../internal docker/image/
