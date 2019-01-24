@@ -3,15 +3,13 @@ name: istio
 version: 1.0.1
 appVersion: 1.0.1
 tillerVersion: ">=2.7.2-0"
-description: Helm chart for all istio components
+description: Helm chart for all Istio in Kyma
 keywords:
-  - istio
-  - security
-  - sidecarInjectorWebhook
-  - mixer
-  - pilot
-  - galley
-sources:
-  - http://github.com/istio/istio
-engine: gotpl
+- istio
+- security
+- sidecarInjectorWebhook
+- mixer
+- pilot
+- galley
+- kyma
 icon: https://istio.io/favicons/android-192x192.png

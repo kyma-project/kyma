@@ -70,16 +70,16 @@ metadata:
     installer: overrides
     component: istio
 data:
-  gateways.istio-ingressgateway.loadBalancerIP: ""
-  gateways.istio-ingressgateway.type: "NodePort"
+  istio.gateways.istio-ingressgateway.loadBalancerIP: ""
+  istio.gateways.istio-ingressgateway.type: "NodePort"
 
-  pilot.resources.limits.memory: 1024Mi
-  pilot.resources.limits.cpu: 100m
-  pilot.resources.requests.memory: 256Mi
-  pilot.resources.requests.cpu: 100m
+  istio.pilot.resources.limits.memory: 1024Mi
+  istio.pilot.resources.limits.cpu: 100m
+  istio.pilot.resources.requests.memory: 256Mi
+  istio.pilot.resources.requests.cpu: 100m
 
-  mixer.resources.limits.memory: 256Mi
-  mixer.resources.requests.memory: 128Mi
+  istio.mixer.resources.limits.memory: 256Mi
+  istio.mixer.resources.requests.memory: 128Mi
 ---
 apiVersion: v1
 kind: ConfigMap
