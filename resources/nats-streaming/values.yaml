@@ -28,7 +28,6 @@ global:
       # Max duration for which an event can be stored (0 for unlimited)
       maxAge: "24h"
       size: "1Gi"
-    clusterID: kyma-nats-streaming
     ports:
       client: 4222
       monitoring: 8222

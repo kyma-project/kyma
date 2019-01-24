@@ -2,10 +2,16 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  event_bus:
+    dir: develop/
+    version: ab9c73dd
+  event_bus_tests:
+    dir: develop/
+    version: f01c8848
   natsStreaming:
     url: "http://nats-streaming.natss:4222"
-    clusterID: "kyma-nats-streaming"
-
   publish:
     maxRequests: 16
     resources:
@@ -26,5 +32,5 @@ global:
     apiURL: http://zipkin.kyma-system:9411/api/v1/spans
   eventBusVersion: "0.2.34"
 e2eTests:
-  nameTester: "test-core-event-bus-tester"
-  nameSubscriber: "test-core-event-bus-subscriber"    
+  nameTester: "test-event-bus-tester"
+  nameSubscriber: "test-event-bus-subscriber"    

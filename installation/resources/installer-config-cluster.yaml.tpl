@@ -31,6 +31,7 @@ metadata:
 data:
   global.isLocalEnv: "false"
   global.knative: "false"
+  global.kymaEventBus: "true"
   global.domainName: "__DOMAIN__"
   global.applicationConnectorDomainName: "__APPLICATION_CONNECTOR_DOMAIN__"
   global.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
@@ -128,4 +129,25 @@ metadata:
 data:
   knative.ingressgateway.service.type: LoadBalancer
   knative.domainName: "__DOMAIN__"
-  
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nats-streaming-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: nats-streaming
+data:
+  global.natsStreaming.clusterID: "kyma-nats-streaming"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: event-bus-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: event-bus
+data:
+  global.natsStreaming.clusterID: "kyma-nats-streaming"

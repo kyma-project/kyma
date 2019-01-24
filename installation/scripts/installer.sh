@@ -93,6 +93,8 @@ fi
 
 if [ $KNATIVE ]; then
     COMBO_YAML=$(sed 's/global\.knative: .*/global.knative: "true"/g' <<<"$COMBO_YAML")
+    COMBO_YAML=$(sed 's/global\.kymaEventBus: .*/global.kymaEventBus: "false"/g' <<<"$COMBO_YAML")
+    COMBO_YAML=$(sed 's/global\.natsStreaming\.clusterID: .*/global.natsStreaming.clusterID: "knative-nats-streaming"/g' <<<"$COMBO_YAML")
 fi
 
 kubectl apply -f - <<<"$COMBO_YAML"

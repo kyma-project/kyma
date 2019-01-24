@@ -31,6 +31,7 @@ metadata:
 data:
   global.isLocalEnv: "true"
   global.knative: "false"
+  global.kymaEventBus: "true"
   global.domainName: "kyma.local"
   global.etcdBackup.containerName: ""
   global.etcdBackup.enabled: "false"
@@ -108,3 +109,25 @@ metadata:
 data:
   knative.ingressgateway.service.type: NodePort
   knative.domainName: "kyma.local"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nats-streaming-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: nats-streaming
+data:
+  global.natsStreaming.clusterID: "kyma-nats-streaming"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: event-bus-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: event-bus
+data:
+  global.natsStreaming.clusterID: "kyma-nats-streaming"

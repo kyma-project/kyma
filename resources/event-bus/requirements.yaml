@@ -1,0 +1,9 @@
+dependencies:
+  - name: publish
+    condition: global.kymaEventBus
+  - name: push
+    condition: global.kymaEventBus
+  - name: sub-validator
+    condition: global.kymaEventBus
+  - name: publish-knative
+    condition: global.knative
