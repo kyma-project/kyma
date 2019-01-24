@@ -11,7 +11,7 @@ const (
 
 type ReleaseManager interface {
 	InstallChart(name string) (hapi_4.Status_Code, string, error)
-	DeleteChart(name string) error
+	DeleteReleaseIfExists(name string) error
 	CheckReleaseExistence(name string) (bool, error)
 	CheckReleaseStatus(name string) (hapi_4.Status_Code, string, error)
 }
@@ -39,16 +39,27 @@ func (r *releaseManager) InstallChart(name string) (hapi_4.Status_Code, string, 
 	return installResponse.Release.Info.Status.Code, installResponse.Release.Info.Description, nil
 }
 
-func (r *releaseManager) DeleteChart(name string) error {
-	_, err := r.helmClient.DeleteRelease(name)
+func (r *releaseManager) DeleteReleaseIfExists(name string) error {
+	releaseExist, err := r.checkExistence(name)
 	if err != nil {
 		return err
+	}
+
+	if releaseExist {
+		_, err := r.helmClient.DeleteRelease(name)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
 func (r *releaseManager) CheckReleaseExistence(name string) (bool, error) {
+	return r.checkExistence(name)
+}
+
+func (r *releaseManager) checkExistence(name string) (bool, error) {
 	listResponse, err := r.helmClient.ListReleases()
 	if err != nil {
 		return false, err

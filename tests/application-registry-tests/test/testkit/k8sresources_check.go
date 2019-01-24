@@ -1,6 +1,7 @@
 package testkit
 
 import (
+	"crypto/tls"
 	"testing"
 
 	application "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -55,6 +56,22 @@ func CheckK8sBasicAuthSecret(t *testing.T, secret *v1core.Secret, name string, l
 	checkLabels(t, labels, secret.Labels)
 }
 
+func CheckK8sCertificateGenSecret(t *testing.T, secret *v1core.Secret, name string, labels Labels, commonName string) {
+	require.Equal(t, name, secret.Name)
+
+	secretData := secret.Data
+	require.Equal(t, commonName, string(secretData["commonName"]))
+
+	crt := secretData["crt"]
+	key := secretData["key"]
+
+	cert, err := tls.X509KeyPair(crt, key)
+	require.NoError(t, err)
+	require.Nil(t, cert.Leaf)
+
+	checkLabels(t, labels, secret.Labels)
+}
+
 func CheckK8sIstioDenier(t *testing.T, denier *istio.Denier, name string, labels Labels, code int, message string) {
 	require.Equal(t, name, denier.Name)
 
@@ -84,19 +101,19 @@ func CheckK8sChecknothing(t *testing.T, checknothing *istio.Checknothing, name s
 	checkLabels(t, labels, checknothing.Labels)
 }
 
-func CheckK8sApplication(t *testing.T, re *application.Application, name string, expectedServiceData ServiceData) {
-	require.Equal(t, name, re.Name)
+func CheckK8sApplication(t *testing.T, app *application.Application, name string, expectedServiceData ServiceData) {
+	require.Equal(t, name, app.Name)
 
-	reService := findServiceInApp(re.Spec.Services, expectedServiceData.ServiceId)
-	require.NotNil(t, reService)
+	appService := findServiceInApp(app.Spec.Services, expectedServiceData.ServiceId)
+	require.NotNil(t, appService)
 
-	require.Equal(t, expectedServiceData.ServiceId, reService.ID)
-	require.Equal(t, expectedServiceData.DisplayName, reService.DisplayName)
-	require.Equal(t, expectedServiceData.ProviderDisplayName, reService.ProviderDisplayName)
-	require.Equal(t, expectedServiceData.LongDescription, reService.LongDescription)
+	require.Equal(t, expectedServiceData.ServiceId, appService.ID)
+	require.Equal(t, expectedServiceData.DisplayName, appService.DisplayName)
+	require.Equal(t, expectedServiceData.ProviderDisplayName, appService.ProviderDisplayName)
+	require.Equal(t, expectedServiceData.LongDescription, appService.LongDescription)
 
 	if expectedServiceData.HasAPI {
-		apiEntry := findEntryOfType(reService.Entries, "API")
+		apiEntry := findEntryOfType(appService.Entries, "API")
 		require.NotNil(t, apiEntry)
 
 		if apiEntry.Type == "OAuth" {
@@ -109,7 +126,7 @@ func CheckK8sApplication(t *testing.T, re *application.Application, name string,
 	}
 
 	if expectedServiceData.HasEvents {
-		eventsEntry := findEntryOfType(reService.Entries, "Events")
+		eventsEntry := findEntryOfType(appService.Entries, "Events")
 		require.NotNil(t, eventsEntry)
 	}
 }

@@ -102,3 +102,4 @@ fabric.properties
 /application-broker.iml
 /application-broker
 /vendor
+/deploy/broker/application-broker

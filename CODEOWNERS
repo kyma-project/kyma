@@ -15,9 +15,6 @@
 # The `installation` PowerShell scripts
 /installation/**/*.ps1 @crabtree @venturasr
 
-# The `prow` directory
-/prow/ @aszecowka @strekm @suleymanakbas91 @crabtree @michal-hudy @pbochynski
-
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @piotrmsc @PK85
 
@@ -113,6 +110,9 @@
 
 # The `binding-usage-controller` subchart
 /resources/core/charts/service-catalog-addons/charts/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+
+# The `brokers-ui` subchart
+/resources/core/charts/service-catalog-addons/charts/brokers-ui/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The `catalog-ui` subchart
 /resources/core/charts/service-catalog-addons/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu

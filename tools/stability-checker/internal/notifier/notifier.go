@@ -18,17 +18,18 @@ import (
 
 // SlackNotifier sends notification about test result to Slack channel.
 type SlackNotifier struct {
-	channelID            string
-	cfgMapName           string
-	cfgMapClient         configMapClient
-	testResultWindowTime time.Duration
-	log                  logrus.FieldLogger
-	slack                slackClient
-	testRenderer         testRenderer
-	summarizer           summarizer
-	testRunnerPodName    string
-	testRunnerNamespace  string
-	showTestStats        bool
+	channelID             string
+	cfgMapName            string
+	cfgMapClient          configMapClient
+	testResultWindowTime  time.Duration
+	log                   logrus.FieldLogger
+	slack                 slackClient
+	testRenderer          testRenderer
+	summarizer            summarizer
+	testRunnerPodName     string
+	testRunnerNamespace   string
+	testRunnerClusterName string
+	showTestStats         bool
 }
 
 type (
@@ -51,18 +52,19 @@ func New(
 	cfgMapName string,
 	resultWindowTime time.Duration,
 	testRunnerPodName, testRunnerNamespace string,
-	log logrus.FieldLogger) *SlackNotifier {
+	testRunnerClusterName string, log logrus.FieldLogger) *SlackNotifier {
 
 	return &SlackNotifier{
-		log:                  log,
-		cfgMapName:           cfgMapName,
-		cfgMapClient:         cfgMapClient,
-		testResultWindowTime: resultWindowTime,
-		slack:                slack,
-		testRenderer:         testRenderer,
-		testRunnerPodName:    testRunnerPodName,
-		testRunnerNamespace:  testRunnerNamespace,
-		showTestStats:        false,
+		log:                   log,
+		cfgMapName:            cfgMapName,
+		cfgMapClient:          cfgMapClient,
+		testResultWindowTime:  resultWindowTime,
+		slack:                 slack,
+		testRenderer:          testRenderer,
+		testRunnerPodName:     testRunnerPodName,
+		testRunnerNamespace:   testRunnerNamespace,
+		testRunnerClusterName: testRunnerClusterName,
+		showTestStats:         false,
 	}
 }
 
@@ -101,8 +103,9 @@ func (s *SlackNotifier) Run(ctx context.Context) {
 			TotalTestsCnt:        len(execResults),
 			TestResultWindowTime: s.testResultWindowTime,
 			TestRunnerInfo: TestRunnerInfo{
-				PodName:   s.testRunnerPodName,
-				Namespace: s.testRunnerNamespace,
+				PodName:     s.testRunnerPodName,
+				Namespace:   s.testRunnerNamespace,
+				ClusterName: s.testRunnerClusterName,
 			},
 			ShowTestStats: s.showTestStats,
 			TestStats:     testStats,

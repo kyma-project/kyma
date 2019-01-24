@@ -48,7 +48,7 @@ The `meta.yaml` file is mandatory as it contains information about the bundle. S
 |   **documentationURL**  |   false  |                                  The **documentationURL** field described in the [Open Service Broker API][service-metadata].                                    |
 |      **supportURL**     |   false  |                                     The **supportURL** field described in the [Open Service Broker API][service-metadata].                                       |
 |       **imageURL**      |   false  |     The **imageURL** field described in the [Open Service Broker API][service-metadata]. You must provide the image as an SVG.          |
-|       **labels**        |   false  |     To organize your project, add arbitrary labels as key/value pairs. Use labels to indicate different elements, such as environments, services, or teams.   |
+|       **labels**        |   false  |     To organize your project, add arbitrary labels as key/value pairs. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
 | **bindingsRetrievable** |   false  |     The **bindingRetrievable** field specifies whether fetching a ServiceBinding using a `GET` call on the resource's endpoint is supported for all plans. The default value is `false`.   |
 |   **planUpdatable**     |   false  |     The **planUpdatable** field specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
 |       **requires**      |   false  |     The **requires** field defines a list of permissions the user must grant to the instances of this service.          |

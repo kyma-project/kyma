@@ -7,7 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
 	apps "k8s.io/api/apps/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 

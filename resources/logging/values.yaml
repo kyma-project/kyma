@@ -79,4 +79,4 @@ global:
     path: eu.gcr.io/kyma-project
   test_logging:
     dir: develop/
-    version: fce4f51f
+    version: e11a469a

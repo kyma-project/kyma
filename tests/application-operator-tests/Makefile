@@ -1,4 +1,4 @@
-APP_NAME = application-operator-test
+APP_NAME = application-operator-tests
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 

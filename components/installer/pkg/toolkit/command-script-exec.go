@@ -3,7 +3,6 @@ package toolkit
 import (
 	"bytes"
 	"log"
-	"os"
 	"os/exec"
 	"strings"
 )
@@ -12,7 +11,6 @@ import (
 type CommandExecutor interface {
 	// RunCommand .
 	RunCommand(execPath string, execArgs ...string) error
-	RunBashCommand(scriptPath string, execArgs ...string) error
 }
 
 //EmptyArgs .
@@ -43,16 +41,4 @@ func (kymaBashExecutor *KymaCommandExecutor) RunCommand(execPath string, execArg
 	}
 
 	return nil
-}
-
-//RunBashCommand .
-func (kymaBashExecutor *KymaCommandExecutor) RunBashCommand(scriptPath string, execArgs ...string) error {
-	if _, err := os.Stat(scriptPath); os.IsNotExist(err) {
-		log.Printf("%s doesn't exist.", scriptPath)
-		return nil
-	}
-
-	execArgs = append([]string{scriptPath}, execArgs...)
-
-	return kymaBashExecutor.RunCommand("/bin/bash", execArgs...)
 }

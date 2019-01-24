@@ -20,7 +20,7 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: ea0d89a3
+    version: 501c4fe5
   alpine_net:
     dir: develop/
     version: ed568f0f
@@ -29,7 +29,7 @@ global:
     version: 8c274255
   api_controller_acceptance_tests:
     dir: develop/
-    version: 8a32751d
+    version: 36d68d98
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
@@ -42,7 +42,7 @@ global:
     version: 4a23580f
   docs:
     dir: develop/
-    version: 6ad85861
+    version: 55889d1c
   namespace_controller:
     dir: develop/
     version: 429bfbcc
@@ -51,7 +51,7 @@ global:
     version: 6e0a7fe2
   event_bus:
     dir: develop/
-    version: f01c8848
+    version: cc07e82c
   event_bus_tests:
     dir: develop/
     version: f01c8848
@@ -60,7 +60,7 @@ global:
     version: fe43403d
   kubeless_integration_tests:
     dir: develop/
-    version: 8a32751d
+    version: e11a469a
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
@@ -69,7 +69,7 @@ global:
     version: 429bfbcc
   test_logging_monitoring:
     dir: develop/
-    version: 6e0a7fe2
+    version: e11a469a
   ui_api_layer:
     dir: pr/
     version: PR-2317

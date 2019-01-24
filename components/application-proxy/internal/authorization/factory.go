@@ -2,6 +2,7 @@ package authorization
 
 import (
 	"net/http"
+	"net/http/httputil"
 
 	"github.com/kyma-project/kyma/components/application-proxy/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-proxy/internal/authorization/oauth"
@@ -11,7 +12,7 @@ import (
 
 type Strategy interface {
 	// Adds Authorization header to the request
-	AddAuthorizationHeader(r *http.Request) apperrors.AppError
+	AddAuthorization(r *http.Request, proxy *httputil.ReverseProxy) apperrors.AppError
 	// Invalidates internal state
 	Invalidate()
 }
@@ -43,6 +44,10 @@ func (asf authorizationStrategyFactory) Create(c *metadatamodel.Credentials) Str
 		basicAuthStrategy := newBasicAuthStrategy(c.BasicAuth.Username, c.BasicAuth.Password)
 
 		return newExternalTokenStrategy(basicAuthStrategy)
+	} else if c != nil && c.CertificateGen != nil {
+		certificateGenStrategy := newCertificateGenStrategy(c.CertificateGen.Certificate, c.CertificateGen.PrivateKey)
+
+		return newExternalTokenStrategy(certificateGenStrategy)
 	} else {
 		noAuthStrategy := newNoAuthStrategy()
 

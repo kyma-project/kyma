@@ -8,9 +8,12 @@ INSTALLER="${RESOURCES_DIR}/installer.yaml"
 INSTALLER_CONFIG=""
 AZURE_BROKER_CONFIG=""
 
+source $CURRENT_DIR/utils.sh
+
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
+    
     key="$1"
 
     case ${key} in
@@ -19,6 +22,7 @@ do
             shift
             ;;
         --cr)
+            checkInputParameterValue "$2"
             CR_PATH="$2"
             shift # past argument
             shift # past value
@@ -27,6 +31,10 @@ do
             KNATIVE=true
             shift
             ;;
+        --*)
+            echo "Unknown flag ${1}"
+            exit 1
+        ;;
         *) # unknown option
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
@@ -41,7 +49,7 @@ echo "
 ################################################################################
 "
 
-kubectl apply -f ${RESOURCES_DIR}/default-sa-rbac-role.yaml
+kubectl apply -f ${RESOURCES_DIR}/default-sa-rbac-role.yaml # to be deleted once the script is used in local scenario only
 
 bash ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
 bash ${CURRENT_DIR}/install-tiller.sh

@@ -7,6 +7,8 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/apiregistration.yaml") . | sha256sum }}
 spec:
   replicas: {{ .Values.controllerManager.replicas }}
   minReadySeconds: {{ .Values.apiserver.minReadySeconds }}
@@ -22,6 +24,7 @@ spec:
   template:
     metadata:
       annotations:
+        sidecar.istio.io/inject: "false"
         prometheus.io/scrape: "{{ .Values.controllerManager.enablePrometheusScrape }}"
       {{ if .Values.controllerManager.annotations }}
 {{ toYaml .Values.controllerManager.annotations | indent 8 }}

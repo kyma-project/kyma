@@ -203,6 +203,89 @@ func TestMetadataHandler_CreateService(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
+	t.Run("should create a service with CertificateGen credentials", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:             "service name",
+			Provider:         "service provider",
+			Description:      "service description",
+			ShortDescription: "service short description",
+			Identifier:       "service identifier",
+			Labels:           &map[string]string{"showcase": "true"},
+			Api: &API{
+				TargetUrl: "http://service.com",
+				Credentials: &Credentials{
+					CertificateGen: &CertificateGen{
+						CommonName: "commonName",
+					},
+				},
+				Spec: apiRawSpec,
+			},
+			Events: &Events{
+				Spec: eventsRawSpec,
+			},
+			Documentation: &Documentation{
+				DisplayName: "documentation name",
+				Description: "documentation description",
+				Type:        "documentation type",
+				Docs:        []DocsObject{{Title: "doc title", Type: "doc type", Source: "doc source"}},
+			},
+		}
+
+		serviceDefinition := &model.ServiceDefinition{
+			Name:             "service name",
+			Provider:         "service provider",
+			Description:      "service description",
+			ShortDescription: "service short description",
+			Identifier:       "service identifier",
+			Labels:           &map[string]string{"showcase": "true"},
+			Api: &model.API{
+				TargetUrl: "http://service.com",
+				Credentials: &model.Credentials{
+					CertificateGen: &model.CertificateGen{
+						CommonName: "commonName",
+					},
+				},
+				Spec: apiRawSpec,
+			},
+			Events: &model.Events{
+				Spec: eventsRawSpec,
+			},
+			Documentation: documentationRaw,
+		}
+
+		validator := ServiceDetailsValidatorFunc(func(sd ServiceDetails) apperrors.AppError {
+			return nil
+		})
+		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
+		serviceDefinitionService.On("Create", "app", serviceDefinition).Return("1", nil)
+
+		metadataHandler := NewMetadataHandler(validator, serviceDefinitionService, false)
+
+		serviceDetailsData, err := json.Marshal(serviceDetails)
+		require.NoError(t, err)
+
+		req, err := http.NewRequest(http.MethodPost, "/app/v1/metadata/services", bytes.NewReader(serviceDetailsData))
+		require.NoError(t, err)
+
+		req = mux.SetURLVars(req, map[string]string{"application": "app"})
+		rr := httptest.NewRecorder()
+
+		// when
+		metadataHandler.CreateService(rr, req)
+
+		// then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var postResponse CreateServiceResponse
+		err = json.Unmarshal(responseBody, &postResponse)
+
+		require.NoError(t, err)
+		assert.Equal(t, "1", postResponse.ID)
+		assert.Equal(t, http.StatusOK, rr.Code)
+	})
+
 	t.Run("should create a service with API without credentials", func(t *testing.T) {
 
 		// given
@@ -460,6 +543,67 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		assert.Equal(t, "http://service.com", serviceDetails.Api.TargetUrl)
 		assert.Equal(t, stars, serviceDetails.Api.Credentials.Basic.Username)
 		assert.Equal(t, stars, serviceDetails.Api.Credentials.Basic.Password)
+		assert.Equal(t, apiSpec, raw2Json(t, serviceDetails.Api.Spec))
+		assert.Equal(t, eventsSpec, raw2Json(t, serviceDetails.Events.Spec))
+		assert.Equal(t, "documentation name", serviceDetails.Documentation.DisplayName)
+		assert.Equal(t, "documentation description", serviceDetails.Documentation.Description)
+		assert.Equal(t, "documentation type", serviceDetails.Documentation.Type)
+		assert.Len(t, serviceDetails.Documentation.Docs, 1)
+		assert.Equal(t, DocsObject{Title: "doc title", Type: "doc type", Source: "doc source"}, serviceDetails.Documentation.Docs[0])
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+	})
+
+	t.Run("should return requested service with CertificateGen credentials", func(t *testing.T) {
+		// given
+		serviceDefinition := model.ServiceDefinition{
+			Name:        "service name",
+			Provider:    "service provider",
+			Description: "service description",
+			Api: &model.API{
+				TargetUrl: "http://service.com",
+				Credentials: &model.Credentials{
+					CertificateGen: &model.CertificateGen{
+						CommonName: "commonName",
+					},
+				},
+				Spec: apiRawSpec,
+			},
+			Events: &model.Events{
+				Spec: eventsRawSpec,
+			},
+			Documentation: documentationRaw,
+		}
+
+		serviceDefinitionService := &metadataMock.ServiceDefinitionService{}
+		serviceDefinitionService.On("GetByID", "app", "123456").Return(serviceDefinition, nil)
+		detailedErrorResponse := false
+
+		metadataHandler := NewMetadataHandler(nil, serviceDefinitionService, detailedErrorResponse)
+
+		req, err := http.NewRequest(http.MethodGet, "/app/v1/metadata/services/123456", nil)
+		require.NoError(t, err)
+
+		req = mux.SetURLVars(req, map[string]string{"application": "app", "serviceId": "123456"})
+		rr := httptest.NewRecorder()
+
+		// when
+		metadataHandler.GetService(rr, req)
+
+		// then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var serviceDetails ServiceDetails
+		err = json.Unmarshal(responseBody, &serviceDetails)
+
+		require.NoError(t, err)
+		serviceDefinitionService.AssertCalled(t, "GetByID", "app", "123456")
+		assert.Equal(t, "service name", serviceDetails.Name)
+		assert.Equal(t, "service provider", serviceDetails.Provider)
+		assert.Equal(t, "service description", serviceDetails.Description)
+		assert.Equal(t, "http://service.com", serviceDetails.Api.TargetUrl)
+		assert.Equal(t, "commonName", serviceDetails.Api.Credentials.CertificateGen.CommonName)
 		assert.Equal(t, apiSpec, raw2Json(t, serviceDetails.Api.Spec))
 		assert.Equal(t, eventsSpec, raw2Json(t, serviceDetails.Events.Spec))
 		assert.Equal(t, "documentation name", serviceDetails.Documentation.DisplayName)

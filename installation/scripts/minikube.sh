@@ -3,6 +3,7 @@
 set -o errexit
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+RESOURCES_DIR="${CURRENT_DIR}/../resources"
 
 MINIKUBE_DOMAIN=""
 MINIKUBE_VERSION=0.28.2
@@ -17,28 +18,37 @@ source $CURRENT_DIR/utils.sh
 POSITIONAL=()
 while [[ $# -gt 0 ]]
 do
+
     key="$1"
 
     case ${key} in
         --disk-size)
-            DISK_SIZE=$2
+            checkInputParameterValue "$2"
+            DISK_SIZE="$2"
             shift
             shift
             ;;
         --vm-driver)
+            checkInputParameterValue "$2"
             VM_DRIVER="$2"
             shift # past argument
             shift # past value
             ;;
         --memory)
-            MEMORY=$2
+            checkInputParameterValue "$2"
+            MEMORY="$2"
             shift
             shift
             ;;
         --domain)
+            checkInputParameterValue "$2"
             MINIKUBE_DOMAIN="$2"
             shift # past argument
             shift # past value
+            ;;
+        --*)
+            echo "Unknown flag ${1}"
+            exit 1
             ;;
         *)    # unknown option
             POSITIONAL+=("$1") # save it in an array for later
@@ -100,9 +110,6 @@ function checkIfMinikubeIsInitialized() {
         read -p "Do you want to remove previous minikube cluster [y/N]: " deleteMinikube
         if [ "${deleteMinikube}" == "y" ]; then
             minikube delete
-        else
-            log "Starting minikube cancelled" red
-            exit -1
         fi
     fi
 }
@@ -171,6 +178,10 @@ function increaseFsInotifyMaxUserInstances() {
     fi
 }
 
+function applyDefaultRbacRole() {
+    kubectl apply -f "${RESOURCES_DIR}/default-sa-rbac-role.yaml"
+}
+
 function start() {
     checkMinikubeVersion
 
@@ -204,6 +215,8 @@ function start() {
     addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} brokers.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} ui-api.${MINIKUBE_DOMAIN} minio.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN}  configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN}"
 
     increaseFsInotifyMaxUserInstances
+
+    applyDefaultRbacRole
 }
 
 start

@@ -13,7 +13,7 @@ rules:
   verbs: ["get", "list", "watch"]
 - apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["eventactivations"]
-  verbs: ["create", "delete"]
+  verbs: ["get", "create", "delete", "update"]
 - apiGroups: [""]
   resources: ["namespaces"]
   verbs: ["patch", "list", "watch"]
@@ -25,5 +25,5 @@ rules:
   verbs: ["get", "list", "watch"]
 - apiGroups: ["servicecatalog.k8s.io"]
   resources: ["servicebrokers"]
-  verbs: ["get","create","delete","list", "update"]
+  verbs: ["get", "create", "delete", "list", "update"]
 

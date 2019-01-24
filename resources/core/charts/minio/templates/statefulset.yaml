@@ -19,6 +19,8 @@ spec:
   template:
     metadata:
       name: {{ template "minio.fullname" . }}
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ template "minio.name" . }}
         release: {{ .Release.Name }}
@@ -30,8 +32,8 @@ spec:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [ "/bin/sh", 
-          "-ce", 
+          command: [ "/bin/sh",
+          "-ce",
           "cp /tmp/config.json {{ .Values.configPath }} &&
           /usr/bin/docker-entrypoint.sh minio -C {{ .Values.configPath }} server
           {{- range $i := until $nodeCount }}

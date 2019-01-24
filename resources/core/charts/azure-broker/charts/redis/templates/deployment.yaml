@@ -10,6 +10,8 @@ metadata:
 spec:
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ template "redis.fullname" . }}
     spec:

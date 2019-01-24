@@ -148,11 +148,6 @@ func (kymaCommandExecutor *mockCommandExecutor) RunCommand(execPath string, exec
 	return nil
 }
 
-//RunBashCommand .
-func (kymaCommandExecutor *mockCommandExecutor) RunBashCommand(execPath string, execArgs ...string) error {
-	panic("RunBashCommand shouldn't be called!")
-}
-
 func (kymaCommandExecutor *mockCommandExecutor) expectNoCalls() *mockCommandExecutor {
 	kymaCommandExecutor.noCallsExpected = true
 	return kymaCommandExecutor
