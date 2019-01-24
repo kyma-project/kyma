@@ -46,3 +46,129 @@ func TestApplicationCRDCreation(t *testing.T) {
 	})
 
 }
+
+func TestSecureConnection(t *testing.T) {
+
+	Convey("Given external solution", t, func() {
+
+		Convey("When token requested", func() {
+
+			Convey("The operator should insert token into TokenRequest CRD", nil)
+
+		})
+
+		Convey("When information on CSR requested", func() {
+
+			Convey("The Connector Service should return Cluster Info", nil)
+
+		})
+
+		Convey("When CSR sent", func() {
+
+			Convey("The Connector Service should return signed certificate", nil)
+
+		})
+
+		Convey("When /v1/services requested", func() {
+
+			Convey("It should return proper data when using signed certificate", nil)
+
+		})
+
+	})
+
+}
+
+func TestServiceRegistration(t *testing.T) {
+
+	Convey("Given valid service data", t, func() {
+
+		Convey("When registration request is sent", func() {
+
+			Convey("It should register the service", nil)
+
+		})
+
+	})
+
+}
+
+func TestEventsRegistration(t *testing.T) {
+
+	Convey("Given valid events data", t, func() {
+
+		Convey("When registration request is sent", func() {
+
+			Convey("It should register the events", nil)
+
+		})
+
+	})
+
+}
+
+func TestBindings(t *testing.T) {
+
+	Convey("Given application and environment", t, func() {
+
+		Convey("When binding is created", func() {
+
+			Convey("It should generate proper service classes", nil)
+
+		})
+
+	})
+
+	Convey("Given service and environment", t, func() {
+
+		Convey("When binding is created", func() {
+
+			Convey("It should create proper service instances", nil)
+
+		})
+
+	})
+
+	Convey("Given events and environment", t, func() {
+
+		Convey("When binding is created", func() {
+
+			Convey("It should create proper service instances", nil)
+
+		})
+
+	})
+
+}
+
+func TestLambdaCreation(t *testing.T) {
+
+	Convey("Given Lambda's code", t, func() {
+
+		Convey("When event-trigger created", func() {
+
+			Convey("It should be accessible within the system", nil)
+
+		})
+
+		Convey("When lambda is created", func() {
+
+			Convey("It should provide proper infrastructure", nil)
+
+		})
+
+		Convey("When service binding is created", func() {
+
+			Convey("It should be containing information on lambda's triggers", nil)
+
+		})
+
+		Convey("When event is sent", func() {
+
+			Convey("Lambda should react to the event", nil)
+
+		})
+
+	})
+
+}
