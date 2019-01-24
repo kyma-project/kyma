@@ -1,0 +1,8 @@
+{
+  "spec":{
+    "displayName": "Azure Service Broker",
+    "description": "Documentation for Azure Service Broker.",
+    "id": "84dad23a-794d-404f-92a1-5e73e91a74af",
+    "type":"Service Class"
+  }
+}

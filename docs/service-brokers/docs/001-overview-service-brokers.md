@@ -15,7 +15,7 @@ Each of the Service Brokers available in Kyma performs these operations in a dif
 
 Kyma provides these Service Brokers to use with the Service Catalog:
 
-* Azure Broker
+* Azure Service Broker
 * Google Cloud Platform Service Broker (Experimental)
 * Application Broker
 * Helm Broker
