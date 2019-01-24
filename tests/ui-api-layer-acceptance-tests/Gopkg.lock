@@ -129,7 +129,7 @@
 [[projects]]
   name = "github.com/machinebox/graphql"
   packages = ["."]
-  revision = "05b17f3157491bbfa5d6fc2006443a272d960d15"
+  revision = "3a92531802258604bd12793465c2e28bc4b2fc85"
 
 [[projects]]
   name = "github.com/mitchellh/mapstructure"
@@ -390,6 +390,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ccbe30a14c6fc55362144c11c8d583e1340c1d5c5ed871ebfb3abbb0fa4e6223"
+  inputs-digest = "bb0b3fb084c23c8fe0e1deb2a0bf93038807c96263a2f159bf756a97228c39eb"
   solver-name = "gps-cdcl"
   solver-version = 1

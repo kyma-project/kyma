@@ -19,10 +19,6 @@ input ResourceAttributes {
     nameArg: String
     namespaceArg: String
 }
-#TODO: resourceRequest and path should be handled in the future (possibility of checking non-resource requests)
-#https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.10/#nonresourceattributes-v1beta1-authorization-k8s-io
-#resourceRequest: Boolean!
-#path: String!
 
 # Content
 

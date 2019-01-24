@@ -72,10 +72,10 @@ global:
     version: 6e0a7fe2
   ui_api_layer:
     dir: pr/
-    version: PR-2213
+    version: PR-2317
   ui_api_layer_acceptance_tests:
-    dir: develop/
-    version: 51c82c25
+    dir: pr/
+    version: PR-2317
 
 test:
   acceptance:
