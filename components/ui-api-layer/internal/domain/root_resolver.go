@@ -345,8 +345,8 @@ func (r *queryResolver) EventActivations(ctx context.Context, environment string
 	return r.app.Resolver.EventActivationsQuery(ctx, environment)
 }
 
-func (r *queryResolver) Apis(ctx context.Context, environment *string, namespace *string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
-	return r.ac.APIsQuery(ctx, environment, namespace, serviceName, hostname)
+func (r *queryResolver) Apis(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
+	return r.ac.APIsQuery(ctx, namespace, serviceName, hostname)
 }
 
 func (r *queryResolver) IDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
