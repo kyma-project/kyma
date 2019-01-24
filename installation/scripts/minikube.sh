@@ -7,7 +7,7 @@ RESOURCES_DIR="${CURRENT_DIR}/../resources"
 
 MINIKUBE_DOMAIN=""
 MINIKUBE_VERSION=0.33.0
-KUBERNETES_VERSION=1.11.3
+KUBERNETES_VERSION=1.11.5
 KUBECTL_CLI_VERSION=1.11.0
 VM_DRIVER=hyperkit
 DISK_SIZE=20g
@@ -204,8 +204,7 @@ function start() {
     --kubernetes-version=v$KUBERNETES_VERSION \
     --vm-driver=$VM_DRIVER \
     --disk-size=$DISK_SIZE \
-    --feature-gates="MountPropagation=false" \
-    -b=kubeadm
+    --bootstrapper=kubeadm
 
     waitForMinikubeToBeUp
 

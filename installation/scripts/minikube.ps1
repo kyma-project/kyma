@@ -6,7 +6,7 @@ param (
 )
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
-$KUBERNETES_VERSION = "1.11.3"
+$KUBERNETES_VERSION = "1.11.5"
 
 Write-Output @"
 ################################################################################
@@ -44,10 +44,9 @@ function StartMinikube() {
 	+ " --extra-config=apiserver.cors-allowed-origins='http://*'"`
         + " --extra-config=apiserver.enable-admission-plugins='DefaultStorageClass,LimitRanger,MutatingAdmissionWebhook,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,ValidatingAdmissionWebhook'"`
         + " --kubernetes-version=v${KUBERNETES_VERSION}"`
-        + " --feature-gates='MountPropagation=false'"`
         + " --disk-size=${DISK_SIZE}"`
         + " --vm-driver=${VM_DRIVER}"`
-        + " -b=kubeadm"
+        + " --bootstrapper=kubeadm"
 
     if ($VM_DRIVER -eq "hyperv") {
         $cmd += " --hyperv-virtual-switch='${env.HYPERV_VIRTUAL_SW}'"
