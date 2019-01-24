@@ -244,6 +244,11 @@ az network dns record-set a create -g $RS_GROUP -z $DNS_DOMAIN -n gateway.$SUB_D
 az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n gateway.$SUB_DOMAIN -a $REMOTE_ENV_IP
 ```
 
+Access your cluster under this address:
+```
+https://console.$SUB_DOMAIN.$DNS_DOMAIN
+```
+
 ## Prepare your Kyma deployment for production use
 
 To use the cluster in a production environment, it is recommended you configure a new server-side certificate for the Application Connector and replace the placeholder certificate it installs with.
