@@ -7,9 +7,16 @@ import (
 )
 
 const (
-	MetadataURLFormat = "https://%s/%s/v1/metadata/services"
-	EventsURLFormat   = "https://%s/%s/v1/events"
+	MetadataURLFormat          = "https://%s/%s/v1/metadata/services"
+	EventsURLFormat            = "https://%s/%s/v1/events"
+	AppManagementInfoURLFormat = "https://%s/v1/applications/management/info"
+	AppCertificatesURLFormat   = "https://%s/v1/applications/certificates"
+
+	RuntimeManagementInfoURLFormat = "https://%s/v1/runtimes/management/info"
+	RuntimeCertificatesURLFormat   = "https://%s/v1/runtimes/certificates"
 )
+
+// TODO - test
 
 type APIUrlsGenerator interface {
 	Generate(reader httpcontext.ContextReader) interface{}
@@ -31,12 +38,16 @@ func (appInfoUrls applicationUrlsStrategy) Generate(reader httpcontext.ContextRe
 	}
 }
 
-func NewApplicationApiUrlsStrategy(appRegistryHost, eventsHost, inforURL, certURL string) APIUrlsGenerator {
+func NewApplicationApiUrlsStrategy(appRegistryHost, eventsHost, infoURL, host string) APIUrlsGenerator {
+	if infoURL == "" {
+		infoURL = fmt.Sprintf(AppManagementInfoURLFormat, host)
+	}
+
 	return &applicationUrlsStrategy{
 		appRegistryHost: appRegistryHost,
 		eventsHost:      eventsHost,
-		infoURL:         inforURL,
-		certURL:         certURL,
+		infoURL:         infoURL,
+		certURL:         fmt.Sprintf(AppCertificatesURLFormat, host),
 	}
 }
 
@@ -52,9 +63,9 @@ func (runtimeInfoUrls runtimeUrlsStrategy) Generate(reader httpcontext.ContextRe
 	}
 }
 
-func NewRuntimeApiUrlsStrategy(infoURL, certURL string) APIUrlsGenerator {
+func NewRuntimeApiUrlsStrategy(host string) APIUrlsGenerator {
 	return &runtimeUrlsStrategy{
-		infoURL: infoURL,
-		certURL: certURL,
+		infoURL: fmt.Sprintf(RuntimeManagementInfoURLFormat, host),
+		certURL: fmt.Sprintf(RuntimeCertificatesURLFormat, host),
 	}
 }

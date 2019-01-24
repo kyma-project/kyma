@@ -13,8 +13,10 @@ type options struct {
 	namespace              string
 	tokenLength            int
 	tokenExpirationMinutes int
-	domainName             string
 	connectorServiceHost   string
+	appRegistryHost        string
+	eventsHost             string
+	getInfoURL             string
 	group                  string
 	tenant                 string
 }
@@ -34,11 +36,10 @@ func parseArgs() *options {
 	namespace := flag.String("namespace", "kyma-integration", "Namespace used by Certificate Service")
 	tokenLength := flag.Int("tokenLength", 64, "Length of a registration tokens.")
 	tokenExpirationMinutes := flag.Int("tokenExpirationMinutes", 5, "Time to Live of tokens expressed in minutes.")
-	domainName := flag.String("domainName", ".wormhole.cluster.kyma.cx", "Domain name used for URL generation.")
-	// appRegistryHost
-	// eventsHost
-	// getInfoURL
 	connectorServiceHost := flag.String("connectorServiceHost", "cert-service.wormhole.cluster.kyma.cx", "Host at which this service is accessible.")
+	appRegistryHost := flag.String("appRegistryHost", "", "Host at which this Application Registry is accessible.")
+	eventsHost := flag.String("eventsHost", "", "Host at which this Event Service is accessible.")
+	getInfoURL := flag.String("getInfoURL", "", "URL at which management information is available.")
 	group := flag.String("group", "", "Default group")
 	tenant := flag.String("tenant", "", "Default tenant")
 
@@ -51,17 +52,22 @@ func parseArgs() *options {
 		namespace:              *namespace,
 		tokenLength:            *tokenLength,
 		tokenExpirationMinutes: *tokenExpirationMinutes,
-		domainName:             *domainName,
 		connectorServiceHost:   *connectorServiceHost,
 		group:                  *group,
 		tenant:                 *tenant,
+		appRegistryHost:        *appRegistryHost,
+		eventsHost:             *eventsHost,
+		getInfoURL:             *getInfoURL,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s --tokenLength=%d "+
-		"--tokenExpirationMinutes=%d --domainName=%s --connectorServiceHost=%s --group=%s --tenant=%s", o.appName, o.externalAPIPort,
-		o.internalAPIPort, o.namespace, o.tokenLength, o.tokenExpirationMinutes, o.domainName, o.connectorServiceHost, o.group, o.tenant)
+		"--tokenExpirationMinutes=%d --connectorServiceHost=%s --appRegistryHost=%s --eventsHost=%s "+
+		"--getInfoURL=%s --group=%s --tenant=%s",
+		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace, o.tokenLength,
+		o.tokenExpirationMinutes, o.connectorServiceHost, o.appRegistryHost, o.eventsHost,
+		o.getInfoURL, o.group, o.tenant)
 }
 
 func parseEnv() *environment {

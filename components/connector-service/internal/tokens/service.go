@@ -11,6 +11,12 @@ import (
 
 type Generator func() (string, apperrors.AppError)
 
+type Service interface {
+	Save(serializableContext httpcontext.Serializer) (string, apperrors.AppError)
+	Replace(token string, serializableContext httpcontext.Serializer) (string, apperrors.AppError)
+	Resolve(token string, destination interface{}) apperrors.AppError
+}
+
 type Creator interface {
 	Save(serializableContext httpcontext.Serializer) (string, apperrors.AppError)
 	Replace(token string, serializableContext httpcontext.Serializer) (string, apperrors.AppError)

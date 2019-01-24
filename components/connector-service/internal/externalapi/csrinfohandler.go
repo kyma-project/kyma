@@ -15,15 +15,15 @@ const (
 	CsrURLFormat = "https://%s/v1/applications/certificates?token=%s"
 )
 
-type infoHandler struct {
-	tokenCreator        tokens.Creator
-	csr                 csrInfo
-	serializerExtractor httpcontext.SerializerExtractor
-	apiInfoUrlsStrategy APIUrlsGenerator
-	host                string
+type CSRInfoHandler struct {
+	tokenCreator         tokens.Creator
+	serializerExtractor  httpcontext.SerializerExtractor
+	apiInfoURLsGenerator APIUrlsGenerator
+	host                 string
+	csr                  csrInfo
 }
 
-func NewInfoHandler(tokenCreator tokens.Creator, serializerExtractor httpcontext.SerializerExtractor, apiInfoUrlsStrategy APIUrlsGenerator, host string, subjectValues certificates.CSRSubject) InfoHandler {
+func NewCSRInfoHandler(tokenCreator tokens.Creator, serializerExtractor httpcontext.SerializerExtractor, apiInfoURLsGeneretor APIUrlsGenerator, host string, subjectValues certificates.CSRSubject) InfoHandler {
 	csr := csrInfo{
 		Country:            subjectValues.Country,
 		Organization:       subjectValues.Organization,
@@ -32,16 +32,16 @@ func NewInfoHandler(tokenCreator tokens.Creator, serializerExtractor httpcontext
 		Province:           subjectValues.Province,
 	}
 
-	return &infoHandler{
-		tokenCreator:        tokenCreator,
-		csr:                 csr,
-		serializerExtractor: serializerExtractor,
-		apiInfoUrlsStrategy: apiInfoUrlsStrategy,
-		host:                host,
+	return &CSRInfoHandler{
+		tokenCreator:         tokenCreator,
+		serializerExtractor:  serializerExtractor,
+		apiInfoURLsGenerator: apiInfoURLsGeneretor,
+		host:                 host,
+		csr:                  csr,
 	}
 }
 
-func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
+func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 	kymaContext, err := ih.serializerExtractor(r.Context())
 	if err != nil {
@@ -56,7 +56,7 @@ func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	csrURL := fmt.Sprintf(CsrURLFormat, ih.host, newToken)
-	apiURLs := ih.apiInfoUrlsStrategy.Generate(kymaContext)
+	apiURLs := ih.apiInfoURLsGenerator.Generate(kymaContext)
 
 	certInfo := makeCertInfo(ih.csr, kymaContext.GetCommonName())
 

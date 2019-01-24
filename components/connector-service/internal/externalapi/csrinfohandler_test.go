@@ -77,14 +77,14 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		apiURLsGenerator := &mocks.APIUrlsGenerator{}
 		apiURLsGenerator.On("Generate", dummyContext).Return(expectedAPI)
 
-		infoHandler := NewInfoHandler(tokenCreator, contextExtractor, apiURLsGenerator, host, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, contextExtractor, apiURLsGenerator, host, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
 		// when
-		infoHandler.GetInfo(rr, req)
+		infoHandler.GetCSRInfo(rr, req)
 
 		// then
 		responseBody, err := ioutil.ReadAll(rr.Body)
@@ -109,14 +109,14 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 			return nil, apperrors.Internal("error")
 		}
 
-		infoHandler := NewInfoHandler(tokenCreator, errorExtractor, apiURLsGenerator, host, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, errorExtractor, apiURLsGenerator, host, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
 		// when
-		infoHandler.GetInfo(rr, req)
+		infoHandler.GetCSRInfo(rr, req)
 
 		// then
 		responseBody, err := ioutil.ReadAll(rr.Body)
@@ -137,14 +137,14 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 		apiURLsGenerator := &mocks.APIUrlsGenerator{}
 
-		infoHandler := NewInfoHandler(tokenCreator, contextExtractor, apiURLsGenerator, host, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, contextExtractor, apiURLsGenerator, host, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
 		// when
-		infoHandler.GetInfo(rr, req)
+		infoHandler.GetCSRInfo(rr, req)
 
 		// then
 		responseBody, err := ioutil.ReadAll(rr.Body)
