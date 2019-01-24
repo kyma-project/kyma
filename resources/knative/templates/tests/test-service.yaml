@@ -1,19 +1,19 @@
-{{ if .Values.global.knative }}
-apiVersion: serving.knative.dev/v1alpha1
-kind: Service
-metadata:
-  name: test-service
-  namespace: knative-serving
-  labels:
-    "helm-chart-test": "true"
-spec:
-  runLatest:
-    configuration:
-      revisionTemplate:
-        spec:
-          container:
-            image: gcr.io/knative-samples/helloworld-go
-            env:
-            - name: TARGET
-              value: {{ .Values.test.target }}
-{{ end }}
+#{{ if .Values.global.knative }}
+#apiVersion: serving.knative.dev/v1alpha1
+#kind: Service
+#metadata:
+#  name: test-service
+#  namespace: knative-serving
+#  labels:
+#    "helm-chart-test": "true"
+#spec:
+#  runLatest:
+#    configuration:
+#      revisionTemplate:
+#        spec:
+#          container:
+#            image: gcr.io/knative-samples/helloworld-go
+#            env:
+#            - name: TARGET
+#              value: {{ .Values.test.target }}
+#{{ end }}
