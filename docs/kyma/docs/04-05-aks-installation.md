@@ -135,14 +135,18 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
       --enable-addons "monitoring,http_application_routing" \
       --generate-ssh-keys
     ```
+2. Fetch credentials to your AKS cluster. Run:
+    ```
+    az aks get-credentials --resource-group $RS_GROUP --name $CLUSTER_NAME
+    ```
 
-2. Install Tiller on your AKS cluster. Run:
+3. Install Tiller on your AKS cluster. Run:
 
     ```
     kubectl apply -f installation/resources/tiller.yaml
     ```
     
-3. Add additional privileges to be able to access readiness probes endpoints:
+4. Add additional privileges to be able to access readiness probes endpoints:
     ```
     kubectl apply -f installation/resources/azure-crb-for-healthz.yaml
     ```
