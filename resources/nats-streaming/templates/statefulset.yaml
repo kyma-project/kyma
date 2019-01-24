@@ -1,15 +1,15 @@
 apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
-  name: {{ template "nats-streaming.fullname" . }}
+  name: {{ .Values.global.natsStreaming.fullname }}
   labels:
 {{ include "nats-streaming.labels.standard" . | indent 4 }}
 spec:
   selector:
     matchLabels:
-      app: {{ template "nats-streaming.name" . }}
+      app: {{ .Values.global.natsStreaming.name }}
       release: {{ .Release.Name }}
-  serviceName: {{ template "nats-streaming.fullname" . }}
+  serviceName: {{ .Values.global.natsStreaming.fullname }}
   replicas: {{ .Values.replicaCount }}
   updateStrategy:
     type: RollingUpdate
@@ -18,7 +18,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
-        app: {{ template "nats-streaming.name" . }}
+        app: {{ .Values.global.natsStreaming.name }}
         release: {{ .Release.Name }}
     spec:
       containers:
@@ -41,18 +41,18 @@ spec:
         - --cluster_id={{ .Values.global.natsStreaming.clusterID }}
         - --http_port={{ .Values.global.natsStreaming.ports.monitoring }}
         - --max_age={{ .Values.global.natsStreaming.persistence.maxAge }}
-        {{ if .Values.persistence.enabled  }}
+        {{ if .Values.global.natsStreaming.persistence.enabled  }}
         - --store=FILE
-        - --dir=/var/lib/nats-streaming/{{ template "nats-streaming.fullname" . }}/$(POD_NAME)
+        - --dir=/var/lib/nats-streaming/{{ .Values.global.natsStreaming.fullname }}/$(POD_NAME)
         {{- else }}
         - --store=MEMORY
         {{- end }}
         - --port={{ .Values.global.natsStreaming.ports.client }}
         {{- if index .Values "configurationFiles" "gnatsd.conf" }}
-        - --config=/etc/nats-streaming/{{ template "nats-streaming.fullname" . }}/gnatsd.conf
+        - --config=/etc/nats-streaming/{{ .Values.global.natsStreaming.fullname }}/gnatsd.conf
         {{- end }}
         {{- if index .Values "configurationFiles" "stan.conf" }}
-        - --stan_config=/etc/nats-streaming/{{ template "nats-streaming.fullname" . }}/stan.conf
+        - --stan_config=/etc/nats-streaming/{{ .Values.global.natsStreaming.fullname }}/stan.conf
         {{- end }}
         - --max_inactivity={{ .Values.global.natsStreaming.channel.maxInactivity }}
         env:
@@ -65,16 +65,16 @@ spec:
         - name: {{ $key }}
           containerPort: {{ $value }}
         {{- end }}
-        {{- if or .Values.persistence.enabled .Values.configurationFiles }}
+        {{- if or .Values.global.natsStreaming.persistence.enabled .Values.configurationFiles }}
         volumeMounts:
         {{- end }}
-        {{- if .Values.persistence.enabled }}
+        {{- if .Values.global.natsStreaming.persistence.enabled }}
         - name: datadir
-          mountPath: /var/lib/nats-streaming/{{ template "nats-streaming.fullname" . }}
+          mountPath: /var/lib/nats-streaming/{{ .Values.global.natsStreaming.fullname }}
         {{- end }}
         {{- if .Values.configurationFiles }}
         - name: config-volume
-          mountPath: /etc/nats-streaming/{{ template "nats-streaming.fullname" . }}
+          mountPath: /etc/nats-streaming/{{ .Values.global.natsStreaming.fullname }}
         {{- end }}
         resources:
 {{ toYaml .Values.global.natsStreaming.resources | indent 10 -}}
@@ -86,22 +86,22 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: {{ template "nats-streaming.fullname" . }}
+          name: {{ .Values.global.natsStreaming.fullname }}
       {{- end }}
-  {{- if .Values.persistence.enabled }}
+  {{- if .Values.global.natsStreaming.persistence.enabled }}
   volumeClaimTemplates:
   - metadata:
       name: datadir
     spec:
-      {{- if .Values.persistence.storageClass }}
-      {{- if (eq "-" .Values.persistence.storageClass) }}
+      {{- if .Values.global.natsStreaming.persistence.storageClass }}
+      {{- if (eq "-" .Values.global.natsStreaming.persistence.storageClass) }}
       storageClassName: ""
       {{- else }}
-      storageClassName: {{ .Values.persistence.storageClass }}
+      storageClassName: {{ .Values.global.natsStreaming.persistence.storageClass }}
       {{- end }}
       {{- end }}
       accessModes:
-      - {{ .Values.persistence.accessMode | quote }}
+      - {{ .Values.global.natsStreaming.persistence.accessMode | quote }}
       resources:
         requests:
           storage: {{ .Values.global.natsStreaming.persistence.size | quote }}

@@ -1,0 +1,28 @@
+# This hook depends on helm creating the target namespace if it doesn't exist
+# before the hook is called. This is the case on Helm v2.9.1
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: label-ns
+  namespace: kube-system
+  labels:
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: hook-succeeded
+spec:
+  template:
+    spec:
+      containers:
+      - name: labeler
+        image: gcr.io/google_containers/hyperkube:v1.9.7
+        command:
+        - kubectl
+        - label
+        - --overwrite
+        - ns
+        - {{ .Values.global.namespace }}
+        - istio-injection=enabled
+      restartPolicy: Never
+      serviceAccountName: tiller

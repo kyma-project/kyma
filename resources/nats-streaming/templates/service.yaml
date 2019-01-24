@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "nats-streaming.fullname" . }}
+  name: {{ .Values.global.natsStreaming.fullname }}
   labels:
 {{ include "nats-streaming.labels.standard" . | indent 4 }}
 spec:
@@ -10,5 +10,5 @@ spec:
     port: {{ .Values.global.natsStreaming.ports.client }}
     targetPort: client
   selector:
-    app: {{ template "nats-streaming.name" . }}
+    app: {{ .Values.global.natsStreaming.name }}
     release: {{ .Release.Name }}
