@@ -28,7 +28,6 @@ global:
       # Max duration for which an event can be stored (0 for unlimited)
       maxAge: "24h"
       size: "1Gi"
-    clusterID: kyma-nats-streaming
     ports:
       client: 4222
       monitoring: 8222
@@ -37,6 +36,9 @@ global:
         memory: "32M"
     channel:
       maxInactivity: "48h"
+    clusterID: "kyma-nats-streaming"
+  isLocalEnv: false
+  knative: false
 # Custom configuration files used to override default NATS and NATS Streaming settings
 # Note that store type, ports, debug and tracing have dedicated configuration options here in values.yaml
 # and cannot be overriden through the configuration files.

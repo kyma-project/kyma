@@ -94,7 +94,7 @@ fi
 kubectl apply -f - <<<"$COMBO_YAML"
 
 if [ $KNATIVE ]; then
-    kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true"}}'
+    kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true", "global.kymaEventBus": "false", "global.natsStreaming.clusterID": "knative-nats-streaming"}}'
 fi
 
 echo -e "\nConfiguring sub-components"

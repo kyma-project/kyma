@@ -93,8 +93,11 @@
 # The `minio` subchart
 /resources/core/charts/minio/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
-# The `event-bus` subchart
-/resources/core/charts/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+# The `event-bus` chart
+/resources/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+
+# The `nats-streaming` chart
+/resources/nats-streaming/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # The `k8s-dashboard-proxy` subchart
 /resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
