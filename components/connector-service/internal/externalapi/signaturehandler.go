@@ -1,10 +1,12 @@
 package externalapi
 
 import (
-	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
 
@@ -12,98 +14,54 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
 )
 
 type signatureHandler struct {
-	tokenCache          tokencache.TokenCache
-	certUtil            certificates.CertificateUtility
-	secretsRepository   secrets.Repository
-	host                string
-	domainName          string
-	csr                 csrInfo
-	serializerExtractor httpcontext.ConnectorClientExtractor
+	// TODO - token remover?
+	tokenCreator             tokens.Creator
+	connectorClientExtractor httpcontext.ConnectorClientExtractor
+	certificateService       certificates.Service
+	host                     string
 }
 
-func NewSignatureHandler(tokenCache tokencache.TokenCache, certUtil certificates.CertificateUtility, secretsRepository secrets.Repository,
-	host string, domainName string, subjectValues certificates.CSRSubject) SignatureHandler {
-	csr := csrInfo{
-		Country:            subjectValues.Country,
-		Organization:       subjectValues.Organization,
-		OrganizationalUnit: subjectValues.OrganizationalUnit,
-		Locality:           subjectValues.Locality,
-		Province:           subjectValues.Province,
-	}
-
+func NewSignatureHandler(tokenCreator tokens.Creator, certificateService certificates.Service, connectorClientExtractor httpcontext.ConnectorClientExtractor, host string) SignatureHandler {
 	return &signatureHandler{
-		tokenCache:        tokenCache,
-		certUtil:          certUtil,
-		secretsRepository: secretsRepository,
-		host:              host, domainName: domainName,
-		csr: csr,
+		tokenCreator:             tokenCreator,
+		connectorClientExtractor: connectorClientExtractor,
+		certificateService:       certificateService,
+		host:                     host,
 	}
 }
 
 func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
-	_, err := sh.serializerExtractor(r.Context())
+	token := r.URL.Query().Get("token")
+	connectorClientContext, err := sh.connectorClientExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	tokenRequest, appErr := sh.readCertRequest(r)
-	if appErr != nil {
-		httphelpers.RespondWithError(w, appErr)
+	signingRequest, err := sh.readCertRequest(r)
+	if err != nil {
+		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	// --------------------------
-
-	// get data for CN
-
-	// --------------------------
-	csr, appErr := sh.loadAndCheckCSR(tokenRequest.CSR, "")
-	if appErr != nil {
-		httphelpers.RespondWithError(w, appErr)
+	rawCSR, err := decodeStringFromBase64(signingRequest.CSR)
+	if err != nil {
+		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	signedCrt, appErr := sh.signCSR("nginx-auth-ca", csr)
-	if appErr != nil {
-		httphelpers.RespondWithError(w, appErr)
+	clientCert, err := sh.certificateService.SignCSR(rawCSR, connectorClientContext.GetCommonName())
+	if err != nil {
+		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	sh.tokenCache.Delete("")
+	sh.tokenCreator.Delete(token)
 
-	httphelpers.RespondWithBody(w, 201, certResponse{CRT: signedCrt})
-}
-
-func (sh *signatureHandler) signCSR(secretName string, csr *x509.CertificateRequest) (
-	string, apperrors.AppError) {
-
-	caCrtBytesEncoded, caKeyBytesEncoded, appErr := sh.secretsRepository.Get(secretName)
-	if appErr != nil {
-		return "", appErr
-	}
-
-	caCrt, appErr := sh.certUtil.LoadCert(caCrtBytesEncoded)
-	if appErr != nil {
-		return "", appErr
-	}
-
-	caKey, appErr := sh.certUtil.LoadKey(caKeyBytesEncoded)
-	if appErr != nil {
-		return "", appErr
-	}
-
-	signedCrt, appErr := sh.certUtil.CreateCrtChain(caCrt, csr, caKey)
-	if appErr != nil {
-		return "", appErr
-	}
-
-	return signedCrt, nil
+	httphelpers.RespondWithBody(w, 201, certResponse{CRT: clientCert})
 }
 
 func (sh *signatureHandler) readCertRequest(r *http.Request) (*certRequest, apperrors.AppError) {
@@ -122,25 +80,11 @@ func (sh *signatureHandler) readCertRequest(r *http.Request) (*certRequest, appe
 	return &tokenRequest, nil
 }
 
-func (sh *signatureHandler) loadAndCheckCSR(encodedData string, reName string) (*x509.CertificateRequest, apperrors.AppError) {
-	csr, appErr := sh.certUtil.LoadCSR(encodedData)
-	if appErr != nil {
-		return nil, appErr
+func decodeStringFromBase64(string string) ([]byte, apperrors.AppError) {
+	bytes, err := base64.StdEncoding.DecodeString(string)
+	if err != nil {
+		return nil, apperrors.BadRequest("There was an error while parsing the base64 content. An incorrect value was provided.")
 	}
 
-	subjectValues := certificates.CSRSubject{
-		CName:              reName,
-		Country:            sh.csr.Country,
-		Organization:       sh.csr.Organization,
-		OrganizationalUnit: sh.csr.OrganizationalUnit,
-		Locality:           sh.csr.Locality,
-		Province:           sh.csr.Province,
-	}
-
-	appErr = sh.certUtil.CheckCSRValues(csr, subjectValues)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	return csr, nil
+	return bytes, nil
 }

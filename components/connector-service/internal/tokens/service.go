@@ -15,11 +15,13 @@ type Service interface {
 	Save(serializableContext httpcontext.Serializer) (string, apperrors.AppError)
 	Replace(token string, serializableContext httpcontext.Serializer) (string, apperrors.AppError)
 	Resolve(token string, destination interface{}) apperrors.AppError
+	Delete(token string)
 }
 
 type Creator interface {
 	Save(serializableContext httpcontext.Serializer) (string, apperrors.AppError)
 	Replace(token string, serializableContext httpcontext.Serializer) (string, apperrors.AppError)
+	Delete(token string)
 }
 
 type Resolver interface {

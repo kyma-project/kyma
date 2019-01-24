@@ -66,25 +66,21 @@ A97O/CNEABohwLZXQYkOQqGDXz6yWmCugtt8Y5of16NDj2AzqXZ++tUvo/CvB/Q8
 fWXUGZObOGD246zwfHLHP3AwzFKU0bfIvqckcw23I+ZUMIbdajw9eg==
 -----END CERTIFICATE-----`
 
-	CSR = `LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1d6Q0NBVU1D
-QVFBd0ZqRVVNQklHQTFVRUF3d0xhRzl6ZEM1bGVDNWpiMjB3Z2dFaU1BMEdDU3FH
-U0liMwpEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUJBUUN4Rk1zN3cxdDMwbVpxVjhx
-SzgvN1BrSlRkSVd6NUFPSkVJdTBMCmlRWU9pYlNDeG5RU2o5RmlVRW54VTNDaldx
-dHhQNFZjU2hDY283OG1nZVk3cnBTRktXejNKV2h3QnIzVmtnU0YKSFBDUVdOTjB3
-TFVEdTdXVkJrVmtpRFVzK05iejMvUG85b2g0K3N5WktmcmRrSFZYcFNlcG9VOEds
-K0tiOEFwYgo1NVEvUlcvVDBNWkhKNHNKcHMwajNmanB5UVVLSDlwdDk3NjhBdzNj
-SjhLdVM4TXRnTlM0NitQbmp0QTAydGViCnpRZGZPNkY2bWk3UGZHOVdwN0FYOWNK
-TnVrR2laYU1qc2s5M09yUGVpNGMzQ0lrS0VCc3FWdEM0eVZYd2svc3oKVUQrS3hT
-RHJFcStOd2Z4SFk1cGVtSFZJTjJVNFl1TmZLK3hFdEcydHJWSUl1OG9UQWdNQkFB
-R2dBREFOQmdrcQpoa2lHOXcwQkFRc0ZBQU9DQVFFQVZtVXF0K2hrdjd1cldFMmVS
-enFGdUhvaTVRQ2ZYYWV4NzcrM0F2eXQrY0FoCkZqazgwVkxnREJJUkpGN2RCWnI2
-d2VtUStoMzZGajV6RDUxSWpnb2w0Vm5ORFE0MkdXaVlwb2NBaFhHUU0xZ1YKWUJS
-Qk1VT1NQNG81bk1yUnJxbFUzSG1ZWHhHNVpleVluQW4rcjJzWFh4Z3lMYUZaY1Vx
-VEo0R1RwdFlMbDd5UAovYVl3K2Jyamo5ZEtMNHNGc1NkbXpTV0k4MnpCRmFMdUMr
-UkZDaTRSYTZwQm1vMW5vZ3c0R3pMWlAvVTFMQktMCjhuTEJ5L1ZyaDVxSCtWUW1T
-SEdTQ3h1SnB4STQvZXFtWWRFbis3T1JqSWltVXFqQ0RsOWp1dGhSakpmNHVwdjIK
-U0ZRVnZMbkxhdncxV2FPNFhHRFBZcWZQdndsbnJZSXdjMUFHQmVnTjhnPT0KLS0t
-LS1FTkQgQ0VSVElGSUNBVEUgUkVRVUVTVC0tLS0tCg==`
+	CSR = `-----BEGIN CERTIFICATE REQUEST-----
+MIICWzCCAUMCAQAwFjEUMBIGA1UEAwwLaG9zdC5leC5jb20wggEiMA0GCSqGSIb3
+DQEBAQUAA4IBDwAwggEKAoIBAQCxFMs7w1t30mZqV8qK8/7PkJTdIWz5AOJEIu0L
+iQYOibSCxnQSj9FiUEnxU3CjWqtxP4VcShCco78mgeY7rpSFKWz3JWhwBr3VkgSF
+HPCQWNN0wLUDu7WVBkVkiDUs+Nbz3/Po9oh4+syZKfrdkHVXpSepoU8Gl+Kb8Apb
+55Q/RW/T0MZHJ4sJps0j3fjpyQUKH9pt9768Aw3cJ8KuS8MtgNS46+PnjtA02teb
+zQdfO6F6mi7PfG9Wp7AX9cJNukGiZaMjsk93OrPei4c3CIkKEBsqVtC4yVXwk/sz
+UD+KxSDrEq+NwfxHY5pemHVIN2U4YuNfK+xEtG2trVIIu8oTAgMBAAGgADANBgkq
+hkiG9w0BAQsFAAOCAQEAVmUqt+hkv7urWE2eRzqFuHoi5QCfXaex77+3Avyt+cAh
+Fjk80VLgDBIRJF7dBZr6wemQ+h36Fj5zD51Ijgol4VnNDQ42GWiYpocAhXGQM1gV
+YBRBMUOSP4o5nMrRrqlU3HmYXxG5ZeyYnAn+r2sXXxgyLaFZcUqTJ4GTptYLl7yP
+/aYw+brjj9dKL4sFsSdmzSWI82zBFaLuC+RFCi4Ra6pBmo1nogw4GzLZP/U1LBKL
+8nLBy/Vrh5qH+VQmSHGSCxuJpxI4/eqmYdEn+7ORjIimUqjCDl9juthRjJf4upv2
+SFQVvLnLavw1WaO4XGDPYqfPvwlnrYIwc1AGBegN8g==
+-----END CERTIFICATE REQUEST-----`
 
 	CrtChain = `-----BEGIN CERTIFICATE-----
 MIIDPDCCAiSgAwIBAgIBAjANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UEBhMCVVMx
@@ -135,8 +131,8 @@ fWXUGZObOGD246zwfHLHP3AwzFKU0bfIvqckcw23I+ZUMIbdajw9eg==
 	invalidKey = `-----BEGIN RSA PRIVATE KEY-----
 -----END RSA PRIVATE KEY-----`
 
-	invalidCSR = `LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KLS0tLS1FTkQgQ0VS
-VElGSUNBVEUgUkVRVUVTVC0tLS0tCg==`
+	invalidCSR = `-----BEGIN CERTIFICATE REQUEST-----
+-----END CERTIFICATE REQUEST-----`
 
 	countryCode        = "US"
 	province           = "state"
@@ -249,24 +245,11 @@ func TestCertificateUtility_LoadCSR(t *testing.T) {
 		certificateUtility := NewCertificateUtility()
 
 		// when
-		key, err := certificateUtility.LoadCSR(CSR)
+		key, err := certificateUtility.LoadCSR([]byte(CSR))
 
 		// then
 		require.NoError(t, err)
 		assert.NotNil(t, key)
-	})
-
-	t.Run("should fail decoding base64", func(t *testing.T) {
-		// given
-		certificateUtility := NewCertificateUtility()
-
-		// when
-		crt, err := certificateUtility.LoadCSR("invalid base64")
-
-		// then
-		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeBadRequest, err.Code())
-		assert.Nil(t, crt)
 	})
 
 	t.Run("should fail decoding CSR", func(t *testing.T) {
@@ -274,7 +257,7 @@ func TestCertificateUtility_LoadCSR(t *testing.T) {
 		certificateUtility := NewCertificateUtility()
 
 		// when
-		crt, err := certificateUtility.LoadCSR("aW52YWxpZCBkYXRh")
+		crt, err := certificateUtility.LoadCSR([]byte("aW52YWxpZCBkYXRh"))
 
 		// then
 		require.Error(t, err)
@@ -287,40 +270,7 @@ func TestCertificateUtility_LoadCSR(t *testing.T) {
 		certificateUtility := NewCertificateUtility()
 
 		// when
-		crt, err := certificateUtility.LoadCSR(invalidCSR)
-
-		// then
-		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeBadRequest, err.Code())
-		assert.Nil(t, crt)
-	})
-
-	t.Run("should fail checking signature", func(t *testing.T) {
-		// given
-		invalidSignatureCSR := `LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1dqQ0NBVUlD
-QVFBd0ZURVRNQkVHQTFVRUF3d0taV010WkdWbVlYVnNkRENDQVNJd0RRWUpLb1pJ
-aHZjTgpBUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTEVVeXp2RFczZlNabXBYeW9y
-ei9zK1FsTjBoYlBrQTRrUWk3UXVKCkJnNkp0SUxHZEJLUDBXSlFTZkZUY0tOYXEz
-RS9oVnhLRUp5anZ5YUI1anV1bElVcGJQY2xhSEFHdmRXU0JJVWMKOEpCWTAzVEF0
-UU83dFpVR1JXU0lOU3o0MXZQZjgrajJpSGo2ekprcCt0MlFkVmVsSjZtaFR3YVg0
-cHZ3Q2x2bgpsRDlGYjlQUXhrY25pd21telNQZCtPbkpCUW9mMm0zM3Zyd0REZHdu
-d3E1THd5MkExTGpyNCtlTzBEVGExNXZOCkIxODdvWHFhTHM5OGIxYW5zQmYxd2sy
-NlFhSmxveU95VDNjNnM5NkxoemNJaVFvUUd5cFcwTGpKVmZDVCt6TlEKUDRyRklP
-c1NyNDNCL0Vkam1sNllkVWczWlRoaTQxOHI3RVMwYmEydFVnaTd5aE1DQXdFQUFh
-QUFNQTBHQ1NxRwpTSWIzRFFFQkN3VUFBNElCQVFBZG1hK3RqanROc0owK1dEUzl2
-K1RidHJOcDNGNEVjNWgyeVF6ek14cFFrclVoCi9wdHF2UGJrcDZTTnBjSk9HeTZE
-NkU0Wm9oNXhQbjdMdVFFZlJyWUtHQ09RRUVLcXZUdGU1eFBDK0g4MWRmbFMKYXZm
-RFpuTGtXRkFVa2h5aG84MWVXNjlkVmRwUzBsUnFQUjdPL0t6dXRjeG51cnBlU3JK
-TWtabml4ajEwY05FYwpXVGZhQmcxdjIvWXRJZTQ0aVBUak5ZZE9lWHk0eTZGdnFq
-UXRDSGdmUDlMUDZaY1dCYndwd0VBcE1YNXQwWXAxCnVPNVAxOEFza0lTNXVBK0ZB
-cEF1dGVhY2hBSHZyUWJLUFZLNlJQM3dyUjlEdXpqMkJ4WU9GZVdvOWVxS1J6Q08K
-NEJNRStVakZFcDRZdjRVM3czUFdZeVFqNC9zTGNPWmZlVys2d0tVdQotLS0tLUVO
-RCBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0K`
-
-		certificateUtility := NewCertificateUtility()
-
-		// when
-		crt, err := certificateUtility.LoadCSR(invalidSignatureCSR)
+		crt, err := certificateUtility.LoadCSR([]byte(invalidCSR))
 
 		// then
 		require.Error(t, err)
@@ -345,7 +295,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 	t.Run("should successfully check CSR values", func(t *testing.T) {
 		// given
 		csrSubject := CSRSubject{
-			CName:              "cname",
+			CommonName:         "cname",
 			Country:            "country",
 			Organization:       "organization",
 			OrganizationalUnit: "organizationalUnit",
@@ -365,7 +315,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 	t.Run("should fail when subject country is nil", func(t *testing.T) {
 		// given
 		csrSubject := CSRSubject{
-			CName: "cname",
+			CommonName: "cname",
 		}
 
 		csr := &x509.CertificateRequest{
@@ -385,10 +335,10 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 		assert.Contains(t, err.Error(), "No country")
 	})
 
-	t.Run("should fail when CName differs", func(t *testing.T) {
+	t.Run("should fail when CommonName differs", func(t *testing.T) {
 		// given
 		csrSubject := CSRSubject{
-			CName:              "differentCname",
+			CommonName:         "differentCname",
 			Country:            "country",
 			Organization:       "organization",
 			OrganizationalUnit: "organizationalUnit",
@@ -404,13 +354,13 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
-		assert.Contains(t, err.Error(), "Invalid CName")
+		assert.Contains(t, err.Error(), "Invalid Common name")
 	})
 
 	t.Run("should fail when Country differs", func(t *testing.T) {
 		// given
 		csrSubject := CSRSubject{
-			CName:              "cname",
+			CommonName:         "cname",
 			Country:            "invalidCountry",
 			Organization:       "organization",
 			OrganizationalUnit: "organizationalUnit",
@@ -433,7 +383,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 	t.Run("should fail when Organization differs", func(t *testing.T) {
 		// given
 		csrSubject := CSRSubject{
-			CName:              "cname",
+			CommonName:         "cname",
 			Country:            "country",
 			Organization:       "invalidOrganization",
 			OrganizationalUnit: "organizationalUnit",
@@ -455,7 +405,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 	t.Run("should fail when OrganizationalUnit differs", func(t *testing.T) {
 		// given
 		csrSubject := CSRSubject{
-			CName:              "cname",
+			CommonName:         "cname",
 			Country:            "country",
 			Organization:       "organization",
 			OrganizationalUnit: "invalidOrganizationalUnit",
@@ -477,7 +427,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 	t.Run("should fail when Locality differs", func(t *testing.T) {
 		// given
 		csrSubject := CSRSubject{
-			CName:              "cname",
+			CommonName:         "cname",
 			Country:            "country",
 			Organization:       "organization",
 			OrganizationalUnit: "organizationalUnit",
@@ -499,7 +449,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 	t.Run("should fail when Province differs", func(t *testing.T) {
 		// given
 		csrSubject := CSRSubject{
-			CName:              "cname",
+			CommonName:         "cname",
 			Country:            "country",
 			Organization:       "organization",
 			OrganizationalUnit: "organizationalUnit",
@@ -614,7 +564,7 @@ func calculateValidityTime(certificate *x509.Certificate) int {
 
 func prepareCrtAndKey(certificateUtility CertificateUtility) (*x509.Certificate, *x509.CertificateRequest, *rsa.PrivateKey) {
 	caCrt, _ := certificateUtility.LoadCert(encodedCert)
-	csr, _ := certificateUtility.LoadCSR(CSR)
+	csr, _ := certificateUtility.LoadCSR([]byte(CSR))
 	key, _ := certificateUtility.LoadKey(encodedKey)
 	return caCrt, csr, key
 }

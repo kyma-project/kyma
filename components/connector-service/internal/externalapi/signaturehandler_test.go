@@ -2,36 +2,31 @@ package externalapi
 
 import (
 	"bytes"
-	"crypto/rsa"
-	"crypto/x509"
+	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	certMock "github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
-	secrectsMock "github.com/kyma-project/kyma/components/connector-service/internal/secrets/mocks"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
-	tokensMock "github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache/mocks"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+
+	certMock "github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
+	tokensMock "github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 const (
-	authSecretName = "nginx-auth-ca"
-	appName        = "appName"
-	token          = "token"
+	appName = "appName"
+	token   = "token"
 
 	host               = "host"
-	domain             = "domain"
 	country            = "country"
 	organization       = "organization"
 	organizationalUnit = "organizationalUnit"
@@ -40,56 +35,37 @@ const (
 )
 
 var (
-	tokenRequestRaw = compact([]byte("{\"csr\":\"CSR\"}"))
-	caCrtEncoded    = []byte("caCrtEncoded")
-	caKeyEncoded    = []byte("caKeyEncoded")
-
-	tokenRequest = certRequest{CSR: "CSR"}
-	caCrt        = &x509.Certificate{}
-	caKey        = &rsa.PrivateKey{}
-	csr          = &x509.CertificateRequest{}
-	crtBase64    = "crtBase64"
+	tokenRequestRaw = compact([]byte("{\"csr\":\"Q1NSCg==\"}"))
+	decodedCSR, _   = decodeStringFromBase64("Q1NSCg==")
+	crtBase64       = "crtBase64"
 )
 
 func TestSignatureHandler_SignCSR(t *testing.T) {
 
-	t.Run("should create certificate", func(t *testing.T) {
+	url := fmt.Sprintf("/v1/applications/certificates?token=%s", token)
+
+	t.Run("should sign client certificate", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
 
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", appName).Return(token, true)
-		tokenCache.On("Delete", appName).Return()
+		tokenCreator := &tokensMock.Creator{}
+		tokenCreator.On("Delete", token).Return()
 
-		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
+		certService := &certMock.Service{}
+		certService.On("SignCSR", decodedCSR, commonName).Return(crtBase64, nil)
 
-		certUtils := &certMock.CertificateUtility{}
-		certUtils.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
-		certUtils.On("LoadKey", caKeyEncoded).Return(caKey, nil)
-		certUtils.On("LoadCSR", tokenRequest.CSR).Return(csr, nil)
-
-		subjectValues := certificates.CSRSubject{
-			CName:              appName,
-			Country:            country,
-			Organization:       organization,
-			OrganizationalUnit: organizationalUnit,
-			Locality:           locality,
-			Province:           province,
+		dummyClientContext := dummyClientContext{}
+		connectorClientExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+			return dummyClientContext, nil
 		}
-		certUtils.On("CheckCSRValues", csr, subjectValues).Return(nil)
-		certUtils.On("CreateCrtChain", caCrt, csr, caKey).Return(crtBase64, nil)
 
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		signatureHandler := NewSignatureHandler(tokenCreator, certService, connectorClientExtractor, host)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
-
 		// when
-		registrationHandler.SignCSR(rr, req)
+		signatureHandler.SignCSR(rr, req)
 
 		// then
 		responseBody, err := ioutil.ReadAll(rr.Body)
@@ -103,353 +79,112 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, rr.Code)
 	})
 
-	t.Run("should return 403 when token not provided", func(t *testing.T) {
+	t.Run("should return 500 when failed to extract client context", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert", appName)
+		errorExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+			return nil, apperrors.Internal("error")
+		}
 
-		tokenCache := &tokensMock.TokenCache{}
-		secretsRepository := &secrectsMock.Repository{}
-		certUtils := &certMock.CertificateUtility{}
-
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		signatureHandler := NewSignatureHandler(nil, nil, errorExtractor, host)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
 		// when
-		registrationHandler.SignCSR(rr, req)
+		signatureHandler.SignCSR(rr, req)
 
 		// then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
+		errorResponse := readErrorResponse(t, rr.Body)
 
-		var errorResponse httperrors.ErrorResponse
-		err = json.Unmarshal(responseBody, &errorResponse)
-		require.NoError(t, err)
-
-		assert.Equal(t, http.StatusForbidden, errorResponse.Code)
-		assert.Equal(t, http.StatusForbidden, rr.Code)
+		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
+		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
 
-	t.Run("should return 400 when token not found", func(t *testing.T) {
+	t.Run("should return 500 when couldn't read request body", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
+		dummyClientContext := dummyClientContext{}
+		connectorClientExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+			return dummyClientContext, nil
+		}
 
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", appName).Return("", false)
-
-		secretsRepository := &secrectsMock.Repository{}
-		certUtils := &certMock.CertificateUtility{}
-
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
-		require.NoError(t, err)
-		rr := httptest.NewRecorder()
-
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
-
-		// when
-		registrationHandler.SignCSR(rr, req)
-
-		// then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
-
-		var errorResponse httperrors.ErrorResponse
-		err = json.Unmarshal(responseBody, &errorResponse)
-		require.NoError(t, err)
-
-		assert.Equal(t, http.StatusForbidden, errorResponse.Code)
-		assert.Equal(t, http.StatusForbidden, rr.Code)
-	})
-
-	t.Run("should return 403 when wrong token provided", func(t *testing.T) {
-		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
-
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", appName).Return("differentToken", true)
-
-		secretsRepository := &secrectsMock.Repository{}
-		certUtils := &certMock.CertificateUtility{}
-
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
-		require.NoError(t, err)
-		rr := httptest.NewRecorder()
-
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
-
-		// when
-		registrationHandler.SignCSR(rr, req)
-
-		// then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
-
-		var errorResponse httperrors.ErrorResponse
-		err = json.Unmarshal(responseBody, &errorResponse)
-		require.NoError(t, err)
-
-		assert.Equal(t, http.StatusForbidden, errorResponse.Code)
-		assert.Equal(t, http.StatusForbidden, rr.Code)
-	})
-
-	t.Run("should return 500 when couldn't unmarshal request body", func(t *testing.T) {
-		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
-
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", appName).Return(token, true)
-
-		secretsRepository := &secrectsMock.Repository{}
-		certUtils := &certMock.CertificateUtility{}
-
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		signatureHandler := NewSignatureHandler(nil, nil, connectorClientExtractor, host)
 
 		incorrectBody := []byte("incorrectBody")
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(incorrectBody))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
-
 		// when
-		registrationHandler.SignCSR(rr, req)
+		signatureHandler.SignCSR(rr, req)
 
 		// then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
-
-		var errorResponse httperrors.ErrorResponse
-		err = json.Unmarshal(responseBody, &errorResponse)
-		require.NoError(t, err)
+		errorResponse := readErrorResponse(t, rr.Body)
 
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
 
-	t.Run("should return 404 when secret not found", func(t *testing.T) {
+	t.Run("should return 400 when failed to decode base64", func(t *testing.T) {
 		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
-
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", appName).Return(token, true)
-		tokenCache.On("Delete", appName).Return()
-
-		secretNotFoundError := apperrors.NotFound("error")
-		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("Get", authSecretName).Return([]byte(""), []byte(""), secretNotFoundError)
-
-		certUtils := &certMock.CertificateUtility{}
-		certUtils.On("LoadCSR", mock.Anything).Return(nil, nil)
-		certUtils.On("CheckCSRValues", mock.Anything, mock.Anything).Return(nil, nil)
-
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
-		require.NoError(t, err)
-		rr := httptest.NewRecorder()
-
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
-
-		// when
-		registrationHandler.SignCSR(rr, req)
-
-		// then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
-
-		var errorResponse httperrors.ErrorResponse
-		err = json.Unmarshal(responseBody, &errorResponse)
-		require.NoError(t, err)
-
-		assert.Equal(t, http.StatusNotFound, errorResponse.Code)
-		assert.Equal(t, "error", errorResponse.Error)
-	})
-
-	t.Run("should return 500 when couldn't load cert", func(t *testing.T) {
-		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
-
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", appName).Return(token, true)
-
-		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
-
-		certUtils := &certMock.CertificateUtility{}
-		certUtils.On("LoadCSR", mock.Anything).Return(nil, nil)
-		certUtils.On("CheckCSRValues", mock.Anything, mock.Anything).Return(nil, nil)
-		certUtils.On("LoadCert", caCrtEncoded).Return(nil, apperrors.Internal("error"))
-
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
-		require.NoError(t, err)
-		rr := httptest.NewRecorder()
-
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
-
-		// when
-		registrationHandler.SignCSR(rr, req)
-
-		// then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
-
-		var errorResponse httperrors.ErrorResponse
-		err = json.Unmarshal(responseBody, &errorResponse)
-		require.NoError(t, err)
-
-		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
-		assert.Equal(t, "error", errorResponse.Error)
-		assert.Equal(t, http.StatusInternalServerError, rr.Code)
-	})
-
-	t.Run("should return 500 when couldn't load key", func(t *testing.T) {
-		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
-
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", appName).Return(token, true)
-
-		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
-
-		certUtils := &certMock.CertificateUtility{}
-		certUtils.On("LoadCSR", mock.Anything).Return(nil, nil)
-		certUtils.On("CheckCSRValues", mock.Anything, mock.Anything).Return(nil, nil)
-		certUtils.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
-		certUtils.On("LoadKey", caKeyEncoded).Return(nil, apperrors.Internal("error"))
-
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
-		require.NoError(t, err)
-		rr := httptest.NewRecorder()
-
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
-
-		// when
-		registrationHandler.SignCSR(rr, req)
-
-		// then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
-
-		var errorResponse httperrors.ErrorResponse
-		err = json.Unmarshal(responseBody, &errorResponse)
-		require.NoError(t, err)
-
-		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
-		assert.Equal(t, "error", errorResponse.Error)
-		assert.Equal(t, http.StatusInternalServerError, rr.Code)
-	})
-
-	t.Run("should return 500 when couldn't load CSR", func(t *testing.T) {
-		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
-
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", appName).Return(token, true)
-
-		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
-
-		certUtils := &certMock.CertificateUtility{}
-		certUtils.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
-		certUtils.On("LoadKey", caKeyEncoded).Return(caKey, nil)
-		certUtils.On("LoadCSR", tokenRequest.CSR).Return(nil, apperrors.Internal("error"))
-
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
-		require.NoError(t, err)
-		rr := httptest.NewRecorder()
-
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
-
-		// when
-		registrationHandler.SignCSR(rr, req)
-
-		// then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
-
-		var errorResponse httperrors.ErrorResponse
-		err = json.Unmarshal(responseBody, &errorResponse)
-		require.NoError(t, err)
-
-		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
-		assert.Equal(t, "error", errorResponse.Error)
-		assert.Equal(t, http.StatusInternalServerError, rr.Code)
-	})
-
-	t.Run("should return 500 when failed to check CSR values", func(t *testing.T) {
-		// given
-		url := fmt.Sprintf("/v1/applications/%s/client-cert?token=%s", appName, token)
-
-		tokenCache := &tokensMock.TokenCache{}
-		tokenCache.On("Get", appName).Return(token, true)
-
-		secretsRepository := &secrectsMock.Repository{}
-		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
-
-		certUtils := &certMock.CertificateUtility{}
-		certUtils.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
-		certUtils.On("LoadKey", caKeyEncoded).Return(caKey, nil)
-		certUtils.On("LoadCSR", tokenRequest.CSR).Return(csr, nil)
-
-		subjectValues := certificates.CSRSubject{
-			CName:              appName,
-			Country:            country,
-			Organization:       organization,
-			OrganizationalUnit: organizationalUnit,
-			Locality:           locality,
-			Province:           province,
+		dummyClientContext := dummyClientContext{}
+		connectorClientExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+			return dummyClientContext, nil
 		}
-		certUtils.On("CheckCSRValues", csr, subjectValues).Return(apperrors.Forbidden("error"))
 
-		registrationHandler := createSignatureHandler(tokenCache, certUtils, secretsRepository)
+		signatureHandler := NewSignatureHandler(nil, nil, connectorClientExtractor, host)
+
+		incorrectBase64Body := compact([]byte("{\"csr\":\"not base 64\"}"))
+		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(incorrectBase64Body))
+		require.NoError(t, err)
+		rr := httptest.NewRecorder()
+
+		// when
+		signatureHandler.SignCSR(rr, req)
+
+		// then
+		errorResponse := readErrorResponse(t, rr.Body)
+
+		assert.Equal(t, http.StatusBadRequest, errorResponse.Code)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+	})
+
+	t.Run("should return 500 when failed to sign CSR", func(t *testing.T) {
+		// given
+		certService := &certMock.Service{}
+		certService.On("SignCSR", decodedCSR, commonName).Return("", apperrors.Internal("error"))
+
+		dummyClientContext := dummyClientContext{}
+		connectorClientExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+			return dummyClientContext, nil
+		}
+
+		signatureHandler := NewSignatureHandler(nil, certService, connectorClientExtractor, host)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
-		req = mux.SetURLVars(req, map[string]string{"appName": appName})
-
 		// when
-		registrationHandler.SignCSR(rr, req)
+		signatureHandler.SignCSR(rr, req)
 
 		// then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
+		errorResponse := readErrorResponse(t, rr.Body)
 
-		var errorResponse httperrors.ErrorResponse
-		err = json.Unmarshal(responseBody, &errorResponse)
-		require.NoError(t, err)
-
-		assert.Equal(t, http.StatusForbidden, errorResponse.Code)
-		assert.Equal(t, "error", errorResponse.Error)
-		assert.Equal(t, http.StatusForbidden, rr.Code)
+		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
+		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
 }
 
-func createSignatureHandler(tokenCache tokencache.TokenCache, certUtils certificates.CertificateUtility, secretsRepository secrets.Repository) SignatureHandler {
-	subjectValues := certificates.CSRSubject{
-		CName:              appName,
-		Country:            country,
-		Organization:       organization,
-		OrganizationalUnit: organizationalUnit,
-		Locality:           locality,
-		Province:           province,
-	}
+func readErrorResponse(t *testing.T, body io.Reader) httperrors.ErrorResponse {
+	responseBody, err := ioutil.ReadAll(body)
+	require.NoError(t, err)
 
-	return NewSignatureHandler(tokenCache, certUtils, secretsRepository, host, domain, subjectValues)
+	var errorResponse httperrors.ErrorResponse
+	err = json.Unmarshal(responseBody, &errorResponse)
+	require.NoError(t, err)
+
+	return errorResponse
 }
 
 func compact(src []byte) []byte {

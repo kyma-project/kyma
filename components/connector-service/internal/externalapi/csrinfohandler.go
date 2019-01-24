@@ -16,27 +16,27 @@ const (
 )
 
 type CSRInfoHandler struct {
-	tokenCreator         tokens.Creator
-	serializerExtractor  httpcontext.ConnectorClientExtractor
-	apiInfoURLsGenerator APIUrlsGenerator
-	host                 string
-	csrSubject           certificates.CSRSubject
+	tokenCreator             tokens.Creator
+	connectorClientExtractor httpcontext.ConnectorClientExtractor
+	apiInfoURLsGenerator     APIUrlsGenerator
+	host                     string
+	csrSubject               certificates.CSRSubject
 }
 
-func NewCSRInfoHandler(tokenCreator tokens.Creator, serializerExtractor httpcontext.ConnectorClientExtractor, apiInfoURLsGenerator APIUrlsGenerator, host string, subjectValues certificates.CSRSubject) InfoHandler {
+func NewCSRInfoHandler(tokenCreator tokens.Creator, connectorClientExtractor httpcontext.ConnectorClientExtractor, apiInfoURLsGenerator APIUrlsGenerator, host string, subjectValues certificates.CSRSubject) InfoHandler {
 
 	return &CSRInfoHandler{
-		tokenCreator:         tokenCreator,
-		serializerExtractor:  serializerExtractor,
-		apiInfoURLsGenerator: apiInfoURLsGenerator,
-		host:                 host,
-		csrSubject:           subjectValues,
+		tokenCreator:             tokenCreator,
+		connectorClientExtractor: connectorClientExtractor,
+		apiInfoURLsGenerator:     apiInfoURLsGenerator,
+		host:                     host,
+		csrSubject:               subjectValues,
 	}
 }
 
 func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
-	connectorClientContext, err := ih.serializerExtractor(r.Context())
+	connectorClientContext, err := ih.connectorClientExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return

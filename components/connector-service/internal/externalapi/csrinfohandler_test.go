@@ -27,17 +27,17 @@ const (
 	application = "application"
 )
 
-type dummyContext struct{}
+type dummyClientContext struct{}
 
-func (dc dummyContext) ToJSON() ([]byte, error) {
+func (dc dummyClientContext) ToJSON() ([]byte, error) {
 	return []byte("test"), nil
 }
 
-func (dc dummyContext) GetApplication() string {
+func (dc dummyClientContext) GetApplication() string {
 	return application
 }
 
-func (dc dummyContext) GetCommonName() string {
+func (dc dummyClientContext) GetCommonName() string {
 	return commonName
 }
 
@@ -53,7 +53,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		Province:           province,
 	}
 
-	dummyClientContext := dummyContext{}
+	dummyClientContext := dummyClientContext{}
 	connectorClientExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
 		return dummyClientContext, nil
 	}
