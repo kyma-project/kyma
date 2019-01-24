@@ -2,9 +2,10 @@ package authz
 
 import (
 	"context"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"
 	"k8s.io/apiserver/pkg/authorization/authorizer"
-	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
