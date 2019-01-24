@@ -8,7 +8,7 @@ and a custom Envoy filter.
 ### Authentication
 
 The Authentication Policy is configured with the default Kyma OpenID Connect provider, Dex. This means that you must use an ID token issued by Dex to access GraphQL.
-The Authentication Policy is defined in [this](./templates/authentication.yaml) file.
+The Authentication Policy is defined in ./templates/authentication.yaml file.
 
 ### Custom Envoy filter
 
@@ -18,7 +18,7 @@ The Envoy filter extracts security-related attributes from GraphQL queries. Thes
 
 - **kyma-graphql-resources** - this header contains the names of the queried resources. The names are comma-separated and sorted in alphabetical order. The list is enclosed with curly braces.
 
-The Envoy filter is registered using the EnvoyFilter custom resource. The source code of the Envoy filter, in the form of a LUA script, is located in [this](./scripts) directory.
+The Envoy filter is registered using the EnvoyFilter custom resource. The source code of the Envoy filter, in the form of a LUA script, is located in ./scripts directory.
 
 ### Authorization
 
