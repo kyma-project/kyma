@@ -73,20 +73,19 @@ A successful call returns the following response:
 
 ## Generate a CSR and send it to Kyma
 
-Generate a CSR using the certificate subject obtained in the previous step:
+Generate a CSR using the certificate subject data obtained in the previous step:
 ```
 openssl genrsa -out generated.key 2048
 openssl req -new -sha256 -out generated.csr -key generated.key -subj "/OU=Test/O=TestOrg/L=Waldorf/ST=Waldorf/C=DE/CN={APP_NAME}"
 openssl base64 -in generated.csr
 ```
 
-Send the encoded CSR to Kyma using the token returned in the **status.token** field of the TokenRequest CR. Run:
-
+Send the encoded CSR to Kyma. Run:
 ```
-curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' https://connector-service.{CLUSTER_DOMAIN}/v1/applications/{APP_NAME}/client-certs?token={TOKEN}
+curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN}
 ```
 
-The response contains a valid client certificate signed by the Kyma Certificate Authority:
+The response contains a valid client certificate signed by the Kyma Certificate Authority.
 ```
 {
     "crt":"BASE64_ENCODED_CRT"
@@ -97,13 +96,13 @@ After you receive the certificate, decode it and use it in your application. Reg
 
 ## Call the Metadata and Event services on local deployment
 
-When you connect an external solution to a local Kyma deployment, you must pass the NodePort of the `application-connector-nginx-ingress-controller` to successfully call the Application Registry and the Event Service.
+When you connect an external solution to a local Kyma deployment, you must pass the NodePort of the `application-connector-nginx-ingress-controller` to successfully call the Metadata Service and the Event Service.
 
 - To get the NodePort, run:
   ```
   kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
   ```
-- Pass the NodePort along with the generated certificate in your calls to the Metadata and Event services. For example:
+- When you send requests to the Metadata Service and the Event Service, pass the NodePort along with the generated certificate and key. For example:
   ```
   curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
   ```
