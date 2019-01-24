@@ -3,12 +3,9 @@
 # Declare variables to be passed into your templates.
 global:
   natsStreaming:
-    fullname: "nats-streaming"
-    name: "nats-streaming"
-    namespace: "natss"
+    url: "http://nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
-    ports:
-      client: "4222"
+
   publish:
     maxRequests: 16
     resources:
