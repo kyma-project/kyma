@@ -71,7 +71,8 @@ metadata:
     installer: overrides
     component: istio
 data:
-  gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
+   gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
+   global.proxy.excludeIPRanges: "__PROXY_EXCLUDE_IP_RANGES__"
 ---
 apiVersion: v1
 kind: ConfigMap
