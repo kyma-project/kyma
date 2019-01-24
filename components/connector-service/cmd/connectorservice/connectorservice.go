@@ -47,7 +47,6 @@ func main() {
 	tokenCache := tokencache.NewTokenCache(options.tokenExpirationMinutes)
 	tokenGenerator := tokens.NewTokenGenerator(options.tokenLength)
 	tokenService := tokens.NewTokenService(tokenCache, tokenGenerator.NewToken)
-	certUtil := certificates.NewCertificateUtility()
 
 	globalMiddlewares, appErr := monitoring.SetupMonitoringMiddleware()
 	if appErr != nil {
@@ -55,7 +54,7 @@ func main() {
 	}
 
 	internalHandler := newInternalHandler(tokenService, options, globalMiddlewares)
-	externalHandler := newExternalHandler(tokenService, certUtil, options, env, globalMiddlewares)
+	externalHandler := newExternalHandler(tokenService, options, env, globalMiddlewares)
 
 	externalSrv := &http.Server{
 		Addr:    ":" + strconv.Itoa(options.externalAPIPort),
@@ -87,7 +86,7 @@ func main() {
 	wg.Wait()
 }
 
-func newExternalHandler(tokenService tokens.Service, utility certificates.CertificateUtility, opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc) http.Handler {
+func newExternalHandler(tokenService tokens.Service, opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc) http.Handler {
 	secretsRepository, appErr := newSecretsRepository(opts.namespace)
 	if appErr != nil {
 		log.Infof("Failed to create secrets repository. %s", appErr.Error())
@@ -102,11 +101,13 @@ func newExternalHandler(tokenService tokens.Service, utility certificates.Certif
 		Province:           env.province,
 	}
 
+	certificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(), "nginx-auth-ca", subjectValues)
+
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenService, middlewares.ResolveApplicationContextExtender)
 	appAPIUrlsGenerator := externalapi.NewApplicationApiUrlsStrategy(opts.appRegistryHost, opts.eventsHost, opts.getInfoURL, opts.connectorServiceHost)
 
 	appHandlerConfig := externalapi.Config{
-		TokenCreator:     tokenService,
+		TokenService:     tokenService,
 		Host:             opts.connectorServiceHost,
 		Subject:          subjectValues,
 		Middlewares:      []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware},
@@ -118,12 +119,13 @@ func newExternalHandler(tokenService tokens.Service, utility certificates.Certif
 	runtimeAPIUrlsGenerator := externalapi.NewRuntimeApiUrlsStrategy(opts.connectorServiceHost)
 
 	runtimeHandlerConfig := externalapi.Config{
-		TokenCreator:     tokenService,
+		TokenService:     tokenService,
 		Host:             opts.connectorServiceHost,
 		Subject:          subjectValues,
 		Middlewares:      []mux.MiddlewareFunc{clusterTokenResolverMiddleware.Middleware},
 		ContextExtractor: httpcontext.ExtractClusterContext,
 		APIUrlsGenerator: runtimeAPIUrlsGenerator,
+		CertService:      certificateService,
 	}
 
 	return externalapi.NewHandler(appHandlerConfig, runtimeHandlerConfig, globalMiddlewares)

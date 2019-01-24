@@ -1,6 +1,8 @@
 package tokens
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"testing"
 
@@ -33,8 +35,9 @@ func TestService_Save(t *testing.T) {
 		}
 
 		tokenCache := &mocks.TokenCache{}
-		tokenCache.On("Put", payload, token)
+		tokenCache.On("Put", token, payload)
 		tokenGenerator := func() (string, apperrors.AppError) { return token, nil }
+
 		tokenService := NewTokenService(tokenCache, tokenGenerator)
 
 		generatedToken, err := tokenService.Save(serializable)
@@ -70,4 +73,68 @@ func TestService_Save(t *testing.T) {
 
 		require.Error(t, err)
 	})
+}
+
+func TestTokenService_Replace(t *testing.T) {
+	newToken := "newToken"
+
+	t.Run("should delete token before saving new one", func(t *testing.T) {
+
+		serializable := dummySerializable{
+			Value: []byte(payload),
+			Error: nil,
+		}
+
+		tokenCache := &mocks.TokenCache{}
+		tokenCache.On("Delete", token)
+		tokenCache.On("Put", newToken, payload)
+		tokenGenerator := func() (string, apperrors.AppError) { return newToken, nil }
+
+		tokenService := NewTokenService(tokenCache, tokenGenerator)
+
+		generatedToken, err := tokenService.Replace(token, serializable)
+
+		require.NoError(t, err)
+		assert.Equal(t, newToken, generatedToken)
+	})
+}
+
+func TestTokenService_Resolve(t *testing.T) {
+
+	dummyString := "data"
+	encodedData := string(compact([]byte("{\"data\":\"data\"}")))
+
+	type data struct {
+		Data string `json:"data"`
+	}
+
+	dummyData := data{Data: dummyString}
+
+	t.Run("shoud resolve token", func(t *testing.T) {
+		// given
+		tokenCache := &mocks.TokenCache{}
+		tokenCache.On("Get", token).Return(encodedData, true)
+
+		var destination data
+
+		tokenService := NewTokenService(tokenCache, nil)
+
+		// when
+		err := tokenService.Resolve(token, &destination)
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, dummyData.Data, destination.Data)
+	})
+
+	// TODO - more tests
+}
+
+func compact(src []byte) []byte {
+	buffer := new(bytes.Buffer)
+	err := json.Compact(buffer, src)
+	if err != nil {
+		return src
+	}
+	return buffer.Bytes()
 }

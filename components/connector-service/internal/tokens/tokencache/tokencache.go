@@ -7,9 +7,9 @@ import (
 )
 
 type TokenCache interface {
-	Put(app string, token string)
-	Get(app string) (string, bool)
-	Delete(app string)
+	Put(token string, data string)
+	Get(token string) (string, bool)
+	Delete(token string)
 }
 
 type tokenCache struct {
@@ -22,19 +22,19 @@ func NewTokenCache(expirationMinutes int) TokenCache {
 	}
 }
 
-func (c *tokenCache) Put(app string, token string) {
-	c.tokenCache.Set(app, token, cache.DefaultExpiration)
+func (c *tokenCache) Put(token string, data string) {
+	c.tokenCache.Set(token, data, cache.DefaultExpiration)
 }
 
-func (c *tokenCache) Get(app string) (string, bool) {
-	token, found := c.tokenCache.Get(app)
+func (c *tokenCache) Get(token string) (string, bool) {
+	data, found := c.tokenCache.Get(token)
 	if !found {
 		return "", found
 	}
 
-	return token.(string), found
+	return data.(string), found
 }
 
-func (c *tokenCache) Delete(app string) {
-	c.tokenCache.Delete(app)
+func (c *tokenCache) Delete(token string) {
+	c.tokenCache.Delete(token)
 }

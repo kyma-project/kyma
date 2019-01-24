@@ -51,14 +51,19 @@ func (svc *tokenService) Save(serializableContext httpcontext.Serializer) (strin
 		return "", apperrors.Internal("Failed to generate token, %s", err.Error())
 	}
 
-	svc.store.Put(string(jsonData), token)
+	svc.store.Put(token, string(jsonData))
 
 	return token, nil
 }
 
 func (svc *tokenService) Replace(token string, serializableContext httpcontext.Serializer) (string, apperrors.AppError) {
-	// TODO
-	return "", nil
+	svc.store.Delete(token)
+
+	return svc.Save(serializableContext)
+}
+
+func (svc *tokenService) Delete(token string) {
+	svc.store.Delete(token)
 }
 
 func (svc *tokenService) Resolve(token string, destination interface{}) apperrors.AppError {
