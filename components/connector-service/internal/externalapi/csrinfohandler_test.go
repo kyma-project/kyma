@@ -54,7 +54,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 	}
 
 	dummyContext := dummyContext{}
-	contextExtractor := func(ctx context.Context) (httpcontext.KymaContext, apperrors.AppError) {
+	contextExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
 		return dummyContext, nil
 	}
 
@@ -105,7 +105,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		tokenCreator := &tokenMocks.Creator{}
 		apiURLsGenerator := &mocks.APIUrlsGenerator{}
 
-		errorExtractor := func(ctx context.Context) (httpcontext.KymaContext, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 

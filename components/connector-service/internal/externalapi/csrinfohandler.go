@@ -17,13 +17,13 @@ const (
 
 type CSRInfoHandler struct {
 	tokenCreator         tokens.Creator
-	serializerExtractor  httpcontext.SerializerExtractor
+	serializerExtractor  httpcontext.ConnectorClientExtractor
 	apiInfoURLsGenerator APIUrlsGenerator
 	host                 string
 	csr                  csrInfo
 }
 
-func NewCSRInfoHandler(tokenCreator tokens.Creator, serializerExtractor httpcontext.SerializerExtractor, apiInfoURLsGeneretor APIUrlsGenerator, host string, subjectValues certificates.CSRSubject) InfoHandler {
+func NewCSRInfoHandler(tokenCreator tokens.Creator, serializerExtractor httpcontext.ConnectorClientExtractor, apiInfoURLsGeneretor APIUrlsGenerator, host string, subjectValues certificates.CSRSubject) InfoHandler {
 	csr := csrInfo{
 		Country:            subjectValues.Country,
 		Organization:       subjectValues.Organization,

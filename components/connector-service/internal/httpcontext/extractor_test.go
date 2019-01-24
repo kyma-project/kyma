@@ -26,7 +26,7 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 
 		ctx := appCtxPayload.ExtendContext(context.Background())
 
-		serializable, err := ExtractSerializableApplicationContext(ctx)
+		serializable, err := ExtractApplicationContext(ctx)
 		require.NoError(t, err)
 
 		extractedContext, ok := serializable.(ApplicationContext)
@@ -36,7 +36,7 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 	})
 
 	t.Run("should fail when there is no ApplicationContext", func(t *testing.T) {
-		_, err := ExtractSerializableApplicationContext(context.Background())
+		_, err := ExtractApplicationContext(context.Background())
 		require.Error(t, err)
 
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
@@ -49,7 +49,7 @@ func Test_ExtractSerializableClusterContext(t *testing.T) {
 
 		ctx := clusterCtxPayload.ExtendContext(context.Background())
 
-		serializable, err := ExtractSerializableClusterContext(ctx)
+		serializable, err := ExtractClusterContext(ctx)
 		require.NoError(t, err)
 
 		extractedContext, ok := serializable.(ClusterContext)
@@ -59,7 +59,7 @@ func Test_ExtractSerializableClusterContext(t *testing.T) {
 	})
 
 	t.Run("should fail when there is no ClusterContext", func(t *testing.T) {
-		_, err := ExtractSerializableClusterContext(context.Background())
+		_, err := ExtractClusterContext(context.Background())
 		require.Error(t, err)
 
 		assert.Equal(t, apperrors.CodeInternal, err.Code())

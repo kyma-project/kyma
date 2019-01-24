@@ -6,10 +6,9 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
 
-// TODO - rename
-type SerializerExtractor func(ctx context.Context) (KymaContext, apperrors.AppError)
+type ConnectorClientExtractor func(ctx context.Context) (ConnectorClientContext, apperrors.AppError)
 
-func ExtractSerializableApplicationContext(ctx context.Context) (KymaContext, apperrors.AppError) {
+func ExtractApplicationContext(ctx context.Context) (ConnectorClientContext, apperrors.AppError) {
 	appCtx, ok := ctx.Value(ApplicationContextKey).(ApplicationContext)
 	if !ok {
 		return nil, apperrors.Internal("Failed to create params when reading ApplicationContext")
@@ -18,7 +17,7 @@ func ExtractSerializableApplicationContext(ctx context.Context) (KymaContext, ap
 	return appCtx, nil
 }
 
-func ExtractSerializableClusterContext(ctx context.Context) (KymaContext, apperrors.AppError) {
+func ExtractClusterContext(ctx context.Context) (ConnectorClientContext, apperrors.AppError) {
 	clusterCtx, ok := ctx.Value(ClusterContextKey).(ClusterContext)
 	if !ok {
 		return nil, apperrors.Internal("Failed to create params when reading ClusterContext")

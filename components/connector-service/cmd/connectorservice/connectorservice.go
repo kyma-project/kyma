@@ -110,7 +110,7 @@ func newExternalHandler(tokenService tokens.Service, utility certificates.Certif
 		Host:             opts.connectorServiceHost,
 		Subject:          subjectValues,
 		Middlewares:      []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware},
-		ContextExtractor: httpcontext.ExtractSerializableApplicationContext,
+		ContextExtractor: httpcontext.ExtractApplicationContext,
 		APIUrlsGenerator: appAPIUrlsGenerator,
 	}
 
@@ -122,7 +122,7 @@ func newExternalHandler(tokenService tokens.Service, utility certificates.Certif
 		Host:             opts.connectorServiceHost,
 		Subject:          subjectValues,
 		Middlewares:      []mux.MiddlewareFunc{clusterTokenResolverMiddleware.Middleware},
-		ContextExtractor: httpcontext.ExtractSerializableClusterContext,
+		ContextExtractor: httpcontext.ExtractClusterContext,
 		APIUrlsGenerator: runtimeAPIUrlsGenerator,
 	}
 
@@ -139,7 +139,7 @@ func newInternalHandler(tokenService tokens.Service, opts *options, globalMiddle
 		Middlewares:      appHandlerMiddlewares,
 		TokenCreator:     tokenService,
 		CSRInfoURL:       fmt.Sprintf(appCSRInfoFmt, opts.connectorServiceHost),
-		ContextExtractor: httpcontext.ExtractSerializableApplicationContext,
+		ContextExtractor: httpcontext.ExtractApplicationContext,
 	}
 
 	runtimeHandlerMiddlewares := []mux.MiddlewareFunc{clusterCtxMiddleware.Middleware}
@@ -147,7 +147,7 @@ func newInternalHandler(tokenService tokens.Service, opts *options, globalMiddle
 		Middlewares:      runtimeHandlerMiddlewares,
 		TokenCreator:     tokenService,
 		CSRInfoURL:       fmt.Sprintf(runtimeCSRInfoFmt, opts.connectorServiceHost),
-		ContextExtractor: httpcontext.ExtractSerializableClusterContext,
+		ContextExtractor: httpcontext.ExtractClusterContext,
 	}
 
 	return internalapi.NewHandler(globalMiddlewares, appHandlerConfig, runtimeHandlerConfig)

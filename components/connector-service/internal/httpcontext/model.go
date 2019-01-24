@@ -14,8 +14,7 @@ const (
 	GroupHeader       = "Group"
 )
 
-// TODO - look for better name - maybe client context
-type KymaContext interface {
+type ConnectorClientContext interface {
 	GetApplication() string
 	ToJSON() ([]byte, error)
 	GetCommonName() string
@@ -29,7 +28,7 @@ type ContextExtender interface {
 	ExtendContext(ctx context.Context) context.Context
 }
 
-type ContextReader interface {
+type ConnectorClientReader interface {
 	GetApplication() string
 	GetCommonName() string
 }

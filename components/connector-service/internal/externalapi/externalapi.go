@@ -18,7 +18,7 @@ type Config struct {
 	Middlewares      []mux.MiddlewareFunc
 	TokenCreator     tokens.Creator
 	APIUrlsGenerator APIUrlsGenerator
-	ContextExtractor httpcontext.SerializerExtractor
+	ContextExtractor httpcontext.ConnectorClientExtractor
 	Host             string
 	Subject          certificates.CSRSubject
 }

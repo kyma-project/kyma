@@ -16,10 +16,8 @@ const (
 	RuntimeCertificatesURLFormat   = "https://%s/v1/runtimes/certificates"
 )
 
-// TODO - test
-
 type APIUrlsGenerator interface {
-	Generate(reader httpcontext.ContextReader) interface{}
+	Generate(reader httpcontext.ConnectorClientReader) interface{}
 }
 
 type applicationUrlsStrategy struct {
@@ -29,7 +27,7 @@ type applicationUrlsStrategy struct {
 	certURL         string
 }
 
-func (appInfoUrls applicationUrlsStrategy) Generate(reader httpcontext.ContextReader) interface{} {
+func (appInfoUrls applicationUrlsStrategy) Generate(reader httpcontext.ConnectorClientReader) interface{} {
 	return applicationApi{
 		MetadataURL:     fmt.Sprintf(MetadataURLFormat, appInfoUrls.appRegistryHost, reader.GetApplication()),
 		EventsURL:       fmt.Sprintf(EventsURLFormat, appInfoUrls.eventsHost, reader.GetApplication()),
@@ -56,7 +54,7 @@ type runtimeUrlsStrategy struct {
 	certURL string
 }
 
-func (runtimeInfoUrls runtimeUrlsStrategy) Generate(reader httpcontext.ContextReader) interface{} {
+func (runtimeInfoUrls runtimeUrlsStrategy) Generate(reader httpcontext.ConnectorClientReader) interface{} {
 	return runtimeApi{
 		InfoURL:         runtimeInfoUrls.infoURL,
 		CertificatesURL: runtimeInfoUrls.certURL,

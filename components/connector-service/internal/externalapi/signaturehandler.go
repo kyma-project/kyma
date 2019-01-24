@@ -23,7 +23,7 @@ type signatureHandler struct {
 	host                string
 	domainName          string
 	csr                 csrInfo
-	serializerExtractor httpcontext.SerializerExtractor
+	serializerExtractor httpcontext.ConnectorClientExtractor
 }
 
 func NewSignatureHandler(tokenCache tokencache.TokenCache, certUtil certificates.CertificateUtility, secretsRepository secrets.Repository,

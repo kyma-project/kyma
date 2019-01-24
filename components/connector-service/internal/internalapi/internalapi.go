@@ -15,7 +15,7 @@ type Config struct {
 	Middlewares      []mux.MiddlewareFunc
 	TokenCreator     tokens.Creator
 	CSRInfoURL       string
-	ContextExtractor httpcontext.SerializerExtractor
+	ContextExtractor httpcontext.ConnectorClientExtractor
 }
 
 type TokenHandler interface {

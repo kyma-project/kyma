@@ -16,10 +16,10 @@ const TokenURLFormat = "https://%s?token=%s"
 type tokenHandler struct {
 	tokenCreator        tokens.Creator
 	csrInfoURL          string
-	serializerExtractor httpcontext.SerializerExtractor
+	serializerExtractor httpcontext.ConnectorClientExtractor
 }
 
-func NewTokenHandler(tokenService tokens.Creator, csrInfoURL string, serializerExtractor httpcontext.SerializerExtractor) TokenHandler {
+func NewTokenHandler(tokenService tokens.Creator, csrInfoURL string, serializerExtractor httpcontext.ConnectorClientExtractor) TokenHandler {
 	return &tokenHandler{tokenCreator: tokenService, csrInfoURL: csrInfoURL, serializerExtractor: serializerExtractor}
 }
 
