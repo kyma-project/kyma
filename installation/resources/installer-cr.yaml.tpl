@@ -18,7 +18,7 @@ spec:
       namespace: "istio-system" # KNative comes with namespaces hardcoded so this one is only for installer
     - name: "istio-kyma-patch"
       namespace: "istio-system"
-    #- name: "prometheus-operator"
+    # - name: "prometheus-operator"
     #  namespace: "kyma-system"
     - name: "dex"
       namespace: "kyma-system"
