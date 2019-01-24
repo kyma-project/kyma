@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	apiName      = "test-pod"
+	apiName      = "test-api"
 	apiNamespace = "ui-api-acceptance-api"
 )
 
