@@ -135,7 +135,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
       --enable-addons "monitoring,http_application_routing" \
       --generate-ssh-keys
     ```
-2. Fetch credentials to your AKS cluster. Run:
+2. To configure kubectl to use your new cluster, run:
     ```
     az aks get-credentials --resource-group $RS_GROUP --name $CLUSTER_NAME
     ```
@@ -204,7 +204,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 ## Deploy Kyma
 
-1. Configure kubectl to use your new cluster. Add yourself as the cluster admin and deploy Kyma Installer with your configuration. Run:
+1. Configure kubectl to use your new cluster and deploy Kyma Installer with your configuration. Run:
     ```
     az aks get-credentials --resource-group $RS_GROUP --name $CLUSTER_NAME
     ```
