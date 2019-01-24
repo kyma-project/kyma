@@ -32,3 +32,6 @@ files:
   - path: "./kyma/docs/kyma/docs/04-07-aks-xip.io-domain.md"
     config:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
+  - path: "./kyma/docs/kyma/docs/037-inst-xip.io-domain.md"
+    config:
+      white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
