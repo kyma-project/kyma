@@ -24,10 +24,10 @@ type applicationUrlsStrategy struct {
 
 func (appInfoUrls applicationUrlsStrategy) Generate(reader httpcontext.ContextReader) interface{} {
 	return applicationApi{
-		MetadataURL: fmt.Sprintf(MetadataURLFormat, appInfoUrls.appRegistryHost, reader.GetApplication()),
-		EventsURL:   fmt.Sprintf(EventsURLFormat, appInfoUrls.eventsHost, reader.GetApplication()),
-		InfoURL:     appInfoUrls.infoURL,
-		CertURL:     appInfoUrls.certURL,
+		MetadataURL:     fmt.Sprintf(MetadataURLFormat, appInfoUrls.appRegistryHost, reader.GetApplication()),
+		EventsURL:       fmt.Sprintf(EventsURLFormat, appInfoUrls.eventsHost, reader.GetApplication()),
+		InfoURL:         appInfoUrls.infoURL,
+		CertificatesURL: appInfoUrls.certURL,
 	}
 }
 
@@ -35,7 +35,7 @@ func NewApplicationApiUrlsStrategy(appRegistryHost, eventsHost, inforURL, certUR
 	return &applicationUrlsStrategy{
 		appRegistryHost: appRegistryHost,
 		eventsHost:      eventsHost,
-		infoURL:         infoURL,
+		infoURL:         inforURL,
 		certURL:         certURL,
 	}
 }
@@ -47,8 +47,8 @@ type runtimeUrlsStrategy struct {
 
 func (runtimeInfoUrls runtimeUrlsStrategy) Generate(reader httpcontext.ContextReader) interface{} {
 	return runtimeApi{
-		InfoURL: runtimeInfoUrls.infoURL,
-		CertURL: appInfoUrls.certURL,
+		InfoURL:         runtimeInfoUrls.infoURL,
+		CertificatesURL: runtimeInfoUrls.certURL,
 	}
 }
 

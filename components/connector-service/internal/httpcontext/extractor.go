@@ -6,7 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
 
-type SerializerExtractor func(ctx context.Context) (Serializer, apperrors.AppError)
+type SerializerExtractor func(ctx context.Context) (KymaContext, apperrors.AppError)
 
 func ExtractSerializableApplicationContext(ctx context.Context) (Serializer, apperrors.AppError) {
 	appCtx, ok := ctx.Value(ApplicationContextKey).(ApplicationContext)

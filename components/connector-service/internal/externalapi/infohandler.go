@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	CsrURLFormat = "https://%s/v1/applications/%s/client-certs?token=%s"
+	CsrURLFormat = "https://%s/v1/applications/certificates?token=%s"
 )
 
 type infoHandler struct {
@@ -43,22 +43,22 @@ func NewInfoHandler(tokenCreator tokens.Creator, serializerExtractor httpcontext
 
 func (ih *infoHandler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
-	serializableContext, err := ih.serializerExtractor(r.Context())
+	kymaContext, err := ih.serializerExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	newToken, err := ih.tokenCreator.Replace(token, serializableContext)
+	newToken, err := ih.tokenCreator.Replace(token, kymaContext)
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	csrURL := fmt.Sprintf(CsrURLFormat, ih.host, reName, newToken)
-	apiURLs := ih.apiInfoUrlsStrategy.Generate(serializableContext)
+	csrURL := fmt.Sprintf(CsrURLFormat, ih.host, newToken)
+	apiURLs := ih.apiInfoUrlsStrategy.Generate(kymaContext)
 
-	certInfo := makeCertInfo(ih.csr, reName)
+	certInfo := makeCertInfo(ih.csr, kymaContext.GetCommonName())
 
 	httphelpers.RespondWithBody(w, 200, infoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
 }

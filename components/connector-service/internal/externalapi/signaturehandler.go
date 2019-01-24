@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
+	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 
@@ -17,13 +17,13 @@ import (
 )
 
 type signatureHandler struct {
-	tokenCache        tokencache.TokenCache
-	certUtil          certificates.CertificateUtility
-	secretsRepository secrets.Repository
-	host              string
-	domainName        string
-	csr               csrInfo
-	tokenParamsParser tokens.TokenParamsParser
+	tokenCache          tokencache.TokenCache
+	certUtil            certificates.CertificateUtility
+	secretsRepository   secrets.Repository
+	host                string
+	domainName          string
+	csr                 csrInfo
+	serializerExtractor httpcontext.SerializerExtractor
 }
 
 func NewSignatureHandler(tokenCache tokencache.TokenCache, certUtil certificates.CertificateUtility, secretsRepository secrets.Repository,
@@ -46,7 +46,7 @@ func NewSignatureHandler(tokenCache tokencache.TokenCache, certUtil certificates
 }
 
 func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
-	tokenParams, err := sh.tokenParamsParser(r.Context())
+	_, err := sh.serializerExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
@@ -63,7 +63,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 	// get data for CN
 
 	// --------------------------
-	csr, appErr := sh.loadAndCheckCSR(tokenRequest.CSR, reName)
+	csr, appErr := sh.loadAndCheckCSR(tokenRequest.CSR, "")
 	if appErr != nil {
 		httphelpers.RespondWithError(w, appErr)
 		return
@@ -75,7 +75,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sh.tokenCache.Delete(reName)
+	sh.tokenCache.Delete("")
 
 	httphelpers.RespondWithBody(w, 201, certResponse{CRT: signedCrt})
 }

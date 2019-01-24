@@ -14,6 +14,13 @@ const (
 	GroupHeader       = "Group"
 )
 
+// TODO - look for better name - maybe client context
+type KymaContext interface {
+	GetApplication() string
+	ToJSON() ([]byte, error)
+	GetCommonName() string
+}
+
 type Serializer interface {
 	ToJSON() ([]byte, error)
 }
@@ -24,6 +31,7 @@ type ContextExtender interface {
 
 type ContextReader interface {
 	GetApplication() string
+	GetCommonName() string
 }
 
 type ApplicationContext struct {
@@ -50,9 +58,10 @@ func (appCtx ApplicationContext) GetApplication() string {
 	return appCtx.Application
 }
 
-//func (ctx ApplicationContext) ToCN(format string) string {
-//	return ctx.Application
-//}
+func (appCtx ApplicationContext) GetCommonName() string {
+	// TODO - construct CN
+	return appCtx.Application
+}
 
 type ClusterContext struct {
 	Group  string
@@ -76,4 +85,9 @@ func (clsCtx ClusterContext) ExtendContext(ctx context.Context) context.Context 
 
 func (clsCtx ClusterContext) GetApplication() string {
 	return ""
+}
+
+func (clsCtx ClusterContext) GetCommonName() string {
+	// TODO - construct CN
+	return clsCtx.Group + clsCtx.Tenant
 }
