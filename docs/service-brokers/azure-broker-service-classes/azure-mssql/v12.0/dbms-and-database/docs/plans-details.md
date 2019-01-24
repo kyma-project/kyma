@@ -28,41 +28,41 @@ These are the provisioning parameters:
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `Location` | `string` | The Azure region in which to provision applicable resources. | Y | None. |
-| `Resource group` | `string` | The new or existing resource group with which to associate new resources. | Y | Creates a new resource group with a UUID as its name. |
-| `Tags` | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | N | ags (even if none are specified) are automatically supplemented with heritage: open-service-broker-azure. |
-| `Tags` | `array` | Tags to be applied to new resources, specified as key/value pairs. | N | ags (even if none are specified) are automatically supplemented with heritage: open-service-broker-azure. |
-| `firewallRules`  | `array` | Specifies the firewall rules to apply to the server. Definition follows. | N | `[]` Left unspecified, Firewall will default to only Azure IPs. If rules are provided, they must have valid values. |
-| `firewallRules[n].name` | `string` | Specifies the name of the generated firewall rule |Y | |
-| `firewallRules[n].startIPAddress` | `string` | Specifies the start of the IP range allowed by this firewall rule | Y | |
-| `firewallRules[n].endIPAddress` | `string` | Specifies the end of the IP range allowed by this firewall rule | Y | |
-| `connectionPolicy` | `string` | Changes connection policy if you want. Refer to [here](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-connectivity-architecture#connection-policy). Valid values are "Redirect", "Proxy", and "Default". | N | |
+| **Location** | `string` | The Azure region in which to provision applicable resources. | Yes | None. |
+| **Resource group** | `string` | The new or existing resource group with which to associate new resources. | Yes | Creates a new resource group with a UUID as its name. |
+| **Tags** | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | No | ags (even if none are specified) are automatically supplemented with heritage: open-service-broker-azure. |
+| **Tags** | `array` | Tags to be applied to new resources, specified as key/value pairs. | No | ags (even if none are specified) are automatically supplemented with heritage: open-service-broker-azure. |
+| **firewallRules**  | `array` | Specifies the firewall rules to apply to the server. Definition follows. | No | `[]` Left unspecified, Firewall will default to only Azure IPs. If rules are provided, they must have valid values. |
+| **firewallRules[n].name** | `string` | Specifies the name of the generated firewall rule |Y | |
+| **firewallRules[n].startIPAddress** | `string` | Specifies the start of the IP range allowed by this firewall rule | Yes | |
+| **firewallRules[n].endIPAddress** | `string` | Specifies the end of the IP range allowed by this firewall rule | Yes | |
+| **connectionPolicy** | `string` | Changes connection policy if you want. Refer to [here](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-connectivity-architecture#connection-policy). Valid values are "Redirect", "Proxy", and "Default". | No | |
 
 Additional Provision Parameters for : standard plan
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `dtus` | `integer` | Specifies Database transaction units, which represent a bundled measure of compute, storage, and IO resources. Valid values are 10, 20, 50, 100, 200, 400, 800, 1600, 3000 | N | 10 |
+| **dtus** | `integer` | Specifies Database transaction units, which represent a bundled measure of compute, storage, and IO resources. Valid values are 10, 20, 50, 100, 200, 400, 800, 1600, 3000 | No | 10 |
 
 Additional Provision Parameters for : premium plan
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `dtus` | `integer` | Specifies Database transaction units, which represent a bundled measure of compute, storage, and IO resources. Valid values are 125, 250, 500, 1000, 1750, 1000 | N | 125 |
+| **dtus** | `integer` | Specifies Database transaction units, which represent a bundled measure of compute, storage, and IO resources. Valid values are 125, 250, 500, 1000, 1750, 1000 | No | 125 |
 
 Additional Provision Parameters for: general-purpose
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `cores` | `integer` | Specifies vCores, which represent the logical CPU. Valid values are 2, 4, 8, 16, or 24, 32, 48, 80 | N | 2 |
-| `storage` | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 1048 | N | 5 |
+| **cores** | `integer` | Specifies vCores, which represent the logical CPU. Valid values are 2, 4, 8, 16, or 24, 32, 48, 80 | No | 2 |
+| **storage** | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 1048 | No | 5 |
 
 Additional Provision Parameters for: business-critical
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `cores` | `integer` | Specifies vCores, which represent the logical CPU. Valid values are 2, 4, 8, 16, or 24, 32, 48, 80 | N | 2 |
-| `storage` | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 1048 | N | 5 |
+| **cores** | `integer` | Specifies vCores, which represent the logical CPU. Valid values are 2, 4, 8, 16, or 24, 32, 48, 80 | No | 2 |
+| **storage** | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 1048 | No | 5 |
 
 ## Bind
 
@@ -78,15 +78,15 @@ Binding returns the following connection details and credentials:
 
 | Field Name | Type | Description |
 |------------|------|-------------|
-| `host` | `string` | The fully-qualified address of the SQL Server. |
-| `port` | `int` | The port number to connect to on the SQL Server. |
-| `database` | `string` | The name of the database. |
-| `username` | `string` | The name of the database user (in the form username@host). |
-| `password` | `string` | The password for the database user. |
-| `uri` | `string` | A uri string containing connection information. |
-| `jdbcUrl` | `string` | A fully formed JDBC url. |
-| `encrypt` | `boolean` | Flag indicating if the connection should be encrypted. |
-| `tags` | `string[]` | List of tags. |
+| **host** | `string` | The fully-qualified address of the SQL Server. |
+| **port** | `int` | The port number to connect to on the SQL Server. |
+| **database** | `string` | The name of the database. |
+| **username** | `string` | The name of the database user (in the form username@host). |
+| **password** | `string` | The password for the database user. |
+| **uri** | `string` | A uri string containing connection information. |
+| **jdbcUrl** | `string` | A fully formed JDBC url. |
+| **encrypt** | `boolean` | Flag indicating if the connection should be encrypted. |
+| **tags** | `string[]` | List of tags. |
 
 ## Update
 
@@ -96,11 +96,11 @@ Updates a previously provisioned SQL DB Database and DBMS.
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `firewallRules`  | `array` | Specifies the firewall rules to apply to the server. Definition follows. | N | `[]` Left unspecified, Firewall will default to only Azure IPs. If rules are provided, they must have valid values. |
-| `firewallRules[n].name` | `string` | Specifies the name of the generated firewall rule |Y | |
-| `firewallRules[n].startIPAddress` | `string` | Specifies the start of the IP range allowed by this firewall rule | Y | |
-| `firewallRules[n].endIPAddress` | `string` | Specifies the end of the IP range allowed by this firewall rule | Y | |
-| `connectionPolicy` | `string` | Changes connection policy if you want. Refer to [here](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-connectivity-architecture#connection-policy). Valid values are "Redirect", "Proxy", and "Default". | N | |
+| **firewallRules**  | `array` | Specifies the firewall rules to apply to the server. Definition follows. | No | `[]` Left unspecified, Firewall will default to only Azure IPs. If rules are provided, they must have valid values. |
+| **firewallRules[n].name** | `string` | Specifies the name of the generated firewall rule |Y | |
+| **firewallRules[n].startIPAddress** | `string` | Specifies the start of the IP range allowed by this firewall rule | Yes | |
+| **firewallRules[n].endIPAddress** | `string` | Specifies the end of the IP range allowed by this firewall rule | Yes | |
+| **connectionPolicy** | `string` | Changes connection policy if you want. Refer to [here](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-connectivity-architecture#connection-policy). Valid values are "Redirect", "Proxy", and "Default". | No | |
 
 Parameters for updating the SQL DB Database differ by plan. See each section for relevant parameters.
 
@@ -108,27 +108,27 @@ Additional Provision Parameters for : standard plan
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `dtu` | `integer` | Specifies Database transaction units, which represent a bundled measure of compute, storage, and IO resources. Valid values are 10, 20, 50, 100, 200, 400, 800, 1600, 3000 | N | 10 |
+| **dtu** | `integer` | Specifies Database transaction units, which represent a bundled measure of compute, storage, and IO resources. Valid values are 10, 20, 50, 100, 200, 400, 800, 1600, 3000 | No | 10 |
 
 Additional Provision Parameters for : premium plan
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `dtu` | `integer` | Specifies Database transaction units, which represent a bundled measure of compute, storage, and IO resources. Valid values are 125, 250, 500, 1000, 1750, 1000 | N | 125 |
+| **dtu** | `integer` | Specifies Database transaction units, which represent a bundled measure of compute, storage, and IO resources. Valid values are 125, 250, 500, 1000, 1750, 1000 | No | 125 |
 
 Additional Provision Parameters for: general-purpose
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `cores` | `integer` | Specifies vCores, which represent the logical CPU. Valid values are 2, 4, 8, 16, or 24, 32, 48, 80 | N | 2 |
-| `storage` | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 1048. Note, decreasing storage is not currently supported | N | 5 |
+| **cores** | `integer` | Specifies vCores, which represent the logical CPU. Valid values are 2, 4, 8, 16, or 24, 32, 48, 80 | No | 2 |
+| **storage** | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 1048. Note, decreasing storage is not currently supported | No | 5 |
 
 Additional Provision Parameters for: business-critical
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `cores` | `integer` | Specifies vCores, which represent the logical CPU. Valid values are 2, 4, 8, 16, or 24, 32, 48, 80 | N | 2 |
-| `storage` | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 1048. Note, decreasing storage is not currently supported | N | 5 |
+| **cores** | `integer` | Specifies vCores, which represent the logical CPU. Valid values are 2, 4, 8, 16, or 24, 32, 48, 80 | No | 2 |
+| **storage** | `integer` | Specifies the amount of storage to allocate in GB. Ranges from 5 to 1048. Note, decreasing storage is not currently supported | No | 5 |
 
 ## Unbind
 

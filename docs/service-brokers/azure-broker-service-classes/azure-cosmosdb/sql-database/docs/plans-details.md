@@ -19,7 +19,7 @@ Provisions a new CosmosDB database onto an existing database account that can be
 
 | Parameter Name | Type | Description | Required | Default Value |
 |----------------|------|-------------|----------|---------------|
-| `parentAlias` | `string` | Specifies the alias of the CosmosDB database account upon which the database should be provisioned. | Y | |
+| **parentAlias** | `string` | Specifies the alias of the CosmosDB database account upon which the database should be provisioned. | Yes | |
 
 ## Bind
 
@@ -35,13 +35,13 @@ Binding returns the following connection details and shared credentials:
 
 | Field Name | Type | Description |
 |------------|------|-------------|
-| `uri` | `string` | The fully-qualified address and port of the CosmosDB database account. |
-| `primaryKey` | `string` | A secret key used for connecting to the CosmosDB database. |
-| `primaryConnectionString` | `string` | The full connection string, which includes the URI and primary key. |
-| `databaseName` | `string` | The generated database name. |
-| `documentdb_database_id` | `string` | The database name provided in a legacy key for use with Azure libraries. |
-| `documentdb_host_endpoint` | `string` | The fully-qualified address and port of the CosmosDB database account provided in a legacy key for use with Azure libraries. |
-| `documentdb_master_key` | `string` | A secret key used for connecting to the CosmosDB database provided in a legacy key for use with Azure libraries. |
+| **uri** | `string` | The fully-qualified address and port of the CosmosDB database account. |
+| **primaryKey** | `string` | A secret key used for connecting to the CosmosDB database. |
+| **primaryConnectionString** | `string` | The full connection string, which includes the URI and primary key. |
+| **databaseName** | `string` | The generated database name. |
+| **documentdb_database_id** | `string` | The database name provided in a legacy key for use with Azure libraries. |
+| **documentdb_host_endpoint** | `string` | The fully-qualified address and port of the CosmosDB database account provided in a legacy key for use with Azure libraries. |
+| **documentdb_master_key** | `string` | A secret key used for connecting to the CosmosDB database provided in a legacy key for use with Azure libraries. |
 
 ## Deprovision
 
