@@ -37,8 +37,6 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
 ```
 >**NOTE:** Using this approach disables the Application Connector. 
 
-2. Follow [these](#installation-install-kyma-on-a-gke-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.
-
 ### Manual IP allocation
 
 1. Get public IP addresses for the load balancer of the GKE cluster to which you deploy Kyma and for the load balancer of the Application Connector.
@@ -67,8 +65,33 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
   ```
 (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__EXTERNAL_PUBLIC_IP__/$EXTERNAL_PUBLIC_IP/g" | sed -e "s/__REMOTE_ENV_IP__/$CONNECTOR_IP/g" | sed -e "s/__APPLICATION_CONNECTOR_DOMAIN__/$CONNECTOR_IP.xip.io/g" | sed -e "s/__SKIP_SSL_VERIFY__/true/g" | sed -e "s/__.*__//g" > my-kyma.yaml
   ```
-3. Follow [these](#installation-install-kyma-on-a-gke-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.  
+### Kyma installation
 
+You can either choose the pre-build image of the Kyma Installer or build your own.
+
+* To build your own image:
+  1. Build an image that is based on the current Installer image and includes the current installation and resources charts. Run:
+     ```
+     docker build -t kyma-installer:latest -f tools/kyma-installer/kyma.Dockerfile . --build-arg INSTALLER_VERSION=63484523
+     ```
+  2. Push the image to your Docker Hub:
+     ```
+     docker tag kyma-installer:latest [YOUR_DOCKER_LOGIN]/kyma-installer:latest
+     docker push [YOUR_DOCKER_LOGIN]/kyma-installer:latest
+     ```
+* To use a prebuild image, go to [this](https://github.com/kyma-project/kyma/releases/) page and check the version of the latest release. Your URL looks as follows:
+```eu.gcr.io/kyma-project/kyma-installer:{latest version}```
+
+In the `my-kyma.yaml` file, change the image URL to the value taken from the previous step.
+```
+kind: Deployment
+metadata:
+  name: kyma-installer
+  namespace: kyma-installer
+......
+        image: eu.gcr.io/kyma-project/develop/installer:30bf314d
+```
+Follow [these](#installation-install-kyma-on-a-gke-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.
 
 ### Add the xip.io self-signed certificate to your OS trusted certificates
 
