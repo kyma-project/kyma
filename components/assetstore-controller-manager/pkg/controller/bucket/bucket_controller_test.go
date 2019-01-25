@@ -17,7 +17,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-const timeout = time.Second * 30
+const timeout = time.Second * 10
 const namespace = "default"
 
 var testErr = errors.New("Test")
@@ -48,6 +48,7 @@ func TestReconcileBucketCreationSuccess(t *testing.T) {
 
 	// Then
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 
 	bucket := &assetstorev1alpha1.Bucket{}
 	err = c.Get(context.TODO(), exp.Key, bucket)
@@ -65,7 +66,11 @@ func TestReconcileBucketCreationFailed(t *testing.T) {
 	instance := fixInitialBucket(name, namespace, "", "")
 
 	bucketHandler := &automock.BucketHandler{}
-	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "").Return(false, testErr)
+	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "").Return(false, testErr).Once()
+	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "").Return(true, nil).Once()
+	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
+	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "").Return(false, nil).Once()
+	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
 
 	cfg := prepareReconcilerTest(t, bucketHandler)
@@ -86,6 +91,9 @@ func TestReconcileBucketCreationFailed(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha1.BucketFailed))
 	g.Expect(bucket.Status.Reason).To(gomega.Equal("BucketCreationFailure"))
+	// Now creating bucket and setting policy will pass
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 }
 
 func TestReconcileBucketCheckFailed(t *testing.T) {
@@ -97,8 +105,9 @@ func TestReconcileBucketCheckFailed(t *testing.T) {
 
 	bucketHandler := &automock.BucketHandler{}
 	bucketHandler.On("CheckIfExists", exp.BucketName).Return(false, testErr).Once()
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil)
-	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, instance.Spec.Policy).Return(false, nil)
+	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
+	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, instance.Spec.Policy).Return(false, nil).Once()
+	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
 
 	cfg := prepareReconcilerTest(t, bucketHandler)
@@ -115,11 +124,6 @@ func TestReconcileBucketCheckFailed(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 	// should retry checking bucket
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
-	// check updated heartbeat time
-	bucket := &assetstorev1alpha1.Bucket{}
-	err = c.Get(context.TODO(), exp.Key, bucket)
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(bucket.Status.LastHeartbeatTime).NotTo(gomega.Equal(instance.Status.LastHeartbeatTime))
 }
 
 func TestReconcileBucketPolicyUpdateSuccess(t *testing.T) {
@@ -132,10 +136,11 @@ func TestReconcileBucketPolicyUpdateSuccess(t *testing.T) {
 
 	bucketHandler := &automock.BucketHandler{}
 	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "").Return(true, nil).Once()
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil)
-	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy1").Return(true, nil)
+	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Times(4)
+	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy1").Return(true, nil).Once()
+	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy1").Return(false, nil).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy2").Return(true, nil).Once()
-	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy2").Return(false, nil)
+	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy2").Return(false, nil).Once()
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
 
@@ -150,6 +155,7 @@ func TestReconcileBucketPolicyUpdateSuccess(t *testing.T) {
 	defer deleteAndExpectSuccess(cfg, exp, bucket)
 
 	// Then
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
@@ -187,8 +193,10 @@ func TestReconcileBucketUpdatePolicyFailed(t *testing.T) {
 
 	bucketHandler := &automock.BucketHandler{}
 	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "").Return(true, nil).Once()
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil)
-	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy1").Return(false, testErr)
+	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "").Return(false, nil).Once()
+	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
+	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy1").Return(false, testErr).Once()
+	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy1").Return(false, nil).Once()
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
 
@@ -203,6 +211,7 @@ func TestReconcileBucketUpdatePolicyFailed(t *testing.T) {
 	defer deleteAndExpectSuccess(cfg, exp, instance)
 
 	// Then
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
@@ -223,9 +232,9 @@ func TestReconcileBucketDeletedRemotely(t *testing.T) {
 	bucketHandler := &automock.BucketHandler{}
 	bucketHandlerBefore := bucketHandler
 	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "test").Return(true, nil).Once()
+	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "").Return(false, nil).Once()
 	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(false, nil)
-	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "").Return(false, nil)
+	bucketHandler.On("CheckIfExists", exp.BucketName).Return(false, nil).Twice()
 	defer bucketHandlerBefore.AssertExpectations(t)
 
 	cfg := prepareReconcilerTest(t, bucketHandler)
@@ -236,8 +245,10 @@ func TestReconcileBucketDeletedRemotely(t *testing.T) {
 	// When
 	err := c.Create(context.TODO(), bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+	defer deleteAndExpectSuccess(cfg, exp, bucket)
 
 	// Then
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 
 	bucket = &assetstorev1alpha1.Bucket{}
@@ -253,6 +264,7 @@ func TestReconcileBucketDeletedRemotely(t *testing.T) {
 	// Then
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
+
 	bucket = &assetstorev1alpha1.Bucket{}
 	err = c.Get(context.TODO(), exp.Key, bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
@@ -268,8 +280,8 @@ func TestReconcileBucketDeleteFailed(t *testing.T) {
 	instance := fixReadyBucket(name, namespace)
 
 	bucketHandler := &automock.BucketHandler{}
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil)
-	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, instance.Spec.Policy).Return(false, nil)
+	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
+	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, instance.Spec.Policy).Return(false, nil).Once()
 	bucketHandler.On("Delete", exp.BucketName).Return(testErr).Once()
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
@@ -288,6 +300,7 @@ func TestReconcileBucketDeleteFailed(t *testing.T) {
 	err = c.Delete(context.TODO(), instance)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 

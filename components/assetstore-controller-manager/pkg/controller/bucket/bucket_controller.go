@@ -82,6 +82,9 @@ type ReconcileBucket struct {
 	deletionFinalizer *bucketFinalizer
 }
 
+const ReasonNotFound = "BucketNotFound"
+const ReasonPolicyUpdateFailed = "BucketPolicyUpdateFailed"
+
 // Reconcile reads that state of the cluster for a Bucket object and makes changes based on the state read
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch;delete
 func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result, error) {
@@ -97,13 +100,16 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 	}
 
 	// Bucket is being deleted
-	handled, requeue, err := r.handleDeletionIfShould(instance)
-	if handled || err != nil {
-		return reconcile.Result{Requeue: requeue}, err
+	handled, err := r.handleDeletionIfShould(instance)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	if handled {
+		return reconcile.Result{}, nil
 	}
 
 	// Phase Empty or Failed
-	if instance.Status.Phase == "" || (instance.Status.Phase == assetstorev1alpha1.BucketFailed && instance.Status.Reason != "BucketNotFound") {
+	if instance.Status.Phase == "" || (instance.Status.Phase == assetstorev1alpha1.BucketFailed && instance.Status.Reason != ReasonNotFound) {
 		return r.handleInitialAndFailedState(instance)
 	}
 
@@ -124,34 +130,33 @@ func (r *ReconcileBucket) addFinalizerIfShould(instance *assetstorev1alpha1.Buck
 	r.deletionFinalizer.AddTo(instance)
 }
 
-func (r *ReconcileBucket) handleDeletionIfShould(instance *assetstorev1alpha1.Bucket) (bool, bool, error) {
+func (r *ReconcileBucket) handleDeletionIfShould(instance *assetstorev1alpha1.Bucket) (bool, error) {
 	if !r.isObjectBeingDeleted(instance) {
-		return false, false, nil
+		return false, nil
 	}
 
 	if !r.deletionFinalizer.IsDefinedIn(instance) {
-		return true, false, nil
+		return true, nil
 	}
 
 	bucketName := r.bucketNameForInstance(instance)
 	err := r.bucketHandler.Delete(bucketName)
-
 	if err != nil {
-		return false, true, err
+		return false, err
 	}
 
 	r.deletionFinalizer.DeleteFrom(instance)
 	err = r.Update(context.Background(), instance)
 	if err != nil {
-		return true, true, nil
+		return true, err
 	}
 
-	return true, false, nil
+	return true, nil
 }
 
 func (r *ReconcileBucket) handleInitialAndFailedState(instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
 	bucketName := r.bucketNameForInstance(instance)
-	_, err := r.bucketHandler.CreateIfDoesntExist(bucketName, instance.Spec.Region)
+	handled, err := r.bucketHandler.CreateIfDoesntExist(bucketName, instance.Spec.Region)
 	if err != nil {
 		updateStatusErr := r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
 			Phase:   assetstorev1alpha1.BucketFailed,
@@ -159,28 +164,40 @@ func (r *ReconcileBucket) handleInitialAndFailedState(instance *assetstorev1alph
 			Message: fmt.Sprintf("Bucket couldn't be created due to error %s", err.Error()),
 		})
 		if updateStatusErr != nil {
-			return reconcile.Result{Requeue: true}, nil
+			return reconcile.Result{}, updateStatusErr
 		}
 
 		return reconcile.Result{}, err
 	}
 
+	if !handled && instance.Status.Reason == ReasonPolicyUpdateFailed {
+		return r.updatePolicyIfShould(instance)
+	}
+
 	r.addFinalizerIfShould(instance)
-	_ = r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
+	err = r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
 		Phase:   assetstorev1alpha1.BucketReady,
 		Reason:  "BucketCreated",
 		Message: "Bucket has been successfully created",
 	})
-	return reconcile.Result{Requeue: true}, nil
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	return reconcile.Result{}, nil
 }
 
 func (r *ReconcileBucket) handleReadyState(instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
 	bucketName := r.bucketNameForInstance(instance)
-	policy := string(instance.Spec.Policy)
 
 	exists, err := r.bucketHandler.CheckIfExists(bucketName)
 	if err != nil {
 		return reconcile.Result{}, err
+	}
+
+	if !exists && instance.Status.Reason == ReasonNotFound {
+		log.Info(fmt.Sprintf("Bucket %s still doesn't exist. Scheduling requeue...", bucketName))
+		return reconcile.Result{RequeueAfter: r.requeueInterval}, nil
 	}
 
 	if !exists {
@@ -189,12 +206,19 @@ func (r *ReconcileBucket) handleReadyState(instance *assetstorev1alpha1.Bucket) 
 		r.deletionFinalizer.DeleteFrom(instance)
 		_ = r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
 			Phase:   assetstorev1alpha1.BucketFailed,
-			Reason:  "BucketNotFound",
+			Reason:  ReasonNotFound,
 			Message: fmt.Sprintf("Bucket %s doesn't exist anymore", bucketName),
 		})
-
-		return reconcile.Result{RequeueAfter: r.requeueInterval}, nil
+		return reconcile.Result{}, nil
 	}
+
+	// Compare policy
+	return r.updatePolicyIfShould(instance)
+}
+
+func (r *ReconcileBucket) updatePolicyIfShould(instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
+	bucketName := r.bucketNameForInstance(instance)
+	policy := string(instance.Spec.Policy)
 
 	// Compare policy
 	updated, err := r.bucketHandler.SetPolicyIfNotEqual(bucketName, policy)
@@ -205,7 +229,7 @@ func (r *ReconcileBucket) handleReadyState(instance *assetstorev1alpha1.Bucket) 
 			Message: fmt.Sprintf("Bucket policy couldn't be set due to error %s", err.Error()),
 		})
 		if updateStatusErr != nil {
-			return reconcile.Result{Requeue: true}, nil
+			return reconcile.Result{}, updateStatusErr
 		}
 
 		return reconcile.Result{}, err
@@ -218,16 +242,8 @@ func (r *ReconcileBucket) handleReadyState(instance *assetstorev1alpha1.Bucket) 
 			Message: "Bucket policy has been updated successfully",
 		})
 		if err != nil {
-			return reconcile.Result{Requeue: true}, err
+			return reconcile.Result{}, err
 		}
-
-		return reconcile.Result{RequeueAfter: r.requeueInterval}, nil
-	}
-
-	// Everything is OK
-	err = r.updateHeartbeatTime(instance)
-	if err != nil {
-		return reconcile.Result{Requeue: true}, err
 	}
 
 	return reconcile.Result{RequeueAfter: r.requeueInterval}, nil
@@ -239,11 +255,6 @@ func (r *ReconcileBucket) isObjectBeingDeleted(instance *assetstorev1alpha1.Buck
 
 func (r *ReconcileBucket) updateStatus(instance *assetstorev1alpha1.Bucket, status assetstorev1alpha1.BucketStatus) error {
 	instance.Status = status
-	instance.Status.LastHeartbeatTime = metav1.Now()
-	return r.Update(context.Background(), instance)
-}
-
-func (r *ReconcileBucket) updateHeartbeatTime(instance *assetstorev1alpha1.Bucket) error {
 	instance.Status.LastHeartbeatTime = metav1.Now()
 	return r.Update(context.Background(), instance)
 }
