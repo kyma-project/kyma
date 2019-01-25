@@ -38,10 +38,10 @@ These are the resources related to this CR:
 
 | Custom resource |   Description |
 |:----------:|:------|
-| Asset |  {Briefly describe the relation between the resources}. |
+| Asset |  Provides the name of the storage bucket which is referred to in the Asset CR. |
 
 These components use this CR:
 
 | Component   |   Description |
 |:----------:|:------|
-| Asset Store |  {Briefly describe the relation between the CR and the given component}. |
+| Asset Store |  Uses the Bucket CR for the storage bucket definition. |

@@ -122,4 +122,4 @@ These components use this CR:
 
 | Component   |   Description |
 |:----------:|:------|
-| Asset Store |  Uses the Asset CR for the details definition of the asset, including its location, and the name of the bucket in which it is stored. |
+| Asset Store |  Uses the Asset CR for the detailed asset definition, including its location and the name of the bucket in which it is stored. |
