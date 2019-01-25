@@ -33,7 +33,7 @@ Create a resource group that will contain all your resources:
 az group create --name $RS_GROUP --location $REGION
 ```
 
->**NOTE:** If you don't own a domain which you can use or you don't want to assign a domain to a cluster, see the [document](#installation-install-kyma-on-an-aks-with-wildcard-dns) which shows you how to create a cluster-based playground environment using a wildcard DNS provided by xip.io. 
+>**NOTE:** If you don't own a domain which you can use or you don't want to assign a domain to a cluster, see the [document](#installation-install-kyma-on-an-aks-cluster-with-wildcard-dns) which shows you how to create a cluster-based playground environment using a wildcard DNS provided by xip.io. 
 
 ## DNS setup
 
@@ -74,7 +74,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     ```
     mkdir letsencrypt
     ```
-4. Run the Certbot Docker image with the `letsencrypt` folder mounted. Certbot stores the TLS certificates in that folder. Export your email address:
+2. Run the Certbot Docker image with the `letsencrypt` folder mounted. Certbot stores the TLS certificates in that folder. Export your email address:
     ```
     export YOUR_EMAIL={YOUR_EMAIL}
     ```
@@ -103,7 +103,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     ```
     Copy the `TXT_VALUE`. 
     
-4. Open a new console and set the environment variables from the [Environment variables](#Environment-variables) section. Export the `TXT_VALUE`.
+3. Open a new console and set the environment variables from the [Environment variables](#installation-install-kyma-on-an-aks-cluster-environment-variables) section. Export the `TXT_VALUE`.
     
     ```
     export TXT_VALUE={YOUR_TXT_VALUE}
@@ -114,9 +114,9 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     az network dns record-set txt create -n "_acme-challenge.$SUB_DOMAIN" -g $RS_GROUP -z $DNS_DOMAIN --ttl 60 > /dev/null
     az network dns record-set txt add-record -n "_acme-challenge.$SUB_DOMAIN" -g $RS_GROUP -z $DNS_DOMAIN --value $TXT_VALUE
     ``` 
-5. Go back to the first console, wait 2 minutes and press enter. 
+4. Go back to the first console, wait 2 minutes and press enter. 
 
-6. Export the certificate and key as environment variables. Run these commands:
+5. Export the certificate and key as environment variables. Run these commands:
 
     ```
     export TLS_CERT=$(cat ./letsencrypt/live/$SUB_DOMAIN.$DNS_DOMAIN/fullchain.pem | base64 | sed 's/ /\\ /g')
