@@ -27,7 +27,7 @@ This Installation guide shows developers how to quickly deploy Kyma on an [Azure
   ```
   export KYMA_VERSION={KYMA_RELEASE_VERSION}
   ```
-
+  >**NOTE:** This step is valid since version 0.7.0
 
 * If you use a custom domain, set also these variables:
   ```
@@ -148,9 +148,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     ```
 
 3. Install Tiller and add additional privileges to be able to access readiness probes endpoints on your AKS cluster.
-At this point you have to decide if you want to install from release or from sources
     * from release
-    >**NOTE:** This step is valid since version 0.7.0
     ```
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/azure-crb-for-healthz.yaml
