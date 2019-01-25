@@ -18,7 +18,11 @@ func TestStorageBucket(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "foo",
 			Namespace: "default",
-		}}
+		},
+		Status: BucketStatus{
+			LastHeartbeatTime: metav1.Now(),
+		},
+	}
 	g := gomega.NewGomegaWithT(t)
 
 	// Test Create
