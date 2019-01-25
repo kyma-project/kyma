@@ -1,8 +1,8 @@
-# Knative Subscription Controller Resources
+# Knative subscription controller resources
 
-This folder includes the resources to deploy and test knative subscription controller under `event-bus/cmd/event-bus-subscription-controller-knative` on a cluster.
+This folder includes the resources you can use to deploy and test the Knative subscription controller on a cluster. You can find the controller [here](https://github.com/kyma-project/kyma/tree/master/components/event-bus/cmd/event-bus-publish-knative).
 
-Deploy knative subscription controller:
+Deploy the Knative subscription controller:
 
 ```
 kubectl apply -f .
