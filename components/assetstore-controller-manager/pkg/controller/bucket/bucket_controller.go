@@ -94,7 +94,7 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 
 		return reconcile.Result{}, err
 	}
-
+	
 	// Bucket is being deleted
 	handled, requeue, err := r.handleDeletionIfShould(instance)
 	if handled || err != nil {
@@ -135,7 +135,7 @@ func (r *ReconcileBucket) handleDeletionIfShould(instance *assetstorev1alpha1.Bu
 	bucketName := r.bucketNameForInstance(instance)
 	err := r.bucketHandler.Delete(bucketName)
 	if err != nil {
-		return true, false, err
+		return false, false, err
 	}
 
 	r.deletionFinalizer.DeleteFrom(instance)
@@ -178,7 +178,7 @@ func (r *ReconcileBucket) handleReadyState(instance *assetstorev1alpha1.Bucket) 
 
 	exists, err := r.bucketHandler.CheckIfExists(bucketName)
 	if err != nil {
-		return reconcile.Result{Requeue: true}, err
+		return reconcile.Result{}, err
 	}
 
 	if !exists {

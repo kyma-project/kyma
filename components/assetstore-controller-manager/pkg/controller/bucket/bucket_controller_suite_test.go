@@ -78,7 +78,7 @@ func prepareReconcilerTest(t *testing.T, handler buckethandler.BucketHandler) *t
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	reconciler, err := newReconciler(mgr, handler, 1*time.Second)
+	reconciler, err := newReconciler(mgr, handler, 60*time.Hour)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	recFn, requests := SetupTestReconcile(reconciler)
