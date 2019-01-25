@@ -93,7 +93,7 @@ func TestApisQuery(t *testing.T) {
 	assert.Equal(t, api.Spec.Hostname, apisRes.Apis[0].Hostname)
 	assert.Equal(t, api.Spec.Service.Name, apisRes.Apis[0].Service.Name)
 	assert.Equal(t, api.Spec.Service.Port, apisRes.Apis[0].Service.Port)
-	assert.Equal(t, 1, apisRes.Apis[0].AuthenticationPolicies)
+	assert.Equal(t, 1, len(apisRes.Apis[0].AuthenticationPolicies))
 	assert.Equal(t, api.Spec.Authentication[0].Type, apisRes.Apis[0].AuthenticationPolicies[0].AuthType)
 	assert.Equal(t, api.Spec.Authentication[0].Jwt.Issuer, apisRes.Apis[0].AuthenticationPolicies[0].Issuer)
 	assert.Equal(t, api.Spec.Authentication[0].Jwt.JwksUri, apisRes.Apis[0].AuthenticationPolicies[0].JwksURI)
