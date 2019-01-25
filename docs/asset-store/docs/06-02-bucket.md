@@ -38,7 +38,7 @@ These are the resources related to this CR:
 
 | Custom resource |   Description |
 |:----------:|:------|
-| Asset |  Provides the name of the storage bucket which is referred to in the Asset CR. |
+| Asset |  Provides the name of the storage bucket which the Asset CR refers to. |
 
 These components use this CR:
 
