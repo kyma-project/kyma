@@ -86,6 +86,7 @@ type ReconcileBucket struct {
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch;delete
 func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	instance := &assetstorev1alpha1.Bucket{}
+
 	err := r.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -94,7 +95,7 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 
 		return reconcile.Result{}, err
 	}
-	
+
 	// Bucket is being deleted
 	handled, requeue, err := r.handleDeletionIfShould(instance)
 	if handled || err != nil {
@@ -134,8 +135,9 @@ func (r *ReconcileBucket) handleDeletionIfShould(instance *assetstorev1alpha1.Bu
 
 	bucketName := r.bucketNameForInstance(instance)
 	err := r.bucketHandler.Delete(bucketName)
+
 	if err != nil {
-		return false, false, err
+		return false, true, err
 	}
 
 	r.deletionFinalizer.DeleteFrom(instance)
@@ -184,6 +186,7 @@ func (r *ReconcileBucket) handleReadyState(instance *assetstorev1alpha1.Bucket) 
 	if !exists {
 		// Bucket was created before, but has been deleted manually
 		log.Info(fmt.Sprintf("Bucket %s/%s has been deleted. Setting failed status...", instance.Namespace, instance.Name))
+		r.deletionFinalizer.DeleteFrom(instance)
 		_ = r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
 			Phase:   assetstorev1alpha1.BucketFailed,
 			Reason:  "BucketNotFound",

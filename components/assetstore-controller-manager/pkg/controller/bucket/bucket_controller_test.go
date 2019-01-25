@@ -227,7 +227,6 @@ func TestReconcile(t *testing.T) {
 		bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
 		bucketHandler.On("CheckIfExists", exp.BucketName).Return(false, nil)
 		bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "").Return(false, nil)
-		bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 		defer bucketHandlerBefore.AssertExpectations(t)
 
 		cfg := prepareReconcilerTest(t, bucketHandler)
@@ -238,7 +237,6 @@ func TestReconcile(t *testing.T) {
 		// When
 		err := c.Create(context.TODO(), bucket)
 		g.Expect(err).NotTo(gomega.HaveOccurred())
-		defer deleteAndExpectSuccess(cfg, exp, bucket)
 
 		// Then
 		g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
@@ -291,6 +289,10 @@ func TestReconcile(t *testing.T) {
 		err = c.Delete(context.TODO(), instance)
 		g.Expect(err).NotTo(gomega.HaveOccurred())
 
+		g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
+		g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
+
+		//Then
 		g.Eventually(func() bool {
 			bucket := &assetstorev1alpha1.Bucket{}
 			err := c.Get(context.TODO(), exp.Key, bucket)
@@ -320,6 +322,9 @@ func fixReadyBucket(name, namespace string) *assetstorev1alpha1.Bucket {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
+			Finalizers: []string{
+				DeleteBucketFinalizerName,
+			},
 		},
 		Spec: assetstorev1alpha1.BucketSpec{
 			Region: "",
