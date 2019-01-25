@@ -12,10 +12,11 @@ import (
 )
 
 const (
-	specAPIType          = "API"
-	specEventsType       = "Events"
-	CredentialsOAuthType = "OAuth"
-	CredentialsBasicType = "Basic"
+	specAPIType                   = "API"
+	specEventsType                = "Events"
+	CredentialsOAuthType          = "OAuth"
+	CredentialsBasicType          = "Basic"
+	CredentialsCertificateGenType = "CertificateGen"
 )
 
 // Manager contains operations for managing Application CRD

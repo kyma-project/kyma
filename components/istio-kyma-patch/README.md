@@ -40,3 +40,7 @@ application fails.
 `istio-system` Namespace. The system doesn't return an error if a resource listed in the delete file is not present in 
 the istio-system Namespace. See the [job ConfigMap](../../resources/istio-kyma-patch/templates/configmap.yaml) to see 
 which patches are applied by default.
+
+5. Enable default sidecar injection for Istio. By default, sidecar injection is enabled in the Namespaces labeled with `istio-injection: enabled`. The patch reverses this behavior: sidecar injection is enabled for all Namespaces, except those labeled with `istio-injection: disabled`.
+
+6. Disable sidecar injection in the `istio-system` Namespace.

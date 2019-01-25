@@ -55,7 +55,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --client_id=$(POD_NAME)
-            - --nats_url=nats://{{ template "nats-streaming.fullname" . }}:{{ toString .Values.global.natsStreaming.ports.client }}
+            - --nats_url={{ .Values.global.natsStreaming.url }}
             - --cluster_id={{ .Values.global.natsStreaming.clusterID }}
             - --tls_skip_verify={{ .Values.http.tlsSkipVerify }}
             - --subscription_name_header={{ .Values.global.push.http.subscriptionNameHeader }}
@@ -64,7 +64,7 @@ spec:
             - --trace_operation_name={{ .Values.trace.operationName }}
             - --check_events_activation={{ .Values.check.eventsActivation }}
           ports:
-            - name: http 
+            - name: http
               containerPort: {{ .Values.port }}
           livenessProbe:
             httpGet:

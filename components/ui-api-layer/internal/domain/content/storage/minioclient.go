@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/golang/glog"
-	"github.com/minio/minio-go"
+	minio "github.com/minio/minio-go"
 	"github.com/pkg/errors"
 )
 

@@ -1,24 +1,24 @@
-{{ if .Values.global.knative }}
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: test-knative-serving-acceptance
-  namespace: knative-serving
-  annotations:
-    "helm.sh/hook": test-success
-  labels:
-    "helm-chart-test": "true"
-spec:
-  containers:
-  - name: test
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_knative_serving_acceptance.dir }}knative-serving-acceptance-tests:{{ .Values.global.test_knative_serving_acceptance.version }}
-    env:
-    - name: INGRESSGATEWAY_ADDRESS
-      value: knative-ingressgateway.istio-system.svc.cluster.local
-    - name: DOMAIN_NAME
-      value: {{ .Values.global.domainName }}
-    - name: TARGET
-      value: {{ .Values.test.target }}
-  restartPolicy: Never
-{{ end }}
+#{{ if .Values.global.knative }}
+#---
+#apiVersion: v1
+#kind: Pod
+#metadata:
+#  name: test-knative-serving-acceptance
+#  namespace: knative-serving
+#  annotations:
+#    "helm.sh/hook": test-success
+#  labels:
+#    "helm-chart-test": "true"
+#spec:
+#  containers:
+#  - name: test
+#    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_knative_serving_acceptance.dir }}knative-serving-acceptance-tests:{{ .Values.global.test_knative_serving_acceptance.version }}
+#    env:
+#    - name: INGRESSGATEWAY_ADDRESS
+#      value: knative-ingressgateway.istio-system.svc.cluster.local
+#    - name: DOMAIN_NAME
+#      value: {{ .Values.global.domainName }}
+#    - name: TARGET
+#      value: {{ .Values.test.target }}
+#  restartPolicy: Never
+#{{ end }}

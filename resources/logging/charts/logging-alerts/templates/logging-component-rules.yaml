@@ -2,16 +2,8 @@
 groups:
 - name: logging-component
   rules:
-  - alert: OKLogDataVolumeUsageIsHigh
-    expr: kubelet_volume_stats_used_bytes{namespace="kube-system",persistentvolumeclaim="data-core-logging-oklog-0"} / kubelet_volume_stats_available_bytes{namespace="kube-system",persistentvolumeclaim="data-core-logging-oklog-0"} * 100 > 80
-    for: 10m
-    labels:
-      severity: critical
-    annotations:
-      description: PVC {{`{{$labels.namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume
-      summary: "PVC core-logging usage is high"
   - alert: OKLogPodMemoryUsageIsHigh
-    expr: container_memory_usage_bytes{namespace="kyma-system",pod_name="core-logging-oklog-0", container_name="oklog"} / container_spec_memory_limit_bytes{namespace="kyma-system", pod_name="core-logging-oklog-0", container_name="oklog"} * 100 > 90
+    expr: container_memory_usage_bytes{namespace="kyma-system",pod_name="logging-oklog-0", container_name="oklog"} / container_spec_memory_limit_bytes{namespace="kyma-system", pod_name="logging-oklog-0", container_name="oklog"} * 100 > 90
     for: 10m
     labels:
       severity: critical
@@ -19,7 +11,7 @@ groups:
       description: Pod {{`{{$labels.namespace}}`}}/{{`{{$labels.pod_name}}`}} is using {{`{{$value}}`}} % of the available memory.
       summary: "OK Log pod memory usage is high"
   - alert: LogspoutPodMemoryUsageIsHigh
-    expr: container_memory_usage_bytes{namespace="kyma-system", pod_name=~"core-logging-logspout(.*)",container_name="logspout"} / container_spec_memory_limit_bytes{namespace="kyma-system", pod_name=~"core-logging-logspout(.*)",container_name="logspout"} * 100 > 90
+    expr: container_memory_usage_bytes{namespace="kyma-system", pod_name=~"logging-logspout(.*)",container_name="logspout"} / container_spec_memory_limit_bytes{namespace="kyma-system", pod_name=~"logging-logspout(.*)",container_name="logspout"} * 100 > 90
     for: 10m
     labels:
       severity: critical
@@ -27,7 +19,7 @@ groups:
       description: Pod {{`{{$labels.namespace}}`}}/{{`{{$labels.pod_name}}`}} is using {{`{{$value}}`}} % of the available volume.
       summary: "LogSpout memory usage is high"
   - alert: LogspoutDaemonSetRolloutStuck
-    expr: kube_daemonset_status_number_ready{daemonset="core-logging-logspout",namespace="kyma-system"}/kube_daemonset_status_desired_number_scheduled{daemonset="core-logging-logspout",namespace="kyma-system"} * 100 < 100
+    expr: kube_daemonset_status_number_ready{daemonset="logging-logspout",namespace="kyma-system"}/kube_daemonset_status_desired_number_scheduled{daemonset="logging-logspout",namespace="kyma-system"} * 100 < 100
     for: 30m
     labels:
       severity: critical

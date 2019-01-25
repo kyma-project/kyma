@@ -3,8 +3,6 @@ package apicontroller
 import (
 	"fmt"
 
-	"time"
-
 	log "github.com/sirupsen/logrus"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -16,11 +14,8 @@ import (
 
 const (
 	namespaceEnv                                   = "NAMESPACE"
-	testIDLength                                   = 8
-	maxRetries                                     = 1000
-	minimalNumberOfCorrectResults                  = 5
-	retrySleep                                     = 2 * time.Second
 	domainNameEnv                                  = "DOMAIN_NAME"
+	testIDLength                                   = 8
 	apiSecurityDisabled                APISecurity = false
 	apiSecurityEnabled                 APISecurity = true
 )
