@@ -21,7 +21,7 @@ rules:
     verbs: ["create", "delete"]
   - apiGroups: ["gateway.kyma-project.io"]
     resources: ["apis"]
-    verbs: ["create", "delete"]
+    verbs: ["create", "delete", "get"]
   - apiGroups: ["apps"]
     resources: ["deployments"]
     verbs: ["create"]
