@@ -73,6 +73,27 @@ func TestBucketHandler_Create(t *testing.T) {
 		// Then
 		g.Expect(err.Error()).To(gomega.ContainSubstring(testErr.Error()))
 	})
+
+	t.Run("ErrorCheckingIfExists", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+
+		minioCli := &automock.MinioClient{}
+		handler := buckethandler.New(minioCli, nil)
+
+		bucketName := "bucket"
+		region := "region"
+		testErr := errors.New("test error")
+
+		minioCli.On("BucketExists", bucketName).Return(false, testErr).Once()
+		defer minioCli.AssertExpectations(t)
+
+		// When
+		_, err := handler.CreateIfDoesntExist(bucketName, region)
+
+		// Then
+		g.Expect(err.Error()).To(gomega.ContainSubstring(testErr.Error()))
+	})
 }
 
 func TestBucketHandler_CheckIfExists(t *testing.T) {
@@ -177,6 +198,26 @@ func TestBucketHandler_Delete(t *testing.T) {
 		// Then
 		g.Expect(err.Error()).To(gomega.ContainSubstring(testErr.Error()))
 	})
+
+	t.Run("ErrorCheckingIfExists", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+
+		minioCli := &automock.MinioClient{}
+		handler := buckethandler.New(minioCli, nil)
+
+		bucketName := "bucket"
+		testErr := errors.New("test error")
+
+		minioCli.On("BucketExists", bucketName).Return(false, testErr).Once()
+		defer minioCli.AssertExpectations(t)
+
+		// When
+		err := handler.Delete(bucketName)
+
+		// Then
+		g.Expect(err.Error()).To(gomega.ContainSubstring(testErr.Error()))
+	})
 }
 
 func TestBucketHandler_SetPolicy(t *testing.T) {
@@ -244,6 +285,27 @@ func TestBucketHandler_SetPolicy(t *testing.T) {
 		// Then
 		g.Expect(err.Error()).To(gomega.ContainSubstring(testErr.Error()))
 	})
+
+	t.Run("ErrorGettingPolicy", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+
+		minioCli := &automock.MinioClient{}
+		handler := buckethandler.New(minioCli, nil)
+
+		bucketName := "bucket"
+		policy := "readonly"
+		testErr := errors.New("test error")
+
+		minioCli.On("GetBucketPolicy", bucketName).Return("", testErr).Once()
+		defer minioCli.AssertExpectations(t)
+
+		// When
+		_, err := handler.SetPolicyIfNotEqual(bucketName, policy)
+
+		// Then
+		g.Expect(err.Error()).To(gomega.ContainSubstring(testErr.Error()))
+	})
 }
 
 func TestBucketHandler_GetPolicy(t *testing.T) {
@@ -290,7 +352,7 @@ func TestBucketHandler_GetPolicy(t *testing.T) {
 }
 
 func TestBucketHandler_ComparePolicy(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
+	t.Run("SuccessEqual", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
@@ -304,10 +366,31 @@ func TestBucketHandler_ComparePolicy(t *testing.T) {
 		defer minioCli.AssertExpectations(t)
 
 		// When
-		policy, err := handler.GetPolicy(bucketName)
+		result, err := handler.ComparePolicy(bucketName, expectedPolicy)
 
 		// Then
-		g.Expect(policy).To(gomega.Equal(expectedPolicy))
+		g.Expect(result).To(gomega.BeTrue())
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+	})
+
+	t.Run("SuccessNotEqual", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+
+		minioCli := &automock.MinioClient{}
+		handler := buckethandler.New(minioCli, nil)
+
+		bucketName := "bucket"
+		policy := "readonly"
+
+		minioCli.On("GetBucketPolicy", bucketName).Return("none", nil).Once()
+		defer minioCli.AssertExpectations(t)
+
+		// When
+		result, err := handler.ComparePolicy(bucketName, policy)
+
+		// Then
+		g.Expect(result).To(gomega.BeFalse())
 		g.Expect(err).NotTo(gomega.HaveOccurred())
 	})
 
@@ -326,6 +409,27 @@ func TestBucketHandler_ComparePolicy(t *testing.T) {
 
 		// When
 		_, err := handler.GetPolicy(bucketName)
+
+		// Then
+		g.Expect(err.Error()).To(gomega.ContainSubstring(testErr.Error()))
+	})
+
+	t.Run("ErrorGettingPolicy", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+
+		minioCli := &automock.MinioClient{}
+		handler := buckethandler.New(minioCli, nil)
+
+		bucketName := "bucket"
+		policy := "readonly"
+		testErr := errors.New("test error")
+
+		minioCli.On("GetBucketPolicy", bucketName).Return("", testErr).Once()
+		defer minioCli.AssertExpectations(t)
+
+		// When
+		_, err := handler.ComparePolicy(bucketName, policy)
 
 		// Then
 		g.Expect(err.Error()).To(gomega.ContainSubstring(testErr.Error()))
