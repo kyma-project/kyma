@@ -12,6 +12,8 @@ spec:
       namespace: "kyma-system"
     - name: "istio"
       namespace: "istio-system"
+    - name: "nats-streaming"
+      namespace: "natss"
     - name: "knative"
       namespace: "istio-system" # KNative comes with namespaces hardcoded so this one is only for installer
     - name: "istio-kyma-patch"

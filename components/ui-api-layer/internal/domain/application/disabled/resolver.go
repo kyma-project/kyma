@@ -51,8 +51,8 @@ func (_m *Resolver) ApplicationStatusField(ctx context.Context, app *gqlschema.A
 	return r0, r1
 }
 
-// ApplicationsQuery provides a failing mock function with given fields: ctx, environment, first, offset
-func (_m *Resolver) ApplicationsQuery(ctx context.Context, environment *string, first *int, offset *int) ([]gqlschema.Application, error) {
+// ApplicationsQuery provides a failing mock function with given fields: ctx, namespace, first, offset
+func (_m *Resolver) ApplicationsQuery(ctx context.Context, namespace *string, first *int, offset *int) ([]gqlschema.Application, error) {
 	var r0 []gqlschema.Application
 	var r1 error
 	r1 = _m.err
@@ -87,8 +87,8 @@ func (_m *Resolver) DeleteApplication(ctx context.Context, name string) (gqlsche
 	return r0, r1
 }
 
-// DisableApplicationMutation provides a failing mock function with given fields: ctx, _a1, environment
-func (_m *Resolver) DisableApplicationMutation(ctx context.Context, _a1 string, environment string) (*gqlschema.ApplicationMapping, error) {
+// DisableApplicationMutation provides a failing mock function with given fields: ctx, _a1, namespace
+func (_m *Resolver) DisableApplicationMutation(ctx context.Context, _a1 string, namespace string) (*gqlschema.ApplicationMapping, error) {
 	var r0 *gqlschema.ApplicationMapping
 	var r1 error
 	r1 = _m.err
@@ -96,8 +96,8 @@ func (_m *Resolver) DisableApplicationMutation(ctx context.Context, _a1 string, 
 	return r0, r1
 }
 
-// EnableApplicationMutation provides a failing mock function with given fields: ctx, _a1, environment
-func (_m *Resolver) EnableApplicationMutation(ctx context.Context, _a1 string, environment string) (*gqlschema.ApplicationMapping, error) {
+// EnableApplicationMutation provides a failing mock function with given fields: ctx, _a1, namespace
+func (_m *Resolver) EnableApplicationMutation(ctx context.Context, _a1 string, namespace string) (*gqlschema.ApplicationMapping, error) {
 	var r0 *gqlschema.ApplicationMapping
 	var r1 error
 	r1 = _m.err
@@ -114,8 +114,8 @@ func (_m *Resolver) EventActivationEventsField(ctx context.Context, eventActivat
 	return r0, r1
 }
 
-// EventActivationsQuery provides a failing mock function with given fields: ctx, environment
-func (_m *Resolver) EventActivationsQuery(ctx context.Context, environment string) ([]gqlschema.EventActivation, error) {
+// EventActivationsQuery provides a failing mock function with given fields: ctx, namespace
+func (_m *Resolver) EventActivationsQuery(ctx context.Context, namespace string) ([]gqlschema.EventActivation, error) {
 	var r0 []gqlschema.EventActivation
 	var r1 error
 	r1 = _m.err
