@@ -19,7 +19,7 @@ spec:
     - name: "istio-kyma-patch"
       namespace: "istio-system"
     # - name: "prometheus-operator"
-    #  namespace: "kyma-system"
+    # namespace: "kyma-system"
     - name: "dex"
       namespace: "kyma-system"
     - name: "service-catalog"
