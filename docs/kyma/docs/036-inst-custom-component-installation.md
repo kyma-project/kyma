@@ -7,13 +7,13 @@ Since Kyma is a modular tool, you can remove some components so that they do not
 
 ## Remove a component
 
->**NOTE:** Not all components can be simply removed from the Kyma installation. In case of Istio and the Service Catalog, you must provide your own deployment of these components in the Kyma-supported version. See [this](https://github.com/kyma-project/kyma/blob/master/resources/istio-kyma-patch/templates/job.yaml#L25) and [this](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/values.yaml#L3) documents accordingly to check the currently supported versions of Istio and the Service Catalog.
+>**NOTE:** Not all components can be simply removed from the Kyma installation. In case of Istio and the Service Catalog, you must provide your own deployment of these components in the Kyma-supported version before you remove them from the  installation process. See [this](https://github.com/kyma-project/kyma/blob/master/resources/istio-kyma-patch/templates/job.yaml#L25) and [this](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/values.yaml#L3) documents accordingly to check the currently supported versions of Istio and the Service Catalog.
 
 To disable a component from the list of components that install with Kyma, remove this component's entries from the appropriate file. The file depends on whether you install Kyma from the release or from sources, and whether you install Kyma locally or on a cluster. The version of your component's deployment must match the version that Kyma currently supports.
 
 ### Installation from the release
 
-1. Download the [newest version]((https://github.com/kyma-project/kyma/releases) of Kyma.
+1. Download the [newest version](https://github.com/kyma-project/kyma/releases) of Kyma.
 2. Customize installation by removing a component from the list of components in the Installation resource. For example, to disable the Application Connector installation, remove this entry:
     ```
     name: "application-connector"
