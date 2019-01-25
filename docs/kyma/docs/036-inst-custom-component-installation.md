@@ -46,22 +46,20 @@ To disable a component from the list of components that you install with Kyma, r
 
 >**NOTE:** This section assumes that you already have your Kyma Lite local version installed successfully.
 
-To install a component that does is not installed with Kyma by default, run an appropriate `helm install` command inside the `resources` directory:
+To install a component that is not installed with Kyma by default, you need to modify  the **Installation** custom resource and add to the list of components the component that you want to install:
 
-* To install Jaeger, run:
+1. Edit the resource:
+    ```
+    kubectl edit installation kyma-installation
+    ```
+2. Add to the list components new component, for example:
+    ```
+    - name: "jaeger"
+      namespace: "kyma-system"
+    ```
+3. Trigger installation
+   ```
+   kubectl label installation/kyma-installation action=install
+   ```
 
-```bash
-helm install -n jaeger -f jaeger/values.yaml --namespace kyma-system --set global.domainName=kyma.local --set global.isLocalEnv=true jaeger/
-```
-
-* To install Logging, run:
-
-```bash
-helm install logging --set global.isLocalEnv=true --namespace=kyma-system --name=logging
-```
-
-* To install Monitoring, run:
-
-```bash
-helm install monitoring --set global.isLocalEnv=true --set global.alertTools.credentials.victorOps.apikey="" --set global.alertTools.credentials.victorOps.routingkey="" --set global.alertTools.credentials.slack.channel="" --set global.alertTools.credentials.slack.apiurl="" --set global.domainName=kyma.local --namespace=kyma-system --name=monitoring
-```
+You can verify the installation status by calling `./installation/scripts/is-installed.sh` in the terminal.
