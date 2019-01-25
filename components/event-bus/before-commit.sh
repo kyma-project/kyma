@@ -36,7 +36,9 @@ fi
 ${buildEnv} go build -v -a -installsuffix cgo -o ./cmd/event-bus-publish/event-bus-publish ./cmd/event-bus-publish/
 ${buildEnv} go build -v -a -installsuffix cgo -o ./cmd/event-bus-publish-knative/event-bus-publish-knative ./cmd/event-bus-publish-knative/
 ${buildEnv} go build -v -a -installsuffix cgo -o ./cmd/event-bus-push/event-bus-push ./cmd/event-bus-push/
+${buildEnv} go build -v -a -installsuffix cgo -o ./cmd/event-bus-subscription-controller-knative/event-bus-subscription-controller-knative ./cmd/event-bus-subscription-controller-knative/
 ${buildEnv} go build -v -a -installsuffix cgo -o ./cmd/event-bus-sv/event-bus-sub-validator ./cmd/event-bus-sv/
+${buildEnv} go build -v -a -installsuffix cgo -o ./cmd/event-bus-sv/event-bus-sv ./cmd/event-bus-sv/
 
 goBuildResult=$?
 if [ ${goBuildResult} != 0 ]; then
@@ -125,4 +127,6 @@ done
 rm ./cmd/event-bus-publish/event-bus-publish
 rm ./cmd/event-bus-publish-knative/event-bus-publish-knative
 rm ./cmd/event-bus-push/event-bus-push
+rm ./cmd/event-bus-subscription-controller-knative
 rm ./cmd/event-bus-sv/event-bus-sub-validator
+rm ./cmd/event-bus-sv/event-bus-sv
