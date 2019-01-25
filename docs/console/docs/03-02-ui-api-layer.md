@@ -5,6 +5,8 @@ type: Details
 
 The UI API Layer is a backend service which provides an API for all views of the Console UI. This service consumes the Kubernetes API and exposes a simplified GraphQL API to allow frontends to perform Kubernetes resource operations.
 
+> **NOTE:** Read [this](#LINK-to-doc) security document for more information about the Kyma GraphQL implementation.
+
 ## Cache
 
 For GraphQL queries, the UI API Layer uses caching which is based on Informers from the Kubernetes Go client. There are separate cache stores for every Kubernetes resource. The stores are synchronized when the service starts. After cache synchronization, a single connection with the Kubernetes API server is established and any event related to one of the observed resources updates the given cache store. This logic ensures that cache stores are always up-to-date without sending multiple requests to the Kubernetes API server.

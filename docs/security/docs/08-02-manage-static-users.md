@@ -1,6 +1,6 @@
 ---
 title: Manage static users in Dex
-type: Details
+type: Tutorials
 ---
 
 ## Create a new static user

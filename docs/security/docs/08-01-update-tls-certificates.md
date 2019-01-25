@@ -1,16 +1,16 @@
 ---
 title: Update TLS certificate
-type: Details
+type: Tutorials
 ---
 
-The TLS certificate is a vital security element. This document describes how to update the TLS certificate in Kyma.
+The TLS certificate is a vital security element. Follow this tutorial to update the TLS certificate in Kyma.
 
->**NOTE:** This procedure can interrupt the communication between your cluster and the outside world for a limited 
+>**NOTE:** This procedure can interrupt the communication between your cluster and the outside world for a limited
 period of time.
 
 ## Prerequisites
  * New TLS certificates
- * Kyma administrator access 
+ * Kyma administrator access
 
 ## Steps
 
@@ -36,7 +36,7 @@ period of time.
         tls.key: $(echo "$KYMA_TLS_KEY" | base64)
     EOF
     ```
- 
+
 3. Update the `kyma-system` Namespace certificate:
 
     ```bash
@@ -51,7 +51,7 @@ period of time.
         tls.crt: $(echo "$KYMA_TLS_CERT" | base64)
     EOF
     ```
-    
+
 4. Update the `kyma-integration` Namespace certificate:
 
     ```bash
@@ -72,13 +72,13 @@ period of time.
     ```bash
     kubectl delete pod -l app=istio-ingressgateway -n istio-system
     ```
-    
+
 6. Restart the Pods in the `kyma-system` Namespace to apply the new certificate:
 
     ```bash
     kubectl delete pod -l tlsSecret=ingress-tls-cert -n kyma-system
     ```
-    
+
 7. Restart the Pods in the `kyma-integration` Namespace to apply the new certificate:
 
     ```bash

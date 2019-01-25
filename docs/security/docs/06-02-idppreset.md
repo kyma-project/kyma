@@ -1,5 +1,5 @@
 ---
-title: Identity Provider Presets
+title: IDPPreset
 type: Custom Resource
 ---
 
