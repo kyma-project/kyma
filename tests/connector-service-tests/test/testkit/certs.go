@@ -107,7 +107,7 @@ func EncodeBase64(src []byte) string {
 }
 
 func decodeCertResponse(certResponse *CrtResponse, t *testing.T) []byte {
-	crtBytes, err := base64.StdEncoding.DecodeString(certResponse.Crt)
+	crtBytes, err := base64.StdEncoding.DecodeString(certResponse.CRTChain)
 	require.NoError(t, err)
 	return crtBytes
 }

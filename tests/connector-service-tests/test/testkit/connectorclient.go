@@ -22,20 +22,16 @@ type ConnectorClient interface {
 }
 
 type connectorClient struct {
-	application    string
-	internalAPIUrl string
-	externalAPIUrl string
-	httpClient     *http.Client
+	httpClient   *http.Client
+	tokenRequest *http.Request
 }
 
-func NewConnectorClient(application, internalAPIUrl, externalAPIUrl string, skipVerify bool) ConnectorClient {
+func NewConnectorClient(tokenRequest *http.Request, skipVerify bool) ConnectorClient {
 	client := NewHttpClient(skipVerify)
 
 	return connectorClient{
-		application:    application,
-		internalAPIUrl: internalAPIUrl,
-		externalAPIUrl: externalAPIUrl,
-		httpClient:     client,
+		httpClient:   client,
+		tokenRequest: tokenRequest,
 	}
 }
 
@@ -48,14 +44,7 @@ func NewHttpClient(skipVerify bool) *http.Client {
 }
 
 func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
-	url := cc.internalAPIUrl + "/v1/applications/tokens"
-
-	request, err := http.NewRequest(http.MethodPost, url, nil)
-	require.NoError(t, err)
-
-	request.Header.Set(ApplicationHeader, cc.application)
-
-	response, err := cc.httpClient.Do(request)
+	response, err := cc.httpClient.Do(cc.tokenRequest)
 	require.NoError(t, err)
 	if response.StatusCode != http.StatusCreated {
 		logResponse(t, response)

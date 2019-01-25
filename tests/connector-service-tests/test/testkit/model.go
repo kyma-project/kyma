@@ -18,6 +18,18 @@ type ApiInfo struct {
 	CertificatesUrl string `json:"certificatesUrl"`
 }
 
+type ApplicationApi struct {
+	MetadataURL     string `json:"metadataUrl"`
+	EventsURL       string `json:"eventsUrl"`
+	InfoURL         string `json:"infoUrl"`
+	CertificatesURL string `json:"certificatesUrl"`
+}
+
+type RuntimeApi struct {
+	InfoURL         string `json:"infoUrl"`
+	CertificatesURL string `json:"certificatesUrl"`
+}
+
 type CertInfo struct {
 	Subject      string `json:"subject"`
 	Extensions   string `json:"extensions"`
@@ -28,9 +40,10 @@ type CsrRequest struct {
 	Csr string `json:"csr"`
 }
 
-// TODO - extend response
 type CrtResponse struct {
-	Crt string `json:"crt"`
+	CRTChain  string `json:"crt"`
+	ClientCRT string `json:"clientCrt"`
+	CaCRT     string `json:"caCrt"`
 }
 
 type ErrorResponse struct {
