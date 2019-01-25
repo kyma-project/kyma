@@ -209,13 +209,8 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     ```
     kubectl apply -f my-kyma.yaml
     ```
-    
-    In case you receive an error:
-    ```
-    Error from server (MethodNotAllowed): error when creating "my-kyma.yaml": 
-    the server does not allow this method on the requested resource (post installations.installer.kyma-project.io) 
-    ```
-    run the command again before going to point no 2
+    >**NOTE:** In case you receive an error: `Error from server (MethodNotAllowed): error when creating "my-kyma.yaml": 
+    the server does not allow this method on the requested resource` run the command again before going to point no 2
     
 2. Check if the Pods of Tiller and the Kyma Installer are running:
     ```
