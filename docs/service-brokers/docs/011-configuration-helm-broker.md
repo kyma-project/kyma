@@ -54,7 +54,8 @@ Follow these steps to add the repository URL:
  
  kubectl set env -n kyma-system deployment/core-helm-broker -e APP_REPOSITORY_URLS="$URLS;http://custom.bundles-repository/bundles.yaml"
  
- #At the moment there is a bug in Minikube, therefore for local installation you need to manually edit the broker and bump the relistRequests attribute
+ # At the moment, there is a bug in Minikube. As a result, for the local installation you need to manually edit the broker and bump the relistRequests attribute.
+ 
  kubectl edit clusterservicebrokers core-helm-broker
  ```
 
