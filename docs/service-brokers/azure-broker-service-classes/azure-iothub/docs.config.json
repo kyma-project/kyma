@@ -1,0 +1,8 @@
+{
+    "spec": {
+      "displayName": "Azure IoT Hub",
+      "description": "Documentation for Azure IoT Hub.",
+      "id": "afd72c3b-6c2d-40f2-ad0d-d90467989be5",
+      "type":"Service Class"
+    }
+}

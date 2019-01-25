@@ -1,0 +1,8 @@
+{
+    "spec": {
+      "displayName": "Azure Service Bus Queue",
+      "description": "Documentation for Azure Service Bus Queue.",
+      "id": "0e93fbb8-7904-43a5-82db-81c7d3886a24",
+      "type":"Service Class"
+    }
+}

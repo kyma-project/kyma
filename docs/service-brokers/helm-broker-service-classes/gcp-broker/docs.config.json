@@ -1,0 +1,8 @@
+{
+  "spec":{
+    "displayName": "GCP Service Broker",
+    "description": "Documentation for GCP Service Broker.",
+    "id": "aff0f62c-a988-406f-a950-348473743071",
+    "type":"Service Class"
+  }
+}

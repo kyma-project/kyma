@@ -22,6 +22,8 @@ spec:
       namespace: "kyma-system"
     - name: "service-catalog"
       namespace: "kyma-system"
+    - name: "nats-streaming"
+      namespace: "natss"
     - name: "core"
       namespace: "kyma-system"
     - name: "application-connector"

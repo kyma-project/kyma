@@ -1,0 +1,47 @@
+# Default values for event-bus-nats-streaming.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1 # more than 1 replica is not currently supported
+image:
+  repository: nats-streaming
+  tag: 0.11.0
+  pullPolicy: IfNotPresent
+nats:
+  debug: true
+  trace: false
+natsStreaming:
+  debug: true
+  trace: false
+global:
+  namespace: natss
+  natsStreaming:
+    fullname: nats-streaming
+    persistence:
+      # If persistence.enabled is false, the MEMORY store will be used, otherwise the FILE store will be used
+      # Specify storage class to use
+      # Default: use default storage class on the cluster
+      # If set to "-", storageClassName: "", which disables dynamic provisioning
+      # If defined, storageClassName: <storageClass>
+      # storageClass: "-"
+      enabled: true
+      accessMode: ReadWriteOnce
+      # Max duration for which an event can be stored (0 for unlimited)
+      maxAge: "24h"
+      size: "1Gi"
+    clusterID: kyma-nats-streaming
+    ports:
+      client: 4222
+      monitoring: 8222
+    resources:
+      limits:
+        memory: "32M"
+    channel:
+      maxInactivity: "48h"
+# Custom configuration files used to override default NATS and NATS Streaming settings
+# Note that store type, ports, debug and tracing have dedicated configuration options here in values.yaml
+# and cannot be overriden through the configuration files.
+configurationFiles:
+  gnatsd.conf: |
+    # configuration file used to override default NATS server settings
+  stan.conf: |
+    # content of configuration file used to override default NATS Streaming server settings
