@@ -12,7 +12,7 @@ spec:
   viewBaseUrl: 'https://brokers.{{ js .Values.global.domainName }}'
   navigationNodes:
     - label: Brokers
-      navigationPath: Brokers
+      navigationPath: brokers
       viewUrl: ''
       order: 3
 ---
