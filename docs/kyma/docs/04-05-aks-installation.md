@@ -156,7 +156,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 ### Using the latest GitHub release
 
->**NOTE:** This manual is valid since version 0.7.0
+>**NOTE:** This step is valid since version 0.7.0
 
 1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
 
