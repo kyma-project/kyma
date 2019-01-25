@@ -28,7 +28,7 @@ files:
       white-list-external: ["custom.bundles-repository"]
   - path: "./kyma/docs/kyma/docs/04-05-aks-installation.md"
     config:
-      white-list-external: ["https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-cluster.yaml"]
+      white-list-external: ["$KYMA_RELEASE_VERSION"]
   - path: "./kyma/docs/kyma/docs/04-07-aks-xip.io-domain.md"
     config:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]

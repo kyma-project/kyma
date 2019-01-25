@@ -16,17 +16,25 @@ This Installation guide shows developers how to quickly deploy Kyma on an [Azure
 ### Environment variables
 
 Set the following environment variables:
-```
-export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
-export CLUSTER_NAME={YOUR_CLUSTER_NAME}
-export REGION={YOUR_REGION} #westeurope
-```
+* To set mandatory variables, run:
+  ```
+  export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
+  export CLUSTER_NAME={YOUR_CLUSTER_NAME}
+  export REGION={YOUR_REGION} #westeurope
+  ```
 
-If you use a custom domain, set also these variables:
-```
-export DNS_DOMAIN={YOUR_DOMAIN} # example.com
-export SUB_DOMAIN={YOUR_SUBDOMAIN} # cluster (in this case the full name of your cluster is cluster.example.com)
-```
+* If you want to install Kyma from release,  choose a [release](https://github.com/kyma-project/kyma/releases/) you want to use and export it as an environment variable. Run:
+  ```
+  export KYMA_RELEASE_VERSION={KYMA_RELEASE_VERSION}
+  ```
+  >**NOTE:** Installation from release is supported since version 0.7.0. 
+  If you want to install Kyma from sources, do not export `KYMA_RELEASE_VERSION`.
+
+* If you use a custom domain, set also these variables:
+  ```
+  export DNS_DOMAIN={YOUR_DOMAIN} # example.com
+  export SUB_DOMAIN={YOUR_SUBDOMAIN} # cluster (in this case the full name of your cluster is cluster.example.com)
+  ```
 
 Create a resource group that will contain all your resources:
 ```
@@ -140,14 +148,15 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     az aks get-credentials --resource-group $RS_GROUP --name $CLUSTER_NAME
     ```
 
-3. Install Tiller on your AKS cluster. Run:
-
+3. Install Tiller and add additional privileges to be able to access readiness probes endpoints on your AKS cluster.
+    * Installation from release
+    ```
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/tiller.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/azure-crb-for-healthz.yaml
+    ```
+    * If you install Kyma from sources, check out [kyma-project](https://github.com/kyma-project/kyma) and enter the root folder. Run:
     ```
     kubectl apply -f installation/resources/tiller.yaml
-    ```
-    
-4. Add additional privileges to be able to access readiness probes endpoints:
-    ```
     kubectl apply -f installation/resources/azure-crb-for-healthz.yaml
     ```
 
@@ -155,37 +164,28 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 ### Using the latest GitHub release
 
-1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
-
-2. Export the version you chose as an environment variable. Run:
-    ```
-    export LATEST={KYMA_RELEASE_VERSION}
-    ```
-
-3. Download the `kyma-config-cluster` file from the release you chose. Run:
+1. Download the `kyma-config-cluster` file from the release you chose. Run:
    ```
-   wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-cluster.yaml
+   wget https://github.com/kyma-project/kyma/releases/download/$KYMA_RELEASE_VERSION/kyma-config-cluster.yaml
    ```
 
-4. Update the file with the values from your environment variables. Run:
+2. Update the file with the values from your environment variables. Run:
     ```
     cat kyma-config-cluster.yaml | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g"|sed -e "s/__.*__//g"  >my-kyma.yaml
     ```
 
-5. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your AKS cluster.
+3. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your AKS cluster.
 
 
 ### Using your own image
 
-1. Checkout [kyma-project](https://github.com/kyma-project/kyma) and enter the root folder.
-
-2. Build an image that is based on the current Installer image and includes the current installation and resources charts. Run:
+1. Build an image that is based on the current Installer image and includes the current installation and resources charts. Run:
 
     ```
     docker build -t kyma-installer:latest -f tools/kyma-installer/kyma.Dockerfile . --build-arg INSTALLER_VERSION=63484523
     ```
 
-3. Push the image to your Docker Hub:
+2. Push the image to your Docker Hub:
     ```
     docker tag kyma-installer:latest {YOUR_DOCKER_LOGIN}/kyma-installer:latest
     ```
@@ -193,38 +193,52 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     docker push {YOUR_DOCKER_LOGIN}/kyma-installer:latest
     ```
 
-4. Prepare the deployment file:
+3. Prepare the deployment file:
 
     ```
     cat installation/resources/installer.yaml <(echo -e "\n---") installation/resources/installer-config-cluster.yaml.tpl  <(echo -e "\n---") installation/resources/installer-cr-cluster.yaml.tpl | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
-5. The output of this operation is the `my_kyma.yaml` file. Modify it to fetch the proper image with the changes you made (`{YOUR_DOCKER_LOGIN}/kyma-installer:latest`). Use the modified file to deploy Kyma on your AKS cluster.
-
+4. In the `my-kyma.yaml` file created in the previous step, change the image URL to `{YOUR_DOCKER_LOGIN}/kyma-installer:latest`.
+    ```
+    kind: Deployment
+    metadata:
+      name: kyma-installer
+      namespace: kyma-installer
+      ......
+        image: eu.gcr.io/kyma-project/develop/installer:30bf314d
+    ```
+    Use the modified file to deploy Kyma on your AKS cluster.
 
 ## Deploy Kyma
 
-1. Configure kubectl to use your new cluster and deploy Kyma Installer with your configuration. Run:
-    ```
-    az aks get-credentials --resource-group $RS_GROUP --name $CLUSTER_NAME
-    ```
-2. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:
+1. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:
     ```
     kubectl apply -f my-kyma.yaml
     ```
-3. Check if the Pods of Tiller and the Kyma Installer are running:
+    >**NOTE:** In case you receive the `Error from server (MethodNotAllowed)` error, run the command again before going to step 2.
+    
+2. Check if the Pods of Tiller and the Kyma Installer are running:
     ```
     kubectl get pods --all-namespaces
     ```
 
-4. Start Kyma installation:
+3. Start Kyma installation:
     ```
     kubectl label installation/kyma-installation action=install
     ```
 
-5. To watch the installation progress, run:
+4. To watch the installation progress, run:
     ```
-    kubectl get pods --all-namespaces -w
+    while true; do \
+      kubectl get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}{'\n'}"; \
+      sleep 5; \
+    done
+    ```
+    After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
+    In case of an error, you can fetch the logs from the Installer by running:
+    ```
+    kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
 
 
