@@ -44,3 +44,5 @@
   directory: service-brokers/helm-broker-service-classes/azure-broker
 - name: redis
   directory: service-brokers/helm-broker-service-classes/redis
+- name: redis
+  directory: service-brokers/helm-broker-service-classes/redis
