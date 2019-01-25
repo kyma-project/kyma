@@ -1,0 +1,8 @@
+{
+    "spec": {
+      "displayName": "Azure Storage Blob Storage Account",
+      "description": "Documentation for Azure Storage Blob Storage Account.",
+      "id": "1a5b4582-29a3-48c5-9cac-511fd8c52756",
+      "type":"Service Class"
+    }
+}
