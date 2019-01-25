@@ -148,13 +148,12 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     ```
 
 3. Install Tiller and add additional privileges to be able to access readiness probes endpoints on your AKS cluster.
-    * from release
+    * Installation from release
     ```
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/azure-crb-for-healthz.yaml
     ```
-    * if you are installing from sources, checkout [kyma-project](https://github.com/kyma-project/kyma) and enter the root folder. Run:
-    
+    * If you are installing from sources, checkout [kyma-project](https://github.com/kyma-project/kyma) and enter the root folder. Run:
     ```
     kubectl apply -f installation/resources/tiller.yaml
     kubectl apply -f installation/resources/azure-crb-for-healthz.yaml
