@@ -3,6 +3,7 @@ kind: Pod
 metadata:
   name: "test-{{ template "fullname" . }}-ui-acceptance"
   annotations:
+    sidecar.istio.io/inject: "false"
     "helm.sh/hook": test-success
   labels:
     "helm-chart-test": "true"
@@ -10,7 +11,7 @@ spec:
   hostNetwork: true
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
-      image: {{ .Values.global.containerRegistry.path }}/ui-tests:037b32b5
+      image: {{ .Values.global.containerRegistry.path }}/ui-tests:bb402b61
       imagePullPolicy: IfNotPresent
       resources:
          requests:
@@ -37,7 +38,7 @@ spec:
       volumeMounts:
         - name: dex-config
           mountPath: /etc/dex/cfg
-  # Needed for detecting if static user is disabled 
+  # Needed for detecting if static user is disabled
   volumes:
     - name: dex-config
       configMap:
@@ -45,4 +46,4 @@ spec:
         items:
           - key: config.yaml
             path: config.yaml
-  restartPolicy: Never   
+  restartPolicy: Never

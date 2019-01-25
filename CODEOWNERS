@@ -15,9 +15,6 @@
 # The `installation` PowerShell scripts
 /installation/**/*.ps1 @crabtree @venturasr
 
-# The `prow` directory
-/prow/ @aszecowka @strekm @suleymanakbas91 @crabtree @michal-hudy @pbochynski
-
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @piotrmsc @PK85
 
@@ -100,10 +97,10 @@
 /resources/core/charts/minio/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The `event-bus` subchart
-/resources/core/charts/event-bus/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+/resources/core/charts/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # The `k8s-dashboard-proxy` subchart
-/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # The `application-broker` subchart
 /resources/application-connector/charts/application-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -154,7 +151,7 @@
 /resources/knative/ @kyma-project/wg-knative
 
 # The `jaeger` charts
-/resources/jaeger/ @a-thaler @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+/resources/jaeger/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # The `prometheus-operator` chart
 /resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
@@ -215,13 +212,13 @@
 /components/application-proxy/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Event Bus Component
-/components/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+/components/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # K8s Dashboard Proxy Component
-/components/k8s-dashboard-proxy/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+/components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # Event Service Component
-/components/event-service/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+/components/event-service/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # Xip Patch Component
 /components/xip-patch/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
@@ -302,10 +299,10 @@
 /tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # Event Bus Tests
-/tests/event-bus/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+/tests/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # Event Service Tests
-/tests/gateway-tests/ @Abd4llA @montaro @abbi-gaurav @marcobebway @radufa @sslavic
+/tests/gateway-tests/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # All .md files
 *.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc
@@ -315,15 +312,3 @@
 
 # Config file for MILV - milv.config.yaml
 milv.config.yaml @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
-
-# Orchestrator file
-orchestrator.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh
-
-# Release file
-release.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh
-
-# integration file
-Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh
-
-# Governance file
-governance.Jenkinsfile @suleymanakbas91 @clebs @a-thaler @lilitgh @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu

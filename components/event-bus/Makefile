@@ -5,6 +5,11 @@ APP_NAME_PUBLISH = event-bus-publish
 IMG_PUBLISH = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME_PUBLISH)
 BINARY_PUBLISH = $(APP_NAME_PUBLISH)
 
+# event-bus-publish-knative
+APP_NAME_PUBLISH_KN = event-bus-publish-knative
+IMG_PUBLISH_KN = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME_PUBLISH_KN)
+BINARY_PUBLISH_KN = $(APP_NAME_PUBLISH_KN)
+
 # event-bus-push
 APP_NAME_PUSH = event-bus-push
 IMG_PUSH = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME_PUSH)
@@ -20,12 +25,14 @@ build:
 	# todo activate before-commit phase and remove the gometalinter
 	#./before-commit.sh ci
 	dep ensure -vendor-only -v
+	go test ./...
 	curl https://raw.githubusercontent.com/alecthomas/gometalinter/master/scripts/install.sh | sh -s v2.0.8
 	./bin/gometalinter --skip=generated --vendor --deadline=2m --disable-all ./...
 
 .PHONY: build-image
 build-image:
 	./docker-build-event-bus-publish.sh $(APP_NAME_PUBLISH) latest event-bus
+	./docker-build-event-bus-publish-knative.sh $(APP_NAME_PUBLISH_KN) latest event-bus
 	./docker-build-event-bus-push.sh $(APP_NAME_PUSH) latest event-bus
 	./docker-build-event-bus-sv.sh $(APP_NAME_SV) latest event-bus
 
@@ -33,6 +40,8 @@ build-image:
 push-image:
 	docker tag $(APP_NAME_PUBLISH) $(IMG_PUBLISH):$(TAG)
 	docker push $(IMG_PUBLISH):$(TAG)
+	docker tag $(APP_NAME_PUBLISH_KN) $(IMG_PUBLISH_KN):$(TAG)
+	docker push $(IMG_PUBLISH_KN):$(TAG)
 	docker tag $(APP_NAME_PUSH) $(IMG_PUSH):$(TAG)
 	docker push $(IMG_PUSH):$(TAG)
 	docker tag $(APP_NAME_SV) $(IMG_SV):$(TAG)
@@ -57,6 +66,7 @@ test:
 
 .PHONY: clean
 clean:
-	rm -f ./cmd/event-bus-publish/$(BINARY_PUBLISH)
-	rm -f ./cmd/event-bus-push/$(BINARY_PUSH)
-	rm -f ./cmd/event-bus-sv/$(BINARY_SV)
+	rm -rf ./cmd/event-bus-publish/$(BINARY_PUBLISH) ./cmd/event-bus-publish/docker
+	rm -rf ./cmd/event-bus-publish-knative/$(BINARY_PUBLISH_KN) ./cmd/event-bus-publish-knative/docker
+	rm -rf ./cmd/event-bus-push/$(BINARY_PUSH) ./cmd/event-bus-push/docker
+	rm -rf ./cmd/event-bus-sv/$(BINARY_SV) ./cmd/event-bus-sv/docker

@@ -7,6 +7,8 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/apiregistration.yaml") . | sha256sum }}
 spec:
   replicas: {{ .Values.apiserver.replicas }}
   minReadySeconds: {{ .Values.apiserver.minReadySeconds }}
@@ -27,8 +29,9 @@ spec:
         release: "{{ .Release.Name }}"
         releaseRevision: "{{ .Release.Revision }}"
         heritage: "{{ .Release.Service }}"
-      {{ if .Values.apiserver.annotations }}
       annotations:
+        sidecar.istio.io/inject: "false"
+      {{ if .Values.apiserver.annotations }}
 {{ toYaml .Values.apiserver.annotations | indent 8 }}
       {{- end }}
     spec:

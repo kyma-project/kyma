@@ -17,7 +17,8 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/webhook/webhook.yaml") . | sha256sum }}      
+        sidecar.istio.io/inject: "false"
+        checksum/config: {{ include (print $.Template.BasePath "/webhook/webhook.yaml") . | sha256sum }}
       labels:
         app: {{ template "pod-preset.name" . }}-webhook
         release: {{ .Release.Name }}

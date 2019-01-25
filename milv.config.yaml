@@ -11,7 +11,7 @@ files:
   - path: "./kyma/tools/stability-checker/README.md"
     config:
       white-list-external: ["https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz"]
-  - path: "./kyma/docs/monitoring/docs/010-architecture-monitoring.md"
+  - path: "./kyma/docs/monitoring/docs/02-01-monitoring.md"
     config:
       white-list-external: ["https://grafana.{DOMAIN"]
   - path: "./kyma/resources/core/charts/monitoring/charts/alertmanager/README.md"
@@ -20,9 +20,15 @@ files:
   - path: "./kyma/docs/application-connector/docs/012-details-serviceclass-documentation.md"
     config:
       white-list-external: ["https://www.orders.com/v1/orders"]
-  - path: "./kyma/docs/security/docs/020-details-kubecofig-generator.md"
+  - path: "./kyma/docs/security/docs/03-01-kubecofig-generator.md"
     config:
       white-list-external: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
   - path: "./kyma/docs/service-brokers/docs/011-configuration-helm-broker.md"
     config:
       white-list-external: ["custom.bundles-repository"]
+  - path: "./kyma/docs/kyma/docs/04-05-aks-installation.md"
+    config:
+      white-list-external: ["https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-cluster.yaml"]
+  - path: "./kyma/docs/kyma/docs/04-07-aks-xip.io-domain.md"
+    config:
+      white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]

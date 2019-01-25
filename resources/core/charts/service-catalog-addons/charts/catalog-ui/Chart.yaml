@@ -2,4 +2,4 @@ apiVersion: v1
 name: catalog-ui
 description: Catalog Service UI for Kyma Console
 version: 0.1.0
-appVersion: 17a707ab
+appVersion: da01b4b4
