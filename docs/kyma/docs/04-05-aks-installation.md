@@ -23,13 +23,12 @@ Set the following environment variables:
   export REGION={YOUR_REGION} #westeurope
   ```
 
-* If you want to install from release go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
-  Export the version you chose as an environment variable. Run:
+* If you want to install Kyma from release,  choose a [release](https://github.com/kyma-project/kyma/releases/) you want to use and export it as an environment variable. Run:
   ```
   export KYMA_RELEASE_VERSION={KYMA_RELEASE_VERSION}
   ```
   >**NOTE:** Installation from release is supported since version 0.7.0. 
-  If you want to install from sources do not export `KYMA_RELEASE_VERSION`.
+  If you want to install Kyma from sources, do not export `KYMA_RELEASE_VERSION`.
 
 * If you use a custom domain, set also these variables:
   ```
@@ -155,7 +154,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/tiller.yaml
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/azure-crb-for-healthz.yaml
     ```
-    * If you are installing from sources, checkout [kyma-project](https://github.com/kyma-project/kyma) and enter the root folder. Run:
+    * If you install Kyma from sources, check out [kyma-project](https://github.com/kyma-project/kyma) and enter the root folder. Run:
     ```
     kubectl apply -f installation/resources/tiller.yaml
     kubectl apply -f installation/resources/azure-crb-for-healthz.yaml
@@ -217,7 +216,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     ```
     kubectl apply -f my-kyma.yaml
     ```
-    >**NOTE:** In case you receive an error: `Error from server (MethodNotAllowed)` run the command again before going to point no 2.
+    >**NOTE:** In case you receive the `Error from server (MethodNotAllowed)` error, run the command again before going to step 2.
     
 2. Check if the Pods of Tiller and the Kyma Installer are running:
     ```
@@ -236,8 +235,8 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
       sleep 5; \
     done
     ```
-    When installation process is finished you will see a `Status: Installed, description: Kyma installed` message.
-    In case of error you can fetch the logs from the installer by running:
+    After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
+    In case of an error, you can fetch the logs from the Installer by running:
     ```
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
