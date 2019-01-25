@@ -26,9 +26,10 @@ Set the following environment variables:
 * If you want to install from release go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
   Export the version you chose as an environment variable. Run:
   ```
-  export KYMA_VERSION={KYMA_RELEASE_VERSION}
+  export KYMA_RELEASE_VERSION={KYMA_RELEASE_VERSION}
   ```
-  >**NOTE:** This step is valid since version 0.7.0
+  >**NOTE:** Installation from release is supported since version 0.7.0. 
+  Empty KYMA_RELEASE_VERSION means that you want to install from sources
 
 * If you use a custom domain, set also these variables:
   ```
@@ -151,8 +152,8 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 3. Install Tiller and add additional privileges to be able to access readiness probes endpoints on your AKS cluster.
     * Installation from release
     ```
-    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
-    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/azure-crb-for-healthz.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/tiller.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/azure-crb-for-healthz.yaml
     ```
     * If you are installing from sources, checkout [kyma-project](https://github.com/kyma-project/kyma) and enter the root folder. Run:
     ```
@@ -166,7 +167,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 1. Download the `kyma-config-cluster` file from the release you chose. Run:
    ```
-   wget https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-config-cluster.yaml
+   wget https://github.com/kyma-project/kyma/releases/download/$KYMA_RELEASE_VERSION/kyma-config-cluster.yaml
    ```
 
 2. Update the file with the values from your environment variables. Run:
