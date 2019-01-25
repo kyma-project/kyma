@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/buckethandler/automock"
 	"github.com/pkg/errors"
+	"os"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
 	"time"
 
@@ -21,6 +23,42 @@ const timeout = time.Second * 10
 const namespace = "default"
 
 var testErr = errors.New("Test")
+
+func TestAdd(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		//given
+		g := gomega.NewGomegaWithT(t)
+
+		// Set test envs
+		accessKeyName := "APP_ACCESS_KEY"
+		secretKeyName := "APP_SECRET_KEY"
+		originalAccessKey := os.Getenv(accessKeyName)
+		originalSecretKey := os.Getenv(secretKeyName)
+
+		err := os.Setenv(accessKeyName, "test")
+		g.Expect(err).ShouldNot(gomega.HaveOccurred())
+		err = os.Setenv(secretKeyName, "test")
+
+		g.Expect(err).ShouldNot(gomega.HaveOccurred())
+		mgr, err := manager.New(cfg, manager.Options{})
+		g.Expect(err).ShouldNot(gomega.HaveOccurred())
+		err = Add(mgr)
+		g.Expect(err).ShouldNot(gomega.HaveOccurred())
+
+		// Restore envs
+		err = os.Setenv(accessKeyName, originalAccessKey)
+		g.Expect(err).ShouldNot(gomega.HaveOccurred())
+		err = os.Setenv(secretKeyName, originalSecretKey)
+		g.Expect(err).ShouldNot(gomega.HaveOccurred())
+	})
+
+
+	t.Run("Error", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		err := Add(nil)
+		g.Expect(err).To(gomega.HaveOccurred())
+	})
+}
 
 func TestReconcileBucketCreationSuccess(t *testing.T) {
 	// Given
@@ -302,6 +340,42 @@ func TestReconcileBucketDeleteFailed(t *testing.T) {
 
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
+
+	//Then
+	g.Eventually(func() bool {
+		bucket := &assetstorev1alpha1.Bucket{}
+		err := c.Get(context.TODO(), exp.Key, bucket)
+		return apierrors.IsNotFound(err)
+	}, timeout, 10*time.Millisecond).Should(gomega.BeTrue())
+}
+
+func TestReconcileBucketAlreadyWithoutFinalizer(t *testing.T) {
+	// Given
+	name := "bucket-delete-failed"
+	exp := expectedFor(name, namespace)
+
+	instance := fixReadyBucket(name, namespace)
+	instance.Finalizers = []string{}
+	bucketHandler := &automock.BucketHandler{}
+	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
+	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, instance.Spec.Policy).Return(false, nil).Once()
+	defer bucketHandler.AssertExpectations(t)
+
+	cfg := prepareReconcilerTest(t, bucketHandler)
+	g := cfg.g
+	c := cfg.c
+	defer cfg.finishTest()
+
+	// When
+	err := c.Create(context.TODO(), instance)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
+
+	err = c.Delete(context.TODO(), instance)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 
 	//Then
