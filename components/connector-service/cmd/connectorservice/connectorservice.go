@@ -31,10 +31,8 @@ import (
 const (
 	appCSRInfoFmt     = "https://%s/v1/applications/signingRequests/info"
 	runtimeCSRInfoFmt = "https://%s/v1/runtimes/signingRequests/info"
+	caSecretName      = "nginx-auth-ca"
 )
-
-// TODO - consider moving to flag
-const caSecretName = "nginx-auth-ca"
 
 func main() {
 	formatter := &log.TextFormatter{

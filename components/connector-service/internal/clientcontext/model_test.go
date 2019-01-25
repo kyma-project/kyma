@@ -1,6 +1,7 @@
 package clientcontext
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -58,5 +59,38 @@ func TestApplicationContext_IsEmpty(t *testing.T) {
 
 			assert.Equal(t, test.result, appCtx.IsEmpty())
 		}
+	})
+}
+
+func TestApplicationContext_ExtendContext(t *testing.T) {
+
+	t.Run("should extend context with application context", func(t *testing.T) {
+		// given
+		appContext := ApplicationContext{
+			Application: "app",
+		}
+
+		// when
+		extended := appContext.ExtendContext(context.Background())
+
+		// then
+		assert.Equal(t, appContext, extended.Value(ApplicationContextKey))
+	})
+}
+
+func TestClusterContext_ExtendContext(t *testing.T) {
+
+	t.Run("should extend context with cluster context", func(t *testing.T) {
+		// given
+		clusterContext := ClusterContext{
+			Group:  "group",
+			Tenant: "tenant",
+		}
+
+		// when
+		extended := clusterContext.ExtendContext(context.Background())
+
+		// then
+		assert.Equal(t, clusterContext, extended.Value(ClusterContextKey))
 	})
 }

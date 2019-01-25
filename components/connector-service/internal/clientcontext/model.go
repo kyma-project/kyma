@@ -75,7 +75,6 @@ func (clsCtx ClusterContext) ToJSON() ([]byte, error) {
 	return json.Marshal(clsCtx)
 }
 
-// TODO -test
 // ExtendContext extends provided context with ClusterContext
 func (clsCtx ClusterContext) ExtendContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, ClusterContextKey, clsCtx)
