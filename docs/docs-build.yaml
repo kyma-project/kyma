@@ -12,6 +12,7 @@
 - name: security
 - name: logging
 - name: console
+- name: asset-store
 
 # Azure Broker
 - name: azure-mysql
