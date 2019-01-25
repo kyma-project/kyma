@@ -3,7 +3,9 @@ title: Services and Plans
 type: Details
 ---
 
-## Service: azure-keyvault
+## Service description
+
+The `azure-keyvault` service consist of the following plan:
 
 | Plan Name | Description |
 |-----------|-------------|

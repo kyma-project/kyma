@@ -3,8 +3,9 @@ title: Services and Plans
 type: Details
 ---
 
+## Service description
 
-## Service: azure-iot-hub
+The `azure-iot-hub` service consist of the following plan:
 
 | Plan Name     | Description                                                  |
 | ------------- | ------------------------------------------------------------ |

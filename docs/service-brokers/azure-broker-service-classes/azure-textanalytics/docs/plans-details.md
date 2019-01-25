@@ -7,7 +7,6 @@ type: Details
 
 The `azure-textanalytics` service provides the following plan names and descriptions:
 
-
 | Plan Name | Description |
 |-----------|-------------|
 | `free` | Free with 5,000 monthly transactions and no overage. |

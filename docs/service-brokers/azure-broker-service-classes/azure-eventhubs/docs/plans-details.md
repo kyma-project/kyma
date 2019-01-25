@@ -3,7 +3,9 @@ title: Services and Plans
 type: Details
 ---
 
-## Service: azure-eventhubs
+## Service description
+
+The `azure-eventhubs` service consist of the following plan:
 
 | Plan Name | Description |
 |-----------|-------------|
