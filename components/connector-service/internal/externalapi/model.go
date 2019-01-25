@@ -1,12 +1,15 @@
 package externalapi
 
+import "github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+
 type certRequest struct {
 	CSR string `json:"csr"`
 }
 
-// TODO - extend response
 type certResponse struct {
-	CRT string `json:"crt"`
+	CRTChain  string `json:"crt"`
+	ClientCRT string `json:"clientCrt"`
+	CaCRT     string `json:"caCrt"`
 }
 
 type infoResponse struct {
@@ -31,4 +34,12 @@ type certInfo struct {
 	Subject      string `json:"subject"`
 	Extensions   string `json:"extensions"`
 	KeyAlgorithm string `json:"key-algorithm"`
+}
+
+func toCertResponse(encodedChain certificates.EncodedCertificateChain) certResponse {
+	return certResponse{
+		CRTChain:  encodedChain.CertificateChain,
+		ClientCRT: encodedChain.ClientCertificate,
+		CaCRT:     encodedChain.CaCertificate,
+	}
 }

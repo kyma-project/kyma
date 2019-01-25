@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/pem"
 	"math/big"
 	"time"
@@ -21,7 +20,8 @@ type CertificateUtility interface {
 	LoadKey(encodedData []byte) (*rsa.PrivateKey, apperrors.AppError)
 	LoadCSR(encodedData []byte) (*x509.CertificateRequest, apperrors.AppError)
 	CheckCSRValues(csr *x509.CertificateRequest, subject CSRSubject) apperrors.AppError
-	CreateCrtChain(caCrt *x509.Certificate, csr *x509.CertificateRequest, key *rsa.PrivateKey) (string, apperrors.AppError)
+	SignCSR(caCrt *x509.Certificate, csr *x509.CertificateRequest, caKey *rsa.PrivateKey) ([]byte, apperrors.AppError)
+	CreateCrtChain(rawCaCRT []byte, rawClientCRT []byte) []byte
 }
 
 type certificateUtility struct {
@@ -118,23 +118,19 @@ func (cu *certificateUtility) CheckCSRValues(csr *x509.CertificateRequest, subje
 	return nil
 }
 
-func (cu *certificateUtility) CreateCrtChain(caCrt *x509.Certificate, csr *x509.CertificateRequest, key *rsa.PrivateKey) (
-	string, apperrors.AppError) {
-
+func (cu *certificateUtility) SignCSR(caCrt *x509.Certificate, csr *x509.CertificateRequest, caKey *rsa.PrivateKey) ([]byte, apperrors.AppError) {
 	clientCRTTemplate := prepareCRTTemplate(csr)
 
-	clientCrtRaw, err := x509.CreateCertificate(rand.Reader, &clientCRTTemplate, caCrt, csr.PublicKey, key)
+	clientCrtRaw, err := x509.CreateCertificate(rand.Reader, &clientCRTTemplate, caCrt, csr.PublicKey, caKey)
 	if err != nil {
-		return "", apperrors.Internal("Error while creating certificate: %s", err)
+		return nil, apperrors.Internal("Error while creating certificate: %s", err)
 	}
 
-	certChain := createBase64EncodedCertChain(clientCrtRaw, caCrt.Raw)
-
-	return certChain, nil
+	return clientCrtRaw, nil
 }
 
-func encodeStringBase64(bytes []byte) string {
-	return base64.StdEncoding.EncodeToString(bytes)
+func (cu *certificateUtility) CreateCrtChain(rawCaCRT []byte, rawClientCRT []byte) []byte {
+	return createCertChain(rawClientCRT, rawCaCRT)
 }
 
 func prepareCRTTemplate(csr *x509.CertificateRequest) x509.Certificate {
@@ -150,11 +146,11 @@ func prepareCRTTemplate(csr *x509.CertificateRequest) x509.Certificate {
 	}
 }
 
-func createBase64EncodedCertChain(clientCrtRaw, caCrtRaw []byte) string {
+func createCertChain(clientCrtRaw, caCrtRaw []byte) []byte {
 	clientCrt := addCertificateHeaderAndFooter(clientCrtRaw)
 	caCrt := addCertificateHeaderAndFooter(caCrtRaw)
 	certChain := append(clientCrt.Bytes(), caCrt.Bytes()...)
-	return encodeStringBase64(certChain)
+	return certChain
 }
 
 func addCertificateHeaderAndFooter(crtRaw []byte) *bytes.Buffer {

@@ -3,6 +3,7 @@ package certificates_test
 import (
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
@@ -35,7 +36,8 @@ var (
 	caCrt     = &x509.Certificate{}
 	caKey     = &rsa.PrivateKey{}
 	csr       = &x509.CertificateRequest{}
-	crtBase64 = "crtBase64"
+	clientCRT = []byte("clientCertificate")
+	certChain = []byte("chain")
 
 	subjectValues = certificates.CSRSubject{
 		CommonName:         appName,
@@ -59,17 +61,26 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certUtils.On("LoadKey", caKeyEncoded).Return(caKey, nil)
 		certUtils.On("LoadCSR", rawCSR).Return(csr, nil)
 		certUtils.On("CheckCSRValues", csr, subjectValues).Return(nil)
-		certUtils.On("CreateCrtChain", caCrt, csr, caKey).Return(crtBase64, nil)
+		certUtils.On("SignCSR", caCrt, csr, caKey).Return(clientCRT, nil)
+		certUtils.On("CreateCrtChain", caCrt.Raw, clientCRT).Return(certChain)
 
 		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, subjectValues)
 
 		// when
-		crt, err := certificatesService.SignCSR(rawCSR, appName)
+		encodedCertChain, apperr := certificatesService.SignCSR(rawCSR, appName)
 
 		// then
-		require.NoError(t, err)
+		require.NoError(t, apperr)
+		assert.NotEmpty(t, encodedCertChain)
 
-		assert.Equal(t, crtBase64, crt)
+		decodedClientCRT, err := decodeBase64(encodedCertChain.ClientCertificate)
+		require.NoError(t, err)
+		assert.Equal(t, clientCRT, decodedClientCRT)
+
+		decodedChain, err := decodeBase64(encodedCertChain.CertificateChain)
+		require.NoError(t, err)
+		assert.Equal(t, certChain, decodedChain)
+
 		secretsRepository.AssertExpectations(t)
 		certUtils.AssertExpectations(t)
 	})
@@ -86,12 +97,12 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, subjectValues)
 
 		// when
-		crt, err := certificatesService.SignCSR(rawCSR, appName)
+		encodedChain, err := certificatesService.SignCSR(rawCSR, appName)
 
 		// then
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeNotFound, err.Code())
-		assert.Equal(t, "", crt)
+		assert.Empty(t, encodedChain)
 		secretsRepository.AssertExpectations(t)
 		certUtils.AssertExpectations(t)
 	})
@@ -106,11 +117,11 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, subjectValues)
 
 		// when
-		crt, err := certificatesService.SignCSR(rawCSR, appName)
+		encodedChain, err := certificatesService.SignCSR(rawCSR, appName)
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, "", crt)
+		assert.Empty(t, encodedChain)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		secretsRepository.AssertExpectations(t)
 		certUtils.AssertExpectations(t)
@@ -127,11 +138,11 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, subjectValues)
 
 		// when
-		crt, err := certificatesService.SignCSR(rawCSR, appName)
+		encodedChain, err := certificatesService.SignCSR(rawCSR, appName)
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, "", crt)
+		assert.Empty(t, encodedChain)
 		assert.Equal(t, apperrors.CodeForbidden, err.Code())
 		secretsRepository.AssertExpectations(t)
 		certUtils.AssertExpectations(t)
@@ -150,11 +161,11 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, subjectValues)
 
 		// when
-		crt, err := certificatesService.SignCSR(rawCSR, appName)
+		encodedChain, err := certificatesService.SignCSR(rawCSR, appName)
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, "", crt)
+		assert.Empty(t, encodedChain)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		secretsRepository.AssertExpectations(t)
 		certUtils.AssertExpectations(t)
@@ -174,13 +185,42 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, subjectValues)
 
 		// when
-		crt, err := certificatesService.SignCSR(rawCSR, appName)
+		encodedChain, err := certificatesService.SignCSR(rawCSR, appName)
 
 		// then
 		require.Error(t, err)
-		assert.Equal(t, "", crt)
+		assert.Empty(t, encodedChain)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 		secretsRepository.AssertExpectations(t)
 		certUtils.AssertExpectations(t)
 	})
+
+	t.Run("should return error when failed to sign CSR", func(t *testing.T) {
+		// given
+		secretsRepository := &secretsMock.Repository{}
+		secretsRepository.On("Get", authSecretName).Return(caCrtEncoded, caKeyEncoded, nil)
+
+		certUtils := &mocks.CertificateUtility{}
+		certUtils.On("LoadCert", caCrtEncoded).Return(caCrt, nil)
+		certUtils.On("LoadKey", caKeyEncoded).Return(caKey, nil)
+		certUtils.On("LoadCSR", rawCSR).Return(csr, nil)
+		certUtils.On("CheckCSRValues", csr, subjectValues).Return(nil)
+		certUtils.On("SignCSR", caCrt, csr, caKey).Return(nil, apperrors.Internal("error"))
+
+		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, subjectValues)
+
+		// when
+		encodedChain, err := certificatesService.SignCSR(rawCSR, appName)
+
+		// then
+		require.Error(t, err)
+		assert.Empty(t, encodedChain)
+		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		secretsRepository.AssertExpectations(t)
+		certUtils.AssertExpectations(t)
+	})
+}
+
+func decodeBase64(base64CrtChain string) ([]byte, error) {
+	return base64.StdEncoding.DecodeString(base64CrtChain)
 }

@@ -11,6 +11,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
@@ -37,7 +39,6 @@ const (
 var (
 	tokenRequestRaw = compact([]byte("{\"csr\":\"Q1NSCg==\"}"))
 	decodedCSR, _   = decodeStringFromBase64("Q1NSCg==")
-	crtBase64       = "crtBase64"
 )
 
 func TestSignatureHandler_SignCSR(t *testing.T) {
@@ -46,12 +47,21 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should sign client certificate", func(t *testing.T) {
 		// given
+		certChainBase64 := "certChainBase64"
+		caCertificate := "caCertificate"
+		clientCertificate := "clientCertificate"
+
+		encodedChain := certificates.EncodedCertificateChain{
+			CertificateChain:  certChainBase64,
+			CaCertificate:     caCertificate,
+			ClientCertificate: clientCertificate,
+		}
 
 		tokenRemover := &tokensMock.Remover{}
 		tokenRemover.On("Delete", token).Return()
 
 		certService := &certMock.Service{}
-		certService.On("SignCSR", decodedCSR, commonName).Return(crtBase64, nil)
+		certService.On("SignCSR", decodedCSR, commonName).Return(encodedChain, nil)
 
 		dummyClientContext := dummyClientContext{}
 		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
@@ -75,7 +85,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		err = json.Unmarshal(responseBody, &certResponse)
 		require.NoError(t, err)
 
-		assert.Equal(t, crtBase64, certResponse.CRT)
+		assert.Equal(t, certChainBase64, certResponse.CRTChain)
 		assert.Equal(t, http.StatusCreated, rr.Code)
 	})
 
@@ -152,7 +162,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 	t.Run("should return 500 when failed to sign CSR", func(t *testing.T) {
 		// given
 		certService := &certMock.Service{}
-		certService.On("SignCSR", decodedCSR, commonName).Return("", apperrors.Internal("error"))
+		certService.On("SignCSR", decodedCSR, commonName).Return(certificates.EncodedCertificateChain{}, apperrors.Internal("error"))
 
 		dummyClientContext := dummyClientContext{}
 		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {

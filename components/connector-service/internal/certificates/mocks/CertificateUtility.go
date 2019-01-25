@@ -28,27 +28,20 @@ func (_m *CertificateUtility) CheckCSRValues(csr *x509.CertificateRequest, subje
 	return r0
 }
 
-// CreateCrtChain provides a mock function with given fields: caCrt, csr, key
-func (_m *CertificateUtility) CreateCrtChain(caCrt *x509.Certificate, csr *x509.CertificateRequest, key *rsa.PrivateKey) (string, apperrors.AppError) {
-	ret := _m.Called(caCrt, csr, key)
+// CreateCrtChain provides a mock function with given fields: rawCaCRT, rawClientCRT
+func (_m *CertificateUtility) CreateCrtChain(rawCaCRT []byte, rawClientCRT []byte) []byte {
+	ret := _m.Called(rawCaCRT, rawClientCRT)
 
-	var r0 string
-	if rf, ok := ret.Get(0).(func(*x509.Certificate, *x509.CertificateRequest, *rsa.PrivateKey) string); ok {
-		r0 = rf(caCrt, csr, key)
+	var r0 []byte
+	if rf, ok := ret.Get(0).(func([]byte, []byte) []byte); ok {
+		r0 = rf(rawCaCRT, rawClientCRT)
 	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	var r1 apperrors.AppError
-	if rf, ok := ret.Get(1).(func(*x509.Certificate, *x509.CertificateRequest, *rsa.PrivateKey) apperrors.AppError); ok {
-		r1 = rf(caCrt, csr, key)
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(apperrors.AppError)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]byte)
 		}
 	}
 
-	return r0, r1
+	return r0
 }
 
 // LoadCSR provides a mock function with given fields: encodedData
@@ -117,6 +110,31 @@ func (_m *CertificateUtility) LoadKey(encodedData []byte) (*rsa.PrivateKey, appe
 	var r1 apperrors.AppError
 	if rf, ok := ret.Get(1).(func([]byte) apperrors.AppError); ok {
 		r1 = rf(encodedData)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(apperrors.AppError)
+		}
+	}
+
+	return r0, r1
+}
+
+// SignCSR provides a mock function with given fields: caCrt, csr, caKey
+func (_m *CertificateUtility) SignCSR(caCrt *x509.Certificate, csr *x509.CertificateRequest, caKey *rsa.PrivateKey) ([]byte, apperrors.AppError) {
+	ret := _m.Called(caCrt, csr, caKey)
+
+	var r0 []byte
+	if rf, ok := ret.Get(0).(func(*x509.Certificate, *x509.CertificateRequest, *rsa.PrivateKey) []byte); ok {
+		r0 = rf(caCrt, csr, caKey)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]byte)
+		}
+	}
+
+	var r1 apperrors.AppError
+	if rf, ok := ret.Get(1).(func(*x509.Certificate, *x509.CertificateRequest, *rsa.PrivateKey) apperrors.AppError); ok {
+		r1 = rf(caCrt, csr, caKey)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(apperrors.AppError)

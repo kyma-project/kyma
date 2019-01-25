@@ -52,7 +52,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	clientCert, err := sh.certificateService.SignCSR(rawCSR, connectorClientContext.GetCommonName())
+	encodedCertificatesChain, err := sh.certificateService.SignCSR(rawCSR, connectorClientContext.GetCommonName())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
@@ -60,7 +60,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 
 	sh.tokenRemover.Delete(token)
 
-	httphelpers.RespondWithBody(w, 201, certResponse{CRT: clientCert})
+	httphelpers.RespondWithBody(w, 201, toCertResponse(encodedCertificatesChain))
 }
 
 func (sh *signatureHandler) readCertRequest(r *http.Request) (*certRequest, apperrors.AppError) {

@@ -7,14 +7,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type loggingtMiddleware struct {
+type middleware struct {
 }
 
-func NewLoggingMiddleware() *loggingtMiddleware {
-	return &loggingtMiddleware{}
+func NewLoggingMiddleware() *middleware {
+	return &middleware{}
 }
 
-func (cc *loggingtMiddleware) Middleware(handler http.Handler) http.Handler {
+func (cc *middleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		dumpRequestToLog(r)
 

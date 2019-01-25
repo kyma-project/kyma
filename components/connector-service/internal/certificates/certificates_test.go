@@ -4,7 +4,6 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 	"testing"
@@ -64,6 +63,27 @@ A97O/CNEABohwLZXQYkOQqGDXz6yWmCugtt8Y5of16NDj2AzqXZ++tUvo/CvB/Q8
 1iL+JpgQs15b0QEIpXRyxOAc5FdHm+I9qtx+BeA3I3tMPhYlM9mDVev8fdHtURN8
 9QM4wWFHncmNvlTK51HPexFI3TF9sEqDUQ7dozcUD8GexHlsvZh95+5TmSlA0kfl
 fWXUGZObOGD246zwfHLHP3AwzFKU0bfIvqckcw23I+ZUMIbdajw9eg==
+-----END CERTIFICATE-----`
+
+	clientCRT = `-----BEGIN CERTIFICATE-----
+MIIDPDCCAiSgAwIBAgIBAjANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UEBhMCVVMx
+DjAMBgNVBAgMBXN0YXRlMQ0wCwYDVQQHDARjaXR5MRAwDgYDVQQKDAdjb21wYW55
+MRAwDgYDVQQLDAdzZWN0aW9uMRQwEgYDVQQDDAtob3N0LmV4LmNvbTEbMBkGCSqG
+SIb3DQEJARYMZW1haWxAZXguY29tMB4XDTE4MDkyNjA5MjQ0MFoXDTE4MTIyNTA5
+MjQ0MFowFjEUMBIGA1UEAxMLaG9zdC5leC5jb20wggEiMA0GCSqGSIb3DQEBAQUA
+A4IBDwAwggEKAoIBAQCxFMs7w1t30mZqV8qK8/7PkJTdIWz5AOJEIu0LiQYOibSC
+xnQSj9FiUEnxU3CjWqtxP4VcShCco78mgeY7rpSFKWz3JWhwBr3VkgSFHPCQWNN0
+wLUDu7WVBkVkiDUs+Nbz3/Po9oh4+syZKfrdkHVXpSepoU8Gl+Kb8Apb55Q/RW/T
+0MZHJ4sJps0j3fjpyQUKH9pt9768Aw3cJ8KuS8MtgNS46+PnjtA02tebzQdfO6F6
+mi7PfG9Wp7AX9cJNukGiZaMjsk93OrPei4c3CIkKEBsqVtC4yVXwk/szUD+KxSDr
+Eq+NwfxHY5pemHVIN2U4YuNfK+xEtG2trVIIu8oTAgMBAAGjJzAlMA4GA1UdDwEB
+/wQEAwIHgDATBgNVHSUEDDAKBggrBgEFBQcDAjANBgkqhkiG9w0BAQsFAAOCAQEA
+On0/O1iBwRA+bCNguRaIaHojLqEENAVneNA7HbRYLwIN1nUwfZvII1ZsKs0xo5M+
+1XfLukKDTOIWE6NvQ4q1Y5zzMHVg5/N+o5tMze+aZxvtlBKfV2dgwddnwgCK/huO
+G6gfxQO88Y7JpZmLmIl4TLH4a2TFH/t1rEQNXE8e+HwNCKOYxhnYfvvt6U1pZhNz
+XExXcKBJ5oiblhW+NiqoiSHxRk9JWV679Wa51nML66khttQOUCZzVkAMhIPIJc0k
+JEEx2RazbgxRj23+bclb/nrPQj4X1G5d2JsvM6jcRiyrp/llfQOn3TgiqtiIUCA0
+JK2K4FJavFZ2tpvqVXyQpg==
 -----END CERTIFICATE-----`
 
 	CSR = `-----BEGIN CERTIFICATE REQUEST-----
@@ -354,7 +374,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeWrongInput, err.Code())
-		assert.Contains(t, err.Error(), "Invalid Common name")
+		assert.Contains(t, err.Error(), "Invalid common name")
 	})
 
 	t.Run("should fail when Country differs", func(t *testing.T) {
@@ -469,21 +489,64 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 	})
 }
 
-func TestCertificateUtility_CreateCrtChain(t *testing.T) {
+func TestCertificateUtility_SignCSR(t *testing.T) {
 
-	t.Run("should create certificate chain", func(t *testing.T) {
+	t.Run("should sign client certificate", func(t *testing.T) {
 		// given
 		certificateUtility := NewCertificateUtility()
 		caCrt, csr, key := prepareCrtAndKey(certificateUtility)
 
 		// when
-		crtBase64, apperr := certificateUtility.CreateCrtChain(caCrt, csr, key)
+		rawClientCRT, apperr := certificateUtility.SignCSR(caCrt, csr, key)
 
 		//then
 		require.NoError(t, apperr)
+		assert.NotEmpty(t, rawClientCRT)
 
-		decodedCrt, err := decodeCrtChain(crtBase64)
+		decodedCrt, err := x509.ParseCertificate(rawClientCRT)
 		require.NoError(t, err)
+
+		validityTime := calculateValidityTime(decodedCrt)
+		assert.Equal(t, CertificateValidityDays, validityTime)
+	})
+
+	t.Run("should return when failed to create certificate", func(t *testing.T) {
+		// given
+		caCrt := &x509.Certificate{}
+		csr := &x509.CertificateRequest{}
+		key := &rsa.PrivateKey{}
+
+		certificateUtility := NewCertificateUtility()
+
+		// when
+		rawClientCRT, err := certificateUtility.SignCSR(caCrt, csr, key)
+
+		// then
+		require.Error(t, err)
+		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		assert.Nil(t, rawClientCRT)
+	})
+
+}
+
+func TestCertificateUtility_CreateCrtChain(t *testing.T) {
+
+	t.Run("should create certificate chain", func(t *testing.T) {
+		// given
+		certificateUtility := NewCertificateUtility()
+		caCrt, apperr := certificateUtility.LoadCert([]byte(cert))
+		require.NoError(t, apperr)
+		clientCRT, apperr := certificateUtility.LoadCert([]byte(clientCRT))
+		require.NoError(t, apperr)
+
+		// when
+		rawCertChain := certificateUtility.CreateCrtChain(caCrt.Raw, clientCRT.Raw)
+
+		//then
+		decodedCrt, err := rawCrtTox509Certificates(rawCertChain)
+		require.NoError(t, err)
+
+		assert.Equal(t, 2, len(decodedCrt))
 
 		expectedCrt, err := rawCrtTox509Certificates([]byte(CrtChain))
 		require.NoError(t, err)
@@ -495,57 +558,6 @@ func TestCertificateUtility_CreateCrtChain(t *testing.T) {
 		assert.Equal(t, expectedCrt[1], decodedCrt[1])
 	})
 
-	t.Run("certificate validity days should equal 365", func(t *testing.T) {
-		// given
-		certificateUtility := NewCertificateUtility()
-		caCrt, csr, key := prepareCrtAndKey(certificateUtility)
-
-		// when
-		crtBase64, apperr := certificateUtility.CreateCrtChain(caCrt, csr, key)
-
-		// then
-		require.NoError(t, apperr)
-
-		decodedCrt, err := decodeCrtChain(crtBase64)
-		require.NoError(t, err)
-
-		expectedvValidityTime := calculateValidityTime(decodedCrt[0])
-		assert.Equal(t, CertificateValidityDays, expectedvValidityTime)
-	})
-
-	t.Run("should return two certificates in chain", func(t *testing.T) {
-		// given
-		certificateUtility := NewCertificateUtility()
-		caCrt, csr, key := prepareCrtAndKey(certificateUtility)
-
-		// when
-		crtBase64, err := certificateUtility.CreateCrtChain(caCrt, csr, key)
-
-		// then
-		require.NoError(t, err)
-
-		decodedCrt, singleCertErr := decodeCrtChain(crtBase64)
-		require.NoError(t, singleCertErr)
-
-		assert.Equal(t, 2, len(decodedCrt))
-	})
-
-	t.Run("should fail creating certificate", func(t *testing.T) {
-		// given
-		caCrt := &x509.Certificate{}
-		csr := &x509.CertificateRequest{}
-		key := &rsa.PrivateKey{}
-
-		certificateUtility := NewCertificateUtility()
-
-		// when
-		crtBase64, err := certificateUtility.CreateCrtChain(caCrt, csr, key)
-
-		// then
-		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
-		assert.Equal(t, "", crtBase64)
-	})
 }
 
 func calculateValidityTime(certificate *x509.Certificate) int {
@@ -580,15 +592,5 @@ func rawCrtTox509Certificates(rawCrt []byte) ([]*x509.Certificate, error) {
 
 	pemBlocks := append(pemBlock.Bytes, pemBlock2.Bytes...)
 
-	decodedCrt, _ := x509.ParseCertificates(pemBlocks)
-	return decodedCrt, nil
-}
-
-func decodeCrtChain(base64CrtChain string) ([]*x509.Certificate, error) {
-	rawCrt, err := base64.StdEncoding.DecodeString(base64CrtChain)
-	if err != nil {
-		return nil, err
-	}
-
-	return rawCrtTox509Certificates(rawCrt)
+	return x509.ParseCertificates(pemBlocks)
 }

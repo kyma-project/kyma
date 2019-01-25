@@ -8,3 +8,9 @@ type CSRSubject struct {
 	Locality           string
 	Province           string
 }
+
+type EncodedCertificateChain struct {
+	CertificateChain  string
+	ClientCertificate string
+	CaCertificate     string
+}
