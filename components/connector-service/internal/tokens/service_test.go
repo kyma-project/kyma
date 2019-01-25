@@ -101,17 +101,16 @@ func TestTokenService_Replace(t *testing.T) {
 
 func TestTokenService_Resolve(t *testing.T) {
 
-	dummyString := "data"
-	encodedData := string(compact([]byte("{\"data\":\"data\"}")))
-
 	type data struct {
 		Data string `json:"data"`
 	}
 
-	dummyData := data{Data: dummyString}
-
 	t.Run("shoud resolve token", func(t *testing.T) {
 		// given
+		dummyString := "data"
+		encodedData := string(compact([]byte("{\"data\":\"data\"}")))
+		dummyData := data{Data: dummyString}
+
 		tokenCache := &mocks.TokenCache{}
 		tokenCache.On("Get", token).Return(encodedData, true)
 
@@ -127,7 +126,22 @@ func TestTokenService_Resolve(t *testing.T) {
 		assert.Equal(t, dummyData.Data, destination.Data)
 	})
 
-	// TODO - more tests
+	t.Run("should return error when token not found", func(t *testing.T) {
+		// given
+		tokenCache := &mocks.TokenCache{}
+		tokenCache.On("Get", token).Return("", false)
+
+		var destination data
+
+		tokenService := NewTokenService(tokenCache, nil)
+
+		// when
+		err := tokenService.Resolve(token, &destination)
+
+		// then
+		require.Error(t, err)
+		assert.Equal(t, apperrors.CodeNotFound, err.Code())
+	})
 }
 
 func compact(src []byte) []byte {

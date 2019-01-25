@@ -17,16 +17,15 @@ import (
 )
 
 type signatureHandler struct {
-	// TODO - token remover?
-	tokenCreator             tokens.Creator
+	tokenRemover             tokens.Remover
 	connectorClientExtractor httpcontext.ConnectorClientExtractor
 	certificateService       certificates.Service
 	host                     string
 }
 
-func NewSignatureHandler(tokenCreator tokens.Creator, certificateService certificates.Service, connectorClientExtractor httpcontext.ConnectorClientExtractor, host string) SignatureHandler {
+func NewSignatureHandler(tokenRemover tokens.Remover, certificateService certificates.Service, connectorClientExtractor httpcontext.ConnectorClientExtractor, host string) SignatureHandler {
 	return &signatureHandler{
-		tokenCreator:             tokenCreator,
+		tokenRemover:             tokenRemover,
 		connectorClientExtractor: connectorClientExtractor,
 		certificateService:       certificateService,
 		host:                     host,
@@ -59,7 +58,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sh.tokenCreator.Delete(token)
+	sh.tokenRemover.Delete(token)
 
 	httphelpers.RespondWithBody(w, 201, certResponse{CRT: clientCert})
 }

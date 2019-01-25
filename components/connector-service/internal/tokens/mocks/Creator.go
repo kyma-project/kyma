@@ -10,11 +10,6 @@ type Creator struct {
 	mock.Mock
 }
 
-// Delete provides a mock function with given fields: token
-func (_m *Creator) Delete(token string) {
-	_m.Called(token)
-}
-
 // Replace provides a mock function with given fields: token, serializableContext
 func (_m *Creator) Replace(token string, serializableContext httpcontext.Serializer) (string, apperrors.AppError) {
 	ret := _m.Called(token, serializableContext)

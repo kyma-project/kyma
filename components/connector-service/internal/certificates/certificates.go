@@ -15,6 +15,7 @@ import (
 
 const CertificateValidityDays = 365
 
+// TODO - consider refactoring bringing out CheckCSRValues
 type CertificateUtility interface {
 	LoadCert(encodedData []byte) (*x509.Certificate, apperrors.AppError)
 	LoadKey(encodedData []byte) (*rsa.PrivateKey, apperrors.AppError)

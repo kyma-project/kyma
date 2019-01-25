@@ -21,6 +21,9 @@ type Service interface {
 type Creator interface {
 	Save(serializableContext httpcontext.Serializer) (string, apperrors.AppError)
 	Replace(token string, serializableContext httpcontext.Serializer) (string, apperrors.AppError)
+}
+
+type Remover interface {
 	Delete(token string)
 }
 
