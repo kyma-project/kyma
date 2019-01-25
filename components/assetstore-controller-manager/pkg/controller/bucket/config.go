@@ -10,8 +10,7 @@ type Config struct {
 	AccessKey              string        `envconfig:""`
 	SecretKey              string        `envconfig:""`
 	UseSSL                 bool          `envconfig:"default=true"`
-	SuccessRequeueInterval time.Duration `envconfig:"default=5m"`
-	FailureRequeueInterval time.Duration `envconfig:"default=10s"`
+	RequeueInterval time.Duration `envconfig:"default=5m"`
 }
 
 func loadConfig(prefix string) (Config, error) {

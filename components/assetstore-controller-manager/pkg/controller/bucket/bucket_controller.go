@@ -35,7 +35,7 @@ func Add(mgr manager.Manager) error {
 	}
 	bucketHandler := buckethandler.New(minioClient, log)
 
-	reconciler, err := newReconciler(mgr, bucketHandler, cfg.SuccessRequeueInterval)
+	reconciler, err := newReconciler(mgr, bucketHandler, cfg.RequeueInterval)
 	if err != nil {
 		return err
 	}
@@ -102,11 +102,11 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 	}
 
 	// Phase Empty or Failed
-	if instance.Status.Phase == "" || instance.Status.Phase == assetstorev1alpha1.BucketFailed {
+	if instance.Status.Phase == "" || (instance.Status.Phase == assetstorev1alpha1.BucketFailed && instance.Status.Reason != "BucketNotFound") {
 		return r.handleInitialAndFailedState(instance)
 	}
 
-	// Phase Ready
+	// Phase Ready or Failed/BucketNotFound
 	return r.handleReadyState(instance)
 }
 
@@ -187,15 +187,25 @@ func (r *ReconcileBucket) handleReadyState(instance *assetstorev1alpha1.Bucket) 
 		_ = r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
 			Phase:   assetstorev1alpha1.BucketFailed,
 			Reason:  "BucketNotFound",
-			Message: "Bucket doesn't exist anymore",
+			Message: fmt.Sprintf("Bucket %s doesn't exist anymore", bucketName),
 		})
-		return reconcile.Result{Requeue: true}, nil
+
+		return reconcile.Result{RequeueAfter: r.requeueInterval}, nil
 	}
 
 	// Compare policy
 	updated, err := r.bucketHandler.SetPolicyIfNotEqual(bucketName, policy)
 	if err != nil {
-		return reconcile.Result{Requeue: true}, err
+		updateStatusErr := r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
+			Phase:   assetstorev1alpha1.BucketFailed,
+			Reason:  "BucketPolicyUpdateFailed",
+			Message: fmt.Sprintf("Bucket policy couldn't be set due to error %s", err.Error()),
+		})
+		if updateStatusErr != nil {
+			return reconcile.Result{Requeue: true}, nil
+		}
+
+		return reconcile.Result{}, err
 	}
 
 	if updated {
@@ -204,7 +214,11 @@ func (r *ReconcileBucket) handleReadyState(instance *assetstorev1alpha1.Bucket) 
 			Reason:  "BucketPolicyUpdated",
 			Message: "Bucket policy has been updated successfully",
 		})
-		return reconcile.Result{Requeue: err != nil, RequeueAfter: r.requeueInterval}, nil
+		if err != nil {
+			return reconcile.Result{Requeue: true}, err
+		}
+
+		return reconcile.Result{RequeueAfter: r.requeueInterval}, nil
 	}
 
 	// Everything is OK
