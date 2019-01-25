@@ -140,20 +140,23 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     az aks get-credentials --resource-group $RS_GROUP --name $CLUSTER_NAME
     ```
 
-3. Install Tiller on your AKS cluster. Run:
+3. Install Tiller and add additional privileges to be able to access readiness probes endpoints on your AKS cluster. Run:
 
     ```
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/0.7.0/installation/resources/tiller.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/0.7.0/installation/resources/azure-crb-for-healthz.yaml
+    ```
+    If you are installing from sources, run:
+    ```
     kubectl apply -f installation/resources/tiller.yaml
-    ```
-    
-4. Add additional privileges to be able to access readiness probes endpoints:
-    ```
     kubectl apply -f installation/resources/azure-crb-for-healthz.yaml
     ```
 
 ## Prepare the installation configuration file
 
 ### Using the latest GitHub release
+
+>**NOTE:** This manual is valid since version 0.7.0
 
 1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
 
@@ -204,27 +207,39 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 ## Deploy Kyma
 
-1. Configure kubectl to use your new cluster and deploy Kyma Installer with your configuration. Run:
-    ```
-    az aks get-credentials --resource-group $RS_GROUP --name $CLUSTER_NAME
-    ```
-2. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:
+1. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:
     ```
     kubectl apply -f my-kyma.yaml
     ```
-3. Check if the Pods of Tiller and the Kyma Installer are running:
+    
+    In case you receive an error:
+    ```
+    Error from server (MethodNotAllowed): error when creating "my-kyma.yaml": 
+    the server does not allow this method on the requested resource (post installations.installer.kyma-project.io) 
+    ```
+    run the command again before going to point no 2
+    
+2. Check if the Pods of Tiller and the Kyma Installer are running:
     ```
     kubectl get pods --all-namespaces
     ```
 
-4. Start Kyma installation:
+3. Start Kyma installation:
     ```
     kubectl label installation/kyma-installation action=install
     ```
 
-5. To watch the installation progress, run:
+4. To watch the installation progress, run:
     ```
-    kubectl get pods --all-namespaces -w
+    while true; do \
+      kubectl get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}{'\n'}"; \
+      sleep 5; \
+    done
+    ```
+    When installation process is finished you will see a `Status: Installed, description: Kyma installed` message.
+    In case of error you can fetch the logs from the installer by running:
+    ```
+    kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
 
 
