@@ -6,13 +6,7 @@ required = [
   "k8s.io/code-generator/cmd/lister-gen",
   "k8s.io/code-generator/cmd/informer-gen",
   "k8s.io/code-generator/cmd/openapi-gen",
-  "k8s.io/gengo/args",
-  "github.com/emicklei/go-restful",
-  "github.com/onsi/ginkgo", # for test framework
-  "github.com/onsi/gomega", # for test matchers
-  "sigs.k8s.io/controller-tools/cmd/controller-gen", # for crd/rbac generation
-  "sigs.k8s.io/testing_frameworks/integration", # for integration testing
-  "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
+  "k8s.io/gengo/args"
 ]
 
 [[constraint]]
@@ -43,16 +37,6 @@ required = [
   name = "github.com/stretchr/testify"
   version = "1.2.1"
 
-[[constraint]]
-  name = "sigs.k8s.io/controller-runtime"
-  # HEAD as of 2018-09-19
-  revision = "5373e8e1f3188ff4266902a6fc86372bc14b3815"
-
-[[override]]
-  name = "gopkg.in/fsnotify.v1"
-  source = "https://github.com/fsnotify/fsnotify.git"
-  version="v1.4.7"
-
 [[override]]
   name = "k8s.io/apimachinery"
   version = "kubernetes-1.11.3"
@@ -63,10 +47,6 @@ required = [
 
 [[override]]
   name = "k8s.io/code-generator"
-  version = "kubernetes-1.11.3"
-
-[[override]]
-  name = "k8s.io/api"
   version = "kubernetes-1.11.3"
 
 [[override]]

@@ -3,9 +3,19 @@
 # Declare variables to be passed into your templates.
 global:
   natsStreaming:
-    url: "http://nats-streaming.natss:4222"
-    clusterID: "kyma-nats-streaming"
-
+    clusterID: kyma-core-nats-streaming
+    ports:
+      client: 4222
+      monitoring: 8222
+    persistence:
+      # Max duration for which an event can be stored (0 for unlimited)
+      maxAge: "24h"
+      size: "1Gi"
+    resources:
+      limits:
+        memory: "32M"
+    channel:
+      maxInactivity: "48h"
   publish:
     maxRequests: 16
     resources:

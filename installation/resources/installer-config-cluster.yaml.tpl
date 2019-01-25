@@ -93,7 +93,6 @@ metadata:
     component: istio
 data:
   global.proxy.includeIPRanges: "10.0.0.1/8"
-  global.proxy.excludeIPRanges: "__PROXY_EXCLUDE_IP_RANGES__"
 
   security.enabled: "true"
 
@@ -128,4 +127,3 @@ metadata:
 data:
   knative.ingressgateway.service.type: LoadBalancer
   knative.domainName: "__DOMAIN__"
-  

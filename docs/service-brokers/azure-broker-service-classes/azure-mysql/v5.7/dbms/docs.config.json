@@ -1,8 +1,0 @@
-{
-  "spec":{
-    "displayName": "Azure Database for MySQL - dbms only",
-    "description": "Documentation for Azure Database for MySQL - dbms only.",
-    "id": "30e7b836-199d-4335-b83d-adc7d23a95c2",
-    "type":"Service Class"
-  }
-}

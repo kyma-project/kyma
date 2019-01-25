@@ -55,33 +55,6 @@ data:
       }
     ]
 
-  istio-sidecar-injector.mutatingwebhookconfiguration.patch.json: |
-    [
-      {
-        "op": "replace",
-        "path": "/webhooks/0/namespaceSelector",
-        "value": {
-          "matchExpressions": [
-            {
-              "key": "istio-injection",
-              "operator": "NotIn",
-              "values": [
-                "disabled"
-              ]
-            }
-          ]
-        }
-      }
-    ]
-
-  istio-system.namespace.patch.json: |
-    [
-      {
-        "op": "add",
-        "path": "/metadata/labels/istio-injection",
-        "value": "disabled"
-      }
-    ]
 
   delete: |
     deployment prometheus

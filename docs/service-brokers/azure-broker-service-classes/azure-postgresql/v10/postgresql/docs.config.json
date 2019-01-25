@@ -1,8 +1,0 @@
-{
-    "spec": {
-      "displayName": "Azure Database for PostgreSQL 10",
-      "description": "Documentation for Azure PostgreSQL Database.",
-      "id": "32d3b4e0-e68f-4e96-93d4-35fd380f0874",
-      "type":"Service Class"
-    }
-}

@@ -31,6 +31,7 @@ For more details on deploying your application with Istio, read [this](https://i
 
 You must also add the **sidecar.istio.io/inject** annotation with the value set to `true` to the Pod template specification, to enable the injection as shown in [this](https://github.com/kyma-project/examples/blob/master/monitoring-custom-metrics/deployment/deployment.yaml#L12) example.
 
+
 ```yaml
 spec:
   template:
@@ -42,7 +43,6 @@ spec:
 For more details on installing the Istio sidecar, read [this](https://istio.io/docs/setup/kubernetes/sidecar-injection/#policy) documentation.
 
 The following ports are used in the Pod:
-
 - `8080` - Envoy captures the traffic only for ports listed in Pod's **containerPorts** (`containerPort: 8080`), or in the **traffic.sidecar.istio.io/includeInboundPorts** annotation. Thus, this port is a part of the Service Mesh and can be used for application's needs.
 
 - `8081` - This is the excluded port from the Service Mesh, which is used for exposing metrics only. The network traffic bypasses Envoy and goes straight to the container. In Kyma, use the suggested `8081` port to expose metrics.
@@ -56,6 +56,10 @@ This is a basic example where `Gauge` and `Counter` metrics are exported using t
 1. Deploy the sample metrics application.
     ```bash
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/monitoring-custom-metrics/deployment/deployment.yaml
+
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/monitoring-custom-metrics/deployment/service-8080.yaml
+
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/monitoring-custom-metrics/deployment/service-8081.yaml
 
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/monitoring-custom-metrics/deployment/service-monitor.yaml
     ```
@@ -88,7 +92,6 @@ kubectl port-forward svc/monitoring-prometheus -n kyma-system 9090:9090
 Forwarding from 127.0.0.1:9090 -> 9090
 Forwarding from [::1]:9090 -> 9090
 ```
-
 All the **sample-metrics** endpoints appear as the [`Targets`](http://localhost:9090/targets#job-sample-metrics-8081) list.
 
 ![Prometheus Dashboard](./assets/pm-dashboard-1.png)
@@ -119,14 +122,12 @@ In Kyma, there is a [template](https://github.com/kyma-project/kyma/blob/master/
 Out of the box, Kyma includes a set of dashboards. The users can create their own **Grafana Dashboard** by using the Grafana UI. The dashboards persist even after the Pod restarts.
 
 For details on how to create dashboards in Grafana, see the following documents:
-
 - [Grafana in Kyma](https://github.com/kyma-project/kyma/blob/master/resources/monitoring/charts/grafana/README.md)
 - [Grafana - Getting started](http://docs.grafana.org/guides/getting_started/)
 - [Export and Import dashboards](http://docs.grafana.org/reference/export_import/)
 - [Grafana - Dashboard API](http://docs.grafana.org/http_api/dashboard/)
 
 ### Cleanup
-
 Run the following commands to completely remove the example and all its resources from the cluster:
 
 1. Remove the **istio-injection** label from the `default` Namespace.

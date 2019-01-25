@@ -1,8 +1,0 @@
-{
-    "spec": {
-      "displayName": "Azure SQL Database - DBMS Only",
-      "description": "Documentation for Azure SQL 12.0-- DBMS Only.",
-      "id": "a7454e0e-be2c-46ac-b55f-8c4278117525",
-      "type":"Service Class"
-    }
-}

@@ -1,8 +1,0 @@
-{
-    "spec": {
-      "displayName": "Azure Storage General Purpose V1 Storage Account",
-      "description": "Documentation for Azure Storage General Purpose V1 Storage Account.",
-      "id": "d10ea062-b627-41e8-a240-543b60030694",
-      "type":"Service Class"
-    }
-}
