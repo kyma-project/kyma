@@ -2,12 +2,16 @@ package dex
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"log"
+
+	"golang.org/x/net/html"
 )
 
 type idTokenProvider interface {
@@ -44,12 +48,17 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if authorizeResp.StatusCode < 300 || authorizeResp.StatusCode > 399 {
+	if authorizeResp.StatusCode < 200 || authorizeResp.StatusCode > 399 {
 		return nil, fmt.Errorf("Authorize - response error: '%s' - %s", authorizeResp.Status, readRespBody(authorizeResp))
 	}
 
 	// /auth/local?req=qruhpy2cqjvv4hcrbuu44mf4v
-	loginEndpoint := authorizeResp.Header.Get("location")
+	var loginEndpoint string
+	if authorizeResp.StatusCode == 200 {
+		loginEndpoint = getLocalAuthLink(authorizeResp.Body)
+	} else {
+		loginEndpoint = authorizeResp.Header.Get("location")
+	}
 	if strings.Contains(loginEndpoint, "#.*error") {
 		return nil, fmt.Errorf("Login - Redirected with error: '%s'", loginEndpoint)
 	}
@@ -111,4 +120,28 @@ func readRespBody(resp *http.Response) string {
 		return "<<Error reading response body>>"
 	}
 	return string(b)
+}
+
+func getLocalAuthLink(body io.Reader) string {
+	z := html.NewTokenizer(body)
+	for {
+		nt := z.Next()
+		if nt == html.ErrorToken {
+			return ""
+		}
+
+		token := z.Token()
+		if "a" != token.Data {
+			continue
+		}
+		for _, attr := range token.Attr {
+			if attr.Key != "href" {
+				continue
+			}
+			match, _ := regexp.MatchString("/auth/local.*", attr.Val)
+			if match {
+				return attr.Val
+			}
+		}
+	}
 }
