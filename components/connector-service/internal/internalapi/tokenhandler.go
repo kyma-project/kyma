@@ -11,7 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 )
 
-const TokenURLFormat = "https://%s?token=%s"
+const TokenURLFormat = "%s?token=%s"
 
 type tokenHandler struct {
 	tokenCreator             tokens.Creator

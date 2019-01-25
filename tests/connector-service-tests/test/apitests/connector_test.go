@@ -4,11 +4,12 @@ import (
 	"crypto/rsa"
 	"crypto/tls"
 	"fmt"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	. "net/http"
 	"net/url"
 	"testing"
 	"time"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"io/ioutil"
 
@@ -31,10 +32,13 @@ func TestConnector(t *testing.T) {
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
 	require.NoError(t, err)
 	app, e := k8sResourcesClient.CreateDummyApplication("app-connector-test-0", "", false)
+	require.NoError(t, e)
+
+	defer func() {
+		k8sResourcesClient.DeleteApplication(app.Name, &v1.DeleteOptions{})
+	}()
 
 	client := testkit.NewConnectorClient(app.Name, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
-
-	require.NoError(t, e)
 
 	clientKey := testkit.CreateKey(t)
 
@@ -109,38 +113,7 @@ func TestConnector(t *testing.T) {
 		require.NotNil(t, err)
 		require.Equal(t, StatusBadRequest, err.StatusCode)
 		require.Equal(t, StatusBadRequest, err.ErrorResponse.Code)
-		require.Equal(t, "CSR: Invalid CName provided.", err.ErrorResponse.Error)
-	})
-
-	t.Run("should accept only one token per application", func(t *testing.T) {
-		// when
-		tokenResponse := client.CreateToken(t)
-
-		// then
-		require.NotEmpty(t, tokenResponse.Token)
-		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
-
-		// when
-		tokenResponse2 := client.CreateToken(t)
-
-		// then
-		require.NotEmpty(t, tokenResponse2.Token)
-		require.Contains(t, tokenResponse2.URL, "token="+tokenResponse2.Token)
-
-		// when
-		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL)
-
-		// then
-		require.Nil(t, infoResponse)
-		require.Equal(t, StatusForbidden, errorResponse.StatusCode)
-
-		// when
-		infoResponse2, errorResponse2 := client.GetInfo(t, tokenResponse2.URL)
-
-		// then
-		require.Nil(t, errorResponse2)
-		require.NotEmpty(t, infoResponse2.CertUrl)
-		require.Equal(t, "rsa2048", infoResponse2.Certificate.KeyAlgorithm)
+		require.Equal(t, "CSR: Invalid common name provided.", err.ErrorResponse.Error)
 	})
 
 	t.Run("should return error for wrong token on info endpoint", func(t *testing.T) {
@@ -220,7 +193,7 @@ func TestConnector(t *testing.T) {
 		require.Equal(t, StatusBadRequest, err.ErrorResponse.Code)
 		require.Equal(t, "There was an error while parsing the base64 content. An incorrect value was provided.", err.ErrorResponse.Error)
 	})
-	k8sResourcesClient.DeleteApplication(app.Name, &v1.DeleteOptions{})
+
 }
 
 func TestApiSpec(t *testing.T) {
@@ -278,8 +251,15 @@ func TestCertificateValidation(t *testing.T) {
 	require.NoError(t, err)
 	testApp, err := k8sResourcesClient.CreateDummyApplication("app-connector-test-1", "", false)
 	require.NoError(t, err)
+	defer func() {
+		k8sResourcesClient.DeleteApplication(testApp.Name, &v1.DeleteOptions{})
+	}()
+
 	forbiddenApp, err := k8sResourcesClient.CreateDummyApplication("app-connector-test-2", "", false)
 	require.NoError(t, err)
+	defer func() {
+		k8sResourcesClient.DeleteApplication(forbiddenApp.Name, &v1.DeleteOptions{})
+	}()
 
 	client := testkit.NewConnectorClient(testApp.Name, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
 
@@ -304,8 +284,6 @@ func TestCertificateValidation(t *testing.T) {
 		require.Equal(t, StatusForbidden, response.StatusCode)
 	})
 
-	k8sResourcesClient.DeleteApplication(testApp.Name, &v1.DeleteOptions{})
-	k8sResourcesClient.DeleteApplication(forbiddenApp.Name, &v1.DeleteOptions{})
 }
 
 func repeatUntilIngressIsCreated(tlsClient *Client, gatewayUrlFormat string, appName string) (*Response, error) {

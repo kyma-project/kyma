@@ -17,6 +17,8 @@ const (
 
 func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
+	emptyClusterContextMiddleware := &clusterContextMiddleware{}
+
 	t.Run("should set context based on header", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +38,7 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewApplicationContextMiddleware()
+		middleware := NewApplicationContextMiddleware(emptyClusterContextMiddleware)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -59,7 +61,7 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewApplicationContextMiddleware()
+		middleware := NewApplicationContextMiddleware(emptyClusterContextMiddleware)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -67,5 +69,37 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
 		// then
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
+	})
+
+	t.Run("should set context based on header and cluster middleware", func(t *testing.T) {
+		// given
+		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			clusterCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
+			require.True(t, ok)
+
+			assert.Equal(t, testApplication, clusterCtx.Application)
+			w.WriteHeader(http.StatusOK)
+		})
+
+		emptyClusterContextMiddleware := &clusterContextMiddleware{
+			defaultTenant: defaultTenant,
+			defaultGroup:  defaultGroup,
+		}
+
+		req, err := http.NewRequest("GET", "/", nil)
+		require.NoError(t, err)
+		req.Header.Set(clientcontext.ApplicationHeader, testApplication)
+
+		rr := httptest.NewRecorder()
+
+		middleware := NewApplicationContextMiddleware(emptyClusterContextMiddleware)
+
+		// when
+		resultHandler := middleware.Middleware(handler)
+		resultHandler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 }

@@ -4,6 +4,7 @@ type certRequest struct {
 	CSR string `json:"csr"`
 }
 
+// TODO - extend response
 type certResponse struct {
 	CRT string `json:"crt"`
 }
@@ -30,12 +31,4 @@ type certInfo struct {
 	Subject      string `json:"subject"`
 	Extensions   string `json:"extensions"`
 	KeyAlgorithm string `json:"key-algorithm"`
-}
-
-type csrInfo struct {
-	Country            string `json:"country"`
-	Organization       string `json:"organization"`
-	OrganizationalUnit string `json:"organizationalUnit"`
-	Locality           string `json:"locality"`
-	Province           string `json:"province"`
 }

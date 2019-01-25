@@ -11,6 +11,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	ApplicationHeader = "Application"
+)
+
 type ConnectorClient interface {
 	CreateToken(t *testing.T) TokenResponse
 	GetInfo(t *testing.T, url string) (*InfoResponse, *Error)
@@ -44,10 +48,12 @@ func NewHttpClient(skipVerify bool) *http.Client {
 }
 
 func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
-	url := cc.internalAPIUrl + "/v1/applications/" + cc.application + "/tokens"
+	url := cc.internalAPIUrl + "/v1/applications/tokens"
 
 	request, err := http.NewRequest(http.MethodPost, url, nil)
 	require.NoError(t, err)
+
+	request.Header.Set(ApplicationHeader, cc.application)
 
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)

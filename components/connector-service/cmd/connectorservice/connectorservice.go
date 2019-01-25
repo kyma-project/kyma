@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/logging"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/gorilla/mux"
@@ -27,8 +29,8 @@ import (
 )
 
 const (
-	appCSRInfoFmt     = "https://%s/v1/applications/csr/info"
-	runtimeCSRInfoFmt = "https://%s/v1/runtimes/csr/info"
+	appCSRInfoFmt     = "https://%s/v1/applications/signingRequests/info"
+	runtimeCSRInfoFmt = "https://%s/v1/runtimes/signingRequests/info"
 )
 
 // TODO - consider moving to flag
@@ -56,6 +58,8 @@ func main() {
 	if appErr != nil {
 		log.Errorf("Error while setting up monitoring: %s", appErr)
 	}
+
+	globalMiddlewares = append(globalMiddlewares, logging.NewLoggingMiddleware().Middleware)
 
 	internalHandler := newInternalHandler(tokenService, options, globalMiddlewares)
 	externalHandler := newExternalHandler(tokenService, options, env, globalMiddlewares)
@@ -117,6 +121,7 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 		Middlewares:      []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware},
 		ContextExtractor: clientcontext.ExtractApplicationContext,
 		APIUrlsGenerator: appAPIUrlsGenerator,
+		CertService:      certificateService,
 	}
 
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenService, clientcontext.ResolveClusterContextExtender)
@@ -137,8 +142,8 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 
 func newInternalHandler(tokenService tokens.Service, opts *options, globalMiddlewares []mux.MiddlewareFunc) http.Handler {
 
-	applicationCtxMiddleware := clientcontextmiddlewares.NewApplicationContextMiddleware()
 	clusterCtxMiddleware := clientcontextmiddlewares.NewClusterContextMiddleware(opts.tenant, opts.group)
+	applicationCtxMiddleware := clientcontextmiddlewares.NewApplicationContextMiddleware(clusterCtxMiddleware)
 
 	appHandlerMiddlewares := []mux.MiddlewareFunc{applicationCtxMiddleware.Middleware}
 	appHandlerConfig := internalapi.Config{

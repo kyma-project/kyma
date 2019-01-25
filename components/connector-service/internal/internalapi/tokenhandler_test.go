@@ -51,7 +51,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		// given
 		csrURL := "domain.local/v1/application/csr/info"
 		expectedTokenResponse := tokenResponse{
-			URL:   fmt.Sprintf("https://%s?token=%s", csrURL, token),
+			URL:   fmt.Sprintf(TokenURLFormat, csrURL, token),
 			Token: token,
 		}
 
@@ -90,7 +90,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 		csrURL := "domain.local/v1/application/csr/info"
 		expectedTokenResponse := tokenResponse{
-			URL:   fmt.Sprintf("https://%s?token=%s", csrURL, token),
+			URL:   fmt.Sprintf(TokenURLFormat, csrURL, token),
 			Token: token,
 		}
 

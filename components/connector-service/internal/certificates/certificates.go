@@ -83,7 +83,7 @@ func (cu *certificateUtility) LoadCSR(encodedData []byte) (*x509.CertificateRequ
 
 func (cu *certificateUtility) CheckCSRValues(csr *x509.CertificateRequest, subject CSRSubject) apperrors.AppError {
 	if csr.Subject.CommonName != subject.CommonName {
-		return apperrors.WrongInput("CSR: Invalid Common name provided.")
+		return apperrors.WrongInput("CSR: Invalid common name provided.")
 	}
 
 	if csr.Subject.Country == nil {

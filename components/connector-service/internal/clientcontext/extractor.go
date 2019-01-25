@@ -28,16 +28,17 @@ func ExtractClusterContext(ctx context.Context) (ConnectorClientContext, apperro
 	return clusterCtx, nil
 }
 
+// TODO - test
 func ResolveClusterContextExtender(token string, tokenResolver tokens.Resolver) (ContextExtender, apperrors.AppError) {
-	var clusterContext *ClusterContext
-	err := tokenResolver.Resolve(token, clusterContext)
+	var clusterContext ClusterContext
+	err := tokenResolver.Resolve(token, &clusterContext)
 
 	return clusterContext, err
 }
 
 func ResolveApplicationContextExtender(token string, tokenResolver tokens.Resolver) (ContextExtender, apperrors.AppError) {
-	var appContext *ApplicationContext
-	err := tokenResolver.Resolve(token, appContext)
+	var appContext ApplicationContext
+	err := tokenResolver.Resolve(token, &appContext)
 
 	return appContext, err
 }

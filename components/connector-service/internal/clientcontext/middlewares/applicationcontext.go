@@ -11,11 +11,13 @@ import (
 )
 
 type appContextMiddleware struct {
-	clusterContextMiddleware
+	*clusterContextMiddleware
 }
 
-func NewApplicationContextMiddleware() *appContextMiddleware {
-	return &appContextMiddleware{}
+func NewApplicationContextMiddleware(clusterContextMiddleware *clusterContextMiddleware) *appContextMiddleware {
+	return &appContextMiddleware{
+		clusterContextMiddleware: clusterContextMiddleware,
+	}
 }
 
 func (cc *appContextMiddleware) Middleware(handler http.Handler) http.Handler {

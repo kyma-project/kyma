@@ -14,6 +14,7 @@ type InfoResponse struct {
 type ApiInfo struct {
 	MetadataURL     string `json:"metadataUrl"`
 	EventsURL       string `json:"eventsUrl"`
+	GetInfoURL      string `json:"getInfoUrl"`
 	CertificatesUrl string `json:"certificatesUrl"`
 }
 
@@ -27,6 +28,7 @@ type CsrRequest struct {
 	Csr string `json:"csr"`
 }
 
+// TODO - extend response
 type CrtResponse struct {
 	Crt string `json:"crt"`
 }
