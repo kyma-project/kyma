@@ -15,7 +15,8 @@ This Installation guide shows developers how to quickly deploy Kyma on an [Azure
 
 ### Environment variables
 
-* Set the following environment variables:
+Set the following environment variables:
+* To set mandatory variables, run:
   ```
   export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
   export CLUSTER_NAME={YOUR_CLUSTER_NAME}
