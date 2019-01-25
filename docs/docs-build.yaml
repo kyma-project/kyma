@@ -38,7 +38,9 @@
   directory: service-brokers/gcp-broker-service-classes/google-cloud-storage
 
 # Helm Broker
-- name: gcp-broker-provider
-  directory: service-brokers/helm-broker-service-classes/gcp-broker-provider
+- name: gcp-broker
+  directory: service-brokers/helm-broker-service-classes/gcp-broker
+- name: azure-broker
+  directory: service-brokers/helm-broker-service-classes/azure-broker
 - name: redis
   directory: service-brokers/helm-broker-service-classes/redis
