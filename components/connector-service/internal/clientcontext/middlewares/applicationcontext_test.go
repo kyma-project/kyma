@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -21,7 +21,7 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			clusterCtx, ok := ctx.Value(httpcontext.ApplicationContextKey).(httpcontext.ApplicationContext)
+			clusterCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
 			require.True(t, ok)
 
 			assert.Equal(t, testApplication, clusterCtx.Application)
@@ -30,9 +30,9 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
 		req, err := http.NewRequest("GET", "/", nil)
 		require.NoError(t, err)
-		req.Header.Set(httpcontext.ApplicationHeader, testApplication)
-		req.Header.Set(httpcontext.TenantHeader, testTenant)
-		req.Header.Set(httpcontext.GroupHeader, testGroup)
+		req.Header.Set(clientcontext.ApplicationHeader, testApplication)
+		req.Header.Set(clientcontext.TenantHeader, testTenant)
+		req.Header.Set(clientcontext.GroupHeader, testGroup)
 
 		rr := httptest.NewRecorder()
 
@@ -54,8 +54,8 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
 		req, err := http.NewRequest("GET", "/", nil)
 		require.NoError(t, err)
-		req.Header.Set(httpcontext.TenantHeader, testTenant)
-		req.Header.Set(httpcontext.GroupHeader, testGroup)
+		req.Header.Set(clientcontext.TenantHeader, testTenant)
+		req.Header.Set(clientcontext.GroupHeader, testGroup)
 
 		rr := httptest.NewRecorder()
 

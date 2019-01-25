@@ -3,24 +3,26 @@ package tokens
 import (
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
-
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
 )
 
 type Generator func() (string, apperrors.AppError)
 
+type Serializer interface {
+	ToJSON() ([]byte, error)
+}
+
 type Service interface {
-	Save(serializableContext httpcontext.Serializer) (string, apperrors.AppError)
-	Replace(token string, serializableContext httpcontext.Serializer) (string, apperrors.AppError)
+	Save(serializableContext Serializer) (string, apperrors.AppError)
+	Replace(token string, serializableContext Serializer) (string, apperrors.AppError)
 	Resolve(token string, destination interface{}) apperrors.AppError
 	Delete(token string)
 }
 
 type Creator interface {
-	Save(serializableContext httpcontext.Serializer) (string, apperrors.AppError)
-	Replace(token string, serializableContext httpcontext.Serializer) (string, apperrors.AppError)
+	Save(serializableContext Serializer) (string, apperrors.AppError)
+	Replace(token string, serializableContext Serializer) (string, apperrors.AppError)
 }
 
 type Remover interface {
@@ -43,7 +45,7 @@ func NewTokenService(store tokencache.TokenCache, generator Generator) *tokenSer
 	}
 }
 
-func (svc *tokenService) Save(serializableContext httpcontext.Serializer) (string, apperrors.AppError) {
+func (svc *tokenService) Save(serializableContext Serializer) (string, apperrors.AppError) {
 	jsonData, err := serializableContext.ToJSON()
 	if err != nil {
 		return "", apperrors.Internal("Faild to serilize token params to JSON, %s", err.Error())
@@ -59,7 +61,7 @@ func (svc *tokenService) Save(serializableContext httpcontext.Serializer) (strin
 	return token, nil
 }
 
-func (svc *tokenService) Replace(token string, serializableContext httpcontext.Serializer) (string, apperrors.AppError) {
+func (svc *tokenService) Replace(token string, serializableContext Serializer) (string, apperrors.AppError) {
 	svc.store.Delete(token)
 
 	return svc.Save(serializableContext)

@@ -3,7 +3,7 @@ package externalapi
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 )
 
 type APIUrlsGenerator interface {
-	Generate(reader httpcontext.ConnectorClientReader) interface{}
+	Generate(reader clientcontext.ConnectorClientReader) interface{}
 }
 
 type applicationUrlsStrategy struct {
@@ -27,7 +27,7 @@ type applicationUrlsStrategy struct {
 	certURL         string
 }
 
-func (appInfoUrls applicationUrlsStrategy) Generate(reader httpcontext.ConnectorClientReader) interface{} {
+func (appInfoUrls applicationUrlsStrategy) Generate(reader clientcontext.ConnectorClientReader) interface{} {
 	return applicationApi{
 		MetadataURL:     fmt.Sprintf(MetadataURLFormat, appInfoUrls.appRegistryHost, reader.GetApplication()),
 		EventsURL:       fmt.Sprintf(EventsURLFormat, appInfoUrls.eventsHost, reader.GetApplication()),
@@ -54,7 +54,7 @@ type runtimeUrlsStrategy struct {
 	certURL string
 }
 
-func (runtimeInfoUrls runtimeUrlsStrategy) Generate(reader httpcontext.ConnectorClientReader) interface{} {
+func (runtimeInfoUrls runtimeUrlsStrategy) Generate(reader clientcontext.ConnectorClientReader) interface{} {
 	return runtimeApi{
 		InfoURL:         runtimeInfoUrls.infoURL,
 		CertificatesURL: runtimeInfoUrls.certURL,

@@ -1,7 +1,9 @@
-package httpcontext
+package clientcontext
 
 import (
 	"context"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
@@ -24,4 +26,18 @@ func ExtractClusterContext(ctx context.Context) (ConnectorClientContext, apperro
 	}
 
 	return clusterCtx, nil
+}
+
+func ResolveClusterContextExtender(token string, tokenResolver tokens.Resolver) (ContextExtender, apperrors.AppError) {
+	var clusterContext *ClusterContext
+	err := tokenResolver.Resolve(token, clusterContext)
+
+	return clusterContext, err
+}
+
+func ResolveApplicationContextExtender(token string, tokenResolver tokens.Resolver) (ContextExtender, apperrors.AppError) {
+	var appContext *ApplicationContext
+	err := tokenResolver.Resolve(token, appContext)
+
+	return appContext, err
 }

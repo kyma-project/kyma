@@ -6,15 +6,16 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+	clientcontextmiddlewares "github.com/kyma-project/kyma/components/connector-service/internal/clientcontext/middlewares"
 	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
 	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi"
+	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares"
 	"github.com/kyma-project/kyma/components/connector-service/internal/internalapi"
-	"github.com/kyma-project/kyma/components/connector-service/internal/middlewares"
 	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring"
 	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
@@ -29,6 +30,9 @@ const (
 	appCSRInfoFmt     = "https://%s/v1/applications/csr/info"
 	runtimeCSRInfoFmt = "https://%s/v1/runtimes/csr/info"
 )
+
+// TODO - consider moving to flag
+const caSecretName = "nginx-auth-ca"
 
 func main() {
 	formatter := &log.TextFormatter{
@@ -101,9 +105,9 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 		Province:           env.province,
 	}
 
-	certificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(), "nginx-auth-ca", subjectValues)
+	certificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(), caSecretName, subjectValues)
 
-	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenService, middlewares.ResolveApplicationContextExtender)
+	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenService, clientcontext.ResolveApplicationContextExtender)
 	appAPIUrlsGenerator := externalapi.NewApplicationApiUrlsStrategy(opts.appRegistryHost, opts.eventsHost, opts.getInfoURL, opts.connectorServiceHost)
 
 	appHandlerConfig := externalapi.Config{
@@ -111,11 +115,11 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 		Host:             opts.connectorServiceHost,
 		Subject:          subjectValues,
 		Middlewares:      []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware},
-		ContextExtractor: httpcontext.ExtractApplicationContext,
+		ContextExtractor: clientcontext.ExtractApplicationContext,
 		APIUrlsGenerator: appAPIUrlsGenerator,
 	}
 
-	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenService, middlewares.ResolveClusterContextExtender)
+	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenService, clientcontext.ResolveClusterContextExtender)
 	runtimeAPIUrlsGenerator := externalapi.NewRuntimeApiUrlsStrategy(opts.connectorServiceHost)
 
 	runtimeHandlerConfig := externalapi.Config{
@@ -123,7 +127,7 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 		Host:             opts.connectorServiceHost,
 		Subject:          subjectValues,
 		Middlewares:      []mux.MiddlewareFunc{clusterTokenResolverMiddleware.Middleware},
-		ContextExtractor: httpcontext.ExtractClusterContext,
+		ContextExtractor: clientcontext.ExtractClusterContext,
 		APIUrlsGenerator: runtimeAPIUrlsGenerator,
 		CertService:      certificateService,
 	}
@@ -133,15 +137,15 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 
 func newInternalHandler(tokenService tokens.Service, opts *options, globalMiddlewares []mux.MiddlewareFunc) http.Handler {
 
-	applicationCtxMiddleware := middlewares.NewApplicationContextMiddleware()
-	clusterCtxMiddleware := middlewares.NewClusterContextMiddleware(opts.tenant, opts.group)
+	applicationCtxMiddleware := clientcontextmiddlewares.NewApplicationContextMiddleware()
+	clusterCtxMiddleware := clientcontextmiddlewares.NewClusterContextMiddleware(opts.tenant, opts.group)
 
 	appHandlerMiddlewares := []mux.MiddlewareFunc{applicationCtxMiddleware.Middleware}
 	appHandlerConfig := internalapi.Config{
 		Middlewares:      appHandlerMiddlewares,
 		TokenCreator:     tokenService,
 		CSRInfoURL:       fmt.Sprintf(appCSRInfoFmt, opts.connectorServiceHost),
-		ContextExtractor: httpcontext.ExtractApplicationContext,
+		ContextExtractor: clientcontext.ExtractApplicationContext,
 	}
 
 	runtimeHandlerMiddlewares := []mux.MiddlewareFunc{clusterCtxMiddleware.Middleware}
@@ -149,7 +153,7 @@ func newInternalHandler(tokenService tokens.Service, opts *options, globalMiddle
 		Middlewares:      runtimeHandlerMiddlewares,
 		TokenCreator:     tokenService,
 		CSRInfoURL:       fmt.Sprintf(runtimeCSRInfoFmt, opts.connectorServiceHost),
-		ContextExtractor: httpcontext.ExtractClusterContext,
+		ContextExtractor: clientcontext.ExtractClusterContext,
 	}
 
 	return internalapi.NewHandler(globalMiddlewares, appHandlerConfig, runtimeHandlerConfig)

@@ -3,7 +3,7 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 
@@ -20,8 +20,8 @@ func NewApplicationContextMiddleware() *appContextMiddleware {
 
 func (cc *appContextMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		appContext := httpcontext.ApplicationContext{
-			Application:    r.Header.Get(httpcontext.ApplicationHeader),
+		appContext := clientcontext.ApplicationContext{
+			Application:    r.Header.Get(clientcontext.ApplicationHeader),
 			ClusterContext: cc.readClusterContextFromRequest(r),
 		}
 

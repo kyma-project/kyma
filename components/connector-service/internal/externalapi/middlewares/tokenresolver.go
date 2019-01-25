@@ -4,12 +4,12 @@ import (
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 )
 
-type ExtenderConstructor func(token string, tokenResolver tokens.Resolver) (httpcontext.ContextExtender, apperrors.AppError)
+type ExtenderConstructor func(token string, tokenResolver tokens.Resolver) (clientcontext.ContextExtender, apperrors.AppError)
 
 type tokenResolverMiddleware struct {
 	tokenResolver       tokens.Resolver
@@ -46,19 +46,4 @@ func (cc *tokenResolverMiddleware) Middleware(handler http.Handler) http.Handler
 
 		handler.ServeHTTP(w, reqWithCtx)
 	})
-}
-
-// TODO - consider moving to httpcontext
-func ResolveClusterContextExtender(token string, tokenResolver tokens.Resolver) (httpcontext.ContextExtender, apperrors.AppError) {
-	var clusterContext *httpcontext.ClusterContext
-	err := tokenResolver.Resolve(token, clusterContext)
-
-	return clusterContext, err
-}
-
-func ResolveApplicationContextExtender(token string, tokenResolver tokens.Resolver) (httpcontext.ContextExtender, apperrors.AppError) {
-	var appContext *httpcontext.ApplicationContext
-	err := tokenResolver.Resolve(token, appContext)
-
-	return appContext, err
 }

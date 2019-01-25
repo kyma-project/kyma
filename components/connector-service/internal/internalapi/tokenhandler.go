@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 
@@ -16,10 +16,10 @@ const TokenURLFormat = "https://%s?token=%s"
 type tokenHandler struct {
 	tokenCreator             tokens.Creator
 	csrInfoURL               string
-	connectorClientExtractor httpcontext.ConnectorClientExtractor
+	connectorClientExtractor clientcontext.ConnectorClientExtractor
 }
 
-func NewTokenHandler(tokenService tokens.Creator, csrInfoURL string, connectorClientExtractor httpcontext.ConnectorClientExtractor) TokenHandler {
+func NewTokenHandler(tokenService tokens.Creator, csrInfoURL string, connectorClientExtractor clientcontext.ConnectorClientExtractor) TokenHandler {
 	return &tokenHandler{tokenCreator: tokenService, csrInfoURL: csrInfoURL, connectorClientExtractor: connectorClientExtractor}
 }
 

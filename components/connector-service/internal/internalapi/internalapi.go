@@ -3,7 +3,7 @@ package internalapi
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
@@ -15,7 +15,7 @@ type Config struct {
 	Middlewares      []mux.MiddlewareFunc
 	TokenCreator     tokens.Creator
 	CSRInfoURL       string
-	ContextExtractor httpcontext.ConnectorClientExtractor
+	ContextExtractor clientcontext.ConnectorClientExtractor
 }
 
 type TokenHandler interface {

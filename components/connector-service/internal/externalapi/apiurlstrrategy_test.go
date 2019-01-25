@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext/mocks"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

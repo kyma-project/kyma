@@ -7,7 +7,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 
 	"github.com/gorilla/mux"
@@ -18,7 +18,7 @@ type Config struct {
 	Middlewares      []mux.MiddlewareFunc
 	TokenService     tokens.Service
 	APIUrlsGenerator APIUrlsGenerator
-	ContextExtractor httpcontext.ConnectorClientExtractor
+	ContextExtractor clientcontext.ConnectorClientExtractor
 	Host             string
 	Subject          certificates.CSRSubject
 	CertService      certificates.Service

@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,7 +23,7 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			clusterCtx, ok := ctx.Value(httpcontext.ClusterContextKey).(httpcontext.ClusterContext)
+			clusterCtx, ok := ctx.Value(clientcontext.ClusterContextKey).(clientcontext.ClusterContext)
 			require.True(t, ok)
 
 			assert.Equal(t, defaultTenant, clusterCtx.Tenant)
@@ -50,7 +50,7 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			clusterCtx, ok := ctx.Value(httpcontext.ClusterContextKey).(httpcontext.ClusterContext)
+			clusterCtx, ok := ctx.Value(clientcontext.ClusterContextKey).(clientcontext.ClusterContext)
 			require.True(t, ok)
 
 			assert.Equal(t, testTenant, clusterCtx.Tenant)
@@ -60,8 +60,8 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 
 		req, err := http.NewRequest("GET", "/", nil)
 		require.NoError(t, err)
-		req.Header.Set(httpcontext.TenantHeader, testTenant)
-		req.Header.Set(httpcontext.GroupHeader, testGroup)
+		req.Header.Set(clientcontext.TenantHeader, testTenant)
+		req.Header.Set(clientcontext.GroupHeader, testGroup)
 
 		rr := httptest.NewRecorder()
 

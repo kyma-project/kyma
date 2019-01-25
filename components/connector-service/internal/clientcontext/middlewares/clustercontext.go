@@ -5,7 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
@@ -38,10 +38,10 @@ func (cc *clusterContextMiddleware) Middleware(handler http.Handler) http.Handle
 	})
 }
 
-func (cc *clusterContextMiddleware) readClusterContextFromRequest(r *http.Request) httpcontext.ClusterContext {
-	clusterContext := httpcontext.ClusterContext{
-		Tenant: r.Header.Get(httpcontext.TenantHeader),
-		Group:  r.Header.Get(httpcontext.GroupHeader),
+func (cc *clusterContextMiddleware) readClusterContextFromRequest(r *http.Request) clientcontext.ClusterContext {
+	clusterContext := clientcontext.ClusterContext{
+		Tenant: r.Header.Get(clientcontext.TenantHeader),
+		Group:  r.Header.Get(clientcontext.GroupHeader),
 	}
 
 	if cc.defaultTenant != "" {

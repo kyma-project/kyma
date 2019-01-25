@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
@@ -17,13 +17,13 @@ const (
 
 type CSRInfoHandler struct {
 	tokenCreator             tokens.Creator
-	connectorClientExtractor httpcontext.ConnectorClientExtractor
+	connectorClientExtractor clientcontext.ConnectorClientExtractor
 	apiInfoURLsGenerator     APIUrlsGenerator
 	host                     string
 	csrSubject               certificates.CSRSubject
 }
 
-func NewCSRInfoHandler(tokenCreator tokens.Creator, connectorClientExtractor httpcontext.ConnectorClientExtractor, apiInfoURLsGenerator APIUrlsGenerator, host string, subjectValues certificates.CSRSubject) InfoHandler {
+func NewCSRInfoHandler(tokenCreator tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, apiInfoURLsGenerator APIUrlsGenerator, host string, subjectValues certificates.CSRSubject) InfoHandler {
 
 	return &CSRInfoHandler{
 		tokenCreator:             tokenCreator,

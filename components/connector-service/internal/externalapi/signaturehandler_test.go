@@ -14,7 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	certMock "github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
 	tokensMock "github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
@@ -54,7 +54,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certService.On("SignCSR", decodedCSR, commonName).Return(crtBase64, nil)
 
 		dummyClientContext := dummyClientContext{}
-		connectorClientExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
@@ -81,7 +81,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when failed to extract client context", func(t *testing.T) {
 		// given
-		errorExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
@@ -104,7 +104,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 	t.Run("should return 500 when couldn't read request body", func(t *testing.T) {
 		// given
 		dummyClientContext := dummyClientContext{}
-		connectorClientExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
@@ -128,7 +128,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 	t.Run("should return 400 when failed to decode base64", func(t *testing.T) {
 		// given
 		dummyClientContext := dummyClientContext{}
-		connectorClientExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
@@ -155,7 +155,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certService.On("SignCSR", decodedCSR, commonName).Return("", apperrors.Internal("error"))
 
 		dummyClientContext := dummyClientContext{}
-		connectorClientExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 

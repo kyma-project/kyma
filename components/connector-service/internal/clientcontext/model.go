@@ -1,4 +1,4 @@
-package httpcontext
+package clientcontext
 
 import (
 	"context"
@@ -18,10 +18,6 @@ type ConnectorClientContext interface {
 	GetApplication() string
 	ToJSON() ([]byte, error)
 	GetCommonName() string
-}
-
-type Serializer interface {
-	ToJSON() ([]byte, error)
 }
 
 type ContextExtender interface {
@@ -53,10 +49,12 @@ func (appCtx ApplicationContext) ExtendContext(ctx context.Context) context.Cont
 	return context.WithValue(ctx, ApplicationContextKey, appCtx)
 }
 
+// GetApplication returns Application identifier
 func (appCtx ApplicationContext) GetApplication() string {
 	return appCtx.Application
 }
 
+// GetCommonName returns expected Common Name value for the Application
 func (appCtx ApplicationContext) GetCommonName() string {
 	// TODO - construct CN
 	return appCtx.Application
@@ -82,10 +80,12 @@ func (clsCtx ClusterContext) ExtendContext(ctx context.Context) context.Context 
 	return context.WithValue(ctx, ClusterContextKey, clsCtx)
 }
 
+// GetApplication returns empty string
 func (clsCtx ClusterContext) GetApplication() string {
 	return ""
 }
 
+// GetCommonName returns expected Common Name value for the Cluster
 func (clsCtx ClusterContext) GetCommonName() string {
 	// TODO - construct CN
 	return clsCtx.Group + clsCtx.Tenant

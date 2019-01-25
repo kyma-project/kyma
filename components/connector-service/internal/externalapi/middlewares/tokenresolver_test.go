@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -26,15 +26,15 @@ func (dce dummyContextExtender) ExtendContext(ctx context.Context) context.Conte
 	return context.WithValue(ctx, dummyKey, dummyValue)
 }
 
-func dummyExtender(token string, tokenResolver tokens.Resolver) (httpcontext.ContextExtender, apperrors.AppError) {
+func dummyExtender(token string, tokenResolver tokens.Resolver) (clientcontext.ContextExtender, apperrors.AppError) {
 	return dummyContextExtender{}, nil
 }
 
-func notFoundExtender(token string, tokenResolver tokens.Resolver) (httpcontext.ContextExtender, apperrors.AppError) {
+func notFoundExtender(token string, tokenResolver tokens.Resolver) (clientcontext.ContextExtender, apperrors.AppError) {
 	return dummyContextExtender{}, apperrors.NotFound("Not found")
 }
 
-func internalErrorExtender(token string, tokenResolver tokens.Resolver) (httpcontext.ContextExtender, apperrors.AppError) {
+func internalErrorExtender(token string, tokenResolver tokens.Resolver) (clientcontext.ContextExtender, apperrors.AppError) {
 	return dummyContextExtender{}, apperrors.Internal("Error")
 }
 

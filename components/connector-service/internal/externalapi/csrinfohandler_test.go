@@ -16,7 +16,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	tokenMocks "github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -54,7 +54,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 	}
 
 	dummyClientContext := dummyClientContext{}
-	connectorClientExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+	connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
 		return dummyClientContext, nil
 	}
 
@@ -105,7 +105,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		tokenCreator := &tokenMocks.Creator{}
 		apiURLsGenerator := &mocks.APIUrlsGenerator{}
 
-		errorExtractor := func(ctx context.Context) (httpcontext.ConnectorClientContext, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 

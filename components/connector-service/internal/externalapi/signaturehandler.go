@@ -8,7 +8,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 
@@ -18,12 +18,12 @@ import (
 
 type signatureHandler struct {
 	tokenRemover             tokens.Remover
-	connectorClientExtractor httpcontext.ConnectorClientExtractor
+	connectorClientExtractor clientcontext.ConnectorClientExtractor
 	certificateService       certificates.Service
 	host                     string
 }
 
-func NewSignatureHandler(tokenRemover tokens.Remover, certificateService certificates.Service, connectorClientExtractor httpcontext.ConnectorClientExtractor, host string) SignatureHandler {
+func NewSignatureHandler(tokenRemover tokens.Remover, certificateService certificates.Service, connectorClientExtractor clientcontext.ConnectorClientExtractor, host string) SignatureHandler {
 	return &signatureHandler{
 		tokenRemover:             tokenRemover,
 		connectorClientExtractor: connectorClientExtractor,
