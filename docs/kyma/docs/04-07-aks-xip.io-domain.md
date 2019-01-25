@@ -83,7 +83,7 @@ You can either choose the pre-build image of the Kyma Installer or build your ow
 * To use a prebuild image, go to [this](https://github.com/kyma-project/kyma/releases/) page and check the version of the latest release. Your URL looks as follows:
 ```eu.gcr.io/kyma-project/kyma-installer:{latest version}```
 
-In the `my-kyma.yaml` file created in the previous step, change the image URL to `{YOUR_DOCKER_LOGIN}/kyma-installer:latest`.
+In the `my-kyma.yaml` file created in the previous step, change the image URL to the value taken from the previous step.
 ```
 kind: Deployment
 metadata:
