@@ -53,29 +53,39 @@ func TestSecureConnection(t *testing.T) {
 
 		Convey("When token requested", func() {
 
-			Convey("The operator should insert token into TokenRequest CRD", nil)
-
-		})
-
-		Convey("When information on CSR requested", func() {
-
-			Convey("The Connector Service should return Cluster Info", nil)
-
-		})
-
-		Convey("When CSR sent", func() {
-
-			Convey("The Connector Service should return signed certificate", nil)
-
-		})
-
-		Convey("When /v1/services requested", func() {
-
-			Convey("It should return proper data when using signed certificate", nil)
+			Convey("The application should be able to fetch certificate and request service data", nil)
 
 		})
 
 	})
+
+	//Convey("Given external solution", t, func() {
+	//
+	//	Convey("When token requested", func() {
+	//
+	//		Convey("The operator should insert token into TokenRequest CRD", nil)
+	//
+	//	})
+	//
+	//	Convey("When information on CSR requested", func() {
+	//
+	//		Convey("The Connector Service should return Cluster Info", nil)
+	//
+	//	})
+	//
+	//	Convey("When CSR sent", func() {
+	//
+	//		Convey("The Connector Service should return signed certificate", nil)
+	//
+	//	})
+	//
+	//	Convey("When /v1/services requested", func() {
+	//
+	//		Convey("It should return proper data when using signed certificate", nil)
+	//
+	//	})
+	//
+	//})
 
 }
 
@@ -141,19 +151,13 @@ func TestBindings(t *testing.T) {
 
 }
 
-func TestLambdaCreation(t *testing.T) {
+func TestLambda(t *testing.T) {
 
-	Convey("Given Lambda's code", t, func() {
+	Convey("Given a Lambda is present", t, func() {
 
 		Convey("When event-trigger created", func() {
 
 			Convey("It should be accessible within the system", nil)
-
-		})
-
-		Convey("When lambda is created", func() {
-
-			Convey("It should provide proper infrastructure", nil)
 
 		})
 
@@ -163,12 +167,15 @@ func TestLambdaCreation(t *testing.T) {
 
 		})
 
-		Convey("When event is sent", func() {
-
-			Convey("Lambda should react to the event", nil)
-
-		})
-
 	})
 
+}
+
+func TestEventSent(t *testing.T) {
+	Convey("When event is sent", func() {
+
+		Convey("Lambda should react to the event", nil)
+
+			Convey("Request should be proxied and response delivered", nil)
+	})
 }
