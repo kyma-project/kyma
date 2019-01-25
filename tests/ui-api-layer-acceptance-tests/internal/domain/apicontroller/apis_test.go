@@ -137,8 +137,15 @@ func fixAPIQuery() *graphql.Request {
 				apis(namespace: $namespace) {
 					name
     				hostname
-    				service
-    				authenticationPolicies
+    				service {
+						name
+						port
+					}
+    				authenticationPolicies {
+						authType
+						jwksUri
+						issuer
+					}
 				}
 			}`
 	req := graphql.NewRequest(query)
