@@ -43,7 +43,7 @@ type api struct {
 type authenticationPolicy struct {
 	AuthType string `json:"type"`
 	Issuer   string `json:"issuer"`
-	JwksURI  string `json:"jwksUri"`
+	JwksURI  string `json:"jwksURI"`
 }
 
 func TestApisQuery(t *testing.T) {
@@ -143,7 +143,7 @@ func fixAPIQuery() *graphql.Request {
 					}
     				authenticationPolicies {
 						type
-						jwksUri
+						jwksURI
 						issuer
 					}
 				}
