@@ -16,6 +16,7 @@ used are stored in the `resources/istio` directory. The installation is customiz
   - Adds a webhook to the Istio Pilot.
   - Creates a TLS certificate for the Ingress Gateway.
   - Deletes all resources related to the `prometheus`, `tracing`, `grafana`, and `servicegraph`charts.
+  - Enables default sidecar injection for Istio.
 
 To learn more about the custom Istio patch applied in Kyma, see the `components/istio-kyma-patch/` directory.
 
