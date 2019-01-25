@@ -142,7 +142,7 @@ func fixAPIQuery() *graphql.Request {
 						port
 					}
     				authenticationPolicies {
-						authType
+						type
 						jwksUri
 						issuer
 					}
