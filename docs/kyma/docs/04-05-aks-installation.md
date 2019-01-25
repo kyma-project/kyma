@@ -29,7 +29,7 @@ Set the following environment variables:
   export KYMA_RELEASE_VERSION={KYMA_RELEASE_VERSION}
   ```
   >**NOTE:** Installation from release is supported since version 0.7.0. 
-  Empty KYMA_RELEASE_VERSION means that you want to install from sources
+  If you want to install from sources do not export `KYMA_RELEASE_VERSION`.
 
 * If you use a custom domain, set also these variables:
   ```
