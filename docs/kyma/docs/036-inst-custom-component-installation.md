@@ -3,13 +3,13 @@ title: Custom component installation
 type: Installation
 ---
 
-Since Kyma is a modular tool, you can remove some components so that they do not install together with Kyma. You can also add some of them after the installation process. Read this document to learn how.
+Since Kyma is modular, you can remove some components so that they are not installed together with Kyma. You can also add some of them after the installation process. Read this document to learn how to do that.
 
 ## Remove a component
 
->**NOTE:** Not all components can be simply removed from the Kyma installation. In case of Istio and the Service Catalog, you must provide your own deployment of these components in the Kyma-supported version before you remove them from the  installation process. See [this](https://github.com/kyma-project/kyma/blob/master/resources/istio-kyma-patch/templates/job.yaml#L25) and [this](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/values.yaml#L3) documents accordingly to check the currently supported versions of Istio and the Service Catalog.
+>**NOTE:** Not all components can be simply removed from the Kyma installation. In case of Istio and the Service Catalog, you must provide your own deployment of these components in the Kyma-supported version before you remove them from the installation process. See [this](https://github.com/kyma-project/kyma/blob/master/resources/istio-kyma-patch/templates/job.yaml#L25) and [this](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/values.yaml#L3) documents accordingly to check the currently supported versions of Istio and the Service Catalog.
 
-To disable a component from the list of components that install with Kyma, remove this component's entries from the appropriate file. The file depends on whether you install Kyma from the release or from sources, and whether you install Kyma locally or on a cluster. The version of your component's deployment must match the version that Kyma currently supports.
+To disable a component from the list of components that you install with Kyma, remove this component's entries from the appropriate file. The file differs depending on whether you install Kyma from the release or from sources, and if you install Kyma locally or on a cluster. The version of your component's deployment must match the version that Kyma currently supports.
 
 ### Installation from the release
 
@@ -19,7 +19,7 @@ To disable a component from the list of components that install with Kyma, remov
     name: "application-connector"
     namespace: "kyma-system"
     ```
-  * from the `kyma-config-local.yaml` file for **local** installation
+  * from the `kyma-config-local.yaml` file for the **local** installation
   * from the `kyma-config-cluster.yaml` file for the **cluster** installation
 
 
@@ -28,7 +28,7 @@ To disable a component from the list of components that install with Kyma, remov
 ### Installation from sources
 
 1. Customize installation by removing a component from the list of components in the following Installation resource:
-  * [installer-cr.yaml.tpl](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr.yaml.tpl)  for the **local** installation
+  * [installer-cr.yaml.tpl](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr.yaml.tpl) for the **local** installation
   *  [installer-cr-cluster.yaml.tpl](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster.yaml.tpl) for the **cluster** installation
 
 2. Follow the installation steps described in the [Install Kyma locally from sources](#installation-install-kyma-locally-from-sources) document, or [Install Kyma on a GKE cluster](#installation-install-kyma-on-a-gke-cluster) accordingly.
@@ -39,14 +39,14 @@ To disable a component from the list of components that install with Kyma, remov
   ```
   kubectl get pods -n kyma-system
   ```
-2. Sign in to the Kyma Console using the `admin@kyma.cx` as described in the [Install Kyma locally from the release](#installation-install-kyma-locally-from-the-release) document.
+2. Sign in to the Kyma Console using the `admin@kyma.cx` email address as described in the [Install Kyma locally from the release](#installation-install-kyma-locally-from-the-release) document.
 
 
 ## Add a component
 
 >**NOTE:** This section assumes that you already have your Kyma Lite local version installed successfully.
 
-To install a component that does not install with Kyma by default, run an appropriate `helm install` command inside the `resources` directory:
+To install a component that does is not installed with Kyma by default, run an appropriate `helm install` command inside the `resources` directory:
 
 * To install Jaeger, run:
 
