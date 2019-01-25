@@ -41,6 +41,6 @@ application fails.
 the istio-system Namespace. See the [job ConfigMap](../../resources/istio-kyma-patch/templates/configmap.yaml) to see 
 which patches are applied by default.
 
-5. Enable default sidecar injection for Istio. By default, sidecar injection is enabled in the Namespaces labelled with `istio-injection: enabled`. The patch reverses this behaviour: sidecar injection is enabled for all Namespaces, except those labelled with `istio-injection: disabled`.
+5. Enable default sidecar injection for Istio. By default, sidecar injection is enabled in the Namespaces labeled with `istio-injection: enabled`. The patch reverses this behavior: sidecar injection is enabled for all Namespaces, except those labeled with `istio-injection: disabled`.
 
-6. Disable sidecar injection for the `istio-system` namespace. As described in the previous step, Istio injects sidecars to all Namespaces. To disable sidecar injection in the `istio-system` Namespace, the namespace must be labelled as non-eligible for sidecar injection.
+6. Disable sidecar injection in the `istio-system` Namespace.
