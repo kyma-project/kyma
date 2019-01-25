@@ -101,6 +101,7 @@ func (h *bucketHandler) SetPolicyIfNotEqual(bucketName string, policy string) (b
 		return false, nil
 	}
 
+	h.logInfof("Current policy for bucket %s is not updated: %s", bucketName, currentPolicy)
 	err = h.client.SetBucketPolicy(bucketName, policy)
 	if err != nil {
 		return false, errors.Wrapf(err, "while setting policy %s for bucket %s", policy, bucketName)

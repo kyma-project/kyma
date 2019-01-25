@@ -22,19 +22,9 @@ type BucketSpec struct {
 	// +optional
 	Region string `json:"region,omitempty"`
 
-	// +kubebuilder:validation:Enum=,none,readonly,readwrite,writeonly
 	// +optional
-	Policy BucketPolicy `json:"policy,omitempty"`
+	Policy string `json:"policy,omitempty"`
 }
-
-type BucketPolicy string
-
-const (
-	BucketPolicyNone      BucketPolicy = "none"
-	BucketPolicyReadOnly               = "readonly"
-	BucketPolicyReadWrite              = "readwrite"
-	BucketPolicyWriteOnly              = "writeonly"
-)
 
 // BucketStatus defines the observed state of Bucket
 type BucketStatus struct {

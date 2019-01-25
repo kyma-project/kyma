@@ -29,12 +29,6 @@ spec:
         spec:
           properties:
             policy:
-              enum:
-              - ""
-              - none
-              - readonly
-              - readwrite
-              - writeonly
               type: string
             region:
               type: string
