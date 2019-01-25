@@ -13,7 +13,3 @@ sidecar.istio.io/inject: "true"
 ```
 
 Read the [Installing the Istio Sidecar](https://istio.io/docs/setup/kubernetes/sidecar-injection.html) document to learn more about sidecar proxy injection.
-
-
-
-
