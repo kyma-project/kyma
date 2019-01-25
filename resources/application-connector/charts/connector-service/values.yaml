@@ -6,6 +6,9 @@ deployment:
     externalAPIPort: &externalAPIPort 8081
     tokenLength: 64
     tokenExpirationMinutes: 5
+    getInfoURL: ""
+    group: "default"
+    tenant: "default"
   envvars:
     country: DE
     organization: Organization
