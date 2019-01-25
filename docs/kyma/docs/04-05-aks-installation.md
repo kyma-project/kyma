@@ -15,25 +15,25 @@ This Installation guide shows developers how to quickly deploy Kyma on an [Azure
 
 ### Environment variables
 
-Set the following environment variables:
-```
-export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
-export CLUSTER_NAME={YOUR_CLUSTER_NAME}
-export REGION={YOUR_REGION} #westeurope
-```
+* Set the following environment variables:
+  ```
+  export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
+  export CLUSTER_NAME={YOUR_CLUSTER_NAME}
+  export REGION={YOUR_REGION} #westeurope
+  ```
 
-If you want to install from release go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
-Export the version you chose as an environment variable. Run:
-```
-export KYMA_VERSION={KYMA_RELEASE_VERSION}
-```
+* If you want to install from release go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
+  Export the version you chose as an environment variable. Run:
+  ```
+  export KYMA_VERSION={KYMA_RELEASE_VERSION}
+  ```
 
 
-If you use a custom domain, set also these variables:
-```
-export DNS_DOMAIN={YOUR_DOMAIN} # example.com
-export SUB_DOMAIN={YOUR_SUBDOMAIN} # cluster (in this case the full name of your cluster is cluster.example.com)
-```
+* If you use a custom domain, set also these variables:
+  ```
+  export DNS_DOMAIN={YOUR_DOMAIN} # example.com
+  export SUB_DOMAIN={YOUR_SUBDOMAIN} # cluster (in this case the full name of your cluster is cluster.example.com)
+  ```
 
 Create a resource group that will contain all your resources:
 ```
