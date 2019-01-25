@@ -200,8 +200,16 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     cat installation/resources/installer.yaml <(echo -e "\n---") installation/resources/installer-config-cluster.yaml.tpl  <(echo -e "\n---") installation/resources/installer-cr-cluster.yaml.tpl | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
-4. The output of this operation is the `my_kyma.yaml` file. Modify it to fetch the proper image with the changes you made (`{YOUR_DOCKER_LOGIN}/kyma-installer:latest`). Use the modified file to deploy Kyma on your AKS cluster.
-
+4. In the `my-kyma.yaml` file created in the previous step, change the image URL to `{YOUR_DOCKER_LOGIN}/kyma-installer:latest`.
+    ```
+    kind: Deployment
+    metadata:
+      name: kyma-installer
+      namespace: kyma-installer
+      ......
+        image: eu.gcr.io/kyma-project/develop/installer:30bf314d
+    ```
+    Use the modified file to deploy Kyma on your AKS cluster.
 
 ## Deploy Kyma
 
