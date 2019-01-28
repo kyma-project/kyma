@@ -3,6 +3,8 @@ package k8s
 import (
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -18,12 +20,16 @@ import (
 type podService struct {
 	client   corev1.CoreV1Interface
 	informer cache.SharedIndexInformer
+	notifier resource.Notifier
 }
 
 func newPodService(informer cache.SharedIndexInformer, client corev1.CoreV1Interface) *podService {
+	notifier := resource.NewNotifier()
+	informer.AddEventHandler(notifier)
 	return &podService{
 		client:   client,
 		informer: informer,
+		notifier: notifier,
 	}
 }
 
@@ -63,6 +69,14 @@ func (svc *podService) List(namespace string, pagingParams pager.PagingParams) (
 	}
 
 	return pods, nil
+}
+
+func (svc *podService) Subscribe(listener resource.Listener) {
+	svc.notifier.AddListener(listener)
+}
+
+func (svc *podService) Unsubscribe(listener resource.Listener) {
+	svc.notifier.DeleteListener(listener)
 }
 
 func (svc *podService) Update(name, namespace string, update v1.Pod) (*v1.Pod, error) {

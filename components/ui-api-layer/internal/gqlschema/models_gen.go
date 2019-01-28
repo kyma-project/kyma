@@ -229,6 +229,11 @@ type Pod struct {
 	JSON              JSON             `json:"json"`
 }
 
+type PodEvent struct {
+	Type SubscriptionEventType `json:"type"`
+	Pod  Pod                   `json:"pod"`
+}
+
 type ResourceQuota struct {
 	Name     string         `json:"name"`
 	Pods     *string        `json:"pods"`

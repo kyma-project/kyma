@@ -1,8 +1,12 @@
 package k8s_test
 
 import (
+	"context"
 	"errors"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/mock"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/automock"
@@ -189,6 +193,39 @@ func TestPodResolver_PodsQuery(t *testing.T) {
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
 		assert.Nil(t, result)
+	})
+}
+
+func TestPodResolver_PodEventSubscription(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), (-24 * time.Hour))
+		cancel()
+
+		svc := automock.NewPodSvc()
+		svc.On("Subscribe", mock.Anything).Once()
+		svc.On("Unsubscribe", mock.Anything).Once()
+		resolver := k8s.NewPodResolver(svc)
+
+		_, err := resolver.PodEventSubscription(ctx, "test")
+
+		require.NoError(t, err)
+		svc.AssertCalled(t, "Subscribe", mock.Anything)
+	})
+
+	t.Run("Unsubscribe after connection close", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), (-24 * time.Hour))
+		cancel()
+
+		svc := automock.NewPodSvc()
+		svc.On("Subscribe", mock.Anything).Once()
+		svc.On("Unsubscribe", mock.Anything).Once()
+		resolver := k8s.NewPodResolver(svc)
+
+		channel, err := resolver.PodEventSubscription(ctx, "test")
+		<-channel
+
+		require.NoError(t, err)
+		svc.AssertCalled(t, "Unsubscribe", mock.Anything)
 	})
 }
 

@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/listener"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -119,6 +121,80 @@ func TestPodService_List(t *testing.T) {
 		assert.Equal(t, []*v1.Pod{
 			expectedPod1, expectedPod2,
 		}, pods)
+	})
+}
+
+func TestPodService_Subscribe(t *testing.T) {
+	t.Run("Simple", func(t *testing.T) {
+		podInformer, _ := fixPodInformer()
+		svc := k8s.NewPodService(podInformer, nil)
+		podListener := listener.NewPod(nil, nil, nil)
+		svc.Subscribe(podListener)
+	})
+
+	t.Run("Duplicated", func(t *testing.T) {
+		podInformer, _ := fixPodInformer()
+		svc := k8s.NewPodService(podInformer, nil)
+		podListener := listener.NewPod(nil, nil, nil)
+
+		svc.Subscribe(podListener)
+		svc.Subscribe(podListener)
+	})
+
+	t.Run("Multiple", func(t *testing.T) {
+		podInformer, _ := fixPodInformer()
+		svc := k8s.NewPodService(podInformer, nil)
+		podListenerA := listener.NewPod(nil, nil, nil)
+		podListenerB := listener.NewPod(nil, nil, nil)
+
+		svc.Subscribe(podListenerA)
+		svc.Subscribe(podListenerB)
+	})
+
+	t.Run("Nil", func(t *testing.T) {
+		podInformer, _ := fixPodInformer()
+		svc := k8s.NewPodService(podInformer, nil)
+
+		svc.Subscribe(nil)
+	})
+}
+
+func TestPodService_Unsubscribe(t *testing.T) {
+	t.Run("Existing", func(t *testing.T) {
+		podInformer, _ := fixPodInformer()
+		svc := k8s.NewPodService(podInformer, nil)
+		podListener := listener.NewPod(nil, nil, nil)
+		svc.Subscribe(podListener)
+
+		svc.Unsubscribe(podListener)
+	})
+
+	t.Run("Duplicated", func(t *testing.T) {
+		podInformer, _ := fixPodInformer()
+		svc := k8s.NewPodService(podInformer, nil)
+		podListener := listener.NewPod(nil, nil, nil)
+		svc.Subscribe(podListener)
+		svc.Subscribe(podListener)
+
+		svc.Unsubscribe(podListener)
+	})
+
+	t.Run("Multiple", func(t *testing.T) {
+		podInformer, _ := fixPodInformer()
+		svc := k8s.NewPodService(podInformer, nil)
+		podListenerA := listener.NewPod(nil, nil, nil)
+		podListenerB := listener.NewPod(nil, nil, nil)
+		svc.Subscribe(podListenerA)
+		svc.Subscribe(podListenerB)
+
+		svc.Unsubscribe(podListenerA)
+	})
+
+	t.Run("Nil", func(t *testing.T) {
+		podInformer, _ := fixPodInformer()
+		svc := k8s.NewPodService(podInformer, nil)
+
+		svc.Unsubscribe(nil)
 	})
 }
 
