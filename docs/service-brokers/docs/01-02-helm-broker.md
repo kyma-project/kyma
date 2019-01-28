@@ -9,7 +9,7 @@ Using bundles, you can also install other brokers, such as the [Google Cloud Pla
 
 For more information about the Service Brokers, see the **Service Brokers overview** document.
 
-The Helm Broker implements the [Open Service Broker API][https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/profile.md#service-metadata] (OSB API).
+The Helm Broker implements the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/profile.md#service-metadata) (OSB API).
 To be compliant with the Service Catalog version used in Kyma, the Helm Broker supports only the following versions of the OSB API:
 - v2.13
 - v2.12
