@@ -14,7 +14,7 @@ spec:
   hosts:
   - log-ui.{{ .Values.global.domainName }}
   gateways:
-  - {{ .Values.global.istio.gateway.name }}
+  - kyma-gateway
   http:
   - match:
     - uri:
@@ -22,5 +22,5 @@ spec:
     route:
     - destination:
         port:
-          number: {{ $servicePort }}
+          number: {{ .Values.service.externalPort }}
         host: {{ $serviceName }}
