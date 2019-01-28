@@ -3,7 +3,9 @@ package bucket
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/buckethandler/automock"
+	automock2 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/cleaner/automock"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/mock"
 	"os"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
@@ -30,8 +32,8 @@ func TestAdd(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		// Set test envs
-		accessKeyName := "APP_ACCESS_KEY"
-		secretKeyName := "APP_SECRET_KEY"
+		accessKeyName := "APP_STORE_ACCESS_KEY"
+		secretKeyName := "APP_STORE_SECRET_KEY"
 		originalAccessKey := os.Getenv(accessKeyName)
 		originalSecretKey := os.Getenv(secretKeyName)
 
@@ -74,7 +76,11 @@ func TestReconcileBucketCreationSuccess(t *testing.T) {
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
 
-	cfg := prepareReconcilerTest(t, bucketHandler)
+	cleaner := &automock2.Cleaner{}
+	cleaner.On("Clean", mock.Anything, exp.BucketName, "").Return(nil).Once()
+	defer cleaner.AssertExpectations(t)
+
+	cfg := prepareReconcilerTest(t, bucketHandler, cleaner)
 	g := cfg.g
 	c := cfg.c
 	defer cfg.finishTest()
@@ -111,7 +117,11 @@ func TestReconcileBucketCreationFailed(t *testing.T) {
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
 
-	cfg := prepareReconcilerTest(t, bucketHandler)
+	cleaner := &automock2.Cleaner{}
+	cleaner.On("Clean", mock.Anything, exp.BucketName, "").Return(nil).Once()
+	defer cleaner.AssertExpectations(t)
+
+	cfg := prepareReconcilerTest(t, bucketHandler, cleaner)
 	g := cfg.g
 	c := cfg.c
 	defer cfg.finishTest()
@@ -148,7 +158,11 @@ func TestReconcileBucketCheckFailed(t *testing.T) {
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
 
-	cfg := prepareReconcilerTest(t, bucketHandler)
+	cleaner := &automock2.Cleaner{}
+	cleaner.On("Clean", mock.Anything, exp.BucketName, "").Return(nil).Once()
+	defer cleaner.AssertExpectations(t)
+
+	cfg := prepareReconcilerTest(t, bucketHandler, cleaner)
 	g := cfg.g
 	c := cfg.c
 	defer cfg.finishTest()
@@ -182,7 +196,11 @@ func TestReconcileBucketPolicyUpdateSuccess(t *testing.T) {
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
 
-	cfg := prepareReconcilerTest(t, bucketHandler)
+	cleaner := &automock2.Cleaner{}
+	cleaner.On("Clean", mock.Anything, exp.BucketName, "").Return(nil).Once()
+	defer cleaner.AssertExpectations(t)
+
+	cfg := prepareReconcilerTest(t, bucketHandler, cleaner)
 	g := cfg.g
 	c := cfg.c
 	defer cfg.finishTest()
@@ -238,7 +256,11 @@ func TestReconcileBucketUpdatePolicyFailed(t *testing.T) {
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
 
-	cfg := prepareReconcilerTest(t, bucketHandler)
+	cleaner := &automock2.Cleaner{}
+	cleaner.On("Clean", mock.Anything, exp.BucketName, "").Return(nil).Once()
+	defer cleaner.AssertExpectations(t)
+
+	cfg := prepareReconcilerTest(t, bucketHandler, cleaner)
 	g := cfg.g
 	c := cfg.c
 	defer cfg.finishTest()
@@ -276,7 +298,7 @@ func TestReconcileBucketDeletedRemotely(t *testing.T) {
 	bucketHandler.On("Exists", exp.BucketName).Return(false, nil).Twice()
 	defer bucketHandlerBefore.AssertExpectations(t)
 
-	cfg := prepareReconcilerTest(t, bucketHandler)
+	cfg := prepareReconcilerTest(t, bucketHandler, nil)
 	g := cfg.g
 	c := cfg.c
 	defer cfg.finishTest()
@@ -325,7 +347,11 @@ func TestReconcileBucketDeleteFailed(t *testing.T) {
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
 
-	cfg := prepareReconcilerTest(t, bucketHandler)
+	cleaner := &automock2.Cleaner{}
+	cleaner.On("Clean", mock.Anything, exp.BucketName, "").Return(nil).Twice()
+	defer cleaner.AssertExpectations(t)
+
+	cfg := prepareReconcilerTest(t, bucketHandler, cleaner)
 	g := cfg.g
 	c := cfg.c
 	defer cfg.finishTest()
@@ -363,7 +389,7 @@ func TestReconcileBucketAlreadyWithoutFinalizer(t *testing.T) {
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, instance.Spec.Policy).Return(false, nil).Once()
 	defer bucketHandler.AssertExpectations(t)
 
-	cfg := prepareReconcilerTest(t, bucketHandler)
+	cfg := prepareReconcilerTest(t, bucketHandler, nil)
 	g := cfg.g
 	c := cfg.c
 	defer cfg.finishTest()

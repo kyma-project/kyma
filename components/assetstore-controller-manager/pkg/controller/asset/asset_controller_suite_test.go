@@ -1,23 +1,22 @@
-package bucket
+package asset
 
 import (
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/buckethandler"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/cleaner"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/finalizer"
-	"github.com/onsi/gomega"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
 	stdlog "log"
 	"os"
 	"path/filepath"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis"
+	"github.com/onsi/gomega"
+	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 var cfg *rest.Config
@@ -73,14 +72,14 @@ type testSuite struct {
 	finishTest func()
 }
 
-func prepareReconcilerTest(t *testing.T, handler buckethandler.BucketHandler, cleaner cleaner.Cleaner) *testSuite {
+func prepareReconcilerTest(t *testing.T, mocks *mocks) *testSuite {
 	g := gomega.NewGomegaWithT(t)
 	mgr, err := manager.New(cfg, manager.Options{})
 	c := mgr.GetClient()
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	reconciler, err := newReconciler(mgr, handler, cleaner, finalizer.New(DeleteBucketFinalizerName), 60*time.Hour, "https://minio.kyma.local")
+	reconciler := newReconciler(mgr, 60*time.Hour, mocks.uploader, mocks.loader, mocks.bucketLister, mocks.cleaner, finalizer.New(deleteAssetFinalizerName), mocks.validator, mocks.mutator)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	recFn, requests := SetupTestReconcile(reconciler)
