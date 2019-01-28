@@ -164,14 +164,15 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 
 ### Using the latest GitHub release
 
-1. Download the `kyma-config-cluster` file from the release you chose. Run:
+1. Download the `kyma-config-cluster.yaml` and `kyma-installer-cluster.yaml` files from the latest release. Run:
    ```
    wget https://github.com/kyma-project/kyma/releases/download/$KYMA_RELEASE_VERSION/kyma-config-cluster.yaml
+   wget https://github.com/kyma-project/kyma/releases/download/$KYMA_RELEASE_VERSION/kyma-installer-cluster.yaml
    ```
 
-2. Update the file with the values from your environment variables. Run:
+2. Update the file with the values from your environment variables. Merge files from step 3 to one `my-kyma.yaml` file. Run:
     ```
-    cat kyma-config-cluster.yaml | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g"|sed -e "s/__.*__//g"  >my-kyma.yaml
+    cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g"|sed -e "s/__.*__//g"  >my-kyma.yaml
     ```
 
 3. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your AKS cluster.
@@ -289,5 +290,5 @@ Follow this steps to configure a new, more secure certificate suitable for produ
 3. Prepare installation file with the following command:
 
     ```
-    cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g"  | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__REMOTE_ENV_CA__/$AC_CRT/g" | sed -e "s/__REMOTE_ENV_CA_KEY__/$AC_KEY/g" |sed -e "s/__.*__//g"  >my-kyma.yaml
+    cat kyma-installer-cluster.yaml <(echo -e "\n---") cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g"  | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__REMOTE_ENV_CA__/$AC_CRT/g" | sed -e "s/__REMOTE_ENV_CA_KEY__/$AC_KEY/g" |sed -e "s/__.*__//g"  >my-kyma.yaml
     ```
