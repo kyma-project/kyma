@@ -1,0 +1,8 @@
+{
+    "spec": {
+      "displayName": "Azure SQL Database - DBMS only registered",
+      "description": "Documentation for Azure SQL 12.0-- DBMS only registered",
+      "id": "c9bd94e7-5b7d-4b20-96e6-c5678f99d997",
+      "type":"Service Class"
+    }
+}

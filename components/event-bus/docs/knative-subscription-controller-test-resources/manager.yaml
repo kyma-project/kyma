@@ -36,7 +36,7 @@ spec:
       containers:
       - command:
         - /root/manager
-        image: eu.gcr.io/kyma-project/event-bus-subscription-controller-knative:0.1.0
+        image: eu.gcr.io/kyma-project/develop/event-bus-subscription-controller-knative:ab9c73dd
         imagePullPolicy: Always
         name: manager
         env:
