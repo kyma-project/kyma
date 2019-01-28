@@ -45,4 +45,4 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.include_subscription_name_header** | **YES**   | Boolean flag indicating if the name of the subscription should be included in the HTTP headers while delivering the event. |
 | **spec.event_type**                       | **YES**   | The event type to which the event trigger is registered.                                                                   |
 | **spec.event_type_version**               | **YES**   | The version of the event type.                                                                                             |
-| **spec.source_id**                        | **YES**   | Identifies the external the external solution which sent the event to Kyma.                                                |
+| **spec.source_id**                        | **YES**   | Identifies the origin of events. This can be an external solution or an defined identifier for internally generated events.|
