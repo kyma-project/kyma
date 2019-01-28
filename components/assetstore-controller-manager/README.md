@@ -26,7 +26,7 @@ make run
 To build the production Docker image, run this command:
 
 ```bash
-docker build {image_name}:{image_tag}
+IMG={image_name}:{image_tag} make docker-build
 ```
 
 The variables are:

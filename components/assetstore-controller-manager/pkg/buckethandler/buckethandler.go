@@ -9,7 +9,7 @@ import (
 //go:generate mockery -name=BucketHandler -output=automock -outpkg=automock -case=underscore
 type BucketHandler interface {
 	CreateIfDoesntExist(bucketName string, region string) (bool, error)
-	CheckIfExists(bucketName string) (bool, error)
+	Exists(bucketName string) (bool, error)
 	Delete(bucketName string) error
 	SetPolicyIfNotEqual(bucketName string, policy string) (bool, error)
 	GetPolicy(bucketName string) (string, error)
@@ -38,7 +38,7 @@ func New(client MinioClient, logger logr.Logger) BucketHandler {
 }
 
 func (h *bucketHandler) CreateIfDoesntExist(bucketName string, region string) (bool, error) {
-	exists, err := h.CheckIfExists(bucketName)
+	exists, err := h.Exists(bucketName)
 	if err != nil {
 		return false, err
 	}
@@ -57,7 +57,7 @@ func (h *bucketHandler) CreateIfDoesntExist(bucketName string, region string) (b
 	return true, nil
 }
 
-func (h *bucketHandler) CheckIfExists(bucketName string) (bool, error) {
+func (h *bucketHandler) Exists(bucketName string) (bool, error) {
 	h.logInfof("Checking if bucket %s exists", bucketName)
 
 	exists, err := h.client.BucketExists(bucketName)
@@ -71,7 +71,7 @@ func (h *bucketHandler) CheckIfExists(bucketName string) (bool, error) {
 func (h *bucketHandler) Delete(bucketName string) error {
 	h.logInfof("Deleting bucket %s...", bucketName)
 
-	exists, err := h.CheckIfExists(bucketName)
+	exists, err := h.Exists(bucketName)
 	if err != nil {
 		return err
 	}

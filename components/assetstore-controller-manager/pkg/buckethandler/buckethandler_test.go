@@ -110,7 +110,7 @@ func TestBucketHandler_CheckIfExists(t *testing.T) {
 		defer minioCli.AssertExpectations(t)
 
 		// When
-		exists, err := handler.CheckIfExists(bucketName)
+		exists, err := handler.Exists(bucketName)
 
 		// Then
 		g.Expect(exists).To(gomega.BeTrue())
@@ -131,7 +131,7 @@ func TestBucketHandler_CheckIfExists(t *testing.T) {
 		defer minioCli.AssertExpectations(t)
 
 		// When
-		_, err := handler.CheckIfExists(bucketName)
+		_, err := handler.Exists(bucketName)
 
 		// Then
 		g.Expect(err.Error()).To(gomega.ContainSubstring(testErr.Error()))

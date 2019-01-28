@@ -69,7 +69,7 @@ func TestReconcileBucketCreationSuccess(t *testing.T) {
 
 	bucketHandler := &automock.BucketHandler{}
 	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, regionName).Return(true, nil).Once()
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
+	bucketHandler.On("Exists", exp.BucketName).Return(true, nil).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "").Return(false, nil).Once()
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
@@ -106,7 +106,7 @@ func TestReconcileBucketCreationFailed(t *testing.T) {
 	bucketHandler := &automock.BucketHandler{}
 	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "").Return(false, testErr).Once()
 	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "").Return(true, nil).Once()
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
+	bucketHandler.On("Exists", exp.BucketName).Return(true, nil).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "").Return(false, nil).Once()
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
@@ -142,8 +142,8 @@ func TestReconcileBucketCheckFailed(t *testing.T) {
 	instance := fixReadyBucket(name, namespace)
 
 	bucketHandler := &automock.BucketHandler{}
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(false, testErr).Once()
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
+	bucketHandler.On("Exists", exp.BucketName).Return(false, testErr).Once()
+	bucketHandler.On("Exists", exp.BucketName).Return(true, nil).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, instance.Spec.Policy).Return(false, nil).Once()
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
 	defer bucketHandler.AssertExpectations(t)
@@ -174,7 +174,7 @@ func TestReconcileBucketPolicyUpdateSuccess(t *testing.T) {
 
 	bucketHandler := &automock.BucketHandler{}
 	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "").Return(true, nil).Once()
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Times(4)
+	bucketHandler.On("Exists", exp.BucketName).Return(true, nil).Times(4)
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy1").Return(true, nil).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy1").Return(false, nil).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy2").Return(true, nil).Once()
@@ -232,7 +232,7 @@ func TestReconcileBucketUpdatePolicyFailed(t *testing.T) {
 	bucketHandler := &automock.BucketHandler{}
 	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "").Return(true, nil).Once()
 	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "").Return(false, nil).Once()
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
+	bucketHandler.On("Exists", exp.BucketName).Return(true, nil).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy1").Return(false, testErr).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "policy1").Return(false, nil).Once()
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
@@ -272,8 +272,8 @@ func TestReconcileBucketDeletedRemotely(t *testing.T) {
 	bucketHandlerBefore := bucketHandler
 	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, regionName).Return(true, nil).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "").Return(false, nil).Once()
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(false, nil).Twice()
+	bucketHandler.On("Exists", exp.BucketName).Return(true, nil).Once()
+	bucketHandler.On("Exists", exp.BucketName).Return(false, nil).Twice()
 	defer bucketHandlerBefore.AssertExpectations(t)
 
 	cfg := prepareReconcilerTest(t, bucketHandler)
@@ -319,7 +319,7 @@ func TestReconcileBucketDeleteFailed(t *testing.T) {
 	instance := fixReadyBucket(name, namespace)
 
 	bucketHandler := &automock.BucketHandler{}
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
+	bucketHandler.On("Exists", exp.BucketName).Return(true, nil).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, instance.Spec.Policy).Return(false, nil).Once()
 	bucketHandler.On("Delete", exp.BucketName).Return(testErr).Once()
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
@@ -359,7 +359,7 @@ func TestReconcileBucketAlreadyWithoutFinalizer(t *testing.T) {
 	instance := fixReadyBucket(name, namespace)
 	instance.Finalizers = []string{}
 	bucketHandler := &automock.BucketHandler{}
-	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
+	bucketHandler.On("Exists", exp.BucketName).Return(true, nil).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, instance.Spec.Policy).Return(false, nil).Once()
 	defer bucketHandler.AssertExpectations(t)
 

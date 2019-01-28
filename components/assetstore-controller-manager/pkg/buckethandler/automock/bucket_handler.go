@@ -8,27 +8,6 @@ type BucketHandler struct {
 	mock.Mock
 }
 
-// CheckIfExists provides a mock function with given fields: bucketName
-func (_m *BucketHandler) CheckIfExists(bucketName string) (bool, error) {
-	ret := _m.Called(bucketName)
-
-	var r0 bool
-	if rf, ok := ret.Get(0).(func(string) bool); ok {
-		r0 = rf(bucketName)
-	} else {
-		r0 = ret.Get(0).(bool)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(bucketName)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // ComparePolicy provides a mock function with given fields: bucketName, policy
 func (_m *BucketHandler) ComparePolicy(bucketName string, policy string) (bool, error) {
 	ret := _m.Called(bucketName, policy)
@@ -83,6 +62,27 @@ func (_m *BucketHandler) Delete(bucketName string) error {
 	}
 
 	return r0
+}
+
+// Exists provides a mock function with given fields: bucketName
+func (_m *BucketHandler) Exists(bucketName string) (bool, error) {
+	ret := _m.Called(bucketName)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(string) bool); ok {
+		r0 = rf(bucketName)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(bucketName)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // GetPolicy provides a mock function with given fields: bucketName
