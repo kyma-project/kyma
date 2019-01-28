@@ -67,24 +67,29 @@ To install Kyma, follow these steps:
   ./scripts/install-tiller.sh
   ```
 
-4. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
+4. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the latest release.
 
-5. Export the version you chose as an environment variable. Run:
+5. Export the release version as an environment variable. Run:
   ```
   export LATEST={KYMA_RELEASE_VERSION}
   ```
 
-6. Configure the Kyma installation using the local configuration file from the $LATEST release:
+6. Deploy the Kyma Installer in your cluster from the `$LATEST` release:
+  ```
+  kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-installer-local.yaml
+  ```
+
+7. Configure the Kyma installation using the local configuration file from the `$LATEST` release:
   ```
   kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml
   ```
 
-7. To trigger the installation process, label the `kyma-installation` custom resource:
+8. To trigger the installation process, label the `kyma-installation` custom resource:
   ```
   kubectl label installation/kyma-installation action=install
   ```
 
-8. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
+9. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
   ```
   ./scripts/is-installed.sh
   ```
