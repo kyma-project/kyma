@@ -11,10 +11,16 @@ You can install Kyma with [Knative](https://cloud.google.com/knative/) and use i
 
 ## Knative with local deployment from release
 
-When you install Kyma locally from a release, follow [this](#installation-install-kyma-locally-from-the-release-install-kyma-on-minikube) guide and run the following command after you complete step 6:
+When you install Kyma locally from a release, follow [this](#installation-install-kyma-locally-from-the-release-install-kyma-on-minikube) guide. 
+Ensure that you created the local Kubernetes cluster with `10240Mb` memory and `30Gb` disk size.
 ```
-kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"knative": "true"}}'
-```  
+./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit" --memory 10240Mb --disk-size 30g
+```
+
+Run the following command before triggering the Kyma installation process:
+```
+kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true"}}'
+```
 
 ## Knative with local deployment from sources
 
@@ -24,22 +30,9 @@ When you install Kyma locally from sources, add the `--knative` argument to the 
 ./run.sh --knative
 ```
 
-## Knative with a GKE cluster deployment from release
+## Knative with a cluster deployment
 
-To install Kyma with Knative when deploying on a GKE cluster from release, follow the instructions outlined in the **Install Kyma on a GKE cluster** installation guide.
-
-To prepare the `my-kyma.yaml` configuration file that installs Kyma with Knative on a GKE cluster, run:
-
+Run the following command before triggering the Kyma installation process:
 ```
-cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/global.knative:.*/global.knative: \"true\"/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g"  >my-kyma.yaml
-```
-
-## Knative with a GKE cluster deployment from sources
-
-To install Kyma with Knative when deploying on a GKE cluster from sources, follow the instructions outlined in the **Install Kyma on a GKE cluster** installation guide.
-
-To prepare the `my-kyma.yaml` configuration file that installs Kyma with Knative on a GKE cluster, run:
-
-```
-cat installation/resources/installer.yaml <(echo -e "\n---") installation/resources/installer-config-cluster.yaml.tpl  <(echo -e "\n---") installation/resources/installer-cr-cluster.yaml.tpl | sed -e "s/global.knative:.*/global.knative: \"true\"/g" | sed -e "s/__DOMAIN__/$DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true"}}'
 ```

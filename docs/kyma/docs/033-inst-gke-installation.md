@@ -117,21 +117,22 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 ### Using the latest GitHub release
 
-1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to use.
+1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the latest release.
 
-2. Export the version you chose as an environment variable. Run:
+2. Export the release version as an environment variable. Run:
     ```
     export LATEST={KYMA_RELEASE_VERSION}
     ```
 
-3. Download the `kyma-config-cluster` file from the release you chose. Run:
+3. Download the `kyma-config-cluster.yaml` and `kyma-installer-cluster.yaml` files from the latest release. Run:
    ```
    wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-cluster.yaml
+   wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-installer-cluster.yaml
    ```
 
-4. Update the file with the values from your environment variables. Run:
+4. Update the file with the values from your environment variables. Merge files from step 3 to one `my-kyma.yaml` file. Run:
     ```
-    cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g"|sed -e "s/__.*__//g"  >my-kyma.yaml
+    cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g"|sed -e "s/__.*__//g"  >my-kyma.yaml
     ```
 
 5. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
@@ -158,7 +159,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 4. Prepare the deployment file:
 
     ```
-    cat installation/resources/installer.yaml <(echo -e "\n---") installation/resources/installer-config-cluster.yaml.tpl  <(echo -e "\n---") installation/resources/installer-cr-cluster.yaml.tpl | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    cat kyma-installer-cluster.yaml <(echo -e "\n---") installation/resources/installer.yaml <(echo -e "\n---") installation/resources/installer-config-cluster.yaml.tpl  <(echo -e "\n---") installation/resources/installer-cr-cluster.yaml.tpl | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
 5. The output of this operation is the `my_kyma.yaml` file. Modify it to fetch the proper image with the changes you made ([YOUR_DOCKER_LOGIN]/kyma-installer:latest). Use the modified file to deploy Kyma on your GKE cluster.
@@ -239,5 +240,5 @@ Follow this steps to configure a new, more secure certificate suitable for produ
 3. Prepare installation file with the following command:
 
     ```
-    cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__REMOTE_ENV_CA__/$AC_CRT/g" | sed -e "s/__REMOTE_ENV_CA_KEY__/$AC_KEY/g" |sed -e "s/__.*__//g"  >my-kyma.yaml
+    cat kyma-installer-cluster.yaml <(echo -e "\n---") cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__REMOTE_ENV_CA__/$AC_CRT/g" | sed -e "s/__REMOTE_ENV_CA_KEY__/$AC_KEY/g" |sed -e "s/__.*__//g"  >my-kyma.yaml
     ```
