@@ -8,43 +8,42 @@ import (
 	"time"
 )
 
+const (
+	APPNAME     = "e2e-app"
+	ACCESSLABEL = "a1b2c3"
+	NAMESPACE   = "kyma-integration"
+)
+
 func TestApplicationCRDCreation(t *testing.T) {
 
 	Convey("Given application data", t, func() {
 
-		appName := "e2e-app"
-		accessLabel := "a1b2c3"
-		skipInstallation := false
-
 		Convey("When CRD created", func() {
 
-			K8SClient, err := testkit.NewK8sResourcesClient("kyma-integration")
+			K8SClient, err := testkit.NewK8sResourcesClient(NAMESPACE)
 			So(err, ShouldBeNil)
 
-			app, err := K8SClient.CreateDummyApplication(appName, accessLabel, skipInstallation)
+			app, err := K8SClient.CreateDummyApplication(APPNAME, ACCESSLABEL, false)
 			So(err, ShouldBeNil)
 			So(app, ShouldNotBeNil)
 
 			Convey("The data within CRD should match Application Data", func() {
 
-				app, err := K8SClient.GetApplication(appName, v1.GetOptions{})
+				app, err := K8SClient.GetApplication(APPNAME, v1.GetOptions{})
 				So(err, ShouldBeNil)
-				So(app.Name, ShouldEqual, appName)
-				So(app.Spec.AccessLabel, ShouldEqual, accessLabel)
-				So(app.Spec.SkipInstallation, ShouldEqual, skipInstallation)
+				So(app.Name, ShouldEqual, APPNAME)
+				So(app.Spec.AccessLabel, ShouldEqual, ACCESSLABEL)
+				So(app.Spec.SkipInstallation, ShouldEqual, false)
 
 				time.Sleep(5 * time.Second)
 
-				checker := testkit.NewK8sChecker(K8SClient, appName)
+				checker := testkit.NewK8sChecker(K8SClient, APPNAME)
 				err = checker.CheckK8sResources()
 
 				So(err, ShouldBeNil)
 			})
-
 		})
-
 	})
-
 }
 
 func TestSecureConnection(t *testing.T) {
@@ -53,30 +52,42 @@ func TestSecureConnection(t *testing.T) {
 
 		Convey("When token requested", func() {
 
+			tokenRequestClient, err := testkit.NewTokenRequestClient(NAMESPACE)
+			So(err, ShouldBeNil)
+
+			tokenRequest, err := tokenRequestClient.CreateTokenRequest(APPNAME)
+			So(err, ShouldBeNil)
+			So(tokenRequest, ShouldNotBeNil)
+
 			Convey("The operator should insert token into TokenRequest CRD", nil)
 
+			//TODO: Polling of tokenRequest
+			time.Sleep(5 * time.Second)
+
+			tokenRequest, err = tokenRequestClient.GetTokenRequest(APPNAME, v1.GetOptions{})
+			So(err, ShouldBeNil)
+			So(tokenRequest.Status.Token, ShouldNotBeNil)
+
+			Convey("When one-click-integration initiated", func() {
+
+				mockAppClient := testkit.NewMockApplicationClient()
+
+				res, err := mockAppClient.ConnectToKyma(tokenRequest.Status.URL, true, false)
+				So(err, ShouldBeNil)
+				So(res, ShouldNotBeNil)
+
+				Convey("The app should be connected to Kyma", func() {
+
+					res, err = mockAppClient.GetConnectionInfo()
+					So(err, ShouldBeNil)
+					So(res.AppName, ShouldEqual, APPNAME)
+					So(res.ClusterDomain, ShouldNotBeNil)
+					So(res.EventsURL, ShouldNotBeNil)
+					So(res.MetadataURL, ShouldNotBeNil)
+				})
+			})
 		})
-
-		Convey("When information on CSR requested", func() {
-
-			Convey("The Connector Service should return Cluster Info", nil)
-
-		})
-
-		Convey("When CSR sent", func() {
-
-			Convey("The Connector Service should return signed certificate", nil)
-
-		})
-
-		Convey("When /v1/services requested", func() {
-
-			Convey("It should return proper data when using signed certificate", nil)
-
-		})
-
 	})
-
 }
 
 func TestServiceRegistration(t *testing.T) {
