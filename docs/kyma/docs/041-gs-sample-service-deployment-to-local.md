@@ -20,7 +20,7 @@ To use the Kyma cluster and install the example, download these tools:
 
 Follow these steps:
 
-1. Deploy the sample service to any of your Environments. Use the `stage` Environment for this guide:
+1. Deploy the sample service to any of your Namespaces. Use the `stage` Namespace for this guide:
 
    ```bash
    kubectl create -n stage -f https://raw.githubusercontent.com/kyma-project/examples/master/http-db-service/deployment/deployment.yaml

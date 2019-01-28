@@ -19,4 +19,5 @@ data:
 {{ else }}
   alert.rules: |-
     {{- include "unhealthy-pods-rules.yaml.tpl" . | indent 4}}
+    {{- include "pvc-90-percent-full-rule.yaml.tpl" . | indent 4}}
 {{ end }}

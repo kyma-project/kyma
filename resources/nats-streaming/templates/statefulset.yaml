@@ -1,0 +1,108 @@
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: {{ .Values.global.natsStreaming.fullname }}
+  labels:
+{{ include "nats-streaming.labels.standard" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.global.natsStreaming.name }}
+      release: {{ .Release.Name }}
+  serviceName: {{ .Values.global.natsStreaming.fullname }}
+  replicas: {{ .Values.replicaCount }}
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ .Values.global.natsStreaming.name }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        {{- if .Values.nats.debug }}
+        - -D
+        {{- end }}
+        {{- if .Values.nats.trace }}
+        - -V
+        {{- end }}
+        {{- if .Values.natsStreaming.debug }}
+        - -SD
+        {{- end }}
+        {{- if .Values.natsStreaming.trace }}
+        - -SV
+        {{- end }}
+        - --cluster_id={{ .Values.global.natsStreaming.clusterID }}
+        - --http_port={{ .Values.global.natsStreaming.ports.monitoring }}
+        - --max_age={{ .Values.global.natsStreaming.persistence.maxAge }}
+        {{ if .Values.global.natsStreaming.persistence.enabled  }}
+        - --store=FILE
+        - --dir=/var/lib/nats-streaming/{{ .Values.global.natsStreaming.fullname }}/$(POD_NAME)
+        {{- else }}
+        - --store=MEMORY
+        {{- end }}
+        - --port={{ .Values.global.natsStreaming.ports.client }}
+        {{- if index .Values "configurationFiles" "gnatsd.conf" }}
+        - --config=/etc/nats-streaming/{{ .Values.global.natsStreaming.fullname }}/gnatsd.conf
+        {{- end }}
+        {{- if index .Values "configurationFiles" "stan.conf" }}
+        - --stan_config=/etc/nats-streaming/{{ .Values.global.natsStreaming.fullname }}/stan.conf
+        {{- end }}
+        - --max_inactivity={{ .Values.global.natsStreaming.channel.maxInactivity }}
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        ports:
+        {{- range $key, $value := .Values.global.natsStreaming.ports }}
+        - name: {{ $key }}
+          containerPort: {{ $value }}
+        {{- end }}
+        {{- if or .Values.global.natsStreaming.persistence.enabled .Values.configurationFiles }}
+        volumeMounts:
+        {{- end }}
+        {{- if .Values.global.natsStreaming.persistence.enabled }}
+        - name: datadir
+          mountPath: /var/lib/nats-streaming/{{ .Values.global.natsStreaming.fullname }}
+        {{- end }}
+        {{- if .Values.configurationFiles }}
+        - name: config-volume
+          mountPath: /etc/nats-streaming/{{ .Values.global.natsStreaming.fullname }}
+        {{- end }}
+        resources:
+{{ toYaml .Values.global.natsStreaming.resources | indent 10 -}}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+      {{- if .Values.configurationFiles }}
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ .Values.global.natsStreaming.fullname }}
+      {{- end }}
+  {{- if .Values.global.natsStreaming.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: datadir
+    spec:
+      {{- if .Values.global.natsStreaming.persistence.storageClass }}
+      {{- if (eq "-" .Values.global.natsStreaming.persistence.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: {{ .Values.global.natsStreaming.persistence.storageClass }}
+      {{- end }}
+      {{- end }}
+      accessModes:
+      - {{ .Values.global.natsStreaming.persistence.accessMode | quote }}
+      resources:
+        requests:
+          storage: {{ .Values.global.natsStreaming.persistence.size | quote }}
+  {{- end }}

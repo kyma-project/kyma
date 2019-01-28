@@ -411,6 +411,31 @@ func TestServiceDetailsValidator_API_Basic(t *testing.T) {
 	})
 }
 
+func TestServiceDetailsValidator_API_Certificate(t *testing.T) {
+	t.Run("should accept Certificate credentials", func(t *testing.T) {
+		// given
+		serviceDetails := ServiceDetails{
+			Name:        "name",
+			Provider:    "provider",
+			Description: "description",
+			Api: &API{
+				TargetUrl: "http://target.com",
+				Credentials: &Credentials{
+					CertificateGen: &CertificateGen{},
+				},
+			},
+		}
+
+		validator := NewServiceDetailsValidator()
+
+		// when
+		err := validator.Validate(serviceDetails)
+
+		// then
+		assert.NoError(t, err)
+	})
+}
+
 func TestServiceDetailsValidator_Events(t *testing.T) {
 	t.Run("should not accept events spec other than json object", func(t *testing.T) {
 		// given

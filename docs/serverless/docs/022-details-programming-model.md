@@ -39,7 +39,7 @@ event:
     foo: "bar"                                  # The data is parsed as JSON when required
   extensions:                                   # Optional parameters
     request:                                    # Reference to the request received
-      query: 
+      query:
         baz: "qux"                              # Query parameters
       headers:
         accept: "application/json"              # Request headers
@@ -78,5 +78,5 @@ The example code logs the original request url. The response is an HTTP 404. The
 Logging is based on standard Node.js functionality. ```console.log("Hello")``` sends "Hello" to the logs. As there is no graphical log tool available, use the command ```kubectl``` to display the logs.
 
 ```sh
-$ kubectl logs -n <environment> -l function=<function> -c <function>
+$ kubectl logs -n {NAMESPACE} -l function=<function> -c {FUNCTION}
 ```

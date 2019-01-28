@@ -36,11 +36,11 @@ func newEventActivationResolver(service eventActivationLister, contentRetriever 
 	}
 }
 
-func (r *eventActivationResolver) EventActivationsQuery(ctx context.Context, environment string) ([]gqlschema.EventActivation, error) {
-	items, err := r.service.List(environment)
+func (r *eventActivationResolver) EventActivationsQuery(ctx context.Context, namespace string) ([]gqlschema.EventActivation, error) {
+	items, err := r.service.List(namespace)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing %s in `%s` environment", pretty.EventActivations, environment))
-		return nil, gqlerror.New(err, pretty.EventActivations, gqlerror.WithEnvironment(environment))
+		glog.Error(errors.Wrapf(err, "while listing %s in `%s` namespace", pretty.EventActivations, namespace))
+		return nil, gqlerror.New(err, pretty.EventActivations, gqlerror.WithEnvironment(namespace))
 	}
 
 	return r.converter.ToGQLs(items), nil

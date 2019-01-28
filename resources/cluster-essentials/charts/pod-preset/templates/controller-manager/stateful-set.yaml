@@ -17,6 +17,8 @@ spec:
   serviceName: {{ template "pod-preset.fullname" . }}-controller
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ template "pod-preset.name" . }}-controller
         release: {{ .Release.Name }}

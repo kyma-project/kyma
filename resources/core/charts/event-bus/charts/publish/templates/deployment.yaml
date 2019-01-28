@@ -30,7 +30,7 @@ spec:
             - --client_id=$(POD_NAME)
             - --max_requests={{ .Values.global.publish.maxRequests }}
             - --nats_streaming_cluster_id={{ .Values.global.natsStreaming.clusterID }}
-            - --nats_url=nats://{{ template "nats-streaming.fullname" . }}:{{ toString .Values.global.natsStreaming.ports.client }}
+            - --nats_url={{ .Values.global.natsStreaming.url }}
             - --port={{ .Values.port }}
             - --trace_api_url={{ .Values.global.trace.apiURL }}
             - --trace_service_name={{ .Values.trace.serviceName }}

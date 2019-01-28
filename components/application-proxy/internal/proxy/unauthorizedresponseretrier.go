@@ -19,7 +19,7 @@ type retrier struct {
 
 type updateCacheEntryFunction = func(string) (*CacheEntry, apperrors.AppError)
 
-func newUnathorizedResponseRetrier(id string, request *http.Request, timeout int, updateCacheEntryFunc updateCacheEntryFunction) *retrier {
+func newUnauthorizedResponseRetrier(id string, request *http.Request, timeout int, updateCacheEntryFunc updateCacheEntryFunction) *retrier {
 	return &retrier{id: id, request: request, retried: false, timeout: timeout, updateCacheEntryFunction: updateCacheEntryFunc}
 }
 
@@ -80,7 +80,7 @@ func (rr *retrier) addAuthorization(r *http.Request, cacheEntry *CacheEntry) err
 	authorizationStrategy := cacheEntry.AuthorizationStrategy
 	authorizationStrategy.Invalidate()
 
-	return authorizationStrategy.AddAuthorizationHeader(r)
+	return authorizationStrategy.AddAuthorization(r, cacheEntry.Proxy)
 }
 
 func (rr *retrier) performRequest(r *http.Request, cacheEntry *CacheEntry) (*http.Response, error) {

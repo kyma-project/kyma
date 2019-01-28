@@ -20,7 +20,7 @@ Provisioning an instance creates a new Cloud Bigtable cluster and instance. Thes
 | **clusters** | `array` | Defines the cluster properties. The amount of items in the cluster must equal 1. For more information, see the **Cluster properties** section. | YES | - |
 | **displayName** | `string` | Cloud Bigtable display name. Must be 4-30 characters long. | YES | - |
 | **instanceId** | `string` |  Unique and permanent identifier for the Cloud Bigtable instance. Use only lowercase letters, numbers, or hyphens. Must be 6-33 characters long. | YES | - |
-| **labels** | `object` | To organize your project, add arbitrary labels as key/value pairs to Cloud Bigtable. Use labels to indicate different elements, such as environments, services, or teams. | NO | - |
+| **labels** | `object` | To organize your project, add arbitrary labels as key/value pairs to Cloud Bigtable. Use labels to indicate different elements, such as Namespaces, services, or teams. | NO | - |
 | **tables** | `array` | The tables present in the requested instance. Each table is served using the resources of its parent cluster. For more information, see the **Tables properties** section. | NO | - |
 | **type** | `string` | The value of this parameter can be either `PRODUCTION` or `DEVELOPMENT`. If your Cloud Bigtable cluster serves data to production, choose `Production`. If you want to experiment with Bigtable without committing to a production-grade cluster, choose `Development`. However, no Service Level Agreement (SLA) applies. | NO | `PRODUCTION` |
 

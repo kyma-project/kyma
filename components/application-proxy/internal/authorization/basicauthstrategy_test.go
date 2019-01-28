@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+
 func TestBasicAuthStrategy(t *testing.T) {
 
 	t.Run("should add Authorization header", func(t *testing.T) {
@@ -19,7 +20,7 @@ func TestBasicAuthStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = basicAuthStrategy.AddAuthorizationHeader(request)
+		err = basicAuthStrategy.AddAuthorization(request, proxyStub)
 
 		// then
 		require.NoError(t, err)

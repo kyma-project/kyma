@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	apps "k8s.io/api/apps/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/informers"
@@ -127,16 +127,6 @@ func fixStatefulSet(name, environment string) *apps.StatefulSet {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: environment,
-		},
-	}
-}
-
-func fixPod(name, environment string, labels map[string]string) *v1.Pod {
-	return &v1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: environment,
-			Labels:    labels,
 		},
 	}
 }
