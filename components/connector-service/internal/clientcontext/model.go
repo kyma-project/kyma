@@ -56,7 +56,7 @@ func (appCtx ApplicationContext) GetApplication() string {
 
 // GetCommonName returns expected Common Name value for the Application
 func (appCtx ApplicationContext) GetCommonName() string {
-	// TODO - construct CN
+	// TODO - adjust CN format after decision is made
 	return appCtx.Application
 }
 
@@ -87,6 +87,6 @@ func (clsCtx ClusterContext) GetApplication() string {
 
 // GetCommonName returns expected Common Name value for the Cluster
 func (clsCtx ClusterContext) GetCommonName() string {
-	// TODO - construct CN
+	// TODO - adjust CN format after decision is made
 	return clsCtx.Group + clsCtx.Tenant
 }

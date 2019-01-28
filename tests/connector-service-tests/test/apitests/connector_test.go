@@ -37,12 +37,12 @@ func TestConnector(t *testing.T) {
 	}()
 
 	t.Run("Connector Service flow for Application", func(t *testing.T) {
-		appTokenRequest := createApplicationTokenRequest(t, config.InternalAPIUrl, "test")
+		appTokenRequest := createApplicationTokenRequest(t, config, "test")
 		CertificateGenerationSuite(t, appTokenRequest, config.SkipSslVerify)
 	})
 
 	t.Run("Connector Service flow for Runtime", func(t *testing.T) {
-		runtimeTokenRequest := createRuntimeTokenRequest(t, config.InternalAPIUrl)
+		runtimeTokenRequest := createRuntimeTokenRequest(t, config)
 		CertificateGenerationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 	})
 }
@@ -108,7 +108,7 @@ func TestCertificateValidation(t *testing.T) {
 
 	t.Run("should access application", func(t *testing.T) {
 		// given
-		tokenRequest := createApplicationTokenRequest(t, config.InternalAPIUrl, testApp.Name)
+		tokenRequest := createApplicationTokenRequest(t, config, testApp.Name)
 		connectorClient := testkit.NewConnectorClient(tokenRequest, config.SkipSslVerify)
 		tlsClient := createTLSClientWithCert(t, connectorClient, config.SkipSslVerify)
 
@@ -122,7 +122,7 @@ func TestCertificateValidation(t *testing.T) {
 
 	t.Run("should receive 403 when accessing Application with invalid CN", func(t *testing.T) {
 		// given
-		tokenRequest := createApplicationTokenRequest(t, config.InternalAPIUrl, "another-application")
+		tokenRequest := createApplicationTokenRequest(t, config, "another-application")
 		connectorClient := testkit.NewConnectorClient(tokenRequest, config.SkipSslVerify)
 		tlsClient := createTLSClientWithCert(t, connectorClient, config.SkipSslVerify)
 
@@ -177,22 +177,34 @@ func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, skipV
 	}
 }
 
-func createApplicationTokenRequest(t *testing.T, internalAPIUrl, appName string) *http.Request {
-	tokenURL := internalAPIUrl + "/v1/applications/tokens"
+func createApplicationTokenRequest(t *testing.T, config testkit.TestConfig, appName string) *http.Request {
+	tokenURL := config.InternalAPIUrl + "/v1/applications/tokens"
 
-	request, err := http.NewRequest(http.MethodPost, tokenURL, nil)
-	require.NoError(t, err)
-
+	request := createTokenRequest(t, tokenURL, config)
 	request.Header.Set(testkit.ApplicationHeader, appName)
 
 	return request
 }
 
-func createRuntimeTokenRequest(t *testing.T, internalAPIUrl string) *http.Request {
-	tokenURL := internalAPIUrl + "/v1/runtimes/tokens"
+func createRuntimeTokenRequest(t *testing.T, config testkit.TestConfig) *http.Request {
+	tokenURL := config.InternalAPIUrl + "/v1/runtimes/tokens"
 
+	request := createTokenRequest(t, tokenURL, config)
+
+	return request
+}
+
+func createTokenRequest(t *testing.T, tokenURL string, config testkit.TestConfig) *http.Request {
 	request, err := http.NewRequest(http.MethodPost, tokenURL, nil)
 	require.NoError(t, err)
+
+	if config.Group != "" {
+		request.Header.Set(testkit.GroupHeader, config.Group)
+	}
+
+	if config.Tenant != "" {
+		request.Header.Set(testkit.TenantHeader, config.Tenant)
+	}
 
 	return request
 }

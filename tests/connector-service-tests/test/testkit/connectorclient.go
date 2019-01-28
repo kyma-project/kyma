@@ -13,6 +13,8 @@ import (
 
 const (
 	ApplicationHeader = "Application"
+	GroupHeader       = "Group"
+	TenantHeader      = "Tenant"
 )
 
 type ConnectorClient interface {
