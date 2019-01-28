@@ -58,7 +58,9 @@ func main() {
 		log.Errorf("Error while setting up monitoring: %s", appErr)
 	}
 
-	globalMiddlewares = append(globalMiddlewares, logging.NewLoggingMiddleware().Middleware)
+	if options.requestLogging {
+		globalMiddlewares = append(globalMiddlewares, logging.NewLoggingMiddleware().Middleware)
+	}
 
 	internalHandler := newInternalHandler(tokenService, options, globalMiddlewares)
 	externalHandler := newExternalHandler(tokenService, options, env, globalMiddlewares)

@@ -4,12 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 )
 
 func RespondWithError(w http.ResponseWriter, apperr apperrors.AppError) {
+	log.Errorln(apperr.Error())
+
 	statusCode, responseBody := httperrors.AppErrorToResponse(apperr)
 
 	Respond(w, statusCode)
