@@ -10,7 +10,7 @@ nats-streaming.labels.standard prints the standard Helm labels.
 The standard labels are frequently used in metadata.
 */ -}}
 {{- define "nats-streaming.labels.standard" -}}
-app: {{ .Values.global.natsStreaming.name }}
+app: {{ .Values.global.natsStreaming.fullname }}
 heritage: {{ .Release.Service | quote }}
 release: {{ .Release.Name | quote }}
 chart: {{ .Chart.Name }}-{{ .Chart.Version }}
