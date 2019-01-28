@@ -6,6 +6,7 @@ deployment:
     externalAPIPort: &externalAPIPort 8081
     tokenLength: 64
     tokenExpirationMinutes: 5
+    caSecretName: nginx-auth-ca
     getInfoURL: ""
     group: "default"
     tenant: "default"

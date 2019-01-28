@@ -35,6 +35,7 @@ spec:
           - "--namespace={{ .Values.global.namespace }}"
           - "--tokenLength={{ .Values.deployment.args.tokenLength }}"
           - "--tokenExpirationMinutes={{ .Values.deployment.args.tokenExpirationMinutes }}"
+          - "--caSecretName={{ .Values.deployment.args.caSecretName }}"
           - "--connectorServiceHost=connector-service.{{ .Values.global.domainName }}"
           - "--appRegistryHost=gateway.{{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}"
           - "--eventsHost=gateway.{{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}"
