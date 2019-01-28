@@ -37,7 +37,7 @@ func TestConnector(t *testing.T) {
 	}()
 
 	t.Run("Connector Service flow for Application", func(t *testing.T) {
-		appTokenRequest := createApplicationTokenRequest(t, config.InternalAPIUrl, app.Name)
+		appTokenRequest := createApplicationTokenRequest(t, config.InternalAPIUrl, "test")
 		CertificateGenerationSuite(t, appTokenRequest, config.SkipSslVerify)
 	})
 
@@ -155,7 +155,7 @@ func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, skipV
 
 	crtResponse, _ := createCertificateChain(t, client, key)
 	require.NotEmpty(t, crtResponse.CRTChain)
-	clientCertBytes, _ := testkit.CrtResponseToPemBytes(t, crtResponse)
+	clientCertBytes := testkit.EncodedCertToPemBytes(t, crtResponse.ClientCRT)
 
 	tlsCert := tls.Certificate{
 		Certificate: [][]byte{clientCertBytes},

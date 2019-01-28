@@ -33,11 +33,14 @@ var (
 	caCrtEncoded = []byte("caCrtEncoded")
 	caKeyEncoded = []byte("caKeyEncoded")
 
-	caCrt     = &x509.Certificate{}
-	caKey     = &rsa.PrivateKey{}
-	csr       = &x509.CertificateRequest{}
-	clientCRT = []byte("clientCertificate")
-	certChain = []byte("chain")
+	caCrt = &x509.Certificate{}
+	caKey = &rsa.PrivateKey{}
+	csr   = &x509.CertificateRequest{}
+
+	clientCRT      = []byte("clientCertificate")
+	clientCRTBytes = []byte("clientCertificateBytes")
+	caCRTBytes     = []byte("caCRTBytes")
+	certChain      = append(clientCRTBytes, caCRTBytes...)
 
 	subjectValues = certificates.CSRSubject{
 		CommonName:         appName,
@@ -49,7 +52,7 @@ var (
 	}
 )
 
-func TestSignatureHandler_SignCSR(t *testing.T) {
+func TestCertificateService_SignCSR(t *testing.T) {
 
 	t.Run("should create certificate", func(t *testing.T) {
 		// given
@@ -62,7 +65,8 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certUtils.On("LoadCSR", rawCSR).Return(csr, nil)
 		certUtils.On("CheckCSRValues", csr, subjectValues).Return(nil)
 		certUtils.On("SignCSR", caCrt, csr, caKey).Return(clientCRT, nil)
-		certUtils.On("CreateCrtChain", caCrt.Raw, clientCRT).Return(certChain)
+		certUtils.On("AddCertificateHeaderAndFooter", caCrt.Raw).Return(caCRTBytes)
+		certUtils.On("AddCertificateHeaderAndFooter", clientCRT).Return(clientCRTBytes)
 
 		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, subjectValues)
 
@@ -75,7 +79,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 		decodedClientCRT, err := decodeBase64(encodedCertChain.ClientCertificate)
 		require.NoError(t, err)
-		assert.Equal(t, clientCRT, decodedClientCRT)
+		assert.Equal(t, clientCRTBytes, decodedClientCRT)
 
 		decodedChain, err := decodeBase64(encodedCertChain.CertificateChain)
 		require.NoError(t, err)

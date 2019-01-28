@@ -529,33 +529,27 @@ func TestCertificateUtility_SignCSR(t *testing.T) {
 
 }
 
-func TestCertificateUtility_CreateCrtChain(t *testing.T) {
+func TestCertificateUtility_AddCertificateHeaderAndFooter(t *testing.T) {
 
-	t.Run("should create certificate chain", func(t *testing.T) {
+	t.Run("should add certificate header and footer", func(t *testing.T) {
 		// given
 		certificateUtility := NewCertificateUtility()
-		caCrt, apperr := certificateUtility.LoadCert([]byte(cert))
-		require.NoError(t, apperr)
-		clientCRT, apperr := certificateUtility.LoadCert([]byte(clientCRT))
+		certificate, apperr := certificateUtility.LoadCert([]byte(cert))
 		require.NoError(t, apperr)
 
 		// when
-		rawCertChain := certificateUtility.CreateCrtChain(caCrt.Raw, clientCRT.Raw)
+		encodedCert := certificateUtility.AddCertificateHeaderAndFooter(certificate.Raw)
 
-		//then
-		decodedCrt, err := rawCrtTox509Certificates(rawCertChain)
+		// then
+		require.NotNil(t, encodedCert)
+
+		// when
+		pemBlock, _ := pem.Decode(encodedCert)
+		decodedCert, err := x509.ParseCertificate(pemBlock.Bytes)
+
+		// then
 		require.NoError(t, err)
-
-		assert.Equal(t, 2, len(decodedCrt))
-
-		expectedCrt, err := rawCrtTox509Certificates([]byte(CrtChain))
-		require.NoError(t, err)
-
-		clientCrtSubject := decodedCrt[0].Subject
-		expectedClientCrtSubject := expectedCrt[0].Subject
-
-		assert.Equal(t, clientCrtSubject, expectedClientCrtSubject)
-		assert.Equal(t, expectedCrt[1], decodedCrt[1])
+		assert.Equal(t, certificate, decodedCert)
 	})
 
 }

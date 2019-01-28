@@ -1,5 +1,7 @@
 package testkit
 
+import "crypto/x509"
+
 type TokenResponse struct {
 	URL   string `json:"url"`
 	Token string `json:"token"`
@@ -54,4 +56,10 @@ type ErrorResponse struct {
 type Error struct {
 	StatusCode    int
 	ErrorResponse ErrorResponse
+}
+
+type DecodedCrtResponse struct {
+	CRTChain  []*x509.Certificate
+	ClientCRT *x509.Certificate
+	CaCRT     *x509.Certificate
 }

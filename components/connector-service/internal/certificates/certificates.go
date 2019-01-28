@@ -1,7 +1,6 @@
 package certificates
 
 import (
-	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -20,7 +19,7 @@ type CertificateUtility interface {
 	LoadCSR(encodedData []byte) (*x509.CertificateRequest, apperrors.AppError)
 	CheckCSRValues(csr *x509.CertificateRequest, subject CSRSubject) apperrors.AppError
 	SignCSR(caCrt *x509.Certificate, csr *x509.CertificateRequest, caKey *rsa.PrivateKey) ([]byte, apperrors.AppError)
-	CreateCrtChain(rawCaCRT []byte, rawClientCRT []byte) []byte
+	AddCertificateHeaderAndFooter(crtRaw []byte) []byte
 }
 
 type certificateUtility struct {
@@ -128,10 +127,6 @@ func (cu *certificateUtility) SignCSR(caCrt *x509.Certificate, csr *x509.Certifi
 	return clientCrtRaw, nil
 }
 
-func (cu *certificateUtility) CreateCrtChain(rawCaCRT []byte, rawClientCRT []byte) []byte {
-	return createCertChain(rawClientCRT, rawCaCRT)
-}
-
 func prepareCRTTemplate(csr *x509.CertificateRequest) x509.Certificate {
 	return x509.Certificate{
 		SignatureAlgorithm: csr.SignatureAlgorithm,
@@ -145,15 +140,6 @@ func prepareCRTTemplate(csr *x509.CertificateRequest) x509.Certificate {
 	}
 }
 
-func createCertChain(clientCrtRaw, caCrtRaw []byte) []byte {
-	clientCrt := addCertificateHeaderAndFooter(clientCrtRaw)
-	caCrt := addCertificateHeaderAndFooter(caCrtRaw)
-	certChain := append(clientCrt.Bytes(), caCrt.Bytes()...)
-	return certChain
-}
-
-func addCertificateHeaderAndFooter(crtRaw []byte) *bytes.Buffer {
-	crt := &bytes.Buffer{}
-	pem.Encode(crt, &pem.Block{Type: "CERTIFICATE", Bytes: crtRaw})
-	return crt
+func (cu *certificateUtility) AddCertificateHeaderAndFooter(crtRaw []byte) []byte {
+	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: crtRaw})
 }

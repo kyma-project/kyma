@@ -24,10 +24,10 @@ func CertificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotEmpty(t, crtResponse.CRTChain)
 
 		// when
-		certificates := testkit.DecodeAndParseCert(t, crtResponse)
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 
 		// then
-		clientsCrt := certificates[0]
+		clientsCrt := certificates.CRTChain[0]
 		testkit.CheckIfSubjectEquals(t, infoResponse.Certificate.Subject, clientsCrt)
 	})
 
@@ -39,10 +39,10 @@ func CertificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotEmpty(t, crtResponse.CRTChain)
 
 		// when
-		certificates := testkit.DecodeAndParseCert(t, crtResponse)
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 
 		// then
-		require.Equal(t, 2, len(certificates))
+		require.Equal(t, 2, len(certificates.CRTChain))
 	})
 
 	t.Run("client cert should be signed by server cert", func(t *testing.T) {
@@ -53,10 +53,29 @@ func CertificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotEmpty(t, crtResponse.CRTChain)
 
 		// when
-		certificates := testkit.DecodeAndParseCert(t, crtResponse)
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 
 		//then
-		testkit.CheckIfCertIsSigned(t, certificates)
+		testkit.CheckIfCertIsSigned(t, certificates.CRTChain)
+	})
+
+	t.Run("should respond with client certificate together with CA crt", func(t *testing.T) {
+		// when
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
+
+		//then
+		require.NotEmpty(t, crtResponse.CRTChain)
+
+		// when
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+
+		// then
+		clientsCrt := certificates.CRTChain[0]
+		testkit.CheckIfSubjectEquals(t, infoResponse.Certificate.Subject, clientsCrt)
+		require.Equal(t, certificates.ClientCRT, clientsCrt)
+
+		caCrt := certificates.CRTChain[1]
+		require.Equal(t, certificates.CaCRT, caCrt)
 	})
 
 	t.Run("should validate CSR subject", func(t *testing.T) {

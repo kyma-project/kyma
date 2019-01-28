@@ -10,7 +10,7 @@ import (
 
 type Service interface {
 	// SignCSR takes encoded CSR, validates subject and generates Certificate based on CA stored in secret
-	// returns encoded certificate chain
+	// returns base64 encoded certificate chain
 	SignCSR(encodedCSR []byte, commonName string) (EncodedCertificateChain, apperrors.AppError)
 }
 
@@ -65,9 +65,11 @@ func (svc *certificateService) signCSR(csr *x509.CertificateRequest) (EncodedCer
 		return EncodedCertificateChain{}, err
 	}
 
-	certChain := svc.certUtil.CreateCrtChain(caCrt.Raw, signedCrt)
+	caCrtBytes := svc.certUtil.AddCertificateHeaderAndFooter(caCrt.Raw)
+	signedCrtBytes := svc.certUtil.AddCertificateHeaderAndFooter(signedCrt)
+	certChain := svc.createCertChain(signedCrtBytes, caCrtBytes)
 
-	return encodeCertificateChain(certChain, signedCrt, caCrt.Raw), nil
+	return encodeCertificateChain(certChain, signedCrtBytes, caCrtBytes), nil
 }
 
 func (svc *certificateService) checkCSR(csr *x509.CertificateRequest, commonName string) apperrors.AppError {
@@ -82,6 +84,10 @@ func (svc *certificateService) checkCSR(csr *x509.CertificateRequest, commonName
 	}
 
 	return svc.certUtil.CheckCSRValues(csr, subjectValues)
+}
+
+func (svc *certificateService) createCertChain(clientCrt, caCrt []byte) []byte {
+	return append(clientCrt, caCrt...)
 }
 
 func encodeCertificateChain(certChain, clientCRT, caCRT []byte) EncodedCertificateChain {

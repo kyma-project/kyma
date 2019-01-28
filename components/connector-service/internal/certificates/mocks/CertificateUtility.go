@@ -12,6 +12,22 @@ type CertificateUtility struct {
 	mock.Mock
 }
 
+// AddCertificateHeaderAndFooter provides a mock function with given fields: crtRaw
+func (_m *CertificateUtility) AddCertificateHeaderAndFooter(crtRaw []byte) []byte {
+	ret := _m.Called(crtRaw)
+
+	var r0 []byte
+	if rf, ok := ret.Get(0).(func([]byte) []byte); ok {
+		r0 = rf(crtRaw)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]byte)
+		}
+	}
+
+	return r0
+}
+
 // CheckCSRValues provides a mock function with given fields: csr, subject
 func (_m *CertificateUtility) CheckCSRValues(csr *x509.CertificateRequest, subject certificates.CSRSubject) apperrors.AppError {
 	ret := _m.Called(csr, subject)
@@ -22,22 +38,6 @@ func (_m *CertificateUtility) CheckCSRValues(csr *x509.CertificateRequest, subje
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(apperrors.AppError)
-		}
-	}
-
-	return r0
-}
-
-// CreateCrtChain provides a mock function with given fields: rawCaCRT, rawClientCRT
-func (_m *CertificateUtility) CreateCrtChain(rawCaCRT []byte, rawClientCRT []byte) []byte {
-	ret := _m.Called(rawCaCRT, rawClientCRT)
-
-	var r0 []byte
-	if rf, ok := ret.Get(0).(func([]byte, []byte) []byte); ok {
-		r0 = rf(rawCaCRT, rawClientCRT)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]byte)
 		}
 	}
 
