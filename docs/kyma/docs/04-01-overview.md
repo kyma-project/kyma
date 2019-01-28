@@ -18,7 +18,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `jaeger` | ✅ | ⛔️ |
 | `logging` | ✅ | ⛔️ |
 | `monitoring` | ✅ | ⛔️ |
-| `prometheus-operator` | ✅ | ✅ |
+| `prometheus-operator` | ✅ | ⛔️ |
 | `service-catalog` | ✅ | ✅ |
 
 ### Installation guides
